@@ -1,0 +1,9 @@
+# Cloudflare Tunnel config.
+# Скопіюй у ~/.cloudflared/config.yml і заміни TUNNEL_ID та домен.
+tunnel: TUNNEL_ID
+credentials-file: /Users/mykolalukianov/.cloudflared/TUNNEL_ID.json
+
+ingress:
+  - hostname: fit.YOUR-DOMAIN.com
+    service: http://localhost:4477
+  - service: http_status:404

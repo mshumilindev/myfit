@@ -1,0 +1,53 @@
+---
+description: Гейт якості перед push і перед «задача готова» — lint, format, типи, тести
+alwaysApply: true
+---
+
+# Гейт якості
+
+Перед будь-яким `git push` (і перед тим, як назвати задачу виконаною) прогони
+гейт. Хуки в `.githooks/` (вмикаються `npm install` → `prepare`) роблять те
+саме примусово; запуск руками наперед économить відхилений push.
+
+## Обов'язкова послідовність
+
+```bash
+npm run lint          # ESLint по репо
+npm run format:check  # Prettier без запису
+npm run typecheck     # tsc --noEmit у client + server + desktop
+npm run test:coverage # Vitest + coverage-гейт (пороги — client/vitest.config.ts)
+node scripts/validate-sql.mjs
+```
+
+Ті самі кроки ганяє CI (`.github/workflows/ci.yml`) + окремим джобом API-смоук
+проти реального сервера. Червоний CI = не мержимо.
+
+Для змін, що торкаються API або синку, — додатково смоук на тестовій БД:
+
+```bash
+GYM_DATA_DIR=$(mktemp -d) PORT=4499 npm run start -w server &
+BASE=http://localhost:4499 node scripts/smoke.mjs   # очікування: 0 FAIL
+```
+
+## При падінні
+
+1. Lint: `npm run lint:fix`, решту — руками.
+2. Format: `npm run format`.
+3. Типи: виправ помилки tsc; не глуши `@ts-ignore`/`any` заради зеленого.
+4. Прожени гейт знову до повного проходження; авто-фікси закоміть **до** push.
+
+## Правила гри
+
+- `--no-verify` — тільки якщо людина явно попросила обійти гейт.
+- Не мас-реформатуй незачеплений код: правила зобов'язують новий і
+  рефакторнутий код (єдиний виняток — разовий bootstrap-прогін Prettier,
+  DEV-PLAN крок 0).
+- Хук не пройшов у середовищі без залежностей (`node_modules` відсутній) —
+  це не привід вимкнути хук; постав залежності.
+- Червоний чек ніколи не подається як зелений — див.
+  [agent-approach.mdc](./agent-approach.mdc).
+
+## Пов'язані правила
+
+- [test-integrity.mdc](./test-integrity.mdc) — що заборонено робити з тестами заради зеленого
+- [stack.mdc](./stack.mdc) — анти-патерни, які лінт не ловить

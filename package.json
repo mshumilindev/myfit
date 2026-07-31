@@ -1,0 +1,34 @@
+{
+  "name": "gym-tracker",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "server",
+    "client",
+    "desktop"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "dev": "npm run dev -w server & npm run dev -w client & wait",
+    "build": "npm run build -w server && npm run build -w client && npm run build -w desktop",
+    "start": "npm run start -w server",
+    "tray": "npm run start -w desktop",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client && npm run typecheck -w desktop",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "node ./scripts/install-git-hooks.mjs",
+    "test": "npm run test -w client",
+    "test:coverage": "npm run test:coverage -w client"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.6.0",
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.59.3"
+  }
+}

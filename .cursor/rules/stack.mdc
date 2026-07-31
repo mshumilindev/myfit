@@ -1,0 +1,56 @@
+---
+description: Зафіксований стек My Fit — шари, конвенції, анти-патерни
+alwaysApply: true
+---
+
+# Зафіксований стек — My Fit
+
+Авторитетний stack-lock репозиторію. Нова робота МАЄ лишатися в цих шарах;
+виняток — лише через запис у `docs/adr/NNN-<тема>.md` **у тому ж коміті**, що й
+зміна залежності чи патерну. Джерело правди рантайму — `package.json`.
+
+## Шари
+
+| Шар | Вибір |
+|-----|-------|
+| Мова | TypeScript 5 (strict) — всюди: client, server, desktop |
+| ФЕ | React 19 (тільки функційні компоненти + хуки) |
+| Збірка ФЕ | Vite 6 + `@vitejs/plugin-react` + `vite-plugin-pwa` (offline-first PWA) |
+| BFF | Express 5, роутери сервіс-модулів через реєстр `server/src/services.ts` |
+| БД | SQLite через better-sqlite3 (синхронний API), файл у `~/.gym-tracker/` |
+| Авторизація | Один акаунт: JWT (`jsonwebtoken`) + bcryptjs; реєстрація закривається після першого користувача |
+| Стан ФЕ | `store.ts`: офлайн-черга в localStorage + повний state-replace із сервера. Без Redux/Zustand/TanStack Query |
+| HTTP на ФЕ | Тільки `request()` з `client/src/api.ts` |
+| Стилі | Звичайний CSS у `client/src/styles.css` (CSS-змінні). Без Tailwind/CSS-in-JS |
+| Десктоп | Electron у треї (`desktop/`), сервер запускає як дочірній процес |
+| Тести | `scripts/smoke.mjs` (API-контракт), `scripts/validate-sql.mjs`; юніт-тести — Vitest, коли з'явиться крок у DEV-PLAN |
+| Lint / format | ESLint (flat config, typescript-eslint) + Prettier |
+
+## Анти-патерни (рев'ю МАЄ їх ловити в новому/зміненому коді)
+
+- Server state повз `store.ts`: власні fetch-кеші, `useEffect + useState` для
+  завантаження даних, дублювання стану сервера в компонентах.
+- Обхід `request()` з `api.ts` голим `fetch`/axios у компонентах.
+- Мутація повз офлайн-чергу: будь-який запис на сервер іде через чергу
+  (`enqueue`), інакше ламається офлайн і ідемпотентність.
+- Id, згенеровані сервером, або ендпоїнти без upsert-семантики — повторна
+  відправка черги має бути безпечною.
+- Класові компоненти, лайфцикл-патерни.
+- Нова залежність «бо звик» — Redux, react-router, axios, Tailwind, ORM тощо.
+  Кожна залежність = розмір PWA-бандла; тільки через ADR.
+- Хардкод портів, шляхів, URL поза `server/src/config.ts` / `client/src/api.ts`.
+- Секрети чи токени в коді або в git (JWT-секрет живе у `~/.gym-tracker/`).
+- Прив'язка до інтернету там, де має працювати офлайн (тренування в залі — це
+  офлайн-сценарій за замовчуванням).
+
+## Іменований виняток (не копіювати як патерн)
+
+- **JWT у localStorage на клієнті** (`client/src/api.ts`) — свідомий дизайн для
+  особистого однокористувацького додатка; у b2b-оригіналі це заборонено. Не
+  розширювати: інші секрети в localStorage не кладемо.
+
+## Пов'язані правила
+
+- [architecture.mdc](./architecture.mdc) — структура і межі
+- [agent-approach.mdc](./agent-approach.mdc) — як пропонувати зміни стеку
+- [quality-gate.mdc](./quality-gate.mdc) — гейт перед push
