@@ -1,0 +1,34 @@
+# CodeRabbit — AI-рев'ю PR-ів (Pro безкоштовно для публічних реп).
+# Профіль "chill" + фільтри — щоб коментарі були по суті, без шуму.
+language: 'en-US'
+tone_instructions: 'Be concise. Only flag real bugs, security issues, and broken logic. Skip style nitpicks — ESLint and Prettier already run in CI.'
+
+reviews:
+  profile: 'chill'
+  high_level_summary: true
+  poem: false
+  request_changes_workflow: false
+  path_filters:
+    - '!**/dist/**'
+    - '!**/dev-dist/**'
+    - '!**/node_modules/**'
+    - '!**/package-lock.json'
+    - '!docs/design/**'
+  path_instructions:
+    - path: 'client/**'
+      instructions: >-
+        React 19 + TypeScript PWA, offline-first. Focus on hooks correctness
+        (deps arrays, stale closures), the offline queue invariants
+        (client-generated UUIDs, idempotent replay, server state replaces local),
+        and i18n completeness (a new string must exist in all four locales).
+    - path: 'server/**'
+      instructions: >-
+        Express 5 + better-sqlite3 (synchronous). Focus on input validation,
+        auth (JWT HS256, brute-force limiter), SQL parameterisation, and
+        idempotent upsert semantics of every endpoint.
+  auto_review:
+    enabled: true
+    drafts: false
+
+chat:
+  auto_reply: true

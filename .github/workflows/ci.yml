@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+jobs:
+  quality:
+    name: Lint · types · tests · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Prettier
+        run: npm run format:check
+      - name: Typecheck (server + client + desktop)
+        run: npm run typecheck
+      - name: Unit tests + coverage gate
+        run: npm run test:coverage
+      - name: Validate SQL schema
+        run: node scripts/validate-sql.mjs
+      - name: Build (server + client)
+        run: npm run build -w server && npm run build -w client
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: client/coverage
+          if-no-files-found: ignore
+
+  smoke:
+    name: API smoke (real server + SQLite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w server
+      - name: Boot server on a throwaway DB and run the contract smoke
+        run: |
+          export GYM_DATA_DIR="$(mktemp -d)"
+          PORT=4499 node server/dist/index.js &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4499/api/health >/dev/null && break
+            sleep 0.5
+          done
+          BASE=http://localhost:4499 node scripts/smoke.mjs

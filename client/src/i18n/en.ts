@@ -1,0 +1,243 @@
+/**
+ * Base dictionary — copy taken VERBATIM from the design boards
+ * (My Fit — All States, S-01…S-50). Other locales must match this shape;
+ * TypeScript enforces completeness via the Strings type in index.ts.
+ */
+export const en = {
+  locale: 'English',
+
+  // Auth (S-01…S-06)
+  appName: 'My Fit',
+  authTagline: 'Everything you lift, in one place.',
+  emailOrUsername: 'Email or username',
+  password: 'Password',
+  signIn: 'Sign in',
+  signingIn: 'Signing in…',
+  newHereCreate: 'New here? Create an account',
+  haveAccountSignIn: 'Already have an account? Sign in',
+  wrongCredentials: 'Wrong username or password',
+  tooManyAttempts: 'Too many failed attempts. Try again in 15 minutes.',
+  serverUnreachable:
+    "Can't reach the server. The first sign-in needs a connection — offline logging works after that.",
+  retry: 'Retry',
+  createYourAccount: 'Create your account',
+  signupNote: 'Your log is private to your account. Free while My Fit is in beta.',
+  username: 'Username',
+  email: 'Email',
+  passwordMin: 'Password (min. 6 characters)',
+  createAccount: 'Create account',
+  creatingAccount: 'Creating…',
+  emailIncomplete: "That email doesn't look complete",
+  passwordTooShort: '6 characters minimum',
+  usernameTooShort: '2 characters minimum',
+
+  // Services / shell (S-07…S-09)
+  services: 'Services',
+  signOut: 'Sign out',
+  training: 'Training',
+  trainingSub: 'Workouts, sets, weights, gyms',
+  nThisWeek: (n: number) => `${n} this week`,
+  nutrition: 'Nutrition',
+  aiBodyScan: 'AI body scan',
+  soon: 'Soon',
+  language: 'Language',
+  signOutTitle: 'Sign out?',
+  signOutQueueBody: (n: number) =>
+    `${n} ${n === 1 ? 'change is' : 'changes are'} still queued. Signing out discards the local queue — sync first if you want to keep them.`,
+  signOutCleanBody: 'Your log stays on the server and comes back on the next sign-in.',
+  stay: 'Stay',
+
+  // Sync status
+  synced: 'Synced',
+  syncing: 'Syncing',
+  offline: 'Offline',
+  failed: 'Failed',
+  offlineQueued: (n: number) =>
+    `No connection. ${n} ${n === 1 ? 'change' : 'changes'} queued — they'll sync on their own.`,
+  offlineQueuedLong: (n: number) =>
+    `Offline · ${n} ${n === 1 ? 'change' : 'changes'} queued. Nothing is lost — they replay in order.`,
+  sendingQueued: 'Sending queued changes',
+  servedFromCache: 'Everything below is served from the local cache.',
+  offlineLastSync: (ago: string) => `Offline · last sync ${ago}`,
+  minAgo: (n: number) => `${n} min ago`,
+  worksOffline: (n: number) => `Works offline · ${n} queued`,
+  queued: 'Queued',
+  changesSynced: (n: number) => `${n} changes synced`,
+
+  // Today (S-10…S-16)
+  today: 'Today',
+  progress: 'Progress',
+  gyms: 'Gyms',
+  apps: 'Apps',
+  nothingLoggedYet: 'Nothing logged yet.',
+  midSession: 'Mid-session.',
+  startFirstSession: 'Start your first session',
+  startEmptySession: 'Start empty session',
+  noHistoryYet: 'No history yet',
+  noHistoryBody:
+    "Log a session and this fills with your weeks. Templates show up after the second one — they're just sessions you kept.",
+  addGymHint: 'Add your gym so unlogged visits can remind you.',
+  add: 'Add',
+  logIt: 'Log it',
+  dismiss: 'Dismiss',
+  unloggedVisit: (dur: string, gym: string, date: string) =>
+    `${dur} at ${gym} on ${date} with nothing logged.`,
+  sessionInProgress: 'Session in progress',
+  recent: 'Recent',
+  templates: 'Templates',
+  nSaved: (n: number) => `${n} saved`,
+  repeat: (name: string) => `Repeat ${name}`,
+  autoClosed: 'Auto-closed',
+  weekDayLetters: ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as string[],
+
+  // Sync failed card (S-16)
+  syncFailedBody: (i: number, n: number, reason: string) =>
+    `Sync failed on change ${i} of ${n} — ${reason}.`,
+  discardChange: 'Discard change',
+
+  // Session (S-17…S-29)
+  inSession: 'In session',
+  inSessionAt: (gym: string) => `In session · ${gym}`,
+  finish: 'Finish',
+  reopen: 'Reopen',
+  noExercisesYet: 'No exercises yet',
+  noExercisesBody: 'Add the first one — recent lifts and your whole history come up as you type.',
+  addExercise: 'Add exercise',
+  orLoadTemplate: 'or load a template',
+  matches: 'Matches',
+  createExercise: (q: string) => `Create “${q}”`,
+  lastLift: (v: string) => `last ${v}`,
+  sets: 'sets',
+  moved: 'moved',
+  exercises: 'exercises',
+  repsCol: 'Reps',
+  kgCol: 'Kg',
+  warmup: 'warm-up',
+  working: 'working',
+  record: 'record',
+  log: 'Log',
+  prev: (v: string) => `prev ${v}`,
+  ghostHint: 'Prefilled from last time · tap a number to nudge it',
+  rest: 'Rest',
+  skip: 'Skip',
+  newRecordToast: (name: string, v: string) => `New record · ${name} ${v}`,
+  setN: (n: number, ex: string) => `Set ${n} · ${ex}`,
+  loggedAt: (t: string) => `logged ${t}`,
+  reps: 'Reps',
+  weightKg: 'Weight, kg',
+  warmupSet: 'Warm-up set',
+  deleteSet: 'Delete set',
+  cancel: 'Cancel',
+  save: 'Save',
+  setDeleted: (v: string) => `Set deleted · ${v}`,
+  undo: 'Undo',
+  renameHint: 'Renaming affects this session only — history keeps the old name.',
+  exerciseMenuTitle: (name: string, n: number) => `${name} · ${n} sets`,
+  rename: 'Rename',
+  duplicateWithSets: 'Duplicate with sets',
+  openHistory: 'Open history',
+  clearAllSets: 'Clear all sets',
+  deleteExercise: 'Delete exercise',
+  deleteExerciseTitle: (name: string) => `Delete “${name}”?`,
+  deleteExerciseBody: (setsDesc: string) =>
+    `${setsDesc} go with it. Added by mistake? Deleting is instant, with a 5-second undo.`,
+  nLoggedSets: (n: number, list: string) => `${n} logged ${n === 1 ? 'set' : 'sets'} — ${list}`,
+  keep: 'Keep',
+  delete: 'Delete',
+  exerciseDeleted: (name: string, n: number) => `“${name}” deleted · ${n} sets`,
+  closedAutomatically: 'Closed automatically',
+  autoCloseNotice: (t: string) =>
+    `Left open for 8 hours, so it was closed at ${t} and may be incomplete. Everything you logged is kept — add what's missing and it saves to the original date.`,
+  nSetsTag: (n: number) => `${n} sets`,
+  finishSessionTitle: 'Finish this session?',
+  finishEmptyWarning: (name: string, sets: number, vol: string, date: string) =>
+    `“${name}” has no sets and will be dropped. Everything else — ${sets} sets, ${vol} — is saved to ${date}.`,
+  finishCleanBody: (sets: number, vol: string, date: string) =>
+    `${sets} sets, ${vol} — saved to ${date}.`,
+  keepGoing: 'Keep going',
+  sessionSaved: 'Session saved',
+  sessionDone: 'Done.',
+  duration: 'Duration',
+  setsStat: 'Sets',
+  movedStat: 'Moved',
+  newRecord: 'New record',
+  prevBest: (v: string, rm: number) => `Previous best ${v} · estimated 1RM up to ${rm} kg`,
+  comparedToLast: 'Compared to last session',
+  sessionVolume: 'Session volume',
+  editSession: 'Edit session',
+  done: 'Done',
+
+  // History (S-30…S-33)
+  addToSession: 'Add exercise to this session',
+  deleteWorkout: 'Delete workout',
+  deleteWorkoutTitle: 'Delete this workout?',
+  deleteWorkoutBody: (desc: string) =>
+    `${desc}. It disappears from every device on the next sync and cannot be undone.`,
+  autoCloseNoticePast:
+    'Auto-closed after 8 hours — may be incomplete. Anything added here saves to the original date.',
+  nSessionsSince: (n: number, since: string) => `${n} sessions · since ${since}`,
+  oneSession: '1 session',
+  recordKg: 'Record kg',
+  est1rm: 'Est. 1RM',
+  lastTopSet: 'Last top set',
+  topSet12w: 'Top set · 12 weeks',
+  recordSuffix: (v: string) => `${v} · record`,
+  lastSessions: 'Last sessions',
+  dateCol: 'Date',
+  topSetCol: 'Top set',
+  volumeCol: 'Volume',
+  notEnoughData: 'Not enough to draw a line',
+  notEnoughDataBody: "Three sessions and the trend appears here. One point isn't a trend.",
+
+  // Progress (S-34…S-36)
+  volumeThisWeek: 'Volume this week',
+  estimated1rm: 'Estimated 1RM',
+  records: 'Records',
+  twoMoreSessions: 'Two more sessions',
+  progressLocked: (n: number) =>
+    `Volume, records and 1RM estimates need three logged sessions before they mean anything. You have ${n === 1 ? 'one' : n}.`,
+  progressUnlocksAt: 'Progress unlocks at',
+  wksAgo: (n: number) => `${n} wks`,
+
+  // Gyms (S-41…S-48)
+  gymsIntro:
+    'Add a gym while standing in it. Open the app there later and the visit is recorded — an unlogged hour shows up on Today.',
+  gymName: 'Gym name',
+  imHere: "I'm here",
+  locating: 'Locating',
+  noGymsYet: 'No gyms yet',
+  noGymsBody:
+    "Name it first, then tap “I'm here” — the button stays disabled until there's a name.",
+  gymsFootnote:
+    "Browsers don't give background location. Visits are only recorded while the app is open.",
+  readingPosition: 'Reading your position…',
+  locatingNote:
+    'Accuracy improves for a few seconds — the save waits for the best fix or 8 s, whichever comes first.',
+  locationBlocked: 'Location is blocked',
+  locationBlockedBody:
+    'Safari → aA → Website Settings → Location → Allow. Gyms and visit reminders stay off until then.',
+  howToFix: 'How to fix',
+  tryAgain: 'Try again',
+  locationBlockedFootnote:
+    'Everything else in the tracker works exactly as before — this only disables gyms.',
+  gpsCoarse: (m: number) =>
+    `Location came back at ±${m} m — too coarse to pin a gym. Step inside and try again, or save it anyway and widen the radius.`,
+  saveAnyway: 'Save anyway',
+  gymAdded: (m: number) => `Gym added · accuracy ±${m} m`,
+  inside: 'Inside',
+  radiusM: (m: number) => `radius ${m} m`,
+  visitsLast7: 'Visits · last 7 days',
+  nVisits: (n: number) => `${n} visits`,
+  radius: 'Radius',
+  radiusHint: 'Wider catches more visits but also the café next door. 150 m suits most gyms.',
+  deleteGymTitle: (name: string) => `Delete “${name}”?`,
+  deleteGymBody: (n: number) =>
+    `${n} recorded visits go with it and reminders for this place stop. Your workouts are untouched.`,
+
+  // Misc
+  updateReady: 'A new version is ready — reload to update',
+  reload: 'Reload',
+  error: 'Error',
+};
+
+export type Strings = typeof en;

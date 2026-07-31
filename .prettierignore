@@ -1,0 +1,15 @@
+# Збірки й залежності
+node_modules/
+dist/
+dev-dist/
+coverage/
+test-results/
+playwright-report/
+
+# Згенероване / бінарне
+package-lock.json
+*.sqlite
+client/public/
+
+# Зовнішні конфіги, чутливі до форматування
+cloudflare/config.example.yml
