@@ -36,7 +36,7 @@ import {
   fmtTonnes,
   useT,
 } from '../i18n';
-import { Dialog, EmptyState, Icon, Sheet, Switch } from '../ui';
+import { Dialog, EmptyState, Icon, LanguageSelector, Sheet, Switch } from '../ui';
 
 const REST_SECONDS = 90;
 
@@ -191,9 +191,12 @@ export function SessionView(props: {
     }
     return (
       <div className="screen" style={{ padding: '14px 22px 24px', gap: 'var(--space-6)' }}>
-        <div className="saved-mark">
-          <i className="ph-fill ph-check-circle" aria-hidden />
-          <span>{t.sessionSaved}</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="saved-mark">
+            <i className="ph-fill ph-check-circle" aria-hidden />
+            <span>{t.sessionSaved}</span>
+          </div>
+          <LanguageSelector />
         </div>
         <div>
           <h1 className="headline" style={{ fontSize: 32 }}>
@@ -295,6 +298,7 @@ export function SessionView(props: {
             <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
           )}
         </div>
+        <LanguageSelector />
         {live ? (
           <button className="btn btn-secondary" disabled={sets === 0} onClick={requestFinish}>
             {t.finish}
@@ -782,10 +786,10 @@ function SetEditorSheet(props: {
   onClose: () => void;
 }) {
   const { t } = useT();
-  const [loggedAt] = useState(() => Date.now());
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
   const [weight, setWeight] = useState(props.set?.weight ?? props.ghost.weight);
   const [warm, setWarm] = useState(props.set?.isWarmup ?? false);
+  const [openedAt] = useState(() => Date.now());
   const [focused, setFocused] = useState<'reps' | 'weight'>('weight');
   const idx = props.set
     ? [...props.exercise.sets]
@@ -797,7 +801,7 @@ function SetEditorSheet(props: {
     <Sheet onClose={props.onClose}>
       <div className="sheet-head">
         <span className="t">{t.setN(idx, props.exercise.name)}</span>
-        {props.set && <span className="m">{t.loggedAt(fmtClock(loggedAt))}</span>}
+        {props.set && <span className="m">{t.loggedAt(fmtClock(openedAt))}</span>}
       </div>
       <div className="steppers">
         <div

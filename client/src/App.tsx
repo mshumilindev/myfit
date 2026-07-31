@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getToken } from './api';
 import { startSyncLoop, useStore } from './store';
 import { useT } from './i18n';
@@ -33,6 +33,7 @@ export function App() {
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [snack, setSnack] = useState<SnackState | null>(null);
+  const snackSeq = useRef(0);
 
   useEffect(() => {
     if (!authed) return;
@@ -42,7 +43,10 @@ export function App() {
   const shell: Shell = {
     openOverlay: setOverlay,
     toast: setToast,
-    snack: setSnack,
+    snack: (s) => {
+      snackSeq.current += 1;
+      setSnack({ ...s, id: snackSeq.current });
+    },
   };
 
   const closeOverlay = useCallback(() => setOverlay(null), []);
@@ -104,13 +108,7 @@ export function App() {
           </>
         )}
         <div className="toast-holder">
-          {snack && (
-            <Snackbar
-              key={`${snack.text}-${snack.onUndo}`}
-              snack={snack}
-              onDone={() => setSnack(null)}
-            />
-          )}
+          {snack && <Snackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
           {toast && <Toast toast={toast} onDone={() => setToast(null)} />}
         </div>
       </div>

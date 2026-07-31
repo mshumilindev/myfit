@@ -21,7 +21,7 @@ import {
   fmtTonnes,
   useT,
 } from '../i18n';
-import { Icon, Spinner, EmptyState } from '../ui';
+import { Icon, LanguageSelector, Spinner, EmptyState } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -112,7 +112,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             {headline}
           </h1>
         </div>
-        <SyncChip store={store} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <SyncChip store={store} />
+          <LanguageSelector />
+        </div>
       </div>
 
       {store.syncStatus === 'offline' && store.queue.length > 0 && (

@@ -2,7 +2,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { HttpError, request, setAuth } from '../api';
 import { useT } from '../i18n';
-import { Icon, Spinner } from '../ui';
+import { Icon, LanguageSelector, Spinner } from '../ui';
 
 type Mode = 'signin' | 'signup';
 
@@ -80,7 +80,10 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   return (
     <form className="auth-body" onSubmit={submit}>
       <div className="auth-card">
-        <Icon name="barbell" className="wordmark" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Icon name="barbell" className="wordmark" />
+          <LanguageSelector />
+        </div>
         <h1 className="auth-title">{mode === 'signin' ? t.appName : t.createYourAccount}</h1>
         {mode === 'signin' ? (
           <p className="auth-sub">{t.authTagline}</p>

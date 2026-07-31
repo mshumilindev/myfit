@@ -2,8 +2,8 @@
  * Shared UI primitives from the design system (S-49/S-50 kit + dialogs/sheets).
  * Every surface here mirrors the boards; keep visual changes in styles.css.
  */
-import { useEffect, useState, type ReactNode } from 'react';
-import { useT } from './i18n';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
 
 export function Icon({ name, className }: { name: string; className?: string }) {
   return <i className={`ph-bold ph-${name}${className ? ` ${className}` : ''}`} aria-hidden />;
@@ -57,6 +57,7 @@ export function Sheet(props: { children: ReactNode; onClose: () => void; padded?
 }
 
 export interface SnackState {
+  id?: number;
   text: string;
   onUndo: () => void;
 }
@@ -68,7 +69,7 @@ export function Snackbar({ snack, onDone }: { snack: SnackState; onDone: () => v
   useEffect(() => {
     const iv = setInterval(() => setLeft((s) => s - 1), 1000);
     return () => clearInterval(iv);
-  }, [snack]);
+  }, []);
   useEffect(() => {
     if (left <= 0) onDone();
   }, [left, onDone]);
@@ -85,9 +86,7 @@ export function Snackbar({ snack, onDone }: { snack: SnackState; onDone: () => v
       >
         {t.undo}
       </button>
-      <span className="snack-count" key={snack.text}>
-        {Math.max(left, 0)}s
-      </span>
+      <span className="snack-count">{Math.max(left, 0)}s</span>
     </div>
   );
 }
@@ -117,6 +116,57 @@ export function Switch({ on, onToggle }: { on: boolean; onToggle: () => void }) 
     <span className={`switch${on ? ' on' : ''}`} role="switch" aria-checked={on} onClick={onToggle}>
       <span className="knob" />
     </span>
+  );
+}
+
+/**
+ * Compact language selector — flag chip on every screen (documented addition
+ * on top of the boards; see docs/DESIGN.md). Opens a popover with all locales.
+ */
+export function LanguageSelector() {
+  const { locale } = useT();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [open]);
+
+  return (
+    <div className="lang" ref={ref}>
+      <button
+        className="lang-chip"
+        aria-label={LOCALES[locale].language}
+        aria-expanded={open}
+        onClick={() => setOpen((x) => !x)}
+      >
+        <span aria-hidden>{FLAGS[locale]}</span>
+      </button>
+      {open && (
+        <div className="lang-pop" role="menu">
+          {LOCALE_IDS.map((id) => (
+            <button
+              key={id}
+              role="menuitemradio"
+              aria-checked={id === locale}
+              className={`lang-item${id === locale ? ' active' : ''}`}
+              onClick={() => {
+                setLocale(id);
+                setOpen(false);
+              }}
+            >
+              <span aria-hidden>{FLAGS[id]}</span>
+              <span>{LOCALES[id].locale}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

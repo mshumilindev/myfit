@@ -1,7 +1,7 @@
 /** Exercise history — design S-32 (filled) and S-33 (too little data). */
 import { est1rm, topSet, useStore } from '../store';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 
 export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: () => void }) {
   const { t, locale } = useT();
@@ -39,6 +39,9 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
           <div className="sub">
             {sessions.length === 1 ? t.oneSession : t.nSessionsSince(sessions.length, since)}
           </div>
+        </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <LanguageSelector />
         </div>
       </div>
 

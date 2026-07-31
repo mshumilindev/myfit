@@ -3,6 +3,7 @@ import { en } from './en';
 import { uk } from './uk';
 import { pl } from './pl';
 import { lt } from './lt';
+import { et } from './et';
 import {
   fmtDurationHM,
   fmtDurationHuman,
@@ -14,7 +15,7 @@ import {
   LOCALES,
 } from './index';
 
-const dicts = { en, uk, pl, lt };
+const dicts = { en, uk, pl, lt, et };
 
 describe('dictionaries', () => {
   it('should expose every en key in every locale with the same type', () => {
@@ -32,8 +33,8 @@ describe('dictionaries', () => {
     }
   });
 
-  it('should register all four locales', () => {
-    expect(Object.keys(LOCALES).sort()).toEqual(['en', 'lt', 'pl', 'uk']);
+  it('should register all five locales', () => {
+    expect(Object.keys(LOCALES).sort()).toEqual(['en', 'et', 'lt', 'pl', 'uk']);
   });
 });
 
@@ -65,6 +66,13 @@ describe('plurals', () => {
     expect(lt.nSetsTag(10)).toBe('10 serijų');
     expect(lt.nSetsTag(11)).toBe('11 serijų');
     expect(lt.nSetsTag(21)).toBe('21 serija');
+  });
+
+  it('should pluralise Estonian muudatused correctly', () => {
+    expect(et.offlineQueued(1)).toContain('1 muudatus j');
+    expect(et.offlineQueued(5)).toContain('5 muudatust');
+    expect(et.nSetsTag(1)).toBe('1 seeria');
+    expect(et.nSetsTag(4)).toBe('4 seeriat');
   });
 
   it('should pluralise English changes correctly', () => {

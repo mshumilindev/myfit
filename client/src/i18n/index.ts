@@ -3,11 +3,20 @@ import { en, type Strings } from './en';
 import { uk } from './uk';
 import { pl } from './pl';
 import { lt } from './lt';
+import { et } from './et';
 
-export type LocaleId = 'en' | 'uk' | 'pl' | 'lt';
+export type LocaleId = 'en' | 'uk' | 'pl' | 'lt' | 'et';
 
-export const LOCALES: Record<LocaleId, Strings> = { en, uk, pl, lt };
-export const LOCALE_IDS: LocaleId[] = ['en', 'uk', 'pl', 'lt'];
+export const LOCALES: Record<LocaleId, Strings> = { en, uk, pl, lt, et };
+export const LOCALE_IDS: LocaleId[] = ['en', 'uk', 'pl', 'lt', 'et'];
+
+export const FLAGS: Record<LocaleId, string> = {
+  en: '\u{1F1EC}\u{1F1E7}',
+  uk: '\u{1F1FA}\u{1F1E6}',
+  pl: '\u{1F1F5}\u{1F1F1}',
+  lt: '\u{1F1F1}\u{1F1F9}',
+  et: '\u{1F1EA}\u{1F1EA}',
+};
 
 const LOCALE_KEY = 'gym.locale';
 
@@ -57,6 +66,7 @@ const dateLocale: Record<LocaleId, string> = {
   uk: 'uk-UA',
   pl: 'pl-PL',
   lt: 'lt-LT',
+  et: 'et-EE',
 };
 
 /** "Friday, 31 July" */

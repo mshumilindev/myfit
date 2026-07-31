@@ -628,6 +628,60 @@ input {
   margin: 6px 10px;
 }
 
+/* --- Language selector (flag chip, every screen) -------------------------- */
+
+.lang {
+  position: relative;
+  flex: none;
+}
+
+.lang-chip {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  padding: 0;
+}
+
+.lang-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 70;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+  min-width: 148px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  font-size: 13px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--color-neutral-300);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lang-item.active {
+  color: var(--color-accent);
+  background: var(--color-accent-900);
+}
+
 /* --- Tab bar -------------------------------------------------------------- */
 
 .tabbar {

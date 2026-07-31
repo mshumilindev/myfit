@@ -5,8 +5,8 @@
 import { useState } from 'react';
 import { clearAuth } from '../api';
 import { resetLocalData, type useStore } from '../store';
-import { LOCALE_IDS, LOCALES, setLocale, useT } from '../i18n';
-import { Dialog, Icon } from '../ui';
+import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from '../i18n';
+import { Dialog, Icon, LanguageSelector } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -18,9 +18,9 @@ export function ServicesView(props: {
   const { t, locale } = useT();
   const { store } = props;
   const [confirm, setConfirm] = useState(false);
-  const [now] = useState(() => Date.now());
+  const [nowTs] = useState(() => Date.now());
 
-  const weekAgo = now - 7 * 24 * 3600 * 1000;
+  const weekAgo = nowTs - 7 * 24 * 3600 * 1000;
   const thisWeek = store.workouts.filter(
     (w) => w.finishedAt !== null && w.startedAt >= weekAgo,
   ).length;
@@ -31,9 +31,12 @@ export function ServicesView(props: {
     <div className="screen" style={{ padding: '14px 20px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 className="h1">{t.services}</h1>
-        <button className="link" onClick={() => setConfirm(true)}>
-          {t.signOut}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <LanguageSelector />
+          <button className="link" onClick={() => setConfirm(true)}>
+            {t.signOut}
+          </button>
+        </div>
       </div>
 
       {status === 'offline' && store.queue.length > 0 && (
@@ -89,6 +92,9 @@ export function ServicesView(props: {
               className={locale === id ? 'active' : ''}
               onClick={() => setLocale(id)}
             >
+              <span aria-hidden style={{ marginRight: 6 }}>
+                {FLAGS[id]}
+              </span>
               {LOCALES[id].locale}
             </button>
           ))}
@@ -112,7 +118,7 @@ export function ServicesView(props: {
             ? t.synced
             : status === 'offline'
               ? store.lastSyncAt
-                ? t.offlineLastSync(t.minAgo(Math.round((now - store.lastSyncAt) / 60000)))
+                ? t.offlineLastSync(t.minAgo(Math.round((nowTs - store.lastSyncAt) / 60000)))
                 : t.offline
               : t.syncing}
         </span>

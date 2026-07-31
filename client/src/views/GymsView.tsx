@@ -4,7 +4,7 @@ import type { Shell } from '../App';
 import type { Gym } from '../types';
 import { deleteGym, getCurrentPositionOnce, upsertGym, type useStore } from '../store';
 import { useT } from '../i18n';
-import { Dialog, Icon, Sheet, Spinner } from '../ui';
+import { Dialog, Icon, LanguageSelector, Sheet, Spinner } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -49,9 +49,17 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
 
   return (
     <div className="screen" style={{ padding: '6px 20px 20px' }}>
-      <h1 className="title-26" style={{ paddingTop: 8 }}>
-        {t.gyms}
-      </h1>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          paddingTop: 8,
+        }}
+      >
+        <h1 className="title-26">{t.gyms}</h1>
+        <LanguageSelector />
+      </div>
       {store.gyms.length === 0 && add.phase === 'idle' && (
         <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--color-neutral-500)', margin: 0 }}>
           {t.gymsIntro}

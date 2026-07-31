@@ -1,8 +1,8 @@
 /** Progress — design S-34…S-36. */
+import { useState } from 'react';
 import { est1rm, topSet, workoutVolumeKg, type useStore } from '../store';
 import { useT } from '../i18n';
-import { EmptyState } from '../ui';
-import { useState } from 'react';
+import { EmptyState, LanguageSelector } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -17,15 +17,25 @@ function weekStart(ts: number): number {
 
 export function ProgressView({ store }: { store: Store }) {
   const { t } = useT();
-  const [now] = useState(() => Date.now());
+  const [nowTs] = useState(() => Date.now());
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
 
   if (finished.length < 3) {
     return (
       <div className="screen">
-        <h1 className="headline" style={{ paddingTop: 8 }}>
-          {t.progress}
-        </h1>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            paddingTop: 8,
+          }}
+        >
+          <h1 className="headline" style={{ margin: 0 }}>
+            {t.progress}
+          </h1>
+          <LanguageSelector />
+        </div>
         <EmptyState
           icon="chart-line-up"
           title={t.twoMoreSessions}
@@ -44,7 +54,7 @@ export function ProgressView({ store }: { store: Store }) {
   }
 
   // Weekly volume, current week last, 10 columns.
-  const thisWeek = weekStart(now);
+  const thisWeek = weekStart(nowTs);
   const weeks: number[] = [];
   for (let i = 9; i >= 0; i--) {
     const start = thisWeek - i * WEEK_MS;
@@ -130,6 +140,9 @@ export function ProgressView({ store }: { store: Store }) {
           </div>
           <div className="lab">{t.volumeThisWeek}</div>
         </div>
+        <div style={{ marginLeft: 'auto' }}>
+          <LanguageSelector />
+        </div>
         {deltaPct !== null && (
           <span className="tag tag-accent" style={{ marginBottom: 22 }}>
             {deltaPct >= 0 ? '+' : '−'}
@@ -198,7 +211,7 @@ export function ProgressView({ store }: { store: Store }) {
         </div>
         <div>
           {records.map(([name, r]) => {
-            const wksAgo = Math.floor((now - r.recTs) / WEEK_MS);
+            const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
             return (
               <div key={name} className="record-row">
                 <span className="n">{name}</span>
