@@ -1,0 +1,240 @@
+import type { Strings } from './en';
+
+/** Lithuanian. Plural helper: 1 pakeitimas / 2 pakeitimai / 10 pakeitimų. */
+const pakeitimai = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && (m100 < 11 || m100 > 19)) return 'pakeitimas';
+  if (m10 >= 2 && (m100 < 11 || m100 > 19)) return 'pakeitimai';
+  return 'pakeitimų';
+};
+const serijos = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && (m100 < 11 || m100 > 19)) return 'serija';
+  if (m10 >= 2 && (m100 < 11 || m100 > 19)) return 'serijos';
+  return 'serijų';
+};
+
+export const lt: Strings = {
+  locale: 'Lietuvių',
+
+  appName: 'My Fit',
+  authTagline: 'Viskas, ką keli, vienoje vietoje.',
+  emailOrUsername: 'El. paštas arba vartotojo vardas',
+  password: 'Slaptažodis',
+  signIn: 'Prisijungti',
+  signingIn: 'Jungiamasi…',
+  newHereCreate: 'Naujokas? Susikurk paskyrą',
+  haveAccountSignIn: 'Jau turi paskyrą? Prisijunk',
+  wrongCredentials: 'Neteisingas vardas arba slaptažodis',
+  tooManyAttempts: 'Per daug nesėkmingų bandymų. Bandyk po 15 minučių.',
+  serverUnreachable:
+    'Nepavyksta pasiekti serverio. Pirmam prisijungimui reikia ryšio — po to veikia įrašai neprisijungus.',
+  retry: 'Bandyti dar',
+  createYourAccount: 'Susikurk paskyrą',
+  signupNote: 'Tavo žurnalas privatus tavo paskyrai. Nemokama, kol My Fit beta versijoje.',
+  username: 'Vartotojo vardas',
+  email: 'El. paštas',
+  passwordMin: 'Slaptažodis (min. 6 simboliai)',
+  createAccount: 'Sukurti paskyrą',
+  creatingAccount: 'Kuriama…',
+  emailIncomplete: 'Šis el. paštas atrodo nepilnas',
+  passwordTooShort: 'Mažiausiai 6 simboliai',
+  usernameTooShort: 'Mažiausiai 2 simboliai',
+
+  services: 'Paslaugos',
+  signOut: 'Atsijungti',
+  training: 'Treniruotės',
+  trainingSub: 'Treniruotės, serijos, svoriai, salės',
+  nThisWeek: (n) => `${n} šią savaitę`,
+  nutrition: 'Mityba',
+  aiBodyScan: 'AI kūno analizė',
+  soon: 'Netrukus',
+  language: 'Kalba',
+  signOutTitle: 'Atsijungti?',
+  signOutQueueBody: (n) =>
+    `Eilėje dar ${n} ${pakeitimai(n)}. Atsijungimas ištrina vietinę eilę — pirma sinchronizuok, jei nori juos išsaugoti.`,
+  signOutCleanBody: 'Žurnalas lieka serveryje ir grįš kitą kartą prisijungus.',
+  stay: 'Likti',
+
+  synced: 'Sinchronizuota',
+  syncing: 'Sinchronizuojama',
+  offline: 'Neprisijungęs',
+  failed: 'Klaida',
+  offlineQueued: (n) => `Nėra ryšio. Eilėje ${n} ${pakeitimai(n)} — jie susisinchronizuos patys.`,
+  offlineQueuedLong: (n) =>
+    `Neprisijungęs · eilėje ${n} ${pakeitimai(n)}. Niekas nedingsta — jie atsikartos iš eilės.`,
+  sendingQueued: 'Siunčiami eilės pakeitimai',
+  servedFromCache: 'Viskas žemiau — iš vietinės atmintinės.',
+  offlineLastSync: (ago) => `Neprisijungęs · paskutinė sinchronizacija ${ago}`,
+  minAgo: (n) => `prieš ${n} min`,
+  worksOffline: (n) => `Veikia neprisijungus · eilėje ${n}`,
+  queued: 'Eilėje',
+  changesSynced: (n) => `Sinchronizuota pakeitimų: ${n}`,
+
+  today: 'Šiandien',
+  progress: 'Pažanga',
+  gyms: 'Salės',
+  apps: 'Paslaugos',
+  nothingLoggedYet: 'Dar nieko neužfiksuota.',
+  midSession: 'Treniruotė vyksta.',
+  startFirstSession: 'Pradėk pirmą treniruotę',
+  startEmptySession: 'Pradėti tuščią treniruotę',
+  noHistoryYet: 'Istorijos dar nėra',
+  noHistoryBody:
+    'Užfiksuok treniruotę — ir čia atsiras tavo savaitės. Šablonai pasirodo po antros — tai tiesiog išsaugotos treniruotės.',
+  addGymHint: 'Pridėk savo salę, kad neužfiksuoti apsilankymai primintų apie save.',
+  add: 'Pridėti',
+  logIt: 'Užfiksuoti',
+  dismiss: 'Atmesti',
+  unloggedVisit: (dur, gym, date) => `${dur} ${gym} ${date} — nieko neužfiksuota.`,
+  sessionInProgress: 'Treniruotė vyksta',
+  recent: 'Paskutinės',
+  templates: 'Šablonai',
+  nSaved: (n) => `Išsaugota: ${n}`,
+  repeat: (name) => `Pakartoti ${name}`,
+  autoClosed: 'Uždaryta automatiškai',
+  weekDayLetters: ['P', 'A', 'T', 'K', 'P', 'Š', 'S'],
+
+  syncFailedBody: (i, n, reason) =>
+    `Sinchronizacija sustojo ties pakeitimu ${i} iš ${n} — ${reason}.`,
+  discardChange: 'Atmesti pakeitimą',
+
+  inSession: 'Treniruotė',
+  inSessionAt: (gym) => `Treniruotė · ${gym}`,
+  finish: 'Baigti',
+  reopen: 'Atnaujinti',
+  noExercisesYet: 'Pratimų dar nėra',
+  noExercisesBody: 'Pridėk pirmą — rašant iškyla paskutiniai pratimai ir visa istorija.',
+  addExercise: 'Pridėti pratimą',
+  orLoadTemplate: 'arba įkelk šabloną',
+  matches: 'Atitikmenys',
+  createExercise: (q) => `Sukurti „${q}“`,
+  lastLift: (v) => `paskutinį kartą ${v}`,
+  sets: 'serijos',
+  moved: 'pakelta',
+  exercises: 'pratimai',
+  repsCol: 'Kart.',
+  kgCol: 'Kg',
+  warmup: 'apšilimas',
+  working: 'darbinė',
+  record: 'rekordas',
+  log: 'Fiksuoti',
+  prev: (v) => `ankst. ${v}`,
+  ghostHint: 'Užpildyta iš praėjusio karto · paliesk skaičių, kad pakoreguotum',
+  rest: 'Poilsis',
+  skip: 'Praleisti',
+  newRecordToast: (name, v) => `Naujas rekordas · ${name} ${v}`,
+  setN: (n, ex) => `Serija ${n} · ${ex}`,
+  loggedAt: (t) => `užfiksuota ${t}`,
+  reps: 'Kartojimai',
+  weightKg: 'Svoris, kg',
+  warmupSet: 'Apšilimo serija',
+  deleteSet: 'Ištrinti seriją',
+  cancel: 'Atšaukti',
+  save: 'Išsaugoti',
+  setDeleted: (v) => `Serija ištrinta · ${v}`,
+  undo: 'Grąžinti',
+  renameHint: 'Pervadinimas galioja tik šiai treniruotei — istorija išlaiko seną pavadinimą.',
+  exerciseMenuTitle: (name, n) => `${name} · ${n} ${serijos(n)}`,
+  rename: 'Pervadinti',
+  duplicateWithSets: 'Dubliuoti su serijomis',
+  openHistory: 'Atverti istoriją',
+  clearAllSets: 'Išvalyti visas serijas',
+  deleteExercise: 'Ištrinti pratimą',
+  deleteExerciseTitle: (name) => `Ištrinti „${name}“?`,
+  deleteExerciseBody: (setsDesc) =>
+    `${setsDesc} dings kartu. Pridėta per klaidą? Trynimas akimirksniu, su 5 sekundžių grąžinimu.`,
+  nLoggedSets: (n, list) => `${n} ${serijos(n)} — ${list}`,
+  keep: 'Palikti',
+  delete: 'Ištrinti',
+  exerciseDeleted: (name, n) => `„${name}“ ištrinta · ${n} ${serijos(n)}`,
+  closedAutomatically: 'Uždaryta automatiškai',
+  autoCloseNotice: (t) =>
+    `Buvo atidaryta 8 valandas, todėl užsidarė ${t} ir gali būti nepilna. Viskas, ką užfiksavai, išsaugota — pridėk, ko trūksta, ir tai išsisaugos pradine data.`,
+  nSetsTag: (n) => `${n} ${serijos(n)}`,
+  finishSessionTitle: 'Baigti treniruotę?',
+  finishEmptyWarning: (name, sets, vol, date) =>
+    `„${name}“ be serijų ir bus praleista. Visa kita — ${sets} ${serijos(sets)}, ${vol} — išsaugoma ${date}.`,
+  finishCleanBody: (sets, vol, date) => `${sets} ${serijos(sets)}, ${vol} — išsaugota ${date}.`,
+  keepGoing: 'Tęsti',
+  sessionSaved: 'Treniruotė išsaugota',
+  sessionDone: 'Atlikta.',
+  duration: 'Trukmė',
+  setsStat: 'Serijos',
+  movedStat: 'Pakelta',
+  newRecord: 'Naujas rekordas',
+  prevBest: (v, rm) => `Ankstesnis rekordas ${v} · numatomas 1RM iki ${rm} kg`,
+  comparedToLast: 'Palyginti su praėjusia treniruote',
+  sessionVolume: 'Treniruotės apimtis',
+  editSession: 'Redaguoti',
+  done: 'Atlikta',
+
+  addToSession: 'Pridėti pratimą į šią treniruotę',
+  deleteWorkout: 'Ištrinti treniruotę',
+  deleteWorkoutTitle: 'Ištrinti šią treniruotę?',
+  deleteWorkoutBody: (desc) =>
+    `${desc}. Ji dings iš visų įrenginių per kitą sinchronizaciją — be galimybės atkurti.`,
+  autoCloseNoticePast:
+    'Uždaryta automatiškai po 8 valandų — gali būti nepilna. Viskas, kas čia pridėta, išsisaugos pradine data.',
+  nSessionsSince: (n, since) => `Treniruočių: ${n} · nuo ${since}`,
+  oneSession: '1 treniruotė',
+  recordKg: 'Rekordas, kg',
+  est1rm: 'Num. 1RM',
+  lastTopSet: 'Paskutinė top serija',
+  topSet12w: 'Top serija · 12 savaičių',
+  recordSuffix: (v) => `${v} · rekordas`,
+  lastSessions: 'Paskutinės treniruotės',
+  dateCol: 'Data',
+  topSetCol: 'Top serija',
+  volumeCol: 'Apimtis',
+  notEnoughData: 'Per mažai linijai nubrėžti',
+  notEnoughDataBody: 'Trys treniruotės — ir čia atsiras tendencija. Vienas taškas — ne tendencija.',
+
+  volumeThisWeek: 'Apimtis šią savaitę',
+  estimated1rm: 'Numatomas 1RM',
+  records: 'Rekordai',
+  twoMoreSessions: 'Dar dvi treniruotės',
+  progressLocked: (n) =>
+    `Apimtis, rekordai ir 1RM vertinimai prasmingi po trijų užfiksuotų treniruočių. Turi ${n === 1 ? 'vieną' : n}.`,
+  progressUnlocksAt: 'Pažanga atsirakins ties',
+  wksAgo: (n) => `prieš ${n} sav`,
+
+  gymsIntro:
+    'Pridėk salę stovėdamas joje. Vėliau ten atidaryk programėlę — apsilankymas užsifiksuos, o neužfiksuota valanda atsiras „Šiandien“.',
+  gymName: 'Salės pavadinimas',
+  imHere: 'Aš čia',
+  locating: 'Nustatoma',
+  noGymsYet: 'Salių dar nėra',
+  noGymsBody: 'Pirma pavadink, tada spausk „Aš čia“ — mygtukas neveikia, kol nėra pavadinimo.',
+  gymsFootnote:
+    'Naršyklės neduoda vietos nustatymo fone. Apsilankymai fiksuojami tik kai programėlė atidaryta.',
+  readingPosition: 'Skaitoma pozicija…',
+  locatingNote:
+    'Tikslumas gerėja kelias sekundes — išsaugojimas laukia geriausio fikso arba 8 s, kas ateis pirmiau.',
+  locationBlocked: 'Vieta užblokuota',
+  locationBlockedBody:
+    'Safari → aA → Svetainės nustatymai → Vieta → Leisti. Salės ir apsilankymų priminimai neveiks iki tol.',
+  howToFix: 'Kaip pataisyti',
+  tryAgain: 'Bandyti dar kartą',
+  locationBlockedFootnote: 'Visa kita programoje veikia kaip anksčiau — tai išjungia tik sales.',
+  gpsCoarse: (m) =>
+    `Vieta grįžo ±${m} m tikslumu — per grubu salei prisegti. Užeik į vidų ir bandyk dar, arba išsaugok ir praplėsk spindulį.`,
+  saveAnyway: 'Vis tiek išsaugoti',
+  gymAdded: (m) => `Salė pridėta · tikslumas ±${m} m`,
+  inside: 'Viduje',
+  radiusM: (m) => `spindulys ${m} m`,
+  visitsLast7: 'Apsilankymai · paskutinės 7 dienos',
+  nVisits: (n) => `Apsilankymų: ${n}`,
+  radius: 'Spindulys',
+  radiusHint:
+    'Platesnis pagauna daugiau apsilankymų, bet ir kavinę šalia. 150 m tinka daugumai salių.',
+  deleteGymTitle: (name) => `Ištrinti „${name}“?`,
+  deleteGymBody: (n) =>
+    `Kartu dings ${n} užfiksuotų apsilankymų, o priminimai šiai vietai sustos. Treniruotės nepaliestos.`,
+
+  updateReady: 'Nauja versija paruošta — perkrauk, kad atsinaujintų',
+  reload: 'Perkrauti',
+  error: 'Klaida',
+};

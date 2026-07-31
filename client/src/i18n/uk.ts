@@ -1,0 +1,238 @@
+import type { Strings } from './en';
+
+/** Ukrainian. Plural helper: 1 зміна / 2 зміни / 5 змін. */
+const zminy = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'зміна';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'зміни';
+  return 'змін';
+};
+const pidhody = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'підхід';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'підходи';
+  return 'підходів';
+};
+
+export const uk: Strings = {
+  locale: 'Українська',
+
+  appName: 'My Fit',
+  authTagline: 'Все, що ти піднімаєш, — в одному місці.',
+  emailOrUsername: 'Email або імʼя користувача',
+  password: 'Пароль',
+  signIn: 'Увійти',
+  signingIn: 'Вхід…',
+  newHereCreate: 'Вперше тут? Створи акаунт',
+  haveAccountSignIn: 'Вже є акаунт? Увійти',
+  wrongCredentials: 'Невірне імʼя або пароль',
+  tooManyAttempts: 'Забагато невдалих спроб. Спробуй за 15 хвилин.',
+  serverUnreachable:
+    'Немає звʼязку із сервером. Перший вхід потребує зʼєднання — далі офлайн-запис працює.',
+  retry: 'Повторити',
+  createYourAccount: 'Створи свій акаунт',
+  signupNote: 'Твій журнал приватний для твого акаунта. Безкоштовно, поки My Fit у беті.',
+  username: 'Імʼя користувача',
+  email: 'Email',
+  passwordMin: 'Пароль (мін. 6 символів)',
+  createAccount: 'Створити акаунт',
+  creatingAccount: 'Створення…',
+  emailIncomplete: 'Цей email виглядає неповним',
+  passwordTooShort: 'Мінімум 6 символів',
+  usernameTooShort: 'Мінімум 2 символи',
+
+  services: 'Сервіси',
+  signOut: 'Вийти',
+  training: 'Тренування',
+  trainingSub: 'Тренування, підходи, вага, зали',
+  nThisWeek: (n) => `${n} цього тижня`,
+  nutrition: 'Харчування',
+  aiBodyScan: 'AI-оцінка тіла',
+  soon: 'Скоро',
+  language: 'Мова',
+  signOutTitle: 'Вийти?',
+  signOutQueueBody: (n) =>
+    `Ще ${n} ${zminy(n)} у черзі. Вихід видалить локальну чергу — синхронізуйся спершу, якщо хочеш їх зберегти.`,
+  signOutCleanBody: 'Журнал лишається на сервері й повернеться при наступному вході.',
+  stay: 'Залишитись',
+
+  synced: 'Синхронізовано',
+  syncing: 'Синхронізація',
+  offline: 'Офлайн',
+  failed: 'Помилка',
+  offlineQueued: (n) => `Немає звʼязку. ${n} ${zminy(n)} у черзі — синхронізуються самі.`,
+  offlineQueuedLong: (n) =>
+    `Офлайн · ${n} ${zminy(n)} у черзі. Ніщо не губиться — вони відтворяться по порядку.`,
+  sendingQueued: 'Надсилаю зміни з черги',
+  servedFromCache: 'Все нижче — з локального кешу.',
+  offlineLastSync: (ago) => `Офлайн · остання синхронізація ${ago}`,
+  minAgo: (n) => `${n} хв тому`,
+  worksOffline: (n) => `Працює офлайн · ${n} у черзі`,
+  queued: 'У черзі',
+  changesSynced: (n) => `Синхронізовано змін: ${n}`,
+
+  today: 'Сьогодні',
+  progress: 'Прогрес',
+  gyms: 'Зали',
+  apps: 'Сервіси',
+  nothingLoggedYet: 'Ще нічого не записано.',
+  midSession: 'Тренування триває.',
+  startFirstSession: 'Почни перше тренування',
+  startEmptySession: 'Почати порожнє тренування',
+  noHistoryYet: 'Історії ще немає',
+  noHistoryBody:
+    'Запиши тренування — і тут зʼявляться твої тижні. Шаблони зʼявляються після другого: це просто збережені тренування.',
+  addGymHint: 'Додай свій зал, щоб незаписані візити нагадували про себе.',
+  add: 'Додати',
+  logIt: 'Записати',
+  dismiss: 'Прибрати',
+  unloggedVisit: (dur, gym, date) => `${dur} у ${gym} ${date} — нічого не записано.`,
+  sessionInProgress: 'Тренування триває',
+  recent: 'Останні',
+  templates: 'Шаблони',
+  nSaved: (n) => `Збережено: ${n}`,
+  repeat: (name) => `Повторити ${name}`,
+  autoClosed: 'Авто-закрито',
+  weekDayLetters: ['П', 'В', 'С', 'Ч', 'П', 'С', 'Н'],
+
+  syncFailedBody: (i, n, reason) => `Синхронізація впала на зміні ${i} з ${n} — ${reason}.`,
+  discardChange: 'Відкинути зміну',
+
+  inSession: 'Тренування',
+  inSessionAt: (gym) => `Тренування · ${gym}`,
+  finish: 'Завершити',
+  reopen: 'Відновити',
+  noExercisesYet: 'Ще немає вправ',
+  noExercisesBody: 'Додай першу — недавні вправи й уся історія підкажуться під час вводу.',
+  addExercise: 'Додати вправу',
+  orLoadTemplate: 'або завантаж шаблон',
+  matches: 'Збіги',
+  createExercise: (q) => `Створити «${q}»`,
+  lastLift: (v) => `минулого разу ${v}`,
+  sets: 'підходи',
+  moved: 'піднято',
+  exercises: 'вправи',
+  repsCol: 'Повт.',
+  kgCol: 'Кг',
+  warmup: 'розминка',
+  working: 'робочий',
+  record: 'рекорд',
+  log: 'Запис',
+  prev: (v) => `мин. ${v}`,
+  ghostHint: 'Заповнено з минулого разу · торкнись числа, щоб підправити',
+  rest: 'Відпочинок',
+  skip: 'Пропустити',
+  newRecordToast: (name, v) => `Новий рекорд · ${name} ${v}`,
+  setN: (n, ex) => `Підхід ${n} · ${ex}`,
+  loggedAt: (t) => `записано ${t}`,
+  reps: 'Повторення',
+  weightKg: 'Вага, кг',
+  warmupSet: 'Розминковий підхід',
+  deleteSet: 'Видалити підхід',
+  cancel: 'Скасувати',
+  save: 'Зберегти',
+  setDeleted: (v) => `Підхід видалено · ${v}`,
+  undo: 'Повернути',
+  renameHint: 'Перейменування діє лише на це тренування — історія зберігає стару назву.',
+  exerciseMenuTitle: (name, n) => `${name} · ${n} ${pidhody(n)}`,
+  rename: 'Перейменувати',
+  duplicateWithSets: 'Дублювати з підходами',
+  openHistory: 'Відкрити історію',
+  clearAllSets: 'Очистити всі підходи',
+  deleteExercise: 'Видалити вправу',
+  deleteExerciseTitle: (name) => `Видалити «${name}»?`,
+  deleteExerciseBody: (setsDesc) =>
+    `${setsDesc} зникнуть разом із нею. Додано помилково? Видалення миттєве, з 5-секундним поверненням.`,
+  nLoggedSets: (n, list) => `${n} ${pidhody(n)} — ${list}`,
+  keep: 'Лишити',
+  delete: 'Видалити',
+  exerciseDeleted: (name, n) => `«${name}» видалено · ${n} ${pidhody(n)}`,
+  closedAutomatically: 'Закрито автоматично',
+  autoCloseNotice: (t) =>
+    `Було відкрите 8 годин, тож закрилося о ${t} і може бути неповним. Усе записане збережено — додай, чого бракує, і воно збережеться на початкову дату.`,
+  nSetsTag: (n) => `${n} ${pidhody(n)}`,
+  finishSessionTitle: 'Завершити тренування?',
+  finishEmptyWarning: (name, sets, vol, date) =>
+    `«${name}» без підходів і буде відкинута. Решта — ${sets} ${pidhody(sets)}, ${vol} — збережеться на ${date}.`,
+  finishCleanBody: (sets, vol, date) => `${sets} ${pidhody(sets)}, ${vol} — збережено на ${date}.`,
+  keepGoing: 'Продовжити',
+  sessionSaved: 'Тренування збережено',
+  sessionDone: 'Готово.',
+  duration: 'Тривалість',
+  setsStat: 'Підходи',
+  movedStat: 'Піднято',
+  newRecord: 'Новий рекорд',
+  prevBest: (v, rm) => `Попередній рекорд ${v} · оцінка 1ПМ до ${rm} кг`,
+  comparedToLast: 'Порівняно з минулим тренуванням',
+  sessionVolume: 'Обʼєм тренування',
+  editSession: 'Редагувати',
+  done: 'Готово',
+
+  addToSession: 'Додати вправу в це тренування',
+  deleteWorkout: 'Видалити тренування',
+  deleteWorkoutTitle: 'Видалити це тренування?',
+  deleteWorkoutBody: (desc) =>
+    `${desc}. Воно зникне з усіх пристроїв при наступній синхронізації — без можливості повернення.`,
+  autoCloseNoticePast:
+    'Авто-закрите через 8 годин — може бути неповним. Усе додане тут збережеться на початкову дату.',
+  nSessionsSince: (n, since) => `Тренувань: ${n} · з ${since}`,
+  oneSession: '1 тренування',
+  recordKg: 'Рекорд, кг',
+  est1rm: 'Оцінка 1ПМ',
+  lastTopSet: 'Останній топ-підхід',
+  topSet12w: 'Топ-підхід · 12 тижнів',
+  recordSuffix: (v) => `${v} · рекорд`,
+  lastSessions: 'Останні тренування',
+  dateCol: 'Дата',
+  topSetCol: 'Топ-підхід',
+  volumeCol: 'Обʼєм',
+  notEnoughData: 'Замало даних для лінії',
+  notEnoughDataBody: 'Три тренування — і тут зʼявиться тренд. Одна точка — це не тренд.',
+
+  volumeThisWeek: 'Обʼєм цього тижня',
+  estimated1rm: 'Оцінка 1ПМ',
+  records: 'Рекорди',
+  twoMoreSessions: 'Ще два тренування',
+  progressLocked: (n) =>
+    `Обʼєм, рекорди й оцінки 1ПМ мають сенс після трьох записаних тренувань. У тебе ${n === 1 ? 'одне' : n}.`,
+  progressUnlocksAt: 'Прогрес відкриється на',
+  wksAgo: (n) => `${n} тиж`,
+
+  gymsIntro:
+    'Додай зал, стоячи в ньому. Відкриєш там додаток пізніше — візит запишеться, а незаписана година зʼявиться на «Сьогодні».',
+  gymName: 'Назва залу',
+  imHere: 'Я тут',
+  locating: 'Визначення',
+  noGymsYet: 'Залів ще немає',
+  noGymsBody: 'Спершу назви його, потім тисни «Я тут» — кнопка неактивна, поки немає назви.',
+  gymsFootnote:
+    'Браузери не дають геолокацію у фоні. Візити записуються лише коли додаток відкритий.',
+  readingPosition: 'Зчитую позицію…',
+  locatingNote:
+    'Точність зростає кілька секунд — збереження чекає найкращого фіксу або 8 с, що настане раніше.',
+  locationBlocked: 'Геолокацію заблоковано',
+  locationBlockedBody:
+    'Safari → aA → Налаштування сайту → Геопозиція → Дозволити. Зали й нагадування про візити вимкнені, поки що.',
+  howToFix: 'Як виправити',
+  tryAgain: 'Спробувати ще',
+  locationBlockedFootnote: 'Решта трекера працює як раніше — це вимикає лише зали.',
+  gpsCoarse: (m) =>
+    `Локація прийшла з точністю ±${m} м — надто грубо, щоб привʼязати зал. Зайди всередину і спробуй ще, або збережи і розшир радіус.`,
+  saveAnyway: 'Зберегти все одно',
+  gymAdded: (m) => `Зал додано · точність ±${m} м`,
+  inside: 'Всередині',
+  radiusM: (m) => `радіус ${m} м`,
+  visitsLast7: 'Візити · останні 7 днів',
+  nVisits: (n) => `Візитів: ${n}`,
+  radius: 'Радіус',
+  radiusHint: 'Ширше — більше візитів, але й кавʼярня поруч. 150 м пасує більшості залів.',
+  deleteGymTitle: (name) => `Видалити «${name}»?`,
+  deleteGymBody: (n) =>
+    `Разом з ним зникнуть ${n} записаних візитів, нагадування для цього місця зупиняться. Тренування не постраждають.`,
+
+  updateReady: 'Нова версія готова — перезавантаж, щоб оновитися',
+  reload: 'Перезавантажити',
+  error: 'Помилка',
+};

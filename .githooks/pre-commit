@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Pre-commit hook для gym-tracker (адаптовано з b2b-portal-ui).
+#
+# Швидкі перевірки тільки по staged-файлах: prettier --write і eslint --fix
+# по staged JS/TS, ре-стейдж результату (пропускаючи частково staged файли,
+# щоб не втягнути unstaged-правки), потім eslint-верифікація. Повний гейт
+# (lint + format:check + typecheck + validate-sql) — на push (.githooks/pre-push).
+#
+# Вмикається через core.hooksPath = .githooks (scripts/install-git-hooks.mjs,
+# запускається 'npm install'). Обхід на один коміт: git commit --no-verify
+
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+if [ ! -d node_modules ]; then
+  echo "[pre-commit] node_modules відсутній. Запусти: npm install"
+  exit 1
+fi
+
+staged=()
+while IFS= read -r line; do
+  [ -n "$line" ] && staged+=("$line")
+done < <(git diff --cached --name-only --diff-filter=ACMR -- \
+  '*.ts' '*.tsx' '*.js' '*.jsx' '*.cjs' '*.mjs')
+
+if [ ${#staged[@]} -eq 0 ]; then
+  echo "[pre-commit] немає staged JS/TS файлів; пропускаю."
+  exit 0
+fi
+
+# Частково staged файли (є І staged, І unstaged зміни) — фіксуємо ДО авто-фіксів:
+# їх не можна сліпо `git add`, інакше unstaged-правки потраплять у коміт.
+partial=$(comm -12 \
+  <(printf '%s\n' "${staged[@]}" | sort -u) \
+  <(git diff --name-only --diff-filter=ACMR -- \
+      '*.ts' '*.tsx' '*.js' '*.jsx' '*.cjs' '*.mjs' | sort -u))
+
+echo "[pre-commit] prettier --write (${#staged[@]} файл(ів))"
+npx --no-install prettier --write "${staged[@]}"
+
+echo "[pre-commit] eslint --fix"
+npx --no-install eslint --fix --no-warn-ignored "${staged[@]}"
+
+for file in "${staged[@]}"; do
+  if printf '%s\n' "$partial" | grep -qxF -- "$file"; then
+    echo "[pre-commit] УВАГА: '$file' частково staged; авто-фікси не ре-стейджу. Переглянь і зроби 'git add' вручну."
+  else
+    git add -- "$file"
+  fi
+done
+
+echo "[pre-commit] eslint (верифікація)"
+npx --no-install eslint --no-warn-ignored "${staged[@]}"
+
+echo "[pre-commit] OK"

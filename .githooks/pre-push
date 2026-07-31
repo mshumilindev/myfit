@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Pre-push hook для gym-tracker (адаптовано з b2b-portal-ui).
+#
+# Прогонить ESLint + Prettier + tsc --noEmit (всі воркспейси) + validate-sql,
+# щоб стильові/типові регресії не їхали в remote. Авто-фіксить що може, і
+# перериває push, якщо авто-фіксери створили диф — закоміть і пушни знову.
+#
+# Вмикається 'npm install' (lifecycle-скрипт 'prepare').
+# Вимкнути вручну: git config --unset core.hooksPath
+# Обхід на один push: git push --no-verify
+
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+if [ ! -d node_modules ]; then
+  echo "[pre-push] node_modules відсутній. Запусти: npm install"
+  exit 1
+fi
+
+echo "[pre-push] npm run lint:fix"
+npm run --silent lint:fix
+echo "[pre-push] npm run format"
+npm run --silent format
+
+if ! git diff --quiet HEAD --; then
+  echo ""
+  echo "[pre-push] робоче дерево відрізняється від HEAD після авто-форматерів:"
+  echo ""
+  git --no-pager diff --stat HEAD --
+  echo ""
+  echo "[pre-push] ПЕРЕРИВАЮ push. Ймовірні причини:"
+  echo "[pre-push]   (а) авто-форматери щойно щось виправили — закоміть диф і пушни знову, або"
+  echo "[pre-push]   (б) є незв'язаний WIP — застешь або закоміть його."
+  echo "[pre-push] Обхід на один push: git push --no-verify"
+  exit 1
+fi
+
+echo "[pre-push] npm run lint"
+npm run --silent lint
+echo "[pre-push] npm run format:check"
+npm run --silent format:check
+echo "[pre-push] npm run typecheck"
+npm run --silent typecheck
+echo "[pre-push] npm run test:coverage"
+npm run --silent test:coverage
+echo "[pre-push] node scripts/validate-sql.mjs"
+node scripts/validate-sql.mjs
+
+echo "[pre-push] OK"
