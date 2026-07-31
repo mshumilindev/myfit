@@ -9,7 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
-    "electron": "^37.2.0",
+    "electron": "^43.2.0",
     "typescript": "^5.8.3",
     "@types/node": "^22.15.0"
   }
