@@ -433,7 +433,7 @@ export function getCurrentPositionOnce(): Promise<{
               : 'Не вдалося визначити локацію',
           ),
         ),
-      { enableHighAccuracy: true, timeout: 15_000 },
+      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
     );
   });
 }

@@ -3,6 +3,7 @@ import {
   LOCALES,
   LOCALE_IDS,
   fmtClock,
+  fmtDayMonth,
   fmtDurationHM,
   fmtDurationHuman,
   fmtFullDate,
@@ -14,6 +15,7 @@ import {
   fmtTonnes,
   setLocale,
   getLocale,
+  t,
 } from '../client/src/i18n';
 
 function walkShape(base: unknown, candidate: unknown, path: string[] = []): void {
@@ -47,11 +49,13 @@ describe('F-02 i18n', () => {
   it('persists selected locale and formats domain values', () => {
     setLocale('uk');
     expect(getLocale()).toBe('uk');
+    expect(t().locale).toBe('Українська');
     expect(localStorage.getItem('gym.locale')).toBe('uk');
     expect(document.documentElement.lang).toBe('uk');
 
     const ts = Date.UTC(2026, 6, 31, 9, 5);
     expect(fmtFullDate(ts)).toBeTruthy();
+    expect(fmtDayMonth(ts)).toBeTruthy();
     expect(fmtShortDate(ts)).toBeTruthy();
     expect(fmtClock(ts)).toMatch(/^\d{2}:\d{2}$/);
     expect(fmtDurationHM(65 * 60000)).toBe('1:05');

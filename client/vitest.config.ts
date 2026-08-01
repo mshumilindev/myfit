@@ -10,7 +10,7 @@ export default defineConfig({
       // Чесний гейт: поріг тримаємо на модулях, які реально покриті тестами
       // (i18n — словники, плюрали, форматери). Розширюємо include разом з
       // новими тестами; знижувати пороги заборонено (test-integrity.mdc).
-      include: ['src/i18n/**'],
+      include: ['src/i18n/**', 'src/data/**'],
       thresholds: {
         statements: 80,
         branches: 80,

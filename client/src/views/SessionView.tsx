@@ -36,7 +36,9 @@ import {
   fmtTonnes,
   useT,
 } from '../i18n';
-import { Dialog, EmptyState, Icon, LanguageSelector, Sheet, Switch } from '../ui';
+import { ConfirmDialog, Dialog, EmptyState, Icon, LanguageSelector, Sheet, Switch } from '../ui';
+import { LOCALE_IDS } from '../i18n';
+import { searchCatalog } from '../data/exercises';
 
 const REST_SECONDS = 90;
 
@@ -83,21 +85,6 @@ export function SessionView(props: {
     startAddConsumed.current = true;
     setSheet({ kind: 'add' });
   }, [props.startAdd, workout]);
-
-  // Desktop shortcuts (W-06): ⌘K add exercise, ⌘⏎ finish.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setSheet({ kind: 'add' });
-      } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && live && sets > 0) {
-        e.preventDefault();
-        requestFinish();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  });
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -325,9 +312,6 @@ export function SessionView(props: {
         {live ? (
           <button className="btn btn-secondary" disabled={sets === 0} onClick={requestFinish}>
             {t.finish}
-            <span className="keycap" aria-hidden>
-              ⌘⏎
-            </span>
           </button>
         ) : workout.autoFinished ? (
           <button className="btn btn-secondary" onClick={() => reopenWorkout(workout.id)}>
@@ -387,11 +371,7 @@ export function SessionView(props: {
               <button
                 className="link"
                 style={{ color: 'var(--color-danger)', marginTop: 'var(--space-2)' }}
-                onClick={() => {
-                  // Nothing logged — discarding loses nothing, no dialog (design rule 4).
-                  deleteWorkout(workout.id);
-                  props.onClose();
-                }}
+                onClick={() => setDialog({ kind: 'del-workout' })}
               >
                 {t.discardSession}
               </button>
@@ -523,9 +503,6 @@ export function SessionView(props: {
             >
               <Icon name="plus" />
               {props.past ? t.addToSession : t.addExercise}
-              <span className="keycap" aria-hidden>
-                ⌘K
-              </span>
             </button>
             {(props.past || live) && !workout.autoFinished && (
               <button
@@ -716,32 +693,21 @@ export function SessionView(props: {
       )}
 
       {dialog?.kind === 'del-workout' && (
-        <Dialog
+        <ConfirmDialog
           danger
-          title={t.deleteWorkoutTitle}
-          onClose={() => setDialog(null)}
-          actions={
-            <>
-              <button className="btn btn-secondary" onClick={() => setDialog(null)}>
-                {t.keep}
-              </button>
-              <button
-                className="danger-outline"
-                onClick={() => {
-                  deleteWorkout(workout.id);
-                  setDialog(null);
-                  props.onClose();
-                }}
-              >
-                {t.delete}
-              </button>
-            </>
-          }
-        >
-          {t.deleteWorkoutBody(
+          title={live ? t.discardSession : t.deleteWorkoutTitle}
+          cancelLabel={t.keep}
+          confirmLabel={t.delete}
+          onCancel={() => setDialog(null)}
+          onConfirm={() => {
+            deleteWorkout(workout.id);
+            setDialog(null);
+            props.onClose();
+          }}
+          body={t.deleteWorkoutBody(
             `${fmtDayMonth(workout.startedAt, locale)}, ${sets} ${t.sets}, ${fmtKg(volume)}`,
           )}
-        </Dialog>
+        />
       )}
     </>
   );
@@ -754,7 +720,7 @@ function AddExerciseSheet(props: {
   onPick: (name: string) => void;
   onClose: () => void;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [q, setQ] = useState('');
   const known = useMemo(() => knownExercises(), []);
   const needle = q.trim().toLowerCase();
@@ -762,6 +728,13 @@ function AddExerciseSheet(props: {
     ? known.filter((k) => k.name.toLowerCase().includes(needle))
     : known.slice(0, 6);
   const exact = known.some((k) => k.name.toLowerCase() === needle);
+  // Built-in catalog (searchable in all five languages); history ranks first.
+  const li = LOCALE_IDS.indexOf(locale);
+  const catalog = needle
+    ? searchCatalog(needle, 8).filter(
+        (c) => !matches.some((m) => c.names.some((n) => n.toLowerCase() === m.name.toLowerCase())),
+      )
+    : [];
 
   return (
     <Sheet onClose={props.onClose}>
@@ -800,6 +773,35 @@ function AddExerciseSheet(props: {
                 {m.last && (
                   <span className="last">{t.lastLift(fmtSet(m.last.weight, m.last.reps))}</span>
                 )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {catalog.length > 0 && (
+        <div>
+          {matches.length === 0 && (
+            <div className="sheet-label" style={{ padding: '8px 4px 2px' }}>
+              {t.matches}
+            </div>
+          )}
+          {catalog.map((c) => {
+            const name = c.names[li] ?? c.names[0];
+            const idx = name.toLowerCase().indexOf(needle);
+            return (
+              <button key={c.id} className="result-row" onClick={() => props.onPick(name)}>
+                <span>
+                  {idx >= 0 ? (
+                    <>
+                      {name.slice(0, idx)}
+                      <span className="hl">{name.slice(idx, idx + needle.length)}</span>
+                      {name.slice(idx + needle.length)}
+                    </>
+                  ) : (
+                    name
+                  )}
+                </span>
+                <span className="last">{t.muscleGroups[c.muscle]}</span>
               </button>
             );
           })}
@@ -870,7 +872,7 @@ function SetEditorSheet(props: {
       <button className="toggle-row" onClick={() => setWarm((x) => !x)}>
         <Icon name="flame" />
         <span className="lab">{t.warmupSet}</span>
-        <Switch on={warm} onToggle={() => setWarm((x) => !x)} />
+        <Switch on={warm} />
       </button>
       <div className="sheet-actions">
         {props.onDelete && (

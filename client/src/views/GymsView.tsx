@@ -1,10 +1,35 @@
 /** Gyms — design S-41…S-48. */
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import type { Gym } from '../types';
 import { deleteGym, getCurrentPositionOnce, upsertGym, type useStore } from '../store';
+import {
+  searchGyms,
+  readCache,
+  haversineM,
+  resolvePhoto,
+  staticMapThumb,
+  resolveAddress,
+  cacheAddress,
+  type Coords,
+  type PlaceResult,
+  type ProviderKeys,
+  type ProviderId,
+  type ProviderState,
+} from '../data/gymProviders';
+import { HouseGraphic } from '../components/HouseGraphic';
 import { useT } from '../i18n';
 import { Dialog, Icon, LanguageSelector, Sheet, Spinner } from '../ui';
+
+// Optional place-provider keys, read from Vite env at build time. Absent keys
+// leave that provider "skipped" (chip greyed) — the app works without them.
+// NOTE: these ship in the client bundle; restrict the Google key by HTTP
+// referrer in Google Cloud Console. For a fully private key, proxy through the
+// server (BFF) instead of calling the provider from the browser.
+const GYM_KEYS: ProviderKeys = {
+  googlePlaces: import.meta.env.VITE_GOOGLE_PLACES_KEY,
+  foursquare: import.meta.env.VITE_FOURSQUARE_KEY,
+};
 
 type Store = ReturnType<typeof useStore>;
 
@@ -16,14 +41,17 @@ type AddState =
 
 export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   const { t } = useT();
-  const [name, setName] = useState('');
+  const [pendingName, setPendingName] = useState('');
   const [add, setAdd] = useState<AddState>({ phase: 'idle' });
   const [justAdded, setJustAdded] = useState<string | null>(null);
   const [editing, setEditing] = useState<Gym | null>(null);
   const [radius, setRadius] = useState(150);
   const [deleting, setDeleting] = useState<Gym | null>(null);
 
-  async function locate() {
+  async function locateFor(gymName: string) {
+    const n = gymName.trim();
+    if (!n) return;
+    setPendingName(n);
     setAdd({ phase: 'locating' });
     try {
       const pos = await getCurrentPositionOnce();
@@ -31,21 +59,52 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
         setAdd({ phase: 'coarse', ...pos });
         return;
       }
-      saveGym(pos.lat, pos.lng, pos.accuracy);
+      saveGym(n, pos.lat, pos.lng, pos.accuracy);
     } catch {
       setAdd({ phase: 'denied' });
     }
   }
 
-  function saveGym(lat: number, lng: number, accuracy: number, radiusM = 150) {
-    const g = upsertGym({ name: name.trim(), lat, lng, radiusM });
+  function saveGym(gymName: string, lat: number, lng: number, accuracy: number, radiusM = 150) {
+    const g = upsertGym({ name: gymName.trim(), lat, lng, radiusM });
     setJustAdded(g.id);
-    setName('');
     setAdd({ phase: 'idle' });
+    setPendingName('');
     shell.toast({ kind: 'ok', icon: 'check-circle', text: t.gymAdded(Math.round(accuracy)) });
   }
 
   const denied = add.phase === 'denied';
+
+  // Saved-gym thumbnails (logo → map tile → graphic) and street addresses,
+  // resolved lazily per gym and keyed by id. Both are cache-backed and cheap,
+  // so we re-attempt whenever an entry is still missing (survives StrictMode's
+  // double-mount and the sync that swaps store.gyms — a fixed AbortController
+  // would cancel these and never retry).
+  const [savedPhotos, setSavedPhotos] = useState<Record<string, string>>({});
+  const [savedAddrs, setSavedAddrs] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let alive = true;
+    const sig = new AbortController().signal; // never aborted — enrichment is idempotent
+    for (const g of store.gyms) {
+      if (!savedPhotos[g.id]) {
+        resolvePhoto({ key: g.id, name: g.name, lat: g.lat, lng: g.lng, sources: ['local'] }, sig)
+          .then((url) => {
+            if (url && alive) setSavedPhotos((m) => ({ ...m, [g.id]: url }));
+          })
+          .catch(() => {});
+      }
+      if (!savedAddrs[g.id]) {
+        resolveAddress(g.lat, g.lng, sig)
+          .then((addr) => {
+            if (addr && alive) setSavedAddrs((m) => ({ ...m, [g.id]: addr }));
+          })
+          .catch(() => {});
+      }
+    }
+    return () => {
+      alive = false;
+    };
+  }, [store.gyms, savedPhotos, savedAddrs]);
 
   return (
     <div className="screen">
@@ -84,7 +143,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
             <button
               className="btn btn-secondary"
               style={{ minHeight: 36, fontSize: 13 }}
-              onClick={locate}
+              onClick={() => locateFor(pendingName)}
             >
               {t.tryAgain}
             </button>
@@ -102,14 +161,14 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
             <button
               className="btn btn-secondary"
               style={{ minHeight: 38, fontSize: 13 }}
-              onClick={() => saveGym(add.lat, add.lng, add.accuracy, 250)}
+              onClick={() => saveGym(pendingName, add.lat, add.lng, add.accuracy, 250)}
             >
               {t.saveAnyway}
             </button>
             <button
               className="btn btn-secondary"
               style={{ minHeight: 38, fontSize: 13, gap: 6 }}
-              onClick={locate}
+              onClick={() => locateFor(pendingName)}
             >
               <Icon name="arrow-clockwise" />
               {t.retry}
@@ -118,32 +177,50 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
         </>
       )}
 
-      <div className="addrow" style={denied ? { opacity: 0.45 } : undefined}>
-        <input
-          className="input"
-          placeholder={t.gymName}
-          value={name}
-          disabled={denied || add.phase === 'locating'}
-          onChange={(e) => setName(e.target.value)}
+      {store.gyms.length > 0 &&
+        store.gyms.map((g) => (
+          <div key={g.id} className={`gym-card${justAdded === g.id ? ' just-added' : ''}`}>
+            <span className="thumb">
+              <GymThumb photo={savedPhotos[g.id]} lat={g.lat} lng={g.lng} />
+            </span>
+            <div className="gym-card-body">
+              <div className="head">
+                <span className="n">{g.name}</span>
+                <button
+                  className="dots"
+                  aria-label="Menu"
+                  onClick={() => {
+                    setEditing(g);
+                    setRadius(g.radiusM);
+                  }}
+                >
+                  <Icon name="dots-three-vertical" />
+                </button>
+              </div>
+              <div className="meta">
+                <span>{savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}</span>
+                <span>{t.radiusM(g.radiusM)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+
+      {!denied && (
+        <GymSearch
+          savedGyms={store.gyms}
+          busy={add.phase === 'locating'}
+          onPick={(r) => {
+            const g = upsertGym({ name: r.name, lat: r.lat, lng: r.lng, radiusM: 150 });
+            setJustAdded(g.id);
+            if (r.address) {
+              cacheAddress(r.lat, r.lng, r.address);
+              setSavedAddrs((m) => ({ ...m, [g.id]: r.address! }));
+            }
+            shell.toast({ kind: 'ok', icon: 'check-circle', text: t.gymAdded(0) });
+          }}
+          onManualHere={(n) => locateFor(n)}
         />
-        <button
-          className="btn btn-primary"
-          disabled={!name.trim() || denied || add.phase === 'locating'}
-          onClick={locate}
-        >
-          {add.phase === 'locating' ? (
-            <>
-              <Spinner onAccent />
-              {t.locating}
-            </>
-          ) : (
-            <>
-              <Icon name="crosshair" />
-              {t.imHere}
-            </>
-          )}
-        </button>
-      </div>
+      )}
 
       {add.phase === 'locating' && (
         <div className="locating-card">
@@ -157,7 +234,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
         </div>
       )}
 
-      {store.gyms.length === 0 && add.phase === 'idle' && !denied ? (
+      {store.gyms.length === 0 && add.phase === 'idle' && !denied && (
         <>
           <div className="empty">
             <Icon name="map-pin" />
@@ -168,30 +245,6 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
             {t.gymsFootnote}
           </div>
         </>
-      ) : (
-        store.gyms.map((g) => (
-          <div key={g.id} className={`gym-card${justAdded === g.id ? ' just-added' : ''}`}>
-            <div className="head">
-              <span className="n">{g.name}</span>
-              <button
-                className="dots"
-                aria-label="Menu"
-                onClick={() => {
-                  setEditing(g);
-                  setRadius(g.radiusM);
-                }}
-              >
-                <Icon name="dots-three-vertical" />
-              </button>
-            </div>
-            <div className="meta">
-              <span>
-                {g.lat.toFixed(5)}, {g.lng.toFixed(5)}
-              </span>
-              <span>{t.radiusM(g.radiusM)}</span>
-            </div>
-          </div>
-        ))
       )}
 
       {denied && (
@@ -282,4 +335,258 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
       )}
     </div>
   );
+}
+
+const PROVIDER_ORDER: ProviderId[] = ['local', 'osm', 'google', 'foursquare'];
+
+/**
+ * Suggestive gym search (AC-SEARCH). Debounced 350 ms; each keystroke cancels
+ * the previous query. Providers stream in; chips show per-provider state;
+ * skeleton rows appear between 300 ms and the first result.
+ */
+function GymSearch({
+  savedGyms,
+  onPick,
+  onManualHere,
+  busy,
+}: {
+  savedGyms: Store['gyms'];
+  onPick: (r: PlaceResult) => void;
+  onManualHere: (name: string) => void;
+  busy: boolean;
+}) {
+  const { t, locale } = useT();
+  const [q, setQ] = useState('');
+  const [results, setResults] = useState<PlaceResult[]>([]);
+  const [providers, setProviders] = useState<Record<ProviderId, ProviderState>>(
+    {} as Record<ProviderId, ProviderState>,
+  );
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const coordsRef = useRef<Coords | null>(null);
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // One geolocation read to bias results (AC-SEARCH-01); silent on denial.
+  useEffect(() => {
+    let alive = true;
+    getCurrentPositionOnce()
+      .then((p) => {
+        if (alive) {
+          coordsRef.current = { lat: p.lat, lng: p.lng };
+          setCoords({ lat: p.lat, lng: p.lng });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const needle = q.trim();
+
+  useEffect(() => {
+    abortRef.current?.abort();
+    if (needle.length < 2) return; // render is gated on needle length; no reset needed
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+    const cached = readCache(needle, coordsRef.current);
+    const skeletonTimer = setTimeout(() => {
+      if (!ctrl.signal.aborted) setShowSkeleton((cached?.length ?? 0) === 0);
+    }, 300);
+    const debounce = setTimeout(() => {
+      if (cached) setResults(cached);
+      setProviders({} as Record<ProviderId, ProviderState>);
+      void searchGyms(needle, coordsRef.current, GYM_KEYS, savedGyms, ctrl.signal, {
+        onResults: (merged) => {
+          if (!ctrl.signal.aborted) {
+            setResults([...merged]);
+            setShowSkeleton(false);
+          }
+        },
+        onProvider: (id, state) => {
+          if (!ctrl.signal.aborted) setProviders((p) => ({ ...p, [id]: state }));
+        },
+      });
+    }, 350);
+    return () => {
+      clearTimeout(debounce);
+      clearTimeout(skeletonTimer);
+      ctrl.abort();
+    };
+  }, [needle, savedGyms]);
+
+  const li = useMemo(() => locale, [locale]);
+
+  // Sort nearest-first when we have a location (AC: closer gyms rank higher).
+  const sorted = useMemo(() => {
+    if (!coords) return results;
+    return [...results].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+  }, [results, coords]);
+
+  // Lazily resolve a real photo/logo per result (keyless: OSM/Commons/Wikidata).
+  // Rows render immediately with a map-tile thumbnail; a photo replaces it if
+  // one is found. `requested` guards against re-fetching the same venue.
+  const [photos, setPhotos] = useState<Record<string, string>>({});
+  const requested = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const ctrl = new AbortController();
+    for (const r of results) {
+      if (r.photoUrl || requested.current.has(r.key)) continue;
+      requested.current.add(r.key);
+      resolvePhoto(r, ctrl.signal)
+        .then((url) => {
+          if (url && !ctrl.signal.aborted) setPhotos((m) => ({ ...m, [r.key]: url }));
+        })
+        .catch(() => {});
+    }
+    return () => ctrl.abort();
+  }, [results]);
+
+  return (
+    <div className="gym-search">
+      <div className="searchbar">
+        <Icon name="magnifying-glass" />
+        <input
+          value={q}
+          placeholder={t.searchGymPlaceholder}
+          onChange={(e) => setQ(e.target.value)}
+        />
+      </div>
+
+      {needle.length >= 2 && (
+        <div className="provider-chips">
+          {PROVIDER_ORDER.map((id) => {
+            const st = providers[id];
+            const status = st?.status ?? 'pending';
+            return (
+              <span key={id} className={`provider-chip ${status}`}>
+                {status === 'pending' ? (
+                  <Spinner size={10} />
+                ) : status === 'answered' ? (
+                  <Icon name="check-circle" weight="fill" />
+                ) : null}
+                {t.providerNames[id]}
+                {st?.status === 'answered' ? ` ${st.count}` : st?.status === 'failed' ? ' —' : ''}
+              </span>
+            );
+          })}
+        </div>
+      )}
+
+      {showSkeleton &&
+        [0, 1, 2].map((i) => (
+          <div key={i} className="gym-result skeleton">
+            <div className="sk thumb" />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="sk" style={{ width: '55%', height: 13 }} />
+              <div className="sk" style={{ width: '75%', height: 9 }} />
+            </div>
+          </div>
+        ))}
+
+      {needle.length >= 2 &&
+        sorted.map((r) => {
+          const dist = coords ? haversineM(coords, r) : null;
+          return (
+            <button key={r.key} className="gym-result" onClick={() => onPick(r)} lang={li}>
+              <span className="thumb">
+                <GymThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+              </span>
+              <span className="body">
+                <span className="name">{highlightSubsequence(r.name, needle)}</span>
+                {(r.address || dist !== null) && (
+                  <span className="addr">
+                    {dist !== null ? `${fmtDistance(dist)}${r.address ? ' · ' : ''}` : ''}
+                    {r.address}
+                  </span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+
+      {needle.length >= 2 &&
+        !showSkeleton &&
+        results.length === 0 &&
+        PROVIDER_ORDER.every((id) => {
+          const st = providers[id];
+          return st && st.status !== 'pending';
+        }) && <div className="footnote">{t.searchGymEmpty}</div>}
+
+      {needle.length >= 2 && (
+        <button className="gym-result manual" disabled={busy} onClick={() => onManualHere(needle)}>
+          <span className="thumb">{busy ? <Spinner onAccent /> : <Icon name="crosshair" />}</span>
+          <span className="body">
+            <span className="name" style={{ color: 'var(--color-accent)' }}>
+              «{needle}»
+            </span>
+            <span className="addr">{busy ? t.locating : t.imHere}</span>
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Result thumbnail with a graceful fallback chain: real photo/logo (when
+ * resolved) → OSM map-tile of the venue → local house graphic. Each level
+ * degrades on load error, so a row is never blank.
+ */
+function GymThumb({ photo, lat, lng }: { photo?: string; lat: number; lng: number }) {
+  const [failed, setFailed] = useState<Set<string>>(new Set());
+  const map = staticMapThumb(lat, lng);
+  const src = photo && !failed.has(photo) ? photo : !failed.has(map) ? map : null;
+  if (!src) return <HouseGraphic size={64} />;
+  return (
+    <img src={src} alt="" loading="lazy" onError={() => setFailed((f) => new Set(f).add(src))} />
+  );
+}
+
+/** ~distance for a result row: "240 m" / "1.2 km". */
+function fmtDistance(m: number): string {
+  return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+/**
+ * Highlight, in brass, only the letters of `name` that the query matches as a
+ * subsequence (so "portlife" lights p-o-r-t-l-i-f-e inside "Sportlife"), which
+ * is what the suggestive-search spec asks for.
+ */
+function highlightSubsequence(name: string, query: string): ReactNode {
+  const q = query.trim().toLowerCase();
+  if (!q) return name;
+  const out: ReactNode[] = [];
+  let qi = 0;
+  let buf = '';
+  let hi = '';
+  const flush = () => {
+    if (buf) {
+      out.push(buf);
+      buf = '';
+    }
+  };
+  const flushHi = () => {
+    if (hi) {
+      out.push(
+        <span key={out.length} className="hl">
+          {hi}
+        </span>,
+      );
+      hi = '';
+    }
+  };
+  for (const ch of name) {
+    if (qi < q.length && ch.toLowerCase() === q[qi]) {
+      flush();
+      hi += ch;
+      qi++;
+    } else {
+      flushHi();
+      buf += ch;
+    }
+  }
+  flush();
+  flushHi();
+  return out;
 }

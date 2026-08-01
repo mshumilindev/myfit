@@ -22,7 +22,9 @@ import {
   fmtTonnes,
   useT,
 } from '../i18n';
+import { WeekStrip } from '../components/WeekStrip';
 import { Icon, LanguageSelector, Sheet, Spinner, EmptyState } from '../ui';
+import { DateField, TimeField, DurationField } from '../components/PickerFields';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -51,22 +53,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const todayFinished = finished.some((w) => w.startedAt >= dayStart.getTime());
 
   const headline = open ? t.midSession : todayFinished ? t.sessionDone : t.nothingLoggedYet;
-
-  // Monday-first current week.
-  const week: { letter: string; ts: number; logged: boolean; isToday: boolean }[] = [];
-  const monday = new Date(dayStart);
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const dayEnd = d.getTime() + 24 * 3600 * 1000;
-    week.push({
-      letter: t.weekDayLetters[i],
-      ts: d.getTime(),
-      logged: finished.some((w) => w.startedAt >= d.getTime() && w.startedAt < dayEnd),
-      isToday: d.getTime() === dayStart.getTime(),
-    });
-  }
 
   const reminder = store.reminders[0];
   const queuedIds = new Set(
@@ -144,16 +130,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         </div>
       )}
 
-      {finished.length > 0 && (
-        <div className="weekstrip">
-          {week.map((d, i) => (
-            <div key={i} className={`cell${d.isToday ? ' today-ring' : ''}`}>
-              <div className="day">{d.letter}</div>
-              <div className={`dot${d.logged ? ' on' : ''}`} />
-            </div>
-          ))}
-        </div>
-      )}
+      {finished.length > 0 && <WeekStrip />}
 
       {reminder && !open && (
         <div className="reminder-card">
@@ -207,9 +184,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         >
           <Icon name="play" />
           {finished.length === 0 ? t.startFirstSession : t.startEmptySession}
-          <span className="keycap" aria-hidden>
-            N
-          </span>
         </button>
       )}
 
@@ -324,6 +298,12 @@ function BackfillSheet(props: {
   const [duration, setDuration] = useState(60);
   const [now] = useState(() => Date.now());
 
+  const [todayIso] = useState(() => {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  });
+
   const startedAt = new Date(`${date}T${time}`).getTime();
   const inFuture = !Number.isNaN(startedAt) && startedAt > now;
   const badDuration = duration < 1 || duration > 480;
@@ -338,42 +318,16 @@ function BackfillSheet(props: {
       <div className="backfill-fields">
         <label className="field-block">
           <span className="field-label">{t.backfillDate}</span>
-          <span className="field-control">
-            <input
-              className="input"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-            <Icon name="calendar-blank" className="field-icon" />
-          </span>
+          <DateField value={date} onChange={setDate} max={todayIso} />
         </label>
         <div className="backfill-grid">
           <label className="field-block">
             <span className="field-label">{t.backfillStart}</span>
-            <span className="field-control">
-              <input
-                className="input"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-              />
-              <Icon name="clock" className="field-icon" />
-            </span>
+            <TimeField value={time} onChange={setTime} />
           </label>
           <label className="field-block">
             <span className="field-label">{t.backfillDuration}</span>
-            <span className="field-control">
-              <input
-                className="input"
-                type="number"
-                min={1}
-                max={480}
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-              />
-              <Icon name="timer" className="field-icon" />
-            </span>
+            <DurationField value={duration} onChange={setDuration} />
           </label>
         </div>
       </div>

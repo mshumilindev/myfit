@@ -20,12 +20,48 @@ export const FLAGS: Record<LocaleId, string> = {
 
 const LOCALE_KEY = 'gym.locale';
 
+/**
+ * IANA timezone → locale: a permissionless proxy for where the user physically
+ * is. Beats browser language, because a user in Kyiv/Warsaw with an English
+ * browser should still get their regional language on first run.
+ */
+const TZ_LOCALE: Record<string, LocaleId> = {
+  'Europe/Kyiv': 'uk',
+  'Europe/Kiev': 'uk',
+  'Europe/Uzhgorod': 'uk',
+  'Europe/Zaporozhye': 'uk',
+  'Europe/Simferopol': 'uk',
+  'Europe/Warsaw': 'pl',
+  'Europe/Vilnius': 'lt',
+  'Europe/Tallinn': 'et',
+};
+
+function fromTimezone(): LocaleId | null {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return TZ_LOCALE[tz] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function fromLanguages(): LocaleId | null {
+  const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+  for (const raw of langs) {
+    const l = (raw || '').toLowerCase();
+    for (const id of LOCALE_IDS) if (l.startsWith(id)) return id;
+  }
+  return null;
+}
+
+/**
+ * Order: saved choice → physical location (timezone) → browser language → en.
+ * The manual selector (every screen) is always the override.
+ */
 function detect(): LocaleId {
   const stored = localStorage.getItem(LOCALE_KEY);
   if (stored && LOCALE_IDS.includes(stored as LocaleId)) return stored as LocaleId;
-  const nav = (navigator.language || 'en').toLowerCase();
-  for (const id of LOCALE_IDS) if (nav.startsWith(id)) return id;
-  return 'en';
+  return fromTimezone() ?? fromLanguages() ?? 'en';
 }
 
 let current: LocaleId = detect();

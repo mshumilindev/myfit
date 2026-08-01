@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../client/src/App';
@@ -86,12 +86,16 @@ describe('F-02/F-08 shell views and design states', () => {
     expect(screen.getByText('Two more sessions')).toBeTruthy();
   });
 
-  it('renders Gyms list and disabled locate action without a name', () => {
+  it('renders Gyms list and gates manual location behind a typed name', async () => {
     render(<GymsView shell={shell} store={sampleStore()} />);
 
     expect(screen.getByRole('heading', { name: 'Gyms' })).toBeTruthy();
     expect(screen.getByText('Smartfit')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /I'm here/ })).toHaveProperty('disabled', true);
+    expect(screen.queryByRole('button', { name: /I'm here/ })).toBeNull();
+
+    await userEvent.type(screen.getByPlaceholderText('Search for a gym'), 'New gym');
+
+    expect(screen.getByRole('button', { name: /New gym.*I'm here/ })).toBeTruthy();
   });
 
   it('renders Services with language picker and switches locale', async () => {
@@ -177,7 +181,7 @@ describe('F-01 auth UI', () => {
     await userEvent.type(screen.getByPlaceholderText('Password (min. 6 characters)'), 'secret123');
     await userEvent.click(screen.getByRole('button', { name: /Create account/ }));
 
-    expect(onLoggedIn).toHaveBeenCalled();
+    await waitFor(() => expect(onLoggedIn).toHaveBeenCalled());
   });
 
   it('renders sign-in errors and retry for unreachable server', async () => {

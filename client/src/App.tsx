@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getToken, getUsername } from './api';
-import { startSyncLoop, startWorkout, useStore } from './store';
+import { getOpenWorkout, startSyncLoop, useStore } from './store';
 import { fmtSessionClock, useT } from './i18n';
 import { Icon, Snackbar, Toast, type SnackState, type ToastState } from './ui';
 import { AuthView } from './views/AuthView';
@@ -26,16 +26,51 @@ export interface Shell {
   snack: (s: SnackState) => void;
 }
 
+const TABS: Tab[] = ['today', 'progress', 'gyms', 'apps'];
+
+/** Serialize the current screen to a URL hash so a refresh restores it. */
+function toHash(tab: Tab, overlay: Overlay): string {
+  if (overlay?.screen === 'session') return '#/session';
+  if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
+  if (overlay?.screen === 'exercise-history')
+    return `#/exercise/${encodeURIComponent(overlay.name)}`;
+  return `#/${tab}`;
+}
+
+/** Parse a URL hash back into {tab, overlay}. Unknown → Today. */
+function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
+  const parts = hash.replace(/^#\/?/, '').split('/');
+  const head = parts[0] ?? '';
+  if (head === 'session') return { tab: 'today', overlay: { screen: 'session', workoutId: '' } };
+  if (head === 'workout' && parts[1])
+    return { tab: 'today', overlay: { screen: 'past-workout', workoutId: parts[1] } };
+  if (head === 'exercise' && parts[1])
+    return {
+      tab: 'today',
+      overlay: { screen: 'exercise-history', name: decodeURIComponent(parts[1]) },
+    };
+  if ((TABS as string[]).includes(head)) return { tab: head as Tab, overlay: null };
+  return { tab: 'today', overlay: null };
+}
+
 export function App() {
   const { t } = useT();
   const store = useStore();
   const [authed, setAuthed] = useState<boolean>(() => !!getToken());
-  const [tab, setTab] = useState<Tab>('today');
-  const [overlay, setOverlay] = useState<Overlay>(null);
-  const [toast, setToast] = useState<ToastState | null>(null);
+  const [tab, setTab] = useState<Tab>(() => fromHash(window.location.hash).tab);
+  const [overlay, setOverlay] = useState<Overlay>(() => {
+    const o = fromHash(window.location.hash).overlay;
+    if (o?.screen === 'session' && !o.workoutId) {
+      const w = getOpenWorkout();
+      return w ? { screen: 'session', workoutId: w.id } : null;
+    }
+    return o;
+  });
+  const [toasts, setToasts] = useState<Array<ToastState & { id: number }>>([]);
   const [snack, setSnack] = useState<SnackState | null>(null);
   const desktopRail = useDesktopRail();
   const snackSeq = useRef(0);
+  const toastSeq = useRef(0);
 
   useEffect(() => {
     if (!authed) return;
@@ -48,7 +83,11 @@ export function App() {
       setOverlay(null);
       setTab(x);
     },
-    toast: setToast,
+    toast: (tst) => {
+      toastSeq.current += 1;
+      const id = toastSeq.current;
+      setToasts((list) => [...list, { ...tst, id }]);
+    },
     snack: (s) => {
       snackSeq.current += 1;
       setSnack({ ...s, id: snackSeq.current });
@@ -56,24 +95,34 @@ export function App() {
   };
 
   const closeOverlay = useCallback(() => setOverlay(null), []);
+  const removeToast = useCallback((id: number) => {
+    setToasts((list) => list.filter((x) => x.id !== id));
+  }, []);
   const open = store.workouts.find((w) => w.finishedAt === null);
 
-  // Global shortcut: N starts/opens a session. (The board says ⌘N, but browsers
-  // reserve it for a new window — single-key like Linear/Gmail instead.)
+  // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed) return;
-    const onKey = (e: KeyboardEvent) => {
-      const el = e.target as HTMLElement | null;
-      const typing =
-        el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
-      if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === 'n') {
-        e.preventDefault();
-        const current = open ?? startWorkout();
-        setOverlay({ screen: 'session', workoutId: current.id });
-      }
+    const next = toHash(tab, overlay);
+    if (window.location.hash !== next) window.history.replaceState(null, '', next);
+  }, [authed, tab, overlay]);
+
+  // URL hash → state (browser back/forward).
+  useEffect(() => {
+    if (!authed) return;
+    const onPop = () => {
+      const { tab: ht, overlay: ho } = fromHash(window.location.hash);
+      setTab(ht);
+      setOverlay(
+        ho?.screen === 'session' && !ho.workoutId
+          ? open
+            ? { screen: 'session', workoutId: open.id }
+            : null
+          : ho,
+      );
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('hashchange', onPop);
+    return () => window.removeEventListener('hashchange', onPop);
   }, [authed, open]);
 
   if (!authed) {
@@ -156,7 +205,9 @@ export function App() {
         )}
         <div className="toast-holder">
           {snack && <Snackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
-          {toast && <Toast toast={toast} onDone={() => setToast(null)} />}
+          {toasts.map((tst) => (
+            <Toast key={tst.id} toast={tst} id={tst.id} onExpire={removeToast} />
+          ))}
         </div>
       </div>
     </div>

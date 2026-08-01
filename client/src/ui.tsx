@@ -230,6 +230,51 @@ export function Dialog(props: {
   );
 }
 
+/**
+ * Reusable confirm prompt for every destructive action (discard, delete of any
+ * kind). One component so wording/behaviour stay consistent: esc / scrim / the
+ * cancel button all dismiss; the confirm is a ruby outline when danger.
+ */
+export function ConfirmDialog(props: {
+  title: ReactNode;
+  body: ReactNode;
+  confirmLabel: string;
+  cancelLabel: string;
+  danger?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') props.onCancel();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [props]);
+  return (
+    <Dialog
+      title={props.title}
+      danger={props.danger}
+      onClose={props.onCancel}
+      actions={
+        <>
+          <button className="btn btn-secondary" onClick={props.onCancel}>
+            {props.cancelLabel}
+          </button>
+          <button
+            className={props.danger ? 'danger-outline' : 'btn btn-primary'}
+            onClick={props.onConfirm}
+          >
+            {props.confirmLabel}
+          </button>
+        </>
+      }
+    >
+      {props.body}
+    </Dialog>
+  );
+}
+
 export function Sheet(props: {
   children: ReactNode;
   onClose: () => void;
@@ -299,12 +344,20 @@ export interface ToastState {
   text: string;
 }
 
-/** One toast at a time, 3.2 s, above the tab bar (S-49 rules). */
-export function Toast({ toast, onDone }: { toast: ToastState; onDone: () => void }) {
+/** Auto-dismissing toast (3.2 s). Multiple stack bottom-right as a queue. */
+export function Toast({
+  toast,
+  id,
+  onExpire,
+}: {
+  toast: ToastState;
+  id: number;
+  onExpire: (id: number) => void;
+}) {
   useEffect(() => {
-    const to = setTimeout(onDone, 3200);
+    const to = setTimeout(() => onExpire(id), 3200);
     return () => clearTimeout(to);
-  }, [toast, onDone]);
+  }, [id, onExpire]);
   return (
     <div className={`toast ${toast.kind}`}>
       <Icon name={toast.icon} />
@@ -313,9 +366,11 @@ export function Toast({ toast, onDone }: { toast: ToastState; onDone: () => void
   );
 }
 
-export function Switch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+export function Switch({ on }: { on: boolean }) {
+  // Presentational only: the enclosing .toggle-row button owns the click, so
+  // the switch must not also handle it (double toggle would cancel out).
   return (
-    <span className={`switch${on ? ' on' : ''}`} role="switch" aria-checked={on} onClick={onToggle}>
+    <span className={`switch${on ? ' on' : ''}`} role="switch" aria-checked={on}>
       <span className="knob" />
     </span>
   );

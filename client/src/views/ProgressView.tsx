@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { est1rm, topSet, workoutVolumeKg, type useStore } from '../store';
 import { useT } from '../i18n';
+import { WeekStrip } from '../components/WeekStrip';
 import { EmptyState, LanguageSelector } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
@@ -143,6 +144,8 @@ export function ProgressView({ store }: { store: Store }) {
           </span>
         )}
       </div>
+
+      <WeekStrip />
 
       <div className="bars">
         {weeks.map((v, i) => (
