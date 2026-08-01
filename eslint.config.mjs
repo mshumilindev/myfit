@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/', '**/dev-dist/', '**/node_modules/', 'cloudflare/'],
+    ignores: ['**/dist/', '**/dev-dist/', '**/.vite/', '**/node_modules/', 'cloudflare/'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

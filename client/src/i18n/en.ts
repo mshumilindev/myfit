@@ -76,9 +76,15 @@ export const en = {
   noHistoryYet: 'No history yet',
   noHistoryBody:
     "Log a session and this fills with your weeks. Templates show up after the second one — they're just sessions you kept.",
-  addGymHint: 'Add your gym so unlogged visits can remind you.',
+  addGymHint: 'Add your gym. Train there without logging — and Today will remind you.',
   add: 'Add',
   logIt: 'Log it',
+  logPastSession: 'Log a past session',
+  backfillDate: 'Date',
+  backfillStart: 'Start',
+  backfillDuration: 'Duration, min',
+  backfillContinue: 'Continue to exercises',
+  backfillFuture: 'That time is in the future',
   dismiss: 'Dismiss',
   unloggedVisit: (dur: string, gym: string, date: string) =>
     `${dur} at ${gym} on ${date} with nothing logged.`,
@@ -169,6 +175,7 @@ export const en = {
 
   // History (S-30…S-33)
   addToSession: 'Add exercise to this session',
+  discardSession: 'Discard session',
   deleteWorkout: 'Delete workout',
   deleteWorkoutTitle: 'Delete this workout?',
   deleteWorkoutBody: (desc: string) =>

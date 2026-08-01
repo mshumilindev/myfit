@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
 import {
+  backfillWorkout,
   dismissReminder,
   logVisitAsWorkout,
   repeatWorkout,
@@ -21,7 +22,7 @@ import {
   fmtTonnes,
   useT,
 } from '../i18n';
-import { Icon, LanguageSelector, Spinner, EmptyState } from '../ui';
+import { Icon, LanguageSelector, Sheet, Spinner, EmptyState } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -37,6 +38,7 @@ function useNowTick(active: boolean): number {
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
+  const [backfill, setBackfill] = useState(false);
   const open = store.workouts.find((w) => w.finishedAt === null);
   const now = useNowTick(!!open);
 
@@ -205,6 +207,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         >
           <Icon name="play" />
           {finished.length === 0 ? t.startFirstSession : t.startEmptySession}
+          <span className="keycap" aria-hidden>
+            N
+          </span>
+        </button>
+      )}
+
+      {!open && (
+        <button className="backfill-trigger" onClick={() => setBackfill(true)}>
+          <Icon name="arrow-counter-clockwise" />
+          <span>{t.logPastSession}</span>
         </button>
       )}
 
@@ -236,11 +248,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <>
           <EmptyState icon="barbell" title={t.noHistoryYet} body={t.noHistoryBody} />
           {store.gyms.length === 0 && (
-            <div className="gym-hint">
+            <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
               <Icon name="map-pin" />
-              <span style={{ flex: 1 }}>{t.addGymHint}</span>
+              <span style={{ flex: 1, textAlign: 'left' }}>{t.addGymHint}</span>
               <span style={{ color: 'var(--color-accent)', fontSize: 12 }}>{t.add}</span>
-            </div>
+            </button>
           )}
         </>
       ) : (
@@ -281,7 +293,109 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </>
         )
       )}
+      {backfill && (
+        <BackfillSheet
+          onClose={() => setBackfill(false)}
+          onCreate={(startedAt, durationMs) => {
+            const w = backfillWorkout(startedAt, durationMs);
+            setBackfill(false);
+            shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: true });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+/** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
+function BackfillSheet(props: {
+  onClose: () => void;
+  onCreate: (startedAt: number, durationMs: number) => void;
+}) {
+  const { t } = useT();
+  const [defaults] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` };
+  });
+  const [date, setDate] = useState(defaults.date);
+  const [time, setTime] = useState('18:00');
+  const [duration, setDuration] = useState(60);
+  const [now] = useState(() => Date.now());
+
+  const startedAt = new Date(`${date}T${time}`).getTime();
+  const inFuture = !Number.isNaN(startedAt) && startedAt > now;
+  const badDuration = duration < 1 || duration > 480;
+  const invalid = Number.isNaN(startedAt) || inFuture || badDuration;
+
+  return (
+    <Sheet onClose={props.onClose} className="backfill-sheet">
+      <div className="sheet-head backfill-head">
+        <Icon name="arrow-counter-clockwise" />
+        <span className="t">{t.logPastSession}</span>
+      </div>
+      <div className="backfill-fields">
+        <label className="field-block">
+          <span className="field-label">{t.backfillDate}</span>
+          <span className="field-control">
+            <input
+              className="input"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <Icon name="calendar-blank" className="field-icon" />
+          </span>
+        </label>
+        <div className="backfill-grid">
+          <label className="field-block">
+            <span className="field-label">{t.backfillStart}</span>
+            <span className="field-control">
+              <input
+                className="input"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+              <Icon name="clock" className="field-icon" />
+            </span>
+          </label>
+          <label className="field-block">
+            <span className="field-label">{t.backfillDuration}</span>
+            <span className="field-control">
+              <input
+                className="input"
+                type="number"
+                min={1}
+                max={480}
+                value={duration}
+                onChange={(e) => setDuration(Number(e.target.value))}
+              />
+              <Icon name="timer" className="field-icon" />
+            </span>
+          </label>
+        </div>
+      </div>
+      {inFuture && (
+        <div className="field-error">
+          <Icon name="warning-circle" />
+          {t.backfillFuture}
+        </div>
+      )}
+      <div className="sheet-actions">
+        <button className="btn btn-secondary grow" onClick={props.onClose}>
+          {t.cancel}
+        </button>
+        <button
+          className="btn btn-primary grow"
+          disabled={invalid}
+          onClick={() => props.onCreate(startedAt, duration * 60000)}
+        >
+          {t.backfillContinue}
+        </button>
+      </div>
+    </Sheet>
   );
 }
 

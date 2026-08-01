@@ -48,15 +48,8 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   const denied = add.phase === 'denied';
 
   return (
-    <div className="screen" style={{ padding: '6px 20px 20px' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          paddingTop: 8,
-        }}
-      >
+    <div className="screen">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <h1 className="title-26">{t.gyms}</h1>
         <LanguageSelector />
       </div>

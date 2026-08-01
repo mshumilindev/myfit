@@ -62,19 +62,20 @@ export function t(): Strings {
 // --- Locale-aware formatters ----------------------------------------------
 
 const dateLocale: Record<LocaleId, string> = {
-  en: 'en-GB',
+  en: 'en-US',
   uk: 'uk-UA',
   pl: 'pl-PL',
   lt: 'lt-LT',
   et: 'et-EE',
 };
 
-/** "Friday, 31 July" */
+/** Locale-natural full date with year: "Saturday, August 1, 2026" / "субота, 1 серпня 2026 р." */
 export function fmtFullDate(ts: number, locale: LocaleId = current): string {
   return new Intl.DateTimeFormat(dateLocale[locale], {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
+    year: 'numeric',
   }).format(new Date(ts));
 }
 

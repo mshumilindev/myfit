@@ -84,9 +84,15 @@ export const lt: Strings = {
   noHistoryYet: 'Istorijos dar nėra',
   noHistoryBody:
     'Užfiksuok treniruotę — ir čia atsiras tavo savaitės. Šablonai pasirodo po antros — tai tiesiog išsaugotos treniruotės.',
-  addGymHint: 'Pridėk savo salę, kad neužfiksuoti apsilankymai primintų apie save.',
+  addGymHint: 'Pridėk savo salę. Pasportuosi ten nieko neužfiksavęs — „Šiandien“ primins.',
   add: 'Pridėti',
   logIt: 'Užfiksuoti',
+  logPastSession: 'Įrašyti praėjusią treniruotę',
+  backfillDate: 'Data',
+  backfillStart: 'Pradžia',
+  backfillDuration: 'Trukmė, min',
+  backfillContinue: 'Toliau prie pratimų',
+  backfillFuture: 'Šis laikas ateityje',
   dismiss: 'Atmesti',
   unloggedVisit: (dur, gym, date) => `${dur} ${gym} ${date} — nieko neužfiksuota.`,
   sessionInProgress: 'Treniruotė vyksta',
@@ -172,6 +178,7 @@ export const lt: Strings = {
   done: 'Atlikta',
 
   addToSession: 'Pridėti pratimą į šią treniruotę',
+  discardSession: 'Atmesti treniruotę',
   deleteWorkout: 'Ištrinti treniruotę',
   deleteWorkoutTitle: 'Ištrinti šią treniruotę?',
   deleteWorkoutBody: (desc) =>

@@ -84,9 +84,15 @@ export const pl: Strings = {
   noHistoryYet: 'Brak historii',
   noHistoryBody:
     'Zapisz trening, a tu pojawią się twoje tygodnie. Szablony pokazują się po drugim — to po prostu zachowane treningi.',
-  addGymHint: 'Dodaj swoją siłownię, by niezapisane wizyty przypominały o sobie.',
+  addGymHint: 'Dodaj swoją siłownię. Potrenujesz tam bez zapisu — „Dziś” przypomni.',
   add: 'Dodaj',
   logIt: 'Zapisz',
+  logPastSession: 'Zapisz przeszły trening',
+  backfillDate: 'Data',
+  backfillStart: 'Początek',
+  backfillDuration: 'Czas trwania, min',
+  backfillContinue: 'Dalej do ćwiczeń',
+  backfillFuture: 'Ten czas jest w przyszłości',
   dismiss: 'Odrzuć',
   unloggedVisit: (dur, gym, date) => `${dur} w ${gym} ${date} — nic nie zapisano.`,
   sessionInProgress: 'Trening w toku',
@@ -172,6 +178,7 @@ export const pl: Strings = {
   done: 'Gotowe',
 
   addToSession: 'Dodaj ćwiczenie do tego treningu',
+  discardSession: 'Odrzuć trening',
   deleteWorkout: 'Usuń trening',
   deleteWorkoutTitle: 'Usunąć ten trening?',
   deleteWorkoutBody: (desc) =>

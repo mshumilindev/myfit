@@ -2,11 +2,120 @@
  * Shared UI primitives from the design system (S-49/S-50 kit + dialogs/sheets).
  * Every surface here mirrors the boards; keep visual changes in styles.css.
  */
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ComponentType,
+  type CSSProperties,
+  type RefObject,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
+import {
+  ArrowClockwise,
+  ArrowCounterClockwise,
+  ArrowRight,
+  ArrowUpRight,
+  ArrowsClockwise,
+  Barbell,
+  CalendarBlank,
+  CaretLeft,
+  Carrot,
+  ChartLine,
+  ChartLineUp,
+  CheckCircle,
+  Clock,
+  ClockCountdown,
+  CloudSlash,
+  Copy,
+  Crosshair,
+  DotsThreeVertical,
+  Eraser,
+  Flame,
+  House,
+  Info,
+  ListPlus,
+  MagnifyingGlass,
+  MapPin,
+  MapPinLine,
+  PencilSimple,
+  Play,
+  Plus,
+  Robot,
+  ShieldCheck,
+  SquaresFour,
+  Timer,
+  Trash,
+  Trophy,
+  WarningCircle,
+  X,
+  type IconProps,
+} from '@phosphor-icons/react';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
 
-export function Icon({ name, className }: { name: string; className?: string }) {
-  return <i className={`ph-bold ph-${name}${className ? ` ${className}` : ''}`} aria-hidden />;
+/**
+ * Icons are bundled SVG components (@phosphor-icons/react) — the same Phosphor
+ * glyphs the boards use, but with no icon font to load (nothing to 404, no
+ * FOUC, works offline). The <i> wrapper keeps the existing `i { font-size }`
+ * CSS contract: the SVG is sized 1em.
+ */
+const ICONS: Record<string, ComponentType<IconProps>> = {
+  'arrow-clockwise': ArrowClockwise,
+  'arrow-counter-clockwise': ArrowCounterClockwise,
+  'arrow-right': ArrowRight,
+  'arrow-up-right': ArrowUpRight,
+  'arrows-clockwise': ArrowsClockwise,
+  barbell: Barbell,
+  'calendar-blank': CalendarBlank,
+  'caret-left': CaretLeft,
+  carrot: Carrot,
+  'chart-line': ChartLine,
+  'chart-line-up': ChartLineUp,
+  'check-circle': CheckCircle,
+  clock: Clock,
+  'clock-countdown': ClockCountdown,
+  'cloud-slash': CloudSlash,
+  copy: Copy,
+  crosshair: Crosshair,
+  'dots-three-vertical': DotsThreeVertical,
+  eraser: Eraser,
+  flame: Flame,
+  house: House,
+  info: Info,
+  'list-plus': ListPlus,
+  'magnifying-glass': MagnifyingGlass,
+  'map-pin': MapPin,
+  'map-pin-slash': MapPinLine,
+  'pencil-simple': PencilSimple,
+  play: Play,
+  plus: Plus,
+  robot: Robot,
+  'shield-check': ShieldCheck,
+  'squares-four': SquaresFour,
+  timer: Timer,
+  trash: Trash,
+  trophy: Trophy,
+  'warning-circle': WarningCircle,
+  x: X,
+};
+
+export function Icon({
+  name,
+  className,
+  weight = 'bold',
+}: {
+  name: string;
+  className?: string;
+  weight?: IconProps['weight'];
+}) {
+  const Glyph = ICONS[name];
+  return (
+    <i className={className} aria-hidden style={{ display: 'inline-flex', lineHeight: 0 }}>
+      {Glyph ? <Glyph size="1em" weight={weight} /> : null}
+    </i>
+  );
 }
 
 export function Spinner({ size = 14, onAccent = false }: { size?: number; onAccent?: boolean }) {
@@ -19,6 +128,85 @@ export function Spinner({ size = 14, onAccent = false }: { size?: number; onAcce
   );
 }
 
+function Portal(props: { children: ReactNode }) {
+  if (typeof document === 'undefined') return <>{props.children}</>;
+  return createPortal(props.children, document.body);
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.min(Math.max(n, min), max);
+}
+
+function activeAnchor(): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  return document.activeElement instanceof HTMLElement ? document.activeElement : null;
+}
+
+function useFixedPanelPosition(
+  kind: 'sheet' | 'popover',
+  anchorRef?: RefObject<HTMLElement | null>,
+): CSSProperties {
+  const [anchor] = useState(activeAnchor);
+  const [style, setStyle] = useState<CSSProperties>({});
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const place = () => {
+      if (!window.matchMedia || !window.matchMedia('(min-width: 720px)').matches) {
+        setStyle({});
+        return;
+      }
+
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const gutter = kind === 'sheet' ? 18 : 8;
+      const preferredW = kind === 'sheet' ? 430 : 176;
+      const width = Math.min(preferredW, viewportW - gutter * 2);
+      const minPanelH = kind === 'sheet' ? 320 : 220;
+      const target = anchorRef?.current ?? anchor;
+      const rect = target && document.body.contains(target) ? target.getBoundingClientRect() : null;
+
+      let left = viewportW - width - gutter;
+      let top = gutter;
+
+      if (rect && rect.width > 0 && rect.height > 0) {
+        if (kind === 'popover') {
+          left = clamp(rect.right - width, gutter, viewportW - width - gutter);
+          top = clamp(rect.bottom + 6, gutter, viewportH - minPanelH - gutter);
+        } else {
+          const rightSide = rect.right + 14;
+          const leftSide = rect.left - width - 14;
+          left =
+            rightSide + width + gutter <= viewportW
+              ? rightSide
+              : leftSide >= gutter
+                ? leftSide
+                : clamp(rect.left, gutter, viewportW - width - gutter);
+          top = clamp(rect.top, gutter, viewportH - minPanelH - gutter);
+        }
+      }
+
+      setStyle({
+        '--overlay-left': `${Math.round(left)}px`,
+        '--overlay-top': `${Math.round(top)}px`,
+        '--overlay-width': `${Math.round(width)}px`,
+        '--overlay-max-height': `${Math.round(viewportH - top - gutter)}px`,
+      } as CSSProperties);
+    };
+
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [anchor, anchorRef, kind]);
+
+  return style;
+}
+
 export function Dialog(props: {
   title: ReactNode;
   danger?: boolean;
@@ -27,32 +215,46 @@ export function Dialog(props: {
   onClose: () => void;
 }) {
   return (
-    <div className="dialog-scrim" onClick={props.onClose}>
-      <div className="dialog" role="alertdialog" onClick={(e) => e.stopPropagation()}>
-        <h2 className="dialog-title">
-          {props.danger && <Icon name="trash" />}
-          {props.title}
-        </h2>
-        <p className="dialog-body">{props.children}</p>
-        <div className="dialog-actions">{props.actions}</div>
+    <Portal>
+      <div className="dialog-scrim" onClick={props.onClose}>
+        <div className="dialog" role="alertdialog" onClick={(e) => e.stopPropagation()}>
+          <h2 className="dialog-title">
+            {props.danger && <Icon name="trash" />}
+            {props.title}
+          </h2>
+          <p className="dialog-body">{props.children}</p>
+          <div className="dialog-actions">{props.actions}</div>
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 }
 
-export function Sheet(props: { children: ReactNode; onClose: () => void; padded?: boolean }) {
+export function Sheet(props: {
+  children: ReactNode;
+  onClose: () => void;
+  padded?: boolean;
+  className?: string;
+}) {
+  const { t } = useT();
+  const style = useFixedPanelPosition('sheet');
   return (
-    <>
+    <Portal>
       <div className="scrim" onClick={props.onClose} />
       <div
-        className="sheet"
+        className={`sheet${props.className ? ` ${props.className}` : ''}`}
         role="dialog"
-        style={props.padded === false ? { padding: '14px 12px 26px', gap: 2 } : undefined}
+        style={props.padded === false ? { ...style, padding: '14px 12px 26px', gap: 2 } : style}
       >
-        <div className="grabber" />
+        <div className="sheet-chrome">
+          <div className="grabber" />
+          <button className="sheet-close" onClick={props.onClose} aria-label={t.cancel}>
+            <Icon name="x" />
+          </button>
+        </div>
         {props.children}
       </div>
-    </>
+    </Portal>
   );
 }
 
@@ -127,11 +329,15 @@ export function LanguageSelector() {
   const { locale } = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
+  const popRef = useRef<HTMLDivElement | null>(null);
+  const popStyle = useFixedPanelPosition('popover', ref);
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (ref.current?.contains(target) || popRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('pointerdown', onDown);
     return () => document.removeEventListener('pointerdown', onDown);
@@ -148,23 +354,25 @@ export function LanguageSelector() {
         <span aria-hidden>{FLAGS[locale]}</span>
       </button>
       {open && (
-        <div className="lang-pop" role="menu">
-          {LOCALE_IDS.map((id) => (
-            <button
-              key={id}
-              role="menuitemradio"
-              aria-checked={id === locale}
-              className={`lang-item${id === locale ? ' active' : ''}`}
-              onClick={() => {
-                setLocale(id);
-                setOpen(false);
-              }}
-            >
-              <span aria-hidden>{FLAGS[id]}</span>
-              <span>{LOCALES[id].locale}</span>
-            </button>
-          ))}
-        </div>
+        <Portal>
+          <div className="lang-pop" role="menu" ref={popRef} style={popStyle}>
+            {LOCALE_IDS.map((id) => (
+              <button
+                key={id}
+                role="menuitemradio"
+                aria-checked={id === locale}
+                className={`lang-item${id === locale ? ' active' : ''}`}
+                onClick={() => {
+                  setLocale(id);
+                  setOpen(false);
+                }}
+              >
+                <span aria-hidden>{FLAGS[id]}</span>
+                <span>{LOCALES[id].locale}</span>
+              </button>
+            ))}
+          </div>
+        </Portal>
       )}
     </div>
   );

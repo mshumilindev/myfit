@@ -2,8 +2,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
-import '@phosphor-icons/web/bold/style.css';
-import '@phosphor-icons/web/fill/style.css';
 import './styles.css';
 import { App } from './App';
 import { getLocale } from './i18n';

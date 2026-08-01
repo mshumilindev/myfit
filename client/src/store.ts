@@ -72,16 +72,6 @@ export function useStore(): StoreState {
   );
 }
 
-export function __getStateForTests(): StoreState {
-  return state;
-}
-
-export function __replaceStateForTests(next: StoreState): void {
-  state = next;
-  persist();
-  emit();
-}
-
 export const uuid = (): string => crypto.randomUUID();
 
 // --- Local mutations (optimistic, queued for the server) -------------------
@@ -713,6 +703,30 @@ export function reopenWorkout(id: string): void {
   void sync();
 }
 
+/** Backfill (spec docs/specs/backfill-session.md): create an already-finished
+ * past session; it goes through the same idempotent upsert queue. */
+export function backfillWorkout(startedAt: number, durationMs: number): Workout {
+  const workout: Workout = {
+    id: uuid(),
+    startedAt,
+    finishedAt: startedAt + durationMs,
+    autoFinished: false,
+    exercises: [],
+  };
+  enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
+    startedAt: workout.startedAt,
+    finishedAt: workout.finishedAt,
+    autoFinished: false,
+  });
+  setState({
+    workouts: sortWorkouts([workout, ...state.workouts]),
+    syncStatus: bumpPending(),
+  });
+  persist();
+  void sync();
+  return workout;
+}
+
 /** «Repeat X»: new session pre-seeded with the exercises of a past one. */
 export function repeatWorkout(sourceId: string): Workout | undefined {
   const src = state.workouts.find((x) => x.id === sourceId);
@@ -737,5 +751,15 @@ export function resetLocalData(): void {
     syncStatus: 'pending',
     lastSyncAt: null,
   };
+  emit();
+}
+
+export function __getStateForTests(): StoreState {
+  return structuredClone(state);
+}
+
+export function __replaceStateForTests(next: StoreState): void {
+  state = structuredClone(next);
+  persist();
   emit();
 }

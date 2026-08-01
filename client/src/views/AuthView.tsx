@@ -193,7 +193,9 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
             : busy
               ? t.creatingAccount
               : t.createAccount}
-          <span className="keycap">⏎</span>
+          <span className="keycap" aria-hidden>
+            ⏎
+          </span>
         </button>
 
         {unreachable && (

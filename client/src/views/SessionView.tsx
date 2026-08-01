@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31. */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Shell } from '../App';
 import type { Exercise, SetEntry, Workout } from '../types';
 import {
@@ -55,6 +55,7 @@ type DialogState =
 export function SessionView(props: {
   workoutId: string;
   past?: boolean;
+  startAdd?: boolean;
   shell: Shell;
   onClose: () => void;
 }) {
@@ -68,6 +69,7 @@ export function SessionView(props: {
   const [summary, setSummary] = useState(false);
   const [restUntil, setRestUntil] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  const startAddConsumed = useRef(false);
 
   const live = !!workout && workout.finishedAt === null && !props.past;
 
@@ -75,6 +77,27 @@ export function SessionView(props: {
     const iv = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(iv);
   }, []);
+
+  useEffect(() => {
+    if (!props.startAdd || startAddConsumed.current || !workout) return;
+    startAddConsumed.current = true;
+    setSheet({ kind: 'add' });
+  }, [props.startAdd, workout]);
+
+  // Desktop shortcuts (W-06): ⌘K add exercise, ⌘⏎ finish.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSheet({ kind: 'add' });
+      } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && live && sets > 0) {
+        e.preventDefault();
+        requestFinish();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -190,10 +213,10 @@ export function SessionView(props: {
       });
     }
     return (
-      <div className="screen" style={{ padding: '14px 22px 24px', gap: 'var(--space-6)' }}>
+      <div className="screen" style={{ gap: 'var(--space-6)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="saved-mark">
-            <i className="ph-fill ph-check-circle" aria-hidden />
+            <Icon name="check-circle" weight="fill" />
             <span>{t.sessionSaved}</span>
           </div>
           <LanguageSelector />
@@ -302,6 +325,9 @@ export function SessionView(props: {
         {live ? (
           <button className="btn btn-secondary" disabled={sets === 0} onClick={requestFinish}>
             {t.finish}
+            <span className="keycap" aria-hidden>
+              ⌘⏎
+            </span>
           </button>
         ) : workout.autoFinished ? (
           <button className="btn btn-secondary" onClick={() => reopenWorkout(workout.id)}>
@@ -348,7 +374,7 @@ export function SessionView(props: {
         )}
 
         {workout.exercises.length === 0 ? (
-          <div style={{ margin: 'auto 8px' }}>
+          <div className="session-empty">
             <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
               <button
                 className="btn btn-primary"
@@ -357,6 +383,17 @@ export function SessionView(props: {
               >
                 <Icon name="plus" />
                 {t.addExercise}
+              </button>
+              <button
+                className="link"
+                style={{ color: 'var(--color-danger)', marginTop: 'var(--space-2)' }}
+                onClick={() => {
+                  // Nothing logged — discarding loses nothing, no dialog (design rule 4).
+                  deleteWorkout(workout.id);
+                  props.onClose();
+                }}
+              >
+                {t.discardSession}
               </button>
             </EmptyState>
           </div>
@@ -486,14 +523,17 @@ export function SessionView(props: {
             >
               <Icon name="plus" />
               {props.past ? t.addToSession : t.addExercise}
+              <span className="keycap" aria-hidden>
+                ⌘K
+              </span>
             </button>
-            {props.past && !workout.autoFinished && (
+            {(props.past || live) && !workout.autoFinished && (
               <button
                 className="link"
                 style={{ color: 'var(--color-danger)', padding: '6px 0', textAlign: 'left' }}
                 onClick={() => setDialog({ kind: 'del-workout' })}
               >
-                {t.deleteWorkout}
+                {live ? t.discardSession : t.deleteWorkout}
               </button>
             )}
           </>

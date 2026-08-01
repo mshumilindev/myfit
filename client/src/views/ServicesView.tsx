@@ -28,7 +28,7 @@ export function ServicesView(props: {
   const status = store.syncStatus;
 
   return (
-    <div className="screen" style={{ padding: '14px 20px 20px' }}>
+    <div className="screen">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 className="h1">{t.services}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

@@ -23,14 +23,7 @@ export function ProgressView({ store }: { store: Store }) {
   if (finished.length < 3) {
     return (
       <div className="screen">
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            paddingTop: 8,
-          }}
-        >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
           <h1 className="headline" style={{ margin: 0 }}>
             {t.progress}
           </h1>

@@ -72,9 +72,15 @@ export const et: Strings = {
   noHistoryYet: 'Ajalugu veel pole',
   noHistoryBody:
     'Logi treening ja siia ilmuvad sinu nädalad. Mallid ilmuvad pärast teist — need on lihtsalt alles hoitud treeningud.',
-  addGymHint: 'Lisa oma jõusaal, et logimata külastused saaksid meelde tuletada.',
+  addGymHint: 'Lisa oma jõusaal. Treenid seal midagi logimata — „Täna“ tuletab meelde.',
   add: 'Lisa',
   logIt: 'Logi',
+  logPastSession: 'Logi möödunud treening',
+  backfillDate: 'Kuupäev',
+  backfillStart: 'Algus',
+  backfillDuration: 'Kestus, min',
+  backfillContinue: 'Edasi harjutustesse',
+  backfillFuture: 'See aeg on tulevikus',
   dismiss: 'Peida',
   unloggedVisit: (dur, gym, date) => `${dur} saalis ${gym} ${date} — midagi ei logitud.`,
   sessionInProgress: 'Treening käib',
@@ -160,6 +166,7 @@ export const et: Strings = {
   done: 'Valmis',
 
   addToSession: 'Lisa harjutus sellesse treeningusse',
+  discardSession: 'Tühista treening',
   deleteWorkout: 'Kustuta treening',
   deleteWorkoutTitle: 'Kustutada see treening?',
   deleteWorkoutBody: (desc) =>

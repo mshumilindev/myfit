@@ -29,7 +29,7 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
   const span = Math.max(record - min, 1);
 
   return (
-    <div className="screen" style={{ padding: '6px 20px 20px', gap: 'var(--space-6)' }}>
+    <div className="screen" style={{ gap: 'var(--space-6)' }}>
       <div className="hist-head">
         <button className="back" onClick={onClose} aria-label="Back">
           <Icon name="caret-left" />

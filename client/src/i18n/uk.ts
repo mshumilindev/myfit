@@ -84,9 +84,15 @@ export const uk: Strings = {
   noHistoryYet: 'Історії ще немає',
   noHistoryBody:
     'Запиши тренування — і тут зʼявляться твої тижні. Шаблони зʼявляються після другого: це просто збережені тренування.',
-  addGymHint: 'Додай свій зал, щоб незаписані візити нагадували про себе.',
+  addGymHint: 'Додай свій зал. Потренуєшся там без запису — «Сьогодні» нагадає.',
   add: 'Додати',
   logIt: 'Записати',
+  logPastSession: 'Записати минуле тренування',
+  backfillDate: 'Дата',
+  backfillStart: 'Початок',
+  backfillDuration: 'Тривалість, хв',
+  backfillContinue: 'Далі до вправ',
+  backfillFuture: 'Цей час у майбутньому',
   dismiss: 'Прибрати',
   unloggedVisit: (dur, gym, date) => `${dur} у ${gym} ${date} — нічого не записано.`,
   sessionInProgress: 'Тренування триває',
@@ -171,6 +177,7 @@ export const uk: Strings = {
   done: 'Готово',
 
   addToSession: 'Додати вправу в це тренування',
+  discardSession: 'Скасувати тренування',
   deleteWorkout: 'Видалити тренування',
   deleteWorkoutTitle: 'Видалити це тренування?',
   deleteWorkoutBody: (desc) =>
