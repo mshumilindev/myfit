@@ -177,12 +177,14 @@ export function fmtTonnes(kg: number): string {
   return `${(kg / 1000).toFixed(1)} t`;
 }
 
-/** "85 × 8" (weight × reps, design order). */
+/** "85 × 8", or "BW × 8" for a bodyweight set (weight = null). */
 export function fmtSet(weight: number | null, reps: number): string {
-  return `${weight ?? 0} × ${reps}`;
+  return `${weight ?? LOCALES[current].bodyweightShort} × ${reps}`;
 }
 
-/** "8 × 80 kg" (reps × weight, snackbar order from the design). */
+/** "8 × 80 kg" / "8 × BW" (reps × weight, snackbar order from the design). */
 export function fmtSetSnack(reps: number, weight: number | null): string {
-  return `${reps} × ${weight ?? 0} kg`;
+  return weight === null
+    ? `${reps} × ${LOCALES[current].bodyweightShort}`
+    : `${reps} × ${weight} kg`;
 }

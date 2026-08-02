@@ -10,6 +10,9 @@
  */
 import type { Gym } from '../types';
 
+/** Google Places key from Vite env — enables Google photos/hours everywhere. */
+const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
+
 export type ProviderId = 'local' | 'osm' | 'google' | 'foursquare';
 
 export interface PlaceResult {
@@ -517,6 +520,14 @@ async function wikidataLogo(qid: string, signal: AbortSignal): Promise<string | 
  */
 export async function resolvePhoto(r: PlaceResult, signal: AbortSignal): Promise<string | null> {
   if (r.photoUrl) return r.photoUrl;
+  if (GOOGLE_KEY) {
+    try {
+      const g = await googleLookup(r.name, r.lat, r.lng, signal);
+      if (g?.photoUrl) return g.photoUrl;
+    } catch (e) {
+      if (signal.aborted) throw e;
+    }
+  }
   try {
     if (r.wikimediaCommons) {
       const url = await commonsThumb(r.wikimediaCommons, signal);
@@ -717,4 +728,302 @@ async function fetchAddress(lat: number, lng: number, signal: AbortSignal): Prom
     if (signal.aborted) throw e;
     return null;
   }
+}
+
+/** ~distance for a row: "240 m" / "1.2 km". */
+export function fmtDistance(m: number): string {
+  return m < 950 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+// --- gym metadata: hours / website / phone (OSM via Nominatim, keyless) -----
+// Overpass is too slow/rate-limited for an on-open call; Nominatim reverse with
+// extratags is reliable and carries the same tags. Coverage varies — many gyms
+// simply have no opening_hours in OSM, in which case the UI says so.
+
+export interface GymMeta {
+  openingHours?: string;
+  website?: string;
+  phone?: string;
+  category?: string;
+  /** Structured hours (Google periods) when available — preferred over raw. */
+  hours?: ParsedHours;
+  openNow?: boolean;
+}
+
+const META_PREFIX = 'gym.meta.';
+const META_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+const metaInflight = new Map<string, Promise<GymMeta | null>>();
+
+export function resolveGymMeta(
+  lat: number,
+  lng: number,
+  signal: AbortSignal,
+  name?: string,
+): Promise<GymMeta | null> {
+  if (GOOGLE_KEY && name) {
+    return googleLookup(name, lat, lng, signal)
+      .then((g) => {
+        if (g && (g.hours || g.website || g.phone || g.hoursRaw)) {
+          return {
+            openingHours: g.hoursRaw?.join(' · '),
+            hours: g.hours,
+            openNow: g.openNow,
+            website: g.website,
+            phone: g.phone,
+            category: 'gym',
+          } as GymMeta;
+        }
+        return fetchGymMetaCached(lat, lng, signal);
+      })
+      .catch((e) => {
+        if (signal.aborted) throw e;
+        return fetchGymMetaCached(lat, lng, signal);
+      });
+  }
+  return fetchGymMetaCached(lat, lng, signal);
+}
+
+function fetchGymMetaCached(
+  lat: number,
+  lng: number,
+  signal: AbortSignal,
+): Promise<GymMeta | null> {
+  const key = `${META_PREFIX}${Math.round(lat * 1e5) / 1e5},${Math.round(lng * 1e5) / 1e5}`;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const { at, meta } = JSON.parse(raw) as { at: number; meta: GymMeta | null };
+      if (Date.now() - at <= META_TTL_MS) return Promise.resolve(meta);
+    }
+  } catch {
+    /* ignore */
+  }
+  const existing = metaInflight.get(key);
+  if (existing) return existing;
+  const job = fetchGymMeta(lat, lng, signal)
+    .then((meta) => {
+      try {
+        localStorage.setItem(key, JSON.stringify({ at: Date.now(), meta }));
+      } catch {
+        /* quota */
+      }
+      return meta;
+    })
+    .catch((e) => {
+      if (signal.aborted) throw e;
+      return null;
+    })
+    .finally(() => metaInflight.delete(key));
+  metaInflight.set(key, job);
+  return job;
+}
+
+async function fetchGymMeta(
+  lat: number,
+  lng: number,
+  signal: AbortSignal,
+): Promise<GymMeta | null> {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2&extratags=1&zoom=18`,
+    { signal, headers: { Accept: 'application/json' } },
+  );
+  if (!res.ok) return null;
+  const j = (await res.json()) as {
+    category?: string;
+    type?: string;
+    extratags?: Record<string, string>;
+  };
+  const x = j.extratags ?? {};
+  return {
+    openingHours: x.opening_hours,
+    website: x.website || x.url || x['contact:website'],
+    phone: x.phone || x['contact:phone'],
+    category: j.type || j.category,
+  };
+}
+
+// --- opening_hours parser (best-effort, common syntaxes) --------------------
+// Returns 7 weekday buckets (Mon..Sun) of [openMinute, closeMinute] ranges.
+// Falls back to null when it can't make sense of the string (UI shows raw).
+
+const OH_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+export interface ParsedHours {
+  week: Array<Array<[number, number]>>;
+}
+
+function parseDayTokens(part: string): number[] {
+  const out = new Set<number>();
+  for (const tokRaw of part.split(',')) {
+    const tok = tokRaw.trim();
+    if (!tok) continue;
+    if (tok.includes('-')) {
+      const [a, b] = tok.split('-').map((x) => OH_DAYS.indexOf(x.trim().slice(0, 2)));
+      if (a >= 0 && b >= 0) {
+        for (let i = a; ; i = (i + 1) % 7) {
+          out.add(i);
+          if (i === b) break;
+        }
+      }
+    } else {
+      const i = OH_DAYS.indexOf(tok.slice(0, 2));
+      if (i >= 0) out.add(i);
+    }
+  }
+  return [...out];
+}
+
+export function parseOpeningHours(raw: string | undefined): ParsedHours | null {
+  if (!raw) return null;
+  const week: Array<Array<[number, number]>> = Array.from({ length: 7 }, () => []);
+  const s = raw.trim();
+  if (/^24\s*\/\s*7$/.test(s) || /\b00:00-24:00\b/.test(s)) {
+    for (let i = 0; i < 7; i++) week[i] = [[0, 1440]];
+    return { week };
+  }
+  let matched = false;
+  for (const ruleRaw of s.split(';')) {
+    const rule = ruleRaw.trim();
+    if (!rule) continue;
+    const timeRe = /\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}(?:\s*,\s*\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})*/;
+    const tm = rule.match(timeRe);
+    const dayPart = (tm ? rule.slice(0, tm.index) : rule.replace(/\b(off|closed)\b/i, '')).trim();
+    const days = parseDayTokens(dayPart);
+    const idx = days.length ? days : [0, 1, 2, 3, 4, 5, 6];
+    if (!tm) continue; // "off"/"closed" → leave those days empty
+    const ranges = tm[0].split(',').map((t) => {
+      const [a, b] = t.split('-').map((x) => {
+        const [h, mi] = x.trim().split(':').map(Number);
+        return h * 60 + (mi || 0);
+      });
+      return [a, b] as [number, number];
+    });
+    for (const di of idx) week[di] = ranges;
+    matched = true;
+  }
+  return matched ? { week } : null;
+}
+
+// --- Google Places lookup: real photo + hours + website + phone -------------
+// One searchText call per venue (cached by coords), used by resolvePhoto and
+// resolveGymMeta so Google enriches the whole app once the key is enabled.
+
+export interface GoogleInfo {
+  photoUrl?: string;
+  website?: string;
+  phone?: string;
+  hours?: ParsedHours;
+  hoursRaw?: string[];
+  openNow?: boolean;
+}
+
+const G_PREFIX = 'gym.google.';
+const G_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const googleInflight = new Map<string, Promise<GoogleInfo | null>>();
+
+export function googleLookup(
+  name: string,
+  lat: number,
+  lng: number,
+  signal: AbortSignal,
+): Promise<GoogleInfo | null> {
+  if (!GOOGLE_KEY || !name) return Promise.resolve(null);
+  const key = `${G_PREFIX}${Math.round(lat * 1e5) / 1e5},${Math.round(lng * 1e5) / 1e5}`;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const { at, info } = JSON.parse(raw) as { at: number; info: GoogleInfo | null };
+      if (Date.now() - at <= G_TTL_MS) return Promise.resolve(info);
+    }
+  } catch {
+    /* ignore */
+  }
+  const existing = googleInflight.get(key);
+  if (existing) return existing;
+  const job = fetchGoogle(name, lat, lng, signal)
+    .then((info) => {
+      try {
+        localStorage.setItem(key, JSON.stringify({ at: Date.now(), info }));
+      } catch {
+        /* quota */
+      }
+      return info;
+    })
+    .catch((e) => {
+      if (signal.aborted) throw e;
+      return null;
+    })
+    .finally(() => googleInflight.delete(key));
+  googleInflight.set(key, job);
+  return job;
+}
+
+interface GPeriodPt {
+  day: number;
+  hour: number;
+  minute: number;
+}
+interface GPeriod {
+  open?: GPeriodPt;
+  close?: GPeriodPt;
+}
+
+function googlePeriodsToHours(periods: GPeriod[] | undefined): ParsedHours | null {
+  if (!periods || periods.length === 0) return null;
+  const week: Array<Array<[number, number]>> = Array.from({ length: 7 }, () => []);
+  const mon = (d: number) => (d + 6) % 7; // Google day 0=Sun → Monday-first
+  for (const per of periods) {
+    if (!per.open) continue;
+    const oi = mon(per.open.day);
+    const openMin = per.open.hour * 60 + (per.open.minute || 0);
+    const closeMin = per.close ? per.close.hour * 60 + (per.close.minute || 0) : 1440;
+    // A close on a later day (overnight/24h) → cap that day at midnight.
+    week[oi].push([openMin, per.close && per.close.day !== per.open.day ? 1440 : closeMin]);
+  }
+  return week.some((d) => d.length) ? { week } : null;
+}
+
+async function fetchGoogle(
+  name: string,
+  lat: number,
+  lng: number,
+  signal: AbortSignal,
+): Promise<GoogleInfo | null> {
+  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method: 'POST',
+    signal,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': GOOGLE_KEY as string,
+      'X-Goog-FieldMask':
+        'places.photos,places.regularOpeningHours,places.currentOpeningHours,places.websiteUri,places.internationalPhoneNumber',
+    },
+    body: JSON.stringify({
+      textQuery: name,
+      locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: 500 } },
+      maxResultCount: 1,
+    }),
+  });
+  if (!res.ok) return null;
+  const j = (await res.json()) as {
+    places?: Array<{
+      photos?: Array<{ name: string }>;
+      websiteUri?: string;
+      internationalPhoneNumber?: string;
+      regularOpeningHours?: { periods?: GPeriod[]; weekdayDescriptions?: string[] };
+      currentOpeningHours?: { openNow?: boolean };
+    }>;
+  };
+  const p = j.places?.[0];
+  if (!p) return null;
+  return {
+    photoUrl: p.photos?.[0]
+      ? `https://places.googleapis.com/v1/${p.photos[0].name}/media?maxWidthPx=1200&key=${GOOGLE_KEY}`
+      : undefined,
+    website: p.websiteUri,
+    phone: p.internationalPhoneNumber,
+    hours: googlePeriodsToHours(p.regularOpeningHours?.periods) ?? undefined,
+    hoursRaw: p.regularOpeningHours?.weekdayDescriptions,
+    openNow: p.currentOpeningHours?.openNow,
+  };
 }

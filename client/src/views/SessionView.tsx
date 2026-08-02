@@ -24,6 +24,8 @@ import {
   workoutSets,
   workoutVolumeKg,
 } from '../store';
+import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
+import { LiveHero } from '../components/LiveHero';
 import {
   fmtClock,
   fmtDayMonth,
@@ -100,7 +102,8 @@ export function SessionView(props: {
 
   const sets = workoutSets(workout);
   const volume = workoutVolumeKg(workout);
-  const gymName = store.gyms[0]?.name;
+  const gym = store.gyms.find((g) => g.id === workout.gymId) ?? null;
+  const gymName = gym?.name;
 
   function ghostFor(ex: Exercise): { reps: number; weight: number } {
     const last = ex.sets[ex.sets.length - 1];
@@ -119,14 +122,14 @@ export function SessionView(props: {
     return best?.id === s.id;
   }
 
-  function logGhost(ex: Exercise, v: { reps: number; weight: number }): void {
+  function logGhost(ex: Exercise, v: { reps: number; weight: number | null }): void {
     const base = Math.max(
       baseline.get(ex.name.toLowerCase()) ?? 0,
       ...ex.sets.filter((s) => !s.isWarmup).map((s) => s.weight ?? 0),
     );
     upsertSet(workout!.id, ex.id, { reps: v.reps, weight: v.weight, isWarmup: false });
     if (live) setRestUntil(Date.now() + REST_SECONDS * 1000);
-    if (v.weight > base && base > 0) {
+    if (v.weight !== null && v.weight > base && base > 0) {
       props.shell.toast({
         kind: 'ok',
         icon: 'trophy',
@@ -294,20 +297,33 @@ export function SessionView(props: {
 
   return (
     <>
-      <div className="session-top">
+      {live && (
+        <LiveHero
+          workout={workout}
+          gym={gym}
+          gyms={store.gyms}
+          offline={store.syncStatus === 'offline'}
+          queued={store.queue.length}
+          mode="session"
+        />
+      )}
+      <div className={`session-top${live ? ' live-toolbar' : ''}`}>
         <button className="back" onClick={props.onClose} aria-label="Back">
           <Icon name="caret-left" />
         </button>
-        <div className="mid">
-          <div className={`kicker${live ? ' live' : ''}`}>{kicker}</div>
-          {live || workout.finishedAt === null ? (
-            <div className="clock">
-              {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
-            </div>
-          ) : (
-            <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
-          )}
-        </div>
+        {!live && (
+          <div className="mid">
+            <div className="kicker">{kicker}</div>
+            {workout.finishedAt === null ? (
+              <div className="clock">
+                {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
+              </div>
+            ) : (
+              <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
+            )}
+          </div>
+        )}
+        {live && <div className="mid" aria-hidden />}
         <LanguageSelector />
         {live ? (
           <button className="btn btn-secondary" disabled={sets === 0} onClick={requestFinish}>
@@ -369,8 +385,8 @@ export function SessionView(props: {
                 {t.addExercise}
               </button>
               <button
-                className="link"
-                style={{ color: 'var(--color-danger)', marginTop: 'var(--space-2)' }}
+                className="link danger-link"
+                style={{ marginTop: 'var(--space-2)' }}
                 onClick={() => setDialog({ kind: 'del-workout' })}
               >
                 {t.discardSession}
@@ -461,7 +477,7 @@ export function SessionView(props: {
                             >
                               <span className="idx">{i + 1}</span>
                               <span className="val">{s.reps}</span>
-                              <span className="val">{s.weight ?? 0}</span>
+                              <span className="val">{s.weight ?? t.bodyweightShort}</span>
                               <span className="kind">
                                 {rec ? t.record : s.isWarmup ? t.warmup : t.working}
                               </span>
@@ -506,8 +522,8 @@ export function SessionView(props: {
             </button>
             {(props.past || live) && !workout.autoFinished && (
               <button
-                className="link"
-                style={{ color: 'var(--color-danger)', padding: '6px 0', textAlign: 'left' }}
+                className="link danger-link"
+                style={{ padding: '6px 0', textAlign: 'left' }}
                 onClick={() => setDialog({ kind: 'del-workout' })}
               >
                 {live ? t.discardSession : t.deleteWorkout}
@@ -550,7 +566,7 @@ export function SessionView(props: {
             if (sheet.set) {
               upsertSet(workout.id, ex.id, { ...vals, id: sheet.set.id });
             } else {
-              logGhost(ex, { reps: vals.reps, weight: vals.weight ?? 0 });
+              logGhost(ex, { reps: vals.reps, weight: vals.weight });
             }
             setSheet(null);
           }}
@@ -722,6 +738,7 @@ function AddExerciseSheet(props: {
 }) {
   const { t, locale } = useT();
   const [q, setQ] = useState('');
+  const [equip, setEquip] = useState<EquipmentId | undefined>(undefined);
   const known = useMemo(() => knownExercises(), []);
   const needle = q.trim().toLowerCase();
   const matches = needle
@@ -729,12 +746,16 @@ function AddExerciseSheet(props: {
     : known.slice(0, 6);
   const exact = known.some((k) => k.name.toLowerCase() === needle);
   // Built-in catalog (searchable in all five languages); history ranks first.
+  // An equipment chip narrows the catalog and also allows browsing with an
+  // empty query (e.g. "show me everything for bands").
   const li = LOCALE_IDS.indexOf(locale);
-  const catalog = needle
-    ? searchCatalog(needle, 8).filter(
-        (c) => !matches.some((m) => c.names.some((n) => n.toLowerCase() === m.name.toLowerCase())),
-      )
-    : [];
+  const catalog =
+    needle || equip !== undefined
+      ? searchCatalog(needle, equip !== undefined ? 14 : 8, equip).filter(
+          (c) =>
+            !matches.some((m) => c.names.some((n) => n.toLowerCase() === m.name.toLowerCase())),
+        )
+      : [];
 
   return (
     <Sheet onClose={props.onClose}>
@@ -749,6 +770,24 @@ function AddExerciseSheet(props: {
             if (e.key === 'Enter' && q.trim()) props.onPick(q.trim());
           }}
         />
+      </div>
+      <div className="equip-chips">
+        <button
+          className={`equip-chip${equip === undefined ? ' active' : ''}`}
+          onClick={() => setEquip(undefined)}
+        >
+          {t.equipmentAll}
+        </button>
+        {EQUIPMENT_IDS.map((id) => (
+          <button
+            key={id}
+            className={`equip-chip${equip === id ? ' active' : ''}`}
+            onClick={() => setEquip((x) => (x === id ? undefined : id))}
+          >
+            <EquipmentIcon equipment={id} />
+            {t.equipmentNames[id]}
+          </button>
+        ))}
       </div>
       {matches.length > 0 && (
         <div>
@@ -801,7 +840,15 @@ function AddExerciseSheet(props: {
                     name
                   )}
                 </span>
-                <span className="last">{t.muscleGroups[c.muscle]}</span>
+                <span className="last">
+                  {c.equipment && (
+                    <span className="equip-tag">
+                      <EquipmentIcon equipment={c.equipment} />
+                      {t.equipmentNames[c.equipment]}
+                    </span>
+                  )}
+                  {t.muscleGroups[c.muscle]}
+                </span>
               </button>
             );
           })}
@@ -829,7 +876,9 @@ function SetEditorSheet(props: {
 }) {
   const { t } = useT();
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
-  const [weight, setWeight] = useState(props.set?.weight ?? props.ghost.weight);
+  const [weight, setWeight] = useState(props.set?.weight ?? props.ghost.weight ?? 0);
+  // Bodyweight = weight stored as null (pull-ups, dips, planks…).
+  const [bw, setBw] = useState(props.set ? props.set.weight === null : false);
   const [warm, setWarm] = useState(props.set?.isWarmup ?? false);
   const [openedAt] = useState(() => Date.now());
   const [focused, setFocused] = useState<'reps' | 'weight'>('weight');
@@ -858,17 +907,30 @@ function SetEditorSheet(props: {
           </div>
         </div>
         <div
-          className={`stepper${focused === 'weight' ? ' focused' : ''}`}
-          onClick={() => setFocused('weight')}
+          className={`stepper${focused === 'weight' ? ' focused' : ''}${bw ? ' disabled' : ''}`}
+          onClick={() => !bw && setFocused('weight')}
         >
           <div className="lab">{t.weightKg}</div>
           <div className="row">
-            <button onClick={() => setWeight((w) => Math.max(0, +(w - 2.5).toFixed(2)))}>−</button>
-            <span className="val">{weight}</span>
-            <button onClick={() => setWeight((w) => +(w + 2.5).toFixed(2))}>+</button>
+            {bw ? (
+              <span className="val">{t.bodyweightShort}</span>
+            ) : (
+              <>
+                <button onClick={() => setWeight((w) => Math.max(0, +(w - 2.5).toFixed(2)))}>
+                  −
+                </button>
+                <span className="val">{weight}</span>
+                <button onClick={() => setWeight((w) => +(w + 2.5).toFixed(2))}>+</button>
+              </>
+            )}
           </div>
         </div>
       </div>
+      <button className="toggle-row" onClick={() => setBw((x) => !x)}>
+        <Icon name="barbell" />
+        <span className="lab">{t.bodyweightSet}</span>
+        <Switch on={bw} />
+      </button>
       <button className="toggle-row" onClick={() => setWarm((x) => !x)}>
         <Icon name="flame" />
         <span className="lab">{t.warmupSet}</span>
@@ -886,7 +948,7 @@ function SetEditorSheet(props: {
         </button>
         <button
           className="btn btn-primary grow"
-          onClick={() => props.onSave({ reps, weight, isWarmup: warm })}
+          onClick={() => props.onSave({ reps, weight: bw ? null : weight, isWarmup: warm })}
         >
           {props.set ? t.save : t.log}
         </button>

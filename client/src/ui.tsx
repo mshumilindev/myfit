@@ -34,6 +34,7 @@ import {
   DotsThreeVertical,
   Eraser,
   Flame,
+  Globe,
   House,
   Info,
   ListPlus,
@@ -41,10 +42,12 @@ import {
   MapPin,
   MapPinLine,
   PencilSimple,
+  Phone,
   Play,
   Plus,
   Robot,
   ShieldCheck,
+  Star,
   SquaresFour,
   Timer,
   Trash,
@@ -82,6 +85,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'dots-three-vertical': DotsThreeVertical,
   eraser: Eraser,
   flame: Flame,
+  globe: Globe,
   house: House,
   info: Info,
   'list-plus': ListPlus,
@@ -89,10 +93,12 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'map-pin': MapPin,
   'map-pin-slash': MapPinLine,
   'pencil-simple': PencilSimple,
+  phone: Phone,
   play: Play,
   plus: Plus,
   robot: Robot,
   'shield-check': ShieldCheck,
+  star: Star,
   'squares-four': SquaresFour,
   timer: Timer,
   trash: Trash,
@@ -153,37 +159,34 @@ function useFixedPanelPosition(
     if (typeof window === 'undefined') return;
 
     const place = () => {
-      if (!window.matchMedia || !window.matchMedia('(min-width: 720px)').matches) {
+      const isDesktop = !!window.matchMedia && window.matchMedia('(min-width: 720px)').matches;
+      if (kind === 'sheet' && !isDesktop) {
         setStyle({});
         return;
       }
 
       const viewportW = window.innerWidth;
       const viewportH = window.innerHeight;
-      const gutter = kind === 'sheet' ? 18 : 8;
+      const gutter = kind === 'sheet' ? 0 : 8;
       const preferredW = kind === 'sheet' ? 430 : 176;
-      const width = Math.min(preferredW, viewportW - gutter * 2);
+      const width = Math.min(preferredW, viewportW - Math.max(gutter * 2, 36));
       const minPanelH = kind === 'sheet' ? 320 : 220;
       const target = anchorRef?.current ?? anchor;
       const rect = target && document.body.contains(target) ? target.getBoundingClientRect() : null;
 
-      let left = viewportW - width - gutter;
+      const appRect = document.querySelector('.app')?.getBoundingClientRect();
+      let left =
+        kind === 'sheet' && appRect
+          ? clamp(appRect.right - width, 0, viewportW - width)
+          : viewportW - width - gutter;
       let top = gutter;
 
-      if (rect && rect.width > 0 && rect.height > 0) {
+      if (kind === 'sheet') {
+        top = 0;
+      } else if (rect && rect.width > 0 && rect.height > 0) {
         if (kind === 'popover') {
           left = clamp(rect.right - width, gutter, viewportW - width - gutter);
           top = clamp(rect.bottom + 6, gutter, viewportH - minPanelH - gutter);
-        } else {
-          const rightSide = rect.right + 14;
-          const leftSide = rect.left - width - 14;
-          left =
-            rightSide + width + gutter <= viewportW
-              ? rightSide
-              : leftSide >= gutter
-                ? leftSide
-                : clamp(rect.left, gutter, viewportW - width - gutter);
-          top = clamp(rect.top, gutter, viewportH - minPanelH - gutter);
         }
       }
 

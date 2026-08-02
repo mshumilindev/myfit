@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+</helmet>
+<div style="flex:none;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 12px 22px;background:#16171a;box-shadow:0 -1px 0 rgba(233,234,236,0.14)">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ c1 }}"><i class="ph-bold ph-house" style="font-size:20px"></i><span style="font-size:10px">Today</span></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ c2 }}"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i><span style="font-size:10px">Progress</span></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ c3 }}"><i class="ph-bold ph-map-pin" style="font-size:20px"></i><span style="font-size:10px">Gyms</span></div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ c4 }}"><i class="ph-bold ph-squares-four" style="font-size:20px"></i><span style="font-size:10px">Apps</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;today&quot;,&quot;progress&quot;,&quot;gyms&quot;,&quot;apps&quot;],&quot;default&quot;:&quot;today&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.active || 'today';
+    const on = '#d9a24f', off = '#71767b';
+    return { c1: a === 'today' ? on : off, c2: a === 'progress' ? on : off, c3: a === 'gyms' ? on : off, c4: a === 'apps' ? on : off };
+  }
+}
+</script>
+</body>
+</html>

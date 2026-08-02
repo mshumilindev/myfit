@@ -10,6 +10,7 @@ playwright-report/
 package-lock.json
 *.sqlite
 client/public/
+docs/design/boards/
 
 # Зовнішні конфіги, чутливі до форматування
 cloudflare/config.example.yml

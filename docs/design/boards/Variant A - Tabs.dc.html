@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  body { margin:0; background:#101120; }
+  .vA button { font: inherit; cursor: pointer; }
+  .vA .tapbtn { transition: background .16s ease, border-color .16s ease, transform .12s ease; }
+  .vA .tapbtn:active { transform: scale(0.985); }
+  .vA .row-in { animation: rowIn .28s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes rowIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+  .vA .pulse { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.55} 50%{opacity:1} }
+  .vA ::-webkit-scrollbar { width:0; height:0; }
+</style>
+</helmet>
+
+<div class="vA" style="font-family:var(--font-body);background:#101120;color:var(--color-text);padding:48px 56px 96px;min-height:100vh">
+  <div style="max-width:1760px;margin:0 auto">
+    <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px">
+      <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">Variant A</span>
+      <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-600)">Bottom tabs · session-first</span>
+    </div>
+    <h1 style="margin:0 0 8px;font-size:36px;font-weight:500;letter-spacing:-0.02em">Four rooms, always one tap away</h1>
+    <p style="margin:0 0 36px;max-width:66ch;font-size:14px;line-height:1.6;color:var(--color-neutral-500)">Tracker is flattened into a permanent tab bar — Today, Progress, Gyms, Apps. The workout takes over the screen as a full session view with a live clock. Everything below is clickable.</p>
+
+    <div style="display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- ══════════ PHONE ══════════ -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Phone · PWA</div>
+        <div style="width:390px;height:844px;background:var(--color-bg);border-radius:38px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;position:relative">
+
+          <!-- status bar -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 26px 4px;font-size:12px;font-weight:500;color:var(--color-neutral-300);flex:none">
+            <span>9:41</span>
+            <span style="display:flex;gap:6px;align-items:center"><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span>
+          </div>
+
+          <!-- ── LOGIN ── -->
+          <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 60px;gap:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:10px;color:var(--color-accent)"><i class="ph-bold ph-barbell" style="font-size:26px"></i><span style="font-size:20px;letter-spacing:-0.01em;color:var(--color-text)">My Fit</span></div>
+              <div style="font-size:28px;line-height:1.15;letter-spacing:-0.02em;margin-top:var(--space-2)">Welcome back.</div>
+              <div style="font-size:13px;color:var(--color-neutral-500);margin-bottom:var(--space-4)">One account, every service.</div>
+              <input class="input" placeholder="Email or username" style="min-height:46px">
+              <input class="input" type="password" placeholder="Password" style="min-height:46px">
+              <button class="btn btn-primary tapbtn" onClick="{{ goMenu }}" style="min-height:46px;font-size:15px;margin-top:var(--space-2)">Sign in</button>
+              <div style="font-size:12px;color:var(--color-neutral-600);text-align:center;margin-top:var(--space-2)">Free while My Fit is in beta</div>
+            </div>
+          </sc-if>
+
+          <!-- ── APPS / SERVICES ── -->
+          <sc-if value="{{ isApps }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:var(--space-4)">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:22px;letter-spacing:-0.02em">Services</div>
+                <button class="btn btn-ghost tapbtn" onClick="{{ goLogin }}" style="font-size:13px">Sign out</button>
+              </div>
+              <button class="tapbtn" onClick="{{ goToday }}" style="text-align:left;background:var(--color-surface);border:1px solid var(--color-accent-800);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;color:var(--color-text)">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-accent-900);color:var(--color-accent-300);display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:22px"></i></span>
+                <span style="flex:1">
+                  <span style="display:block;font-size:16px">Training</span>
+                  <span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Workouts, sets, weights, gyms</span>
+                </span>
+                <span class="tag tag-accent">3 this week</span>
+              </button>
+              <div style="text-align:left;background:var(--color-surface);border:1px solid transparent;border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;opacity:0.45">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-neutral-900);display:grid;place-items:center"><i class="ph-bold ph-carrot" style="font-size:22px"></i></span>
+                <span style="flex:1"><span style="display:block;font-size:16px">Nutrition</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Soon</span></span>
+              </div>
+              <div style="text-align:left;background:var(--color-surface);border:1px solid transparent;border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;opacity:0.45">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-neutral-900);display:grid;place-items:center"><i class="ph-bold ph-robot" style="font-size:22px"></i></span>
+                <span style="flex:1"><span style="display:block;font-size:16px">AI body scan</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Soon</span></span>
+              </div>
+              <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-neutral-600);padding-top:var(--space-6)">
+                <span style="width:7px;height:7px;border-radius:50%;background:#46c46e"></span> Synced
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── TODAY ── -->
+          <sc-if value="{{ isToday }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;overflow:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-top:6px">
+                <div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div>
+                  <div style="font-size:24px;letter-spacing:-0.02em;margin-top:2px">Today</div>
+                </div>
+                <button class="tapbtn" onClick="{{ goApps }}" style="width:38px;height:38px;border-radius:50%;background:var(--color-surface);border:1px solid var(--color-divider);color:var(--color-neutral-300);display:grid;place-items:center"><i class="ph-bold ph-squares-four" style="font-size:18px"></i></button>
+              </div>
+
+              <sc-if value="{{ hasReminder }}" hint-placeholder-val="{{ true }}">
+                <div class="row-in" style="background:var(--color-surface);border-radius:var(--radius-lg);padding:14px;box-shadow:inset 3px 0 0 var(--color-accent)">
+                  <div style="display:flex;gap:10px;align-items:flex-start">
+                    <i class="ph-bold ph-map-pin" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+                    <div style="font-size:13px;line-height:1.5;color:var(--color-neutral-300)">You were at <strong style="color:var(--color-text)">Smartass Obolon</strong> for 1h 20m on 12 Jul, but nothing was logged.</div>
+                  </div>
+                  <div style="display:flex;gap:8px;margin-top:var(--space-3)">
+                    <button class="btn btn-primary tapbtn" onClick="{{ openWorkout }}" style="font-size:13px">Log it now</button>
+                    <button class="btn btn-ghost tapbtn" onClick="{{ dismissReminder }}" style="font-size:13px">Not a workout</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sessionLive }}" hint-placeholder-val="{{ false }}">
+                <button class="tapbtn" onClick="{{ openWorkout }}" style="width:100%;text-align:left;border:1px solid var(--color-accent);background:var(--color-accent-900);border-radius:var(--radius-lg);padding:18px;color:var(--color-text);display:flex;align-items:center;gap:14px">
+                  <span style="width:10px;height:10px;border-radius:50%;background:var(--color-accent)" class="pulse"></span>
+                  <span style="flex:1"><span style="display:block;font-size:16px">Session in progress</span><span style="display:block;font-size:12px;color:var(--color-accent-300);margin-top:2px;font-variant-numeric:tabular-nums">{{ clock }} · {{ setCount }} sets logged</span></span>
+                  <i class="ph-bold ph-arrow-right" style="font-size:18px;color:var(--color-accent)"></i>
+                </button>
+              </sc-if>
+
+              <sc-if value="{{ sessionIdle }}" hint-placeholder-val="{{ true }}">
+                <button class="btn btn-primary tapbtn" onClick="{{ startWorkout }}" style="width:100%;min-height:60px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start workout</button>
+              </sc-if>
+
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Repeat a session</div>
+                <div style="display:flex;gap:10px;overflow:auto;padding-bottom:4px">
+                  <button class="tapbtn" onClick="{{ startWorkout }}" style="flex:none;width:172px;text-align:left;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:12px;color:var(--color-text)">
+                    <span style="display:block;font-size:14px">Push day</span>
+                    <span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:4px">5 exercises · 18 sets</span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</span>
+                  </button>
+                  <button class="tapbtn" onClick="{{ startWorkout }}" style="flex:none;width:172px;text-align:left;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:12px;color:var(--color-text)">
+                    <span style="display:block;font-size:14px">Legs · heavy</span>
+                    <span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:4px">4 exercises · 14 sets</span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</span>
+                  </button>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:12px">
+                  <div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">3</div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:2px">Sessions</div>
+                </div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:12px">
+                  <div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">14.2<span style="font-size:12px;color:var(--color-neutral-500)">t</span></div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:2px">Volume</div>
+                </div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:12px">
+                  <div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:var(--color-accent)">2</div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:2px">PRs</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">History</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <button class="tapbtn" onClick="{{ openWorkout }}" style="width:100%;text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-md);padding:12px 14px;color:var(--color-text);display:flex;align-items:center;gap:12px">
+                    <span style="flex:1"><span style="display:block;font-size:14px">Wed 29 Jul · Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">5 exercises · 18 sets · 4 980 kg</span></span>
+                    <span style="font-size:12px;color:var(--color-neutral-500);font-variant-numeric:tabular-nums">1:12</span>
+                  </button>
+                  <button class="tapbtn" onClick="{{ openWorkout }}" style="width:100%;text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-md);padding:12px 14px;color:var(--color-text);display:flex;align-items:center;gap:12px">
+                    <span style="flex:1"><span style="display:block;font-size:14px">Mon 27 Jul · Legs</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">4 exercises · 14 sets</span><span class="tag tag-neutral" style="margin-top:6px">Auto-closed</span></span>
+                    <span style="font-size:12px;color:var(--color-neutral-500);font-variant-numeric:tabular-nums">0:54</span>
+                  </button>
+                  <button class="tapbtn" onClick="{{ openWorkout }}" style="width:100%;text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-md);padding:12px 14px;color:var(--color-text);display:flex;align-items:center;gap:12px">
+                    <span style="flex:1"><span style="display:block;font-size:14px">Sat 25 Jul · Pull day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">6 exercises · 21 sets · 5 640 kg</span></span>
+                    <span style="font-size:12px;color:var(--color-neutral-500);font-variant-numeric:tabular-nums">1:03</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── WORKOUT ── -->
+          <sc-if value="{{ isWorkout }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+              <div style="flex:none;display:flex;align-items:center;gap:12px;padding:8px 16px 12px">
+                <button class="tapbtn" onClick="{{ goToday }}" style="width:36px;height:36px;border-radius:50%;background:transparent;border:none;color:var(--color-neutral-300);display:grid;place-items:center"><i class="ph-bold ph-caret-left" style="font-size:20px"></i></button>
+                <div style="flex:1">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">Live session</div>
+                  <div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">{{ clock }}</div>
+                </div>
+                <button class="btn btn-secondary tapbtn" onClick="{{ finishWorkout }}" style="font-size:13px">Finish</button>
+              </div>
+
+              <div style="flex:1;overflow:auto;padding:0 16px 16px;display:flex;flex-direction:column;gap:var(--space-3)">
+                <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="2">
+                  <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:14px">
+                    <div style="display:flex;align-items:center;gap:10px">
+                      <span style="font-size:15px;flex:1">{{ ex.name }}</span>
+                      <span style="font-size:11px;color:var(--color-neutral-500)">last {{ ex.last }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;margin-top:var(--space-3)">
+                      <sc-for list="{{ ex.rows }}" as="s" hint-placeholder-count="3">
+                        <div class="row-in" style="display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;padding:7px 0;font-size:14px;font-variant-numeric:tabular-nums">
+                          <span style="color:var(--color-neutral-600);font-size:12px">{{ s.n }}</span>
+                          <span>{{ s.label }}</span>
+                          <span class="tag tag-neutral">{{ s.kind }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-top:var(--space-3)">
+                      <div style="display:flex;align-items:center;background:var(--color-bg);border-radius:var(--radius-md);overflow:hidden">
+                        <button class="tapbtn" data-id="{{ ex.id }}" data-f="reps" data-d="-1" onClick="{{ step }}" style="width:38px;height:44px;background:transparent;border:none;color:var(--color-neutral-400);font-size:18px">−</button>
+                        <span style="flex:1;text-align:center;font-size:16px;font-variant-numeric:tabular-nums">{{ ex.reps }}</span>
+                        <button class="tapbtn" data-id="{{ ex.id }}" data-f="reps" data-d="1" onClick="{{ step }}" style="width:38px;height:44px;background:transparent;border:none;color:var(--color-neutral-400);font-size:18px">+</button>
+                      </div>
+                      <div style="display:flex;align-items:center;background:var(--color-bg);border-radius:var(--radius-md);overflow:hidden">
+                        <button class="tapbtn" data-id="{{ ex.id }}" data-f="weight" data-d="-2.5" onClick="{{ step }}" style="width:38px;height:44px;background:transparent;border:none;color:var(--color-neutral-400);font-size:18px">−</button>
+                        <span style="flex:1;text-align:center;font-size:16px;font-variant-numeric:tabular-nums">{{ ex.weight }}</span>
+                        <button class="tapbtn" data-id="{{ ex.id }}" data-f="weight" data-d="2.5" onClick="{{ step }}" style="width:38px;height:44px;background:transparent;border:none;color:var(--color-neutral-400);font-size:18px">+</button>
+                      </div>
+                      <button class="btn btn-primary tapbtn" data-id="{{ ex.id }}" onClick="{{ logSet }}" style="height:44px;padding-inline:16px;font-size:14px">Log</button>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:6px"><span>reps</span><span style="margin-right:76px">kg</span></div>
+                  </div>
+                </sc-for>
+
+                <button class="btn btn-secondary tapbtn" onClick="{{ addExercise }}" style="min-height:44px;gap:8px"><i class="ph-bold ph-plus"></i>Add exercise</button>
+              </div>
+
+              <sc-if value="{{ resting }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:none;margin:0 16px 12px;background:var(--color-accent-900);border-radius:var(--radius-md);padding:12px 14px;display:flex;align-items:center;gap:12px">
+                  <i class="ph-bold ph-timer" style="font-size:18px;color:var(--color-accent-300)"></i>
+                  <span style="flex:1;font-size:13px;color:var(--color-accent-200)">Rest</span>
+                  <span style="font-size:18px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">{{ restClock }}</span>
+                  <button class="btn btn-ghost tapbtn" onClick="{{ skipRest }}" style="font-size:12px">Skip</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ── PROGRESS ── -->
+          <sc-if value="{{ isProgress }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+              <div style="padding-top:6px"><div style="font-size:24px;letter-spacing:-0.02em">Progress</div></div>
+              <div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--space-4)">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Weekly volume</div>
+                  <div style="font-size:12px;color:var(--color-accent)">+18% vs June</div>
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:7px;height:132px">
+                  <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div>
+                  <div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div>
+                  <div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div>
+                  <div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:8px"><span>W23</span><span>W27</span><span>W31</span></div>
+              </div>
+
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Personal records</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:center;gap:12px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 14px">
+                    <span style="flex:1;font-size:14px">Back Squat</span>
+                    <span style="font-size:15px;font-variant-numeric:tabular-nums">110 kg</span>
+                    <span class="tag tag-accent">+5</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 14px">
+                    <span style="flex:1;font-size:14px">Bench Press</span>
+                    <span style="font-size:15px;font-variant-numeric:tabular-nums">82.5 kg</span>
+                    <span class="tag tag-accent">+2.5</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 14px">
+                    <span style="flex:1;font-size:14px">Deadlift</span>
+                    <span style="font-size:15px;font-variant-numeric:tabular-nums">140 kg</span>
+                    <span style="font-size:11px;color:var(--color-neutral-600)">6 wks ago</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Back Squat · top set</div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px 14px 10px">
+                  <svg viewBox="0 0 300 90" style="width:100%;height:90px;display:block">
+                    <polyline points="6,74 42,70 78,62 114,64 150,50 186,44 222,38 258,26 294,14" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                    <circle cx="294" cy="14" r="4" fill="var(--color-accent)"></circle>
+                  </svg>
+                  <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:4px"><span>90 kg</span><span>110 kg</span></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ── GYMS ── -->
+          <sc-if value="{{ isGyms }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+              <div style="padding-top:6px"><div style="font-size:24px;letter-spacing:-0.02em">Gyms</div></div>
+              <p style="font-size:13px;line-height:1.55;color:var(--color-neutral-500);margin:0">Add a gym while standing in it. Open the app there and visits get recorded — an hour or more without a logged workout and Today will remind you.</p>
+              <div style="display:flex;gap:8px">
+                <input class="input" placeholder="Gym name" style="flex:1;min-height:44px">
+                <button class="btn btn-primary tapbtn" style="min-height:44px;gap:6px"><i class="ph-bold ph-crosshair"></i>I'm here</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:var(--space-2)">
+                <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:14px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="flex:1;font-size:15px">Smartass Obolon</span>
+                    <span class="tag tag-accent">You're here</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--color-neutral-500);font-variant-numeric:tabular-nums">
+                    <span>50.51234, 30.49871</span><span>radius 150 m</span>
+                  </div>
+                  <div style="height:4px;border-radius:2px;background:var(--color-neutral-900);margin-top:10px;overflow:hidden"><div style="width:38%;height:100%;background:var(--color-accent)"></div></div>
+                </div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:14px">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:15px">Sportlife Livoberezhna</span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--color-neutral-500);font-variant-numeric:tabular-nums">
+                    <span>50.45219, 30.60112</span><span>radius 200 m</span>
+                  </div>
+                  <div style="height:4px;border-radius:2px;background:var(--color-neutral-900);margin-top:10px;overflow:hidden"><div style="width:52%;height:100%;background:var(--color-neutral-700)"></div></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- tab bar -->
+          <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:none;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 12px 22px;background:var(--color-bg);box-shadow:0 -1px 0 var(--color-divider)">
+              <button class="tapbtn" onClick="{{ goToday }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colToday }}">
+                <i class="ph-bold ph-house" style="font-size:20px"></i><span style="font-size:10px;letter-spacing:0.04em">Today</span>
+              </button>
+              <button class="tapbtn" onClick="{{ goProgress }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colProgress }}">
+                <i class="ph-bold ph-chart-line-up" style="font-size:20px"></i><span style="font-size:10px;letter-spacing:0.04em">Progress</span>
+              </button>
+              <button class="tapbtn" onClick="{{ goGyms }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colGyms }}">
+                <i class="ph-bold ph-map-pin" style="font-size:20px"></i><span style="font-size:10px;letter-spacing:0.04em">Gyms</span>
+              </button>
+              <button class="tapbtn" onClick="{{ goApps }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colApps }}">
+                <i class="ph-bold ph-squares-four" style="font-size:20px"></i><span style="font-size:10px;letter-spacing:0.04em">Apps</span>
+              </button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- ══════════ DESKTOP ══════════ -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Desktop / tray window · same tabs as a rail</div>
+        <div style="width:1180px;height:760px;background:var(--color-bg);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex">
+          <div style="width:216px;flex:none;background:#13152180;padding:16px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 0 0 var(--color-divider)">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 18px;color:var(--color-text)"><i class="ph-bold ph-barbell" style="font-size:20px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+            <button class="tapbtn" onClick="{{ goToday }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:{{ bgToday }};color:{{ colToday }};font-size:14px;text-align:left"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</button>
+            <button class="tapbtn" onClick="{{ goProgress }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:{{ bgProgress }};color:{{ colProgress }};font-size:14px;text-align:left"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</button>
+            <button class="tapbtn" onClick="{{ goGyms }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:{{ bgGyms }};color:{{ colGyms }};font-size:14px;text-align:left"><i class="ph-bold ph-map-pin" style="font-size:17px"></i>Gyms</button>
+            <div style="height:1px;background:var(--color-divider);margin:14px 8px"></div>
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:0 10px 8px">Services</div>
+            <button class="tapbtn" onClick="{{ goToday }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:transparent;color:var(--color-neutral-300);font-size:14px;text-align:left"><i class="ph-bold ph-barbell" style="font-size:17px"></i>Training</button>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-600);font-size:14px;opacity:0.5"><i class="ph-bold ph-carrot" style="font-size:17px"></i>Nutrition</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-600);font-size:14px;opacity:0.5"><i class="ph-bold ph-robot" style="font-size:17px"></i>AI body scan</div>
+            <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--color-neutral-600);padding:10px"><span style="width:7px;height:7px;border-radius:50%;background:#46c46e"></span>Synced</div>
+          </div>
+
+          <div style="flex:1;display:flex;min-width:0">
+            <div style="flex:1;overflow:auto;padding:26px 30px;display:flex;flex-direction:column;gap:var(--space-6);min-width:0">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                <div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div>
+                  <div style="font-size:30px;letter-spacing:-0.02em;margin-top:4px">{{ deskTitle }}</div>
+                </div>
+                <sc-if value="{{ sessionIdle }}" hint-placeholder-val="{{ true }}">
+                  <button class="btn btn-primary tapbtn" onClick="{{ startWorkout }}" style="min-height:40px;font-size:14px;gap:8px"><i class="ph-bold ph-play"></i>Start workout</button>
+                </sc-if>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px">
+                  <div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">3</div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sessions this week</div>
+                </div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px">
+                  <div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">14.2 t</div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Volume</div>
+                </div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px">
+                  <div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:var(--color-accent)">2</div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">New PRs</div>
+                </div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px">
+                  <div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">21 d</div>
+                  <div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Streak</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--space-4)">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Weekly volume</div>
+                  <div style="font-size:12px;color:var(--color-accent)">+18% vs June</div>
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:10px;height:150px">
+                  <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:71%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div>
+                  <div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div>
+                  <div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div>
+                  <div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">History</div>
+                <table class="table">
+                  <thead><tr><th>Session</th><th>Exercises</th><th>Sets</th><th>Volume</th><th>Duration</th></tr></thead>
+                  <tbody>
+                    <tr><td>Wed 29 Jul · Push day</td><td>5</td><td>18</td><td>4 980 kg</td><td>1:12</td></tr>
+                    <tr><td>Mon 27 Jul · Legs <span class="tag tag-neutral" style="margin-left:6px">Auto-closed</span></td><td>4</td><td>14</td><td>3 420 kg</td><td>0:54</td></tr>
+                    <tr><td>Sat 25 Jul · Pull day</td><td>6</td><td>21</td><td>5 640 kg</td><td>1:03</td></tr>
+                    <tr><td>Thu 23 Jul · Push day</td><td>5</td><td>17</td><td>4 610 kg</td><td>1:08</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="width:340px;flex:none;padding:26px 24px;display:flex;flex-direction:column;gap:var(--space-4);box-shadow:-1px 0 0 var(--color-divider)">
+              <sc-if value="{{ sessionLive }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:var(--space-4);min-height:0">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)" class="pulse"></span>
+                    <span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);flex:1">Live session</span>
+                    <span style="font-size:16px;font-variant-numeric:tabular-nums">{{ clock }}</span>
+                  </div>
+                  <div style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px">
+                    <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="2">
+                      <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:12px">
+                        <div style="display:flex;align-items:center;gap:8px"><span style="flex:1;font-size:14px">{{ ex.name }}</span><span style="font-size:11px;color:var(--color-neutral-500)">last {{ ex.last }}</span></div>
+                        <sc-for list="{{ ex.rows }}" as="s" hint-placeholder-count="2">
+                          <div class="row-in" style="display:flex;gap:10px;align-items:center;font-size:13px;padding:5px 0;font-variant-numeric:tabular-nums"><span style="color:var(--color-neutral-600);font-size:11px;width:14px">{{ s.n }}</span><span style="flex:1">{{ s.label }}</span><span class="tag tag-neutral">{{ s.kind }}</span></div>
+                        </sc-for>
+                        <div style="display:flex;gap:6px;margin-top:8px">
+                          <div style="flex:1;display:flex;align-items:center;background:var(--color-bg);border-radius:var(--radius-sm)">
+                            <button class="tapbtn" data-id="{{ ex.id }}" data-f="reps" data-d="-1" onClick="{{ step }}" style="width:30px;height:34px;background:none;border:none;color:var(--color-neutral-400)">−</button>
+                            <span style="flex:1;text-align:center;font-size:14px;font-variant-numeric:tabular-nums">{{ ex.reps }}</span>
+                            <button class="tapbtn" data-id="{{ ex.id }}" data-f="reps" data-d="1" onClick="{{ step }}" style="width:30px;height:34px;background:none;border:none;color:var(--color-neutral-400)">+</button>
+                          </div>
+                          <div style="flex:1;display:flex;align-items:center;background:var(--color-bg);border-radius:var(--radius-sm)">
+                            <button class="tapbtn" data-id="{{ ex.id }}" data-f="weight" data-d="-2.5" onClick="{{ step }}" style="width:30px;height:34px;background:none;border:none;color:var(--color-neutral-400)">−</button>
+                            <span style="flex:1;text-align:center;font-size:14px;font-variant-numeric:tabular-nums">{{ ex.weight }}</span>
+                            <button class="tapbtn" data-id="{{ ex.id }}" data-f="weight" data-d="2.5" onClick="{{ step }}" style="width:30px;height:34px;background:none;border:none;color:var(--color-neutral-400)">+</button>
+                          </div>
+                          <button class="btn btn-primary tapbtn" data-id="{{ ex.id }}" onClick="{{ logSet }}" style="height:34px;font-size:13px">Log</button>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <button class="btn btn-secondary tapbtn" onClick="{{ finishWorkout }}" style="min-height:38px">Finish session</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ sessionIdle }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Templates</div>
+                  <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:14px;color:var(--color-text)">
+                    <span style="display:block;font-size:15px">Push day</span>
+                    <span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:4px">Bench · Incline DB · Dips · Lateral raise · Triceps</span>
+                    <span style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</span>
+                  </button>
+                  <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:14px;color:var(--color-text)">
+                    <span style="display:block;font-size:15px">Legs · heavy</span>
+                    <span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:4px">Squat · RDL · Leg press · Calf raise</span>
+                    <span style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</span>
+                  </button>
+                  <div style="height:1px;background:var(--color-divider);margin:var(--space-2) 0"></div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Personal records</div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums">110 kg</span><span class="tag tag-accent">+5</span></div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Bench Press</span><span style="font-variant-numeric:tabular-nums">82.5 kg</span><span class="tag tag-accent">+2.5</span></div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Deadlift</span><span style="font-variant-numeric:tabular-nums">140 kg</span></div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1800,&quot;height&quot;:1100}}">
+class Component extends DCLogic {
+  state = {
+    view: 'today',
+    live: false,
+    reminder: true,
+    elapsed: 724,
+    rest: 0,
+    exercises: [
+      { id: 'e1', name: 'Back Squat', last: '85 kg × 8', reps: 8, weight: 85, sets: [
+        { r: 12, w: 40, warm: true }, { r: 8, w: 80 }, { r: 8, w: 85 } ] },
+      { id: 'e2', name: 'Romanian Deadlift', last: '70 kg × 10', reps: 10, weight: 70, sets: [ { r: 10, w: 70 } ] }
+    ]
+  };
+
+  componentDidMount() {
+    this.t = setInterval(() => {
+      this.setState((s) => ({
+        elapsed: s.live ? s.elapsed + 1 : s.elapsed,
+        rest: s.rest > 0 ? s.rest - 1 : 0
+      }));
+    }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+
+  mmss(t) { return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+
+  renderVals() {
+    const s = this.state;
+    const ac = 'var(--color-accent)', dim = 'var(--color-neutral-600)';
+    const setCount = s.exercises.reduce((n, e) => n + e.sets.length, 0);
+    const go = (v) => () => this.setState({ view: v });
+    return {
+      isLogin: s.view === 'login',
+      isApps: s.view === 'apps',
+      isToday: s.view === 'today',
+      isWorkout: s.view === 'workout',
+      isProgress: s.view === 'progress',
+      isGyms: s.view === 'gyms',
+      showTabs: s.view !== 'login' && s.view !== 'workout',
+      deskTitle: s.view === 'progress' ? 'Progress' : s.view === 'gyms' ? 'Gyms' : 'Today',
+      sessionLive: s.live,
+      sessionIdle: !s.live,
+      hasReminder: s.reminder && !s.live,
+      clock: this.mmss(s.elapsed),
+      restClock: this.mmss(s.rest),
+      resting: s.rest > 0,
+      setCount,
+      colToday: s.view === 'today' ? ac : dim,
+      colProgress: s.view === 'progress' ? ac : dim,
+      colGyms: s.view === 'gyms' ? ac : dim,
+      colApps: s.view === 'apps' ? ac : dim,
+      bgToday: s.view === 'today' ? 'var(--color-accent-900)' : 'transparent',
+      bgProgress: s.view === 'progress' ? 'var(--color-accent-900)' : 'transparent',
+      bgGyms: s.view === 'gyms' ? 'var(--color-accent-900)' : 'transparent',
+      exercises: s.exercises.map((e) => ({
+        id: e.id, name: e.name, last: e.last, reps: e.reps, weight: e.weight,
+        rows: e.sets.map((x, i) => ({
+          n: i + 1,
+          label: x.r + ' × ' + x.w + ' kg',
+          kind: x.warm ? 'warm-up' : 'working'
+        }))
+      })),
+      goLogin: go('login'), goApps: go('apps'), goToday: go('today'),
+      goProgress: go('progress'), goGyms: go('gyms'), goMenu: go('apps'),
+      openWorkout: () => this.setState({ view: 'workout', live: true, reminder: false }),
+      startWorkout: () => this.setState({ view: 'workout', live: true, elapsed: 0, reminder: false }),
+      finishWorkout: () => this.setState({ view: 'today', live: false, rest: 0 }),
+      dismissReminder: () => this.setState({ reminder: false }),
+      skipRest: () => this.setState({ rest: 0 }),
+      step: (ev) => {
+        const b = ev.currentTarget;
+        const id = b.dataset.id, f = b.dataset.f, d = Number(b.dataset.d);
+        this.setState((st) => ({
+          exercises: st.exercises.map((e) =>
+            e.id === id ? Object.assign({}, e, { [f]: Math.max(0, e[f] + d) }) : e)
+        }));
+      },
+      logSet: (ev) => {
+        const id = ev.currentTarget.dataset.id;
+        this.setState((st) => ({
+          rest: 90,
+          live: true,
+          exercises: st.exercises.map((e) =>
+            e.id === id ? Object.assign({}, e, { sets: e.sets.concat([{ r: e.reps, w: e.weight }]) }) : e)
+        }));
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

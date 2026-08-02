@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  /* Nocturne, retuned: graphite + silver ground, brass accent */
+  :root {
+    --color-bg: #16171a;
+    --color-surface: #1f2125;
+    --color-text: #e9eaec;
+    --color-divider: rgba(233,234,236,0.14);
+    --color-accent: #d9a24f;
+    --color-accent-100: #fbf3e6; --color-accent-200: #f6e6cb; --color-accent-300: #eed3a5;
+    --color-accent-400: #e4bb76; --color-accent-500: #d9a24f; --color-accent-600: #b3833d;
+    --color-accent-700: #8a642e; --color-accent-800: #5b4420; --color-accent-900: #342713;
+    --color-neutral-100: #f5f6f7; --color-neutral-200: #e6e8ea; --color-neutral-300: #d0d3d6;
+    --color-neutral-400: #b0b4b8; --color-neutral-500: #90959a; --color-neutral-600: #71767b;
+    --color-neutral-700: #55595e; --color-neutral-800: #3b3f43; --color-neutral-900: #262a2d;
+    --shadow-sm: 0 0 0 1px #3b3f43;
+    --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0,0,0,0.6);
+    --shadow-lg: 0 0 0 1px #6b7075, 0 18px 44px rgba(0,0,0,0.7);
+    /* semantic: emerald for success, ruby for destructive — used as marks and thin fills only */
+    --color-ok: #4cbe8c; --color-ok-text: #b7e8cf; --color-ok-tint: #16291f; --color-ok-line: #2f6f52;
+    --color-danger: #e2564f; --color-danger-text: #f3c2bf; --color-danger-tint: #2c1614; --color-danger-line: #7d302b;
+  }
+  body { margin:0; background:#0f1012; }
+  .mf button { font: inherit; cursor: pointer; }
+  .mf .tapbtn { transition: background .16s ease, color .16s ease, border-color .16s ease, transform .1s ease; }
+  .mf .tapbtn:active { transform: scale(0.985); }
+  .mf .row-in { animation: rowIn .28s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes rowIn { from { opacity:0; transform: translateY(-5px) } to { opacity:1; transform:none } }
+  .mf .fade-in { animation: fadeIn .2s ease both; }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  .mf .breathe { animation: breathe 2.6s ease-in-out infinite; }
+  @keyframes breathe { 0%,100%{ opacity:.45 } 50%{ opacity:1 } }
+  .mf ::-webkit-scrollbar { width:0; height:0; }
+</style>
+</helmet>
+
+<div class="mf" style="font-family:var(--font-body);background:#0f1012;color:var(--color-text);padding:48px 56px 96px;min-height:100vh">
+  <div style="max-width:1760px;margin:0 auto">
+    <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px">
+      <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">My Fit</span>
+      <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-600)">Graphite &amp; silver · brass accent</span>
+    </div>
+    <h1 style="margin:0 0 8px;font-size:36px;font-weight:500;letter-spacing:-0.02em">The merged build</h1>
+    <p style="margin:0 0 36px;max-width:70ch;font-size:14px;line-height:1.6;color:var(--color-neutral-500)">Tabs from A, the in-place session table from C, and the week strip, start block and recent list from B — on a graphite ground with silver type. The accent is a brass amber: warm against a cool neutral, ~4:1 on the ground, and it never floods a surface — only lines, marks and numbers.</p>
+
+    <div style="display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- ══════════ PHONE ══════════ -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Phone · PWA</div>
+        <div style="width:390px;height:844px;background:var(--color-bg);border-radius:38px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;position:relative">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 26px 4px;font-size:12px;font-weight:500;color:var(--color-neutral-300);flex:none">
+            <span>9:41</span>
+            <span style="display:flex;gap:6px;align-items:center"><i class="ph-fill ph-cell-signal-high"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span>
+          </div>
+
+          <!-- LOGIN -->
+          <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+              <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+              <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">My Fit</div>
+              <div style="font-size:13px;color:var(--color-neutral-500);margin-bottom:var(--space-6)">Everything you lift, in one place.</div>
+              <input class="input" placeholder="Email or username" style="min-height:48px">
+              <input class="input" type="password" placeholder="Password" style="min-height:48px">
+              <button class="btn btn-primary tapbtn" onClick="{{ goToday }}" style="min-height:48px;font-size:15px;margin-top:var(--space-3)">Sign in</button>
+              <button class="tapbtn" onClick="{{ goRegister }}" style="background:none;border:none;color:var(--color-neutral-500);font-size:12px;padding:8px">New here? Create an account</button>
+            </div>
+          </sc-if>
+
+          <!-- REGISTER (first run) -->
+          <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+              <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+              <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">Create your account</div>
+              <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-ok-tint);margin-bottom:var(--space-4)">
+                <i class="ph-bold ph-shield-check" style="font-size:15px;color:var(--color-ok);margin-top:2px"></i>
+                <span style="font-size:12px;line-height:1.5;color:var(--color-ok-text)">Your log is private to your account. Free while My Fit is in beta.</span>
+              </div>
+              <input class="input" placeholder="Username" style="min-height:48px">
+              <input class="input" placeholder="Email" style="min-height:48px">
+              <input class="input" type="password" placeholder="Password (min. 6 characters)" style="min-height:48px">
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-danger-text)"><i class="ph-bold ph-warning-circle" style="font-size:14px;color:var(--color-danger)"></i>Password is too short — 6 characters minimum</div>
+              <button class="btn btn-primary tapbtn" onClick="{{ goToday }}" style="min-height:48px;font-size:15px;margin-top:var(--space-2)">Create account</button>
+              <button class="tapbtn" onClick="{{ goLogin }}" style="background:none;border:none;color:var(--color-neutral-500);font-size:12px;padding:8px">Back to sign in</button>
+            </div>
+          </sc-if>
+
+          <!-- APPS -->
+          <sc-if value="{{ isApps }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:14px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:22px;letter-spacing:-0.02em">Services</div>
+                <button class="btn btn-ghost tapbtn" onClick="{{ goLogin }}" style="font-size:13px">Sign out</button>
+              </div>
+              <button class="tapbtn" onClick="{{ goToday }}" style="text-align:left;background:var(--color-surface);border:1px solid var(--color-accent-800);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;color:var(--color-text)">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-accent-900);color:var(--color-accent-300);display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:22px"></i></span>
+                <span style="flex:1"><span style="display:block;font-size:16px">Training</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Workouts, sets, weights, gyms</span></span>
+                <span class="tag tag-accent">3 this week</span>
+              </button>
+              <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;opacity:0.4">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-neutral-900);display:grid;place-items:center"><i class="ph-bold ph-carrot" style="font-size:22px"></i></span>
+                <span style="flex:1"><span style="display:block;font-size:16px">Nutrition</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Soon</span></span>
+              </div>
+              <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;opacity:0.4">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-neutral-900);display:grid;place-items:center"><i class="ph-bold ph-robot" style="font-size:22px"></i></span>
+                <span style="flex:1"><span style="display:block;font-size:16px">AI body scan</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Soon</span></span>
+              </div>
+              <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-neutral-600)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</div>
+            </div>
+          </sc-if>
+
+          <!-- TODAY -->
+          <sc-if value="{{ isToday }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+                <div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div>
+                  <div style="font-size:30px;letter-spacing:-0.025em;line-height:1.1;margin-top:5px">{{ heroLine }}</div>
+                </div>
+                <button class="tapbtn" onClick="{{ toggleOffline }}" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-neutral-500);margin-top:4px;background:none;border:none;padding:4px 0"><span style="width:7px;height:7px;border-radius:50%;background:{{ syncDot }}"></span>{{ syncLabel }}</button>
+              </div>
+
+              <sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
+                <div class="fade-in" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 3px 0 0 var(--color-danger)">
+                  <i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger)"></i>
+                  <span style="flex:1;font-size:12px;line-height:1.45;color:var(--color-danger-text)">No connection. Two changes are queued — they'll sync on their own.</span>
+                </div>
+              </sc-if>
+
+              <!-- week strip (from B) -->
+              <div style="display:flex;gap:6px">
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">M</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">T</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">W</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">T</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-400)">F</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0;box-shadow:0 0 0 3px var(--color-neutral-900)"></div></div>
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">S</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+                <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">S</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+              </div>
+
+              <sc-if value="{{ hasReminder }}" hint-placeholder-val="{{ true }}">
+                <div class="fade-in" style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)">
+                  <i class="ph-bold ph-map-pin" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+                  <div style="flex:1">
+                    <div style="font-size:13px;line-height:1.5;color:var(--color-neutral-300)">1h 20m at <strong style="color:var(--color-text)">Smartass Obolon</strong> on 12 Jul with nothing logged.</div>
+                    <div style="display:flex;gap:14px;margin-top:9px">
+                      <button class="tapbtn" onClick="{{ startWorkout }}" style="background:none;border:none;padding:0;color:var(--color-accent);font-size:13px">Log it</button>
+                      <button class="tapbtn" onClick="{{ dismissReminder }}" style="background:none;border:none;padding:0;color:var(--color-neutral-600);font-size:13px">Dismiss</button>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- start block (from B) -->
+              <sc-if value="{{ sessionIdle }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <button class="btn btn-primary tapbtn" onClick="{{ startWorkout }}" style="min-height:62px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start empty session</button>
+                  <div style="display:flex;gap:10px">
+                    <button class="tapbtn" onClick="{{ startWorkout }}" style="flex:1;text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-md);padding:14px;color:var(--color-text)">
+                      <i class="ph-bold ph-arrow-counter-clockwise" style="font-size:16px;color:var(--color-accent)"></i>
+                      <span style="display:block;font-size:14px;margin-top:8px">Repeat Push day</span>
+                      <span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Wed · 5 exercises</span>
+                    </button>
+                    <button class="tapbtn" onClick="{{ goTemplates }}" style="flex:1;text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-md);padding:14px;color:var(--color-text)">
+                      <i class="ph-bold ph-cards" style="font-size:16px;color:var(--color-accent)"></i>
+                      <span style="display:block;font-size:14px;margin-top:8px">Templates</span>
+                      <span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">4 saved</span>
+                    </button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sessionLive }}" hint-placeholder-val="{{ false }}">
+                <button class="tapbtn" onClick="{{ openWorkout }}" style="width:100%;text-align:left;border:1px solid var(--color-accent);background:var(--color-accent-900);border-radius:var(--radius-lg);padding:17px;color:var(--color-text);display:flex;align-items:center;gap:13px">
+                  <span style="width:9px;height:9px;border-radius:50%;background:var(--color-accent);flex:none" class="breathe"></span>
+                  <span style="flex:1"><span style="display:block;font-size:16px">Session in progress</span><span style="display:block;font-size:12px;color:var(--color-accent-300);margin-top:3px;font-variant-numeric:tabular-nums">{{ clock }} · {{ setCount }} sets · {{ volume }}</span></span>
+                  <i class="ph-bold ph-arrow-right" style="font-size:18px;color:var(--color-accent)"></i>
+                </button>
+              </sc-if>
+
+              <!-- recent (from B) -->
+              <sc-if value="{{ notEmpty }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:var(--space-3)">
+                    <span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);flex:1">Recent</span>
+                    <button class="tapbtn" onClick="{{ toggleEmpty }}" style="background:none;border:none;padding:0;font-size:11px;color:var(--color-neutral-700)">empty state</button>
+                  </div>
+                  <div style="display:flex;flex-direction:column">
+                    <button class="tapbtn" onClick="{{ goPast }}" style="text-align:left;background:none;border:none;padding:14px 0;color:var(--color-text);display:flex;align-items:baseline;gap:12px;box-shadow:0 1px 0 var(--color-divider)">
+                      <span style="width:44px;flex:none;font-size:11px;color:var(--color-neutral-600)">29 JUL</span>
+                      <span style="flex:1"><span style="display:block;font-size:15px">Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg · 1:12</span></span>
+                      <i class="ph-bold ph-arrow-up-right" style="font-size:13px;color:var(--color-neutral-700)"></i>
+                    </button>
+                    <button class="tapbtn" onClick="{{ goPast }}" style="text-align:left;background:none;border:none;padding:14px 0;color:var(--color-text);display:flex;align-items:baseline;gap:12px;box-shadow:0 1px 0 var(--color-divider)">
+                      <span style="width:44px;flex:none;font-size:11px;color:var(--color-neutral-600)">27 JUL</span>
+                      <span style="flex:1"><span style="display:block;font-size:15px">Legs <span class="tag tag-neutral" style="margin-left:6px">Auto-closed</span></span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">14 sets · 3 420 kg · 0:54</span></span>
+                      <i class="ph-bold ph-arrow-up-right" style="font-size:13px;color:var(--color-neutral-700)"></i>
+                    </button>
+                    <button class="tapbtn" onClick="{{ goPast }}" style="text-align:left;background:none;border:none;padding:14px 0;color:var(--color-text);display:flex;align-items:baseline;gap:12px">
+                      <span style="width:44px;flex:none;font-size:11px;color:var(--color-neutral-600)">25 JUL</span>
+                      <span style="flex:1"><span style="display:block;font-size:15px">Pull day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">21 sets · 5 640 kg · 1:03</span></span>
+                      <i class="ph-bold ph-arrow-up-right" style="font-size:13px;color:var(--color-neutral-700)"></i>
+                    </button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-8) 0">
+                  <i class="ph-bold ph-barbell" style="font-size:26px;color:var(--color-neutral-700)"></i>
+                  <div style="font-size:17px">Nothing logged yet</div>
+                  <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:34ch">Your first session takes about four taps. Sets you log offline are queued and sync as soon as you are back online.</div>
+                  <button class="tapbtn" onClick="{{ toggleEmpty }}" style="background:none;border:none;padding:0;font-size:12px;color:var(--color-accent)">Show filled state</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- SESSION (from C: inline tables with ghost row) -->
+          <sc-if value="{{ isWorkout }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+              <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+                <button class="tapbtn" onClick="{{ goToday }}" style="width:36px;height:36px;border-radius:50%;background:transparent;border:none;color:var(--color-neutral-300);display:grid;place-items:center"><i class="ph-bold ph-caret-left" style="font-size:20px"></i></button>
+                <div style="flex:1">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session · Smartass Obolon</div>
+                  <div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">{{ clock }}</div>
+                </div>
+                <button class="btn btn-secondary tapbtn" onClick="{{ finishWorkout }}" style="font-size:13px">Finish</button>
+              </div>
+
+              <div style="flex:none;display:flex;gap:18px;padding:0 18px 12px;font-variant-numeric:tabular-nums">
+                <div><div style="font-size:18px">{{ setCount }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">sets</div></div>
+                <div><div style="font-size:18px">{{ volume }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">moved</div></div>
+                <div><div style="font-size:18px">{{ exCount }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">exercises</div></div>
+              </div>
+
+              <div style="flex:1;overflow:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+                <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="2">
+                  <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+                    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px">
+                      <button class="tapbtn" onClick="{{ goExercise }}" style="flex:1;text-align:left;background:none;border:none;padding:0;color:var(--color-text);font-size:15px;display:flex;align-items:center;gap:6px">{{ ex.name }}<i class="ph-bold ph-caret-right" style="font-size:12px;color:var(--color-neutral-700)"></i></button>
+                      <span style="font-size:11px;color:var(--color-neutral-600)">prev {{ ex.last }}</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:4px">
+                      <span>#</span><span>Reps</span><span>Kg</span><span></span>
+                    </div>
+                    <sc-for list="{{ ex.rows }}" as="s" hint-placeholder-count="3">
+                      <div class="row-in" style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)">
+                        <span style="font-size:11px;color:var(--color-neutral-600)">{{ s.n }}</span>
+                        <span style="color:{{ s.fg }}">{{ s.reps }}</span>
+                        <span style="color:{{ s.fg }}">{{ s.weight }}</span>
+                        <span style="font-size:10px;color:{{ s.kindFg }};text-align:right">{{ s.kind }}</span>
+                      </div>
+                    </sc-for>
+                    <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums">
+                      <span style="font-size:11px;color:var(--color-neutral-700)">{{ ex.nextN }}</span>
+                      <button class="tapbtn" data-id="{{ ex.id }}" data-f="reps" data-d="1" onClick="{{ bump }}" style="text-align:left;background:none;border:none;border-bottom:1px dashed var(--color-neutral-700);color:var(--color-neutral-400);font-size:16px;padding:2px 0;font-variant-numeric:tabular-nums">{{ ex.ghostReps }}</button>
+                      <button class="tapbtn" data-id="{{ ex.id }}" data-f="weight" data-d="2.5" onClick="{{ bump }}" style="text-align:left;background:none;border:none;border-bottom:1px dashed var(--color-neutral-700);color:var(--color-neutral-400);font-size:16px;padding:2px 0;font-variant-numeric:tabular-nums">{{ ex.ghostWeight }}</button>
+                      <button class="btn btn-primary tapbtn" data-id="{{ ex.id }}" onClick="{{ addSet }}" style="height:34px;padding:0;font-size:13px">Log</button>
+                    </div>
+                    <div style="font-size:10px;color:var(--color-neutral-600);margin-top:7px">Prefilled from last time · tap a number to nudge it</div>
+                  </div>
+                </sc-for>
+                <button class="btn btn-secondary tapbtn" onClick="{{ addExercise }}" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Add exercise</button>
+              </div>
+
+              <sc-if value="{{ resting }}" hint-placeholder-val="{{ false }}">
+                <div class="fade-in" style="flex:none;margin:0 18px 14px;background:var(--color-accent-900);border-radius:var(--radius-md);padding:11px 14px;display:flex;align-items:center;gap:12px">
+                  <i class="ph-bold ph-timer" style="font-size:17px;color:var(--color-accent-300)"></i>
+                  <span style="flex:1;font-size:13px;color:var(--color-accent-200)">Rest</span>
+                  <span style="font-size:18px;font-variant-numeric:tabular-nums;color:var(--color-accent-100)">{{ restClock }}</span>
+                  <button class="btn btn-ghost tapbtn" onClick="{{ skipRest }}" style="font-size:12px">Skip</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- PROGRESS -->
+          <sc-if value="{{ isProgress }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-8)">
+              <div style="display:flex;align-items:flex-end;gap:14px;padding-top:8px">
+                <div><div style="font-size:40px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">14.2<span style="font-size:16px;color:var(--color-neutral-500)"> t</span></div><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:7px">Volume this week</div></div>
+                <span class="tag tag-accent" style="margin-bottom:22px">+18%</span>
+              </div>
+              <div style="display:flex;align-items:flex-end;gap:7px;height:140px">
+                <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div>
+                <div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div>
+                <div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div>
+                <div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div>
+                <div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div>
+                <div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div>
+                <div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div>
+                <div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div>
+                <div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div>
+                <div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Estimated 1RM</div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px 14px 10px">
+                  <svg viewBox="0 0 300 100" style="width:100%;height:100px;display:block">
+                    <polyline points="6,84 42,78 78,70 114,72 150,58 186,50 222,42 258,30 294,16" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                    <polyline points="6,92 42,88 78,86 114,84 150,76 186,72 222,66 258,60 294,52" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-dasharray="3 4"></polyline>
+                    <circle cx="294" cy="16" r="4" fill="var(--color-accent)"></circle>
+                  </svg>
+                  <div style="display:flex;gap:16px;font-size:11px;color:var(--color-neutral-600);margin-top:8px">
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-accent);display:inline-block"></span>Squat 120 kg</span>
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-neutral-700);display:inline-block"></span>Bench 93 kg</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-2)">Records</div>
+                <div style="display:flex;flex-direction:column">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px">Back Squat</span><span style="font-size:15px;font-variant-numeric:tabular-nums">110 kg</span><span class="tag tag-accent">+5</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px">Bench Press</span><span style="font-size:15px;font-variant-numeric:tabular-nums">82.5 kg</span><span class="tag tag-accent">+2.5</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 0"><span style="flex:1;font-size:15px">Deadlift</span><span style="font-size:15px;font-variant-numeric:tabular-nums">140 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">6 wks</span></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- GYMS -->
+          <sc-if value="{{ isGyms }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+              <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+              <p style="font-size:13px;line-height:1.55;color:var(--color-neutral-500);margin:0">Add a gym while standing in it. Visits are matched against your log — an unlogged hour shows up on Today.</p>
+              <div style="display:flex;gap:8px">
+                <input class="input" placeholder="Gym name" style="flex:1;min-height:46px">
+                <button class="btn btn-primary tapbtn" onClick="{{ addGym }}" style="min-height:46px;gap:6px"><i class="ph-bold ph-crosshair"></i>I'm here</button>
+              </div>
+              <sc-if value="{{ gymError }}" hint-placeholder-val="{{ false }}">
+                <div class="fade-in" style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+                  <i class="ph-bold ph-warning-circle" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+                  <span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-danger-text)">Location came back at ±240 m — too coarse to pin a gym. Step inside and try again, or widen the radius afterwards.</span>
+                </div>
+              </sc-if>
+              <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:15px;margin-top:var(--space-2)">
+                <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Smartass Obolon</span><span class="tag tag-accent">Inside</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-500);margin-top:10px;font-variant-numeric:tabular-nums"><span>50.51234, 30.49871</span><span>150 m</span></div>
+                <div style="display:flex;gap:3px;margin-top:12px;align-items:flex-end;height:26px">
+                  <div style="flex:1;height:40%;background:var(--color-accent-800);border-radius:2px"></div>
+                  <div style="flex:1;height:70%;background:var(--color-accent-700);border-radius:2px"></div>
+                  <div style="flex:1;height:100%;background:var(--color-accent);border-radius:2px"></div>
+                  <div style="flex:1;height:55%;background:var(--color-accent-800);border-radius:2px"></div>
+                  <div style="flex:1;height:85%;background:var(--color-accent-700);border-radius:2px"></div>
+                  <div style="flex:1;height:30%;background:var(--color-neutral-800);border-radius:2px"></div>
+                  <div style="flex:1;height:20%;background:var(--color-neutral-800);border-radius:2px"></div>
+                </div>
+                <div style="font-size:10px;color:var(--color-neutral-600);margin-top:6px;letter-spacing:0.06em;text-transform:uppercase">Visits · 11 of 12 logged</div>
+              </div>
+              <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:15px">
+                <div style="font-size:16px">Sportlife Livoberezhna</div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-500);margin-top:10px;font-variant-numeric:tabular-nums"><span>50.45219, 30.60112</span><span>200 m</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- SESSION SUMMARY -->
+          <sc-if value="{{ isSummary }}" hint-placeholder-val="{{ false }}">
+            <div class="fade-in" style="flex:1;overflow:auto;padding:14px 22px 24px;display:flex;flex-direction:column;gap:var(--space-6)">
+              <div style="display:flex;align-items:center;gap:9px;color:var(--color-ok)">
+                <i class="ph-fill ph-check-circle" style="font-size:20px"></i>
+                <span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">Session saved</span>
+              </div>
+              <div>
+                <div style="font-size:32px;letter-spacing:-0.025em;line-height:1.1">Leg day, done.</div>
+                <div style="font-size:13px;color:var(--color-neutral-500);margin-top:6px">Friday, 31 July · Smartass Obolon</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:22px;font-variant-numeric:tabular-nums">{{ clock }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Duration</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:22px;font-variant-numeric:tabular-nums">{{ setCount }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sets</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:22px;font-variant-numeric:tabular-nums">{{ lastVolume }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Moved</div></div>
+              </div>
+              <div style="border-radius:var(--radius-lg);background:var(--color-ok-tint);padding:16px;box-shadow:inset 0 0 0 1px var(--color-ok-line)">
+                <div style="display:flex;align-items:center;gap:8px;color:var(--color-ok)"><i class="ph-bold ph-trophy" style="font-size:16px"></i><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">New record</span></div>
+                <div style="font-size:24px;letter-spacing:-0.02em;margin-top:9px;color:var(--color-ok-text);font-variant-numeric:tabular-nums">Back Squat · 85 kg × 8</div>
+                <div style="font-size:12px;color:var(--color-ok-text);opacity:0.75;margin-top:5px">Previous best 80 kg × 8 · estimated 1RM up to 106 kg</div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Compared to last leg day</div>
+                <div style="display:flex;flex-direction:column">
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 0;box-shadow:0 1px 0 var(--color-divider);font-size:14px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">1 385 kg</span><span style="font-size:12px;color:var(--color-ok);width:52px;text-align:right">+12%</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 0;box-shadow:0 1px 0 var(--color-divider);font-size:14px"><span style="flex:1">Romanian Deadlift</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">700 kg</span><span style="font-size:12px;color:var(--color-danger);width:52px;text-align:right">−8%</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:11px 0;font-size:14px"><span style="flex:1">Session volume</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">{{ lastVolume }}</span><span style="font-size:12px;color:var(--color-ok);width:52px;text-align:right">+4%</span></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:auto">
+                <button class="btn btn-secondary tapbtn" onClick="{{ goPast }}" style="flex:1;min-height:44px;font-size:14px">Edit session</button>
+                <button class="btn btn-primary tapbtn" onClick="{{ goToday }}" style="flex:1;min-height:44px;font-size:14px">Done</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- PAST WORKOUT (editable, auto-closed) -->
+          <sc-if value="{{ isPast }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+              <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+                <button class="tapbtn" onClick="{{ goToday }}" style="width:36px;height:36px;border-radius:50%;background:transparent;border:none;color:var(--color-neutral-300);display:grid;place-items:center"><i class="ph-bold ph-caret-left" style="font-size:20px"></i></button>
+                <div style="flex:1">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Mon 27 July · 08:40 → 09:34</div>
+                  <div style="font-size:20px;letter-spacing:-0.02em">Legs</div>
+                </div>
+                <button class="tapbtn" onClick="{{ askDelete }}" style="width:36px;height:36px;border-radius:50%;background:transparent;border:none;color:var(--color-danger);display:grid;place-items:center"><i class="ph-bold ph-trash" style="font-size:18px"></i></button>
+              </div>
+              <div style="flex:1;overflow:auto;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+                <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)">
+                  <i class="ph-bold ph-clock-countdown" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+                  <div style="font-size:12px;line-height:1.5;color:var(--color-neutral-300)">Auto-closed after 8 hours — it may be incomplete. Anything you add here is saved to the original date.</div>
+                </div>
+                <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+                  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><span style="flex:1;font-size:15px">Front Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">960 kg moved</span></div>
+                  <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:4px"><span>#</span><span>Reps</span><span>Kg</span><span></span></div>
+                  <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">10</span><span style="color:var(--color-neutral-500)">40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+                  <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>60</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+                  <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-600)">3</span><span>8</span><span>65</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+                </div>
+                <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+                  <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px"><span style="flex:1;font-size:15px">Leg Press</span><span style="font-size:11px;color:var(--color-neutral-600)">2 460 kg moved</span></div>
+                  <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span>12</span><span>160</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+                  <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>10</span><span>170</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+                </div>
+                <button class="btn btn-secondary tapbtn" onClick="{{ goExercise }}" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Add exercise to this session</button>
+                <button class="tapbtn" onClick="{{ askDelete }}" style="align-self:flex-start;background:none;border:none;color:var(--color-danger);font-size:13px;padding:8px 0">Delete workout</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- TEMPLATES -->
+          <sc-if value="{{ isTemplates }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+              <div style="display:flex;align-items:center;gap:10px;padding-top:8px">
+                <button class="tapbtn" onClick="{{ goToday }}" style="width:34px;height:34px;border-radius:50%;background:transparent;border:none;color:var(--color-neutral-300);display:grid;place-items:center;margin-left:-8px"><i class="ph-bold ph-caret-left" style="font-size:19px"></i></button>
+                <div style="font-size:26px;letter-spacing:-0.025em">Templates</div>
+              </div>
+              <p style="font-size:13px;line-height:1.55;color:var(--color-neutral-500);margin:0">A template is just a past session you kept. Loading one prefills every exercise with the weights you used last time.</p>
+              <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-lg);padding:16px;color:var(--color-text)">
+                <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Push day</span><span class="tag tag-accent">Used 6×</span></div>
+                <div style="font-size:12px;color:var(--color-neutral-500);margin-top:7px;line-height:1.5">Bench Press · Incline DB · Dips · Lateral raise · Triceps pushdown</div>
+                <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-accent);margin-top:12px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load · 18 sets prefilled</div>
+              </button>
+              <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-lg);padding:16px;color:var(--color-text)">
+                <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Legs · heavy</span><span class="tag tag-neutral">Used 4×</span></div>
+                <div style="font-size:12px;color:var(--color-neutral-500);margin-top:7px;line-height:1.5">Back Squat · Romanian Deadlift · Leg Press · Calf raise</div>
+                <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-accent);margin-top:12px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load · 14 sets prefilled</div>
+              </button>
+              <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:none;border-radius:var(--radius-lg);padding:16px;color:var(--color-text)">
+                <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Pull day</span><span class="tag tag-neutral">Used 5×</span></div>
+                <div style="font-size:12px;color:var(--color-neutral-500);margin-top:7px;line-height:1.5">Pull-up · Barbell row · Face pull · Curl</div>
+                <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-accent);margin-top:12px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load · 16 sets prefilled</div>
+              </button>
+              <button class="btn btn-secondary tapbtn" onClick="{{ startWorkout }}" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Save current session as template</button>
+            </div>
+          </sc-if>
+
+          <!-- EXERCISE HISTORY -->
+          <sc-if value="{{ isExercise }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+              <div style="display:flex;align-items:center;gap:10px;padding-top:8px">
+                <button class="tapbtn" onClick="{{ openWorkout }}" style="width:34px;height:34px;border-radius:50%;background:transparent;border:none;color:var(--color-neutral-300);display:grid;place-items:center;margin-left:-8px"><i class="ph-bold ph-caret-left" style="font-size:19px"></i></button>
+                <div style="flex:1">
+                  <div style="font-size:26px;letter-spacing:-0.025em">Back Squat</div>
+                  <div style="font-size:12px;color:var(--color-neutral-500);margin-top:3px">14 sessions · since March</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums;color:var(--color-ok)">110</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Record kg</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">120</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Est. 1RM</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">85</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Last top set</div></div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Top set · 12 weeks</div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px 14px 10px">
+                  <svg viewBox="0 0 300 96" style="width:100%;height:96px;display:block">
+                    <polyline points="6,80 34,76 62,68 90,70 118,58 146,52 174,46 202,36 230,30 258,22 286,12" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                    <circle cx="286" cy="12" r="4" fill="var(--color-ok)"></circle>
+                  </svg>
+                  <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:4px"><span>60 kg</span><span style="color:var(--color-ok)">110 kg · record</span></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-2)">Last sessions</div>
+                <table class="table">
+                  <thead><tr><th>Date</th><th>Top set</th><th>Volume</th></tr></thead>
+                  <tbody>
+                    <tr><td>29 Jul</td><td style="font-variant-numeric:tabular-nums">85 × 8</td><td style="font-variant-numeric:tabular-nums">1 385 kg</td></tr>
+                    <tr><td>25 Jul</td><td style="font-variant-numeric:tabular-nums">82.5 × 8</td><td style="font-variant-numeric:tabular-nums">1 240 kg</td></tr>
+                    <tr><td>21 Jul</td><td style="font-variant-numeric:tabular-nums">80 × 8</td><td style="font-variant-numeric:tabular-nums">1 180 kg</td></tr>
+                    <tr><td>17 Jul</td><td style="font-variant-numeric:tabular-nums">80 × 6</td><td style="font-variant-numeric:tabular-nums">1 060 kg</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- TOAST -->
+          <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+            <div class="fade-in" style="position:absolute;left:18px;right:18px;bottom:96px;z-index:8;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:{{ toastBg }};box-shadow:var(--shadow-md);color:{{ toastFg }}">
+              <i class="{{ toastIcon }}" style="font-size:17px"></i>
+              <span style="flex:1;font-size:13px">{{ toastText }}</span>
+            </div>
+          </sc-if>
+
+          <!-- DELETE DIALOG -->
+          <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+            <div class="fade-in" style="position:absolute;inset:0;z-index:9;background:rgba(10,11,13,0.66);display:grid;place-items:center;padding:22px">
+              <div style="width:100%;background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-3)">
+                <div style="display:flex;align-items:center;gap:9px;color:var(--color-danger)"><i class="ph-bold ph-trash" style="font-size:17px"></i><span style="font-size:17px;color:var(--color-text)">Delete this workout?</span></div>
+                <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">Legs · 27 July, 14 sets. This removes it from every device on the next sync and cannot be undone.</div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--space-2)">
+                  <button class="btn btn-secondary tapbtn" onClick="{{ closeConfirm }}" style="min-height:40px;font-size:14px">Keep</button>
+                  <button class="tapbtn" onClick="{{ confirmDelete }}" style="min-height:40px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px">Delete</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- TAB BAR (from A) -->
+          <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:none;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 12px 22px;background:var(--color-bg);box-shadow:0 -1px 0 var(--color-divider)">
+              <button class="tapbtn" onClick="{{ goToday }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colToday }}"><i class="ph-bold ph-house" style="font-size:20px"></i><span style="font-size:10px">Today</span></button>
+              <button class="tapbtn" onClick="{{ goProgress }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colProgress }}"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i><span style="font-size:10px">Progress</span></button>
+              <button class="tapbtn" onClick="{{ goGyms }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colGyms }}"><i class="ph-bold ph-map-pin" style="font-size:20px"></i><span style="font-size:10px">Gyms</span></button>
+              <button class="tapbtn" onClick="{{ goApps }}" style="background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:{{ colApps }}"><i class="ph-bold ph-squares-four" style="font-size:20px"></i><span style="font-size:10px">Apps</span></button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- ══════════ DESKTOP ══════════ -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Desktop / tray window · tabs become a rail, session docks right</div>
+        <div style="width:1180px;height:760px;background:var(--color-bg);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex">
+          <div style="width:210px;flex:none;padding:16px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 0 0 var(--color-divider)">
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 18px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+            <button class="tapbtn" onClick="{{ goToday }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:{{ bgToday }};color:{{ colToday }};font-size:14px;text-align:left"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</button>
+            <button class="tapbtn" onClick="{{ goProgress }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:{{ bgProgress }};color:{{ colProgress }};font-size:14px;text-align:left"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</button>
+            <button class="tapbtn" onClick="{{ goGyms }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:{{ bgGyms }};color:{{ colGyms }};font-size:14px;text-align:left"><i class="ph-bold ph-map-pin" style="font-size:17px"></i>Gyms</button>
+            <div style="height:1px;background:var(--color-divider);margin:14px 8px"></div>
+            <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:0 10px 8px">Services</div>
+            <button class="tapbtn" onClick="{{ goToday }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);border:none;background:transparent;color:var(--color-neutral-300);font-size:14px;text-align:left"><i class="ph-bold ph-barbell" style="font-size:17px"></i>Training</button>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-600);font-size:14px;opacity:0.5"><i class="ph-bold ph-carrot" style="font-size:17px"></i>Nutrition</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-600);font-size:14px;opacity:0.5"><i class="ph-bold ph-robot" style="font-size:17px"></i>AI body scan</div>
+            <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--color-neutral-600);padding:10px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</div>
+          </div>
+
+          <div style="flex:1;display:flex;min-width:0">
+            <div style="flex:1;overflow:auto;padding:26px 30px;display:flex;flex-direction:column;gap:var(--space-6);min-width:0">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                <div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div>
+                  <div style="font-size:32px;letter-spacing:-0.025em;margin-top:4px">{{ deskTitle }}</div>
+                </div>
+                <sc-if value="{{ sessionIdle }}" hint-placeholder-val="{{ true }}">
+                  <button class="btn btn-primary tapbtn" onClick="{{ startWorkout }}" style="min-height:40px;font-size:14px;gap:8px"><i class="ph-bold ph-play"></i>Start session</button>
+                </sc-if>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">3</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sessions</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">14.2 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Volume</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:var(--color-accent)">2</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">New PRs</div></div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">21 d</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Streak</div></div>
+              </div>
+
+              <div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--space-4)">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Weekly volume</div>
+                  <div style="font-size:12px;color:var(--color-accent-300)">+18% vs June</div>
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:10px;height:150px">
+                  <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div>
+                  <div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div>
+                  <div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div>
+                  <div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div>
+                  <div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div>
+                  <div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Recent sessions</div>
+                <table class="table">
+                  <thead><tr><th>Date</th><th>Session</th><th>Sets</th><th>Volume</th><th>Duration</th></tr></thead>
+                  <tbody>
+                    <tr><td>Wed 29 Jul</td><td>Push day</td><td>18</td><td>4 980 kg</td><td>1:12</td></tr>
+                    <tr><td>Mon 27 Jul</td><td>Legs <span class="tag tag-neutral" style="margin-left:6px">Auto-closed</span></td><td>14</td><td>3 420 kg</td><td>0:54</td></tr>
+                    <tr><td>Sat 25 Jul</td><td>Pull day</td><td>21</td><td>5 640 kg</td><td>1:03</td></tr>
+                    <tr><td>Thu 23 Jul</td><td>Push day</td><td>17</td><td>4 610 kg</td><td>1:08</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="width:352px;flex:none;padding:24px 22px;display:flex;flex-direction:column;gap:var(--space-4);box-shadow:-1px 0 0 var(--color-divider);min-height:0">
+              <sc-if value="{{ sessionLive }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:var(--space-4);min-height:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)" class="breathe"></span>
+                    <span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);flex:1">In session</span>
+                    <span style="font-size:17px;font-variant-numeric:tabular-nums">{{ clock }}</span>
+                  </div>
+                  <div style="display:flex;gap:16px;font-variant-numeric:tabular-nums">
+                    <div><div style="font-size:16px">{{ setCount }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">sets</div></div>
+                    <div><div style="font-size:16px">{{ volume }}</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">moved</div></div>
+                  </div>
+                  <div style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px">
+                    <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="2">
+                      <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:12px">
+                        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px"><span style="flex:1;font-size:14px">{{ ex.name }}</span><span style="font-size:11px;color:var(--color-neutral-600)">prev {{ ex.last }}</span></div>
+                        <sc-for list="{{ ex.rows }}" as="s" hint-placeholder-count="2">
+                          <div class="row-in" style="display:grid;grid-template-columns:16px 1fr 1fr 52px;gap:8px;align-items:center;padding:5px 0;font-size:14px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">{{ s.n }}</span><span style="color:{{ s.fg }}">{{ s.reps }}</span><span style="color:{{ s.fg }}">{{ s.weight }}</span><span style="font-size:10px;color:{{ s.kindFg }};text-align:right">{{ s.kind }}</span></div>
+                        </sc-for>
+                        <div style="display:grid;grid-template-columns:16px 1fr 1fr 52px;gap:8px;align-items:center;padding:7px 0 0;font-size:14px;font-variant-numeric:tabular-nums">
+                          <span style="font-size:11px;color:var(--color-neutral-700)">{{ ex.nextN }}</span>
+                          <button class="tapbtn" data-id="{{ ex.id }}" data-f="reps" data-d="1" onClick="{{ bump }}" style="text-align:left;background:none;border:none;border-bottom:1px dashed var(--color-neutral-700);color:var(--color-neutral-400);font-size:14px;padding:1px 0;font-variant-numeric:tabular-nums">{{ ex.ghostReps }}</button>
+                          <button class="tapbtn" data-id="{{ ex.id }}" data-f="weight" data-d="2.5" onClick="{{ bump }}" style="text-align:left;background:none;border:none;border-bottom:1px dashed var(--color-neutral-700);color:var(--color-neutral-400);font-size:14px;padding:1px 0;font-variant-numeric:tabular-nums">{{ ex.ghostWeight }}</button>
+                          <button class="btn btn-primary tapbtn" data-id="{{ ex.id }}" onClick="{{ addSet }}" style="height:28px;padding:0;font-size:12px">Log</button>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <button class="btn btn-secondary tapbtn" onClick="{{ finishWorkout }}" style="min-height:38px;font-size:13px">Finish session</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sessionIdle }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Templates</div>
+                  <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:14px;color:var(--color-text)">
+                    <span style="display:block;font-size:15px">Push day</span>
+                    <span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:4px">Bench · Incline DB · Dips · Lateral raise · Triceps</span>
+                    <span style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</span>
+                  </button>
+                  <button class="tapbtn" onClick="{{ startWorkout }}" style="text-align:left;background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:14px;color:var(--color-text)">
+                    <span style="display:block;font-size:15px">Legs · heavy</span>
+                    <span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:4px">Squat · RDL · Leg press · Calf raise</span>
+                    <span style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</span>
+                  </button>
+                  <div style="height:1px;background:var(--color-divider);margin:var(--space-2) 0"></div>
+                  <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Records</div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums">110 kg</span><span class="tag tag-accent">+5</span></div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Bench Press</span><span style="font-variant-numeric:tabular-nums">82.5 kg</span><span class="tag tag-accent">+2.5</span></div>
+                  <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Deadlift</span><span style="font-variant-numeric:tabular-nums">140 kg</span></div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1800,&quot;height&quot;:1100}}">
+class Component extends DCLogic {
+  state = {
+    view: 'today',
+    live: false,
+    reminder: true,
+    elapsed: 0,
+    rest: 0,
+    offline: false,
+    empty: false,
+    toast: null,
+    toastKind: 'ok',
+    confirm: false,
+    gymAdds: 0,
+    gymError: false,
+    lastVolume: '4.9 t',
+    exercises: [
+      { id: 'e1', name: 'Back Squat', last: '85 × 8', reps: 8, weight: 85, sets: [ { r: 12, w: 40, warm: true }, { r: 8, w: 80 }, { r: 8, w: 85 } ] },
+      { id: 'e2', name: 'Romanian Deadlift', last: '70 × 10', reps: 10, weight: 72.5, sets: [ { r: 10, w: 70 } ] }
+    ]
+  };
+
+  componentDidMount() {
+    this.t = setInterval(() => this.setState((s) => ({
+      elapsed: s.live ? s.elapsed + 1 : s.elapsed,
+      rest: s.rest > 0 ? s.rest - 1 : 0
+    })), 1000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+
+  mmss(t) { return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
+
+  toast(text, kind) {
+    clearTimeout(this.tt);
+    this.setState({ toast: text, toastKind: kind || 'ok' });
+    this.tt = setTimeout(() => this.setState({ toast: null }), 3200);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const on = 'var(--color-accent)', off = 'var(--color-neutral-600)';
+    const setCount = s.exercises.reduce((n, e) => n + e.sets.length, 0);
+    const kg = s.exercises.reduce((n, e) => n + e.sets.reduce((m, x) => m + x.r * x.w, 0), 0);
+    const go = (v) => () => this.setState({ view: v });
+    return {
+      isLogin: s.view === 'login',
+      isRegister: s.view === 'register',
+      isApps: s.view === 'apps',
+      isToday: s.view === 'today',
+      isWorkout: s.view === 'workout',
+      isProgress: s.view === 'progress',
+      isGyms: s.view === 'gyms',
+      isSummary: s.view === 'summary',
+      isPast: s.view === 'past',
+      isTemplates: s.view === 'templates',
+      isExercise: s.view === 'exercise',
+      showTabs: ['login', 'register', 'workout', 'summary', 'past', 'exercise'].indexOf(s.view) === -1,
+      isEmpty: s.empty,
+      notEmpty: !s.empty,
+      offline: s.offline,
+      syncDot: s.offline ? 'var(--color-danger)' : 'var(--color-ok)',
+      syncLabel: s.offline ? 'Offline · 2 queued' : 'Synced',
+      hasToast: !!s.toast,
+      toastText: s.toast || '',
+      toastFg: s.toastKind === 'ok' ? 'var(--color-ok-text)' : 'var(--color-danger-text)',
+      toastBg: s.toastKind === 'ok' ? 'var(--color-ok-tint)' : 'var(--color-danger-tint)',
+      toastIcon: s.toastKind === 'ok' ? 'ph-bold ph-check-circle' : 'ph-bold ph-warning-circle',
+      confirmOpen: s.confirm,
+      gymError: s.gymError,
+      lastVolume: s.lastVolume,
+      deskTitle: s.view === 'progress' ? 'Progress' : s.view === 'gyms' ? 'Gyms' : 'Today',
+      heroLine: s.live ? 'Mid-session.' : 'Nothing logged yet.',
+      sessionLive: s.live,
+      sessionIdle: !s.live,
+      hasReminder: s.reminder && !s.live,
+      clock: this.mmss(s.elapsed),
+      restClock: this.mmss(s.rest),
+      resting: s.rest > 0,
+      setCount,
+      exCount: s.exercises.length,
+      volume: (kg / 1000).toFixed(1) + ' t',
+      colToday: s.view === 'today' ? on : off,
+      colProgress: s.view === 'progress' ? on : off,
+      colGyms: s.view === 'gyms' ? on : off,
+      colApps: s.view === 'apps' ? on : off,
+      bgToday: s.view === 'today' ? 'var(--color-accent-900)' : 'transparent',
+      bgProgress: s.view === 'progress' ? 'var(--color-accent-900)' : 'transparent',
+      bgGyms: s.view === 'gyms' ? 'var(--color-accent-900)' : 'transparent',
+      exercises: s.exercises.map((e) => ({
+        id: e.id, name: e.name, last: e.last,
+        nextN: e.sets.length + 1,
+        ghostReps: e.reps,
+        ghostWeight: e.weight,
+        rows: e.sets.map((x, i) => {
+          const pr = !x.warm && x.w >= 85;
+          return {
+            n: i + 1, reps: x.r, weight: x.w,
+            kind: x.warm ? 'warm-up' : (pr ? 'record' : 'working'),
+            kindFg: pr ? 'var(--color-ok)' : 'var(--color-neutral-600)',
+            fg: x.warm ? 'var(--color-neutral-500)' : 'var(--color-text)'
+          };
+        })
+      })),
+      goLogin: go('login'), goApps: go('apps'), goToday: go('today'),
+      goProgress: go('progress'), goGyms: go('gyms'), goRegister: go('register'),
+      goTemplates: go('templates'), goPast: go('past'), goExercise: go('exercise'),
+      toggleOffline: () => this.setState((st) => ({ offline: !st.offline })),
+      toggleEmpty: () => this.setState((st) => ({ empty: !st.empty })),
+      closeConfirm: () => this.setState({ confirm: false }),
+      askDelete: () => this.setState({ confirm: true }),
+      confirmDelete: () => { this.setState({ confirm: false, view: 'today' }); this.toast('Workout deleted', 'err'); },
+      addGym: () => {
+        const n = this.state.gymAdds + 1;
+        const bad = n % 2 === 0;
+        this.setState({ gymAdds: n, gymError: bad });
+        this.toast(bad ? 'GPS accuracy ±240 m — try again inside' : 'Gym added', bad ? 'err' : 'ok');
+      },
+      openWorkout: () => this.setState({ view: 'workout', live: true, reminder: false }),
+      startWorkout: () => this.setState({ view: 'workout', live: true, elapsed: 0, reminder: false, empty: false }),
+      finishWorkout: () => this.setState((st) => ({
+        view: 'summary', live: false, rest: 0,
+        lastVolume: (st.exercises.reduce((n, e) => n + e.sets.reduce((m, x) => m + x.r * x.w, 0), 0) / 1000).toFixed(1) + ' t'
+      })),
+      dismissReminder: () => this.setState({ reminder: false }),
+      skipRest: () => this.setState({ rest: 0 }),
+      bump: (ev) => {
+        const b = ev.currentTarget, id = b.dataset.id, f = b.dataset.f, d = Number(b.dataset.d);
+        this.setState((st) => ({
+          exercises: st.exercises.map((e) => e.id === id ? Object.assign({}, e, { [f]: Math.max(0, e[f] + d) }) : e)
+        }));
+      },
+      addSet: (ev) => {
+        const id = ev.currentTarget.dataset.id;
+        const ex = this.state.exercises.find((e) => e.id === id);
+        if (ex && ex.weight >= 85) this.toast('New record · ' + ex.name + ' ' + ex.weight + ' kg × ' + ex.reps, 'ok');
+        this.setState((st) => ({
+          live: true, rest: 90,
+          exercises: st.exercises.map((e) => e.id === id
+            ? Object.assign({}, e, { sets: e.sets.concat([{ r: e.reps, w: e.weight }]) })
+            : e)
+        }));
+      },
+      addExercise: () => this.setState((st) => ({
+        exercises: st.exercises.concat([{ id: 'e' + (st.exercises.length + 1), name: 'Bench Press', last: '80 × 5', reps: 5, weight: 80, sets: [] }])
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

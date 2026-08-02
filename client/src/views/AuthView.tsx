@@ -57,16 +57,24 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
     try {
       const res =
         mode === 'signup'
-          ? await request<{ token: string; username: string }>('POST', '/api/auth/register', {
+          ? await request<{
+              token: string;
+              username: string;
+              role?: 'member' | 'trainer' | 'admin';
+            }>('POST', '/api/auth/register', {
               username: username.trim(),
               email: email.trim(),
               password,
             })
-          : await request<{ token: string; username: string }>('POST', '/api/auth/login', {
+          : await request<{
+              token: string;
+              username: string;
+              role?: 'member' | 'trainer' | 'admin';
+            }>('POST', '/api/auth/login', {
               identifier: identifier.trim(),
               password,
             });
-      setAuth(res.token, res.username);
+      setAuth(res.token, res.username, res.role ?? 'member');
       onLoggedIn();
     } catch (err) {
       if (err instanceof HttpError && err.status === 401) setError(t.wrongCredentials);

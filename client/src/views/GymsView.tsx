@@ -1,8 +1,7 @@
 /** Gyms — design S-41…S-48. */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
-import type { Gym } from '../types';
-import { deleteGym, getCurrentPositionOnce, upsertGym, type useStore } from '../store';
+import { getCurrentPositionOnce, upsertGym, type useStore } from '../store';
 import {
   searchGyms,
   readCache,
@@ -18,8 +17,9 @@ import {
   type ProviderState,
 } from '../data/gymProviders';
 import { HouseGraphic } from '../components/HouseGraphic';
+import { GymThumb } from '../components/GymThumb';
 import { useT } from '../i18n';
-import { Dialog, Icon, LanguageSelector, Sheet, Spinner } from '../ui';
+import { Icon, LanguageSelector, Spinner } from '../ui';
 
 // Optional place-provider keys, read from Vite env at build time. Absent keys
 // leave that provider "skipped" (chip greyed) — the app works without them.
@@ -44,9 +44,6 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   const [pendingName, setPendingName] = useState('');
   const [add, setAdd] = useState<AddState>({ phase: 'idle' });
   const [justAdded, setJustAdded] = useState<string | null>(null);
-  const [editing, setEditing] = useState<Gym | null>(null);
-  const [radius, setRadius] = useState(150);
-  const [deleting, setDeleting] = useState<Gym | null>(null);
 
   async function locateFor(gymName: string) {
     const n = gymName.trim();
@@ -80,19 +77,11 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   // so we re-attempt whenever an entry is still missing (survives StrictMode's
   // double-mount and the sync that swaps store.gyms — a fixed AbortController
   // would cancel these and never retry).
-  const [savedPhotos, setSavedPhotos] = useState<Record<string, string>>({});
   const [savedAddrs, setSavedAddrs] = useState<Record<string, string>>({});
   useEffect(() => {
     let alive = true;
     const sig = new AbortController().signal; // never aborted — enrichment is idempotent
     for (const g of store.gyms) {
-      if (!savedPhotos[g.id]) {
-        resolvePhoto({ key: g.id, name: g.name, lat: g.lat, lng: g.lng, sources: ['local'] }, sig)
-          .then((url) => {
-            if (url && alive) setSavedPhotos((m) => ({ ...m, [g.id]: url }));
-          })
-          .catch(() => {});
-      }
       if (!savedAddrs[g.id]) {
         resolveAddress(g.lat, g.lng, sig)
           .then((addr) => {
@@ -104,7 +93,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
     return () => {
       alive = false;
     };
-  }, [store.gyms, savedPhotos, savedAddrs]);
+  }, [store.gyms, savedAddrs]);
 
   return (
     <div className="screen">
@@ -179,23 +168,39 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
 
       {store.gyms.length > 0 &&
         store.gyms.map((g) => (
-          <div key={g.id} className={`gym-card${justAdded === g.id ? ' just-added' : ''}`}>
+          <div
+            key={g.id}
+            className={`gym-card tappable${justAdded === g.id ? ' just-added' : ''}`}
+            role="button"
+            tabIndex={0}
+            onClick={() =>
+              shell.openOverlay({
+                screen: 'gym',
+                gymId: g.id,
+                name: g.name,
+                lat: g.lat,
+                lng: g.lng,
+                address: savedAddrs[g.id],
+              })
+            }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ')
+                shell.openOverlay({
+                  screen: 'gym',
+                  gymId: g.id,
+                  name: g.name,
+                  lat: g.lat,
+                  lng: g.lng,
+                  address: savedAddrs[g.id],
+                });
+            }}
+          >
             <span className="thumb">
-              <GymThumb photo={savedPhotos[g.id]} lat={g.lat} lng={g.lng} />
+              <GymThumb name={g.name} lat={g.lat} lng={g.lng} />
             </span>
             <div className="gym-card-body">
               <div className="head">
                 <span className="n">{g.name}</span>
-                <button
-                  className="dots"
-                  aria-label="Menu"
-                  onClick={() => {
-                    setEditing(g);
-                    setRadius(g.radiusM);
-                  }}
-                >
-                  <Icon name="dots-three-vertical" />
-                </button>
               </div>
               <div className="meta">
                 <span>{savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}</span>
@@ -210,13 +215,14 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
           savedGyms={store.gyms}
           busy={add.phase === 'locating'}
           onPick={(r) => {
-            const g = upsertGym({ name: r.name, lat: r.lat, lng: r.lng, radiusM: 150 });
-            setJustAdded(g.id);
-            if (r.address) {
-              cacheAddress(r.lat, r.lng, r.address);
-              setSavedAddrs((m) => ({ ...m, [g.id]: r.address! }));
-            }
-            shell.toast({ kind: 'ok', icon: 'check-circle', text: t.gymAdded(0) });
+            if (r.address) cacheAddress(r.lat, r.lng, r.address);
+            shell.openOverlay({
+              screen: 'gym',
+              name: r.name,
+              lat: r.lat,
+              lng: r.lng,
+              address: r.address,
+            });
           }}
           onManualHere={(n) => locateFor(n)}
         />
@@ -251,87 +257,6 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
         <div style={{ fontSize: 12, lineHeight: 1.55, color: 'var(--color-neutral-500)' }}>
           {t.locationBlockedFootnote}
         </div>
-      )}
-
-      {editing && (
-        <Sheet onClose={() => setEditing(null)}>
-          <div className="sheet-head">
-            <span className="t">{editing.name}</span>
-          </div>
-          <div className="slider-block">
-            <div className="head">
-              <span>{t.radius}</span>
-              <span className="v">{radius} m</span>
-            </div>
-            <input
-              type="range"
-              min={30}
-              max={2000}
-              step={10}
-              value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
-            />
-            <div className="scale">
-              <span>30 m</span>
-              <span>2 000 m</span>
-            </div>
-          </div>
-          <div className="info-row">
-            <Icon name="info" />
-            <span>{t.radiusHint}</span>
-          </div>
-          <div className="sheet-actions">
-            <button
-              className="danger-outline"
-              style={{ minHeight: 44 }}
-              onClick={() => {
-                setDeleting(editing);
-                setEditing(null);
-              }}
-            >
-              <Icon name="trash" />
-              {t.delete}
-            </button>
-            <button className="btn btn-secondary grow" onClick={() => setEditing(null)}>
-              {t.cancel}
-            </button>
-            <button
-              className="btn btn-primary grow"
-              onClick={() => {
-                upsertGym({ ...editing, radiusM: radius });
-                setEditing(null);
-              }}
-            >
-              {t.save}
-            </button>
-          </div>
-        </Sheet>
-      )}
-
-      {deleting && (
-        <Dialog
-          danger
-          title={t.deleteGymTitle(deleting.name)}
-          onClose={() => setDeleting(null)}
-          actions={
-            <>
-              <button className="btn btn-secondary" onClick={() => setDeleting(null)}>
-                {t.keep}
-              </button>
-              <button
-                className="danger-outline"
-                onClick={() => {
-                  deleteGym(deleting.id);
-                  setDeleting(null);
-                }}
-              >
-                {t.delete}
-              </button>
-            </>
-          }
-        >
-          {t.deleteGymBody(store.reminders.filter((r) => r.gymId === deleting.id).length)}
-        </Dialog>
       )}
     </div>
   );
@@ -490,7 +415,7 @@ function GymSearch({
           return (
             <button key={r.key} className="gym-result" onClick={() => onPick(r)} lang={li}>
               <span className="thumb">
-                <GymThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+                <ResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
               </span>
               <span className="body">
                 <span className="name">{highlightSubsequence(r.name, needle)}</span>
@@ -533,7 +458,7 @@ function GymSearch({
  * resolved) → OSM map-tile of the venue → local house graphic. Each level
  * degrades on load error, so a row is never blank.
  */
-function GymThumb({ photo, lat, lng }: { photo?: string; lat: number; lng: number }) {
+function ResultThumb({ photo, lat, lng }: { photo?: string; lat: number; lng: number }) {
   const [failed, setFailed] = useState<Set<string>>(new Set());
   const map = staticMapThumb(lat, lng);
   const src = photo && !failed.has(photo) ? photo : !failed.has(map) ? map : null;

@@ -6,6 +6,7 @@ import {
   __replaceStateForTests,
   addExercise,
   applyAutoFinish,
+  backfillWorkout,
   clearSets,
   deleteGym,
   deleteExercise,
@@ -30,6 +31,7 @@ import {
   startWorkout,
   startSyncLoop,
   sync,
+  toggleFavorite,
   topSet,
   upsertGym,
   upsertSet,
@@ -224,6 +226,48 @@ describe('F-04 Offline queue and sync', () => {
     expect(__getStateForTests().queue).toHaveLength(1);
     expect(__getStateForTests().syncStatus).toBe('pending');
   });
+
+  it('drops permanently rejected queue items and still refetches server truth', async () => {
+    setAuth('token', 'demo');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    __replaceStateForTests(
+      state({
+        queue: [
+          {
+            id: 'bad',
+            method: 'PUT',
+            url: '/api/tracker/workouts/bad',
+            body: { startedAt: 'bad' },
+            queuedAt: 1,
+          },
+        ],
+      }),
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (init?.method === 'PUT') {
+          return new Response(JSON.stringify({ error: 'bad payload' }), { status: 400 });
+        }
+        if (url.endsWith('/api/tracker/state')) {
+          return new Response(JSON.stringify({ workouts: [], gyms: [], reminders: [] }), {
+            status: 200,
+          });
+        }
+        throw new Error('unexpected request');
+      }),
+    );
+
+    await sync();
+
+    expect(warn).toHaveBeenCalledWith(
+      'sync: dropping rejected mutation',
+      expect.objectContaining({ id: 'bad' }),
+      'bad payload',
+    );
+    expect(__getStateForTests().queue).toEqual([]);
+    expect(__getStateForTests().syncStatus).toBe('synced');
+  });
 });
 
 describe('F-05 Gyms and reminders store', () => {
@@ -245,9 +289,31 @@ describe('F-05 Gyms and reminders store', () => {
     expect(__getStateForTests().queue.map((q) => q.method)).toContain('POST');
   });
 
+  it('backfills a finished workout with optional gym id through the upsert queue', () => {
+    const startedAt = Date.now() - 3600_000;
+    const retro = backfillWorkout(startedAt, 45 * 60_000, 'gym-1');
+
+    expect(retro).toMatchObject({
+      startedAt,
+      finishedAt: startedAt + 45 * 60_000,
+      autoFinished: false,
+      gymId: 'gym-1',
+      exercises: [],
+    });
+    expect(__getStateForTests().workouts[0]).toMatchObject({ id: retro.id });
+    expect(__getStateForTests().queue.at(-1)).toMatchObject({
+      method: 'PUT',
+      url: `/api/tracker/workouts/${retro.id}`,
+      body: expect.objectContaining({ gymId: 'gym-1' }),
+    });
+  });
+
   it('updates and deletes gyms', () => {
     const gym = upsertGym({ id: 'g1', name: 'Old', lat: 1, lng: 2, radiusM: 150 });
     upsertGym({ ...gym, name: 'New', radiusM: 250 });
+    toggleFavorite('g1');
+    toggleFavorite('missing');
+    expect(__getStateForTests().gyms[0]).toMatchObject({ name: 'New', favorite: true });
     deleteGym('g1');
 
     expect(__getStateForTests().gyms).toEqual([]);

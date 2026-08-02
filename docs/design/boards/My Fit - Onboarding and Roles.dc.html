@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  :root {
+    --color-bg: #16171a; --color-surface: #1f2125; --color-text: #e9eaec;
+    --color-divider: rgba(233,234,236,0.14);
+    --color-accent: #d9a24f;
+    --color-accent-100: #fbf3e6; --color-accent-200: #f6e6cb; --color-accent-300: #eed3a5;
+    --color-accent-400: #e4bb76; --color-accent-500: #d9a24f; --color-accent-600: #b3833d;
+    --color-accent-700: #8a642e; --color-accent-800: #5b4420; --color-accent-900: #342713;
+    --color-neutral-100: #f5f6f7; --color-neutral-200: #e6e8ea; --color-neutral-300: #d0d3d6;
+    --color-neutral-400: #b0b4b8; --color-neutral-500: #90959a; --color-neutral-600: #71767b;
+    --color-neutral-700: #55595e; --color-neutral-800: #3b3f43; --color-neutral-900: #262a2d;
+    --shadow-sm: 0 0 0 1px #3b3f43;
+    --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0,0,0,0.6);
+    --shadow-lg: 0 0 0 1px #6b7075, 0 18px 44px rgba(0,0,0,0.7);
+    --color-ok: #4cbe8c; --color-ok-text: #b7e8cf; --color-ok-tint: #16291f; --color-ok-line: #2f6f52;
+    --color-danger: #e2564f; --color-danger-text: #f3c2bf; --color-danger-tint: #2c1614; --color-danger-line: #7d302b;
+    --photo: radial-gradient(120% 90% at 78% 8%, rgba(217,162,79,0.30), transparent 58%), radial-gradient(90% 70% at 12% 92%, rgba(120,140,170,0.18), transparent 60%), linear-gradient(160deg, #2b2e34 0%, #202329 45%, #15171b 100%);
+    --photo-2: radial-gradient(110% 80% at 20% 10%, rgba(217,162,79,0.22), transparent 60%), radial-gradient(80% 70% at 90% 80%, rgba(90,120,160,0.20), transparent 62%), linear-gradient(200deg, #272a30 0%, #1c1f24 55%, #131519 100%);
+    --generic: repeating-linear-gradient(135deg, rgba(233,234,236,0.035) 0 2px, transparent 2px 11px), linear-gradient(160deg, #23262a 0%, #1a1c20 100%);
+    --face: radial-gradient(80% 80% at 40% 26%, rgba(217,162,79,0.35), transparent 62%), linear-gradient(150deg, #33373d, #1c1f23);
+  }
+  body { margin:0; background:#0d0e10; }
+  @keyframes shimmer { 0%{opacity:.35} 50%{opacity:.7} 100%{opacity:.35} }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes pulse { 0%{opacity:1} 50%{opacity:.45} 100%{opacity:1} }
+  .sk { animation: shimmer 1.6s ease-in-out infinite; background:#262a2d; border-radius:6px; }
+  .sp { animation: spin 1s linear infinite; }
+  .live { animation: pulse 2.6s ease-in-out infinite; }
+</style>
+</helmet>
+
+<div style="font-family:var(--font-body);background:#0d0e10;color:var(--color-text);padding:52px 60px 120px;min-height:100vh">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">My Fit</span>
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-600)">Onboarding, avatars, and the admin / trainer roles</span>
+  </div>
+  <h1 style="margin:0 0 10px;font-size:38px;font-weight:500;letter-spacing:-0.025em">Sign-up as a first workout</h1>
+  <p style="margin:0 0 22px;max-width:78ch;font-size:14px;line-height:1.65;color:var(--color-neutral-500)">The account form is replaced by a four-step arrival: who you are, your face, your gym, your first set. Each step owns the whole screen with a photographic ground, and the flow ends inside a live session rather than on a dashboard. Behind it, two new roles — <strong style="color:var(--color-neutral-300);font-weight:500">admin</strong> creates people and hands out invite links; <strong style="color:var(--color-neutral-300);font-weight:500">trainer</strong> reads the same data, but only for the clients an admin assigned. Ids: <span style="color:var(--color-neutral-300)">O-01 … O-10</span> onboarding, <span style="color:var(--color-neutral-300)">AD-01 … AD-07</span> admin, <span style="color:var(--color-neutral-300)">TR-01 … TR-04</span> trainer.</p>
+
+  <div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:44px;font-size:11px">
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--color-surface)"><i class="ph-bold ph-user" style="font-size:13px;color:var(--color-neutral-400)"></i>Member — own data only</span>
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--color-surface)"><i class="ph-bold ph-shield-star" style="font-size:13px;color:var(--color-accent)"></i>Admin — creates people, links, assignments</span>
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--color-surface)"><i class="ph-bold ph-user-focus" style="font-size:13px;color:var(--color-ok)"></i>Trainer — reads assigned clients only</span>
+  </div>
+
+  <!-- ══════════════ A · ONBOARDING ══════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">A</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Phone · arrival</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">O-01 → O-10 · four steps, ending in a live session</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- O-01 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-01</span> · Invite link opened</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <div style="position:absolute;inset:0;background:var(--photo)"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(22,23,26,0.97) 32%,rgba(22,23,26,0.55) 62%,rgba(22,23,26,0.25))"></div>
+        <div style="position:relative;display:flex;flex-direction:column;height:100%">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 28px 44px;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:11px;margin-bottom:var(--space-4)">
+              <span style="width:44px;height:44px;border-radius:50%;background:var(--face);flex:none;box-shadow:inset 0 0 0 1px var(--color-accent-700)"></span>
+              <span style="font-size:13px;line-height:1.45;color:var(--color-neutral-300);flex:1">Andrii invited you to My Fit and already set up your profile.</span>
+            </div>
+            <i class="ph-bold ph-barbell" style="font-size:26px;color:var(--color-accent)"></i>
+            <div style="font-size:36px;line-height:1.08;letter-spacing:-0.03em;margin-top:var(--space-2)">Four steps<br>and you're lifting.</div>
+            <div style="font-size:13px;color:var(--color-neutral-400);line-height:1.55;margin-bottom:var(--space-6)">Account, photo, gym, first set. Under two minutes — and the last step is a real session, not a summary.</div>
+            <div style="display:flex;gap:7px;margin-bottom:var(--space-4)">
+              <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+              <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+              <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+              <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+            </div>
+            <button class="btn btn-primary" style="min-height:52px;font-size:16px;gap:9px">Start <i class="ph-bold ph-arrow-right"></i></button>
+            <div style="text-align:center;font-size:12px;color:var(--color-neutral-600);padding-top:6px">Link valid until 9 Aug · one use</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Arriving by an admin's link: their avatar and name are shown, so the invite is attributable. The four-bar rail introduced here is the same component through every step.</div>
+    </div>
+
+    <!-- O-02 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-02</span> · Step 1 · who you are</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;padding:10px 28px 0">
+          <div style="display:flex;gap:7px">
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)"><span style="color:var(--color-accent)">Step 1 of 4</span><span>Who you are</span></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <div style="font-size:30px;letter-spacing:-0.025em;line-height:1.12;margin-bottom:var(--space-4)">Let's get your name<br>on the account.</div>
+          <input class="input" value="Marta Kovalenko" style="min-height:50px;font-size:16px">
+          <input class="input" value="marta@example.com" style="min-height:50px;font-size:16px">
+          <input class="input" type="password" placeholder="Password · 6 characters minimum" style="min-height:50px;font-size:16px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-ok-text);padding:4px 2px"><i class="ph-fill ph-check-circle" style="font-size:14px;color:var(--color-ok)"></i>Name and email came from your invite — change them if they're wrong</div>
+          <button class="btn btn-primary" style="min-height:50px;font-size:15px;gap:8px;margin-top:var(--space-3)">Continue <i class="ph-bold ph-arrow-right"></i></button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Invited users arrive with name and email prefilled from the admin's record; a self-serve sign-up shows the same screen empty.</div>
+    </div>
+
+    <!-- O-03 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-03</span> · Step 2 · avatar</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;padding:10px 28px 0">
+          <div style="display:flex;gap:7px">
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)"><span style="color:var(--color-accent)">Step 2 of 4</span><span>Your face</span></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-4)">
+          <div style="font-size:30px;letter-spacing:-0.025em;line-height:1.12">A photo, so your<br>trainer knows you.</div>
+          <div style="display:flex;justify-content:center;padding:var(--space-4) 0">
+            <div style="width:150px;height:150px;border-radius:50%;background:var(--face);position:relative;box-shadow:0 0 0 1px var(--color-accent-700), 0 0 0 9px rgba(217,162,79,0.08)">
+              <span style="position:absolute;right:4px;bottom:4px;width:42px;height:42px;border-radius:50%;background:var(--color-bg);box-shadow:0 0 0 1px var(--color-neutral-700);display:grid;place-items:center"><i class="ph-bold ph-camera" style="font-size:19px;color:var(--color-accent)"></i></span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" style="flex:1;min-height:46px;font-size:14px;gap:7px"><i class="ph-bold ph-camera"></i>Camera</button>
+            <button class="btn btn-secondary" style="flex:1;min-height:46px;font-size:14px;gap:7px"><i class="ph-bold ph-image"></i>Library</button>
+          </div>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55;text-align:center">Cropped to a square, stored on your hub, visible to you, your admin and your trainer.</div>
+          <button class="btn btn-primary" style="min-height:50px;font-size:15px;gap:8px">Continue <i class="ph-bold ph-arrow-right"></i></button>
+          <div style="text-align:center;font-size:13px;color:var(--color-neutral-500)">Skip — use my initials</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Skipping is explicit and names the fallback (initials on a graphite disc). The ring around the avatar is the same brass glow the live hero uses.</div>
+    </div>
+
+    <!-- O-04 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-04</span> · Step 2 · uploading &amp; crop</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:10px 28px;opacity:0.3">
+          <div style="display:flex;gap:7px"><span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span><span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span><span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span><span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span></div>
+          <div style="font-size:30px;letter-spacing:-0.025em;margin-top:40px">A photo, so your trainer knows you.</div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 18px 26px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="font-size:17px;margin-top:4px">Position your photo</div>
+          <div style="height:250px;border-radius:12px;background:var(--face);position:relative;overflow:hidden">
+            <div style="position:absolute;inset:0;background:rgba(10,11,13,0.55)"></div>
+            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:200px;height:200px;border-radius:50%;box-shadow:0 0 0 9999px rgba(10,11,13,0.55), inset 0 0 0 2px var(--color-accent)"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <i class="ph-bold ph-magnifying-glass-minus" style="font-size:16px;color:var(--color-neutral-500)"></i>
+            <div style="flex:1;height:4px;border-radius:2px;background:var(--color-neutral-800);position:relative"><div style="width:44%;height:100%;background:var(--color-accent);border-radius:2px"></div><span style="position:absolute;left:44%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:var(--color-accent)"></span></div>
+            <i class="ph-bold ph-magnifying-glass-plus" style="font-size:16px;color:var(--color-neutral-500)"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <span class="sp" style="display:inline-block;width:14px;height:14px;border:2px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>
+            <span style="flex:1;font-size:12px;color:var(--color-neutral-300)">Uploading · 1.2 MB → 512 px</span>
+            <span style="font-size:11px;color:var(--color-neutral-600);font-variant-numeric:tabular-nums">68%</span>
+          </div>
+          <div style="display:flex;gap:10px"><button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px">Cancel</button><button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Use photo</button></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Crop is a circle mask over the raw frame; the upload runs while you adjust, so “Use photo” is instant. Downscaled to 512 px before it leaves the device.</div>
+    </div>
+
+    <!-- O-05 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-05</span> · Step 3 · pick your gym</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;padding:10px 28px 0">
+          <div style="display:flex;gap:7px">
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            <span style="flex:1;height:3px;border-radius:2px;background:var(--color-neutral-800)"></span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)"><span style="color:var(--color-accent)">Step 3 of 4</span><span>Your gym</span></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:18px 20px 20px;display:flex;flex-direction:column;gap:var(--space-3)">
+          <div style="font-size:28px;letter-spacing:-0.025em;line-height:1.14;padding:0 8px">Where do you<br>train?</div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:var(--space-3) 8px 0"><i class="ph-bold ph-crosshair" style="font-size:13px;color:var(--color-accent)"></i>Within 400 m of you</div>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-accent)">
+            <div style="height:104px;background:var(--photo);position:relative"><span style="position:absolute;right:10px;top:10px;width:24px;height:24px;border-radius:50%;background:var(--color-accent);display:grid;place-items:center"><i class="ph-bold ph-check" style="font-size:13px;color:#1a1409"></i></span></div>
+            <div style="padding:12px 14px"><div style="font-size:15px">Smartass Obolon</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:4px">Prospekt Obolonskyi 1B · 40 m · OpenStreetMap</div></div>
+          </div>
+          <div style="display:flex;gap:11px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:56px;height:56px;border-radius:9px;background:var(--photo-2);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Iron Yard</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Marshala Tymoshenka 4 · 180 m</span></span>
+          </div>
+          <div style="display:flex;gap:11px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:56px;height:56px;border-radius:9px;background:var(--generic);flex:none;display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-neutral-700)"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Kachalka na Peremohy</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Peremohy 24 · 320 m · no photo</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:11px 13px;margin-top:var(--space-2)">
+            <i class="ph-bold ph-magnifying-glass" style="font-size:15px;color:var(--color-neutral-500)"></i>
+            <span style="flex:1;font-size:14px;color:var(--color-neutral-600)">Search another gym</span>
+          </div>
+          <button class="btn btn-primary" style="min-height:50px;font-size:15px;gap:8px;margin-top:auto">Continue <i class="ph-bold ph-arrow-right"></i></button>
+          <div style="text-align:center;font-size:13px;color:var(--color-neutral-500)">Skip — I'll add it later</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The whole gym-discovery stack (G-01…G-05) runs here unchanged — nearby first, providers merged, house graphic where no photo exists. Selection is the brass ring plus a check, not a radio.</div>
+    </div>
+
+    <!-- O-06 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-06</span> · Step 4 · the wow moment</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <div style="position:absolute;inset:0;background:var(--photo)"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(22,23,26,0.97) 30%,rgba(22,23,26,0.5) 66%,rgba(22,23,26,0.2))"></div>
+        <div style="position:relative;display:flex;flex-direction:column;height:100%">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="flex:none;padding:10px 28px 0">
+            <div style="display:flex;gap:7px">
+              <span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span><span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span><span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span><span style="flex:1;height:3px;border-radius:2px;background:var(--color-accent)"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:9px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)"><span>Ready</span><span style="color:var(--color-neutral-500)">Smartass Obolon</span></div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 28px 44px;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:var(--space-4)">
+              <span style="width:52px;height:52px;border-radius:50%;background:var(--face);flex:none;box-shadow:0 0 0 1px var(--color-accent-700),0 0 0 6px rgba(217,162,79,0.10)"></span>
+              <span><span style="display:block;font-size:16px">Marta Kovalenko</span><span style="display:block;font-size:12px;color:var(--color-neutral-400);margin-top:2px">Trainer · Andrii Bondar</span></span>
+            </div>
+            <div style="font-size:38px;line-height:1.08;letter-spacing:-0.03em">You're in.<br>Bar's loaded.</div>
+            <div style="font-size:13px;color:var(--color-neutral-400);line-height:1.55;margin-bottom:var(--space-4)">You're standing in Smartass Obolon right now. Start the session and your first set is thirty seconds away.</div>
+            <button class="btn btn-primary" style="min-height:58px;font-size:17px;gap:10px;border-radius:var(--radius-lg)"><i class="ph-bold ph-play" style="font-size:18px"></i>Start training now</button>
+            <div style="text-align:center;font-size:13px;color:var(--color-neutral-500);padding-top:6px">Just take me to the app</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The payoff: the gym's own photograph fills the screen, the profile is assembled in front of you, and the primary action starts a real session. The "wow" is that sign-up ends in the product, not in a welcome screen.</div>
+    </div>
+
+    <!-- O-07 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-07</span> · Landed in a live session</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;background:var(--photo);position:relative">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="height:148px;position:relative;background:linear-gradient(to top,rgba(22,23,26,0.94),rgba(22,23,26,0.35) 55%,rgba(22,23,26,0.15))">
+            <div style="position:absolute;left:20px;top:14px;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(10,11,13,0.55);box-shadow:inset 0 0 0 1px var(--color-accent-700)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+            <div style="position:absolute;left:20px;right:20px;bottom:14px;display:flex;align-items:flex-end;gap:14px">
+              <div style="flex:1"><div style="font-size:40px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">00:04</div><div style="font-size:12px;color:var(--color-neutral-300);margin-top:9px">Your first session</div></div>
+            </div>
+          </div>
+          <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:0 26px 60px;gap:var(--space-3)">
+          <i class="ph-bold ph-list-plus" style="font-size:26px;color:var(--color-neutral-700)"></i>
+          <div style="font-size:18px">Add your first exercise</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:32ch">Type any name — it's saved as you go. After the second session, weights come prefilled from the last one.</div>
+          <button class="btn btn-primary" style="min-height:46px;font-size:15px;gap:8px;margin-top:var(--space-3)"><i class="ph-bold ph-plus"></i>Add exercise</button>
+          <div style="font-size:12px;color:var(--color-neutral-600);margin-top:var(--space-2)">or load one of Andrii's programs</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Continuous with S-17: same empty session, but the hero is already carrying the gym photo picked two screens earlier, and an admin-authored program is offered.</div>
+    </div>
+
+    <!-- O-08 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-08</span> · Link expired / already used</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-link-break" style="font-size:28px;color:var(--color-danger)"></i>
+          <div style="font-size:30px;letter-spacing:-0.025em;line-height:1.12;margin-top:var(--space-3)">This link is<br>no longer valid.</div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line);margin-top:var(--space-3)">
+            <i class="ph-bold ph-warning-circle" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-danger-text)">Invites expire after 7 days and work once. This one was opened on 28 July.</span>
+          </div>
+          <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;margin-top:var(--space-2)">Ask Andrii to send a new one — from their people list it's two taps.</div>
+          <button class="btn btn-secondary" style="min-height:48px;font-size:14px;gap:8px;margin-top:var(--space-3)"><i class="ph-bold ph-paper-plane-tilt"></i>Request a new link</button>
+          <div style="text-align:center;font-size:13px;color:var(--color-neutral-500);padding-top:4px">I already have an account — sign in</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">States the rule, the date, and who to ask. Requesting notifies the admin in their people list — no email round-trip needed.</div>
+    </div>
+
+    <!-- O-09 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-09</span> · Step errors &amp; states</div>
+      <div style="width:390px;background:var(--color-bg);border-radius:20px;box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:var(--space-5)">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Email already registered</div>
+          <input class="input" value="marta@example.com" style="min-height:46px;border-color:var(--color-danger)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-danger-text);margin-top:8px"><i class="ph-bold ph-warning-circle" style="font-size:14px;color:var(--color-danger)"></i>An account already uses this email — sign in instead</div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Avatar too large</div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)"><i class="ph-bold ph-image-broken" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i><span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-danger-text)">That file is 24 MB. Pick something under 10 MB — it's downscaled to 512 px anyway.</span></div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Location refused at step 3</div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-neutral-700)"><i class="ph-bold ph-map-pin" style="font-size:16px;color:var(--color-neutral-400);margin-top:1px"></i><span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-neutral-300)">No location — search by name instead, or skip. Onboarding never blocks on a permission.</span></div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Creating the account</div>
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;gap:9px" disabled><span class="sp" style="display:inline-block;width:14px;height:14px;border:2px solid var(--color-accent-800);border-top-color:var(--color-accent);border-radius:50%"></span>Setting things up…</button>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Resuming an abandoned flow</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)"><i class="ph-bold ph-arrow-counter-clockwise" style="font-size:15px;color:var(--color-accent)"></i><span style="flex:1;font-size:12px;color:var(--color-neutral-300)">Picking up at step 3 of 4</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.7">Rules · Every step persists on blur, so closing the app resumes where you left. Steps 2 and 3 are skippable; step 1 is not. No step may block on a device permission. Back is always available and never loses input.</div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The error grammar from S-49 applies unchanged: inline under the field, banner for the surface, no dialogs during onboarding.</div>
+    </div>
+
+    <!-- O-10 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">O-10</span> · Member profile · avatar &amp; people</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Profile</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:4px 0">
+            <div style="width:76px;height:76px;border-radius:50%;background:var(--face);flex:none;position:relative;box-shadow:0 0 0 1px var(--color-neutral-800)">
+              <span style="position:absolute;right:0;bottom:0;width:26px;height:26px;border-radius:50%;background:var(--color-bg);box-shadow:0 0 0 1px var(--color-neutral-700);display:grid;place-items:center"><i class="ph-bold ph-pencil-simple" style="font-size:12px;color:var(--color-accent)"></i></span>
+            </div>
+            <div style="flex:1"><div style="font-size:18px">Marta Kovalenko</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:3px">marta@example.com</div><span class="tag tag-neutral" style="margin-top:8px;display:inline-block">Member</span></div>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:var(--space-2)">Who can see your training</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:38px;height:38px;border-radius:50%;background:var(--face);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Andrii Bondar</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:2px">Admin · full access</span></span>
+            <i class="ph-bold ph-shield-star" style="font-size:16px;color:var(--color-accent)"></i>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:38px;height:38px;border-radius:50%;background:var(--photo-2);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Olha Sydorenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:2px">Trainer · reads your sessions</span></span>
+            <i class="ph-bold ph-user-focus" style="font-size:16px;color:var(--color-ok)"></i>
+          </div>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55;padding:0 2px">You can't see other members, and they can't see you. Only these two see your data.</div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;gap:2px">
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 2px;box-shadow:0 1px 0 var(--color-divider);font-size:15px"><i class="ph-bold ph-bell" style="font-size:17px;color:var(--color-neutral-500)"></i>Notifications</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 2px;box-shadow:0 1px 0 var(--color-divider);font-size:15px"><i class="ph-bold ph-scales" style="font-size:17px;color:var(--color-neutral-500)"></i>Units · kg</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:13px 2px;font-size:15px;color:var(--color-danger)"><i class="ph-bold ph-sign-out" style="font-size:17px"></i>Sign out</div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="apps" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A member's view of the role system is a short, honest list of the two people who can read their data — visibility is explained, never implied.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ B · ADMIN ══════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">B</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Web · admin</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">AD-01 → AD-07 · people, invite links, assignments</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- AD-01 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-01</span> · People</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-map-pin" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-users-three" style="font-size:20px"></i></div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:7px"><span style="width:34px;height:34px;border-radius:50%;background:var(--face)"></span><span style="font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent)">Admin</span></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;padding:30px 40px;gap:22px;overflow:hidden">
+          <div style="display:flex;align-items:flex-end;gap:16px">
+            <div style="flex:1"><div style="font-size:30px;letter-spacing:-0.025em">People</div><div style="font-size:13px;color:var(--color-neutral-500);margin-top:6px">6 members · 2 trainers · 1 invite pending</div></div>
+            <button class="btn btn-secondary" style="min-height:42px;font-size:14px;gap:8px"><i class="ph-bold ph-user-focus"></i>Add trainer</button>
+            <button class="btn btn-primary" style="min-height:42px;font-size:14px;gap:8px"><i class="ph-bold ph-user-plus"></i>New member </button>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="flex:1;display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:10px 13px"><i class="ph-bold ph-magnifying-glass" style="font-size:15px;color:var(--color-neutral-500)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-600)">Search people</span></div>
+            <div style="display:flex;gap:0;border-radius:var(--radius-md);overflow:hidden;box-shadow:inset 0 0 0 1px var(--color-neutral-800)">
+              <span style="padding:9px 15px;font-size:13px;background:var(--color-accent-900);color:var(--color-accent)">All</span>
+              <span style="padding:9px 15px;font-size:13px;color:var(--color-neutral-500)">Members</span>
+              <span style="padding:9px 15px;font-size:13px;color:var(--color-neutral-500)">Trainers</span>
+              <span style="padding:9px 15px;font-size:13px;color:var(--color-neutral-500)">Pending</span>
+            </div>
+          </div>
+          <table class="table">
+            <thead><tr><th style="width:280px">Person</th><th>Role</th><th>Trainer</th><th>Last session</th><th>30-day volume</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--face);flex:none"></span><span><span style="display:block;font-size:14px">Marta Kovalenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">marta@example.com</span></span></span></td>
+                <td><span class="tag tag-neutral">Member</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">Olha Sydorenko</td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">Today · live</td>
+                <td style="font-variant-numeric:tabular-nums">42.8 t</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-400)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span>Training now</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--photo-2);flex:none"></span><span><span style="display:block;font-size:14px">Dmytro Illienko</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">dmytro@example.com</span></span></span></td>
+                <td><span class="tag tag-neutral">Member</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">Olha Sydorenko</td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">Yesterday</td>
+                <td style="font-variant-numeric:tabular-nums">31.2 t</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-500)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Active</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:12px;color:var(--color-neutral-500)">SK</span><span><span style="display:block;font-size:14px">Sofia Kravets</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">sofia@example.com</span></span></span></td>
+                <td><span class="tag tag-neutral">Member</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-600)">—</td>
+                <td style="font-size:13px;color:var(--color-neutral-600)">Never</td>
+                <td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">—</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-accent-300)"><i class="ph-bold ph-link" style="font-size:12px"></i>Invite sent · 5 d left</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--photo);flex:none"></span><span><span style="display:block;font-size:14px">Olha Sydorenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">olha@example.com</span></span></span></td>
+                <td><span class="tag tag-accent">Trainer</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">4 clients</td>
+                <td style="font-size:13px;color:var(--color-neutral-600)">—</td>
+                <td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">—</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-500)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Active</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:12px;color:var(--color-neutral-500)">PH</span><span><span style="display:block;font-size:14px">Pavlo Hrytsenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">pavlo@example.com</span></span></span></td>
+                <td><span class="tag tag-neutral">Member</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-600)">—</td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">14 Jun</td>
+                <td style="font-variant-numeric:tabular-nums">6.4 t</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-500)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-neutral-700)"></span>Dormant · 48 d</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--photo-2);flex:none"></span><span><span style="display:block;font-size:14px">Iryna Melnyk</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">iryna@example.com</span></span></span></td>
+                <td><span class="tag tag-neutral">Member</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">Taras Lymar</td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">29 Jul</td>
+                <td style="font-variant-numeric:tabular-nums">18.9 t</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-500)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Active</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:12px;color:var(--color-neutral-500)">TL</span><span><span style="display:block;font-size:14px">Taras Lymar</span><span style="display:block;font-size:11px;color:var(--color-neutral-600);margin-top:2px">taras@example.com</span></span></span></td>
+                <td><span class="tag tag-accent">Trainer</span></td>
+                <td style="font-size:13px;color:var(--color-neutral-400)">2 clients</td>
+                <td style="font-size:13px;color:var(--color-neutral-600)">—</td>
+                <td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">—</td>
+                <td><span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-500)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Active</span></td>
+                <td style="text-align:right"><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:auto;display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface);max-width:640px">
+            <i class="ph-bold ph-shield-star" style="font-size:15px;color:var(--color-accent);margin-top:1px"></i>
+            <span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500);flex:1">This page exists only for admins. Members never see each other; trainers see only the clients assigned to them.</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">One table, every person. A live session shows as a pulsing brass dot in the status column — the same signal the member sees in their own hero.</div>
+    </div>
+
+    <!-- AD-02 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-02</span> · New member · link generated</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;position:relative">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-users-three" style="font-size:20px"></i></div>
+        </div>
+        <div style="flex:1;padding:30px 40px;opacity:0.35"><div style="font-size:30px;letter-spacing:-0.025em">People</div><div style="margin-top:22px;background:var(--color-surface);border-radius:var(--radius-lg);height:340px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.62);display:grid;place-items:center">
+          <div style="width:620px;background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden">
+            <div style="padding:22px 26px;box-shadow:0 1px 0 var(--color-divider)">
+              <div style="display:flex;align-items:center;gap:10px;color:var(--color-ok)"><i class="ph-fill ph-check-circle" style="font-size:19px"></i><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">Account created</span></div>
+              <div style="font-size:22px;letter-spacing:-0.02em;margin-top:10px">Sofia Kravets is ready to claim</div>
+              <div style="font-size:13px;color:var(--color-neutral-500);margin-top:6px;line-height:1.55">Send this link. When Sofia opens it she sets her own password, adds a photo and picks a gym — and her data binds to this account.</div>
+            </div>
+            <div style="padding:22px 26px;display:flex;flex-direction:column;gap:16px">
+              <div>
+                <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:9px">Invite link</div>
+                <div style="display:flex;gap:10px">
+                  <div style="flex:1;display:flex;align-items:center;gap:10px;background:var(--color-bg);border-radius:var(--radius-md);padding:12px 13px;box-shadow:inset 0 0 0 1px var(--color-accent-800)"><i class="ph-bold ph-link" style="font-size:15px;color:var(--color-accent)"></i><span style="flex:1;font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-300)">myfit.local/join/9f3a-c21e-77bd</span></div>
+                  <button class="btn btn-primary" style="min-height:44px;font-size:14px;gap:7px"><i class="ph-bold ph-copy"></i>Copy</button>
+                  <button class="btn btn-secondary" style="min-height:44px;font-size:14px;gap:7px"><i class="ph-bold ph-qr-code"></i>QR</button>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px">
+                <div style="flex:1;background:var(--color-bg);border-radius:var(--radius-md);padding:13px"><div style="font-size:11px;color:var(--color-neutral-600)">Expires</div><div style="font-size:15px;margin-top:5px">9 Aug 2026 · 7 days</div></div>
+                <div style="flex:1;background:var(--color-bg);border-radius:var(--radius-md);padding:13px"><div style="font-size:11px;color:var(--color-neutral-600)">Uses</div><div style="font-size:15px;margin-top:5px">Single use</div></div>
+                <div style="flex:1;background:var(--color-bg);border-radius:var(--radius-md);padding:13px"><div style="font-size:11px;color:var(--color-neutral-600)">Assigned trainer</div><div style="font-size:15px;margin-top:5px">Olha Sydorenko</div></div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg)"><i class="ph-bold ph-info" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i><span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500)">The link carries no password. Until it's claimed the account holds only the name, email and trainer you set here.</span></div>
+            </div>
+            <div style="padding:18px 26px;box-shadow:0 -1px 0 var(--color-divider);display:flex;gap:12px;justify-content:flex-end">
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Create another</button>
+              <button class="btn btn-primary" style="min-height:40px;font-size:14px">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Creation and the link are one dialog — the admin never has to go looking for what they just made. QR is there because most invites happen standing in the gym.</div>
+    </div>
+
+    <!-- AD-03 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-03</span> · Member detail · admin view</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-users-three" style="font-size:20px"></i></div>
+        </div>
+        <div style="width:300px;flex:none;box-shadow:1px 0 0 var(--color-divider);padding:24px 18px;display:flex;flex-direction:column;gap:10px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:9px 12px"><i class="ph-bold ph-magnifying-glass" style="font-size:14px;color:var(--color-neutral-500)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-600)">Search people</span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);box-shadow:inset 0 0 0 1px var(--color-accent-700)"><span style="width:32px;height:32px;border-radius:50%;background:var(--face);flex:none"></span><span style="flex:1"><span style="display:block;font-size:13px">Marta Kovalenko</span><span style="display:block;font-size:10px;color:var(--color-accent-300);margin-top:2px">Training now</span></span><span class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent)"></span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--radius-md)"><span style="width:32px;height:32px;border-radius:50%;background:var(--photo-2);flex:none"></span><span style="flex:1"><span style="display:block;font-size:13px">Dmytro Illienko</span><span style="display:block;font-size:10px;color:var(--color-neutral-600);margin-top:2px">Yesterday</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--radius-md)"><span style="width:32px;height:32px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:11px;color:var(--color-neutral-500)">SK</span><span style="flex:1"><span style="display:block;font-size:13px">Sofia Kravets</span><span style="display:block;font-size:10px;color:var(--color-accent-300);margin-top:2px">Invite pending</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--radius-md)"><span style="width:32px;height:32px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:11px;color:var(--color-neutral-500)">PH</span><span style="flex:1"><span style="display:block;font-size:13px">Pavlo Hrytsenko</span><span style="display:block;font-size:10px;color:var(--color-neutral-600);margin-top:2px">Dormant · 48 d</span></span></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:var(--radius-md)"><span style="width:32px;height:32px;border-radius:50%;background:var(--photo-2);flex:none"></span><span style="flex:1"><span style="display:block;font-size:13px">Iryna Melnyk</span><span style="display:block;font-size:10px;color:var(--color-neutral-600);margin-top:2px">29 Jul</span></span></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div style="flex:none;padding:26px 36px 18px;box-shadow:0 1px 0 var(--color-divider)">
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="width:64px;height:64px;border-radius:50%;background:var(--face);flex:none;box-shadow:0 0 0 1px var(--color-accent-700)"></span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px;letter-spacing:-0.025em">Marta Kovalenko</span><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--color-accent-900)"><span class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-200)">Training now · 24:18</span></span></div>
+                <div style="font-size:12px;color:var(--color-neutral-500);margin-top:6px">marta@example.com · joined 3 Mar 2026 · trainer Olha Sydorenko</div>
+              </div>
+              <button class="btn btn-secondary" style="min-height:38px;font-size:13px;gap:7px"><i class="ph-bold ph-user-focus"></i>Change trainer</button>
+              <button class="btn btn-secondary" style="min-height:38px;font-size:13px;gap:7px"><i class="ph-bold ph-pencil-simple"></i>Edit</button>
+              <i class="ph-bold ph-dots-three" style="font-size:19px;color:var(--color-neutral-600)"></i>
+            </div>
+            <div style="display:flex;gap:26px;margin-top:20px;font-size:13px">
+              <span style="color:var(--color-accent);box-shadow:0 2px 0 var(--color-accent);padding-bottom:9px">Overview</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Sessions</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Programs</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Gyms</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Account</span>
+            </div>
+          </div>
+          <div style="flex:1;padding:26px 36px;display:grid;grid-template-columns:1fr 340px;gap:32px;overflow:hidden">
+            <div style="display:flex;flex-direction:column;gap:24px">
+              <div style="display:flex;gap:12px">
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">42.8 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">30-day volume</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">14</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Sessions</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums;color:var(--color-ok)">3</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">New records</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">3.5</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Per week</div></div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Weekly volume</div>
+                <div style="display:flex;align-items:flex-end;gap:8px;height:120px">
+                  <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Recent sessions</div>
+                <table class="table"><thead><tr><th>Date</th><th>Session</th><th>Gym</th><th>Sets</th><th>Volume</th></tr></thead><tbody>
+                  <tr><td>Today</td><td>Legs <span class="tag tag-accent" style="margin-left:6px">Live</span></td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">7</td><td style="font-variant-numeric:tabular-nums">2 100 kg</td></tr>
+                  <tr><td>29 Jul</td><td>Push day</td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">18</td><td style="font-variant-numeric:tabular-nums">4 980 kg</td></tr>
+                  <tr><td>27 Jul</td><td>Legs</td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">14</td><td style="font-variant-numeric:tabular-nums">3 420 kg</td></tr>
+                  <tr><td>25 Jul</td><td>Pull day</td><td>Sportlife Livoberezhna</td><td style="font-variant-numeric:tabular-nums">21</td><td style="font-variant-numeric:tabular-nums">5 640 kg</td></tr>
+                </tbody></table>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Programs assigned</div>
+              <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px">
+                <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:14px">Upper / lower · 8 weeks</span><span class="tag tag-accent">Week 4</span></div>
+                <div style="height:3px;border-radius:2px;background:var(--color-neutral-900);margin-top:11px;overflow:hidden"><div style="width:50%;height:100%;background:var(--color-accent)"></div></div>
+                <div style="font-size:11px;color:var(--color-neutral-500);margin-top:8px">Assigned by Olha · 12 of 24 sessions</div>
+              </div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Records</div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 var(--color-divider);font-size:13px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">110 kg</span><span class="tag tag-accent">+5</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 var(--color-divider);font-size:13px"><span style="flex:1">Bench Press</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">82.5 kg</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;font-size:13px"><span style="flex:1">Deadlift</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">140 kg</span></div>
+              <div style="margin-top:auto;display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-eye" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i><span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500);flex:1">Marta sees that you and Olha can read this. Nothing here is hidden from her.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The admin's member view is the member's own Progress screen plus account controls — same charts, same records, so nothing has to be learned twice.</div>
+    </div>
+
+    <!-- AD-04 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:700px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-04</span> · Assign trainer</div>
+      <div style="width:700px;background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden">
+        <div style="padding:22px 26px;box-shadow:0 1px 0 var(--color-divider)">
+          <div style="font-size:20px">Who trains Marta?</div>
+          <div style="font-size:12px;color:var(--color-neutral-500);margin-top:6px;line-height:1.55">A trainer gets read access to Marta's sessions, progress and programs — nothing else, and no ability to change them.</div>
+        </div>
+        <div style="padding:18px 26px;display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-md);background:var(--color-bg);box-shadow:inset 0 0 0 1px var(--color-accent)">
+            <span style="width:38px;height:38px;border-radius:50%;background:var(--photo);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Olha Sydorenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:2px">4 clients · trainer since Jan 2026</span></span>
+            <span style="width:22px;height:22px;border-radius:50%;background:var(--color-accent);display:grid;place-items:center"><i class="ph-bold ph-check" style="font-size:12px;color:#1a1409"></i></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <span style="width:38px;height:38px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:12px;color:var(--color-neutral-500)">TL</span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Taras Lymar</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:2px">2 clients</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <span style="width:38px;height:38px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center"><i class="ph-bold ph-prohibit" style="font-size:15px;color:var(--color-neutral-600)"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">No trainer</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:2px">Only you can see this member's data</span></span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg);margin-top:6px"><i class="ph-bold ph-bell" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i><span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500)">Marta and the trainer are both notified when this changes. Removing a trainer revokes their access immediately, including any open tab.</span></div>
+        </div>
+        <div style="padding:18px 26px;box-shadow:0 -1px 0 var(--color-divider);display:flex;gap:12px;justify-content:flex-end">
+          <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Cancel</button>
+          <button class="btn btn-primary" style="min-height:40px;font-size:14px">Assign</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Assignment is the only way a trainer gains visibility — there is no self-service request and no org-wide trainer.</div>
+    </div>
+
+    <!-- AD-05 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:700px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-05</span> · Invite &amp; member menu · destructive states</div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Invite states in the people table</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-link" style="font-size:15px;color:var(--color-accent)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Invite sent · 5 days left</span><span style="font-size:12px;color:var(--color-accent)">Copy</span><span style="font-size:12px;color:var(--color-accent)">Revoke</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-hourglass-low" style="font-size:15px;color:var(--color-neutral-500)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-400)">Invite expired · 28 Jul</span><span style="font-size:12px;color:var(--color-accent)">New link</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-prohibit" style="font-size:15px;color:var(--color-danger)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-400)">Invite revoked · link dead</span><span style="font-size:12px;color:var(--color-accent)">New link</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-fill ph-check-circle" style="font-size:15px;color:var(--color-ok)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Claimed 31 Jul · account active</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-paper-plane-tilt" style="font-size:15px;color:var(--color-accent)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Sofia asked for a new link · 2 h ago</span><span style="font-size:12px;color:var(--color-accent)">Send</span></div>
+        </div>
+        <div style="display:flex;gap:16px">
+          <div style="width:330px;background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:8px;display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:8px 10px 6px">Marta Kovalenko</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px"><i class="ph-bold ph-eye" style="font-size:16px;color:var(--color-neutral-400)"></i>Open profile</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px"><i class="ph-bold ph-user-focus" style="font-size:16px;color:var(--color-neutral-400)"></i>Change trainer</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px"><i class="ph-bold ph-pencil-simple" style="font-size:16px;color:var(--color-neutral-400)"></i>Edit name &amp; email</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px"><i class="ph-bold ph-key" style="font-size:16px;color:var(--color-neutral-400)"></i>Send password reset</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px"><i class="ph-bold ph-export" style="font-size:16px;color:var(--color-neutral-400)"></i>Export their data</div>
+            <div style="height:1px;background:var(--color-divider);margin:5px 10px"></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px;color:var(--color-danger)"><i class="ph-bold ph-pause-circle" style="font-size:16px"></i>Suspend access</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 10px;font-size:14px;color:var(--color-danger)"><i class="ph-bold ph-trash" style="font-size:16px"></i>Delete member</div>
+          </div>
+          <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:18px;display:flex;flex-direction:column;gap:12px;align-self:flex-start">
+            <div style="display:flex;align-items:center;gap:9px"><i class="ph-bold ph-trash" style="font-size:17px;color:var(--color-danger)"></i><span style="font-size:17px">Delete Marta Kovalenko?</span></div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">14 sessions, 42.8 t of logged volume and 3 records are deleted with the account. Olha loses access at the same moment. This cannot be undone.</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg);box-shadow:inset 0 0 0 1px var(--color-danger-line)"><span style="font-size:12px;color:var(--color-neutral-500)">Type</span><span style="font-size:12px;color:var(--color-danger-text);font-variant-numeric:tabular-nums">Marta Kovalenko</span><span style="flex:1"></span><span style="width:1px;height:16px;background:var(--color-danger)"></span></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px"><button class="btn btn-secondary" style="min-height:40px;font-size:14px">Keep</button><button style="min-height:40px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px" disabled>Delete</button></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Deleting a person is the only action in the product that requires typing the name — it destroys another human's training history, so the 5-second undo is not enough.</div>
+    </div>
+
+    <!-- AD-06 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:700px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-06</span> · People · empty, skeleton, failed</div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:24px;display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+          <i class="ph-bold ph-users-three" style="font-size:26px;color:var(--color-neutral-700)"></i>
+          <div style="font-size:18px">No one here but you</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:52ch">Create a member and hand them a link. They set their own password — you never see or type it.</div>
+          <button class="btn btn-primary" style="min-height:44px;font-size:14px;gap:8px;margin-top:4px"><i class="ph-bold ph-user-plus"></i>New member</button>
+        </div>
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:24px;display:flex;flex-direction:column;gap:14px">
+          <div class="sk" style="width:120px;height:10px"></div>
+          <div style="display:flex;gap:14px;align-items:center"><div class="sk" style="width:34px;height:34px;border-radius:50%"></div><div class="sk" style="flex:1;height:12px"></div><div class="sk" style="width:70px;height:12px"></div><div class="sk" style="width:90px;height:12px"></div></div>
+          <div style="display:flex;gap:14px;align-items:center"><div class="sk" style="width:34px;height:34px;border-radius:50%"></div><div class="sk" style="flex:1;height:12px"></div><div class="sk" style="width:70px;height:12px"></div><div class="sk" style="width:90px;height:12px"></div></div>
+          <div style="display:flex;gap:14px;align-items:center"><div class="sk" style="width:34px;height:34px;border-radius:50%"></div><div class="sk" style="flex:1;height:12px"></div><div class="sk" style="width:70px;height:12px"></div><div class="sk" style="width:90px;height:12px"></div></div>
+        </div>
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <i class="ph-bold ph-warning-octagon" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <div style="flex:1"><div style="font-size:13px;color:var(--color-danger-text);line-height:1.5">Couldn't create the account — that email already belongs to Dmytro Illienko.</div><div style="font-size:11px;color:var(--color-danger-text);opacity:0.7;margin-top:5px;font-variant-numeric:tabular-nums">409 · POST /api/admin/users</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-danger)"><i class="ph-bold ph-cloud-slash" style="font-size:15px;color:var(--color-danger)"></i><span style="flex:1;font-size:12px;color:var(--color-danger-text)">Offline — admin actions need the server. Nothing is queued here.</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Admin writes are the one part of the product that is <em>not</em> offline-first: identity can't be reconciled after the fact, so the UI says so instead of queueing.</div>
+    </div>
+
+    <!-- AD-07 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:700px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">AD-07</span> · Permission matrix</div>
+      <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:22px;display:flex;flex-direction:column;gap:16px">
+        <table class="table">
+          <thead><tr><th style="width:290px">Capability</th><th>Member</th><th>Trainer</th><th>Admin</th></tr></thead>
+          <tbody>
+            <tr><td>Own sessions, progress, gyms</td><td style="color:var(--color-ok)">Read / write</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-neutral-600)">—</td></tr>
+            <tr><td>Assigned clients' sessions</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-accent-300)">Read</td><td style="color:var(--color-ok)">Read</td></tr>
+            <tr><td>Any member's sessions</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-ok)">Read</td></tr>
+            <tr><td>Assign a program to a client</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-ok)">Write</td><td style="color:var(--color-ok)">Write</td></tr>
+            <tr><td>Edit a client's logged sets</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-danger)">Never</td><td style="color:var(--color-danger)">Never</td></tr>
+            <tr><td>Create / edit / delete people</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-ok)">Write</td></tr>
+            <tr><td>Generate and revoke invite links</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-ok)">Write</td></tr>
+            <tr><td>Assign trainers to members</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-ok)">Write</td></tr>
+            <tr><td>See the list of all people</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-accent-300)">Own clients</td><td style="color:var(--color-ok)">Everyone</td></tr>
+            <tr><td>Change someone's role</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-neutral-600)">—</td><td style="color:var(--color-ok)">Write</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.7">Rules · Nobody but the owner ever writes a logged set — a trainer who spots an error asks the member to fix it. A member's data is visible to exactly two roles: their admin, and the one trainer assigned to them. Revoking an assignment kills access on the next request, not at the next login. Every read of another person's data is written to an audit log the member can open from their profile.</div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The whole authorisation model on one screen — build the API guard from this table, not from the screens.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ C · TRAINER ══════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">C</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Trainer</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">TR-01 → TR-04 · read-only, assigned clients only</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- TR-01 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">TR-01</span> · Trainer · my clients</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-user-focus" style="font-size:20px"></i></div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:7px"><span style="width:34px;height:34px;border-radius:50%;background:var(--photo)"></span><span style="font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-ok)">Trainer</span></div>
+        </div>
+        <div style="flex:1;padding:30px 40px;display:flex;flex-direction:column;gap:22px;overflow:hidden">
+          <div style="display:flex;align-items:flex-end;gap:16px">
+            <div style="flex:1"><div style="font-size:30px;letter-spacing:-0.025em">My clients</div><div style="font-size:13px;color:var(--color-neutral-500);margin-top:6px">4 assigned by Andrii · 1 training right now</div></div>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:inset 0 0 0 1px var(--color-accent-800)">
+              <div style="height:96px;background:var(--photo);position:relative"><div style="position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(10,11,13,0.6)"><span class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;color:var(--color-accent-200)">Training now · 24:18</span></div></div>
+              <div style="padding:14px;display:flex;gap:12px;align-items:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--face);flex:none;margin-top:-32px;box-shadow:0 0 0 3px var(--color-surface)"></span><span style="flex:1"><span style="display:block;font-size:15px">Marta Kovalenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Legs · 7 sets · 2.1 t</span></span></div>
+            </div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden">
+              <div style="height:96px;background:var(--photo-2)"></div>
+              <div style="padding:14px;display:flex;gap:12px;align-items:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--photo-2);flex:none;margin-top:-32px;box-shadow:0 0 0 3px var(--color-surface)"></span><span style="flex:1"><span style="display:block;font-size:15px">Dmytro Illienko</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Last session yesterday</span></span></div>
+            </div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden">
+              <div style="height:96px;background:var(--generic)"></div>
+              <div style="padding:14px;display:flex;gap:12px;align-items:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--color-neutral-900);flex:none;margin-top:-32px;box-shadow:0 0 0 3px var(--color-surface);display:grid;place-items:center;font-size:12px;color:var(--color-neutral-500)">PH</span><span style="flex:1"><span style="display:block;font-size:15px">Pavlo Hrytsenko</span><span style="display:block;font-size:11px;color:var(--color-danger-text);margin-top:3px">Dormant · 48 days</span></span></div>
+            </div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);overflow:hidden">
+              <div style="height:96px;background:var(--photo)"></div>
+              <div style="padding:14px;display:flex;gap:12px;align-items:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--photo-2);flex:none;margin-top:-32px;box-shadow:0 0 0 3px var(--color-surface)"></span><span style="flex:1"><span style="display:block;font-size:15px">Iryna Melnyk</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Last session 29 Jul</span></span></div>
+            </div>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:var(--space-2)">This week across your clients</div>
+          <table class="table">
+            <thead><tr><th style="width:240px">Client</th><th>Sessions</th><th>Volume</th><th>vs last week</th><th>Program</th><th>Last seen</th></tr></thead>
+            <tbody>
+              <tr><td><span style="display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:50%;background:var(--face);flex:none"></span>Marta Kovalenko</span></td><td style="font-variant-numeric:tabular-nums">4</td><td style="font-variant-numeric:tabular-nums">14.2 t</td><td style="color:var(--color-ok);font-variant-numeric:tabular-nums">+18%</td><td style="font-size:13px;color:var(--color-neutral-400)">Upper / lower · wk 4</td><td style="font-size:13px;color:var(--color-accent)">Now</td></tr>
+              <tr><td><span style="display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:50%;background:var(--photo-2);flex:none"></span>Dmytro Illienko</span></td><td style="font-variant-numeric:tabular-nums">3</td><td style="font-variant-numeric:tabular-nums">9.8 t</td><td style="color:var(--color-ok);font-variant-numeric:tabular-nums">+4%</td><td style="font-size:13px;color:var(--color-neutral-400)">Push / pull · wk 2</td><td style="font-size:13px;color:var(--color-neutral-400)">Yesterday</td></tr>
+              <tr><td><span style="display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:50%;background:var(--color-neutral-900);flex:none;display:grid;place-items:center;font-size:11px;color:var(--color-neutral-500)">PH</span>Pavlo Hrytsenko</span></td><td style="font-variant-numeric:tabular-nums">0</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">—</td><td style="color:var(--color-danger);font-variant-numeric:tabular-nums">−100%</td><td style="font-size:13px;color:var(--color-neutral-600)">None</td><td style="font-size:13px;color:var(--color-danger-text)">48 d ago</td></tr>
+              <tr><td><span style="display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:50%;background:var(--photo-2);flex:none"></span>Iryna Melnyk</span></td><td style="font-variant-numeric:tabular-nums">2</td><td style="font-variant-numeric:tabular-nums">6.1 t</td><td style="color:var(--color-danger);font-variant-numeric:tabular-nums">−12%</td><td style="font-size:13px;color:var(--color-neutral-400)">Full body · wk 6</td><td style="font-size:13px;color:var(--color-neutral-400)">29 Jul</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:auto;display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface);max-width:660px"><i class="ph-bold ph-user-focus" style="font-size:15px;color:var(--color-ok);margin-top:1px"></i><span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500);flex:1">You see these four because Andrii assigned them. You can't search for other members, and they can't see each other.</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The trainer's home is four client cards, not a people table — the scale is different, so the layout is too. Dormant clients are the one thing surfaced in ruby.</div>
+    </div>
+
+    <!-- TR-02 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">TR-02</span> · Client detail · read-only</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-user-focus" style="font-size:20px"></i></div>
+          <div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:7px"><span style="width:34px;height:34px;border-radius:50%;background:var(--photo)"></span><span style="font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-ok)">Trainer</span></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div style="flex:none;height:44px;display:flex;align-items:center;gap:10px;padding:0 36px;background:var(--color-ok-tint);box-shadow:inset 0 -1px 0 var(--color-ok-line)">
+            <i class="ph-bold ph-eye" style="font-size:15px;color:var(--color-ok)"></i>
+            <span style="flex:1;font-size:12px;color:var(--color-ok-text)">Read-only — you're viewing Marta's data as her trainer. Nothing here can be edited, and Marta can see that you looked.</span>
+          </div>
+          <div style="flex:none;padding:24px 36px 18px;box-shadow:0 1px 0 var(--color-divider)">
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="width:64px;height:64px;border-radius:50%;background:var(--face);flex:none;box-shadow:0 0 0 1px var(--color-accent-700)"></span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:10px"><span style="font-size:26px;letter-spacing:-0.025em">Marta Kovalenko</span><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--color-accent-900)"><span class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-200)">Training now · 24:18</span></span></div>
+                <div style="font-size:12px;color:var(--color-neutral-500);margin-top:6px">Your client since 3 Mar 2026 · Upper / lower, week 4</div>
+              </div>
+              <button class="btn btn-secondary" style="min-height:38px;font-size:13px;gap:7px"><i class="ph-bold ph-cards"></i>Assign program</button>
+              <button class="btn btn-secondary" style="min-height:38px;font-size:13px;gap:7px"><i class="ph-bold ph-note"></i>Add a note</button>
+            </div>
+            <div style="display:flex;gap:26px;margin-top:20px;font-size:13px">
+              <span style="color:var(--color-accent);box-shadow:0 2px 0 var(--color-accent);padding-bottom:9px">Overview</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Sessions</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Programs</span>
+              <span style="color:var(--color-neutral-500);padding-bottom:9px">Notes</span>
+            </div>
+          </div>
+          <div style="flex:1;padding:26px 36px;display:grid;grid-template-columns:1fr 340px;gap:32px;overflow:hidden">
+            <div style="display:flex;flex-direction:column;gap:24px">
+              <div style="display:flex;gap:12px">
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">42.8 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">30-day volume</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">14</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Sessions</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums;color:var(--color-ok)">3</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">New records</div></div>
+                <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">92%</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Program adherence</div></div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Live right now</div>
+                <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-accent-800)">
+                  <div style="padding:16px 18px">
+                    <div style="display:grid;grid-template-columns:34px 1fr 1fr 110px;gap:12px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:6px;box-shadow:0 1px 0 var(--color-divider)"><span>#</span><span>Reps</span><span>Weight</span><span>Type</span></div>
+                    <div style="display:grid;grid-template-columns:34px 1fr 1fr 110px;gap:12px;align-items:center;padding:9px 0;font-size:15px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:12px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">12</span><span style="color:var(--color-neutral-500)">40 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">Warm-up</span></div>
+                    <div style="display:grid;grid-template-columns:34px 1fr 1fr 110px;gap:12px;align-items:center;padding:9px 0;font-size:15px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:12px;color:var(--color-neutral-600)">2</span><span>8</span><span>80 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">Working</span></div>
+                    <div style="display:grid;grid-template-columns:34px 1fr 1fr 110px;gap:12px;align-items:center;padding:9px 0;font-size:15px;font-variant-numeric:tabular-nums;background:var(--color-ok-tint);border-radius:6px"><span style="font-size:12px;color:var(--color-ok);padding-left:6px">3</span><span style="color:var(--color-ok-text)">8</span><span style="color:var(--color-ok-text)">90 kg</span><span style="font-size:11px;color:var(--color-ok)">Record</span></div>
+                    <div style="font-size:11px;color:var(--color-neutral-600);margin-top:12px">Back Squat · updating live · you cannot edit these</div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Recent sessions</div>
+                <table class="table"><thead><tr><th>Date</th><th>Session</th><th>Gym</th><th>Sets</th><th>Volume</th></tr></thead><tbody>
+                  <tr><td>29 Jul</td><td>Push day</td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">18</td><td style="font-variant-numeric:tabular-nums">4 980 kg</td></tr>
+                  <tr><td>27 Jul</td><td>Legs</td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">14</td><td style="font-variant-numeric:tabular-nums">3 420 kg</td></tr>
+                </tbody></table>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Your notes</div>
+              <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px"><div style="font-size:13px;line-height:1.55;color:var(--color-neutral-300)">Knee tracking improved at 85. Hold the squat here for another two weeks before adding load.</div><div style="font-size:11px;color:var(--color-neutral-600);margin-top:9px">29 Jul · private to you and Marta</div></div>
+              <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px"><div style="font-size:13px;line-height:1.55;color:var(--color-neutral-300)">Missed two sessions during travel — reset week 3 rather than skipping ahead.</div><div style="font-size:11px;color:var(--color-neutral-600);margin-top:9px">18 Jul</div></div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:var(--space-2)">Records</div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 var(--color-divider);font-size:13px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">110 kg</span><span class="tag tag-accent">+5</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;font-size:13px"><span style="flex:1">Bench Press</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">82.5 kg</span></div>
+              <div style="margin-top:auto;display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-lock-simple" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i><span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500);flex:1">No edit, delete or account controls exist on this page — not disabled, absent.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Identical to AD-03 minus every write affordance, plus a permanent emerald read-only bar and a notes column. Watching a client's live session is the trainer's killer feature.</div>
+    </div>
+
+    <!-- TR-03 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:700px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">TR-03</span> · Trainer · empty, revoked, denied</div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:24px;display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+          <i class="ph-bold ph-user-focus" style="font-size:26px;color:var(--color-neutral-700)"></i>
+          <div style="font-size:18px">No clients assigned yet</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:52ch">An admin decides who you train. When someone is assigned they appear here with their full history — you don't need to do anything.</div>
+        </div>
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <i class="ph-bold ph-prohibit" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <div style="flex:1"><div style="font-size:13px;color:var(--color-danger-text);line-height:1.5">Pavlo is no longer your client. Andrii reassigned them on 31 July.</div><div style="font-size:11px;color:var(--color-danger-text);opacity:0.7;margin-top:5px;font-variant-numeric:tabular-nums">403 · GET /api/clients/pavlo</div></div>
+          </div>
+          <div style="font-size:12px;color:var(--color-neutral-500);line-height:1.55">Shown when an open tab loses access mid-view. The data is cleared from the screen immediately, not left visible until reload.</div>
+        </div>
+        <div style="width:700px;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">What a trainer never sees</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface);font-size:12px;color:var(--color-neutral-500)"><i class="ph-bold ph-x" style="font-size:11px;color:var(--color-danger)"></i>The people table</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface);font-size:12px;color:var(--color-neutral-500)"><i class="ph-bold ph-x" style="font-size:11px;color:var(--color-danger)"></i>Invite links</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface);font-size:12px;color:var(--color-neutral-500)"><i class="ph-bold ph-x" style="font-size:11px;color:var(--color-danger)"></i>Unassigned members</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface);font-size:12px;color:var(--color-neutral-500)"><i class="ph-bold ph-x" style="font-size:11px;color:var(--color-danger)"></i>Other trainers' clients</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface);font-size:12px;color:var(--color-neutral-500)"><i class="ph-bold ph-x" style="font-size:11px;color:var(--color-danger)"></i>Account or role controls</span>
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface);font-size:12px;color:var(--color-neutral-500)"><i class="ph-bold ph-x" style="font-size:11px;color:var(--color-danger)"></i>Any set-editing control</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Denied states name who changed what and when — a 403 with no explanation makes people distrust the product.</div>
+    </div>
+
+    <!-- TR-04 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">TR-04</span> · Trainer on the phone</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;height:38px;display:flex;align-items:center;gap:9px;padding:0 20px;background:var(--color-ok-tint);box-shadow:inset 0 -1px 0 var(--color-ok-line)"><i class="ph-bold ph-eye" style="font-size:13px;color:var(--color-ok)"></i><span style="font-size:11px;color:var(--color-ok-text)">Read-only · trainer view</span></div>
+        <div style="flex:1;overflow:hidden;padding:14px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div><div style="font-size:26px;letter-spacing:-0.025em">My clients</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:4px">4 assigned · 1 training now</div></div>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-accent-800)">
+            <div style="height:104px;background:var(--photo);position:relative"><div style="position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(10,11,13,0.6)"><span class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;color:var(--color-accent-200)">Training now · 24:18</span></div></div>
+            <div style="padding:13px 14px;display:flex;gap:12px;align-items:center"><span style="width:38px;height:38px;border-radius:50%;background:var(--face);flex:none;margin-top:-30px;box-shadow:0 0 0 3px var(--color-surface)"></span><span style="flex:1"><span style="display:block;font-size:15px">Marta Kovalenko</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Legs · 7 sets · 2.1 t</span></span><i class="ph-bold ph-caret-right" style="font-size:14px;color:var(--color-neutral-600)"></i></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)"><span style="width:52px;height:52px;border-radius:9px;background:var(--photo-2);flex:none"></span><span style="flex:1"><span style="display:block;font-size:14px">Dmytro Illienko</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Yesterday · 9.8 t this week</span></span></div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)"><span style="width:52px;height:52px;border-radius:9px;background:var(--generic);flex:none;display:grid;place-items:center;font-size:13px;color:var(--color-neutral-600)">PH</span><span style="flex:1"><span style="display:block;font-size:14px">Pavlo Hrytsenko</span><span style="display:block;font-size:11px;color:var(--color-danger-text);margin-top:3px">Dormant · 48 days</span></span></div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)"><span style="width:52px;height:52px;border-radius:9px;background:var(--photo);flex:none"></span><span style="flex:1"><span style="display:block;font-size:14px">Iryna Melnyk</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">29 Jul · 6.1 t this week</span></span></div>
+        </div>
+        <div style="flex:none;display:grid;grid-template-columns:repeat(3,1fr);padding:8px 12px 22px;background:#16171a;box-shadow:0 -1px 0 rgba(233,234,236,0.14)">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:var(--color-accent)"><i class="ph-bold ph-user-focus" style="font-size:20px"></i><span style="font-size:10px">Clients</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:var(--color-neutral-600)"><i class="ph-bold ph-cards" style="font-size:20px"></i><span style="font-size:10px">Programs</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;color:var(--color-neutral-600)"><i class="ph-bold ph-user" style="font-size:20px"></i><span style="font-size:10px">Me</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A trainer's phone has three tabs, not four — no Today, no Gyms, because a trainer account logs nothing of its own. The emerald read-only bar is permanent.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

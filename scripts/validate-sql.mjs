@@ -10,12 +10,34 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.join(here, '..', 'server', 'src');
 
 const dbTs = fs.readFileSync(path.join(srcDir, 'db.ts'), 'utf8');
-const schemaMatch = dbTs.match(/db\.exec\(`([\s\S]*?)`\)/);
-if (!schemaMatch) throw new Error('schema not found in db.ts');
+const execRe = /\.exec\(\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|`([\s\S]*?)`)\s*,?\s*\)/g;
+const execBlocks = [...dbTs.matchAll(execRe)].map((m) => m[1] ?? m[2] ?? m[3]);
+if (execBlocks.length === 0) throw new Error('schema not found in db.ts');
+
+const alterBlocks = [
+  ...dbTs.matchAll(
+    /(?:"((?:ALTER TABLE|CREATE UNIQUE INDEX)(?:[^"\\]|\\.)*)"|'((?:ALTER TABLE|CREATE UNIQUE INDEX)(?:[^'\\]|\\.)*)')/g,
+  ),
+].map((m) => m[1] ?? m[2]);
 
 const db = new DatabaseSync(':memory:');
 db.exec('PRAGMA foreign_keys = ON');
-db.exec(schemaMatch[1]);
+execBlocks.forEach((sql, index) => {
+  try {
+    db.exec(sql);
+  } catch (err) {
+    if (!sql.trim().startsWith('ALTER TABLE')) throw err;
+  }
+  if (index === 0) {
+    for (const stmt of alterBlocks) {
+      try {
+        db.exec(stmt);
+      } catch {
+        // Idempotent migrations can fail when a column/index already exists.
+      }
+    }
+  }
+});
 console.log('schema: OK');
 
 let total = 0,

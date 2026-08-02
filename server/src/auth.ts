@@ -2,7 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from 'express'
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
-import { db, type UserRow } from './db.js';
+import { db, type InviteRow, type UserRow } from './db.js';
 import { config } from './config.js';
 import { apiRateLimit } from './rate-limit.js';
 
@@ -100,17 +100,32 @@ authRouter.post('/register', (req: Request, res: Response) => {
   if (taken) {
     return res.status(409).json({ error: 'That username or email is already taken.' });
   }
+  // The first account on a fresh instance is the admin (AC-ROLE bootstrap).
+  const isFirst = (db.prepare('SELECT COUNT(*) AS n FROM users').get() as { n: number }).n === 0;
   const user: UserRow = {
     id: crypto.randomUUID(),
     username: name,
     email: mail,
     password_hash: bcrypt.hashSync(password, 10),
     created_at: Date.now(),
+    role: isFirst ? 'admin' : 'member',
+    status: 'active',
+    trainer_id: null,
+    avatar_ext: null,
   };
   db.prepare(
-    'INSERT INTO users (id, username, email, password_hash, created_at) VALUES (?, ?, ?, ?, ?)',
-  ).run(user.id, user.username, user.email, user.password_hash, user.created_at);
-  res.json({ token: sign(user.id), username: user.username, email: user.email });
+    `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    user.id,
+    user.username,
+    user.email,
+    user.password_hash,
+    user.created_at,
+    user.role,
+    user.status,
+  );
+  res.json({ token: sign(user.id), username: user.username, email: user.email, role: user.role });
 });
 
 /** Login with email or username (legacy accounts may have no email yet). */
@@ -132,12 +147,94 @@ authRouter.post('/login', (req: Request, res: Response) => {
   const user = db
     .prepare('SELECT * FROM users WHERE username = ? OR email = ?')
     .get(identifier, identifier.toLowerCase()) as UserRow | undefined;
-  if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+  if (!user || !user.password_hash || !bcrypt.compareSync(password, user.password_hash)) {
     recordFailure(key);
     return res.status(401).json({ error: 'Wrong username or password.' });
   }
+  if (user.status === 'suspended') {
+    return res.status(403).json({ error: 'This account is suspended. Ask your admin.' });
+  }
   failures.delete(key);
-  res.json({ token: sign(user.id), username: user.username, email: user.email });
+  res.json({ token: sign(user.id), username: user.username, email: user.email, role: user.role });
+});
+
+// --- Invite links (AC-INVITE, AC-ONB) --------------------------------------
+
+function inviteState(inv: InviteRow): 'valid' | 'expired' | 'claimed' | 'revoked' {
+  if (inv.revoked_at) return 'revoked';
+  if (inv.claimed_at) return 'claimed';
+  if (Date.now() > inv.expires_at) return 'expired';
+  return 'valid';
+}
+
+/** Public: what an invite link shows before any form (AC-ONB-01, AC-ONB-11). */
+authRouter.get('/invite/:token', (req: Request, res: Response) => {
+  const inv = db.prepare('SELECT * FROM invites WHERE token = ?').get(req.params.token) as
+    InviteRow | undefined;
+  if (!inv) return res.status(404).json({ error: 'unknown link' });
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(inv.user_id) as
+    UserRow | undefined;
+  const inviter = db.prepare('SELECT username FROM users WHERE id = ?').get(inv.created_by) as
+    { username: string } | undefined;
+  res.json({
+    state: inviteState(inv),
+    kind: inv.kind,
+    inviter: inviter?.username ?? null,
+    name: user?.username ?? null,
+    email: user?.email ?? null,
+    expiresAt: inv.expires_at,
+    claimedAt: inv.claimed_at,
+    revokedAt: inv.revoked_at,
+  });
+});
+
+/** Claim an invite: set password, bind to the pre-created id (AC-INVITE-08). */
+authRouter.post('/claim', (req: Request, res: Response) => {
+  const { token, password, username, email } = req.body ?? {};
+  if (typeof token !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'token and password are required' });
+  }
+  if (!isValidPassword(password)) {
+    return res
+      .status(400)
+      .json({ error: `Password: ${PASSWORD_MIN} to ${PASSWORD_MAX} characters.` });
+  }
+  const inv = db.prepare('SELECT * FROM invites WHERE token = ?').get(token) as
+    InviteRow | undefined;
+  if (!inv || inviteState(inv) !== 'valid') {
+    return res.status(410).json({ error: 'link no longer valid' });
+  }
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(inv.user_id) as
+    UserRow | undefined;
+  if (!user) return res.status(410).json({ error: 'account gone' });
+  const now = Date.now();
+  const name =
+    typeof username === 'string' && username.trim().length >= 2
+      ? username.trim().slice(0, USERNAME_MAX)
+      : user.username;
+  const mail =
+    typeof email === 'string' && isValidEmail(normEmail(email)) ? normEmail(email) : user.email;
+  const dupe = db
+    .prepare('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?')
+    .get(name, mail, user.id) as { id: string } | undefined;
+  if (dupe) return res.status(409).json({ error: 'That name or email is already taken.' });
+  db.prepare(
+    `UPDATE users SET password_hash = ?, status = 'active', username = ?, email = ? WHERE id = ?`,
+  ).run(bcrypt.hashSync(password, 10), name, mail, user.id);
+  db.prepare('UPDATE invites SET claimed_at = ? WHERE token = ?').run(now, token);
+  res.json({ token: sign(user.id), username: name, email: mail, role: user.role });
+});
+
+/** "Request a new link" from a dead invite — notifies the admin in-product. */
+authRouter.post('/invite/:token/request-new', (req: Request, res: Response) => {
+  const inv = db.prepare('SELECT * FROM invites WHERE token = ?').get(req.params.token) as
+    InviteRow | undefined;
+  if (!inv) return res.status(404).json({ error: 'unknown link' });
+  db.prepare('UPDATE invites SET re_requested_at = ? WHERE token = ?').run(
+    Date.now(),
+    req.params.token,
+  );
+  res.json({ ok: true });
 });
 
 /** Set or change email on an existing account (legacy accounts created before emails). */
@@ -182,4 +279,30 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
   } catch {
     res.status(401).json({ error: 'invalid token' });
   }
+}
+
+/** Role gate: reads the role from the DB on EVERY request (AC-ROLE-07). */
+export function requireRole(...roles: Array<'member' | 'trainer' | 'admin'>) {
+  return (req: AuthedRequest, res: Response, next: NextFunction): void => {
+    requireAuth(req, res, () => {
+      const user = db.prepare('SELECT role, status FROM users WHERE id = ?').get(req.userId) as
+        { role: 'member' | 'trainer' | 'admin'; status: string } | undefined;
+      if (!user || user.status === 'suspended' || !roles.includes(user.role)) {
+        res.status(403).json({ error: 'forbidden' });
+        return;
+      }
+      next();
+    });
+  };
+}
+
+/** Audit every read of another person's data (AC-ROLE-08). */
+export function auditRead(readerId: string, subjectId: string, resource: string): void {
+  if (readerId === subjectId) return;
+  db.prepare('INSERT INTO audit_log (reader_id, subject_id, resource, at) VALUES (?, ?, ?, ?)').run(
+    readerId,
+    subjectId,
+    resource,
+    Date.now(),
+  );
 }

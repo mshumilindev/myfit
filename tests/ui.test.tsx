@@ -41,6 +41,7 @@ function sampleStore(): StoreState {
         startedAt: now - 30 * 60000,
         finishedAt: null,
         autoFinished: false,
+        gymId: 'g1',
         exercises: [
           {
             id: 'bench',
@@ -70,13 +71,13 @@ function sampleStore(): StoreState {
 }
 
 describe('F-02/F-08 shell views and design states', () => {
-  it('renders Today live state and opens session overlay', async () => {
+  it('renders Today live state without the old duplicate live card', () => {
     const s = sampleStore();
     render(<TodayView shell={shell} store={s} />);
 
     expect(screen.getByRole('heading', { name: 'Mid-session.' })).toBeTruthy();
-    await userEvent.click(screen.getByRole('button', { name: /Session in progress/ }));
-    expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'session', workoutId: 'open' });
+    expect(screen.queryByRole('button', { name: /Session in progress/ })).toBeNull();
+    expect(screen.getByText('Recent')).toBeTruthy();
   });
 
   it('renders Progress locked state before three sessions', () => {
@@ -133,7 +134,7 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(s);
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
-    expect(screen.getByText('In session · Smartfit')).toBeTruthy();
+    expect(screen.getByText('Live · Smartfit')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Finish' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Log' })).toBeTruthy();
     expect(screen.queryByRole('navigation')).toBeNull();
@@ -165,12 +166,17 @@ describe('F-01 auth UI', () => {
   it('renders sign-up validation and submits registration', async () => {
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValueOnce(new Response(JSON.stringify({ registered: false }), { status: 200 }))
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify({ token: 'token', username: 'demo' }), { status: 200 }),
-        ),
+      vi.fn(async (url: string) => {
+        if (url.endsWith('/api/auth/status')) {
+          return new Response(JSON.stringify({ registered: false }), { status: 200 });
+        }
+        if (url.endsWith('/api/auth/register')) {
+          return new Response(JSON.stringify({ token: 'token', username: 'demo' }), {
+            status: 200,
+          });
+        }
+        return new Response(JSON.stringify({ error: 'unexpected request' }), { status: 500 });
+      }),
     );
     const onLoggedIn = vi.fn();
     render(<AuthView onLoggedIn={onLoggedIn} />);
@@ -192,7 +198,6 @@ describe('F-01 auth UI', () => {
     expect(screen.getByRole('button', { name: 'Retry' })).toBeTruthy();
   });
 });
-
 describe('F-06 progress and history UI', () => {
   function richStore(): StoreState {
     const now = Date.now();

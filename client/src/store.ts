@@ -103,6 +103,7 @@ export function applyAutoFinish(): void {
         startedAt: closed.startedAt,
         finishedAt: closed.finishedAt,
         autoFinished: true,
+        gymId: closed.gymId ?? null,
       });
       return closed;
     }
@@ -119,7 +120,7 @@ function bumpPending(): SyncStatus {
   return navigator.onLine ? 'pending' : 'offline';
 }
 
-export function startWorkout(): Workout {
+export function startWorkout(gymId: string | null = null): Workout {
   applyAutoFinish();
   const now = Date.now();
   // Starting a new workout closes any still-open one (marked as auto).
@@ -140,12 +141,14 @@ export function startWorkout(): Workout {
     startedAt: now,
     finishedAt: null,
     autoFinished: false,
+    gymId,
     exercises: [],
   };
   enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
     startedAt: workout.startedAt,
     finishedAt: null,
     autoFinished: false,
+    gymId,
   });
   setState({
     workouts: sortWorkouts([workout, ...workouts]),
@@ -168,6 +171,7 @@ export function finishWorkout(id: string, at = Date.now()): void {
     startedAt: w.startedAt,
     finishedAt: at,
     autoFinished: false,
+    gymId: w.gymId ?? null,
   });
   persist();
   void sync();
@@ -180,8 +184,29 @@ export function updateWorkoutTimes(
   finishedAt: number | null,
   autoFinished: boolean,
 ): void {
+  const w = state.workouts.find((x) => x.id === id);
   patchWorkout(id, { startedAt, finishedAt, autoFinished });
-  enqueue('PUT', `/api/tracker/workouts/${id}`, { startedAt, finishedAt, autoFinished });
+  enqueue('PUT', `/api/tracker/workouts/${id}`, {
+    startedAt,
+    finishedAt,
+    autoFinished,
+    gymId: w?.gymId ?? null,
+  });
+  persist();
+  void sync();
+}
+
+/** Attach (or change) the gym a session belongs to, mid-session or after. */
+export function attachGymToWorkout(workoutId: string, gymId: string | null): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  patchWorkout(workoutId, { gymId });
+  enqueue('PUT', `/api/tracker/workouts/${workoutId}`, {
+    startedAt: w.startedAt,
+    finishedAt: w.finishedAt,
+    autoFinished: w.autoFinished,
+    gymId,
+  });
   persist();
   void sync();
 }
@@ -301,10 +326,18 @@ export function upsertGym(gym: Omit<Gym, 'id'> & { id?: string }): Gym {
     lat: full.lat,
     lng: full.lng,
     radiusM: full.radiusM,
+    favorite: full.favorite ?? false,
   });
   persist();
   void sync();
   return full;
+}
+
+/** Flip the favourite flag on a gym (used as a fallback suggestion). */
+export function toggleFavorite(id: string): void {
+  const g = state.gyms.find((x) => x.id === id);
+  if (!g) return;
+  upsertGym({ ...g, favorite: !g.favorite });
 }
 
 export function deleteGym(id: string): void {
@@ -341,12 +374,14 @@ export function logVisitAsWorkout(r: Reminder): Workout {
     startedAt: r.visitStart,
     finishedAt: r.visitEnd,
     autoFinished: false,
+    gymId: r.gymId,
     exercises: [],
   };
   enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
     startedAt: workout.startedAt,
     finishedAt: workout.finishedAt,
     autoFinished: false,
+    gymId: r.gymId,
   });
   setState({
     workouts: sortWorkouts([workout, ...state.workouts]),
@@ -705,18 +740,24 @@ export function reopenWorkout(id: string): void {
 
 /** Backfill (spec docs/specs/backfill-session.md): create an already-finished
  * past session; it goes through the same idempotent upsert queue. */
-export function backfillWorkout(startedAt: number, durationMs: number): Workout {
+export function backfillWorkout(
+  startedAt: number,
+  durationMs: number,
+  gymId: string | null = null,
+): Workout {
   const workout: Workout = {
     id: uuid(),
     startedAt,
     finishedAt: startedAt + durationMs,
     autoFinished: false,
+    gymId,
     exercises: [],
   };
   enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
     startedAt: workout.startedAt,
     finishedAt: workout.finishedAt,
     autoFinished: false,
+    gymId,
   });
   setState({
     workouts: sortWorkouts([workout, ...state.workouts]),

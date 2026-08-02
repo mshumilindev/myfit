@@ -3,10 +3,12 @@
  * the boards have no settings screen; the language picker lives here).
  */
 import { useState } from 'react';
-import { clearAuth } from '../api';
+import { clearAuth, getUsername } from '../api';
 import { resetLocalData, type useStore } from '../store';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from '../i18n';
 import { Dialog, Icon, LanguageSelector } from '../ui';
+import { Avatar } from '../components/Avatar';
+import { ProfileSheet } from '../components/ProfileSheet';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -18,6 +20,7 @@ export function ServicesView(props: {
   const { t, locale } = useT();
   const { store } = props;
   const [confirm, setConfirm] = useState(false);
+  const [profile, setProfile] = useState(false);
   const [nowTs] = useState(() => Date.now());
 
   const weekAgo = nowTs - 7 * 24 * 3600 * 1000;
@@ -32,6 +35,9 @@ export function ServicesView(props: {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 className="h1">{t.services}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="profile-chip" aria-label="Profile" onClick={() => setProfile(true)}>
+            <Avatar name={getUsername() ?? '?'} size={30} />
+          </button>
           <LanguageSelector />
           <button className="link" onClick={() => setConfirm(true)}>
             {t.signOut}
@@ -149,6 +155,7 @@ export function ServicesView(props: {
           {store.queue.length > 0 ? t.signOutQueueBody(store.queue.length) : t.signOutCleanBody}
         </Dialog>
       )}
+      {profile && <ProfileSheet onClose={() => setProfile(false)} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 /** Today — design S-10…S-16. */
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
+import type { Gym } from '../types';
 import {
   backfillWorkout,
   dismissReminder,
@@ -17,14 +18,14 @@ import {
   fmtDurationHuman,
   fmtFullDate,
   fmtKg,
-  fmtSessionClock,
   fmtShortDate,
-  fmtTonnes,
   useT,
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { Icon, LanguageSelector, Sheet, Spinner, EmptyState } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
+import { GymPicker } from '../components/GymPicker';
+import { GymThumb } from '../components/GymThumb';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -40,6 +41,13 @@ function useNowTick(active: boolean): number {
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
+  const [startPicker, setStartPicker] = useState(false);
+
+  function beginSession(gymId: string | null) {
+    setStartPicker(false);
+    const w = startWorkout(gymId);
+    shell.openOverlay({ screen: 'session', workoutId: w.id });
+  }
   const [backfill, setBackfill] = useState(false);
   const open = store.workouts.find((w) => w.finishedAt === null);
   const now = useNowTick(!!open);
@@ -159,27 +167,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         </div>
       )}
 
-      {open ? (
-        <button
-          className="live-card"
-          onClick={() => shell.openOverlay({ screen: 'session', workoutId: open.id })}
-        >
-          <span className="pulse" />
-          <span style={{ flex: 1 }}>
-            <span className="t">{t.sessionInProgress}</span>
-            <div className="m">
-              {fmtSessionClock(now - open.startedAt)} · {workoutSets(open)} {t.sets} ·{' '}
-              {fmtTonnes(workoutVolumeKg(open))}
-            </div>
-          </span>
-          <Icon name="arrow-right" />
-        </button>
-      ) : (
+      {!open && (
         <button
           className="btn btn-primary btn-big"
           onClick={() => {
-            const w = startWorkout();
-            shell.openOverlay({ screen: 'session', workoutId: w.id });
+            if (store.gyms.length > 0) setStartPicker(true);
+            else beginSession(null);
           }}
         >
           <Icon name="play" />
@@ -218,10 +211,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         </div>
       )}
 
-      {finished.length === 0 && !open ? (
+      {finished.length === 0 ? (
         <>
           <EmptyState icon="barbell" title={t.noHistoryYet} body={t.noHistoryBody} />
-          {store.gyms.length === 0 && (
+          {!open && store.gyms.length === 0 && (
             <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
               <Icon name="map-pin" />
               <span style={{ flex: 1, textAlign: 'left' }}>{t.addGymHint}</span>
@@ -267,11 +260,20 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </>
         )
       )}
+      {startPicker && (
+        <GymPicker
+          gyms={store.gyms}
+          title={t.pickGymTitle}
+          onClose={() => setStartPicker(false)}
+          onPick={beginSession}
+        />
+      )}
       {backfill && (
         <BackfillSheet
+          gyms={store.gyms}
           onClose={() => setBackfill(false)}
-          onCreate={(startedAt, durationMs) => {
-            const w = backfillWorkout(startedAt, durationMs);
+          onCreate={(startedAt, durationMs, gymId) => {
+            const w = backfillWorkout(startedAt, durationMs, gymId);
             setBackfill(false);
             shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: true });
           }}
@@ -283,10 +285,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
 /** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
 function BackfillSheet(props: {
+  gyms: Gym[];
   onClose: () => void;
-  onCreate: (startedAt: number, durationMs: number) => void;
+  onCreate: (startedAt: number, durationMs: number, gymId: string | null) => void;
 }) {
   const { t } = useT();
+  const [gymId, setGymId] = useState<string | null>(null);
+  const [gymPicker, setGymPicker] = useState(false);
+  const chosenGym = props.gyms.find((g) => g.id === gymId) ?? null;
   const [defaults] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
@@ -331,6 +337,45 @@ function BackfillSheet(props: {
           </label>
         </div>
       </div>
+      {props.gyms.length > 0 && (
+        <label className="field-block">
+          <span className="field-label">{t.backfillGym}</span>
+          <button
+            type="button"
+            className="input gym-select"
+            onClick={() => setGymPicker((x) => !x)}
+          >
+            {chosenGym ? (
+              <span className="gym-select-chosen">
+                <span className="thumb">
+                  <GymThumb
+                    name={chosenGym.name}
+                    lat={chosenGym.lat}
+                    lng={chosenGym.lng}
+                    size={28}
+                  />
+                </span>
+                {chosenGym.name}
+              </span>
+            ) : (
+              <span className="gym-select-placeholder">{t.backfillGymChoose}</span>
+            )}
+            <Icon name={gymPicker ? 'caret-left' : 'arrow-right'} className="go" />
+          </button>
+          {gymPicker && (
+            <GymPicker
+              gyms={props.gyms}
+              title={t.pickGymTitle}
+              variant="inline"
+              onClose={() => setGymPicker(false)}
+              onPick={(id) => {
+                setGymId(id);
+                setGymPicker(false);
+              }}
+            />
+          )}
+        </label>
+      )}
       {inFuture && (
         <div className="field-error">
           <Icon name="warning-circle" />
@@ -344,7 +389,7 @@ function BackfillSheet(props: {
         <button
           className="btn btn-primary grow"
           disabled={invalid}
-          onClick={() => props.onCreate(startedAt, duration * 60000)}
+          onClick={() => props.onCreate(startedAt, duration * 60000, gymId)}
         >
           {t.backfillContinue}
         </button>

@@ -3,6 +3,9 @@
  * Search matches any language. History entries always rank above the catalog.
  * Names tuple order: [en, uk, pl, lt, et].
  */
+import DB_RAW from './exercises.db.json';
+import type { EquipmentId } from './equipment';
+
 export type MuscleGroup =
   | 'chest'
   | 'back'
@@ -22,6 +25,8 @@ export interface CatalogExercise {
   id: string;
   muscle: MuscleGroup;
   names: [string, string, string, string, string];
+  /** Equipment (free-exercise-db taxonomy); null = unknown/none listed. */
+  equipment?: EquipmentId | null;
 }
 
 const x = (
@@ -1221,17 +1226,59 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
   x('jump-rope', 'cardio', 'Jump Rope', 'Скакалка', 'Skakanka', 'Šokdynė', 'Hüppenöör'),
 ];
 
-/** Case-insensitive search across every locale name; returns catalog order. */
-export function searchCatalog(query: string, limit = 8): CatalogExercise[] {
+// --- free-exercise-db import (public domain, 873 entries) -------------------
+// Compact rows [name, equipment|null, muscle]. English-only names; the curated
+// localized catalog above stays first-class and DB rows fill the long tail.
+
+type DbRow = [string, EquipmentId | null, MuscleGroup];
+const DB_ROWS = DB_RAW as DbRow[];
+
+/** Curated EN name (lowercased) → equipment, learned from the DB by name. */
+const DB_EQUIP_BY_NAME = new Map<string, EquipmentId | null>(
+  DB_ROWS.map((r) => [r[0].toLowerCase(), r[1]]),
+);
+
+const CURATED_EN = new Set(EXERCISE_CATALOG.map((e) => e.names[0].toLowerCase()));
+
+/** Curated entries enriched with equipment where the DB knows the same name. */
+const CURATED: CatalogExercise[] = EXERCISE_CATALOG.map((e) => ({
+  ...e,
+  equipment: e.equipment ?? DB_EQUIP_BY_NAME.get(e.names[0].toLowerCase()) ?? null,
+}));
+
+/** DB rows as catalog entries (EN name in every slot), minus curated dupes. */
+const DB_ENTRIES: CatalogExercise[] = DB_ROWS.filter(
+  (r) => !CURATED_EN.has(r[0].toLowerCase()),
+).map((r, i) => ({
+  id: `db-${i}`,
+  muscle: r[2],
+  names: [r[0], r[0], r[0], r[0], r[0]],
+  equipment: r[1],
+}));
+
+/**
+ * Case-insensitive search across every locale name (curated first, then the
+ * free-exercise-db long tail). `equipment` narrows results to one type.
+ */
+export function searchCatalog(
+  query: string,
+  limit = 8,
+  equipment?: EquipmentId | null,
+): CatalogExercise[] {
   const q = query.trim().toLowerCase();
-  if (!q) return [];
+  if (!q && equipment === undefined) return [];
+  const pool =
+    equipment === undefined
+      ? [...CURATED, ...DB_ENTRIES]
+      : [...CURATED, ...DB_ENTRIES].filter((e) => (e.equipment ?? null) === equipment);
+  if (!q) return pool.slice(0, limit);
   const starts: CatalogExercise[] = [];
   const contains: CatalogExercise[] = [];
-  for (const ex of EXERCISE_CATALOG) {
+  for (const ex of pool) {
     const names = ex.names.map((n) => n.toLowerCase());
     if (names.some((n) => n.startsWith(q))) starts.push(ex);
     else if (names.some((n) => n.includes(q))) contains.push(ex);
-    if (starts.length >= limit) break;
+    if (starts.length >= limit * 2) break;
   }
   return [...starts, ...contains].slice(0, limit);
 }

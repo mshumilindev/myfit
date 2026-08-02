@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  :root {
+    --color-bg: #16171a; --color-surface: #1f2125; --color-text: #e9eaec;
+    --color-divider: rgba(233,234,236,0.14);
+    --color-accent: #d9a24f;
+    --color-accent-100: #fbf3e6; --color-accent-200: #f6e6cb; --color-accent-300: #eed3a5;
+    --color-accent-400: #e4bb76; --color-accent-500: #d9a24f; --color-accent-600: #b3833d;
+    --color-accent-700: #8a642e; --color-accent-800: #5b4420; --color-accent-900: #342713;
+    --color-neutral-100: #f5f6f7; --color-neutral-200: #e6e8ea; --color-neutral-300: #d0d3d6;
+    --color-neutral-400: #b0b4b8; --color-neutral-500: #90959a; --color-neutral-600: #71767b;
+    --color-neutral-700: #55595e; --color-neutral-800: #3b3f43; --color-neutral-900: #262a2d;
+    --shadow-sm: 0 0 0 1px #3b3f43;
+    --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0,0,0,0.6);
+    --shadow-lg: 0 0 0 1px #6b7075, 0 18px 44px rgba(0,0,0,0.7);
+    --color-ok: #4cbe8c; --color-ok-text: #b7e8cf; --color-ok-tint: #16291f; --color-ok-line: #2f6f52;
+    --color-danger: #e2564f; --color-danger-text: #f3c2bf; --color-danger-tint: #2c1614; --color-danger-line: #7d302b;
+  }
+  body { margin:0; background:#0d0e10; }
+  @keyframes shimmer { 0% { opacity:.35 } 50% { opacity:.7 } 100% { opacity:.35 } }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .sk { animation: shimmer 1.6s ease-in-out infinite; background:#262a2d; border-radius:6px; }
+  .sp { animation: spin 1s linear infinite; }
+</style>
+</helmet>
+
+<div style="font-family:var(--font-body);background:#0d0e10;color:var(--color-text);padding:52px 60px 120px;min-height:100vh">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">My Fit</span>
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-600)">Complete state inventory · graphite &amp; silver</span>
+  </div>
+  <h1 style="margin:0 0 10px;font-size:38px;font-weight:500;letter-spacing:-0.025em">Every screen, every state</h1>
+  <p style="margin:0 0 20px;max-width:76ch;font-size:14px;line-height:1.65;color:var(--color-neutral-500)">Fifty frames: idle, loading skeletons, empty, filled, errors, confirmations, notifications and undo — including editing and deleting an exercise or a single set. Numbers are stable references (<span style="color:var(--color-neutral-300)">S-23</span>) so a build prompt can point at any frame. The token panel at the end carries the palette and the rules.</p>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:44px;font-size:11px">
+    <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface)"><span style="width:9px;height:9px;border-radius:50%;background:var(--color-accent)"></span>Brass — action, focus, live</span>
+    <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface)"><span style="width:9px;height:9px;border-radius:50%;background:var(--color-ok)"></span>Emerald — success, records, sync healthy</span>
+    <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface)"><span style="width:9px;height:9px;border-radius:50%;background:var(--color-danger)"></span>Ruby — destructive, failure, offline</span>
+    <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--color-surface)"><span style="width:9px;height:9px;border-radius:50%;background:var(--color-neutral-700)"></span>Graphite — surfaces, skeletons, disabled</span>
+  </div>
+
+  <!-- ══════════════════ A · AUTH ══════════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">A</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Auth</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">S-01 → S-06 · single account, registration closes after the first</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- S-01 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500);letter-spacing:0.04em"><span style="color:var(--color-accent)">S-01</span> · Sign in · idle</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+          <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">My Fit</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);margin-bottom:var(--space-6)">Everything you lift, in one place.</div>
+          <input class="input" placeholder="Email or username" style="min-height:48px">
+          <input class="input" type="password" placeholder="Password" style="min-height:48px">
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;margin-top:var(--space-3)">Sign in</button>
+          <div style="text-align:center;font-size:12px;color:var(--color-neutral-600);padding-top:8px">New here? Create an account</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Default entry for a signed-out visitor. Primary stays outlined — never a filled block.</div>
+    </div>
+
+    <!-- S-02 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500);letter-spacing:0.04em"><span style="color:var(--color-accent)">S-02</span> · Sign in · wrong credentials</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+          <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">My Fit</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);margin-bottom:var(--space-6)">Everything you lift, in one place.</div>
+          <input class="input" value="andrii" style="min-height:48px">
+          <input class="input" type="password" value="••••••" style="min-height:48px;border-color:var(--color-danger)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-danger-text)"><i class="ph-bold ph-warning-circle" style="font-size:14px;color:var(--color-danger)"></i>Wrong username or password</div>
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;margin-top:var(--space-2)">Sign in</button>
+          <div style="text-align:center;font-size:12px;color:var(--color-neutral-600);padding-top:8px">New here? Create an account</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">401 from <code style="font-size:10px">/api/auth/login</code>. Field takes a ruby border; message sits under the field, never as a toast.</div>
+    </div>
+
+    <!-- S-03 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500);letter-spacing:0.04em"><span style="color:var(--color-accent)">S-03</span> · Sign in · server unreachable</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+          <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">My Fit</div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line);margin:var(--space-2) 0 var(--space-4)">
+            <i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <span style="font-size:12px;line-height:1.5;color:var(--color-danger-text)">Can't reach the server. The first sign-in needs a connection — offline logging works after that.</span>
+          </div>
+          <input class="input" placeholder="Email or username" style="min-height:48px" disabled>
+          <input class="input" type="password" placeholder="Password" style="min-height:48px" disabled>
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;margin-top:var(--space-2)" disabled>Sign in</button>
+          <button class="btn btn-secondary" style="min-height:42px;font-size:13px;gap:7px"><i class="ph-bold ph-arrow-clockwise"></i>Retry</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Fetch to <code style="font-size:10px">/api/auth/status</code> failed. Controls drop to 45% and a Retry appears.</div>
+    </div>
+
+    <!-- S-04 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500);letter-spacing:0.04em"><span style="color:var(--color-accent)">S-04</span> · Sign in · submitting</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+          <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">My Fit</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);margin-bottom:var(--space-6)">Everything you lift, in one place.</div>
+          <input class="input" value="andrii" style="min-height:48px" disabled>
+          <input class="input" type="password" value="••••••••" style="min-height:48px" disabled>
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;margin-top:var(--space-3);gap:9px" disabled><span class="sp" style="display:inline-block;width:14px;height:14px;border:2px solid var(--color-accent-800);border-top-color:var(--color-accent);border-radius:50%"></span>Signing in…</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Spinner replaces the label; no layout shift, button keeps its height.</div>
+    </div>
+
+    <!-- S-05 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500);letter-spacing:0.04em"><span style="color:var(--color-accent)">S-05</span> · Sign up</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+          <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">Create your account</div>
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-ok-tint);margin-bottom:var(--space-4)">
+            <i class="ph-bold ph-shield-check" style="font-size:15px;color:var(--color-ok);margin-top:2px"></i>
+            <span style="font-size:12px;line-height:1.5;color:var(--color-ok-text)">Your log is private to your account. Free while My Fit is in beta.</span>
+          </div>
+          <input class="input" placeholder="Username" style="min-height:48px">
+          <input class="input" placeholder="Email" style="min-height:48px">
+          <input class="input" type="password" placeholder="Password (min. 6 characters)" style="min-height:48px">
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;margin-top:var(--space-2)">Create account</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Sign-up is open to anyone. The emerald note is a reassurance, not a success message.</div>
+    </div>
+
+    <!-- S-06 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500);letter-spacing:0.04em"><span style="color:var(--color-accent)">S-06</span> · Register · validation</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px 40px;gap:var(--space-3)">
+          <i class="ph-bold ph-barbell" style="font-size:28px;color:var(--color-accent)"></i>
+          <div style="font-size:32px;line-height:1.1;letter-spacing:-0.025em;margin-top:var(--space-4)">Create your account</div>
+          <div style="height:var(--space-4)"></div>
+          <input class="input" value="andrii" style="min-height:48px">
+          <input class="input" value="andrii@" style="min-height:48px;border-color:var(--color-danger)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-danger-text)"><i class="ph-bold ph-warning-circle" style="font-size:14px;color:var(--color-danger)"></i>That email doesn't look complete</div>
+          <input class="input" type="password" value="•••" style="min-height:48px;border-color:var(--color-danger)">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-danger-text)"><i class="ph-bold ph-warning-circle" style="font-size:14px;color:var(--color-danger)"></i>6 characters minimum</div>
+          <button class="btn btn-primary" style="min-height:48px;font-size:15px;margin-top:var(--space-2)" disabled>Create account</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Validation runs on blur; the submit stays disabled until every field is clean.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ B · SHELL & TODAY ══════════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">B</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Shell &amp; Today</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">S-07 → S-16 · services, sync, the home surface</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-07</span> · Services · synced</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:14px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:22px;letter-spacing:-0.02em">Services</div><span style="font-size:13px;color:var(--color-accent)">Sign out</span></div>
+          <div style="background:var(--color-surface);border:1px solid var(--color-accent-800);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center">
+            <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-accent-900);color:var(--color-accent-300);display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:22px"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:16px">Training</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Workouts, sets, weights, gyms</span></span>
+            <span class="tag tag-accent">3 this week</span>
+          </div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;opacity:0.4">
+            <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-neutral-900);display:grid;place-items:center"><i class="ph-bold ph-carrot" style="font-size:22px"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:16px">Nutrition</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Soon</span></span>
+          </div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center;opacity:0.4">
+            <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-neutral-900);display:grid;place-items:center"><i class="ph-bold ph-robot" style="font-size:22px"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:16px">AI body scan</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Soon</span></span>
+          </div>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-neutral-600)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</div>
+        </div>
+        <dc-import name="MFTabs" active="apps" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Tiles come from the service registry; “soon” tiles are inert at 40%.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-08</span> · Services · offline with queue</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:14px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:22px;letter-spacing:-0.02em">Services</div><span style="font-size:13px;color:var(--color-accent)">Sign out</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 3px 0 0 var(--color-danger)">
+            <i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger)"></i>
+            <span style="flex:1;font-size:12px;line-height:1.45;color:var(--color-danger-text)">Offline · 6 changes queued. Nothing is lost — they replay in order.</span>
+          </div>
+          <div style="background:var(--color-surface);border:1px solid var(--color-accent-800);border-radius:var(--radius-lg);padding:18px;display:flex;gap:14px;align-items:center">
+            <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--color-accent-900);color:var(--color-accent-300);display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:22px"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:16px">Training</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:2px">Works offline · 6 queued</span></span>
+          </div>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-danger-text)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-danger)"></span>Offline · last sync 41 min ago</div>
+        </div>
+        <dc-import name="MFTabs" active="apps" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Ruby is a status here, not an error to fix — the copy stays calm.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-09</span> · Sign out · confirm</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:14px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4);opacity:0.3">
+          <div style="font-size:22px;letter-spacing:-0.02em">Services</div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);height:80px"></div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);height:80px"></div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);height:80px"></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.66);display:grid;place-items:center;padding:22px">
+          <div style="width:100%;background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="font-size:17px">Sign out?</div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">6 changes are still queued. Signing out discards the local queue — sync first if you want to keep them.</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--space-2)">
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Stay</button>
+              <button style="min-height:40px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Destructive dialogs name the loss before the verb.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-10</span> · Today · skeleton</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="display:flex;flex-direction:column;gap:9px;padding-top:6px"><div class="sk" style="width:120px;height:10px"></div><div class="sk" style="width:210px;height:26px"></div></div>
+          <div style="display:flex;gap:6px">
+            <div class="sk" style="flex:1;height:46px"></div><div class="sk" style="flex:1;height:46px"></div><div class="sk" style="flex:1;height:46px"></div><div class="sk" style="flex:1;height:46px"></div><div class="sk" style="flex:1;height:46px"></div><div class="sk" style="flex:1;height:46px"></div><div class="sk" style="flex:1;height:46px"></div>
+          </div>
+          <div class="sk" style="height:62px;border-radius:14px"></div>
+          <div style="display:flex;gap:10px"><div class="sk" style="flex:1;height:92px"></div><div class="sk" style="flex:1;height:92px"></div></div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div class="sk" style="width:70px;height:9px"></div>
+            <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="width:40px;height:9px"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk" style="width:120px;height:13px"></div><div class="sk" style="width:180px;height:9px"></div></div></div>
+            <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="width:40px;height:9px"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk" style="width:96px;height:13px"></div><div class="sk" style="width:164px;height:9px"></div></div></div>
+            <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="width:40px;height:9px"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk" style="width:130px;height:13px"></div><div class="sk" style="width:150px;height:9px"></div></div></div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Shown until the local cache resolves. Blocks mirror the real boxes and breathe at 1.6s — never a spinner.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-11</span> · Today · empty (first run)</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:5px">Nothing logged yet.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-neutral-500);margin-top:4px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</span>
+          </div>
+          <button class="btn btn-primary" style="min-height:62px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start your first session</button>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-8) 0">
+            <i class="ph-bold ph-barbell" style="font-size:26px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:17px">No history yet</div>
+            <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:34ch">Log a session and this fills with your weeks. Templates show up after the second one — they're just sessions you kept.</div>
+          </div>
+          <div style="margin-top:auto;display:flex;align-items:flex-start;gap:9px;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <i class="ph-bold ph-map-pin" style="font-size:15px;color:var(--color-accent);margin-top:2px"></i>
+            <span style="font-size:12px;line-height:1.5;color:var(--color-neutral-400);flex:1">Add your gym so unlogged visits can remind you.</span>
+            <span style="font-size:12px;color:var(--color-accent)">Add</span>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Empty is a layout, not a shrug: one primary, one explanation, one next step.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-12</span> · Today · filled + gym reminder</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:5px">Nothing logged yet.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-neutral-500);margin-top:4px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">M</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">T</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">W</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">T</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-400)">F</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0;box-shadow:0 0 0 3px var(--color-neutral-900)"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">S</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">S</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+          </div>
+          <div style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)">
+            <i class="ph-bold ph-map-pin" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+            <div style="flex:1">
+              <div style="font-size:13px;line-height:1.5;color:var(--color-neutral-300)">1h 20m at <strong style="color:var(--color-text)">Smartass Obolon</strong> on 12 Jul with nothing logged.</div>
+              <div style="display:flex;gap:14px;margin-top:9px"><span style="font-size:13px;color:var(--color-accent)">Log it</span><span style="font-size:13px;color:var(--color-neutral-600)">Dismiss</span></div>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="min-height:60px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start empty session</button>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:14px"><i class="ph-bold ph-arrow-counter-clockwise" style="font-size:16px;color:var(--color-accent)"></i><div style="font-size:14px;margin-top:8px">Repeat Push day</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">Wed · 5 exercises</div></div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:14px"><i class="ph-bold ph-cards" style="font-size:16px;color:var(--color-accent)"></i><div style="font-size:14px;margin-top:8px">Templates</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">4 saved</div></div>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:var(--space-2)">Recent</div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg · 1:12</span></span><i class="ph-bold ph-arrow-up-right" style="font-size:13px;color:var(--color-neutral-700)"></i></div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">27 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Legs <span class="tag tag-neutral" style="margin-left:6px">Auto-closed</span></span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">14 sets · 3 420 kg · 0:54</span></span><i class="ph-bold ph-arrow-up-right" style="font-size:13px;color:var(--color-neutral-700)"></i></div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The reminder card is the only element allowed above the primary action.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-13</span> · Today · live session bar</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:5px">Mid-session.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-neutral-500);margin-top:4px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</span>
+          </div>
+          <div style="border:1px solid var(--color-accent);background:var(--color-accent-900);border-radius:var(--radius-lg);padding:17px;display:flex;align-items:center;gap:13px">
+            <span style="width:9px;height:9px;border-radius:50%;background:var(--color-accent);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:16px">Session in progress</span><span style="display:block;font-size:12px;color:var(--color-accent-300);margin-top:3px;font-variant-numeric:tabular-nums">24:18 · 7 sets · 2.1 t</span></span>
+            <i class="ph-bold ph-arrow-right" style="font-size:18px;color:var(--color-accent)"></i>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:var(--space-2)">Recent</div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg · 1:12</span></span></div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">27 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Legs</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">14 sets · 3 420 kg · 0:54</span></span></div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">25 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Pull day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">21 sets · 5 640 kg · 1:03</span></span></div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The live card replaces the start button; the dot breathes at 2.6s so the screen has one heartbeat.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-14</span> · Today · offline, queued</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:5px">Nothing logged yet.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-danger-text);margin-top:4px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-danger)"></span>Offline</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 3px 0 0 var(--color-danger)">
+            <i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger)"></i>
+            <span style="flex:1;font-size:12px;line-height:1.45;color:var(--color-danger-text)">No connection. 2 changes queued — they'll sync on their own.</span>
+          </div>
+          <button class="btn btn-primary" style="min-height:60px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start empty session</button>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;padding:0 2px">Everything below is served from the local cache.</div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Push day <span class="tag tag-neutral" style="margin-left:6px">Queued</span></span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg</span></span></div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">27 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Legs</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">14 sets · 3 420 kg</span></span></div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Queued records carry a neutral tag, never a ruby one — they aren't broken.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-15</span> · Today · syncing progress</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:5px">Nothing logged yet.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-neutral-400);margin-top:4px"><span class="sp" style="display:inline-block;width:11px;height:11px;border:2px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>Syncing</span>
+          </div>
+          <div style="padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--color-neutral-300)"><i class="ph-bold ph-arrows-clockwise" style="font-size:15px;color:var(--color-accent)"></i><span style="flex:1">Sending queued changes</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">4 / 6</span></div>
+            <div style="height:3px;border-radius:2px;background:var(--color-neutral-900);margin-top:10px;overflow:hidden"><div style="width:66%;height:100%;background:var(--color-accent)"></div></div>
+          </div>
+          <button class="btn btn-primary" style="min-height:60px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start empty session</button>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg</span></span></div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The only determinate progress bar in the product — the queue has a known length.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-16</span> · Today · sync failed</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-top:6px">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:5px">Nothing logged yet.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-danger-text);margin-top:4px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-danger)"></span>Failed</span>
+          </div>
+          <div style="padding:13px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <i class="ph-bold ph-warning-octagon" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+              <div style="flex:1"><div style="font-size:13px;color:var(--color-danger-text);line-height:1.5">Sync failed on change 3 of 6 — the server rejected a workout that no longer exists.</div>
+              <div style="font-size:11px;color:var(--color-danger-text);opacity:0.7;margin-top:5px;font-variant-numeric:tabular-nums">409 · upsert workout 4f2c…</div></div>
+            </div>
+            <div style="display:flex;gap:9px;margin-top:12px">
+              <button class="btn btn-secondary" style="min-height:36px;font-size:13px;gap:6px"><i class="ph-bold ph-arrow-clockwise"></i>Retry</button>
+              <button style="min-height:36px;padding:0 14px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:13px">Discard change</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="min-height:60px;font-size:16px;border-radius:var(--radius-lg);gap:10px"><i class="ph-bold ph-play" style="font-size:18px"></i>Start empty session</button>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg</span></span></div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A blocked queue is the one case that earns a persistent card with the raw reason and two exits.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ C · SESSION ══════════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">C</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Live session</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">S-17 → S-29 · logging, editing and deleting sets and exercises</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-17</span> · Session · empty</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session · Smartass Obolon</div><div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">0:14</div></div>
+          <button class="btn btn-secondary" style="font-size:13px" disabled>Finish</button>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:var(--space-3);padding:0 26px 60px">
+          <i class="ph-bold ph-list-plus" style="font-size:26px;color:var(--color-neutral-700)"></i>
+          <div style="font-size:18px">No exercises yet</div>
+          <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:32ch">Add the first one — recent lifts and your whole history come up as you type.</div>
+          <button class="btn btn-primary" style="min-height:46px;font-size:15px;gap:8px;margin-top:var(--space-3)"><i class="ph-bold ph-plus"></i>Add exercise</button>
+          <div style="font-size:12px;color:var(--color-neutral-600);margin-top:var(--space-2)">or load a template</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Finish is disabled while the session holds nothing — no empty records.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-18</span> · Add exercise · search sheet</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3">
+          <div style="font-size:22px;font-variant-numeric:tabular-nums">24:18</div>
+          <div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:150px"></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 16px 24px;display:flex;flex-direction:column;gap:10px;max-height:74%">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-bg);border-radius:var(--radius-md);padding:10px 12px;margin-top:6px">
+            <i class="ph-bold ph-magnifying-glass" style="font-size:16px;color:var(--color-neutral-500)"></i>
+            <span style="flex:1;font-size:15px">squ</span>
+            <span style="width:1px;height:18px;background:var(--color-accent)"></span>
+          </div>
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:8px 4px 2px">Matches</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 4px;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px"><span style="color:var(--color-accent)">Squ</span>at · back</span><span style="font-size:11px;color:var(--color-neutral-600)">last 85 × 8</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 4px;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px"><span style="color:var(--color-accent)">Squ</span>at · front</span><span style="font-size:11px;color:var(--color-neutral-600)">last 65 × 8</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 4px;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px">Bulgarian split <span style="color:var(--color-accent)">squ</span>at</span><span style="font-size:11px;color:var(--color-neutral-600)">last 24 × 10</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 4px;color:var(--color-accent)"><i class="ph-bold ph-plus" style="font-size:15px"></i><span style="font-size:15px">Create “squ”</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Matching is substring, ranked by recency; creating a new name is always the last row.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-19</span> · Session · logging (ghost row)</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session · Smartass Obolon</div><div style="font-size:22px;letter-spacing:-0.02em;font-variant-numeric:tabular-nums">24:18</div></div>
+          <button class="btn btn-secondary" style="font-size:13px">Finish</button>
+        </div>
+        <div style="flex:none;display:flex;gap:18px;padding:0 18px 12px;font-variant-numeric:tabular-nums">
+          <div><div style="font-size:18px">7</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">sets</div></div>
+          <div><div style="font-size:18px">2.1 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">moved</div></div>
+          <div><div style="font-size:18px">2</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">exercises</div></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1;display:flex;align-items:center;gap:6px">Back Squat<i class="ph-bold ph-caret-right" style="font-size:12px;color:var(--color-neutral-700)"></i></span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:4px"><span>#</span><span>Reps</span><span>Kg</span><span></span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">12</span><span style="color:var(--color-neutral-500)">40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>80</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">3</span><span>8</span><span>85</span><span style="font-size:10px;color:var(--color-ok);text-align:right">record</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums">
+              <span style="font-size:11px;color:var(--color-neutral-700)">4</span>
+              <span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700);padding-bottom:2px">8</span>
+              <span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700);padding-bottom:2px">85</span>
+              <button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button>
+            </div>
+            <div style="font-size:10px;color:var(--color-neutral-600);margin-top:7px">Prefilled from last time · tap a number to nudge it</div>
+          </div>
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Romanian Deadlift</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 70 × 10</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span>10</span><span>70</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">2</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700);padding-bottom:2px">10</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700);padding-bottom:2px">72.5</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button></div>
+          </div>
+          <button class="btn btn-secondary" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Add exercise</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The core loop: the dashed ghost row is the only editable thing; Log commits it and moves down.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-20</span> · Set logged · PR + rest timer</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session</div><div style="font-size:22px;font-variant-numeric:tabular-nums">25:02</div></div>
+          <button class="btn btn-secondary" style="font-size:13px">Finish</button>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px">
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">3</span><span>8</span><span>85</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;background:var(--color-ok-tint);border-radius:6px"><span style="font-size:11px;color:var(--color-ok)">4</span><span style="color:var(--color-ok-text)">8</span><span style="color:var(--color-ok-text)">90</span><span style="font-size:10px;color:var(--color-ok);text-align:right">record</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">5</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">8</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">90</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button></div>
+          </div>
+        </div>
+        <div style="flex:none;margin:0 18px 12px;background:var(--color-accent-900);border-radius:var(--radius-md);padding:11px 14px;display:flex;align-items:center;gap:12px">
+          <i class="ph-bold ph-timer" style="font-size:17px;color:var(--color-accent-300)"></i>
+          <span style="flex:1;font-size:13px;color:var(--color-accent-200)">Rest</span>
+          <span style="font-size:18px;font-variant-numeric:tabular-nums;color:var(--color-accent-100)">1:24</span>
+          <span style="font-size:12px;color:var(--color-accent-300)">Skip</span>
+        </div>
+        <div style="flex:none;margin:0 18px 22px;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-ok-tint);box-shadow:var(--shadow-md)">
+          <i class="ph-bold ph-trophy" style="font-size:17px;color:var(--color-ok)"></i>
+          <span style="flex:1;font-size:13px;color:var(--color-ok-text)">New record · Back Squat 90 kg × 8</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Rest starts on Log and counts down in place. The PR toast holds 3.2s; the row keeps its emerald tint for the session.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-21</span> · Edit set · sheet</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3">
+          <div style="font-size:22px;font-variant-numeric:tabular-nums">25:02</div>
+          <div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:190px"></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 18px 26px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px"><span style="font-size:17px;flex:1">Set 2 · Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">logged 24:02</span></div>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;background:var(--color-bg);border-radius:var(--radius-md);padding:10px 12px">
+              <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Reps</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:6px"><span style="font-size:22px;color:var(--color-neutral-400)">−</span><span style="flex:1;text-align:center;font-size:24px;font-variant-numeric:tabular-nums">8</span><span style="font-size:22px;color:var(--color-neutral-400)">+</span></div>
+            </div>
+            <div style="flex:1;background:var(--color-bg);border-radius:var(--radius-md);padding:10px 12px;box-shadow:inset 0 0 0 1px var(--color-accent)">
+              <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Weight, kg</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:6px"><span style="font-size:22px;color:var(--color-neutral-400)">−</span><span style="flex:1;text-align:center;font-size:24px;font-variant-numeric:tabular-nums">80</span><span style="font-size:22px;color:var(--color-neutral-400)">+</span></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <i class="ph-bold ph-flame" style="font-size:16px;color:var(--color-neutral-500)"></i>
+            <span style="flex:1;font-size:14px">Warm-up set</span>
+            <span style="width:40px;height:24px;border-radius:12px;background:var(--color-neutral-800);position:relative;display:inline-block"><span style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--color-neutral-500)"></span></span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button style="flex:none;min-height:44px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px;display:inline-flex;align-items:center;gap:7px"><i class="ph-bold ph-trash"></i>Delete set</button>
+            <button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px">Cancel</button>
+            <button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Save</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Tapping any logged row opens this. Steppers, not a keyboard; delete lives left, away from Save.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-22</span> · Set deleted · undo</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session</div><div style="font-size:22px;font-variant-numeric:tabular-nums">25:40</div></div>
+          <button class="btn btn-secondary" style="font-size:13px">Finish</button>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px">
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">12</span><span style="color:var(--color-neutral-500)">40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>85</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">3</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">8</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">85</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button></div>
+          </div>
+        </div>
+        <div style="flex:none;margin:0 18px 26px;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-md)">
+          <i class="ph-bold ph-trash" style="font-size:16px;color:var(--color-danger)"></i>
+          <span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Set deleted · 8 × 80 kg</span>
+          <span style="font-size:13px;color:var(--color-accent)">Undo</span>
+          <span style="font-size:11px;color:var(--color-neutral-600);font-variant-numeric:tabular-nums">4s</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A single set deletes with no dialog — the undo snackbar is the safety net (5s, then it commits to the queue). Remaining sets renumber immediately.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-23</span> · Rename exercise · inline</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session</div><div style="font-size:22px;font-variant-numeric:tabular-nums">26:11</div></div>
+          <button class="btn btn-secondary" style="font-size:13px">Finish</button>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <input class="input" value="Back Squat" style="flex:1;min-height:40px;font-size:15px;border-color:var(--color-accent)">
+              <button class="btn btn-primary" style="height:40px;padding-inline:12px;font-size:13px">Save</button>
+            </div>
+            <div style="font-size:11px;color:var(--color-neutral-600);margin-bottom:8px">Renaming affects this session only — history keeps the old name.</div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider);opacity:0.6"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span>12</span><span>40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;opacity:0.6"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>85</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+          </div>
+        </div>
+        <div style="flex:none;height:290px;background:var(--color-surface);box-shadow:0 -1px 0 var(--color-divider);padding:10px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:6px;justify-content:space-between;font-size:11px;color:var(--color-neutral-500);padding:0 4px 4px">Keyboard</div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:5px">
+            <div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div>
+            <div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div><div style="background:var(--color-neutral-800);border-radius:5px"></div>
+            <div style="background:var(--color-neutral-800);border-radius:5px;grid-column:span 2"></div><div style="background:var(--color-neutral-800);border-radius:5px;grid-column:span 6"></div><div style="background:var(--color-accent-800);border-radius:5px;grid-column:span 2"></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The name becomes a field in place; sets dim to 60% so the edit is obviously scoped to the title.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-24</span> · Exercise menu</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3">
+          <div style="font-size:22px;font-variant-numeric:tabular-nums">26:40</div>
+          <div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:190px"></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 12px 26px;display:flex;flex-direction:column;gap:2px">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center;margin-bottom:10px"></div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:0 10px 8px">Back Squat · 3 sets</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-pencil-simple" style="font-size:18px;color:var(--color-neutral-400)"></i>Rename</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-copy" style="font-size:18px;color:var(--color-neutral-400)"></i>Duplicate with sets</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-arrows-down-up" style="font-size:18px;color:var(--color-neutral-400)"></i>Reorder</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-chart-line-up" style="font-size:18px;color:var(--color-neutral-400)"></i>Open history</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-eraser" style="font-size:18px;color:var(--color-neutral-400)"></i>Clear all sets</div>
+          <div style="height:1px;background:var(--color-divider);margin:6px 10px"></div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px;color:var(--color-danger)"><i class="ph-bold ph-trash" style="font-size:18px"></i>Delete exercise</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Opened from the ⋮ on the exercise header. Destructive item sits alone under a rule.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-25</span> · Delete exercise · confirm</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3">
+          <div style="font-size:22px;font-variant-numeric:tabular-nums">26:52</div>
+          <div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:190px"></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.66);display:grid;place-items:center;padding:22px">
+          <div style="width:100%;background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:9px"><i class="ph-bold ph-trash" style="font-size:17px;color:var(--color-danger)"></i><span style="font-size:17px">Delete “Back Squat”?</span></div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">3 logged sets go with it — 12 × 40, 8 × 80, 8 × 85. Added by mistake? Deleting is instant, with a 5-second undo.</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--space-2)">
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Keep</button>
+              <button style="min-height:40px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A dialog only when sets would be lost. An exercise with zero sets deletes straight away with undo.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-26</span> · Exercise deleted · undo</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session</div><div style="font-size:22px;font-variant-numeric:tabular-nums">27:03</div></div>
+          <button class="btn btn-secondary" style="font-size:13px">Finish</button>
+        </div>
+        <div style="flex:none;display:flex;gap:18px;padding:0 18px 12px;font-variant-numeric:tabular-nums">
+          <div><div style="font-size:18px">1</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">sets</div></div>
+          <div><div style="font-size:18px">0.7 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">moved</div></div>
+          <div><div style="font-size:18px">1</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">exercises</div></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Romanian Deadlift</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 70 × 10</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span>10</span><span>70</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">2</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">10</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">72.5</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button></div>
+          </div>
+          <button class="btn btn-secondary" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Add exercise</button>
+        </div>
+        <div style="flex:none;margin:0 18px 26px;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-md)">
+          <i class="ph-bold ph-trash" style="font-size:16px;color:var(--color-danger)"></i>
+          <span style="flex:1;font-size:13px;color:var(--color-neutral-300)">“Back Squat” deleted · 3 sets</span>
+          <span style="font-size:13px;color:var(--color-accent)">Undo</span>
+          <span style="font-size:11px;color:var(--color-neutral-600);font-variant-numeric:tabular-nums">5s</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Totals update the moment the card leaves; undo restores it in its original position.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-27</span> · Session · 8-hour auto-close</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-500)">Closed automatically</div><div style="font-size:22px;font-variant-numeric:tabular-nums">8:00:00</div></div>
+          <button class="btn btn-secondary" style="font-size:13px">Reopen</button>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)">
+            <i class="ph-bold ph-clock-countdown" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+            <div style="font-size:12px;line-height:1.5;color:var(--color-neutral-300)">Left open for 8 hours, so it was closed at 18:02 and may be incomplete. Everything you logged is kept — add what's missing and it saves to the original date.</div>
+          </div>
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Back Squat</span><span class="tag tag-neutral">3 sets</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">12</span><span style="color:var(--color-neutral-500)">40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>80</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Brass, not ruby: the rule fired as designed. Reopen restarts the clock from the original start.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-28</span> · Finish · empty exercise warning</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3">
+          <div style="font-size:22px;font-variant-numeric:tabular-nums">41:07</div>
+          <div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:190px"></div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.66);display:grid;place-items:center;padding:22px">
+          <div style="width:100%;background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="font-size:17px">Finish this session?</div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">“Leg Press” has no sets and will be dropped. Everything else — 11 sets, 3.4 t — is saved to 31 July.</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--space-2)">
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Keep going</button>
+              <button class="btn btn-primary" style="min-height:40px;font-size:14px">Finish</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Only shown when something would be silently dropped; otherwise Finish is immediate.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-29</span> · Summary · saved</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:14px 22px 24px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="display:flex;align-items:center;gap:9px;color:var(--color-ok)"><i class="ph-fill ph-check-circle" style="font-size:20px"></i><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">Session saved</span></div>
+          <div><div style="font-size:32px;letter-spacing:-0.025em;line-height:1.1">Leg day, done.</div><div style="font-size:13px;color:var(--color-neutral-500);margin-top:6px">Friday, 31 July · Smartass Obolon</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:22px;font-variant-numeric:tabular-nums">41:07</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Duration</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:22px;font-variant-numeric:tabular-nums">11</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sets</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:22px;font-variant-numeric:tabular-nums">3.4 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Moved</div></div>
+          </div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-ok-tint);padding:16px;box-shadow:inset 0 0 0 1px var(--color-ok-line)">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--color-ok)"><i class="ph-bold ph-trophy" style="font-size:16px"></i><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">New record</span></div>
+            <div style="font-size:24px;letter-spacing:-0.02em;margin-top:9px;color:var(--color-ok-text);font-variant-numeric:tabular-nums">Back Squat · 90 kg × 8</div>
+            <div style="font-size:12px;color:var(--color-ok-text);opacity:0.75;margin-top:5px">Previous best 85 kg × 8 · estimated 1RM up to 112 kg</div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Compared to last leg day</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;box-shadow:0 1px 0 var(--color-divider);font-size:14px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">1 385 kg</span><span style="font-size:12px;color:var(--color-ok);width:52px;text-align:right">+12%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;box-shadow:0 1px 0 var(--color-divider);font-size:14px"><span style="flex:1">Romanian Deadlift</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">700 kg</span><span style="font-size:12px;color:var(--color-danger);width:52px;text-align:right">−8%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 0;font-size:14px"><span style="flex:1">Session volume</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">3.4 t</span><span style="font-size:12px;color:var(--color-ok);width:52px;text-align:right">+4%</span></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:auto">
+            <button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px">Edit session</button>
+            <button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Done</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The one place emerald gets a whole panel. A drop is stated plainly in ruby — no scolding copy.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ D · HISTORY, PROGRESS, TEMPLATES ══════════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">D</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">History, progress, templates</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">S-30 → S-40</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-30</span> · Past workout · edit</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 12px">
+          <i class="ph-bold ph-caret-left" style="font-size:20px;color:var(--color-neutral-300);width:36px;text-align:center"></i>
+          <div style="flex:1"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Mon 27 July · 08:40 → 09:34</div><div style="font-size:20px;letter-spacing:-0.02em">Legs</div></div>
+          <i class="ph-bold ph-trash" style="font-size:18px;color:var(--color-danger);width:36px;text-align:center"></i>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:0 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)">
+            <i class="ph-bold ph-clock-countdown" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+            <div style="font-size:12px;line-height:1.5;color:var(--color-neutral-300)">Auto-closed after 8 hours — may be incomplete. Anything added here saves to the original date.</div>
+          </div>
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="flex:1;font-size:15px">Front Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">960 kg</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:4px"><span>#</span><span>Reps</span><span>Kg</span><span></span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">10</span><span style="color:var(--color-neutral-500)">40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>60</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-600)">3</span><span>8</span><span>65</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">4</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">8</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">65</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Add</button></div>
+          </div>
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="flex:1;font-size:15px">Leg Press</span><span style="font-size:11px;color:var(--color-neutral-600)">2 460 kg</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span>12</span><span>160</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>10</span><span>170</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+          </div>
+          <button class="btn btn-secondary" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Add exercise to this session</button>
+          <span style="font-size:13px;color:var(--color-danger);padding:6px 0">Delete workout</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A past session is the live view minus the clock — same rows, same ⋮ menu, same ghost row.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-31</span> · Delete workout · confirm</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3"><div style="font-size:20px">Legs</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:190px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.66);display:grid;place-items:center;padding:22px">
+          <div style="width:100%;background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:9px"><i class="ph-bold ph-trash" style="font-size:17px;color:var(--color-danger)"></i><span style="font-size:17px">Delete this workout?</span></div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">Legs · 27 July, 14 sets, 3 420 kg. It disappears from every device on the next sync and cannot be undone.</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--space-2)">
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Keep</button>
+              <button style="min-height:40px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Whole workouts get a dialog and no undo — the sync makes it irreversible, so say so.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-32</span> · Exercise history</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:8px">
+            <i class="ph-bold ph-caret-left" style="font-size:19px;color:var(--color-neutral-300);margin-left:-6px"></i>
+            <div><div style="font-size:26px;letter-spacing:-0.025em">Back Squat</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:3px">14 sessions · since March</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums;color:var(--color-ok)">110</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Record kg</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">120</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Est. 1RM</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">85</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Last top set</div></div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Top set · 12 weeks</div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px 14px 10px">
+              <svg viewBox="0 0 300 96" style="width:100%;height:96px;display:block">
+                <polyline points="6,80 34,76 62,68 90,70 118,58 146,52 174,46 202,36 230,30 258,22 286,12" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                <circle cx="286" cy="12" r="4" fill="var(--color-ok)"></circle>
+              </svg>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:4px"><span>60 kg</span><span style="color:var(--color-ok)">110 kg · record</span></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-2)">Last sessions</div>
+            <table class="table"><thead><tr><th>Date</th><th>Top set</th><th>Volume</th></tr></thead><tbody>
+              <tr><td>29 Jul</td><td style="font-variant-numeric:tabular-nums">85 × 8</td><td style="font-variant-numeric:tabular-nums">1 385 kg</td></tr>
+              <tr><td>25 Jul</td><td style="font-variant-numeric:tabular-nums">82.5 × 8</td><td style="font-variant-numeric:tabular-nums">1 240 kg</td></tr>
+              <tr><td>21 Jul</td><td style="font-variant-numeric:tabular-nums">80 × 8</td><td style="font-variant-numeric:tabular-nums">1 180 kg</td></tr>
+              <tr><td>17 Jul</td><td style="font-variant-numeric:tabular-nums">80 × 6</td><td style="font-variant-numeric:tabular-nums">1 060 kg</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Reached from the exercise name in a session or from the ⋮ menu.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-33</span> · Exercise history · too little data</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:8px">
+            <i class="ph-bold ph-caret-left" style="font-size:19px;color:var(--color-neutral-300);margin-left:-6px"></i>
+            <div><div style="font-size:26px;letter-spacing:-0.025em">Bulgarian split squat</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:3px">1 session</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">24</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Record kg</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;color:var(--color-neutral-700)">—</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Est. 1RM</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">24</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Last top set</div></div>
+          </div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:26px 18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px">
+            <i class="ph-bold ph-chart-line" style="font-size:22px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:15px">Not enough to draw a line</div>
+            <div style="font-size:12px;color:var(--color-neutral-500);line-height:1.55">Three sessions and the trend appears here. One point isn't a trend.</div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-2)">Last sessions</div>
+            <table class="table"><thead><tr><th>Date</th><th>Top set</th><th>Volume</th></tr></thead><tbody>
+              <tr><td>25 Jul</td><td style="font-variant-numeric:tabular-nums">24 × 10</td><td style="font-variant-numeric:tabular-nums">480 kg</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Never fake a chart from one point — say what unlocks it.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-34</span> · Progress · skeleton</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-8)">
+          <div style="display:flex;flex-direction:column;gap:10px;padding-top:8px"><div class="sk" style="width:150px;height:34px"></div><div class="sk" style="width:110px;height:9px"></div></div>
+          <div style="display:flex;align-items:flex-end;gap:7px;height:140px">
+            <div class="sk" style="flex:1;height:38%"></div><div class="sk" style="flex:1;height:52%"></div><div class="sk" style="flex:1;height:44%"></div><div class="sk" style="flex:1;height:66%"></div><div class="sk" style="flex:1;height:58%"></div><div class="sk" style="flex:1;height:71%"></div><div class="sk" style="flex:1;height:74%"></div><div class="sk" style="flex:1;height:69%"></div><div class="sk" style="flex:1;height:88%"></div><div class="sk" style="flex:1;height:100%"></div>
+          </div>
+          <div class="sk" style="height:140px;border-radius:14px"></div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="sk" style="width:80px;height:9px"></div>
+            <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="flex:1;height:13px"></div><div class="sk" style="width:60px;height:13px"></div></div>
+            <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="flex:1;height:13px"></div><div class="sk" style="width:60px;height:13px"></div></div>
+            <div style="display:flex;gap:12px;align-items:center"><div class="sk" style="flex:1;height:13px"></div><div class="sk" style="width:60px;height:13px"></div></div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="progress" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Charts are computed from the whole log — this shows while the aggregation runs.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-35</span> · Progress · filled</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-8)">
+          <div style="display:flex;align-items:flex-end;gap:14px;padding-top:8px">
+            <div><div style="font-size:40px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">14.2<span style="font-size:16px;color:var(--color-neutral-500)"> t</span></div><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:7px">Volume this week</div></div>
+            <span class="tag tag-accent" style="margin-bottom:22px">+18%</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:7px;height:140px">
+            <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-3)">Estimated 1RM</div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px 14px 10px">
+              <svg viewBox="0 0 300 100" style="width:100%;height:100px;display:block">
+                <polyline points="6,84 42,78 78,70 114,72 150,58 186,50 222,42 258,30 294,16" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                <polyline points="6,92 42,88 78,86 114,84 150,76 186,72 222,66 258,60 294,52" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-dasharray="3 4"></polyline>
+              </svg>
+              <div style="display:flex;gap:16px;font-size:11px;color:var(--color-neutral-600);margin-top:8px"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-accent);display:inline-block"></span>Squat 120 kg</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-neutral-700);display:inline-block"></span>Bench 93 kg</span></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-2)">Records</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px">Back Squat</span><span style="font-size:15px;font-variant-numeric:tabular-nums">110 kg</span><span class="tag tag-accent">+5</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px">Bench Press</span><span style="font-size:15px;font-variant-numeric:tabular-nums">82.5 kg</span><span class="tag tag-accent">+2.5</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0"><span style="flex:1;font-size:15px">Deadlift</span><span style="font-size:15px;font-variant-numeric:tabular-nums">140 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">6 wks</span></div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="progress" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Only the current week takes the full-chroma bar; history stays graphite.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-36</span> · Progress · empty</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:12px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="padding-top:8px"><div style="font-size:30px;letter-spacing:-0.025em">Progress</div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-8) 0">
+            <i class="ph-bold ph-chart-line-up" style="font-size:26px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:17px">Two more sessions</div>
+            <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:34ch">Volume, records and 1RM estimates need three logged sessions before they mean anything. You have one.</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="font-size:11px;color:var(--color-neutral-500);flex:1">Progress unlocks at</span>
+            <div style="display:flex;gap:5px"><span style="width:9px;height:9px;border-radius:50%;background:var(--color-accent)"></span><span style="width:9px;height:9px;border-radius:50%;background:var(--color-neutral-800)"></span><span style="width:9px;height:9px;border-radius:50%;background:var(--color-neutral-800)"></span></div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="progress" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Progress toward the unlock is itself the graphic.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-37</span> · Templates · list</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:8px"><i class="ph-bold ph-caret-left" style="font-size:19px;color:var(--color-neutral-300);margin-left:-6px"></i><div style="font-size:26px;letter-spacing:-0.025em">Templates</div></div>
+          <p style="font-size:13px;line-height:1.55;color:var(--color-neutral-500);margin:0">A template is a past session you kept. Loading one prefills every exercise with last time's weights.</p>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Push day</span><span class="tag tag-accent">Used 6×</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-top:7px;line-height:1.5">Bench Press · Incline DB · Dips · Lateral raise · Triceps pushdown</div>
+            <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-accent);margin-top:12px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load · 18 sets prefilled</div>
+          </div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Legs · heavy</span><span class="tag tag-neutral">Used 4×</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-top:7px;line-height:1.5">Back Squat · Romanian Deadlift · Leg Press · Calf raise</div>
+            <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-accent);margin-top:12px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load · 14 sets prefilled</div>
+          </div>
+          <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Pull day</span><span class="tag tag-neutral">Used 5×</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="font-size:12px;color:var(--color-neutral-500);margin-top:7px;line-height:1.5">Pull-up · Barbell row · Face pull · Curl</div>
+            <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--color-accent);margin-top:12px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load · 16 sets prefilled</div>
+          </div>
+          <button class="btn btn-secondary" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Save last session as template</button>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">⋮ carries rename, duplicate and delete — same menu grammar as exercises.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-38</span> · Templates · empty</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:8px"><i class="ph-bold ph-caret-left" style="font-size:19px;color:var(--color-neutral-300);margin-left:-6px"></i><div style="font-size:26px;letter-spacing:-0.025em">Templates</div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-8) 0">
+            <i class="ph-bold ph-cards" style="font-size:26px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:17px">No templates yet</div>
+            <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:34ch">Finish a session you'd repeat and keep it — it lands here with every exercise and its weights.</div>
+          </div>
+          <button class="btn btn-primary" style="min-height:46px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Save “Push day” from 29 Jul</button>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The empty state offers the most likely candidate instead of an abstract “create”.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-39</span> · Save as template · sheet</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3"><div style="font-size:26px">Templates</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:150px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 18px 26px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="font-size:17px;margin-top:4px">Save as template</div>
+          <input class="input" value="Legs · heavy" style="min-height:46px;font-size:15px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <span style="flex:1;font-size:14px">Keep last used weights</span>
+            <span style="width:40px;height:24px;border-radius:12px;background:var(--color-accent-800);position:relative;display:inline-block"><span style="position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:var(--color-accent)"></span></span>
+          </div>
+          <div style="font-size:12px;color:var(--color-neutral-600);line-height:1.5">4 exercises, 14 sets. Warm-ups are kept as warm-ups.</div>
+          <div style="display:flex;gap:10px"><button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px">Cancel</button><button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Save template</button></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Name is prefilled from the session; the toggle decides prefilled vs blank weights.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-40</span> · Template · menu &amp; delete</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3"><div style="font-size:26px">Templates</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:150px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 12px 26px;display:flex;flex-direction:column;gap:2px">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center;margin-bottom:10px"></div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:0 10px 8px">Push day · used 6×</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-play" style="font-size:18px;color:var(--color-neutral-400)"></i>Load into a new session</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-pencil-simple" style="font-size:18px;color:var(--color-neutral-400)"></i>Rename</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-copy" style="font-size:18px;color:var(--color-neutral-400)"></i>Duplicate</div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px"><i class="ph-bold ph-arrows-clockwise" style="font-size:18px;color:var(--color-neutral-400)"></i>Refresh weights from last use</div>
+          <div style="height:1px;background:var(--color-divider);margin:6px 10px"></div>
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 10px;font-size:15px;color:var(--color-danger)"><i class="ph-bold ph-trash" style="font-size:18px"></i>Delete template</div>
+          <div style="font-size:11px;color:var(--color-neutral-600);padding:8px 10px 0;line-height:1.5">Deleting a template never touches the sessions it came from — undo snackbar, no dialog.</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Same sheet grammar as the exercise menu, so one mental model covers both.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ E · GYMS ══════════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">E</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">My gyms</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">S-41 → S-48 · location, permissions, visits</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-41</span> · Gyms · empty</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+          <p style="font-size:13px;line-height:1.55;color:var(--color-neutral-500);margin:0">Add a gym while standing in it. Open the app there later and the visit is recorded — an unlogged hour shows up on Today.</p>
+          <div style="display:flex;gap:8px"><input class="input" placeholder="Gym name" style="flex:1;min-height:46px"><button class="btn btn-primary" style="min-height:46px;gap:6px" disabled><i class="ph-bold ph-crosshair"></i>I'm here</button></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-8) 0">
+            <i class="ph-bold ph-map-pin" style="font-size:26px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:17px">No gyms yet</div>
+            <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:34ch">Name it first, then tap “I'm here” — the button stays disabled until there's a name.</div>
+          </div>
+          <div style="margin-top:auto;font-size:11px;color:var(--color-neutral-600);line-height:1.55">Browsers don't give background location. Visits are only recorded while the app is open.</div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The platform limitation is stated on the empty screen, not hidden in a settings page.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-42</span> · Gyms · locating</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+          <div style="display:flex;gap:8px"><input class="input" value="Smartass Obolon" style="flex:1;min-height:46px"><button class="btn btn-primary" style="min-height:46px;gap:8px" disabled><span class="sp" style="display:inline-block;width:14px;height:14px;border:2px solid var(--color-accent-800);border-top-color:var(--color-accent);border-radius:50%"></span>Locating</button></div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:10px"><i class="ph-bold ph-crosshair" style="font-size:16px;color:var(--color-accent)"></i><span style="flex:1;font-size:14px">Reading your position…</span></div>
+            <div class="sk" style="height:10px;width:70%"></div>
+            <div class="sk" style="height:10px;width:45%"></div>
+            <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Accuracy improves for a few seconds — the save waits for the best fix or 8 s, whichever comes first.</div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Indeterminate wait = spinner + skeleton rows, never a fake progress bar.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-43</span> · Gyms · permission denied</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+          <div style="padding:14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <div style="display:flex;align-items:flex-start;gap:10px"><i class="ph-bold ph-map-pin-slash" style="font-size:17px;color:var(--color-danger);margin-top:1px"></i>
+              <div style="flex:1"><div style="font-size:14px;color:var(--color-danger-text)">Location is blocked</div><div style="font-size:12px;line-height:1.5;color:var(--color-danger-text);opacity:0.8;margin-top:5px">Safari → aA → Website Settings → Location → Allow. Gyms and visit reminders stay off until then.</div></div>
+            </div>
+            <div style="display:flex;gap:9px;margin-top:12px"><button class="btn btn-secondary" style="min-height:36px;font-size:13px">How to fix</button><button class="btn btn-secondary" style="min-height:36px;font-size:13px">Try again</button></div>
+          </div>
+          <div style="display:flex;gap:8px;opacity:0.45"><input class="input" placeholder="Gym name" style="flex:1;min-height:46px" disabled><button class="btn btn-primary" style="min-height:46px;gap:6px" disabled><i class="ph-bold ph-crosshair"></i>I'm here</button></div>
+          <div style="font-size:12px;color:var(--color-neutral-500);line-height:1.55">Everything else in the tracker works exactly as before — this only disables gyms.</div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Blocked permission names the exact path to fix it, and scopes the damage.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-44</span> · Gyms · GPS too coarse</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+          <div style="display:flex;gap:8px"><input class="input" value="Smartass Obolon" style="flex:1;min-height:46px;border-color:var(--color-danger)"><button class="btn btn-primary" style="min-height:46px;gap:6px"><i class="ph-bold ph-crosshair"></i>I'm here</button></div>
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <i class="ph-bold ph-warning-circle" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-danger-text)">Location came back at ±240 m — too coarse to pin a gym. Step inside and try again, or save it anyway and widen the radius.</span>
+          </div>
+          <div style="display:flex;gap:9px"><button class="btn btn-secondary" style="min-height:38px;font-size:13px">Save anyway</button><button class="btn btn-secondary" style="min-height:38px;font-size:13px;gap:6px"><i class="ph-bold ph-arrow-clockwise"></i>Retry</button></div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">A recoverable failure always offers the override — the user may know better than the fix.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-45</span> · Gym added · success</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+          <div style="display:flex;gap:8px"><input class="input" placeholder="Gym name" style="flex:1;min-height:46px"><button class="btn btn-primary" style="min-height:46px;gap:6px"><i class="ph-bold ph-crosshair"></i>I'm here</button></div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:15px;box-shadow:inset 0 0 0 1px var(--color-ok-line)">
+            <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Smartass Obolon</span><span class="tag tag-accent">Inside</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-500);margin-top:10px;font-variant-numeric:tabular-nums"><span>50.51234, 30.49871 · ±12 m</span><span>150 m</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:96px;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-ok-tint);box-shadow:var(--shadow-md)">
+          <i class="ph-bold ph-check-circle" style="font-size:17px;color:var(--color-ok)"></i>
+          <span style="flex:1;font-size:13px;color:var(--color-ok-text)">Gym added · accuracy ±12 m</span>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Success toasts state the fact plus the number that makes it trustworthy.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-46</span> · Gyms · list, inside radius</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Gyms</div>
+          <div style="display:flex;gap:8px"><input class="input" placeholder="Gym name" style="flex:1;min-height:46px"><button class="btn btn-primary" style="min-height:46px;gap:6px"><i class="ph-bold ph-crosshair"></i>I'm here</button></div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:15px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Smartass Obolon</span><span class="tag tag-accent">Inside</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-500);margin-top:10px;font-variant-numeric:tabular-nums"><span>50.51234, 30.49871</span><span>radius 150 m</span></div>
+            <div style="display:flex;gap:3px;margin-top:12px;align-items:flex-end;height:26px">
+              <div style="flex:1;height:40%;background:var(--color-accent-800);border-radius:2px"></div><div style="flex:1;height:70%;background:var(--color-accent-700);border-radius:2px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:2px"></div><div style="flex:1;height:55%;background:var(--color-accent-800);border-radius:2px"></div><div style="flex:1;height:85%;background:var(--color-accent-700);border-radius:2px"></div><div style="flex:1;height:30%;background:var(--color-neutral-800);border-radius:2px"></div><div style="flex:1;height:20%;background:var(--color-neutral-800);border-radius:2px"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:6px;letter-spacing:0.06em;text-transform:uppercase"><span>Visits · last 7 days</span><span style="color:var(--color-ok)">11 of 12 logged</span></div>
+          </div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:15px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Sportlife Livoberezhna</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-neutral-500);margin-top:10px;font-variant-numeric:tabular-nums"><span>50.45219, 30.60112</span><span>radius 200 m</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:12px;letter-spacing:0.06em;text-transform:uppercase"><span>3 visits</span><span style="color:var(--color-danger)">2 of 3 logged</span></div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">“Inside” is live proximity; the logged ratio is the only place a percentage turns ruby.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-47</span> · Gym · edit radius</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3"><div style="font-size:26px">Gyms</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:150px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 18px 26px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="font-size:17px;margin-top:4px">Smartass Obolon</div>
+          <div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12px;color:var(--color-neutral-500)">Radius</span><span style="font-size:20px;font-variant-numeric:tabular-nums">150 m</span></div>
+            <div style="height:4px;border-radius:2px;background:var(--color-neutral-800);margin-top:12px;position:relative"><div style="width:32%;height:100%;background:var(--color-accent);border-radius:2px"></div><span style="position:absolute;left:32%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--color-accent);box-shadow:0 0 0 4px rgba(217,162,79,0.16)"></span></div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:10px"><span>30 m</span><span>2 000 m</span></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg)"><i class="ph-bold ph-info" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i><span style="font-size:12px;line-height:1.5;color:var(--color-neutral-500)">Wider catches more visits but also the café next door. 150 m suits most gyms.</span></div>
+          <div style="display:flex;gap:10px"><button style="flex:none;min-height:44px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px;display:inline-flex;align-items:center;gap:7px"><i class="ph-bold ph-trash"></i>Delete</button><button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px">Cancel</button><button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Save</button></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Same sheet shape as the set editor: values on top, destructive left, confirm right.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-48</span> · Gym · delete confirm</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 18px;opacity:0.3"><div style="font-size:26px">Gyms</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:150px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.66);display:grid;place-items:center;padding:22px">
+          <div style="width:100%;background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:9px"><i class="ph-bold ph-trash" style="font-size:17px;color:var(--color-danger)"></i><span style="font-size:17px">Delete “Smartass Obolon”?</span></div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">12 recorded visits go with it and reminders for this place stop. Your workouts are untouched.</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:var(--space-2)"><button class="btn btn-secondary" style="min-height:40px;font-size:14px">Keep</button><button style="min-height:40px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px">Delete</button></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Always say what is <em>not</em> lost — it's the sentence that lets someone tap Delete calmly.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ F · SYSTEM KIT ══════════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">F</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Notifications, skeletons, tokens</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">S-49 → S-50 · the pieces every screen reuses</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:540px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-49</span> · Notification kit</div>
+      <div style="background:var(--color-bg);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--space-6)">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Toasts · 3.2 s, bottom, above the tab bar</div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-ok-tint)"><i class="ph-bold ph-check-circle" style="font-size:17px;color:var(--color-ok)"></i><span style="flex:1;font-size:13px;color:var(--color-ok-text)">Gym added · accuracy ±12 m</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-ok-tint)"><i class="ph-bold ph-trophy" style="font-size:17px;color:var(--color-ok)"></i><span style="flex:1;font-size:13px;color:var(--color-ok-text)">New record · Back Squat 90 kg × 8</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint)"><i class="ph-bold ph-warning-circle" style="font-size:17px;color:var(--color-danger)"></i><span style="flex:1;font-size:13px;color:var(--color-danger-text)">GPS accuracy ±240 m — try again inside</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-trash" style="font-size:16px;color:var(--color-danger)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Set deleted · 8 × 80 kg</span><span style="font-size:13px;color:var(--color-accent)">Undo</span><span style="font-size:11px;color:var(--color-neutral-600);font-variant-numeric:tabular-nums">4s</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-surface)"><i class="ph-bold ph-cloud-check" style="font-size:16px;color:var(--color-ok)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">6 changes synced</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Banners · persistent, inline, dismissible only when harmless</div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 3px 0 0 var(--color-danger)"><i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger)"></i><span style="flex:1;font-size:12px;color:var(--color-danger-text)">Offline · 2 changes queued</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)"><i class="ph-bold ph-map-pin" style="font-size:16px;color:var(--color-accent)"></i><span style="flex:1;font-size:12px;color:var(--color-neutral-300)">Unlogged hour at Smartass Obolon</span><span style="font-size:12px;color:var(--color-accent)">Log it</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-neutral-600)"><i class="ph-bold ph-download-simple" style="font-size:16px;color:var(--color-neutral-400)"></i><span style="flex:1;font-size:12px;color:var(--color-neutral-300)">A new version is ready — reload to update</span><span style="font-size:12px;color:var(--color-accent)">Reload</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-accent-900)"><span class="sp" style="display:inline-block;width:13px;height:13px;border:2px solid var(--color-accent-800);border-top-color:var(--color-accent);border-radius:50%"></span><span style="flex:1;font-size:12px;color:var(--color-accent-200)">Syncing 4 / 6</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Status marks</div>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--color-neutral-400)">
+            <span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:var(--color-ok)"></span>Synced</span>
+            <span style="display:inline-flex;align-items:center;gap:7px"><span class="sp" style="display:inline-block;width:11px;height:11px;border:2px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>Syncing</span>
+            <span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:var(--color-danger)"></span>Offline / failed</span>
+            <span style="display:inline-flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span>Live session</span>
+            <span class="tag tag-neutral">Queued</span><span class="tag tag-neutral">Auto-closed</span><span class="tag tag-accent">Inside</span><span class="tag tag-accent">Record</span>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.6">Rules · One toast at a time; a new one replaces the old. Anything reversible gets an undo instead of a dialog. Anything irreversible after sync gets a dialog and no undo. Errors that block the queue stay on screen until resolved.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:540px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">S-50</span> · Skeleton &amp; loading kit</div>
+      <div style="background:var(--color-bg);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--space-6)">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Blocks · #262a2d, 6px radius, 1.6 s breathe</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;align-items:center"><div class="sk" style="width:44px;height:44px;border-radius:12px"></div><div style="flex:1;display:flex;flex-direction:column;gap:7px"><div class="sk" style="width:40%;height:13px"></div><div class="sk" style="width:65%;height:9px"></div></div></div>
+            <div class="sk" style="height:62px;border-radius:14px"></div>
+            <div style="display:flex;gap:8px"><div class="sk" style="flex:1;height:70px"></div><div class="sk" style="flex:1;height:70px"></div><div class="sk" style="flex:1;height:70px"></div></div>
+            <div style="display:flex;align-items:flex-end;gap:6px;height:70px"><div class="sk" style="flex:1;height:40%"></div><div class="sk" style="flex:1;height:65%"></div><div class="sk" style="flex:1;height:50%"></div><div class="sk" style="flex:1;height:80%"></div><div class="sk" style="flex:1;height:100%"></div></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Spinners &amp; progress</div>
+          <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+            <span class="sp" style="display:inline-block;width:16px;height:16px;border:2px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>
+            <span class="sp" style="display:inline-block;width:22px;height:22px;border:2px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>
+            <div style="flex:1;min-width:180px"><div style="height:3px;border-radius:2px;background:var(--color-neutral-900);overflow:hidden"><div style="width:66%;height:100%;background:var(--color-accent)"></div></div><div style="font-size:10px;color:var(--color-neutral-600);margin-top:6px">Determinate — queue only</div></div>
+            <button class="btn btn-primary" style="min-height:40px;font-size:14px;gap:9px" disabled><span class="sp" style="display:inline-block;width:14px;height:14px;border:2px solid var(--color-accent-800);border-top-color:var(--color-accent);border-radius:50%"></span>Working…</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.6">Rules · Under 300 ms show nothing. 300 ms–2 s: skeleton shaped like the real layout. Over 2 s or unknown length: spinner with a label saying what is happening. Never swap a skeleton for a spinner on the same surface — pick one per screen. Content replaces skeletons in place, no cross-fade, no layout jump.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;width:540px">
+      <div style="font-size:11px;color:var(--color-neutral-500)">Handoff · tokens &amp; rules</div>
+      <div style="background:var(--color-bg);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:var(--space-6)">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Palette</div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:11px;font-variant-numeric:tabular-nums">
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#16171a;box-shadow:inset 0 0 0 1px #3b3f43"></span><span style="color:var(--color-neutral-400)">bg #16171a</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#1f2125"></span><span style="color:var(--color-neutral-400)">surface #1f2125</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#e9eaec"></span><span style="color:var(--color-neutral-400)">text #e9eaec</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#90959a"></span><span style="color:var(--color-neutral-400)">muted #90959a</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#d9a24f"></span><span style="color:var(--color-neutral-400)">accent #d9a24f</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#342713"></span><span style="color:var(--color-neutral-400)">accent tint #342713</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#4cbe8c"></span><span style="color:var(--color-neutral-400)">ok #4cbe8c</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#16291f"></span><span style="color:var(--color-neutral-400)">ok tint #16291f</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#e2564f"></span><span style="color:var(--color-neutral-400)">danger #e2564f</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#2c1614"></span><span style="color:var(--color-neutral-400)">danger tint #2c1614</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#262a2d"></span><span style="color:var(--color-neutral-400)">skeleton #262a2d</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:26px;height:26px;border-radius:6px;background:#3b3f43"></span><span style="color:var(--color-neutral-400)">hairline #3b3f43</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Type &amp; metrics</div>
+          <div style="font-size:12px;color:var(--color-neutral-400);line-height:1.9">
+            Inter 400/500 · display 30–40 / −0.025em · title 22 · body 15 · secondary 13 · meta 11–12 · label 10 uppercase 0.12em<br>
+            Numbers always <span style="font-variant-numeric:tabular-nums">tabular-nums</span> · radius 8 / 14 · tap target ≥ 44 px · session rows 16 px<br>
+            Spacing 5.6 / 8.4 / 11.2 / 16.8 / 22.4 px · phone gutter 18–20 px · card padding 13–16 px
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Rules a build must keep</div>
+          <div style="font-size:12px;color:var(--color-neutral-400);line-height:1.9">
+            1 · Brass is action and focus; emerald is a result; ruby is loss or failure. Nothing else is coloured.<br>
+            2 · Primary buttons are outlined, never filled. Accent never floods a surface.<br>
+            3 · Set logging is the ghost row: prefilled from last time, tap a number to nudge, Log commits.<br>
+            4 · Reversible → undo snackbar (5 s). Irreversible after sync → dialog naming what is lost and what survives.<br>
+            5 · Offline is a state, not an error: local first, queue replays in order, tags stay neutral.<br>
+            6 · Every list has empty, skeleton, filled and failed. No screen ships with only the filled one.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -18,6 +18,8 @@ export interface Workout {
   startedAt: number;
   finishedAt: number | null;
   autoFinished: boolean;
+  /** Saved gym this session belongs to (null = not attached). */
+  gymId?: string | null;
   exercises: Exercise[];
 }
 
@@ -27,6 +29,8 @@ export interface Gym {
   lat: number;
   lng: number;
   radiusM: number;
+  /** User-marked favourite (fallback suggestion when GPS is unavailable). */
+  favorite?: boolean;
 }
 
 /** "Був у залі 1год+, але тренування не залоговане" */

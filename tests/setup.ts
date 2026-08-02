@@ -14,6 +14,7 @@ beforeEach(() => {
   setLocale('en');
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   Object.defineProperty(navigator, 'onLine', {
     configurable: true,
     value: true,

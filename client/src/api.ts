@@ -1,5 +1,8 @@
 const TOKEN_KEY = 'gym.token';
 const USERNAME_KEY = 'gym.username';
+const ROLE_KEY = 'gym.role';
+
+export type Role = 'member' | 'trainer' | 'admin';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -7,13 +10,24 @@ export function getToken(): string | null {
 export function getUsername(): string | null {
   return localStorage.getItem(USERNAME_KEY);
 }
-export function setAuth(token: string, username: string): void {
+export function setAuth(token: string, username: string, role: Role = 'member'): void {
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(USERNAME_KEY, username);
+  localStorage.setItem(ROLE_KEY, role);
+}
+
+export function getRole(): Role {
+  const r = localStorage.getItem(ROLE_KEY);
+  return r === 'admin' || r === 'trainer' ? r : 'member';
+}
+
+export function setRole(role: Role): void {
+  localStorage.setItem(ROLE_KEY, role);
 }
 export function clearAuth(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USERNAME_KEY);
+  localStorage.removeItem(ROLE_KEY);
 }
 
 export class HttpError extends Error {

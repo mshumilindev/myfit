@@ -1,8 +1,9 @@
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../server/src/index';
 import { db } from '../server/src/db';
+import { auditRead, requireRole } from '../server/src/auth';
 
 const app = createApp();
 
@@ -31,6 +32,9 @@ async function register(username = 'mykola', email = 'me@example.com') {
 
 beforeEach(() => {
   db.exec(`
+    DELETE FROM trainer_notes;
+    DELETE FROM audit_log;
+    DELETE FROM invites;
     DELETE FROM reminder_dismissals;
     DELETE FROM presence_pings;
     DELETE FROM sets;
@@ -106,6 +110,155 @@ describe('F-01 Auth', () => {
     expect(
       (await req('POST', '/api/auth/login', { identifier: 'locked', password: 'wrong' })).status,
     ).toBe(429);
+  });
+
+  it('exposes invite state, claims valid links and marks re-requested dead links', async () => {
+    const admin = await register('owner', 'owner@example.com');
+    const adminId = (
+      db.prepare('SELECT id FROM users WHERE email = ?').get('owner@example.com') as { id: string }
+    ).id;
+    const invitedId = crypto.randomUUID();
+    const token = 'invite-token';
+    const now = Date.now();
+    db.prepare(
+      `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      invitedId,
+      'Invited Member',
+      'invited@example.com',
+      '__pending__',
+      now,
+      'member',
+      'invited',
+    );
+    db.prepare(
+      `INSERT INTO invites (token, user_id, created_by, kind, created_at, expires_at)
+       VALUES (?, ?, ?, 'invite', ?, ?)`,
+    ).run(token, invitedId, adminId, now, now + 7 * 24 * 3600_000);
+
+    expect((await req('GET', `/api/auth/invite/${token}`)).data).toMatchObject({
+      state: 'valid',
+      inviter: 'owner',
+      name: 'Invited Member',
+      email: 'invited@example.com',
+    });
+    expect((await req('GET', '/api/auth/invite/missing')).status).toBe(404);
+    expect((await req('POST', '/api/auth/claim', { token })).status).toBe(400);
+    expect((await req('POST', '/api/auth/claim', { token, password: '123' })).status).toBe(400);
+
+    const claimed = await req<{ token: string; username: string; email: string; role: string }>(
+      'POST',
+      '/api/auth/claim',
+      {
+        token,
+        username: 'Claimed Member',
+        email: 'Claimed@Example.com',
+        password: 'secret123',
+      },
+    );
+    expect(claimed.status).toBe(200);
+    expect(claimed.data).toMatchObject({
+      username: 'Claimed Member',
+      email: 'claimed@example.com',
+      role: 'member',
+    });
+    expect((await req('POST', '/api/auth/claim', { token, password: 'secret123' })).status).toBe(
+      410,
+    );
+    expect(
+      (
+        await req('POST', '/api/auth/login', {
+          identifier: 'claimed@example.com',
+          password: 'secret123',
+        })
+      ).status,
+    ).toBe(200);
+    expect((await req('POST', `/api/auth/invite/${token}/request-new`)).status).toBe(200);
+    expect(
+      (
+        db.prepare('SELECT re_requested_at FROM invites WHERE token = ?').get(token) as {
+          re_requested_at: number | null;
+        }
+      ).re_requested_at,
+    ).toEqual(expect.any(Number));
+    expect((await req('POST', '/api/auth/invite/missing/request-new')).status).toBe(404);
+
+    const otherId = crypto.randomUUID();
+    db.prepare(
+      `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).run(otherId, 'Other', 'other@example.com', '__pending__', now, 'member', 'invited');
+    for (const [suffix, patch, expectedState] of [
+      ['expired', { expires_at: now - 1 }, 'expired'],
+      ['revoked', { revoked_at: now }, 'revoked'],
+    ] as const) {
+      const t = `invite-${suffix}`;
+      db.prepare(
+        `INSERT INTO invites (token, user_id, created_by, kind, created_at, expires_at, revoked_at)
+         VALUES (?, ?, ?, 'invite', ?, ?, ?)`,
+      ).run(t, otherId, adminId, now, patch.expires_at ?? now + 1000, patch.revoked_at ?? null);
+      expect((await req('GET', `/api/auth/invite/${t}`)).data).toMatchObject({
+        state: expectedState,
+      });
+      expect(
+        (await req('POST', '/api/auth/claim', { token: t, password: 'secret123' })).status,
+      ).toBe(410);
+    }
+
+    expect(admin.token).toEqual(expect.any(String));
+  });
+
+  it('rejects duplicate invite claims and enforces role gates plus audit logging', async () => {
+    const admin = await register('owner', 'owner@example.com');
+    const member = await register('member', 'member@example.com');
+    const adminId = (
+      db.prepare('SELECT id FROM users WHERE email = ?').get('owner@example.com') as { id: string }
+    ).id;
+    const memberId = (
+      db.prepare('SELECT id FROM users WHERE email = ?').get('member@example.com') as { id: string }
+    ).id;
+    const invitedId = crypto.randomUUID();
+    const token = 'dupe-token';
+    const now = Date.now();
+    db.prepare(
+      `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).run(invitedId, 'Invited', 'new@example.com', '__pending__', now, 'member', 'invited');
+    db.prepare(
+      `INSERT INTO invites (token, user_id, created_by, kind, created_at, expires_at)
+       VALUES (?, ?, ?, 'invite', ?, ?)`,
+    ).run(token, invitedId, adminId, now, now + 1000);
+
+    expect(
+      (
+        await req('POST', '/api/auth/claim', {
+          token,
+          username: 'member',
+          email: 'new@example.com',
+          password: 'secret123',
+        })
+      ).status,
+    ).toBe(409);
+
+    const next = vi.fn();
+    const res: { status: ReturnType<typeof vi.fn>; json: ReturnType<typeof vi.fn> } = {
+      status: vi.fn(),
+      json: vi.fn(),
+    };
+    res.status.mockReturnValue(res);
+    res.json.mockReturnValue(res);
+    const adminReq = { headers: { authorization: `Bearer ${admin.token}` } };
+    requireRole('admin')(adminReq as never, res as never, next);
+    expect(next).toHaveBeenCalledTimes(1);
+
+    const memberReq = { headers: { authorization: `Bearer ${member.token}` } };
+    requireRole('admin')(memberReq as never, res as never, vi.fn());
+    expect(res.status).toHaveBeenCalledWith(403);
+
+    auditRead(adminId, adminId, 'self');
+    auditRead(adminId, memberId, 'profile');
+    expect((db.prepare('SELECT COUNT(*) AS n FROM audit_log').get() as { n: number }).n).toBe(1);
   });
 });
 

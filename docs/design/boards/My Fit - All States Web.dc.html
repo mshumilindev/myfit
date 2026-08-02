@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  :root {
+    --color-bg: #16171a; --color-surface: #1f2125; --color-text: #e9eaec;
+    --color-divider: rgba(233,234,236,0.14);
+    --color-accent: #d9a24f;
+    --color-accent-100: #fbf3e6; --color-accent-200: #f6e6cb; --color-accent-300: #eed3a5;
+    --color-accent-400: #e4bb76; --color-accent-500: #d9a24f; --color-accent-600: #b3833d;
+    --color-accent-700: #8a642e; --color-accent-800: #5b4420; --color-accent-900: #342713;
+    --color-neutral-100: #f5f6f7; --color-neutral-200: #e6e8ea; --color-neutral-300: #d0d3d6;
+    --color-neutral-400: #b0b4b8; --color-neutral-500: #90959a; --color-neutral-600: #71767b;
+    --color-neutral-700: #55595e; --color-neutral-800: #3b3f43; --color-neutral-900: #262a2d;
+    --shadow-sm: 0 0 0 1px #3b3f43;
+    --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0,0,0,0.6);
+    --shadow-lg: 0 0 0 1px #6b7075, 0 18px 44px rgba(0,0,0,0.7);
+    --color-ok: #4cbe8c; --color-ok-text: #b7e8cf; --color-ok-tint: #16291f; --color-ok-line: #2f6f52;
+    --color-danger: #e2564f; --color-danger-text: #f3c2bf; --color-danger-tint: #2c1614; --color-danger-line: #7d302b;
+  }
+  body { margin:0; background:#0d0e10; }
+  @keyframes shimmer { 0% { opacity:.35 } 50% { opacity:.7 } 100% { opacity:.35 } }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .sk { animation: shimmer 1.6s ease-in-out infinite; background:#262a2d; border-radius:6px; }
+  .sp { animation: spin 1s linear infinite; }
+</style>
+</helmet>
+
+<div style="font-family:var(--font-body);background:#0d0e10;color:var(--color-text);padding:52px 60px 120px;min-height:100vh">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">My Fit</span>
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-600)">Web &amp; desktop states</span>
+  </div>
+  <h1 style="margin:0 0 10px;font-size:38px;font-weight:500;letter-spacing:-0.025em">The same product at 1280 px</h1>
+  <p style="margin:0 0 40px;max-width:78ch;font-size:14px;line-height:1.65;color:var(--color-neutral-500)">The browser app, the desktop window and the tray popover — every state the phone board carries, plus what only exists here: hover, focus rings, context menus, the two-pane history and narrow-window collapse. Reference ids are <span style="color:var(--color-neutral-300)">W-01 … W-13</span>; they pair with S-xx on the phone board.</p>
+
+  <!-- ══════════ W · AUTH ══════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">W · A</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Auth</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">W-01 → W-02 · centred card, window chrome</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:30px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-01</span> · Sign in · idle &amp; submitting</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#1b1d21">
+          <span style="width:11px;height:11px;border-radius:50%;background:#3b3f43"></span><span style="width:11px;height:11px;border-radius:50%;background:#3b3f43"></span><span style="width:11px;height:11px;border-radius:50%;background:#3b3f43"></span>
+          <span style="flex:1;text-align:center;font-size:12px;color:var(--color-neutral-600)">My Fit — myfit.app</span>
+        </div>
+        <div style="flex:1;display:grid;place-items:center">
+          <div style="width:380px;display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:10px"><i class="ph-bold ph-barbell" style="font-size:24px;color:var(--color-accent)"></i><span style="font-size:20px">My Fit</span></div>
+            <div style="font-size:13px;color:var(--color-neutral-500);margin-bottom:var(--space-4)">Everything you lift, in one place.</div>
+            <input class="input" placeholder="Email or username" style="min-height:44px">
+            <input class="input" type="password" placeholder="Password" style="min-height:44px;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(217,162,79,0.14)">
+            <div style="font-size:11px;color:var(--color-neutral-600)">Focus ring: 2px brass, offset 2 — tab order is username → password → submit.</div>
+            <button class="btn btn-primary" style="min-height:44px;font-size:15px;margin-top:var(--space-2)">Sign in <span style="font-size:11px;border:1px solid var(--color-accent-700);border-radius:4px;padding:1px 5px;margin-left:8px">↵</span></button>
+            <div style="text-align:center;font-size:12px;color:var(--color-neutral-600);padding-top:6px">New here? Create an account</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Card is 380 px and optically centred; the window never stretches the form. Enter submits from any field.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-02</span> · Sign in · hub unreachable + wrong password</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#1b1d21">
+          <span style="width:11px;height:11px;border-radius:50%;background:#3b3f43"></span><span style="width:11px;height:11px;border-radius:50%;background:#3b3f43"></span><span style="width:11px;height:11px;border-radius:50%;background:#3b3f43"></span>
+          <span style="flex:1;text-align:center;font-size:12px;color:var(--color-neutral-600)">My Fit — myfit.app</span>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:60px">
+          <div style="width:380px;display:flex;flex-direction:column;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:10px"><i class="ph-bold ph-barbell" style="font-size:24px;color:var(--color-accent)"></i><span style="font-size:20px">My Fit</span></div>
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line);margin:var(--space-2) 0">
+              <i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+              <span style="font-size:12px;line-height:1.5;color:var(--color-danger-text)">Can't reach the server. Check your connection and try again — anything logged offline is still queued.</span>
+            </div>
+            <input class="input" placeholder="Email or username" style="min-height:44px" disabled>
+            <input class="input" type="password" placeholder="Password" style="min-height:44px" disabled>
+            <div style="display:flex;gap:9px"><button class="btn btn-primary" style="flex:1;min-height:44px;font-size:15px" disabled>Sign in</button><button class="btn btn-secondary" style="min-height:44px;font-size:13px;gap:7px"><i class="ph-bold ph-arrow-clockwise"></i>Retry</button></div>
+          </div>
+          <div style="width:380px;display:flex;flex-direction:column;gap:var(--space-3);opacity:0.9">
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Variant · credentials rejected</div>
+            <input class="input" value="andrii" style="min-height:44px">
+            <input class="input" type="password" value="••••••" style="min-height:44px;border-color:var(--color-danger)">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--color-danger-text)"><i class="ph-bold ph-warning-circle" style="font-size:14px;color:var(--color-danger)"></i>Wrong username or password</div>
+            <button class="btn btn-primary" style="min-height:44px;font-size:15px">Sign in</button>
+            <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Both errors are inline. The desktop never uses a toast for a blocking failure.</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Two failure modes side by side: an unreachable server disables the form; a rejected password does not.</div>
+    </div>
+  </div>
+
+  <!-- ══════════ W · TODAY ══════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">W · B</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Today</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">W-03 → W-05 · rail, main column, right panel</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:30px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-03</span> · Today · skeleton</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div class="sk" style="height:34px"></div><div class="sk" style="height:34px"></div><div class="sk" style="height:34px"></div>
+          <div style="height:1px;background:var(--color-divider);margin:10px 8px"></div>
+          <div class="sk" style="height:28px"></div><div class="sk" style="height:28px"></div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;flex-direction:column;gap:10px"><div class="sk" style="width:130px;height:10px"></div><div class="sk" style="width:220px;height:30px"></div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"><div class="sk" style="height:76px"></div><div class="sk" style="height:76px"></div><div class="sk" style="height:76px"></div><div class="sk" style="height:76px"></div></div>
+          <div style="display:flex;align-items:flex-end;gap:10px;height:150px"><div class="sk" style="flex:1;height:38%"></div><div class="sk" style="flex:1;height:52%"></div><div class="sk" style="flex:1;height:44%"></div><div class="sk" style="flex:1;height:66%"></div><div class="sk" style="flex:1;height:58%"></div><div class="sk" style="flex:1;height:71%"></div><div class="sk" style="flex:1;height:74%"></div><div class="sk" style="flex:1;height:69%"></div><div class="sk" style="flex:1;height:88%"></div><div class="sk" style="flex:1;height:100%"></div></div>
+          <div style="display:flex;flex-direction:column;gap:12px"><div class="sk" style="width:80px;height:9px"></div><div class="sk" style="height:14px"></div><div class="sk" style="height:14px"></div><div class="sk" style="height:14px"></div><div class="sk" style="height:14px"></div></div>
+        </div>
+        <div style="width:330px;flex:none;padding:26px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:-1px 0 0 var(--color-divider)">
+          <div class="sk" style="width:90px;height:9px"></div><div class="sk" style="height:96px;border-radius:8px"></div><div class="sk" style="height:96px;border-radius:8px"></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">All three columns skeleton together — no column resolves early and shifts the others.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-04</span> · Today · filled, hover states</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:rgba(233,234,236,0.05);color:var(--color-neutral-300);font-size:14px"><i class="ph-bold ph-map-pin" style="font-size:17px"></i>Gyms<span style="margin-left:auto;font-size:10px;color:var(--color-neutral-600)">hover</span></div>
+          <div style="height:1px;background:var(--color-divider);margin:12px 8px"></div>
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:0 10px 8px">Services</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-300);font-size:14px"><i class="ph-bold ph-barbell" style="font-size:17px"></i>Training</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-600);font-size:14px;opacity:0.5"><i class="ph-bold ph-carrot" style="font-size:17px"></i>Nutrition</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-600);font-size:14px;opacity:0.5"><i class="ph-bold ph-robot" style="font-size:17px"></i>AI body scan</div>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:9px;padding:10px 8px;border-radius:var(--radius-md);background:rgba(233,234,236,0.05)"><span style="width:24px;height:24px;border-radius:50%;background:var(--color-accent-900);color:var(--color-accent-300);display:grid;place-items:center;font-size:11px">A</span><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">andrii</span><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span></div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:24px;min-width:0">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:32px;letter-spacing:-0.025em;margin-top:4px">Today</div></div>
+            <button class="btn btn-primary" style="min-height:40px;font-size:14px;gap:8px"><i class="ph-bold ph-play"></i>Start session</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;font-variant-numeric:tabular-nums">3</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sessions</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;font-variant-numeric:tabular-nums">14.2 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Volume</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;font-variant-numeric:tabular-nums;color:var(--color-accent)">2</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">New PRs</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:14px 16px"><div style="font-size:26px;font-variant-numeric:tabular-nums">21 d</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Streak</div></div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Weekly volume</div><div style="font-size:12px;color:var(--color-accent-300)">+18% vs June</div></div>
+            <div style="display:flex;align-items:flex-end;gap:10px;height:140px">
+              <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:8px">History</div>
+            <table class="table">
+              <thead><tr><th>Date</th><th>Session</th><th>Sets</th><th>Volume</th><th>Duration</th><th style="width:40px"></th></tr></thead>
+              <tbody>
+                <tr style="background:rgba(233,234,236,0.04)"><td>Wed 29 Jul</td><td>Push day</td><td>18</td><td>4 980 kg</td><td>1:12</td><td style="text-align:right;color:var(--color-neutral-500)"><i class="ph-bold ph-dots-three"></i></td></tr>
+                <tr><td>Mon 27 Jul</td><td>Legs <span class="tag tag-neutral" style="margin-left:6px">Auto-closed</span></td><td>14</td><td>3 420 kg</td><td>0:54</td><td></td></tr>
+                <tr><td>Sat 25 Jul</td><td>Pull day</td><td>21</td><td>5 640 kg</td><td>1:03</td><td></td></tr>
+                <tr><td>Thu 23 Jul</td><td>Push day</td><td>17</td><td>4 610 kg</td><td>1:08</td><td></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="width:330px;flex:none;padding:26px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:-1px 0 0 var(--color-divider)">
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Templates</div>
+          <div style="background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:14px"><div style="font-size:15px">Push day</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:4px;line-height:1.5">Bench · Incline DB · Dips · Lateral raise</div><div style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</div></div>
+          <div style="background:var(--color-surface);border:1px solid var(--color-divider);border-radius:var(--radius-md);padding:14px"><div style="font-size:15px">Legs · heavy</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:4px;line-height:1.5">Squat · RDL · Leg press · Calf raise</div><div style="display:inline-flex;gap:6px;align-items:center;font-size:12px;color:var(--color-accent);margin-top:10px"><i class="ph-bold ph-arrow-counter-clockwise"></i>Load template</div></div>
+          <div style="height:1px;background:var(--color-divider);margin:6px 0"></div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Records</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums">110 kg</span><span class="tag tag-accent">+5</span></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Bench Press</span><span style="font-variant-numeric:tabular-nums">82.5 kg</span><span class="tag tag-accent">+2.5</span></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span style="flex:1">Deadlift</span><span style="font-variant-numeric:tabular-nums">140 kg</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Hover is a 4% text tint — shown on the rail item and the first table row. The account chip at the bottom of the rail replaces the phone's Apps tab.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-05</span> · Today · empty · offline · sync failed</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-map-pin" style="font-size:17px"></i>Gyms</div>
+          <div style="margin-top:auto;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--color-danger-text);padding:10px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-danger)"></span>Offline · 2 queued</div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:20px;min-width:0">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 3px 0 0 var(--color-danger)">
+            <i class="ph-bold ph-cloud-slash" style="font-size:16px;color:var(--color-danger)"></i>
+            <span style="flex:1;font-size:12px;color:var(--color-danger-text)">No connection. 2 changes queued — they replay in order as soon as you are back online.</span>
+          </div>
+          <div style="padding:13px 14px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <div style="display:flex;align-items:flex-start;gap:10px"><i class="ph-bold ph-warning-octagon" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+              <div style="flex:1"><div style="font-size:13px;color:var(--color-danger-text);line-height:1.5">Sync failed on change 3 of 6 — the server rejected a workout that no longer exists.</div><div style="font-size:11px;color:var(--color-danger-text);opacity:0.7;margin-top:5px;font-variant-numeric:tabular-nums">409 · upsert workout 4f2c…</div></div>
+              <button class="btn btn-secondary" style="min-height:32px;font-size:12px;gap:6px"><i class="ph-bold ph-arrow-clockwise"></i>Retry</button>
+              <button style="min-height:32px;padding:0 12px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:12px">Discard</button>
+            </div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:14px;max-width:46ch">
+            <i class="ph-bold ph-barbell" style="font-size:30px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:24px;letter-spacing:-0.02em">Nothing logged yet</div>
+            <div style="font-size:14px;color:var(--color-neutral-500);line-height:1.6">Start a session and this page fills with your weeks, records and trends. Templates appear after the second one.</div>
+            <div style="display:flex;gap:10px;margin-top:6px">
+              <button class="btn btn-primary" style="min-height:40px;font-size:14px;gap:8px"><i class="ph-bold ph-play"></i>Start session</button>
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Import from a CSV</button>
+            </div>
+          </div>
+        </div>
+        <div style="width:330px;flex:none;padding:26px 22px;display:flex;flex-direction:column;gap:12px;box-shadow:-1px 0 0 var(--color-divider)">
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Templates</div>
+          <div style="border:1px dashed var(--color-neutral-800);border-radius:var(--radius-md);padding:16px;font-size:12px;color:var(--color-neutral-600);line-height:1.55">Keep a finished session and it lands here, ready to load with last time's weights.</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Three states stacked in one frame: offline banner, blocked queue, empty main. Panels keep their frame — an empty side panel shows a dashed placeholder, never a blank hole.</div>
+    </div>
+  </div>
+
+  <!-- ══════════ W · SESSION ══════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">W · C</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Live session</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">W-06 → W-11 · logging, editing, deleting</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:30px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-06</span> · Session · logging, focused ghost row</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;display:flex;flex-direction:column;gap:4px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-map-pin" style="font-size:17px"></i>Gyms</div>
+          <div style="margin-top:auto;padding:10px;border-radius:var(--radius-md);background:var(--color-accent-900);display:flex;align-items:center;gap:9px"><span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span><span style="flex:1;font-size:12px;color:var(--color-accent-200)">In session</span><span style="font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-accent-100)">24:18</span></div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:20px;min-width:0">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">In session · Smartass Obolon</div><div style="font-size:30px;letter-spacing:-0.025em;margin-top:4px">Leg day</div></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="font-size:22px;font-variant-numeric:tabular-nums;color:var(--color-neutral-300)">24:18</span><button class="btn btn-secondary" style="min-height:38px;font-size:13px">Finish </button></div>
+          </div>
+          <div style="display:flex;gap:26px;font-variant-numeric:tabular-nums">
+            <div><div style="font-size:20px">7</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">sets</div></div>
+            <div><div style="font-size:20px">2.1 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">moved</div></div>
+            <div><div style="font-size:20px">2</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">exercises</div></div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font-size:17px">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span><span style="margin-left:auto;font-size:11px;color:var(--color-neutral-600)">1 385 kg moved</span></div>
+            <table class="table" style="max-width:620px">
+              <thead><tr><th style="width:44px">Set</th><th>Reps</th><th>Weight</th><th>Type</th><th style="width:90px"></th></tr></thead>
+              <tbody>
+                <tr><td style="font-variant-numeric:tabular-nums">1</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">12</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">40</td><td style="font-size:12px;color:var(--color-neutral-500)">warm-up</td><td></td></tr>
+                <tr style="background:rgba(233,234,236,0.04)"><td style="font-variant-numeric:tabular-nums">2</td><td style="font-variant-numeric:tabular-nums">8</td><td style="font-variant-numeric:tabular-nums">80</td><td style="font-size:12px;color:var(--color-neutral-500)">working</td><td style="text-align:right;color:var(--color-neutral-500);font-size:14px"><i class="ph-bold ph-pencil-simple" style="margin-right:10px"></i><i class="ph-bold ph-trash" style="color:var(--color-danger)"></i></td></tr>
+                <tr><td style="font-variant-numeric:tabular-nums">3</td><td style="font-variant-numeric:tabular-nums">8</td><td style="font-variant-numeric:tabular-nums">85</td><td style="font-size:12px;color:var(--color-ok)">record</td><td></td></tr>
+                <tr>
+                  <td style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">4</td>
+                  <td><span style="display:inline-block;min-width:46px;padding:3px 8px;border-radius:6px;border:1px solid var(--color-accent);box-shadow:0 0 0 3px rgba(217,162,79,0.14);font-variant-numeric:tabular-nums">8</span></td>
+                  <td><span style="display:inline-block;min-width:46px;padding:3px 8px;border-radius:6px;border:1px solid var(--color-neutral-800);color:var(--color-neutral-400);font-variant-numeric:tabular-nums">85</span></td>
+                  <td style="font-size:12px;color:var(--color-neutral-700)">prefilled</td>
+                  <td><button class="btn btn-primary" style="height:30px;padding-inline:12px;font-size:12px">Log</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size:11px;color:var(--color-neutral-600);margin-top:8px">Hovering a logged row reveals edit and delete.</div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font-size:17px">Romanian Deadlift</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 70 × 10</span></div>
+            <table class="table" style="max-width:620px">
+              <tbody>
+                <tr><td style="width:44px;font-variant-numeric:tabular-nums">1</td><td style="font-variant-numeric:tabular-nums">10</td><td style="font-variant-numeric:tabular-nums">70</td><td style="font-size:12px;color:var(--color-neutral-500)">working</td><td style="width:90px"></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <button class="btn btn-secondary" style="align-self:flex-start;font-size:13px;gap:8px"><i class="ph-bold ph-plus"></i>Add exercise</button>
+        </div>
+        <div style="width:330px;flex:none;padding:26px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:-1px 0 0 var(--color-divider)">
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Rest</div>
+          <div style="background:var(--color-accent-900);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;gap:12px"><i class="ph-bold ph-timer" style="font-size:18px;color:var(--color-accent-300)"></i><span style="flex:1;font-size:13px;color:var(--color-accent-200)">Since last set</span><span style="font-size:20px;font-variant-numeric:tabular-nums;color:var(--color-accent-100)">1:24</span></div>
+          <div style="height:1px;background:var(--color-divider);margin:6px 0"></div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Last time · Leg day</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--color-neutral-400)"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums">3 × 8 · 85 kg</span></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--color-neutral-400)"><span style="flex:1">Romanian Deadlift</span><span style="font-variant-numeric:tabular-nums">3 × 10 · 70 kg</span></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--color-neutral-400)"><span style="flex:1">Leg Press</span><span style="font-variant-numeric:tabular-nums">3 × 12 · 160 kg</span></div>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55;margin-top:6px">The right panel is reference only — nothing here is editable, so the eye always knows where input happens.</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Desktop logging uses two real fields and a Log button; the phone's stepper disappears.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-07</span> · Set · inline edit &amp; row context menu</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;position:relative">
+        <div style="width:206px;flex:none;padding:16px 12px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:20px;min-width:0">
+          <div style="font-size:30px;letter-spacing:-0.025em">Leg day</div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font-size:17px">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span></div>
+            <table class="table" style="max-width:620px">
+              <thead><tr><th style="width:44px">Set</th><th>Reps</th><th>Weight</th><th>Type</th><th style="width:120px"></th></tr></thead>
+              <tbody>
+                <tr><td style="font-variant-numeric:tabular-nums">1</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">12</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">40</td><td style="font-size:12px;color:var(--color-neutral-500)">warm-up</td><td></td></tr>
+                <tr>
+                  <td style="font-variant-numeric:tabular-nums">2</td>
+                  <td><span style="display:inline-block;min-width:46px;padding:3px 8px;border-radius:6px;border:1px solid var(--color-accent);box-shadow:0 0 0 3px rgba(217,162,79,0.14);font-variant-numeric:tabular-nums">8</span></td>
+                  <td><span style="display:inline-block;min-width:52px;padding:3px 8px;border-radius:6px;border:1px solid var(--color-neutral-800);font-variant-numeric:tabular-nums">82.5</span></td>
+                  <td></td>
+                  <td style="text-align:right"></td>
+                </tr>
+                <tr><td style="font-variant-numeric:tabular-nums">3</td><td style="font-variant-numeric:tabular-nums">8</td><td style="font-variant-numeric:tabular-nums">85</td><td style="font-size:12px;color:var(--color-ok)">record</td><td></td></tr>
+              </tbody>
+            </table>
+            <div style="font-size:11px;color:var(--color-neutral-600);margin-top:8px">Double-click a row edits it in place — no modal, the table never reflows.</div>
+          </div>
+        </div>
+        <div style="position:absolute;left:420px;top:330px;width:250px;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);padding:6px;display:flex;flex-direction:column">
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:8px 10px 6px">Set 2 · right-click</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;background:rgba(233,234,236,0.05);font-size:13px"><i class="ph-bold ph-pencil-simple" style="font-size:15px;color:var(--color-neutral-400)"></i>Edit</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-copy" style="font-size:15px;color:var(--color-neutral-400)"></i>Duplicate</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-flame" style="font-size:15px;color:var(--color-neutral-400)"></i>Mark as warm-up</div>
+          <div style="height:1px;background:var(--color-divider);margin:4px 8px"></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px;color:var(--color-danger)"><i class="ph-bold ph-trash" style="font-size:15px"></i>Delete set<span style="margin-left:auto;font-size:11px;opacity:0.7">⌫</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Right-click is a first-class desktop path — the same items the ⋮ menu carries, at the pointer.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-08</span> · Exercise · rename, menu, delete dialog, undo</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;position:relative">
+        <div style="width:206px;flex:none;padding:16px 12px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:26px;min-width:0">
+          <div>
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Rename in place</div>
+            <div style="display:flex;align-items:center;gap:10px;max-width:520px"><input class="input" value="Back Squat" style="flex:1;min-height:38px;font-size:16px;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(217,162,79,0.14)"><button class="btn btn-primary" style="height:38px;font-size:13px">Save</button><button class="btn btn-secondary" style="height:38px;font-size:13px">Cancel</button></div>
+            <div style="font-size:11px;color:var(--color-neutral-600);margin-top:8px">Renaming affects this session only — history keeps the old name.</div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Exercise menu · ⋮ or right-click on the heading</div>
+            <div style="width:266px;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);padding:6px;display:flex;flex-direction:column">
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-pencil-simple" style="font-size:15px;color:var(--color-neutral-400)"></i>Rename<span style="margin-left:auto;font-size:11px;color:var(--color-neutral-600)">F2</span></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-copy" style="font-size:15px;color:var(--color-neutral-400)"></i>Duplicate with sets</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-arrows-down-up" style="font-size:15px;color:var(--color-neutral-400)"></i>Move up / down</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-chart-line-up" style="font-size:15px;color:var(--color-neutral-400)"></i>Open history</div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px"><i class="ph-bold ph-eraser" style="font-size:15px;color:var(--color-neutral-400)"></i>Clear all sets</div>
+              <div style="height:1px;background:var(--color-divider);margin:4px 8px"></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;font-size:13px;color:var(--color-danger)"><i class="ph-bold ph-trash" style="font-size:15px"></i>Delete exercise</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Undo toast · bottom-left, 5 s</div>
+            <div style="width:400px;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:var(--shadow-md)"><i class="ph-bold ph-trash" style="font-size:16px;color:var(--color-danger)"></i><span style="flex:1;font-size:13px;color:var(--color-neutral-300)">“Back Squat” deleted · 3 sets</span></div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.45);display:grid;place-items:center end;padding-right:60px">
+          <div style="width:440px;background:var(--color-surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:9px"><i class="ph-bold ph-trash" style="font-size:17px;color:var(--color-danger)"></i><span style="font-size:18px">Delete “Back Squat”?</span></div>
+            <div style="font-size:13px;line-height:1.55;color:var(--color-neutral-400)">3 logged sets go with it — 12 × 40, 8 × 80, 8 × 85. Deleting is instant, with a 5-second undo.</div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px"><button class="btn btn-secondary" style="min-height:38px;font-size:14px">Keep</button><button style="min-height:38px;padding:0 16px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:14px">Delete</button></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">All four editing surfaces in one frame — rename, menu, undo toast on the left, the delete dialog on the right. Dialogs are 440 px, esc keeps, Enter confirms the destructive action only when it is focused.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-09</span> · Session finished · summary</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+        </div>
+        <div style="flex:1;padding:30px 34px;display:flex;flex-direction:column;gap:24px;min-width:0;max-width:760px">
+          <div style="display:flex;align-items:center;gap:9px;color:var(--color-ok)"><i class="ph-fill ph-check-circle" style="font-size:20px"></i><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">Session saved</span></div>
+          <div><div style="font-size:34px;letter-spacing:-0.03em;line-height:1.1">Leg day, done.</div><div style="font-size:13px;color:var(--color-neutral-500);margin-top:6px">Friday, 31 July · Smartass Obolon · synced</div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">41:07</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Duration</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">11</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sets</div></div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">3.4 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Moved</div></div>
+          </div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-ok-tint);padding:18px;box-shadow:inset 0 0 0 1px var(--color-ok-line)">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--color-ok)"><i class="ph-bold ph-trophy" style="font-size:16px"></i><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase">New record</span></div>
+            <div style="font-size:26px;letter-spacing:-0.02em;margin-top:9px;color:var(--color-ok-text);font-variant-numeric:tabular-nums">Back Squat · 90 kg × 8</div>
+            <div style="font-size:12px;color:var(--color-ok-text);opacity:0.75;margin-top:5px">Previous best 85 kg × 8 · estimated 1RM up to 112 kg</div>
+          </div>
+          <table class="table">
+            <thead><tr><th>Exercise</th><th>Sets</th><th>Volume</th><th>vs last time</th></tr></thead>
+            <tbody>
+              <tr><td>Back Squat</td><td>4</td><td style="font-variant-numeric:tabular-nums">1 385 kg</td><td style="color:var(--color-ok)">+12%</td></tr>
+              <tr><td>Romanian Deadlift</td><td>3</td><td style="font-variant-numeric:tabular-nums">700 kg</td><td style="color:var(--color-danger)">−8%</td></tr>
+              <tr><td>Leg Press</td><td>4</td><td style="font-variant-numeric:tabular-nums">1 315 kg</td><td style="color:var(--color-ok)">+4%</td></tr>
+            </tbody>
+          </table>
+          <div style="display:flex;gap:10px"><button class="btn btn-secondary" style="min-height:40px;font-size:14px">Edit session</button><button class="btn btn-secondary" style="min-height:40px;font-size:14px;gap:7px"><i class="ph-bold ph-cards"></i>Save as template</button><button class="btn btn-primary" style="min-height:40px;font-size:14px">Done</button></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">The summary is a page, not a modal — it holds the comparison table the phone can't fit.</div>
+    </div>
+  </div>
+
+  <!-- ══════════ W · HISTORY, PROGRESS, GYMS ══════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">W · D</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">History, progress, gyms</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">W-10 → W-13 · two-pane, charts, location errors</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:30px;flex-wrap:wrap;margin-bottom:56px">
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-10</span> · History · two-pane, past session selected</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</div>
+        </div>
+        <div style="width:290px;flex:none;padding:20px 14px;display:flex;flex-direction:column;gap:6px;box-shadow:1px 0 0 var(--color-divider);overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;background:var(--color-surface);border-radius:var(--radius-md);padding:8px 10px;margin-bottom:8px"><i class="ph-bold ph-magnifying-glass" style="font-size:14px;color:var(--color-neutral-500)"></i><span style="font-size:13px;color:var(--color-neutral-600)">Filter sessions</span></div>
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:6px 8px">July</div>
+          <div style="padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 2px 0 0 var(--color-accent)"><div style="font-size:14px">Mon 27 · Legs</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">14 sets · 3 420 kg <span class="tag tag-neutral" style="margin-left:6px">Auto-closed</span></div></div>
+          <div style="padding:11px 12px;border-radius:var(--radius-md)"><div style="font-size:14px">Wed 29 · Push day</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg</div></div>
+          <div style="padding:11px 12px;border-radius:var(--radius-md);background:rgba(233,234,236,0.04)"><div style="font-size:14px">Sat 25 · Pull day</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">21 sets · 5 640 kg</div></div>
+          <div style="padding:11px 12px;border-radius:var(--radius-md)"><div style="font-size:14px">Thu 23 · Push day</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">17 sets · 4 610 kg</div></div>
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding:14px 8px 6px">June</div>
+          <div style="padding:11px 12px;border-radius:var(--radius-md)"><div style="font-size:14px">Mon 30 · Legs</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:3px">12 sets · 2 980 kg</div></div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:20px;min-width:0">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Mon 27 July · 08:40 → 09:34</div><div style="font-size:28px;letter-spacing:-0.025em;margin-top:4px">Legs</div></div>
+            <div style="display:flex;gap:9px"><button class="btn btn-secondary" style="min-height:36px;font-size:13px;gap:7px"><i class="ph-bold ph-cards"></i>Save as template</button><button style="min-height:36px;padding:0 14px;border-radius:var(--radius-md);background:transparent;border:1px solid var(--color-danger);color:var(--color-danger);font-size:13px;display:inline-flex;align-items:center;gap:7px"><i class="ph-bold ph-trash"></i>Delete</button></div>
+          </div>
+          <div style="display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)"><i class="ph-bold ph-clock-countdown" style="font-size:16px;color:var(--color-accent);margin-top:1px"></i><div style="font-size:12px;line-height:1.5;color:var(--color-neutral-300)">Auto-closed after 8 hours — may be incomplete. Anything added here saves to 27 July.</div></div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font-size:16px">Front Squat</span><span style="margin-left:auto;font-size:11px;color:var(--color-neutral-600)">960 kg</span></div>
+            <table class="table" style="max-width:600px"><thead><tr><th style="width:44px">Set</th><th>Reps</th><th>Weight</th><th>Type</th><th style="width:80px"></th></tr></thead><tbody>
+              <tr><td style="font-variant-numeric:tabular-nums">1</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">10</td><td style="font-variant-numeric:tabular-nums;color:var(--color-neutral-500)">40</td><td style="font-size:12px;color:var(--color-neutral-500)">warm-up</td><td></td></tr>
+              <tr><td style="font-variant-numeric:tabular-nums">2</td><td style="font-variant-numeric:tabular-nums">8</td><td style="font-variant-numeric:tabular-nums">60</td><td style="font-size:12px;color:var(--color-neutral-500)">working</td><td></td></tr>
+              <tr><td style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">3</td><td style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">8</td><td style="color:var(--color-neutral-700);font-variant-numeric:tabular-nums">60</td><td style="font-size:12px;color:var(--color-neutral-700)">prefilled</td><td><button class="btn btn-primary" style="height:28px;padding-inline:10px;font-size:12px">Add</button></td></tr>
+            </tbody></table>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px"><span style="font-size:16px">Leg Press</span><span style="margin-left:auto;font-size:11px;color:var(--color-neutral-600)">2 460 kg</span></div>
+            <table class="table" style="max-width:600px"><tbody>
+              <tr><td style="width:44px;font-variant-numeric:tabular-nums">1</td><td style="font-variant-numeric:tabular-nums">12</td><td style="font-variant-numeric:tabular-nums">160</td><td style="font-size:12px;color:var(--color-neutral-500)">working</td><td style="width:80px"></td></tr>
+              <tr><td style="font-variant-numeric:tabular-nums">2</td><td style="font-variant-numeric:tabular-nums">10</td><td style="font-variant-numeric:tabular-nums">170</td><td style="font-size:12px;color:var(--color-neutral-500)">working</td><td></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Master–detail: the list keeps its scroll position while the detail changes. Selected row takes a brass edge, hover a 4% tint.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-11</span> · Progress · filled &amp; not-enough-data</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-chart-line-up" style="font-size:17px"></i>Progress</div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:22px;min-width:0">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+            <div style="font-size:30px;letter-spacing:-0.025em">Progress</div>
+            <div class="seg" style="font-size:13px"><span class="seg-opt" style="color:var(--color-accent);box-shadow:inset 0 0 0 1px var(--color-accent)">12 weeks</span><span class="seg-opt">6 months</span><span class="seg-opt">All time</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:22px">
+            <div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Weekly volume</div>
+              <div style="display:flex;align-items:flex-end;gap:9px;height:170px">
+                <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px;position:relative"><span style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;background:var(--color-surface);box-shadow:var(--shadow-md);border-radius:6px;padding:6px 9px;font-variant-numeric:tabular-nums">W29 · 12.8 t · 3 sessions</span></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+              </div>
+              <div style="font-size:11px;color:var(--color-neutral-600);margin-top:10px">Hover a bar for the exact week — the tooltip is the only floating element on this page.</div>
+            </div>
+            <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;justify-content:center">
+              <i class="ph-bold ph-chart-line" style="font-size:22px;color:var(--color-neutral-700)"></i>
+              <div style="font-size:15px">Bench needs one more</div>
+              <div style="font-size:12px;color:var(--color-neutral-500);line-height:1.55">Two sessions logged. A third unlocks its 1RM trend.</div>
+              <div style="display:flex;gap:5px;margin-top:4px"><span style="width:9px;height:9px;border-radius:50%;background:var(--color-accent)"></span><span style="width:9px;height:9px;border-radius:50%;background:var(--color-accent)"></span><span style="width:9px;height:9px;border-radius:50%;background:var(--color-neutral-800)"></span></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px">
+            <div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Estimated 1RM</div>
+              <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:16px 14px 10px">
+                <svg viewBox="0 0 300 90" style="width:100%;height:90px;display:block">
+                  <polyline points="6,76 42,70 78,62 114,64 150,50 186,44 222,36 258,26 294,14" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                  <polyline points="6,84 42,80 78,78 114,76 150,68 186,64 222,58 258,52 294,46" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-dasharray="3 4"></polyline>
+                </svg>
+                <div style="display:flex;gap:16px;font-size:11px;color:var(--color-neutral-600);margin-top:8px"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-accent);display:inline-block"></span>Squat 120 kg</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-neutral-700);display:inline-block"></span>Bench 93 kg</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Records</div>
+              <table class="table"><thead><tr><th>Lift</th><th>Record</th><th>Est. 1RM</th><th>Moved</th></tr></thead><tbody>
+                <tr><td>Back Squat</td><td style="font-variant-numeric:tabular-nums">110 × 3</td><td style="font-variant-numeric:tabular-nums">120 kg</td><td><span class="tag tag-accent">+5</span></td></tr>
+                <tr><td>Bench Press</td><td style="font-variant-numeric:tabular-nums">82.5 × 5</td><td style="font-variant-numeric:tabular-nums">93 kg</td><td><span class="tag tag-accent">+2.5</span></td></tr>
+                <tr><td>Deadlift</td><td style="font-variant-numeric:tabular-nums">140 × 2</td><td style="font-variant-numeric:tabular-nums">148 kg</td><td></td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Desktop earns the range switcher and hover tooltips; the “not enough data” state sits inline beside real charts instead of replacing the page.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-12</span> · Gyms · list, radius edit, location errors</div>
+      <div style="width:1120px;height:700px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:206px;flex:none;padding:16px 12px;box-shadow:1px 0 0 var(--color-divider)">
+          <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 16px"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-accent)"></i><span style="font-size:16px">My Fit</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;color:var(--color-neutral-400);font-size:14px"><i class="ph-bold ph-house" style="font-size:17px"></i>Today</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-md);background:var(--color-accent-900);color:var(--color-accent);font-size:14px"><i class="ph-bold ph-map-pin" style="font-size:17px"></i>Gyms</div>
+        </div>
+        <div style="flex:1;padding:26px 30px;display:flex;flex-direction:column;gap:18px;min-width:0">
+          <div style="font-size:30px;letter-spacing:-0.025em">Gyms</div>
+          <div style="display:flex;gap:10px;max-width:560px"><input class="input" placeholder="Gym name" style="flex:1;min-height:40px"><button class="btn btn-primary" style="min-height:40px;gap:6px"><i class="ph-bold ph-crosshair"></i>Use my location</button></div>
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line);max-width:640px">
+            <i class="ph-bold ph-warning-circle" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-danger-text)">Desktop location is IP-based and came back at ±2 km — add the gym from your phone while standing in it, or type coordinates below.</span>
+          </div>
+          <table class="table" style="max-width:820px">
+            <thead><tr><th>Gym</th><th>Coordinates</th><th>Radius</th><th>Visits logged</th><th style="width:90px"></th></tr></thead>
+            <tbody>
+              <tr><td>Smartass Obolon <span class="tag tag-accent" style="margin-left:6px">Inside</span></td><td style="font-variant-numeric:tabular-nums">50.51234, 30.49871</td><td style="font-variant-numeric:tabular-nums">150 m</td><td style="color:var(--color-ok)">11 / 12</td><td style="text-align:right;color:var(--color-neutral-500);font-size:14px"><i class="ph-bold ph-pencil-simple" style="margin-right:10px"></i><i class="ph-bold ph-trash" style="color:var(--color-danger)"></i></td></tr>
+              <tr><td>Sportlife Livoberezhna</td><td style="font-variant-numeric:tabular-nums">50.45219, 30.60112</td><td style="font-variant-numeric:tabular-nums">200 m</td><td style="color:var(--color-danger)">2 / 3</td><td></td></tr>
+              <tr><td>Hotel gym · Lviv</td><td style="font-variant-numeric:tabular-nums">49.83968, 24.02972</td><td style="font-variant-numeric:tabular-nums">80 m</td><td style="color:var(--color-neutral-500)">1 / 1</td><td></td></tr>
+            </tbody>
+          </table>
+          <div style="display:flex;gap:22px;align-items:flex-start;max-width:820px;margin-top:6px">
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);padding:16px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:14px">Smartass Obolon · radius</span><span style="font-size:18px;font-variant-numeric:tabular-nums">150 m</span></div>
+              <div style="height:4px;border-radius:2px;background:var(--color-neutral-800);margin-top:14px;position:relative"><div style="width:32%;height:100%;background:var(--color-accent);border-radius:2px"></div><span style="position:absolute;left:32%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:var(--color-accent);box-shadow:0 0 0 4px rgba(217,162,79,0.16)"></span></div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-neutral-600);margin-top:10px"><span>30 m</span><span>2 000 m</span></div>
+            </div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-lg);padding:16px">
+              <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Visits · last 7 days</div>
+              <div style="display:flex;gap:5px;align-items:flex-end;height:44px"><div style="flex:1;height:40%;background:var(--color-accent-800);border-radius:2px"></div><div style="flex:1;height:70%;background:var(--color-accent-700);border-radius:2px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:2px"></div><div style="flex:1;height:55%;background:var(--color-accent-800);border-radius:2px"></div><div style="flex:1;height:85%;background:var(--color-accent-700);border-radius:2px"></div><div style="flex:1;height:30%;background:var(--color-neutral-800);border-radius:2px"></div><div style="flex:1;height:20%;background:var(--color-neutral-800);border-radius:2px"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5;max-width:1120px">Desktop is honest about its weak geolocation and hands the job to the phone — the one place the two clients differ in capability.</div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px;width:1120px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">W-13</span> · Tray popover · narrow window · desktop behaviours</div>
+      <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+        <div style="width:380px;height:520px;background:var(--color-bg);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 0 var(--color-divider)"><span style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span><span style="flex:1;font-size:13px">In session · Leg day</span><span style="font-size:14px;font-variant-numeric:tabular-nums">24:18</span></div>
+          <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:15px">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span></div>
+            <div style="display:flex;gap:8px">
+              <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:8px 10px"><div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Reps</div><div style="font-size:20px;font-variant-numeric:tabular-nums">8</div></div>
+              <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:8px 10px"><div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Kg</div><div style="font-size:20px;font-variant-numeric:tabular-nums">85</div></div>
+              <button class="btn btn-primary" style="width:78px;font-size:14px">Log</button>
+            </div>
+            <div style="height:1px;background:var(--color-divider)"></div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-400)"><span style="width:16px;font-size:11px;color:var(--color-neutral-600)">3</span><span style="flex:1">8 × 85</span><span class="tag tag-accent">record</span></div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-400)"><span style="width:16px;font-size:11px;color:var(--color-neutral-600)">2</span><span style="flex:1">8 × 80</span></div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-500)"><span style="width:16px;font-size:11px;color:var(--color-neutral-600)">1</span><span style="flex:1">12 × 40</span><span style="font-size:11px">warm-up</span></div>
+            <div style="margin-top:auto;display:flex;gap:8px"><button class="btn btn-secondary" style="flex:1;min-height:36px;font-size:13px">Open window</button><button class="btn btn-secondary" style="flex:1;min-height:36px;font-size:13px">Finish</button></div>
+          </div>
+        </div>
+
+        <div style="width:400px;height:520px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#1b1d21"><span style="width:10px;height:10px;border-radius:50%;background:#3b3f43"></span><span style="width:10px;height:10px;border-radius:50%;background:#3b3f43"></span><span style="width:10px;height:10px;border-radius:50%;background:#3b3f43"></span><span style="flex:1;text-align:center;font-size:11px;color:var(--color-neutral-600)">400 px — rail collapses</span></div>
+          <div style="flex:none;display:flex;align-items:center;gap:10px;padding:12px 14px;box-shadow:0 1px 0 var(--color-divider)"><i class="ph-bold ph-list" style="font-size:18px;color:var(--color-neutral-400)"></i><span style="flex:1;font-size:15px">Today</span><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span></div>
+          <div style="flex:1;padding:16px 14px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:24px;letter-spacing:-0.025em">Nothing logged yet.</div>
+            <button class="btn btn-primary" style="min-height:48px;font-size:15px;gap:9px"><i class="ph-bold ph-play"></i>Start session</button>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:6px">Recent</div>
+            <div style="display:flex;align-items:baseline;gap:10px;padding:10px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:40px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1;font-size:14px">Push day</span><span style="font-size:11px;color:var(--color-neutral-500)">1:12</span></div>
+            <div style="display:flex;align-items:baseline;gap:10px;padding:10px 0"><span style="width:40px;font-size:11px;color:var(--color-neutral-600)">27 JUL</span><span style="flex:1;font-size:14px">Legs</span><span style="font-size:11px;color:var(--color-neutral-500)">0:54</span></div>
+            <div style="margin-top:auto;font-size:11px;color:var(--color-neutral-600);line-height:1.55">Under 720 px the rail becomes a hamburger, the right panel drops below the main column, and the layout matches the phone.</div>
+          </div>
+        </div>
+
+        <div style="width:290px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-sm);padding:18px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Desktop behaviours</div>
+          <div style="font-size:12px;color:var(--color-neutral-400);line-height:1.85">Hover on any row is a 4% text tint.<br>Double-click a logged set edits it in place — no modal.<br>Right-click opens the same menu the ⋮ carries.<br>Focus ring is 2 px brass, offset 2.<br>The rail collapses to a hamburger under 720 px.<br>The live band stays sticky while the pane scrolls.</div>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55;margin-top:4px">Every action is reachable by pointer alone — nothing in the product is hidden behind a key combination.</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Three desktop-only surfaces: the tray popover for a set between sets, the collapsed window, and the behaviour reference this board is built on.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

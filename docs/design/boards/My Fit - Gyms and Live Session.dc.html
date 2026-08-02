@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/styles.css">
+<script src="_ds/nocturne-9cf7d899-d545-405d-beb1-b63d8ef83897/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+<style>
+  :root {
+    --color-bg: #16171a; --color-surface: #1f2125; --color-text: #e9eaec;
+    --color-divider: rgba(233,234,236,0.14);
+    --color-accent: #d9a24f;
+    --color-accent-100: #fbf3e6; --color-accent-200: #f6e6cb; --color-accent-300: #eed3a5;
+    --color-accent-400: #e4bb76; --color-accent-500: #d9a24f; --color-accent-600: #b3833d;
+    --color-accent-700: #8a642e; --color-accent-800: #5b4420; --color-accent-900: #342713;
+    --color-neutral-100: #f5f6f7; --color-neutral-200: #e6e8ea; --color-neutral-300: #d0d3d6;
+    --color-neutral-400: #b0b4b8; --color-neutral-500: #90959a; --color-neutral-600: #71767b;
+    --color-neutral-700: #55595e; --color-neutral-800: #3b3f43; --color-neutral-900: #262a2d;
+    --shadow-sm: 0 0 0 1px #3b3f43;
+    --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0,0,0,0.6);
+    --shadow-lg: 0 0 0 1px #6b7075, 0 18px 44px rgba(0,0,0,0.7);
+    --color-ok: #4cbe8c; --color-ok-text: #b7e8cf; --color-ok-tint: #16291f; --color-ok-line: #2f6f52;
+    --color-danger: #e2564f; --color-danger-text: #f3c2bf; --color-danger-tint: #2c1614; --color-danger-line: #7d302b;
+    --photo: radial-gradient(120% 90% at 78% 8%, rgba(217,162,79,0.30), transparent 58%), radial-gradient(90% 70% at 12% 92%, rgba(120,140,170,0.18), transparent 60%), linear-gradient(160deg, #2b2e34 0%, #202329 45%, #15171b 100%);
+    --photo-2: radial-gradient(110% 80% at 20% 10%, rgba(217,162,79,0.22), transparent 60%), radial-gradient(80% 70% at 90% 80%, rgba(90,120,160,0.20), transparent 62%), linear-gradient(200deg, #272a30 0%, #1c1f24 55%, #131519 100%);
+    --generic: repeating-linear-gradient(135deg, rgba(233,234,236,0.035) 0 2px, transparent 2px 11px), linear-gradient(160deg, #23262a 0%, #1a1c20 100%);
+  }
+  body { margin:0; background:#0d0e10; }
+  @keyframes shimmer { 0%{opacity:.35} 50%{opacity:.7} 100%{opacity:.35} }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  @keyframes pulse { 0%{opacity:1} 50%{opacity:.45} 100%{opacity:1} }
+  .sk { animation: shimmer 1.6s ease-in-out infinite; background:#262a2d; border-radius:6px; }
+  .sp { animation: spin 1s linear infinite; }
+  .live { animation: pulse 2.6s ease-in-out infinite; }
+</style>
+</helmet>
+
+<div style="font-family:var(--font-body);background:#0d0e10;color:var(--color-text);padding:52px 60px 120px;min-height:100vh">
+  <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px">
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">My Fit</span>
+    <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-600)">Gym discovery, imagery, and the live-session hero</span>
+  </div>
+  <h1 style="margin:0 0 10px;font-size:38px;font-weight:500;letter-spacing:-0.025em">Find the gym. Wear its picture.</h1>
+  <p style="margin:0 0 22px;max-width:78ch;font-size:14px;line-height:1.65;color:var(--color-neutral-500)">Two additions to the system. <strong style="color:var(--color-neutral-300);font-weight:500">Discovery</strong>: a gym is searched across databases first, then Google by name + location for a photo, and falls back to a house graphic that never looks broken. <strong style="color:var(--color-neutral-300);font-weight:500">Presence</strong>: an open session becomes a photographic hero banner carried on every screen, phone and desktop, so the app is never ambiguous about being live. Ids are <span style="color:var(--color-neutral-300)">G-01 … G-12</span> (phone) and <span style="color:var(--color-neutral-300)">GW-01 … GW-06</span> (web).</p>
+
+  <div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:44px;font-size:11px">
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--color-surface)"><span style="width:22px;height:16px;border-radius:3px;background:var(--photo);display:inline-block"></span>Provider photo — found in a database</span>
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--color-surface)"><span style="width:22px;height:16px;border-radius:3px;background:var(--photo-2);display:inline-block"></span>Google image — picked by you</span>
+    <span style="display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:var(--color-surface)"><span style="width:22px;height:16px;border-radius:3px;background:var(--generic);display:inline-block"></span>House graphic — nothing found anywhere</span>
+  </div>
+
+  <!-- ══════════════ A · PHONE — DISCOVERY ══════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">A</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Phone · finding a gym</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">G-01 → G-07 · databases, Google fallback, imagery</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- G-01 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-01</span> · Add gym · nearby, unsearched</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="font-size:26px;letter-spacing:-0.025em;padding-top:8px">Add a gym</div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 13px">
+            <i class="ph-bold ph-magnifying-glass" style="font-size:16px;color:var(--color-neutral-500)"></i>
+            <span style="flex:1;font-size:15px;color:var(--color-neutral-600)">Search by name or address</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);padding-top:var(--space-2)"><i class="ph-bold ph-crosshair" style="font-size:13px;color:var(--color-accent)"></i>Within 400 m of you</div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:64px;height:64px;border-radius:10px;background:var(--photo);flex:none;position:relative;overflow:hidden"><span style="position:absolute;left:6px;bottom:5px;font-size:8px;letter-spacing:0.06em;text-transform:uppercase;color:rgba(233,234,236,0.6)">OSM</span></span>
+            <span style="flex:1"><span style="display:block;font-size:15px">Smartass Obolon</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:3px">Prospekt Obolonskyi 1B · 40 m</span><span style="display:inline-flex;gap:6px;margin-top:7px"><span class="tag tag-neutral" style="font-size:9px">OpenStreetMap</span><span class="tag tag-neutral" style="font-size:9px">Photo</span></span></span>
+            <i class="ph-bold ph-plus-circle" style="font-size:22px;color:var(--color-accent)"></i>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:64px;height:64px;border-radius:10px;background:var(--generic);flex:none;display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-neutral-700)"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:15px">Iron Yard</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:3px">Marshala Tymoshenka 4 · 180 m</span><span style="display:inline-flex;gap:6px;margin-top:7px"><span class="tag tag-neutral" style="font-size:9px">Foursquare</span><span class="tag tag-neutral" style="font-size:9px">No photo</span></span></span>
+            <i class="ph-bold ph-plus-circle" style="font-size:22px;color:var(--color-accent)"></i>
+          </div>
+          <div style="height:1px;background:var(--color-divider);margin:var(--space-2) 0"></div>
+          <div style="display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-neutral-700)">
+            <i class="ph-bold ph-crosshair" style="font-size:16px;color:var(--color-neutral-400)"></i>
+            <span style="flex:1;font-size:13px;line-height:1.45;color:var(--color-neutral-300)">Not in the list? Pin exactly where you stand.</span>
+            <span style="font-size:13px;color:var(--color-accent)">Pin</span>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Nearby is offered before typing: one GPS read, then a merged query. Each row states which database it came from and whether a photo exists — so nothing surprises you after you tap.</div>
+    </div>
+
+    <!-- G-02 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-02</span> · Searching · providers streaming</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 13px;box-shadow:inset 0 0 0 1px var(--color-accent);margin-top:12px">
+            <i class="ph-bold ph-magnifying-glass" style="font-size:16px;color:var(--color-accent)"></i>
+            <span style="flex:1;font-size:15px">smartass</span>
+            <span class="sp" style="display:inline-block;width:14px;height:14px;border:2px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-ok-tint);font-size:11px;color:var(--color-ok-text)"><i class="ph-fill ph-check-circle" style="font-size:11px;color:var(--color-ok)"></i>Local · 1</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-ok-tint);font-size:11px;color:var(--color-ok-text)"><i class="ph-fill ph-check-circle" style="font-size:11px;color:var(--color-ok)"></i>OSM · 2</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-400)"><span class="sp" style="display:inline-block;width:9px;height:9px;border:1.5px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>Google Places</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-400)"><span class="sp" style="display:inline-block;width:9px;height:9px;border:1.5px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>Foursquare</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:64px;height:64px;border-radius:10px;background:var(--photo);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:15px">Smartass Obolon</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:3px">Prospekt Obolonskyi 1B · 40 m</span></span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:64px;height:64px;border-radius:10px;background:var(--photo-2);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:15px">Smartass Livoberezhna</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:3px">Raisy Okipnoi 8 · 6.4 km</span></span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <div class="sk" style="width:64px;height:64px;border-radius:10px;flex:none"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="sk" style="width:58%;height:13px"></div><div class="sk" style="width:76%;height:9px"></div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface);opacity:0.6">
+            <div class="sk" style="width:64px;height:64px;border-radius:10px;flex:none"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="sk" style="width:44%;height:13px"></div><div class="sk" style="width:64%;height:9px"></div></div>
+          </div>
+          <div style="margin-top:auto;font-size:11px;color:var(--color-neutral-600);line-height:1.55">Results appear as each database answers — the list never waits for the slowest one.</div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Provider chips are the loading indicator: each turns emerald with its count as it lands. Deduplication merges the same venue across sources into one row.</div>
+    </div>
+
+    <!-- G-03 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-03</span> · Nothing in any database</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:12px 13px;box-shadow:inset 0 0 0 1px var(--color-accent);margin-top:12px">
+            <i class="ph-bold ph-magnifying-glass" style="font-size:16px;color:var(--color-accent)"></i>
+            <span style="flex:1;font-size:15px">Kachalka na Peremohy</span>
+            <i class="ph-bold ph-x" style="font-size:14px;color:var(--color-neutral-500)"></i>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">Local · 0</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">OSM · 0</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">Google Places · 0</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">Foursquare · 0</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-3);padding:var(--space-6) 0 var(--space-4)">
+            <i class="ph-bold ph-map-pin-simple-area" style="font-size:26px;color:var(--color-neutral-700)"></i>
+            <div style="font-size:17px">No database knows this place</div>
+            <div style="font-size:13px;color:var(--color-neutral-500);line-height:1.55;max-width:34ch">Plenty of good gyms aren't mapped. Add it by hand — and let a web search look for a picture.</div>
+          </div>
+          <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Add by hand</div>
+            <input class="input" value="Kachalka na Peremohy" style="min-height:46px;font-size:15px">
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg)">
+              <i class="ph-bold ph-crosshair" style="font-size:15px;color:var(--color-accent)"></i>
+              <span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Kyiv · 50.4501, 30.5234 · ±12 m</span>
+              <span style="font-size:12px;color:var(--color-accent)">Change</span>
+            </div>
+            <button class="btn btn-primary" style="min-height:46px;font-size:14px;gap:8px"><i class="ph-bold ph-image-square"></i>Find a photo on Google</button>
+            <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55">Searches “Kachalka na Peremohy gym Kyiv” for images. You pick one, or skip and take the house graphic.</div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Zero results is a fork, not a dead end: the manual form is already filled with what you typed and where you stand.</div>
+    </div>
+
+    <!-- G-04 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-04</span> · Google image search · pick one</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 20px;opacity:0.3"><div style="font-size:26px;padding-top:8px">Add a gym</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:170px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 18px 26px;display:flex;flex-direction:column;gap:var(--space-4);max-height:82%">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="margin-top:4px"><div style="font-size:17px">Pick a photo</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:4px">Google · “Kachalka na Peremohy gym Kyiv” · 8 results</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="height:96px;border-radius:10px;background:var(--photo);box-shadow:0 0 0 2px var(--color-accent);position:relative"><span style="position:absolute;top:7px;right:7px;width:20px;height:20px;border-radius:50%;background:var(--color-accent);display:grid;place-items:center"><i class="ph-bold ph-check" style="font-size:12px;color:#1a1409"></i></span></div>
+            <div style="height:96px;border-radius:10px;background:var(--photo-2)"></div>
+            <div style="height:96px;border-radius:10px;background:var(--photo-2)"></div>
+            <div style="height:96px;border-radius:10px;background:var(--photo)"></div>
+            <div style="height:96px;border-radius:10px;background:var(--photo)"></div>
+            <div style="height:96px;border-radius:10px;background:var(--photo-2)"></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <i class="ph-bold ph-info" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i>
+            <span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500)">The image is cached on your hub, not hot-linked, and is only ever shown inside your app.</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px">Use house graphic</button>
+            <button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Use this photo</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Skipping is a first-class button, not a link — the house graphic is a legitimate choice, not a punishment.</div>
+    </div>
+
+    <!-- G-05 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-05</span> · Image search failed / nothing usable</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column;position:relative">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;padding:6px 20px;opacity:0.3"><div style="font-size:26px;padding-top:8px">Add a gym</div><div style="margin-top:14px;background:var(--color-surface);border-radius:var(--radius-md);height:170px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.6)"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:var(--color-surface);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);padding:14px 18px 26px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="width:34px;height:4px;border-radius:2px;background:var(--color-neutral-700);align-self:center"></div>
+          <div style="font-size:17px;margin-top:4px">No usable picture</div>
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-danger-tint);box-shadow:inset 0 0 0 1px var(--color-danger-line)">
+            <i class="ph-bold ph-image-broken" style="font-size:16px;color:var(--color-danger);margin-top:1px"></i>
+            <span style="flex:1;font-size:12px;line-height:1.5;color:var(--color-danger-text)">The image search returned nothing above 600 px. Rather than a blurry thumbnail, the gym takes the house graphic.</span>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;padding:14px;border-radius:var(--radius-md);background:var(--color-bg)">
+            <span style="width:92px;height:70px;border-radius:10px;background:var(--generic);flex:none;display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:26px;color:var(--color-neutral-700)"></i></span>
+            <div style="flex:1"><div style="font-size:14px">House graphic</div><div style="font-size:11px;color:var(--color-neutral-500);line-height:1.5;margin-top:4px">Graphite weave with the barbell mark. Tinted brass while a session runs here.</div></div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" style="flex:1;min-height:44px;font-size:14px;gap:7px"><i class="ph-bold ph-camera"></i>Take one now</button>
+            <button class="btn btn-primary" style="flex:1;min-height:44px;font-size:14px">Keep graphic</button>
+          </div>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">You can replace it any time from the gym's menu.</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The failure shows exactly what you'll get instead, at real size — no one has to imagine the fallback.</div>
+    </div>
+
+    <!-- G-06 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-06</span> · Gym detail · sources &amp; radius</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;height:232px;background:var(--photo);position:relative">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="position:absolute;left:14px;top:44px;width:34px;height:34px;border-radius:50%;background:rgba(10,11,13,0.55);display:grid;place-items:center"><i class="ph-bold ph-caret-left" style="font-size:17px;color:var(--color-neutral-200)"></i></div>
+          <div style="position:absolute;right:14px;top:44px;width:34px;height:34px;border-radius:50%;background:rgba(10,11,13,0.55);display:grid;place-items:center"><i class="ph-bold ph-dots-three-vertical" style="font-size:17px;color:var(--color-neutral-200)"></i></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:20px;background:linear-gradient(to top,rgba(22,23,26,0.96),rgba(22,23,26,0.55) 45%,transparent)">
+            <div style="font-size:26px;letter-spacing:-0.025em">Smartass Obolon</div>
+            <div style="font-size:12px;color:var(--color-neutral-400);margin-top:5px">Prospekt Obolonskyi 1B · 40 m away</div>
+          </div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:16px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="tag tag-accent">Inside</span><span class="tag tag-neutral">OpenStreetMap</span><span class="tag tag-neutral">Photo · Google</span>
+          </div>
+          <div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12px;color:var(--color-neutral-500)">Radius</span><span style="font-size:20px;font-variant-numeric:tabular-nums">150 m</span></div>
+            <div style="height:4px;border-radius:2px;background:var(--color-neutral-800);margin-top:12px;position:relative"><div style="width:32%;height:100%;background:var(--color-accent);border-radius:2px"></div><span style="position:absolute;left:32%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--color-accent);box-shadow:0 0 0 4px rgba(217,162,79,0.16)"></span></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">18</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Sessions</div></div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">62 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Moved here</div></div>
+            <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:13px"><div style="font-size:20px;font-variant-numeric:tabular-nums">1:04</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:3px">Avg length</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <i class="ph-bold ph-image-square" style="font-size:16px;color:var(--color-neutral-400)"></i>
+            <span style="flex:1;font-size:13px;color:var(--color-neutral-300)">Photo from Google, cached 12 Jul</span>
+            <span style="font-size:12px;color:var(--color-accent)">Replace</span>
+          </div>
+          <button class="btn btn-primary" style="min-height:52px;font-size:15px;border-radius:var(--radius-lg);gap:9px;margin-top:auto"><i class="ph-bold ph-play" style="font-size:16px"></i>Start session here</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The photo is the header, scrim-darkened so the name stays legible on any picture. Provenance is visible and replaceable — never a mystery image.</div>
+    </div>
+
+    <!-- G-07 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-07</span> · Gyms list · with imagery</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+        <div style="flex:1;overflow:hidden;padding:6px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:center;gap:10px;padding-top:8px"><div style="flex:1;font-size:26px;letter-spacing:-0.025em">Gyms</div><i class="ph-bold ph-plus" style="font-size:19px;color:var(--color-accent)"></i></div>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-accent-800)">
+            <div style="height:120px;background:var(--photo);position:relative">
+              <div style="position:absolute;left:12px;top:12px;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(10,11,13,0.6)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent-200)">You're here</span></div>
+            </div>
+            <div style="padding:14px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Smartass Obolon</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-neutral-500);margin-top:8px;font-variant-numeric:tabular-nums"><span>18 sessions · 62 t</span><span>radius 150 m</span></div>
+            </div>
+          </div>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface)">
+            <div style="height:120px;background:var(--photo-2)"></div>
+            <div style="padding:14px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Sportlife Livoberezhna</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-neutral-500);margin-top:8px;font-variant-numeric:tabular-nums"><span>3 sessions · 8 t</span><span>radius 200 m</span></div>
+            </div>
+          </div>
+          <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface)">
+            <div style="height:120px;background:var(--generic);display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:30px;color:var(--color-neutral-700)"></i></div>
+            <div style="padding:14px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:16px">Kachalka na Peremohy</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-neutral-500);margin-top:8px"><span>1 session · added by hand</span><span style="color:var(--color-accent)">Add photo</span></div>
+            </div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="gyms" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Cards, not rows, once pictures exist. The gym you're standing in takes a brass hairline and a live chip — the same language the session hero uses.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ B · PHONE — LIVE HERO ══════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">B</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Phone · the live-session hero</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">G-08 → G-12 · carried on every screen</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:20px"></div>
+  <p style="margin:0 0 26px;max-width:74ch;font-size:13px;line-height:1.65;color:var(--color-neutral-500)">One rule: while a session is open, the first thing under the status bar is a photographic band of the gym you're in — 148 px tall on the screen you're on, collapsing to a 52 px strip as you scroll, and reduced to that strip on every other tab. It is the only element in the product allowed to run a photograph edge to edge, which is what makes “live” unmistakable.</p>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- G-08 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-08</span> · Today · hero, expanded</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;background:var(--photo);position:relative">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="height:148px;position:relative;background:linear-gradient(to top,rgba(22,23,26,0.94),rgba(22,23,26,0.35) 55%,rgba(22,23,26,0.15))">
+            <div style="position:absolute;left:20px;top:14px;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(10,11,13,0.55);box-shadow:inset 0 0 0 1px var(--color-accent-700)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+            <div style="position:absolute;left:20px;right:20px;bottom:14px;display:flex;align-items:flex-end;gap:14px">
+              <div style="flex:1">
+                <div style="font-size:40px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">24:18</div>
+                <div style="display:flex;gap:14px;margin-top:9px;font-size:12px;color:var(--color-neutral-300);font-variant-numeric:tabular-nums"><span>7 sets</span><span>2.1 t</span><span>2 exercises</span></div>
+              </div>
+              <button class="btn btn-primary" style="min-height:42px;font-size:14px;gap:8px;background:rgba(10,11,13,0.5)"><i class="ph-bold ph-arrow-right"></i>Resume</button>
+            </div>
+          </div>
+          <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:16px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between">
+            <div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:26px;letter-spacing:-0.025em;margin-top:5px">Mid-session.</div></div>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-neutral-500);margin-top:4px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">M</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">T</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">W</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">T</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-accent-800)"><div style="font-size:10px;color:var(--color-neutral-300)">F</div><div class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">S</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-accent);margin:7px auto 0"></div></div>
+            <div style="flex:1;text-align:center;padding:9px 0;border-radius:var(--radius-md);background:var(--color-surface)"><div style="font-size:10px;color:var(--color-neutral-600)">S</div><div style="width:6px;height:6px;border-radius:50%;background:var(--color-neutral-800);margin:7px auto 0"></div></div>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Recent</div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">29 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Push day</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">18 sets · 4 980 kg · 1:12</span></span></div>
+          <div style="display:flex;align-items:baseline;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="width:44px;font-size:11px;color:var(--color-neutral-600)">27 JUL</span><span style="flex:1"><span style="display:block;font-size:15px">Legs</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">14 sets · 3 420 kg · 0:54</span></span></div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The start button is gone while live — the hero <em>is</em> the action. Today's own headline shrinks to 26 px so the band stays the loudest thing.</div>
+    </div>
+
+    <!-- G-09 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-09</span> · Progress · hero, collapsed strip</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;background:var(--photo);position:relative">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="height:52px;display:flex;align-items:center;gap:11px;padding:0 20px;background:linear-gradient(to right,rgba(22,23,26,0.92),rgba(22,23,26,0.62))">
+            <span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent);flex:none"></span>
+            <span style="font-size:13px;color:var(--color-neutral-200);flex:1">Live · Smartass Obolon</span>
+            <span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">24:18</span>
+            <i class="ph-bold ph-arrow-right" style="font-size:15px;color:var(--color-accent)"></i>
+          </div>
+          <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:16px 20px 20px;display:flex;flex-direction:column;gap:var(--space-6)">
+          <div style="display:flex;align-items:flex-end;gap:14px">
+            <div><div style="font-size:38px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">14.2<span style="font-size:16px;color:var(--color-neutral-500)"> t</span></div><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:7px">Volume this week</div></div>
+            <span class="tag tag-accent" style="margin-bottom:20px">+18%</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:7px;height:130px">
+            <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px;box-shadow:0 0 0 1px var(--color-accent-300)"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:var(--space-2)">Records</div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;box-shadow:0 1px 0 var(--color-divider)"><span style="flex:1;font-size:15px">Back Squat</span><span style="font-size:15px;font-variant-numeric:tabular-nums">110 kg</span><span class="tag tag-accent">+5</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0"><span style="flex:1;font-size:15px">Bench Press</span><span style="font-size:15px;font-variant-numeric:tabular-nums">82.5 kg</span><span class="tag tag-accent">+2.5</span></div>
+          </div>
+        </div>
+        <dc-import name="MFTabs" active="progress" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Away from Today the hero is a 52 px strip: photo still visible through a 92% scrim, dot, gym, clock, arrow. Tapping anywhere in it returns to the session.</div>
+    </div>
+
+    <!-- G-10 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-10</span> · Session · photo header, logging</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;background:var(--photo);position:relative">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="height:126px;position:relative;background:linear-gradient(to top,rgba(22,23,26,0.95),rgba(22,23,26,0.4) 60%,rgba(22,23,26,0.1))">
+            <div style="position:absolute;left:12px;top:10px;width:32px;height:32px;border-radius:50%;background:rgba(10,11,13,0.5);display:grid;place-items:center"><i class="ph-bold ph-caret-down" style="font-size:16px;color:var(--color-neutral-200)"></i></div>
+            <button class="btn btn-secondary" style="position:absolute;right:14px;top:12px;min-height:32px;font-size:12px;background:rgba(10,11,13,0.5)">Finish</button>
+            <div style="position:absolute;left:20px;right:20px;bottom:12px">
+              <div style="display:inline-flex;align-items:center;gap:7px;margin-bottom:7px"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+              <div style="display:flex;align-items:baseline;gap:14px"><span style="font-size:32px;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">24:18</span><span style="font-size:12px;color:var(--color-neutral-400);font-variant-numeric:tabular-nums">7 sets · 2.1 t</span></div>
+            </div>
+          </div>
+          <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:14px 18px 18px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:4px"><span>#</span><span>Reps</span><span>Kg</span><span></span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">12</span><span style="color:var(--color-neutral-500)">40</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">warm-up</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">2</span><span>8</span><span>80</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">3</span><span>8</span><span>85</span><span style="font-size:10px;color:var(--color-ok);text-align:right">record</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">4</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700);padding-bottom:2px">8</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700);padding-bottom:2px">85</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button></div>
+          </div>
+          <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:15px;flex:1">Romanian Deadlift</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 70 × 10</span><i class="ph-bold ph-dots-three-vertical" style="font-size:16px;color:var(--color-neutral-600)"></i></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">1</span><span>10</span><span>70</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+            <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">2</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">10</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">72.5</span><button class="btn btn-primary" style="height:34px;padding:0;font-size:13px">Log</button></div>
+          </div>
+          <button class="btn btn-secondary" style="min-height:44px;gap:8px;font-size:14px"><i class="ph-bold ph-plus"></i>Add exercise</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Inside the session the header keeps the photo but drops to 126 px and gives Finish a home. Scrolling collapses it to the same 52 px strip.</div>
+    </div>
+
+    <!-- G-11 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-11</span> · Live at an unknown place</div>
+      <div style="width:390px;height:844px;background:var(--color-bg);border-radius:34px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+        <div style="flex:none;background:var(--generic);position:relative">
+          <dc-import name="MFStatus" hint-size="100%,34px"></dc-import>
+          <div style="height:148px;position:relative;background:linear-gradient(to top,rgba(22,23,26,0.9),rgba(22,23,26,0.3) 60%,transparent)">
+            <i class="ph-bold ph-barbell" style="position:absolute;right:24px;top:26px;font-size:44px;color:rgba(233,234,236,0.07)"></i>
+            <div style="position:absolute;left:20px;top:14px;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(10,11,13,0.55);box-shadow:inset 0 0 0 1px var(--color-accent-700)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · somewhere new</span></div>
+            <div style="position:absolute;left:20px;right:20px;bottom:14px;display:flex;align-items:flex-end;gap:14px">
+              <div style="flex:1"><div style="font-size:40px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">08:42</div><div style="display:flex;gap:14px;margin-top:9px;font-size:12px;color:var(--color-neutral-300);font-variant-numeric:tabular-nums"><span>2 sets</span><span>0.4 t</span></div></div>
+              <button class="btn btn-primary" style="min-height:42px;font-size:14px;gap:8px;background:rgba(10,11,13,0.5)"><i class="ph-bold ph-arrow-right"></i>Resume</button>
+            </div>
+          </div>
+          <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+        </div>
+        <div style="flex:1;overflow:hidden;padding:16px 20px 20px;display:flex;flex-direction:column;gap:var(--space-4)">
+          <div style="display:flex;gap:11px;align-items:flex-start;padding:13px 14px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 3px 0 0 var(--color-accent)">
+            <i class="ph-bold ph-map-pin" style="font-size:16px;color:var(--color-accent);margin-top:2px"></i>
+            <div style="flex:1">
+              <div style="font-size:13px;line-height:1.5;color:var(--color-neutral-300)">You're 2.3 km from any saved gym. Attach this session to a place so it gets a picture and counts toward that gym.</div>
+              <div style="display:flex;gap:14px;margin-top:10px"><span style="font-size:13px;color:var(--color-accent)">Search nearby</span><span style="font-size:13px;color:var(--color-accent)">Pin here</span><span style="font-size:13px;color:var(--color-neutral-600)">Not now</span></div>
+            </div>
+          </div>
+          <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:var(--space-2)">Closest saved</div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:56px;height:56px;border-radius:9px;background:var(--photo);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:15px">Smartass Obolon</span><span style="display:block;font-size:12px;color:var(--color-neutral-500);margin-top:3px">2.3 km away · outside radius</span></span>
+            <span style="font-size:12px;color:var(--color-accent)">Use</span>
+          </div>
+          <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55;margin-top:var(--space-2)">Until you choose, the hero keeps the house graphic — the session is never blocked by a missing gym.</div>
+        </div>
+        <dc-import name="MFTabs" active="today" hint-size="100%,78px"></dc-import>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Location doesn't match a saved gym: the hero still runs, on the graphite weave, and the prompt to attach a place sits below it as a dismissible card.</div>
+    </div>
+
+    <!-- G-12 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:390px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">G-12</span> · Hero states · anatomy</div>
+      <div style="width:390px;background:var(--color-bg);border-radius:20px;box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:var(--space-6)">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Expanded · 148 px · own screen</div>
+          <div style="border-radius:12px;overflow:hidden;background:var(--photo)">
+            <div style="height:148px;position:relative;background:linear-gradient(to top,rgba(22,23,26,0.94),rgba(22,23,26,0.35) 55%,rgba(22,23,26,0.15))">
+              <div style="position:absolute;left:14px;top:12px;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:rgba(10,11,13,0.55);box-shadow:inset 0 0 0 1px var(--color-accent-700)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+              <div style="position:absolute;left:14px;right:14px;bottom:12px;display:flex;align-items:flex-end;gap:12px"><div style="flex:1"><div style="font-size:36px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">24:18</div><div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--color-neutral-300)"><span>7 sets</span><span>2.1 t</span></div></div><button class="btn btn-primary" style="min-height:38px;font-size:13px;background:rgba(10,11,13,0.5)">Resume</button></div>
+            </div>
+            <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Collapsed · 52 px · other tabs, scrolled</div>
+          <div style="border-radius:12px;overflow:hidden;background:var(--photo)">
+            <div style="height:52px;display:flex;align-items:center;gap:11px;padding:0 14px;background:linear-gradient(to right,rgba(22,23,26,0.92),rgba(22,23,26,0.62))"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:13px;color:var(--color-neutral-200);flex:1">Live · Smartass Obolon</span><span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">24:18</span><i class="ph-bold ph-arrow-right" style="font-size:15px;color:var(--color-accent)"></i></div>
+            <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Resting · timer takes the number</div>
+          <div style="border-radius:12px;overflow:hidden;background:var(--photo)">
+            <div style="height:52px;display:flex;align-items:center;gap:11px;padding:0 14px;background:linear-gradient(to right,rgba(52,39,19,0.92),rgba(22,23,26,0.7))"><i class="ph-bold ph-timer" style="font-size:16px;color:var(--color-accent)"></i><span style="font-size:13px;color:var(--color-accent-200);flex:1">Rest · Back Squat</span><span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-accent-100)">1:24</span><span style="font-size:12px;color:var(--color-accent-300)">Skip</span></div>
+            <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Offline while live · ruby dot, photo stays</div>
+          <div style="border-radius:12px;overflow:hidden;background:var(--photo)">
+            <div style="height:52px;display:flex;align-items:center;gap:11px;padding:0 14px;background:linear-gradient(to right,rgba(22,23,26,0.92),rgba(22,23,26,0.62))"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-danger)"></span><span style="font-size:13px;color:var(--color-neutral-200);flex:1">Live · offline · 3 queued</span><span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">24:18</span><i class="ph-bold ph-arrow-right" style="font-size:15px;color:var(--color-accent)"></i></div>
+            <div style="height:1px;background:linear-gradient(to right,var(--color-danger),rgba(226,86,79,0.15) 70%,transparent)"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Loading the photo · skeleton, never a jump</div>
+          <div style="border-radius:12px;overflow:hidden">
+            <div class="sk" style="height:52px;border-radius:0;display:flex;align-items:center;gap:11px;padding:0 14px"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:13px;color:var(--color-neutral-300);flex:1">Live · Smartass Obolon</span><span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">24:18</span></div>
+            <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.7">Rules · The band is the only full-bleed photograph in the product. Scrim is a bottom-up gradient to 94% so any picture works. The brass hairline under it is constant — it, not the photo, is what says “live”. Expanded → collapsed is a height transition at 180 ms; the photo never cross-fades. Auto-close at 8 h turns the dot graphite and the label reads “Closed automatically”.</div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Five states, one component. Build it once and mount it above the router outlet.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════ C · WEB ══════════════ -->
+  <div style="display:flex;align-items:baseline;gap:12px;margin:0 0 6px">
+    <span style="font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent)">C</span>
+    <span style="font-size:22px;letter-spacing:-0.02em">Web · 1440 × 900</span>
+    <span style="font-size:12px;color:var(--color-neutral-600)">GW-01 → GW-06 · discovery in two panes, hero across the rail</span>
+  </div>
+  <div style="height:1px;background:linear-gradient(to right,var(--color-divider),transparent 60%);margin-bottom:26px"></div>
+
+  <div style="display:flex;gap:26px;flex-wrap:wrap;margin-bottom:56px">
+
+    <!-- GW-01 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">GW-01</span> · Gyms · search across databases</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-map-pin" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-squares-four" style="font-size:20px"></i></div>
+          <div style="margin-top:auto;width:34px;height:34px;border-radius:50%;background:var(--color-neutral-900);display:grid;place-items:center;font-size:12px;color:var(--color-neutral-400)">A</div>
+        </div>
+        <div style="width:460px;flex:none;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;padding:26px 24px;gap:16px">
+          <div style="font-size:26px;letter-spacing:-0.025em">Gyms</div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:11px 13px;box-shadow:inset 0 0 0 1px var(--color-accent)">
+            <i class="ph-bold ph-magnifying-glass" style="font-size:16px;color:var(--color-accent)"></i>
+            <span style="flex:1;font-size:14px">smartass</span>
+
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-ok-tint);font-size:11px;color:var(--color-ok-text)"><i class="ph-fill ph-check-circle" style="font-size:11px;color:var(--color-ok)"></i>Local · 1</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-ok-tint);font-size:11px;color:var(--color-ok-text)"><i class="ph-fill ph-check-circle" style="font-size:11px;color:var(--color-ok)"></i>OSM · 2</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-ok-tint);font-size:11px;color:var(--color-ok-text)"><i class="ph-fill ph-check-circle" style="font-size:11px;color:var(--color-ok)"></i>Places · 3</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-400)"><span class="sp" style="display:inline-block;width:9px;height:9px;border:1.5px solid var(--color-neutral-800);border-top-color:var(--color-accent);border-radius:50%"></span>Foursquare</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-accent-800)">
+            <span style="width:72px;height:56px;border-radius:8px;background:var(--photo);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Smartass Obolon</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Prospekt Obolonskyi 1B · 40 m</span><span style="display:inline-flex;gap:5px;margin-top:6px"><span class="tag tag-neutral" style="font-size:9px">OSM</span><span class="tag tag-neutral" style="font-size:9px">Places</span></span></span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:72px;height:56px;border-radius:8px;background:var(--photo-2);flex:none"></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Smartass Livoberezhna</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Raisy Okipnoi 8 · 6.4 km</span></span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <span style="width:72px;height:56px;border-radius:8px;background:var(--generic);flex:none;display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:19px;color:var(--color-neutral-700)"></i></span>
+            <span style="flex:1"><span style="display:block;font-size:14px">Smartass Pozniaky</span><span style="display:block;font-size:11px;color:var(--color-neutral-500);margin-top:3px">Kniazhyi Zaton 9 · 11 km</span><span style="display:inline-flex;gap:5px;margin-top:6px"><span class="tag tag-neutral" style="font-size:9px">No photo</span></span></span>
+          </div>
+          <div style="margin-top:auto;display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border-radius:var(--radius-md);background:var(--color-surface)">
+            <i class="ph-bold ph-info" style="font-size:15px;color:var(--color-neutral-500);margin-top:1px"></i>
+            <span style="font-size:11px;line-height:1.5;color:var(--color-neutral-500);flex:1">Desktop location is IP-based (±2 km). Pick from the list rather than pinning — or add the gym from your phone.</span>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="height:320px;background:var(--photo);position:relative;flex:none">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(22,23,26,0.95),rgba(22,23,26,0.25) 60%,transparent)"></div>
+            <div style="position:absolute;left:36px;bottom:26px">
+              <div style="font-size:34px;letter-spacing:-0.025em">Smartass Obolon</div>
+              <div style="font-size:13px;color:var(--color-neutral-400);margin-top:6px">Prospekt Obolonskyi 1B, Kyiv · 40 m away</div>
+              <div style="display:flex;gap:6px;margin-top:12px"><span class="tag tag-accent">Inside</span><span class="tag tag-neutral">OpenStreetMap</span><span class="tag tag-neutral">Photo · Places</span></div>
+            </div>
+            <button class="btn btn-secondary" style="position:absolute;right:36px;bottom:26px;min-height:38px;font-size:13px;gap:7px;background:rgba(10,11,13,0.5)"><i class="ph-bold ph-image-square"></i>Replace photo</button>
+          </div>
+          <div style="flex:1;padding:26px 36px;display:flex;flex-direction:column;gap:22px">
+            <div style="display:flex;gap:12px">
+              <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">18</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Sessions</div></div>
+              <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">62 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Moved here</div></div>
+              <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">1:04</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Avg length</div></div>
+              <div style="flex:1;background:var(--color-surface);border-radius:var(--radius-md);padding:16px"><div style="font-size:24px;font-variant-numeric:tabular-nums">150 m</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:4px">Radius</div></div>
+            </div>
+            <div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Sessions here</div>
+              <table class="table"><thead><tr><th>Date</th><th>Session</th><th>Sets</th><th>Volume</th><th>Length</th></tr></thead><tbody>
+                <tr><td>29 Jul</td><td>Push day</td><td style="font-variant-numeric:tabular-nums">18</td><td style="font-variant-numeric:tabular-nums">4 980 kg</td><td style="font-variant-numeric:tabular-nums">1:12</td></tr>
+                <tr><td>27 Jul</td><td>Legs</td><td style="font-variant-numeric:tabular-nums">14</td><td style="font-variant-numeric:tabular-nums">3 420 kg</td><td style="font-variant-numeric:tabular-nums">0:54</td></tr>
+                <tr><td>25 Jul</td><td>Pull day</td><td style="font-variant-numeric:tabular-nums">21</td><td style="font-variant-numeric:tabular-nums">5 640 kg</td><td style="font-variant-numeric:tabular-nums">1:03</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">List left, detail right. The photo is a 320 px header — the one place on desktop a picture runs full width of the pane. Provider chips carry counts as each database answers.</div>
+    </div>
+
+    <!-- GW-02 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">GW-02</span> · Nothing found → Google image picker</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;position:relative">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-house" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-map-pin" style="font-size:20px"></i></div>
+        </div>
+        <div style="width:460px;flex:none;box-shadow:1px 0 0 var(--color-divider);padding:26px 24px;display:flex;flex-direction:column;gap:16px;opacity:0.45">
+          <div style="font-size:26px;letter-spacing:-0.025em">Gyms</div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--color-surface);border-radius:var(--radius-md);padding:11px 13px"><i class="ph-bold ph-magnifying-glass" style="font-size:16px;color:var(--color-neutral-500)"></i><span style="flex:1;font-size:14px">Kachalka na Peremohy</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">Local · 0</span><span style="padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">OSM · 0</span><span style="padding:5px 10px;border-radius:999px;background:var(--color-surface);font-size:11px;color:var(--color-neutral-500)">Places · 0</span></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:30px 0"><i class="ph-bold ph-map-pin-simple-area" style="font-size:24px;color:var(--color-neutral-700)"></i><div style="font-size:16px">No database knows this place</div></div>
+        </div>
+        <div style="flex:1;padding:36px;opacity:0.45"><div style="background:var(--color-surface);border-radius:var(--radius-lg);height:280px"></div></div>
+        <div style="position:absolute;inset:0;background:rgba(10,11,13,0.62);display:grid;place-items:center">
+          <div style="width:840px;background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);overflow:hidden">
+            <div style="padding:22px 26px;box-shadow:0 1px 0 var(--color-divider);display:flex;align-items:flex-end;gap:16px">
+              <div style="flex:1"><div style="font-size:20px">Pick a photo for “Kachalka na Peremohy”</div><div style="font-size:12px;color:var(--color-neutral-500);margin-top:5px">Google Images · “Kachalka na Peremohy gym Kyiv” · 8 results over 600 px</div></div>
+              <div style="display:flex;align-items:center;gap:9px;font-size:12px;color:var(--color-neutral-500)"><span style="padding:3px 7px;border-radius:4px;background:var(--color-neutral-900);font-size:10px">←→</span>browseuse</div>
+            </div>
+            <div style="padding:22px 26px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+              <div style="height:130px;border-radius:10px;background:var(--photo);box-shadow:0 0 0 2px var(--color-accent);position:relative"><span style="position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:50%;background:var(--color-accent);display:grid;place-items:center"><i class="ph-bold ph-check" style="font-size:13px;color:#1a1409"></i></span><span style="position:absolute;left:9px;bottom:8px;font-size:10px;color:rgba(233,234,236,0.7);font-variant-numeric:tabular-nums">1600 × 1067</span></div>
+              <div style="height:130px;border-radius:10px;background:var(--photo-2);position:relative"><span style="position:absolute;left:9px;bottom:8px;font-size:10px;color:rgba(233,234,236,0.55);font-variant-numeric:tabular-nums">1280 × 853</span></div>
+              <div style="height:130px;border-radius:10px;background:var(--photo);position:relative"><span style="position:absolute;left:9px;bottom:8px;font-size:10px;color:rgba(233,234,236,0.55);font-variant-numeric:tabular-nums">1024 × 768</span></div>
+              <div style="height:130px;border-radius:10px;background:var(--photo-2);position:relative"><span style="position:absolute;left:9px;bottom:8px;font-size:10px;color:rgba(233,234,236,0.55);font-variant-numeric:tabular-nums">960 × 640</span></div>
+              <div style="height:130px;border-radius:10px;background:var(--photo-2)"></div>
+              <div style="height:130px;border-radius:10px;background:var(--photo)"></div>
+              <div style="height:130px;border-radius:10px;background:var(--photo)"></div>
+              <div style="height:130px;border-radius:10px;background:var(--generic);display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--color-neutral-800)"><div style="text-align:center"><i class="ph-bold ph-barbell" style="font-size:24px;color:var(--color-neutral-700)"></i><div style="font-size:11px;color:var(--color-neutral-500);margin-top:7px">House graphic</div></div></div>
+            </div>
+            <div style="padding:18px 26px;box-shadow:0 -1px 0 var(--color-divider);display:flex;align-items:center;gap:14px">
+              <span style="flex:1;font-size:11px;color:var(--color-neutral-600);line-height:1.5">Cached on your hub, never hot-linked. Replaceable later from the gym's menu.</span>
+              <button class="btn btn-secondary" style="min-height:40px;font-size:14px">Cancel</button>
+              <button class="btn btn-primary" style="min-height:40px;font-size:14px">Use this photo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Desktop shows dimensions on each candidate and keeps the house graphic as the last tile — choosing the fallback is one click, in the same grid.</div>
+    </div>
+
+    <!-- GW-03 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">GW-03</span> · Today · hero band across the content pane</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent);position:relative"><i class="ph-bold ph-house" style="font-size:20px"></i><span class="live" style="position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-map-pin" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-squares-four" style="font-size:20px"></i></div>
+          <div style="margin-top:auto;width:34px;height:34px;border-radius:50%;background:var(--color-neutral-900);display:grid;place-items:center;font-size:12px;color:var(--color-neutral-400)">A</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="flex:none;height:210px;background:var(--photo);position:relative">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(22,23,26,0.95),rgba(22,23,26,0.3) 65%,rgba(22,23,26,0.1))"></div>
+            <div style="position:absolute;left:40px;top:26px;display:inline-flex;align-items:center;gap:8px;padding:6px 13px;border-radius:999px;background:rgba(10,11,13,0.5);box-shadow:inset 0 0 0 1px var(--color-accent-700)"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+            <div style="position:absolute;left:40px;right:40px;bottom:26px;display:flex;align-items:flex-end;gap:30px">
+              <div style="font-size:56px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">24:18</div>
+              <div style="display:flex;gap:30px;padding-bottom:8px;font-variant-numeric:tabular-nums">
+                <div><div style="font-size:20px">7</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:3px">Sets</div></div>
+                <div><div style="font-size:20px">2.1 t</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:3px">Moved</div></div>
+                <div><div style="font-size:20px">Back Squat</div><div style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-500);margin-top:3px">Current</div></div>
+              </div>
+              <div style="flex:1"></div>
+              <button class="btn btn-primary" style="min-height:46px;font-size:15px;gap:9px;background:rgba(10,11,13,0.45)"><i class="ph-bold ph-arrow-right"></i>Resume session </button>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 60%,transparent)"></div>
+          </div>
+          <div style="flex:1;padding:30px 40px;display:grid;grid-template-columns:1fr 380px;gap:34px;overflow:hidden">
+            <div style="display:flex;flex-direction:column;gap:24px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><div><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Friday, 31 July</div><div style="font-size:28px;letter-spacing:-0.025em;margin-top:6px">Mid-session.</div></div><span style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-neutral-500)"><span style="width:7px;height:7px;border-radius:50%;background:var(--color-ok)"></span>Synced</span></div>
+              <div>
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Recent</div>
+                <table class="table"><thead><tr><th>Date</th><th>Session</th><th>Gym</th><th>Sets</th><th>Volume</th></tr></thead><tbody>
+                  <tr><td>29 Jul</td><td>Push day</td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">18</td><td style="font-variant-numeric:tabular-nums">4 980 kg</td></tr>
+                  <tr><td>27 Jul</td><td>Legs</td><td>Smartass Obolon</td><td style="font-variant-numeric:tabular-nums">14</td><td style="font-variant-numeric:tabular-nums">3 420 kg</td></tr>
+                  <tr><td>25 Jul</td><td>Pull day</td><td>Sportlife Livoberezhna</td><td style="font-variant-numeric:tabular-nums">21</td><td style="font-variant-numeric:tabular-nums">5 640 kg</td></tr>
+                </tbody></table>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">This week</div>
+              <div style="display:flex;align-items:flex-end;gap:6px;height:110px">
+                <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+              </div>
+              <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface)">
+                <div style="height:110px;background:var(--photo);position:relative"><div style="position:absolute;left:12px;bottom:10px;display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:rgba(10,11,13,0.6)"><span class="live" style="width:6px;height:6px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;color:var(--color-accent-200)">You're here</span></div></div>
+                <div style="padding:13px"><div style="font-size:14px">Smartass Obolon</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:4px">18 sessions · 62 t moved</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">On desktop the hero is 210 px and spans the content pane, not the rail — the rail instead carries a brass dot on the Today icon so the state survives even at the narrowest window.</div>
+    </div>
+
+    <!-- GW-04 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">GW-04</span> · Session · photo hero + keyboard logging</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent);position:relative"><i class="ph-bold ph-house" style="font-size:20px"></i><span class="live" style="position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-map-pin" style="font-size:20px"></i></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="flex:none;height:150px;background:var(--photo);position:relative">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(22,23,26,0.95),rgba(22,23,26,0.35) 65%,rgba(22,23,26,0.1))"></div>
+            <div style="position:absolute;left:40px;top:20px;display:inline-flex;align-items:center;gap:8px"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+            <div style="position:absolute;left:40px;right:40px;bottom:20px;display:flex;align-items:flex-end;gap:26px">
+              <div style="font-size:42px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">24:18</div>
+              <div style="display:flex;gap:24px;padding-bottom:6px;font-size:13px;color:var(--color-neutral-300);font-variant-numeric:tabular-nums"><span>7 sets</span><span>2.1 t</span><span>2 exercises</span></div>
+              <div style="flex:1"></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:var(--radius-md);background:rgba(52,39,19,0.75)"><i class="ph-bold ph-timer" style="font-size:16px;color:var(--color-accent-300)"></i><span style="font-size:13px;color:var(--color-accent-200)">Rest</span><span style="font-size:17px;font-variant-numeric:tabular-nums;color:var(--color-accent-100)">1:24</span><span style="font-size:12px;color:var(--color-accent-300)">Skip</span></div>
+              <button class="btn btn-secondary" style="min-height:40px;font-size:13px;background:rgba(10,11,13,0.45)">Finish </button>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 60%,transparent)"></div>
+          </div>
+          <div style="flex:1;padding:26px 40px;display:grid;grid-template-columns:1fr 320px;gap:30px;overflow:hidden">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:18px 20px">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span style="font-size:17px;flex:1">Back Squat</span><span style="font-size:12px;color:var(--color-neutral-600)">prev 85 × 8 · record 110</span><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></div>
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 120px 90px;gap:12px;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);padding-bottom:6px;box-shadow:0 1px 0 var(--color-divider)"><span>#</span><span>Reps</span><span>Weight</span><span>Type</span><span></span></div>
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 120px 90px;gap:12px;align-items:center;padding:9px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:12px;color:var(--color-neutral-600)">1</span><span style="color:var(--color-neutral-500)">12</span><span style="color:var(--color-neutral-500)">40 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">Warm-up</span><span></span></div>
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 120px 90px;gap:12px;align-items:center;padding:9px 0;font-size:16px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:12px;color:var(--color-neutral-600)">2</span><span>8</span><span>80 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">Working</span><span></span></div>
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 120px 90px;gap:12px;align-items:center;padding:9px 0;font-size:16px;font-variant-numeric:tabular-nums;background:var(--color-ok-tint);border-radius:6px"><span style="font-size:12px;color:var(--color-ok);padding-left:6px">3</span><span style="color:var(--color-ok-text)">8</span><span style="color:var(--color-ok-text)">90 kg</span><span style="font-size:11px;color:var(--color-ok)">Record</span><span></span></div>
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 120px 90px;gap:12px;align-items:center;padding:12px 0 2px;font-size:16px;font-variant-numeric:tabular-nums">
+                  <span style="font-size:12px;color:var(--color-neutral-700)">4</span>
+                  <input class="input" value="8" style="min-height:40px;font-size:16px">
+                  <input class="input" value="90" style="min-height:40px;font-size:16px;border-color:var(--color-accent)">
+                  <span style="font-size:11px;color:var(--color-neutral-600)">Working</span>
+                  <button class="btn btn-primary" style="min-height:40px;font-size:13px">Log</button>
+                </div>
+              </div>
+              <div style="border-radius:var(--radius-lg);background:var(--color-surface);padding:18px 20px">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="font-size:17px;flex:1">Romanian Deadlift</span><span style="font-size:12px;color:var(--color-neutral-600)">prev 70 × 10</span><i class="ph-bold ph-dots-three" style="font-size:17px;color:var(--color-neutral-600)"></i></div>
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 120px 90px;gap:12px;align-items:center;padding:9px 0;font-size:16px;font-variant-numeric:tabular-nums"><span style="font-size:12px;color:var(--color-neutral-600)">1</span><span>10</span><span>70 kg</span><span style="font-size:11px;color:var(--color-neutral-600)">Working</span><span></span></div>
+              </div>
+              <button class="btn btn-secondary" style="min-height:44px;font-size:14px;gap:8px;align-self:flex-start"><i class="ph-bold ph-plus"></i>Add exercise </button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface)">
+                <div style="height:120px;background:var(--photo)"></div>
+                <div style="padding:14px"><div style="font-size:14px">Smartass Obolon</div><div style="font-size:11px;color:var(--color-neutral-500);margin-top:4px">Started 18:24 · inside radius</div></div>
+              </div>
+              <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Last time here</div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 var(--color-divider);font-size:13px"><span style="flex:1">Back Squat</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">85 × 8</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;box-shadow:0 1px 0 var(--color-divider);font-size:13px"><span style="flex:1">Romanian Deadlift</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">70 × 10</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:10px 0;font-size:13px"><span style="flex:1">Session volume</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-400)">3.1 t</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">The hero shrinks to 150 px inside the session so the rows dominate, and absorbs the rest timer instead of floating it. The gym card in the right column repeats the photo at card scale.</div>
+    </div>
+
+    <!-- GW-05 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">GW-05</span> · Other screens while live · collapsed band</div>
+      <div style="width:1440px;height:900px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex">
+        <div style="width:74px;flex:none;background:#131417;box-shadow:1px 0 0 var(--color-divider);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px">
+          <i class="ph-bold ph-barbell" style="font-size:22px;color:var(--color-accent);margin-bottom:18px"></i>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600);position:relative"><i class="ph-bold ph-house" style="font-size:20px"></i><span class="live" style="position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:var(--color-accent-900);color:var(--color-accent)"><i class="ph-bold ph-chart-line-up" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-map-pin" style="font-size:20px"></i></div>
+          <div style="width:46px;height:46px;border-radius:10px;display:grid;place-items:center;color:var(--color-neutral-600)"><i class="ph-bold ph-squares-four" style="font-size:20px"></i></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div style="flex:none;height:60px;background:var(--photo);position:relative">
+            <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(22,23,26,0.93),rgba(22,23,26,0.66))"></div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;gap:14px;padding:0 40px">
+              <span class="live" style="width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span>
+              <span style="font-size:14px;color:var(--color-neutral-200)">Live · Smartass Obolon</span>
+              <span style="font-size:12px;color:var(--color-neutral-500)">7 sets · 2.1 t</span>
+              <div style="flex:1"></div>
+              <span style="font-size:20px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">24:18</span>
+              <button class="btn btn-secondary" style="min-height:34px;font-size:12px;gap:7px;background:rgba(10,11,13,0.4)"><i class="ph-bold ph-arrow-right"></i>Resume</button>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 60%,transparent)"></div>
+          </div>
+          <div style="flex:1;padding:30px 40px;display:flex;flex-direction:column;gap:26px;overflow:hidden">
+            <div style="display:flex;align-items:flex-end;gap:16px"><div><div style="font-size:44px;letter-spacing:-0.03em;line-height:1;font-variant-numeric:tabular-nums">14.2<span style="font-size:18px;color:var(--color-neutral-500)"> t</span></div><div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600);margin-top:8px">Volume this week</div></div><span class="tag tag-accent" style="margin-bottom:24px">+18%</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;flex:1">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Weekly volume</div>
+                <div style="display:flex;align-items:flex-end;gap:8px;height:190px">
+                  <div style="flex:1;height:38%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:52%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:44%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:66%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:58%;background:var(--color-neutral-800);border-radius:3px"></div><div style="flex:1;height:71%;background:var(--color-accent-800);border-radius:3px"></div><div style="flex:1;height:74%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:69%;background:var(--color-accent-700);border-radius:3px"></div><div style="flex:1;height:88%;background:var(--color-accent-600);border-radius:3px"></div><div style="flex:1;height:100%;background:var(--color-accent);border-radius:3px"></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-neutral-600)">Estimated 1RM</div>
+                <div style="background:var(--color-surface);border-radius:var(--radius-lg);padding:18px">
+                  <svg viewBox="0 0 400 150" style="width:100%;height:150px;display:block">
+                    <polyline points="8,126 52,118 96,104 140,108 184,86 228,74 272,62 316,44 360,24 392,16" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                    <polyline points="8,138 52,132 96,128 140,124 184,112 228,106 272,98 316,88 360,78 392,72" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.5" stroke-dasharray="3 4"></polyline>
+                  </svg>
+                  <div style="display:flex;gap:18px;font-size:11px;color:var(--color-neutral-600);margin-top:10px"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-accent);display:inline-block"></span>Squat 120 kg</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:2px;background:var(--color-neutral-700);display:inline-block"></span>Bench 93 kg</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Away from Today the band is 60 px, photo still readable behind a horizontal scrim. It is sticky — scrolling the content never removes it.</div>
+    </div>
+
+    <!-- GW-06 -->
+    <div style="display:flex;flex-direction:column;gap:8px;width:1440px">
+      <div style="font-size:11px;color:var(--color-neutral-500)"><span style="color:var(--color-accent)">GW-06</span> · Narrow window, tray popover, imagery rules</div>
+      <div style="display:flex;gap:22px;align-items:flex-start">
+        <div style="width:400px;height:660px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-md);overflow:hidden;display:flex;flex-direction:column">
+          <div style="flex:none;height:44px;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:0 1px 0 var(--color-divider)"><span style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#3b3f43"></span><span style="width:10px;height:10px;border-radius:50%;background:#3b3f43"></span><span style="width:10px;height:10px;border-radius:50%;background:#3b3f43"></span></span><i class="ph-bold ph-list" style="font-size:17px;color:var(--color-neutral-400);margin-left:6px"></i><span style="flex:1;font-size:12px;color:var(--color-neutral-500);text-align:center">My Fit</span></div>
+          <div style="flex:none;height:52px;background:var(--photo);position:relative">
+            <div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(22,23,26,0.92),rgba(22,23,26,0.62));display:flex;align-items:center;gap:11px;padding:0 16px"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="flex:1;font-size:13px;color:var(--color-neutral-200)">Live · Smartass Obolon</span><span style="font-size:15px;font-variant-numeric:tabular-nums;color:var(--color-accent-200)">24:18</span></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+          </div>
+          <div style="flex:1;padding:18px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:22px;letter-spacing:-0.025em">Mid-session.</div>
+            <div style="border-radius:var(--radius-md);background:var(--color-surface);padding:13px 14px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:14px;flex:1">Back Squat</span><span style="font-size:11px;color:var(--color-neutral-600)">prev 85 × 8</span></div>
+              <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:7px 0;font-size:15px;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 var(--color-divider)"><span style="font-size:11px;color:var(--color-neutral-600)">3</span><span>8</span><span>85</span><span style="font-size:10px;color:var(--color-neutral-600);text-align:right">working</span></div>
+              <div style="display:grid;grid-template-columns:18px 1fr 1fr 62px;gap:8px;align-items:center;padding:9px 0 2px;font-size:15px;font-variant-numeric:tabular-nums"><span style="font-size:11px;color:var(--color-neutral-700)">4</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">8</span><span style="color:var(--color-neutral-400);border-bottom:1px dashed var(--color-neutral-700)">85</span><button class="btn btn-primary" style="height:32px;padding:0;font-size:12px">Log</button></div>
+            </div>
+            <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.55;margin-top:auto">Under 720 px the rail collapses to a hamburger; the hero keeps the 52 px phone strip.</div>
+          </div>
+        </div>
+
+        <div style="width:360px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden">
+          <div style="height:110px;background:var(--photo);position:relative">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(22,23,26,0.95),rgba(22,23,26,0.2))"></div>
+            <div style="position:absolute;left:16px;top:12px;display:inline-flex;align-items:center;gap:7px"><span class="live" style="width:7px;height:7px;border-radius:50%;background:var(--color-accent)"></span><span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent-200)">Live · Smartass Obolon</span></div>
+            <div style="position:absolute;left:16px;bottom:12px;display:flex;align-items:baseline;gap:12px"><span style="font-size:30px;letter-spacing:-0.03em;font-variant-numeric:tabular-nums">24:18</span><span style="font-size:11px;color:var(--color-neutral-400)">7 sets · 2.1 t</span></div>
+          </div>
+          <div style="height:1px;background:linear-gradient(to right,var(--color-accent),rgba(217,162,79,0.15) 70%,transparent)"></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+            <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Menu-bar popover</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+              <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:11px"><div style="font-size:11px;color:var(--color-neutral-600)">Reps</div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px"><span style="font-size:16px;color:var(--color-neutral-400)">−</span><span style="font-size:19px;font-variant-numeric:tabular-nums">8</span><span style="font-size:16px;color:var(--color-neutral-400)">+</span></div></div>
+              <div style="background:var(--color-surface);border-radius:var(--radius-md);padding:11px"><div style="font-size:11px;color:var(--color-neutral-600)">Kg</div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px"><span style="font-size:16px;color:var(--color-neutral-400)">−</span><span style="font-size:19px;font-variant-numeric:tabular-nums">85</span><span style="font-size:16px;color:var(--color-neutral-400)">+</span></div></div>
+            </div>
+            <button class="btn btn-primary" style="min-height:40px;font-size:14px">Log set</button>
+            <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Same photograph, 110 px. Logging without leaving whatever you're doing.</div>
+          </div>
+        </div>
+
+        <div style="width:400px;background:var(--color-bg);border-radius:12px;box-shadow:var(--shadow-sm);padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Imagery rules</div>
+          <div style="font-size:12px;color:var(--color-neutral-400);line-height:1.85">
+            <strong style="color:var(--color-neutral-200);font-weight:500">Resolution order</strong> — local DB → OpenStreetMap → Google Places → Foursquare → Google Images by “name + city gym” → house graphic. First hit with a photo over 600 px wins; the rest still merge into one venue row.<br><br>
+            <strong style="color:var(--color-neutral-200);font-weight:500">Storage</strong> — the chosen image is fetched once, downscaled to 1600 px, and cached on the user's own hub. Never hot-linked, never shown outside the app, replaceable from the gym menu.<br><br>
+            <strong style="color:var(--color-neutral-200);font-weight:500">Treatment</strong> — every photo carries a bottom-up scrim to 94% and sits behind text at ≥ 4.5:1. Photos appear at four sizes only: 320 px pane header, 210/150/60 px hero, 120 px card, 64 px row thumb.<br><br>
+            <strong style="color:var(--color-neutral-200);font-weight:500">House graphic</strong> — graphite weave plus the barbell mark, generated locally at any size. It is a valid final state, never labelled “missing”.
+          </div>
+          <div style="display:flex;gap:9px">
+            <div style="flex:1;height:64px;border-radius:8px;background:var(--photo)"></div>
+            <div style="flex:1;height:64px;border-radius:8px;background:var(--photo-2)"></div>
+            <div style="flex:1;height:64px;border-radius:8px;background:var(--generic);display:grid;place-items:center"><i class="ph-bold ph-barbell" style="font-size:20px;color:var(--color-neutral-700)"></i></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--color-neutral-600);line-height:1.5">Narrow window, menu-bar popover and the imagery contract that governs every frame above.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

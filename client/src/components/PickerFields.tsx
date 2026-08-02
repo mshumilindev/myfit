@@ -5,7 +5,17 @@
  * (those ignore the graphite/brass tokens) and no third-party lib (offline PWA,
  * pixel-parity with the boards). Design: docs/DESIGN.md.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
 
@@ -16,17 +26,25 @@ function Popover({
   onClose,
   children,
   className,
+  anchorRef,
+  placement = 'down',
 }: {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
   className?: string;
+  anchorRef: RefObject<HTMLElement | null>;
+  placement?: 'up' | 'down';
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const style = useAnchoredPopoverStyle(open, ref, anchorRef, placement);
+
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+      const target = e.target as Node;
+      if (ref.current?.contains(target) || anchorRef.current?.contains(target)) return;
+      onClose();
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -37,13 +55,67 @@ function Popover({
       document.removeEventListener('pointerdown', onDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open, onClose]);
+  }, [anchorRef, open, onClose]);
+
   if (!open) return null;
-  return (
-    <div className={`picker-pop${className ? ` ${className}` : ''}`} ref={ref} role="dialog">
+
+  return createPortal(
+    <div
+      className={`picker-pop${className ? ` ${className}` : ''}`}
+      ref={ref}
+      role="dialog"
+      style={style}
+    >
       {children}
-    </div>
+    </div>,
+    document.body,
   );
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.min(Math.max(n, min), max);
+}
+
+function useAnchoredPopoverStyle(
+  open: boolean,
+  popoverRef: RefObject<HTMLElement | null>,
+  anchorRef: RefObject<HTMLElement | null>,
+  placement: 'up' | 'down',
+): CSSProperties {
+  const [style, setStyle] = useState<CSSProperties>({});
+
+  useLayoutEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+
+    const place = () => {
+      const anchor = anchorRef.current;
+      if (!anchor || !document.body.contains(anchor)) return;
+      const rect = anchor.getBoundingClientRect();
+      const pop = popoverRef.current?.getBoundingClientRect();
+      const popW = pop?.width ?? Math.max(rect.width, 176);
+      const popH = pop?.height ?? 240;
+      const gutter = 8;
+      const left = clamp(rect.left, gutter, window.innerWidth - popW - gutter);
+      const downTop = clamp(rect.bottom + 6, gutter, window.innerHeight - popH - gutter);
+      const upTop = clamp(rect.top - popH - 6, gutter, window.innerHeight - popH - gutter);
+
+      setStyle({
+        left: `${Math.round(left)}px`,
+        top: `${Math.round(placement === 'up' ? upTop : downTop)}px`,
+        minWidth: `${Math.round(rect.width)}px`,
+      });
+    };
+
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [anchorRef, open, placement, popoverRef]);
+
+  return style;
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -79,6 +151,7 @@ export function DateField({
 }) {
   const { t, locale } = useT();
   const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
   const [text, setText] = useState(() => isoToDisplay(value));
   const [view, setView] = useState(() => value || todayIso());
 
@@ -117,7 +190,7 @@ export function DateField({
 
   return (
     <div className="picker">
-      <div className="input-field">
+      <div className="input-field" ref={anchorRef}>
         <input
           className="input"
           inputMode="numeric"
@@ -135,7 +208,7 @@ export function DateField({
           <Icon name="calendar-blank" />
         </button>
       </div>
-      <Popover open={open} onClose={() => setOpen(false)} className="cal">
+      <Popover open={open} onClose={() => setOpen(false)} className="cal" anchorRef={anchorRef}>
         <div className="cal-head">
           <button
             type="button"
@@ -255,6 +328,7 @@ export function TimeField({
 }) {
   const { t } = useT();
   const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
   const [text, setText] = useState(value);
   const [prevValue, setPrevValue] = useState(value);
   if (value !== prevValue) {
@@ -275,7 +349,7 @@ export function TimeField({
 
   return (
     <div className="picker up">
-      <div className="input-field">
+      <div className="input-field" ref={anchorRef}>
         <input
           className="input"
           inputMode="numeric"
@@ -298,7 +372,13 @@ export function TimeField({
           <Icon name="clock" />
         </button>
       </div>
-      <Popover open={open} onClose={() => setOpen(false)} className="time">
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        className="time"
+        anchorRef={anchorRef}
+        placement="up"
+      >
         <div className="time-cols">
           <div className="time-col" role="listbox" aria-label={t.backfillStart}>
             {HOURS.map((h) => (
@@ -348,10 +428,11 @@ export function DurationField({
 }) {
   const { t } = useT();
   const [open, setOpen] = useState(false);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="picker up">
-      <div className="input-field">
+      <div className="input-field" ref={anchorRef}>
         <input
           className="input"
           type="number"
@@ -370,7 +451,13 @@ export function DurationField({
           <Icon name="timer" />
         </button>
       </div>
-      <Popover open={open} onClose={() => setOpen(false)} className="dur">
+      <Popover
+        open={open}
+        onClose={() => setOpen(false)}
+        className="dur"
+        anchorRef={anchorRef}
+        placement="up"
+      >
         <div className="dur-list" role="listbox" aria-label={t.backfillDuration}>
           {DURATIONS.map((d) => (
             <button

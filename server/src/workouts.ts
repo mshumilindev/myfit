@@ -35,6 +35,7 @@ interface WorkoutJson {
   startedAt: number;
   finishedAt: number | null;
   autoFinished: boolean;
+  gymId: string | null;
   updatedAt: number;
   exercises: ExerciseJson[];
 }
@@ -67,6 +68,7 @@ function fullState(userId: string): WorkoutJson[] {
     startedAt: w.started_at,
     finishedAt: w.finished_at,
     autoFinished: !!w.auto_finished,
+    gymId: w.gym_id ?? null,
     updatedAt: w.updated_at,
     exercises: (exStmt.all(w.id) as ExerciseRow[]).map((e) => ({
       id: e.id,
@@ -102,12 +104,15 @@ workoutsRouter.put('/workouts/:id', (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
   const { id } = req.params;
   if (!isId(id)) return res.status(400).json({ error: 'bad id' });
-  const { startedAt, finishedAt = null, autoFinished = false } = req.body ?? {};
+  const { startedAt, finishedAt = null, autoFinished = false, gymId = null } = req.body ?? {};
   if (typeof startedAt !== 'number') {
     return res.status(400).json({ error: 'startedAt (number) required' });
   }
   if (finishedAt !== null && typeof finishedAt !== 'number') {
     return res.status(400).json({ error: 'finishedAt must be number or null' });
+  }
+  if (gymId !== null && !isId(gymId)) {
+    return res.status(400).json({ error: 'gymId must be a string or null' });
   }
   const now = Date.now();
 
@@ -124,14 +129,15 @@ workoutsRouter.put('/workouts/:id', (req: AuthedRequest, res: Response) => {
   }
 
   db.prepare(
-    `INSERT INTO workouts (id, user_id, started_at, finished_at, auto_finished, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)
+    `INSERT INTO workouts (id, user_id, started_at, finished_at, auto_finished, gym_id, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        started_at = excluded.started_at,
        finished_at = excluded.finished_at,
        auto_finished = excluded.auto_finished,
+       gym_id = excluded.gym_id,
        updated_at = excluded.updated_at`,
-  ).run(id, userId, startedAt, finishedAt, autoFinished ? 1 : 0, now);
+  ).run(id, userId, startedAt, finishedAt, autoFinished ? 1 : 0, gymId, now);
 
   // The 8h rule also applies to the workout we just wrote.
   autoCloseStale(userId, now);

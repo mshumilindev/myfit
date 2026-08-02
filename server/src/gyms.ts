@@ -20,6 +20,7 @@ export function listGyms(userId: string) {
     lat: g.lat,
     lng: g.lng,
     radiusM: g.radius_m,
+    favorite: !!g.favorite,
   }));
 }
 
@@ -27,7 +28,7 @@ gymsRouter.put('/gyms/:id', (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
   const { id } = req.params;
   if (!isId(id)) return res.status(400).json({ error: 'bad id' });
-  const { name, lat, lng, radiusM = 150 } = req.body ?? {};
+  const { name, lat, lng, radiusM = 150, favorite = false } = req.body ?? {};
   if (typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'name required' });
   }
@@ -40,11 +41,12 @@ gymsRouter.put('/gyms/:id', (req: AuthedRequest, res: Response) => {
     return res.status(403).json({ error: 'not yours' });
   }
   db.prepare(
-    `INSERT INTO gyms (id, user_id, name, lat, lng, radius_m, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO gyms (id, user_id, name, lat, lng, radius_m, favorite, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        name = excluded.name, lat = excluded.lat, lng = excluded.lng,
-       radius_m = excluded.radius_m, updated_at = excluded.updated_at`,
+       radius_m = excluded.radius_m, favorite = excluded.favorite,
+       updated_at = excluded.updated_at`,
   ).run(
     id,
     userId,
@@ -52,6 +54,7 @@ gymsRouter.put('/gyms/:id', (req: AuthedRequest, res: Response) => {
     lat,
     lng,
     Math.max(30, Math.min(2000, Number(radiusM) || 150)),
+    favorite ? 1 : 0,
     Date.now(),
   );
   res.json({ ok: true });

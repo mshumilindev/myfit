@@ -37,7 +37,10 @@ async function api<T>(method: string, url: string, body?: unknown, token?: strin
   return (await res.json()) as T;
 }
 
-test.beforeEach(async () => {
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('gym.locale', 'en');
+  });
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gym-e2e-'));
   server = spawn(process.execPath, ['server/dist/index.js'], {
     cwd: path.resolve(__dirname, '../..'),
@@ -145,7 +148,9 @@ test('F-05/F-06 gyms, reminders and progress locked state', async ({ page }) => 
   await expect(page.getByText(/Smartfit/)).toBeVisible();
   await page.getByRole('button', { name: 'Gyms' }).click();
   await expect(page.getByText('Smartfit')).toBeVisible();
-  await expect(page.getByRole('button', { name: /I'm here/ })).toBeDisabled();
+  await expect(page.getByRole('button', { name: /I'm here/ })).toHaveCount(0);
+  await page.getByPlaceholder('Search for a gym').fill('New gym');
+  await expect(page.getByRole('button', { name: /New gym.*I'm here/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Progress' }).click();
   await expect(page.getByText('Two more sessions')).toBeVisible();
