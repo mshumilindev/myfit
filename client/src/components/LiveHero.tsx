@@ -6,7 +6,7 @@
  * it runs on the house graphic and offers to attach one; offline turns the dot
  * and hairline ruby; an auto-closed session turns graphite with Reopen.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { Gym, Workout } from '../types';
 import { attachGymToWorkout, workoutSets, workoutVolumeKg } from '../store';
 import { fmtSessionClock, fmtTonnes, useT } from '../i18n';
@@ -22,6 +22,7 @@ export function LiveHero({
   queued,
   onResume,
   mode = 'compact',
+  actions,
 }: {
   workout: Workout;
   gym: Gym | null;
@@ -30,6 +31,8 @@ export function LiveHero({
   queued: number;
   onResume?: () => void;
   mode?: 'today' | 'session' | 'compact';
+  /** Extra buttons (e.g. Finish) rendered in the hero action row. */
+  actions?: ReactNode;
 }) {
   const { t } = useT();
   const [now, setNow] = useState(() => Date.now());
@@ -43,12 +46,24 @@ export function LiveHero({
   }, [closed]);
 
   const elapsed = (workout.finishedAt ?? now) - workout.startedAt;
+  const sets = workoutSets(workout);
+  const volume = fmtTonnes(workoutVolumeKg(workout));
   const state = closed ? 'closed' : offline ? 'offline' : 'live';
   const label = closed
     ? t.liveClosedAuto
-    : offline
-      ? `${t.liveLabel} · ${t.liveOfflineQueued(queued)}`
-      : `${t.liveLabel} · ${gym ? gym.name : t.liveNoGym}`;
+    : mode === 'session'
+      ? offline
+        ? `${t.inSession} · ${t.liveOfflineQueued(queued)}`
+        : gym
+          ? t.inSessionAt(gym.name)
+          : t.inSession
+      : offline
+        ? `${t.liveLabel} · ${t.liveOfflineQueued(queued)}`
+        : `${t.liveLabel} · ${gym ? gym.name : t.liveNoGym}`;
+  const meta =
+    mode === 'session'
+      ? `${sets} ${t.sets} · ${volume} · ${workout.exercises.length} ${t.exercises}`
+      : `${sets} · ${volume}`;
   const interactive = mode !== 'session' && !!onResume;
   const body = (
     <>
@@ -58,9 +73,7 @@ export function LiveHero({
       </div>
       <div className="live-hero-stats">
         <span className="live-timer">{fmtSessionClock(elapsed)}</span>
-        <span className="live-meta">
-          {workoutSets(workout)} · {fmtTonnes(workoutVolumeKg(workout))}
-        </span>
+        <span className="live-meta">{meta}</span>
       </div>
     </>
   );
@@ -94,6 +107,7 @@ export function LiveHero({
             {closed ? t.liveReopen : t.liveResume}
           </button>
         )}
+        {actions}
       </div>
       {picker && (
         <GymPicker

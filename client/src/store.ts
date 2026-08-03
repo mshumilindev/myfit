@@ -8,6 +8,7 @@ import {
   type Reminder,
   type SetEntry,
   type SyncStatus,
+  type SyncError,
   type Workout,
 } from './types';
 import { HttpError, getToken, request } from './api';
@@ -23,6 +24,7 @@ export interface StoreState {
   reminders: Reminder[];
   queue: QueuedMutation[];
   syncStatus: SyncStatus;
+  syncError: SyncError | null;
   lastSyncAt: number | null;
 }
 
@@ -41,6 +43,7 @@ let state: StoreState = {
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   queue: load<QueuedMutation[]>(QUEUE_KEY, []),
   syncStatus: 'pending',
+  syncError: null,
   lastSyncAt: null,
 };
 
@@ -153,6 +156,7 @@ export function getOpenWorkout(): Workout | undefined {
 }
 
 function bumpPending(): SyncStatus {
+  if (state.syncStatus === 'failed') return 'failed';
   return navigator.onLine ? 'pending' : 'offline';
 }
 
@@ -573,12 +577,18 @@ export async function sync(): Promise<void> {
         await request(item.method, item.url, item.body);
       } catch (err) {
         if (err instanceof HttpError && err.status !== 401) {
-          // Permanent rejection (bad payload etc.) — drop so the queue
-          // doesn't get poisoned; the refetch below will restore truth.
-          console.warn('sync: dropping rejected mutation', item, err.message);
-        } else {
-          throw err; // network error or 401 — stop, keep the queue
+          // Permanent rejection: halt the queue rather than skip, and surface
+          // the blocking change with its raw status line (AC-SYNC-02, AC-SYNC-05).
+          setState({
+            syncStatus: 'failed',
+            syncError: {
+              status: err.status,
+              statusLine: `${item.method} ${item.url} → ${err.status} ${err.message}`.trim(),
+            },
+          });
+          return;
         }
+        throw err; // network error or 401 — stop, keep the queue
       }
       setState({ queue: state.queue.slice(1) });
     }
@@ -593,6 +603,7 @@ export async function sync(): Promise<void> {
       reminders: data.reminders ?? [],
       syncStatus: 'synced',
       lastSyncAt: Date.now(),
+      syncError: null,
     });
   } catch {
     setState({
@@ -606,6 +617,23 @@ export async function sync(): Promise<void> {
   } finally {
     syncing = false;
   }
+}
+
+/** Retry a queue blocked by a permanent rejection (AC-SYNC-05). */
+export function retrySync(): void {
+  setState({ syncStatus: navigator.onLine ? 'pending' : 'offline', syncError: null });
+  void sync();
+}
+
+/** Drop the change blocking the queue and resume (AC-SYNC-05). */
+export function discardBlockingChange(): void {
+  if (state.queue.length === 0) return;
+  setState({
+    queue: state.queue.slice(1),
+    syncStatus: navigator.onLine ? 'pending' : 'offline',
+    syncError: null,
+  });
+  void sync();
 }
 
 export function startSyncLoop(): () => void {
@@ -902,6 +930,7 @@ export function resetLocalData(): void {
     reminders: [],
     queue: [],
     syncStatus: 'pending',
+    syncError: null,
     lastSyncAt: null,
   };
   emit();

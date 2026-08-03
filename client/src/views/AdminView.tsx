@@ -126,11 +126,11 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           text: t.stInviteSent(Math.max(0, Math.ceil((p.invite.expiresAt - now) / DAY))),
           cls: 'muted',
         };
-      if (p.invite.state === 'expired') return { text: t.stInviteExpired, cls: 'danger' };
-      if (p.invite.state === 'revoked') return { text: t.stInviteRevoked, cls: 'danger' };
+      if (p.invite.state === 'expired') return { text: t.stInviteExpired, cls: 'muted' };
+      if (p.invite.state === 'revoked') return { text: t.stInviteRevoked, cls: 'muted' };
     }
     if (p.lastSessionAt && now - p.lastSessionAt > 30 * DAY)
-      return { text: t.stDormant(Math.floor((now - p.lastSessionAt) / DAY)), cls: 'danger' };
+      return { text: t.stDormant(Math.floor((now - p.lastSessionAt) / DAY)), cls: 'muted' };
     return { text: t.stActive, cls: '' };
   }
 
@@ -150,13 +150,10 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <div className="kicker">{t.roleAdmin}</div>
-          <h1 className="title-26">{t.adminPeople}</h1>
+          <h2 className="title-26">{t.adminPeople}</h2>
           <div className="sub">{t.adminSummary(members, trainers.length, pending)}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button className="btn btn-secondary" onClick={() => setCreating('trainer')}>
-            {t.adminNewTrainer}
-          </button>
           <button className="btn btn-primary" onClick={() => setCreating('member')}>
             <Icon name="plus" /> {t.adminNewMember}
           </button>
@@ -209,7 +206,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
       {load === 'failed' && (
         <div className="empty">
           <Icon name="warning-circle" />
-          <div className="t">{t.error}</div>
+          <h4 className="t">{t.error}</h4>
           <button className="btn btn-secondary" onClick={() => refresh()}>
             {t.retry}
           </button>
@@ -218,21 +215,27 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
 
       {load === 'ready' && people.length <= 1 && (
         <div className="empty">
-          <Icon name="map-pin" />
-          <div className="t">{t.adminEmptyTitle}</div>
-          <div className="s">{t.adminEmptyBody}</div>
+          <Icon name="users-three" />
+          <h4 className="t">{t.adminEmptyTitle}</h4>
+          <p className="s">{t.adminEmptyBody}</p>
           <button className="btn btn-primary" onClick={() => setCreating('member')}>
             <Icon name="plus" /> {t.adminNewMember}
           </button>
         </div>
       )}
 
-      {load === 'ready' && me && (
+      {load === 'ready' && people.length > 1 && me && (
         <div
           className="admin-me-card"
           role="button"
           tabIndex={0}
           onClick={() => onOpenProfile(me.id)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onOpenProfile(me.id);
+            }
+          }}
         >
           <Avatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
           <div className="who">
@@ -270,6 +273,12 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 role="button"
                 tabIndex={0}
                 onClick={() => onOpenProfile(p.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onOpenProfile(p.id);
+                  }
+                }}
               >
                 <div className="who">
                   <Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
@@ -342,7 +351,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         </div>
       )}
 
-      {load === 'ready' && (
+      {load === 'ready' && people.length > 1 && (
         <div className="admin-foot-note">
           <Icon name="shield-check" />
           <span>{t.adminOnlyNote}</span>
@@ -549,6 +558,7 @@ function NewPersonDialog(props: {
   onCreated: (p: Person, token: string, expiresAt: number) => void;
 }) {
   const { t } = useT();
+  const [role, setRole] = useState<Person['role']>(props.kind);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
@@ -560,7 +570,7 @@ function NewPersonDialog(props: {
   return (
     <Sheet onClose={props.onClose}>
       <div className="sheet-head">
-        <span className="t">{props.kind === 'member' ? t.adminNewMember : t.adminNewTrainer}</span>
+        <span className="t">{t.adminNewMember}</span>
       </div>
       <input
         className="input"
@@ -587,7 +597,33 @@ function NewPersonDialog(props: {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      {props.kind === 'member' && props.trainers.length > 0 && (
+      <div className="admin-role-field">
+        <div className="field-label">{t.adminColRole}</div>
+        <div className="admin-role-options">
+          {(
+            [
+              ['member', t.roleMember, t.adminMemberRoleHint, 'user'],
+              ['trainer', t.roleTrainer, t.adminTrainerRoleHint, 'user-focus'],
+              ['admin', t.roleAdmin, t.adminAdminRoleHint, 'shield-check'],
+            ] as Array<[Person['role'], string, string, Parameters<typeof Icon>[0]['name']]>
+          ).map(([id, label, hint, icon]) => (
+            <button
+              key={id}
+              className={`admin-role-card${role === id ? ' selected' : ''}`}
+              type="button"
+              onClick={() => setRole(id)}
+            >
+              <Icon name={icon} />
+              <span className="body">
+                <span className="n">{label}</span>
+                <span className="s">{hint}</span>
+              </span>
+              {role === id && <Icon name="check-circle" weight="fill" />}
+            </button>
+          ))}
+        </div>
+      </div>
+      {role === 'member' && props.trainers.length > 0 && (
         <div className="assign-list">
           <div className="field-label">{t.adminAssignedTrainer}</div>
           <button
@@ -645,8 +681,8 @@ function NewPersonDialog(props: {
                 lastName: lastName.trim(),
                 username: username.trim(),
                 email: email.trim(),
-                trainerId,
-                role: props.kind,
+                trainerId: role === 'member' ? trainerId : null,
+                role,
               });
               props.onCreated(r.person, r.invite.token, r.invite.expires_at);
             } catch (e) {
@@ -698,6 +734,7 @@ function LinkDialog(props: {
           <Icon name="copy" /> {copied ? t.adminCopied : t.adminCopy}
         </button>
         <button className="btn btn-secondary" onClick={() => setShowQr((x) => !x)}>
+          <Icon name="qr-code" />
           {t.adminQr}
         </button>
       </div>

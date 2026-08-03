@@ -98,6 +98,15 @@ export const et: Strings = {
   repeat: (name) => `Korda ${name}`,
   autoClosed: 'Auto-suletud',
   weekDayLetters: ['E', 'T', 'K', 'N', 'R', 'L', 'P'],
+  weekDayNames: [
+    'Esmaspäev',
+    'Teisipäev',
+    'Kolmapäev',
+    'Neljapäev',
+    'Reede',
+    'Laupäev',
+    'Pühapäev',
+  ],
 
   // Today · desktop 3-column (W-04/W-05)
   restSinceLast: 'Viimasest seeriast',
@@ -281,6 +290,11 @@ export const et: Strings = {
   myGyms: 'Minu jõusaalid',
   nearbyGyms: 'Lähedal',
   nearbyQuery: 'jõusaal',
+  navMe: 'Mina',
+  profileTrainerPriv: 'Treeneri õigused',
+  profileTrainerPrivHint: 'Annab juurdepääsu määratud klientidele ja programmide loomisele.',
+  trReadonlyBar: 'Näed kliendi andmeid, kuid ei saa muuta tema salvestatut.',
+  trAssignProgram: 'Määra programm',
   searchGymEmpty: 'Midagi ei leitud — lisa käsitsi allpool',
   addManually: 'Lisa käsitsi',
   pickGymTitle: 'Kus sa treenid?',
@@ -379,7 +393,7 @@ export const et: Strings = {
   roleMember: 'Liige',
   roleTrainer: 'Treener',
   roleAdmin: 'Administraator',
-  adminPeople: 'Inimesed',
+  adminPeople: 'Kasutajad',
   adminSummary: (m, tr, p) => `${m} liiget · ${tr} treenerit · ${p} kutset ootel`,
   adminNewMember: 'Uus liige',
   adminNewTrainer: 'Lisa treener',
@@ -394,6 +408,9 @@ export const et: Strings = {
   adminColLast: 'Viimane treening',
   adminColVol: '30 päeva maht',
   adminColStatus: 'Olek',
+  adminMemberRoleHint: 'Treenib. Näeb ainult enda andmeid.',
+  adminTrainerRoleHint: 'Treenib ja loeb kliente, kelle määrad.',
+  adminAdminRoleHint: 'Täisjuurdepääs, kaasa arvatud sinu konto.',
   stTrainingNow: 'Treenib praegu',
   stActive: 'Aktiivne',
   stDormant: (d) => `Passiivne · ${d} p`,
@@ -453,6 +470,7 @@ export const et: Strings = {
   adminPerWeek: 'Nädalas',
   adminRecent: 'Viimased treeningud',
   trMyClients: 'Minu kliendid',
+  trClientsTab: 'Kliendid',
   trSummary: (n, live) => `${n} määratud · ${live} treenib praegu`,
   trReadOnly: (n) =>
     `Ainult lugemiseks — vaatad kasutaja ${n} andmeid tema treenerina. Siin ei saa midagi muuta ja ta näeb, et profiil avati.`,
@@ -462,6 +480,13 @@ export const et: Strings = {
   trEmptyTitle: 'Kliente pole veel määratud',
   trEmptyBody:
     'Administraator otsustab, keda sa treenid. Kui keegi määratakse, ilmub ta siia kogu ajalooga — sina ei pea midagi tegema.',
+  trFooterNote: 'Kliendid määrab administraator — teisi inimesi ei saa otsida.',
+  trWeekAcrossClients: 'See nädal sinu klientide lõikes',
+  trClient: 'Klient',
+  trVsLastWeek: 'võrreldes eelmise nädalaga',
+  trLastSeen: 'Viimati nähtud',
+  trLiveNow: 'Praegu otse',
+  trLiveReadOnly: 'Uueneb otse · sa ei saa seda muuta',
   trLostAccess: (n) => `${n} ei ole enam sinu klient.`,
   trNotes: 'Sinu märkmed',
   trAddNote: 'Lisa märge',
@@ -486,6 +511,9 @@ export const et: Strings = {
   profileAvatarRemoved: 'Foto eemaldatud',
   profileAvatarType: 'Kasuta JPEG, PNG või WebP pilti.',
   profileAvatarTooBig: 'Pilt peab olema kuni 10 MB.',
+  profileSettings: 'Seaded',
+  profileUnits: 'Ühikud',
+  profileUnitsKg: 'kg',
   profileSecurity: 'Turvalisus',
   profilePasswordBody:
     'Muuda parooli praeguse parooliga. Administraatorid ja treenerid seda ei näe.',
@@ -532,19 +560,39 @@ export const et: Strings = {
   progTitle: 'Programmid',
   progNew: 'Uus programm',
   progName: 'Programmi nimi',
+  progNameHeader: 'Programmi pealkiri',
   progWeeks: 'Nädalad',
   progDaysPerWeek: 'Seansse nädalas',
   progDay: (n) => `${n}. päev`,
   progAddItem: 'Lisa harjutus',
+  progAddItemToDay: (day) => `Lisa harjutus päevale ${day}`,
   progAssignTo: (n) => `Määra: ${n}`,
   progWeekN: (n) => `${n}. nädal`,
-  progSessions: (d, t) => `${d}/${t} seanssi`,
+  progSessions: (d, t) => (t > 0 ? `${d}/${t} seanssi` : `${d} seanssi`),
   progAdherence: 'Programmi järgimine',
   progStart: (n) => `Alusta ${n}. päeva`,
   progAssignedBy: (n) => `Määras ${n}`,
   progNone: 'Programmi pole määratud',
   progRemove: 'Eemalda programm',
   progEmpty: 'Programme pole veel — loo üks ja määra kliendile.',
+  progSearchPrograms: 'Otsi programme',
+  progNoSearchResults: 'Sobivaid programme ei leitud.',
+  progDuplicate: 'Duplikeeri',
+  progDuplicateName: (name) => `${name} koopia`,
+  progWeeksCount: (n) => `${n} nädalat`,
+  progWeeksWord: () => 'nädalat',
+  progDaysCount: (n) => `${n} päeva nädalas`,
+  progDaysAWeekWord: () => 'päeva nädalas',
+  progWeekShort: (n) => (n === 1 ? 'ndl 1' : `${n}. nädal`),
+  progAssignedMembers: (n) => `määratud ${n} liikmele`,
+  progCreatedBy: (name) => `lõi ${name}`,
+  progSelectedDayTitle: (n) => `${n}. päev`,
+  progDayLine: (weekday, day) => `${weekday} · ${day}`,
+  progDayWorkoutSummary: (exercises, sets) => `${exercises} harjutust · ${sets} seeriat`,
+  progNoWeightNote:
+    'Raskuse veergu ei ole meelega. Programm kirjeldab tööd; seanss võtab koormuse iga liikme ajaloost, nii sobib üks programm eri liikmetele.',
+  csvExportProgram: 'Ekspordi programm',
+  exerciseLabel: 'Harjutus',
   progMemberEmpty: 'Pane oma nädal kokku või oota treeneri programmi.',
   progNoItems: 'Sellel päeval pole veel harjutusi.',
   progSets: 'Seeriad',
@@ -553,11 +601,108 @@ export const et: Strings = {
   progAssignClient: 'Vali klient',
   progNoClients: 'Kliente pole',
   progAssign: 'Määra',
+  progStatusDraft: 'Mustand',
+  progStatusActive: 'Aktiivne',
+  progStatusArchived: 'Arhiveeritud',
+  progStatusMine: 'Minu',
+  progEditPlan: 'Muuda plaani',
+  progRoutePlanWeek: 'Planeeri nädal',
+  progRoutePlanWeekBody: 'Sea seitse päeva korraga — sobib ühe treeningbloki jaoks.',
+  progRouteBuild: 'Ehita programm',
+  progRouteBuildBody:
+    'Mitu nädalat päevade, seeriate ja kordustega, mida saab taaskasutada ja aktiveerida.',
+  progRouteWait: 'Oota treenerit',
+  progRouteWaitBody:
+    'Kui sulle on määratud treener, ilmub tema koostatud programm siia automaatselt.',
+  progNoEndDate: 'Lõppkuupäevata',
+  progOpenEnded: 'Jätkuv',
+  trStat7Days: 'Viimased 7 päeva',
+  progDayNamePlaceholder: 'Päeva nimi (valikuline)',
+  progBackfill: 'Täienda',
+  progNoticeFinished: 'Programm on läbi — tubli töö.',
+  progNoticeWeekComplete: (week) => `${week}. nädal on täidetud.`,
+  progNoticeMissed: (n) =>
+    n === 1
+      ? '1 päev vahele jäänud — täienda see allpool.'
+      : `${n} päeva vahele jäänud — täienda need allpool.`,
+  noticeText: (kind, actor, detail) => {
+    switch (kind) {
+      case 'program-assigned':
+        return `${actor ?? 'Treener'} määras sulle programmi „${detail}”.`;
+      case 'program-replaced':
+        return `${actor ?? 'Treener'} asendas su aktiivse programmi programmiga „${detail}”.`;
+      case 'role-changed':
+        return `Sinu roll muudeti: ${detail}.`;
+      case 'trainer-assigned':
+        return `${detail} on nüüd sinu treener.`;
+      case 'trainer-removed':
+        return 'Sinu treener eemaldati.';
+      case 'client-assigned':
+        return `${detail} määrati sulle kliendiks.`;
+      case 'client-removed':
+        return `${detail} ei ole enam sinu klient.`;
+      default:
+        return 'Sul on uus teade.';
+    }
+  },
+  syncBlockedTitle: 'Sünkroonimine on peatunud',
+  syncBlockedBody:
+    'Üks muudatus lükati tagasi, seega järgnevad ei sünkroonita. Proovi uuesti või loobu sellest muudatusest, et ülejäänud läbi lasta.',
+  syncDiscard: 'Loobu muudatusest',
+  assignSearchMembers: 'Otsi liikmeid',
+  assignTitle: (program) => `Määra „${program}“`,
+  assignIntro:
+    'Määramine asendab liikme aktiivse programmi. Treeninguajalugu jääb alles ja plaaniväliseid treeninguid saab endiselt alustada.',
+  assignStartWeek: 'Alustusnädal',
+  assignStartPoint: (week, weekday) => `Algab ${weekday}, programmi ${week}. nädalast.`,
+  assignReplaceWarn:
+    'Iga liikme praegune aktiivne programm asendatakse. Logitud ajalugu jääb puutumata.',
+  assignClientHint: 'sinu klient · aktiivne programm asendatakse',
+  assignConfirmN: (n) => (n === 1 ? 'Määra' : `Määra ${n}-le`),
+  csvImport: 'Impordi CSV',
+  csvExport: 'Ekspordi CSV',
+  csvTemplate: 'Laadi mall alla',
+  csvColumns:
+    'Veerud: Päev, Harjutus, Tüüp, Seeriad, Kordused, Kestus, Varustus. Raskuse veerg jäetakse vahele.',
+  csvChooseFile: 'Vali CSV-fail',
+  csvOrPaste: 'või kleebi CSV',
+  csvMapBody:
+    'Seosta iga veerg väljaga. Leitud raskuse veerg jäetakse kõrvale — programmid ei kanna raskust.',
+  csvContinue: 'Edasi',
+  csvBack: 'Tagasi',
+  csvWeightDiscarded: 'Raskuse veerg leiti ja jäeti kõrvale. Programmid ei kanna raskust.',
+  csvNoRows: 'Ridu ei leitud — kontrolli, et failil on päis ja vähemalt üks rida.',
+  csvShape: (rows, days) => `${rows} rida · ${days} päeva`,
+  csvValidCount: (valid, problems) => `${valid} valmis · ${problems} vajab tähelepanu`,
+  csvImportN: (n) => `Impordi ${n} rida`,
+  csvUseSuggestion: (name) => `Kasuta „${name}”`,
+  csvFields: {
+    ignore: 'Eira',
+    day: 'Päev',
+    name: 'Harjutus',
+    kind: 'Tüüp',
+    sets: 'Seeriad',
+    reps: 'Kordused',
+    setsReps: 'Seeriad × kordused',
+    duration: 'Kestus',
+    equipment: 'Varustus',
+    weight: 'Raskus (kõrvale)',
+  },
+  csvProblems: {
+    'missing-name': 'Harjutuse nimi puudub',
+    'missing-reps': 'Kordused puuduvad',
+    'bad-day': 'Päev peab olema 1–7',
+    'unknown-equipment': 'Tundmatu varustus',
+    'unmatched-exercise': 'Tundmatu harjutus',
+  },
+  progActivate: 'Aktiveeri',
+  progArchive: 'Arhiveeri',
   progWeekStrip: 'Programmi nädal',
   progPrescriptionRule: 'Ettekirjutus on seeriad, kordused ja varustus. Raskus tuleb ajaloost.',
   progCopyDay: 'Kopeeri päev kohta',
   progCopyChoose: 'Vali päev',
   progEquipment: 'Varustus',
+  progRestShort: 'Puhkus',
   progRestDay: 'Puhkepäev',
   progPlanProgress: 'Plaani edenemine',
   progSetsDone: (done, total) => `${done} / ${total} seeriat`,

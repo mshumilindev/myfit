@@ -13,53 +13,66 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ArrowClockwise,
-  ArrowCounterClockwise,
-  ArrowRight,
-  ArrowUpRight,
-  ArrowsClockwise,
-  Barbell,
-  CalendarBlank,
-  Camera,
-  CaretLeft,
-  Carrot,
-  ChartLine,
-  ChartLineUp,
-  CheckCircle,
-  Clock,
-  ClockCountdown,
-  CloudSlash,
-  Copy,
-  Crosshair,
-  DotsSixVertical,
-  DotsThreeVertical,
-  Eraser,
-  Flame,
-  Globe,
-  House,
-  ImageSquare,
-  Info,
-  ListPlus,
-  MagnifyingGlass,
-  MapPin,
-  MapPinLine,
-  PencilSimple,
-  Phone,
-  Play,
-  Plus,
-  Robot,
-  ShieldCheck,
-  Star,
-  SquaresFour,
-  Timer,
-  Trash,
-  Trophy,
-  User,
-  WarningCircle,
-  X,
-  type IconProps,
-} from '@phosphor-icons/react';
+import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
+import { ArrowCounterClockwise } from '@phosphor-icons/react/ArrowCounterClockwise';
+import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
+import { ArrowUpRight } from '@phosphor-icons/react/ArrowUpRight';
+import { ArrowsClockwise } from '@phosphor-icons/react/ArrowsClockwise';
+import { Archive } from '@phosphor-icons/react/Archive';
+import { Barbell } from '@phosphor-icons/react/Barbell';
+import { CalendarBlank } from '@phosphor-icons/react/CalendarBlank';
+import { Camera } from '@phosphor-icons/react/Camera';
+import { Cards } from '@phosphor-icons/react/Cards';
+import { CaretLeft } from '@phosphor-icons/react/CaretLeft';
+import { CaretRight } from '@phosphor-icons/react/CaretRight';
+import { Carrot } from '@phosphor-icons/react/Carrot';
+import { ChartLine } from '@phosphor-icons/react/ChartLine';
+import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
+import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
+import { Clock } from '@phosphor-icons/react/Clock';
+import { ClockCountdown } from '@phosphor-icons/react/ClockCountdown';
+import { CloudSlash } from '@phosphor-icons/react/CloudSlash';
+import { Copy } from '@phosphor-icons/react/Copy';
+import { Crosshair } from '@phosphor-icons/react/Crosshair';
+import { DotsSixVertical } from '@phosphor-icons/react/DotsSixVertical';
+import { DotsThree } from '@phosphor-icons/react/DotsThree';
+import { DotsThreeVertical } from '@phosphor-icons/react/DotsThreeVertical';
+import { DownloadSimple } from '@phosphor-icons/react/DownloadSimple';
+import { Eraser } from '@phosphor-icons/react/Eraser';
+import { Envelope } from '@phosphor-icons/react/Envelope';
+import { Eye } from '@phosphor-icons/react/Eye';
+import { Flame } from '@phosphor-icons/react/Flame';
+import { Globe } from '@phosphor-icons/react/Globe';
+import { House } from '@phosphor-icons/react/House';
+import { ImageSquare } from '@phosphor-icons/react/ImageSquare';
+import { Info } from '@phosphor-icons/react/Info';
+import { Key } from '@phosphor-icons/react/Key';
+import { ListChecks } from '@phosphor-icons/react/ListChecks';
+import { ListPlus } from '@phosphor-icons/react/ListPlus';
+import { LockSimple } from '@phosphor-icons/react/LockSimple';
+import { MagnifyingGlass } from '@phosphor-icons/react/MagnifyingGlass';
+import { MapPin } from '@phosphor-icons/react/MapPin';
+import { MapPinLine } from '@phosphor-icons/react/MapPinLine';
+import { PencilSimple } from '@phosphor-icons/react/PencilSimple';
+import { Phone } from '@phosphor-icons/react/Phone';
+import { Play } from '@phosphor-icons/react/Play';
+import { Plus } from '@phosphor-icons/react/Plus';
+import { QrCode } from '@phosphor-icons/react/QrCode';
+import { Robot } from '@phosphor-icons/react/Robot';
+import { Scales } from '@phosphor-icons/react/Scales';
+import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
+import { SignOut } from '@phosphor-icons/react/SignOut';
+import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
+import { Star } from '@phosphor-icons/react/Star';
+import { Timer } from '@phosphor-icons/react/Timer';
+import { Trash } from '@phosphor-icons/react/Trash';
+import { Trophy } from '@phosphor-icons/react/Trophy';
+import { UploadSimple } from '@phosphor-icons/react/UploadSimple';
+import { User } from '@phosphor-icons/react/User';
+import { UserFocus } from '@phosphor-icons/react/UserFocus';
+import { WarningCircle } from '@phosphor-icons/react/WarningCircle';
+import { X } from '@phosphor-icons/react/X';
+import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
 
 /**
@@ -74,10 +87,12 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrow-right': ArrowRight,
   'arrow-up-right': ArrowUpRight,
   'arrows-clockwise': ArrowsClockwise,
+  archive: Archive,
   barbell: Barbell,
   'calendar-blank': CalendarBlank,
   camera: Camera,
   'caret-left': CaretLeft,
+  'caret-right': CaretRight,
   carrot: Carrot,
   'chart-line': ChartLine,
   'chart-line-up': ChartLineUp,
@@ -88,14 +103,21 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   copy: Copy,
   crosshair: Crosshair,
   'dots-six': DotsSixVertical,
+  'dots-three': DotsThree,
   'dots-three-vertical': DotsThreeVertical,
   eraser: Eraser,
+  envelope: Envelope,
+  eye: Eye,
   flame: Flame,
   globe: Globe,
   house: House,
   'image-square': ImageSquare,
   info: Info,
+  key: Key,
+  cards: Cards,
+  'list-checks': ListChecks,
   'list-plus': ListPlus,
+  'lock-simple': LockSimple,
   'magnifying-glass': MagnifyingGlass,
   'map-pin': MapPin,
   'map-pin-slash': MapPinLine,
@@ -103,14 +125,20 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   phone: Phone,
   play: Play,
   plus: Plus,
+  'qr-code': QrCode,
   robot: Robot,
+  scales: Scales,
   'shield-check': ShieldCheck,
+  'sign-out': SignOut,
   star: Star,
   'squares-four': SquaresFour,
   timer: Timer,
   trash: Trash,
   trophy: Trophy,
   user: User,
+  'user-focus': UserFocus,
+  'download-simple': DownloadSimple,
+  'upload-simple': UploadSimple,
   'warning-circle': WarningCircle,
   x: X,
 };
@@ -160,6 +188,7 @@ function activeAnchor(): HTMLElement | null {
 function useFixedPanelPosition(
   kind: 'sheet' | 'popover',
   anchorRef?: RefObject<HTMLElement | null>,
+  preferredWidth?: number,
 ): CSSProperties {
   const [anchor] = useState(activeAnchor);
   const [style, setStyle] = useState<CSSProperties>({});
@@ -177,7 +206,7 @@ function useFixedPanelPosition(
       const viewportW = window.innerWidth;
       const viewportH = window.innerHeight;
       const gutter = kind === 'sheet' ? 0 : 8;
-      const preferredW = kind === 'sheet' ? 430 : 176;
+      const preferredW = preferredWidth ?? (kind === 'sheet' ? 430 : 176);
       const width = Math.min(preferredW, viewportW - Math.max(gutter * 2, 36));
       const minPanelH = kind === 'sheet' ? 320 : 220;
       const target = anchorRef?.current ?? anchor;
@@ -210,7 +239,7 @@ function useFixedPanelPosition(
       window.removeEventListener('resize', place);
       window.removeEventListener('scroll', place, true);
     };
-  }, [anchor, anchorRef, kind]);
+  }, [anchor, anchorRef, kind, preferredWidth]);
 
   return style;
 }
@@ -290,7 +319,11 @@ export function Sheet(props: {
   className?: string;
 }) {
   const { t } = useT();
-  const style = useFixedPanelPosition('sheet');
+  const style = useFixedPanelPosition(
+    'sheet',
+    undefined,
+    props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
+  );
   return (
     <Portal>
       <div className="scrim" onClick={props.onClose} />
@@ -451,8 +484,8 @@ export function EmptyState(props: {
   return (
     <div className="empty">
       <Icon name={props.icon} />
-      <div className="t">{props.title}</div>
-      <div className="s">{props.body}</div>
+      <h4 className="t">{props.title}</h4>
+      <p className="s">{props.body}</p>
       {props.children}
     </div>
   );

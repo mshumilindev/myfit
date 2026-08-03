@@ -110,6 +110,7 @@ export const pl: Strings = {
   repeat: (name) => `Powtórz ${name}`,
   autoClosed: 'Auto-zamknięty',
   weekDayLetters: ['P', 'W', 'Ś', 'C', 'P', 'S', 'N'],
+  weekDayNames: ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'],
 
   // Today · desktop 3-column (W-04/W-05)
   restSinceLast: 'Od ostatniej serii',
@@ -293,6 +294,11 @@ export const pl: Strings = {
   myGyms: 'Moje siłownie',
   nearbyGyms: 'W pobliżu',
   nearbyQuery: 'siłownia',
+  navMe: 'Ja',
+  profileTrainerPriv: 'Uprawnienia trenera',
+  profileTrainerPrivHint: 'Daje dostęp do przypisanych klientów i tworzenia programów.',
+  trReadonlyBar: 'Możesz przeglądać dane klienta, ale nie edytować tego, co zapisał.',
+  trAssignProgram: 'Przypisz program',
   searchGymEmpty: 'Nic nie znaleziono — dodaj ręcznie poniżej',
   addManually: 'Dodaj ręcznie',
   pickGymTitle: 'Gdzie trenujesz?',
@@ -393,7 +399,7 @@ export const pl: Strings = {
   roleMember: 'Członek',
   roleTrainer: 'Trener',
   roleAdmin: 'Administrator',
-  adminPeople: 'Osoby',
+  adminPeople: 'Użytkownicy',
   adminSummary: (m, tr, p) => `${m} członków · ${tr} trenerów · ${p} oczekujących zaproszeń`,
   adminNewMember: 'Nowy członek',
   adminNewTrainer: 'Dodaj trenera',
@@ -408,6 +414,9 @@ export const pl: Strings = {
   adminColLast: 'Ostatnia sesja',
   adminColVol: 'Objętość z 30 dni',
   adminColStatus: 'Stan',
+  adminMemberRoleHint: 'Trenuje. Widzi tylko własne dane.',
+  adminTrainerRoleHint: 'Trenuje i czyta klientów, których przypiszesz.',
+  adminAdminRoleHint: 'Pełny dostęp, łącznie z twoim kontem.',
   stTrainingNow: 'Trenuje teraz',
   stActive: 'Aktywny',
   stDormant: (d) => `Nieaktywny · ${d} d`,
@@ -467,6 +476,7 @@ export const pl: Strings = {
   adminPerWeek: 'Tygodniowo',
   adminRecent: 'Ostatnie sesje',
   trMyClients: 'Moi klienci',
+  trClientsTab: 'Klienci',
   trSummary: (n, live) => `${n} przypisanych · ${live} trenuje teraz`,
   trReadOnly: (n) =>
     `Tylko odczyt — oglądasz dane ${n} jako trener. Niczego tutaj nie da się edytować, a klient widzi, że profil został otwarty.`,
@@ -476,6 +486,13 @@ export const pl: Strings = {
   trEmptyTitle: 'Nie przypisano jeszcze klientów',
   trEmptyBody:
     'Administrator decyduje, kogo prowadzisz. Gdy ktoś zostanie przypisany, pojawi się tutaj z pełną historią — nie musisz nic robić.',
+  trFooterNote: 'Klientów przydziela administrator — nie możesz szukać innych osób.',
+  trWeekAcrossClients: 'Ten tydzień u twoich klientów',
+  trClient: 'Klient',
+  trVsLastWeek: 'vs zeszły tydzień',
+  trLastSeen: 'Ostatnio widziany',
+  trLiveNow: 'Na żywo teraz',
+  trLiveReadOnly: 'Aktualizuje się na żywo · nie możesz tego edytować',
   trLostAccess: (n) => `${n} nie jest już twoim klientem.`,
   trNotes: 'Twoje notatki',
   trAddNote: 'Dodaj notatkę',
@@ -500,6 +517,9 @@ export const pl: Strings = {
   profileAvatarRemoved: 'Zdjęcie usunięte',
   profileAvatarType: 'Użyj obrazu JPEG, PNG albo WebP.',
   profileAvatarTooBig: 'Obraz musi mieć maksymalnie 10 MB.',
+  profileSettings: 'Ustawienia',
+  profileUnits: 'Jednostki',
+  profileUnitsKg: 'kg',
   profileSecurity: 'Bezpieczeństwo',
   profilePasswordBody: 'Zmień hasło, podając obecne. Administratorzy i trenerzy go nie widzą.',
   profilePasswordCurrent: 'Obecne hasło',
@@ -545,19 +565,40 @@ export const pl: Strings = {
   progTitle: 'Programy',
   progNew: 'Nowy program',
   progName: 'Nazwa programu',
+  progNameHeader: 'Tytuł programu',
   progWeeks: 'Tygodnie',
   progDaysPerWeek: 'Sesje tygodniowo',
   progDay: (n) => `Dzień ${n}`,
   progAddItem: 'Dodaj ćwiczenie',
+  progAddItemToDay: (day) => `Dodaj ćwiczenie do ${day}`,
   progAssignTo: (n) => `Przypisz do ${n}`,
   progWeekN: (n) => `Tydzień ${n}`,
-  progSessions: (d, t) => `${d} z ${t} sesji`,
+  progSessions: (d, t) => (t > 0 ? `${d} z ${t} sesji` : `${d} sesji`),
   progAdherence: 'Realizacja programu',
   progStart: (n) => `Zacznij dzień ${n}`,
   progAssignedBy: (n) => `Przypisał ${n}`,
   progNone: 'Brak przypisanego programu',
   progRemove: 'Usuń program',
   progEmpty: 'Nie ma jeszcze programów — utwórz jeden i przypisz klientowi.',
+  progSearchPrograms: 'Szukaj programów',
+  progNoSearchResults: 'Brak pasujących programów.',
+  progDuplicate: 'Duplikuj',
+  progDuplicateName: (name) => `${name} kopia`,
+  progWeeksCount: (n) => `${n} ${n === 1 ? 'tydzień' : 'tygodni'}`,
+  progWeeksWord: (n) => (n === 1 ? 'tydzień' : 'tygodni'),
+  progDaysCount: (n) => `${n} ${n === 1 ? 'dzień' : 'dni'} w tygodniu`,
+  progDaysAWeekWord: (n) => `${n === 1 ? 'dzień' : 'dni'} w tygodniu`,
+  progWeekShort: (n) => (n === 1 ? 'tydz. 1' : `tydzień ${n}`),
+  progAssignedMembers: (n) => `przypisano do ${n} ${n === 1 ? 'osoby' : 'osób'}`,
+  progCreatedBy: (name) => `utworzone przez ${name}`,
+  progSelectedDayTitle: (n) => `Dzień ${n}`,
+  progDayLine: (weekday, day) => `${weekday} · ${day}`,
+  progDayWorkoutSummary: (exercises, sets) =>
+    `${exercises} ${exercises === 1 ? 'ćwiczenie' : 'ćwiczenia'} · ${sets} ${sets === 1 ? 'seria' : 'serii'}`,
+  progNoWeightNote:
+    'Kolumny ciężaru nie ma celowo. Program opisuje pracę; sesja bierze obciążenie z historii każdej osoby, więc jeden program pasuje do różnych klientów.',
+  csvExportProgram: 'Eksportuj program',
+  exerciseLabel: 'Ćwiczenie',
   progMemberEmpty: 'Ułóż własny tydzień albo poczekaj na program od trenera.',
   progNoItems: 'Ten dzień nie ma jeszcze ćwiczeń.',
   progSets: 'Serie',
@@ -566,11 +607,107 @@ export const pl: Strings = {
   progAssignClient: 'Wybierz klienta',
   progNoClients: 'Brak klientów',
   progAssign: 'Przypisz',
+  progStatusDraft: 'Szkic',
+  progStatusActive: 'Aktywny',
+  progStatusArchived: 'Zarchiwizowany',
+  progStatusMine: 'Mój',
+  progEditPlan: 'Edytuj plan',
+  progRoutePlanWeek: 'Zaplanuj tydzień',
+  progRoutePlanWeekBody: 'Rozpisz siedem dni raz — dobre na pojedynczy blok treningowy.',
+  progRouteBuild: 'Zbuduj program',
+  progRouteBuildBody: 'Wiele tygodni z dniami, seriami i powtórzeniami, które można aktywować.',
+  progRouteWait: 'Poczekaj na trenera',
+  progRouteWaitBody:
+    'Jeśli masz przypisanego trenera, zbudowany przez niego program pojawi się tu automatycznie.',
+  progNoEndDate: 'Bez daty końca',
+  progOpenEnded: 'Bezterminowo',
+  trStat7Days: 'Ostatnie 7 dni',
+  progDayNamePlaceholder: 'Nazwa dnia (opcjonalnie)',
+  progBackfill: 'Uzupełnij',
+  progNoticeFinished: 'Program ukończony — dobra robota.',
+  progNoticeWeekComplete: (week) => `Tydzień ${week} ukończony.`,
+  progNoticeMissed: (n) =>
+    n === 1
+      ? 'Pominięto 1 dzień — uzupełnij go poniżej.'
+      : `Pominięto dni: ${n} — uzupełnij je poniżej.`,
+  noticeText: (kind, actor, detail) => {
+    switch (kind) {
+      case 'program-assigned':
+        return `${actor ?? 'Trener'} przypisał ci program „${detail}”.`;
+      case 'program-replaced':
+        return `${actor ?? 'Trener'} zastąpił twój aktywny program programem „${detail}”.`;
+      case 'role-changed':
+        return `Twoja rola została zmieniona na ${detail}.`;
+      case 'trainer-assigned':
+        return `${detail} jest teraz twoim trenerem.`;
+      case 'trainer-removed':
+        return 'Twój trener został odłączony.';
+      case 'client-assigned':
+        return `${detail} został przypisany do ciebie jako klient.`;
+      case 'client-removed':
+        return `${detail} nie jest już twoim klientem.`;
+      default:
+        return 'Masz nowe powiadomienie.';
+    }
+  },
+  syncBlockedTitle: 'Synchronizacja zablokowana',
+  syncBlockedBody:
+    'Jedna zmiana została odrzucona, więc kolejne nie mogą się zsynchronizować. Ponów próbę lub odrzuć tę zmianę, aby przepuścić resztę.',
+  syncDiscard: 'Odrzuć zmianę',
+  assignSearchMembers: 'Szukaj członków',
+  assignTitle: (program) => `Przypisz „${program}”`,
+  assignIntro:
+    'Przypisanie zastąpi aktywny program członka. Historia treningów pozostaje bez zmian, a sesje poza planem nadal są możliwe.',
+  assignStartWeek: 'Tydzień startu',
+  assignStartPoint: (week, weekday) => `Start w ${weekday}, od ${week}. tygodnia programu.`,
+  assignReplaceWarn:
+    'Bieżący aktywny program każdego członka zostanie zastąpiony. Zapisana historia pozostaje nienaruszona.',
+  assignClientHint: 'twój klient · aktywny program zostanie zastąpiony',
+  assignConfirmN: (n) => (n === 1 ? 'Przypisz' : `Przypisz do ${n}`),
+  csvImport: 'Importuj CSV',
+  csvExport: 'Eksportuj CSV',
+  csvTemplate: 'Pobierz szablon',
+  csvColumns:
+    'Kolumny: Dzień, Ćwiczenie, Typ, Serie, Powtórzenia, Czas, Sprzęt. Kolumna ciężaru jest ignorowana.',
+  csvChooseFile: 'Wybierz plik CSV',
+  csvOrPaste: 'lub wklej CSV',
+  csvMapBody:
+    'Dopasuj każdą kolumnę do pola. Wykryta kolumna ciężaru zostanie odrzucona — programy nie zawierają obciążenia.',
+  csvContinue: 'Dalej',
+  csvBack: 'Wstecz',
+  csvWeightDiscarded: 'Znaleziono i odrzucono kolumnę ciężaru. Programy nie zawierają obciążenia.',
+  csvNoRows: 'Nie znaleziono wierszy — sprawdź, czy plik ma nagłówek i co najmniej jeden wiersz.',
+  csvShape: (rows, days) => `${rows} wierszy · ${days} dni`,
+  csvValidCount: (valid, problems) => `${valid} gotowe · ${problems} wymaga uwagi`,
+  csvImportN: (n) => `Importuj ${n} wierszy`,
+  csvUseSuggestion: (name) => `Użyj „${name}”`,
+  csvFields: {
+    ignore: 'Ignoruj',
+    day: 'Dzień',
+    name: 'Ćwiczenie',
+    kind: 'Typ',
+    sets: 'Serie',
+    reps: 'Powtórzenia',
+    setsReps: 'Serie × powtórzenia',
+    duration: 'Czas',
+    equipment: 'Sprzęt',
+    weight: 'Ciężar (odrzucony)',
+  },
+  csvProblems: {
+    'missing-name': 'Brak nazwy ćwiczenia',
+    'missing-reps': 'Brak powtórzeń',
+    'bad-day': 'Dzień musi być 1–7',
+    'unknown-equipment': 'Nieznany sprzęt',
+    'unmatched-exercise': 'Nierozpoznane ćwiczenie',
+  },
+  progActivate: 'Aktywuj',
+  progArchive: 'Archiwizuj',
   progWeekStrip: 'Tydzień programu',
   progPrescriptionRule: 'Plan to serie, powtórzenia i sprzęt. Ciężar pochodzi z historii.',
   progCopyDay: 'Kopiuj dzień do',
   progCopyChoose: 'Wybierz dzień',
   progEquipment: 'Sprzęt',
+  progRestShort: 'Odpoczynek',
   progRestDay: 'Dzień odpoczynku',
   progPlanProgress: 'Postęp planu',
   progSetsDone: (done, total) => `${done} / ${total} serii`,

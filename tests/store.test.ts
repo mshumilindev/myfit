@@ -33,6 +33,8 @@ import {
   startWorkout,
   startSyncLoop,
   sync,
+  retrySync,
+  discardBlockingChange,
   toggleFavorite,
   topSet,
   upsertGym,
@@ -52,6 +54,7 @@ function state(patch: Partial<StoreState> = {}): StoreState {
     reminders: [],
     queue: [],
     syncStatus: 'pending',
+    syncError: null,
     lastSyncAt: null,
     ...patch,
   };
@@ -325,9 +328,8 @@ describe('F-04 Offline queue and sync', () => {
     expect(__getStateForTests().syncStatus).toBe('pending');
   });
 
-  it('drops permanently rejected queue items and still refetches server truth', async () => {
+  it('halts the queue and surfaces a permanent rejection (AC-SYNC-02, AC-SYNC-05)', async () => {
     setAuth('token', 'demo');
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     __replaceStateForTests(
       state({
         queue: [
@@ -338,33 +340,76 @@ describe('F-04 Offline queue and sync', () => {
             body: { startedAt: 'bad' },
             queuedAt: 1,
           },
+          { id: 'next', method: 'DELETE', url: '/api/tracker/workouts/next', queuedAt: 2 },
         ],
       }),
     );
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (url: string, init?: RequestInit) => {
+      vi.fn(async (_url: string, init?: RequestInit) => {
         if (init?.method === 'PUT') {
           return new Response(JSON.stringify({ error: 'bad payload' }), { status: 400 });
         }
-        if (url.endsWith('/api/tracker/state')) {
-          return new Response(JSON.stringify({ workouts: [], gyms: [], reminders: [] }), {
-            status: 200,
-          });
-        }
-        throw new Error('unexpected request');
+        throw new Error('queue should have halted before this request');
       }),
     );
 
     await sync();
 
-    expect(warn).toHaveBeenCalledWith(
-      'sync: dropping rejected mutation',
-      expect.objectContaining({ id: 'bad' }),
-      'bad payload',
+    // Halts at the blocking change rather than skipping it (AC-SYNC-02).
+    expect(__getStateForTests().queue.map((q) => q.id)).toEqual(['bad', 'next']);
+    expect(__getStateForTests().syncStatus).toBe('failed');
+    expect(__getStateForTests().syncError?.status).toBe(400);
+    expect(__getStateForTests().syncError?.statusLine).toContain('400');
+  });
+
+  it('discards the blocking change so the rest can replay (AC-SYNC-05)', () => {
+    setAuth('token', 'demo');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ workouts: [], gyms: [], reminders: [] }), { status: 200 }),
+      ),
     );
-    expect(__getStateForTests().queue).toEqual([]);
-    expect(__getStateForTests().syncStatus).toBe('synced');
+    __replaceStateForTests(
+      state({
+        syncStatus: 'failed',
+        syncError: { status: 400, statusLine: 'PUT /api/tracker/workouts/bad → 400 Bad Request' },
+        queue: [
+          { id: 'bad', method: 'PUT', url: '/api/tracker/workouts/bad', queuedAt: 1 },
+          { id: 'next', method: 'DELETE', url: '/api/tracker/workouts/next', queuedAt: 2 },
+        ],
+      }),
+    );
+
+    discardBlockingChange();
+
+    // The blocking change is dropped synchronously and the error is cleared.
+    expect(__getStateForTests().queue.map((q) => q.id)).toEqual(['next']);
+    expect(__getStateForTests().syncError).toBeNull();
+  });
+
+  it('retrySync clears the failed state before re-attempting (AC-SYNC-05)', () => {
+    setAuth('token', 'demo');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ workouts: [], gyms: [], reminders: [] }), { status: 200 }),
+      ),
+    );
+    __replaceStateForTests(
+      state({
+        syncStatus: 'failed',
+        syncError: { status: 409, statusLine: 'PUT /x → 409 Conflict' },
+        queue: [{ id: 'bad', method: 'PUT', url: '/api/tracker/workouts/bad', queuedAt: 1 }],
+      }),
+    );
+
+    retrySync();
+
+    expect(__getStateForTests().syncError).toBeNull();
   });
 });
 

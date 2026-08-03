@@ -300,6 +300,40 @@ describe('F-01 Auth', () => {
     expect((db.prepare('SELECT COUNT(*) AS n FROM audit_log').get() as { n: number }).n).toBe(1);
   });
 
+  it('lets admins create invited admins from the role field', async () => {
+    const admin = await register('owner', 'owner@example.com');
+    const created = await req<{
+      person: { id: string; role: string; status: string; trainerId: string | null };
+      invite: { token: string };
+    }>(
+      'POST',
+      '/api/admin/users',
+      {
+        firstName: 'Sofia',
+        lastName: 'Kravets',
+        username: 'sofia',
+        email: 'sofia@example.com',
+        role: 'admin',
+        trainerId: 'ignored-for-admin',
+      },
+      admin.token,
+    );
+
+    expect(created.status).toBe(200);
+    expect(created.data.person).toMatchObject({
+      role: 'admin',
+      status: 'invited',
+      trainerId: null,
+    });
+    expect(created.data.invite.token).toEqual(expect.any(String));
+    expect(
+      db.prepare('SELECT role, trainer_id FROM users WHERE id = ?').get(created.data.person.id) as {
+        role: string;
+        trainer_id: string | null;
+      },
+    ).toEqual({ role: 'admin', trainer_id: null });
+  });
+
   it('serves direct profile links only to the owner, an admin or the assigned trainer', async () => {
     const admin = await register('owner', 'owner@example.com');
     const member = await register('member', 'member@example.com');

@@ -103,6 +103,15 @@ export const en = {
   repeat: (name: string) => `Repeat ${name}`,
   autoClosed: 'Auto-closed',
   weekDayLetters: ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as string[],
+  weekDayNames: [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ] as string[],
 
   // Today · desktop 3-column (W-04/W-05)
   restSinceLast: 'Since last set',
@@ -292,6 +301,11 @@ export const en = {
   myGyms: 'My gyms',
   nearbyGyms: 'Nearby',
   nearbyQuery: 'gym',
+  navMe: 'Me',
+  profileTrainerPriv: 'Trainer privileges',
+  profileTrainerPrivHint: 'Grants access to assigned clients and program authoring.',
+  trReadonlyBar: "You can view this client's data but not edit what they logged.",
+  trAssignProgram: 'Assign a program',
   searchGymEmpty: 'Nothing found — add it manually below',
   addManually: 'Add manually',
   pickGymTitle: 'Where are you training?',
@@ -393,7 +407,7 @@ export const en = {
   roleMember: 'Member',
   roleTrainer: 'Trainer',
   roleAdmin: 'Admin',
-  adminPeople: 'People',
+  adminPeople: 'Users',
   adminSummary: (m: number, tr: number, p: number) =>
     `${m} members · ${tr} trainers · ${p} invites pending`,
   adminNewMember: 'New member',
@@ -409,6 +423,9 @@ export const en = {
   adminColLast: 'Last session',
   adminColVol: '30-day volume',
   adminColStatus: 'Status',
+  adminMemberRoleHint: 'Trains. Sees only their own data.',
+  adminTrainerRoleHint: 'Trains, and reads the clients you assign.',
+  adminAdminRoleHint: 'Everything, including your own account.',
   stTrainingNow: 'Training now',
   stActive: 'Active',
   stDormant: (d: number) => `Dormant · ${d} d`,
@@ -467,6 +484,7 @@ export const en = {
   adminPerWeek: 'Per week',
   adminRecent: 'Recent sessions',
   trMyClients: 'My clients',
+  trClientsTab: 'Clients',
   trSummary: (n: number, live: number) => `${n} assigned · ${live} training now`,
   trReadOnly: (n: string) =>
     `Read-only — you're viewing ${n}'s data as their trainer. Nothing here can be edited, and they can see that you looked.`,
@@ -476,6 +494,13 @@ export const en = {
   trEmptyTitle: 'No clients assigned yet',
   trEmptyBody:
     "An admin decides who you train. When someone is assigned they appear here with their full history — you don't need to do anything.",
+  trFooterNote: "An admin assigns your clients — you can't search for other people.",
+  trWeekAcrossClients: 'This week across your clients',
+  trClient: 'Client',
+  trVsLastWeek: 'vs last week',
+  trLastSeen: 'Last seen',
+  trLiveNow: 'Live right now',
+  trLiveReadOnly: 'Updating live · you cannot edit these',
   trLostAccess: (n: string) => `${n} is no longer your client.`,
   trNotes: 'Your notes',
   trAddNote: 'Add a note',
@@ -500,6 +525,9 @@ export const en = {
   profileAvatarRemoved: 'Photo removed',
   profileAvatarType: 'Use a JPEG, PNG or WebP image.',
   profileAvatarTooBig: 'The image must be 10 MB or smaller.',
+  profileSettings: 'Settings',
+  profileUnits: 'Units',
+  profileUnitsKg: 'kg',
   profileSecurity: 'Security',
   profilePasswordBody:
     'Change your password with your current password. Admins and trainers do not see it.',
@@ -546,19 +574,40 @@ export const en = {
   progTitle: 'Programs',
   progNew: 'New program',
   progName: 'Program name',
+  progNameHeader: 'Program title',
   progWeeks: 'Weeks',
   progDaysPerWeek: 'Sessions per week',
   progDay: (n: number) => `Day ${n}`,
   progAddItem: 'Add exercise',
+  progAddItemToDay: (day: string) => `Add exercise to ${day}`,
   progAssignTo: (n: string) => `Assign to ${n}`,
   progWeekN: (n: number) => `Week ${n}`,
-  progSessions: (d: number, t: number) => `${d} of ${t} sessions`,
+  progSessions: (d: number, t: number) => (t > 0 ? `${d} of ${t} sessions` : `${d} sessions`),
   progAdherence: 'Program adherence',
   progStart: (n: number) => `Start day ${n}`,
   progAssignedBy: (n: string) => `Assigned by ${n}`,
   progNone: 'No program assigned',
   progRemove: 'Remove program',
   progEmpty: 'No programs yet — create one and assign it to a client.',
+  progSearchPrograms: 'Search programs',
+  progNoSearchResults: 'No matching programs.',
+  progDuplicate: 'Duplicate',
+  progDuplicateName: (name: string) => `${name} copy`,
+  progWeeksCount: (n: number) => `${n} ${n === 1 ? 'week' : 'weeks'}`,
+  progWeeksWord: (n: number): string => (n === 1 ? 'week' : 'weeks'),
+  progDaysCount: (n: number) => `${n} ${n === 1 ? 'day' : 'days'} a week`,
+  progDaysAWeekWord: (n: number): string => `${n === 1 ? 'day' : 'days'} a week`,
+  progWeekShort: (n: number) => (n === 1 ? 'wk 1' : `week ${n}`),
+  progAssignedMembers: (n: number) => `assigned to ${n} ${n === 1 ? 'member' : 'members'}`,
+  progCreatedBy: (name: string) => `created by ${name}`,
+  progSelectedDayTitle: (n: number) => `Day ${n}`,
+  progDayLine: (weekday: string, day: string) => `${weekday} · ${day}`,
+  progDayWorkoutSummary: (exercises: number, sets: number) =>
+    `${exercises} ${exercises === 1 ? 'exercise' : 'exercises'} · ${sets} ${sets === 1 ? 'set' : 'sets'}`,
+  progNoWeightNote:
+    "There is no weight column, by design. A program describes work; the session supplies load from each member's own history, so one program fits every member.",
+  csvExportProgram: 'Export program',
+  exerciseLabel: 'Exercise',
   progMemberEmpty: 'Build your own week, or wait for a trainer to assign one.',
   progNoItems: 'No exercises on this day yet.',
   progSets: 'Sets',
@@ -567,11 +616,106 @@ export const en = {
   progAssignClient: 'Choose a client',
   progNoClients: 'No clients available',
   progAssign: 'Assign',
+  progStatusDraft: 'Draft',
+  progStatusActive: 'Active',
+  progStatusArchived: 'Archived',
+  progStatusMine: 'Mine',
+  progEditPlan: 'Edit plan',
+  progRoutePlanWeek: 'Plan a week',
+  progRoutePlanWeekBody: 'Lay out seven days once — good for a single training block.',
+  progRouteBuild: 'Build a program',
+  progRouteBuildBody: 'Multiple weeks with days, sets and reps you can reuse and activate.',
+  progRouteWait: 'Wait for a trainer',
+  progRouteWaitBody:
+    'If a trainer is assigned to you, the program they build appears here automatically.',
+  progNoEndDate: 'No end date',
+  progOpenEnded: 'Ongoing',
+  trStat7Days: 'Last 7 days',
+  progDayNamePlaceholder: 'Day name (optional)',
+  progBackfill: 'Backfill',
+  progNoticeFinished: 'Program finished — nice work.',
+  progNoticeWeekComplete: (week: number) => `Week ${week} complete.`,
+  progNoticeMissed: (n: number) =>
+    n === 1 ? '1 day missed — backfill it below.' : `${n} days missed — backfill them below.`,
+  noticeText: (kind: string, actor: string | null, detail: string | null) => {
+    switch (kind) {
+      case 'program-assigned':
+        return `${actor ?? 'A trainer'} assigned you the program “${detail}”.`;
+      case 'program-replaced':
+        return `${actor ?? 'A trainer'} replaced your active program with “${detail}”.`;
+      case 'role-changed':
+        return `Your role was changed to ${detail}.`;
+      case 'trainer-assigned':
+        return `${detail} is now your trainer.`;
+      case 'trainer-removed':
+        return 'Your trainer was removed.';
+      case 'client-assigned':
+        return `${detail} was assigned to you as a client.`;
+      case 'client-removed':
+        return `${detail} is no longer your client.`;
+      default:
+        return 'You have a new notice.';
+    }
+  },
+  syncBlockedTitle: 'Sync is blocked',
+  syncBlockedBody:
+    'One change was rejected, so nothing after it can sync. Retry it, or discard that one change to let the rest through.',
+  syncDiscard: 'Discard change',
+  assignSearchMembers: 'Search members',
+  assignTitle: (program: string) => `Assign “${program}”`,
+  assignIntro:
+    "Assigning replaces the member's active program. Their logged history is untouched, and they can still start off-plan sessions any time.",
+  assignStartWeek: 'Start week',
+  assignStartPoint: (week: number, weekday: string) =>
+    `Starts on ${weekday}, at program week ${week}.`,
+  assignReplaceWarn:
+    "Each member's current active program will be replaced. Their logged history is untouched.",
+  assignClientHint: 'your client · active program will be replaced',
+  assignConfirmN: (n: number) => (n === 1 ? 'Assign' : `Assign to ${n}`),
+  csvImport: 'Import CSV',
+  csvExport: 'Export CSV',
+  csvTemplate: 'Download template',
+  csvColumns:
+    'Columns: Day, Exercise, Kind, Sets, Reps, Duration, Equipment. A weight column is ignored.',
+  csvChooseFile: 'Choose a CSV file',
+  csvOrPaste: 'or paste CSV',
+  csvMapBody:
+    'Match each column to a field. A detected weight column is discarded — programs never carry load.',
+  csvContinue: 'Continue',
+  csvBack: 'Back',
+  csvWeightDiscarded: 'A weight column was found and discarded. Programs never carry load.',
+  csvNoRows: 'No rows found — check the file has a header and at least one row.',
+  csvShape: (rows: number, days: number) => `${rows} rows · ${days} days`,
+  csvValidCount: (valid: number, problems: number) => `${valid} ready · ${problems} need attention`,
+  csvImportN: (n: number) => `Import ${n} rows`,
+  csvUseSuggestion: (name: string) => `Use “${name}”`,
+  csvFields: {
+    ignore: 'Ignore',
+    day: 'Day',
+    name: 'Exercise',
+    kind: 'Kind',
+    sets: 'Sets',
+    reps: 'Reps',
+    setsReps: 'Sets × reps',
+    duration: 'Duration',
+    equipment: 'Equipment',
+    weight: 'Weight (discarded)',
+  },
+  csvProblems: {
+    'missing-name': 'No exercise name',
+    'missing-reps': 'Missing reps',
+    'bad-day': 'Day must be 1–7',
+    'unknown-equipment': 'Unknown equipment',
+    'unmatched-exercise': 'Unrecognised exercise',
+  },
+  progActivate: 'Activate',
+  progArchive: 'Archive',
   progWeekStrip: 'Program week',
   progPrescriptionRule: 'Prescription is sets, reps and equipment. Weight comes from history.',
   progCopyDay: 'Copy day to',
   progCopyChoose: 'Choose day',
   progEquipment: 'Equipment',
+  progRestShort: 'Rest',
   progRestDay: 'Rest day',
   progPlanProgress: 'Plan progress',
   progSetsDone: (done: number, total: number) => `${done} / ${total} sets`,

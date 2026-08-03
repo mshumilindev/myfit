@@ -9,6 +9,7 @@ import { db, type InviteRow, type UserRow, type WorkoutRow } from './db.js';
 import { requireRole, auditRead, type AuthedRequest } from './auth.js';
 import { apiRateLimit } from './rate-limit.js';
 import { displayName, nameParts, parseNameInput } from './user-names.js';
+import { createNotice, actorName } from './notices.js';
 
 export const adminRouter = Router();
 adminRouter.use(apiRateLimit);
@@ -187,7 +188,7 @@ adminRouter.get('/people', (_req: AuthedRequest, res: Response) => {
   res.json({ people: users.map(personJson), serverTime: Date.now() });
 });
 
-/** AD-02: create a member (or trainer) + invite link in one step. */
+/** AD-02: create a user + invite link in one step. */
 adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
   const { name, email, trainerId = null, role = 'member' } = req.body ?? {};
   const names = parseNameInput(req.body ?? {});
@@ -201,8 +202,8 @@ adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
   if (typeof email !== 'string' || !EMAIL_RE.test(email.trim().toLowerCase())) {
     return res.status(400).json({ error: 'valid email required' });
   }
-  if (role !== 'member' && role !== 'trainer') {
-    return res.status(400).json({ error: 'role must be member or trainer' });
+  if (role !== 'member' && role !== 'trainer' && role !== 'admin') {
+    return res.status(400).json({ error: 'role must be member, trainer or admin' });
   }
   const mail = email.trim().toLowerCase();
   const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(mail) as
@@ -237,7 +238,7 @@ adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
     mail,
     Date.now(),
     role,
-    isId(trainerId) ? trainerId : null,
+    role === 'member' && isId(trainerId) ? trainerId : null,
     names.firstName,
     names.lastName,
   );
@@ -318,7 +319,21 @@ adminRouter.post('/users/:id/trainer', (req: AuthedRequest, res: Response) => {
       { role: string } | undefined;
     if (!tr || tr.role !== 'trainer') return res.status(400).json({ error: 'not a trainer' });
   }
+  const prevTrainer = u.trainer_id;
   db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, u.id);
+  // Notify the affected people (AC-ROLE-10). Assignments name the admin.
+  const admin = actorName(req.userId!);
+  const memberName = displayName(u);
+  if (trainerId !== null) {
+    const trRow = db.prepare('SELECT * FROM users WHERE id = ?').get(trainerId) as UserRow;
+    createNotice(u.id, 'trainer-assigned', admin, displayName(trRow));
+    createNotice(trainerId, 'client-assigned', admin, memberName);
+  } else {
+    createNotice(u.id, 'trainer-removed', admin, null);
+  }
+  if (prevTrainer && prevTrainer !== trainerId) {
+    createNotice(prevTrainer, 'client-removed', admin, memberName);
+  }
   res.json({ ok: true });
 });
 
@@ -331,6 +346,7 @@ adminRouter.post('/users/:id/role', (req: AuthedRequest, res: Response) => {
   if (req.params.id === req.userId)
     return res.status(400).json({ error: 'cannot change own role' });
   db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.id);
+  createNotice(String(req.params.id), 'role-changed', actorName(req.userId!), String(role));
   res.json({ ok: true });
 });
 

@@ -8,6 +8,7 @@ import { adminRouter } from './admin.js';
 import { trainerRouter } from './trainer.js';
 import { profileRouter } from './profile.js';
 import { programsRouter } from './programs.js';
+import { noticesRouter } from './notices.js';
 import { services } from './services.js';
 import { apiRateLimit } from './rate-limit.js';
 
@@ -26,6 +27,7 @@ export function createApp(): express.Express {
   app.use('/api/trainer', trainerRouter);
   app.use('/api/profile', profileRouter);
   app.use('/api/programs', programsRouter);
+  app.use('/api/notices', noticesRouter);
   // Service modules from the registry: /api/<service-id>/...
   for (const service of services) {
     for (const router of service.routers) {

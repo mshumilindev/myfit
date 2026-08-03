@@ -163,6 +163,24 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const streakDays = runWeeks * 7;
 
   const templates = finished.slice(0, 2);
+  const livePlannedSets = open
+    ? open.exercises.reduce((sum, ex) => {
+        if ((ex.plannedSets ?? 0) > 0) return sum + (ex.plannedSets ?? 0);
+        return sum + Math.max(ex.sets.length, ex.kind === 'strength' ? 1 : 1);
+      }, 0)
+    : 0;
+  const liveDoneSets = open ? workoutSets(open) : 0;
+  const liveProgressPct =
+    livePlannedSets > 0 ? Math.min(100, Math.round((liveDoneSets / livePlannedSets) * 100)) : 0;
+  const livePrimaryName =
+    open?.exercises.find((ex) => ex.sets.length < (ex.plannedSets ?? ex.sets.length + 1))?.name ??
+    open?.exercises[0]?.name ??
+    t.today;
+  const liveExerciseSummary = open?.exercises
+    .map((ex) => ex.name.trim())
+    .filter(Boolean)
+    .slice(0, 4)
+    .join(' · ');
 
   useEffect(() => {
     request<{ assignment: ProgramAssignment | null }>('GET', '/api/programs/mine')
@@ -221,7 +239,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         </div>
         {assignment.adherence !== null && (
-          <span className="tag tag-accent">{Math.round(assignment.adherence * 100)}%</span>
+          <span className="tag tag-ok">{Math.round(assignment.adherence * 100)}%</span>
         )}
       </div>
       <div className="program-day-actions">
@@ -313,38 +331,116 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   );
 
   return (
-    <div className="screen paned">
+    <div className={`screen paned${open ? ' today-live-mode' : ''}`}>
       <div className="pane-main">
-        {hasHistory ? (
-          <div className="td-topbar">
-            <div>
-              <div className="kicker">{fmtFullDate(now, locale)}</div>
-              <h1>{t.today}</h1>
-            </div>
-            <div className="td-topbar-actions">
-              <SyncChip store={store} />
-
-              {!open && (
+        {open && <h2 className="visually-hidden">{t.today}</h2>}
+        {!open &&
+          (hasHistory ? (
+            <div className="td-topbar">
+              <div>
+                <div className="kicker">{fmtFullDate(now, locale)}</div>
+                <h2>{t.today}</h2>
+              </div>
+              <div className="td-topbar-actions">
+                <SyncChip store={store} />
                 <button className="btn btn-primary" onClick={startSession}>
                   <Icon name="play" />
                   {t.startEmptySession}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="td-topbar">
-            <div className="kicker">{fmtFullDate(now, locale)}</div>
-            <div className="td-topbar-actions">
-              <SyncChip store={store} />
+          ) : (
+            <div className="td-topbar">
+              <div className="kicker">{fmtFullDate(now, locale)}</div>
+              <div className="td-topbar-actions">
+                <SyncChip store={store} />
+              </div>
             </div>
-          </div>
-        )}
+          ))}
 
         {banners}
         {programCard}
 
-        {hasHistory ? (
+        {open ? (
+          <>
+            <section className="today-live-summary">
+              <div className="today-live-summary-head">
+                <Icon name="list-checks" />
+                <span>{liveExerciseSummary || livePrimaryName}</span>
+                <strong>
+                  {liveProgressPct}% ·{' '}
+                  {t.progSetsDone(liveDoneSets, livePlannedSets || liveDoneSets)}
+                </strong>
+              </div>
+              <div className="today-live-segments">
+                {Array.from({ length: Math.max(livePlannedSets, liveDoneSets, 1) }, (_, i) => (
+                  <span key={i} className={i < liveDoneSets ? 'done' : ''} />
+                ))}
+              </div>
+              <p>{t.progGhostDivision}</p>
+            </section>
+
+            <div className="td-history">
+              <div className="section-label" style={{ marginBottom: 8 }}>
+                {t.recent}
+              </div>
+              <span className="visually-hidden">{t.tdHistory}</span>
+              <div className="desktop-only">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>{t.colDate}</th>
+                      <th>{t.colSession}</th>
+                      <th>{t.colSets}</th>
+                      <th>{t.volumeCol}</th>
+                      <th>{t.duration}</th>
+                      <th className="td-history-dots"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {finished.slice(0, 5).map((w) => (
+                      <tr
+                        key={w.id}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() =>
+                          shell.openOverlay({ screen: 'past-workout', workoutId: w.id })
+                        }
+                      >
+                        <td>{fmtShortDate(w.startedAt, locale)}</td>
+                        <td>{fmtDayMonth(w.startedAt, locale)}</td>
+                        <td>{workoutSets(w)}</td>
+                        <td>{fmtKg(workoutVolumeKg(w))}</td>
+                        <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
+                        <td className="td-history-dots">
+                          <Icon name="dots-three" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mobile-only">
+                {finished.slice(0, 4).map((w) => (
+                  <button
+                    key={w.id}
+                    className="recent-row"
+                    onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: w.id })}
+                  >
+                    <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
+                    <span style={{ flex: 1 }}>
+                      <span className="name">{fmtDayMonth(w.startedAt, locale)}</span>
+                      <div className="stats">
+                        {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
+                        {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
+                      </div>
+                    </span>
+                    <Icon name="arrow-up-right" className="go" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : hasHistory ? (
           <>
             <div className="td-stats">
               <div className="td-stat">
@@ -356,7 +452,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div className="l">{t.statVolume}</div>
               </div>
               <div className="td-stat">
-                <div className={`v${newPrs > 0 ? ' accent' : ''}`}>{newPrs}</div>
+                <div className={`v${newPrs > 0 ? ' ok' : ''}`}>{newPrs}</div>
                 <div className="l">{t.statNewPrs}</div>
               </div>
               <div className="td-stat">
@@ -520,21 +616,29 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               .filter(Boolean)
               .slice(0, 4)
               .join(' · ');
+            const stats = `${workoutSets(w)} ${t.sets} · ${fmtKg(workoutVolumeKg(w))}${
+              w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''
+            }`;
             return (
               <button
                 key={w.id}
                 className="td-tpl"
+                aria-label={`${t.loadTemplate}: ${fmtDayMonth(w.startedAt, locale)}`}
                 onClick={() => {
                   const nw = repeatWorkout(w.id);
                   if (nw) shell.openOverlay({ screen: 'session', workoutId: nw.id });
                 }}
               >
-                <div className="n">{fmtDayMonth(w.startedAt, locale)}</div>
-                {names && <div className="ex">{names}</div>}
-                <div className="load">
+                <span className="td-tpl-date">{fmtShortDate(w.startedAt, locale)}</span>
+                <span className="td-tpl-body">
+                  <span className="n">{fmtDayMonth(w.startedAt, locale)}</span>
+                  {names && <span className="ex">{names}</span>}
+                  <span className="meta">{stats}</span>
+                </span>
+                <span className="td-tpl-action">
                   <Icon name="arrow-counter-clockwise" />
-                  {t.loadTemplate}
-                </div>
+                  <span className="visually-hidden">{t.loadTemplate}</span>
+                </span>
               </button>
             );
           })
@@ -552,7 +656,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div key={name} className="record-row">
                   <span className="n">{name}</span>
                   <span className="v">{r.recW} kg</span>
-                  {recent && <span className="tag tag-accent">{t.record}</span>}
+                  {recent && <span className="tag tag-ok">{t.record}</span>}
                 </div>
               );
             })}

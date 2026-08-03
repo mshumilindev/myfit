@@ -2,7 +2,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { HttpError, request, setUsername } from '../api';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { Icon, Spinner } from '../ui';
+import { ConfirmDialog, Icon, LanguageSelector, Spinner, Switch } from '../ui';
 import { Avatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { GymThumb } from '../components/GymThumb';
@@ -82,10 +82,12 @@ export function ProfileView({
   userId,
   shell,
   onClose,
+  embedded = false,
 }: {
   userId: string;
   shell: Shell;
   onClose: () => void;
+  embedded?: boolean;
 }) {
   const { t, locale } = useT();
   const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => ({
@@ -102,15 +104,20 @@ export function ProfileView({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordEditing, setPasswordEditing] = useState(false);
   const [trainerNote, setTrainerNote] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [noteError, setNoteError] = useState<string | null>(null);
   const [avatarRefresh, setAvatarRefresh] = useState(0);
+  const [profileEditing, setProfileEditing] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const load = loaded.userId === userId ? loaded.value : 'loading';
   const isSelf = typeof load === 'object' && load.viewer.relation === 'self';
+  const isTrainerView = typeof load === 'object' && load.viewer.relation === 'trainer';
   const canEditDetails =
     typeof load === 'object' &&
     (load.viewer.relation === 'self' || load.viewer.relation === 'admin');
+  const isAdminViewer = typeof load === 'object' && load.viewer.relation === 'admin';
 
   useEffect(() => {
     let alive = true;
@@ -170,11 +177,34 @@ export function ProfileView({
       setEditLastName(next.person.lastName ?? '');
       setEditUsername(next.person.username);
       setLoaded({ userId, value: next });
+      setProfileEditing(false);
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
     } catch (e) {
       setProfileError(e instanceof Error ? e.message : t.error);
     } finally {
       setSavingProfile(false);
+    }
+  }
+
+  async function toggleTrainer() {
+    if (typeof load !== 'object') return;
+    const next = load.person.role === 'trainer' ? 'member' : 'trainer';
+    try {
+      await request('POST', `/api/admin/users/${encodeURIComponent(load.person.id)}/role`, {
+        role: next,
+      });
+      const fresh = await request<ProfileData>(
+        'GET',
+        `/api/profile/users/${encodeURIComponent(load.person.id)}`,
+      );
+      setLoaded({ userId, value: fresh });
+      shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
+    } catch (e) {
+      shell.toast({
+        kind: 'danger',
+        icon: 'warning-circle',
+        text: e instanceof Error ? e.message : t.error,
+      });
     }
   }
 
@@ -214,6 +244,7 @@ export function ProfileView({
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setPasswordEditing(false);
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profilePasswordSaved });
     } catch (e) {
       setPasswordError(e instanceof Error ? e.message : t.error);
@@ -263,16 +294,44 @@ export function ProfileView({
     newPassword.length >= 6 &&
     confirmPassword.length >= 6 &&
     !savingPassword;
+  const pageClass = [
+    'screen',
+    'profile-page',
+    embedded ? 'profile-embedded' : '',
+    isSelf ? 'profile-self' : '',
+    profileEditing ? 'profile-editing' : '',
+    passwordEditing ? 'profile-password-editing' : '',
+    typeof load === 'object' && load.viewer.relation === 'trainer' ? 'profile-trainer-view' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
-    <div className="screen profile-page">
+    <div className={pageClass}>
+      {typeof load === 'object' && load.viewer.relation === 'trainer' && (
+        <div className="tr-readonly-bar">
+          <Icon name="eye" />
+          <span style={{ flex: 1 }}>{t.trReadOnlyBar}</span>
+          <button className="btn btn-secondary" onClick={() => shell.goTab('programs')}>
+            {t.trAssignProgram}
+          </button>
+        </div>
+      )}
       <div className="profile-top">
-        <button className="profile-back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+        {!embedded && (
+          <button className="profile-back" onClick={onClose} aria-label={t.backAction}>
+            <Icon name="caret-left" />
+          </button>
+        )}
         <div>
           <div className="kicker">{t.profileTitle}</div>
-          <h1 className="title-26">{load === 'loading' ? t.profileTitle : profileName(load, t)}</h1>
+          <h2 className="title-26">
+            {embedded && isSelf
+              ? t.navMe
+              : load === 'loading'
+                ? t.profileTitle
+                : profileName(load, t)}
+          </h2>
         </div>
       </div>
 
@@ -280,16 +339,16 @@ export function ProfileView({
       {(load === 'denied' || load === 'missing' || load === 'failed') && (
         <div className="empty">
           <Icon name="warning-circle" />
-          <div className="t">
+          <h4 className="t">
             {load === 'denied'
               ? t.profileAccessDenied
               : load === 'missing'
                 ? t.profileMissing
                 : t.error}
-          </div>
-          <div className="s">
+          </h4>
+          <p className="s">
             {load === 'denied' ? t.profileAccessDeniedBody : `GET /api/profile/users/${userId}`}
-          </div>
+          </p>
         </div>
       )}
 
@@ -321,7 +380,26 @@ export function ProfileView({
                 <span className="tag tag-accent">
                   {load.viewer.relation === 'self' ? t.profileSelf : roleLabel(load.person.role)}
                 </span>
+                {isTrainerView && load.summary.liveSessions > 0 && (
+                  <span className="profile-live-pill">
+                    <span className="live-dot" />
+                    {t.stTrainingNow}
+                  </span>
+                )}
+                {embedded && isSelf && canEditDetails && (
+                  <button
+                    className="profile-mobile-edit"
+                    onClick={() => setProfileEditing((x) => !x)}
+                  >
+                    {profileEditing ? t.done : t.edit}
+                  </button>
+                )}
               </div>
+              {embedded && isSelf && (
+                <p className="profile-mobile-meta">
+                  @{load.person.username} · {roleLabel(load.person.role).toLowerCase()}
+                </p>
+              )}
               {canEditDetails ? (
                 <div className="profile-detail-fields" aria-label={t.profileEditTitle}>
                   <label className="input-field">
@@ -408,6 +486,74 @@ export function ProfileView({
             </div>
           </section>
 
+          {!isTrainerView && (
+            <section className="profile-section profile-access-section">
+              <div className="field-label">{t.profWhoSees}</div>
+              {load.access.length === 0 ? (
+                <div className="detail-muted">{t.profNoAccess}</div>
+              ) : (
+                load.access.map((a) => (
+                  <div key={a.id} className="access-row">
+                    <Avatar userId={a.id} name={a.name} size={34} />
+                    <span className="n">{a.name}</span>
+                    <span className="s">
+                      {roleLabel(a.role)} · {a.role === 'admin' ? t.profFullAccess : t.profReads}
+                    </span>
+                  </div>
+                ))
+              )}
+            </section>
+          )}
+
+          {isSelf && (
+            <>
+              <div className="field-label profile-mobile-settings-title">{t.profileSettings}</div>
+              <div className="profile-lang">
+                <Icon name="translate" />
+                <span>{t.language}</span>
+                <LanguageSelector />
+                <Icon name="arrow-right" className="profile-setting-caret" />
+              </div>
+              <section className="profile-mobile-settings">
+                <div className="profile-setting-row static">
+                  <Icon name="scales" />
+                  <span>{t.profileUnits}</span>
+                  <span>{t.profileUnitsKg}</span>
+                </div>
+                <button className="profile-setting-row" onClick={() => setPasswordEditing(true)}>
+                  <Icon name="key" />
+                  <span>{t.password}</span>
+                  <Icon name="arrow-right" className="profile-setting-caret" />
+                </button>
+                <div className="profile-setting-row static">
+                  <Icon name="envelope" />
+                  <span>{t.email}</span>
+                  <span>{load.person.email ?? '—'}</span>
+                </div>
+              </section>
+              <button
+                className="profile-setting-row profile-signout"
+                onClick={() => setConfirmSignOut(true)}
+              >
+                <Icon name="sign-out" />
+                <span>{t.signOut}</span>
+              </button>
+            </>
+          )}
+
+          {isAdminViewer && load.person.id !== load.viewer.id && load.person.role !== 'admin' && (
+            <button className="toggle-row" onClick={() => void toggleTrainer()}>
+              <Icon name="barbell" />
+              <span className="lab">
+                <div>{t.profileTrainerPriv}</div>
+                <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
+                  {t.profileTrainerPrivHint}
+                </div>
+              </span>
+              <Switch on={load.person.role === 'trainer'} />
+            </button>
+          )}
+
           {profileError && (
             <div className="error-card profile-error">
               <Icon name="warning-circle" />
@@ -462,6 +608,7 @@ export function ProfileView({
                     setNewPassword('');
                     setConfirmPassword('');
                     setPasswordError(null);
+                    setPasswordEditing(false);
                   }}
                   disabled={
                     savingPassword || (!currentPassword && !newPassword && !confirmPassword)
@@ -486,10 +633,14 @@ export function ProfileView({
             </section>
           )}
 
-          <p className="profile-privacy-note">
-            <Icon name="shield-check" />
-            {t.profileDirectPrivateNote}
-          </p>
+          {!isTrainerView && (
+            <p className="profile-privacy-note">
+              <Icon name="shield-check" />
+              {t.profileDirectPrivateNote}
+            </p>
+          )}
+
+          {load.viewer.relation === 'trainer' && <TrainerLivePanel load={load} />}
 
           <section className="profile-stats">
             <StatGroup title={t.profileStatsActivity} icon="calendar-blank">
@@ -546,23 +697,6 @@ export function ProfileView({
                 label={t.cardioMinutes}
               />
             </StatGroup>
-          </section>
-
-          <section className="profile-section">
-            <div className="field-label">{t.profWhoSees}</div>
-            {load.access.length === 0 ? (
-              <div className="detail-muted">{t.profNoAccess}</div>
-            ) : (
-              load.access.map((a) => (
-                <div key={a.id} className="access-row">
-                  <Avatar userId={a.id} name={a.name} size={34} />
-                  <span className="n">{a.name}</span>
-                  <span className="s">
-                    {roleLabel(a.role)} · {a.role === 'admin' ? t.profFullAccess : t.profReads}
-                  </span>
-                </div>
-              ))
-            )}
           </section>
 
           <section className="profile-columns">
@@ -651,7 +785,7 @@ export function ProfileView({
             </div>
           </section>
 
-          <section className="profile-section">
+          <section className="profile-section profile-recent-section">
             <div className="field-label">{t.adminRecent}</div>
             {load.sessions.length === 0 ? (
               <div className="detail-muted">{t.profileNoTraining}</div>
@@ -689,8 +823,34 @@ export function ProfileView({
             )}
           </section>
 
+          {load.viewer.relation === 'self' && (
+            <section className="profile-section profile-audit-section">
+              <div className="field-label">{t.profileAuditReads}</div>
+              {load.audit.length === 0 ? (
+                <div className="detail-muted">{t.profNoAccess}</div>
+              ) : (
+                <div className="profile-list">
+                  {load.audit.map((a) => (
+                    <div
+                      key={`${a.at}-${a.readerName ?? 'system'}-${a.resource}`}
+                      className="profile-row"
+                    >
+                      <span>
+                        <span className="n">{a.readerName ?? roleLabel(a.readerRole)}</span>
+                        <span className="s">
+                          {roleLabel(a.readerRole)} · {a.resource}
+                        </span>
+                      </span>
+                      <span className="s">{fmtDayMonth(a.at, locale)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
           {(load.notes.length > 0 || load.viewer.relation === 'trainer') && (
-            <section className="profile-section">
+            <section className="profile-section profile-notes-section">
               <div className="field-label">
                 {load.viewer.relation === 'trainer' ? t.trNotes : t.profileNotes}
               </div>
@@ -732,29 +892,53 @@ export function ProfileView({
               )}
             </section>
           )}
-
-          {load.viewer.relation === 'self' && (
-            <section className="profile-section">
-              <div className="field-label">{t.profileAuditReads}</div>
-              {load.audit.length === 0 ? (
-                <div className="detail-muted">{t.profAuditEmpty}</div>
-              ) : (
-                <div className="detail-sessions">
-                  {load.audit.slice(0, 20).map((r, i) => (
-                    <div key={`${r.at}-${i}`} className="row">
-                      <span>{fmtDayMonth(r.at, locale)}</span>
-                      <span>{r.readerName ?? '—'}</span>
-                      <span>{r.readerRole}</span>
-                      <span>{r.resource}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          )}
         </>
       )}
+      {confirmSignOut && (
+        <ConfirmDialog
+          title={t.signOutTitle}
+          body={shell.queueLength > 0 ? t.signOutQueueBody(shell.queueLength) : t.signOutCleanBody}
+          confirmLabel={t.signOut}
+          cancelLabel={t.cancel}
+          danger
+          onCancel={() => setConfirmSignOut(false)}
+          onConfirm={() => {
+            setConfirmSignOut(false);
+            shell.signOut();
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function TrainerLivePanel({ load }: { load: ProfileData }) {
+  const { t } = useT();
+  const live = load.sessions.find((s) => s.live);
+  if (!live) return null;
+  const primary = live.exerciseNames[0] ?? t.stTrainingNow;
+
+  return (
+    <section className="profile-section tr-live-panel">
+      <div className="field-label">{t.trLiveNow}</div>
+      <div className="tr-live-card">
+        <div className="tr-live-head">
+          <span>{primary}</span>
+          <span>
+            {live.sets} · {fmtTonnes(live.volumeKg)}
+          </span>
+        </div>
+        <div className="tr-live-grid">
+          <span>#</span>
+          <span>{t.setsStat}</span>
+          <span>{t.profileLifetime}</span>
+          <strong>1</strong>
+          <strong>{live.sets}</strong>
+          <strong>{fmtTonnes(live.volumeKg)}</strong>
+        </div>
+        <p>{t.trLiveReadOnly}</p>
+      </div>
+    </section>
   );
 }
 

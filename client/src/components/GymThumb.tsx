@@ -39,6 +39,12 @@ export function GymThumb({
   const src = photo && !failed.has(photo) ? photo : !failed.has(map) ? map : null;
   if (!src) return <HouseGraphic size={size} />;
   return (
-    <img src={src} alt="" loading="lazy" onError={() => setFailed((f) => new Set(f).add(src))} />
+    <img
+      className="lighten"
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={() => setFailed((f) => new Set(f).add(src))}
+    />
   );
 }

@@ -145,6 +145,7 @@ export function GymDetailView({
     ? sessions.reduce((s, w) => s + ((w.finishedAt ?? 0) - w.startedAt), 0) / sessions.length
     : 0;
   const dist = coords ? haversineM(coords, { lat, lng }) : null;
+  const inside = dist !== null && dist <= (gym?.radiusM ?? 150);
 
   const directionsHref = coords
     ? `https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=${coords.lat}%2C${coords.lng}%3B${lat}%2C${lng}`
@@ -160,7 +161,7 @@ export function GymDetailView({
         </button>
         <div className="hero-top-right"></div>
         <div className="hero-text">
-          <h1>{name}</h1>
+          <h2>{name}</h2>
           <div className="loc">
             <Icon name="map-pin" />
             <span>
@@ -168,6 +169,11 @@ export function GymDetailView({
               {dist !== null ? ` · ${fmtDistance(dist)}` : ''}
             </span>
           </div>
+          {inside && (
+            <span className="tag tag-accent" style={{ marginTop: 8, alignSelf: 'flex-start' }}>
+              {t.inside}
+            </span>
+          )}
         </div>
       </div>
 

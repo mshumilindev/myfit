@@ -110,6 +110,15 @@ export const lt: Strings = {
   repeat: (name) => `Pakartoti ${name}`,
   autoClosed: 'Uždaryta automatiškai',
   weekDayLetters: ['P', 'A', 'T', 'K', 'P', 'Š', 'S'],
+  weekDayNames: [
+    'Pirmadienis',
+    'Antradienis',
+    'Trečiadienis',
+    'Ketvirtadienis',
+    'Penktadienis',
+    'Šeštadienis',
+    'Sekmadienis',
+  ],
 
   // Today · desktop 3-column (W-04/W-05)
   restSinceLast: 'Nuo paskutinės serijos',
@@ -293,6 +302,11 @@ export const lt: Strings = {
   myGyms: 'Mano sporto klubai',
   nearbyGyms: 'Netoliese',
   nearbyQuery: 'sporto klubas',
+  navMe: 'Aš',
+  profileTrainerPriv: 'Trenerio teisės',
+  profileTrainerPrivHint: 'Suteikia prieigą prie priskirtų klientų ir programų kūrimo.',
+  trReadonlyBar: 'Gali peržiūrėti kliento duomenis, bet negali redaguoti to, ką jis užfiksavo.',
+  trAssignProgram: 'Priskirti programą',
   searchGymEmpty: 'Nieko nerasta — pridėk rankiniu būdu žemiau',
   addManually: 'Pridėti rankiniu būdu',
   pickGymTitle: 'Kur treniruojiesi?',
@@ -391,7 +405,7 @@ export const lt: Strings = {
   roleMember: 'Narys',
   roleTrainer: 'Treneris',
   roleAdmin: 'Administratorius',
-  adminPeople: 'Žmonės',
+  adminPeople: 'Naudotojai',
   adminSummary: (m, tr, p) => `${m} nariai · ${tr} treneriai · ${p} laukiančių kvietimų`,
   adminNewMember: 'Naujas narys',
   adminNewTrainer: 'Pridėti trenerį',
@@ -406,6 +420,9 @@ export const lt: Strings = {
   adminColLast: 'Paskutinė sesija',
   adminColVol: '30 dienų apimtis',
   adminColStatus: 'Būsena',
+  adminMemberRoleHint: 'Treniruojasi. Mato tik savo duomenis.',
+  adminTrainerRoleHint: 'Treniruojasi ir skaito tavo priskirtus klientus.',
+  adminAdminRoleHint: 'Visa prieiga, įskaitant tavo paskyrą.',
   stTrainingNow: 'Dabar treniruojasi',
   stActive: 'Aktyvus',
   stDormant: (d) => `Neaktyvus · ${d} d.`,
@@ -465,6 +482,7 @@ export const lt: Strings = {
   adminPerWeek: 'Per savaitę',
   adminRecent: 'Naujausios sesijos',
   trMyClients: 'Mano klientai',
+  trClientsTab: 'Klientai',
   trSummary: (n, live) => `${n} priskirta · ${live} dabar treniruojasi`,
   trReadOnly: (n) =>
     `Tik skaitymui — žiūri ${n} duomenis kaip treneris. Čia nieko negalima redaguoti, o klientas mato, kad profilis buvo atvertas.`,
@@ -474,6 +492,13 @@ export const lt: Strings = {
   trEmptyTitle: 'Klientų dar nepriskirta',
   trEmptyBody:
     'Administratorius nusprendžia, ką treniruoji. Kai žmogus priskiriamas, jis čia pasirodo su visa istorija — tau nieko daryti nereikia.',
+  trFooterNote: 'Klientus priskiria administratorius — kitų žmonių ieškoti negalima.',
+  trWeekAcrossClients: 'Ši savaitė tarp tavo klientų',
+  trClient: 'Klientas',
+  trVsLastWeek: 'palyginti su praėjusia savaite',
+  trLastSeen: 'Paskutinį kartą',
+  trLiveNow: 'Gyvai dabar',
+  trLiveReadOnly: 'Atnaujinama gyvai · negali to redaguoti',
   trLostAccess: (n) => `${n} nebėra tavo klientas.`,
   trNotes: 'Tavo pastabos',
   trAddNote: 'Pridėti pastabą',
@@ -497,6 +522,9 @@ export const lt: Strings = {
   profileAvatarRemoved: 'Nuotrauka pašalinta',
   profileAvatarType: 'Naudok JPEG, PNG arba WebP vaizdą.',
   profileAvatarTooBig: 'Vaizdas turi būti ne didesnis kaip 10 MB.',
+  profileSettings: 'Nustatymai',
+  profileUnits: 'Vienetai',
+  profileUnitsKg: 'kg',
   profileSecurity: 'Saugumas',
   profilePasswordBody:
     'Pakeisk slaptažodį įvesdamas dabartinį. Administratoriai ir treneriai jo nemato.',
@@ -543,19 +571,39 @@ export const lt: Strings = {
   progTitle: 'Programos',
   progNew: 'Nauja programa',
   progName: 'Programos pavadinimas',
+  progNameHeader: 'Programos antraštė',
   progWeeks: 'Savaitės',
   progDaysPerWeek: 'Sesijos per savaitę',
   progDay: (n) => `${n} diena`,
   progAddItem: 'Pridėti pratimą',
+  progAddItemToDay: (day) => `Pridėti pratimą į ${day}`,
   progAssignTo: (n) => `Priskirti ${n}`,
   progWeekN: (n) => `${n} savaitė`,
-  progSessions: (d, t) => `${d} iš ${t} sesijų`,
+  progSessions: (d, t) => (t > 0 ? `${d} iš ${t} sesijų` : `${d} sesijų`),
   progAdherence: 'Programos laikymasis',
   progStart: (n) => `Pradėti ${n} dieną`,
   progAssignedBy: (n) => `Priskyrė ${n}`,
   progNone: 'Programa nepriskirta',
   progRemove: 'Pašalinti programą',
   progEmpty: 'Programų dar nėra — sukurk vieną ir priskirk klientui.',
+  progSearchPrograms: 'Ieškoti programų',
+  progNoSearchResults: 'Atitinkančių programų nėra.',
+  progDuplicate: 'Dubliuoti',
+  progDuplicateName: (name) => `${name} kopija`,
+  progWeeksCount: (n) => `${n} sav.`,
+  progWeeksWord: () => 'sav.',
+  progDaysCount: (n) => `${n} d. per savaitę`,
+  progDaysAWeekWord: () => 'd. per savaitę',
+  progWeekShort: (n) => (n === 1 ? 'sav. 1' : `${n} sav.`),
+  progAssignedMembers: (n) => `priskirta ${n} nariams`,
+  progCreatedBy: (name) => `sukūrė ${name}`,
+  progSelectedDayTitle: (n) => `${n} diena`,
+  progDayLine: (weekday, day) => `${weekday} · ${day}`,
+  progDayWorkoutSummary: (exercises, sets) => `${exercises} pratimai · ${sets} serijos`,
+  progNoWeightNote:
+    'Svorio stulpelio nėra tyčia. Programa aprašo darbą; sesija paima apkrovą iš kiekvieno nario istorijos, todėl viena programa tinka skirtingiems nariams.',
+  csvExportProgram: 'Eksportuoti programą',
+  exerciseLabel: 'Pratimas',
   progMemberEmpty: 'Susidėliok savo savaitę arba palauk trenerio programos.',
   progNoItems: 'Šią dieną pratimų dar nėra.',
   progSets: 'Serijos',
@@ -564,12 +612,109 @@ export const lt: Strings = {
   progAssignClient: 'Pasirink klientą',
   progNoClients: 'Klientų nėra',
   progAssign: 'Priskirti',
+  progStatusDraft: 'Juodraštis',
+  progStatusActive: 'Aktyvi',
+  progStatusArchived: 'Archyvuota',
+  progStatusMine: 'Mano',
+  progEditPlan: 'Redaguoti planą',
+  progRoutePlanWeek: 'Suplanuoti savaitę',
+  progRoutePlanWeekBody:
+    'Sudėliokite septynias dienas vieną kartą — tinka vienam treniruočių blokui.',
+  progRouteBuild: 'Sukurti programą',
+  progRouteBuildBody:
+    'Kelios savaitės su dienomis, serijomis ir pakartojimais, kurias galima aktyvuoti.',
+  progRouteWait: 'Laukti trenerio',
+  progRouteWaitBody: 'Jei jums priskirtas treneris, jo sukurta programa čia atsiras automatiškai.',
+  progNoEndDate: 'Be pabaigos datos',
+  progOpenEnded: 'Tęstinė',
+  trStat7Days: 'Paskutinės 7 d.',
+  progDayNamePlaceholder: 'Dienos pavadinimas (nebūtina)',
+  progBackfill: 'Papildyti',
+  progNoticeFinished: 'Programa baigta — puikus darbas.',
+  progNoticeWeekComplete: (week) => `${week} savaitė baigta.`,
+  progNoticeMissed: (n) =>
+    n === 1
+      ? 'Praleista 1 diena — papildykite ją žemiau.'
+      : `Praleista dienų: ${n} — papildykite jas žemiau.`,
+  noticeText: (kind, actor, detail) => {
+    switch (kind) {
+      case 'program-assigned':
+        return `${actor ?? 'Treneris'} priskyrė tau programą „${detail}”.`;
+      case 'program-replaced':
+        return `${actor ?? 'Treneris'} pakeitė tavo aktyvią programą į „${detail}”.`;
+      case 'role-changed':
+        return `Tavo vaidmuo pakeistas į ${detail}.`;
+      case 'trainer-assigned':
+        return `${detail} dabar yra tavo treneris.`;
+      case 'trainer-removed':
+        return 'Tavo treneris pašalintas.';
+      case 'client-assigned':
+        return `${detail} priskirtas tau kaip klientas.`;
+      case 'client-removed':
+        return `${detail} nebėra tavo klientas.`;
+      default:
+        return 'Turite naują pranešimą.';
+    }
+  },
+  syncBlockedTitle: 'Sinchronizavimas sustabdytas',
+  syncBlockedBody:
+    'Vienas pakeitimas buvo atmestas, todėl tolesni nesisinchronizuoja. Bandykite dar kartą arba atmeskite tą pakeitimą, kad praeitų kiti.',
+  syncDiscard: 'Atmesti pakeitimą',
+  assignSearchMembers: 'Ieškoti narių',
+  assignTitle: (program) => `Priskirti „${program}“`,
+  assignIntro:
+    'Priskyrimas pakeis aktyvią nario programą. Treniruočių istorija neliečiama, o sesijas ne pagal planą vis tiek galima pradėti.',
+  assignStartWeek: 'Pradžios savaitė',
+  assignStartPoint: (week, weekday) => `Pradžia ${weekday}, nuo ${week}-os programos savaitės.`,
+  assignReplaceWarn:
+    'Kiekvieno nario dabartinė aktyvi programa bus pakeista. Įrašyta istorija nepaliesta.',
+  assignClientHint: 'jusu klientas · aktyvi programa bus pakeista',
+  assignConfirmN: (n) => (n === 1 ? 'Priskirti' : `Priskirti ${n}`),
+  csvImport: 'Importuoti CSV',
+  csvExport: 'Eksportuoti CSV',
+  csvTemplate: 'Atsisiųsti šabloną',
+  csvColumns:
+    'Stulpeliai: Diena, Pratimas, Tipas, Serijos, Pakartojimai, Trukmė, Įranga. Svorio stulpelis ignoruojamas.',
+  csvChooseFile: 'Pasirinkti CSV failą',
+  csvOrPaste: 'arba įklijuokite CSV',
+  csvMapBody:
+    'Susiekite kiekvieną stulpelį su lauku. Aptiktas svorio stulpelis atmetamas — programose nėra svorio.',
+  csvContinue: 'Toliau',
+  csvBack: 'Atgal',
+  csvWeightDiscarded: 'Rastas ir atmestas svorio stulpelis. Programose nėra svorio.',
+  csvNoRows: 'Eilučių nerasta — patikrinkite, ar yra antraštė ir bent viena eilutė.',
+  csvShape: (rows, days) => `${rows} eil. · ${days} d.`,
+  csvValidCount: (valid, problems) => `${valid} paruošta · ${problems} reikia dėmesio`,
+  csvImportN: (n) => `Importuoti ${n} eil.`,
+  csvUseSuggestion: (name) => `Naudoti „${name}”`,
+  csvFields: {
+    ignore: 'Ignoruoti',
+    day: 'Diena',
+    name: 'Pratimas',
+    kind: 'Tipas',
+    sets: 'Serijos',
+    reps: 'Pakartojimai',
+    setsReps: 'Serijos × pakartojimai',
+    duration: 'Trukmė',
+    equipment: 'Įranga',
+    weight: 'Svoris (atmesta)',
+  },
+  csvProblems: {
+    'missing-name': 'Nėra pratimo pavadinimo',
+    'missing-reps': 'Trūksta pakartojimų',
+    'bad-day': 'Diena turi būti 1–7',
+    'unknown-equipment': 'Nežinoma įranga',
+    'unmatched-exercise': 'Neatpažintas pratimas',
+  },
+  progActivate: 'Aktyvuoti',
+  progArchive: 'Archyvuoti',
   progWeekStrip: 'Programos savaitė',
   progPrescriptionRule:
     'Nurodymas yra serijos, pakartojimai ir įranga. Svoris imamas iš istorijos.',
   progCopyDay: 'Kopijuoti dieną į',
   progCopyChoose: 'Pasirink dieną',
   progEquipment: 'Įranga',
+  progRestShort: 'Poilsis',
   progRestDay: 'Poilsio diena',
   progPlanProgress: 'Plano progresas',
   progSetsDone: (done, total) => `${done} / ${total} serijų`,

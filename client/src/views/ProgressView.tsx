@@ -1,8 +1,7 @@
 /** Progress — design S-34…S-36. */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { est1rm, topSet, workoutVolumeKg, type useStore } from '../store';
-import { useT } from '../i18n';
-import { WeekStrip } from '../components/WeekStrip';
+import { fmtDayMonth, fmtKg, useT } from '../i18n';
 import { EmptyState } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
@@ -17,34 +16,11 @@ function weekStart(ts: number): number {
 }
 
 export function ProgressView({ store }: { store: Store }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [nowTs] = useState(() => Date.now());
+  const [selectedName, setSelectedName] = useState<string | null>(null);
+  const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
-
-  if (finished.length < 3) {
-    return (
-      <div className="screen">
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-          <h1 className="headline" style={{ margin: 0 }}>
-            {t.progress}
-          </h1>
-        </div>
-        <EmptyState
-          icon="chart-line-up"
-          title={t.twoMoreSessions}
-          body={t.progressLocked(finished.length)}
-        />
-        <div className="unlock">
-          <span style={{ flex: 1 }}>{t.progressUnlocksAt}</span>
-          <span className="dots">
-            {[0, 1, 2].map((i) => (
-              <span key={i} className={i < finished.length ? 'on' : ''} />
-            ))}
-          </span>
-        </div>
-      </div>
-    );
-  }
 
   // Weekly volume, current week last, 10 columns.
   const thisWeek = weekStart(nowTs);
@@ -108,7 +84,27 @@ export function ProgressView({ store }: { store: Store }) {
     return { name, pts };
   });
 
-  const records = [...byName.entries()].sort((a, b) => b[1].recW - a[1].recW).slice(0, 3);
+  const records = [...byName.entries()]
+    .sort((a, b) => b[1].count - a[1].count || b[1].recW - a[1].recW)
+    .slice(0, 3);
+  const selected = records.find(([name]) => name === selectedName) ?? records[0] ?? null;
+  const selectedSessions = selected
+    ? finished
+        .map((workout) => {
+          const exercise = workout.exercises.find((item) => item.name.trim() === selected[0]);
+          const top = exercise ? topSet(exercise.sets) : null;
+          return exercise && top ? { workout, exercise, top } : null;
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null)
+        .sort((a, b) => b.workout.startedAt - a.workout.startedAt)
+    : [];
+  const latest = selectedSessions[0] ?? null;
+  const selectedRecord = selected?.[1] ?? null;
+  const selectedRecordRm = selectedRecord ? est1rm(selectedRecord.recW, selectedRecord.recReps) : 0;
+  const latestVolume = latest ? exerciseVolumeKg(latest.exercise) : 0;
+  const selectedSince = selectedSessions.length
+    ? fmtDayMonth(selectedSessions[selectedSessions.length - 1].workout.startedAt, locale)
+    : '';
 
   function polyline(pts: { rm: number }[], w: number, h: number): string {
     if (pts.length < 2) return '';
@@ -123,102 +119,278 @@ export function ProgressView({ store }: { store: Store }) {
       .join(' ');
   }
 
+  if (finished.length < 3) {
+    return (
+      <div className="screen progress-page progress-locked">
+        <div className="progress-head">
+          <h2 className="headline">{t.progress}</h2>
+        </div>
+        <div className="progress-locked-layout">
+          <section className="progress-weekly-panel">
+            <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
+            <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />
+          </section>
+          <div className="progress-locked-empty">
+            <EmptyState
+              icon="chart-line-up"
+              title={t.twoMoreSessions}
+              body={t.progressLocked(finished.length)}
+            />
+            <UnlockDots finishedCount={finished.length} label={t.progressUnlocksAt} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="screen" style={{ gap: 'var(--space-8)' }}>
-      <div className="kpi">
-        <div>
-          <div className="big num">
-            {(cur / 1000).toFixed(1)}
-            <span className="unit"> t</span>
-          </div>
-          <div className="lab">{t.volumeThisWeek}</div>
-        </div>
-        <div style={{ marginLeft: 'auto' }}></div>
-        {deltaPct !== null && (
-          <span className="tag tag-accent" style={{ marginBottom: 22 }}>
-            {deltaPct >= 0 ? '+' : '−'}
-            {Math.abs(deltaPct)}%
-          </span>
-        )}
-      </div>
+    <div className="screen progress-page progress-filled">
+      <h2 className="visually-hidden">{t.progress}</h2>
+      <section className="progress-summary-pane">
+        <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
+        <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />
 
-      <WeekStrip />
-
-      <div className="bars">
-        {weeks.map((v, i) => (
-          <div
-            key={i}
-            className="bar"
-            style={{
-              height: `${Math.max((v / maxWeek) * 100, 4)}%`,
-              background: barColors[i],
-            }}
-          />
-        ))}
-      </div>
-
-      {lines.length > 0 && lines[0].pts.length >= 2 && (
-        <div>
-          <div className="section-label" style={{ marginBottom: 8 }}>
-            {t.estimated1rm}
-          </div>
-          <div className="chart-card">
-            <svg viewBox="0 0 300 100" style={{ width: '100%', height: 100, display: 'block' }}>
-              <polyline
-                points={polyline(lines[0].pts, 300, 100)}
-                fill="none"
-                stroke="var(--color-accent)"
-                strokeWidth="2"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-              {lines[1] && lines[1].pts.length >= 2 && (
-                <polyline
-                  points={polyline(lines[1].pts, 300, 100)}
-                  fill="none"
-                  stroke="var(--color-neutral-700)"
-                  strokeWidth="1.5"
-                  strokeDasharray="3 4"
-                />
-              )}
-            </svg>
-            <div className="chart-legend">
-              <span>
-                <span className="sw" style={{ background: 'var(--color-accent)' }} />
-                {lines[0].name} {lines[0].pts[lines[0].pts.length - 1].rm} kg
-              </span>
-              {lines[1] && lines[1].pts.length >= 2 && (
-                <span>
-                  <span className="sw" style={{ background: 'var(--color-neutral-700)' }} />
-                  {lines[1].name} {lines[1].pts[lines[1].pts.length - 1].rm} kg
-                </span>
-              )}
+        {lines.length > 0 && lines[0].pts.length >= 2 && (
+          <div>
+            <div className="section-label" style={{ marginBottom: 8 }}>
+              {t.estimated1rm}
             </div>
-          </div>
-        </div>
-      )}
-
-      <div>
-        <div className="section-label" style={{ marginBottom: 4 }}>
-          {t.records}
-        </div>
-        <div>
-          {records.map(([name, r]) => {
-            const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
-            return (
-              <div key={name} className="record-row">
-                <span className="n">{name}</span>
-                <span className="v">{r.recW} kg</span>
-                {wksAgo < 2 ? (
-                  <span className="tag tag-accent">{t.record}</span>
-                ) : (
-                  <span className="when num">{t.wksAgo(wksAgo)}</span>
+            <div className="chart-card">
+              <svg viewBox="0 0 300 100" style={{ width: '100%', height: 100, display: 'block' }}>
+                <polyline
+                  points={polyline(lines[0].pts, 300, 100)}
+                  fill="none"
+                  stroke="var(--color-accent)"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                {lines[1] && lines[1].pts.length >= 2 && (
+                  <polyline
+                    points={polyline(lines[1].pts, 300, 100)}
+                    fill="none"
+                    stroke="var(--color-neutral-700)"
+                    strokeWidth="1.5"
+                    strokeDasharray="3 4"
+                  />
+                )}
+              </svg>
+              <div className="chart-legend">
+                <span>
+                  <span className="sw" style={{ background: 'var(--color-accent)' }} />
+                  {lines[0].name} {lines[0].pts[lines[0].pts.length - 1].rm} kg
+                </span>
+                {lines[1] && lines[1].pts.length >= 2 && (
+                  <span>
+                    <span className="sw" style={{ background: 'var(--color-neutral-700)' }} />
+                    {lines[1].name} {lines[1].pts[lines[1].pts.length - 1].rm} kg
+                  </span>
                 )}
               </div>
-            );
-          })}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <div className="section-label" style={{ marginBottom: 4 }}>
+            {t.records}
+          </div>
+          <div>
+            {records.map(([name, r]) => {
+              const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
+              return (
+                <button
+                  key={name}
+                  className={`record-row${selected?.[0] === name ? ' selected' : ''}`}
+                  onClick={() => setSelectedName(name)}
+                >
+                  <span className="n">{name}</span>
+                  <span className="v">{r.recW} kg</span>
+                  {wksAgo < 2 ? (
+                    <span className="tag tag-ok">{t.record}</span>
+                  ) : (
+                    <span className="when num">{t.wksAgo(wksAgo)}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {showDesktopDetail && selected && selectedRecord && (
+        <section className="progress-detail-pane">
+          <div>
+            <h3>{selected[0]}</h3>
+            <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>
+          </div>
+          <div className="progress-detail-stats">
+            <div className="cell">
+              <div className="v ok">{selectedRecord.recW}</div>
+              <div className="l">{t.record}</div>
+            </div>
+            <div className="cell">
+              <div className="v">{selectedRecordRm}</div>
+              <div className="l">{t.estimated1rm}</div>
+            </div>
+            <div className="cell">
+              <div className="v">{latest?.top.weight ?? 0}</div>
+              <div className="l">{t.lastTopSet}</div>
+            </div>
+            <div className="cell">
+              <div className="v">{fmtKg(latestVolume)}</div>
+              <div className="l">{t.movedStat}</div>
+            </div>
+          </div>
+
+          <div>
+            <div className="section-label">{t.topSet12w}</div>
+            <div className="progress-detail-chart">
+              <svg viewBox="0 0 400 130" preserveAspectRatio="none">
+                <polyline
+                  points={polyline(
+                    [...selectedSessions].reverse().map((item) => ({
+                      rm: est1rm(item.top.weight ?? 0, item.top.reps),
+                    })),
+                    400,
+                    130,
+                  )}
+                  fill="none"
+                  stroke="var(--color-accent)"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="progress-chart-axis">
+                <span>
+                  {selectedSessions.length
+                    ? `${selectedSessions.length} ${t.gymStatSessions.toLowerCase()}`
+                    : ''}
+                </span>
+                <span>
+                  {selectedRecord.recW} kg · {t.record}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="section-label">{t.lastSessions}</div>
+            <table className="table progress-detail-table">
+              <thead>
+                <tr>
+                  <th>{t.dateCol}</th>
+                  <th>{t.topSetCol}</th>
+                  <th>{t.sets}</th>
+                  <th>{t.movedStat}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedSessions.slice(0, 5).map(({ workout, exercise, top }) => (
+                  <tr key={workout.id}>
+                    <td>{fmtDayMonth(workout.startedAt, locale)}</td>
+                    <td>
+                      {top.weight ?? 0} × {top.reps}
+                    </td>
+                    <td>{exercise.sets.length}</td>
+                    <td>{fmtKg(exerciseVolumeKg(exercise))}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
+}
+
+function ProgressKpi({
+  cur,
+  deltaPct,
+  label,
+}: {
+  cur: number;
+  deltaPct: number | null;
+  label: string;
+}) {
+  return (
+    <div className="kpi">
+      <div>
+        <div className="big num">
+          {(cur / 1000).toFixed(1)}
+          <span className="unit"> t</span>
+        </div>
+        <div className="lab">{label}</div>
+      </div>
+      <div style={{ marginLeft: 'auto' }}></div>
+      {deltaPct !== null && (
+        <span
+          className={`tag ${deltaPct >= 0 ? 'tag-accent' : 'tag-neutral'}`}
+          style={{ marginBottom: 22 }}
+        >
+          {deltaPct >= 0 ? '+' : '−'}
+          {Math.abs(deltaPct)}%
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Bars({ weeks, maxWeek, colors }: { weeks: number[]; maxWeek: number; colors: string[] }) {
+  return (
+    <div className="bars">
+      {weeks.map((v, i) => (
+        <div
+          key={i}
+          className="bar"
+          style={{
+            height: `${Math.max((v / maxWeek) * 100, 4)}%`,
+            background: colors[i],
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function UnlockDots({ finishedCount, label }: { finishedCount: number; label: string }) {
+  return (
+    <div className="unlock">
+      <span style={{ flex: 1 }}>{label}</span>
+      <span className="dots">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className={i < finishedCount ? 'on' : ''} />
+        ))}
+      </span>
+    </div>
+  );
+}
+
+function exerciseVolumeKg(exercise: Store['workouts'][number]['exercises'][number]): number {
+  return exercise.sets.reduce((sum, set) => sum + (set.weight ?? 0) * set.reps, 0);
+}
+
+function getDesktopDetailMatch(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    !!window.matchMedia &&
+    window.matchMedia('(min-width: 960px)').matches
+  );
+}
+
+function useDesktopDetail(): boolean {
+  const [matches, setMatches] = useState(getDesktopDetailMatch);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const query = window.matchMedia('(min-width: 960px)');
+    const onChange = () => setMatches(query.matches);
+    onChange();
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, []);
+
+  return matches;
 }

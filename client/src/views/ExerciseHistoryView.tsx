@@ -35,7 +35,7 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
           <Icon name="caret-left" />
         </button>
         <div>
-          <h1 className="title-26">{name}</h1>
+          <h2 className="title-26">{name}</h2>
           <div className="sub">
             {sessions.length === 1 ? t.oneSession : t.nSessionsSince(sessions.length, since)}
           </div>
@@ -55,7 +55,7 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
             className="v"
             style={{ fontSize: 20, color: rm === null ? 'var(--color-neutral-700)' : undefined }}
           >
-            {sessions.length >= 3 && rm !== null ? rm : '—'}
+            {rm !== null ? rm : '—'}
           </div>
           <div className="l">{t.est1rm}</div>
         </div>
@@ -115,8 +115,8 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
       ) : (
         <div className="empty-card">
           <Icon name="chart-line" />
-          <div className="t">{t.notEnoughData}</div>
-          <div className="s">{t.notEnoughDataBody}</div>
+          <h4 className="t">{t.notEnoughData}</h4>
+          <p className="s">{t.notEnoughDataBody}</p>
         </div>
       )}
 

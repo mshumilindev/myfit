@@ -1,7 +1,13 @@
 /** Gyms — design S-41…S-48. */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
-import { getCurrentPositionOnce, upsertGym, type useStore } from '../store';
+import {
+  getCurrentPositionOnce,
+  startWorkout,
+  upsertGym,
+  workoutVolumeKg,
+  type useStore,
+} from '../store';
 import {
   searchGyms,
   readCache,
@@ -18,7 +24,8 @@ import {
 } from '../data/gymProviders';
 import { HouseGraphic } from '../components/HouseGraphic';
 import { GymThumb } from '../components/GymThumb';
-import { useT } from '../i18n';
+import { RouteMap } from '../components/RouteMap';
+import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { Icon, Spinner } from '../ui';
 
 // Optional place-provider keys, read from Vite env at build time. Absent keys
@@ -40,10 +47,12 @@ type AddState =
   | { phase: 'coarse'; lat: number; lng: number; accuracy: number };
 
 export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [pendingName, setPendingName] = useState('');
   const [add, setAdd] = useState<AddState>({ phase: 'idle' });
   const [justAdded, setJustAdded] = useState<string | null>(null);
+  const [selectedGymId, setSelectedGymId] = useState<string | null>(null);
+  const showDesktopDetail = useDesktopDetail();
 
   async function locateFor(gymName: string) {
     const n = gymName.trim();
@@ -71,6 +80,26 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   }
 
   const denied = add.phase === 'denied';
+  const selectedGym = useMemo(
+    () => store.gyms.find((g) => g.id === selectedGymId) ?? store.gyms[0] ?? null,
+    [selectedGymId, store.gyms],
+  );
+  const selectedSessions = useMemo(
+    () =>
+      selectedGym
+        ? store.workouts
+            .filter((w) => w.gymId === selectedGym.id && w.finishedAt !== null)
+            .sort((a, b) => b.startedAt - a.startedAt)
+        : [],
+    [selectedGym, store.workouts],
+  );
+  const totalVol = selectedSessions.reduce((sum, workout) => sum + workoutVolumeKg(workout), 0);
+  const avgMs = selectedSessions.length
+    ? selectedSessions.reduce(
+        (sum, workout) => sum + ((workout.finishedAt ?? 0) - workout.startedAt),
+        0,
+      ) / selectedSessions.length
+    : 0;
 
   // Saved-gym thumbnails (logo → map tile → graphic) and street addresses,
   // resolved lazily per gym and keyed by id. Both are cache-backed and cheap,
@@ -95,171 +124,307 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
     };
   }, [store.gyms, savedAddrs]);
 
-  return (
-    <div className="screen">
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-        <h1 className="title-26">{t.gyms}</h1>
-      </div>
-      {store.gyms.length === 0 && add.phase === 'idle' && (
-        <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--color-neutral-500)', margin: 0 }}>
-          {t.gymsIntro}
-        </p>
-      )}
+  const openGym = (g: NonNullable<typeof selectedGym>) =>
+    shell.openOverlay({
+      screen: 'gym',
+      gymId: g.id,
+      name: g.name,
+      lat: g.lat,
+      lng: g.lng,
+      address: savedAddrs[g.id],
+    });
 
-      {denied && (
-        <div className="error-card">
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Icon name="map-pin-slash" className="" />
-            <div>
-              <div style={{ fontSize: 14, color: 'var(--color-danger-text)' }}>
-                {t.locationBlocked}
+  const startAtSelectedGym = () => {
+    if (!selectedGym) return;
+    const workout = startWorkout(selectedGym.id);
+    shell.openOverlay({ screen: 'session', workoutId: workout.id });
+  };
+
+  return (
+    <div className="screen gyms-page">
+      <div className="gyms-layout">
+        <section className="gyms-list-pane">
+          <div className="gyms-title-row">
+            <h2 className="title-26">{t.gyms}</h2>
+          </div>
+          {store.gyms.length === 0 && add.phase === 'idle' && (
+            <p className="gyms-intro">{t.gymsIntro}</p>
+          )}
+
+          {denied && (
+            <div className="error-card">
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Icon name="map-pin-slash" className="" />
+                <div>
+                  <div style={{ fontSize: 14, color: 'var(--color-danger-text)' }}>
+                    {t.locationBlocked}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      lineHeight: 1.5,
+                      color: 'var(--color-danger-text)',
+                      opacity: 0.8,
+                      marginTop: 5,
+                    }}
+                  >
+                    {t.locationBlockedBody}
+                  </div>
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  color: 'var(--color-danger-text)',
-                  opacity: 0.8,
-                  marginTop: 5,
-                }}
-              >
-                {t.locationBlockedBody}
+              <div style={{ display: 'flex', gap: 9, marginTop: 12 }}>
+                <button
+                  className="btn btn-secondary"
+                  style={{ minHeight: 36, fontSize: 13 }}
+                  onClick={() => locateFor(pendingName)}
+                >
+                  {t.tryAgain}
+                </button>
               </div>
             </div>
-          </div>
-          <div style={{ display: 'flex', gap: 9, marginTop: 12 }}>
-            <button
-              className="btn btn-secondary"
-              style={{ minHeight: 36, fontSize: 13 }}
-              onClick={() => locateFor(pendingName)}
-            >
-              {t.tryAgain}
-            </button>
-          </div>
-        </div>
-      )}
+          )}
 
-      {add.phase === 'coarse' && (
-        <>
-          <div className="banner danger-ring">
-            <Icon name="warning-circle" />
-            <span>{t.gpsCoarse(Math.round(add.accuracy))}</span>
-          </div>
-          <div style={{ display: 'flex', gap: 9 }}>
-            <button
-              className="btn btn-secondary"
-              style={{ minHeight: 38, fontSize: 13 }}
-              onClick={() => saveGym(pendingName, add.lat, add.lng, add.accuracy, 250)}
-            >
-              {t.saveAnyway}
-            </button>
-            <button
-              className="btn btn-secondary"
-              style={{ minHeight: 38, fontSize: 13, gap: 6 }}
-              onClick={() => locateFor(pendingName)}
-            >
-              <Icon name="arrow-clockwise" />
-              {t.retry}
-            </button>
-          </div>
-        </>
-      )}
+          {add.phase === 'coarse' && (
+            <>
+              <div className="banner danger-ring">
+                <Icon name="warning-circle" />
+                <span>{t.gpsCoarse(Math.round(add.accuracy))}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 9 }}>
+                <button
+                  className="btn btn-secondary"
+                  style={{ minHeight: 38, fontSize: 13 }}
+                  onClick={() => saveGym(pendingName, add.lat, add.lng, add.accuracy, 250)}
+                >
+                  {t.saveAnyway}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  style={{ minHeight: 38, fontSize: 13, gap: 6 }}
+                  onClick={() => locateFor(pendingName)}
+                >
+                  <Icon name="arrow-clockwise" />
+                  {t.retry}
+                </button>
+              </div>
+            </>
+          )}
 
-      {store.gyms.length > 0 && <div className="section-label">{t.myGyms}</div>}
-      {store.gyms.length > 0 &&
-        store.gyms.map((g) => (
-          <div
-            key={g.id}
-            className={`gym-card tappable${justAdded === g.id ? ' just-added' : ''}`}
-            role="button"
-            tabIndex={0}
-            onClick={() =>
-              shell.openOverlay({
-                screen: 'gym',
-                gymId: g.id,
-                name: g.name,
-                lat: g.lat,
-                lng: g.lng,
-                address: savedAddrs[g.id],
-              })
-            }
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ')
+          {store.gyms.length > 0 && <div className="section-label">{t.myGyms}</div>}
+          {store.gyms.length > 0 &&
+            store.gyms.map((g) => {
+              const selected = selectedGym?.id === g.id;
+              return (
+                <div
+                  key={g.id}
+                  className={`gym-card tappable${justAdded === g.id ? ' just-added' : ''}${
+                    selected ? ' selected' : ''
+                  }`}
+                  role="button"
+                  tabIndex={0}
+                  onMouseEnter={() => setSelectedGymId(g.id)}
+                  onFocus={() => setSelectedGymId(g.id)}
+                  onClick={() => {
+                    setSelectedGymId(g.id);
+                    openGym(g);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setSelectedGymId(g.id);
+                      openGym(g);
+                    }
+                  }}
+                >
+                  <span className="thumb">
+                    <GymThumb name={g.name} lat={g.lat} lng={g.lng} />
+                  </span>
+                  <div className="gym-card-body">
+                    <div className="head">
+                      <span className="n">{g.name}</span>
+                    </div>
+                    <div className="meta">
+                      <span>{savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}</span>
+                      <span>{t.radiusM(g.radiusM)}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+          {!denied && (
+            <GymSearch
+              savedGyms={store.gyms}
+              busy={add.phase === 'locating'}
+              onPick={(r) => {
+                if (r.address) cacheAddress(r.lat, r.lng, r.address);
                 shell.openOverlay({
                   screen: 'gym',
-                  gymId: g.id,
-                  name: g.name,
-                  lat: g.lat,
-                  lng: g.lng,
-                  address: savedAddrs[g.id],
+                  name: r.name,
+                  lat: r.lat,
+                  lng: r.lng,
+                  address: r.address,
                 });
-            }}
-          >
-            <span className="thumb">
-              <GymThumb name={g.name} lat={g.lat} lng={g.lng} />
-            </span>
-            <div className="gym-card-body">
-              <div className="head">
-                <span className="n">{g.name}</span>
+              }}
+              onManualHere={(n) => locateFor(n)}
+            />
+          )}
+
+          {add.phase === 'locating' && (
+            <div className="locating-card">
+              <div className="row">
+                <Icon name="crosshair" />
+                <span style={{ flex: 1 }}>{t.readingPosition}</span>
               </div>
-              <div className="meta">
-                <span>{savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}</span>
-                <span>{t.radiusM(g.radiusM)}</span>
+              <div className="sk" style={{ height: 10, width: '70%' }} />
+              <div className="sk" style={{ height: 10, width: '45%' }} />
+              <div className="footnote">{t.locatingNote}</div>
+            </div>
+          )}
+
+          {store.gyms.length === 0 && add.phase === 'idle' && !denied && (
+            <>
+              <div className="empty">
+                <Icon name="map-pin" />
+                <h4 className="t">{t.noGymsYet}</h4>
+                <p className="s">{t.noGymsBody}</p>
+              </div>
+              <div className="footnote" style={{ marginTop: 'auto' }}>
+                {t.gymsFootnote}
+              </div>
+            </>
+          )}
+
+          {denied && (
+            <div style={{ fontSize: 12, lineHeight: 1.55, color: 'var(--color-neutral-500)' }}>
+              {t.locationBlockedFootnote}
+            </div>
+          )}
+        </section>
+
+        {showDesktopDetail && selectedGym && (
+          <aside className="gyms-detail-pane">
+            <div className="gyms-detail-hero">
+              <GymThumb
+                name={selectedGym.name}
+                lat={selectedGym.lat}
+                lng={selectedGym.lng}
+                size={480}
+              />
+              <div className="gyms-hero-scrim" />
+              <div className="gyms-hero-text">
+                <h1>{selectedGym.name}</h1>
+                <p>
+                  {savedAddrs[selectedGym.id] ??
+                    `${selectedGym.lat.toFixed(5)}, ${selectedGym.lng.toFixed(5)}`}
+                </p>
               </div>
             </div>
-          </div>
-        ))}
 
-      {!denied && (
-        <GymSearch
-          savedGyms={store.gyms}
-          busy={add.phase === 'locating'}
-          onPick={(r) => {
-            if (r.address) cacheAddress(r.lat, r.lng, r.address);
-            shell.openOverlay({
-              screen: 'gym',
-              name: r.name,
-              lat: r.lat,
-              lng: r.lng,
-              address: r.address,
-            });
-          }}
-          onManualHere={(n) => locateFor(n)}
-        />
-      )}
+            <div className="gyms-detail-body">
+              <div className="gyms-actions">
+                <button className="btn btn-primary" onClick={startAtSelectedGym}>
+                  <Icon name="play" />
+                  {t.startSessionHere}
+                </button>
+                <button className="btn btn-secondary" onClick={() => openGym(selectedGym)}>
+                  <Icon name="pencil-simple" />
+                  {t.edit}
+                </button>
+              </div>
 
-      {add.phase === 'locating' && (
-        <div className="locating-card">
-          <div className="row">
-            <Icon name="crosshair" />
-            <span style={{ flex: 1 }}>{t.readingPosition}</span>
-          </div>
-          <div className="sk" style={{ height: 10, width: '70%' }} />
-          <div className="sk" style={{ height: 10, width: '45%' }} />
-          <div className="footnote">{t.locatingNote}</div>
-        </div>
-      )}
+              {selectedSessions.length > 0 ? (
+                <div className="gyms-stat-grid">
+                  <div className="cell">
+                    <div className="v">{selectedSessions.length}</div>
+                    <div className="l">{t.gymStatSessions}</div>
+                  </div>
+                  <div className="cell">
+                    <div className="v">{fmtTonnes(totalVol)}</div>
+                    <div className="l">{t.gymStatMoved}</div>
+                  </div>
+                  <div className="cell">
+                    <div className="v">{fmtDurationHM(avgMs)}</div>
+                    <div className="l">{t.gymStatAvg}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="detail-muted">{t.gymNoStats}</div>
+              )}
 
-      {store.gyms.length === 0 && add.phase === 'idle' && !denied && (
-        <>
-          <div className="empty">
-            <Icon name="map-pin" />
-            <div className="t">{t.noGymsYet}</div>
-            <div className="s">{t.noGymsBody}</div>
-          </div>
-          <div className="footnote" style={{ marginTop: 'auto' }}>
-            {t.gymsFootnote}
-          </div>
-        </>
-      )}
+              <section className="gyms-panel">
+                <div className="gyms-panel-head">
+                  <span>{t.lastSessions}</span>
+                  <span>{t.radiusM(selectedGym.radiusM)}</span>
+                </div>
+                {selectedSessions.length > 0 ? (
+                  <div className="gyms-session-table">
+                    {selectedSessions.slice(0, 5).map((workout) => (
+                      <button
+                        key={workout.id}
+                        className="gyms-session-row"
+                        onClick={() =>
+                          shell.openOverlay({ screen: 'past-workout', workoutId: workout.id })
+                        }
+                      >
+                        <span>
+                          <strong>{fmtDayMonth(workout.startedAt, locale)}</strong>
+                          <small>
+                            {workout.exercises.map((exercise) => exercise.name).join(' · ') ||
+                              t.noExercisesYet}
+                          </small>
+                        </span>
+                        <span>
+                          {fmtTonnes(workoutVolumeKg(workout))}
+                          <small>
+                            {workout.finishedAt
+                              ? fmtDurationHM(workout.finishedAt - workout.startedAt)
+                              : '—'}
+                          </small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="detail-muted">{t.gymNoStats}</p>
+                )}
+              </section>
 
-      {denied && (
-        <div style={{ fontSize: 12, lineHeight: 1.55, color: 'var(--color-neutral-500)' }}>
-          {t.locationBlockedFootnote}
-        </div>
-      )}
+              <section className="gyms-map-panel">
+                <div className="gyms-panel-head">
+                  <span>{t.gymMap}</span>
+                  <span>{t.gymDirections}</span>
+                </div>
+                <RouteMap from={null} to={{ lat: selectedGym.lat, lng: selectedGym.lng }} />
+              </section>
+            </div>
+          </aside>
+        )}
+      </div>
     </div>
   );
+}
+
+function getDesktopDetailMatch(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    !!window.matchMedia &&
+    window.matchMedia('(min-width: 960px)').matches
+  );
+}
+
+function useDesktopDetail(): boolean {
+  const [matches, setMatches] = useState(getDesktopDetailMatch);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const query = window.matchMedia('(min-width: 960px)');
+    const onChange = () => setMatches(query.matches);
+    onChange();
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, []);
+
+  return matches;
 }
 
 const PROVIDER_ORDER: ProviderId[] = ['local', 'osm', 'google', 'foursquare'];
@@ -496,7 +661,7 @@ function GymSearch({
         <button className="gym-result manual" disabled={busy} onClick={() => onManualHere(needle)}>
           <span className="thumb">{busy ? <Spinner onAccent /> : <Icon name="crosshair" />}</span>
           <span className="body">
-            <span className="name" style={{ color: 'var(--color-accent)' }}>
+            <span className="name" style={{ color: 'var(--color-accent-300)' }}>
               «{needle}»
             </span>
             <span className="addr">{busy ? t.locating : t.imHere}</span>

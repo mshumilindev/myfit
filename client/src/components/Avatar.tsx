@@ -59,7 +59,7 @@ export function Avatar({
 
   const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
   if (src) {
-    return <img className="avatar" style={style} src={src} alt="" />;
+    return <img className="avatar lighten" style={style} src={src} alt="" />;
   }
   return (
     <span className="avatar initials" style={style} aria-hidden>

@@ -3,6 +3,20 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/@phosphor-icons')) {
+            return 'vendor-icons';
+          }
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

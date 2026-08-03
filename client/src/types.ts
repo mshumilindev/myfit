@@ -61,6 +61,20 @@ export interface QueuedMutation {
   queuedAt: number;
 }
 
-export type SyncStatus = 'synced' | 'pending' | 'offline' | 'syncing';
+export type SyncStatus = 'synced' | 'pending' | 'offline' | 'syncing' | 'failed';
+
+export interface Notice {
+  id: string;
+  kind: string;
+  actor: string | null;
+  detail: string | null;
+  createdAt: number;
+  read: boolean;
+}
+
+export interface SyncError {
+  status: number;
+  statusLine: string;
+}
 
 export const AUTO_FINISH_MS = 8 * 60 * 60 * 1000;

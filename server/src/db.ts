@@ -148,6 +148,7 @@ CREATE TABLE IF NOT EXISTS programs (
   name          TEXT NOT NULL,
   weeks         INTEGER NOT NULL DEFAULT 8,
   days_per_week INTEGER NOT NULL DEFAULT 3,
+  status        TEXT NOT NULL DEFAULT 'draft',
   updated_at    INTEGER NOT NULL
 );
 
@@ -172,9 +173,24 @@ CREATE TABLE IF NOT EXISTS program_assignments (
   assigned_by TEXT NOT NULL,
   started_at  INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS notices (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind       TEXT NOT NULL,
+  actor      TEXT,
+  detail     TEXT,
+  created_at INTEGER NOT NULL,
+  read_at    INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_notices_user ON notices(user_id, created_at DESC);
 `);
 
-for (const stmt of ['ALTER TABLE program_items ADD COLUMN equipment TEXT']) {
+for (const stmt of [
+  'ALTER TABLE program_items ADD COLUMN equipment TEXT',
+  "ALTER TABLE programs ADD COLUMN status TEXT NOT NULL DEFAULT 'active'",
+  'ALTER TABLE programs ADD COLUMN day_names TEXT',
+]) {
   try {
     db.exec(stmt);
   } catch {
@@ -238,7 +254,19 @@ export interface ProgramRow {
   name: string;
   weeks: number;
   days_per_week: number;
+  status: 'draft' | 'active' | 'archived';
+  day_names: string | null;
   updated_at: number;
+}
+
+export interface NoticeRow {
+  id: string;
+  user_id: string;
+  kind: string;
+  actor: string | null;
+  detail: string | null;
+  created_at: number;
+  read_at: number | null;
 }
 
 export interface ProgramItemRow {

@@ -23,6 +23,8 @@ const shell: Shell = {
   goTab: vi.fn(),
   toast: vi.fn(),
   snack: vi.fn(),
+  signOut: vi.fn(),
+  queueLength: 0,
 };
 
 function store(patch: Partial<StoreState> = {}): StoreState {
@@ -129,9 +131,72 @@ describe('F-02/F-08 shell views and design states', () => {
     await userEvent.click(programsTab);
 
     expect(await screen.findByRole('heading', { name: 'Programs' })).toBeTruthy();
-    expect(screen.getByText('No program assigned')).toBeTruthy();
+    expect(await screen.findByText('No program assigned')).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Apps' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Services' })).toBeNull();
+  });
+
+  it('matches member, admin and trainer tab sets to their role shells', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.endsWith('/api/tracker/state')) {
+          return new Response(JSON.stringify({ workouts: [], gyms: [], reminders: [] }), {
+            status: 200,
+          });
+        }
+        if (url.endsWith('/api/trainer/clients')) {
+          return new Response(JSON.stringify({ clients: [] }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+      }),
+    );
+
+    window.location.hash = '#/today';
+    setAuth('token', 'member', 'member');
+    __replaceStateForTests(store());
+    const member = render(<App />);
+
+    expect(await screen.findByRole('button', { name: 'Today' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Progress' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Gyms' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Programs' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Me' })).toBeTruthy();
+    expect(
+      [...member.container.querySelectorAll('.tabbar button')].map((x) => x.textContent),
+    ).toEqual(['Today', 'Progress', 'Programs', 'Gyms', 'Me']);
+    expect(screen.queryByRole('button', { name: 'Users' })).toBeNull();
+    member.unmount();
+
+    window.location.hash = '#/today';
+    setAuth('token', 'admin', 'admin');
+    __replaceStateForTests(store());
+    const admin = render(<App />);
+
+    expect(await screen.findByRole('button', { name: 'Today' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Users' })).toBeTruthy();
+    expect(
+      [...admin.container.querySelectorAll('.tabbar button')].map((x) => x.textContent),
+    ).toEqual(['Today', 'Progress', 'Programs', 'Gyms', 'Users']);
+    expect(screen.queryByRole('button', { name: 'Me' })).toBeNull();
+    admin.unmount();
+
+    window.location.hash = '#/today';
+    setAuth('token', 'coach', 'trainer');
+    __replaceStateForTests(store());
+    render(<App />);
+
+    expect(await screen.findByRole('button', { name: 'Clients' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Programs' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Me' })).toBeTruthy();
+    expect([...document.querySelectorAll('.tabbar button')].map((x) => x.textContent)).toEqual([
+      'Clients',
+      'Programs',
+      'Me',
+    ]);
+    expect(screen.queryByRole('button', { name: 'Today' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Progress' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Gyms' })).toBeNull();
   });
 
   it('opens every admin person through the full user details page', async () => {

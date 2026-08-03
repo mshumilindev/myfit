@@ -110,6 +110,7 @@ export const uk: Strings = {
   repeat: (name) => `Повторити ${name}`,
   autoClosed: 'Авто-закрито',
   weekDayLetters: ['П', 'В', 'С', 'Ч', 'П', 'С', 'Н'],
+  weekDayNames: ['Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота', 'Неділя'],
 
   // Today · desktop 3-column (W-04/W-05)
   restSinceLast: 'Від останнього підходу',
@@ -292,6 +293,11 @@ export const uk: Strings = {
   myGyms: 'Мої джими',
   nearbyGyms: 'Поблизу',
   nearbyQuery: 'спортзал',
+  navMe: 'Я',
+  profileTrainerPriv: 'Права тренера',
+  profileTrainerPrivHint: 'Дає доступ до призначених клієнтів і створення програм.',
+  trReadonlyBar: 'Ти можеш переглядати дані клієнта, але не редагувати залоговане.',
+  trAssignProgram: 'Призначити програму',
   searchGymEmpty: 'Нічого не знайдено — додай вручну нижче',
   addManually: 'Додати вручну',
   pickGymTitle: 'Де ти тренуєшся?',
@@ -392,7 +398,7 @@ export const uk: Strings = {
   roleMember: 'Учасник',
   roleTrainer: 'Тренер',
   roleAdmin: 'Адмін',
-  adminPeople: 'Люди',
+  adminPeople: 'Користувачі',
   adminSummary: (m, tr, p) => `${m} учасників · ${tr} тренерів · ${p} запрошень чекає`,
   adminNewMember: 'Новий учасник',
   adminNewTrainer: 'Додати тренера',
@@ -407,6 +413,9 @@ export const uk: Strings = {
   adminColLast: 'Остання сесія',
   adminColVol: 'Обсяг за 30 днів',
   adminColStatus: 'Статус',
+  adminMemberRoleHint: 'Тренується. Бачить лише власні дані.',
+  adminTrainerRoleHint: 'Тренується і читає клієнтів, яких ти призначиш.',
+  adminAdminRoleHint: 'Повний доступ, включно з твоїм акаунтом.',
   stTrainingNow: 'Тренується',
   stActive: 'Активний',
   stDormant: (d) => `Неактивний · ${d} дн`,
@@ -465,6 +474,7 @@ export const uk: Strings = {
   adminPerWeek: 'На тиждень',
   adminRecent: 'Останні сесії',
   trMyClients: 'Мої клієнти',
+  trClientsTab: 'Клієнти',
   trSummary: (n, live) => `${n} призначено · ${live} тренується зараз`,
   trReadOnly: (n) =>
     `Лише читання — ти дивишся дані ${n} як тренер. Тут нічого не можна змінити, і людина бачить, що ти заходив.`,
@@ -474,6 +484,13 @@ export const uk: Strings = {
   trEmptyTitle: 'Клієнтів ще не призначено',
   trEmptyBody:
     'Кого ти тренуєш — вирішує адмін. Щойно когось призначать, вони зʼявляться тут з усією історією — тобі нічого робити не треба.',
+  trFooterNote: 'Клієнтів призначає адмін — шукати інших людей не можна.',
+  trWeekAcrossClients: 'Цей тиждень по клієнтах',
+  trClient: 'Клієнт',
+  trVsLastWeek: 'до минулого тижня',
+  trLastSeen: 'Остання активність',
+  trLiveNow: 'Наживо зараз',
+  trLiveReadOnly: 'Оновлюється наживо · ти не можеш це редагувати',
   trLostAccess: (n) => `${n} більше не твій клієнт.`,
   trNotes: 'Твої нотатки',
   trAddNote: 'Додати нотатку',
@@ -498,6 +515,9 @@ export const uk: Strings = {
   profileAvatarRemoved: 'Фото видалено',
   profileAvatarType: 'Використай JPEG, PNG або WebP.',
   profileAvatarTooBig: 'Зображення має бути не більше 10 MB.',
+  profileSettings: 'Налаштування',
+  profileUnits: 'Одиниці',
+  profileUnitsKg: 'кг',
   profileSecurity: 'Безпека',
   profilePasswordBody:
     'Зміни пароль через поточний пароль. Адміни й тренери не бачать твій пароль.',
@@ -544,19 +564,41 @@ export const uk: Strings = {
   progTitle: 'Програми',
   progNew: 'Нова програма',
   progName: 'Назва програми',
+  progNameHeader: 'Заголовок програми',
   progWeeks: 'Тижнів',
   progDaysPerWeek: 'Сесій на тиждень',
   progDay: (n) => `День ${n}`,
   progAddItem: 'Додати вправу',
+  progAddItemToDay: (day) => `Додати вправу до ${day}`,
   progAssignTo: (n) => `Призначити ${n}`,
   progWeekN: (n) => `Тиждень ${n}`,
-  progSessions: (d, t) => `${d} з ${t} сесій`,
+  progSessions: (d, t) => (t > 0 ? `${d} з ${t} сесій` : `${d} сесій`),
   progAdherence: 'Дотримання програми',
   progStart: (n) => `Почати день ${n}`,
   progAssignedBy: (n) => `Призначив ${n}`,
   progNone: 'Програму не призначено',
   progRemove: 'Прибрати програму',
   progEmpty: 'Програм ще немає — створи і признач клієнту.',
+  progSearchPrograms: 'Пошук програм',
+  progNoSearchResults: 'Збігів серед програм немає.',
+  progDuplicate: 'Дублювати',
+  progDuplicateName: (name) => `${name} копія`,
+  progWeeksCount: (n) => `${n} ${n === 1 ? 'тиждень' : n >= 2 && n <= 4 ? 'тижні' : 'тижнів'}`,
+  progWeeksWord: (n) => (n === 1 ? 'тиждень' : n >= 2 && n <= 4 ? 'тижні' : 'тижнів'),
+  progDaysCount: (n) => `${n} ${n === 1 ? 'день' : 'дні'} на тиждень`,
+  progDaysAWeekWord: (n) => `${n === 1 ? 'день' : 'дні'} на тиждень`,
+  progWeekShort: (n) => (n === 1 ? 'тиж. 1' : `тиждень ${n}`),
+  progAssignedMembers: (n) =>
+    `призначено ${n} ${n === 1 ? 'учаснику' : n >= 2 && n <= 4 ? 'учасникам' : 'учасникам'}`,
+  progCreatedBy: (name) => `створив ${name}`,
+  progSelectedDayTitle: (n) => `День ${n}`,
+  progDayLine: (weekday, day) => `${weekday} · ${day}`,
+  progDayWorkoutSummary: (exercises, sets) =>
+    `${exercises} ${exercises === 1 ? 'вправа' : 'вправи'} · ${sets} ${sets === 1 ? 'підхід' : 'підходів'}`,
+  progNoWeightNote:
+    'Колонки ваги тут немає навмисно. Програма описує роботу; сесія підставляє навантаження з історії кожного учасника, тому одна програма підходить різним людям.',
+  csvExportProgram: 'Експорт програми',
+  exerciseLabel: 'Вправа',
   progMemberEmpty: 'Склади власний тиждень або дочекайся програми від тренера.',
   progNoItems: 'На цей день ще немає вправ.',
   progSets: 'Підходи',
@@ -565,11 +607,107 @@ export const uk: Strings = {
   progAssignClient: 'Обери клієнта',
   progNoClients: 'Клієнтів немає',
   progAssign: 'Призначити',
+  progStatusDraft: 'Чернетка',
+  progStatusActive: 'Активна',
+  progStatusArchived: 'В архіві',
+  progStatusMine: 'Моя',
+  progEditPlan: 'Редагувати план',
+  progRoutePlanWeek: 'Спланувати тиждень',
+  progRoutePlanWeekBody: 'Розкладіть сім днів один раз — зручно для окремого блоку тренувань.',
+  progRouteBuild: 'Створити програму',
+  progRouteBuildBody: 'Кілька тижнів із днями, підходами й повтореннями, які можна активувати.',
+  progRouteWait: 'Чекати на тренера',
+  progRouteWaitBody:
+    'Якщо до вас прикріплено тренера, створена ним програма зʼявиться тут автоматично.',
+  progNoEndDate: 'Без кінцевої дати',
+  progOpenEnded: 'Безстроково',
+  trStat7Days: 'Останні 7 днів',
+  progDayNamePlaceholder: 'Назва дня (необовʼязково)',
+  progBackfill: 'Дозаписати',
+  progNoticeFinished: 'Програму завершено — гарна робота.',
+  progNoticeWeekComplete: (week) => `Тиждень ${week} завершено.`,
+  progNoticeMissed: (n) =>
+    n === 1
+      ? 'Пропущено 1 день — дозапишіть його нижче.'
+      : `Пропущено днів: ${n} — дозапишіть їх нижче.`,
+  noticeText: (kind, actor, detail) => {
+    switch (kind) {
+      case 'program-assigned':
+        return `${actor ?? 'Тренер'} призначив вам програму «${detail}».`;
+      case 'program-replaced':
+        return `${actor ?? 'Тренер'} замінив вашу активну програму на «${detail}».`;
+      case 'role-changed':
+        return `Вашу роль змінено на ${detail}.`;
+      case 'trainer-assigned':
+        return `${detail} тепер ваш тренер.`;
+      case 'trainer-removed':
+        return 'Вашого тренера відкріплено.';
+      case 'client-assigned':
+        return `${detail} призначено вам як клієнта.`;
+      case 'client-removed':
+        return `${detail} більше не ваш клієнт.`;
+      default:
+        return 'У вас нове сповіщення.';
+    }
+  },
+  syncBlockedTitle: 'Синхронізацію зупинено',
+  syncBlockedBody:
+    'Одну зміну відхилено, тож наступні не синхронізуються. Повторіть спробу або відкиньте цю зміну, щоб пропустити решту.',
+  syncDiscard: 'Відкинути зміну',
+  assignSearchMembers: 'Пошук учасників',
+  assignTitle: (program) => `Призначити «${program}»`,
+  assignIntro:
+    'Призначення замінить активну програму учасника. Історія тренувань не зміниться, і він усе ще зможе почати сесію поза планом.',
+  assignStartWeek: 'Тиждень старту',
+  assignStartPoint: (week, weekday) => `Старт у ${weekday}, з ${week}-го тижня програми.`,
+  assignReplaceWarn:
+    'Поточну активну програму кожного учасника буде замінено. Історія тренувань лишається незмінною.',
+  assignClientHint: 'ваш клієнт · активну програму буде замінено',
+  assignConfirmN: (n) => (n === 1 ? 'Призначити' : `Призначити ${n}`),
+  csvImport: 'Імпорт CSV',
+  csvExport: 'Експорт CSV',
+  csvTemplate: 'Завантажити шаблон',
+  csvColumns:
+    'Колонки: День, Вправа, Тип, Підходи, Повторення, Тривалість, Обладнання. Колонка ваги ігнорується.',
+  csvChooseFile: 'Вибрати файл CSV',
+  csvOrPaste: 'або вставте CSV',
+  csvMapBody:
+    'Зіставте кожну колонку з полем. Виявлену колонку ваги буде відкинуто — програми не містять ваги.',
+  csvContinue: 'Далі',
+  csvBack: 'Назад',
+  csvWeightDiscarded: 'Знайдено й відкинуто колонку ваги. Програми не містять ваги.',
+  csvNoRows: 'Рядків не знайдено — перевірте, що є заголовок і хоча б один рядок.',
+  csvShape: (rows, days) => `${rows} рядків · ${days} днів`,
+  csvValidCount: (valid, problems) => `${valid} готово · ${problems} потребують уваги`,
+  csvImportN: (n) => `Імпортувати ${n} рядків`,
+  csvUseSuggestion: (name) => `Взяти «${name}»`,
+  csvFields: {
+    ignore: 'Ігнорувати',
+    day: 'День',
+    name: 'Вправа',
+    kind: 'Тип',
+    sets: 'Підходи',
+    reps: 'Повторення',
+    setsReps: 'Підходи × повтори',
+    duration: 'Тривалість',
+    equipment: 'Обладнання',
+    weight: 'Вага (відкинуто)',
+  },
+  csvProblems: {
+    'missing-name': 'Немає назви вправи',
+    'missing-reps': 'Немає повторень',
+    'bad-day': 'День має бути 1–7',
+    'unknown-equipment': 'Невідоме обладнання',
+    'unmatched-exercise': 'Невідома вправа',
+  },
+  progActivate: 'Активувати',
+  progArchive: 'В архів',
   progWeekStrip: 'Тиждень програми',
   progPrescriptionRule: 'Припис — це підходи, повторення й обладнання. Вага йде з історії.',
   progCopyDay: 'Скопіювати день у',
   progCopyChoose: 'Обери день',
   progEquipment: 'Обладнання',
+  progRestShort: 'Відпочинок',
   progRestDay: 'День відпочинку',
   progPlanProgress: 'Прогрес плану',
   progSetsDone: (done, total) => `${done} / ${total} підходів`,

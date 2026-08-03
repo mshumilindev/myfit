@@ -11,6 +11,7 @@ package-lock.json
 *.sqlite
 client/public/
 docs/design/boards/
+My Fit - FINAL.html
 
 # Зовнішні конфіги, чутливі до форматування
 cloudflare/config.example.yml

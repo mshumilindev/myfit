@@ -33,7 +33,7 @@ export function WeekStrip() {
       {days.map((d, i) => (
         <div key={i} className={`cell${d.isToday ? ' today-ring' : ''}`}>
           <div className="day">{d.letter}</div>
-          <div className={`dot${d.logged ? ' on' : ''}`} />
+          <div className={`dot${d.isToday ? ' today' : d.logged ? ' done' : ''}`} />
         </div>
       ))}
     </div>

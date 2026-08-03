@@ -1,7 +1,7 @@
 /** Auth — design S-01…S-06. Sign-in default, sign-up open to anyone. */
 import { useEffect, useState, type FormEvent } from 'react';
 import { HttpError, request, setAuth } from '../api';
-import { useT } from '../i18n';
+import { fmtSessionClock, useT } from '../i18n';
 import { Icon, LanguageSelector, Spinner } from '../ui';
 
 type Mode = 'signin' | 'signup';
@@ -15,6 +15,8 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lockUntil, setLockUntil] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   const [identifier, setIdentifier] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -56,6 +58,13 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
       firstName.trim().length < 2 ||
       username.trim().length < 2);
 
+  useEffect(() => {
+    if (lockUntil === null) return;
+    const iv = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(iv);
+  }, [lockUntil]);
+  const locked = lockUntil !== null && lockUntil > now;
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (busy || (mode === 'signup' && signupInvalid)) return;
@@ -89,7 +98,8 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
       onLoggedIn();
     } catch (err) {
       if (err instanceof HttpError && err.status === 401) setError(t.wrongCredentials);
-      else if (err instanceof HttpError && err.status === 429) setError(t.tooManyAttempts);
+      else if (err instanceof HttpError && err.status === 429)
+        setLockUntil(Date.now() + 15 * 60 * 1000);
       else setError(err instanceof Error ? err.message : t.error);
     } finally {
       setBusy(false);
@@ -103,7 +113,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           <Icon name="barbell" className="wordmark" />
           <LanguageSelector />
         </div>
-        <h1 className="auth-title">{mode === 'signin' ? t.appName : t.createYourAccount}</h1>
+        <h2 className="auth-title">{mode === 'signin' ? t.appName : t.createYourAccount}</h2>
         {mode === 'signin' ? (
           <p className="auth-sub">{t.authTagline}</p>
         ) : (
@@ -127,7 +137,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.emailOrUsername}
               value={identifier}
               autoComplete="username"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onChange={(e) => setIdentifier(e.target.value)}
             />
             <input
@@ -136,7 +146,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.password}
               value={password}
               autoComplete="current-password"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onChange={(e) => setPassword(e.target.value)}
             />
           </>
@@ -147,7 +157,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.firstName}
               value={firstName}
               autoComplete="given-name"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onBlur={() => setTouched((x) => ({ ...x, firstName: true }))}
               onChange={(e) => setFirstName(e.target.value)}
             />
@@ -162,7 +172,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.lastName}
               value={lastName}
               autoComplete="family-name"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onChange={(e) => setLastName(e.target.value)}
             />
             <input
@@ -170,7 +180,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.username}
               value={username}
               autoComplete="username"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onBlur={() => setTouched((x) => ({ ...x, username: true }))}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -186,7 +196,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.email}
               value={email}
               autoComplete="email"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onBlur={() => setTouched((x) => ({ ...x, email: true }))}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -202,7 +212,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
               placeholder={t.passwordMin}
               value={password}
               autoComplete="new-password"
-              disabled={unreachable || busy}
+              disabled={unreachable || busy || locked}
               onBlur={() => setTouched((x) => ({ ...x, password: true }))}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -215,33 +225,36 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           </>
         )}
 
-        {error && (
-          <div className="field-error">
-            <Icon name="warning-circle" />
-            {error}
+        {locked ? (
+          <div className="banner danger-ring">
+            <Icon name="lock-simple" />
+            <span style={{ flex: 1 }}>{t.tooManyAttempts}</span>
+            <span className="num">{fmtSessionClock((lockUntil ?? now) - now)}</span>
           </div>
+        ) : (
+          error && (
+            <div className="field-error">
+              <Icon name="warning-circle" />
+              {error}
+            </div>
+          )
         )}
 
         <button
           className="btn btn-primary"
           style={{ minHeight: 48, fontSize: 15, marginTop: 'var(--space-3)', gap: 9 }}
-          disabled={busy || checking || unreachable || (mode === 'signup' && signupInvalid)}
+          disabled={
+            busy || checking || unreachable || locked || (mode === 'signup' && signupInvalid)
+          }
         >
-          {busy && <Spinner onAccent />}
-          {mode === 'signin'
-            ? busy
-              ? t.signingIn
-              : t.signIn
-            : busy
-              ? t.creatingAccount
-              : t.createAccount}
+          {busy ? <Spinner onAccent /> : mode === 'signin' ? t.signIn : t.createAccount}
         </button>
 
         {unreachable && (
           <button
             type="button"
             className="btn btn-secondary"
-            style={{ minHeight: 42, fontSize: 13, gap: 7 }}
+            style={{ minHeight: 44, fontSize: 13, gap: 7 }}
             onClick={() => {
               setChecking(true);
               probe();
@@ -263,6 +276,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           {mode === 'signin' ? t.newHereCreate : t.haveAccountSignIn}
         </button>
       </div>
+      <div className="auth-visual" aria-hidden />
     </form>
   );
 }

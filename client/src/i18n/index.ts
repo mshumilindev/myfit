@@ -115,6 +115,11 @@ export function fmtFullDate(ts: number, locale: LocaleId = current): string {
   }).format(new Date(ts));
 }
 
+/** "Monday" — weekday name in the active locale. */
+export function fmtWeekday(ts: number, locale: LocaleId = current): string {
+  return new Intl.DateTimeFormat(dateLocale[locale], { weekday: 'long' }).format(new Date(ts));
+}
+
 /** "31 July" */
 export function fmtDayMonth(ts: number, locale: LocaleId = current): string {
   return new Intl.DateTimeFormat(dateLocale[locale], {

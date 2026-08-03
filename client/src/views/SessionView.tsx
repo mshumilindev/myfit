@@ -30,6 +30,8 @@ import {
   workoutVolumeKg,
   reorderExercises,
 } from '../store';
+import { LiveHero } from '../components/LiveHero';
+import { GymThumb } from '../components/GymThumb';
 import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import {
   fmtClock,
@@ -47,7 +49,6 @@ import { ConfirmDialog, Dialog, EmptyState, Icon, Sheet, Switch } from '../ui';
 import { LOCALE_IDS } from '../i18n';
 import { searchCatalog } from '../data/exercises';
 
-const REST_SECONDS = 90;
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
 
 type SheetState =
@@ -83,7 +84,6 @@ export function SessionView(props: {
   const dragId = useRef<string | null>(null);
   const [renameVal, setRenameVal] = useState('');
   const [summary, setSummary] = useState(false);
-  const [restUntil, setRestUntil] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const startAddConsumed = useRef(false);
 
@@ -127,6 +127,20 @@ export function SessionView(props: {
   );
   const planPercent =
     prescribedSets > 0 ? Math.round((loggedPrescribedSets / prescribedSets) * 100) : 0;
+  const sortedExercises = [...workout.exercises].sort((a, b) => a.position - b.position);
+  const activeExerciseId =
+    sortedExercises.find((ex) => {
+      const planned = Math.max(0, ex.plannedSets ?? 0);
+      return planned > 0 ? ex.sets.length < planned : ex.sets.length === 0;
+    })?.id ??
+    sortedExercises[0]?.id ??
+    null;
+  const lastTimeRows = sortedExercises
+    .filter((e) => isStrengthExercise(e))
+    .map((e) => ({ name: e.name, prev: prevLift(e.name, workout.id) }))
+    .filter((r) => r.prev);
+  const showSessionSide =
+    !!(live || props.past) && !!(gym || lastTimeRows.length > 0 || entries > 0);
 
   function ghostFor(ex: Exercise): { reps: number; weight: number | null } {
     const last = ex.sets[ex.sets.length - 1];
@@ -166,7 +180,6 @@ export function SessionView(props: {
       ...ex.sets.filter((s) => !s.isWarmup).map((s) => s.weight ?? 0),
     );
     upsertSet(workout!.id, ex.id, { reps: v.reps, weight: v.weight, isWarmup: false });
-    if (live) setRestUntil(Date.now() + REST_SECONDS * 1000);
     if (v.weight !== null && v.weight > base && base > 0) {
       props.shell.toast({
         kind: 'ok',
@@ -190,7 +203,6 @@ export function SessionView(props: {
       calories: null,
       rpe: null,
     });
-    if (live) setRestUntil(Date.now() + REST_SECONDS * 1000);
   }
 
   function formatTimedEntry(s: SetEntry): string {
@@ -281,9 +293,9 @@ export function SessionView(props: {
           </div>
         </div>
         <div>
-          <h1 className="headline" style={{ fontSize: 32 }}>
+          <h2 className="headline" style={{ fontSize: 32 }}>
             {t.sessionDone}
-          </h1>
+          </h2>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-500)', marginTop: 6 }}>
             {fmtFullDate(workout.startedAt, locale)}
             {gymName ? ` · ${gymName}` : ''}
@@ -377,9 +389,30 @@ export function SessionView(props: {
         }`;
 
   return (
-    <div className="screen paned session-screen">
+    <div
+      className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}`}
+    >
       <div className="pane-main">
         <div className={`session-top${live ? ' live-toolbar' : ''}`}>
+          {live && (
+            <LiveHero
+              workout={workout}
+              gym={gym}
+              gyms={store.gyms}
+              offline={store.syncStatus === 'offline'}
+              queued={store.queue.length}
+              mode="session"
+              actions={
+                <button
+                  className="btn btn-secondary"
+                  disabled={entries === 0}
+                  onClick={requestFinish}
+                >
+                  {t.finish}
+                </button>
+              }
+            />
+          )}
           <button className="back" onClick={props.onClose} aria-label={t.backAction}>
             <Icon name="caret-left" />
           </button>
@@ -395,27 +428,7 @@ export function SessionView(props: {
               )}
             </div>
           )}
-          {live && (
-            <div className="mid">
-              <div className="kicker accent">{gymName ? t.inSessionAt(gymName) : t.inSession}</div>
-              <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
-            </div>
-          )}
-
-          {live ? (
-            <div className="session-top-right">
-              <span className="session-clock">
-                {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
-              </span>
-              <button
-                className="btn btn-secondary"
-                disabled={entries === 0}
-                onClick={requestFinish}
-              >
-                {t.finish}
-              </button>
-            </div>
-          ) : workout.autoFinished ? (
+          {live ? null : workout.autoFinished ? (
             <button className="btn btn-secondary" onClick={() => reopenWorkout(workout.id)}>
               {t.reopen}
             </button>
@@ -430,7 +443,7 @@ export function SessionView(props: {
           )}
         </div>
 
-        {live && (sets > 0 || cardioMinutes > 0) && (
+        {live && (
           <div className="stats-strip">
             <div>
               <div className="v">{sets}</div>
@@ -512,253 +525,252 @@ export function SessionView(props: {
             </div>
           ) : (
             <>
-              {[...workout.exercises]
-                .sort((a, b) => a.position - b.position)
-                .map((ex) => {
-                  const ghost = ghostFor(ex);
-                  const timedGhost = timedGhostFor(ex);
-                  const prev = prevLift(ex.name, workout.id);
-                  const kind = exerciseKind(ex);
-                  const timed = isTimedExercise(ex);
-                  const planned = Math.max(0, ex.plannedSets ?? 0);
-                  const directLogBlocked = !timed && planned > 0 && ghost.weight === null;
-                  return (
-                    <div
-                      key={ex.id}
-                      className="exercise-card"
-                      onDragOver={(e) => {
-                        if (dragId.current && dragId.current !== ex.id) e.preventDefault();
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        const from = dragId.current;
-                        dragId.current = null;
-                        if (!from || from === ex.id) return;
-                        const ids = [...workout.exercises]
-                          .sort((a, b) => a.position - b.position)
-                          .map((x) => x.id);
-                        const fi = ids.indexOf(from);
-                        const ti = ids.indexOf(ex.id);
-                        if (fi < 0 || ti < 0) return;
-                        ids.splice(ti, 0, ids.splice(fi, 1)[0]);
-                        reorderExercises(workout.id, ids);
-                      }}
-                    >
-                      <div className="head">
-                        {renaming === ex.id ? (
-                          <>
-                            <input
-                              className="input"
-                              style={{
-                                minHeight: 40,
-                                fontSize: 15,
-                                borderColor: 'var(--color-accent)',
-                              }}
-                              value={renameVal}
-                              autoFocus
-                              onChange={(e) => setRenameVal(e.target.value)}
-                            />
-                            <button
-                              className="btn btn-primary"
-                              style={{ height: 40, fontSize: 13 }}
-                              onClick={() => {
-                                if (renameVal.trim())
-                                  renameExercise(workout.id, ex.id, renameVal.trim());
-                                setRenaming(null);
-                              }}
-                            >
-                              {t.save}
-                            </button>
-                          </>
-                        ) : (
-                          <>
+              {sortedExercises.map((ex) => {
+                const ghost = ghostFor(ex);
+                const timedGhost = timedGhostFor(ex);
+                const prev = prevLift(ex.name, workout.id);
+                const kind = exerciseKind(ex);
+                const timed = isTimedExercise(ex);
+                const planned = Math.max(0, ex.plannedSets ?? 0);
+                const completed = planned > 0 && ex.sets.length >= planned;
+                const directLogBlocked = !timed && planned > 0 && ghost.weight === null;
+                return (
+                  <div
+                    key={ex.id}
+                    className={`exercise-card${completed ? ' completed' : ''}${activeExerciseId === ex.id ? ' active' : ''}${timed ? ' timed-card' : ''}${ex.sets.length === 0 ? ' empty-card' : ''}`}
+                    onDragOver={(e) => {
+                      if (dragId.current && dragId.current !== ex.id) e.preventDefault();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const from = dragId.current;
+                      dragId.current = null;
+                      if (!from || from === ex.id) return;
+                      const ids = [...workout.exercises]
+                        .sort((a, b) => a.position - b.position)
+                        .map((x) => x.id);
+                      const fi = ids.indexOf(from);
+                      const ti = ids.indexOf(ex.id);
+                      if (fi < 0 || ti < 0) return;
+                      ids.splice(ti, 0, ids.splice(fi, 1)[0]);
+                      reorderExercises(workout.id, ids);
+                    }}
+                  >
+                    <div className="head">
+                      {renaming === ex.id ? (
+                        <>
+                          <input
+                            className="input"
+                            style={{
+                              minHeight: 40,
+                              fontSize: 15,
+                              borderColor: 'var(--color-accent)',
+                            }}
+                            value={renameVal}
+                            autoFocus
+                            onChange={(e) => setRenameVal(e.target.value)}
+                          />
+                          <button
+                            className="btn btn-primary"
+                            style={{ height: 40, fontSize: 13 }}
+                            onClick={() => {
+                              if (renameVal.trim())
+                                renameExercise(workout.id, ex.id, renameVal.trim());
+                              setRenaming(null);
+                            }}
+                          >
+                            {t.save}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span
+                            className="drag-handle"
+                            draggable
+                            title={t.reorder}
+                            onDragStart={(e) => {
+                              dragId.current = ex.id;
+                              e.dataTransfer.effectAllowed = 'move';
+                            }}
+                            onDragEnd={() => {
+                              dragId.current = null;
+                            }}
+                          >
+                            <Icon name="dots-six" />
+                          </span>
+                          <button
+                            className="name"
+                            onClick={() =>
+                              props.shell.openOverlay({
+                                screen: 'exercise-history',
+                                name: ex.name,
+                              })
+                            }
+                          >
+                            {ex.name}
+                          </button>
+                          {timed && <span className="prev">{t.exerciseKindNames[kind]}</span>}
+                          {!timed && prev && (
+                            <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
+                          )}
+                          {planned > 0 && (
                             <span
-                              className="drag-handle"
-                              draggable
-                              title={t.reorder}
-                              onDragStart={(e) => {
-                                dragId.current = ex.id;
-                                e.dataTransfer.effectAllowed = 'move';
-                              }}
-                              onDragEnd={() => {
-                                dragId.current = null;
-                              }}
+                              className={`plan-count${ex.sets.length >= planned ? ' done' : ''}`}
                             >
-                              <Icon name="dots-six" />
+                              {ex.sets.length} / {planned}
                             </span>
+                          )}
+                          {(ex.equipment ?? []).slice(0, 3).map((id) => (
+                            <span key={id} className="exercise-equipment">
+                              <EquipmentIcon equipment={id as EquipmentId} />
+                            </span>
+                          ))}
+                          <button
+                            className="dots"
+                            onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
+                            aria-label={t.menuAction}
+                          >
+                            <Icon name="dots-three-vertical" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {renaming === ex.id && (
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: 'var(--color-neutral-600)',
+                          marginBottom: 8,
+                        }}
+                      >
+                        {t.renameHint}
+                      </div>
+                    )}
+                    {timed ? (
+                      <>
+                        <div className="set-grid header timed">
+                          <span>#</span>
+                          <span>{t.durationMinCol}</span>
+                          <span>{t.distanceKmCol}</span>
+                          <span>{t.rpeShort}</span>
+                        </div>
+                        <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
+                          {[...ex.sets]
+                            .sort((a, b) => a.position - b.position)
+                            .map((s, i) => (
+                              <button
+                                key={s.id}
+                                className="set-row timed"
+                                onClick={() =>
+                                  setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })
+                                }
+                              >
+                                <span className="idx">{i + 1}</span>
+                                <span className="val">{s.durationMin ?? 0}</span>
+                                <span className="val">{s.distanceKm ?? '—'}</span>
+                                <span className="kind">{s.rpe ?? t.optionalMark}</span>
+                              </button>
+                            ))}
+                          <div className="ghost-row timed">
+                            <span className="idx">{ex.sets.length + 1}</span>
                             <button
-                              className="name"
+                              className="gval"
                               onClick={() =>
-                                props.shell.openOverlay({
-                                  screen: 'exercise-history',
-                                  name: ex.name,
-                                })
+                                setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
                               }
                             >
-                              {ex.name}
+                              {timedGhost.durationMin}
                             </button>
-                            {timed && <span className="prev">{t.exerciseKindNames[kind]}</span>}
-                            {!timed && prev && (
-                              <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
-                            )}
-                            {planned > 0 && (
-                              <span
-                                className={`plan-count${ex.sets.length >= planned ? ' done' : ''}`}
-                              >
-                                {ex.sets.length} / {planned}
-                              </span>
-                            )}
-                            {(ex.equipment ?? []).slice(0, 3).map((id) => (
-                              <span key={id} className="exercise-equipment">
-                                <EquipmentIcon equipment={id as EquipmentId} />
-                              </span>
-                            ))}
                             <button
-                              className="dots"
-                              onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
-                              aria-label={t.menuAction}
+                              className="gval"
+                              onClick={() =>
+                                setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
+                              }
                             >
-                              <Icon name="dots-three-vertical" />
+                              {timedGhost.distanceKm ?? '—'}
                             </button>
-                          </>
-                        )}
-                      </div>
-                      {renaming === ex.id && (
-                        <div
-                          style={{
-                            fontSize: 11,
-                            color: 'var(--color-neutral-600)',
-                            marginBottom: 8,
-                          }}
-                        >
-                          {t.renameHint}
-                        </div>
-                      )}
-                      {timed ? (
-                        <>
-                          <div className="set-grid header timed">
-                            <span>#</span>
-                            <span>{t.durationMinCol}</span>
-                            <span>{t.distanceKmCol}</span>
-                            <span>{t.rpeShort}</span>
+                            <button
+                              className="btn btn-primary log-btn"
+                              onClick={() => logTimedGhost(ex, timedGhost)}
+                            >
+                              {props.past ? t.add : t.log}
+                            </button>
                           </div>
-                          <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
-                            {[...ex.sets]
-                              .sort((a, b) => a.position - b.position)
-                              .map((s, i) => (
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="set-grid header">
+                          <span>#</span>
+                          <span>{t.repsCol}</span>
+                          <span>{t.kgCol}</span>
+                          <span />
+                        </div>
+                        <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
+                          {[...ex.sets]
+                            .sort((a, b) => a.position - b.position)
+                            .map((s, i) => {
+                              const rec = isRecordSet(ex, s);
+                              return (
                                 <button
                                   key={s.id}
-                                  className="set-row timed"
+                                  className={`set-row${s.isWarmup ? ' warm' : ''}${rec ? ' record' : ''}`}
                                   onClick={() =>
                                     setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })
                                   }
                                 >
                                   <span className="idx">{i + 1}</span>
-                                  <span className="val">{s.durationMin ?? 0}</span>
-                                  <span className="val">{s.distanceKm ?? '—'}</span>
-                                  <span className="kind">{s.rpe ?? t.optionalMark}</span>
+                                  <span className="val">{s.reps}</span>
+                                  <span className="val">{s.weight ?? t.bodyweightShort}</span>
+                                  <span className="kind">
+                                    {rec ? t.record : s.isWarmup ? t.warmup : t.working}
+                                  </span>
                                 </button>
-                              ))}
-                            <div className="ghost-row timed">
-                              <span className="idx">{ex.sets.length + 1}</span>
-                              <button
-                                className="gval"
-                                onClick={() =>
-                                  setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
-                                }
-                              >
-                                {timedGhost.durationMin}
-                              </button>
-                              <button
-                                className="gval"
-                                onClick={() =>
-                                  setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
-                                }
-                              >
-                                {timedGhost.distanceKm ?? '—'}
-                              </button>
-                              <button
-                                className="btn btn-primary log-btn"
-                                onClick={() => logTimedGhost(ex, timedGhost)}
-                              >
-                                {props.past ? t.add : t.log}
-                              </button>
-                            </div>
+                              );
+                            })}
+                          <div className="ghost-row">
+                            <span className="idx">{ex.sets.length + 1}</span>
+                            <button
+                              className="gval"
+                              onClick={() =>
+                                setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
+                              }
+                            >
+                              {ghost.reps}
+                            </button>
+                            <button
+                              className="gval"
+                              onClick={() =>
+                                setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
+                              }
+                            >
+                              {ghost.weight ?? '—'}
+                            </button>
+                            <button
+                              className="btn btn-primary log-btn"
+                              disabled={directLogBlocked}
+                              onClick={() => logGhost(ex, ghost)}
+                            >
+                              {props.past ? t.add : t.log}
+                            </button>
                           </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="set-grid header">
-                            <span>#</span>
-                            <span>{t.repsCol}</span>
-                            <span>{t.kgCol}</span>
-                            <span />
-                          </div>
-                          <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
-                            {[...ex.sets]
-                              .sort((a, b) => a.position - b.position)
-                              .map((s, i) => {
-                                const rec = isRecordSet(ex, s);
-                                return (
-                                  <button
-                                    key={s.id}
-                                    className={`set-row${s.isWarmup ? ' warm' : ''}${rec ? ' record' : ''}`}
-                                    onClick={() =>
-                                      setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })
-                                    }
-                                  >
-                                    <span className="idx">{i + 1}</span>
-                                    <span className="val">{s.reps}</span>
-                                    <span className="val">{s.weight ?? t.bodyweightShort}</span>
-                                    <span className="kind">
-                                      {rec ? t.record : s.isWarmup ? t.warmup : t.working}
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            <div className="ghost-row">
-                              <span className="idx">{ex.sets.length + 1}</span>
-                              <button
-                                className="gval"
-                                onClick={() =>
-                                  setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
-                                }
-                              >
-                                {ghost.reps}
-                              </button>
-                              <button
-                                className="gval"
-                                onClick={() =>
-                                  setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })
-                                }
-                              >
-                                {ghost.weight ?? '—'}
-                              </button>
-                              <button
-                                className="btn btn-primary log-btn"
-                                disabled={directLogBlocked}
-                                onClick={() => logGhost(ex, ghost)}
-                              >
-                                {props.past ? t.add : t.log}
-                              </button>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                      {ex.sets.length === 0 && live && (
-                        <div className="ghost-hint">
-                          {directLogBlocked
-                            ? t.progWeightRequired
-                            : planned > 0
-                              ? t.progGhostDivision
-                              : timed
-                                ? t.timedGhostHint
-                                : t.ghostHint}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      </>
+                    )}
+                    {ex.sets.length === 0 && live && (
+                      <div className="ghost-hint">
+                        {directLogBlocked
+                          ? t.progWeightRequired
+                          : planned > 0
+                            ? t.progGhostDivision
+                            : timed
+                              ? t.timedGhostHint
+                              : t.ghostHint}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <button
                 className="btn btn-secondary"
                 style={{ minHeight: 44, fontSize: 14, gap: 8 }}
@@ -779,55 +791,46 @@ export function SessionView(props: {
             </>
           )}
         </div>
-
-        {live && restUntil !== null && restUntil > now && (
-          <div className="rest-bar mobile-only">
-            <Icon name="timer" />
-            <span className="label">{t.rest}</span>
-            <span className="time">{fmtSessionClock(restUntil - now)}</span>
-            <button className="skip" onClick={() => setRestUntil(null)}>
-              {t.skip}
-            </button>
-          </div>
-        )}
       </div>
-      {(live || props.past) && (
-        <aside className="pane-side desktop-only">
-          <div className="section-label">{t.rest}</div>
-          {restUntil !== null && restUntil > now ? (
-            <div className="rest-panel active">
-              <Icon name="timer" />
-              <span className="lab">{t.restSinceLast}</span>
-              <span className="time">{fmtSessionClock(restUntil - now)}</span>
-            </div>
-          ) : (
-            <div className="rest-panel idle">
-              <Icon name="timer" />
-              <span className="lab">{t.restSinceLast}</span>
-              <span className="time">—</span>
+      {showSessionSide && (
+        <aside className="pane-side desktop-only session-side">
+          {gym && (
+            <div className="session-gym-card">
+              <div className="session-gym-photo">
+                <GymThumb name={gym.name} lat={gym.lat} lng={gym.lng} size={320} />
+              </div>
+              <div className="session-gym-copy">
+                <div className="section-label">{gym.name}</div>
+                <div className="session-side-meta">
+                  {fmtClock(workout.startedAt)} · {t.inside}
+                </div>
+              </div>
             </div>
           )}
-          {(() => {
-            const rows = workout.exercises
-              .filter((e) => isStrengthExercise(e))
-              .map((e) => ({ name: e.name, prev: prevLift(e.name, workout.id) }))
-              .filter((r) => r.prev);
-            return rows.length > 0 ? (
-              <>
-                <div className="td-side-divider" />
-                <div className="section-label">{t.lastTimeLabel}</div>
-                {rows.map((r) => (
-                  <div key={r.name} className="lasttime-row">
-                    <span className="n">{r.name}</span>
-                    <span className="v">
-                      {r.prev!.reps}
-                      {r.prev!.weight !== null ? ` · ${r.prev!.weight} kg` : ''}
-                    </span>
-                  </div>
-                ))}
-              </>
-            ) : null;
-          })()}
+          {lastTimeRows.length > 0 && (
+            <>
+              {gym && <div className="td-side-divider" />}
+              <div className="section-label">{t.lastTimeLabel}</div>
+            </>
+          )}
+          {lastTimeRows.map((r) => (
+            <div key={r.name} className="lasttime-row">
+              <span className="n">{r.name}</span>
+              <span className="v">
+                {r.prev!.reps}
+                {r.prev!.weight !== null ? ` · ${r.prev!.weight} kg` : ''}
+              </span>
+            </div>
+          ))}
+          {entries > 0 && (
+            <>
+              {(gym || lastTimeRows.length > 0) && <div className="td-side-divider" />}
+              <div className="lasttime-row session-total-row">
+                <span className="n">{t.moved}</span>
+                <span className="v">{fmtTonnes(volume)}</span>
+              </div>
+            </>
+          )}
         </aside>
       )}
 

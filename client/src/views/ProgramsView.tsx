@@ -1,10 +1,16 @@
 /** Programs — trainer/admin authoring + client assignment (AC-ROLE-06, O-07). */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getRole, request } from '../api';
+import { getRole, getUsername, request } from '../api';
+import { knownExercises, useStore, backfillWorkout, addExercise } from '../store';
+import { ProgramCsvDialog } from './ProgramCsvDialog';
+import { ProgramAssignDialog } from './ProgramAssignDialog';
+import { programToCsv, type ProgramItemLike } from '../data/programCsv';
 import type { ExerciseKind } from '../types';
 import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { Icon, Spinner } from '../ui';
 import { useT } from '../i18n';
+import type { Shell } from '../App';
+import { weekDayStatuses, programOutlook, type DayCell } from '../data/programDays';
 
 interface ProgramItem {
   id: string;
@@ -23,7 +29,9 @@ interface Program {
   name: string;
   weeks: number;
   daysPerWeek: number;
+  status: 'draft' | 'active' | 'archived';
   authorId: string;
+  dayNames: Record<string, string>;
   items: ProgramItem[];
 }
 
@@ -35,6 +43,7 @@ interface ClientOption {
 interface ProgramAssignment {
   program: Program;
   assignedBy: string | null;
+  startedAt: number;
   week: number;
   done: number;
   total: number;
@@ -50,7 +59,9 @@ function freshProgram(name: string): Program {
     name,
     weeks: 8,
     daysPerWeek: 3,
+    status: 'draft',
     authorId: '',
+    dayNames: {},
     items: [],
   };
 }
@@ -66,25 +77,42 @@ function normalizeItems(items: ProgramItem[]): ProgramItem[] {
     });
 }
 
-export function ProgramsView() {
+function shortDayLabel(name: string): string {
+  const cleaned = name.trim();
+  if (!cleaned) return '';
+  return cleaned.length > 18 ? `${cleaned.slice(0, 17)}...` : cleaned;
+}
+
+export function ProgramsView({ shell }: { shell: Shell }) {
   const { t } = useT();
+  const store = useStore();
   const role = getRole();
   const [programs, setPrograms] = useState<Program[] | null>(null);
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [draft, setDraft] = useState<Program>(() => freshProgram(t.progNew));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [programQuery, setProgramQuery] = useState('');
   const [assignClientIds, setAssignClientIds] = useState<string[]>([]);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [memberEditing, setMemberEditing] = useState(false);
+  const [memberDetailOpen, setMemberDetailOpen] = useState(false);
+  const [memberLoaded, setMemberLoaded] = useState(false);
+  const [csvOpen, setCsvOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [outlookNow] = useState(() => Date.now());
+  const didPickInitialProgram = useRef(false);
   const dragItem = useRef<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (role === 'member') {
       request<{ assignment: ProgramAssignment | null }>('GET', '/api/programs/mine')
         .then((data) => {
           setFailed(false);
+          setMemberLoaded(true);
           setAssignment(
             data.assignment
               ? {
@@ -97,14 +125,18 @@ export function ProgramsView() {
               : null,
           );
         })
-        .catch(() => setFailed(true));
+        .catch(() => {
+          setFailed(true);
+          setMemberLoaded(true);
+        });
       return;
     }
     request<{ programs: Program[] }>('GET', '/api/programs')
       .then((data) => {
         setFailed(false);
         setPrograms(data.programs);
-        if (!selectedId && data.programs[0]) {
+        if (!didPickInitialProgram.current && !selectedId && data.programs[0]) {
+          didPickInitialProgram.current = true;
           setSelectedId(data.programs[0].id);
           setDraft({ ...data.programs[0], items: normalizeItems(data.programs[0].items) });
         }
@@ -130,6 +162,11 @@ export function ProgramsView() {
   }, [role]);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => i + 1), []);
+  const programMatches = useMemo(() => {
+    const q = programQuery.trim().toLowerCase();
+    if (!q) return programs ?? [];
+    return (programs ?? []).filter((program) => program.name.toLowerCase().includes(q));
+  }, [programQuery, programs]);
   const selectedDayItems = useMemo(
     () =>
       draft.items
@@ -137,7 +174,31 @@ export function ProgramsView() {
         .sort((a, b) => a.position - b.position),
     [draft.items, selectedDay],
   );
-  const selectedClients = clients.filter((client) => assignClientIds.includes(client.id));
+  const currentProgramWeek = Math.min(
+    Math.max(1, draft.status === 'active' ? Math.ceil(draft.weeks / 2) : 1),
+    Math.max(1, draft.weeks),
+  );
+  const selectedDaySetCount = selectedDayItems.reduce(
+    (sum, item) => sum + (item.kind === 'strength' ? item.sets : 1),
+    0,
+  );
+  const dayLabels = useMemo(() => {
+    const labels = new Map<number, string>();
+    for (const day of days) {
+      const explicit = draft.dayNames?.[day]?.trim();
+      if (explicit) {
+        labels.set(day, shortDayLabel(explicit));
+        continue;
+      }
+      const firstNamed = draft.items
+        .filter((item) => item.day === day)
+        .sort((a, b) => a.position - b.position)
+        .find((item) => item.name.trim());
+      if (firstNamed) labels.set(day, shortDayLabel(firstNamed.name));
+    }
+    return labels;
+  }, [days, draft.items, draft.dayNames]);
+  const selectedDayLabel = dayLabels.get(selectedDay) ?? t.progDay(selectedDay);
 
   function selectProgram(program: Program) {
     setSelectedId(program.id);
@@ -148,6 +209,103 @@ export function ProgramsView() {
     const next = freshProgram(t.progNew);
     setSelectedId(null);
     setDraft(next);
+  }
+
+  function setDayName(day: number, name: string) {
+    setDraft((p) => {
+      const dayNames = { ...p.dayNames };
+      if (name.trim()) dayNames[String(day)] = name;
+      else delete dayNames[String(day)];
+      return { ...p, dayNames };
+    });
+  }
+
+  function duplicateProgram() {
+    setSelectedId(null);
+    setDraft((p) => ({
+      ...p,
+      id: crypto.randomUUID(),
+      name: t.progDuplicateName(p.name),
+      status: 'draft',
+      items: p.items.map((item) => ({ ...item, id: crypto.randomUUID() })),
+    }));
+  }
+
+  // Member self-authoring (AC-PROG-15): 'plan a week' = 1 week, 'build a program' = full.
+  function startMemberDraft(weeks: number) {
+    setSelectedId(null);
+    setDraft({ ...freshProgram(t.progNew), weeks });
+    setMemberEditing(true);
+  }
+
+  function editMemberProgram() {
+    if (!assignment) return;
+    setSelectedId(assignment.program.id);
+    setDraft({ ...assignment.program, items: normalizeItems(assignment.program.items) });
+    setMemberDetailOpen(false);
+    setMemberEditing(true);
+  }
+
+  function exitMemberEditing() {
+    setMemberEditing(false);
+    setMemberDetailOpen(false);
+    setSelectedId(null);
+    setDraft(freshProgram(t.progNew));
+    load();
+  }
+
+  function importItems(items: ProgramItemLike[]) {
+    setDraft((p) => {
+      const withIds = items.map((it) => ({ ...it, id: crypto.randomUUID() }));
+      const maxDay = Math.max(p.daysPerWeek, 1, ...items.map((i) => i.day));
+      return {
+        ...p,
+        daysPerWeek: Math.min(7, maxDay),
+        items: normalizeItems([...p.items, ...withIds]),
+      };
+    });
+  }
+
+  function exportCsv() {
+    const csv = programToCsv(
+      draft.items.map((i) => ({
+        day: i.day,
+        position: i.position,
+        name: i.name,
+        kind: i.kind,
+        sets: i.sets,
+        reps: i.reps,
+        durationMin: i.durationMin,
+        equipment: i.equipment,
+      })),
+    );
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${draft.name.trim() || 'program'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Backfill a missed program day: a backdated session pre-seeded with that
+  // day's prescriptions as ghost rows (weights come from history in the logger).
+  function backfillDay(cell: DayCell) {
+    const a = assignment;
+    if (!a) return;
+    const items = a.program.items
+      .filter((i) => i.day === cell.day)
+      .sort((x, y) => x.position - y.position);
+    const w = backfillWorkout(cell.date, 45 * 60 * 1000, null);
+    for (const it of items) {
+      addExercise(w.id, it.name, it.kind, {
+        plannedSets: it.kind === 'strength' ? it.sets : null,
+        plannedReps: it.kind === 'strength' ? it.reps : null,
+        plannedDurationMin: it.kind === 'strength' ? null : (it.durationMin ?? 10),
+        equipment: it.equipment,
+      });
+    }
+    shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
   }
 
   function addItem(day: number) {
@@ -229,6 +387,7 @@ export function ProgramsView() {
         name: draft.name,
         weeks: draft.weeks,
         daysPerWeek: draft.daysPerWeek,
+        dayNames: draft.dayNames,
         items: draft.items
           .filter((i) => i.name.trim())
           .map((i) => ({
@@ -251,11 +410,12 @@ export function ProgramsView() {
     }
   }
 
-  async function assign() {
+  async function assign(startWeek: number) {
     if (!selectedId || assignClientIds.length === 0) return;
     for (const memberId of assignClientIds) {
-      await request('POST', `/api/programs/${selectedId}/assign`, { memberId });
+      await request('POST', `/api/programs/${selectedId}/assign`, { memberId, startWeek });
     }
+    setAssignClientIds([]);
   }
 
   async function removeProgram(id: string) {
@@ -265,16 +425,68 @@ export function ProgramsView() {
     load();
   }
 
-  if (role === 'member') {
+  async function setStatus(status: 'draft' | 'active' | 'archived') {
+    if (!selectedId) return;
+    try {
+      await request('POST', `/api/programs/${selectedId}/status`, { status });
+      setDraft((p) => ({ ...p, status }));
+      if (role === 'member') setMemberEditing(false);
+      load();
+    } catch {
+      /* server rejects activation when a day is empty; keep draft */
+    }
+  }
+
+  if (role === 'member' && !memberEditing) {
     const active = assignment?.program ?? null;
+    const isMine = !!assignment && assignment.assignedBy === getUsername();
+    const startedAt = assignment?.startedAt ?? null;
+    const outlookInput =
+      active && startedAt !== null
+        ? {
+            startedAt,
+            weeks: active.weeks,
+            daysPerWeek: active.daysPerWeek,
+            itemCountByDay: active.items.reduce<Record<number, number>>((m, it) => {
+              m[it.day] = (m[it.day] ?? 0) + 1;
+              return m;
+            }, {}),
+            workoutDates: store.workouts
+              .filter((w) => w.finishedAt !== null)
+              .map((w) => w.startedAt),
+            now: outlookNow,
+          }
+        : null;
+    const outlook = outlookInput ? programOutlook(outlookInput) : null;
+    const dayStatus = new Map<number, DayCell>(
+      outlookInput && outlook
+        ? weekDayStatuses(outlookInput, outlook.currentWeek).map((c) => [c.day, c])
+        : [],
+    );
+    const liveOpen = store.workouts.some((w) => w.finishedAt === null);
+    const activeEquipment = active
+      ? ([...new Set(active.items.flatMap((item) => item.equipment ?? []))] as EquipmentId[])
+      : [];
+    const adherence =
+      assignment?.adherence !== null && assignment?.adherence !== undefined
+        ? Math.round(assignment.adherence * 100)
+        : null;
     return (
       <div className="screen programs-page">
         <div className="programs-top">
           <div>
             <div className="kicker">{t.training}</div>
-            <h1 className="title-26">{t.progTitle}</h1>
+            <h2 className="title-26">{t.progTitle}</h2>
           </div>
         </div>
+
+        {!memberLoaded && !failed && (
+          <div className="program-skeleton" aria-hidden="true">
+            <div className="sk" style={{ height: 14, width: '38%' }} />
+            <div className="sk" style={{ height: 64, borderRadius: 'var(--radius-lg)' }} />
+            <div className="sk" style={{ height: 132, borderRadius: 'var(--radius-lg)' }} />
+          </div>
+        )}
 
         {failed && (
           <button className="program-card" onClick={load}>
@@ -283,46 +495,254 @@ export function ProgramsView() {
           </button>
         )}
 
-        {!failed && !active && (
-          <div className="today-program-card">
-            <div className="program-card-head">
-              <Icon name="copy" />
-              <div>
-                <div className="field-label">{t.progTitle}</div>
-                <div className="n">{t.progNone}</div>
-                <div className="s">{t.progMemberEmpty}</div>
-              </div>
+        {memberLoaded && !failed && !active && (
+          <div className="program-routes">
+            <div className="program-route-intro">
+              <div className="field-label">{t.progTitle}</div>
+              <div className="n">{t.progNone}</div>
+              <div className="s">{t.progMemberEmpty}</div>
             </div>
-            <div className="program-week-strip" aria-label={t.progWeekStrip}>
-              {days.map((day) => (
-                <div key={day} className="program-week-slot">
-                  <span>{t.weekDayLetters[day - 1]}</span>
-                  <strong>+</strong>
-                </div>
-              ))}
+            <button className="program-route" onClick={() => startMemberDraft(1)}>
+              <Icon name="calendar-blank" />
+              <div className="body">
+                <div className="n">{t.progRoutePlanWeek}</div>
+                <div className="s">{t.progRoutePlanWeekBody}</div>
+              </div>
+              <Icon name="arrow-right" className="go" />
+            </button>
+            <button className="program-route" onClick={() => startMemberDraft(8)}>
+              <Icon name="squares-four" />
+              <div className="body">
+                <div className="n">{t.progRouteBuild}</div>
+                <div className="s">{t.progRouteBuildBody}</div>
+              </div>
+              <Icon name="arrow-right" className="go" />
+            </button>
+            <div className="program-route passive">
+              <Icon name="clock-countdown" />
+              <div className="body">
+                <div className="n">{t.progRouteWait}</div>
+                <div className="s">{t.progRouteWaitBody}</div>
+              </div>
             </div>
           </div>
         )}
 
-        {active && (
+        {active &&
+          !memberDetailOpen &&
+          (liveOpen ? (
+            <section className="program-member-list compact">
+              <button
+                className="program-member-list-card active"
+                onClick={() => setMemberDetailOpen(true)}
+              >
+                <span className="program-card-title">
+                  <span className="n">{active.name}</span>
+                  <span className="tag tag-accent">{t.progStatusActive}</span>
+                  <Icon name="dots-three-vertical" />
+                </span>
+                <span className="s">
+                  {t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}
+                  {assignment?.assignedBy && !isMine
+                    ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
+                    : ''}
+                </span>
+                <span className="program-card-progress" aria-hidden>
+                  {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
+                    const cur = assignment?.week ?? 1;
+                    return (
+                      <span key={wk} className={wk === cur ? 'current' : wk < cur ? 'past' : ''} />
+                    );
+                  })}
+                </span>
+              </button>
+              <div
+                className="program-week-strip program-week-strip-compact"
+                aria-label={t.progWeekStrip}
+              >
+                {days.map((day) => {
+                  const count = active.items.filter((item) => item.day === day).length;
+                  const st = dayStatus.get(day)?.status;
+                  return (
+                    <button
+                      key={day}
+                      className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
+                      onClick={() => setMemberDetailOpen(true)}
+                    >
+                      <span>{t.weekDayLetters[day - 1]}</span>
+                      <strong>{count > 0 ? count : '+'}</strong>
+                    </button>
+                  );
+                })}
+              </div>
+              {outlook?.missedCount ? (
+                <div className="program-notice miss">
+                  <Icon name="warning-circle" />
+                  {t.progNoticeMissed(outlook.missedCount)}
+                </div>
+              ) : null}
+            </section>
+          ) : (
+            <section className="program-member-list">
+              <button className="program-member-cover" onClick={() => setMemberDetailOpen(true)}>
+                <span className="field-label">{t.progStatusActive}</span>
+                <span className="program-cover-title">{active.name}</span>
+                <span className="program-cover-meta">
+                  {t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}
+                  {assignment?.assignedBy && !isMine
+                    ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
+                    : ''}
+                </span>
+                <span className="program-cover-progress">
+                  <span>
+                    {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
+                      const cur = assignment?.week ?? 1;
+                      return (
+                        <i key={wk} className={wk === cur ? 'current' : wk < cur ? 'past' : ''} />
+                      );
+                    })}
+                  </span>
+                  <em>
+                    {t.progWeekShort(assignment?.week ?? 1)} / {active.weeks}
+                  </em>
+                </span>
+                {adherence !== null && <span className="tag tag-ok">{adherence}%</span>}
+              </button>
+
+              <div
+                className="program-week-strip program-week-strip-compact"
+                aria-label={t.progWeekStrip}
+              >
+                {days.map((day) => {
+                  const count = active.items.filter((item) => item.day === day).length;
+                  const st = dayStatus.get(day)?.status;
+                  return (
+                    <button
+                      key={day}
+                      className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
+                      onClick={() => setMemberDetailOpen(true)}
+                    >
+                      <span>{t.weekDayLetters[day - 1]}</span>
+                      <strong>{count > 0 ? count : '+'}</strong>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                className="program-member-list-card active"
+                onClick={() => setMemberDetailOpen(true)}
+              >
+                <span className="program-card-title">
+                  <span className="n">{active.name}</span>
+                  <span className="tag tag-accent">{t.progStatusActive}</span>
+                  <Icon name="dots-three-vertical" />
+                </span>
+                <span className="s">
+                  {t.progDaysCount(active.daysPerWeek)} · {t.progWeeksCount(active.weeks)}
+                </span>
+                <span className="program-member-list-meta">
+                  <span>{t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}</span>
+                  {adherence !== null && <span className="ok">{adherence}%</span>}
+                </span>
+              </button>
+
+              <button className="program-member-list-card" onClick={() => startMemberDraft(8)}>
+                <span className="program-card-title">
+                  <span className="n">{t.progRouteBuild}</span>
+                  <span className="tag tag-neutral">{t.progStatusDraft}</span>
+                </span>
+                <span className="s">{t.progRouteBuildBody}</span>
+              </button>
+
+              {activeEquipment.length > 0 && (
+                <div className="program-member-equipment">
+                  {activeEquipment.slice(0, 4).map((id) => (
+                    <span key={id} className="tag tag-neutral">
+                      <EquipmentIcon equipment={id} />
+                      {t.equipmentNames[id]}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
+
+        {active && memberDetailOpen && (
           <section className="program-member-detail">
+            <div className="program-member-detail-top">
+              <button
+                className="round-icon"
+                aria-label={t.backAction}
+                onClick={() => setMemberDetailOpen(false)}
+              >
+                <Icon name="caret-left" />
+              </button>
+            </div>
             <div className="program-card-head">
               <Icon name="copy" />
               <div>
-                <div className="field-label">{t.progWeekN(assignment?.week ?? 1)}</div>
+                <div className="field-label">
+                  {t.progWeekN(assignment?.week ?? 1)}
+                  {isMine && (
+                    <span className="tag tag-accent program-mine-tag">{t.progStatusMine}</span>
+                  )}
+                </div>
                 <div className="n">{active.name}</div>
                 <div className="s">
                   {assignment
                     ? `${t.progSessions(assignment.done, assignment.total)}${
-                        assignment.assignedBy ? ` · ${t.progAssignedBy(assignment.assignedBy)}` : ''
+                        assignment.assignedBy && !isMine
+                          ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
+                          : ''
                       }`
                     : ''}
                 </div>
               </div>
               {assignment?.adherence !== null && assignment?.adherence !== undefined && (
-                <span className="tag tag-accent">{Math.round(assignment.adherence * 100)}%</span>
+                <span className="tag tag-ok">{Math.round(assignment.adherence * 100)}%</span>
+              )}
+              {isMine && (
+                <button className="btn btn-secondary btn-sm" onClick={editMemberProgram}>
+                  <Icon name="pencil-simple" />
+                  {t.progEditPlan}
+                </button>
               )}
             </div>
+
+            <div className="program-weeks" aria-label={t.progTitle}>
+              {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
+                const cur = assignment?.week ?? 1;
+                return (
+                  <span
+                    key={wk}
+                    className={`program-week-bar${wk === cur ? ' current' : wk < cur ? ' past' : ''}`}
+                  />
+                );
+              })}
+            </div>
+
+            {outlook && (
+              <div className="program-notices">
+                {outlook.finished ? (
+                  <div className="program-notice ok">
+                    <Icon name="check-circle" />
+                    {t.progNoticeFinished}
+                  </div>
+                ) : outlook.weekComplete ? (
+                  <div className="program-notice ok">
+                    <Icon name="check-circle" />
+                    {t.progNoticeWeekComplete(outlook.currentWeek)}
+                  </div>
+                ) : null}
+                {outlook.missedCount > 0 && (
+                  <div className="program-notice miss">
+                    <Icon name="warning-circle" />
+                    {t.progNoticeMissed(outlook.missedCount)}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="program-week-strip" aria-label={t.progWeekStrip}>
               {days.map((day) => {
@@ -344,16 +764,35 @@ export function ProgramsView() {
                 const equipment = [
                   ...new Set(items.flatMap((item) => item.equipment ?? [])),
                 ] as EquipmentId[];
+                const st = dayStatus.get(day)?.status;
+                const cell = dayStatus.get(day);
                 return (
-                  <div key={day} className="program-member-day">
+                  <div
+                    key={day}
+                    className={`program-member-day${st === 'missed' ? ' missed' : st === 'logged' ? ' logged' : ''}`}
+                  >
                     <div className="program-day-head">
                       <div>
-                        <div className="field-label">{t.progDay(day)}</div>
+                        <div className="field-label">
+                          {active.dayNames?.[day] || t.progDay(day)}
+                        </div>
                         <div className="program-day-sub">
                           {items.length > 0 ? t.progPrescriptionRule : t.progRestDay}
                         </div>
                       </div>
-                      {equipment.length > 0 && (
+                      {st === 'logged' && (
+                        <Icon name="check-circle" className="program-day-check" />
+                      )}
+                      {st === 'missed' && cell && (
+                        <button
+                          className="btn btn-secondary btn-sm program-day-backfill"
+                          onClick={() => backfillDay(cell)}
+                        >
+                          <Icon name="arrow-counter-clockwise" />
+                          {t.progBackfill}
+                        </button>
+                      )}
+                      {st !== 'missed' && st !== 'logged' && equipment.length > 0 && (
                         <div className="program-start-equipment">
                           {equipment.map((id) => (
                             <EquipmentIcon key={id} equipment={id} />
@@ -393,45 +832,188 @@ export function ProgramsView() {
   }
 
   return (
-    <div className="screen programs-page">
+    <div className="screen programs-page programs-author-page">
       <div className="programs-top">
         <div>
-          <div className="kicker">{role === 'admin' ? t.roleAdmin : t.roleTrainer}</div>
-          <h1 className="title-26">{t.progTitle}</h1>
+          <div className="kicker">
+            {role === 'admin' ? t.roleAdmin : role === 'trainer' ? t.roleTrainer : t.training}
+          </div>
+          <h2 className="title-26">{t.progTitle}</h2>
         </div>
         <div className="program-actions">
-          <button className="btn btn-secondary" onClick={newProgram}>
-            <Icon name="plus" />
-            {t.progNew}
-          </button>
+          {role === 'member' ? (
+            <button className="btn btn-secondary" onClick={exitMemberEditing}>
+              {t.cancel}
+            </button>
+          ) : (
+            <button className="btn btn-secondary" onClick={newProgram}>
+              <Icon name="plus" />
+              {t.progNew}
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="program-layout">
-        <aside className="program-list">
-          {programs === null && !failed && <Spinner size={18} />}
-          {failed && (
-            <button className="program-card" onClick={load}>
-              <Icon name="warning-circle" />
-              <span>{t.retry}</span>
-            </button>
-          )}
-          {programs?.length === 0 && <div className="detail-muted">{t.progEmpty}</div>}
-          {(programs ?? []).map((program) => (
-            <button
-              key={program.id}
-              className={`program-card${selectedId === program.id ? ' active' : ''}`}
-              onClick={() => selectProgram(program)}
-            >
-              <span className="n">{program.name}</span>
-              <span className="s">
-                {program.weeks} {t.progWeeks} · {program.daysPerWeek} {t.progDaysPerWeek}
-              </span>
-            </button>
-          ))}
-        </aside>
+      <div className={`program-layout${role === 'member' ? ' solo' : ''}`}>
+        {role !== 'member' && (
+          <aside className="program-list">
+            <div className="program-list-head">
+              <div className="program-list-title">{t.progTitle}</div>
+              <button className="program-list-new" onClick={newProgram} aria-label={t.progNew}>
+                <Icon name="plus" />
+              </button>
+            </div>
+            <label className="program-search">
+              <Icon name="magnifying-glass" />
+              <input
+                value={programQuery}
+                placeholder={t.progSearchPrograms}
+                onChange={(e) => setProgramQuery(e.target.value)}
+              />
+            </label>
+            {programs === null && !failed && <Spinner size={18} />}
+            {failed && (
+              <button className="program-card" onClick={load}>
+                <Icon name="warning-circle" />
+                <span>{t.retry}</span>
+              </button>
+            )}
+            {programs?.length === 0 && <div className="detail-muted">{t.progEmpty}</div>}
+            {programs && programs.length > 0 && programMatches.length === 0 && (
+              <div className="detail-muted">{t.progNoSearchResults}</div>
+            )}
+            {programMatches.map((program) => (
+              <button
+                key={program.id}
+                className={`program-card${selectedId === program.id ? ' active' : ''}`}
+                onClick={() => selectProgram(program)}
+              >
+                <span className="program-card-title">
+                  <span className="n">{program.name}</span>
+                  <span className={`tag tag-${program.status === 'active' ? 'accent' : 'neutral'}`}>
+                    {program.status === 'active'
+                      ? t.progStatusActive
+                      : program.status === 'archived'
+                        ? t.progStatusArchived
+                        : t.progStatusDraft}
+                  </span>
+                </span>
+                <span className="s">
+                  {t.progWeeksCount(program.weeks)} · {t.progDaysCount(program.daysPerWeek)}
+                  {program.status === 'active' ? ` · ${t.progWeekShort(currentProgramWeek)}` : ''}
+                </span>
+              </button>
+            ))}
+            <div className="program-sidebar-actions">
+              <button className="btn btn-secondary btn-sm" onClick={() => setCsvOpen(true)}>
+                <Icon name="upload-simple" />
+                {t.csvImport}
+              </button>
+              <button
+                className="btn btn-secondary btn-sm"
+                disabled={draft.items.length === 0}
+                onClick={exportCsv}
+              >
+                <Icon name="download-simple" />
+                {t.csvExportProgram}
+              </button>
+            </div>
+          </aside>
+        )}
 
         <section className="program-editor">
+          <div className="program-editor-head">
+            <div className="program-editor-title-row">
+              <div className="program-title-block">
+                <div className="program-title-line">
+                  <input
+                    className="program-title-input"
+                    value={draft.name}
+                    onChange={(e) => setDraft((p) => ({ ...p, name: e.target.value }))}
+                    aria-label={t.progNameHeader}
+                  />
+                  <span className={`tag tag-${draft.status === 'active' ? 'accent' : 'neutral'}`}>
+                    {draft.status === 'active'
+                      ? t.progStatusActive
+                      : draft.status === 'archived'
+                        ? t.progStatusArchived
+                        : t.progStatusDraft}
+                  </span>
+                </div>
+                <div className="program-meta-edit">
+                  <label>
+                    <input
+                      value={draft.weeks}
+                      type="number"
+                      min={1}
+                      max={52}
+                      onChange={(e) =>
+                        setDraft((p) => ({ ...p, weeks: Number(e.target.value) || 1 }))
+                      }
+                      aria-label={t.progWeeks}
+                    />
+                    <span>{t.progWeeksWord(draft.weeks)}</span>
+                  </label>
+                  <span>·</span>
+                  <label>
+                    <input
+                      value={draft.daysPerWeek}
+                      type="number"
+                      min={1}
+                      max={7}
+                      onChange={(e) =>
+                        setDraft((p) => ({ ...p, daysPerWeek: Number(e.target.value) || 1 }))
+                      }
+                      aria-label={t.progDaysPerWeek}
+                    />
+                    <span>{t.progDaysAWeekWord(draft.daysPerWeek)}</span>
+                  </label>
+                  {selectedId && (
+                    <>
+                      <span>·</span>
+                      <span>{t.progAssignedMembers(clients.length)}</span>
+                    </>
+                  )}
+                  <span>·</span>
+                  <span>{t.progCreatedBy(getUsername() ?? t.adminYou)}</span>
+                </div>
+              </div>
+              <div className="program-head-actions">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={draft.items.length === 0}
+                  onClick={duplicateProgram}
+                >
+                  <Icon name="copy" />
+                  {t.progDuplicate}
+                </button>
+                {role !== 'member' && (
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    disabled={!selectedId}
+                    onClick={() => setAssignOpen(true)}
+                  >
+                    <Icon name="user-focus" />
+                    {t.progAssign}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="program-weeks program-weeks-detail" aria-label={t.progPlanProgress}>
+              {Array.from({ length: Math.max(1, draft.weeks) }, (_, i) => i + 1).map((wk) => (
+                <span key={wk} className="program-week-cell">
+                  <span
+                    className={`program-week-bar${wk === currentProgramWeek ? ' current' : wk < currentProgramWeek ? ' past' : ''}`}
+                  />
+                  <span className={wk === currentProgramWeek ? 'active' : ''}>
+                    {wk === 1 ? t.progWeekShort(1) : wk}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+
           <div className="program-fields">
             <label className="field-block">
               <span className="field-label">{t.progName}</span>
@@ -448,9 +1030,19 @@ export function ProgramsView() {
                 type="number"
                 min={1}
                 max={52}
-                value={draft.weeks}
+                value={draft.weeks === 0 ? '' : draft.weeks}
+                disabled={draft.weeks === 0}
+                placeholder={draft.weeks === 0 ? t.progOpenEnded : undefined}
                 onChange={(e) => setDraft((p) => ({ ...p, weeks: Number(e.target.value) || 1 }))}
               />
+              <label className="program-openended">
+                <input
+                  type="checkbox"
+                  checked={draft.weeks === 0}
+                  onChange={(e) => setDraft((p) => ({ ...p, weeks: e.target.checked ? 0 : 8 }))}
+                />
+                {t.progNoEndDate}
+              </label>
             </label>
             <label className="field-block">
               <span className="field-label">{t.progDaysPerWeek}</span>
@@ -467,6 +1059,21 @@ export function ProgramsView() {
             </label>
           </div>
 
+          <div className="program-io">
+            <button className="btn btn-secondary btn-sm" onClick={() => setCsvOpen(true)}>
+              <Icon name="upload-simple" />
+              {t.csvImport}
+            </button>
+            <button
+              className="btn btn-secondary btn-sm"
+              disabled={draft.items.length === 0}
+              onClick={exportCsv}
+            >
+              <Icon name="download-simple" />
+              {t.csvExport}
+            </button>
+          </div>
+
           <div className="program-week-strip" aria-label={t.progWeekStrip}>
             {days.map((day) => {
               const count = draft.items.filter((item) => item.day === day).length;
@@ -477,7 +1084,22 @@ export function ProgramsView() {
                   onClick={() => setSelectedDay(day)}
                 >
                   <span>{t.weekDayLetters[day - 1]}</span>
-                  <strong>{count > 0 ? count : '+'}</strong>
+                  <strong>
+                    {count > 0 ? (dayLabels.get(day) ?? t.progDay(day)) : t.progRestShort}
+                  </strong>
+                  <em>
+                    {count > 0
+                      ? t.progDayWorkoutSummary(
+                          count,
+                          draft.items
+                            .filter((item) => item.day === day)
+                            .reduce(
+                              (sum, item) => sum + (item.kind === 'strength' ? item.sets : 1),
+                              0,
+                            ),
+                        )
+                      : t.progRestDay}
+                  </em>
                 </button>
               );
             })}
@@ -486,8 +1108,21 @@ export function ProgramsView() {
           <div className="program-day">
             <div className="program-day-head">
               <div>
-                <div className="field-label">{t.progDay(selectedDay)}</div>
-                <div className="program-day-sub">{t.progPrescriptionRule}</div>
+                <div className="field-label program-day-title">
+                  {t.progDayLine(t.weekDayNames[selectedDay - 1], selectedDayLabel)}
+                </div>
+                <input
+                  className="input program-day-name-input"
+                  value={draft.dayNames?.[selectedDay] ?? ''}
+                  placeholder={t.progDayNamePlaceholder}
+                  maxLength={40}
+                  onChange={(e) => setDayName(selectedDay, e.target.value)}
+                />
+                <div className="program-day-sub">
+                  {selectedDayItems.length > 0
+                    ? t.progDayWorkoutSummary(selectedDayItems.length, selectedDaySetCount)
+                    : t.progPrescriptionRule}
+                </div>
               </div>
               <div className="program-day-tools">
                 <label className="copy-day">
@@ -500,7 +1135,7 @@ export function ProgramsView() {
                       if (target) copyDayTo(target);
                     }}
                   >
-                    <option value="">{t.progCopyChoose}</option>
+                    <option value="">{t.progCopyDay}</option>
                     {days
                       .filter((day) => day !== selectedDay)
                       .map((day) => (
@@ -512,22 +1147,34 @@ export function ProgramsView() {
                 </label>
                 <button className="link" onClick={() => addItem(selectedDay)}>
                   <Icon name="plus" />
-                  {t.progAddItem}
+                  {t.progAddItemToDay(selectedDayLabel)}
                 </button>
               </div>
             </div>
             {selectedDayItems.length === 0 && <div className="detail-muted">{t.progNoItems}</div>}
+            {selectedDayItems.length > 0 && (
+              <div className="program-table-head" aria-hidden>
+                <span>{t.exerciseLabel}</span>
+                <span>{t.progSets}</span>
+                <span>{t.progReps}</span>
+                <span>{t.progEquipment}</span>
+                <span />
+              </div>
+            )}
             {selectedDayItems.map((item) => (
               <div
                 key={item.id}
-                className="program-item-row"
+                className={`program-item-row${draggingId === item.id ? ' dragging' : ''}${
+                  draggingId && draggingId !== item.id ? ' drop-target' : ''
+                }`}
                 onDragOver={(e) => {
-                  if (dragItem.current && dragItem.current !== item.id) e.preventDefault();
+                  if (dragItem.current) e.preventDefault();
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
                   const from = dragItem.current;
                   dragItem.current = null;
+                  setDraggingId(null);
                   if (from) moveItem(from, item.id, selectedDay);
                 }}
               >
@@ -537,10 +1184,13 @@ export function ProgramsView() {
                   title={t.reorder}
                   onDragStart={(e) => {
                     dragItem.current = item.id;
+                    setDraggingId(item.id);
                     e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', item.id);
                   }}
                   onDragEnd={() => {
                     dragItem.current = null;
+                    setDraggingId(null);
                   }}
                 >
                   <Icon name="dots-six" />
@@ -605,44 +1255,38 @@ export function ProgramsView() {
           </div>
 
           <div className="program-footer">
-            <div className="program-assign">
-              <div className="member-picker">
-                {selectedClients.length > 0 && (
-                  <div className="equipment-chips">
-                    {selectedClients.map((client) => (
-                      <button
-                        key={client.id}
-                        className="equipment-chip"
-                        onClick={() => toggleClient(client.id)}
-                      >
-                        {client.name}
-                        <Icon name="x" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div className="client-picks">
-                  {clients.length === 0 && <span className="detail-muted">{t.progNoClients}</span>}
-                  {clients.map((client) => (
-                    <button
-                      key={client.id}
-                      className={`client-pick${assignClientIds.includes(client.id) ? ' selected' : ''}`}
-                      onClick={() => toggleClient(client.id)}
-                    >
-                      <Icon name="user" />
-                      {client.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="program-no-weight-note">
+              <Icon name="scales" />
+              <span>{t.progNoWeightNote}</span>
+            </div>
+            {role !== 'member' && (
               <button
                 className="btn btn-secondary"
-                disabled={!selectedId || assignClientIds.length === 0}
-                onClick={assign}
+                disabled={!selectedId}
+                onClick={() => setAssignOpen(true)}
               >
+                <Icon name="user" />
                 {t.progAssign}
               </button>
-            </div>
+            )}
+            {selectedId && draft.status !== 'active' && (
+              <button
+                className="btn btn-secondary"
+                disabled={
+                  !Array.from({ length: draft.daysPerWeek }, (_, i) => i + 1).every((day) =>
+                    draft.items.some((it) => it.day === day),
+                  )
+                }
+                onClick={() => setStatus('active')}
+              >
+                {t.progActivate}
+              </button>
+            )}
+            {selectedId && draft.status === 'active' && (
+              <button className="btn btn-secondary" onClick={() => setStatus('archived')}>
+                {t.progArchive}
+              </button>
+            )}
             <button
               className="danger-outline"
               disabled={!selectedId}
@@ -661,6 +1305,24 @@ export function ProgramsView() {
           </div>
         </section>
       </div>
+      {csvOpen && (
+        <ProgramCsvDialog
+          known={knownExercises().map((e) => e.name)}
+          onClose={() => setCsvOpen(false)}
+          onImport={importItems}
+        />
+      )}
+      {assignOpen && (
+        <ProgramAssignDialog
+          clients={clients}
+          programName={draft.name}
+          selectedIds={assignClientIds}
+          onToggle={toggleClient}
+          weeks={draft.weeks}
+          onClose={() => setAssignOpen(false)}
+          onConfirm={assign}
+        />
+      )}
     </div>
   );
 }
@@ -674,6 +1336,22 @@ function EquipmentSelector({
 }) {
   const { t } = useT();
   const [query, setQuery] = useState('');
+  const panelRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      const d = panelRef.current;
+      if (d?.open && e.target instanceof Node && !d.contains(e.target)) d.open = false;
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && panelRef.current?.open) panelRef.current.open = false;
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, []);
   const common = EQUIPMENT_IDS.slice(0, 6);
   const q = query.trim().toLowerCase();
   const matches = (q ? EQUIPMENT_IDS : common).filter((id) =>
@@ -730,6 +1408,32 @@ function EquipmentSelector({
           </button>
         ))}
       </div>
+      <details className="equipment-compact-panel" ref={panelRef}>
+        <summary>
+          <Icon name="plus" />
+          {t.progEquipment}
+        </summary>
+        <label className="equipment-search">
+          <Icon name="magnifying-glass" />
+          <input
+            value={query}
+            placeholder={t.progEquipment}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </label>
+        <div className="equipment-options">
+          {matches.map((id) => (
+            <button
+              key={id}
+              className={`equipment-option${value.includes(id) ? ' selected' : ''}`}
+              onClick={() => toggle(id)}
+            >
+              <EquipmentIcon equipment={id} />
+              <span>{highlighted(t.equipmentNames[id])}</span>
+            </button>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }

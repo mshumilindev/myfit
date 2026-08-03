@@ -116,7 +116,7 @@ export function OnboardingView({
       <div className="onb-shell center">
         <div className="onb-card">
           <Icon name="warning-circle" className="onb-dead-icon" />
-          <h1>{t.onbDead}</h1>
+          <h2>{t.onbDead}</h2>
           <p className="lead">{t.onbDeadBody(when)}</p>
           <button
             className="btn btn-primary btn-big"
@@ -188,7 +188,7 @@ export function OnboardingView({
     return (
       <div className="onb-shell center">
         <div className="onb-card">
-          <h1>{t.onbWho}</h1>
+          <h2>{t.onbWho}</h2>
           <input
             className="input"
             type="password"
@@ -245,7 +245,7 @@ export function OnboardingView({
             </div>
           )}
           <Icon name="barbell" className="onb-wordmark" />
-          <h1 className="display">{t.onbTitle}</h1>
+          <h2 className="display">{t.onbTitle}</h2>
           <p className="lead">{t.onbBody}</p>
           {railBars(1)}
           <button
@@ -266,7 +266,7 @@ export function OnboardingView({
       {step === 1 && (
         <div className="onb-card">
           {rail}
-          <h1 className="display sm">{t.onbWhoLead}</h1>
+          <h2 className="display sm">{t.onbWhoLead}</h2>
           <input
             className="input"
             placeholder={t.firstName}
@@ -391,7 +391,7 @@ export function OnboardingView({
                 )}
               </div>
             </div>
-            <h1 className="display">{t.onbWow}</h1>
+            <h2 className="display">{t.onbWow}</h2>
             <p className="lead">{gym?.gymName ? t.onbWowBody(gym.gymName) : t.onbWowBodyNoGym}</p>
             <button
               className="btn btn-primary btn-big"
@@ -427,7 +427,7 @@ function AvatarStep({ rail, onDone }: { rail: React.ReactNode; onDone: (had: boo
   return (
     <div className="onb-card">
       {rail}
-      <h1 className="display sm">{t.onbFaceLead}</h1>
+      <h2 className="display sm">{t.onbFaceLead}</h2>
       <AvatarUploader
         name={t.onbFace}
         onUploaded={() => onDone(true)}
@@ -459,14 +459,16 @@ function GymStep({
   const { t } = useT();
   const [q, setQ] = useState('');
   const [coords, setCoords] = useState<Coords | null>(null);
+  const [denied, setDenied] = useState(false);
   const [results, setResults] = useState<PlaceResult[]>([]);
+  const [nearby, setNearby] = useState<PlaceResult[]>([]);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let alive = true;
     getCurrentPositionOnce()
       .then((p) => alive && setCoords({ lat: p.lat, lng: p.lng }))
-      .catch(() => {});
+      .catch(() => alive && setDenied(true));
     return () => {
       alive = false;
     };
@@ -492,16 +494,34 @@ function GymStep({
     };
   }, [needle, coords]);
 
+  useEffect(() => {
+    if (!coords) return;
+    const ctrl = new AbortController();
+    void searchGyms(t.nearbyQuery, coords, {}, [], ctrl.signal, {
+      onResults: (m) => {
+        if (!ctrl.signal.aborted) setNearby([...m]);
+      },
+      onProvider: () => {},
+    });
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coords]);
+
   const sorted = useMemo(() => {
     if (!coords) return results;
     return [...results].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
   }, [results, coords]);
+  const nearbySorted = useMemo(() => {
+    if (!coords) return [] as PlaceResult[];
+    return [...nearby].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+  }, [nearby, coords]);
+  const showNearby = needle.length < 2;
+  const list = showNearby ? nearbySorted : sorted;
 
   return (
     <div className="onb-card">
-      <div className="kicker">{t.onbStepOf(3)}</div>
       {rail}
-      <h1>{t.onbGymStep}</h1>
+      <h2>{t.onbGymStep}</h2>
       <p className="lead">{t.onbGymLead}</p>
       <div className="searchbar">
         <Icon name="magnifying-glass" />
@@ -511,8 +531,20 @@ function GymStep({
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
+      {denied && (
+        <div className="banner">
+          <Icon name="map-pin-slash" />
+          <span>{t.locationBlockedBody}</span>
+        </div>
+      )}
+      {showNearby && list.length > 0 && (
+        <div className="onb-near">
+          <Icon name="crosshair" />
+          <span>{t.onbNearYou(fmtDistance(2000))}</span>
+        </div>
+      )}
       <div className="onb-gym-list">
-        {sorted.slice(0, 4).map((r) => {
+        {list.slice(0, 4).map((r) => {
           const d = coords ? haversineM(coords, r) : null;
           return (
             <button key={r.key} className="onb-gym-card" onClick={() => onPick(r)}>

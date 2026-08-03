@@ -1,24 +1,57 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { getToken, getUsername } from './api';
-import { getOpenWorkout, startSyncLoop, useStore } from './store';
-import { fmtSessionClock, useT } from './i18n';
-import { Icon, LanguageSelector, Snackbar, Toast, type SnackState, type ToastState } from './ui';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { clearAuth, getRole, getToken, getUsername, request } from './api';
+import { getOpenWorkout, startSyncLoop, useStore, retrySync, discardBlockingChange } from './store';
+import { useT } from './i18n';
+import {
+  Icon,
+  LanguageSelector,
+  Snackbar,
+  Spinner,
+  Toast,
+  type SnackState,
+  type ToastState,
+} from './ui';
 import { AuthView } from './views/AuthView';
-import { OnboardingView } from './views/OnboardingView';
-import { AdminView } from './views/AdminView';
-import { TrainerView } from './views/TrainerView';
-import { getRole } from './api';
-import { TodayView } from './views/TodayView';
-import { ProgressView } from './views/ProgressView';
-import { GymsView } from './views/GymsView';
-import { SessionView } from './views/SessionView';
-import { ExerciseHistoryView } from './views/ExerciseHistoryView';
-import { GymDetailView } from './views/GymDetailView';
-import { ProfileView } from './views/ProfileView';
-import { ProgramsView } from './views/ProgramsView';
 import { LiveHero } from './components/LiveHero';
+import type { SyncError, Notice } from './types';
 
-export type Tab = 'today' | 'progress' | 'gyms' | 'people' | 'programs';
+const OnboardingView = lazy(() =>
+  import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
+);
+const AdminView = lazy(() =>
+  import('./views/AdminView').then((module) => ({ default: module.AdminView })),
+);
+const TrainerView = lazy(() =>
+  import('./views/TrainerView').then((module) => ({ default: module.TrainerView })),
+);
+const TodayView = lazy(() =>
+  import('./views/TodayView').then((module) => ({ default: module.TodayView })),
+);
+const ProgressView = lazy(() =>
+  import('./views/ProgressView').then((module) => ({ default: module.ProgressView })),
+);
+const GymsView = lazy(() =>
+  import('./views/GymsView').then((module) => ({ default: module.GymsView })),
+);
+const SessionView = lazy(() =>
+  import('./views/SessionView').then((module) => ({ default: module.SessionView })),
+);
+const ExerciseHistoryView = lazy(() =>
+  import('./views/ExerciseHistoryView').then((module) => ({
+    default: module.ExerciseHistoryView,
+  })),
+);
+const GymDetailView = lazy(() =>
+  import('./views/GymDetailView').then((module) => ({ default: module.GymDetailView })),
+);
+const ProfileView = lazy(() =>
+  import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
+);
+const ProgramsView = lazy(() =>
+  import('./views/ProgramsView').then((module) => ({ default: module.ProgramsView })),
+);
+
+export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 
 export type Overlay =
   | { screen: 'session'; workoutId: string }
@@ -33,9 +66,41 @@ export interface Shell {
   goTab: (t: Tab) => void;
   toast: (t: ToastState) => void;
   snack: (s: SnackState) => void;
+  signOut: () => void;
+  queueLength: number;
 }
 
-const TABS: Tab[] = ['today', 'progress', 'gyms', 'people', 'programs'];
+const TABS: Tab[] = ['today', 'progress', 'gyms', 'programs', 'people', 'me'];
+type NavRole = ReturnType<typeof getRole>;
+type NavLabels = Pick<
+  ReturnType<typeof useT>['t'],
+  'today' | 'progress' | 'gyms' | 'progTitle' | 'adminPeople' | 'trClientsTab' | 'navMe'
+>;
+type NavItem = { id: Tab; icon: string; label: string };
+
+function defaultTabForRole(role: NavRole): Tab {
+  return role === 'trainer' ? 'people' : 'today';
+}
+
+function tabsForRole(role: NavRole, t: NavLabels): NavItem[] {
+  if (role === 'trainer') {
+    return [
+      { id: 'people', icon: 'user-focus', label: t.trClientsTab },
+      { id: 'programs', icon: 'cards', label: t.progTitle },
+      { id: 'me', icon: 'user', label: t.navMe },
+    ];
+  }
+
+  return [
+    { id: 'today', icon: 'house', label: t.today },
+    { id: 'progress', icon: 'chart-line-up', label: t.progress },
+    { id: 'programs', icon: 'list-checks', label: t.progTitle },
+    { id: 'gyms', icon: 'map-pin', label: t.gyms },
+    role === 'admin'
+      ? { id: 'people', icon: 'shield-check', label: t.adminPeople }
+      : { id: 'me', icon: 'user', label: t.navMe },
+  ];
+}
 
 /** Serialize the current screen to a URL hash so a refresh restores it. */
 function toHash(tab: Tab, overlay: Overlay): string {
@@ -45,6 +110,7 @@ function toHash(tab: Tab, overlay: Overlay): string {
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
+  if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
 
@@ -62,6 +128,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     };
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
+  if (head === 'me') return { tab: 'me', overlay: null };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -73,6 +140,29 @@ export function App() {
   const { t } = useT();
   const store = useStore();
   const [authed, setAuthed] = useState<boolean>(() => !!getToken());
+  const [notices, setNotices] = useState<Notice[]>([]);
+
+  const loadNotices = useCallback(() => {
+    if (!getToken()) return;
+    request<{ notices: Notice[] }>('GET', '/api/notices')
+      .then((d) => setNotices(Array.isArray(d?.notices) ? d.notices : []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    loadNotices();
+    const iv = setInterval(loadNotices, 30_000);
+    window.addEventListener('focus', loadNotices);
+    return () => {
+      clearInterval(iv);
+      window.removeEventListener('focus', loadNotices);
+    };
+  }, [loadNotices]);
+
+  function dismissNotice(id: string) {
+    setNotices((ns) => ns.filter((n) => n.id !== id));
+    request('POST', `/api/notices/${id}/read`).catch(() => {});
+  }
   // Invite links (#/join/<token>) open onboarding before any auth gate.
   const [joinToken, setJoinToken] = useState<string | null>(() => {
     const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(window.location.hash);
@@ -113,6 +203,14 @@ export function App() {
       snackSeq.current += 1;
       setSnack({ ...s, id: snackSeq.current });
     },
+    signOut: () => {
+      clearAuth();
+      setOverlay(null);
+      setTab(defaultTabForRole(getRole()));
+      setAuthed(false);
+      window.history.replaceState(null, '', '#/today');
+    },
+    queueLength: store.queue.length,
   };
 
   const closeOverlay = useCallback(() => setOverlay(null), []);
@@ -120,13 +218,17 @@ export function App() {
     setToasts((list) => list.filter((x) => x.id !== id));
   }, []);
   const open = store.workouts.find((w) => w.finishedAt === null);
+  const role = getRole();
+  const tabs = tabsForRole(role, t);
+  const tabAllowed = tabs.some((x) => x.id === tab);
+  const effectiveTab = tabAllowed ? tab : defaultTabForRole(role);
 
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(tab, overlay);
+    const next = toHash(effectiveTab, overlay);
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
-  }, [authed, joinToken, tab, overlay]);
+  }, [authed, joinToken, effectiveTab, overlay]);
 
   // URL hash → state (browser back/forward).
   useEffect(() => {
@@ -149,15 +251,17 @@ export function App() {
   if (joinToken) {
     return (
       <div className="app">
-        <OnboardingView
-          token={joinToken}
-          onDone={(workoutId) => {
-            setJoinToken(null);
-            window.location.hash = '#/today';
-            if (getToken()) setAuthed(true);
-            if (workoutId) setOverlay({ screen: 'session', workoutId });
-          }}
-        />
+        <Suspense fallback={<ScreenFallback />}>
+          <OnboardingView
+            token={joinToken}
+            onDone={(workoutId) => {
+              setJoinToken(null);
+              window.location.hash = '#/today';
+              if (getToken()) setAuthed(true);
+              if (workoutId) setOverlay({ screen: 'session', workoutId });
+            }}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -174,49 +278,29 @@ export function App() {
     setOverlay(null);
     setTab(x);
   };
-  const memberOnly: Tab[] = ['today', 'progress', 'gyms'];
-  if (getRole() === 'trainer' && memberOnly.includes(tab)) {
-    // Render-time coercion (no effect): trainers land on their clients.
-    setTab('people');
-  }
-
-  const role = getRole();
-  // TR-04: a trainer's shell has no Today/Progress/Gyms — they log nothing.
-  const tabs: { id: Tab; icon: string; label: string }[] =
-    role === 'trainer'
-      ? [
-          { id: 'people', icon: 'barbell', label: t.trMyClients },
-          { id: 'programs', icon: 'copy', label: t.progTitle },
-        ]
-      : [
-          { id: 'today', icon: 'house', label: t.today },
-          { id: 'progress', icon: 'chart-line-up', label: t.progress },
-          { id: 'programs', icon: 'copy', label: t.progTitle },
-          { id: 'gyms', icon: 'map-pin', label: t.gyms },
-          ...(role === 'admin'
-            ? [{ id: 'people' as Tab, icon: 'shield-check', label: t.adminPeople }]
-            : []),
-        ];
 
   return (
     <div className="app">
       {desktopRail && (
         <Rail
-          tab={tab}
+          tab={effectiveTab}
           overlayOpen={overlay !== null}
           goTab={goTab}
-          openWorkoutId={open?.id}
           openWorkoutStartedAt={open?.startedAt}
           syncStatus={store.syncStatus}
-          onOpenSession={() => open && setOverlay({ screen: 'session', workoutId: open.id })}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
         />
       )}
       <div className="main-col">
-        {desktopRail ? null : (
-          <div className="lang-mobile">
-            <LanguageSelector />
-          </div>
+        {store.syncStatus === 'failed' && (
+          <SyncBlockedCard
+            error={store.syncError}
+            onRetry={retrySync}
+            onDiscard={discardBlockingChange}
+          />
+        )}
+        {authed && notices.some((n) => !n.read) && (
+          <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
         )}
         {open && overlay?.screen !== 'session' && overlay?.screen !== 'past-workout' && (
           <LiveHero
@@ -226,57 +310,71 @@ export function App() {
             offline={store.syncStatus === 'offline'}
             queued={store.queue.length}
             onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
-            mode={tab === 'today' ? 'today' : 'compact'}
+            mode={effectiveTab === 'today' ? 'today' : 'compact'}
           />
         )}
-        {overlay?.screen === 'session' && (
-          <SessionView workoutId={overlay.workoutId} shell={shell} onClose={closeOverlay} />
-        )}
-        {overlay?.screen === 'past-workout' && (
-          <SessionView
-            workoutId={overlay.workoutId}
-            past
-            startAdd={overlay.startAdd}
-            shell={shell}
-            onClose={closeOverlay}
-          />
-        )}
-        {overlay?.screen === 'exercise-history' && (
-          <ExerciseHistoryView name={overlay.name} onClose={closeOverlay} />
-        )}
-        {overlay?.screen === 'gym' && (
-          <GymDetailView
-            gymId={overlay.gymId}
-            candName={overlay.name}
-            candLat={overlay.lat}
-            candLng={overlay.lng}
-            candAddress={overlay.address}
-            shell={shell}
-            onClose={closeOverlay}
-          />
-        )}
-        {overlay?.screen === 'profile' && (
-          <ProfileView userId={overlay.userId} shell={shell} onClose={closeOverlay} />
-        )}
+        <Suspense fallback={<ScreenFallback />}>
+          {overlay?.screen === 'session' && (
+            <SessionView workoutId={overlay.workoutId} shell={shell} onClose={closeOverlay} />
+          )}
+          {overlay?.screen === 'past-workout' && (
+            <SessionView
+              workoutId={overlay.workoutId}
+              past
+              startAdd={overlay.startAdd}
+              shell={shell}
+              onClose={closeOverlay}
+            />
+          )}
+          {overlay?.screen === 'exercise-history' && (
+            <ExerciseHistoryView name={overlay.name} onClose={closeOverlay} />
+          )}
+          {overlay?.screen === 'gym' && (
+            <GymDetailView
+              gymId={overlay.gymId}
+              candName={overlay.name}
+              candLat={overlay.lat}
+              candLng={overlay.lng}
+              candAddress={overlay.address}
+              shell={shell}
+              onClose={closeOverlay}
+            />
+          )}
+          {overlay?.screen === 'profile' && (
+            <ProfileView userId={overlay.userId} shell={shell} onClose={closeOverlay} />
+          )}
+        </Suspense>
         {!overlay && (
           <>
-            {tab === 'today' && <TodayView shell={shell} store={store} />}
-            {tab === 'progress' && <ProgressView store={store} />}
-            {tab === 'gyms' && <GymsView shell={shell} store={store} />}
-            {tab === 'people' &&
-              (role === 'trainer' ? (
-                <TrainerView
-                  onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
+            <Suspense fallback={<ScreenFallback />}>
+              {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
+              {effectiveTab === 'progress' && <ProgressView store={store} />}
+              {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}
+              {effectiveTab === 'people' &&
+                (role === 'trainer' ? (
+                  <TrainerView
+                    onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
+                  />
+                ) : (
+                  <AdminView
+                    onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
+                  />
+                ))}
+              {effectiveTab === 'programs' && <ProgramsView shell={shell} />}
+              {effectiveTab === 'me' && (
+                <ProfileView
+                  userId="me"
+                  shell={shell}
+                  embedded
+                  onClose={() => setTab(defaultTabForRole(role))}
                 />
-              ) : (
-                <AdminView onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })} />
-              ))}
-            {tab === 'programs' && <ProgramsView />}
+              )}
+            </Suspense>
             <nav className="tabbar">
               {tabs.map((x) => (
                 <button
                   key={x.id}
-                  className={tab === x.id ? 'active' : ''}
+                  className={effectiveTab === x.id ? 'active' : ''}
                   onClick={() => setTab(x.id)}
                 >
                   <Icon name={x.icon} />
@@ -293,6 +391,14 @@ export function App() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function ScreenFallback() {
+  return (
+    <div className="screen screen-fallback" role="status" aria-live="polite">
+      <Spinner size={20} />
     </div>
   );
 }
@@ -329,44 +435,20 @@ function Rail(props: {
   tab: Tab;
   overlayOpen: boolean;
   goTab: (t: Tab) => void;
-  openWorkoutId?: string;
   openWorkoutStartedAt?: number;
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
-  onOpenSession: () => void;
   onOpenProfile: () => void;
 }) {
   const { t } = useT();
-  const [now, setNow] = useState(() => Date.now());
   const live = props.openWorkoutStartedAt !== undefined;
 
-  useEffect(() => {
-    if (!live) return;
-    const iv = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(iv);
-  }, [live]);
-
   const role = getRole();
-  // TR-04: trainer rail is clients-only; admins get People (AD-01).
-  const nav: { id: Tab; icon: string; label: string }[] =
-    role === 'trainer'
-      ? [
-          { id: 'people', icon: 'barbell', label: t.trMyClients },
-          { id: 'programs', icon: 'copy', label: t.progTitle },
-        ]
-      : [
-          { id: 'today', icon: 'house', label: t.today },
-          { id: 'progress', icon: 'chart-line-up', label: t.progress },
-          { id: 'programs', icon: 'copy', label: t.progTitle },
-          { id: 'gyms', icon: 'map-pin', label: t.gyms },
-          ...(role === 'admin'
-            ? [{ id: 'people' as Tab, icon: 'shield-check', label: t.adminPeople }]
-            : []),
-        ];
+  const nav = tabsForRole(role, t);
 
   const dotColor =
     props.syncStatus === 'synced'
       ? 'var(--color-ok)'
-      : props.syncStatus === 'offline'
+      : props.syncStatus === 'offline' || props.syncStatus === 'failed'
         ? 'var(--color-danger)'
         : 'var(--color-neutral-600)';
   const username = getUsername() ?? '';
@@ -381,25 +463,19 @@ function Rail(props: {
         <button
           key={x.id}
           className={`rail-item${props.tab === x.id && !props.overlayOpen ? ' active' : ''}`}
+          aria-label={x.label}
+          title={x.label}
           onClick={() => props.goTab(x.id)}
         >
           <Icon name={x.icon} />
-          {x.label}
+          <span className="rail-label">{x.label}</span>
+          {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
       <div className="rail-foot">
         <div className="rail-lang">
           <LanguageSelector />
         </div>
-        {live && (
-          <button className="rail-session-chip" onClick={props.onOpenSession}>
-            <span className="dot" />
-            <span className="lab">{t.inSession}</span>
-            <span className="clock">
-              {fmtSessionClock(now - (props.openWorkoutStartedAt ?? now))}
-            </span>
-          </button>
-        )}
         <button className="account-chip" onClick={props.onOpenProfile}>
           <span className="avatar">{(username[0] ?? '?').toUpperCase()}</span>
           <span className="name">{username}</span>
@@ -407,5 +483,58 @@ function Rail(props: {
         </button>
       </div>
     </aside>
+  );
+}
+
+/** Persistent blocked-queue card: plain reason, raw status line, Retry + Discard (AC-SYNC-05). */
+function SyncBlockedCard(props: {
+  error: SyncError | null;
+  onRetry: () => void;
+  onDiscard: () => void;
+}) {
+  const { t } = useT();
+  return (
+    <div className="sync-blocked" role="alert">
+      <div className="sync-blocked-head">
+        <Icon name="cloud-slash" />
+        <div>
+          <h4 className="t">{t.syncBlockedTitle}</h4>
+          <p className="s">{t.syncBlockedBody}</p>
+        </div>
+      </div>
+      {props.error && <code className="sync-blocked-line">{props.error.statusLine}</code>}
+      <div className="sync-blocked-actions">
+        <button className="btn btn-secondary btn-sm" onClick={props.onDiscard}>
+          {t.syncDiscard}
+        </button>
+        <button className="btn btn-primary btn-sm" onClick={props.onRetry}>
+          {t.retry}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function noticeIcon(kind: string): string {
+  if (kind.startsWith('program')) return 'copy';
+  if (kind.startsWith('role')) return 'shield-check';
+  return 'barbell';
+}
+
+/** In-product notices strip: assignment, role and trainer changes (AC-ROLE-10, AC-PLAN-11). */
+function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void }) {
+  const { t } = useT();
+  return (
+    <div className="notice-strip">
+      {props.notices.map((n) => (
+        <div key={n.id} className="notice" role="status">
+          <Icon name={noticeIcon(n.kind)} />
+          <span className="notice-text">{t.noticeText(n.kind, n.actor, n.detail)}</span>
+          <button className="notice-x" aria-label={t.dismiss} onClick={() => props.onDismiss(n.id)}>
+            <Icon name="x" />
+          </button>
+        </div>
+      ))}
+    </div>
   );
 }
