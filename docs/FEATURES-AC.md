@@ -20,22 +20,22 @@
 
 **Статус:** OK. Покрито smoke, unit/integration, e2e.
 
-## F-02 Shell, Services, i18n
+## F-02 Shell & i18n
 
-**Сценарій:** після входу користувач бачить shell, вкладки Today/Progress/Gyms/Apps,
-стан синку й може змінити мову.
+**Сценарій:** після входу користувач бачить shell, вкладки
+Today/Progress/Programs/Gyms, стан синку й може змінити мову.
 
 **AC**
 
 - Shell запускає sync-loop тільки для авторизованого користувача.
 - Bottom tabbar є на mobile shell-екранах; session/dialog screens його не мають.
-- Apps показує Training active, Nutrition/AI body scan як Soon.
+- Services/Apps тимчасово не рендериться: зараз є тільки Training, тому
+  перемикач сервісів не має сенсу.
 - Мова перемикається між `en`, `uk`, `pl`, `lt`, зберігається в localStorage і
   ставить `document.documentElement.lang`.
-- Sign out очищає auth і локальний cache/queue після confirm dialog.
 - Offline/queued/synced стани показані як стан, не як помилка.
 
-**Статус:** OK; Settings/Language у Apps — задокументоване відхилення дизайну.
+**Статус:** OK; Language selector лишається як компактний чип на екранах.
 
 ## F-03 Workout Session
 
@@ -47,15 +47,17 @@
 - Start створює workout з client UUID і `finishedAt: null`.
 - Якщо вже є open workout, новий start auto-closes попередній.
 - Open workout старше 8 год auto-finishes на `startedAt + 8h` з `autoFinished`.
-- Exercise upsert має name/position, set upsert має reps/weight/warmup/position.
+- Exercise upsert має name/kind/position, set upsert має reps/weight/warmup/cardio
+  metrics/position.
+- Вправи можна переставляти drag-and-drop; новий порядок синхронізується через
+  idempotent exercise upsert з позиціями `0..n-1`.
 - Ghost row префілиться з попереднього top working set для цієї вправи.
 - Working set record позначається emerald, warmup не рахується record.
 - Delete set/exercise має undo через idempotent restore.
 - Finish drops set-less exercises після warning і лишає filled exercises.
 - Finished workout можна редагувати.
 
-**Статус:** OK для реалізованого ядра; reorder exercise не реалізовано і
-зафіксовано в `docs/DESIGN.md`.
+**Статус:** OK для реалізованого ядра.
 
 ## F-04 Offline Queue & Sync
 
@@ -131,22 +133,57 @@
 - Brass = action/focus/live; emerald = success/records; ruby = loss/failure/offline.
 - Primary buttons outlined, accent не заливає surfaces.
 - Mobile screens не мають overlap на 390x844.
-- Auth/Today/Session/Progress/Gyms/Apps мають empty/filled/offline/loading states
+- Auth/Today/Session/Progress/Programs/Gyms мають empty/filled/offline/loading states
   відповідно до реалізованої фази.
-- Новий UI-рядок додається у всі 4 локалі.
+- Новий UI-рядок додається у всі пʼять локалей.
 
 **Статус:** OK для перевірених screens; Templates, failed queue і повні desktop
 двоколонкові layouts лишаються фазовими gaps з `docs/DESIGN.md`.
 
+## F-09 Programs
+
+**Сценарій:** тренер або адмін створює програму з тижнів, семислотових
+dateless-днів і prescription items; клієнт бачить активну програму на Today і
+стартує день як звичайну сесію з плановими ghost rows.
+
+**AC**
+
+- Trainer/admin можуть створити, редагувати й видалити власну програму.
+- Програма має name, weeks, daysPerWeek і 7 Monday-first day slots без дат.
+- Prescription item містить sets, reps, equipment і kind
+  `strength/cardio/warmup/cooldown`.
+- Program item **не має weight/%1RM/RPE**; сервер відкидає weight навіть якщо
+  старий клієнт або CSV його надішле.
+- Equipment береться з закритого словника, має іконки, searchable multi-select,
+  removable chips і common one-tap chips.
+- Items у програмі можна переставляти drag-and-drop; порядок зберігається як
+  `day + position`.
+- День можна скопіювати у будь-який інший slot через `copy day to`.
+- Assignment використовує multi-select chips; trainer може призначити програму
+  тільки своєму клієнту, admin може призначати будь-кому.
+- Member читає тільки свою активну програму через `/api/programs/mine`.
+- Today показує active program card із 7-slot week strip, required equipment і
+  кнопками старту тільки для запланованих днів.
+- Start day створює workout з усіма вправами дня, але не створює logged sets.
+  Strength ghost rows беруть reps із програми, weight з історії; якщо історії
+  немає, прямий log блокується до введення ваги.
+- Live session показує segmented plan progress, `logged / prescribed` на вправі
+  і пояснення, що reps йдуть із програми, а weight з історії.
+
+**Статус:** OK для MVP authoring/assignment/start-day за `Programs.zip`.
+Залишаються фазовими gaps: повний CSV mapping+preview, backfill missed day зі
+`Mark skipped`, equipment mismatch prompt і нотифікації assignment/replaced.
+
 ## Матриця Автоперевірок
 
-| Feature                 | Unit/integration | API smoke | E2E                     |
-| ----------------------- | ---------------- | --------- | ----------------------- |
-| F-01 Auth               | так              | так       | так                     |
-| F-02 Shell/i18n         | так              | ні        | так                     |
-| F-03 Workout Session    | так              | так       | так                     |
-| F-04 Offline Queue/Sync | так              | так       | так                     |
-| F-05 Gyms/Reminders     | так              | так       | так                     |
-| F-06 Progress/History   | так              | ні        | так                     |
-| F-07 PWA/Desktop        | частково         | health    | PWA так, desktop manual |
-| F-08 Design System      | так              | ні        | так                     |
+| Feature                 | Unit/integration | API smoke | E2E                      |
+| ----------------------- | ---------------- | --------- | ------------------------ |
+| F-01 Auth               | так              | так       | так                      |
+| F-02 Shell/i18n         | так              | ні        | так                      |
+| F-03 Workout Session    | так              | так       | так                      |
+| F-04 Offline Queue/Sync | так              | так       | так                      |
+| F-05 Gyms/Reminders     | так              | так       | так                      |
+| F-06 Progress/History   | так              | ні        | так                      |
+| F-07 PWA/Desktop        | частково         | health    | PWA так, desktop manual  |
+| F-08 Design System      | так              | ні        | так                      |
+| F-09 Programs           | так              | так       | Today/start day частково |

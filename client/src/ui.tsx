@@ -21,6 +21,7 @@ import {
   ArrowsClockwise,
   Barbell,
   CalendarBlank,
+  Camera,
   CaretLeft,
   Carrot,
   ChartLine,
@@ -31,11 +32,13 @@ import {
   CloudSlash,
   Copy,
   Crosshair,
+  DotsSixVertical,
   DotsThreeVertical,
   Eraser,
   Flame,
   Globe,
   House,
+  ImageSquare,
   Info,
   ListPlus,
   MagnifyingGlass,
@@ -52,6 +55,7 @@ import {
   Timer,
   Trash,
   Trophy,
+  User,
   WarningCircle,
   X,
   type IconProps,
@@ -72,6 +76,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrows-clockwise': ArrowsClockwise,
   barbell: Barbell,
   'calendar-blank': CalendarBlank,
+  camera: Camera,
   'caret-left': CaretLeft,
   carrot: Carrot,
   'chart-line': ChartLine,
@@ -82,11 +87,13 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'cloud-slash': CloudSlash,
   copy: Copy,
   crosshair: Crosshair,
+  'dots-six': DotsSixVertical,
   'dots-three-vertical': DotsThreeVertical,
   eraser: Eraser,
   flame: Flame,
   globe: Globe,
   house: House,
+  'image-square': ImageSquare,
   info: Info,
   'list-plus': ListPlus,
   'magnifying-glass': MagnifyingGlass,
@@ -103,6 +110,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   timer: Timer,
   trash: Trash,
   trophy: Trophy,
+  user: User,
   'warning-circle': WarningCircle,
   x: X,
 };
@@ -117,8 +125,9 @@ export function Icon({
   weight?: IconProps['weight'];
 }) {
   const Glyph = ICONS[name];
+  const classes = ['ui-icon', className].filter(Boolean).join(' ');
   return (
-    <i className={className} aria-hidden style={{ display: 'inline-flex', lineHeight: 0 }}>
+    <i className={classes} aria-hidden>
       {Glyph ? <Glyph size="1em" weight={weight} /> : null}
     </i>
   );
@@ -174,11 +183,7 @@ function useFixedPanelPosition(
       const target = anchorRef?.current ?? anchor;
       const rect = target && document.body.contains(target) ? target.getBoundingClientRect() : null;
 
-      const appRect = document.querySelector('.app')?.getBoundingClientRect();
-      let left =
-        kind === 'sheet' && appRect
-          ? clamp(appRect.right - width, 0, viewportW - width)
-          : viewportW - width - gutter;
+      let left = viewportW - width - gutter;
       let top = gutter;
 
       if (kind === 'sheet') {
@@ -410,6 +415,7 @@ export function LanguageSelector() {
         onClick={() => setOpen((x) => !x)}
       >
         <span aria-hidden>{FLAGS[locale]}</span>
+        <span className="lang-chip-label">{LOCALES[locale].locale}</span>
       </button>
       {open && (
         <Portal>

@@ -60,28 +60,24 @@ test.afterEach(async () => {
   fs.rmSync(dataDir, { recursive: true, force: true });
 });
 
-test('F-01/F-02/F-08 auth, shell, language and sign-out dialog', async ({ page }) => {
+test('F-01/F-02/F-08 auth, shell and language', async ({ page }) => {
   await page.goto(BASE);
   await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible();
 
+  await page.getByPlaceholder('First name').fill('Demo');
+  await page.getByPlaceholder('Last name').fill('User');
   await page.getByPlaceholder('Username').fill('demo');
   await page.getByPlaceholder('Email').fill('Demo@Example.com');
   await page.getByPlaceholder('Password (min. 6 characters)').fill('secret123');
   await page.getByRole('button', { name: 'Create account' }).click();
 
   await expect(page.getByRole('heading', { name: 'Nothing logged yet.' })).toBeVisible();
-  await page.getByRole('button', { name: 'Apps' }).click();
-  await expect(page.getByRole('heading', { name: 'Services' })).toBeVisible();
-  await expect(page.getByText('Nutrition')).toBeVisible();
-  await expect(page.getByText('AI body scan')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Apps' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Programs' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Українська' }).click();
-  await expect(page.getByRole('heading', { name: 'Сервіси' })).toBeVisible();
-
-  await page.getByRole('button', { name: 'Вийти' }).click();
-  await expect(page.getByRole('alertdialog')).toBeVisible();
-  await page.getByRole('button', { name: 'Залишитись' }).click();
-  await expect(page.getByRole('alertdialog')).toBeHidden();
+  await page.getByRole('button', { name: 'Language' }).click();
+  await page.getByRole('menuitemradio', { name: 'Українська' }).click();
+  await expect(page.getByRole('heading', { name: 'Ще нічого не записано.' })).toBeVisible();
 });
 
 test('F-03/F-04 session logging, ghost row, finish and recent history', async ({ page }) => {
@@ -154,4 +150,50 @@ test('F-05/F-06 gyms, reminders and progress locked state', async ({ page }) => 
 
   await page.getByRole('button', { name: 'Progress' }).click();
   await expect(page.getByText('Two more sessions')).toBeVisible();
+});
+
+test('W-04 desktop pages keep the whole content lane scrollable', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 520 });
+  await api<{ token: string }>('POST', '/api/auth/register', {
+    firstName: 'Demo',
+    lastName: 'User',
+    email: 'desktop@example.com',
+    password: 'secret123',
+  });
+
+  await page.goto(BASE);
+  await page.getByPlaceholder('Email or username').fill('desktop@example.com');
+  await page.getByPlaceholder('Password').fill('secret123');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('button', { name: /Demo User/ }).click();
+  await expect(page.getByRole('heading', { name: 'Demo User' })).toBeVisible();
+
+  const layout = await page.evaluate(() => {
+    const main = document.querySelector('.main-col')?.getBoundingClientRect();
+    const screen = document.querySelector('.screen')?.getBoundingClientRect();
+    const content = document.querySelector('.screen')?.firstElementChild?.getBoundingClientRect();
+    const scroller = document.querySelector('.screen') as HTMLElement | null;
+    if (!main || !screen || !content || !scroller) throw new Error('desktop layout missing');
+    return {
+      mainLeft: main.left,
+      mainRight: main.right,
+      screenLeft: screen.left,
+      screenRight: screen.right,
+      screenTop: screen.top,
+      contentWidth: content.width,
+      clientHeight: scroller.clientHeight,
+      scrollHeight: scroller.scrollHeight,
+    };
+  });
+
+  expect(Math.abs(layout.screenLeft - layout.mainLeft)).toBeLessThan(1);
+  expect(Math.abs(layout.screenRight - layout.mainRight)).toBeLessThan(1);
+  expect(layout.contentWidth).toBeLessThanOrEqual(900);
+  expect(layout.scrollHeight).toBeGreaterThan(layout.clientHeight);
+
+  await page.mouse.move(1420, layout.screenTop + 120);
+  await page.mouse.wheel(0, 700);
+  await expect
+    .poll(() => page.evaluate(() => (document.querySelector('.screen') as HTMLElement).scrollTop))
+    .toBeGreaterThan(0);
 });

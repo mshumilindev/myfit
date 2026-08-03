@@ -21,7 +21,7 @@ import {
   type Coords,
 } from '../data/gymProviders';
 import { fmtTonnes, fmtDurationHM, useT } from '../i18n';
-import { Icon, LanguageSelector, ConfirmDialog } from '../ui';
+import { Icon, ConfirmDialog } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 
@@ -128,7 +128,7 @@ export function GymDetailView({
   if (lat === undefined || lng === undefined || !name) {
     return (
       <div className="screen">
-        <button className="back" onClick={onClose} aria-label="Back">
+        <button className="back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
       </div>
@@ -155,12 +155,10 @@ export function GymDetailView({
       <div className="gym-detail-hero">
         <GymThumb name={name} lat={lat} lng={lng} size={320} />
         <div className="hero-scrim" />
-        <button className="hero-back" onClick={onClose} aria-label="Back">
+        <button className="hero-back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
-        <div className="hero-top-right">
-          <LanguageSelector />
-        </div>
+        <div className="hero-top-right"></div>
         <div className="hero-text">
           <h1>{name}</h1>
           <div className="loc">

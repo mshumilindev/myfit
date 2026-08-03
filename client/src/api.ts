@@ -16,6 +16,10 @@ export function setAuth(token: string, username: string, role: Role = 'member'):
   localStorage.setItem(ROLE_KEY, role);
 }
 
+export function setUsername(username: string): void {
+  localStorage.setItem(USERNAME_KEY, username);
+}
+
 export function getRole(): Role {
   const r = localStorage.getItem(ROLE_KEY);
   return r === 'admin' || r === 'trainer' ? r : 'member';

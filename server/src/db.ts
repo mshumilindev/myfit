@@ -27,6 +27,11 @@ CREATE TABLE IF NOT EXISTS exercises (
   id         TEXT PRIMARY KEY,
   workout_id TEXT NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
   name       TEXT NOT NULL,
+  kind       TEXT NOT NULL DEFAULT 'strength',
+  planned_sets INTEGER,
+  planned_reps INTEGER,
+  planned_duration_min REAL,
+  equipment  TEXT,
   position   INTEGER NOT NULL DEFAULT 0,
   updated_at INTEGER NOT NULL
 );
@@ -37,6 +42,10 @@ CREATE TABLE IF NOT EXISTS sets (
   reps        INTEGER NOT NULL,
   weight      REAL,
   is_warmup   INTEGER NOT NULL DEFAULT 0,
+  duration_min REAL,
+  distance_km  REAL,
+  calories     INTEGER,
+  rpe          REAL,
   position    INTEGER NOT NULL DEFAULT 0,
   updated_at  INTEGER NOT NULL
 );
@@ -82,6 +91,17 @@ for (const stmt of [
   "ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'",
   'ALTER TABLE users ADD COLUMN trainer_id TEXT',
   'ALTER TABLE users ADD COLUMN avatar_ext TEXT',
+  'ALTER TABLE users ADD COLUMN first_name TEXT',
+  'ALTER TABLE users ADD COLUMN last_name TEXT',
+  "ALTER TABLE exercises ADD COLUMN kind TEXT NOT NULL DEFAULT 'strength'",
+  'ALTER TABLE exercises ADD COLUMN planned_sets INTEGER',
+  'ALTER TABLE exercises ADD COLUMN planned_reps INTEGER',
+  'ALTER TABLE exercises ADD COLUMN planned_duration_min REAL',
+  'ALTER TABLE exercises ADD COLUMN equipment TEXT',
+  'ALTER TABLE sets ADD COLUMN duration_min REAL',
+  'ALTER TABLE sets ADD COLUMN distance_km REAL',
+  'ALTER TABLE sets ADD COLUMN calories INTEGER',
+  'ALTER TABLE sets ADD COLUMN rpe REAL',
 ]) {
   try {
     db.exec(stmt);
@@ -121,7 +141,46 @@ CREATE TABLE IF NOT EXISTS trainer_notes (
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_notes_member ON trainer_notes(member_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS programs (
+  id            TEXT PRIMARY KEY,
+  author_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name          TEXT NOT NULL,
+  weeks         INTEGER NOT NULL DEFAULT 8,
+  days_per_week INTEGER NOT NULL DEFAULT 3,
+  updated_at    INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS program_items (
+  id           TEXT PRIMARY KEY,
+  program_id   TEXT NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+  day          INTEGER NOT NULL DEFAULT 1,
+  position     INTEGER NOT NULL DEFAULT 0,
+  name         TEXT NOT NULL,
+  kind         TEXT NOT NULL DEFAULT 'strength',
+  sets         INTEGER NOT NULL DEFAULT 3,
+  reps         INTEGER NOT NULL DEFAULT 8,
+  weight       REAL,
+  duration_min REAL,
+  equipment    TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_program_items ON program_items(program_id, day, position);
+
+CREATE TABLE IF NOT EXISTS program_assignments (
+  member_id   TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  program_id  TEXT NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+  assigned_by TEXT NOT NULL,
+  started_at  INTEGER NOT NULL
+);
 `);
+
+for (const stmt of ['ALTER TABLE program_items ADD COLUMN equipment TEXT']) {
+  try {
+    db.exec(stmt);
+  } catch {
+    /* column already present */
+  }
+}
 
 // Bootstrap: if the instance has no admin yet, the oldest account (the
 // instance owner) becomes one — pre-roles installs get exactly one admin.
@@ -144,6 +203,21 @@ db.exec(
   'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL',
 );
 
+db.exec(`
+UPDATE users
+   SET first_name = CASE
+     WHEN INSTR(TRIM(username), ' ') > 0
+       THEN SUBSTR(TRIM(username), 1, INSTR(TRIM(username), ' ') - 1)
+     ELSE TRIM(username)
+   END
+ WHERE first_name IS NULL OR TRIM(first_name) = '';
+
+UPDATE users
+   SET last_name = NULLIF(TRIM(SUBSTR(TRIM(username), INSTR(TRIM(username), ' ') + 1)), '')
+ WHERE (last_name IS NULL OR TRIM(last_name) = '')
+   AND INSTR(TRIM(username), ' ') > 0;
+`);
+
 export interface UserRow {
   id: string;
   username: string;
@@ -154,6 +228,31 @@ export interface UserRow {
   status: 'active' | 'invited' | 'suspended';
   trainer_id: string | null;
   avatar_ext: string | null;
+  first_name: string | null;
+  last_name: string | null;
+}
+
+export interface ProgramRow {
+  id: string;
+  author_id: string;
+  name: string;
+  weeks: number;
+  days_per_week: number;
+  updated_at: number;
+}
+
+export interface ProgramItemRow {
+  id: string;
+  program_id: string;
+  day: number;
+  position: number;
+  name: string;
+  kind: 'strength' | 'cardio' | 'warmup' | 'cooldown';
+  sets: number;
+  reps: number;
+  weight: number | null;
+  duration_min: number | null;
+  equipment: string | null;
 }
 
 export interface InviteRow {
@@ -182,6 +281,11 @@ export interface ExerciseRow {
   id: string;
   workout_id: string;
   name: string;
+  kind: 'strength' | 'cardio' | 'warmup' | 'cooldown';
+  planned_sets: number | null;
+  planned_reps: number | null;
+  planned_duration_min: number | null;
+  equipment: string | null;
   position: number;
   updated_at: number;
 }
@@ -210,6 +314,10 @@ export interface SetRow {
   reps: number;
   weight: number | null;
   is_warmup: number;
+  duration_min: number | null;
+  distance_km: number | null;
+  calories: number | null;
+  rpe: number | null;
   position: number;
   updated_at: number;
 }

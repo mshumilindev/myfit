@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getToken, getUsername } from './api';
 import { getOpenWorkout, startSyncLoop, useStore } from './store';
 import { fmtSessionClock, useT } from './i18n';
-import { Icon, Snackbar, Toast, type SnackState, type ToastState } from './ui';
+import { Icon, LanguageSelector, Snackbar, Toast, type SnackState, type ToastState } from './ui';
 import { AuthView } from './views/AuthView';
 import { OnboardingView } from './views/OnboardingView';
 import { AdminView } from './views/AdminView';
@@ -11,18 +11,20 @@ import { getRole } from './api';
 import { TodayView } from './views/TodayView';
 import { ProgressView } from './views/ProgressView';
 import { GymsView } from './views/GymsView';
-import { ServicesView } from './views/ServicesView';
 import { SessionView } from './views/SessionView';
 import { ExerciseHistoryView } from './views/ExerciseHistoryView';
 import { GymDetailView } from './views/GymDetailView';
+import { ProfileView } from './views/ProfileView';
+import { ProgramsView } from './views/ProgramsView';
 import { LiveHero } from './components/LiveHero';
 
-export type Tab = 'today' | 'progress' | 'gyms' | 'apps' | 'people';
+export type Tab = 'today' | 'progress' | 'gyms' | 'people' | 'programs';
 
 export type Overlay =
   | { screen: 'session'; workoutId: string }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
+  | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
   | null;
 
@@ -33,7 +35,7 @@ export interface Shell {
   snack: (s: SnackState) => void;
 }
 
-const TABS: Tab[] = ['today', 'progress', 'gyms', 'apps', 'people'];
+const TABS: Tab[] = ['today', 'progress', 'gyms', 'people', 'programs'];
 
 /** Serialize the current screen to a URL hash so a refresh restores it. */
 function toHash(tab: Tab, overlay: Overlay): string {
@@ -41,6 +43,7 @@ function toHash(tab: Tab, overlay: Overlay): string {
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
+  if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
   return `#/${tab}`;
 }
@@ -57,6 +60,8 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
       tab: 'today',
       overlay: { screen: 'exercise-history', name: decodeURIComponent(parts[1]) },
     };
+  if (head === 'profile' && parts[1])
+    return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -181,16 +186,16 @@ export function App() {
     role === 'trainer'
       ? [
           { id: 'people', icon: 'barbell', label: t.trMyClients },
-          { id: 'apps', icon: 'squares-four', label: t.apps },
+          { id: 'programs', icon: 'copy', label: t.progTitle },
         ]
       : [
           { id: 'today', icon: 'house', label: t.today },
           { id: 'progress', icon: 'chart-line-up', label: t.progress },
+          { id: 'programs', icon: 'copy', label: t.progTitle },
           { id: 'gyms', icon: 'map-pin', label: t.gyms },
           ...(role === 'admin'
             ? [{ id: 'people' as Tab, icon: 'shield-check', label: t.adminPeople }]
             : []),
-          { id: 'apps', icon: 'squares-four', label: t.apps },
         ];
 
   return (
@@ -204,9 +209,15 @@ export function App() {
           openWorkoutStartedAt={open?.startedAt}
           syncStatus={store.syncStatus}
           onOpenSession={() => open && setOverlay({ screen: 'session', workoutId: open.id })}
+          onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
         />
       )}
       <div className="main-col">
+        {desktopRail ? null : (
+          <div className="lang-mobile">
+            <LanguageSelector />
+          </div>
+        )}
         {open && overlay?.screen !== 'session' && overlay?.screen !== 'past-workout' && (
           <LiveHero
             workout={open}
@@ -244,22 +255,23 @@ export function App() {
             onClose={closeOverlay}
           />
         )}
+        {overlay?.screen === 'profile' && (
+          <ProfileView userId={overlay.userId} shell={shell} onClose={closeOverlay} />
+        )}
         {!overlay && (
           <>
             {tab === 'today' && <TodayView shell={shell} store={store} />}
             {tab === 'progress' && <ProgressView store={store} />}
             {tab === 'gyms' && <GymsView shell={shell} store={store} />}
-            {tab === 'people' && (role === 'trainer' ? <TrainerView /> : <AdminView />)}
-            {tab === 'apps' && (
-              <ServicesView
-                store={store}
-                onSignedOut={() => {
-                  setAuthed(false);
-                  setTab('today');
-                }}
-                onOpenTraining={() => setTab('today')}
-              />
-            )}
+            {tab === 'people' &&
+              (role === 'trainer' ? (
+                <TrainerView
+                  onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
+                />
+              ) : (
+                <AdminView onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })} />
+              ))}
+            {tab === 'programs' && <ProgramsView />}
             <nav className="tabbar">
               {tabs.map((x) => (
                 <button
@@ -309,9 +321,9 @@ function useDesktopRail(): boolean {
 }
 
 /**
- * Desktop rail (W-04): 206px, brand, labeled nav, Services section, and an
- * account chip at the foot — it replaces the phone's Apps tab. During a live
- * session the foot also carries the in-session chip (W-06). Hidden under 720px.
+ * Desktop rail (W-04): 206px, brand, labeled nav, and an account chip at the
+ * foot. During a live session the foot also carries the in-session chip (W-06).
+ * Hidden under 720px.
  */
 function Rail(props: {
   tab: Tab;
@@ -321,6 +333,7 @@ function Rail(props: {
   openWorkoutStartedAt?: number;
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
   onOpenSession: () => void;
+  onOpenProfile: () => void;
 }) {
   const { t } = useT();
   const [now, setNow] = useState(() => Date.now());
@@ -336,10 +349,14 @@ function Rail(props: {
   // TR-04: trainer rail is clients-only; admins get People (AD-01).
   const nav: { id: Tab; icon: string; label: string }[] =
     role === 'trainer'
-      ? [{ id: 'people', icon: 'barbell', label: t.trMyClients }]
+      ? [
+          { id: 'people', icon: 'barbell', label: t.trMyClients },
+          { id: 'programs', icon: 'copy', label: t.progTitle },
+        ]
       : [
           { id: 'today', icon: 'house', label: t.today },
           { id: 'progress', icon: 'chart-line-up', label: t.progress },
+          { id: 'programs', icon: 'copy', label: t.progTitle },
           { id: 'gyms', icon: 'map-pin', label: t.gyms },
           ...(role === 'admin'
             ? [{ id: 'people' as Tab, icon: 'shield-check', label: t.adminPeople }]
@@ -370,21 +387,10 @@ function Rail(props: {
           {x.label}
         </button>
       ))}
-      <div className="rail-divider" />
-      <div className="rail-label">{t.services}</div>
-      <button className="rail-item" onClick={() => props.goTab('today')}>
-        <Icon name="barbell" />
-        {t.training}
-      </button>
-      <div className="rail-item disabled">
-        <Icon name="carrot" />
-        {t.nutrition}
-      </div>
-      <div className="rail-item disabled">
-        <Icon name="robot" />
-        {t.aiBodyScan}
-      </div>
       <div className="rail-foot">
+        <div className="rail-lang">
+          <LanguageSelector />
+        </div>
         {live && (
           <button className="rail-session-chip" onClick={props.onOpenSession}>
             <span className="dot" />
@@ -394,7 +400,7 @@ function Rail(props: {
             </span>
           </button>
         )}
-        <button className="account-chip" onClick={() => props.goTab('apps')}>
+        <button className="account-chip" onClick={props.onOpenProfile}>
           <span className="avatar">{(username[0] ?? '?').toUpperCase()}</span>
           <span className="name">{username}</span>
           <span className="dot" style={{ background: dotColor }} />

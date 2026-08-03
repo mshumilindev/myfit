@@ -1,13 +1,16 @@
-/** Today — design S-10…S-16. */
+/** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
-import type { Gym } from '../types';
+import type { ExerciseKind, Gym } from '../types';
+import { request } from '../api';
 import {
+  addExercise,
   backfillWorkout,
   dismissReminder,
   logVisitAsWorkout,
   repeatWorkout,
   startWorkout,
+  topSet,
   workoutSets,
   workoutVolumeKg,
   type useStore,
@@ -22,12 +25,64 @@ import {
   useT,
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
-import { Icon, LanguageSelector, Sheet, Spinner, EmptyState } from '../ui';
+import { Icon, Sheet, Spinner } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
+import { EquipmentIcon, type EquipmentId } from '../data/equipment';
 
 type Store = ReturnType<typeof useStore>;
+
+const DAY_MS = 24 * 3600 * 1000;
+const WEEK_MS = 7 * DAY_MS;
+
+function weekStartOf(ts: number): number {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  return d.getTime();
+}
+
+const BAR_COLORS = [
+  'var(--color-neutral-800)',
+  'var(--color-neutral-800)',
+  'var(--color-neutral-800)',
+  'var(--color-neutral-800)',
+  'var(--color-neutral-800)',
+  'var(--color-accent-800)',
+  'var(--color-accent-700)',
+  'var(--color-accent-700)',
+  'var(--color-accent-600)',
+  'var(--color-accent)',
+];
+
+interface ProgramItem {
+  id: string;
+  day: number;
+  position: number;
+  name: string;
+  kind: ExerciseKind;
+  sets: number;
+  reps: number;
+  durationMin: number | null;
+  equipment: EquipmentId[];
+}
+
+interface ProgramAssignment {
+  program: {
+    id: string;
+    name: string;
+    weeks: number;
+    daysPerWeek: number;
+    items: ProgramItem[];
+  };
+  assignedBy: string | null;
+  week: number;
+  done: number;
+  total: number;
+  expectedSoFar: number;
+  adherence: number | null;
+}
 
 function useNowTick(active: boolean): number {
   const [now, setNow] = useState(() => Date.now());
@@ -42,31 +97,95 @@ function useNowTick(active: boolean): number {
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
   const [startPicker, setStartPicker] = useState(false);
+  const [backfill, setBackfill] = useState(false);
+  const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
 
   function beginSession(gymId: string | null) {
     setStartPicker(false);
     const w = startWorkout(gymId);
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
-  const [backfill, setBackfill] = useState(false);
+  function startSession() {
+    if (store.gyms.length > 0) setStartPicker(true);
+    else beginSession(null);
+  }
+
   const open = store.workouts.find((w) => w.finishedAt === null);
   const now = useNowTick(!!open);
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
+  const hasHistory = finished.length > 0;
   const firstLoad = store.workouts.length === 0 && store.lastSyncAt === null && !!store.queue;
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
-
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
-  const todayFinished = finished.some((w) => w.startedAt >= dayStart.getTime());
-
-  const headline = open ? t.midSession : todayFinished ? t.sessionDone : t.nothingLoggedYet;
 
   const reminder = store.reminders[0];
   const queuedIds = new Set(
     store.queue.map((q) => q.url.match(/workouts\/([0-9a-f-]+)/)?.[1]).filter(Boolean),
   );
-  const lastFinished = finished[0];
+
+  // --- Aggregates for the stat grid, weekly bars and records (W-04) --------
+  const totalVolKg = finished.reduce((v, w) => v + workoutVolumeKg(w), 0);
+  const byName = new Map<string, { recW: number; recReps: number; recTs: number }>();
+  for (const w of finished) {
+    for (const e of w.exercises) {
+      const top = topSet(e.sets);
+      if (!top || (top.weight ?? 0) <= 0) continue;
+      const key = e.name.trim();
+      if (!key) continue;
+      const cur = byName.get(key) ?? { recW: 0, recReps: 0, recTs: 0 };
+      if ((top.weight ?? 0) > cur.recW) {
+        cur.recW = top.weight ?? 0;
+        cur.recReps = top.reps;
+        cur.recTs = w.startedAt;
+      }
+      byName.set(key, cur);
+    }
+  }
+  const newPrs = [...byName.values()].filter((r) => now - r.recTs < 14 * DAY_MS).length;
+  const records = [...byName.entries()].sort((a, b) => b[1].recW - a[1].recW).slice(0, 3);
+
+  const thisWeek = weekStartOf(now);
+  const weeks: number[] = [];
+  for (let i = 9; i >= 0; i--) {
+    const s = thisWeek - i * WEEK_MS;
+    weeks.push(
+      finished
+        .filter((w) => weekStartOf(w.startedAt) === s)
+        .reduce((v, w) => v + workoutVolumeKg(w), 0),
+    );
+  }
+  const maxWeek = Math.max(...weeks, 1);
+  const deltaPct = weeks[8] > 0 ? Math.round(((weeks[9] - weeks[8]) / weeks[8]) * 100) : null;
+
+  const weeksSet = new Set(finished.map((w) => weekStartOf(w.startedAt)));
+  let runWeeks = 0;
+  for (let c = thisWeek; weeksSet.has(c); c -= WEEK_MS) runWeeks++;
+  const streakDays = runWeeks * 7;
+
+  const templates = finished.slice(0, 2);
+
+  useEffect(() => {
+    request<{ assignment: ProgramAssignment | null }>('GET', '/api/programs/mine')
+      .then((data) => setAssignment(data.assignment))
+      .catch(() => setAssignment(null));
+  }, []);
+
+  function startProgramDay(day: number) {
+    if (!assignment) return;
+    const items = assignment.program.items
+      .filter((item) => item.day === day)
+      .sort((a, b) => a.position - b.position);
+    const w = startWorkout(null);
+    for (const item of items) {
+      addExercise(w.id, item.name, item.kind, {
+        plannedSets: item.kind === 'strength' ? item.sets : 1,
+        plannedReps: item.kind === 'strength' ? item.reps : null,
+        plannedDurationMin: item.kind === 'strength' ? null : (item.durationMin ?? 10),
+        equipment: item.equipment,
+      });
+    }
+    shell.openOverlay({ screen: 'session', workoutId: w.id });
+  }
 
   if (showSkeleton) {
     return (
@@ -85,42 +204,69 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           <div className="sk" style={{ flex: 1, height: 92 }} />
           <div className="sk" style={{ flex: 1, height: 92 }} />
         </div>
-        <div className="sk" style={{ width: 70, height: 9 }} />
-        {[0, 1, 2].map((i) => (
-          <div key={i} style={{ display: 'flex', gap: 12 }}>
-            <div className="sk" style={{ width: 40, height: 9 }} />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div className="sk" style={{ width: '45%', height: 13 }} />
-              <div className="sk" style={{ width: '65%', height: 9 }} />
-            </div>
-          </div>
-        ))}
       </div>
     );
   }
 
-  return (
-    <div className="screen">
-      <div className="today-head">
+  const programCard = !open && assignment && (
+    <section className="today-program-card">
+      <div className="program-card-head">
+        <Icon name="copy" />
         <div>
-          <div className="kicker">{fmtFullDate(now, locale)}</div>
-          <h1 className="headline" style={{ fontSize: 26 }}>
-            {headline}
-          </h1>
+          <div className="field-label">{t.progTitle}</div>
+          <div className="n">{assignment.program.name}</div>
+          <div className="s">
+            {t.progWeekN(assignment.week)} · {t.progSessions(assignment.done, assignment.total)}
+            {assignment.assignedBy ? ` · ${t.progAssignedBy(assignment.assignedBy)}` : ''}
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <SyncChip store={store} />
-          <LanguageSelector />
-        </div>
+        {assignment.adherence !== null && (
+          <span className="tag tag-accent">{Math.round(assignment.adherence * 100)}%</span>
+        )}
       </div>
+      <div className="program-day-actions">
+        {Array.from({ length: 7 }, (_, i) => i + 1).map((day) => {
+          const items = assignment.program.items
+            .filter((item) => item.day === day)
+            .sort((a, b) => a.position - b.position);
+          const equipment = [
+            ...new Set(items.flatMap((item) => item.equipment ?? [])),
+          ] as EquipmentId[];
+          const hasPlan = items.length > 0;
+          return (
+            <button
+              key={day}
+              className={`program-start-day${hasPlan ? ' planned' : ''}`}
+              disabled={!hasPlan}
+              onClick={() => startProgramDay(day)}
+            >
+              <span className="program-start-top">
+                <span>{t.weekDayLetters[day - 1]}</span>
+                {hasPlan ? <Icon name="play" /> : <span>+</span>}
+              </span>
+              <strong>{hasPlan ? t.progStart(day) : t.progRestDay}</strong>
+              {equipment.length > 0 && (
+                <span className="program-start-equipment">
+                  {equipment.slice(0, 4).map((id) => (
+                    <EquipmentIcon key={id} equipment={id} />
+                  ))}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
 
+  const banners = (
+    <>
       {store.syncStatus === 'offline' && store.queue.length > 0 && (
         <div className="banner offline">
           <Icon name="cloud-slash" />
           <span>{t.offlineQueued(store.queue.length)}</span>
         </div>
       )}
-
       {store.syncStatus === 'syncing' && store.queue.length > 0 && (
         <div className="sync-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -137,9 +283,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         </div>
       )}
-
-      {finished.length > 0 && <WeekStrip />}
-
       {reminder && !open && (
         <div className="reminder-card">
           <Icon name="map-pin" />
@@ -166,100 +309,257 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         </div>
       )}
+    </>
+  );
 
-      {!open && (
-        <button
-          className="btn btn-primary btn-big"
-          onClick={() => {
-            if (store.gyms.length > 0) setStartPicker(true);
-            else beginSession(null);
-          }}
-        >
-          <Icon name="play" />
-          {finished.length === 0 ? t.startFirstSession : t.startEmptySession}
-        </button>
-      )}
-
-      {!open && (
-        <button className="backfill-trigger" onClick={() => setBackfill(true)}>
-          <Icon name="arrow-counter-clockwise" />
-          <span>{t.logPastSession}</span>
-        </button>
-      )}
-
-      {store.syncStatus === 'offline' && (
-        <div style={{ fontSize: 11, color: 'var(--color-neutral-600)', padding: '0 2px' }}>
-          {t.servedFromCache}
-        </div>
-      )}
-
-      {!open && lastFinished && (
-        <div className="quick">
-          <button
-            className="tile"
-            onClick={() => {
-              const w = repeatWorkout(lastFinished.id);
-              if (w) shell.openOverlay({ screen: 'session', workoutId: w.id });
-            }}
-          >
-            <Icon name="arrow-counter-clockwise" />
-            <div className="t">{t.repeat(fmtDayMonth(lastFinished.startedAt, locale))}</div>
-            <div className="s">
-              {lastFinished.exercises.length} {t.exercises}
-            </div>
-          </button>
-        </div>
-      )}
-
-      {finished.length === 0 ? (
-        <>
-          <EmptyState icon="barbell" title={t.noHistoryYet} body={t.noHistoryBody} />
-          {!open && store.gyms.length === 0 && (
-            <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
-              <Icon name="map-pin" />
-              <span style={{ flex: 1, textAlign: 'left' }}>{t.addGymHint}</span>
-              <span style={{ color: 'var(--color-accent)', fontSize: 12 }}>{t.add}</span>
-            </button>
-          )}
-        </>
-      ) : (
-        finished.length > 0 && (
-          <>
-            <div className="section-label" style={{ marginTop: 'var(--space-2)' }}>
-              {t.recent}
-            </div>
+  return (
+    <div className="screen paned">
+      <div className="pane-main">
+        {hasHistory ? (
+          <div className="td-topbar">
             <div>
-              {finished.slice(0, 5).map((w) => (
-                <button
-                  key={w.id}
-                  className="recent-row"
-                  onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: w.id })}
-                >
-                  <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
-                  <span style={{ flex: 1 }}>
-                    <span className="name">{fmtDayMonth(w.startedAt, locale)}</span>
-                    {w.autoFinished && (
-                      <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
-                        {t.autoClosed}
-                      </span>
-                    )}
-                    {queuedIds.has(w.id) && (
-                      <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
-                        {t.queued}
-                      </span>
-                    )}
-                    <div className="stats">
-                      {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
-                      {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
-                    </div>
-                  </span>
-                  <Icon name="arrow-up-right" className="go" />
-                </button>
-              ))}
+              <div className="kicker">{fmtFullDate(now, locale)}</div>
+              <h1>{t.today}</h1>
             </div>
+            <div className="td-topbar-actions">
+              <SyncChip store={store} />
+
+              {!open && (
+                <button className="btn btn-primary" onClick={startSession}>
+                  <Icon name="play" />
+                  {t.startEmptySession}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="td-topbar">
+            <div className="kicker">{fmtFullDate(now, locale)}</div>
+            <div className="td-topbar-actions">
+              <SyncChip store={store} />
+            </div>
+          </div>
+        )}
+
+        {banners}
+        {programCard}
+
+        {hasHistory ? (
+          <>
+            <div className="td-stats">
+              <div className="td-stat">
+                <div className="v">{finished.length}</div>
+                <div className="l">{t.statSessions}</div>
+              </div>
+              <div className="td-stat">
+                <div className="v">{(totalVolKg / 1000).toFixed(1)} t</div>
+                <div className="l">{t.statVolume}</div>
+              </div>
+              <div className="td-stat">
+                <div className={`v${newPrs > 0 ? ' accent' : ''}`}>{newPrs}</div>
+                <div className="l">{t.statNewPrs}</div>
+              </div>
+              <div className="td-stat">
+                <div className="v">{t.statDays(streakDays)}</div>
+                <div className="l">{t.statStreak}</div>
+              </div>
+            </div>
+
+            <div className="mobile-only">
+              <WeekStrip />
+            </div>
+
+            <div>
+              <div className="td-block-head">
+                <div className="section-label">{t.weeklyVolume}</div>
+                {deltaPct !== null && (
+                  <div className="td-delta">
+                    {deltaPct >= 0 ? '+' : '−'}
+                    {Math.abs(deltaPct)}%
+                  </div>
+                )}
+              </div>
+              <div className="bars">
+                {weeks.map((v, i) => (
+                  <div
+                    key={i}
+                    className="bar"
+                    style={{
+                      height: `${Math.max((v / maxWeek) * 100, 4)}%`,
+                      background: BAR_COLORS[i],
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="td-history">
+              <div className="section-label" style={{ marginBottom: 8 }}>
+                {t.tdHistory}
+              </div>
+              {/* Desktop: full table (W-04). */}
+              <div className="desktop-only">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>{t.colDate}</th>
+                      <th>{t.colSession}</th>
+                      <th>{t.colSets}</th>
+                      <th>{t.volumeCol}</th>
+                      <th>{t.duration}</th>
+                      <th className="td-history-dots"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {finished.slice(0, 8).map((w) => (
+                      <tr
+                        key={w.id}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() =>
+                          shell.openOverlay({ screen: 'past-workout', workoutId: w.id })
+                        }
+                      >
+                        <td>{fmtShortDate(w.startedAt, locale)}</td>
+                        <td>
+                          {fmtDayMonth(w.startedAt, locale)}
+                          {w.autoFinished && (
+                            <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
+                              {t.autoClosed}
+                            </span>
+                          )}
+                          {queuedIds.has(w.id) && (
+                            <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
+                              {t.queued}
+                            </span>
+                          )}
+                        </td>
+                        <td>{workoutSets(w)}</td>
+                        <td>{fmtKg(workoutVolumeKg(w))}</td>
+                        <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
+                        <td className="td-history-dots">
+                          <Icon name="dots-three" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Mobile: stacked rows (S-13). */}
+              <div className="mobile-only">
+                {finished.slice(0, 5).map((w) => (
+                  <button
+                    key={w.id}
+                    className="recent-row"
+                    onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: w.id })}
+                  >
+                    <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
+                    <span style={{ flex: 1 }}>
+                      <span className="name">{fmtDayMonth(w.startedAt, locale)}</span>
+                      {w.autoFinished && (
+                        <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
+                          {t.autoClosed}
+                        </span>
+                      )}
+                      <div className="stats">
+                        {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
+                        {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
+                      </div>
+                    </span>
+                    <Icon name="arrow-up-right" className="go" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {!open && (
+              <button className="backfill-trigger" onClick={() => setBackfill(true)}>
+                <Icon name="arrow-counter-clockwise" />
+                <span>{t.logPastSession}</span>
+              </button>
+            )}
           </>
-        )
-      )}
+        ) : (
+          <div className="td-empty">
+            <Icon name="barbell" />
+            <div className="td-empty-title">{t.tdEmptyTitle}</div>
+            <div className="td-empty-body">{t.tdEmptyBody}</div>
+            <div className="td-empty-actions">
+              {!open && (
+                <button className="btn btn-primary" onClick={startSession}>
+                  <Icon name="play" />
+                  {t.startFirstSession}
+                </button>
+              )}
+              <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
+                {t.logPastSession}
+              </button>
+            </div>
+            {!open && store.gyms.length === 0 && (
+              <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
+                <Icon name="map-pin" />
+                <span style={{ flex: 1, textAlign: 'left' }}>{t.addGymHint}</span>
+                <span style={{ color: 'var(--color-accent)', fontSize: 12 }}>{t.add}</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        {store.syncStatus === 'offline' && (
+          <div style={{ fontSize: 11, color: 'var(--color-neutral-600)', padding: '0 2px' }}>
+            {t.servedFromCache}
+          </div>
+        )}
+      </div>
+
+      <aside className="pane-side">
+        <div className="section-label">{t.templates}</div>
+        {templates.length > 0 ? (
+          templates.map((w) => {
+            const names = w.exercises
+              .map((e) => e.name.trim())
+              .filter(Boolean)
+              .slice(0, 4)
+              .join(' · ');
+            return (
+              <button
+                key={w.id}
+                className="td-tpl"
+                onClick={() => {
+                  const nw = repeatWorkout(w.id);
+                  if (nw) shell.openOverlay({ screen: 'session', workoutId: nw.id });
+                }}
+              >
+                <div className="n">{fmtDayMonth(w.startedAt, locale)}</div>
+                {names && <div className="ex">{names}</div>}
+                <div className="load">
+                  <Icon name="arrow-counter-clockwise" />
+                  {t.loadTemplate}
+                </div>
+              </button>
+            );
+          })
+        ) : (
+          <div className="td-tpl-empty">{t.templatesHint}</div>
+        )}
+
+        {records.length > 0 && (
+          <>
+            <div className="td-side-divider" />
+            <div className="section-label">{t.records}</div>
+            {records.map(([name, r]) => {
+              const recent = now - r.recTs < 14 * DAY_MS;
+              return (
+                <div key={name} className="record-row">
+                  <span className="n">{name}</span>
+                  <span className="v">{r.recW} kg</span>
+                  {recent && <span className="tag tag-accent">{t.record}</span>}
+                </div>
+              );
+            })}
+          </>
+        )}
+      </aside>
+
       {startPicker && (
         <GymPicker
           gyms={store.gyms}

@@ -2,9 +2,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { request } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
-import { Icon, LanguageSelector, Spinner } from '../ui';
+import { Icon, Spinner } from '../ui';
 import { Avatar } from '../components/Avatar';
-import { MemberDetailSheet } from './AdminView';
 
 interface Client {
   id: string;
@@ -20,11 +19,10 @@ interface Client {
   dormantDays: number | null;
 }
 
-export function TrainerView() {
+export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
   const [clients, setClients] = useState<Client[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [open, setOpen] = useState<Client | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
   const refresh = useCallback(() => {
@@ -57,7 +55,6 @@ export function TrainerView() {
           <h1 className="title-26">{t.trMyClients}</h1>
           {clients && <div className="sub">{t.trSummary(clients.length, liveCount)}</div>}
         </div>
-        <LanguageSelector />
       </div>
 
       {clients === null && !failed && <Spinner size={18} />}
@@ -83,7 +80,7 @@ export function TrainerView() {
         <button
           key={c.id}
           className={`tr-client-card${c.dormantDays !== null ? ' dormant' : ''}${c.live ? ' live' : ''}`}
-          onClick={() => setOpen(c)}
+          onClick={() => onOpenProfile(c.id)}
         >
           <Avatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={40} />
           <span className="body">
@@ -102,18 +99,6 @@ export function TrainerView() {
           <Icon name="arrow-up-right" className="go" />
         </button>
       ))}
-
-      {open && (
-        <MemberDetailSheet
-          person={{ id: open.id, name: open.name, avatar: open.avatar }}
-          now={now}
-          trainerMode
-          onClose={() => setOpen(null)}
-          onAddNote={async (text) => {
-            await request('POST', `/api/trainer/clients/${open.id}/notes`, { text });
-          }}
-        />
-      )}
     </div>
   );
 }

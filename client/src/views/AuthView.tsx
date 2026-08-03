@@ -17,12 +17,15 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [error, setError] = useState<string | null>(null);
 
   const [identifier, setIdentifier] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [touched, setTouched] = useState<{
     email?: boolean;
     password?: boolean;
+    firstName?: boolean;
     username?: boolean;
   }>({});
 
@@ -44,10 +47,14 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
 
   const emailBad = mode === 'signup' && touched.email && !EMAIL_RE.test(email.trim());
   const passwordBad = mode === 'signup' && touched.password && password.length < 6;
+  const firstNameBad = mode === 'signup' && touched.firstName && firstName.trim().length < 2;
   const usernameBad = mode === 'signup' && touched.username && username.trim().length < 2;
   const signupInvalid =
     mode === 'signup' &&
-    (!EMAIL_RE.test(email.trim()) || password.length < 6 || username.trim().length < 2);
+    (!EMAIL_RE.test(email.trim()) ||
+      password.length < 6 ||
+      firstName.trim().length < 2 ||
+      username.trim().length < 2);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -60,8 +67,11 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           ? await request<{
               token: string;
               username: string;
+              name?: string;
               role?: 'member' | 'trainer' | 'admin';
             }>('POST', '/api/auth/register', {
+              firstName: firstName.trim(),
+              lastName: lastName.trim(),
               username: username.trim(),
               email: email.trim(),
               password,
@@ -69,12 +79,13 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           : await request<{
               token: string;
               username: string;
+              name?: string;
               role?: 'member' | 'trainer' | 'admin';
             }>('POST', '/api/auth/login', {
               identifier: identifier.trim(),
               password,
             });
-      setAuth(res.token, res.username, res.role ?? 'member');
+      setAuth(res.token, res.name ?? res.username, res.role ?? 'member');
       onLoggedIn();
     } catch (err) {
       if (err instanceof HttpError && err.status === 401) setError(t.wrongCredentials);
@@ -131,6 +142,29 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           </>
         ) : (
           <>
+            <input
+              className={`input${firstNameBad ? ' error' : ''}`}
+              placeholder={t.firstName}
+              value={firstName}
+              autoComplete="given-name"
+              disabled={unreachable || busy}
+              onBlur={() => setTouched((x) => ({ ...x, firstName: true }))}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            {firstNameBad && (
+              <div className="field-error">
+                <Icon name="warning-circle" />
+                {t.firstNameTooShort}
+              </div>
+            )}
+            <input
+              className="input"
+              placeholder={t.lastName}
+              value={lastName}
+              autoComplete="family-name"
+              disabled={unreachable || busy}
+              onChange={(e) => setLastName(e.target.value)}
+            />
             <input
               className={`input${usernameBad ? ' error' : ''}`}
               placeholder={t.username}

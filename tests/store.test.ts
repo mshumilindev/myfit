@@ -24,6 +24,8 @@ import {
   recordPresence,
   repeatWorkout,
   recordWeight,
+  renameExercise,
+  reorderExercises,
   resetLocalData,
   reopenWorkout,
   restoreExercise,
@@ -37,6 +39,8 @@ import {
   upsertSet,
   updateWorkoutTimes,
   workoutSets,
+  workoutCardioDistanceKm,
+  workoutCardioMinutes,
   workoutVolumeKg,
 } from '../client/src/store';
 import { setAuth } from '../client/src/api';
@@ -121,6 +125,46 @@ describe('F-03 Workout store', () => {
     expect(workoutVolumeKg(finished!)).toBe(1100);
   });
 
+  it('logs cardio, warm-up and cool-down entries without polluting strength volume', () => {
+    const w = startWorkout();
+    const bike = addExercise(w.id, 'Bike', 'cardio');
+    const warm = addExercise(w.id, 'Warm-up', 'warmup');
+    upsertSet(w.id, bike.id, {
+      reps: 0,
+      weight: null,
+      isWarmup: false,
+      durationMin: 22,
+      distanceKm: 7.5,
+      calories: 180,
+      rpe: 6,
+    });
+    upsertSet(w.id, warm.id, {
+      reps: 0,
+      weight: null,
+      isWarmup: true,
+      durationMin: 8,
+      distanceKm: null,
+      calories: null,
+      rpe: 3,
+    });
+
+    const current = __getStateForTests().workouts.find((x) => x.id === w.id)!;
+    expect(workoutSets(current)).toBe(0);
+    expect(workoutVolumeKg(current)).toBe(0);
+    expect(workoutCardioMinutes(current)).toBe(30);
+    expect(workoutCardioDistanceKm(current)).toBe(7.5);
+    expect(
+      __getStateForTests().queue.some(
+        (q) => q.url.includes('/exercises/') && JSON.stringify(q.body).includes('"kind":"cardio"'),
+      ),
+    ).toBe(true);
+    expect(
+      __getStateForTests().queue.some(
+        (q) => q.url.includes('/sets/') && JSON.stringify(q.body).includes('"durationMin":22'),
+      ),
+    ).toBe(true);
+  });
+
   it('updates, deletes and reopens workouts and sets', () => {
     const w = startWorkout();
     const ex = addExercise(w.id, 'Press');
@@ -133,6 +177,60 @@ describe('F-03 Workout store', () => {
 
     expect(__getStateForTests().workouts).toEqual([]);
     expect(__getStateForTests().queue.map((q) => q.method)).toContain('DELETE');
+  });
+
+  it('reorders exercises and syncs their new positions idempotently', () => {
+    const w = startWorkout();
+    const squat = addExercise(w.id, 'Squat');
+    const bench = addExercise(w.id, 'Bench');
+    const row = addExercise(w.id, 'Row');
+
+    reorderExercises(w.id, [row.id, squat.id, bench.id]);
+
+    const current = __getStateForTests().workouts.find((x) => x.id === w.id)!;
+    expect(current.exercises.map((e) => [e.name, e.position])).toEqual([
+      ['Row', 0],
+      ['Squat', 1],
+      ['Bench', 2],
+    ]);
+    expect(
+      __getStateForTests().queue.filter(
+        (q) => q.method === 'PUT' && q.url.includes(`/workouts/${w.id}/exercises/`),
+      ),
+    ).toHaveLength(6);
+  });
+
+  it('keeps program prescription metadata on add, rename and duplicate', () => {
+    const w = startWorkout();
+    const ex = addExercise(w.id, 'Bench', 'strength', {
+      plannedSets: 3,
+      plannedReps: 8,
+      equipment: ['barbell'],
+    });
+
+    renameExercise(w.id, ex.id, 'Paused bench');
+    duplicateExercise(w.id, ex.id);
+
+    const current = __getStateForTests().workouts.find((x) => x.id === w.id)!;
+    expect(current.exercises[0]).toMatchObject({
+      name: 'Paused bench',
+      plannedSets: 3,
+      plannedReps: 8,
+      equipment: ['barbell'],
+    });
+    expect(current.exercises[1]).toMatchObject({
+      plannedSets: 3,
+      plannedReps: 8,
+      equipment: ['barbell'],
+    });
+    const exerciseWrites = __getStateForTests().queue.filter((q) =>
+      q.url.includes(`/workouts/${w.id}/exercises/`),
+    );
+    expect(exerciseWrites.at(-1)?.body).toMatchObject({
+      plannedSets: 3,
+      plannedReps: 8,
+      equipment: ['barbell'],
+    });
   });
 
   it('restores deleted set/exercise and duplicates exercises idempotently through queue', () => {

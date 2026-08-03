@@ -75,10 +75,43 @@ describe('F-01 Auth', () => {
         })
       ).status,
     ).toBe(409);
+
+    const named = await req<{
+      username: string;
+      name: string;
+      firstName: string;
+      lastName: string | null;
+      email: string;
+    }>('POST', '/api/auth/register', {
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      email: 'ada@example.com',
+      password: 'secret123',
+    });
+    expect(named.status).toBe(200);
+    expect(named.data).toMatchObject({
+      name: 'Ada Lovelace',
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      email: 'ada@example.com',
+    });
+    expect(named.data.username).toBe('ada');
   });
 
   it('logs in by email or username and rate-limits repeated failures', async () => {
     const { token } = await register('mykola', 'me@example.com');
+
+    expect((await req('POST', '/api/auth/login', { identifier: 'me@example.com' })).status).toBe(
+      400,
+    );
+    expect(
+      (
+        await req('POST', '/api/auth/login', {
+          identifier: 'x'.repeat(255),
+          password: 'secret123',
+        })
+      ).status,
+    ).toBe(400);
 
     expect(
       (
@@ -100,6 +133,12 @@ describe('F-01 Auth', () => {
     expect((await req('GET', '/api/tracker/state', undefined, 'bad-token')).status).toBe(401);
     const badSub = jwt.sign({ sub: 42 }, 'test-secret', { algorithm: 'HS256' });
     expect((await req('GET', '/api/tracker/state', undefined, badSub)).status).toBe(401);
+    db.prepare("UPDATE users SET status = 'suspended' WHERE email = ?").run('new@example.com');
+    expect(
+      (await req('POST', '/api/auth/login', { identifier: 'mykola', password: 'secret123' }))
+        .status,
+    ).toBe(403);
+    db.prepare("UPDATE users SET status = 'active' WHERE email = ?").run('new@example.com');
     expect(
       (await req('POST', '/api/auth/login', { identifier: 'mykola', password: 'wrong' })).status,
     ).toBe(401);
@@ -260,6 +299,174 @@ describe('F-01 Auth', () => {
     auditRead(adminId, memberId, 'profile');
     expect((db.prepare('SELECT COUNT(*) AS n FROM audit_log').get() as { n: number }).n).toBe(1);
   });
+
+  it('serves direct profile links only to the owner, an admin or the assigned trainer', async () => {
+    const admin = await register('owner', 'owner@example.com');
+    const member = await register('member', 'member@example.com');
+    const trainer = await register('coach', 'coach@example.com');
+    const stranger = await register('stranger', 'stranger@example.com');
+    const ids = Object.fromEntries(
+      (
+        db.prepare('SELECT id, email FROM users').all() as Array<{
+          id: string;
+          email: string;
+        }>
+      ).map((u) => [u.email, u.id]),
+    );
+    const memberId = ids['member@example.com'];
+    const trainerId = ids['coach@example.com'];
+    const strangerId = ids['stranger@example.com'];
+    const now = Date.now();
+    db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
+    db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, memberId);
+    db.prepare(
+      'INSERT INTO gyms (id, user_id, name, lat, lng, radius_m, favorite, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    ).run('gym-profile', memberId, 'Smartfit', 50.45, 30.52, 150, 1, now);
+    db.prepare(
+      'INSERT INTO workouts (id, user_id, started_at, finished_at, auto_finished, gym_id, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run('workout-profile', memberId, now - 3600_000, now, 0, 'gym-profile', now);
+    db.prepare(
+      'INSERT INTO exercises (id, workout_id, name, position, updated_at) VALUES (?, ?, ?, ?, ?)',
+    ).run('exercise-profile', 'workout-profile', 'Squat', 0, now);
+    db.prepare(
+      'INSERT INTO sets (id, exercise_id, reps, weight, is_warmup, position, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run('set-profile', 'exercise-profile', 8, 100, 0, 0, now);
+    db.prepare(
+      'INSERT INTO exercises (id, workout_id, name, kind, position, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+    ).run('cardio-profile', 'workout-profile', 'Bike', 'cardio', 1, now);
+    db.prepare(
+      'INSERT INTO sets (id, exercise_id, reps, weight, is_warmup, duration_min, distance_km, calories, rpe, position, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    ).run('cardio-set-profile', 'cardio-profile', 0, null, 0, 18, 5.1, 120, 5, 0, now);
+    db.prepare(
+      'INSERT INTO trainer_notes (id, trainer_id, member_id, text, created_at) VALUES (?, ?, ?, ?, ?)',
+    ).run('note-profile', trainerId, memberId, 'Keep depth consistent.', now);
+
+    const own = await req<{
+      person: { id: string; name: string; email: string };
+      summary: { volumeKg: number; cardioMinutes: number };
+      gyms: Array<{ name: string; lat: number; lng: number; radiusM: number; sessions: number }>;
+      topExercises: Array<{ name: string }>;
+      notes: Array<{ text: string }>;
+    }>('GET', '/api/profile/users/me', undefined, member.token);
+    expect(own.status).toBe(200);
+    expect(own.data.person.id).toBe(memberId);
+    expect(own.data.summary.volumeKg).toBe(800);
+    expect(own.data.summary.cardioMinutes).toBe(18);
+    expect(own.data.gyms[0].name).toBe('Smartfit');
+    expect(own.data.gyms[0]).toMatchObject({
+      lat: 50.45,
+      lng: 30.52,
+      radiusM: 150,
+      sessions: 1,
+    });
+    expect(own.data.topExercises[0].name).toBe('Squat');
+    expect(own.data.notes[0].text).toBe('Keep depth consistent.');
+
+    const edited = await req<{
+      person: { name: string; username: string; email: string };
+    }>(
+      'PUT',
+      '/api/profile/me',
+      { firstName: 'Member', lastName: 'Edited', username: 'member-edited' },
+      member.token,
+    );
+    expect(edited.status).toBe(200);
+    expect(edited.data.person).toMatchObject({
+      name: 'Member Edited',
+      username: 'member-edited',
+      email: 'member@example.com',
+    });
+    expect(
+      (
+        await req(
+          'PUT',
+          '/api/profile/me',
+          { firstName: 'Owner', username: 'member-edited' },
+          member.token,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await req(
+          'PUT',
+          '/api/profile/me',
+          { firstName: 'Member', lastName: 'Edited', username: 'owner' },
+          member.token,
+        )
+      ).status,
+    ).toBe(409);
+
+    expect(
+      (
+        await req(
+          'PUT',
+          '/api/profile/me/password',
+          { currentPassword: 'wrong', newPassword: 'newsecret123' },
+          member.token,
+        )
+      ).status,
+    ).toBe(401);
+    expect(
+      (
+        await req(
+          'PUT',
+          '/api/profile/me/password',
+          { currentPassword: 'secret123', newPassword: 'short' },
+          member.token,
+        )
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await req(
+          'PUT',
+          '/api/profile/me/password',
+          { currentPassword: 'secret123', newPassword: 'newsecret123' },
+          member.token,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await req('POST', '/api/auth/login', {
+          identifier: 'member-edited',
+          password: 'secret123',
+        })
+      ).status,
+    ).toBe(401);
+    expect(
+      (
+        await req('POST', '/api/auth/login', {
+          identifier: 'member-edited',
+          password: 'newsecret123',
+        })
+      ).status,
+    ).toBe(200);
+
+    expect(
+      (await req('GET', `/api/profile/users/${memberId}`, undefined, admin.token)).status,
+    ).toBe(200);
+    expect(
+      (await req('GET', `/api/profile/users/${memberId}`, undefined, trainer.token)).status,
+    ).toBe(200);
+    expect(
+      (await req('GET', `/api/profile/users/${memberId}`, undefined, stranger.token)).status,
+    ).toBe(403);
+    expect(
+      (await req('GET', `/api/profile/users/${strangerId}`, undefined, trainer.token)).status,
+    ).toBe(403);
+
+    const audited = await req<{ audit: Array<{ readerName: string }> }>(
+      'GET',
+      '/api/profile/users/me',
+      undefined,
+      member.token,
+    );
+    expect(audited.data.audit.map((a) => a.readerName)).toEqual(
+      expect.arrayContaining(['owner', 'coach']),
+    );
+  });
 });
 
 describe('F-03/F-05 Tracker API', () => {
@@ -268,7 +475,9 @@ describe('F-03/F-05 Tracker API', () => {
     const t0 = Date.now();
     const w1 = crypto.randomUUID();
     const ex = crypto.randomUUID();
+    const cardio = crypto.randomUUID();
     const set = crypto.randomUUID();
+    const cardioSet = crypto.randomUUID();
 
     expect((await req('GET', '/api/tracker/state')).status).toBe(401);
     expect(
@@ -315,6 +524,26 @@ describe('F-03/F-05 Tracker API', () => {
       (
         await req(
           'PUT',
+          `/api/tracker/workouts/${w1}/exercises/${cardio}`,
+          { name: 'Bike', kind: 'cardio', position: 1 },
+          token,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await req(
+          'PUT',
+          `/api/tracker/workouts/${w1}/exercises/${crypto.randomUUID()}`,
+          { name: 'Mystery', kind: 'bad-kind' },
+          token,
+        )
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await req(
+          'PUT',
           `/api/tracker/workouts/${w1}/exercises/${crypto.randomUUID()}`,
           { name: '' },
           token,
@@ -335,6 +564,21 @@ describe('F-03/F-05 Tracker API', () => {
       'PUT',
       `/api/tracker/exercises/${ex}/sets/${set}`,
       { reps: 8, weight: 100, isWarmup: false, position: 0 },
+      token,
+    );
+    await req(
+      'PUT',
+      `/api/tracker/exercises/${cardio}/sets/${cardioSet}`,
+      {
+        reps: 0,
+        weight: null,
+        isWarmup: false,
+        durationMin: 22,
+        distanceKm: 7.5,
+        calories: 180,
+        rpe: 6,
+        position: 0,
+      },
       token,
     );
     expect(
@@ -378,10 +622,21 @@ describe('F-03/F-05 Tracker API', () => {
       workouts: Array<{
         id: string;
         finishedAt: number | null;
-        exercises: Array<{ sets: unknown[] }>;
+        exercises: Array<{
+          id: string;
+          kind: string;
+          sets: Array<{ durationMin: number | null; distanceKm: number | null }>;
+        }>;
       }>;
     }>('GET', '/api/tracker/state', undefined, token);
     expect(state1.data.workouts.find((w) => w.id === w1)?.exercises[0].sets).toHaveLength(1);
+    const stateCardio = state1.data.workouts
+      .find((w) => w.id === w1)
+      ?.exercises.find((e) => e.id === cardio);
+    expect(stateCardio).toMatchObject({
+      kind: 'cardio',
+      sets: [expect.objectContaining({ durationMin: 22, distanceKm: 7.5 })],
+    });
 
     const w2 = crypto.randomUUID();
     await req(
@@ -545,5 +800,93 @@ describe('F-03/F-05 Tracker API', () => {
       expect.objectContaining({ visitStart: ovStart }),
     );
     expect((await req('DELETE', `/api/tracker/gyms/${gym}`, undefined, token)).status).toBe(200);
+  });
+});
+
+describe('F-09 Programs API', () => {
+  it('lets a trainer author, order and assign a program to their own client', async () => {
+    await register('owner', 'owner@example.com');
+    const trainer = await register('coach', 'coach@example.com');
+    const member = await register('member', 'member@example.com');
+    const ids = Object.fromEntries(
+      (
+        db.prepare('SELECT id, email FROM users').all() as Array<{
+          id: string;
+          email: string;
+        }>
+      ).map((u) => [u.email, u.id]),
+    );
+    const trainerId = ids['coach@example.com'];
+    const memberId = ids['member@example.com'];
+    db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
+    db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, memberId);
+
+    const saved = await req<{
+      program: {
+        id: string;
+        items: Array<{
+          name: string;
+          day: number;
+          position: number;
+          kind: string;
+          equipment: string[];
+          weight?: number;
+        }>;
+      };
+    }>(
+      'PUT',
+      '/api/programs/push-program',
+      {
+        name: 'Push day',
+        weeks: 6,
+        daysPerWeek: 2,
+        items: [
+          {
+            name: 'Bench',
+            day: 1,
+            position: 1,
+            kind: 'strength',
+            sets: 3,
+            reps: 8,
+            weight: 80,
+            equipment: ['barbell', 'machine', 'unknown'],
+          },
+          { name: 'Warm-up', day: 1, position: 0, kind: 'warmup', durationMin: 8 },
+          { name: 'Bike', day: 2, position: 0, kind: 'cardio', durationMin: 20 },
+        ],
+      },
+      trainer.token,
+    );
+    expect(saved.status).toBe(200);
+    expect(saved.data.program.items.map((i) => [i.name, i.day, i.position])).toEqual([
+      ['Warm-up', 1, 0],
+      ['Bench', 1, 1],
+      ['Bike', 2, 0],
+    ]);
+    expect(saved.data.program.items.find((i) => i.name === 'Bench')).toMatchObject({
+      equipment: ['barbell', 'machine'],
+    });
+    expect(saved.data.program.items.find((i) => i.name === 'Bench')).not.toHaveProperty('weight');
+    expect(
+      (await req('POST', '/api/programs/push-program/assign', { memberId }, trainer.token)).status,
+    ).toBe(200);
+
+    const mine = await req<{
+      assignment: {
+        program: {
+          name: string;
+          items: Array<{ kind: string; durationMin: number | null; equipment: string[] }>;
+        };
+        total: number;
+        adherence: number | null;
+      };
+    }>('GET', '/api/programs/mine', undefined, member.token);
+    expect(mine.status).toBe(200);
+    expect(mine.data.assignment.program.name).toBe('Push day');
+    expect(mine.data.assignment.program.items[0]).toMatchObject({
+      kind: 'warmup',
+      durationMin: 8,
+    });
+    expect(mine.data.assignment.total).toBe(12);
   });
 });

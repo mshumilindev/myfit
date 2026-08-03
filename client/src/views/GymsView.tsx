@@ -19,7 +19,7 @@ import {
 import { HouseGraphic } from '../components/HouseGraphic';
 import { GymThumb } from '../components/GymThumb';
 import { useT } from '../i18n';
-import { Icon, LanguageSelector, Spinner } from '../ui';
+import { Icon, Spinner } from '../ui';
 
 // Optional place-provider keys, read from Vite env at build time. Absent keys
 // leave that provider "skipped" (chip greyed) — the app works without them.
@@ -99,7 +99,6 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
     <div className="screen">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <h1 className="title-26">{t.gyms}</h1>
-        <LanguageSelector />
       </div>
       {store.gyms.length === 0 && add.phase === 'idle' && (
         <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--color-neutral-500)', margin: 0 }}>
@@ -166,6 +165,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
         </>
       )}
 
+      {store.gyms.length > 0 && <div className="section-label">{t.myGyms}</div>}
       {store.gyms.length > 0 &&
         store.gyms.map((g) => (
           <div
@@ -290,6 +290,7 @@ function GymSearch({
   const coordsRef = useRef<Coords | null>(null);
   const [coords, setCoords] = useState<Coords | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [nearby, setNearby] = useState<PlaceResult[]>([]);
 
   // One geolocation read to bias results (AC-SEARCH-01); silent on denial.
   useEffect(() => {
@@ -306,6 +307,21 @@ function GymSearch({
       alive = false;
     };
   }, []);
+
+  // Nearby suggestions: once we have a location, fetch a few closest gyms with a
+  // generic locale term so the list has something useful before any typing.
+  useEffect(() => {
+    if (!coords) return;
+    const ctrl = new AbortController();
+    void searchGyms(t.nearbyQuery, coords, GYM_KEYS, savedGyms, ctrl.signal, {
+      onResults: (merged) => {
+        if (!ctrl.signal.aborted) setNearby([...merged]);
+      },
+      onProvider: () => {},
+    });
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coords]);
 
   const needle = q.trim();
 
@@ -348,6 +364,17 @@ function GymSearch({
     return [...results].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
   }, [results, coords]);
 
+  // Closest 5 nearby gyms not already saved (within ~80 m counts as saved).
+  const nearbySorted = useMemo(() => {
+    if (!coords) return [] as PlaceResult[];
+    const isSaved = (r: PlaceResult) =>
+      savedGyms.some((g) => haversineM({ lat: g.lat, lng: g.lng }, r) < 80);
+    return [...nearby]
+      .filter((r) => !isSaved(r))
+      .sort((a, b) => haversineM(coords, a) - haversineM(coords, b))
+      .slice(0, 5);
+  }, [nearby, coords, savedGyms]);
+
   // Lazily resolve a real photo/logo per result (keyless: OSM/Commons/Wikidata).
   // Rows render immediately with a map-tile thumbnail; a photo replaces it if
   // one is found. `requested` guards against re-fetching the same venue.
@@ -355,7 +382,7 @@ function GymSearch({
   const requested = useRef<Set<string>>(new Set());
   useEffect(() => {
     const ctrl = new AbortController();
-    for (const r of results) {
+    for (const r of [...results, ...nearby]) {
       if (r.photoUrl || requested.current.has(r.key)) continue;
       requested.current.add(r.key);
       resolvePhoto(r, ctrl.signal)
@@ -365,7 +392,7 @@ function GymSearch({
         .catch(() => {});
     }
     return () => ctrl.abort();
-  }, [results]);
+  }, [results, nearby]);
 
   return (
     <div className="gym-search">
@@ -377,6 +404,33 @@ function GymSearch({
           onChange={(e) => setQ(e.target.value)}
         />
       </div>
+
+      {needle.length < 2 && nearbySorted.length > 0 && (
+        <>
+          <div className="section-label" style={{ marginTop: 4 }}>
+            {t.nearbyGyms}
+          </div>
+          {nearbySorted.map((r) => {
+            const dist = coords ? haversineM(coords, r) : null;
+            return (
+              <button key={r.key} className="gym-result" onClick={() => onPick(r)} lang={li}>
+                <span className="thumb">
+                  <ResultThumb photo={r.photoUrl ?? photos[r.key]} lat={r.lat} lng={r.lng} />
+                </span>
+                <span className="body">
+                  <span className="name">{r.name}</span>
+                  {(r.address || dist !== null) && (
+                    <span className="addr">
+                      {dist !== null ? `${fmtDistance(dist)}${r.address ? ' · ' : ''}` : ''}
+                      {r.address}
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </>
+      )}
 
       {needle.length >= 2 && (
         <div className="provider-chips">

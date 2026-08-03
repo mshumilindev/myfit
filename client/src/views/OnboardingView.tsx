@@ -11,15 +11,19 @@ import {
   type PlaceResult,
 } from '../data/gymProviders';
 import { fmtDayMonth, useT } from '../i18n';
+import { fullPersonName, splitPersonName } from '../name';
 import { Icon, LanguageSelector, Spinner } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { Avatar } from '../components/Avatar';
+import { AvatarUploader } from '../components/AvatarUploader';
 
 interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
   kind: 'invite' | 'reset';
   inviter: string | null;
   name: string | null;
+  firstName: string | null;
+  lastName: string | null;
   email: string | null;
   expiresAt: number;
   claimedAt: number | null;
@@ -29,6 +33,8 @@ interface InviteInfo {
 interface Resume {
   step: number;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   gymId?: string;
   gymName?: string;
@@ -58,20 +64,23 @@ export function OnboardingView({
   const { t, locale } = useT();
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
   const saved = useMemo(() => loadResume(token), [token]);
+  const savedName = splitPersonName(saved?.name ?? '');
   // 0 = landing, 1..4 = steps.
   const [step, setStep] = useState(saved?.step ?? 0);
-  const [name, setName] = useState(saved?.name ?? '');
+  const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
+  const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
   const [email, setEmail] = useState(saved?.email ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [gym, setGym] = useState<Resume | null>(saved);
+  const name = fullPersonName(firstName, lastName);
   const [requested, setRequested] = useState(false);
 
   // AC-ONB-06: persist on every meaningful change.
   function persist(patch: Partial<Resume>): void {
-    const cur = loadResume(token) ?? { step, name, email };
-    const next = { ...cur, step, name, email, ...patch };
+    const cur = loadResume(token) ?? { step, name, firstName, lastName, email };
+    const next = { ...cur, step, name, firstName, lastName, email, ...patch };
     localStorage.setItem(resumeKey(token), JSON.stringify(next));
   }
 
@@ -80,7 +89,9 @@ export function OnboardingView({
       .then((i) => {
         setInfo(i);
         if (i.state === 'valid') {
-          setName((n) => n || i.name || '');
+          const invited = splitPersonName(i.name ?? '');
+          setFirstName((n) => n || i.firstName || invited.firstName);
+          setLastName((n) => n || i.lastName || invited.lastName);
           setEmail((e) => e || i.email || '');
         }
       })
@@ -152,8 +163,16 @@ export function OnboardingView({
         username: string;
         email: string | null;
         role: 'member' | 'trainer' | 'admin';
-      }>('POST', '/api/auth/claim', { token, password, username: name, email });
-      setAuth(res.token, res.username, res.role);
+        name?: string;
+      }>('POST', '/api/auth/claim', {
+        token,
+        password,
+        username: name,
+        firstName,
+        lastName,
+        email,
+      });
+      setAuth(res.token, res.name ?? res.username, res.role);
       return true;
     } catch (e) {
       if (e instanceof HttpError && e.status === 409) setError(t.onbEmailTaken);
@@ -250,10 +269,17 @@ export function OnboardingView({
           <h1 className="display sm">{t.onbWhoLead}</h1>
           <input
             className="input"
-            placeholder={t.username}
-            value={name}
+            placeholder={t.firstName}
+            value={firstName}
             onBlur={() => persist({})}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+          <input
+            className="input"
+            placeholder={t.lastName}
+            value={lastName}
+            onBlur={() => persist({})}
+            onChange={(e) => setLastName(e.target.value)}
           />
           <input
             className="input"
@@ -284,7 +310,7 @@ export function OnboardingView({
           )}
           <button
             className="btn btn-primary btn-big"
-            disabled={busy || name.trim().length < 2 || password.length < 6}
+            disabled={busy || firstName.trim().length < 2 || password.length < 6}
             onClick={async () => {
               // Already claimed on a previous run → just advance.
               if (getToken() && loadResume(token)) {
@@ -323,6 +349,8 @@ export function OnboardingView({
               setGym({
                 step: 4,
                 name,
+                firstName,
+                lastName,
                 email,
                 gymId: g.id,
                 gymName: g.name,
@@ -331,7 +359,7 @@ export function OnboardingView({
               });
               persist({ step: 4, gymId: g.id, gymName: g.name, gymLat: g.lat, gymLng: g.lng });
             } else {
-              setGym({ step: 4, name, email });
+              setGym({ step: 4, name, firstName, lastName, email });
               persist({ step: 4, gymId: undefined, gymName: undefined });
             }
             setStep(4);
@@ -395,154 +423,26 @@ export function OnboardingView({
 
 function AvatarStep({ rail, onDone }: { rail: React.ReactNode; onDone: (had: boolean) => void }) {
   const { t } = useT();
-  const [file, setFile] = useState<File | null>(null);
-  const [imgUrl, setImgUrl] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const cameraRef = useRef<HTMLInputElement | null>(null);
-  const libraryRef = useRef<HTMLInputElement | null>(null);
-
-  function pick(f: File | undefined): void {
-    if (!f) return;
-    if (f.size > 10 * 1024 * 1024) {
-      setError(t.onbAvatarTooBig(`${Math.round(f.size / 1024 / 1024)} MB`));
-      return;
-    }
-    if (!/^image\/(jpeg|png|webp|heic|heif)/.test(f.type)) {
-      setError(t.onbAvatarType);
-      return;
-    }
-    setError(null);
-    setFile(f);
-    setImgUrl(URL.createObjectURL(f));
-    setZoom(1);
-  }
-
-  async function upload(): Promise<void> {
-    const img = imgRef.current;
-    if (!img || !file) return;
-    setBusy(true);
-    try {
-      // AC-AVATAR-02/03: circular mask over the frame; output a 512px square.
-      const size = 512;
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d')!;
-      const iw = img.naturalWidth;
-      const ih = img.naturalHeight;
-      const base = Math.min(iw, ih) / zoom;
-      const sx = (iw - base) / 2;
-      const sy = (ih - base) / 2;
-      ctx.drawImage(img, sx, sy, base, base, 0, 0, size, size);
-      const blob: Blob = await new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b!), 'image/jpeg', 0.86),
-      );
-      const res = await fetch('/api/profile/me/avatar', {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${getToken() ?? ''}`,
-          'Content-Type': 'image/jpeg',
-        },
-        body: blob,
-      });
-      if (!res.ok) throw new Error(`upload ${res.status}`);
-      onDone(true);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t.error);
-    } finally {
-      setBusy(false);
-    }
-  }
 
   return (
     <div className="onb-card">
       {rail}
       <h1 className="display sm">{t.onbFaceLead}</h1>
-
-      {!imgUrl ? (
-        <>
-          <div className="onb-avatar-ring">
-            <span className="cam-badge">
-              <Icon name="plus" />
-            </span>
-          </div>
-          <div className="onb-two">
-            <button className="btn btn-secondary" onClick={() => cameraRef.current?.click()}>
-              <Icon name="map-pin" /> {t.onbCamera}
+      <AvatarUploader
+        name={t.onbFace}
+        onUploaded={() => onDone(true)}
+        idleFooter={
+          <>
+            <div className="footnote center">{t.onbFaceNote}</div>
+            <button className="btn btn-primary btn-big" onClick={() => onDone(false)}>
+              {t.onbContinue} <Icon name="arrow-right" />
             </button>
-            <button className="btn btn-secondary" onClick={() => libraryRef.current?.click()}>
-              <Icon name="copy" /> {t.onbLibrary}
+            <button className="footer-link" onClick={() => onDone(false)}>
+              {t.onbSkipInitials}
             </button>
-          </div>
-          <input
-            ref={cameraRef}
-            type="file"
-            accept="image/*"
-            capture="user"
-            hidden
-            onChange={(e) => pick(e.target.files?.[0])}
-          />
-          <input
-            ref={libraryRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic"
-            hidden
-            onChange={(e) => pick(e.target.files?.[0])}
-          />
-          {error && (
-            <div className="field-error">
-              <Icon name="warning-circle" />
-              {error}
-            </div>
-          )}
-          <div className="footnote center">{t.onbFaceNote}</div>
-          <button className="btn btn-primary btn-big" onClick={() => onDone(false)}>
-            {t.onbContinue} <Icon name="arrow-right" />
-          </button>
-          <button className="footer-link" onClick={() => onDone(false)}>
-            {t.onbSkipInitials}
-          </button>
-        </>
-      ) : (
-        <>
-          <div className="kicker">{t.onbPosition}</div>
-          <div className="onb-crop">
-            <img ref={imgRef} src={imgUrl} alt="" style={{ transform: `scale(${zoom})` }} />
-            <div className="mask" />
-          </div>
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.01}
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-          />
-          {error && (
-            <div className="field-error">
-              <Icon name="warning-circle" />
-              {error}
-            </div>
-          )}
-          <div className="onb-two">
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setImgUrl(null);
-                setFile(null);
-              }}
-            >
-              {t.cancel}
-            </button>
-            <button className="btn btn-primary" disabled={busy} onClick={() => void upload()}>
-              {busy && <Spinner onAccent />} {t.onbUsePhoto}
-            </button>
-          </div>
-        </>
-      )}
+          </>
+        }
+      />
     </div>
   );
 }

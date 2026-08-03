@@ -1,13 +1,17 @@
 /** Admin — design AD-01…AD-06. People table, invites, assignments. */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { request, getToken, getUsername, HttpError } from '../api';
-import { fmtDayMonth, fmtTonnes, fmtDurationHM, fmtSessionClock, useT } from '../i18n';
-import { Dialog, Icon, LanguageSelector, Sheet, Spinner } from '../ui';
+import { request, getToken, getUsername } from '../api';
+import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
+import { fullPersonName } from '../name';
+import { Dialog, Icon, Sheet, Spinner } from '../ui';
 import { Avatar } from '../components/Avatar';
 
 interface Person {
   id: string;
   name: string;
+  username: string;
+  firstName: string;
+  lastName: string | null;
   email: string | null;
   role: 'member' | 'trainer' | 'admin';
   status: 'active' | 'invited' | 'suspended';
@@ -37,7 +41,7 @@ function inviteLink(token: string): string {
   return `${window.location.origin}/#/join/${token}`;
 }
 
-export function AdminView() {
+export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
   const [people, setPeople] = useState<Person[]>([]);
   const [load, setLoad] = useState<Load>('loading');
@@ -48,7 +52,6 @@ export function AdminView() {
   const [assignFor, setAssignFor] = useState<Person | null>(null);
   const [editFor, setEditFor] = useState<Person | null>(null);
   const [deleteFor, setDeleteFor] = useState<Person | null>(null);
-  const [detailFor, setDetailFor] = useState<Person | null>(null);
   const [linkFor, setLinkFor] = useState<{
     person: Person;
     token: string;
@@ -157,7 +160,6 @@ export function AdminView() {
           <button className="btn btn-primary" onClick={() => setCreating('member')}>
             <Icon name="plus" /> {t.adminNewMember}
           </button>
-          <LanguageSelector />
         </div>
       </div>
 
@@ -226,7 +228,12 @@ export function AdminView() {
       )}
 
       {load === 'ready' && me && (
-        <div className="admin-me-card" role="button" tabIndex={0} onClick={() => setDetailFor(me)}>
+        <div
+          className="admin-me-card"
+          role="button"
+          tabIndex={0}
+          onClick={() => onOpenProfile(me.id)}
+        >
           <Avatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
           <div className="who">
             <div className="n">
@@ -262,7 +269,7 @@ export function AdminView() {
                 className="admin-row"
                 role="button"
                 tabIndex={0}
-                onClick={() => setDetailFor(p)}
+                onClick={() => onOpenProfile(p.id)}
               >
                 <div className="who">
                   <Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
@@ -321,7 +328,7 @@ export function AdminView() {
                 </div>
                 <button
                   className="dots"
-                  aria-label="Menu"
+                  aria-label={t.menuAction}
                   onClick={(e) => {
                     e.stopPropagation();
                     setMenuFor(p);
@@ -370,7 +377,7 @@ export function AdminView() {
           <button
             className="menu-item"
             onClick={() => {
-              setDetailFor(menuFor);
+              onOpenProfile(menuFor.id);
               setMenuFor(null);
             }}
           >
@@ -529,10 +536,6 @@ export function AdminView() {
           }}
         />
       )}
-
-      {detailFor && (
-        <MemberDetailSheet person={detailFor} now={now} onClose={() => setDetailFor(null)} />
-      )}
     </div>
   );
 }
@@ -546,7 +549,9 @@ function NewPersonDialog(props: {
   onCreated: (p: Person, token: string, expiresAt: number) => void;
 }) {
   const { t } = useT();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [trainerId, setTrainerId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -559,9 +564,21 @@ function NewPersonDialog(props: {
       </div>
       <input
         className="input"
+        placeholder={t.firstName}
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+      />
+      <input
+        className="input"
+        placeholder={t.lastName}
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+      />
+      <input
+        className="input"
         placeholder={t.username}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
       <input
         className={`input${error ? ' error' : ''}`}
@@ -609,7 +626,12 @@ function NewPersonDialog(props: {
         </button>
         <button
           className="btn btn-primary grow"
-          disabled={busy || name.trim().length < 2 || !email.includes('@')}
+          disabled={
+            busy ||
+            firstName.trim().length < 2 ||
+            username.trim().length < 2 ||
+            !email.includes('@')
+          }
           onClick={async () => {
             setBusy(true);
             setError(null);
@@ -618,17 +640,17 @@ function NewPersonDialog(props: {
                 person: Person;
                 invite: { token: string; expires_at: number };
               }>('POST', '/api/admin/users', {
-                name: name.trim(),
+                name: fullPersonName(firstName, lastName),
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                username: username.trim(),
                 email: email.trim(),
                 trainerId,
                 role: props.kind,
               });
               props.onCreated(r.person, r.invite.token, r.invite.expires_at);
             } catch (e) {
-              if (e instanceof HttpError && e.status === 409) {
-                const holder = /belongs|taken/.test(e.message) ? e.message : '';
-                setError(`${t.adminEmailTaken(holder || '…')} 409 · POST /api/admin/users`);
-              } else setError(e instanceof Error ? e.message : t.error);
+              setError(e instanceof Error ? e.message : t.error);
             } finally {
               setBusy(false);
             }
@@ -783,12 +805,13 @@ function AssignTrainerDialog(props: {
   );
 }
 
-// --- Edit name & email -------------------------------------------------------
+// --- Edit user details -------------------------------------------------------
 
 function EditDialog(props: { person: Person; onClose: () => void; onDone: () => void }) {
   const { t } = useT();
-  const [name, setName] = useState(props.person.name);
-  const [email, setEmail] = useState(props.person.email ?? '');
+  const [firstName, setFirstName] = useState(props.person.firstName);
+  const [lastName, setLastName] = useState(props.person.lastName ?? '');
+  const [username, setUsername] = useState(props.person.username);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   return (
@@ -796,12 +819,23 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
       <div className="sheet-head">
         <span className="t">{t.adminEditNameEmail}</span>
       </div>
-      <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
       <input
         className="input"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        placeholder={t.firstName}
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+      />
+      <input
+        className="input"
+        placeholder={t.lastName}
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+      />
+      <input
+        className="input"
+        placeholder={t.username}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
       {error && (
         <div className="field-error">
@@ -815,12 +849,17 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
         </button>
         <button
           className="btn btn-primary grow"
-          disabled={busy}
+          disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
           onClick={async () => {
             setBusy(true);
             setError(null);
             try {
-              await request('PUT', `/api/admin/users/${props.person.id}`, { name, email });
+              await request('PUT', `/api/admin/users/${props.person.id}`, {
+                name: fullPersonName(firstName, lastName),
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                username: username.trim(),
+              });
               props.onDone();
             } catch (e) {
               setError(e instanceof Error ? e.message : t.error);
@@ -880,165 +919,5 @@ function DeleteDialog(props: { person: Person; onClose: () => void; onDone: () =
         onChange={(e) => setTyped(e.target.value)}
       />
     </Dialog>
-  );
-}
-
-// --- Member detail (AD-03, shared shape with trainer view) -------------------
-
-export interface DetailData {
-  person: Person;
-  volume30: number;
-  sessions30: number;
-  perWeek: number;
-  sessions: Array<{
-    id: string;
-    startedAt: number;
-    finishedAt: number | null;
-    live: boolean;
-    sets: number;
-    volumeKg: number;
-    gymName: string | null;
-  }>;
-  notes: Array<{ id: string; text: string; createdAt: number; trainerName: string }>;
-}
-
-export function MemberDetailSheet({
-  person,
-  now,
-  onClose,
-  trainerMode = false,
-  onAddNote,
-}: {
-  person: Person | { id: string; name: string; avatar: boolean };
-  now: number;
-  onClose: () => void;
-  trainerMode?: boolean;
-  onAddNote?: (text: string) => Promise<void>;
-}) {
-  const { t, locale } = useT();
-  const [data, setData] = useState<DetailData | null | 'denied'>(null);
-  const [note, setNote] = useState('');
-
-  useEffect(() => {
-    const url = trainerMode
-      ? `/api/trainer/clients/${person.id}`
-      : `/api/admin/users/${person.id}/detail`;
-    request<DetailData>('GET', url)
-      .then(setData)
-      .catch((e) => {
-        if (e instanceof HttpError && e.status === 403) setData('denied');
-      });
-  }, [person.id, trainerMode]);
-
-  const live = data !== null && data !== 'denied' ? data.sessions.find((s) => s.live) : undefined;
-
-  return (
-    <Sheet onClose={onClose}>
-      {trainerMode && (
-        <div className="tr-readonly-bar">
-          <Icon name="shield-check" /> {t.trReadOnly(person.name)}
-        </div>
-      )}
-      <div className="detail-head">
-        <Avatar userId={person.id} name={person.name} hasPhoto={person.avatar} size={40} />
-        <div>
-          <div className="h1">
-            {person.name}
-            {live && (
-              <span className="live-chip">
-                <span className="live-dot" /> {t.stTrainingNow} ·{' '}
-                {fmtSessionClock(now - live.startedAt)}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      {data === null && <Spinner size={18} />}
-      {data === 'denied' && (
-        <div className="empty">
-          <Icon name="warning-circle" />
-          <div className="t">{t.trLostAccess(person.name)}</div>
-          <div className="s">403 · GET /api/trainer/clients</div>
-        </div>
-      )}
-      {data !== null && data !== 'denied' && (
-        <>
-          <div className="stat-grid">
-            <div className="cell">
-              <div className="v">{fmtTonnes(data.volume30)}</div>
-              <div className="l">{t.adminVol30}</div>
-            </div>
-            <div className="cell">
-              <div className="v">{data.sessions30}</div>
-              <div className="l">{t.adminSessions}</div>
-            </div>
-            <div className="cell">
-              <div className="v">{data.perWeek}</div>
-              <div className="l">{t.adminPerWeek}</div>
-            </div>
-          </div>
-          <div className="field-label">{t.adminRecent}</div>
-          <div className="detail-sessions">
-            {data.sessions.slice(0, 8).map((s) => (
-              <div key={s.id} className="row">
-                <span>{fmtDayMonth(s.startedAt, locale)}</span>
-                <span>{s.gymName ?? '—'}</span>
-                <span>
-                  {s.sets} · {fmtTonnes(s.volumeKg)}
-                </span>
-                <span>
-                  {s.live ? (
-                    <span className="live-chip">
-                      <span className="live-dot" />
-                    </span>
-                  ) : s.finishedAt ? (
-                    fmtDurationHM(s.finishedAt - s.startedAt)
-                  ) : (
-                    ''
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-          {(data.notes.length > 0 || trainerMode) && (
-            <>
-              <div className="field-label">{t.trNotes}</div>
-              {data.notes.map((n) => (
-                <div key={n.id} className="tr-note">
-                  <div>{n.text}</div>
-                  <div className="m">
-                    {fmtDayMonth(n.createdAt, locale)} · {t.trNotePrivate}
-                  </div>
-                </div>
-              ))}
-              {trainerMode && onAddNote && (
-                <div className="tr-note-add">
-                  <input
-                    className="input"
-                    placeholder={t.trAddNote}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                  />
-                  <button
-                    className="btn btn-secondary"
-                    disabled={!note.trim()}
-                    onClick={async () => {
-                      await onAddNote(note.trim());
-                      setNote('');
-                      const url = `/api/trainer/clients/${person.id}`;
-                      request<DetailData>('GET', url)
-                        .then(setData)
-                        .catch(() => {});
-                    }}
-                  >
-                    {t.save}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </>
-      )}
-    </Sheet>
   );
 }

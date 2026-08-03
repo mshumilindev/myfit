@@ -1,7 +1,7 @@
 /** Exercise history — design S-32 (filled) and S-33 (too little data). */
 import { est1rm, topSet, useStore } from '../store';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
-import { Icon, LanguageSelector } from '../ui';
+import { Icon } from '../ui';
 
 export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: () => void }) {
   const { t, locale } = useT();
@@ -31,7 +31,7 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
   return (
     <div className="screen" style={{ gap: 'var(--space-6)' }}>
       <div className="hist-head">
-        <button className="back" onClick={onClose} aria-label="Back">
+        <button className="back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
         <div>
@@ -40,9 +40,7 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
             {sessions.length === 1 ? t.oneSession : t.nSessionsSince(sessions.length, since)}
           </div>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <LanguageSelector />
-        </div>
+        <div style={{ marginLeft: 'auto' }}></div>
       </div>
 
       <div className="stat-grid">

@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import { db, type InviteRow, type UserRow } from './db.js';
 import { config } from './config.js';
 import { apiRateLimit } from './rate-limit.js';
+import { displayName, nameParts, parseNameInput } from './user-names.js';
 
 export interface AuthedRequest extends Request {
   userId?: string;
@@ -30,6 +31,31 @@ function isValidEmail(email: string): boolean {
 
 function isValidPassword(password: string): boolean {
   return password.length >= PASSWORD_MIN && password.length <= PASSWORD_MAX;
+}
+
+function authPayload(user: UserRow) {
+  const parts = nameParts(user);
+  return {
+    token: sign(user.id),
+    username: user.username,
+    name: displayName(user),
+    firstName: parts.firstName,
+    lastName: parts.lastName,
+    email: user.email,
+    role: user.role,
+  };
+}
+
+function uniqueUsername(base: string): string {
+  const cleaned = base.trim().slice(0, USERNAME_MAX) || 'user';
+  let candidate = cleaned;
+  let suffix = 2;
+  while (db.prepare('SELECT id FROM users WHERE username = ?').get(candidate)) {
+    const tail = `-${suffix}`;
+    candidate = `${cleaned.slice(0, USERNAME_MAX - tail.length)}${tail}`;
+    suffix += 1;
+  }
+  return candidate;
 }
 
 // --- Brute-force limiter (in-memory, per ip+identifier) ------------------
@@ -77,13 +103,15 @@ function sign(userId: string): string {
 /** Sign-up is open to anyone (multi-user product). */
 authRouter.post('/register', (req: Request, res: Response) => {
   const { username, email, password } = req.body ?? {};
-  if (typeof username !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
-    return res.status(400).json({ error: 'Username, email and password are required.' });
+  if (typeof email !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'First name, email and password are required.' });
   }
-  const name = username.trim();
+  const names = parseNameInput(req.body ?? {});
+  const legacyUsername = typeof username === 'string' ? username.trim().slice(0, USERNAME_MAX) : '';
+  const name = legacyUsername || uniqueUsername(normEmail(email).split('@')[0] ?? names.firstName);
   const mail = normEmail(email);
-  if (name.length < 2 || name.length > USERNAME_MAX) {
-    return res.status(400).json({ error: 'Username: 2 to 64 characters.' });
+  if (names.firstName.length < 2 || names.firstName.length > USERNAME_MAX) {
+    return res.status(400).json({ error: 'First name: 2 to 64 characters.' });
   }
   if (!isValidEmail(mail)) {
     return res.status(400).json({ error: "That email doesn't look complete." });
@@ -112,10 +140,12 @@ authRouter.post('/register', (req: Request, res: Response) => {
     status: 'active',
     trainer_id: null,
     avatar_ext: null,
+    first_name: names.firstName,
+    last_name: names.lastName,
   };
   db.prepare(
-    `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (id, username, email, password_hash, created_at, role, status, first_name, last_name)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     user.id,
     user.username,
@@ -124,8 +154,10 @@ authRouter.post('/register', (req: Request, res: Response) => {
     user.created_at,
     user.role,
     user.status,
+    user.first_name,
+    user.last_name,
   );
-  res.json({ token: sign(user.id), username: user.username, email: user.email, role: user.role });
+  res.json(authPayload(user));
 });
 
 /** Login with email or username (legacy accounts may have no email yet). */
@@ -155,7 +187,7 @@ authRouter.post('/login', (req: Request, res: Response) => {
     return res.status(403).json({ error: 'This account is suspended. Ask your admin.' });
   }
   failures.delete(key);
-  res.json({ token: sign(user.id), username: user.username, email: user.email, role: user.role });
+  res.json(authPayload(user));
 });
 
 // --- Invite links (AC-INVITE, AC-ONB) --------------------------------------
@@ -174,13 +206,16 @@ authRouter.get('/invite/:token', (req: Request, res: Response) => {
   if (!inv) return res.status(404).json({ error: 'unknown link' });
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(inv.user_id) as
     UserRow | undefined;
-  const inviter = db.prepare('SELECT username FROM users WHERE id = ?').get(inv.created_by) as
-    { username: string } | undefined;
+  const inviter = db.prepare('SELECT * FROM users WHERE id = ?').get(inv.created_by) as
+    UserRow | undefined;
+  const parts = user ? nameParts(user) : { firstName: '', lastName: null };
   res.json({
     state: inviteState(inv),
     kind: inv.kind,
-    inviter: inviter?.username ?? null,
-    name: user?.username ?? null,
+    inviter: inviter ? displayName(inviter) : null,
+    name: user ? displayName(user) : null,
+    firstName: parts.firstName || null,
+    lastName: parts.lastName,
     email: user?.email ?? null,
     expiresAt: inv.expires_at,
     claimedAt: inv.claimed_at,
@@ -208,6 +243,9 @@ authRouter.post('/claim', (req: Request, res: Response) => {
     UserRow | undefined;
   if (!user) return res.status(410).json({ error: 'account gone' });
   const now = Date.now();
+  const names = parseNameInput(req.body ?? {});
+  const firstName = names.firstName || nameParts(user).firstName;
+  const lastName = names.firstName ? names.lastName : nameParts(user).lastName;
   const name =
     typeof username === 'string' && username.trim().length >= 2
       ? username.trim().slice(0, USERNAME_MAX)
@@ -217,12 +255,18 @@ authRouter.post('/claim', (req: Request, res: Response) => {
   const dupe = db
     .prepare('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?')
     .get(name, mail, user.id) as { id: string } | undefined;
+  if (!firstName || firstName.length < 2) {
+    return res.status(400).json({ error: 'First name: 2 to 64 characters.' });
+  }
   if (dupe) return res.status(409).json({ error: 'That name or email is already taken.' });
   db.prepare(
-    `UPDATE users SET password_hash = ?, status = 'active', username = ?, email = ? WHERE id = ?`,
-  ).run(bcrypt.hashSync(password, 10), name, mail, user.id);
+    `UPDATE users
+        SET password_hash = ?, status = 'active', username = ?, email = ?, first_name = ?, last_name = ?
+      WHERE id = ?`,
+  ).run(bcrypt.hashSync(password, 10), name, mail, firstName, lastName, user.id);
   db.prepare('UPDATE invites SET claimed_at = ? WHERE token = ?').run(now, token);
-  res.json({ token: sign(user.id), username: name, email: mail, role: user.role });
+  const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id) as UserRow;
+  res.json(authPayload(updated));
 });
 
 /** "Request a new link" from a dead invite — notifies the admin in-product. */

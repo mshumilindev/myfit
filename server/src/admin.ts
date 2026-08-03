@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import { db, type InviteRow, type UserRow, type WorkoutRow } from './db.js';
 import { requireRole, auditRead, type AuthedRequest } from './auth.js';
 import { apiRateLimit } from './rate-limit.js';
+import { displayName, nameParts, parseNameInput } from './user-names.js';
 
 export const adminRouter = Router();
 adminRouter.use(apiRateLimit);
@@ -18,10 +19,27 @@ const INVITE_TTL = 7 * DAY;
 
 const isId = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 64;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_MAX = 64;
+
+function cleanUsername(value: unknown): string {
+  return typeof value === 'string' ? value.trim().slice(0, USERNAME_MAX) : '';
+}
 
 function newToken(): string {
   // 128 bits, hex — AC-INVITE-02.
   return crypto.randomBytes(16).toString('hex');
+}
+
+function uniqueUsername(base: string): string {
+  const cleaned = base.trim().slice(0, USERNAME_MAX) || 'user';
+  let candidate = cleaned;
+  let suffix = 2;
+  while (db.prepare('SELECT id FROM users WHERE username = ?').get(candidate)) {
+    const tail = `-${suffix}`;
+    candidate = `${cleaned.slice(0, USERNAME_MAX - tail.length)}${tail}`;
+    suffix += 1;
+  }
+  return candidate;
 }
 
 function latestInvite(userId: string): InviteRow | undefined {
@@ -63,7 +81,7 @@ function volume30d(userId: string, now = Date.now()): number {
          FROM sets s
          JOIN exercises e ON e.id = s.exercise_id
          JOIN workouts w ON w.id = e.workout_id
-        WHERE w.user_id = ? AND w.started_at >= ?`,
+        WHERE w.user_id = ? AND w.started_at >= ? AND COALESCE(e.kind, 'strength') = 'strength'`,
     )
     .get(userId, now - 30 * DAY) as { v: number };
   return row.v;
@@ -82,6 +100,9 @@ function lastSession(userId: string): { at: number | null; live: boolean } {
 export interface PersonJson {
   id: string;
   name: string;
+  username: string;
+  firstName: string;
+  lastName: string | null;
   email: string | null;
   role: string;
   status: string;
@@ -104,8 +125,7 @@ export interface PersonJson {
 
 function personJson(u: UserRow): PersonJson {
   const trainer = u.trainer_id
-    ? (db.prepare('SELECT username FROM users WHERE id = ?').get(u.trainer_id) as
-        { username: string } | undefined)
+    ? (db.prepare('SELECT * FROM users WHERE id = ?').get(u.trainer_id) as UserRow | undefined)
     : undefined;
   const clientCount =
     u.role === 'trainer'
@@ -141,12 +161,14 @@ function personJson(u: UserRow): PersonJson {
   }
   return {
     id: u.id,
-    name: u.username,
+    name: displayName(u),
+    username: u.username,
+    ...nameParts(u),
     email: u.email,
     role: u.role,
     status: u.status,
     trainerId: u.trainer_id,
-    trainerName: trainer?.username ?? null,
+    trainerName: trainer ? displayName(trainer) : null,
     clientCount,
     lastSessionAt: last.at,
     live: last.live,
@@ -159,15 +181,22 @@ function personJson(u: UserRow): PersonJson {
 
 /** AD-01: the people table. */
 adminRouter.get('/people', (_req: AuthedRequest, res: Response) => {
-  const users = db.prepare('SELECT * FROM users ORDER BY username').all() as UserRow[];
+  const users = db
+    .prepare('SELECT * FROM users ORDER BY first_name, last_name, username')
+    .all() as UserRow[];
   res.json({ people: users.map(personJson), serverTime: Date.now() });
 });
 
 /** AD-02: create a member (or trainer) + invite link in one step. */
 adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
   const { name, email, trainerId = null, role = 'member' } = req.body ?? {};
-  if (typeof name !== 'string' || name.trim().length < 2) {
-    return res.status(400).json({ error: 'name required' });
+  const names = parseNameInput(req.body ?? {});
+  const explicitUsername = cleanUsername((req.body ?? {}).username);
+  if (names.firstName.length < 2) {
+    return res.status(400).json({ error: 'first name required' });
+  }
+  if (explicitUsername && explicitUsername.length < 2) {
+    return res.status(400).json({ error: 'valid username required' });
   }
   if (typeof email !== 'string' || !EMAIL_RE.test(email.trim().toLowerCase())) {
     return res.status(400).json({ error: 'valid email required' });
@@ -176,17 +205,42 @@ adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
     return res.status(400).json({ error: 'role must be member or trainer' });
   }
   const mail = email.trim().toLowerCase();
-  const existing = db.prepare('SELECT username FROM users WHERE email = ?').get(mail) as
-    { username: string } | undefined;
+  const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(mail) as
+    UserRow | undefined;
   if (existing) {
     // AC-ADMIN-13: name the existing holder.
-    return res.status(409).json({ error: 'email taken', holder: existing.username });
+    return res.status(409).json({ error: 'email taken', holder: displayName(existing) });
+  }
+  if (explicitUsername) {
+    const usernameTaken = db
+      .prepare('SELECT * FROM users WHERE username = ?')
+      .get(explicitUsername) as UserRow | undefined;
+    if (usernameTaken) {
+      return res.status(409).json({ error: 'username taken', holder: displayName(usernameTaken) });
+    }
   }
   const id = crypto.randomUUID();
+  const username =
+    explicitUsername ||
+    uniqueUsername(
+      typeof name === 'string' && name.trim().length >= 2
+        ? name
+        : `${mail.split('@')[0]}-${id.slice(0, 6)}`,
+    );
   db.prepare(
-    `INSERT INTO users (id, username, email, password_hash, created_at, role, status, trainer_id)
-     VALUES (?, ?, ?, '', ?, ?, 'invited', ?)`,
-  ).run(id, name.trim(), mail, Date.now(), role, isId(trainerId) ? trainerId : null);
+    `INSERT INTO users
+       (id, username, email, password_hash, created_at, role, status, trainer_id, first_name, last_name)
+     VALUES (?, ?, ?, '', ?, ?, 'invited', ?, ?, ?)`,
+  ).run(
+    id,
+    username,
+    mail,
+    Date.now(),
+    role,
+    isId(trainerId) ? trainerId : null,
+    names.firstName,
+    names.lastName,
+  );
   const inv = issueInvite(id, req.userId!, 'invite');
   res.json({
     person: personJson(db.prepare('SELECT * FROM users WHERE id = ?').get(id) as UserRow),
@@ -220,22 +274,36 @@ adminRouter.post('/invites/:token/revoke', (req: AuthedRequest, res: Response) =
   res.json({ ok: true });
 });
 
-/** Edit name & email (AC-ADMIN-09). */
+/** Edit user identity details (AC-ADMIN-09). */
 adminRouter.put('/users/:id', (req: AuthedRequest, res: Response) => {
   const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id) as
     UserRow | undefined;
   if (!u) return res.status(404).json({ error: 'not found' });
-  const { name, email } = req.body ?? {};
-  const nextName = typeof name === 'string' && name.trim().length >= 2 ? name.trim() : u.username;
+  const { email } = req.body ?? {};
+  const names = parseNameInput(req.body ?? {});
+  const username = cleanUsername((req.body ?? {}).username) || u.username;
+  const nextFirst = names.firstName || nameParts(u).firstName;
+  const nextLast = names.firstName ? names.lastName : nameParts(u).lastName;
   const nextMail =
     typeof email === 'string' && EMAIL_RE.test(email.trim().toLowerCase())
       ? email.trim().toLowerCase()
       : u.email;
-  const dupe = db
-    .prepare('SELECT id, username FROM users WHERE (username = ? OR email = ?) AND id != ?')
-    .get(nextName, nextMail, u.id) as { id: string; username: string } | undefined;
-  if (dupe) return res.status(409).json({ error: 'email taken', holder: dupe.username });
-  db.prepare('UPDATE users SET username = ?, email = ? WHERE id = ?').run(nextName, nextMail, u.id);
+  if (username.length < 2) {
+    return res.status(400).json({ error: 'valid username required' });
+  }
+  const dupe = db.prepare('SELECT * FROM users WHERE email = ? AND id != ?').get(nextMail, u.id) as
+    UserRow | undefined;
+  if (dupe) return res.status(409).json({ error: 'email taken', holder: displayName(dupe) });
+  const usernameDupe = db
+    .prepare('SELECT * FROM users WHERE username = ? AND id != ?')
+    .get(username, u.id) as UserRow | undefined;
+  if (usernameDupe) {
+    return res.status(409).json({ error: 'username taken', holder: displayName(usernameDupe) });
+  }
+  if (nextFirst.length < 2) return res.status(400).json({ error: 'first name required' });
+  db.prepare(
+    'UPDATE users SET first_name = ?, last_name = ?, username = ?, email = ? WHERE id = ?',
+  ).run(nextFirst, nextLast, username, nextMail, u.id);
   res.json({ ok: true });
 });
 
@@ -308,7 +376,8 @@ export function memberDetail(u: UserRow) {
   const sessions = workouts.map((w) => {
     const stats = db
       .prepare(
-        `SELECT COUNT(*) AS sets, COALESCE(SUM(s.reps * COALESCE(s.weight, 0)), 0) AS vol
+        `SELECT COUNT(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.id END) AS sets,
+                COALESCE(SUM(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.reps * COALESCE(s.weight, 0) ELSE 0 END), 0) AS vol
            FROM sets s JOIN exercises e ON e.id = s.exercise_id
           WHERE e.workout_id = ?`,
       )
@@ -334,13 +403,32 @@ export function memberDetail(u: UserRow) {
     sessions30: count30.length,
     perWeek: Math.round((count30.length / 30) * 7 * 10) / 10,
     sessions,
-    notes: db
-      .prepare(
-        `SELECT n.id, n.text, n.created_at AS createdAt, u.username AS trainerName
-           FROM trainer_notes n JOIN users u ON u.id = n.trainer_id
-          WHERE n.member_id = ? ORDER BY n.created_at DESC`,
-      )
-      .all(u.id),
+    notes: (
+      db
+        .prepare(
+          `SELECT n.id, n.text, n.created_at AS createdAt,
+                  u.username, u.first_name AS firstName, u.last_name AS lastName
+             FROM trainer_notes n JOIN users u ON u.id = n.trainer_id
+            WHERE n.member_id = ? ORDER BY n.created_at DESC`,
+        )
+        .all(u.id) as Array<{
+        id: string;
+        text: string;
+        createdAt: number;
+        username: string;
+        firstName: string | null;
+        lastName: string | null;
+      }>
+    ).map((n) => ({
+      id: n.id,
+      text: n.text,
+      createdAt: n.createdAt,
+      trainerName: displayName({
+        username: n.username,
+        first_name: n.firstName,
+        last_name: n.lastName,
+      }),
+    })),
   };
 }
 
@@ -365,7 +453,13 @@ adminRouter.get('/users/:id/export', (req: AuthedRequest, res: Response) => {
   res.setHeader('Content-Disposition', `attachment; filename="myfit-${u.username}.json"`);
   res.json({
     exportedAt: Date.now(),
-    person: { id: u.id, name: u.username, email: u.email },
+    person: {
+      id: u.id,
+      name: displayName(u),
+      username: u.username,
+      ...nameParts(u),
+      email: u.email,
+    },
     workouts: full,
     gyms: db.prepare('SELECT * FROM gyms WHERE user_id = ?').all(u.id),
   });

@@ -16,6 +16,7 @@
     "tray": "npm run start -w desktop",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w client && npm run typecheck -w desktop",
     "lint": "eslint .",
+    "i18n:check": "node scripts/check-i18n.mjs",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { est1rm, topSet, workoutSets, workoutVolumeKg } from './store';
+import {
+  est1rm,
+  topSet,
+  workoutCardioDistanceKm,
+  workoutCardioMinutes,
+  workoutSets,
+  workoutVolumeKg,
+} from './store';
 import type { SetEntry, Workout } from './types';
 
 const set = (over: Partial<SetEntry>): SetEntry => ({
@@ -61,6 +68,21 @@ describe('workout aggregates', () => {
         position: 1,
         sets: [set({ reps: 10, weight: 70 })],
       },
+      {
+        id: 'e3',
+        name: 'Bike',
+        kind: 'cardio',
+        position: 2,
+        sets: [
+          set({
+            reps: 0,
+            weight: null,
+            durationMin: 20,
+            distanceKm: 6.2,
+            calories: 160,
+          }),
+        ],
+      },
     ],
   };
 
@@ -68,7 +90,12 @@ describe('workout aggregates', () => {
     expect(workoutSets(w)).toBe(3);
   });
 
-  it('should sum volume as Σ reps × weight (warm-ups included)', () => {
+  it('should sum strength volume as Σ reps × weight (warm-ups included)', () => {
     expect(workoutVolumeKg(w)).toBe(12 * 40 + 8 * 80 + 10 * 70);
+  });
+
+  it('should sum timed exercise cardio metrics separately', () => {
+    expect(workoutCardioMinutes(w)).toBe(20);
+    expect(workoutCardioDistanceKm(w)).toBe(6.2);
   });
 });

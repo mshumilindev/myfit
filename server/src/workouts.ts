@@ -42,7 +42,12 @@ interface WorkoutJson {
 interface ExerciseJson {
   id: string;
   name: string;
+  kind: ExerciseRow['kind'];
   position: number;
+  plannedSets: number | null;
+  plannedReps: number | null;
+  plannedDurationMin: number | null;
+  equipment: string[];
   sets: SetJson[];
 }
 interface SetJson {
@@ -50,6 +55,10 @@ interface SetJson {
   reps: number;
   weight: number | null;
   isWarmup: boolean;
+  durationMin: number | null;
+  distanceKm: number | null;
+  calories: number | null;
+  rpe: number | null;
   position: number;
 }
 
@@ -73,12 +82,21 @@ function fullState(userId: string): WorkoutJson[] {
     exercises: (exStmt.all(w.id) as ExerciseRow[]).map((e) => ({
       id: e.id,
       name: e.name,
+      kind: e.kind ?? 'strength',
       position: e.position,
+      plannedSets: e.planned_sets ?? null,
+      plannedReps: e.planned_reps ?? null,
+      plannedDurationMin: e.planned_duration_min ?? null,
+      equipment: parseStringArray(e.equipment),
       sets: (setStmt.all(e.id) as SetRow[]).map((s) => ({
         id: s.id,
         reps: s.reps,
         weight: s.weight,
         isWarmup: !!s.is_warmup,
+        durationMin: s.duration_min ?? null,
+        distanceKm: s.distance_km ?? null,
+        calories: s.calories ?? null,
+        rpe: s.rpe ?? null,
         position: s.position,
       })),
     })),
@@ -98,6 +116,27 @@ workoutsRouter.get('/state', (req: AuthedRequest, res: Response) => {
 });
 
 const isId = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 64;
+const EXERCISE_KINDS = new Set(['strength', 'cardio', 'warmup', 'cooldown']);
+const numOr = (value: unknown, fallback: number): number => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+function parseStringArray(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const value = JSON.parse(raw) as unknown;
+    return Array.isArray(value) ? value.filter((x): x is string => typeof x === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function optionalPositiveNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
 
 /** Upsert a workout (client-generated UUID → replay-safe for offline sync). */
 workoutsRouter.put('/workouts/:id', (req: AuthedRequest, res: Response) => {
@@ -163,19 +202,50 @@ workoutsRouter.put('/workouts/:wid/exercises/:id', (req: AuthedRequest, res: Res
   if (!ownWorkout(userId, wid)) {
     return res.status(404).json({ error: 'workout not found' });
   }
-  const { name, position = 0 } = req.body ?? {};
+  const {
+    name,
+    kind = 'strength',
+    position = 0,
+    plannedSets = null,
+    plannedReps = null,
+    plannedDurationMin = null,
+    equipment = [],
+  } = req.body ?? {};
   if (typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'name required' });
   }
+  if (typeof kind !== 'string' || !EXERCISE_KINDS.has(kind)) {
+    return res.status(400).json({ error: 'bad exercise kind' });
+  }
   const now = Date.now();
+  const equipmentJson = JSON.stringify(
+    Array.isArray(equipment) ? equipment.filter((x): x is string => typeof x === 'string') : [],
+  );
   db.prepare(
-    `INSERT INTO exercises (id, workout_id, name, position, updated_at)
-       VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO exercises
+       (id, workout_id, name, kind, planned_sets, planned_reps, planned_duration_min, equipment, position, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name,
+         kind = excluded.kind,
+         planned_sets = excluded.planned_sets,
+         planned_reps = excluded.planned_reps,
+         planned_duration_min = excluded.planned_duration_min,
+         equipment = excluded.equipment,
          position = excluded.position,
          updated_at = excluded.updated_at`,
-  ).run(id, wid, name.trim(), Number(position) || 0, now);
+  ).run(
+    id,
+    wid,
+    name.trim(),
+    kind,
+    optionalPositiveNumber(plannedSets),
+    optionalPositiveNumber(plannedReps),
+    optionalPositiveNumber(plannedDurationMin),
+    equipmentJson,
+    numOr(position, 0),
+    now,
+  );
   res.json({ ok: true });
 });
 
@@ -201,24 +271,60 @@ workoutsRouter.put('/exercises/:eid/sets/:id', (req: AuthedRequest, res: Respons
     .get(eid, userId) as ExerciseRow | undefined;
   if (!ex) return res.status(404).json({ error: 'exercise not found' });
 
-  const { reps, weight = null, isWarmup = false, position = 0 } = req.body ?? {};
+  const {
+    reps,
+    weight = null,
+    isWarmup = false,
+    durationMin = null,
+    distanceKm = null,
+    calories = null,
+    rpe = null,
+    position = 0,
+  } = req.body ?? {};
   if (typeof reps !== 'number' || reps < 0) {
     return res.status(400).json({ error: 'reps (number) required' });
   }
   if (weight !== null && typeof weight !== 'number') {
     return res.status(400).json({ error: 'weight must be number or null' });
   }
+  for (const [key, value] of [
+    ['durationMin', durationMin],
+    ['distanceKm', distanceKm],
+    ['calories', calories],
+    ['rpe', rpe],
+  ] as const) {
+    if (value !== null && (typeof value !== 'number' || value < 0)) {
+      return res.status(400).json({ error: `${key} must be number or null` });
+    }
+  }
   const now = Date.now();
   db.prepare(
-    `INSERT INTO sets (id, exercise_id, reps, weight, is_warmup, position, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO sets
+       (id, exercise_id, reps, weight, is_warmup, duration_min, distance_km, calories, rpe, position, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          reps = excluded.reps,
          weight = excluded.weight,
          is_warmup = excluded.is_warmup,
+         duration_min = excluded.duration_min,
+         distance_km = excluded.distance_km,
+         calories = excluded.calories,
+         rpe = excluded.rpe,
          position = excluded.position,
          updated_at = excluded.updated_at`,
-  ).run(id, eid, reps, weight, isWarmup ? 1 : 0, Number(position) || 0, now);
+  ).run(
+    id,
+    eid,
+    reps,
+    weight,
+    isWarmup ? 1 : 0,
+    durationMin,
+    distanceKm,
+    calories === null ? null : Math.round(calories),
+    rpe,
+    numOr(position, 0),
+    now,
+  );
   res.json({ ok: true });
 });
 

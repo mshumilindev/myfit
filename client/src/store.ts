@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 import {
   AUTO_FINISH_MS,
   type Exercise,
+  type ExerciseKind,
   type Gym,
   type QueuedMutation,
   type Reminder,
@@ -74,6 +75,25 @@ export function useStore(): StoreState {
 
 export const uuid = (): string => crypto.randomUUID();
 
+export function exerciseKind(ex: Exercise): ExerciseKind {
+  return ex.kind ?? 'strength';
+}
+
+export function isStrengthExercise(ex: Exercise): boolean {
+  return exerciseKind(ex) === 'strength';
+}
+
+export function isTimedExercise(ex: Exercise): boolean {
+  return exerciseKind(ex) !== 'strength';
+}
+
+interface ExercisePlan {
+  plannedSets?: number | null;
+  plannedReps?: number | null;
+  plannedDurationMin?: number | null;
+  equipment?: string[];
+}
+
 // --- Local mutations (optimistic, queued for the server) -------------------
 
 function enqueue(method: QueuedMutation['method'], url: string, body?: unknown): void {
@@ -82,6 +102,22 @@ function enqueue(method: QueuedMutation['method'], url: string, body?: unknown):
 
 function sortWorkouts(ws: Workout[]): Workout[] {
   return [...ws].sort((a, b) => b.startedAt - a.startedAt);
+}
+
+function exerciseUpsertBody(e: Exercise): ExercisePlan & {
+  name: string;
+  kind: ExerciseKind;
+  position: number;
+} {
+  return {
+    name: e.name,
+    kind: exerciseKind(e),
+    position: e.position,
+    plannedSets: e.plannedSets ?? null,
+    plannedReps: e.plannedReps ?? null,
+    plannedDurationMin: e.plannedDurationMin ?? null,
+    equipment: e.equipment ?? [],
+  };
 }
 
 /**
@@ -211,6 +247,31 @@ export function attachGymToWorkout(workoutId: string, gymId: string | null): voi
   void sync();
 }
 
+/** Drag-and-drop reorder: rewrite positions 0..n-1 and sync changed ones. */
+export function reorderExercises(workoutId: string, orderedIds: string[]): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  const byId = new Map(w.exercises.map((e) => [e.id, e]));
+  const next = orderedIds
+    .map((id, i) => {
+      const e = byId.get(id);
+      return e ? { ...e, position: i } : null;
+    })
+    .filter((e): e is NonNullable<typeof e> => e !== null);
+  if (next.length !== w.exercises.length) return;
+  for (const e of next) {
+    const old = byId.get(e.id)!;
+    if (old.position !== e.position) {
+      enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${e.id}`, {
+        ...exerciseUpsertBody(e),
+      });
+    }
+  }
+  patchWorkout(workoutId, { exercises: next });
+  persist();
+  void sync();
+}
+
 export function deleteWorkout(id: string): void {
   setState({
     workouts: state.workouts.filter((w) => w.id !== id),
@@ -221,20 +282,29 @@ export function deleteWorkout(id: string): void {
   void sync();
 }
 
-export function addExercise(workoutId: string, name: string): Exercise {
+export function addExercise(
+  workoutId: string,
+  name: string,
+  kind: ExerciseKind = 'strength',
+  plan: ExercisePlan = {},
+): Exercise {
   const w = state.workouts.find((x) => x.id === workoutId);
   const exercise: Exercise = {
     id: uuid(),
     name,
+    kind,
     position: w ? w.exercises.length : 0,
+    plannedSets: plan.plannedSets ?? null,
+    plannedReps: plan.plannedReps ?? null,
+    plannedDurationMin: plan.plannedDurationMin ?? null,
+    equipment: plan.equipment ?? [],
     sets: [],
   };
   patchWorkout(workoutId, {
     exercises: [...(w?.exercises ?? []), exercise],
   });
   enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exercise.id}`, {
-    name,
-    position: exercise.position,
+    ...exerciseUpsertBody(exercise),
   });
   persist();
   void sync();
@@ -250,8 +320,7 @@ export function renameExercise(workoutId: string, exerciseId: string, name: stri
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, name } : e)),
   });
   enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exerciseId}`, {
-    name,
-    position: ex.position,
+    ...exerciseUpsertBody({ ...ex, name }),
   });
   persist();
   void sync();
@@ -283,6 +352,10 @@ export function upsertSet(
     reps: set.reps,
     weight: set.weight,
     isWarmup: set.isWarmup,
+    durationMin: set.durationMin ?? null,
+    distanceKm: set.distanceKm ?? null,
+    calories: set.calories ?? null,
+    rpe: set.rpe ?? null,
     position: existing ? existing.position : ex.sets.length,
   };
   const sets = existing ? ex.sets.map((s) => (s.id === full.id ? full : s)) : [...ex.sets, full];
@@ -293,6 +366,10 @@ export function upsertSet(
     reps: full.reps,
     weight: full.weight,
     isWarmup: full.isWarmup,
+    durationMin: full.durationMin ?? null,
+    distanceKm: full.distanceKm ?? null,
+    calories: full.calories ?? null,
+    rpe: full.rpe ?? null,
     position: full.position,
   });
   persist();
@@ -570,7 +647,9 @@ export function lastSessionWith(
   const needle = name.trim().toLowerCase();
   for (const w of state.workouts) {
     if (w.id === beforeWorkoutId || w.finishedAt === null) continue;
-    const ex = w.exercises.find((e) => e.name.trim().toLowerCase() === needle);
+    const ex = w.exercises.find(
+      (e) => isStrengthExercise(e) && e.name.trim().toLowerCase() === needle,
+    );
     if (ex && ex.sets.length > 0) return { workout: w, exercise: ex };
   }
   return undefined;
@@ -591,6 +670,7 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
   for (const w of state.workouts) {
     if (w.id === excludeWorkoutId) continue;
     for (const e of w.exercises) {
+      if (!isStrengthExercise(e)) continue;
       if (e.name.trim().toLowerCase() !== needle) continue;
       for (const s of e.sets) {
         if (!s.isWarmup && (s.weight ?? 0) > max) max = s.weight ?? 0;
@@ -610,6 +690,7 @@ export function knownExercises(): { name: string; last?: PrevLift }[] {
   const seen = new Map<string, PrevLift | undefined>();
   for (const w of state.workouts) {
     for (const e of w.exercises) {
+      if (!isStrengthExercise(e)) continue;
       const key = e.name.trim();
       if (!key || seen.has(key.toLowerCase())) continue;
       const top = topSet(e.sets) ?? e.sets[e.sets.length - 1];
@@ -619,6 +700,7 @@ export function knownExercises(): { name: string; last?: PrevLift }[] {
   const out: { name: string; last?: PrevLift }[] = [];
   for (const w of state.workouts) {
     for (const e of w.exercises) {
+      if (!isStrengthExercise(e)) continue;
       const key = e.name.trim();
       if (!key) continue;
       if (out.some((o) => o.name.toLowerCase() === key.toLowerCase())) continue;
@@ -629,12 +711,30 @@ export function knownExercises(): { name: string; last?: PrevLift }[] {
 }
 
 export function workoutSets(w: Workout): number {
-  return w.exercises.reduce((n, e) => n + e.sets.length, 0);
+  return w.exercises.reduce((n, e) => n + (isStrengthExercise(e) ? e.sets.length : 0), 0);
 }
 
 export function workoutVolumeKg(w: Workout): number {
   return w.exercises.reduce(
-    (v, e) => v + e.sets.reduce((s, x) => s + (x.weight ?? 0) * x.reps, 0),
+    (v, e) =>
+      v + (isStrengthExercise(e) ? e.sets.reduce((s, x) => s + (x.weight ?? 0) * x.reps, 0) : 0),
+    0,
+  );
+}
+
+export function workoutCardioMinutes(w: Workout): number {
+  return w.exercises.reduce(
+    (n, e) =>
+      n +
+      (isTimedExercise(e) ? e.sets.reduce((s, x) => s + Math.max(0, x.durationMin ?? 0), 0) : 0),
+    0,
+  );
+}
+
+export function workoutCardioDistanceKm(w: Workout): number {
+  return w.exercises.reduce(
+    (n, e) =>
+      n + (isTimedExercise(e) ? e.sets.reduce((s, x) => s + Math.max(0, x.distanceKm ?? 0), 0) : 0),
     0,
   );
 }
@@ -653,6 +753,10 @@ export function restoreSet(workoutId: string, exerciseId: string, set: SetEntry)
     reps: set.reps,
     weight: set.weight,
     isWarmup: set.isWarmup,
+    durationMin: set.durationMin ?? null,
+    distanceKm: set.distanceKm ?? null,
+    calories: set.calories ?? null,
+    rpe: set.rpe ?? null,
     position: set.position,
   });
   persist();
@@ -666,14 +770,17 @@ export function restoreExercise(workoutId: string, exercise: Exercise): void {
     exercises: [...w.exercises, exercise].sort((a, b) => a.position - b.position),
   });
   enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exercise.id}`, {
-    name: exercise.name,
-    position: exercise.position,
+    ...exerciseUpsertBody(exercise),
   });
   for (const s of exercise.sets) {
     enqueue('PUT', `/api/tracker/exercises/${exercise.id}/sets/${s.id}`, {
       reps: s.reps,
       weight: s.weight,
       isWarmup: s.isWarmup,
+      durationMin: s.durationMin ?? null,
+      distanceKm: s.distanceKm ?? null,
+      calories: s.calories ?? null,
+      rpe: s.rpe ?? null,
       position: s.position,
     });
   }
@@ -702,7 +809,12 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
   const copy: Exercise = {
     id: uuid(),
     name: ex.name,
+    kind: exerciseKind(ex),
     position: w.exercises.length,
+    plannedSets: ex.plannedSets ?? null,
+    plannedReps: ex.plannedReps ?? null,
+    plannedDurationMin: ex.plannedDurationMin ?? null,
+    equipment: ex.equipment ?? [],
     sets: ex.sets.map((s, i) => ({ ...s, id: uuid(), position: i })),
   };
   restoreExercise(workoutId, copy);
@@ -774,7 +886,7 @@ export function repeatWorkout(sourceId: string): Workout | undefined {
   if (!src) return undefined;
   const w = startWorkout();
   for (const e of [...src.exercises].sort((a, b) => a.position - b.position)) {
-    addExercise(w.id, e.name);
+    addExercise(w.id, e.name, exerciseKind(e));
   }
   return state.workouts.find((x) => x.id === w.id);
 }

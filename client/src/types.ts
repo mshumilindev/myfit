@@ -3,13 +3,24 @@ export interface SetEntry {
   reps: number;
   weight: number | null;
   isWarmup: boolean;
+  durationMin?: number | null;
+  distanceKm?: number | null;
+  calories?: number | null;
+  rpe?: number | null;
   position: number;
 }
+
+export type ExerciseKind = 'strength' | 'cardio' | 'warmup' | 'cooldown';
 
 export interface Exercise {
   id: string;
   name: string;
+  kind?: ExerciseKind;
   position: number;
+  plannedSets?: number | null;
+  plannedReps?: number | null;
+  plannedDurationMin?: number | null;
+  equipment?: string[];
   sets: SetEntry[];
 }
 

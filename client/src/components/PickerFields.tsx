@@ -194,7 +194,7 @@ export function DateField({
         <input
           className="input"
           inputMode="numeric"
-          placeholder="dd.mm.yyyy"
+          placeholder={t.datePlaceholder}
           value={text}
           onChange={(e) => commitText(e.target.value)}
         />
@@ -213,7 +213,7 @@ export function DateField({
           <button
             type="button"
             className="cal-nav"
-            aria-label="prev"
+            aria-label={t.previousAction}
             onClick={() => shiftMonth(-1)}
           >
             <Icon name="caret-left" />
@@ -222,7 +222,7 @@ export function DateField({
           <button
             type="button"
             className="cal-nav flip"
-            aria-label="next"
+            aria-label={t.nextAction}
             onClick={() => shiftMonth(1)}
           >
             <Icon name="caret-left" />
@@ -353,7 +353,7 @@ export function TimeField({
         <input
           className="input"
           inputMode="numeric"
-          placeholder="hh:mm"
+          placeholder={t.timePlaceholder}
           value={text}
           onChange={(e) => commitText(e.target.value)}
           onBlur={() => {

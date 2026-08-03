@@ -9,6 +9,7 @@ import { db, type UserRow } from './db.js';
 import { requireRole, auditRead, type AuthedRequest } from './auth.js';
 import { apiRateLimit } from './rate-limit.js';
 import { memberDetail } from './admin.js';
+import { displayName } from './user-names.js';
 
 export const trainerRouter = Router();
 trainerRouter.use(apiRateLimit);
@@ -25,7 +26,7 @@ function myClient(req: AuthedRequest, id: string): UserRow | null {
 /** TR-01: assigned clients with last-seen + weekly volume. */
 trainerRouter.get('/clients', (req: AuthedRequest, res: Response) => {
   const clients = db
-    .prepare('SELECT * FROM users WHERE trainer_id = ? ORDER BY username')
+    .prepare('SELECT * FROM users WHERE trainer_id = ? ORDER BY first_name, last_name, username')
     .all(req.userId) as UserRow[];
   const now = Date.now();
   res.json({
@@ -37,7 +38,8 @@ trainerRouter.get('/clients', (req: AuthedRequest, res: Response) => {
         .get(u.id) as { id: string; started_at: number; finished_at: number | null } | undefined;
       const week = db
         .prepare(
-          `SELECT COUNT(DISTINCT w.id) AS sessions, COALESCE(SUM(s.reps * COALESCE(s.weight,0)),0) AS vol
+          `SELECT COUNT(DISTINCT w.id) AS sessions,
+                  COALESCE(SUM(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.reps * COALESCE(s.weight,0) ELSE 0 END),0) AS vol
              FROM workouts w
              LEFT JOIN exercises e ON e.workout_id = w.id
              LEFT JOIN sets s ON s.exercise_id = e.id
@@ -48,14 +50,15 @@ trainerRouter.get('/clients', (req: AuthedRequest, res: Response) => {
         last?.finished_at === null
           ? (db
               .prepare(
-                `SELECT COUNT(*) AS sets, COALESCE(SUM(s.reps * COALESCE(s.weight,0)),0) AS vol
+                `SELECT COUNT(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.id END) AS sets,
+                        COALESCE(SUM(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.reps * COALESCE(s.weight,0) ELSE 0 END),0) AS vol
                  FROM sets s JOIN exercises e ON e.id = s.exercise_id WHERE e.workout_id = ?`,
               )
               .get(last.id) as { sets: number; vol: number })
           : null;
       return {
         id: u.id,
-        name: u.username,
+        name: displayName(u),
         avatar: !!u.avatar_ext,
         lastSessionAt: last?.started_at ?? null,
         live: last?.finished_at === null,
@@ -78,12 +81,11 @@ trainerRouter.get('/clients', (req: AuthedRequest, res: Response) => {
 trainerRouter.get('/clients/:id', (req: AuthedRequest, res: Response) => {
   const u = myClient(req, String(req.params.id));
   if (!u) {
-    const ex = db
-      .prepare('SELECT username, trainer_id FROM users WHERE id = ?')
-      .get(req.params.id) as { username: string; trainer_id: string | null } | undefined;
+    const ex = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id) as
+      UserRow | undefined;
     return res.status(403).json({
       error: 'not your client',
-      name: ex?.username ?? null,
+      name: ex ? displayName(ex) : null,
     });
   }
   auditRead(req.userId!, u.id, 'trainer-detail');

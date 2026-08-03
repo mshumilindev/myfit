@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { est1rm, topSet, workoutVolumeKg, type useStore } from '../store';
 import { useT } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
-import { EmptyState, LanguageSelector } from '../ui';
+import { EmptyState } from '../ui';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -28,7 +28,6 @@ export function ProgressView({ store }: { store: Store }) {
           <h1 className="headline" style={{ margin: 0 }}>
             {t.progress}
           </h1>
-          <LanguageSelector />
         </div>
         <EmptyState
           icon="chart-line-up"
@@ -134,9 +133,7 @@ export function ProgressView({ store }: { store: Store }) {
           </div>
           <div className="lab">{t.volumeThisWeek}</div>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <LanguageSelector />
-        </div>
+        <div style={{ marginLeft: 'auto' }}></div>
         {deltaPct !== null && (
           <span className="tag tag-accent" style={{ marginBottom: 22 }}>
             {deltaPct >= 0 ? '+' : '−'}
