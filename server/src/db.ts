@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS programs (
   weeks         INTEGER NOT NULL DEFAULT 8,
   days_per_week INTEGER NOT NULL DEFAULT 3,
   status        TEXT NOT NULL DEFAULT 'draft',
+  day_names     TEXT,
   updated_at    INTEGER NOT NULL
 );
 
