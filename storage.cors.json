@@ -8,14 +8,7 @@
       "http://localhost:4477",
       "http://127.0.0.1:4477"
     ],
-    "method": [
-      "GET",
-      "HEAD",
-      "PUT",
-      "POST",
-      "DELETE",
-      "OPTIONS"
-    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
     "maxAgeSeconds": 3600,
     "responseHeader": [
       "Content-Type",
