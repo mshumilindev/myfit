@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { HttpError, callFn, signInWithPayload, type AuthPayload } from '../api';
 import { fmtSessionClock, useT } from '../i18n';
 import { Icon, LanguageSelector, Spinner } from '../ui';
+import { InstallShortcut } from './InstallShortcut';
 
 export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   const { t } = useT();
@@ -137,6 +138,8 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
             {t.retry}
           </button>
         )}
+
+        <InstallShortcut />
 
         <p className="footer-link" style={{ pointerEvents: 'none' }}>
           {t.newHereCreate}

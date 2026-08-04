@@ -1050,6 +1050,92 @@ i > svg {
   width: 100%;
 }
 
+.auth-install-btn {
+  min-height: 44px;
+  font-size: 14px;
+  gap: 10px;
+  margin-top: var(--space-3);
+  width: 100%;
+}
+
+.auth-install-btn .ui-icon {
+  font-size: 18px;
+}
+
+.install-guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 4px 8px;
+}
+
+.install-guide-brand {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  color: var(--color-text);
+}
+
+.install-guide-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.install-guide-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-neutral-500);
+}
+
+.install-guide-steps {
+  list-style: none;
+  margin: var(--space-2) 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.install-guide-steps li {
+  display: grid;
+  grid-template-columns: 24px 18px 1fr;
+  gap: 10px;
+  align-items: start;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.install-guide-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-accent-800);
+  color: var(--color-accent-100);
+  font-size: 12px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
+.install-guide-steps .ui-icon {
+  margin-top: 3px;
+  color: var(--color-neutral-400);
+  font-size: 16px;
+}
+
+.install-guide .btn-primary {
+  min-height: 44px;
+  width: 100%;
+}
+
 .note-ok {
   display: flex;
   gap: 9px;

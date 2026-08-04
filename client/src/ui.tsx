@@ -13,6 +13,8 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
+import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
 import { ArrowCounterClockwise } from '@phosphor-icons/react/ArrowCounterClockwise';
 import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
@@ -20,6 +22,7 @@ import { ArrowUpRight } from '@phosphor-icons/react/ArrowUpRight';
 import { ArrowsClockwise } from '@phosphor-icons/react/ArrowsClockwise';
 import { Archive } from '@phosphor-icons/react/Archive';
 import { Barbell } from '@phosphor-icons/react/Barbell';
+import { Export } from '@phosphor-icons/react/Export';
 import { CalendarBlank } from '@phosphor-icons/react/CalendarBlank';
 import { Camera } from '@phosphor-icons/react/Camera';
 import { Cards } from '@phosphor-icons/react/Cards';
@@ -98,6 +101,8 @@ import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
  * CSS contract: the SVG is sized 1em.
  */
 const ICONS: Record<string, ComponentType<IconProps>> = {
+  'android-logo': AndroidLogo,
+  'apple-logo': AppleLogo,
   'arrow-clockwise': ArrowClockwise,
   'arrow-counter-clockwise': ArrowCounterClockwise,
   'arrow-right': ArrowRight,
@@ -105,6 +110,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrows-clockwise': ArrowsClockwise,
   archive: Archive,
   barbell: Barbell,
+  export: Export,
   'calendar-blank': CalendarBlank,
   camera: Camera,
   'caret-left': CaretLeft,

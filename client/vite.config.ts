@@ -21,23 +21,30 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
+        id: '/',
         name: 'Spotter',
         short_name: 'Spotter',
         description: 'Everything you lift, in one place.',
         lang: 'en',
+        dir: 'ltr',
         start_url: '/',
+        scope: '/',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
+        orientation: 'portrait-primary',
         background_color: '#16171a',
         theme_color: '#16171a',
+        categories: ['health', 'fitness', 'lifestyle'],
         icons: [
-          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           {
-            src: '/icon-512.png',
+            src: '/icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable',
+            purpose: 'maskable',
           },
         ],
       },
@@ -46,6 +53,7 @@ export default defineConfig({
         // offline queue in localStorage, so we must never serve stale API data).
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
