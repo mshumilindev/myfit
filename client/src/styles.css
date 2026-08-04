@@ -85,23 +85,36 @@
 
   --font: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
   --content-width: 640px;
+
+  /* Real-device insets (iOS/Android PWA). Design MFTabs used 22px as a mock
+     home-indicator — on device that role belongs ONLY to --safe-bottom. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
+html {
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+/* Pin the shell to the visual viewport. 100dvh / max-height on iOS standalone
+   PWAs often leaves a dead band under the tab bar (home-indicator gap). */
 body,
 #root {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  height: 100dvh;
-  max-height: 100dvh;
   overflow: hidden;
+  margin: 0;
 }
 
 body {
-  margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font);
@@ -175,8 +188,10 @@ i > svg {
   margin: 0 auto;
   position: relative;
   overflow: hidden;
-  /* Translucent iOS status bar: keep chrome under the notch, pad content. */
-  padding-top: env(safe-area-inset-top, 0px);
+  /* Translucent status bar (black-translucent): pad content, not the shell. */
+  padding-top: var(--safe-top);
+  /* Bottom inset lives on .tabbar / sheets — never here, or the hub floats. */
+  padding-bottom: 0;
 }
 
 .screen {
@@ -766,7 +781,8 @@ i > svg {
   position: fixed;
   left: 18px;
   right: 18px;
-  bottom: 96px;
+  /* Clears MFTabs content (~56px) + home-indicator inset. */
+  bottom: calc(64px + var(--safe-bottom));
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -864,7 +880,7 @@ i > svg {
   background: var(--color-surface);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   box-shadow: var(--shadow-lg);
-  padding: var(--space-4) var(--gutter) calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-4) var(--gutter) calc(var(--space-8) + var(--safe-bottom));
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -1095,10 +1111,9 @@ i > svg {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  /* Design 78px already baked in ~22px home-indicator; do NOT also add
-     env(safe-area) on top — that double-counted and left a huge gap. */
-  min-height: 56px;
-  padding: 8px 12px max(22px, env(safe-area-inset-bottom, 0px));
+  /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA
+     that inset is --safe-bottom only — never 22px + safe-area (was ~56–70px). */
+  padding: 8px 12px var(--safe-bottom);
   background: var(--color-bg);
   box-shadow: 0 -1px 0 var(--color-divider);
   z-index: 30;
@@ -5067,7 +5082,7 @@ i > svg {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 16px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  padding: 16px 20px calc(28px + var(--safe-bottom));
 }
 
 .detail-card {
