@@ -7,12 +7,14 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type ComponentType,
   type CSSProperties,
   type RefObject,
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { getMutationPending, subscribeMutation } from './api';
 import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
 import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
@@ -650,5 +652,23 @@ export function EmptyState(props: {
       <p className="s">{props.body}</p>
       {props.children}
     </div>
+  );
+}
+
+/** Full-page scrim + spinner while a mutation (callable / tracked write) is in flight. */
+export function ServerBusyOverlay() {
+  const { t } = useT();
+  const busy = useSyncExternalStore(
+    subscribeMutation,
+    () => getMutationPending() > 0,
+    () => false,
+  );
+  if (!busy) return null;
+  return (
+    <Portal>
+      <div className="server-busy-scrim" role="alert" aria-busy="true" aria-live="assertive">
+        <div className="sp" aria-label={t.saving} />
+      </div>
+    </Portal>
   );
 }

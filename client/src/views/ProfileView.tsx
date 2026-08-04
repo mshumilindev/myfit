@@ -2,7 +2,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
-import { HttpError, callFn, currentUid, setUsername } from '../api';
+import { HttpError, callFn, currentUid, setUsername, trackMutation } from '../api';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Switch, ProfileSkeleton } from '../ui';
@@ -222,8 +222,12 @@ export function ProfileView({
     if (typeof load !== 'object') return;
     const uid = currentUid();
     if (uid) {
-      await deleteObject(ref(storage, `avatars/${uid}/photo`)).catch(() => undefined);
-      await updateDoc(doc(db, 'users', uid), { avatarExt: null, updatedAt: Date.now() });
+      await trackMutation(
+        (async () => {
+          await deleteObject(ref(storage, `avatars/${uid}/photo`)).catch(() => undefined);
+          await updateDoc(doc(db, 'users', uid), { avatarExt: null, updatedAt: Date.now() });
+        })(),
+      );
       invalidateAvatarCache(uid);
     }
     setLoaded({

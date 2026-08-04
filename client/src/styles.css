@@ -102,35 +102,13 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--color-bg);
-  /* Honeycomb cage — graphite cells, brass seam glow (reference vibe, our palette).
-     Overall blend stays quiet so UI stays primary. */
-  background-image:
-    radial-gradient(ellipse 85% 70% at 50% 42%, rgba(217, 162, 79, 0.07), transparent 62%),
-    radial-gradient(ellipse 55% 45% at 18% 0%, rgba(217, 162, 79, 0.035), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(52, 39, 19, 0.35), transparent 55%),
-    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, rgba(10, 11, 13, 0.55) 100%),
-    url('/patterns/honeycomb.png');
-  background-size:
-    auto,
-    auto,
-    auto,
-    auto,
-    139px 120px;
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
-  background-attachment: fixed;
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font);
   font-size: 15px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    background-attachment: scroll;
-  }
 }
 
 button {
@@ -442,6 +420,31 @@ i > svg {
 }
 
 /* --- Skeleton placeholders (S-50: never spinners for data load) ----------- */
+
+/* Mutation busy overlay (create/update/delete) — design .sp spinner */
+.server-busy-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 11, 13, 0.55);
+}
+
+.sp {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-neutral-800);
+  border-top-color: var(--color-accent);
+  animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 @keyframes shimmer {
   0% {
@@ -1136,7 +1139,7 @@ i > svg {
   justify-content: center;
   padding: 0 28px 18vh;
   min-height: 100%;
-  background: transparent;
+  background: var(--color-bg);
 }
 
 .auth-card {

@@ -6,7 +6,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
-import { currentUid } from '../api';
+import { currentUid, trackMutation } from '../api';
 import { db, storage } from '../firebase';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
@@ -207,11 +207,15 @@ export function AvatarUploader({
       if (!uid) throw new Error(t.error);
       // Upload to Storage (access-gated by storage.rules), then flag the photo
       // on the user's own doc so `hasPhoto` persists across devices.
-      await uploadBytes(ref(storage, `avatars/${uid}/photo`), blob, {
-        contentType: 'image/jpeg',
-        cacheControl: 'no-store',
-      });
-      await updateDoc(doc(db, 'users', uid), { avatarExt: 'jpg', updatedAt: Date.now() });
+      await trackMutation(
+        (async () => {
+          await uploadBytes(ref(storage, `avatars/${uid}/photo`), blob, {
+            contentType: 'image/jpeg',
+            cacheControl: 'no-store',
+          });
+          await updateDoc(doc(db, 'users', uid), { avatarExt: 'jpg', updatedAt: Date.now() });
+        })(),
+      );
       const preview = URL.createObjectURL(blob);
       invalidateAvatarCache(uid);
       clearPicked();

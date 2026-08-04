@@ -136,8 +136,72 @@ function codeToStatus(code: string): number {
   }
 }
 
+/**
+ * Full-page busy overlay for in-flight mutations (create/update/delete).
+ * Read-only callables stay quiet so lists/profiles don't flash a scrim on load.
+ */
+const QUIET_CALLABLES = new Set([
+  'authStatus',
+  'invitePreview',
+  'profileUser',
+  'adminPeople',
+  'adminUserDetail',
+  'trainerClients',
+  'trainerClientDetail',
+  'programMine',
+]);
+
+let mutationPending = 0;
+const mutationListeners = new Set<() => void>();
+
+function emitMutation(): void {
+  for (const l of mutationListeners) l();
+}
+
+export function beginMutation(): void {
+  mutationPending += 1;
+  emitMutation();
+}
+
+export function endMutation(): void {
+  mutationPending = Math.max(0, mutationPending - 1);
+  emitMutation();
+}
+
+export function getMutationPending(): number {
+  return mutationPending;
+}
+
+export function subscribeMutation(cb: () => void): () => void {
+  mutationListeners.add(cb);
+  return () => {
+    mutationListeners.delete(cb);
+  };
+}
+
+/** Wrap a direct Firestore/Storage write so it shares the global busy overlay. */
+export async function trackMutation<T>(promise: Promise<T>): Promise<T> {
+  beginMutation();
+  try {
+    return await promise;
+  } finally {
+    endMutation();
+  }
+}
+
+export type CallFnOptions = {
+  /** Skip the global busy overlay (default for known read callables). */
+  quiet?: boolean;
+};
+
 /** Call a Cloud Function by name. Throws HttpError (status + details) on failure. */
-export async function callFn<T = unknown>(name: string, data?: unknown): Promise<T> {
+export async function callFn<T = unknown>(
+  name: string,
+  data?: unknown,
+  opts?: CallFnOptions,
+): Promise<T> {
+  const quiet = opts?.quiet ?? QUIET_CALLABLES.has(name);
+  if (!quiet) beginMutation();
   try {
     const fn = httpsCallable(functions, name);
     const res = (await fn(data ?? {})) as HttpsCallableResult<T>;
@@ -164,5 +228,7 @@ export async function callFn<T = unknown>(name: string, data?: unknown): Promise
       (/^Firebase: Error \(functions\//.test(raw) ? raw.replace(/^Firebase:\s*/, '') : raw) ||
       'Request failed';
     throw new HttpError(codeToStatus(e.code ?? ''), message, e.details ?? e);
+  } finally {
+    if (!quiet) endMutation();
   }
 }

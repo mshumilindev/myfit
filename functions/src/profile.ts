@@ -22,7 +22,12 @@ import {
   usernameRef,
   type UserDoc,
 } from './lib';
-import { listUserWorkouts, type StoredWorkout } from './aggregates';
+import {
+  listUserWorkouts,
+  workoutStrengthStats,
+  exerciseVolumeKg,
+  type StoredWorkout,
+} from './aggregates';
 
 const DAY = 24 * 60 * 60 * 1000;
 const USERNAME_MAX = 64;
@@ -84,10 +89,7 @@ function isStrength(kind?: string) {
   return (kind ?? 'strength') === 'strength';
 }
 function strengthVol(w: StoredWorkout): number {
-  let v = 0;
-  for (const e of w.exercises ?? [])
-    if (isStrength(e.kind)) for (const s of e.sets ?? []) v += (s.reps ?? 0) * (s.weight ?? 0);
-  return v;
+  return workoutStrengthStats(w).volumeKg;
 }
 function volumeSince(workouts: StoredWorkout[], since: number): number {
   return workouts.filter((w) => w.startedAt >= since).reduce((v, w) => v + strengthVol(w), 0);
@@ -107,13 +109,12 @@ function trainingSummary(workouts: StoredWorkout[], now = Date.now()) {
     firstSessionAt = firstSessionAt === null ? w.startedAt : Math.min(firstSessionAt, w.startedAt);
     lastSessionAt = lastSessionAt === null ? w.startedAt : Math.max(lastSessionAt, w.startedAt);
     if (w.finishedAt) durationMs += w.finishedAt - w.startedAt;
+    const stats = workoutStrengthStats(w);
+    sets += stats.sets;
+    volumeKg += stats.volumeKg;
     for (const e of w.exercises ?? []) {
       if (isStrength(e.kind)) {
-        exNames.add((e as { name?: string }).name?.toLowerCase() ?? '');
-        for (const s of e.sets ?? []) {
-          sets++;
-          volumeKg += (s.reps ?? 0) * (s.weight ?? 0);
-        }
+        exNames.add(e.name?.toLowerCase() ?? '');
       } else {
         for (const s of e.sets ?? [])
           cardioMinutes += (s as { durationMin?: number }).durationMin ?? 0;
@@ -149,17 +150,12 @@ interface GymDoc {
 
 function recentSessions(workouts: StoredWorkout[], gyms: Map<string, GymDoc>) {
   return workouts.slice(0, 30).map((w) => {
-    let sets = 0;
     let exercises = 0;
-    let volumeKg = 0;
     for (const e of w.exercises ?? []) {
       if (!isStrength(e.kind)) continue;
       exercises++;
-      for (const s of e.sets ?? []) {
-        sets++;
-        volumeKg += (s.reps ?? 0) * (s.weight ?? 0);
-      }
     }
+    const stats = workoutStrengthStats(w);
     const names = [...(w.exercises ?? [])]
       .map((e, i) => ({ e: e as { name?: string; position?: number }, i }))
       .sort((a, b) => (a.e.position ?? a.i) - (b.e.position ?? b.i))
@@ -175,9 +171,9 @@ function recentSessions(workouts: StoredWorkout[], gyms: Map<string, GymDoc>) {
       durationMs: w.finishedAt ? w.finishedAt - w.startedAt : null,
       gymId: gym?.id ?? null,
       gymName: gym?.name ?? null,
-      sets,
+      sets: stats.sets,
       exercises,
-      volumeKg,
+      volumeKg: stats.volumeKg,
       exerciseNames: names,
     };
   });
@@ -233,9 +229,10 @@ function topExercises(workouts: StoredWorkout[]) {
         volumeKg: 0,
         bestE1rm: 0,
       };
+      agg.volumeKg += exerciseVolumeKg(e);
       for (const s of e.sets ?? []) {
         agg.sets++;
-        agg.volumeKg += (s.reps ?? 0) * (s.weight ?? 0);
+        // e1RM uses the entered (per-side) load, not the doubled volume weight.
         agg.bestE1rm = Math.max(agg.bestE1rm, (s.weight ?? 0) * (1 + (s.reps ?? 0) / 30));
       }
       agg.sessions.add(w.id);

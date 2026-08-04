@@ -1,7 +1,7 @@
 /** Programs — trainer/admin authoring + client assignment (AC-ROLE-06, O-07). */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
-import { getRole, getUsername, callFn, currentUid } from '../api';
+import { getRole, getUsername, callFn, currentUid, trackMutation } from '../api';
 import { db } from '../firebase';
 import { ProgramCsvDialog } from './ProgramCsvDialog';
 import { ProgramAssignDialog } from './ProgramAssignDialog';
@@ -469,7 +469,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
         updatedAt: Date.now(),
       };
       // Rules allow an author to write their own program document.
-      await setDoc(doc(db, 'programs', program.id), program);
+      await trackMutation(setDoc(doc(db, 'programs', program.id), program));
       setSelectedId(program.id);
       setDraft({ ...program, items: normalizeItems(program.items) });
       load();
@@ -480,9 +480,13 @@ export function ProgramsView({ shell }: { shell: Shell }) {
 
   async function assign(startWeek: number) {
     if (!selectedId || assignClientIds.length === 0) return;
-    for (const memberId of assignClientIds) {
-      await callFn('assignProgram', { id: selectedId, memberId, startWeek });
-    }
+    await trackMutation(
+      (async () => {
+        for (const memberId of assignClientIds) {
+          await callFn('assignProgram', { id: selectedId, memberId, startWeek });
+        }
+      })(),
+    );
     setAssignClientIds([]);
   }
 
