@@ -37,12 +37,18 @@ export function Avatar({
   useEffect(() => {
     if (!key || urlCache.has(key)) return;
     let alive = true;
-    fetch(`/api/profile/avatars/${userId}`, {
+    // refreshKey busts any browser-cached response (including a stale 404 from
+    // before the first upload) so a freshly saved avatar shows immediately.
+    fetch(`/api/profile/avatars/${userId}?v=${refreshKey}`, {
       headers: { Authorization: `Bearer ${getToken() ?? ''}` },
+      cache: 'no-store',
     })
       .then(async (r) => {
+        // Only treat an actual image as a photo; an error/HTML body would just
+        // render as a broken picture, so fall through to initials instead.
         if (!r.ok) return null;
         const blob = await r.blob();
+        if (!blob.type.startsWith('image/') || blob.size === 0) return null;
         return URL.createObjectURL(blob);
       })
       .then((url) => {
@@ -55,11 +61,11 @@ export function Avatar({
     return () => {
       alive = false;
     };
-  }, [userId, key]);
+  }, [userId, key, refreshKey]);
 
   const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
   if (src) {
-    return <img className="avatar lighten" style={style} src={src} alt="" />;
+    return <img key={src} className="avatar lighten" style={style} src={src} alt="" />;
   }
   return (
     <span className="avatar initials" style={style} aria-hidden>

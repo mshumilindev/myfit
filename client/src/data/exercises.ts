@@ -1223,6 +1223,33 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     'Slidinėjimo ergometras',
     'Suusaergomeeter',
   ),
+  x(
+    'bent-over-row',
+    'back',
+    'Bent-over Row',
+    'Тяга в нахилі',
+    'Wiosłowanie w opadzie',
+    'Trauka pasilenkus',
+    'Sõudmine ettekallutatult',
+  ),
+  x(
+    'leg-curl',
+    'hamstrings',
+    'Leg Curl',
+    'Згинання ніг',
+    'Uginanie nóg',
+    'Kojų lenkimas',
+    'Jalgade painutus',
+  ),
+  x(
+    'calf-raise',
+    'calves',
+    'Calf Raise',
+    'Підйоми на носки',
+    'Wspięcia na palce',
+    'Kėlimasis ant pirštų galų',
+    'Päkkadele tõus',
+  ),
   x('jump-rope', 'cardio', 'Jump Rope', 'Скакалка', 'Skakanka', 'Šokdynė', 'Hüppenöör'),
 ];
 
@@ -1238,12 +1265,19 @@ const DB_EQUIP_BY_NAME = new Map<string, EquipmentId | null>(
   DB_ROWS.map((r) => [r[0].toLowerCase(), r[1]]),
 );
 
+const EXTRA_EQUIP: Record<string, EquipmentId> = {
+  'bent-over-row': 'barbell',
+  'leg-curl': 'machine',
+  'calf-raise': 'body',
+};
+
 const CURATED_EN = new Set(EXERCISE_CATALOG.map((e) => e.names[0].toLowerCase()));
 
 /** Curated entries enriched with equipment where the DB knows the same name. */
-const CURATED: CatalogExercise[] = EXERCISE_CATALOG.map((e) => ({
+export const CURATED: CatalogExercise[] = EXERCISE_CATALOG.map((e) => ({
   ...e,
-  equipment: e.equipment ?? DB_EQUIP_BY_NAME.get(e.names[0].toLowerCase()) ?? null,
+  equipment:
+    e.equipment ?? EXTRA_EQUIP[e.id] ?? DB_EQUIP_BY_NAME.get(e.names[0].toLowerCase()) ?? null,
 }));
 
 /** DB rows as catalog entries (EN name in every slot), minus curated dupes. */
@@ -1256,6 +1290,156 @@ const DB_ENTRIES: CatalogExercise[] = DB_ROWS.filter(
   equipment: r[1],
 }));
 
+// --- Muscle metadata (design MG/EQ) -----------------------------------------
+// An exercise carries one primary group and any number of secondary ones
+// (EQ-4). Secondaries for curated entries are listed explicitly where the
+// boards show them; the long tail falls back to movement-pattern keywords.
+
+const SECONDARY_BY_ID: Record<string, MuscleGroup[]> = {
+  'bent-over-row': ['biceps'],
+  'leg-curl': [],
+  'calf-raise': [],
+  'back-squat': ['glutes', 'core'],
+  'front-squat': ['core'],
+  'bulgarian-split-squat': ['glutes'],
+  'goblet-squat': ['core'],
+  'zercher-squat': ['core', 'back'],
+  'hack-squat': ['glutes'],
+  'barbell-lunge': ['glutes'],
+  'leg-press': ['glutes'],
+  'bench-press': ['triceps'],
+  'incline-bench-press': ['triceps', 'shoulders'],
+  'decline-bench-press': ['triceps'],
+  'dumbbell-bench-press': ['triceps'],
+  'incline-dumbbell-press': ['triceps', 'shoulders'],
+  'romanian-deadlift': ['glutes', 'back'],
+  deadlift: ['glutes', 'hamstrings', 'back'],
+  'hip-thrust': ['hamstrings'],
+};
+
+const SECONDARY_RULES: Array<[RegExp, MuscleGroup, MuscleGroup[]]> = [
+  [/squat|lunge|leg press/i, 'quads', ['glutes']],
+  [/bench|push-?up|press/i, 'chest', ['triceps']],
+  [/row|pull-?up|pulldown|chin/i, 'back', ['biceps']],
+  [/deadlift/i, 'hamstrings', ['glutes', 'back']],
+  [/deadlift/i, 'back', ['glutes', 'hamstrings']],
+  [/overhead|shoulder press|military/i, 'shoulders', ['triceps']],
+  [/dip/i, 'triceps', ['chest']],
+  [/thrust|bridge/i, 'glutes', ['hamstrings']],
+];
+
+/** Secondary muscle groups for a catalog entry (possibly empty). */
+export function secondaryMusclesOf(ex: CatalogExercise): MuscleGroup[] {
+  const custom = CUSTOM_SECONDARIES(ex.id);
+  if (custom) return custom;
+  const explicit = SECONDARY_BY_ID[ex.id];
+  if (explicit) return explicit;
+  for (const [re, primary, secondaries] of SECONDARY_RULES) {
+    if (primary === ex.muscle && re.test(ex.names[0])) return secondaries;
+  }
+  return [];
+}
+
+export interface MuscleInfo {
+  primary: MuscleGroup;
+  secondary: MuscleGroup[];
+  equipment: EquipmentId | null;
+}
+
+const BY_NAME = new Map<string, CatalogExercise>();
+for (const ex of [...CURATED, ...DB_ENTRIES]) {
+  for (const n of ex.names) {
+    const key = n.trim().toLowerCase();
+    if (key && !BY_NAME.has(key)) BY_NAME.set(key, ex);
+  }
+}
+
+// --- Server catalog: custom exercises authored by admins/trainers -----------
+// The hub keeps a shared exercise_catalog table; entries land here on sync
+// and win over the built-in lists, so a just-created exercise resolves its
+// muscles and equipment immediately on every device.
+
+export interface CustomExercise {
+  id: string;
+  name: string;
+  kind?: string;
+  primaryMuscle: MuscleGroup | null;
+  secondaryMuscles: MuscleGroup[];
+  equipment: string[];
+}
+
+const CUSTOM_CACHE_KEY = 'gym.catalog';
+const customByName = new Map<string, CustomExercise>();
+let customList: CustomExercise[] = [];
+
+export function registerCustomExercises(list: CustomExercise[]): void {
+  customList = list;
+  customByName.clear();
+  for (const e of list) {
+    const key = e.name.trim().toLowerCase();
+    if (key) customByName.set(key, e);
+  }
+  try {
+    localStorage.setItem(CUSTOM_CACHE_KEY, JSON.stringify(list));
+  } catch {
+    /* quota */
+  }
+}
+
+/** Add/replace one entry locally (right after a PUT, before the next sync). */
+export function registerCustomExercise(e: CustomExercise): void {
+  registerCustomExercises([...customList.filter((x) => x.id !== e.id), e]);
+}
+
+export function customExercises(): CustomExercise[] {
+  return customList;
+}
+
+try {
+  const raw = localStorage.getItem(CUSTOM_CACHE_KEY);
+  if (raw) {
+    const list = JSON.parse(raw) as CustomExercise[];
+    if (Array.isArray(list)) registerCustomExercises(list);
+  }
+} catch {
+  /* corrupted cache — server sync repopulates it */
+}
+
+function customAsCatalogEntry(e: CustomExercise): CatalogExercise {
+  return {
+    id: `custom-${e.id}`,
+    muscle: e.primaryMuscle ?? 'fullbody',
+    names: [e.name, e.name, e.name, e.name, e.name],
+    equipment: (e.equipment[0] as EquipmentId | undefined) ?? null,
+  };
+}
+
+function CUSTOM_SECONDARIES(id: string): MuscleGroup[] | null {
+  const raw = id.startsWith('custom-') ? id.slice('custom-'.length) : null;
+  const hit = raw ? customList.find((e) => e.id === raw) : undefined;
+  return hit ? hit.secondaryMuscles : null;
+}
+
+/** Catalog lookup by (any-locale) exercise name; null for unknown names. */
+export function muscleInfoByName(name: string): MuscleInfo | null {
+  const key = name.trim().toLowerCase();
+  const custom = customByName.get(key);
+  if (custom && custom.primaryMuscle) {
+    return {
+      primary: custom.primaryMuscle,
+      secondary: custom.secondaryMuscles,
+      equipment: (custom.equipment[0] as EquipmentId | undefined) ?? null,
+    };
+  }
+  const ex = BY_NAME.get(key);
+  if (!ex) return null;
+  return {
+    primary: ex.muscle,
+    secondary: secondaryMusclesOf(ex),
+    equipment: ex.equipment ?? null,
+  };
+}
+
 /**
  * Case-insensitive search across every locale name (curated first, then the
  * free-exercise-db long tail). `equipment` narrows results to one type.
@@ -1264,13 +1448,21 @@ export function searchCatalog(
   query: string,
   limit = 8,
   equipment?: EquipmentId | null,
+  muscle?: MuscleGroup,
 ): CatalogExercise[] {
   const q = query.trim().toLowerCase();
-  if (!q && equipment === undefined) return [];
-  const pool =
-    equipment === undefined
-      ? [...CURATED, ...DB_ENTRIES]
-      : [...CURATED, ...DB_ENTRIES].filter((e) => (e.equipment ?? null) === equipment);
+  if (!q && equipment === undefined && muscle === undefined) return [];
+  const custom = customList.map(customAsCatalogEntry);
+  // Browsing by filter only (no typed query) draws from the hand-verified
+  // curated list + the user's own custom exercises. The free-exercise-db long
+  // tail has noisy muscle tags (a power clean listed as "hamstrings"), so it is
+  // only reached when the user explicitly types a name to search for.
+  const base = q ? [...custom, ...CURATED, ...DB_ENTRIES] : [...custom, ...CURATED];
+  let pool =
+    equipment === undefined ? base : base.filter((e) => (e.equipment ?? null) === equipment);
+  if (muscle !== undefined) {
+    pool = pool.filter((e) => e.muscle === muscle || secondaryMusclesOf(e).includes(muscle));
+  }
   if (!q) return pool.slice(0, limit);
   const starts: CatalogExercise[] = [];
   const contains: CatalogExercise[] = [];

@@ -102,6 +102,16 @@ for (const stmt of [
   'ALTER TABLE sets ADD COLUMN distance_km REAL',
   'ALTER TABLE sets ADD COLUMN calories INTEGER',
   'ALTER TABLE sets ADD COLUMN rpe REAL',
+  // Set types & drops (design DS, EQ-4)
+  "ALTER TABLE sets ADD COLUMN type TEXT NOT NULL DEFAULT 'working'",
+  'ALTER TABLE sets ADD COLUMN drops TEXT',
+  // Supersets & muscles (design SS/MG, EQ-4)
+  'ALTER TABLE exercises ADD COLUMN group_id TEXT',
+  'ALTER TABLE exercises ADD COLUMN group_order INTEGER',
+  'ALTER TABLE exercises ADD COLUMN primary_muscle TEXT',
+  'ALTER TABLE exercises ADD COLUMN secondary_muscles TEXT',
+  // Gym equipment inventory (design EQ)
+  'ALTER TABLE gyms ADD COLUMN inventory TEXT',
 ]) {
   try {
     db.exec(stmt);
@@ -175,6 +185,18 @@ CREATE TABLE IF NOT EXISTS program_assignments (
   started_at  INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS exercise_catalog (
+  id                TEXT PRIMARY KEY,
+  name              TEXT NOT NULL,
+  name_lower        TEXT NOT NULL UNIQUE,
+  kind              TEXT NOT NULL DEFAULT 'strength',
+  primary_muscle    TEXT,
+  secondary_muscles TEXT,
+  equipment         TEXT,
+  created_by        TEXT NOT NULL,
+  updated_at        INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS notices (
   id         TEXT PRIMARY KEY,
   user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -191,6 +213,10 @@ for (const stmt of [
   'ALTER TABLE program_items ADD COLUMN equipment TEXT',
   "ALTER TABLE programs ADD COLUMN status TEXT NOT NULL DEFAULT 'active'",
   'ALTER TABLE programs ADD COLUMN day_names TEXT',
+  // Prescribed supersets and drop-on-last (design EQ-2/EQ-5)
+  'ALTER TABLE program_items ADD COLUMN group_id TEXT',
+  'ALTER TABLE program_items ADD COLUMN group_order INTEGER',
+  'ALTER TABLE program_items ADD COLUMN drop_last INTEGER NOT NULL DEFAULT 0',
 ]) {
   try {
     db.exec(stmt);
@@ -282,6 +308,9 @@ export interface ProgramItemRow {
   weight: number | null;
   duration_min: number | null;
   equipment: string | null;
+  group_id: string | null;
+  group_order: number | null;
+  drop_last: number;
 }
 
 export interface InviteRow {
@@ -315,6 +344,10 @@ export interface ExerciseRow {
   planned_reps: number | null;
   planned_duration_min: number | null;
   equipment: string | null;
+  group_id: string | null;
+  group_order: number | null;
+  primary_muscle: string | null;
+  secondary_muscles: string | null;
   position: number;
   updated_at: number;
 }
@@ -327,6 +360,7 @@ export interface GymRow {
   lng: number;
   radius_m: number;
   favorite: number;
+  inventory: string | null;
   updated_at: number;
 }
 
@@ -343,6 +377,8 @@ export interface SetRow {
   reps: number;
   weight: number | null;
   is_warmup: number;
+  type: string | null;
+  drops: string | null;
   duration_min: number | null;
   distance_km: number | null;
   calories: number | null;

@@ -115,6 +115,15 @@ export function fmtFullDate(ts: number, locale: LocaleId = current): string {
   }).format(new Date(ts));
 }
 
+/** "Friday, 31 July" — the Today kicker from the design (no year, one line). */
+export function fmtWeekdayDayMonth(ts: number, locale: LocaleId = current): string {
+  return new Intl.DateTimeFormat(dateLocale[locale], {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date(ts));
+}
+
 /** "Monday" — weekday name in the active locale. */
 export function fmtWeekday(ts: number, locale: LocaleId = current): string {
   return new Intl.DateTimeFormat(dateLocale[locale], { weekday: 'long' }).format(new Date(ts));

@@ -1,8 +1,18 @@
-/** Progress — design S-34…S-36. */
+/** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
 import { useEffect, useState } from 'react';
-import { est1rm, topSet, workoutVolumeKg, type useStore } from '../store';
-import { fmtDayMonth, fmtKg, useT } from '../i18n';
-import { EmptyState } from '../ui';
+import {
+  est1rm,
+  exerciseNeeds,
+  missingAtGym,
+  muscleVolumeKg,
+  topSet,
+  workoutVolumeKg,
+  type useStore,
+} from '../store';
+import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
+import { EmptyState, Icon } from '../ui';
+import { EquipChip, MuscleChip, MuscleIcon } from '../components/Muscle';
+import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -19,6 +29,8 @@ export function ProgressView({ store }: { store: Store }) {
   const { t, locale } = useT();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
+  const [seg, setSeg] = useState<'total' | 'muscle' | 'records'>('total');
+  const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
 
@@ -119,6 +131,101 @@ export function ProgressView({ store }: { store: Store }) {
       .join(' ');
   }
 
+  // --- By muscle (MG-3): this week's volume per primary group --------------
+  const weekWorkouts = finished.filter((w) => weekStart(w.startedAt) === thisWeek);
+  const recentWorkouts = finished.filter((w) => nowTs - w.startedAt < 4 * 7 * 24 * 3600 * 1000);
+  const volThisWeek = muscleVolumeKg(weekWorkouts);
+  const volRecent = muscleVolumeKg(recentWorkouts);
+  const muscleRows: Array<{ m: MuscleGroup; v: number }> = [...volRecent.keys()]
+    .map((m) => ({ m, v: volThisWeek.get(m) ?? 0 }))
+    .sort((a, b) => b.v - a.v);
+  const maxMuscle = Math.max(1, ...muscleRows.map((r) => r.v));
+  const weekTotal = [...volThisWeek.values()].reduce((a, b) => a + b, 0);
+  const emptyMuscles = muscleRows.filter((r) => r.v === 0).map((r) => t.muscleGroups[r.m]);
+  const topMuscle = muscleRows.length > 0 && muscleRows[0].v > 0 ? muscleRows[0] : null;
+
+  function muscleBarColor(v: number): string {
+    const r = v / maxMuscle;
+    if (r >= 0.85) return 'var(--color-accent)';
+    if (r >= 0.55) return 'var(--color-accent-600)';
+    return 'var(--color-accent-700)';
+  }
+
+  function renderMuscleRows(interactive: boolean) {
+    return (
+      <div className="muscle-rows">
+        {muscleRows.map(({ m, v }) => {
+          const sel = interactive && selMuscle === m;
+          const row = (
+            <>
+              <MuscleIcon
+                muscle={m}
+                variant="row"
+                tone={sel ? 'onAccent' : v === 0 ? 'muted' : 'primary'}
+              />
+              <span className="n">{t.muscleGroups[m]}</span>
+              <span className="bar">
+                {v > 0 && (
+                  <span
+                    style={{ width: `${(v / maxMuscle) * 100}%`, background: muscleBarColor(v) }}
+                  />
+                )}
+              </span>
+              <span className="v">{v > 0 ? fmtTonnes(v) : '—'}</span>
+            </>
+          );
+          if (!interactive) {
+            return (
+              <div key={m} className={`muscle-row${v === 0 ? ' dim' : ''}`}>
+                {row}
+              </div>
+            );
+          }
+          return (
+            <button
+              key={m}
+              className={`muscle-row${v === 0 ? ' dim' : ''}${sel ? ' sel' : ''}`}
+              onClick={() => {
+                setSelMuscle(m);
+                const candidate = ranked.find(([name]) => muscleInfoByName(name)?.primary === m);
+                if (candidate) setSelectedName(candidate[0]);
+              }}
+            >
+              {row}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const muscleNote = (
+    <div className="muscle-note">
+      <Icon name="scales" />
+      <p>
+        {t.muscleWeekNote(
+          emptyMuscles.length > 0 ? emptyMuscles.join(' · ') : null,
+          topMuscle ? t.muscleGroups[topMuscle.m] : null,
+          topMuscle && weekTotal > 0 ? `${Math.round((topMuscle.v / weekTotal) * 100)}%` : null,
+        )}
+      </p>
+    </div>
+  );
+
+  const segControl = (
+    <div className="seg3">
+      <button className={seg === 'total' ? 'active' : ''} onClick={() => setSeg('total')}>
+        {t.totalLabel}
+      </button>
+      <button className={seg === 'muscle' ? 'active' : ''} onClick={() => setSeg('muscle')}>
+        {t.byMuscle}
+      </button>
+      <button className={seg === 'records' ? 'active' : ''} onClick={() => setSeg('records')}>
+        {t.records}
+      </button>
+    </div>
+  );
+
   if (finished.length < 3) {
     return (
       <div className="screen progress-page progress-locked">
@@ -133,7 +240,7 @@ export function ProgressView({ store }: { store: Store }) {
           <div className="progress-locked-empty">
             <EmptyState
               icon="chart-line-up"
-              title={t.twoMoreSessions}
+              title={t.moreSessionsTitle(Math.max(1, 3 - finished.length))}
               body={t.progressLocked(finished.length)}
             />
             <UnlockDots finishedCount={finished.length} label={t.progressUnlocksAt} />
@@ -148,9 +255,12 @@ export function ProgressView({ store }: { store: Store }) {
       <h2 className="visually-hidden">{t.progress}</h2>
       <section className="progress-summary-pane">
         <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
-        <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />
+        {segControl}
+        {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
+        {seg === 'muscle' && muscleNote}
+        {seg === 'total' && <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />}
 
-        {lines.length > 0 && lines[0].pts.length >= 2 && (
+        {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
           <div>
             <div className="section-label" style={{ marginBottom: 8 }}>
               {t.estimated1rm}
@@ -191,47 +301,75 @@ export function ProgressView({ store }: { store: Store }) {
           </div>
         )}
 
-        <div>
-          <div className="section-label" style={{ marginBottom: 4 }}>
-            {t.records}
-          </div>
+        {(seg === 'records' || (showDesktopDetail && seg !== 'muscle')) && (
           <div>
-            {records.map(([name, r]) => {
-              const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
-              return (
-                <button
-                  key={name}
-                  className={`record-row${selected?.[0] === name ? ' selected' : ''}`}
-                  onClick={() => setSelectedName(name)}
-                >
-                  <span className="n">{name}</span>
-                  <span className="v">{r.recW} kg</span>
-                  {wksAgo < 2 ? (
-                    <span className="tag tag-ok">{t.record}</span>
-                  ) : (
-                    <span className="when num">{t.wksAgo(wksAgo)}</span>
-                  )}
-                </button>
-              );
-            })}
+            <div
+              className="section-label"
+              style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}
+            >
+              <span style={{ flex: 1 }}>{t.records}</span>
+              {showDesktopDetail && (
+                <a href="#/exercises" className="link" style={{ fontSize: 12 }}>
+                  {t.exercisesTitle}
+                </a>
+              )}
+            </div>
+            <div>
+              {records.map(([name, r]) => {
+                const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
+                return (
+                  <button
+                    key={name}
+                    className={`record-row${selected?.[0] === name ? ' selected' : ''}`}
+                    onClick={() => setSelectedName(name)}
+                  >
+                    <span className="n">{name}</span>
+                    <span className="v">{r.recW} kg</span>
+                    {wksAgo < 2 ? (
+                      <span className="tag tag-ok">{t.record}</span>
+                    ) : (
+                      <span className="when num">{t.wksAgo(wksAgo)}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </section>
 
       {showDesktopDetail && selected && selectedRecord && (
         <section className="progress-detail-pane">
           <div>
             <h3>{selected[0]}</h3>
-            <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>
+            {(() => {
+              const info = muscleInfoByName(selected[0]);
+              const needs = exerciseNeeds(selected[0]);
+              if (!info && needs.length === 0)
+                return <p>{t.nSessionsSince(selectedSessions.length, selectedSince)}</p>;
+              return (
+                <div className="hist-chips" style={{ alignItems: 'center' }}>
+                  {info && info.primary !== 'cardio' && (
+                    <MuscleChip muscle={info.primary} tone="primary" size="lg" />
+                  )}
+                  {info?.secondary.map((m) => (
+                    <MuscleChip key={m} muscle={m} tone="secondary" size="lg" />
+                  ))}
+                  {needs.map((id) => (
+                    <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />
+                  ))}
+                </div>
+              );
+            })()}
           </div>
           <div className="progress-detail-stats">
             <div className="cell">
               <div className="v ok">{selectedRecord.recW}</div>
-              <div className="l">{t.record}</div>
+              <div className="l">{t.recordKg}</div>
             </div>
             <div className="cell">
               <div className="v">{selectedRecordRm}</div>
-              <div className="l">{t.estimated1rm}</div>
+              <div className="l">{t.est1rm}</div>
             </div>
             <div className="cell">
               <div className="v">{latest?.top.weight ?? 0}</div>
@@ -239,7 +377,7 @@ export function ProgressView({ store }: { store: Store }) {
             </div>
             <div className="cell">
               <div className="v">{fmtKg(latestVolume)}</div>
-              <div className="l">{t.movedStat}</div>
+              <div className="l">{t.lastVolume}</div>
             </div>
           </div>
 
@@ -275,31 +413,45 @@ export function ProgressView({ store }: { store: Store }) {
             </div>
           </div>
 
-          <div>
-            <div className="section-label">{t.lastSessions}</div>
-            <table className="table progress-detail-table">
-              <thead>
-                <tr>
-                  <th>{t.dateCol}</th>
-                  <th>{t.topSetCol}</th>
-                  <th>{t.sets}</th>
-                  <th>{t.movedStat}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedSessions.slice(0, 5).map(({ workout, exercise, top }) => (
-                  <tr key={workout.id}>
-                    <td>{fmtDayMonth(workout.startedAt, locale)}</td>
-                    <td>
-                      {top.weight ?? 0} × {top.reps}
-                    </td>
-                    <td>{exercise.sets.length}</td>
-                    <td>{fmtKg(exerciseVolumeKg(exercise))}</td>
+          {store.gyms.length > 0 && (
+            <div>
+              <div className="section-label">{t.whereYouCanDoIt}</div>
+              <table className="table progress-detail-table">
+                <thead>
+                  <tr>
+                    <th>{t.gymCol}</th>
+                    <th>{t.needsCol}</th>
+                    <th>{t.statusCol}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {store.gyms.map((g) => {
+                    const needs = exerciseNeeds(selected[0]);
+                    const missing = missingAtGym(g, needs);
+                    return (
+                      <tr key={g.id}>
+                        <td>{g.name}</td>
+                        <td style={{ color: 'var(--color-neutral-400)' }}>
+                          {needs.map((id) => equipLabel(id, t)).join(' · ') || '—'}
+                        </td>
+                        <td>
+                          {missing.length === 0 ? (
+                            <span style={{ color: 'var(--color-ok-text)' }}>
+                              {t.allHere(needs.length)}
+                            </span>
+                          ) : (
+                            <span style={{ color: 'var(--color-danger-text)' }}>
+                              {t.noItemShort(equipLabel(missing[0], t))}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       )}
     </div>
@@ -324,7 +476,6 @@ function ProgressKpi({
         </div>
         <div className="lab">{label}</div>
       </div>
-      <div style={{ marginLeft: 'auto' }}></div>
       {deltaPct !== null && (
         <span
           className={`tag ${deltaPct >= 0 ? 'tag-accent' : 'tag-neutral'}`}
@@ -366,6 +517,11 @@ function UnlockDots({ finishedCount, label }: { finishedCount: number; label: st
       </span>
     </div>
   );
+}
+
+function equipLabel(id: string, t: ReturnType<typeof useT>['t']): string {
+  const names = t.equipmentNames as Record<string, string>;
+  return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
 }
 
 function exerciseVolumeKg(exercise: Store['workouts'][number]['exercises'][number]): number {

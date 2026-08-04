@@ -9,6 +9,7 @@ import { trainerRouter } from './trainer.js';
 import { profileRouter } from './profile.js';
 import { programsRouter } from './programs.js';
 import { noticesRouter } from './notices.js';
+import { exercisesRouter } from './exercises.js';
 import { services } from './services.js';
 import { apiRateLimit } from './rate-limit.js';
 
@@ -28,6 +29,8 @@ export function createApp(): express.Express {
   app.use('/api/profile', profileRouter);
   app.use('/api/programs', programsRouter);
   app.use('/api/notices', noticesRouter);
+  // Shared exercise catalog: admin/trainer-authored custom exercises.
+  app.use('/api/exercises', exercisesRouter);
   // Service modules from the registry: /api/<service-id>/...
   for (const service of services) {
     for (const router of service.routers) {

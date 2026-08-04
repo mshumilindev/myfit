@@ -58,7 +58,23 @@ import { Phone } from '@phosphor-icons/react/Phone';
 import { Play } from '@phosphor-icons/react/Play';
 import { Plus } from '@phosphor-icons/react/Plus';
 import { QrCode } from '@phosphor-icons/react/QrCode';
+import { CaretLineDown } from '@phosphor-icons/react/CaretLineDown';
+import { CaretLineUp } from '@phosphor-icons/react/CaretLineUp';
+import { Check } from '@phosphor-icons/react/Check';
+import { Circle } from '@phosphor-icons/react/Circle';
+import { Columns } from '@phosphor-icons/react/Columns';
+import { Cylinder } from '@phosphor-icons/react/Cylinder';
+import { Devices } from '@phosphor-icons/react/Devices';
+import { Equals } from '@phosphor-icons/react/Equals';
+import { Fire } from '@phosphor-icons/react/Fire';
+import { FrameCorners } from '@phosphor-icons/react/FrameCorners';
+import { FunnelSimple } from '@phosphor-icons/react/FunnelSimple';
+import { PersonSimple } from '@phosphor-icons/react/PersonSimple';
+import { Plugs } from '@phosphor-icons/react/Plugs';
 import { Robot } from '@phosphor-icons/react/Robot';
+import { Rows } from '@phosphor-icons/react/Rows';
+import { Toolbox } from '@phosphor-icons/react/Toolbox';
+import { WaveSine } from '@phosphor-icons/react/WaveSine';
 import { Scales } from '@phosphor-icons/react/Scales';
 import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
 import { SignOut } from '@phosphor-icons/react/SignOut';
@@ -126,7 +142,23 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   play: Play,
   plus: Plus,
   'qr-code': QrCode,
+  'caret-line-down': CaretLineDown,
+  'caret-line-up': CaretLineUp,
+  check: Check,
+  circle: Circle,
+  columns: Columns,
+  cylinder: Cylinder,
+  devices: Devices,
+  equals: Equals,
+  fire: Fire,
+  'frame-corners': FrameCorners,
+  'funnel-simple': FunnelSimple,
+  'person-simple': PersonSimple,
+  plugs: Plugs,
   robot: Robot,
+  rows: Rows,
+  toolbox: Toolbox,
+  'wave-sine': WaveSine,
   scales: Scales,
   'shield-check': ShieldCheck,
   'sign-out': SignOut,
@@ -159,6 +191,20 @@ export function Icon({
       {Glyph ? <Glyph size="1em" weight={weight} /> : null}
     </i>
   );
+}
+
+/** Media hook: true at the desktop breakpoint (≥720 px). */
+export function useIsDesktop(): boolean {
+  const [is, setIs] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 720px)').matches,
+  );
+  useEffect(() => {
+    const q = window.matchMedia('(min-width: 720px)');
+    const on = () => setIs(q.matches);
+    q.addEventListener('change', on);
+    return () => q.removeEventListener('change', on);
+  }, []);
+  return is;
 }
 
 export function Spinner({ size = 14, onAccent = false }: { size?: number; onAccent?: boolean }) {

@@ -118,7 +118,9 @@ export function GymDetailView({
       r[1] > r[0] ? nowMin >= r[0] && nowMin < r[1] : nowMin >= r[0] || nowMin < r[1];
     return parsed.week[todayIdx].some(inRange);
   }, [parsed, todayIdx, nowMin]);
-  const openNow = meta?.openNow ?? computedOpen;
+  // Prefer live computation from the hours (local clock): the provider's
+  // openNow is cached for days and shows the state at fetch time, not now.
+  const openNow = computedOpen ?? meta?.openNow ?? null;
 
   const fmtDay = (ranges: Array<[number, number]>) =>
     ranges.length === 0

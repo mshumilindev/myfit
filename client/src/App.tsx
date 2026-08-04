@@ -2,16 +2,9 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { clearAuth, getRole, getToken, getUsername, request } from './api';
 import { getOpenWorkout, startSyncLoop, useStore, retrySync, discardBlockingChange } from './store';
 import { useT } from './i18n';
-import {
-  Icon,
-  LanguageSelector,
-  Snackbar,
-  Spinner,
-  Toast,
-  type SnackState,
-  type ToastState,
-} from './ui';
+import { Icon, LanguageSelector, Snackbar, Toast, type SnackState, type ToastState } from './ui';
 import { AuthView } from './views/AuthView';
+import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
 import type { SyncError, Notice } from './types';
 
@@ -41,6 +34,11 @@ const ExerciseHistoryView = lazy(() =>
     default: module.ExerciseHistoryView,
   })),
 );
+const ExerciseLibraryView = lazy(() =>
+  import('./views/ExerciseLibraryView').then((module) => ({
+    default: module.ExerciseLibraryView,
+  })),
+);
 const GymDetailView = lazy(() =>
   import('./views/GymDetailView').then((module) => ({ default: module.GymDetailView })),
 );
@@ -59,6 +57,7 @@ export type Overlay =
   | { screen: 'exercise-history'; name: string }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
+  | { screen: 'library' }
   | null;
 
 export interface Shell {
@@ -110,6 +109,7 @@ function toHash(tab: Tab, overlay: Overlay): string {
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
+  if (overlay?.screen === 'library') return '#/exercises';
   if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
@@ -129,6 +129,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
   if (head === 'me') return { tab: 'me', overlay: null };
+  if (head === 'exercises') return { tab: 'progress', overlay: { screen: 'library' } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -169,14 +170,27 @@ export function App() {
     return m ? m[1] : null;
   });
   const [tab, setTab] = useState<Tab>(() => fromHash(window.location.hash).tab);
-  const [overlay, setOverlay] = useState<Overlay>(() => {
+  // Overlay navigation keeps a stack of parents: the back button on an overlay
+  // returns to the screen it was opened from (session → exercise history →
+  // back lands on the session again), never blindly through browser history.
+  const [overlayNav, setOverlayNav] = useState<{ cur: Overlay; stack: Overlay[] }>(() => {
     const o = fromHash(window.location.hash).overlay;
     if (o?.screen === 'session' && !o.workoutId) {
       const w = getOpenWorkout();
-      return w ? { screen: 'session', workoutId: w.id } : null;
+      return { cur: w ? { screen: 'session', workoutId: w.id } : null, stack: [] };
     }
-    return o;
+    return { cur: o, stack: [] };
   });
+  const overlay = overlayNav.cur;
+  /** Open an overlay, remembering the current one as its logical parent.
+   * Passing null resets the whole overlay stack (used when switching tabs). */
+  const setOverlay = useCallback((o: Overlay) => {
+    setOverlayNav((n) =>
+      o === null
+        ? { cur: null, stack: [] }
+        : { cur: o, stack: n.cur === null ? n.stack : [...n.stack, n.cur] },
+    );
+  }, []);
   const [toasts, setToasts] = useState<Array<ToastState & { id: number }>>([]);
   const [snack, setSnack] = useState<SnackState | null>(null);
   const desktopRail = useDesktopRail();
@@ -213,7 +227,14 @@ export function App() {
     queueLength: store.queue.length,
   };
 
-  const closeOverlay = useCallback(() => setOverlay(null), []);
+  /** Back from an overlay: pop to the logical parent screen, not history. */
+  const closeOverlay = useCallback(() => {
+    setOverlayNav((n) =>
+      n.stack.length > 0
+        ? { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) }
+        : { cur: null, stack: [] },
+    );
+  }, []);
   const removeToast = useCallback((id: number) => {
     setToasts((list) => list.filter((x) => x.id !== id));
   }, []);
@@ -236,13 +257,15 @@ export function App() {
     const onPop = () => {
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       setTab(ht);
-      setOverlay(
-        ho?.screen === 'session' && !ho.workoutId
-          ? open
-            ? { screen: 'session', workoutId: open.id }
-            : null
-          : ho,
-      );
+      setOverlayNav({
+        cur:
+          ho?.screen === 'session' && !ho.workoutId
+            ? open
+              ? { screen: 'session', workoutId: open.id }
+              : null
+            : ho,
+        stack: [],
+      });
     };
     window.addEventListener('hashchange', onPop);
     return () => window.removeEventListener('hashchange', onPop);
@@ -329,6 +352,7 @@ export function App() {
           {overlay?.screen === 'exercise-history' && (
             <ExerciseHistoryView name={overlay.name} onClose={closeOverlay} />
           )}
+          {overlay?.screen === 'library' && <ExerciseLibraryView onClose={closeOverlay} />}
           {overlay?.screen === 'gym' && (
             <GymDetailView
               gymId={overlay.gymId}
@@ -395,10 +419,26 @@ export function App() {
   );
 }
 
+/** Page-load placeholder: a skeleton of a typical screen, never a spinner. */
 function ScreenFallback() {
+  const { t } = useT();
   return (
-    <div className="screen screen-fallback" role="status" aria-live="polite">
-      <Spinner size={20} />
+    <div className="screen screen-skel" role="status" aria-live="polite" aria-label={t.syncing}>
+      <div className="skel-head">
+        <div className="sk" style={{ width: 120, height: 11 }} />
+        <div className="sk" style={{ width: 170, height: 28 }} />
+      </div>
+      <div className="skel-grid">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="sk skel-stat" />
+        ))}
+      </div>
+      <div className="sk skel-block" />
+      <div className="skel-rows">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} className="sk skel-row" />
+        ))}
+      </div>
     </div>
   );
 }
@@ -476,10 +516,16 @@ function Rail(props: {
         <div className="rail-lang">
           <LanguageSelector />
         </div>
-        <button className="account-chip" onClick={props.onOpenProfile}>
-          <span className="avatar">{(username[0] ?? '?').toUpperCase()}</span>
-          <span className="name">{username}</span>
-          <span className="dot" style={{ background: dotColor }} />
+        <button
+          className="account-chip"
+          onClick={props.onOpenProfile}
+          aria-label={username}
+          title={username}
+        >
+          <span className="account-avatar">
+            <Avatar userId="me" name={username} hasPhoto size={34} />
+            <span className="dot" style={{ background: dotColor }} />
+          </span>
         </button>
       </div>
     </aside>

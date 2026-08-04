@@ -96,10 +96,10 @@ export function LiveHero({
         <div className="live-hero-body">{body}</div>
       )}
       <div className="live-hero-actions">
-        {!gym && !closed && (
+        {!closed && (
           <button className="live-attach" onClick={() => setPicker(true)}>
             <Icon name="map-pin" />
-            {t.liveAttach}
+            {gym ? t.changeGym : t.liveAttach}
           </button>
         )}
         {mode !== 'session' && (

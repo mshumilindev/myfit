@@ -1,7 +1,9 @@
-/** Exercise history — design S-32 (filled) and S-33 (too little data). */
-import { est1rm, topSet, useStore } from '../store';
+/** Exercise history — design S-32/S-33 + EQ-3 (muscles, equipment, gyms). */
+import { est1rm, exerciseNeeds, missingAtGym, topSet, useStore } from '../store';
+import { muscleInfoByName } from '../data/exercises';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
 import { Icon } from '../ui';
+import { EquipChip, MuscleChip } from '../components/Muscle';
 
 export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: () => void }) {
   const { t, locale } = useT();
@@ -34,13 +36,35 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
         <button className="back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
-        <div>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <h2 className="title-26">{name}</h2>
-          <div className="sub">
-            {sessions.length === 1 ? t.oneSession : t.nSessionsSince(sessions.length, since)}
-          </div>
+          {(() => {
+            const info = muscleInfoByName(name);
+            const needs = exerciseNeeds(name);
+            if (!info && needs.length === 0) {
+              return (
+                <div className="sub">
+                  {sessions.length === 1 ? t.oneSession : t.nSessionsSince(sessions.length, since)}
+                </div>
+              );
+            }
+            return (
+              <>
+                <div className="hist-chips">
+                  {info && info.primary !== 'cardio' && (
+                    <MuscleChip muscle={info.primary} tone="primary" size="lg" />
+                  )}
+                  {info?.secondary.map((m) => (
+                    <MuscleChip key={m} muscle={m} tone="secondary" size="lg" />
+                  ))}
+                  {needs.map((id) => (
+                    <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </div>
-        <div style={{ marginLeft: 'auto' }}></div>
       </div>
 
       <div className="stat-grid">
@@ -66,6 +90,44 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
           <div className="l">{t.lastTopSet}</div>
         </div>
       </div>
+
+      {store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
+        <div>
+          <div className="section-label" style={{ marginBottom: 8 }}>
+            {t.whereYouCanDoIt}
+          </div>
+          <div className="wcdi-rows">
+            {store.gyms.map((g) => {
+              const needs = exerciseNeeds(name);
+              const missing = missingAtGym(g, needs);
+              const names = t.equipmentNames as Record<string, string>;
+              const label = (id: string) =>
+                (names[id] ?? id.charAt(0).toUpperCase() + id.slice(1)).toLowerCase();
+              return (
+                <div key={g.id} className={`wcdi-row${missing.length > 0 ? ' miss' : ''}`}>
+                  {missing.length === 0 ? (
+                    <Icon name="check-circle" weight="fill" className="ok" />
+                  ) : (
+                    <Icon name="warning-circle" className="bad" />
+                  )}
+                  <span className="n" style={{ fontSize: 13 }}>
+                    {g.name}
+                  </span>
+                  {missing.length === 0 ? (
+                    <span className="v">{needs.map(label).join(' · ')}</span>
+                  ) : (
+                    <span className="v miss">{t.noItemShort(label(missing[0]))}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="sheet-note" style={{ background: 'var(--color-surface)', marginTop: 8 }}>
+            <Icon name="info" />
+            <p>{t.inventoryNote}</p>
+          </div>
+        </div>
+      )}
 
       {chartPts.length >= 3 ? (
         <div>

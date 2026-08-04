@@ -1,13 +1,22 @@
 /** Programs — trainer/admin authoring + client assignment (AC-ROLE-06, O-07). */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getRole, getUsername, request } from '../api';
-import { knownExercises, useStore, backfillWorkout, addExercise } from '../store';
 import { ProgramCsvDialog } from './ProgramCsvDialog';
 import { ProgramAssignDialog } from './ProgramAssignDialog';
 import { programToCsv, type ProgramItemLike } from '../data/programCsv';
 import type { ExerciseKind } from '../types';
 import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
-import { Icon, Spinner } from '../ui';
+import { MuscleChip, MuscleIcon, equipmentIconName } from '../components/Muscle';
+import {
+  addExercise,
+  backfillWorkout,
+  knownExercises,
+  resolveMuscles,
+  startWorkout,
+  useStore,
+} from '../store';
+import type { MuscleGroup } from '../data/exercises';
+import { ConfirmDialog, Icon, Spinner } from '../ui';
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { weekDayStatuses, programOutlook, type DayCell } from '../data/programDays';
@@ -22,6 +31,9 @@ interface ProgramItem {
   reps: number;
   durationMin: number | null;
   equipment: EquipmentId[];
+  groupId?: string | null;
+  groupOrder?: number | null;
+  dropLast?: boolean;
 }
 
 interface Program {
@@ -95,6 +107,9 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   const [programQuery, setProgramQuery] = useState('');
   const [assignClientIds, setAssignClientIds] = useState<string[]>([]);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
+  const [ignoredEquipWarn, setIgnoredEquipWarn] = useState<string[]>([]);
+  /** EQ-5 · rows picked for “Group selected as superset”. */
+  const [pickedItemIds, setPickedItemIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [memberEditing, setMemberEditing] = useState(false);
@@ -102,6 +117,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   const [memberLoaded, setMemberLoaded] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
+  const [confirmDeleteProgram, setConfirmDeleteProgram] = useState(false);
   const [outlookNow] = useState(() => Date.now());
   const didPickInitialProgram = useRef(false);
   const dragItem = useRef<string | null>(null);
@@ -329,6 +345,34 @@ export function ProgramsView({ shell }: { shell: Shell }) {
     }));
   }
 
+  /** EQ-5 · prescribe the picked exercises as one superset. */
+  function groupPicked() {
+    if (pickedItemIds.length < 2) return;
+    const gid = crypto.randomUUID();
+    setDraft((p) => ({
+      ...p,
+      items: p.items.map((i) =>
+        pickedItemIds.includes(i.id)
+          ? { ...i, groupId: gid, groupOrder: pickedItemIds.indexOf(i.id) }
+          : i,
+      ),
+    }));
+    setPickedItemIds([]);
+  }
+
+  function ungroupItem(id: string) {
+    setDraft((p) => {
+      const gid = p.items.find((i) => i.id === id)?.groupId ?? null;
+      if (!gid) return p;
+      return {
+        ...p,
+        items: p.items.map((i) =>
+          i.groupId === gid ? { ...i, groupId: null, groupOrder: null } : i,
+        ),
+      };
+    });
+  }
+
   function patchItem(id: string, patch: Partial<ProgramItem>) {
     setDraft((p) => ({ ...p, items: p.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) }));
   }
@@ -399,6 +443,9 @@ export function ProgramsView({ shell }: { shell: Shell }) {
             reps: i.reps,
             durationMin: i.durationMin,
             equipment: i.equipment,
+            groupId: i.groupId ?? null,
+            groupOrder: i.groupOrder ?? null,
+            dropLast: !!i.dropLast,
           })),
       };
       const data = await request<{ program: Program }>('PUT', `/api/programs/${draft.id}`, payload);
@@ -420,6 +467,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
 
   async function removeProgram(id: string) {
     await request('DELETE', `/api/programs/${id}`);
+    setConfirmDeleteProgram(false);
     setSelectedId(null);
     setDraft(freshProgram(t.progNew));
     load();
@@ -766,6 +814,41 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 ] as EquipmentId[];
                 const st = dayStatus.get(day)?.status;
                 const cell = dayStatus.get(day);
+                const isToday =
+                  !!cell &&
+                  Math.floor(cell.date / 86_400_000) === Math.floor(outlookNow / 86_400_000);
+                // EQ-2 · the day sums its muscles; the gym inventory is
+                // checked against the gym this member trains the most.
+                const dayMuscles: MuscleGroup[] = [];
+                for (const item of items) {
+                  const m = resolveMuscles({ name: item.name, kind: item.kind });
+                  if (m.primary && !dayMuscles.includes(m.primary)) dayMuscles.push(m.primary);
+                  for (const sec of m.secondary) {
+                    if (!dayMuscles.includes(sec)) dayMuscles.push(sec);
+                  }
+                }
+                const gymCounts = new Map<string, number>();
+                for (const w of store.workouts) {
+                  if (w.gymId) gymCounts.set(w.gymId, (gymCounts.get(w.gymId) ?? 0) + 1);
+                }
+                const homeGym =
+                  [...gymCounts.entries()]
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([id]) => store.gyms.find((g) => g.id === id))[0] ?? null;
+                const missing =
+                  homeGym?.inventory && homeGym.inventory.length > 0
+                    ? equipment.filter((id) => !homeGym.inventory!.includes(id))
+                    : [];
+                const equipLabel = (id: string) => {
+                  const names = t.equipmentNames as Record<string, string>;
+                  return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+                };
+                const warnKey = `${day}:${missing.join(',')}`;
+                const letters = new Map<string, number>();
+                for (const item of items) {
+                  const gid = item.groupId ?? null;
+                  if (gid && !letters.has(gid)) letters.set(gid, letters.size);
+                }
                 return (
                   <div
                     key={day}
@@ -773,11 +856,16 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                   >
                     <div className="program-day-head">
                       <div>
-                        <div className="field-label">
-                          {active.dayNames?.[day] || t.progDay(day)}
-                        </div>
-                        <div className="program-day-sub">
-                          {items.length > 0 ? t.progPrescriptionRule : t.progRestDay}
+                        <div className="pd-title-row">
+                          <span className="pd-title">
+                            {t.progDayLine(
+                              t.weekDayNames[day - 1],
+                              active.dayNames?.[day] || t.progDay(day),
+                            )}
+                          </span>
+                          {isToday && st !== 'logged' && (
+                            <span className="tag tag-accent">{t.today}</span>
+                          )}
                         </div>
                       </div>
                       {st === 'logged' && (
@@ -792,34 +880,118 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                           {t.progBackfill}
                         </button>
                       )}
-                      {st !== 'missed' && st !== 'logged' && equipment.length > 0 && (
-                        <div className="program-start-equipment">
-                          {equipment.map((id) => (
-                            <EquipmentIcon key={id} equipment={id} />
-                          ))}
-                        </div>
-                      )}
                     </div>
                     {items.length === 0 ? (
                       <div className="detail-muted">{t.progRestDay}</div>
                     ) : (
-                      <div className="program-prescriptions">
-                        {items.map((item) => (
-                          <div key={item.id} className="program-prescription-row">
-                            <span className="n">{item.name}</span>
-                            <span className="s">
-                              {item.kind === 'strength'
-                                ? `${item.sets} × ${item.reps}`
-                                : `${item.durationMin ?? 10} ${t.minShort}`}
-                            </span>
-                            <span className="equipment-mini">
-                              {(item.equipment ?? []).map((id) => (
-                                <EquipmentIcon key={id} equipment={id} />
-                              ))}
-                            </span>
+                      <>
+                        {dayMuscles.length > 0 && (
+                          <div className="pd-chips">
+                            {dayMuscles.map((m) => (
+                              <MuscleChip key={m} muscle={m} />
+                            ))}
                           </div>
-                        ))}
+                        )}
+                        <div className="program-prescriptions">
+                          {items.map((item) => {
+                            const gid = item.groupId ?? null;
+                            const letter = gid
+                              ? String.fromCharCode(65 + (letters.get(gid) ?? 0))
+                              : null;
+                            return (
+                              <div key={item.id} className="program-prescription-row pdr">
+                                <span className={`pdr-bar${gid ? ' on' : ''}`} />
+                                <span className="n">
+                                  {item.name}
+                                  {letter && (
+                                    <span className="pdr-index">
+                                      {letter}
+                                      {(item.groupOrder ?? 0) + 1}
+                                    </span>
+                                  )}
+                                </span>
+                                {item.dropLast && (
+                                  <span className="pdr-drop">
+                                    <Icon name="caret-line-down" />
+                                    {t.dropOnLast}
+                                  </span>
+                                )}
+                                <span className="s">
+                                  {item.kind === 'strength'
+                                    ? `${item.sets} × ${item.reps}`
+                                    : `${item.durationMin ?? 10} ${t.minShort}`}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {equipment.length > 0 && (
+                          <div className="pd-equip">
+                            {equipment
+                              .filter((id) => !missing.includes(id))
+                              .map((id) => (
+                                <span key={id} className="mchip">
+                                  <Icon name={equipmentIconName(id)} />
+                                  {equipLabel(id)}
+                                </span>
+                              ))}
+                            {missing.map((id) => (
+                              <span key={id} className="mchip ruby">
+                                <Icon name="warning-circle" />
+                                {equipLabel(id)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {missing.length > 0 && homeGym && !ignoredEquipWarn.includes(warnKey) && (
+                      <div className="pd-warn">
+                        <Icon name="warning-circle" />
+                        <div className="pd-warn-body">
+                          <p>{t.gymMissingSwap(homeGym.name, equipLabel(missing[0]))}</p>
+                          <div className="pd-warn-actions">
+                            <button
+                              className="pd-warn-swap"
+                              onClick={() => {
+                                if (isMine) editMemberProgram();
+                                else setIgnoredEquipWarn((x) => [...x, warnKey]);
+                              }}
+                            >
+                              {t.suggestSwap}
+                            </button>
+                            <button
+                              className="pd-warn-ignore"
+                              onClick={() => setIgnoredEquipWarn((x) => [...x, warnKey])}
+                            >
+                              {t.ignoreLabel}
+                            </button>
+                          </div>
+                        </div>
                       </div>
+                    )}
+                    {isToday && st !== 'logged' && items.length > 0 && !liveOpen && (
+                      <button
+                        className="btn btn-primary pd-start"
+                        onClick={() => {
+                          const w = startWorkout(null);
+                          for (const item of items) {
+                            addExercise(w.id, item.name, item.kind, {
+                              plannedSets: item.kind === 'strength' ? item.sets : 1,
+                              plannedReps: item.kind === 'strength' ? item.reps : null,
+                              plannedDurationMin:
+                                item.kind === 'strength' ? null : (item.durationMin ?? 10),
+                              equipment: item.equipment,
+                              groupId: item.groupId ?? null,
+                              groupOrder: item.groupOrder ?? null,
+                            });
+                          }
+                          shell.openOverlay({ screen: 'session', workoutId: w.id });
+                        }}
+                      >
+                        <Icon name="play" />
+                        {t.startDay(active.dayNames?.[day] || t.progDay(day))}
+                      </button>
                     )}
                   </div>
                 );
@@ -1157,101 +1329,241 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 <span>{t.exerciseLabel}</span>
                 <span>{t.progSets}</span>
                 <span>{t.progReps}</span>
+                <span className="pir-muscles-head">{t.musclesCol}</span>
                 <span>{t.progEquipment}</span>
                 <span />
               </div>
             )}
-            {selectedDayItems.map((item) => (
-              <div
-                key={item.id}
-                className={`program-item-row${draggingId === item.id ? ' dragging' : ''}${
-                  draggingId && draggingId !== item.id ? ' drop-target' : ''
-                }`}
-                onDragOver={(e) => {
-                  if (dragItem.current) e.preventDefault();
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const from = dragItem.current;
-                  dragItem.current = null;
-                  setDraggingId(null);
-                  if (from) moveItem(from, item.id, selectedDay);
-                }}
-              >
-                <span
-                  className="drag-handle"
-                  draggable
-                  title={t.reorder}
-                  onDragStart={(e) => {
-                    dragItem.current = item.id;
-                    setDraggingId(item.id);
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', item.id);
+            {selectedDayItems.map((item) => {
+              const gid = item.groupId ?? null;
+              const gLetters = new Map<string, number>();
+              for (const it of selectedDayItems) {
+                const g = it.groupId ?? null;
+                if (g && !gLetters.has(g)) gLetters.set(g, gLetters.size);
+              }
+              const gLabel = gid
+                ? `${String.fromCharCode(65 + (gLetters.get(gid) ?? 0))}${(item.groupOrder ?? 0) + 1}`
+                : null;
+              const picked = pickedItemIds.includes(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`program-item-row${draggingId === item.id ? ' dragging' : ''}${
+                    draggingId && draggingId !== item.id ? ' drop-target' : ''
+                  }${picked ? ' picked' : ''}${gid ? ' grouped' : ''}`}
+                  onDragOver={(e) => {
+                    if (dragItem.current) e.preventDefault();
                   }}
-                  onDragEnd={() => {
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const from = dragItem.current;
                     dragItem.current = null;
                     setDraggingId(null);
+                    if (from) moveItem(from, item.id, selectedDay);
                   }}
                 >
-                  <Icon name="dots-six" />
-                </span>
-                <input
-                  className="input"
-                  value={item.name}
-                  placeholder={t.addExercise}
-                  onChange={(e) => patchItem(item.id, { name: e.target.value })}
-                />
-                <select
-                  className="input"
-                  value={item.kind}
-                  onChange={(e) => patchItem(item.id, { kind: e.target.value as ExerciseKind })}
-                >
-                  {KINDS.map((kind) => (
-                    <option key={kind} value={kind}>
-                      {t.exerciseKindNames[kind]}
-                    </option>
-                  ))}
-                </select>
-                {item.kind === 'strength' ? (
-                  <>
+                  <span
+                    className="drag-handle"
+                    draggable
+                    title={gid ? t.ungroup : t.reorder}
+                    onClick={() => {
+                      if (gid) {
+                        ungroupItem(item.id);
+                      } else {
+                        setPickedItemIds((x) =>
+                          x.includes(item.id) ? x.filter((v) => v !== item.id) : [...x, item.id],
+                        );
+                      }
+                    }}
+                    onDragStart={(e) => {
+                      dragItem.current = item.id;
+                      setDraggingId(item.id);
+                      e.dataTransfer.effectAllowed = 'move';
+                      e.dataTransfer.setData('text/plain', item.id);
+                    }}
+                    onDragEnd={() => {
+                      dragItem.current = null;
+                      setDraggingId(null);
+                    }}
+                  >
+                    {gLabel ? (
+                      <span className="pir-gindex">
+                        <span className="pir-gbar" />
+                        {gLabel}
+                      </span>
+                    ) : (
+                      <Icon name="dots-six" />
+                    )}
+                  </span>
+                  <span className="pir-name">
                     <input
                       className="input"
-                      type="number"
-                      min={1}
-                      value={item.sets}
-                      aria-label={t.progSets}
-                      onChange={(e) => patchItem(item.id, { sets: Number(e.target.value) || 1 })}
+                      value={item.name}
+                      placeholder={t.addExercise}
+                      onChange={(e) => patchItem(item.id, { name: e.target.value })}
                     />
-                    <input
-                      className="input"
-                      type="number"
-                      min={1}
-                      value={item.reps}
-                      aria-label={t.progReps}
-                      onChange={(e) => patchItem(item.id, { reps: Number(e.target.value) || 1 })}
-                    />
-                  </>
-                ) : (
-                  <input
+                    {item.kind === 'strength' && (
+                      <button
+                        className={`pdr-drop pir-droplast${item.dropLast ? '' : ' off'}`}
+                        title={t.dropOnLast}
+                        onClick={() => patchItem(item.id, { dropLast: !item.dropLast })}
+                      >
+                        <Icon name="caret-line-down" />
+                        {t.dropOnLast}
+                      </button>
+                    )}
+                  </span>
+                  <select
                     className="input"
-                    type="number"
-                    min={1}
-                    value={item.durationMin ?? 10}
-                    aria-label={t.progDuration}
-                    onChange={(e) =>
-                      patchItem(item.id, { durationMin: Number(e.target.value) || 1 })
-                    }
+                    value={item.kind}
+                    onChange={(e) => patchItem(item.id, { kind: e.target.value as ExerciseKind })}
+                  >
+                    {KINDS.map((kind) => (
+                      <option key={kind} value={kind}>
+                        {t.exerciseKindNames[kind]}
+                      </option>
+                    ))}
+                  </select>
+                  {item.kind === 'strength' ? (
+                    <>
+                      <input
+                        className="input"
+                        type="number"
+                        min={1}
+                        value={item.sets}
+                        aria-label={t.progSets}
+                        onChange={(e) => patchItem(item.id, { sets: Number(e.target.value) || 1 })}
+                      />
+                      <input
+                        className="input"
+                        type="number"
+                        min={1}
+                        value={item.reps}
+                        aria-label={t.progReps}
+                        onChange={(e) => patchItem(item.id, { reps: Number(e.target.value) || 1 })}
+                      />
+                    </>
+                  ) : (
+                    <input
+                      className="input"
+                      type="number"
+                      min={1}
+                      value={item.durationMin ?? 10}
+                      aria-label={t.progDuration}
+                      onChange={(e) =>
+                        patchItem(item.id, { durationMin: Number(e.target.value) || 1 })
+                      }
+                    />
+                  )}
+                  <button
+                    className="trash"
+                    aria-label={t.delete}
+                    onClick={() => removeItem(item.id)}
+                  >
+                    <Icon name="trash" />
+                  </button>
+                  <EquipmentSelector
+                    value={item.equipment}
+                    onChange={(equipment) => patchItem(item.id, { equipment })}
                   />
-                )}
-                <button className="trash" aria-label={t.delete} onClick={() => removeItem(item.id)}>
-                  <Icon name="trash" />
+                  <span className="pir-muscles">
+                    {(() => {
+                      // EQ-5: words, primary bright and secondaries in grey.
+                      const m = resolveMuscles({ name: item.name, kind: item.kind });
+                      if (!m.primary) return null;
+                      return (
+                        <>
+                          <span className="pm">{t.muscleGroups[m.primary]}</span>
+                          {m.secondary.slice(0, 2).map((x) => (
+                            <span key={x} className="sm">
+                              {' · '}
+                              {t.muscleGroups[x]}
+                            </span>
+                          ))}
+                        </>
+                      );
+                    })()}
+                  </span>
+                </div>
+              );
+            })}
+            <aside className="program-day-rail">
+              {(() => {
+                const dayMuscles: MuscleGroup[] = [];
+                for (const item of selectedDayItems) {
+                  const m = resolveMuscles({ name: item.name, kind: item.kind });
+                  if (m.primary && !dayMuscles.includes(m.primary)) dayMuscles.push(m.primary);
+                  for (const sec of m.secondary) {
+                    if (!dayMuscles.includes(sec)) dayMuscles.push(sec);
+                  }
+                }
+                const equipment = [
+                  ...new Set(selectedDayItems.flatMap((i) => i.equipment ?? [])),
+                ] as string[];
+                const gymCounts = new Map<string, number>();
+                for (const w of store.workouts) {
+                  if (w.gymId) gymCounts.set(w.gymId, (gymCounts.get(w.gymId) ?? 0) + 1);
+                }
+                const homeGym =
+                  role === 'member'
+                    ? ([...gymCounts.entries()]
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([id]) => store.gyms.find((g) => g.id === id))[0] ?? null)
+                    : null;
+                const missing =
+                  homeGym?.inventory && homeGym.inventory.length > 0
+                    ? equipment.filter((id) => !homeGym.inventory!.includes(id))
+                    : [];
+                const equipLabel = (id: string) => {
+                  const names = t.equipmentNames as Record<string, string>;
+                  return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+                };
+                return (
+                  <>
+                    <h6>{t.thisDayCovers}</h6>
+                    <div className="rail-chips">
+                      {dayMuscles.map((m) => (
+                        <span key={m} className="fchip" style={{ cursor: 'default' }}>
+                          <MuscleIcon muscle={m} variant="chip" tone="primary" />
+                          {t.muscleGroups[m]}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="rail-note">{t.dayCoversNote}</p>
+                    <h6>{t.equipmentNeeded}</h6>
+                    {equipment
+                      .filter((id) => !missing.includes(id))
+                      .map((id) => (
+                        <div key={id} className="rail-equip-cell">
+                          {equipLabel(id)}
+                        </div>
+                      ))}
+                    {missing.map((id) => (
+                      <div key={id} className="rail-equip-cell ruby">
+                        {equipLabel(id)}
+                      </div>
+                    ))}
+                    <div className="sheet-note" style={{ background: 'var(--color-surface)' }}>
+                      <p>{t.equipCheckNote}</p>
+                    </div>
+                  </>
+                );
+              })()}
+            </aside>
+            {selectedDayItems.length > 1 && (
+              <div className="program-day-actions-row desktop-only">
+                <button className="btn btn-secondary btn-sm" onClick={() => addItem(selectedDay)}>
+                  {t.addExercise}
                 </button>
-                <EquipmentSelector
-                  value={item.equipment}
-                  onChange={(equipment) => patchItem(item.id, { equipment })}
-                />
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={pickedItemIds.length < 2}
+                  onClick={() => groupPicked()}
+                >
+                  {t.groupSelectedSuperset}
+                </button>
               </div>
-            ))}
+            )}
           </div>
 
           <div className="program-footer">
@@ -1290,7 +1602,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
             <button
               className="danger-outline"
               disabled={!selectedId}
-              onClick={() => selectedId && removeProgram(selectedId)}
+              onClick={() => selectedId && setConfirmDeleteProgram(true)}
             >
               <Icon name="trash" />
               {t.delete}
@@ -1321,6 +1633,17 @@ export function ProgramsView({ shell }: { shell: Shell }) {
           weeks={draft.weeks}
           onClose={() => setAssignOpen(false)}
           onConfirm={assign}
+        />
+      )}
+      {confirmDeleteProgram && selectedId && (
+        <ConfirmDialog
+          danger
+          title={t.deleteProgramTitle(draft.name)}
+          body={t.deleteProgramBody}
+          confirmLabel={t.delete}
+          cancelLabel={t.keep}
+          onCancel={() => setConfirmDeleteProgram(false)}
+          onConfirm={() => void removeProgram(selectedId)}
         />
       )}
     </div>

@@ -51,7 +51,9 @@ function RowHours({ name, lat, lng }: { name: string; lat: number; lng: number }
         const ranges = parsed.week[idx];
         const inRange = (r: [number, number]) =>
           r[1] > r[0] ? nowMin >= r[0] && nowMin < r[1] : nowMin >= r[0] || nowMin < r[1];
-        const open = meta.openNow ?? ranges.some(inRange);
+        // Compute from the hours in local time — the provider's openNow is a
+        // cached snapshot (up to 7 days old) and goes stale, e.g. at 02:30.
+        const open = ranges.some(inRange);
         const label = ranges.length
           ? ranges.map((r) => `${hhmm(r[0])}–${hhmm(r[1])}`).join(', ')
           : t.gymDayClosed;

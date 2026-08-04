@@ -512,7 +512,6 @@ export function ProfileView({
                 <Icon name="translate" />
                 <span>{t.language}</span>
                 <LanguageSelector />
-                <Icon name="arrow-right" className="profile-setting-caret" />
               </div>
               <section className="profile-mobile-settings">
                 <div className="profile-setting-row static">

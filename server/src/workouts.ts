@@ -48,13 +48,23 @@ interface ExerciseJson {
   plannedReps: number | null;
   plannedDurationMin: number | null;
   equipment: string[];
+  groupId: string | null;
+  groupOrder: number | null;
+  primaryMuscle: string | null;
+  secondaryMuscles: string[];
   sets: SetJson[];
+}
+interface DropJson {
+  reps: number;
+  weight: number | null;
 }
 interface SetJson {
   id: string;
   reps: number;
   weight: number | null;
   isWarmup: boolean;
+  type: string;
+  drops: DropJson[];
   durationMin: number | null;
   distanceKm: number | null;
   calories: number | null;
@@ -88,11 +98,17 @@ function fullState(userId: string): WorkoutJson[] {
       plannedReps: e.planned_reps ?? null,
       plannedDurationMin: e.planned_duration_min ?? null,
       equipment: parseStringArray(e.equipment),
+      groupId: e.group_id ?? null,
+      groupOrder: e.group_order ?? null,
+      primaryMuscle: e.primary_muscle ?? null,
+      secondaryMuscles: parseStringArray(e.secondary_muscles),
       sets: (setStmt.all(e.id) as SetRow[]).map((s) => ({
         id: s.id,
         reps: s.reps,
         weight: s.weight,
         isWarmup: !!s.is_warmup,
+        type: s.type ?? (s.is_warmup ? 'warmup' : 'working'),
+        drops: parseDrops(s.drops),
         durationMin: s.duration_min ?? null,
         distanceKm: s.distance_km ?? null,
         calories: s.calories ?? null,
@@ -130,6 +146,35 @@ function parseStringArray(raw: string | null): string[] {
   } catch {
     return [];
   }
+}
+
+const SET_TYPES = new Set(['working', 'warmup', 'drop', 'reverse-drop']);
+
+function parseDrops(raw: string | null): DropJson[] {
+  if (!raw) return [];
+  try {
+    const value = JSON.parse(raw) as unknown;
+    if (!Array.isArray(value)) return [];
+    return value
+      .filter((d): d is { reps: unknown; weight: unknown } => !!d && typeof d === 'object')
+      .map((d) => ({
+        reps: Number(d.reps) || 0,
+        weight: d.weight === null ? null : Number(d.weight) || 0,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function sanitizeDrops(value: unknown): DropJson[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((d): d is { reps: unknown; weight: unknown } => !!d && typeof d === 'object')
+    .slice(0, 20)
+    .map((d) => ({
+      reps: Math.max(0, Math.round(Number(d.reps) || 0)),
+      weight: d.weight === null || d.weight === undefined ? null : Number(d.weight) || 0,
+    }));
 }
 
 function optionalPositiveNumber(value: unknown): number | null {
@@ -210,6 +255,10 @@ workoutsRouter.put('/workouts/:wid/exercises/:id', (req: AuthedRequest, res: Res
     plannedReps = null,
     plannedDurationMin = null,
     equipment = [],
+    groupId = null,
+    groupOrder = null,
+    primaryMuscle = null,
+    secondaryMuscles = [],
   } = req.body ?? {};
   if (typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'name required' });
@@ -217,14 +266,23 @@ workoutsRouter.put('/workouts/:wid/exercises/:id', (req: AuthedRequest, res: Res
   if (typeof kind !== 'string' || !EXERCISE_KINDS.has(kind)) {
     return res.status(400).json({ error: 'bad exercise kind' });
   }
+  if (groupId !== null && !isId(groupId)) {
+    return res.status(400).json({ error: 'groupId must be a string or null' });
+  }
   const now = Date.now();
   const equipmentJson = JSON.stringify(
     Array.isArray(equipment) ? equipment.filter((x): x is string => typeof x === 'string') : [],
   );
+  const secondaryJson = JSON.stringify(
+    Array.isArray(secondaryMuscles)
+      ? secondaryMuscles.filter((x): x is string => typeof x === 'string')
+      : [],
+  );
   db.prepare(
     `INSERT INTO exercises
-       (id, workout_id, name, kind, planned_sets, planned_reps, planned_duration_min, equipment, position, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (id, workout_id, name, kind, planned_sets, planned_reps, planned_duration_min, equipment,
+        group_id, group_order, primary_muscle, secondary_muscles, position, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name,
          kind = excluded.kind,
@@ -232,6 +290,10 @@ workoutsRouter.put('/workouts/:wid/exercises/:id', (req: AuthedRequest, res: Res
          planned_reps = excluded.planned_reps,
          planned_duration_min = excluded.planned_duration_min,
          equipment = excluded.equipment,
+         group_id = excluded.group_id,
+         group_order = excluded.group_order,
+         primary_muscle = excluded.primary_muscle,
+         secondary_muscles = excluded.secondary_muscles,
          position = excluded.position,
          updated_at = excluded.updated_at`,
   ).run(
@@ -243,6 +305,10 @@ workoutsRouter.put('/workouts/:wid/exercises/:id', (req: AuthedRequest, res: Res
     optionalPositiveNumber(plannedReps),
     optionalPositiveNumber(plannedDurationMin),
     equipmentJson,
+    groupId,
+    groupOrder === null ? null : numOr(groupOrder, 0),
+    typeof primaryMuscle === 'string' && primaryMuscle ? primaryMuscle : null,
+    secondaryJson,
     numOr(position, 0),
     now,
   );
@@ -275,6 +341,8 @@ workoutsRouter.put('/exercises/:eid/sets/:id', (req: AuthedRequest, res: Respons
     reps,
     weight = null,
     isWarmup = false,
+    type = null,
+    drops = [],
     durationMin = null,
     distanceKm = null,
     calories = null,
@@ -297,15 +365,22 @@ workoutsRouter.put('/exercises/:eid/sets/:id', (req: AuthedRequest, res: Respons
       return res.status(400).json({ error: `${key} must be number or null` });
     }
   }
+  const setType =
+    typeof type === 'string' && SET_TYPES.has(type) ? type : isWarmup ? 'warmup' : 'working';
+  const dropsJson = JSON.stringify(
+    setType === 'drop' || setType === 'reverse-drop' ? sanitizeDrops(drops) : [],
+  );
   const now = Date.now();
   db.prepare(
     `INSERT INTO sets
-       (id, exercise_id, reps, weight, is_warmup, duration_min, distance_km, calories, rpe, position, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (id, exercise_id, reps, weight, is_warmup, type, drops, duration_min, distance_km, calories, rpe, position, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          reps = excluded.reps,
          weight = excluded.weight,
          is_warmup = excluded.is_warmup,
+         type = excluded.type,
+         drops = excluded.drops,
          duration_min = excluded.duration_min,
          distance_km = excluded.distance_km,
          calories = excluded.calories,
@@ -317,7 +392,9 @@ workoutsRouter.put('/exercises/:eid/sets/:id', (req: AuthedRequest, res: Respons
     eid,
     reps,
     weight,
-    isWarmup ? 1 : 0,
+    setType === 'warmup' ? 1 : 0,
+    setType,
+    dropsJson,
     durationMin,
     distanceKm,
     calories === null ? null : Math.round(calories),

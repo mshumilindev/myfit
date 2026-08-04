@@ -459,12 +459,22 @@ profileRouter.delete('/me/avatar', (req: AuthedRequest, res: Response) => {
 
 /** AC-AVATAR-09: owner, any admin, or the assigned trainer only. */
 profileRouter.get('/avatars/:userId', (req: AuthedRequest, res: Response) => {
-  const target = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.userId) as
+  const viewer = me(req);
+  const targetId = req.params.userId === 'me' ? viewer.id : req.params.userId;
+  const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId) as
     UserRow | undefined;
   if (!target || !target.avatar_ext) return res.status(404).end();
-  const viewer = me(req);
   const allowed =
     viewer.id === target.id || viewer.role === 'admin' || target.trainer_id === viewer.id;
   if (!allowed) return res.status(403).end();
-  res.sendFile(path.join(AVATAR_DIR, `${target.id}.${target.avatar_ext}`));
+  const file = path.join(AVATAR_DIR, `${target.id}.${target.avatar_ext}`);
+  // Self-heal: if the DB says there's an avatar but the file is gone (moved
+  // data dir, manual delete), clear the flag so the client stops asking and
+  // shows initials cleanly instead of a broken image.
+  if (!fs.existsSync(file)) {
+    db.prepare('UPDATE users SET avatar_ext = NULL WHERE id = ?').run(target.id);
+    return res.status(404).end();
+  }
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(file);
 });

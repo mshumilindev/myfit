@@ -1,8 +1,24 @@
+/**
+ * Set type (design DS-1): working · warm-up · dropset · reverse dropset.
+ * A drop/reverse-drop is still ONE set; its parts live in `drops`.
+ */
+export type SetType = 'working' | 'warmup' | 'drop' | 'reverse-drop';
+
+/** One drop inside a drop/reverse-drop set (after the start weight). */
+export interface DropEntry {
+  reps: number;
+  weight: number | null;
+}
+
 export interface SetEntry {
   id: string;
   reps: number;
   weight: number | null;
   isWarmup: boolean;
+  /** Absent = derived from isWarmup ('warmup') or 'working'. */
+  type?: SetType;
+  /** Drop parts for drop/reverse-drop sets, in performed order. */
+  drops?: DropEntry[];
   durationMin?: number | null;
   distanceKm?: number | null;
   calories?: number | null;
@@ -21,6 +37,13 @@ export interface Exercise {
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
   equipment?: string[];
+  /** Superset group (design SS-1): null/absent = ungrouped. */
+  groupId?: string | null;
+  /** Order inside the superset group (0 = A1). */
+  groupOrder?: number | null;
+  /** Muscle groups (design MG-1): one primary, any number of secondaries. */
+  primaryMuscle?: string | null;
+  secondaryMuscles?: string[];
   sets: SetEntry[];
 }
 
@@ -31,6 +54,8 @@ export interface Workout {
   autoFinished: boolean;
   /** Saved gym this session belongs to (null = not attached). */
   gymId?: string | null;
+  /** Program day name this session came from (e.g. "Push day"); null if none. */
+  dayName?: string | null;
   exercises: Exercise[];
 }
 
@@ -42,6 +67,9 @@ export interface Gym {
   radiusM: number;
   /** User-marked favourite (fallback suggestion when GPS is unavailable). */
   favorite?: boolean;
+  /** Equipment inventory (design EQ-3): what you ticked on this gym.
+   *  Absent/empty = never audited → never warn. */
+  inventory?: string[];
 }
 
 /** "Був у залі 1год+, але тренування не залоговане" */

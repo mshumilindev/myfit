@@ -16,6 +16,7 @@ function topLevelKeys(text) {
   const body = text.slice(bodyStart + 1, bodyEnd);
   const keys = [];
   let depth = 0;
+  let depthAtLineStart = 0;
   let quote = null;
   let escape = false;
   let lineStart = 0;
@@ -35,10 +36,13 @@ function topLevelKeys(text) {
     if (ch === '}' || ch === ']' || ch === ')') depth -= 1;
     if (ch === '\n') {
       const line = body.slice(lineStart, i);
-      if (depth === 0) {
+      // A key belongs to the depth its line STARTS on, so a multi-line value
+      // (array/object) counts the same as its single-line formatting.
+      if (depthAtLineStart === 0) {
         const match = /^\s*([a-zA-Z][a-zA-Z0-9_]*)\s*:/.exec(line);
         if (match) keys.push(match[1]);
       }
+      depthAtLineStart = depth;
       lineStart = i + 1;
     }
   }

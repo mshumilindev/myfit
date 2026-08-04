@@ -111,6 +111,8 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   // The signed-in admin is pinned on top as a distinct card (user request);
   // everyone else lives in the AD-01 table below.
   const myName = getUsername();
+  // The signed-in admin is pinned to their own card above the roster, always
+  // separate from the table of everyone else.
   const me = people.find((p) => p.name === myName) ?? null;
   const others = filtered.filter((p) => p.id !== me?.id);
 
@@ -224,33 +226,33 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         </div>
       )}
 
-      {load === 'ready' && people.length > 1 && me && (
-        <div
-          className="admin-me-card"
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpenProfile(me.id)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onOpenProfile(me.id);
-            }
-          }}
-        >
-          <Avatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
+      {load === 'ready' && me && (
+        <button className="admin-me-card" onClick={() => onOpenProfile(me.id)} aria-label={me.name}>
           <div className="who">
-            <div className="n">
-              {me.name} <span className="tag tag-accent">{t.adminYou}</span>
+            <Avatar userId={me.id} name={me.name} hasPhoto={me.avatar} size={40} />
+            <div className="who-text">
+              <div className="n">
+                <span className="nm">{me.name}</span>
+              </div>
+              <div className="e">{me.email}</div>
             </div>
-            <div className="e">{me.email}</div>
           </div>
-          <span className="tag tag-accent">{t.roleAdmin}</span>
-          <div className="meta vol">{me.volume30 > 0 ? fmtTonnes(me.volume30) : '—'}</div>
-          <div className={`meta status ${statusOf(me).cls}`}>
-            {me.live && <span className="live-dot" />}
+          <span className={`col-role tag ${me.role === 'member' ? 'tag-neutral' : 'tag-accent'}`}>
+            {me.role === 'trainer'
+              ? t.roleTrainer
+              : me.role === 'admin'
+                ? t.roleAdmin
+                : t.roleMember}
+          </span>
+          <span className="col-trainer" />
+          <span className="col-last" />
+          <span className="col-vol">{me.volume30 > 0 ? fmtTonnes(me.volume30) : '—'}</span>
+          <span className={`col-status ${statusOf(me).cls}`}>
+            <span className={`st-dot ${statusOf(me).cls}`} />
             {statusOf(me).text}
-          </div>
-        </div>
+          </span>
+          <span className="col-dots" />
+        </button>
       )}
 
       {load === 'ready' && others.length > 0 && (
@@ -311,7 +313,9 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   </div>
                 </div>
                 <span>
-                  <span className={`tag ${p.role === 'trainer' ? 'tag-accent' : 'tag-neutral'}`}>
+                  <span
+                    className={`tag ${p.role === 'trainer' || p.role === 'admin' ? 'tag-accent' : 'tag-neutral'}`}
+                  >
                     {p.role === 'trainer'
                       ? t.roleTrainer
                       : p.role === 'admin'

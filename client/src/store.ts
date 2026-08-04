@@ -1,17 +1,26 @@
 import { useSyncExternalStore } from 'react';
 import {
   AUTO_FINISH_MS,
+  type DropEntry,
   type Exercise,
   type ExerciseKind,
   type Gym,
   type QueuedMutation,
   type Reminder,
   type SetEntry,
+  type SetType,
   type SyncStatus,
   type SyncError,
   type Workout,
 } from './types';
-import { HttpError, getToken, request } from './api';
+import {
+  muscleInfoByName,
+  registerCustomExercise,
+  registerCustomExercises,
+  type CustomExercise,
+  type MuscleGroup,
+} from './data/exercises';
+import { HttpError, getRole, getToken, request } from './api';
 
 const STATE_KEY = 'gym.state';
 const QUEUE_KEY = 'gym.queue';
@@ -90,11 +99,257 @@ export function isTimedExercise(ex: Exercise): boolean {
   return exerciseKind(ex) !== 'strength';
 }
 
+// --- Set types & drops (design DS-1…DS-4, EQ-4) ----------------------------
+
+/** Effective type of a set; falls back to the legacy isWarmup flag. */
+export function setTypeOf(s: SetEntry): SetType {
+  return s.type ?? (s.isWarmup ? 'warmup' : 'working');
+}
+
+export function setDrops(s: SetEntry): DropEntry[] {
+  const t = setTypeOf(s);
+  return t === 'drop' || t === 'reverse-drop' ? (s.drops ?? []) : [];
+}
+
+/** Total reps of a set: the start plus every drop (EQ-4 counting rules). */
+export function setRepsTotal(s: SetEntry): number {
+  return s.reps + setDrops(s).reduce((n, d) => n + d.reps, 0);
+}
+
+/** Volume of one set in kg: start + drops. Warm-ups contribute nothing. */
+export function setVolumeKg(s: SetEntry): number {
+  if (setTypeOf(s) === 'warmup') return 0;
+  return (s.weight ?? 0) * s.reps + setDrops(s).reduce((v, d) => v + (d.weight ?? 0) * d.reps, 0);
+}
+
+/**
+ * Weight is often entered per side, so total volume doubles the entered load:
+ *  - Dumbbells: two of them by default (a 20 kg dumbbell in each hand moves
+ *    40 kg). Single-dumbbell moves held with both hands (goblet, pullover) and
+ *    explicit one-arm variants stay ×1.
+ *  - Cables: a single stack pulled with both hands (lat/straight-arm pulldown,
+ *    pushdown, seated row) is ×1 — the stack weight IS the total. Only bilateral
+ *    two-cable moves (pec fly, crossover) load two stacks, so those double.
+ * Records and 1RM estimates keep the entered per-side weight — like with like.
+ */
+const ONE_ARM_NAME = /\b(one|single)[- ](arm|hand|leg)\b|unilateral|одн(ією|у|ой)\s*рук/i;
+/** Dumbbell moves done with a single dumbbell held in both hands → ×1. */
+const SINGLE_DUMBBELL = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
+/** Cable moves that load two separate stacks at once → ×2. */
+const BILATERAL_CABLE = /\bflye?\b|cross[- ]?over|pec\b/i;
+
+export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number {
+  const eq = equipmentFor(ex);
+  const name = ex.name;
+  if (ONE_ARM_NAME.test(name)) return 1;
+  if (eq.includes('dumbbell')) return SINGLE_DUMBBELL.test(name) ? 1 : 2;
+  if (eq.includes('cable')) return BILATERAL_CABLE.test(name) ? 2 : 1;
+  return 1;
+}
+
+/** Volume of one exercise in kg (drops included, warm-ups excluded, per-hand ×2). */
+export function exerciseVolumeKg(ex: Exercise): number {
+  return ex.sets.reduce((v, s) => v + setVolumeKg(s), 0) * perHandFactor(ex);
+}
+
+// --- Supersets (design SS-1…SS-3) ------------------------------------------
+
+export interface SupersetGroup {
+  groupId: string;
+  /** A, B, C… in first-appearance order. */
+  letter: string;
+  exercises: Exercise[];
+}
+
+/** One entry per card in position order: single exercises or whole groups. */
+export type SessionBlock =
+  { kind: 'single'; exercise: Exercise } | { kind: 'group'; group: SupersetGroup };
+
+export function sessionBlocks(w: Workout): SessionBlock[] {
+  const sorted = [...w.exercises].sort((a, b) => a.position - b.position);
+  const seen = new Set<string>();
+  const blocks: SessionBlock[] = [];
+  let letterIdx = 0;
+  for (const ex of sorted) {
+    const gid = ex.groupId ?? null;
+    if (!gid) {
+      blocks.push({ kind: 'single', exercise: ex });
+      continue;
+    }
+    if (seen.has(gid)) continue;
+    seen.add(gid);
+    const members = sorted
+      .filter((e) => (e.groupId ?? null) === gid)
+      .sort((a, b) => (a.groupOrder ?? 0) - (b.groupOrder ?? 0));
+    if (members.length < 2) {
+      blocks.push({ kind: 'single', exercise: ex });
+      continue;
+    }
+    blocks.push({
+      kind: 'group',
+      group: { groupId: gid, letter: String.fromCharCode(65 + letterIdx++), exercises: members },
+    });
+  }
+  return blocks;
+}
+
+/** Next free superset letter for a workout ('A' when none exist yet). */
+export function nextSupersetLetter(w: Workout): string {
+  const used = sessionBlocks(w).filter((b) => b.kind === 'group').length;
+  return String.fromCharCode(65 + used);
+}
+
+/** Rounds in a superset = the longest member (planned or logged, SS-2 note). */
+export function groupRounds(g: SupersetGroup): number {
+  return Math.max(
+    1,
+    ...g.exercises.map((e) => Math.max(e.sets.length, Math.max(0, e.plannedSets ?? 0))),
+  );
+}
+
+/** Current round = shortest member's next set (1-based, capped at rounds). */
+export function groupCurrentRound(g: SupersetGroup): number {
+  const done = Math.min(...g.exercises.map((e) => e.sets.length));
+  return Math.min(done + 1, groupRounds(g));
+}
+
+/** Group exercises with the given ids as a superset; keeps every set (SS-2). */
+export function groupAsSuperset(workoutId: string, exerciseIds: string[]): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w || exerciseIds.length < 2) return;
+  const gid = uuid();
+  const next = w.exercises.map((e) => {
+    const order = exerciseIds.indexOf(e.id);
+    if (order < 0) return e;
+    return { ...e, groupId: gid, groupOrder: order };
+  });
+  patchWorkout(workoutId, { exercises: next });
+  for (const e of next) {
+    if (e.groupId === gid) {
+      enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${e.id}`, {
+        ...exerciseUpsertBody(e),
+      });
+    }
+  }
+  persist();
+  void sync();
+}
+
+/** Ungroup restores plain numbering and keeps every set (SS-2 note). */
+export function ungroupSuperset(workoutId: string, groupId: string): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  const next = w.exercises.map((e) =>
+    e.groupId === groupId ? { ...e, groupId: null, groupOrder: null } : e,
+  );
+  patchWorkout(workoutId, { exercises: next });
+  for (const e of next) {
+    if (w.exercises.find((x) => x.id === e.id)?.groupId === groupId) {
+      enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${e.id}`, {
+        ...exerciseUpsertBody(e),
+      });
+    }
+  }
+  persist();
+  void sync();
+}
+
+// --- Muscle groups (design MG-1…MG-5, EQ-4) --------------------------------
+
+export interface ResolvedMuscles {
+  primary: MuscleGroup | null;
+  secondary: MuscleGroup[];
+}
+
+/** Muscles for an exercise: its own fields first, then the catalog by name. */
+export function resolveMuscles(
+  ex: Pick<Exercise, 'name' | 'primaryMuscle' | 'secondaryMuscles' | 'kind'>,
+): ResolvedMuscles {
+  if (ex.primaryMuscle) {
+    return {
+      primary: ex.primaryMuscle as MuscleGroup,
+      secondary: (ex.secondaryMuscles ?? []) as MuscleGroup[],
+    };
+  }
+  if ((ex.kind ?? 'strength') !== 'strength') return { primary: null, secondary: [] };
+  const info = muscleInfoByName(ex.name);
+  if (!info || info.primary === 'cardio') return { primary: null, secondary: [] };
+  return { primary: info.primary, secondary: info.secondary };
+}
+
+/** Sets per primary muscle in one workout — drops count as one (DS-4 rail). */
+export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
+  const m = new Map<MuscleGroup, number>();
+  for (const e of w.exercises) {
+    if (!isStrengthExercise(e)) continue;
+    const { primary } = resolveMuscles(e);
+    if (!primary) continue;
+    m.set(primary, (m.get(primary) ?? 0) + e.sets.length);
+  }
+  return m;
+}
+
+/** Volume per primary muscle across workouts (MG-3: sums to the total). */
+export function muscleVolumeKg(workouts: Workout[]): Map<MuscleGroup, number> {
+  const m = new Map<MuscleGroup, number>();
+  for (const w of workouts) {
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e)) continue;
+      const { primary } = resolveMuscles(e);
+      if (!primary) continue;
+      m.set(primary, (m.get(primary) ?? 0) + exerciseVolumeKg(e));
+    }
+  }
+  return m;
+}
+
+/** Distinct equipment ids used by a workout's exercises (DS-4 rail). */
+export function workoutEquipment(w: Workout): string[] {
+  const out: string[] = [];
+  for (const e of w.exercises) {
+    for (const id of equipmentFor(e)) if (!out.includes(id)) out.push(id);
+  }
+  return out;
+}
+
+/** Equipment for an exercise: its own list first, then the catalog. */
+export function equipmentFor(ex: Pick<Exercise, 'name' | 'equipment'>): string[] {
+  if (ex.equipment && ex.equipment.length > 0) return ex.equipment;
+  const info = muscleInfoByName(ex.name);
+  return info?.equipment ? [info.equipment] : [];
+}
+
+/** Equipment an exercise name needs, learned from history + the catalog. */
+export function exerciseNeeds(name: string): string[] {
+  const needle = name.trim().toLowerCase();
+  const out: string[] = [];
+  const info = muscleInfoByName(name);
+  if (info?.equipment) out.push(info.equipment);
+  for (const w of state.workouts) {
+    for (const e of w.exercises) {
+      if (e.name.trim().toLowerCase() !== needle) continue;
+      for (const id of e.equipment ?? []) if (!out.includes(id)) out.push(id);
+    }
+  }
+  return out;
+}
+
+/** Equipment an exercise needs that a gym's inventory lacks (EQ-2/EQ-3).
+ *  A gym with no inventory set is never flagged as missing anything. */
+export function missingAtGym(gym: Gym | null | undefined, needs: string[]): string[] {
+  if (!gym?.inventory || gym.inventory.length === 0) return [];
+  return needs.filter((id) => !gym.inventory!.includes(id));
+}
+
 interface ExercisePlan {
   plannedSets?: number | null;
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
   equipment?: string[];
+  groupId?: string | null;
+  groupOrder?: number | null;
+  primaryMuscle?: string | null;
+  secondaryMuscles?: string[];
 }
 
 // --- Local mutations (optimistic, queued for the server) -------------------
@@ -120,6 +375,10 @@ function exerciseUpsertBody(e: Exercise): ExercisePlan & {
     plannedReps: e.plannedReps ?? null,
     plannedDurationMin: e.plannedDurationMin ?? null,
     equipment: e.equipment ?? [],
+    groupId: e.groupId ?? null,
+    groupOrder: e.groupOrder ?? null,
+    primaryMuscle: e.primaryMuscle ?? null,
+    secondaryMuscles: e.secondaryMuscles ?? [],
   };
 }
 
@@ -293,6 +552,7 @@ export function addExercise(
   plan: ExercisePlan = {},
 ): Exercise {
   const w = state.workouts.find((x) => x.id === workoutId);
+  const info = kind === 'strength' ? muscleInfoByName(name) : null;
   const exercise: Exercise = {
     id: uuid(),
     name,
@@ -301,7 +561,11 @@ export function addExercise(
     plannedSets: plan.plannedSets ?? null,
     plannedReps: plan.plannedReps ?? null,
     plannedDurationMin: plan.plannedDurationMin ?? null,
-    equipment: plan.equipment ?? [],
+    equipment: plan.equipment ?? (info?.equipment ? [info.equipment] : []),
+    groupId: plan.groupId ?? null,
+    groupOrder: plan.groupOrder ?? null,
+    primaryMuscle: plan.primaryMuscle ?? (info && info.primary !== 'cardio' ? info.primary : null),
+    secondaryMuscles: plan.secondaryMuscles ?? (info ? info.secondary : []),
     sets: [],
   };
   patchWorkout(workoutId, {
@@ -351,11 +615,14 @@ export function upsertSet(
   const ex = w.exercises.find((e) => e.id === exerciseId);
   if (!ex) return;
   const existing = set.id ? ex.sets.find((s) => s.id === set.id) : undefined;
+  const type: SetType = set.type ?? (set.isWarmup ? 'warmup' : 'working');
   const full: SetEntry = {
     id: set.id ?? uuid(),
     reps: set.reps,
     weight: set.weight,
-    isWarmup: set.isWarmup,
+    isWarmup: type === 'warmup',
+    type,
+    drops: type === 'drop' || type === 'reverse-drop' ? (set.drops ?? []) : [],
     durationMin: set.durationMin ?? null,
     distanceKm: set.distanceKm ?? null,
     calories: set.calories ?? null,
@@ -370,6 +637,8 @@ export function upsertSet(
     reps: full.reps,
     weight: full.weight,
     isWarmup: full.isWarmup,
+    type: full.type,
+    drops: full.drops ?? [],
     durationMin: full.durationMin ?? null,
     distanceKm: full.distanceKm ?? null,
     calories: full.calories ?? null,
@@ -378,6 +647,32 @@ export function upsertSet(
   });
   persist();
   void sync();
+}
+
+/** Append one drop to an already-logged set (DS-2 · “Add a drop”). */
+export function addDropToSet(
+  workoutId: string,
+  exerciseId: string,
+  setId: string,
+  drop: DropEntry,
+  reverse = false,
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  const ex = w?.exercises.find((e) => e.id === exerciseId);
+  const s = ex?.sets.find((x) => x.id === setId);
+  if (!w || !ex || !s) return;
+  const type: SetType =
+    setTypeOf(s) === 'drop' || setTypeOf(s) === 'reverse-drop'
+      ? setTypeOf(s)
+      : reverse
+        ? 'reverse-drop'
+        : 'drop';
+  upsertSet(workoutId, exerciseId, {
+    ...s,
+    id: s.id,
+    type,
+    drops: [...(s.drops ?? []), drop],
+  });
 }
 
 export function deleteSet(workoutId: string, exerciseId: string, setId: string): void {
@@ -408,6 +703,7 @@ export function upsertGym(gym: Omit<Gym, 'id'> & { id?: string }): Gym {
     lng: full.lng,
     radiusM: full.radiusM,
     favorite: full.favorite ?? false,
+    inventory: full.inventory ?? [],
   });
   persist();
   void sync();
@@ -636,6 +932,74 @@ export function discardBlockingChange(): void {
   void sync();
 }
 
+/** Pull the shared custom-exercise catalog (admin/trainer-authored). */
+function refreshExerciseCatalog(): void {
+  request<{ exercises: CustomExercise[] }>('GET', '/api/exercises')
+    .then((d) => {
+      if (Array.isArray(d?.exercises)) {
+        registerCustomExercises(d.exercises);
+        emit();
+      }
+    })
+    .catch(() => {});
+}
+
+/**
+ * Persist a custom exercise to the shared server catalog (admins and trainers
+ * only — members keep it purely local). Registers locally right away so the
+ * chips and the picker know the muscles immediately, before the round-trip.
+ */
+export function saveCatalogExercise(meta: {
+  name: string;
+  kind?: string;
+  primaryMuscle: MuscleGroup | null;
+  secondaryMuscles: MuscleGroup[];
+  equipment: string[];
+}): void {
+  const role = getRole();
+  if (role !== 'admin' && role !== 'trainer') return;
+  registerCustomExercise({ id: `pending-${meta.name.toLowerCase()}`, ...meta });
+  emit();
+  request<{ exercise: CustomExercise }>('PUT', '/api/exercises', meta)
+    .then((d) => {
+      if (d?.exercise) {
+        registerCustomExercise(d.exercise);
+        emit();
+      }
+    })
+    .catch(() => {});
+}
+
+/** Update an exercise's muscles/equipment in place (and sync it). */
+export function updateExerciseMeta(
+  workoutId: string,
+  exerciseId: string,
+  meta: {
+    primaryMuscle: MuscleGroup | null;
+    secondaryMuscles: MuscleGroup[];
+    equipment: string[];
+  },
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  const ex = w.exercises.find((e) => e.id === exerciseId);
+  if (!ex) return;
+  const next = {
+    ...ex,
+    primaryMuscle: meta.primaryMuscle,
+    secondaryMuscles: meta.secondaryMuscles,
+    equipment: meta.equipment,
+  };
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => (e.id === exerciseId ? next : e)),
+  });
+  enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exerciseId}`, {
+    ...exerciseUpsertBody(next),
+  });
+  persist();
+  void sync();
+}
+
 export function startSyncLoop(): () => void {
   const tick = () => {
     applyAutoFinish();
@@ -646,6 +1010,7 @@ export function startSyncLoop(): () => void {
   window.addEventListener('online', tick);
   window.addEventListener('focus', tick);
   tick();
+  refreshExerciseCatalog();
   return () => {
     clearInterval(interval);
     window.removeEventListener('online', tick);
@@ -660,11 +1025,16 @@ export interface PrevLift {
   weight: number | null;
 }
 
+/** Heaviest weight touched in a set, drops included. */
+export function setTopWeight(s: SetEntry): number {
+  return Math.max(s.weight ?? 0, ...setDrops(s).map((d) => d.weight ?? 0));
+}
+
 /** Working top set of an exercise: heaviest weight, then most reps. */
 export function topSet(sets: SetEntry[]): SetEntry | undefined {
   return [...sets]
-    .filter((s) => !s.isWarmup)
-    .sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0) || b.reps - a.reps)[0];
+    .filter((s) => setTypeOf(s) !== 'warmup')
+    .sort((a, b) => setTopWeight(b) - setTopWeight(a) || b.reps - a.reps)[0];
 }
 
 /** Last finished session that contains this exercise name (case-insensitive). */
@@ -701,7 +1071,7 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
       if (!isStrengthExercise(e)) continue;
       if (e.name.trim().toLowerCase() !== needle) continue;
       for (const s of e.sets) {
-        if (!s.isWarmup && (s.weight ?? 0) > max) max = s.weight ?? 0;
+        if (setTypeOf(s) !== 'warmup' && setTopWeight(s) > max) max = setTopWeight(s);
       }
     }
   }
@@ -743,11 +1113,7 @@ export function workoutSets(w: Workout): number {
 }
 
 export function workoutVolumeKg(w: Workout): number {
-  return w.exercises.reduce(
-    (v, e) =>
-      v + (isStrengthExercise(e) ? e.sets.reduce((s, x) => s + (x.weight ?? 0) * x.reps, 0) : 0),
-    0,
-  );
+  return w.exercises.reduce((v, e) => v + (isStrengthExercise(e) ? exerciseVolumeKg(e) : 0), 0);
 }
 
 export function workoutCardioMinutes(w: Workout): number {
@@ -781,6 +1147,8 @@ export function restoreSet(workoutId: string, exerciseId: string, set: SetEntry)
     reps: set.reps,
     weight: set.weight,
     isWarmup: set.isWarmup,
+    type: setTypeOf(set),
+    drops: set.drops ?? [],
     durationMin: set.durationMin ?? null,
     distanceKm: set.distanceKm ?? null,
     calories: set.calories ?? null,
@@ -805,6 +1173,8 @@ export function restoreExercise(workoutId: string, exercise: Exercise): void {
       reps: s.reps,
       weight: s.weight,
       isWarmup: s.isWarmup,
+      type: setTypeOf(s),
+      drops: s.drops ?? [],
       durationMin: s.durationMin ?? null,
       distanceKm: s.distanceKm ?? null,
       calories: s.calories ?? null,
@@ -843,6 +1213,8 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
     plannedReps: ex.plannedReps ?? null,
     plannedDurationMin: ex.plannedDurationMin ?? null,
     equipment: ex.equipment ?? [],
+    primaryMuscle: ex.primaryMuscle ?? null,
+    secondaryMuscles: ex.secondaryMuscles ?? [],
     sets: ex.sets.map((s, i) => ({ ...s, id: uuid(), position: i })),
   };
   restoreExercise(workoutId, copy);

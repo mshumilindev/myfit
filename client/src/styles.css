@@ -81,6 +81,7 @@
 
   --tap-min: 44px;
   --gutter-phone: 18px;
+  --gutter: 18px;
 
   --font: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
   --content-width: 640px;
@@ -444,6 +445,45 @@ i > svg {
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
+/* Page-load skeleton (replaces the spinner). Mirrors a typical screen: a
+   title, a small stat grid, a wide block and a few list rows. */
+.screen-skel {
+  gap: 20px;
+}
+.screen-skel .skel-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}
+.screen-skel .skel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 719px) {
+  .screen-skel .skel-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.screen-skel .skel-stat {
+  height: 74px;
+  border-radius: var(--radius-md);
+}
+.screen-skel .skel-block {
+  height: 130px;
+  border-radius: var(--radius-md);
+}
+.screen-skel .skel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.screen-skel .skel-row {
+  height: 42px;
+  border-radius: var(--radius-sm);
+}
+
 .sp {
   display: inline-block;
   border: 2px solid var(--color-neutral-800);
@@ -668,22 +708,23 @@ i > svg {
 }
 
 .sheet {
+  /* Phone: a bottom drawer with rounded shoulders and a grabber (S-18,
+     SS-2/DS-1/DS-3) — content-height, never a full screen. */
   position: fixed;
   left: 0;
   right: 0;
-  top: 0;
+  top: auto;
   bottom: 0;
   z-index: 51;
   background: var(--color-surface);
-  border-radius: 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   box-shadow: var(--shadow-lg);
-  padding: calc(12px + env(safe-area-inset-top, 0px)) 18px
-    calc(24px + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-4) var(--gutter) calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  height: 100dvh;
-  max-height: none;
+  height: auto;
+  max-height: calc(100dvh - 46px);
   overflow-y: auto;
 }
 
@@ -693,12 +734,25 @@ i > svg {
 }
 
 .sheet-chrome {
-  min-height: 34px;
+  min-height: 4px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   flex: none;
-  position: relative;
+}
+
+.sheet-chrome .grabber {
+  display: block;
+  width: 34px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-neutral-700);
+}
+
+@media (max-width: 719px) {
+  .sheet-close {
+    display: none;
+  }
 }
 
 .grabber {
@@ -1345,6 +1399,20 @@ i > svg {
   box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.08);
 }
 
+/* On the phone the admin filter tabs span the full width, sharing it evenly. */
+@media (max-width: 719px) {
+  .admin-toolbar .seg {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  .admin-toolbar .seg button {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 4px;
+    text-align: center;
+  }
+}
+
 /* --- Session -------------------------------------------------------------- */
 
 .session-top {
@@ -1643,8 +1711,8 @@ i > svg {
 
 .set-row.record {
   background: var(--color-ok-tint);
-  border-radius: 6px;
-  box-shadow: none;
+  border-radius: 0;
+  box-shadow: inset 3px 0 0 var(--color-ok);
 }
 
 .set-row.record .idx {
@@ -2971,6 +3039,34 @@ i > svg {
   color: var(--color-neutral-600);
 }
 
+.sheet-head.with-back {
+  align-items: center;
+}
+
+.sheet-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-left: -6px;
+  background: none;
+  border: none;
+  color: var(--color-neutral-300);
+  font-size: 18px;
+  cursor: pointer;
+  flex: none;
+}
+
+/* New-exercise editor: labels above chip rows, comfortable rhythm. */
+.new-exercise-sheet .field-label {
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.new-exercise-sheet .field-label:first-of-type {
+  margin-top: var(--space-2);
+}
+
 .backfill-head {
   align-items: center;
 }
@@ -3949,37 +4045,28 @@ i > svg {
   flex: none;
 }
 
-.account-chip .name {
-  max-width: 54px;
-  font-size: 9px;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-neutral-600);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Rail account: just the avatar, with a small sync dot in the corner. No
+   username label, no hover background or border. */
+.account-avatar {
+  position: relative;
+  display: inline-flex;
 }
 
 .account-chip .dot {
-  display: none;
-  width: 7px;
-  height: 7px;
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  border: 2px solid var(--color-bg);
   flex: none;
 }
 
 .account-chip:focus-visible {
-  outline: none;
-}
-
-.account-chip:hover .avatar,
-.account-chip:focus-visible .avatar {
-  box-shadow: 0 0 0 2px var(--color-accent);
-}
-
-.account-chip:hover .name {
-  color: var(--color-neutral-400);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 50%;
 }
 
 /* --- Desktop layout (≥720px) ---------------------------------------------- */
@@ -5405,6 +5492,115 @@ i > svg {
   color: var(--color-neutral-500);
   margin-top: 3px;
 }
+/* The signed-in admin, pinned above the roster in their own card. On the phone
+   it is a simple row; on desktop it aligns to the roster table's columns so the
+   You card reads as the first, highlighted row. */
+.admin-me-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 13px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  cursor: pointer;
+}
+
+/* The role tag hugs its label instead of stretching across the grid cell. */
+.admin-me-card .col-role {
+  justify-self: start;
+}
+
+.admin-me-card .who {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-me-card .who-text {
+  min-width: 0;
+}
+
+.admin-me-card .n {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--color-text);
+}
+
+.admin-me-card .n .nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-me-card .e {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-me-card .col-vol {
+  color: var(--color-text);
+}
+
+.admin-me-card .col-role {
+  flex: none;
+}
+
+.admin-me-card .col-vol {
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.admin-me-card .col-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  flex: none;
+}
+
+.admin-me-card .col-status.live {
+  color: var(--color-accent);
+}
+
+/* Mobile: hide the numeric columns, keep name + role + status compact. */
+@media (max-width: 719px) {
+  .admin-me-card .col-trainer,
+  .admin-me-card .col-last,
+  .admin-me-card .col-vol,
+  .admin-me-card .col-dots {
+    display: none;
+  }
+}
+
+/* Desktop: match the roster table grid so columns line up under the headers. */
+@media (min-width: 720px) {
+  .admin-me-card {
+    display: grid;
+    grid-template-columns: 1.6fr 0.8fr 1fr 1fr 0.9fr 1.2fr 28px;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+  }
+  .admin-me-card .col-trainer,
+  .admin-me-card .col-last {
+    display: block;
+  }
+}
+
 .admin-row {
   display: flex;
   align-items: center;
@@ -6039,12 +6235,12 @@ i > svg {
   .avatar-uploader-actions {
   display: none;
 }
-.profile-page.profile-embedded.profile-self:not(.profile-password-editing) .profile-security {
+.profile-page.profile-self:not(.profile-password-editing) .profile-security {
   display: none;
 }
-.profile-page.profile-embedded.profile-self.profile-password-editing .profile-mobile-settings-title,
-.profile-page.profile-embedded.profile-self.profile-password-editing .profile-lang,
-.profile-page.profile-embedded.profile-self.profile-password-editing .profile-mobile-settings {
+.profile-page.profile-self.profile-password-editing .profile-mobile-settings-title,
+.profile-page.profile-self.profile-password-editing .profile-lang,
+.profile-page.profile-self.profile-password-editing .profile-mobile-settings {
   display: none;
 }
 .profile-top {
@@ -6652,7 +6848,19 @@ i > svg {
     margin-top: 5px;
   }
 
-  .program-item-row > input.input:first-of-type {
+  .program-item-row .pir-name {
+    display: contents;
+  }
+
+  .program-item-row .pir-droplast {
+    display: none;
+  }
+
+  .program-item-row .pir-muscles {
+    display: none;
+  }
+
+  .program-item-row .pir-name > .input {
     grid-column: 2 / 4;
     grid-row: 1;
   }
@@ -6663,12 +6871,12 @@ i > svg {
     width: 100%;
   }
 
-  .program-item-row > input.input[type='number']:nth-of-type(2) {
+  .program-item-row > input.input[type='number']:nth-of-type(1) {
     grid-column: 2 / 3;
     grid-row: 3;
   }
 
-  .program-item-row > input.input[type='number']:nth-of-type(3) {
+  .program-item-row > input.input[type='number']:nth-of-type(2) {
     grid-column: 3 / 5;
     grid-row: 3;
   }
@@ -7098,7 +7306,7 @@ i > svg {
 
   .program-table-head {
     display: grid;
-    grid-template-columns: 28px minmax(240px, 1fr) 80px 80px minmax(220px, 0.72fr) 34px;
+    grid-template-columns: 28px minmax(200px, 1fr) 72px 72px 168px minmax(170px, 0.62fr) 34px;
     gap: 10px;
     padding: 0 0 9px;
     box-shadow: 0 1px 0 var(--color-divider);
@@ -7115,7 +7323,7 @@ i > svg {
 
   .programs-author-page .program-item-row {
     position: relative;
-    grid-template-columns: 28px minmax(240px, 1fr) 80px 80px minmax(220px, 0.72fr) 34px;
+    grid-template-columns: 28px minmax(200px, 1fr) 72px 72px 168px minmax(170px, 0.62fr) 34px;
     grid-template-rows: minmax(28px, auto) auto;
     column-gap: 10px;
     row-gap: 2px;
@@ -7130,10 +7338,19 @@ i > svg {
     color: var(--color-neutral-700);
   }
 
-  .programs-author-page .program-item-row > input.input:first-of-type {
+  .programs-author-page .program-item-row .pir-name {
     grid-column: 2;
     grid-row: 1;
     align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .programs-author-page .program-item-row .pir-name > .input {
+    flex: 0 1 auto;
+    min-width: 40px;
   }
 
   .programs-author-page .program-item-row > select.input {
@@ -7145,27 +7362,38 @@ i > svg {
     max-width: 100%;
   }
 
-  .programs-author-page .program-item-row > input.input[type='number']:nth-of-type(2) {
+  .programs-author-page .program-item-row > input.input[type='number']:nth-of-type(1) {
     grid-column: 3;
     grid-row: 1;
   }
 
   /* Cardio rows carry a single duration input — let it span Sets + Reps. */
-  .programs-author-page .program-item-row > input.input[type='number']:nth-of-type(2):last-of-type {
+  .programs-author-page .program-item-row > input.input[type='number']:nth-of-type(1):last-of-type {
     grid-column: 3 / 5;
   }
 
-  .programs-author-page .program-item-row > input.input[type='number']:nth-of-type(3) {
+  .programs-author-page .program-item-row > input.input[type='number']:nth-of-type(2) {
     grid-column: 4;
     grid-row: 1;
   }
 
+  .programs-author-page .program-item-row .pir-muscles {
+    grid-column: 5;
+    grid-row: 1;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .programs-author-page .program-item-row .trash {
-    grid-column: 6;
+    grid-column: 7;
     grid-row: 1;
   }
 
   .programs-author-page .program-item-row > .input,
+  .programs-author-page .program-item-row .pir-name > .input,
   .programs-author-page .program-item-row > select.input {
     min-height: 0;
     height: 24px;
@@ -7192,6 +7420,7 @@ i > svg {
   }
 
   .programs-author-page .program-item-row > .input:focus-visible,
+  .programs-author-page .program-item-row .pir-name > .input:focus-visible,
   .programs-author-page .program-item-row > select.input:focus-visible {
     outline: none;
     box-shadow: inset 0 -1px 0 var(--color-accent);
@@ -7202,7 +7431,7 @@ i > svg {
   }
 
   .programs-author-page .program-item-row .equipment-picker {
-    grid-column: 5;
+    grid-column: 6;
     grid-row: 1;
     min-width: 0;
     gap: 5px;
@@ -7703,32 +7932,6 @@ i > svg {
   box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.08);
   color: var(--color-accent);
 }
-.admin-me-card {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 14px 16px;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow:
-    inset 0 0 0 1px var(--color-accent-800),
-    inset 0 -1px 0 var(--color-accent);
-  cursor: pointer;
-}
-.admin-me-card .who {
-  flex: 1;
-  min-width: 0;
-}
-.admin-me-card .who .n {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-}
-.admin-me-card .who .e {
-  font-size: 11px;
-  color: var(--color-neutral-500);
-}
 .admin-table {
   display: flex;
   flex-direction: column;
@@ -7763,6 +7966,10 @@ i > svg {
   gap: 11px;
   min-width: 0;
   flex: none;
+}
+
+.admin-table .admin-row .who > div {
+  min-width: 0;
 }
 .admin-row .meta.vol {
   color: var(--color-text);
@@ -7941,14 +8148,12 @@ i > svg {
   .gym-hint:hover,
   .account-chip:hover,
   .rail-session-chip:hover,
-  .admin-me-card:hover,
   .gym-card.tappable:hover {
     box-shadow: inset 0 0 0 1px var(--color-neutral-700);
     background: rgba(233, 234, 236, 0.05);
   }
 
-  .rail-session-chip:hover,
-  .admin-me-card:hover {
+  .rail-session-chip:hover {
     border-color: var(--color-accent);
   }
 
@@ -7972,7 +8177,8 @@ i > svg {
   }
 
   .set-row.record:hover {
-    background: color-mix(in srgb, var(--color-ok-tint) 88%, var(--color-ok) 12%);
+    background: color-mix(in srgb, var(--color-ok-tint) 82%, var(--color-ok) 18%);
+    border-radius: 0;
     box-shadow: inset 3px 0 0 var(--color-ok);
   }
 
@@ -8287,22 +8493,87 @@ i > svg {
 }
 
 /* --- Today desktop: header, stat grid, weekly volume, templates --------- */
+/* Design S-13 (mobile): kicker + title left, status chip aligned to the top;
+   W-04 (desktop): the row aligns to the baseline of the big title. */
 .td-topbar {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  padding-top: 6px;
 }
-.td-topbar h1 {
-  font-size: 32px;
+.td-topbar h1,
+.td-topbar h2 {
+  font-size: 30px;
   letter-spacing: -0.025em;
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   font-weight: 500;
 }
 .td-topbar-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 2px;
+}
+
+/* Design S-13: on the phone the CTAs live in the body — a big primary Start
+ * session and a secondary Log-a-past-session below it. */
+.td-start-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.td-start-cta {
+  min-height: 60px;
+  font-size: 16px;
+  border-radius: var(--radius-lg);
+  gap: 10px;
+  width: 100%;
+}
+
+.td-start-cta i {
+  font-size: 18px;
+}
+
+.td-backfill-cta {
+  min-height: 48px;
+  font-size: 14px;
+  border-radius: var(--radius-lg);
+  gap: 8px;
+  width: 100%;
+}
+
+/* Design W-04: the desktop header row is kicker + Today on the left and the
+ * actions on the right; the sync state already lives in the rail dot. */
+@media (min-width: 720px) {
+  .td-topbar {
+    align-items: flex-end;
+    padding-top: 0;
+  }
+  .td-topbar h1,
+  .td-topbar h2 {
+    font-size: 32px;
+    margin-top: 4px;
+  }
+  .td-topbar-actions {
+    margin-top: 0;
+  }
+  .td-topbar-actions .sync-chip {
+    display: none;
+  }
+}
+
+/* The desktop header CTAs sit in a flex row; the wrapper handles visibility so
+   the buttons themselves keep their icon/label gap. */
+.td-header-ctas {
+  display: none;
+}
+@media (min-width: 720px) {
+  .td-header-ctas {
+    display: flex;
+    gap: 10px;
+  }
 }
 .td-stats {
   display: grid;
@@ -8338,6 +8609,23 @@ i > svg {
   align-items: baseline;
   justify-content: space-between;
   margin-bottom: 14px;
+}
+
+/* Section headings (History, Templates, Records…) get a divider from the block
+   above with symmetric breathing room, so every section break reads the same. */
+.section-divide {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* On desktop the templates label heads its own rail column — no divider. */
+@media (min-width: 720px) {
+  .td-templates-label.section-divide {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
 }
 .td-delta {
   font-size: 12px;
@@ -8526,6 +8814,26 @@ i > svg {
 .desktop-only {
   display: none;
 }
+
+/* Flex controls (buttons, chip-links) must keep their flex box under the
+ * responsive utilities — display:block would kill their icon/label gap. */
+.btn.mobile-only,
+.backfill-trigger.mobile-only {
+  display: inline-flex;
+}
+.btn.desktop-only {
+  display: none;
+}
+@media (min-width: 720px) {
+  .btn.mobile-only,
+  .backfill-trigger.mobile-only {
+    display: none !important;
+  }
+  .btn.desktop-only {
+    display: inline-flex !important;
+  }
+}
+
 @media (min-width: 720px) {
   .desktop-only {
     display: block !important;
@@ -8647,14 +8955,60 @@ i > svg {
   line-height: 1.55;
 }
 
+/* Past/backfill session: the gym is editable at any time (map-pin row under
+ * the title) — same picker as the live hero attach. */
+.past-gym-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 2px 0;
+  background: none;
+  border: none;
+  color: var(--color-neutral-400);
+  font-size: 12px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.past-gym-row i {
+  color: var(--color-neutral-500);
+  font-size: 13px;
+  line-height: 0;
+}
+
+.past-gym-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.past-gym-row i.edit {
+  color: var(--color-neutral-600);
+  font-size: 11px;
+}
+
+@media (hover: hover) {
+  .past-gym-row:hover {
+    color: var(--color-neutral-200);
+  }
+}
+
 @media (max-width: 719px) {
+  /* The session screens manage their own padding, so the .screen gutter must
+     not stack on top of it — content aligns to the same 20px as every other
+     screen. */
+  .session-screen.screen {
+    padding: 0;
+  }
+
   .session-past .session-top {
-    padding: var(--space-2) var(--space-4) var(--space-4);
+    padding: var(--space-2) 20px var(--space-4);
     box-shadow: 0 1px 0 var(--color-divider);
   }
 
   .session-past .session-body {
-    padding: var(--space-4) var(--gutter);
+    padding: var(--space-4) 20px 20px;
   }
 
   .session-past .session-top .title {
@@ -8724,7 +9078,7 @@ i > svg {
   }
 
   .session-live .plan-progress {
-    max-width: 620px;
+    max-width: 720px;
   }
 
   .session-live .exercise-card,
@@ -8798,16 +9152,6 @@ i > svg {
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(217, 162, 79, 0.14);
     color: var(--color-text);
-  }
-
-  .session-live .ghost-row::before,
-  .session-past .ghost-row::before {
-    content: 'prefilled';
-    grid-column: 4;
-    grid-row: 1;
-    color: var(--color-neutral-700);
-    font-size: 12px;
-    align-self: center;
   }
 
   .session-live .ghost-row .log-btn,
@@ -9092,6 +9436,30 @@ i > svg {
     background: var(--color-surface);
     padding: 18px 20px;
     box-shadow: none;
+    position: relative;
+  }
+
+  /* Center the whole session content column (cards, plan bar, buttons). */
+  .session-live .session-body > *,
+  .session-past .session-body > * {
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  /* The ⋮ menu sits in the card's top-right corner, not inline with the name;
+     the header reserves space on the right so the set-count never overlaps it. */
+  .session-live .exercise-card .head,
+  .session-past .exercise-card .head {
+    padding-right: 30px;
+  }
+
+  .session-live .exercise-card .head .dots,
+  .session-past .exercise-card .head .dots {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
   }
 
   .session-live .exercise-card.active {
@@ -10229,4 +10597,1686 @@ h6 {
 
 .drag-handle:active {
   cursor: grabbing;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Set types, muscles, equipment — design addendum (SS · DS · MG · EQ).
+   A bracket means a superset; indented sub-rows are drops inside one set;
+   muscle chips locate, the label names; equipment travels with the name.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* --- Graphite chips: muscle silhouette + word, equipment icon + word ------ */
+/* Muscle/equipment chips share one size across the whole app — the same as the
+   add-exercise filter chips (fchip): 11px text, 5×10 padding, pill radius. */
+.mchip,
+.echip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--color-neutral-900);
+  font-size: 11px;
+  color: var(--color-neutral-400);
+  white-space: nowrap;
+}
+
+.echip {
+  color: var(--color-neutral-500);
+}
+
+.mchip i,
+.echip i {
+  font-size: 11px;
+  line-height: 0;
+}
+
+.exercise-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.ss-card .exercise-chips {
+  padding-left: 26px;
+}
+
+/* --- Superset bracket block (SS-1/SS-3) ----------------------------------- */
+.ss-block {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.ss-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  flex: none;
+}
+
+.ss-block.past .ss-bar {
+  background: var(--color-accent-700);
+}
+
+.ss-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ss-block.past .ss-body {
+  gap: var(--space-2);
+}
+
+.ss-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ss-block.past .ss-head {
+  align-items: baseline;
+}
+
+.ss-head .tag {
+  font-size: 9px;
+}
+
+.ss-round {
+  flex: 1;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+
+.ss-rounds-meta {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-head .dots {
+  background: none;
+  border: none;
+  color: var(--color-neutral-600);
+  font-size: 15px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.ss-index {
+  font-size: 11px;
+  color: var(--color-accent);
+  width: 16px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.ss-block.past .ss-index {
+  color: var(--color-accent-300);
+}
+
+.exercise-card.ss-active {
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+
+.ss-now {
+  font-size: 11px;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.ss-done {
+  color: var(--color-ok);
+  font-size: 14px;
+  line-height: 0;
+}
+
+.set-row.rrow,
+.ghost-row.rrow {
+  grid-template-columns: 26px 1fr 1fr 56px;
+  gap: var(--space-3);
+}
+
+.set-row .kind.just-now {
+  color: var(--color-ok);
+}
+
+/* --- Past workout, collapsed for reading (SS-3) --------------------------- */
+.past-ex-card {
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: none;
+  width: 100%;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.past-ex-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.past-ex-row .n {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.past-ex-row .v {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --- Dropsets in the set list (DS-2) -------------------------------------- */
+.set-wrap {
+  padding: var(--space-2) 0;
+  box-shadow: 0 1px 0 var(--color-divider);
+}
+
+.set-wrap > .set-row {
+  padding: 0;
+  box-shadow: none;
+}
+
+.set-row .kind.tdrop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--color-accent);
+}
+
+.set-row .kind.tdrop i {
+  font-size: 10px;
+  line-height: 0;
+}
+
+.drops {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-left: 18px;
+}
+
+.set-row.rrow + .drops,
+.rrow ~ .drops {
+  padding-left: 26px;
+}
+
+.drops .dbar {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--color-accent-800);
+  flex: none;
+}
+
+.drops .dlist {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.drop-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 62px;
+  gap: var(--space-3);
+  align-items: center;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-400);
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drop-row .kind {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  text-align: right;
+}
+
+.set-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+  padding-left: 18px;
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.ghost-tools {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding-left: 18px;
+}
+
+.ghost-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--color-accent-900);
+  font-size: 11px;
+  color: var(--color-accent-200);
+  border: none;
+  cursor: pointer;
+}
+
+.ghost-chip i {
+  font-size: 11px;
+  line-height: 0;
+}
+
+.ghost-chip.muted {
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-500);
+}
+
+/* --- Set type drawer (DS-1) ----------------------------------------------- */
+.stype-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  box-shadow: 0 1px 0 var(--color-divider);
+  background: none;
+  border: none;
+  width: 100%;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.stype-row.last {
+  box-shadow: none;
+}
+
+.stype-row > i {
+  font-size: 16px;
+  color: var(--color-neutral-400);
+  line-height: 0;
+}
+
+.stype-row .n {
+  flex: 1;
+  font-size: 15px;
+}
+
+.stype-row .hint {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+}
+
+.stype-check {
+  width: 19px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  display: grid;
+  place-items: center;
+  color: #1a1409;
+}
+
+.stype-check i {
+  font-size: 11px;
+  line-height: 0;
+}
+
+.sheet-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.sheet-note > i {
+  font-size: 15px;
+  color: var(--color-neutral-500);
+  margin-top: 1px;
+  line-height: 0;
+}
+
+.sheet-note p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--color-neutral-500);
+}
+
+.sheet-note strong {
+  font-weight: 500;
+  color: var(--color-neutral-300);
+}
+
+/* --- Drop editor (DS-3) --------------------------------------------------- */
+.dropedit-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.dropedit-head h4 {
+  margin: 0;
+  flex: 1;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--color-accent);
+}
+
+.type-badge i {
+  font-size: 11px;
+  line-height: 0;
+}
+
+.dropedit-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dropedit-grid {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr 34px;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.dropedit-grid.header {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+.dropedit-grid .lab {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+
+.dropedit-grid .input {
+  min-height: 40px;
+  font-size: 15px;
+}
+
+.dropedit-grid .drop-trash {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: 15px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+  line-height: 0;
+}
+
+.dropedit-add {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropedit-add > i {
+  font-size: 14px;
+  color: var(--color-accent);
+  line-height: 0;
+}
+
+.dropedit-add .n {
+  flex: 1;
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+.dropedit-add .m {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- “Superset with…” drawer (SS-2) --------------------------------------- */
+.ss-pick-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-top: var(--space-2);
+}
+
+.ss-pick-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  box-shadow: 0 1px 0 var(--color-divider);
+  background: none;
+  border: none;
+  width: 100%;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ss-pick-row:last-child {
+  box-shadow: none;
+}
+
+.ss-pick-row .idx {
+  font-size: 11px;
+  color: var(--color-accent);
+  width: 16px;
+  flex: none;
+}
+
+.ss-pick-row .n {
+  flex: 1;
+  font-size: 14px;
+}
+
+.ss-pick-row.dim .n {
+  color: var(--color-neutral-400);
+}
+
+.ss-pick-row .meta {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+}
+
+.cbx {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-700);
+}
+
+.cbx.on {
+  background: var(--color-accent);
+  box-shadow: none;
+  display: grid;
+  place-items: center;
+  color: #1a1409;
+}
+
+.cbx.on i {
+  font-size: 10px;
+  line-height: 0;
+}
+
+/* --- Exercise picker filters & rows (MG-2) -------------------------------- */
+.filter-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* Add-exercise · four large kind buttons (Strength + timed kinds). */
+.kind-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: var(--space-2);
+}
+
+.kind-card {
+  min-height: 78px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.kind-card i {
+  color: var(--color-accent);
+  font-size: 22px;
+}
+
+.kind-card.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-900);
+}
+
+@media (hover: hover) {
+  .kind-card:not(.active):hover {
+    border-color: var(--color-neutral-700);
+    background: rgba(233, 234, 236, 0.05);
+  }
+}
+
+/* Add-exercise · filters split into labelled Muscle / Equipment blocks with
+ * larger, finger-friendly chips. */
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.filter-group-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+.filter-chips.lg {
+  gap: var(--space-2);
+}
+
+.fchip.lg {
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-md);
+  min-height: 40px;
+}
+
+.fchip.lg i {
+  font-size: 15px;
+}
+
+.fchip.lg svg {
+  width: 12px;
+  height: 20px;
+}
+
+.fchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--color-neutral-900);
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fchip i {
+  font-size: 11px;
+  line-height: 0;
+}
+
+.fchip .x {
+  font-size: 9px;
+  line-height: 0;
+}
+
+.fchip.active {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+}
+
+.pick-count {
+  margin: var(--space-2) 0 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border: none;
+  width: 100%;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.pick-row.unavailable {
+  opacity: 0.45;
+}
+
+.pick-row .txt {
+  flex: 1;
+  min-width: 0;
+}
+
+.pick-row .txt .n {
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pick-row .txt .s {
+  display: block;
+  font-size: 10px;
+  color: var(--color-neutral-500);
+  margin-top: 2px;
+}
+
+.pick-row .txt .s.warn {
+  color: var(--color-danger-text);
+}
+
+.pick-row .eq {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  white-space: nowrap;
+}
+
+.pick-row .eq i {
+  font-size: 10px;
+  line-height: 0;
+}
+
+.pick-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* --- Progress · by muscle (MG-3/MG-4) ------------------------------------- */
+.seg3 {
+  display: flex;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+
+.seg3 button {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.seg3 button.active {
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+}
+
+.muscle-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.muscle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.muscle-row .n {
+  width: 78px;
+  flex: none;
+  font-size: 13px;
+}
+
+.muscle-row.dim .n {
+  color: var(--color-neutral-500);
+}
+
+.muscle-row .bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-neutral-900);
+  overflow: hidden;
+}
+
+.muscle-row .bar > span {
+  display: block;
+  height: 100%;
+}
+
+.muscle-row .v {
+  width: 46px;
+  flex: none;
+  text-align: right;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  font-variant-numeric: tabular-nums;
+}
+
+.muscle-row.dim .v {
+  color: var(--color-neutral-600);
+}
+
+.muscle-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 3px 0 0 var(--color-neutral-700);
+}
+
+.muscle-note > i {
+  font-size: 15px;
+  color: var(--color-neutral-400);
+  margin-top: 1px;
+  line-height: 0;
+}
+
+.muscle-note p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--color-neutral-300);
+}
+
+/* --- Live session rail: worked so far + equipment in use (DS-4) ----------- */
+.side-muscle-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.side-muscle-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.side-muscle-row .n {
+  flex: 1;
+  font-size: 13px;
+}
+
+.side-muscle-row.dim .n {
+  color: var(--color-neutral-500);
+}
+
+.side-muscle-row .bar {
+  width: 120px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--color-neutral-900);
+  overflow: hidden;
+}
+
+.side-muscle-row .bar > span {
+  display: block;
+  height: 100%;
+}
+
+.side-muscle-row .v {
+  width: 38px;
+  text-align: right;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.side-muscle-row.dim .v {
+  color: var(--color-neutral-600);
+}
+
+.side-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  line-height: 1.55;
+}
+
+.echip-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.echip.lg {
+  padding: 4px 9px;
+  font-size: 11px;
+  color: var(--color-neutral-400);
+}
+
+.echip.lg i {
+  font-size: 11px;
+}
+
+/* --- Exercise history header & “where you can do it” (EQ-3/MG-4) ---------- */
+.hist-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+.hist-sub {
+  margin-top: var(--space-3);
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+
+.wcdi-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wcdi-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.wcdi-row .n {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wcdi-row .v {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+}
+
+.wcdi-row .v.miss {
+  color: var(--color-danger-text);
+}
+
+.searchbar-funnel {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 15px;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.pick-hint {
+  margin: auto 0 0;
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  line-height: 1.55;
+}
+
+.ss-sheet-title {
+  margin: var(--space-3) 0 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.ss-sheet-sub {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-neutral-500);
+}
+
+.toggle-row .toggle-value {
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+@media (min-width: 720px) {
+  .sheet-chrome .grabber {
+    display: none;
+  }
+}
+
+/* Session cards: the boards show no drag handle — the name row drags. */
+.session-live .exercise-card .drag-handle,
+.session-past .exercise-card .drag-handle {
+  display: none;
+}
+
+/* Add-exercise: full-width bordered button. */
+.session-add-btn {
+  min-height: 46px;
+  font-size: 14px;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Discard session: same bordered shape as Add exercise but red, pinned to the
+   bottom of the page and centered. */
+.session-discard-row {
+  margin-top: auto;
+  padding-top: var(--space-5);
+  display: flex;
+  justify-content: center;
+}
+
+.session-discard-btn {
+  min-height: 46px;
+  gap: 8px;
+  font-size: 14px;
+  padding-inline: 22px;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  background: transparent;
+}
+
+@media (hover: hover) {
+  .session-discard-btn:hover {
+    background: var(--color-danger-tint);
+  }
+}
+
+.past-ex-row .count {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.queued-ex-card .n {
+  color: var(--color-neutral-400);
+  font-size: 15px;
+}
+
+@media (max-width: 719px) {
+  .sheet-close {
+    display: none;
+  }
+}
+
+.mchip.lg,
+.echip.lg {
+  padding: 4px 9px;
+  font-size: 11px;
+}
+
+.mchip.lg {
+  color: var(--color-neutral-500);
+}
+
+.mchip.lg.primary {
+  color: var(--color-neutral-300);
+}
+
+.muscle-row.sel {
+  background: var(--color-accent-900);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  margin: -6px -10px;
+  width: calc(100% + 20px);
+}
+
+.muscle-row.sel .n {
+  color: var(--color-accent-100);
+}
+
+.muscle-row.sel .v {
+  color: var(--color-accent-200);
+}
+
+.wcdi-row > i {
+  font-size: 15px;
+  line-height: 0;
+}
+
+.wcdi-row > i.ok {
+  color: var(--color-ok);
+}
+
+.wcdi-row > i.bad {
+  color: var(--color-danger);
+}
+
+.wcdi-row.miss .n {
+  color: var(--color-neutral-400);
+}
+
+/* --- Desktop session table (DS-4): TYPE column, kg suffix, real inputs ---- */
+@media (min-width: 720px) {
+  /* Every strength row — single or superset round — shares the 5-column table
+     (design GW-04 / DS-4): index · reps · weight · type · action. */
+  .session-live .exercise-card .set-grid.header,
+  .session-live .exercise-card .set-row,
+  .session-live .exercise-card .ghost-row,
+  .session-past .exercise-card .set-grid.header,
+  .session-past .exercise-card .set-row,
+  .session-past .exercise-card .ghost-row {
+    grid-template-columns: 34px 1fr 1fr 120px 90px;
+    gap: var(--space-4);
+  }
+
+  .session-live .exercise-card .set-row .kind,
+  .session-live .exercise-card .ghost-row .kind,
+  .session-past .exercise-card .set-row .kind,
+  .session-past .exercise-card .ghost-row .kind {
+    font-size: 11px;
+    text-align: left;
+  }
+
+  .session-live .exercise-card .set-row .kind.tdrop,
+  .session-past .exercise-card .set-row .kind.tdrop {
+    justify-content: flex-start;
+  }
+
+  .session-live .exercise-card .cell5,
+  .session-past .exercise-card .cell5 {
+    font-size: 11px;
+    color: var(--color-neutral-600);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .session-live .exercise-card .drops,
+  .session-past .exercise-card .drops {
+    padding-left: 34px;
+    gap: var(--space-4);
+  }
+
+  .session-live .exercise-card .drop-row,
+  .session-past .exercise-card .drop-row {
+    grid-template-columns: 1fr 1fr 120px 90px;
+    gap: var(--space-4);
+  }
+
+  .session-live .exercise-card .drop-row .kind,
+  .session-past .exercise-card .drop-row .kind {
+    font-size: 11px;
+    text-align: left;
+  }
+
+  .session-live .exercise-card .set-foot,
+  .session-past .exercise-card .set-foot {
+    display: none;
+  }
+
+  .session-live .exercise-card .ghost-row .gval,
+  .session-past .exercise-card .ghost-row .gval {
+    min-height: 40px;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    background: transparent;
+  }
+
+  .session-live .exercise-card .ghost-row .gval:first-of-type,
+  .session-past .exercise-card .ghost-row .gval:first-of-type {
+    border-color: var(--color-divider);
+    box-shadow: none;
+    color: var(--color-text);
+  }
+
+  .session-live .exercise-card .ghost-row .gval:last-of-type,
+  .session-past .exercise-card .ghost-row .gval:last-of-type {
+    border-color: var(--color-accent);
+    box-shadow: none;
+  }
+
+  .session-live .exercise-card .ghost-row .log-btn,
+  .session-past .exercise-card .ghost-row .log-btn {
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  /* Collapsed past rows (SS-3) share the same 720px reading column as the
+     expanded cards, so they never look narrower or off-grid. */
+  .session-past .past-ex-card,
+  .session-past .ss-block,
+  .session-live .past-ex-card,
+  .session-live .ss-block {
+    max-width: 720px;
+  }
+
+  .session-past .past-ex-card {
+    padding: 16px 20px;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+  }
+
+  .session-past .past-ex-row .n {
+    font-size: 15px;
+  }
+
+  .session-past .past-ex-row .v {
+    font-size: 13px;
+  }
+
+  /* Superset as one table behind the bracket */
+  .ss-desktop {
+    gap: var(--space-4);
+  }
+
+  .ss-desktop-card {
+    flex: 1;
+    min-width: 0;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .ss-desktop-card .ss-head {
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
+  }
+
+  .ss-desktop-card .ss-round {
+    font-size: 12px;
+  }
+
+  .ss-table .ss-td-idx {
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ss-table td.num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ss-table td.dim {
+    color: var(--color-neutral-500);
+  }
+
+  .ss-table .eq {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--color-neutral-500);
+  }
+
+  .ss-table .eq i {
+    font-size: 11px;
+    line-height: 0;
+  }
+
+  /* Exercise header: chips travel inline with the name on desktop */
+  .session-live .exercise-card .exercise-chips {
+    margin: -6px 0 var(--space-3);
+  }
+}
+
+.searchbar-funnel i {
+  color: var(--color-accent);
+}
+
+/* --- Program day · what to expect before you leave (EQ-2) ----------------- */
+.pd-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.pd-title {
+  font-size: 15px;
+}
+
+.pd-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.program-prescription-row.pdr {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  box-shadow: 0 1px 0 var(--color-divider);
+  font-size: 13px;
+}
+
+.program-prescription-row.pdr:last-child {
+  box-shadow: none;
+}
+
+.pdr-bar {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.pdr-bar.on {
+  background: var(--color-accent);
+}
+
+.program-prescription-row.pdr .n {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdr-index {
+  color: var(--color-accent);
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.pdr-drop {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.pdr-drop i {
+  font-size: 10px;
+  line-height: 0;
+}
+
+.program-prescription-row.pdr .s {
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.pd-equip {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+
+.pd-equip .mchip {
+  color: var(--color-neutral-500);
+}
+
+.mchip.ruby {
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
+}
+
+.pd-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 3px 0 0 var(--color-danger);
+  margin-top: var(--space-3);
+}
+
+.pd-warn > i {
+  font-size: 15px;
+  color: var(--color-danger);
+  margin-top: 1px;
+  line-height: 0;
+}
+
+.pd-warn-body {
+  flex: 1;
+}
+
+.pd-warn-body p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-neutral-300);
+}
+
+.pd-warn-actions {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.pd-warn-actions button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pd-warn-swap {
+  color: var(--color-accent);
+}
+
+.pd-warn-ignore {
+  color: var(--color-neutral-600);
+}
+
+.pd-start {
+  min-height: 50px;
+  font-size: 15px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  width: 100%;
+}
+
+/* --- EQ-5 · day editor: brackets, picking, muscles column, rail ----------- */
+.pir-gindex {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.pir-gbar {
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--color-accent);
+}
+
+.program-item-row.picked {
+  box-shadow:
+    inset 0 0 0 1px var(--color-accent-700),
+    0 1px 0 var(--color-divider);
+  border-radius: var(--radius-sm);
+}
+
+.pir-droplast {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pir-droplast.off {
+  visibility: hidden;
+  color: var(--color-neutral-600);
+}
+
+.program-item-row:hover .pir-droplast.off {
+  visibility: visible;
+}
+
+.program-day-actions-row {
+  display: flex;
+  gap: var(--space-3);
+  padding: 12px 0 0;
+}
+
+@media (min-width: 960px) {
+  .pir-muscles-head {
+    display: inline;
+  }
+
+  /* EQ-5 · right rail: this day covers + equipment needed */
+  .programs-author-page .program-day {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    column-gap: 34px;
+    align-content: start;
+  }
+
+  .programs-author-page .program-day > * {
+    grid-column: 1;
+  }
+
+  .programs-author-page .program-day > .program-day-rail {
+    grid-column: 2;
+    grid-row: 1 / span 30;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    align-self: start;
+  }
+}
+
+.program-day-rail {
+  display: none;
+}
+
+.program-day-rail h6 {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+  font-weight: 600;
+}
+
+.program-day-rail .rail-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  line-height: 1.55;
+}
+
+.rail-equip-cell {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 13px;
+}
+
+.rail-equip-cell.ruby {
+  background: var(--color-danger-tint);
+  box-shadow: inset 0 0 0 1px var(--color-danger-line);
+  color: var(--color-danger-text);
+}
+
+.rail-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* --- Exercise library (MG-5) ---------------------------------------------- */
+.exlib {
+  gap: var(--space-6);
+}
+
+.exlib-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.exlib-top .back {
+  background: none;
+  border: none;
+  color: var(--color-neutral-300);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.exlib-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+
+.exlib-filters {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.exlib-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+
+.exlib-search i {
+  font-size: 15px;
+  color: var(--color-neutral-500);
+  line-height: 0;
+}
+
+.exlib-search input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.exlib-applied {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.exlib-scope {
+  flex: none;
+}
+
+.exlib-scope button {
+  padding: 8px 14px;
+}
+
+.exlib-vocab {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.vchip {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-neutral-400);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.vchip.active {
+  background: var(--color-neutral-800);
+  color: var(--color-neutral-100);
+}
+
+.exlib-table td {
+  vertical-align: middle;
+}
+
+.exlib-table .exlib-primary {
+  color: var(--color-text);
+}
+
+.exlib-table .exlib-secondary {
+  color: var(--color-neutral-500);
+}
+
+.exlib-table .exlib-eq,
+.exlib-table .exlib-last {
+  color: var(--color-neutral-500);
+}
+
+.exlib-table .exlib-rec {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.exlib-table tr.exlib-off {
+  opacity: 0.45;
+}
+
+.exlib-table tr.exlib-off .exlib-miss {
+  color: var(--color-danger-text);
+}
+
+.exlib-note {
+  margin: 0;
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  line-height: 1.55;
+}
+
+.programs-author-page .program-item-row .pir-muscles {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pir-muscles .pm {
+  color: var(--color-neutral-200);
+}
+
+.pir-muscles .sm {
+  color: var(--color-neutral-500);
+}
+
+@media (min-width: 720px) {
+  /* DS-4: in the session header row, equipment reads as icon + word, no pill */
+  .session-live .exercise-card .exercise-chips .echip {
+    background: transparent;
+    padding: 0;
+    font-size: 11px;
+  }
+
+  .session-live .exercise-card .exercise-chips .echip i {
+    font-size: 11px;
+  }
 }

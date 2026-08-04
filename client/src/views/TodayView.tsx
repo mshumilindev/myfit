@@ -19,9 +19,10 @@ import {
   fmtDayMonth,
   fmtDurationHM,
   fmtDurationHuman,
-  fmtFullDate,
   fmtKg,
   fmtShortDate,
+  fmtWeekday,
+  fmtWeekdayDayMonth,
   useT,
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
@@ -66,6 +67,9 @@ interface ProgramItem {
   reps: number;
   durationMin: number | null;
   equipment: EquipmentId[];
+  groupId?: string | null;
+  groupOrder?: number | null;
+  dropLast?: boolean;
 }
 
 interface ProgramAssignment {
@@ -99,6 +103,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
+
+  /** Session heading: the program day name if it has one, else the weekday. */
+  const sessionTitle = (w: { dayName?: string | null; startedAt: number }) =>
+    w.dayName || fmtWeekday(w.startedAt, locale);
 
   function beginSession(gymId: string | null) {
     setStartPicker(false);
@@ -200,6 +208,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         plannedReps: item.kind === 'strength' ? item.reps : null,
         plannedDurationMin: item.kind === 'strength' ? null : (item.durationMin ?? 10),
         equipment: item.equipment,
+        // A prescribed superset arrives grouped (EQ-2 → SS-1).
+        groupId: item.groupId ?? null,
+        groupOrder: item.groupOrder ?? null,
       });
     }
     shell.openOverlay({ screen: 'session', workoutId: w.id });
@@ -338,20 +349,26 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           (hasHistory ? (
             <div className="td-topbar">
               <div>
-                <div className="kicker">{fmtFullDate(now, locale)}</div>
+                <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
                 <h2>{t.today}</h2>
               </div>
               <div className="td-topbar-actions">
                 <SyncChip store={store} />
-                <button className="btn btn-primary" onClick={startSession}>
-                  <Icon name="play" />
-                  {t.startEmptySession}
-                </button>
+                <div className="td-header-ctas">
+                  <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
+                    <Icon name="arrow-counter-clockwise" />
+                    {t.logPastSession}
+                  </button>
+                  <button className="btn btn-primary" onClick={startSession}>
+                    <Icon name="play" />
+                    {t.startSessionLabel}
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
             <div className="td-topbar">
-              <div className="kicker">{fmtFullDate(now, locale)}</div>
+              <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
               <div className="td-topbar-actions">
                 <SyncChip store={store} />
               </div>
@@ -360,6 +377,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {banners}
         {programCard}
+
+        {!open && hasHistory && (
+          <div className="td-start-ctas mobile-only">
+            <button className="btn btn-primary td-start-cta" onClick={startSession}>
+              <Icon name="play" />
+              {t.startSessionLabel}
+            </button>
+            <button className="btn btn-secondary td-backfill-cta" onClick={() => setBackfill(true)}>
+              <Icon name="arrow-counter-clockwise" />
+              {t.logPastSession}
+            </button>
+          </div>
+        )}
 
         {open ? (
           <>
@@ -407,7 +437,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         }
                       >
                         <td>{fmtShortDate(w.startedAt, locale)}</td>
-                        <td>{fmtDayMonth(w.startedAt, locale)}</td>
+                        <td>{sessionTitle(w)}</td>
                         <td>{workoutSets(w)}</td>
                         <td>{fmtKg(workoutVolumeKg(w))}</td>
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
@@ -428,7 +458,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   >
                     <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
                     <span style={{ flex: 1 }}>
-                      <span className="name">{fmtDayMonth(w.startedAt, locale)}</span>
+                      <span className="name">{sessionTitle(w)}</span>
                       <div className="stats">
                         {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
                         {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
@@ -490,7 +520,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
 
             <div className="td-history">
-              <div className="section-label" style={{ marginBottom: 8 }}>
+              <div className="section-label section-divide" style={{ marginBottom: 8 }}>
                 {t.tdHistory}
               </div>
               {/* Desktop: full table (W-04). */}
@@ -550,7 +580,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   >
                     <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
                     <span style={{ flex: 1 }}>
-                      <span className="name">{fmtDayMonth(w.startedAt, locale)}</span>
+                      <span className="name">{sessionTitle(w)}</span>
                       {w.autoFinished && (
                         <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
                           {t.autoClosed}
@@ -566,13 +596,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 ))}
               </div>
             </div>
-
-            {!open && (
-              <button className="backfill-trigger" onClick={() => setBackfill(true)}>
-                <Icon name="arrow-counter-clockwise" />
-                <span>{t.logPastSession}</span>
-              </button>
-            )}
           </>
         ) : (
           <div className="td-empty">
@@ -608,7 +631,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       </div>
 
       <aside className="pane-side">
-        <div className="section-label">{t.templates}</div>
+        <div className="section-label section-divide td-templates-label">{t.templates}</div>
         {templates.length > 0 ? (
           templates.map((w) => {
             const names = w.exercises
@@ -631,7 +654,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               >
                 <span className="td-tpl-date">{fmtShortDate(w.startedAt, locale)}</span>
                 <span className="td-tpl-body">
-                  <span className="n">{fmtDayMonth(w.startedAt, locale)}</span>
+                  <span className="n">{sessionTitle(w)}</span>
                   {names && <span className="ex">{names}</span>}
                   <span className="meta">{stats}</span>
                 </span>
@@ -648,8 +671,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {records.length > 0 && (
           <>
-            <div className="td-side-divider" />
-            <div className="section-label">{t.records}</div>
+            <div className="section-label section-divide">{t.records}</div>
             {records.map(([name, r]) => {
               const recent = now - r.recTs < 14 * DAY_MS;
               return (

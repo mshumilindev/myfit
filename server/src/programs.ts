@@ -47,6 +47,9 @@ interface ItemJson {
   reps: number;
   durationMin: number | null;
   equipment: string[];
+  groupId: string | null;
+  groupOrder: number | null;
+  dropLast: boolean;
 }
 
 function parseEquipment(raw: string | null): string[] {
@@ -111,6 +114,9 @@ function programJson(p: ProgramRow): {
     reps: i.reps,
     durationMin: i.duration_min,
     equipment: parseEquipment(i.equipment),
+    groupId: i.group_id ?? null,
+    groupOrder: i.group_order ?? null,
+    dropLast: !!i.drop_last,
   }));
   return {
     id: p.id,
@@ -216,8 +222,9 @@ programsRouter.put('/:id', requireAuth, (req: AuthedRequest, res: Response) => {
   db.prepare('DELETE FROM program_items WHERE program_id = ?').run(id);
   const ins = db.prepare(
     `INSERT INTO program_items
-       (id, program_id, day, position, name, kind, sets, reps, weight, duration_min, equipment)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, program_id, day, position, name, kind, sets, reps, weight, duration_min, equipment,
+        group_id, group_order, drop_last)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   if (Array.isArray(items)) {
     for (const [idx, raw] of (items as Array<Record<string, unknown>>).entries()) {
@@ -236,6 +243,11 @@ programsRouter.put('/:id', requireAuth, (req: AuthedRequest, res: Response) => {
         null,
         raw.durationMin === null || raw.durationMin === undefined ? null : Number(raw.durationMin),
         JSON.stringify(cleanEquipment(raw.equipment)),
+        typeof raw.groupId === 'string' && raw.groupId ? raw.groupId.slice(0, 64) : null,
+        raw.groupOrder === null || raw.groupOrder === undefined
+          ? null
+          : Number(raw.groupOrder) || 0,
+        raw.dropLast ? 1 : 0,
       );
     }
   }
