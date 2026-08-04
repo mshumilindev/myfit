@@ -44,8 +44,25 @@ import {
   workoutCardioDistanceKm,
   workoutCardioMinutes,
   workoutVolumeKg,
+  perHandFactor,
+  setVolumeKg,
+  setRepsTotal,
+  exerciseVolumeKg,
+  muscleVolumeKg,
+  muscleSetsInWorkout,
+  equipmentFor,
+  workoutEquipment,
+  resolveMuscles,
+  sessionBlocks,
+  nextSupersetLetter,
+  groupRounds,
+  groupCurrentRound,
+  saveCatalogExercise,
+  updateExerciseMeta,
 } from '../client/src/store';
-import { setAuth } from '../client/src/api';
+import { setAuth, setRole } from '../client/src/api';
+import { customExercises, registerCustomExercise } from '../client/src/data/exercises';
+import type { Exercise, SetEntry } from '../client/src/types';
 
 function state(patch: Partial<StoreState> = {}): StoreState {
   return {
@@ -591,5 +608,264 @@ describe('F-06 Derived progress/history data', () => {
     ).toBeUndefined();
     expect(prevLift('missing')).toBeUndefined();
     expect(repeatWorkout('missing')).toBeUndefined();
+  });
+});
+
+// --- Volume math, per-hand loading, supersets and muscle resolution ---------
+
+function set(patch: Partial<SetEntry> = {}): SetEntry {
+  return { id: crypto.randomUUID(), reps: 8, weight: 100, isWarmup: false, position: 0, ...patch };
+}
+
+function ex(patch: Partial<Exercise> = {}): Exercise {
+  return { id: crypto.randomUUID(), name: 'Move', position: 0, sets: [], ...patch };
+}
+
+describe('EQ per-hand loading (perHandFactor)', () => {
+  it('doubles dumbbell moves but keeps single-dumbbell and one-arm variants ×1', () => {
+    expect(perHandFactor({ name: 'Dumbbell Curl', equipment: ['dumbbell'] })).toBe(2);
+    expect(perHandFactor({ name: 'Dumbbell Bench Press', equipment: ['dumbbell'] })).toBe(2);
+    // Held with both hands / one arm at a time → the entered load IS the total.
+    expect(perHandFactor({ name: 'Goblet Squat', equipment: ['dumbbell'] })).toBe(1);
+    expect(perHandFactor({ name: 'Dumbbell Pullover', equipment: ['dumbbell'] })).toBe(1);
+    expect(perHandFactor({ name: 'One-arm Dumbbell Row', equipment: ['dumbbell'] })).toBe(1);
+    expect(perHandFactor({ name: 'Single-arm Dumbbell Press', equipment: ['dumbbell'] })).toBe(1);
+  });
+
+  it('keeps single-stack cables ×1 but doubles bilateral two-cable moves', () => {
+    expect(perHandFactor({ name: 'Lat Pulldown', equipment: ['cable'] })).toBe(1);
+    expect(perHandFactor({ name: 'Triceps Pushdown', equipment: ['cable'] })).toBe(1);
+    expect(perHandFactor({ name: 'Seated Cable Row', equipment: ['cable'] })).toBe(1);
+    expect(perHandFactor({ name: 'Cable Pec Fly', equipment: ['cable'] })).toBe(2);
+    expect(perHandFactor({ name: 'Cable Fly', equipment: ['cable'] })).toBe(2);
+    expect(perHandFactor({ name: 'Cable Crossover', equipment: ['cable'] })).toBe(2);
+  });
+
+  it('leaves barbell and machine moves at ×1', () => {
+    expect(perHandFactor({ name: 'Bench Press', equipment: ['barbell'] })).toBe(1);
+    expect(perHandFactor({ name: 'Leg Press', equipment: ['machine'] })).toBe(1);
+    expect(perHandFactor({ name: 'Pull-up', equipment: [] })).toBe(1);
+  });
+});
+
+describe('EQ set and exercise volume', () => {
+  it('sums start weight plus drops and ignores warm-ups', () => {
+    expect(setVolumeKg(set({ reps: 8, weight: 100 }))).toBe(800);
+    expect(setVolumeKg(set({ isWarmup: true, reps: 10, weight: 40 }))).toBe(0);
+
+    const dropSet = set({
+      reps: 5,
+      weight: 100,
+      type: 'drop',
+      drops: [
+        { reps: 5, weight: 80 },
+        { reps: 5, weight: 60 },
+      ],
+    });
+    // 100×5 + 80×5 + 60×5 = 500 + 400 + 300
+    expect(setVolumeKg(dropSet)).toBe(1200);
+    expect(setRepsTotal(dropSet)).toBe(15);
+  });
+
+  it('applies the per-hand factor to a whole exercise and drops warm-up sets', () => {
+    const curl = ex({
+      name: 'Dumbbell Curl',
+      equipment: ['dumbbell'],
+      sets: [set({ reps: 10, weight: 20 }), set({ isWarmup: true, reps: 10, weight: 10 })],
+    });
+    // working set 20×10 = 200, warm-up excluded, ×2 hands = 400
+    expect(exerciseVolumeKg(curl)).toBe(400);
+
+    const bench = ex({
+      name: 'Bench Press',
+      equipment: ['barbell'],
+      sets: [set({ reps: 5, weight: 100 })],
+    });
+    expect(exerciseVolumeKg(bench)).toBe(500);
+  });
+});
+
+describe('MG muscle resolution and per-muscle volume', () => {
+  it('prefers the exercise’s own muscle fields, then the catalog, then null', () => {
+    expect(
+      resolveMuscles({ name: 'Anything', primaryMuscle: 'chest', secondaryMuscles: ['triceps'] }),
+    ).toEqual({ primary: 'chest', secondary: ['triceps'] });
+
+    // Falls back to the catalog by name (Bench Press → chest).
+    const byCatalog = resolveMuscles({ name: 'Bench Press' });
+    expect(byCatalog.primary).toBe('chest');
+
+    // Non-strength kinds and unknown names resolve to no muscle.
+    expect(resolveMuscles({ name: 'Bench Press', kind: 'cardio' })).toEqual({
+      primary: null,
+      secondary: [],
+    });
+    expect(resolveMuscles({ name: 'No Such Lift 123' })).toEqual({
+      primary: null,
+      secondary: [],
+    });
+  });
+
+  it('sums volume and set counts per primary muscle across workouts', () => {
+    const w = workout({
+      exercises: [
+        ex({
+          name: 'Bench Press',
+          equipment: ['barbell'],
+          primaryMuscle: 'chest',
+          sets: [set({ reps: 5, weight: 100 }), set({ reps: 5, weight: 100 })],
+        }),
+        ex({
+          name: 'Back Squat',
+          equipment: ['barbell'],
+          primaryMuscle: 'quads',
+          sets: [set({ reps: 5, weight: 140 })],
+        }),
+      ],
+    });
+
+    const vol = muscleVolumeKg([w]);
+    expect(vol.get('chest')).toBe(1000);
+    expect(vol.get('quads')).toBe(700);
+
+    const counts = muscleSetsInWorkout(w);
+    expect(counts.get('chest')).toBe(2);
+    expect(counts.get('quads')).toBe(1);
+  });
+});
+
+describe('EQ equipment resolution', () => {
+  it('prefers the exercise’s own equipment then the catalog, and lists a workout’s kit', () => {
+    expect(equipmentFor({ name: 'Whatever', equipment: ['cable'] })).toEqual(['cable']);
+    // Fallback via a registered custom exercise.
+    registerCustomExercise({
+      id: 'test-machine',
+      name: 'Test Machine Move',
+      primaryMuscle: 'chest',
+      secondaryMuscles: ['triceps'],
+      equipment: ['machine'],
+    });
+    expect(equipmentFor({ name: 'Test Machine Move', equipment: [] })).toEqual(['machine']);
+
+    const w = workout({
+      exercises: [
+        ex({ name: 'A', equipment: ['barbell'] }),
+        ex({ name: 'B', equipment: ['cable'] }),
+        ex({ name: 'C', equipment: ['barbell'] }),
+      ],
+    });
+    expect(workoutEquipment(w)).toEqual(['barbell', 'cable']);
+  });
+});
+
+describe('SS supersets', () => {
+  it('groups exercises into blocks and counts rounds', () => {
+    const w = workout({
+      exercises: [
+        ex({ id: 'solo', name: 'Squat', position: 0 }),
+        ex({
+          id: 'a1',
+          name: 'Bench',
+          position: 1,
+          groupId: 'g1',
+          groupOrder: 0,
+          plannedSets: 3,
+          sets: [set()],
+        }),
+        ex({
+          id: 'a2',
+          name: 'Row',
+          position: 2,
+          groupId: 'g1',
+          groupOrder: 1,
+          sets: [set(), set()],
+        }),
+      ],
+    });
+
+    const blocks = sessionBlocks(w);
+    expect(blocks.map((b) => b.kind)).toEqual(['single', 'group']);
+    const group = blocks.find((b) => b.kind === 'group')!;
+    if (group.kind !== 'group') throw new Error('expected group');
+    expect(group.group.letter).toBe('A');
+    expect(group.group.exercises.map((e) => e.id)).toEqual(['a1', 'a2']);
+    // longest member: a1 planned 3 vs a2 logged 2 → 3 rounds
+    expect(groupRounds(group.group)).toBe(3);
+    // shortest member has 1 logged set → next round is 2
+    expect(groupCurrentRound(group.group)).toBe(2);
+    expect(nextSupersetLetter(w)).toBe('B');
+  });
+
+  it('treats a lone group member as a single block', () => {
+    const w = workout({
+      exercises: [ex({ id: 'x', name: 'Curl', position: 0, groupId: 'g9', groupOrder: 0 })],
+    });
+    expect(sessionBlocks(w).map((b) => b.kind)).toEqual(['single']);
+  });
+});
+
+describe('Custom catalog authoring', () => {
+  it('only admins/trainers persist custom exercises; members stay local-only', () => {
+    setAuth('token', 'demo', 'member');
+    saveCatalogExercise({
+      name: 'Member Move',
+      primaryMuscle: 'chest',
+      secondaryMuscles: [],
+      equipment: ['machine'],
+    });
+    expect(customExercises().some((e) => e.name === 'Member Move')).toBe(false);
+
+    setRole('admin');
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        calls.push(`${init?.method} ${url}`);
+        return new Response(
+          JSON.stringify({
+            exercise: {
+              id: 'srv-1',
+              name: 'Admin Move',
+              primaryMuscle: 'back',
+              secondaryMuscles: ['biceps'],
+              equipment: ['cable'],
+            },
+          }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    saveCatalogExercise({
+      name: 'Admin Move',
+      primaryMuscle: 'back',
+      secondaryMuscles: ['biceps'],
+      equipment: ['cable'],
+    });
+    // Registered locally right away (before the round-trip resolves).
+    expect(customExercises().some((e) => e.name === 'Admin Move')).toBe(true);
+    expect(calls.some((c) => c.includes('PUT') && c.includes('/api/exercises'))).toBe(true);
+  });
+
+  it('updates an exercise’s muscles/equipment in place and queues the change', () => {
+    const w = startWorkout();
+    const e = addExercise(w.id, 'Mystery Lift');
+    updateExerciseMeta(w.id, e.id, {
+      primaryMuscle: 'shoulders',
+      secondaryMuscles: ['triceps'],
+      equipment: ['dumbbell'],
+    });
+
+    const current = __getStateForTests().workouts.find((x) => x.id === w.id)!;
+    expect(current.exercises[0]).toMatchObject({
+      primaryMuscle: 'shoulders',
+      secondaryMuscles: ['triceps'],
+      equipment: ['dumbbell'],
+    });
+    expect(
+      __getStateForTests().queue.some(
+        (q) => q.method === 'PUT' && q.url.endsWith(`/exercises/${e.id}`),
+      ),
+    ).toBe(true);
   });
 });

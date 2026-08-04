@@ -13,6 +13,8 @@ import {
   fmtSetSnack,
   fmtShortDate,
   fmtTonnes,
+  fmtWeekday,
+  fmtWeekdayDayMonth,
   setLocale,
   getLocale,
   t,
@@ -65,5 +67,20 @@ describe('F-02 i18n', () => {
     expect(fmtTonnes(2100)).toBe('2.1 t');
     expect(fmtSet(85, 8)).toBe('85 × 8');
     expect(fmtSetSnack(8, 80)).toBe('8 × 80 kg');
+  });
+
+  it('formats weekday kickers used by Today and template rows', () => {
+    // 2026-07-31 is a Friday; noon UTC keeps the weekday stable across TZs.
+    const friday = Date.UTC(2026, 6, 31, 12, 0);
+
+    setLocale('en');
+    expect(fmtWeekday(friday, 'en')).toBe('Friday');
+    expect(fmtWeekdayDayMonth(friday, 'en')).toBe('Friday, July 31');
+
+    // Locale-aware: the Ukrainian weekday is a non-empty, different string.
+    const uk = fmtWeekday(friday, 'uk');
+    expect(uk).toBeTruthy();
+    expect(uk).not.toBe('Friday');
+    expect(fmtWeekdayDayMonth(friday, 'uk')).toContain('липня');
   });
 });

@@ -836,8 +836,11 @@ describe('F-03 session UI', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
     expect(screen.getByPlaceholderText('Search exercises')).toBeTruthy();
+    // The four large kind buttons: Strength keeps the search open; the three
+    // timed kinds (Cardio/Warm-up/Cool-down) log a session of that kind
+    // directly and close the sheet.
     await userEvent.click(screen.getAllByRole('button', { name: 'Cardio' })[0]);
-    expect(screen.getByPlaceholderText('Add cardio')).toBeTruthy();
+    await waitFor(() => expect(screen.queryByPlaceholderText('Search exercises')).toBeNull());
 
     cleanup();
     __replaceStateForTests(s);
