@@ -6,6 +6,7 @@
  * include dropset parts, apply per-hand factor for dumbbells / bilateral cables.
  */
 import { db } from './lib';
+import EQUIPMENT_BY_NAME from './data/equipment-by-name.json';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -60,12 +61,15 @@ export function setVolumeKg(s: StoredSet): number {
 }
 
 /**
- * Equipment on the exercise doc, or a light name heuristic when older sessions
- * lack `equipment` (full catalog lives only on the client).
+ * Equipment on the exercise doc, catalog name lookup, or a light name heuristic
+ * when older sessions lack `equipment`.
  */
 export function equipmentFor(ex: Pick<StoredExercise, 'name' | 'equipment'>): string[] {
   if (ex.equipment && ex.equipment.length > 0) return ex.equipment;
-  const n = (ex.name ?? '').toLowerCase();
+  const key = (ex.name ?? '').trim().toLowerCase();
+  const fromCatalog = (EQUIPMENT_BY_NAME as Record<string, string>)[key];
+  if (fromCatalog) return [fromCatalog];
+  const n = key;
   if (/\bdumbbell\b|\bdb\b|гантел/.test(n)) return ['dumbbell'];
   if (/\bcable\b|кабел|блок/.test(n)) return ['cable'];
   if (/\bbarbell\b|\bbb\b|штан/.test(n)) return ['barbell'];

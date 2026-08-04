@@ -405,6 +405,8 @@ describe('EQ per-hand loading (perHandFactor)', () => {
     expect(perHandFactor({ name: 'Dumbbell Pullover', equipment: ['dumbbell'] })).toBe(1);
     expect(perHandFactor({ name: 'One-arm Dumbbell Row', equipment: ['dumbbell'] })).toBe(1);
     expect(perHandFactor({ name: 'Single-arm Dumbbell Press', equipment: ['dumbbell'] })).toBe(1);
+    // Catalog name without "dumbbell" in the title — resolve via muscleInfoByName.
+    expect(perHandFactor({ name: 'Alternate Hammer Curl', equipment: [] })).toBe(2);
   });
 
   it('keeps single-stack cables ×1 but doubles bilateral two-cable moves', () => {

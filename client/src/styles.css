@@ -1966,7 +1966,7 @@ i > svg {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-neutral-600);
-  padding-bottom: 4px;
+  padding: 0 8px 4px;
 }
 
 .set-row {
@@ -1974,16 +1974,17 @@ i > svg {
   grid-template-columns: 18px 1fr 1fr 62px;
   gap: 8px;
   align-items: center;
-  padding: 7px 0;
+  padding: 7px 8px;
   font-size: 16px;
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 1px 0 var(--color-divider);
+  box-shadow: none;
   background: none;
   border: none;
   width: 100%;
   color: var(--color-text);
   text-align: left;
   cursor: pointer;
+  border-radius: 0;
 }
 
 .set-row .idx {
@@ -2004,7 +2005,7 @@ i > svg {
 .set-row.record {
   background: var(--color-ok-tint);
   border-radius: 0;
-  box-shadow: inset 3px 0 0 var(--color-ok);
+  box-shadow: none;
 }
 
 .set-row.record .idx {
@@ -2024,7 +2025,9 @@ i > svg {
   grid-template-columns: 18px 1fr 1fr 62px;
   gap: 8px;
   align-items: center;
-  padding: 9px 0 2px;
+  margin-top: 10px;
+  padding: 14px 8px 2px;
+  border-top: 1px solid var(--color-divider);
   font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
@@ -8442,9 +8445,6 @@ i > svg {
   .recent-row:hover,
   .set-row:hover {
     background: rgba(233, 234, 236, 0.045);
-    box-shadow:
-      inset 3px 0 0 var(--color-accent),
-      0 1px 0 var(--color-divider);
   }
 
   .recent-row:hover .go,
@@ -8460,8 +8460,6 @@ i > svg {
 
   .set-row.record:hover {
     background: color-mix(in srgb, var(--color-ok-tint) 82%, var(--color-ok) 18%);
-    border-radius: 0;
-    box-shadow: inset 3px 0 0 var(--color-ok);
   }
 
   .live-card:hover,
@@ -9427,7 +9425,7 @@ i > svg {
   .session-live .set-row,
   .session-past .set-row {
     min-height: 38px;
-    padding: 7px 0;
+    padding: 7px 8px;
   }
 
   .session-live .set-row:hover,
@@ -9443,7 +9441,9 @@ i > svg {
 
   .session-live .ghost-row,
   .session-past .ghost-row {
-    padding: 7px 0;
+    margin-top: 10px;
+    padding: 14px 8px 7px;
+    border-top: 1px solid var(--color-divider);
   }
 
   .session-live .ghost-row .gval,
@@ -9798,11 +9798,6 @@ i > svg {
   .session-past .ghost-row .gval:first-of-type {
     border-color: var(--color-neutral-700);
     box-shadow: none;
-  }
-
-  .session-live .ghost-row::before,
-  .session-past .ghost-row::before {
-    content: none;
   }
 }
 
@@ -11089,11 +11084,12 @@ h6 {
 /* --- Dropsets in the set list (DS-2) -------------------------------------- */
 .set-wrap {
   padding: var(--space-2) 0;
-  box-shadow: 0 1px 0 var(--color-divider);
+  box-shadow: none;
 }
 
 .set-wrap > .set-row {
-  padding: 0;
+  /* Keep horizontal inset so record/hover tint don't sit flush. */
+  padding: 7px 8px;
   box-shadow: none;
 }
 

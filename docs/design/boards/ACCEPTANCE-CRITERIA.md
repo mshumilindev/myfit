@@ -360,7 +360,7 @@ Areas: AUTH · ONB · AVATAR · ROLE · ADMIN · INVITE · TRAINER · SEARCH · 
 
 **AC-GYM-04 [S-46]** A gym MUST show live "Inside" proximity, visit count and the logged/total ratio, with the ratio ruby when visits are unlogged.
 
-**AC-GYM-05 [S-47]** Radius MUST be adjustable from 30 m to 2000 m, default 150 m.
+**AC-GYM-05 [S-47]** Radius MUST be adjustable from 30 m to 2000 m, default 50 m.
 
 **AC-GYM-06 [S-48]** Deleting a gym MUST state the visits lost and explicitly state that workouts are untouched.
 

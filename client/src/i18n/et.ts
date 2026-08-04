@@ -871,7 +871,7 @@ export const et: Strings = {
   nVisits: (n) => `Külastusi: ${n}`,
   radius: 'Raadius',
   radiusHint:
-    'Laiem püüab rohkem külastusi, aga ka kõrvaloleva kohviku. 150 m sobib enamikule saalidest.',
+    'Laiem püüab rohkem külastusi, aga ka kõrvaloleva kohviku. 50 m sobib enamikule saalidest.',
   deleteGymTitle: (name) => `Kustutada „${name}"?`,
   deleteGymBody: (n) =>
     `Koos sellega kaob ${n} salvestatud külastust ja selle koha meeldetuletused peatuvad. Treeninguid ei puudutata.`,

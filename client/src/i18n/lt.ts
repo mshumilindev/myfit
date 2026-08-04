@@ -883,7 +883,7 @@ export const lt: Strings = {
   nVisits: (n) => `Apsilankymų: ${n}`,
   radius: 'Spindulys',
   radiusHint:
-    'Platesnis pagauna daugiau apsilankymų, bet ir kavinę šalia. 150 m tinka daugumai salių.',
+    'Platesnis pagauna daugiau apsilankymų, bet ir kavinę šalia. 50 m tinka daugumai salių.',
   deleteGymTitle: (name) => `Ištrinti „${name}“?`,
   deleteGymBody: (n) =>
     `Kartu dings ${n} užfiksuotų apsilankymų, o priminimai šiai vietai sustos. Treniruotės nepaliestos.`,

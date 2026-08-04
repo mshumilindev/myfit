@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS gyms (
   name       TEXT NOT NULL,
   lat        REAL NOT NULL,
   lng        REAL NOT NULL,
-  radius_m   INTEGER NOT NULL DEFAULT 150,
+  radius_m   INTEGER NOT NULL DEFAULT 50,
   updated_at INTEGER NOT NULL
 );
 

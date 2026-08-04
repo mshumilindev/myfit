@@ -885,7 +885,7 @@ export const en = {
   visitsLast7: 'Visits · last 7 days',
   nVisits: (n: number) => `${n} visits`,
   radius: 'Radius',
-  radiusHint: 'Wider catches more visits but also the café next door. 150 m suits most gyms.',
+  radiusHint: 'Wider catches more visits but also the café next door. 50 m suits most gyms.',
   deleteGymTitle: (name: string) => `Delete “${name}”?`,
   deleteGymBody: (n: number) =>
     `${n} recorded visits go with it and reminders for this place stop. Your workouts are untouched.`,

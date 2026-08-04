@@ -8,6 +8,7 @@ import {
   workoutVolumeKg,
   type useStore,
 } from '../store';
+import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   searchGyms,
   readCache,
@@ -71,7 +72,13 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
     }
   }
 
-  function saveGym(gymName: string, lat: number, lng: number, accuracy: number, radiusM = 150) {
+  function saveGym(
+    gymName: string,
+    lat: number,
+    lng: number,
+    accuracy: number,
+    radiusM = DEFAULT_GYM_RADIUS_M,
+  ) {
     const g = upsertGym({ name: gymName.trim(), lat, lng, radiusM });
     setJustAdded(g.id);
     setAdd({ phase: 'idle' });

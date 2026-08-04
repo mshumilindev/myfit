@@ -163,7 +163,7 @@ const localProvider: Provider = async ({ query, savedGyms }) => {
  * the caller's nearest-first sort places the closest branch on top. We request
  * a generous limit (40) because a chain's closest branch can sit well below its
  * flagship in importance order — at limit 12 the nearest gym could be missing
- * entirely (the reason a bare "Zdrofit" once hid the 150 m branch).
+ * entirely (the reason a bare "Zdrofit" once hid the 50 m branch).
  */
 /** Cyrillic → Latin transliteration so "Здрофіт" also finds "Zdrofit". */
 const CYR_LATIN: Record<string, string> = {

@@ -39,7 +39,7 @@ gymsRouter.put('/gyms/:id', (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
   const { id } = req.params;
   if (!isId(id)) return res.status(400).json({ error: 'bad id' });
-  const { name, lat, lng, radiusM = 150, favorite = false, inventory = [] } = req.body ?? {};
+  const { name, lat, lng, radiusM = 50, favorite = false, inventory = [] } = req.body ?? {};
   if (typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ error: 'name required' });
   }
@@ -65,7 +65,7 @@ gymsRouter.put('/gyms/:id', (req: AuthedRequest, res: Response) => {
     name.trim(),
     lat,
     lng,
-    Math.max(30, Math.min(2000, Number(radiusM) || 150)),
+    Math.max(30, Math.min(2000, Number(radiusM) || 50)),
     favorite ? 1 : 0,
     JSON.stringify(Array.isArray(inventory) ? inventory.filter((x) => typeof x === 'string') : []),
     Date.now(),

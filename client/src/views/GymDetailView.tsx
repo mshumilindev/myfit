@@ -11,6 +11,7 @@ import {
   getCurrentPositionOnce,
   workoutVolumeKg,
 } from '../store';
+import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   resolveAddress,
   resolveGymMeta,
@@ -137,7 +138,7 @@ export function GymDetailView({
     );
   }
 
-  const ensureSaved = () => gym ?? upsertGym({ name, lat, lng, radiusM: 150 });
+  const ensureSaved = () => gym ?? upsertGym({ name, lat, lng, radiusM: DEFAULT_GYM_RADIUS_M });
 
   const sessions = gym
     ? store.workouts.filter((w) => w.gymId === gym.id && w.finishedAt !== null)
@@ -147,7 +148,7 @@ export function GymDetailView({
     ? sessions.reduce((s, w) => s + ((w.finishedAt ?? 0) - w.startedAt), 0) / sessions.length
     : 0;
   const dist = coords ? haversineM(coords, { lat, lng }) : null;
-  const inside = dist !== null && dist <= (gym?.radiusM ?? 150);
+  const inside = dist !== null && dist <= (gym?.radiusM ?? DEFAULT_GYM_RADIUS_M);
 
   const directionsHref = coords
     ? `https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=${coords.lat}%2C${coords.lng}%3B${lat}%2C${lng}`

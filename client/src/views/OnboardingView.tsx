@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { callFn, signInWithPayload, currentUid, HttpError, type AuthPayload } from '../api';
 import { startWorkout, upsertGym, getCurrentPositionOnce } from '../store';
+import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   searchGyms,
   haversineM,
@@ -335,7 +336,12 @@ export function OnboardingView({
           rail={rail}
           onPick={(r) => {
             if (r) {
-              const g = upsertGym({ name: r.name, lat: r.lat, lng: r.lng, radiusM: 150 });
+              const g = upsertGym({
+                name: r.name,
+                lat: r.lat,
+                lng: r.lng,
+                radiusM: DEFAULT_GYM_RADIUS_M,
+              });
               if (r.address) cacheAddress(r.lat, r.lng, r.address);
               setGym({
                 step: 4,

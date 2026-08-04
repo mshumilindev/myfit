@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   est1rm,
   exerciseNeeds,
+  exerciseVolumeKg,
   missingAtGym,
   muscleVolumeKg,
   topSet,
@@ -522,10 +523,6 @@ function UnlockDots({ finishedCount, label }: { finishedCount: number; label: st
 function equipLabel(id: string, t: ReturnType<typeof useT>['t']): string {
   const names = t.equipmentNames as Record<string, string>;
   return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
-}
-
-function exerciseVolumeKg(exercise: Store['workouts'][number]['exercises'][number]): number {
-  return exercise.sets.reduce((sum, set) => sum + (set.weight ?? 0) * set.reps, 0);
 }
 
 function getDesktopDetailMatch(): boolean {

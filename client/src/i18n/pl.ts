@@ -876,7 +876,7 @@ export const pl: Strings = {
   visitsLast7: 'Wizyty · ostatnie 7 dni',
   nVisits: (n) => `Wizyt: ${n}`,
   radius: 'Promień',
-  radiusHint: 'Szerzej łapie więcej wizyt, ale i kawiarnię obok. 150 m pasuje większości siłowni.',
+  radiusHint: 'Szerzej łapie więcej wizyt, ale i kawiarnię obok. 50 m pasuje większości siłowni.',
   deleteGymTitle: (name) => `Usunąć „${name}”?`,
   deleteGymBody: (n) =>
     `Zniknie z nim ${n} zapisanych wizyt, a przypomnienia dla tego miejsca ustaną. Treningi zostają nietknięte.`,

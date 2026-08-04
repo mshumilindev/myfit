@@ -72,6 +72,9 @@ export interface Gym {
   inventory?: string[];
 }
 
+/** Default geofence for a newly saved gym (AC-GYM-05). */
+export const DEFAULT_GYM_RADIUS_M = 50;
+
 /** "Був у залі 1год+, але тренування не залоговане" */
 export interface Reminder {
   gymId: string;
