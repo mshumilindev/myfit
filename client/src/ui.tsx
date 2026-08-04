@@ -213,13 +213,120 @@ export function useIsDesktop(): boolean {
   return is;
 }
 
-export function Spinner({ size = 14, onAccent = false }: { size?: number; onAccent?: boolean }) {
+/** S-10 · Today · skeleton — never a spinner. */
+export function ScreenSkeleton({ label }: { label?: string }) {
+  const recent = [
+    { title: 120, sub: 180 },
+    { title: 96, sub: 164 },
+    { title: 130, sub: 150 },
+  ] as const;
   return (
-    <span
-      className={`sp${onAccent ? ' on-accent' : ''}`}
-      style={{ width: size, height: size }}
+    <div className="screen screen-skel" role="status" aria-live="polite" aria-label={label}>
+      <div className="skel-head">
+        <div className="sk" style={{ width: 120, height: 10 }} />
+        <div className="sk" style={{ width: 210, height: 26 }} />
+      </div>
+      <div className="skel-week">
+        {Array.from({ length: 7 }, (_, i) => (
+          <div key={i} className="sk" style={{ flex: 1, height: 46 }} />
+        ))}
+      </div>
+      <div className="sk skel-cta" />
+      <div className="skel-tiles">
+        <div className="sk" style={{ flex: 1, height: 92 }} />
+        <div className="sk" style={{ flex: 1, height: 92 }} />
+      </div>
+      <div className="skel-recent">
+        <div className="sk" style={{ width: 70, height: 9 }} />
+        {recent.map((row, i) => (
+          <div key={i} className="skel-recent-row">
+            <div className="sk" style={{ width: 40, height: 9 }} />
+            <div className="skel-recent-body">
+              <div className="sk" style={{ width: row.title, height: 13 }} />
+              <div className="sk" style={{ width: row.sub, height: 9 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** AD-06 people rows, or S-50 avatar-row when `withMeta` is false. */
+export function RowListSkeleton({
+  rows = 3,
+  withAvatar = true,
+  withMeta = true,
+  className,
+}: {
+  rows?: number;
+  withAvatar?: boolean;
+  withMeta?: boolean;
+  className?: string;
+}) {
+  return (
+    <div
+      className={['row-list-skel', className].filter(Boolean).join(' ')}
       aria-hidden
-    />
+      role="presentation"
+    >
+      {withMeta && <div className="sk" style={{ width: 120, height: 10 }} />}
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="row-list-skel-item">
+          {withAvatar && (
+            <div
+              className="sk row-list-skel-avatar"
+              style={withMeta ? undefined : { width: 44, height: 44, borderRadius: 12 }}
+            />
+          )}
+          {withMeta ? (
+            <>
+              <div className="sk row-list-skel-line" />
+              <div className="sk row-list-skel-meta" style={{ width: 70 }} />
+              <div className="sk row-list-skel-meta" style={{ width: 90 }} />
+            </>
+          ) : (
+            <div className="row-list-skel-body">
+              <div className="sk" style={{ width: '40%', height: 13 }} />
+              <div className="sk" style={{ width: '65%', height: 9 }} />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** O-10 · Profile · avatar & people skeleton. */
+export function ProfileSkeleton() {
+  return (
+    <div className="profile-skel" aria-hidden role="presentation">
+      <div className="profile-skel-hero">
+        <div className="sk profile-skel-avatar" />
+        <div className="profile-skel-id">
+          <div className="sk" style={{ width: '55%', height: 18 }} />
+          <div className="sk" style={{ width: '42%', height: 12 }} />
+          <div className="sk" style={{ width: 72, height: 22, borderRadius: 999 }} />
+        </div>
+      </div>
+      <div className="sk" style={{ width: 160, height: 10 }} />
+      <div className="profile-skel-people">
+        {[0, 1].map((i) => (
+          <div key={i} className="profile-skel-person">
+            <div className="sk profile-skel-person-avatar" />
+            <div className="profile-skel-person-body">
+              <div className="sk" style={{ width: '46%', height: 14 }} />
+              <div className="sk" style={{ width: '62%', height: 11 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="profile-skel-rows">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="sk profile-skel-row" />
+        ))}
+      </div>
+    </div>
   );
 }
 

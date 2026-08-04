@@ -9,8 +9,8 @@ import { ref, uploadBytes } from 'firebase/storage';
 import { currentUid } from '../api';
 import { db, storage } from '../firebase';
 import { useT } from '../i18n';
-import { Icon, Spinner } from '../ui';
-import { Avatar } from './Avatar';
+import { Icon } from '../ui';
+import { Avatar, invalidateAvatarCache } from './Avatar';
 
 export function AvatarUploader({
   userId,
@@ -28,7 +28,7 @@ export function AvatarUploader({
   refreshKey?: number;
   compact?: boolean;
   idleFooter?: ReactNode;
-  onUploaded: () => void;
+  onUploaded: (previewUrl?: string) => void;
   onRemoved?: () => Promise<void> | void;
 }) {
   const { t } = useT();
@@ -212,8 +212,10 @@ export function AvatarUploader({
         cacheControl: 'no-store',
       });
       await updateDoc(doc(db, 'users', uid), { avatarExt: 'jpg', updatedAt: Date.now() });
+      const preview = URL.createObjectURL(blob);
+      invalidateAvatarCache(uid);
       clearPicked();
-      onUploaded();
+      onUploaded(preview);
     } catch (e) {
       setError(e instanceof Error ? e.message : t.error);
     } finally {
@@ -272,7 +274,7 @@ export function AvatarUploader({
                 name={name}
                 hasPhoto={hasPhoto}
                 refreshKey={refreshKey}
-                size={compact ? 104 : 142}
+                size={compact ? 112 : 150}
               />
             ) : (
               <Icon name="plus" className="avatar-uploader-plus" />
@@ -288,7 +290,7 @@ export function AvatarUploader({
               onClick={() => void openCamera()}
               disabled={busy || cameraBusy}
             >
-              {cameraBusy ? <Spinner size={12} /> : <Icon name="camera" />} {t.onbCamera}
+              <Icon name="camera" /> {t.onbCamera}
             </button>
             <button
               className="btn btn-secondary"
@@ -437,7 +439,7 @@ export function AvatarUploader({
               disabled={busy || !imageSize}
               onClick={() => void upload()}
             >
-              {busy && <Spinner onAccent />} {t.onbUsePhoto}
+              {t.onbUsePhoto}
             </button>
           </div>
         </>

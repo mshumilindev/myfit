@@ -67,6 +67,13 @@ function pollHealth(): void {
   req.setTimeout(2000, () => req.destroy());
 }
 
+const APP_ICON = path.resolve(__dirname, '../assets/app-icon.png');
+const TRAY_ICON = path.resolve(__dirname, '../assets/tray.png');
+
+function appIcon() {
+  return nativeImage.createFromPath(APP_ICON);
+}
+
 // --- Popup window under the tray icon --------------------------------------
 
 function createWindow(): void {
@@ -78,6 +85,7 @@ function createWindow(): void {
     resizable: true,
     fullscreenable: false,
     skipTaskbar: true,
+    icon: appIcon(),
     webPreferences: { contextIsolation: true },
   });
   win.loadURL(APP_URL);
@@ -131,7 +139,8 @@ function openMainWindow(): void {
     height: 800,
     minWidth: 480,
     minHeight: 600,
-    title: 'My Fit',
+    title: 'Spotter',
+    icon: appIcon(),
     webPreferences: { contextIsolation: true },
   });
   mainWin.loadURL(APP_URL);
@@ -146,9 +155,8 @@ function openMainWindow(): void {
 // --- Tray ------------------------------------------------------------------
 
 function trayIcon() {
-  const icon = nativeImage.createFromPath(path.resolve(__dirname, '../assets/trayTemplate.png'));
-  icon.setTemplateImage(true); // adapts to light/dark menu bar on macOS
-  return icon;
+  // Gold brand glyph (not a macOS template — color is intentional).
+  return nativeImage.createFromPath(TRAY_ICON);
 }
 
 function updateMenu(): void {
@@ -178,14 +186,17 @@ function updateMenu(): void {
 }
 
 app.whenReady().then(() => {
-  if (process.platform === 'darwin') app.dock?.hide(); // menu-bar app only
+  if (process.platform === 'darwin') {
+    app.dock?.hide(); // menu-bar app only
+    app.dock?.setIcon(appIcon());
+  }
 
   startServer();
   setInterval(pollHealth, 3000);
   pollHealth();
 
   tray = new Tray(trayIcon());
-  tray.setToolTip('My Fit');
+  tray.setToolTip('Spotter');
   updateMenu();
   tray.on('click', toggleWindow);
 });

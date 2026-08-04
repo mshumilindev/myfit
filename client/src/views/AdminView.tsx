@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { callFn, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
-import { Dialog, Icon, Sheet, Spinner } from '../ui';
+import { Dialog, Icon, Sheet } from '../ui';
 import { Avatar } from '../components/Avatar';
 
 interface Person {
@@ -693,7 +693,7 @@ function NewPersonDialog(props: {
             }
           }}
         >
-          {busy && <Spinner onAccent />} {t.save}
+          {t.save}
         </button>
       </div>
     </Sheet>
@@ -834,7 +834,7 @@ function AssignTrainerDialog(props: {
             }
           }}
         >
-          {busy && <Spinner onAccent />} {t.adminAssign}
+          {t.adminAssign}
         </button>
       </div>
     </Sheet>
@@ -905,7 +905,7 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
             }
           }}
         >
-          {busy && <Spinner onAccent />} {t.save}
+          {t.save}
         </button>
       </div>
     </Sheet>

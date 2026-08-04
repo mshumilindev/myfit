@@ -26,7 +26,7 @@ import { HouseGraphic } from '../components/HouseGraphic';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { Icon, Spinner } from '../ui';
+import { Icon } from '../ui';
 
 // Optional place-provider keys, read from Vite env at build time. Absent keys
 // leave that provider "skipped" (chip greyed) — the app works without them.
@@ -605,7 +605,7 @@ function GymSearch({
             return (
               <span key={id} className={`provider-chip ${status}`}>
                 {status === 'pending' ? (
-                  <Spinner size={10} />
+                  <span className="sk-dot" />
                 ) : status === 'answered' ? (
                   <Icon name="check-circle" weight="fill" />
                 ) : null}
@@ -659,7 +659,9 @@ function GymSearch({
 
       {needle.length >= 2 && (
         <button className="gym-result manual" disabled={busy} onClick={() => onManualHere(needle)}>
-          <span className="thumb">{busy ? <Spinner onAccent /> : <Icon name="crosshair" />}</span>
+          <span className="thumb">
+            {busy ? <span className="sk-dot" /> : <Icon name="crosshair" />}
+          </span>
           <span className="body">
             <span className="name" style={{ color: 'var(--color-accent-300)' }}>
               «{needle}»

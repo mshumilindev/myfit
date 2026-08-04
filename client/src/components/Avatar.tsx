@@ -18,6 +18,22 @@ export function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+/** Drop cached object-URLs for a user (all refresh generations). */
+export function invalidateAvatarCache(userId: string): void {
+  for (const [key, url] of urlCache) {
+    if (key === userId || key.startsWith(`${userId}#`)) {
+      URL.revokeObjectURL(url);
+      urlCache.delete(key);
+    }
+  }
+}
+
+/** Seed cache so the next Avatar mount paints immediately after upload. */
+export function seedAvatarCache(userId: string, objectUrl: string, refreshKey = 0): void {
+  invalidateAvatarCache(userId);
+  urlCache.set(`${userId}#${refreshKey}`, objectUrl);
+}
+
 export function Avatar({
   userId,
   name,
@@ -31,37 +47,65 @@ export function Avatar({
   size?: number;
   refreshKey?: number;
 }) {
-  const key = userId && hasPhoto ? `${userId}#${refreshKey}` : null;
-  // Cached object-URLs resolve synchronously (render-time), fetches via effect.
-  const cached = key ? (urlCache.get(key) ?? null) : null;
-  const [fetched, setFetched] = useState<string | null>(null);
-  const src = cached ?? fetched;
+  // Never use the literal "me" — Storage paths are avatars/{uid}/photo.
+  const uid = userId && userId !== 'me' ? userId : undefined;
+  const cacheKey = uid && hasPhoto ? `${uid}#${refreshKey}` : null;
+
+  return (
+    <AvatarFace
+      key={cacheKey ?? `initials-${name}-${size}`}
+      uid={uid}
+      cacheKey={cacheKey}
+      name={name}
+      size={size}
+    />
+  );
+}
+
+function AvatarFace({
+  uid,
+  cacheKey,
+  name,
+  size,
+}: {
+  uid?: string;
+  cacheKey: string | null;
+  name: string;
+  size: number;
+}) {
+  const [src, setSrc] = useState<string | null>(() =>
+    cacheKey ? (urlCache.get(cacheKey) ?? null) : null,
+  );
 
   useEffect(() => {
-    if (!key || urlCache.has(key)) return;
+    if (!cacheKey || !uid || urlCache.has(cacheKey)) return;
     let alive = true;
-    // getBlob honours storage.rules; a missing file / denied read simply falls
-    // through to initials. refreshKey re-runs this after an upload or removal.
-    getBlob(ref(storage, `avatars/${userId}/photo`))
+    getBlob(ref(storage, `avatars/${uid}/photo`))
       .then((blob) => {
         if (!blob || blob.size === 0) return null;
         return URL.createObjectURL(blob);
       })
       .then((url) => {
-        if (url && alive) {
-          urlCache.set(key, url);
-          setFetched(url);
+        if (!alive) {
+          if (url) URL.revokeObjectURL(url);
+          return;
+        }
+        if (url) {
+          urlCache.set(cacheKey, url);
+          setSrc(url);
         }
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.warn('[avatar] getBlob failed', uid, err);
+      });
     return () => {
       alive = false;
     };
-  }, [userId, key, refreshKey]);
+  }, [uid, cacheKey]);
 
   const style = { width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.38)) };
   if (src) {
-    return <img key={src} className="avatar lighten" style={style} src={src} alt="" />;
+    return <img className="avatar lighten" style={style} src={src} alt="" />;
   }
   return (
     <span className="avatar initials" style={style} aria-hidden>

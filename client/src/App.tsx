@@ -10,8 +10,17 @@ import {
 } from './api';
 import { db } from './firebase';
 import { getOpenWorkout, startSyncLoop, useStore, retrySync, discardBlockingChange } from './store';
+import { SpotterMark } from './brand/SpotterMark';
 import { useT } from './i18n';
-import { Icon, LanguageSelector, Snackbar, Toast, type SnackState, type ToastState } from './ui';
+import {
+  Icon,
+  LanguageSelector,
+  Snackbar,
+  Toast,
+  ScreenSkeleton,
+  type SnackState,
+  type ToastState,
+} from './ui';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -235,6 +244,23 @@ export function App() {
   const desktopRail = useDesktopRail();
   const snackSeq = useRef(0);
   const toastSeq = useRef(0);
+
+  // One-shot sign-out via #/logout (local testing / support links).
+  useEffect(() => {
+    if (!/^#\/logout\/?$/i.test(window.location.hash)) return;
+    let cancelled = false;
+    void (async () => {
+      await apiSignOut();
+      if (cancelled) return;
+      setAuthed(false);
+      setOverlay(null);
+      setJoinToken(null);
+      window.history.replaceState(null, '', '#/');
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [setOverlay]);
 
   useEffect(() => {
     if (!authed) return;
@@ -461,25 +487,7 @@ export function App() {
 /** Page-load placeholder: a skeleton of a typical screen, never a spinner. */
 function ScreenFallback() {
   const { t } = useT();
-  return (
-    <div className="screen screen-skel" role="status" aria-live="polite" aria-label={t.syncing}>
-      <div className="skel-head">
-        <div className="sk" style={{ width: 120, height: 11 }} />
-        <div className="sk" style={{ width: 170, height: 28 }} />
-      </div>
-      <div className="skel-grid">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="sk skel-stat" />
-        ))}
-      </div>
-      <div className="sk skel-block" />
-      <div className="skel-rows">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className="sk skel-row" />
-        ))}
-      </div>
-    </div>
-  );
+  return <ScreenSkeleton label={t.syncing} />;
 }
 
 function getDesktopRailMatch(): boolean {
@@ -535,7 +543,7 @@ function Rail(props: {
   return (
     <aside className="rail">
       <div className="rail-brand">
-        <Icon name="barbell" />
+        <SpotterMark size={32} variant="sidebar" />
         <span>{t.appName}</span>
       </div>
       {nav.map((x) => (
@@ -562,7 +570,7 @@ function Rail(props: {
           title={username}
         >
           <span className="account-avatar">
-            <Avatar userId="me" name={username} hasPhoto size={34} />
+            <Avatar userId={currentUid() ?? undefined} name={username} hasPhoto size={34} />
             <span className="dot" style={{ background: dotColor }} />
           </span>
         </button>

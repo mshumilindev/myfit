@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { callFn } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
-import { Icon, Spinner } from '../ui';
+import { Icon, RowListSkeleton } from '../ui';
 import { Avatar } from '../components/Avatar';
 
 interface Client {
@@ -62,7 +62,7 @@ export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => 
         </div>
       </div>
 
-      {clients === null && !failed && <Spinner size={18} />}
+      {clients === null && !failed && <RowListSkeleton rows={4} withMeta={false} />}
       {failed && (
         <div className="empty">
           <Icon name="warning-circle" />

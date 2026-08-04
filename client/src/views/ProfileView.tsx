@@ -5,8 +5,8 @@ import { deleteObject, ref } from 'firebase/storage';
 import { HttpError, callFn, currentUid, setUsername } from '../api';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { ConfirmDialog, Icon, LanguageSelector, Spinner, Switch } from '../ui';
-import { Avatar } from '../components/Avatar';
+import { ConfirmDialog, Icon, LanguageSelector, Switch, ProfileSkeleton } from '../ui';
+import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
@@ -204,13 +204,17 @@ export function ProfileView({
     }
   }
 
-  function avatarUploaded() {
+  function avatarUploaded(previewUrl?: string) {
     if (typeof load !== 'object') return;
+    setAvatarRefresh((n) => {
+      const next = n + 1;
+      if (previewUrl) seedAvatarCache(load.person.id, previewUrl, next);
+      return next;
+    });
     setLoaded({
       userId,
       value: { ...load, person: { ...load.person, avatar: true } },
     });
-    setAvatarRefresh((n) => n + 1);
     shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileAvatarUpdated });
   }
 
@@ -220,6 +224,7 @@ export function ProfileView({
     if (uid) {
       await deleteObject(ref(storage, `avatars/${uid}/photo`)).catch(() => undefined);
       await updateDoc(doc(db, 'users', uid), { avatarExt: null, updatedAt: Date.now() });
+      invalidateAvatarCache(uid);
     }
     setLoaded({
       userId,
@@ -329,7 +334,7 @@ export function ProfileView({
         </div>
       </div>
 
-      {load === 'loading' && <Spinner size={18} />}
+      {load === 'loading' && <ProfileSkeleton />}
       {(load === 'denied' || load === 'missing' || load === 'failed') && (
         <div className="empty">
           <Icon name="warning-circle" />
@@ -873,7 +878,7 @@ export function ProfileView({
                     disabled={savingNote || !trainerNote.trim()}
                     onClick={saveTrainerNote}
                   >
-                    {savingNote && <Spinner size={12} />} {t.save}
+                    {t.save}
                   </button>
                 </div>
               )}

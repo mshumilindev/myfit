@@ -95,6 +95,9 @@ html,
 body,
 #root {
   height: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 body {
@@ -105,6 +108,7 @@ body {
   font-size: 15px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
 button {
@@ -171,11 +175,17 @@ i > svg {
   margin: 0 auto;
   position: relative;
   overflow: hidden;
+  /* Translucent iOS status bar: keep chrome under the notch, pad content. */
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .screen {
   flex: 1;
+  min-height: 0; /* flex child must shrink or overflow-y never scrolls */
+  overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -409,7 +419,7 @@ i > svg {
   color: var(--color-neutral-100);
 }
 
-/* --- Skeleton & spinner (S-50 rules) ------------------------------------- */
+/* --- Skeleton placeholders (S-50: never spinners for data load) ----------- */
 
 @keyframes shimmer {
   0% {
@@ -420,12 +430,6 @@ i > svg {
   }
   100% {
     opacity: 0.35;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 
@@ -445,56 +449,172 @@ i > svg {
   animation: shimmer 1.6s ease-in-out infinite;
 }
 
-/* Page-load skeleton (replaces the spinner). Mirrors a typical screen: a
-   title, a small stat grid, a wide block and a few list rows. */
+/* S-10 · Today · skeleton — full-screen placeholder until cache resolves. */
 .screen-skel {
-  gap: 20px;
+  gap: var(--space-6);
 }
 .screen-skel .skel-head {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   padding-top: 6px;
 }
-.screen-skel .skel-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+.screen-skel .skel-week {
+  display: flex;
+  gap: 6px;
+}
+.screen-skel .skel-cta {
+  height: 62px;
+  border-radius: 14px;
+}
+.screen-skel .skel-tiles {
+  display: flex;
+  gap: 10px;
+}
+.screen-skel .skel-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.screen-skel .skel-recent-row {
+  display: flex;
   gap: 12px;
+  align-items: center;
 }
-@media (max-width: 719px) {
-  .screen-skel .skel-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.screen-skel .skel-recent-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
 }
-.screen-skel .skel-stat {
-  height: 74px;
-  border-radius: var(--radius-md);
-}
-.screen-skel .skel-block {
-  height: 130px;
-  border-radius: var(--radius-md);
-}
-.screen-skel .skel-rows {
+
+/* AD-06 · People list skeleton rows. */
+.row-list-skel {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
-.screen-skel .skel-row {
-  height: 42px;
+
+.program-list-skel {
+  padding: 8px 4px 12px;
+}
+
+.row-list-skel-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.row-list-skel-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.row-list-skel-line {
+  flex: 1;
+  height: 12px;
+  min-width: 0;
+}
+
+.row-list-skel-meta {
+  height: 12px;
+  flex: none;
+}
+
+.row-list-skel-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+/* O-10 · Profile · avatar & people skeleton. */
+.profile-skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.profile-skel-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+.profile-skel-avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.profile-skel-id {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.profile-skel-people {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-skel-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.profile-skel-person-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.profile-skel-person-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-skel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+}
+
+.profile-skel-row {
+  height: 46px;
   border-radius: var(--radius-sm);
 }
 
-.sp {
-  display: inline-block;
-  border: 2px solid var(--color-neutral-800);
-  border-top-color: var(--color-accent);
+.sk-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  flex: none;
+  background: var(--color-neutral-700);
+  animation: shimmer 1.6s ease-in-out infinite;
 }
 
-.sp.on-accent {
-  border-color: var(--color-accent-800);
-  border-top-color: var(--color-accent);
+.provider-chip .sk-dot {
+  width: 8px;
+  height: 8px;
 }
 
 .progress-track {
@@ -936,8 +1056,10 @@ i > svg {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  min-height: 78px;
-  padding: 8px 12px calc(22px + env(safe-area-inset-bottom, 0px));
+  /* Design 78px already baked in ~22px home-indicator; do NOT also add
+     env(safe-area) on top — that double-counted and left a huge gap. */
+  min-height: 56px;
+  padding: 8px 12px max(22px, env(safe-area-inset-bottom, 0px));
   background: var(--color-bg);
   box-shadow: 0 -1px 0 var(--color-divider);
   z-index: 30;
@@ -1021,9 +1143,20 @@ i > svg {
   display: none;
 }
 
-.auth-body .wordmark {
-  font-size: 28px;
-  color: var(--color-accent);
+.auth-body .wordmark,
+.auth-body .spotter-mark.wordmark {
+  width: 36px;
+  height: 36px;
+  display: block;
+  flex: none;
+}
+
+.spotter-mark {
+  display: block;
+  flex: none;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .auth-title {
@@ -3975,6 +4108,7 @@ i > svg {
 
 .main-col {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -3997,9 +4131,12 @@ i > svg {
   font-weight: 500;
 }
 
-.rail-brand i {
-  font-size: 22px;
+.rail-brand i,
+.rail-brand .spotter-mark {
+  font-size: 32px;
   color: var(--color-accent);
+  width: 32px;
+  height: 32px;
 }
 
 .rail-brand span {
@@ -4150,9 +4287,11 @@ i > svg {
 }
 
 .account-chip:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 50%;
+  outline: none;
+}
+
+.account-chip:focus-visible .avatar {
+  box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 /* --- Desktop layout (≥720px) ---------------------------------------------- */
@@ -5437,13 +5576,12 @@ i > svg {
   flex: 1;
   min-height: 46px;
 }
+/* Empty onboarding disc — filled override lives with AvatarUploader (O-03). */
 .onb-avatar-ring {
   width: 150px;
   height: 150px;
   margin: 8px auto;
   border-radius: 50%;
-  border: 1px dashed var(--color-neutral-700);
-  box-shadow: 0 0 24px rgba(217, 162, 79, 0.14);
   display: grid;
   place-items: center;
   color: var(--color-neutral-600);
@@ -8232,11 +8370,20 @@ i > svg {
 
   .quick .tile:hover,
   .gym-hint:hover,
-  .account-chip:hover,
   .rail-session-chip:hover,
   .gym-card.tappable:hover {
     box-shadow: inset 0 0 0 1px var(--color-neutral-700);
     background: rgba(233, 234, 236, 0.05);
+  }
+
+  /* Rail account: ring the circular avatar (brass), not the chip box. */
+  .account-chip:hover {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .account-chip:hover .avatar {
+    box-shadow: 0 0 0 1px var(--color-accent);
   }
 
   .rail-session-chip:hover {
@@ -8309,9 +8456,11 @@ i > svg {
   margin-top: auto;
   padding-bottom: 48px;
 }
-.onb-wordmark {
-  font-size: 22px;
-  color: var(--color-accent);
+.onb-wordmark,
+.onb-wordmark.spotter-mark {
+  width: 36px;
+  height: 36px;
+  display: block;
 }
 .onb-card h1.display {
   font-size: 34px;
@@ -8342,15 +8491,22 @@ i > svg {
   flex: none;
   margin-top: 1px;
 }
+/* O-03 / AUTH: face fills the disc; brass is outside via box-shadow. */
 .onb-avatar-ring {
   position: relative;
   width: 150px;
   height: 150px;
   margin: 10px auto;
+  padding: 0;
   border-radius: 50%;
-  border: 1px solid var(--color-accent-700);
-  background: radial-gradient(circle at 35% 30%, rgba(217, 162, 79, 0.28), rgba(22, 23, 26, 0) 65%);
-  box-shadow: 0 0 34px rgba(217, 162, 79, 0.18);
+  border: none;
+  background: var(--color-neutral-900);
+  box-shadow:
+    0 0 0 1px var(--color-accent-700),
+    0 0 0 9px rgba(217, 162, 79, 0.08);
+  display: grid;
+  place-items: center;
+  overflow: visible;
 }
 .onb-avatar-ring .cam-badge {
   position: absolute;
@@ -8359,12 +8515,14 @@ i > svg {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
+  background: var(--color-bg);
+  box-shadow: 0 0 0 1px var(--color-neutral-700);
+  border: none;
   display: grid;
   place-items: center;
   color: var(--color-accent);
   font-size: 16px;
+  z-index: 1;
 }
 .avatar-uploader {
   display: flex;
@@ -8373,13 +8531,22 @@ i > svg {
   gap: 10px;
 }
 .avatar-uploader-ring {
-  border: 1px solid var(--color-accent-700);
   cursor: pointer;
 }
+/* Photo / initials fill the ring edge-to-edge (no inset gap). */
 .avatar-uploader-ring .avatar {
-  width: calc(100% - 8px) !important;
-  height: calc(100% - 8px) !important;
-  margin: 4px;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0;
+  display: block;
+  object-fit: cover;
+}
+.avatar-uploader-ring .avatar.initials {
+  display: grid;
+}
+/* With a photo, dissolve dark values into the page, not a nested ring fill. */
+.avatar-uploader-ring:has(img.avatar) {
+  background: transparent;
 }
 .avatar-uploader-plus {
   color: var(--color-accent);

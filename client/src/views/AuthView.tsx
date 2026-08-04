@@ -1,8 +1,9 @@
 /** Auth — design S-01. Sign-in only; new accounts come via invite onboarding. */
 import { useEffect, useState, type FormEvent } from 'react';
 import { HttpError, callFn, signInWithPayload, type AuthPayload } from '../api';
+import { SpotterMark } from '../brand/SpotterMark';
 import { fmtSessionClock, useT } from '../i18n';
-import { Icon, LanguageSelector, Spinner } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 import { InstallShortcut } from './InstallShortcut';
 
 export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
@@ -70,7 +71,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
     <form className="auth-body" onSubmit={submit}>
       <div className="auth-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Icon name="barbell" className="wordmark" />
+          <SpotterMark size={36} variant="tight" className="wordmark" />
           <LanguageSelector />
         </div>
         <h2 className="auth-title">{t.appName}</h2>
@@ -121,7 +122,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
           style={{ minHeight: 48, fontSize: 15, marginTop: 'var(--space-3)', gap: 9 }}
           disabled={busy || checking || unreachable || locked}
         >
-          {busy ? <Spinner onAccent /> : t.signIn}
+          {busy ? t.signingIn : t.signIn}
         </button>
 
         {unreachable && (

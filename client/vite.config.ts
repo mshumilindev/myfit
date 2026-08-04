@@ -21,7 +21,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
+      includeAssets: ['favicon.ico', 'favicon/**/*', 'apple-touch-icon.png', 'icons/*.png'],
       manifest: {
         id: '/',
         name: 'Spotter',
@@ -38,10 +38,26 @@ export default defineConfig({
         theme_color: '#16171a',
         categories: ['health', 'fitness', 'lifestyle'],
         icons: [
-          { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           {
-            src: '/icon-512-maskable.png',
+            src: '/icons/spotter-pwa-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/spotter-pwa-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/icons/spotter-maskable-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: '/icons/spotter-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

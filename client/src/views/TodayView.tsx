@@ -26,7 +26,7 @@ import {
   useT,
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
-import { Icon, Sheet, Spinner } from '../ui';
+import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -830,7 +830,7 @@ export function SyncChip({ store }: { store: Store }) {
   if (s === 'syncing') {
     return (
       <div className="sync-chip">
-        <Spinner size={11} />
+        <span className="sk-dot" />
         <span>{t.syncing}</span>
       </div>
     );

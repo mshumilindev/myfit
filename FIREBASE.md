@@ -6,6 +6,8 @@ The backend moved from the self-hosted Express + SQLite server to Firebase:
 - **Firestore** holds all tracker/user/program data; the client reads & writes it
   directly (offline-first) — see `firestore.rules`.
 - **Cloud Storage** holds avatars at `avatars/{uid}/photo` — see `storage.rules`.
+  Browser reads/writes need CORS on the bucket (`storage.cors.json`); apply with
+  the GCS API / `gsutil cors set storage.cors.json gs://<bucket>`.
 - **Cloud Functions** (`functions/`) do only the privileged / cross-user work:
   auth (bcrypt → Firebase **custom token**), admin, trainer, programs assignment,
   profile reads, and an hourly auto-finish job.

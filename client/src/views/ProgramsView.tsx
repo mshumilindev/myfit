@@ -18,7 +18,7 @@ import {
   useStore,
 } from '../store';
 import type { MuscleGroup } from '../data/exercises';
-import { ConfirmDialog, Icon, Spinner } from '../ui';
+import { ConfirmDialog, Icon, RowListSkeleton } from '../ui';
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { weekDayStatuses, programOutlook, type DayCell } from '../data/programDays';
@@ -551,9 +551,23 @@ export function ProgramsView({ shell }: { shell: Shell }) {
 
         {!memberLoaded && !failed && (
           <div className="program-skeleton" aria-hidden="true">
-            <div className="sk" style={{ height: 14, width: '38%' }} />
-            <div className="sk" style={{ height: 64, borderRadius: 'var(--radius-lg)' }} />
-            <div className="sk" style={{ height: 132, borderRadius: 'var(--radius-lg)' }} />
+            {/* S-50 kit: avatar row + CTA block + three tiles */}
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div
+                className="sk"
+                style={{ width: 44, height: 44, borderRadius: 12, flex: 'none' }}
+              />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
+                <div className="sk" style={{ width: '40%', height: 13 }} />
+                <div className="sk" style={{ width: '65%', height: 9 }} />
+              </div>
+            </div>
+            <div className="sk" style={{ height: 62, borderRadius: 14 }} />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div className="sk" style={{ flex: 1, height: 70 }} />
+              <div className="sk" style={{ flex: 1, height: 70 }} />
+              <div className="sk" style={{ flex: 1, height: 70 }} />
+            </div>
           </div>
         )}
 
@@ -1064,7 +1078,14 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 onChange={(e) => setProgramQuery(e.target.value)}
               />
             </label>
-            {programs === null && !failed && <Spinner size={18} />}
+            {programs === null && !failed && (
+              <RowListSkeleton
+                rows={4}
+                withAvatar={false}
+                withMeta={false}
+                className="program-list-skel"
+              />
+            )}
             {failed && (
               <button className="program-card" onClick={load}>
                 <Icon name="warning-circle" />

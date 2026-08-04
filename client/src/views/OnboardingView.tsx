@@ -12,7 +12,8 @@ import {
 } from '../data/gymProviders';
 import { fmtDayMonth, useT } from '../i18n';
 import { fullPersonName, splitPersonName } from '../name';
-import { Icon, LanguageSelector, Spinner } from '../ui';
+import { SpotterMark } from '../brand/SpotterMark';
+import { Icon, LanguageSelector, ScreenSkeleton } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { Avatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
@@ -99,11 +100,7 @@ export function OnboardingView({
   }, [token]);
 
   if (info === null) {
-    return (
-      <div className="onb-shell center">
-        <Spinner size={22} />
-      </div>
-    );
+    return <ScreenSkeleton />;
   }
 
   const resumable = saved !== null && !!currentUid();
@@ -203,7 +200,7 @@ export function OnboardingView({
               if (await claim()) onDone();
             }}
           >
-            {busy && <Spinner onAccent />} {t.save}
+            {t.save}
           </button>
         </div>
       </div>
@@ -238,7 +235,7 @@ export function OnboardingView({
               <span>{t.onbInvited(info.inviter)}</span>
             </div>
           )}
-          <Icon name="barbell" className="onb-wordmark" />
+          <SpotterMark size={36} variant="tight" className="onb-wordmark" />
           <h2 className="display">{t.onbTitle}</h2>
           <p className="lead">{t.onbBody}</p>
           {railBars(1)}
@@ -318,7 +315,7 @@ export function OnboardingView({
               }
             }}
           >
-            {busy && <Spinner onAccent />} {t.onbContinue} <Icon name="arrow-right" />
+            {t.onbContinue} <Icon name="arrow-right" />
           </button>
         </div>
       )}
