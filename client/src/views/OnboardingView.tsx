@@ -235,7 +235,7 @@ export function OnboardingView({
               <span>{t.onbInvited(info.inviter)}</span>
             </div>
           )}
-          <SpotterMark size={36} variant="tight" className="onb-wordmark" />
+          <SpotterMark size={48} variant="tight" className="onb-wordmark" />
           <h2 className="display">{t.onbTitle}</h2>
           <p className="lead">{t.onbBody}</p>
           {railBars(1)}

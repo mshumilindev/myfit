@@ -70,10 +70,10 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
   return (
     <form className="auth-body" onSubmit={submit}>
       <div className="auth-card">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <SpotterMark size={36} variant="tight" className="wordmark" />
+        <div className="auth-lang">
           <LanguageSelector />
         </div>
+        <SpotterMark size={88} variant="tight" className="wordmark" />
         <h2 className="auth-title">{t.appName}</h2>
         <p className="auth-sub">{t.authTagline}</p>
 

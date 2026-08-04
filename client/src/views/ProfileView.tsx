@@ -508,8 +508,6 @@ export function ProfileView({
             <>
               <div className="field-label profile-mobile-settings-title">{t.profileSettings}</div>
               <div className="profile-lang">
-                <Icon name="translate" />
-                <span>{t.language}</span>
                 <LanguageSelector />
               </div>
               <section className="profile-mobile-settings">
@@ -601,16 +599,15 @@ export function ProfileView({
                 </label>
                 <button
                   className="btn btn-secondary"
+                  type="button"
                   onClick={() => {
                     setCurrentPassword('');
                     setNewPassword('');
                     setConfirmPassword('');
                     setPasswordError(null);
+                    setSavingPassword(false);
                     setPasswordEditing(false);
                   }}
-                  disabled={
-                    savingPassword || (!currentPassword && !newPassword && !confirmPassword)
-                  }
                 >
                   {t.cancel}
                 </button>

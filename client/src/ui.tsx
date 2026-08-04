@@ -602,12 +602,15 @@ export function LanguageSelector() {
     <div className="lang" ref={ref}>
       <button
         className="lang-chip"
+        type="button"
         aria-label={LOCALES[locale].language}
         aria-expanded={open}
+        aria-haspopup="menu"
         onClick={() => setOpen((x) => !x)}
       >
         <span aria-hidden>{FLAGS[locale]}</span>
         <span className="lang-chip-label">{LOCALES[locale].locale}</span>
+        <Icon name="caret-line-down" className="lang-chip-caret" />
       </button>
       {open && (
         <Portal>

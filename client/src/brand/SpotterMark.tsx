@@ -1,4 +1,4 @@
-/** Brand mark — transparent gold Spotter glyph (not Phosphor). */
+/** Brand mark — Spotter glyph on accent-100 plate (design token). */
 import { iconSrcFor, type SpotterMarkVariant } from './spotterIcons';
 
 export function SpotterMark({
@@ -6,6 +6,7 @@ export function SpotterMark({
   variant = 'tight',
   className,
   alt = '',
+  plate = true,
 }: {
   /** CSS display size in px. Asset is chosen at ≥2× for retina detail. */
   size?: number;
@@ -13,10 +14,14 @@ export function SpotterMark({
   variant?: SpotterMarkVariant;
   className?: string;
   alt?: string;
+  /** Light brass plate (`--color-accent-100`). Off only if the parent paints one. */
+  plate?: boolean;
 }) {
-  return (
+  const img = (
     <img
-      className={['spotter-mark', `spotter-mark--${variant}`, className].filter(Boolean).join(' ')}
+      className={['spotter-mark', `spotter-mark--${variant}`, !plate ? className : undefined]
+        .filter(Boolean)
+        .join(' ')}
       src={iconSrcFor(variant, size)}
       width={size}
       height={size}
@@ -24,5 +29,14 @@ export function SpotterMark({
       draggable={false}
       decoding="async"
     />
+  );
+  if (!plate) return img;
+  return (
+    <span
+      className={['spotter-mark-plate', className].filter(Boolean).join(' ')}
+      style={{ width: size, height: size }}
+    >
+      {img}
+    </span>
   );
 }

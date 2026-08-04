@@ -1,11 +1,11 @@
 /**
  * Spotter brand icon URLs (served from /icons + /favicon).
- * Canonical pack: brand/icons/ (gold v2).
+ * Canonical pack: brand/icons/ — regenerated from source/logo.png
+ * via scripts/generate-brand-icons.py.
  *
- * - install / PWA: web pwa + maskable (full background)
- * - rail / narrow nav: sidebar (fills the slot)
- * - small UI: glyphTight (almost no padding — details stay readable)
- * - cards / larger UI: glyph (transparent with breathing room)
+ * - UI glyphs: transparent (CSS plate = --color-accent-100 via SpotterMark)
+ * - install / PWA / favicon / desktop: baked on accent-100 plate
+ * - rail / narrow nav: sidebar glyph + CSS plate
  */
 const I = (name: string) => `/icons/${name}`;
 const F = (name: string) => `/favicon/${name}`;

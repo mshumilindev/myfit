@@ -543,7 +543,7 @@ function Rail(props: {
   return (
     <aside className="rail">
       <div className="rail-brand">
-        <SpotterMark size={32} variant="sidebar" />
+        <SpotterMark size={40} variant="sidebar" />
         <span>{t.appName}</span>
       </div>
       {nav.map((x) => (

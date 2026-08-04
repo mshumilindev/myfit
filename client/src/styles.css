@@ -1001,17 +1001,31 @@ i > svg {
 }
 
 .lang-chip {
-  width: 32px;
+  width: auto;
+  min-width: 32px;
   height: 32px;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   font-size: 16px;
   line-height: 1;
   background: transparent;
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-md);
   cursor: pointer;
-  padding: 0;
+  padding: 0 10px;
+  color: var(--color-text);
+}
+.lang-chip-caret {
+  margin-left: 2px;
+  flex: none;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  transition: transform 0.14s ease;
+}
+.lang-chip[aria-expanded='true'] .lang-chip-caret {
+  transform: rotate(180deg);
 }
 
 .lang-pop {
@@ -1098,7 +1112,7 @@ i > svg {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 0 28px 40px;
+  padding: 0 28px 18vh;
   min-height: 100%;
   background: var(--color-bg);
 }
@@ -1109,6 +1123,13 @@ i > svg {
   gap: var(--space-3);
   width: 100%;
   justify-content: center;
+  position: relative;
+}
+
+.auth-lang {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 var(--space-6);
 }
 
 .auth-card .input {
@@ -1126,7 +1147,7 @@ i > svg {
   .auth-body {
     align-items: center;
     justify-content: center;
-    padding: 0 28px;
+    padding: 0 28px 12vh;
   }
 
   .auth-card {
@@ -1144,17 +1165,42 @@ i > svg {
 }
 
 .auth-body .wordmark,
-.auth-body .spotter-mark.wordmark {
-  width: 36px;
-  height: 36px;
-  display: block;
+.auth-body .spotter-mark-plate.wordmark {
+  width: 88px;
+  height: 88px;
+  display: grid;
+  place-items: center;
   flex: none;
+  align-self: center;
+  margin: 0 0 var(--space-6);
+  border-radius: var(--radius-lg);
+}
+
+.auth-body .wordmark .spotter-mark,
+.auth-body .spotter-mark-plate.wordmark .spotter-mark {
+  width: 78px;
+  height: 78px;
+}
+
+.spotter-mark-plate {
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-100);
+}
+
+.spotter-mark-plate .spotter-mark {
+  width: 88%;
+  height: 88%;
 }
 
 .spotter-mark {
   display: block;
   flex: none;
   object-fit: contain;
+  object-position: center;
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -1163,13 +1209,15 @@ i > svg {
   font-size: 32px;
   letter-spacing: -0.025em;
   font-weight: 500;
-  margin: var(--space-4) 0 0;
+  margin: 0;
+  text-align: center;
 }
 
 .auth-sub {
   font-size: 13px;
   color: var(--color-neutral-500);
   margin: 0 0 var(--space-6);
+  text-align: center;
 }
 
 .footer-link {
@@ -4131,15 +4179,18 @@ i > svg {
   font-weight: 500;
 }
 
-.rail-brand i,
-.rail-brand .spotter-mark {
-  font-size: 32px;
-  color: var(--color-accent);
-  width: 32px;
-  height: 32px;
+.rail-brand .spotter-mark-plate {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
 }
 
-.rail-brand span {
+.rail-brand .spotter-mark-plate .spotter-mark {
+  width: 34px;
+  height: 34px;
+}
+
+.rail-brand span:not(.spotter-mark-plate) {
   display: none;
 }
 
@@ -6970,20 +7021,8 @@ i > svg {
     margin-top: 4px;
   }
 
-  .profile-page.profile-embedded.profile-self .profile-lang .lang-chip {
-    min-height: 49px;
-    height: auto;
-    border: none;
-    border-radius: 0;
-    padding: var(--space-4) 0;
-    background: transparent;
-    box-shadow: inset 0 -1px 0 var(--color-divider);
-    font-size: 15px;
-  }
-
-  .profile-page.profile-embedded.profile-self .profile-lang .lang-chip::before {
-    content: '';
-    width: 17px;
+  .profile-page.profile-embedded.profile-self .profile-lang {
+    max-width: 220px;
   }
 
   .profile-page.profile-embedded.profile-self .profile-stats {
@@ -7975,23 +8014,8 @@ i > svg {
   }
 
   .profile-page.profile-embedded.profile-self .profile-lang {
-    border-radius: var(--radius-md);
-    box-shadow: inset 0 -1px 0 var(--color-divider);
-  }
-
-  .profile-page.profile-embedded.profile-self .profile-lang .lang-chip {
-    justify-content: flex-start;
     width: 100%;
-    min-height: 49px;
-    border: none;
-    border-radius: 0;
-    padding: var(--space-4) 0;
-    background: transparent;
-    font-size: 15px;
-  }
-
-  .profile-page.profile-embedded.profile-self .profile-lang .lang-chip-label {
-    font-size: 15px;
+    max-width: none;
   }
 
   .profile-page.profile-embedded.profile-self .profile-meta-grid {
@@ -8457,10 +8481,17 @@ i > svg {
   padding-bottom: 48px;
 }
 .onb-wordmark,
-.onb-wordmark.spotter-mark {
-  width: 36px;
-  height: 36px;
-  display: block;
+.onb-wordmark.spotter-mark-plate {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-md);
+}
+.onb-wordmark .spotter-mark,
+.onb-wordmark.spotter-mark-plate .spotter-mark {
+  width: 40px;
+  height: 40px;
 }
 .onb-card h1.display {
   font-size: 34px;
@@ -9779,72 +9810,68 @@ i > svg {
   display: none;
 }
 
-/* Language chip label — hidden by default (flag only); shown full-width in the rail */
+/* Language chip label: compact (flag + caret) by default; name in rail/profile. */
 .lang-chip-label {
   display: none;
-}
-.rail-lang,
-.profile-lang {
-  width: 100%;
-}
-.rail-lang .lang,
-.profile-lang .lang {
-  width: 100%;
-}
-.rail-lang .lang-chip,
-.profile-lang .lang-chip {
-  width: 100%;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 9px;
-  padding: 0 10px;
+  font-size: 13px;
+  color: var(--color-neutral-300);
+  white-space: nowrap;
 }
 .rail-lang .lang-chip-label,
 .profile-lang .lang-chip-label {
   display: inline;
-  font-size: 13px;
-  color: var(--color-neutral-300);
+}
+.rail-lang {
+  width: 100%;
+}
+.rail-lang .lang,
+.rail-lang .lang-chip {
+  width: 100%;
+}
+.rail-lang .lang-chip,
+.profile-lang .lang-chip {
+  height: 38px;
+  gap: 9px;
+  padding: 0 10px 0 12px;
+}
+.rail-lang .lang-chip-caret,
+.profile-lang .lang-chip-caret {
+  margin-left: auto;
+}
+
+/* Profile: hug content on web; full-row on phone. */
+.profile-lang {
+  width: auto;
+  max-width: 220px;
+}
+.profile-lang .lang {
+  width: 100%;
+}
+.profile-lang .lang-chip {
+  width: 100%;
 }
 
 .profile-page.profile-embedded.profile-self .profile-lang {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  width: 100%;
-  min-height: 49px;
-  padding: var(--space-4) 0;
-  box-shadow: inset 0 -1px 0 var(--color-divider);
-}
-
-.profile-page.profile-embedded.profile-self .profile-lang > i:first-child {
-  flex: 0 0 17px;
-  color: var(--color-neutral-500);
-  font-size: 17px;
-}
-
-.profile-page.profile-embedded.profile-self .profile-lang > span {
-  flex: 1;
-  min-width: 0;
-  font-size: 15px;
-}
-
-.profile-page.profile-embedded.profile-self .profile-lang .lang {
+  display: block;
   width: auto;
+  max-width: 220px;
+  min-height: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .profile-page.profile-embedded.profile-self .profile-lang .lang-chip {
-  width: auto;
-  height: auto;
-  min-height: 0;
-  gap: 8px;
-  padding: 0;
-  border: none;
-  border-radius: 0;
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+  gap: 9px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
   background: transparent;
   box-shadow: none;
-  color: var(--color-neutral-500);
+  color: var(--color-text);
+  font-size: 13px;
 }
 
 .profile-page.profile-embedded.profile-self .profile-lang .lang-chip::before {
@@ -9852,7 +9879,7 @@ i > svg {
 }
 
 .profile-page.profile-embedded.profile-self .profile-lang .lang-chip-label {
-  color: var(--color-neutral-500);
+  color: var(--color-neutral-300);
 }
 
 /* gym-result thumb square — clip photos into a fixed square (gym list) */
