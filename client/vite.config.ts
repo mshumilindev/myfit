@@ -39,25 +39,25 @@ export default defineConfig({
         categories: ['health', 'fitness', 'lifestyle'],
         icons: [
           {
-            src: '/icons/spotter-pwa-192.png',
+            src: '/icons/spotter-app-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/icons/spotter-pwa-512.png',
+            src: '/icons/spotter-app-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/icons/spotter-maskable-192.png',
+            src: '/icons/spotter-app-maskable-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'maskable',
           },
           {
-            src: '/icons/spotter-maskable-512.png',
+            src: '/icons/spotter-app-maskable-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

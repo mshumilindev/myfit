@@ -150,6 +150,7 @@ def main() -> None:
 
     save_png(plated, brand / 'favicon' / 'apple-touch-icon.png', 180)
     save_png(plated, root / 'client' / 'public' / 'favicon' / 'apple-touch-icon.png', 180)
+    save_png(plated, root / 'client' / 'public' / 'favicon' / 'apple-touch-180.png', 180)
     save_png(plated, root / 'client' / 'public' / 'apple-touch-icon.png', 180)
     save_ico(plated, brand / 'favicon' / 'favicon.ico', [16, 32, 48])
     save_ico(plated, root / 'client' / 'public' / 'favicon' / 'favicon.ico', [16, 32, 48])
@@ -159,10 +160,20 @@ def main() -> None:
 
     for size in PWA_SIZES:
         save_png(plated, brand / 'web' / f'spotter-pwa-{size}.png', size)
+        save_png(plated, brand / 'web' / f'spotter-app-{size}.png', size)
         save_png(plated, brand / 'web' / f'spotter-glyph-{size}.png', size)
         save_png(plated_mask, brand / 'web' / f'spotter-maskable-{size}.png', size)
+        save_png(plated_mask, brand / 'web' / f'spotter-app-maskable-{size}.png', size)
         save_png(plated, root / 'client' / 'public' / 'icons' / f'spotter-pwa-{size}.png', size)
-        save_png(plated_mask, root / 'client' / 'public' / 'icons' / f'spotter-maskable-{size}.png', size)
+        save_png(plated, root / 'client' / 'public' / 'icons' / f'spotter-app-{size}.png', size)
+        save_png(
+            plated_mask, root / 'client' / 'public' / 'icons' / f'spotter-maskable-{size}.png', size
+        )
+        save_png(
+            plated_mask,
+            root / 'client' / 'public' / 'icons' / f'spotter-app-maskable-{size}.png',
+            size,
+        )
         save_png(plated, root / 'client' / 'public' / f'icon-{size}.png', size)
         save_png(plated_mask, root / 'client' / 'public' / f'icon-{size}-maskable.png', size)
 

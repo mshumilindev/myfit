@@ -10,7 +10,7 @@ python3 scripts/generate-brand-icons.py
 | Folder                         | Use                                                                          |
 | ------------------------------ | ---------------------------------------------------------------------------- |
 | `source/`                      | Raw + zoomed masters; `*-plated-*` on accent-100 `#fbf3e6`                   |
-| `web/`                         | PWA / install icons (accent-100 plate) → `client/public/icons/spotter-pwa-*` |
+| `web/`                         | PWA / install icons (accent-100 plate) → `client/public/icons/spotter-app-*` |
 | `transparent/`                 | UI glyphs for CSS plate (`SpotterMark`)                                      |
 | `sidebar/`                     | Narrow rail / nav glyphs (transparent; plate via CSS)                        |
 | `favicon/`                     | `favicon.ico` + PNG + apple-touch on accent-100                              |

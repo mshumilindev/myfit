@@ -73,12 +73,12 @@ export const spotterIcons = {
     64: I('spotter-sidebar-64.png'),
   },
   pwa: {
-    192: I('spotter-pwa-192.png'),
-    512: I('spotter-pwa-512.png'),
+    192: I('spotter-app-192.png'),
+    512: I('spotter-app-512.png'),
   },
   maskable: {
-    192: I('spotter-maskable-192.png'),
-    512: I('spotter-maskable-512.png'),
+    192: I('spotter-app-maskable-192.png'),
+    512: I('spotter-app-maskable-512.png'),
   },
   favicon: {
     ico: F('favicon.ico'),
@@ -92,7 +92,7 @@ export const spotterIcons = {
     192: F('favicon-192.png'),
     256: F('favicon-256.png'),
     512: F('favicon-512.png'),
-    appleTouch: F('apple-touch-icon.png'),
+    appleTouch: F('apple-touch-180.png'),
   },
 } as const;
 
