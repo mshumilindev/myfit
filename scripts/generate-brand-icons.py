@@ -176,6 +176,17 @@ def main() -> None:
         )
         save_png(plated, root / 'client' / 'public' / f'icon-{size}.png', size)
         save_png(plated_mask, root / 'client' / 'public' / f'icon-{size}-maskable.png', size)
+        # Install-time paths (cache-busted folder — home screen OS caches aggressively).
+        save_png(plated, root / 'client' / 'public' / 'brand' / 'v2' / f'icon-{size}.png', size)
+        save_png(
+            plated_mask,
+            root / 'client' / 'public' / 'brand' / 'v2' / f'maskable-{size}.png',
+            size,
+        )
+
+    save_png(plated, root / 'client' / 'public' / 'brand' / 'v2' / 'apple-touch-180.png', 180)
+    save_png(plated, root / 'client' / 'public' / 'brand' / 'v2' / 'apple-touch-precomposed.png', 180)
+    save_png(plated, root / 'client' / 'public' / 'apple-touch-icon-precomposed.png', 180)
 
     for size in [16, 24, 32, 48, 64, 96, 128, 180, 256, 384]:
         save_png(plated, brand / 'web' / f'spotter-glyph-{size}.png', size)
