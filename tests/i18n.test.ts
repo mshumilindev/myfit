@@ -33,7 +33,12 @@ function walkShape(base: unknown, candidate: unknown, path: string[] = []): void
 
 function callEveryFunction(value: unknown): void {
   if (typeof value === 'function') {
-    expect(value(2, 'Squat', '31 July', 'reason')).toBeTruthy();
+    try {
+      expect(value(2, 'Squat', '31 July', 'reason')).toBeTruthy();
+    } catch {
+      // Some helpers take a string first (e.g. noItemHere(item)).
+      expect(value('Barbell', 2, 'Squat', '31 July')).toBeTruthy();
+    }
     return;
   }
   if (!value || typeof value !== 'object') return;

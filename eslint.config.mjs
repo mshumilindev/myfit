@@ -10,6 +10,8 @@ export default tseslint.config(
       '**/dev-dist/',
       '**/.vite/',
       '**/node_modules/',
+      '**/coverage/',
+      'functions/lib/',
       'cloudflare/',
       'docs/design/boards/',
     ],
@@ -32,7 +34,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['server/src/**/*.ts', 'desktop/src/**/*.ts', 'scripts/**/*.mjs'],
+    files: [
+      'server/src/**/*.ts',
+      'desktop/src/**/*.ts',
+      'functions/src/**/*.ts',
+      'scripts/**/*.mjs',
+    ],
     languageOptions: {
       globals: {
         ...globals.node,
