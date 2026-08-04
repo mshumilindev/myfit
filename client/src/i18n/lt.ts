@@ -251,7 +251,7 @@ export const lt: Strings = {
   filters: 'Filtrai',
   availableHere: 'Prieinama čia',
   nExercises: (n: number) => `${n} pratim${n === 1 ? 'as' : n < 10 ? 'ai' : 'ų'}`,
-  noItemHere: (item: string) => `Čia nėra: ${item.toLowerCase()}`,
+  noItemHere: (item: string) => `Čia nėra: ${String(item).toLowerCase()}`,
   filtersCombineNote:
     'Filtrai jungiasi: raumuo ir įranga ir tai, ką turi ši salė. Pratimas, kurio salė negali aprūpinti, lieka matomas 45% ryškumu, o ne dingsta — gal žinai geriau.',
   byMuscle: 'Pagal raumenis',
@@ -266,7 +266,7 @@ export const lt: Strings = {
     'Inventorius — tai, ką pažymėjai kiekvienoje salėje; niekas jo netikrina. Salė be inventoriaus niekada nežymima kaip stokojanti.',
   primaryGreySub: (n: number) => `Pagrindinis žalvariu, antriniai pilkai · sesijos: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Abu yra' : 'Viskas yra'),
-  noItemShort: (item: string) => `Nėra: ${item.toLowerCase()}`,
+  noItemShort: (item: string) => `Nėra: ${String(item).toLowerCase()}`,
   needsCol: 'Reikia',
   statusCol: 'Būsena',
   gymCol: 'Salė',

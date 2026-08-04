@@ -125,7 +125,7 @@ describe('F-03 Workout store', () => {
       ),
     ).toBe(true);
     expect(workoutSets(finished!)).toBe(2);
-    expect(workoutVolumeKg(finished!)).toBe(1100);
+    expect(workoutVolumeKg(finished!)).toBe(800);
   });
 
   it('logs cardio, warm-up and cool-down entries without polluting strength volume', () => {

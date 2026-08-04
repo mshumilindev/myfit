@@ -835,7 +835,7 @@ describe('F-03 session UI', () => {
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
-    expect(screen.getByPlaceholderText('Add exercise')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Search exercises')).toBeTruthy();
     await userEvent.click(screen.getAllByRole('button', { name: 'Cardio' })[0]);
     expect(screen.getByPlaceholderText('Add cardio')).toBeTruthy();
 

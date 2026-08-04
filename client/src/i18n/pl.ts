@@ -243,7 +243,7 @@ export const pl: Strings = {
   filters: 'Filtry',
   availableHere: 'Dostępne tutaj',
   nExercises: (n: number) => `${n} ${n === 1 ? 'ćwiczenie' : n < 5 ? 'ćwiczenia' : 'ćwiczeń'}`,
-  noItemHere: (item: string) => `Brak tutaj: ${item.toLowerCase()}`,
+  noItemHere: (item: string) => `Brak tutaj: ${String(item).toLowerCase()}`,
   filtersCombineNote:
     'Filtry się łączą: mięsień i sprzęt i to, co ma ta siłownia. Ćwiczenie, którego siłownia nie wyposaży, zostaje widoczne na 45%, zamiast znikać — możesz wiedzieć lepiej.',
   byMuscle: 'Wg mięśni',
@@ -258,7 +258,7 @@ export const pl: Strings = {
     'Inwentarz to, co odhaczyłeś na każdej siłowni — nikt go nie audytuje. Siłownia bez inwentarza nigdy nie jest oznaczana jako niepełna.',
   primaryGreySub: (n: number) => `Główny mosiądzem, drugorzędne szarością · sesje: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Oba są' : 'Wszystko jest'),
-  noItemShort: (item: string) => `Brak: ${item.toLowerCase()}`,
+  noItemShort: (item: string) => `Brak: ${String(item).toLowerCase()}`,
   needsCol: 'Potrzebuje',
   statusCol: 'Stan',
   gymCol: 'Siłownia',

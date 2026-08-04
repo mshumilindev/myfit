@@ -246,7 +246,7 @@ export const en = {
   filters: 'Filters',
   availableHere: 'Available here',
   nExercises: (n: number) => `${n} ${n === 1 ? 'exercise' : 'exercises'}`,
-  noItemHere: (item: string) => `No ${item.toLowerCase()} here`,
+  noItemHere: (item: string) => `No ${String(item).toLowerCase()} here`,
   filtersCombineNote:
     'Filters combine: muscle and equipment and what this gym has. An exercise the gym can’t equip stays visible at 45% rather than disappearing — you may know better.',
   byMuscle: 'By muscle',
@@ -262,7 +262,7 @@ export const en = {
   primaryGreySub: (n: number) =>
     `Primary in brass, secondary in grey · ${n} ${n === 1 ? 'session' : 'sessions'}`,
   allHere: (n: number): string => (n === 2 ? 'Both here' : 'All here'),
-  noItemShort: (item: string) => `No ${item.toLowerCase()}`,
+  noItemShort: (item: string) => `No ${String(item).toLowerCase()}`,
   needsCol: 'Needs',
   statusCol: 'Status',
   gymCol: 'Gym',

@@ -238,7 +238,7 @@ export const et: Strings = {
   filters: 'Filtrid',
   availableHere: 'Saadaval siin',
   nExercises: (n: number) => `${n} harjutus${n === 1 ? '' : 't'}`,
-  noItemHere: (item: string) => `Siin pole: ${item.toLowerCase()}`,
+  noItemHere: (item: string) => `Siin pole: ${String(item).toLowerCase()}`,
   filtersCombineNote:
     'Filtrid liituvad: lihas ja varustus ja see, mis sellel saalil on. Harjutus, mida saal ei varusta, jääb 45% nähtavaks, mitte ei kao — sina võid teada paremini.',
   byMuscle: 'Lihaste kaupa',
@@ -253,7 +253,7 @@ export const et: Strings = {
     'Inventar on see, mille igal saalil linnutasid — keegi ei auditeeri seda. Ilma inventarita saali ei märgita kunagi puudulikuks.',
   primaryGreySub: (n: number) => `Peamine messingis, teisesed hallis · sessioone: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Mõlemad olemas' : 'Kõik olemas'),
-  noItemShort: (item: string) => `Pole: ${item.toLowerCase()}`,
+  noItemShort: (item: string) => `Pole: ${String(item).toLowerCase()}`,
   needsCol: 'Vajab',
   statusCol: 'Seis',
   gymCol: 'Saal',

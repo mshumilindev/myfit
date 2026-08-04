@@ -242,7 +242,7 @@ export const uk: Strings = {
   filters: 'Фільтри',
   availableHere: 'Доступно тут',
   nExercises: (n: number) => `${n} вправ${n === 1 ? 'а' : n < 5 ? 'и' : ''}`,
-  noItemHere: (item: string) => `Тут немає: ${item.toLowerCase()}`,
+  noItemHere: (item: string) => `Тут немає: ${String(item).toLowerCase()}`,
   filtersCombineNote:
     'Фільтри поєднуються: м’яз і обладнання і те, що є в цьому залі. Вправа, яку зал не може обладнати, лишається видимою на 45%, а не зникає — тобі видніше.',
   byMuscle: 'За м’язами',
@@ -257,7 +257,7 @@ export const uk: Strings = {
     'Інвентар — це те, що ти відмітив у кожному залі; ніхто його не перевіряє. Зал без інвентаря ніколи не позначається як неповний.',
   primaryGreySub: (n: number) => `Основний — латунню, другорядні — сірим · сесій: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Обидва є' : 'Все є'),
-  noItemShort: (item: string) => `Немає: ${item.toLowerCase()}`,
+  noItemShort: (item: string) => `Немає: ${String(item).toLowerCase()}`,
   needsCol: 'Потрібно',
   statusCol: 'Статус',
   gymCol: 'Зал',
