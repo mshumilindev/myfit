@@ -57,6 +57,11 @@ import {
   nextSupersetLetter,
   groupRounds,
   groupCurrentRound,
+  groupAsSuperset,
+  ungroupSuperset,
+  missingAtGym,
+  attachGymToWorkout,
+  addDropToSet,
   saveCatalogExercise,
   updateExerciseMeta,
 } from '../client/src/store';
@@ -801,6 +806,71 @@ describe('SS supersets', () => {
       exercises: [ex({ id: 'x', name: 'Curl', position: 0, groupId: 'g9', groupOrder: 0 })],
     });
     expect(sessionBlocks(w).map((b) => b.kind)).toEqual(['single']);
+  });
+
+  it('groups and ungroups exercises through the queue', () => {
+    const w = startWorkout();
+    const a = addExercise(w.id, 'Bench');
+    const b = addExercise(w.id, 'Row');
+    const c = addExercise(w.id, 'Squat');
+
+    groupAsSuperset(w.id, [a.id]); // too few — no-op
+    expect(__getStateForTests().workouts[0].exercises.every((e) => !e.groupId)).toBe(true);
+
+    groupAsSuperset(w.id, [a.id, b.id]);
+    const grouped = __getStateForTests().workouts[0].exercises;
+    const gid = grouped.find((e) => e.id === a.id)!.groupId;
+    expect(gid).toBeTruthy();
+    expect(grouped.find((e) => e.id === b.id)?.groupId).toBe(gid);
+    expect(grouped.find((e) => e.id === c.id)?.groupId).toBeFalsy();
+    expect(
+      __getStateForTests().queue.filter(
+        (q) => q.method === 'PUT' && String(q.url).includes('/exercises/'),
+      ).length,
+    ).toBeGreaterThanOrEqual(2);
+
+    ungroupSuperset(w.id, gid!);
+    expect(__getStateForTests().workouts[0].exercises.every((e) => e.groupId == null)).toBe(true);
+  });
+});
+
+describe('EQ gym inventory gaps and session helpers', () => {
+  it('flags missing kit only when the gym has an inventory list', () => {
+    expect(missingAtGym(null, ['barbell'])).toEqual([]);
+    expect(
+      missingAtGym({ id: 'g', name: 'Empty', lat: 0, lng: 0, radiusM: 100 }, ['barbell']),
+    ).toEqual([]);
+    expect(
+      missingAtGym(
+        { id: 'g', name: 'Smart', lat: 0, lng: 0, radiusM: 100, inventory: ['dumbbell'] },
+        ['barbell', 'dumbbell'],
+      ),
+    ).toEqual(['barbell']);
+  });
+
+  it('attaches a gym and appends drop sets on a logged lift', () => {
+    const gym = upsertGym({ name: 'Home', lat: 1, lng: 2, radiusM: 100 });
+    const w = startWorkout();
+    const e = addExercise(w.id, 'Curl');
+    upsertSet(w.id, e.id, { reps: 10, weight: 20, isWarmup: false, position: 0 });
+    const setId = __getStateForTests().workouts[0].exercises[0].sets[0].id;
+
+    attachGymToWorkout(w.id, gym.id);
+    expect(__getStateForTests().workouts[0].gymId).toBe(gym.id);
+    expect(
+      __getStateForTests().queue.some(
+        (q) => q.method === 'PUT' && q.url === `/api/tracker/workouts/${w.id}`,
+      ),
+    ).toBe(true);
+
+    addDropToSet(w.id, e.id, setId, { reps: 8, weight: 15 });
+    const logged = __getStateForTests().workouts[0].exercises[0].sets[0];
+    expect(logged.type).toBe('drop');
+    expect(logged.drops).toEqual([{ reps: 8, weight: 15 }]);
+
+    addDropToSet(w.id, e.id, setId, { reps: 6, weight: 12 }, true);
+    expect(__getStateForTests().workouts[0].exercises[0].sets[0].type).toBe('drop');
+    expect(__getStateForTests().workouts[0].exercises[0].sets[0].drops).toHaveLength(2);
   });
 });
 

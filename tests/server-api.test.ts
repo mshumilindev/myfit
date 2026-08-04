@@ -639,6 +639,63 @@ describe('F-03/F-05 Tracker API', () => {
       (
         await req(
           'PUT',
+          `/api/tracker/exercises/${ex}/sets/${crypto.randomUUID()}`,
+          { reps: 5, durationMin: -1 },
+          token,
+        )
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await req(
+          'PUT',
+          `/api/tracker/workouts/${w1}/exercises/${crypto.randomUUID()}`,
+          { name: 'Grouped', groupId: 12 },
+          token,
+        )
+      ).status,
+    ).toBe(400);
+    const dropEx = crypto.randomUUID();
+    const dropSet = crypto.randomUUID();
+    const groupId = crypto.randomUUID();
+    expect(
+      (
+        await req(
+          'PUT',
+          `/api/tracker/workouts/${w1}/exercises/${dropEx}`,
+          {
+            name: 'Curl',
+            position: 2,
+            groupId,
+            groupOrder: 0,
+            equipment: ['dumbbell', 12, null],
+            secondaryMuscles: ['forearms', 7, null],
+            primaryMuscle: 'biceps',
+          },
+          token,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await req(
+          'PUT',
+          `/api/tracker/exercises/${dropEx}/sets/${dropSet}`,
+          {
+            reps: 10,
+            weight: 20,
+            type: 'drop',
+            drops: [{ reps: 8, weight: 15 }, { reps: 'x', weight: null }, null, 'skip'],
+            position: 0,
+          },
+          token,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await req(
+          'PUT',
           `/api/tracker/exercises/${crypto.randomUUID()}/sets/${crypto.randomUUID()}`,
           { reps: 5 },
           token,
@@ -735,6 +792,33 @@ describe('F-03/F-05 Tracker API', () => {
     expect(
       (await req('PUT', `/api/tracker/gyms/${crypto.randomUUID()}`, { name: 'Bad' }, token)).status,
     ).toBe(400);
+    expect(
+      (
+        await req(
+          'PUT',
+          `/api/tracker/gyms/${gym}`,
+          {
+            name: 'Smartfit',
+            lat: 50.45,
+            lng: 30.52,
+            radiusM: 150,
+            inventory: ['barbell', 42, null],
+          },
+          token,
+        )
+      ).status,
+    ).toBe(200);
+    const other = await register('olena', 'olena@example.com');
+    expect(
+      (
+        await req(
+          'PUT',
+          `/api/tracker/gyms/${gym}`,
+          { name: 'Stolen', lat: 1, lng: 2 },
+          other.token,
+        )
+      ).status,
+    ).toBe(403);
     expect(
       (
         await req(
