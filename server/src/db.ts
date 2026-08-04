@@ -174,7 +174,10 @@ CREATE TABLE IF NOT EXISTS program_items (
   reps         INTEGER NOT NULL DEFAULT 8,
   weight       REAL,
   duration_min REAL,
-  equipment    TEXT
+  equipment    TEXT,
+  group_id     TEXT,
+  group_order  INTEGER,
+  drop_last    INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_program_items ON program_items(program_id, day, position);
 
