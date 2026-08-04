@@ -21,7 +21,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon/**/*', 'apple-touch-icon.png', 'icons/*.png'],
+      includeAssets: [
+        'favicon.ico',
+        'favicon/**/*',
+        'apple-touch-icon.png',
+        'icons/*.png',
+        'patterns/**/*',
+      ],
       manifest: {
         id: '/',
         name: 'Spotter',

@@ -103,20 +103,21 @@ body,
 body {
   margin: 0;
   background-color: var(--color-bg);
-  /* Quiet luxury gym atmosphere: soft brass pools + hairline cage mesh.
-     Kept barely above the graphite ground so UI stays primary. */
+  /* Honeycomb cage — graphite cells, brass seam glow (reference vibe, our palette).
+     Overall blend stays quiet so UI stays primary. */
   background-image:
-    radial-gradient(ellipse 90% 55% at 12% -8%, rgba(217, 162, 79, 0.055), transparent 58%),
-    radial-gradient(ellipse 70% 50% at 100% 108%, rgba(217, 162, 79, 0.04), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 70% 20%, rgba(233, 234, 236, 0.018), transparent 60%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='124.7' viewBox='0 0 72 124.7'%3E%3Cg fill='none' stroke='%23d9a24f' stroke-width='0.7' stroke-opacity='0.055'%3E%3Cpath d='M36 2.5 L69.5 21.75 V60.25 L36 79.5 L2.5 60.25 V21.75 Z'/%3E%3Cpath d='M36 79.5 L69.5 98.75 V122.2'/%3E%3Cpath d='M36 79.5 L2.5 98.75 V122.2'/%3E%3C/g%3E%3C/svg%3E"),
-    repeating-linear-gradient(
-      -18deg,
-      transparent 0,
-      transparent 11px,
-      rgba(233, 234, 236, 0.012) 11px,
-      rgba(233, 234, 236, 0.012) 12px
-    );
+    radial-gradient(ellipse 85% 70% at 50% 42%, rgba(217, 162, 79, 0.07), transparent 62%),
+    radial-gradient(ellipse 55% 45% at 18% 0%, rgba(217, 162, 79, 0.035), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(52, 39, 19, 0.35), transparent 55%),
+    radial-gradient(ellipse 120% 90% at 50% 50%, transparent 40%, rgba(10, 11, 13, 0.55) 100%),
+    url('/patterns/honeycomb.png');
+  background-size:
+    auto,
+    auto,
+    auto,
+    auto,
+    139px 120px;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
   background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font);
