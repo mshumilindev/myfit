@@ -1,6 +1,8 @@
 /** Programs — trainer/admin authoring + client assignment (AC-ROLE-06, O-07). */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getRole, getUsername, request } from '../api';
+import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { getRole, getUsername, callFn, currentUid } from '../api';
+import { db } from '../firebase';
 import { ProgramCsvDialog } from './ProgramCsvDialog';
 import { ProgramAssignDialog } from './ProgramAssignDialog';
 import { programToCsv, type ProgramItemLike } from '../data/programCsv';
@@ -125,7 +127,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
 
   const load = useCallback(() => {
     if (role === 'member') {
-      request<{ assignment: ProgramAssignment | null }>('GET', '/api/programs/mine')
+      callFn<{ assignment: ProgramAssignment | null }>('programMine')
         .then((data) => {
           setFailed(false);
           setMemberLoaded(true);
@@ -147,14 +149,20 @@ export function ProgramsView({ shell }: { shell: Shell }) {
         });
       return;
     }
-    request<{ programs: Program[] }>('GET', '/api/programs')
-      .then((data) => {
+    const uid = currentUid();
+    if (!uid) return;
+    // Authored programs, read straight from Firestore (rules: author only).
+    getDocs(query(collection(db, 'programs'), where('authorId', '==', uid)))
+      .then((snap) => {
+        const list = snap.docs
+          .map((d) => d.data() as Program & { updatedAt?: number })
+          .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
         setFailed(false);
-        setPrograms(data.programs);
-        if (!didPickInitialProgram.current && !selectedId && data.programs[0]) {
+        setPrograms(list);
+        if (!didPickInitialProgram.current && !selectedId && list[0]) {
           didPickInitialProgram.current = true;
-          setSelectedId(data.programs[0].id);
-          setDraft({ ...data.programs[0], items: normalizeItems(data.programs[0].items) });
+          setSelectedId(list[0].id);
+          setDraft({ ...list[0], items: normalizeItems(list[0].items) });
         }
       })
       .catch(() => setFailed(true));
@@ -168,8 +176,9 @@ export function ProgramsView({ shell }: { shell: Shell }) {
     if (role === 'member') {
       return;
     }
-    const path = role === 'admin' ? '/api/admin/people' : '/api/trainer/clients';
-    request<{ people?: ClientOption[]; clients?: ClientOption[] }>('GET', path)
+    callFn<{ people?: ClientOption[]; clients?: ClientOption[] }>(
+      role === 'admin' ? 'adminPeople' : 'trainerClients',
+    )
       .then((data) => {
         const rows = role === 'admin' ? (data.people ?? []) : (data.clients ?? []);
         setClients(rows.filter((c) => c.id && c.name));
@@ -425,32 +434,44 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   }
 
   async function save() {
+    const uid = currentUid();
+    if (!uid) return;
     setSaving(true);
     try {
-      const payload = {
-        name: draft.name,
-        weeks: draft.weeks,
-        daysPerWeek: draft.daysPerWeek,
-        dayNames: draft.dayNames,
-        items: draft.items
-          .filter((i) => i.name.trim())
-          .map((i) => ({
-            day: i.day,
-            position: i.position,
-            name: i.name.trim(),
-            kind: i.kind,
-            sets: i.sets,
-            reps: i.reps,
-            durationMin: i.durationMin,
-            equipment: i.equipment,
-            groupId: i.groupId ?? null,
-            groupOrder: i.groupOrder ?? null,
-            dropLast: !!i.dropLast,
-          })),
+      const rawW = Number(draft.weeks);
+      const weeks = rawW === 0 ? 0 : Math.max(1, Math.min(52, rawW || 8));
+      const daysPerWeek = Math.max(1, Math.min(7, Number(draft.daysPerWeek) || 3));
+      const items = draft.items
+        .filter((i) => i.name.trim())
+        .map((i, idx) => ({
+          id: i.id || crypto.randomUUID(),
+          day: Math.max(1, Math.min(7, i.day || 1)),
+          position: i.position ?? idx,
+          name: i.name.trim().slice(0, 120),
+          kind: i.kind,
+          sets: i.sets,
+          reps: i.reps,
+          durationMin: i.durationMin,
+          equipment: i.equipment,
+          groupId: i.groupId ?? null,
+          groupOrder: i.groupOrder ?? null,
+          dropLast: !!i.dropLast,
+        }));
+      const program: Program & { updatedAt: number } = {
+        id: draft.id,
+        authorId: uid,
+        name: draft.name.trim() || t.progNew,
+        weeks,
+        daysPerWeek,
+        status: draft.status ?? 'draft',
+        dayNames: draft.dayNames ?? {},
+        items,
+        updatedAt: Date.now(),
       };
-      const data = await request<{ program: Program }>('PUT', `/api/programs/${draft.id}`, payload);
-      setSelectedId(data.program.id);
-      setDraft({ ...data.program, items: normalizeItems(data.program.items) });
+      // Rules allow an author to write their own program document.
+      await setDoc(doc(db, 'programs', program.id), program);
+      setSelectedId(program.id);
+      setDraft({ ...program, items: normalizeItems(program.items) });
       load();
     } finally {
       setSaving(false);
@@ -460,13 +481,13 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   async function assign(startWeek: number) {
     if (!selectedId || assignClientIds.length === 0) return;
     for (const memberId of assignClientIds) {
-      await request('POST', `/api/programs/${selectedId}/assign`, { memberId, startWeek });
+      await callFn('assignProgram', { id: selectedId, memberId, startWeek });
     }
     setAssignClientIds([]);
   }
 
   async function removeProgram(id: string) {
-    await request('DELETE', `/api/programs/${id}`);
+    await callFn('deleteProgram', { id });
     setConfirmDeleteProgram(false);
     setSelectedId(null);
     setDraft(freshProgram(t.progNew));
@@ -476,12 +497,12 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   async function setStatus(status: 'draft' | 'active' | 'archived') {
     if (!selectedId) return;
     try {
-      await request('POST', `/api/programs/${selectedId}/status`, { status });
+      await callFn('setProgramStatus', { id: selectedId, status });
       setDraft((p) => ({ ...p, status }));
       if (role === 'member') setMemberEditing(false);
       load();
     } catch {
-      /* server rejects activation when a day is empty; keep draft */
+      /* activation is rejected when a day is empty; keep the draft */
     }
   }
 

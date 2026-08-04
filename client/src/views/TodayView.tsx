@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
 import type { ExerciseKind, Gym } from '../types';
-import { request } from '../api';
+import { callFn } from '../api';
 import {
   addExercise,
   backfillWorkout,
@@ -191,7 +191,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     .join(' · ');
 
   useEffect(() => {
-    request<{ assignment: ProgramAssignment | null }>('GET', '/api/programs/mine')
+    callFn<{ assignment: ProgramAssignment | null }>('programMine')
       .then((data) => setAssignment(data.assignment))
       .catch(() => setAssignment(null));
   }, []);

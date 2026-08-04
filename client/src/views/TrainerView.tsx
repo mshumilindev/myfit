@@ -1,6 +1,6 @@
 /** Trainer — design TR-01…TR-04. Assigned clients only, read-only. */
 import { useCallback, useEffect, useState } from 'react';
-import { request } from '../api';
+import { callFn } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { Icon, Spinner } from '../ui';
 import { Avatar } from '../components/Avatar';
@@ -30,7 +30,7 @@ export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
-    request<{ clients: Client[] }>('GET', '/api/trainer/clients')
+    callFn<{ clients: Client[] }>('trainerClients')
       .then((d) => setClients(d.clients))
       .catch(() => setFailed(true));
   }, []);

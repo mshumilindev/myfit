@@ -1,5 +1,14 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { clearAuth, getRole, getToken, getUsername, request } from './api';
+import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import {
+  getRole,
+  getUsername,
+  currentUid,
+  onAuthChange,
+  watchRoleClaim,
+  signOut as apiSignOut,
+} from './api';
+import { db } from './firebase';
 import { getOpenWorkout, startSyncLoop, useStore, retrySync, discardBlockingChange } from './store';
 import { useT } from './i18n';
 import { Icon, LanguageSelector, Snackbar, Toast, type SnackState, type ToastState } from './ui';
@@ -140,29 +149,59 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
 export function App() {
   const { t } = useT();
   const store = useStore();
-  const [authed, setAuthed] = useState<boolean>(() => !!getToken());
+  const [authed, setAuthed] = useState<boolean>(() => !!currentUid());
   const [notices, setNotices] = useState<Notice[]>([]);
 
-  const loadNotices = useCallback(() => {
-    if (!getToken()) return;
-    request<{ notices: Notice[] }>('GET', '/api/notices')
-      .then((d) => setNotices(Array.isArray(d?.notices) ? d.notices : []))
-      .catch(() => {});
+  // Firebase restores the session asynchronously; track it and keep the cached
+  // role claim fresh.
+  useEffect(() => {
+    const unsubRole = watchRoleClaim();
+    const unsub = onAuthChange((user) => setAuthed(!!user));
+    return () => {
+      unsub();
+      unsubRole();
+    };
   }, []);
 
+  // Notices: a live listener on the user's own notices subcollection.
   useEffect(() => {
-    loadNotices();
-    const iv = setInterval(loadNotices, 30_000);
-    window.addEventListener('focus', loadNotices);
-    return () => {
-      clearInterval(iv);
-      window.removeEventListener('focus', loadNotices);
-    };
-  }, [loadNotices]);
+    if (!authed) return;
+    const uid = currentUid();
+    if (!uid) return;
+    return onSnapshot(
+      collection(db, 'users', uid, 'notices'),
+      (snap) => {
+        const list = snap.docs
+          .map((d) => {
+            const n = d.data() as {
+              kind: string;
+              actor: string | null;
+              detail: string | null;
+              createdAt: number;
+              readAt: number | null;
+            };
+            return {
+              id: d.id,
+              kind: n.kind,
+              actor: n.actor ?? null,
+              detail: n.detail ?? null,
+              createdAt: n.createdAt,
+              read: n.readAt != null,
+            };
+          })
+          .sort((a, b) => b.createdAt - a.createdAt)
+          .slice(0, 50);
+        setNotices(list);
+      },
+      () => {},
+    );
+  }, [authed]);
 
   function dismissNotice(id: string) {
-    setNotices((ns) => ns.filter((n) => n.id !== id));
-    request('POST', `/api/notices/${id}/read`).catch(() => {});
+    setNotices((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    const uid = currentUid();
+    if (uid)
+      updateDoc(doc(db, 'users', uid, 'notices', id), { readAt: Date.now() }).catch(() => {});
   }
   // Invite links (#/join/<token>) open onboarding before any auth gate.
   const [joinToken, setJoinToken] = useState<string | null>(() => {
@@ -218,9 +257,9 @@ export function App() {
       setSnack({ ...s, id: snackSeq.current });
     },
     signOut: () => {
-      clearAuth();
       setOverlay(null);
       setTab(defaultTabForRole(getRole()));
+      void apiSignOut();
       setAuthed(false);
       window.history.replaceState(null, '', '#/today');
     },
@@ -280,7 +319,7 @@ export function App() {
             onDone={(workoutId) => {
               setJoinToken(null);
               window.location.hash = '#/today';
-              if (getToken()) setAuthed(true);
+              if (currentUid()) setAuthed(true);
               if (workoutId) setOverlay({ screen: 'session', workoutId });
             }}
           />

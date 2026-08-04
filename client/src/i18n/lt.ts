@@ -19,7 +19,7 @@ const serijos = (n: number): string => {
 export const lt: Strings = {
   locale: 'Lietuvių',
 
-  appName: 'My Fit',
+  appName: 'Spotter',
   backAction: 'Atgal',
   menuAction: 'Meniu',
   reorder: 'Keisti tvarką',
@@ -32,7 +32,7 @@ export const lt: Strings = {
   password: 'Slaptažodis',
   signIn: 'Prisijungti',
   signingIn: 'Jungiamasi…',
-  newHereCreate: 'Naujokas? Susikurk paskyrą',
+  newHereCreate: 'Naujokas? Paprašyk admino pakvietimo nuorodos.',
   haveAccountSignIn: 'Jau turi paskyrą? Prisijunk',
   wrongCredentials: 'Neteisingas vardas arba slaptažodis',
   tooManyAttempts: 'Per daug nesėkmingų bandymų. Bandyk po 15 minučių.',
@@ -40,7 +40,7 @@ export const lt: Strings = {
     'Nepavyksta pasiekti serverio. Pirmam prisijungimui reikia ryšio — po to veikia įrašai neprisijungus.',
   retry: 'Bandyti dar',
   createYourAccount: 'Susikurk paskyrą',
-  signupNote: 'Tavo žurnalas privatus tavo paskyrai. Nemokama, kol My Fit beta versijoje.',
+  signupNote: 'Tavo žurnalas privatus tavo paskyrai. Nemokama, kol Spotter beta versijoje.',
   username: 'Vartotojo vardas',
   firstName: 'Vardas',
   lastName: 'Pavardė',
@@ -251,7 +251,7 @@ export const lt: Strings = {
   filters: 'Filtrai',
   availableHere: 'Prieinama čia',
   nExercises: (n: number) => `${n} pratim${n === 1 ? 'as' : n < 10 ? 'ai' : 'ų'}`,
-  noItemHere: (item: string) => `Čia nėra: ${String(item).toLowerCase()}`,
+  noItemHere: (item: string) => `Čia nėra: ${item.toLowerCase()}`,
   filtersCombineNote:
     'Filtrai jungiasi: raumuo ir įranga ir tai, ką turi ši salė. Pratimas, kurio salė negali aprūpinti, lieka matomas 45% ryškumu, o ne dingsta — gal žinai geriau.',
   byMuscle: 'Pagal raumenis',
@@ -266,7 +266,7 @@ export const lt: Strings = {
     'Inventorius — tai, ką pažymėjai kiekvienoje salėje; niekas jo netikrina. Salė be inventoriaus niekada nežymima kaip stokojanti.',
   primaryGreySub: (n: number) => `Pagrindinis žalvariu, antriniai pilkai · sesijos: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Abu yra' : 'Viskas yra'),
-  noItemShort: (item: string) => `Nėra: ${String(item).toLowerCase()}`,
+  noItemShort: (item: string) => `Nėra: ${item.toLowerCase()}`,
   needsCol: 'Reikia',
   statusCol: 'Būsena',
   gymCol: 'Salė',
@@ -478,7 +478,7 @@ export const lt: Strings = {
   },
   equipmentAll: 'Visa įranga',
   bodyweightShort: 'SS',
-  onbInvited: (name) => `${name} pakvietė tave į My Fit ir jau paruošė profilį.`,
+  onbInvited: (name) => `${name} pakvietė tave į Spotter ir jau paruošė profilį.`,
   onbTitle: 'Keturi žingsniai — ir treniruojiesi.',
   onbBody:
     'Paskyra, nuotrauka, salė, pirmoji serija. Mažiau nei dvi minutės — paskutinis žingsnis yra tikra sesija.',

@@ -1,6 +1,9 @@
 /** Full user profile page: direct-link safe, data-rich, role-aware. */
 import { useEffect, useState, type ReactNode } from 'react';
-import { HttpError, request, setUsername } from '../api';
+import { doc, updateDoc } from 'firebase/firestore';
+import { deleteObject, ref } from 'firebase/storage';
+import { HttpError, callFn, currentUid, setUsername } from '../api';
+import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Spinner, Switch } from '../ui';
 import { Avatar } from '../components/Avatar';
@@ -121,7 +124,7 @@ export function ProfileView({
 
   useEffect(() => {
     let alive = true;
-    request<ProfileData>('GET', `/api/profile/users/${encodeURIComponent(userId)}`)
+    callFn<ProfileData>('profileUser', { id: userId })
       .then((data) => {
         if (alive) setLoaded({ userId, value: data });
         if (alive && (data.viewer.relation === 'self' || data.viewer.relation === 'admin')) {
@@ -156,22 +159,20 @@ export function ProfileView({
     try {
       let next: ProfileData;
       if (load.viewer.relation === 'self') {
-        next = await request<ProfileData>('PUT', '/api/profile/me', {
+        next = await callFn<ProfileData>('updateProfile', {
           firstName: editFirstName,
           lastName: editLastName,
           username: editUsername,
         });
         setUsername(next.person.name);
       } else {
-        await request('PUT', `/api/admin/users/${encodeURIComponent(load.person.id)}`, {
+        await callFn('adminEditUser', {
+          id: load.person.id,
           firstName: editFirstName,
           lastName: editLastName,
           username: editUsername,
         });
-        next = await request<ProfileData>(
-          'GET',
-          `/api/profile/users/${encodeURIComponent(load.person.id)}`,
-        );
+        next = await callFn<ProfileData>('profileUser', { id: load.person.id });
       }
       setEditFirstName(next.person.firstName);
       setEditLastName(next.person.lastName ?? '');
@@ -190,13 +191,8 @@ export function ProfileView({
     if (typeof load !== 'object') return;
     const next = load.person.role === 'trainer' ? 'member' : 'trainer';
     try {
-      await request('POST', `/api/admin/users/${encodeURIComponent(load.person.id)}/role`, {
-        role: next,
-      });
-      const fresh = await request<ProfileData>(
-        'GET',
-        `/api/profile/users/${encodeURIComponent(load.person.id)}`,
-      );
+      await callFn('adminChangeRole', { id: load.person.id, role: next });
+      const fresh = await callFn<ProfileData>('profileUser', { id: load.person.id });
       setLoaded({ userId, value: fresh });
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
     } catch (e) {
@@ -220,7 +216,11 @@ export function ProfileView({
 
   async function removeAvatar() {
     if (typeof load !== 'object') return;
-    await request('DELETE', '/api/profile/me/avatar');
+    const uid = currentUid();
+    if (uid) {
+      await deleteObject(ref(storage, `avatars/${uid}/photo`)).catch(() => undefined);
+      await updateDoc(doc(db, 'users', uid), { avatarExt: null, updatedAt: Date.now() });
+    }
     setLoaded({
       userId,
       value: { ...load, person: { ...load.person, avatar: false } },
@@ -237,10 +237,7 @@ export function ProfileView({
     setSavingPassword(true);
     setPasswordError(null);
     try {
-      await request('PUT', '/api/profile/me/password', {
-        currentPassword,
-        newPassword,
-      });
+      await callFn('changePassword', { currentPassword, newPassword });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -260,11 +257,8 @@ export function ProfileView({
     setSavingNote(true);
     setNoteError(null);
     try {
-      await request('POST', `/api/trainer/clients/${load.person.id}/notes`, { text });
-      const next = await request<ProfileData>(
-        'GET',
-        `/api/profile/users/${encodeURIComponent(userId)}`,
-      );
+      await callFn('trainerAddNote', { id: load.person.id, text });
+      const next = await callFn<ProfileData>('profileUser', { id: userId });
       setLoaded({ userId, value: next });
       setTrainerNote('');
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileNoteSaved });

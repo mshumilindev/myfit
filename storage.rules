@@ -1,0 +1,33 @@
+rules_version = '2';
+
+// Spotter — Cloud Storage rules for avatars.
+// Path: avatars/{userId}/{fileName}. The owner uploads/deletes their own photo;
+// reads are allowed for the owner, any admin, or the member's assigned trainer
+// (looked up in Firestore). Role comes from the custom-token `role` claim.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function role() {
+      return request.auth != null && 'role' in request.auth.token
+        ? request.auth.token.role
+        : 'member';
+    }
+    function isAdmin() {
+      return role() == 'admin';
+    }
+    function trainerOf(userId) {
+      return role() == 'trainer'
+        && firestore.get(/databases/(default)/documents/users/$(userId)).data.trainerId == request.auth.uid;
+    }
+
+    match /avatars/{userId}/{fileName} {
+      allow read: if request.auth != null
+        && (request.auth.uid == userId || isAdmin() || trainerOf(userId));
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 6 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

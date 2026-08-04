@@ -19,7 +19,7 @@ const pidhody = (n: number): string => {
 export const uk: Strings = {
   locale: 'Українська',
 
-  appName: 'My Fit',
+  appName: 'Spotter',
   backAction: 'Назад',
   menuAction: 'Меню',
   reorder: 'Переставити',
@@ -32,7 +32,7 @@ export const uk: Strings = {
   password: 'Пароль',
   signIn: 'Увійти',
   signingIn: 'Вхід…',
-  newHereCreate: 'Вперше тут? Створи акаунт',
+  newHereCreate: 'Вперше тут? Попроси адміна дати invite-посилання.',
   haveAccountSignIn: 'Вже є акаунт? Увійти',
   wrongCredentials: 'Невірне імʼя або пароль',
   tooManyAttempts: 'Забагато невдалих спроб. Спробуй за 15 хвилин.',
@@ -40,7 +40,7 @@ export const uk: Strings = {
     'Немає звʼязку із сервером. Перший вхід потребує зʼєднання — далі офлайн-запис працює.',
   retry: 'Повторити',
   createYourAccount: 'Створи свій акаунт',
-  signupNote: 'Твій журнал приватний для твого акаунта. Безкоштовно, поки My Fit у беті.',
+  signupNote: 'Твій журнал приватний для твого акаунта. Безкоштовно, поки Spotter у беті.',
   username: 'Імʼя користувача',
   firstName: 'Імʼя',
   lastName: 'Прізвище',
@@ -242,7 +242,7 @@ export const uk: Strings = {
   filters: 'Фільтри',
   availableHere: 'Доступно тут',
   nExercises: (n: number) => `${n} вправ${n === 1 ? 'а' : n < 5 ? 'и' : ''}`,
-  noItemHere: (item: string) => `Тут немає: ${String(item).toLowerCase()}`,
+  noItemHere: (item: string) => `Тут немає: ${item.toLowerCase()}`,
   filtersCombineNote:
     'Фільтри поєднуються: м’яз і обладнання і те, що є в цьому залі. Вправа, яку зал не може обладнати, лишається видимою на 45%, а не зникає — тобі видніше.',
   byMuscle: 'За м’язами',
@@ -257,7 +257,7 @@ export const uk: Strings = {
     'Інвентар — це те, що ти відмітив у кожному залі; ніхто його не перевіряє. Зал без інвентаря ніколи не позначається як неповний.',
   primaryGreySub: (n: number) => `Основний — латунню, другорядні — сірим · сесій: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Обидва є' : 'Все є'),
-  noItemShort: (item: string) => `Немає: ${String(item).toLowerCase()}`,
+  noItemShort: (item: string) => `Немає: ${item.toLowerCase()}`,
   needsCol: 'Потрібно',
   statusCol: 'Статус',
   gymCol: 'Зал',
@@ -469,7 +469,7 @@ export const uk: Strings = {
   },
   equipmentAll: 'Все обладнання',
   bodyweightShort: 'ВВ',
-  onbInvited: (name) => `${name} запросив тебе в My Fit і вже налаштував профіль.`,
+  onbInvited: (name) => `${name} запросив тебе в Spotter і вже налаштував профіль.`,
   onbTitle: 'Чотири кроки — і ти тренуєшся.',
   onbBody:
     'Акаунт, фото, зал, перший підхід. Менш ніж дві хвилини — і останній крок це справжня сесія, а не підсумок.',

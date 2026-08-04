@@ -1,10 +1,13 @@
 /**
  * Avatar (AC-AVATAR-07/08): the person's photo when one exists, otherwise
  * initials on a graphite disc — never a broken image, silhouette or empty
- * circle. Auth'd image URLs go through fetch with the bearer token.
+ * circle. The photo is fetched from Cloud Storage via getBlob, which downloads
+ * over an authenticated request so storage.rules (owner/admin/assigned-trainer)
+ * are enforced — unlike a tokenized download URL.
  */
 import { useEffect, useState } from 'react';
-import { getToken } from '../api';
+import { getBlob, ref } from 'firebase/storage';
+import { storage } from '../firebase';
 
 const urlCache = new Map<string, string>();
 
@@ -37,18 +40,11 @@ export function Avatar({
   useEffect(() => {
     if (!key || urlCache.has(key)) return;
     let alive = true;
-    // refreshKey busts any browser-cached response (including a stale 404 from
-    // before the first upload) so a freshly saved avatar shows immediately.
-    fetch(`/api/profile/avatars/${userId}?v=${refreshKey}`, {
-      headers: { Authorization: `Bearer ${getToken() ?? ''}` },
-      cache: 'no-store',
-    })
-      .then(async (r) => {
-        // Only treat an actual image as a photo; an error/HTML body would just
-        // render as a broken picture, so fall through to initials instead.
-        if (!r.ok) return null;
-        const blob = await r.blob();
-        if (!blob.type.startsWith('image/') || blob.size === 0) return null;
+    // getBlob honours storage.rules; a missing file / denied read simply falls
+    // through to initials. refreshKey re-runs this after an upload or removal.
+    getBlob(ref(storage, `avatars/${userId}/photo`))
+      .then((blob) => {
+        if (!blob || blob.size === 0) return null;
         return URL.createObjectURL(blob);
       })
       .then((url) => {

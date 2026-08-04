@@ -1,4 +1,26 @@
+/**
+ * Tracker store — Firestore-native.
+ *
+ * A workout is a single document at users/{uid}/workouts/{wid} with its
+ * exercises/sets nested inline (matching the in-memory shape). Reads come from
+ * live onSnapshot listeners; writes go straight to Firestore, whose offline
+ * persistence queues and replays them automatically — so the old hand-rolled
+ * localStorage mutation queue is gone. Every mutation still patches in-memory
+ * state first for instant UI; the snapshot reconciles to canonical data.
+ *
+ * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
+ * are unchanged — they operate on the in-memory workouts array.
+ */
 import { useSyncExternalStore } from 'react';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  type Unsubscribe,
+} from 'firebase/firestore';
+import { db } from './firebase';
 import {
   AUTO_FINISH_MS,
   type DropEntry,
@@ -20,17 +42,17 @@ import {
   type CustomExercise,
   type MuscleGroup,
 } from './data/exercises';
-import { HttpError, getRole, getToken, request } from './api';
+import { currentUid, getRole } from './api';
 
-const STATE_KEY = 'gym.state';
-const QUEUE_KEY = 'gym.queue';
-const GYMS_KEY = 'gym.gyms';
-const REMINDERS_KEY = 'gym.reminders';
+const STATE_KEY = 'spotter.state';
+const GYMS_KEY = 'spotter.gyms';
+const REMINDERS_KEY = 'spotter.reminders';
 
 export interface StoreState {
   workouts: Workout[];
   gyms: Gym[];
   reminders: Reminder[];
+  /** Retained for compatibility; always empty (Firestore handles queueing). */
   queue: QueuedMutation[];
   syncStatus: SyncStatus;
   syncError: SyncError | null;
@@ -50,11 +72,15 @@ let state: StoreState = {
   workouts: load<Workout[]>(STATE_KEY, []),
   gyms: load<Gym[]>(GYMS_KEY, []),
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
-  queue: load<QueuedMutation[]>(QUEUE_KEY, []),
+  queue: [],
   syncStatus: 'pending',
   syncError: null,
   lastSyncAt: null,
 };
+
+// Pings & dismissals feed reminder computation; kept outside StoreState.
+let pings: Array<{ gymId: string; at: number }> = [];
+let dismissals: Array<{ gymId: string; visitStart: number }> = [];
 
 const listeners = new Set<() => void>();
 
@@ -63,10 +89,13 @@ function emit(): void {
 }
 
 function persist(): void {
-  localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
-  localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
-  localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(state.queue));
+  try {
+    localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
+    localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
+    localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
+  } catch {
+    /* quota / private mode — Firestore cache is the real store */
+  }
 }
 
 function setState(patch: Partial<StoreState>): void {
@@ -90,52 +119,37 @@ export const uuid = (): string => crypto.randomUUID();
 export function exerciseKind(ex: Exercise): ExerciseKind {
   return ex.kind ?? 'strength';
 }
-
 export function isStrengthExercise(ex: Exercise): boolean {
   return exerciseKind(ex) === 'strength';
 }
-
 export function isTimedExercise(ex: Exercise): boolean {
   return exerciseKind(ex) !== 'strength';
 }
 
 // --- Set types & drops (design DS-1…DS-4, EQ-4) ----------------------------
 
-/** Effective type of a set; falls back to the legacy isWarmup flag. */
 export function setTypeOf(s: SetEntry): SetType {
   return s.type ?? (s.isWarmup ? 'warmup' : 'working');
 }
-
 export function setDrops(s: SetEntry): DropEntry[] {
   const t = setTypeOf(s);
   return t === 'drop' || t === 'reverse-drop' ? (s.drops ?? []) : [];
 }
-
-/** Total reps of a set: the start plus every drop (EQ-4 counting rules). */
 export function setRepsTotal(s: SetEntry): number {
   return s.reps + setDrops(s).reduce((n, d) => n + d.reps, 0);
 }
-
-/** Volume of one set in kg: start + drops. Warm-ups contribute nothing. */
 export function setVolumeKg(s: SetEntry): number {
   if (setTypeOf(s) === 'warmup') return 0;
   return (s.weight ?? 0) * s.reps + setDrops(s).reduce((v, d) => v + (d.weight ?? 0) * d.reps, 0);
 }
 
 /**
- * Weight is often entered per side, so total volume doubles the entered load:
- *  - Dumbbells: two of them by default (a 20 kg dumbbell in each hand moves
- *    40 kg). Single-dumbbell moves held with both hands (goblet, pullover) and
- *    explicit one-arm variants stay ×1.
- *  - Cables: a single stack pulled with both hands (lat/straight-arm pulldown,
- *    pushdown, seated row) is ×1 — the stack weight IS the total. Only bilateral
- *    two-cable moves (pec fly, crossover) load two stacks, so those double.
- * Records and 1RM estimates keep the entered per-side weight — like with like.
+ * Per-side entry doubling (unchanged from the pre-Firebase store):
+ *  - Dumbbells double by default; single-dumbbell / one-arm variants stay ×1.
+ *  - Cables: single-stack ×1; bilateral two-cable moves (fly, crossover) ×2.
  */
 const ONE_ARM_NAME = /\b(one|single)[- ](arm|hand|leg)\b|unilateral|одн(ією|у|ой)\s*рук/i;
-/** Dumbbell moves done with a single dumbbell held in both hands → ×1. */
 const SINGLE_DUMBBELL = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
-/** Cable moves that load two separate stacks at once → ×2. */
 const BILATERAL_CABLE = /\bflye?\b|cross[- ]?over|pec\b/i;
 
 export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number {
@@ -147,7 +161,6 @@ export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number 
   return 1;
 }
 
-/** Volume of one exercise in kg (drops included, warm-ups excluded, per-hand ×2). */
 export function exerciseVolumeKg(ex: Exercise): number {
   return ex.sets.reduce((v, s) => v + setVolumeKg(s), 0) * perHandFactor(ex);
 }
@@ -156,12 +169,9 @@ export function exerciseVolumeKg(ex: Exercise): number {
 
 export interface SupersetGroup {
   groupId: string;
-  /** A, B, C… in first-appearance order. */
   letter: string;
   exercises: Exercise[];
 }
-
-/** One entry per card in position order: single exercises or whole groups. */
 export type SessionBlock =
   { kind: 'single'; exercise: Exercise } | { kind: 'group'; group: SupersetGroup };
 
@@ -193,49 +203,33 @@ export function sessionBlocks(w: Workout): SessionBlock[] {
   return blocks;
 }
 
-/** Next free superset letter for a workout ('A' when none exist yet). */
 export function nextSupersetLetter(w: Workout): string {
   const used = sessionBlocks(w).filter((b) => b.kind === 'group').length;
   return String.fromCharCode(65 + used);
 }
-
-/** Rounds in a superset = the longest member (planned or logged, SS-2 note). */
 export function groupRounds(g: SupersetGroup): number {
   return Math.max(
     1,
     ...g.exercises.map((e) => Math.max(e.sets.length, Math.max(0, e.plannedSets ?? 0))),
   );
 }
-
-/** Current round = shortest member's next set (1-based, capped at rounds). */
 export function groupCurrentRound(g: SupersetGroup): number {
   const done = Math.min(...g.exercises.map((e) => e.sets.length));
   return Math.min(done + 1, groupRounds(g));
 }
 
-/** Group exercises with the given ids as a superset; keeps every set (SS-2). */
 export function groupAsSuperset(workoutId: string, exerciseIds: string[]): void {
   const w = state.workouts.find((x) => x.id === workoutId);
   if (!w || exerciseIds.length < 2) return;
   const gid = uuid();
   const next = w.exercises.map((e) => {
     const order = exerciseIds.indexOf(e.id);
-    if (order < 0) return e;
-    return { ...e, groupId: gid, groupOrder: order };
+    return order < 0 ? e : { ...e, groupId: gid, groupOrder: order };
   });
   patchWorkout(workoutId, { exercises: next });
-  for (const e of next) {
-    if (e.groupId === gid) {
-      enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${e.id}`, {
-        ...exerciseUpsertBody(e),
-      });
-    }
-  }
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
-/** Ungroup restores plain numbering and keeps every set (SS-2 note). */
 export function ungroupSuperset(workoutId: string, groupId: string): void {
   const w = state.workouts.find((x) => x.id === workoutId);
   if (!w) return;
@@ -243,15 +237,7 @@ export function ungroupSuperset(workoutId: string, groupId: string): void {
     e.groupId === groupId ? { ...e, groupId: null, groupOrder: null } : e,
   );
   patchWorkout(workoutId, { exercises: next });
-  for (const e of next) {
-    if (w.exercises.find((x) => x.id === e.id)?.groupId === groupId) {
-      enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${e.id}`, {
-        ...exerciseUpsertBody(e),
-      });
-    }
-  }
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
 // --- Muscle groups (design MG-1…MG-5, EQ-4) --------------------------------
@@ -261,7 +247,6 @@ export interface ResolvedMuscles {
   secondary: MuscleGroup[];
 }
 
-/** Muscles for an exercise: its own fields first, then the catalog by name. */
 export function resolveMuscles(
   ex: Pick<Exercise, 'name' | 'primaryMuscle' | 'secondaryMuscles' | 'kind'>,
 ): ResolvedMuscles {
@@ -277,7 +262,6 @@ export function resolveMuscles(
   return { primary: info.primary, secondary: info.secondary };
 }
 
-/** Sets per primary muscle in one workout — drops count as one (DS-4 rail). */
 export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
   const m = new Map<MuscleGroup, number>();
   for (const e of w.exercises) {
@@ -289,7 +273,6 @@ export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
   return m;
 }
 
-/** Volume per primary muscle across workouts (MG-3: sums to the total). */
 export function muscleVolumeKg(workouts: Workout[]): Map<MuscleGroup, number> {
   const m = new Map<MuscleGroup, number>();
   for (const w of workouts) {
@@ -303,23 +286,19 @@ export function muscleVolumeKg(workouts: Workout[]): Map<MuscleGroup, number> {
   return m;
 }
 
-/** Distinct equipment ids used by a workout's exercises (DS-4 rail). */
 export function workoutEquipment(w: Workout): string[] {
   const out: string[] = [];
-  for (const e of w.exercises) {
+  for (const e of w.exercises)
     for (const id of equipmentFor(e)) if (!out.includes(id)) out.push(id);
-  }
   return out;
 }
 
-/** Equipment for an exercise: its own list first, then the catalog. */
 export function equipmentFor(ex: Pick<Exercise, 'name' | 'equipment'>): string[] {
   if (ex.equipment && ex.equipment.length > 0) return ex.equipment;
   const info = muscleInfoByName(ex.name);
   return info?.equipment ? [info.equipment] : [];
 }
 
-/** Equipment an exercise name needs, learned from history + the catalog. */
 export function exerciseNeeds(name: string): string[] {
   const needle = name.trim().toLowerCase();
   const out: string[] = [];
@@ -334,8 +313,6 @@ export function exerciseNeeds(name: string): string[] {
   return out;
 }
 
-/** Equipment an exercise needs that a gym's inventory lacks (EQ-2/EQ-3).
- *  A gym with no inventory set is never flagged as missing anything. */
 export function missingAtGym(gym: Gym | null | undefined, needs: string[]): string[] {
   if (!gym?.inventory || gym.inventory.length === 0) return [];
   return needs.filter((id) => !gym.inventory!.includes(id));
@@ -352,66 +329,61 @@ interface ExercisePlan {
   secondaryMuscles?: string[];
 }
 
-// --- Local mutations (optimistic, queued for the server) -------------------
+// --- Firestore writes -------------------------------------------------------
 
-function enqueue(method: QueuedMutation['method'], url: string, body?: unknown): void {
-  state.queue.push({ id: uuid(), method, url, body, queuedAt: Date.now() });
+function onWriteError(err: unknown): void {
+  const code = (err as { code?: string })?.code ?? '';
+  if (code === 'permission-denied') {
+    setState({
+      syncStatus: 'failed',
+      syncError: { status: 403, statusLine: 'Firestore write rejected (permission-denied)' },
+    });
+  }
+  // Transient errors: Firestore retries automatically; nothing to do.
+}
+
+function writeWorkoutDoc(w: Workout): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'workouts', w.id), { ...w, updatedAt: Date.now() }).catch(
+    onWriteError,
+  );
+}
+function saveWorkout(id: string): void {
+  const w = state.workouts.find((x) => x.id === id);
+  if (w) writeWorkoutDoc(w);
+}
+function deleteWorkoutDoc(id: string): void {
+  const uid = currentUid();
+  if (!uid) return;
+  deleteDoc(doc(db, 'users', uid, 'workouts', id)).catch(onWriteError);
+}
+function writeGymDoc(g: Gym): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'gyms', g.id), { ...g, updatedAt: Date.now() }).catch(onWriteError);
+}
+function deleteGymDoc(id: string): void {
+  const uid = currentUid();
+  if (!uid) return;
+  deleteDoc(doc(db, 'users', uid, 'gyms', id)).catch(onWriteError);
+}
+function writePingDoc(id: string, gymId: string, at: number): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'pings', id), { gymId, at }).catch(onWriteError);
+}
+function writeDismissalDoc(gymId: string, visitStart: number): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'reminderDismissals', `${gymId}:${visitStart}`), {
+    gymId,
+    visitStart,
+  }).catch(onWriteError);
 }
 
 function sortWorkouts(ws: Workout[]): Workout[] {
   return [...ws].sort((a, b) => b.startedAt - a.startedAt);
-}
-
-function exerciseUpsertBody(e: Exercise): ExercisePlan & {
-  name: string;
-  kind: ExerciseKind;
-  position: number;
-} {
-  return {
-    name: e.name,
-    kind: exerciseKind(e),
-    position: e.position,
-    plannedSets: e.plannedSets ?? null,
-    plannedReps: e.plannedReps ?? null,
-    plannedDurationMin: e.plannedDurationMin ?? null,
-    equipment: e.equipment ?? [],
-    groupId: e.groupId ?? null,
-    groupOrder: e.groupOrder ?? null,
-    primaryMuscle: e.primaryMuscle ?? null,
-    secondaryMuscles: e.secondaryMuscles ?? [],
-  };
-}
-
-/**
- * Mirrors the server's 8h rule locally so it also works offline:
- * open workouts older than 8h get finishedAt = startedAt + 8h + auto flag.
- */
-export function applyAutoFinish(): void {
-  const now = Date.now();
-  let changed = false;
-  const workouts = state.workouts.map((w) => {
-    if (w.finishedAt === null && w.startedAt + AUTO_FINISH_MS <= now) {
-      changed = true;
-      const closed: Workout = {
-        ...w,
-        finishedAt: w.startedAt + AUTO_FINISH_MS,
-        autoFinished: true,
-      };
-      enqueue('PUT', `/api/tracker/workouts/${w.id}`, {
-        startedAt: closed.startedAt,
-        finishedAt: closed.finishedAt,
-        autoFinished: true,
-        gymId: closed.gymId ?? null,
-      });
-      return closed;
-    }
-    return w;
-  });
-  if (changed) setState({ workouts, syncStatus: bumpPending() });
-}
-
-export function getOpenWorkout(): Workout | undefined {
-  return state.workouts.find((w) => w.finishedAt === null);
 }
 
 function bumpPending(): SyncStatus {
@@ -419,19 +391,35 @@ function bumpPending(): SyncStatus {
   return navigator.onLine ? 'pending' : 'offline';
 }
 
+/** Mirrors the 8h auto-finish rule locally (also runs offline). */
+export function applyAutoFinish(): void {
+  const now = Date.now();
+  const changed: string[] = [];
+  const workouts = state.workouts.map((w) => {
+    if (w.finishedAt === null && w.startedAt + AUTO_FINISH_MS <= now) {
+      changed.push(w.id);
+      return { ...w, finishedAt: w.startedAt + AUTO_FINISH_MS, autoFinished: true };
+    }
+    return w;
+  });
+  if (changed.length) {
+    setState({ workouts, syncStatus: bumpPending() });
+    for (const id of changed) saveWorkout(id);
+  }
+}
+
+export function getOpenWorkout(): Workout | undefined {
+  return state.workouts.find((w) => w.finishedAt === null);
+}
+
 export function startWorkout(gymId: string | null = null): Workout {
   applyAutoFinish();
   const now = Date.now();
-  // Starting a new workout closes any still-open one (marked as auto).
+  const closed: string[] = [];
   const workouts = state.workouts.map((w) => {
     if (w.finishedAt === null) {
-      const closed: Workout = { ...w, finishedAt: now, autoFinished: true };
-      enqueue('PUT', `/api/tracker/workouts/${w.id}`, {
-        startedAt: closed.startedAt,
-        finishedAt: closed.finishedAt,
-        autoFinished: true,
-      });
-      return closed;
+      closed.push(w.id);
+      return { ...w, finishedAt: now, autoFinished: true };
     }
     return w;
   });
@@ -443,17 +431,9 @@ export function startWorkout(gymId: string | null = null): Workout {
     gymId,
     exercises: [],
   };
-  enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
-    startedAt: workout.startedAt,
-    finishedAt: null,
-    autoFinished: false,
-    gymId,
-  });
-  setState({
-    workouts: sortWorkouts([workout, ...workouts]),
-    syncStatus: bumpPending(),
-  });
-  void sync();
+  setState({ workouts: sortWorkouts([workout, ...workouts]), syncStatus: bumpPending() });
+  for (const id of closed) saveWorkout(id);
+  writeWorkoutDoc(workout);
   return workout;
 }
 
@@ -463,54 +443,27 @@ function patchWorkout(id: string, patch: Partial<Workout>): void {
 }
 
 export function finishWorkout(id: string, at = Date.now()): void {
-  const w = state.workouts.find((x) => x.id === id);
-  if (!w) return;
+  if (!state.workouts.find((x) => x.id === id)) return;
   patchWorkout(id, { finishedAt: at, autoFinished: false });
-  enqueue('PUT', `/api/tracker/workouts/${id}`, {
-    startedAt: w.startedAt,
-    finishedAt: at,
-    autoFinished: false,
-    gymId: w.gymId ?? null,
-  });
-  persist();
-  void sync();
+  saveWorkout(id);
 }
 
-/** Edit workout times (allowed even after it's finished). */
 export function updateWorkoutTimes(
   id: string,
   startedAt: number,
   finishedAt: number | null,
   autoFinished: boolean,
 ): void {
-  const w = state.workouts.find((x) => x.id === id);
   patchWorkout(id, { startedAt, finishedAt, autoFinished });
-  enqueue('PUT', `/api/tracker/workouts/${id}`, {
-    startedAt,
-    finishedAt,
-    autoFinished,
-    gymId: w?.gymId ?? null,
-  });
-  persist();
-  void sync();
+  saveWorkout(id);
 }
 
-/** Attach (or change) the gym a session belongs to, mid-session or after. */
 export function attachGymToWorkout(workoutId: string, gymId: string | null): void {
-  const w = state.workouts.find((x) => x.id === workoutId);
-  if (!w) return;
+  if (!state.workouts.find((x) => x.id === workoutId)) return;
   patchWorkout(workoutId, { gymId });
-  enqueue('PUT', `/api/tracker/workouts/${workoutId}`, {
-    startedAt: w.startedAt,
-    finishedAt: w.finishedAt,
-    autoFinished: w.autoFinished,
-    gymId,
-  });
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
-/** Drag-and-drop reorder: rewrite positions 0..n-1 and sync changed ones. */
 export function reorderExercises(workoutId: string, orderedIds: string[]): void {
   const w = state.workouts.find((x) => x.id === workoutId);
   if (!w) return;
@@ -522,27 +475,13 @@ export function reorderExercises(workoutId: string, orderedIds: string[]): void 
     })
     .filter((e): e is NonNullable<typeof e> => e !== null);
   if (next.length !== w.exercises.length) return;
-  for (const e of next) {
-    const old = byId.get(e.id)!;
-    if (old.position !== e.position) {
-      enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${e.id}`, {
-        ...exerciseUpsertBody(e),
-      });
-    }
-  }
   patchWorkout(workoutId, { exercises: next });
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
 export function deleteWorkout(id: string): void {
-  setState({
-    workouts: state.workouts.filter((w) => w.id !== id),
-    syncStatus: bumpPending(),
-  });
-  enqueue('DELETE', `/api/tracker/workouts/${id}`);
-  persist();
-  void sync();
+  setState({ workouts: state.workouts.filter((w) => w.id !== id), syncStatus: bumpPending() });
+  deleteWorkoutDoc(id);
 }
 
 export function addExercise(
@@ -568,41 +507,25 @@ export function addExercise(
     secondaryMuscles: plan.secondaryMuscles ?? (info ? info.secondary : []),
     sets: [],
   };
-  patchWorkout(workoutId, {
-    exercises: [...(w?.exercises ?? []), exercise],
-  });
-  enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exercise.id}`, {
-    ...exerciseUpsertBody(exercise),
-  });
-  persist();
-  void sync();
+  patchWorkout(workoutId, { exercises: [...(w?.exercises ?? []), exercise] });
+  saveWorkout(workoutId);
   return exercise;
 }
 
 export function renameExercise(workoutId: string, exerciseId: string, name: string): void {
   const w = state.workouts.find((x) => x.id === workoutId);
-  if (!w) return;
-  const ex = w.exercises.find((e) => e.id === exerciseId);
-  if (!ex) return;
+  if (!w?.exercises.find((e) => e.id === exerciseId)) return;
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, name } : e)),
   });
-  enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exerciseId}`, {
-    ...exerciseUpsertBody({ ...ex, name }),
-  });
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
 export function deleteExercise(workoutId: string, exerciseId: string): void {
   const w = state.workouts.find((x) => x.id === workoutId);
   if (!w) return;
-  patchWorkout(workoutId, {
-    exercises: w.exercises.filter((e) => e.id !== exerciseId),
-  });
-  enqueue('DELETE', `/api/tracker/exercises/${exerciseId}`);
-  persist();
-  void sync();
+  patchWorkout(workoutId, { exercises: w.exercises.filter((e) => e.id !== exerciseId) });
+  saveWorkout(workoutId);
 }
 
 export function upsertSet(
@@ -611,9 +534,8 @@ export function upsertSet(
   set: Omit<SetEntry, 'id' | 'position'> & { id?: string },
 ): void {
   const w = state.workouts.find((x) => x.id === workoutId);
-  if (!w) return;
-  const ex = w.exercises.find((e) => e.id === exerciseId);
-  if (!ex) return;
+  const ex = w?.exercises.find((e) => e.id === exerciseId);
+  if (!w || !ex) return;
   const existing = set.id ? ex.sets.find((s) => s.id === set.id) : undefined;
   const type: SetType = set.type ?? (set.isWarmup ? 'warmup' : 'working');
   const full: SetEntry = {
@@ -633,23 +555,9 @@ export function upsertSet(
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
-  enqueue('PUT', `/api/tracker/exercises/${exerciseId}/sets/${full.id}`, {
-    reps: full.reps,
-    weight: full.weight,
-    isWarmup: full.isWarmup,
-    type: full.type,
-    drops: full.drops ?? [],
-    durationMin: full.durationMin ?? null,
-    distanceKm: full.distanceKm ?? null,
-    calories: full.calories ?? null,
-    rpe: full.rpe ?? null,
-    position: full.position,
-  });
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
-/** Append one drop to an already-logged set (DS-2 · “Add a drop”). */
 export function addDropToSet(
   workoutId: string,
   exerciseId: string,
@@ -667,12 +575,7 @@ export function addDropToSet(
       : reverse
         ? 'reverse-drop'
         : 'drop';
-  upsertSet(workoutId, exerciseId, {
-    ...s,
-    id: s.id,
-    type,
-    drops: [...(s.drops ?? []), drop],
-  });
+  upsertSet(workoutId, exerciseId, { ...s, id: s.id, type, drops: [...(s.drops ?? []), drop] });
 }
 
 export function deleteSet(workoutId: string, exerciseId: string, setId: string): void {
@@ -683,9 +586,7 @@ export function deleteSet(workoutId: string, exerciseId: string, setId: string):
       e.id === exerciseId ? { ...e, sets: e.sets.filter((s) => s.id !== setId) } : e,
     ),
   });
-  enqueue('DELETE', `/api/tracker/sets/${setId}`);
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
 // --- Gyms & presence -------------------------------------------------------
@@ -697,20 +598,10 @@ export function upsertGym(gym: Omit<Gym, 'id'> & { id?: string }): Gym {
     gyms: exists ? state.gyms.map((g) => (g.id === full.id ? full : g)) : [...state.gyms, full],
     syncStatus: bumpPending(),
   });
-  enqueue('PUT', `/api/tracker/gyms/${full.id}`, {
-    name: full.name,
-    lat: full.lat,
-    lng: full.lng,
-    radiusM: full.radiusM,
-    favorite: full.favorite ?? false,
-    inventory: full.inventory ?? [],
-  });
-  persist();
-  void sync();
+  writeGymDoc(full);
   return full;
 }
 
-/** Flip the favourite flag on a gym (used as a fallback suggestion). */
 export function toggleFavorite(id: string): void {
   const g = state.gyms.find((x) => x.id === id);
   if (!g) return;
@@ -718,33 +609,21 @@ export function toggleFavorite(id: string): void {
 }
 
 export function deleteGym(id: string): void {
-  setState({
-    gyms: state.gyms.filter((g) => g.id !== id),
-    syncStatus: bumpPending(),
-  });
-  enqueue('DELETE', `/api/tracker/gyms/${id}`);
-  persist();
-  void sync();
+  setState({ gyms: state.gyms.filter((g) => g.id !== id), syncStatus: bumpPending() });
+  deleteGymDoc(id);
 }
 
 export function dismissReminder(r: Reminder): void {
+  dismissals = [...dismissals, { gymId: r.gymId, visitStart: r.visitStart }];
   setState({
     reminders: state.reminders.filter(
       (x) => !(x.gymId === r.gymId && x.visitStart === r.visitStart),
     ),
     syncStatus: bumpPending(),
   });
-  // Dismissals go through the queue too, so it works offline. Replay is
-  // safe: the server does INSERT OR IGNORE.
-  enqueue('POST', `/api/tracker/reminders/dismiss`, {
-    gymId: r.gymId,
-    visitStart: r.visitStart,
-  });
-  persist();
-  void sync();
+  writeDismissalDoc(r.gymId, r.visitStart);
 }
 
-/** «Залогувати заднім числом»: тренування на час візиту в зал. */
 export function logVisitAsWorkout(r: Reminder): Workout {
   const workout: Workout = {
     id: uuid(),
@@ -754,12 +633,6 @@ export function logVisitAsWorkout(r: Reminder): Workout {
     gymId: r.gymId,
     exercises: [],
   };
-  enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
-    startedAt: workout.startedAt,
-    finishedAt: workout.finishedAt,
-    autoFinished: false,
-    gymId: r.gymId,
-  });
   setState({
     workouts: sortWorkouts([workout, ...state.workouts]),
     reminders: state.reminders.filter(
@@ -767,8 +640,7 @@ export function logVisitAsWorkout(r: Reminder): Workout {
     ),
     syncStatus: bumpPending(),
   });
-  persist();
-  void sync();
+  writeWorkoutDoc(workout);
   return workout;
 }
 
@@ -783,16 +655,9 @@ function haversineM(lat1: number, lng1: number, lat2: number, lng2: number): num
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-const LAST_PING_KEY = 'gym.lastPingAt';
+const LAST_PING_KEY = 'spotter.lastPingAt';
 const PING_EVERY_MS = 5 * 60 * 1000;
 
-/**
- * Якщо додаток відкритий і ми фізично в радіусі одного із залів —
- * пишемо "presence ping" (не частіше ніж раз на 5 хв). Із цих точок
- * сервер збирає візити й нагадує про незалоговані тренування.
- * (Браузер не дає геолокацію у фоні — тому точки з'являються лише
- * коли додаток відкривають.)
- */
 export function recordPresence(): void {
   if (state.gyms.length === 0 || !('geolocation' in navigator)) return;
   const last = Number(localStorage.getItem(LAST_PING_KEY) ?? 0);
@@ -800,31 +665,22 @@ export function recordPresence(): void {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       const { latitude, longitude, accuracy } = pos.coords;
-      if (accuracy > 500) return; // надто неточно, щоб судити
+      if (accuracy > 500) return;
       const gym = state.gyms.find(
         (g) => haversineM(latitude, longitude, g.lat, g.lng) <= g.radiusM + accuracy,
       );
       if (!gym) return;
       localStorage.setItem(LAST_PING_KEY, String(Date.now()));
-      enqueue('PUT', `/api/tracker/pings/${uuid()}`, {
-        gymId: gym.id,
-        at: Date.now(),
-      });
-      persist();
-      void sync();
+      writePingDoc(uuid(), gym.id, Date.now());
     },
     () => {
-      /* відмова в доступі — просто мовчимо */
+      /* denied — stay quiet */
     },
     { enableHighAccuracy: false, maximumAge: 120_000, timeout: 10_000 },
   );
 }
 
-export function getCurrentPositionOnce(): Promise<{
-  lat: number;
-  lng: number;
-  accuracy: number;
-}> {
+export function getCurrentPositionOnce(): Promise<{ lat: number; lng: number; accuracy: number }> {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
       reject(new Error('Геолокація недоступна в цьому браузері'));
@@ -850,105 +706,177 @@ export function getCurrentPositionOnce(): Promise<{
   });
 }
 
-// --- Sync ------------------------------------------------------------------
+// --- Reminders (computed client-side from own pings + workouts) ------------
 
-let syncing = false;
+const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
+const VISIT_GAP_MS = 45 * 60 * 1000;
+const MIN_VISIT_MS = 60 * 60 * 1000;
+const OVERLAP_SLACK_MS = 30 * 60 * 1000;
 
-/**
- * The contract the user asked for:
- * 1) replay the offline queue to the server, in order;
- * 2) if everything is delivered — clear the queue;
- * 3) fetch fresh state from the server and REPLACE the local copy
- *    (server is the single source of truth).
- * On network failure we keep everything local and retry later.
- */
-export async function sync(): Promise<void> {
-  if (syncing || !getToken()) return;
-  syncing = true;
-  setState({ syncStatus: 'syncing' });
-  try {
-    while (state.queue.length > 0) {
-      const item = state.queue[0];
-      try {
-        await request(item.method, item.url, item.body);
-      } catch (err) {
-        if (err instanceof HttpError && err.status !== 401) {
-          // Permanent rejection: halt the queue rather than skip, and surface
-          // the blocking change with its raw status line (AC-SYNC-02, AC-SYNC-05).
-          setState({
-            syncStatus: 'failed',
-            syncError: {
-              status: err.status,
-              statusLine: `${item.method} ${item.url} → ${err.status} ${err.message}`.trim(),
-            },
-          });
-          return;
-        }
-        throw err; // network error or 401 — stop, keep the queue
-      }
-      setState({ queue: state.queue.slice(1) });
+function computeReminders(now = Date.now()): Reminder[] {
+  const recent = pings
+    .filter((p) => p.at >= now - LOOKBACK_MS)
+    .sort((a, b) => a.gymId.localeCompare(b.gymId) || a.at - b.at);
+  if (recent.length === 0) return [];
+  const gymNames = new Map(state.gyms.map((g) => [g.id, g.name]));
+  const dismissed = new Set(dismissals.map((d) => `${d.gymId}:${d.visitStart}`));
+  const out: Reminder[] = [];
+  let visit: { gymId: string; start: number; end: number } | null = null;
+
+  const flush = (v: { gymId: string; start: number; end: number }) => {
+    if (v.end - v.start < MIN_VISIT_MS) return;
+    if (dismissed.has(`${v.gymId}:${v.start}`)) return;
+    const overlaps = state.workouts.some((w) => {
+      const wEnd = w.finishedAt ?? now;
+      return w.startedAt <= v.end + OVERLAP_SLACK_MS && wEnd >= v.start - OVERLAP_SLACK_MS;
+    });
+    if (overlaps) return;
+    out.push({
+      gymId: v.gymId,
+      gymName: gymNames.get(v.gymId) ?? 'зал',
+      visitStart: v.start,
+      visitEnd: v.end,
+    });
+  };
+
+  for (const p of recent) {
+    if (!visit || visit.gymId !== p.gymId || p.at - visit.end > VISIT_GAP_MS) {
+      if (visit) flush(visit);
+      visit = { gymId: p.gymId, start: p.at, end: p.at };
+    } else {
+      visit.end = p.at;
     }
-    const data = await request<{
-      workouts: Workout[];
-      gyms: Gym[];
-      reminders: Reminder[];
-    }>('GET', '/api/tracker/state');
-    setState({
-      workouts: sortWorkouts(data.workouts),
-      gyms: data.gyms ?? [],
-      reminders: data.reminders ?? [],
-      syncStatus: 'synced',
-      lastSyncAt: Date.now(),
-      syncError: null,
-    });
-  } catch {
-    setState({
-      syncStatus:
-        navigator.onLine && state.queue.length === 0
-          ? 'pending'
-          : navigator.onLine
-            ? 'pending'
-            : 'offline',
-    });
-  } finally {
-    syncing = false;
+  }
+  if (visit) flush(visit);
+  return out.sort((a, b) => b.visitStart - a.visitStart);
+}
+
+function recomputeReminders(): void {
+  setState({ reminders: computeReminders() });
+}
+
+// --- Live listeners (replaces the old sync loop) ---------------------------
+
+let unsubs: Unsubscribe[] = [];
+let presenceTimer: ReturnType<typeof setInterval> | null = null;
+
+function markSynced(fromCache: boolean, hasPending: boolean): void {
+  const status: SyncStatus = hasPending
+    ? navigator.onLine
+      ? 'pending'
+      : 'offline'
+    : fromCache && !navigator.onLine
+      ? 'offline'
+      : 'synced';
+  const patch: Partial<StoreState> = {
+    syncStatus: state.syncStatus === 'failed' ? 'failed' : status,
+  };
+  if (status === 'synced') {
+    patch.lastSyncAt = Date.now();
+    patch.syncError = null;
+    if (state.syncStatus === 'failed') patch.syncStatus = 'synced';
+  }
+  setState(patch);
+}
+
+export function startSyncLoop(): () => void {
+  const uid = currentUid();
+  if (!uid) return () => undefined;
+  stopListeners();
+
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'workouts'),
+      (snap) => {
+        state = {
+          ...state,
+          workouts: sortWorkouts(snap.docs.map((d) => d.data() as Workout)),
+        };
+        recomputeReminders();
+        markSynced(snap.metadata.fromCache, snap.metadata.hasPendingWrites);
+        applyAutoFinish();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'gyms'),
+      (snap) => {
+        state = { ...state, gyms: snap.docs.map((d) => d.data() as Gym) };
+        recomputeReminders();
+        emit();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'pings'),
+      (snap) => {
+        pings = snap.docs.map((d) => d.data() as { gymId: string; at: number });
+        recomputeReminders();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'reminderDismissals'),
+      (snap) => {
+        dismissals = snap.docs.map((d) => d.data() as { gymId: string; visitStart: number });
+        recomputeReminders();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'exerciseCatalog'),
+      (snap) => {
+        registerCustomExercises(snap.docs.map((d) => d.data() as CustomExercise));
+        emit();
+      },
+      () => undefined,
+    ),
+  );
+
+  const tick = () => {
+    applyAutoFinish();
+    recordPresence();
+  };
+  presenceTimer = setInterval(tick, 15_000);
+  window.addEventListener('online', tick);
+  window.addEventListener('focus', tick);
+  tick();
+
+  return () => stopListeners();
+}
+
+function stopListeners(): void {
+  for (const u of unsubs) u();
+  unsubs = [];
+  if (presenceTimer) {
+    clearInterval(presenceTimer);
+    presenceTimer = null;
   }
 }
 
-/** Retry a queue blocked by a permanent rejection (AC-SYNC-05). */
+/** No-op kept for compatibility — Firestore syncs continuously on its own. */
+export async function sync(): Promise<void> {
+  /* writes flush automatically; nothing to drain */
+}
+
+/** No-ops kept for API/UI compatibility — Firestore retries writes itself. */
 export function retrySync(): void {
   setState({ syncStatus: navigator.onLine ? 'pending' : 'offline', syncError: null });
-  void sync();
 }
-
-/** Drop the change blocking the queue and resume (AC-SYNC-05). */
 export function discardBlockingChange(): void {
-  if (state.queue.length === 0) return;
-  setState({
-    queue: state.queue.slice(1),
-    syncStatus: navigator.onLine ? 'pending' : 'offline',
-    syncError: null,
-  });
-  void sync();
+  setState({ syncStatus: navigator.onLine ? 'pending' : 'offline', syncError: null });
 }
 
-/** Pull the shared custom-exercise catalog (admin/trainer-authored). */
-function refreshExerciseCatalog(): void {
-  request<{ exercises: CustomExercise[] }>('GET', '/api/exercises')
-    .then((d) => {
-      if (Array.isArray(d?.exercises)) {
-        registerCustomExercises(d.exercises);
-        emit();
-      }
-    })
-    .catch(() => {});
-}
+// --- Shared exercise catalog -----------------------------------------------
 
-/**
- * Persist a custom exercise to the shared server catalog (admins and trainers
- * only — members keep it purely local). Registers locally right away so the
- * chips and the picker know the muscles immediately, before the round-trip.
- */
 export function saveCatalogExercise(meta: {
   name: string;
   kind?: string;
@@ -958,64 +886,47 @@ export function saveCatalogExercise(meta: {
 }): void {
   const role = getRole();
   if (role !== 'admin' && role !== 'trainer') return;
-  registerCustomExercise({ id: `pending-${meta.name.toLowerCase()}`, ...meta });
+  const id = meta.name.trim().toLowerCase();
+  registerCustomExercise({ id: `pending-${id}`, ...meta });
   emit();
-  request<{ exercise: CustomExercise }>('PUT', '/api/exercises', meta)
-    .then((d) => {
-      if (d?.exercise) {
-        registerCustomExercise(d.exercise);
-        emit();
-      }
-    })
-    .catch(() => {});
-}
-
-/** Update an exercise's muscles/equipment in place (and sync it). */
-export function updateExerciseMeta(
-  workoutId: string,
-  exerciseId: string,
-  meta: {
-    primaryMuscle: MuscleGroup | null;
-    secondaryMuscles: MuscleGroup[];
-    equipment: string[];
-  },
-): void {
-  const w = state.workouts.find((x) => x.id === workoutId);
-  if (!w) return;
-  const ex = w.exercises.find((e) => e.id === exerciseId);
-  if (!ex) return;
-  const next = {
-    ...ex,
+  const uid = currentUid();
+  if (!uid) return;
+  // Rules gate this to trainer/admin; id is the lowercased name (uniqueness).
+  setDoc(doc(db, 'exerciseCatalog', id), {
+    id,
+    name: meta.name.trim(),
+    kind: meta.kind ?? 'strength',
     primaryMuscle: meta.primaryMuscle,
     secondaryMuscles: meta.secondaryMuscles,
     equipment: meta.equipment,
-  };
-  patchWorkout(workoutId, {
-    exercises: w.exercises.map((e) => (e.id === exerciseId ? next : e)),
-  });
-  enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exerciseId}`, {
-    ...exerciseUpsertBody(next),
-  });
-  persist();
-  void sync();
+    createdBy: uid,
+    updatedAt: Date.now(),
+  })
+    .then(() => registerCustomExercise({ id, ...meta }))
+    .catch(onWriteError);
 }
 
-export function startSyncLoop(): () => void {
-  const tick = () => {
-    applyAutoFinish();
-    recordPresence();
-    void sync();
-  };
-  const interval = setInterval(tick, 15_000);
-  window.addEventListener('online', tick);
-  window.addEventListener('focus', tick);
-  tick();
-  refreshExerciseCatalog();
-  return () => {
-    clearInterval(interval);
-    window.removeEventListener('online', tick);
-    window.removeEventListener('focus', tick);
-  };
+export function updateExerciseMeta(
+  workoutId: string,
+  exerciseId: string,
+  meta: { primaryMuscle: MuscleGroup | null; secondaryMuscles: MuscleGroup[]; equipment: string[] },
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  const ex = w?.exercises.find((e) => e.id === exerciseId);
+  if (!w || !ex) return;
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) =>
+      e.id === exerciseId
+        ? {
+            ...e,
+            primaryMuscle: meta.primaryMuscle,
+            secondaryMuscles: meta.secondaryMuscles,
+            equipment: meta.equipment,
+          }
+        : e,
+    ),
+  });
+  saveWorkout(workoutId);
 }
 
 // --- Derived data for the designed UI (ghost rows, PRs, compare) -----------
@@ -1025,19 +936,14 @@ export interface PrevLift {
   weight: number | null;
 }
 
-/** Heaviest weight touched in a set, drops included. */
 export function setTopWeight(s: SetEntry): number {
   return Math.max(s.weight ?? 0, ...setDrops(s).map((d) => d.weight ?? 0));
 }
-
-/** Working top set of an exercise: heaviest weight, then most reps. */
 export function topSet(sets: SetEntry[]): SetEntry | undefined {
   return [...sets]
     .filter((s) => setTypeOf(s) !== 'warmup')
     .sort((a, b) => setTopWeight(b) - setTopWeight(a) || b.reps - a.reps)[0];
 }
-
-/** Last finished session that contains this exercise name (case-insensitive). */
 export function lastSessionWith(
   name: string,
   beforeWorkoutId?: string,
@@ -1052,38 +958,28 @@ export function lastSessionWith(
   }
   return undefined;
 }
-
-/** «prev 85 × 8» + ghost prefill for an exercise name. */
 export function prevLift(name: string, currentWorkoutId?: string): PrevLift | undefined {
   const found = lastSessionWith(name, currentWorkoutId);
   if (!found) return undefined;
   const top = topSet(found.exercise.sets) ?? found.exercise.sets[found.exercise.sets.length - 1];
   return top ? { reps: top.reps, weight: top.weight } : undefined;
 }
-
-/** All-time record weight for a name (working sets), excluding one workout. */
 export function recordWeight(name: string, excludeWorkoutId?: string): number {
   const needle = name.trim().toLowerCase();
   let max = 0;
   for (const w of state.workouts) {
     if (w.id === excludeWorkoutId) continue;
     for (const e of w.exercises) {
-      if (!isStrengthExercise(e)) continue;
-      if (e.name.trim().toLowerCase() !== needle) continue;
-      for (const s of e.sets) {
+      if (!isStrengthExercise(e) || e.name.trim().toLowerCase() !== needle) continue;
+      for (const s of e.sets)
         if (setTypeOf(s) !== 'warmup' && setTopWeight(s) > max) max = setTopWeight(s);
-      }
     }
   }
   return max;
 }
-
-/** Epley estimated 1RM, rounded. */
 export function est1rm(weight: number, reps: number): number {
   return Math.round(weight * (1 + reps / 30));
 }
-
-/** Distinct exercise names across history, most recent first. */
 export function knownExercises(): { name: string; last?: PrevLift }[] {
   const seen = new Map<string, PrevLift | undefined>();
   for (const w of state.workouts) {
@@ -1100,8 +996,7 @@ export function knownExercises(): { name: string; last?: PrevLift }[] {
     for (const e of w.exercises) {
       if (!isStrengthExercise(e)) continue;
       const key = e.name.trim();
-      if (!key) continue;
-      if (out.some((o) => o.name.toLowerCase() === key.toLowerCase())) continue;
+      if (!key || out.some((o) => o.name.toLowerCase() === key.toLowerCase())) continue;
       out.push({ name: key, last: seen.get(key.toLowerCase()) });
     }
   }
@@ -1111,11 +1006,9 @@ export function knownExercises(): { name: string; last?: PrevLift }[] {
 export function workoutSets(w: Workout): number {
   return w.exercises.reduce((n, e) => n + (isStrengthExercise(e) ? e.sets.length : 0), 0);
 }
-
 export function workoutVolumeKg(w: Workout): number {
   return w.exercises.reduce((v, e) => v + (isStrengthExercise(e) ? exerciseVolumeKg(e) : 0), 0);
 }
-
 export function workoutCardioMinutes(w: Workout): number {
   return w.exercises.reduce(
     (n, e) =>
@@ -1124,7 +1017,6 @@ export function workoutCardioMinutes(w: Workout): number {
     0,
   );
 }
-
 export function workoutCardioDistanceKm(w: Workout): number {
   return w.exercises.reduce(
     (n, e) =>
@@ -1143,20 +1035,7 @@ export function restoreSet(workoutId: string, exerciseId: string, set: SetEntry)
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
-  enqueue('PUT', `/api/tracker/exercises/${exerciseId}/sets/${set.id}`, {
-    reps: set.reps,
-    weight: set.weight,
-    isWarmup: set.isWarmup,
-    type: setTypeOf(set),
-    drops: set.drops ?? [],
-    durationMin: set.durationMin ?? null,
-    distanceKm: set.distanceKm ?? null,
-    calories: set.calories ?? null,
-    rpe: set.rpe ?? null,
-    position: set.position,
-  });
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
 export function restoreExercise(workoutId: string, exercise: Exercise): void {
@@ -1165,25 +1044,7 @@ export function restoreExercise(workoutId: string, exercise: Exercise): void {
   patchWorkout(workoutId, {
     exercises: [...w.exercises, exercise].sort((a, b) => a.position - b.position),
   });
-  enqueue('PUT', `/api/tracker/workouts/${workoutId}/exercises/${exercise.id}`, {
-    ...exerciseUpsertBody(exercise),
-  });
-  for (const s of exercise.sets) {
-    enqueue('PUT', `/api/tracker/exercises/${exercise.id}/sets/${s.id}`, {
-      reps: s.reps,
-      weight: s.weight,
-      isWarmup: s.isWarmup,
-      type: setTypeOf(s),
-      drops: s.drops ?? [],
-      durationMin: s.durationMin ?? null,
-      distanceKm: s.distanceKm ?? null,
-      calories: s.calories ?? null,
-      rpe: s.rpe ?? null,
-      position: s.position,
-    });
-  }
-  persist();
-  void sync();
+  saveWorkout(workoutId);
 }
 
 export function clearSets(workoutId: string, exerciseId: string): SetEntry[] {
@@ -1194,9 +1055,7 @@ export function clearSets(workoutId: string, exerciseId: string): SetEntry[] {
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets: [] } : e)),
   });
-  for (const s of removed) enqueue('DELETE', `/api/tracker/sets/${s.id}`);
-  persist();
-  void sync();
+  saveWorkout(workoutId);
   return removed;
 }
 
@@ -1220,38 +1079,21 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
   restoreExercise(workoutId, copy);
 }
 
-/** Drops set-less exercises on finish (design S-28) and returns the workout. */
 export function finishWorkoutClean(id: string): Workout | undefined {
   const w = state.workouts.find((x) => x.id === id);
   if (!w) return undefined;
-  for (const e of w.exercises) {
-    if (e.sets.length === 0) {
-      patchWorkout(id, {
-        exercises: state.workouts.find((x) => x.id === id)!.exercises.filter((x) => x.id !== e.id),
-      });
-      enqueue('DELETE', `/api/tracker/exercises/${e.id}`);
-    }
-  }
+  const kept = w.exercises.filter((e) => e.sets.length > 0);
+  if (kept.length !== w.exercises.length) patchWorkout(id, { exercises: kept });
   finishWorkout(id);
   return state.workouts.find((x) => x.id === id);
 }
 
-/** Reopen an auto-closed session: clock keeps the original start (S-27). */
 export function reopenWorkout(id: string): void {
-  const w = state.workouts.find((x) => x.id === id);
-  if (!w) return;
+  if (!state.workouts.find((x) => x.id === id)) return;
   patchWorkout(id, { finishedAt: null, autoFinished: false });
-  enqueue('PUT', `/api/tracker/workouts/${id}`, {
-    startedAt: w.startedAt,
-    finishedAt: null,
-    autoFinished: false,
-  });
-  persist();
-  void sync();
+  saveWorkout(id);
 }
 
-/** Backfill (spec docs/specs/backfill-session.md): create an already-finished
- * past session; it goes through the same idempotent upsert queue. */
 export function backfillWorkout(
   startedAt: number,
   durationMs: number,
@@ -1265,22 +1107,11 @@ export function backfillWorkout(
     gymId,
     exercises: [],
   };
-  enqueue('PUT', `/api/tracker/workouts/${workout.id}`, {
-    startedAt: workout.startedAt,
-    finishedAt: workout.finishedAt,
-    autoFinished: false,
-    gymId,
-  });
-  setState({
-    workouts: sortWorkouts([workout, ...state.workouts]),
-    syncStatus: bumpPending(),
-  });
-  persist();
-  void sync();
+  setState({ workouts: sortWorkouts([workout, ...state.workouts]), syncStatus: bumpPending() });
+  writeWorkoutDoc(workout);
   return workout;
 }
 
-/** «Repeat X»: new session pre-seeded with the exercises of a past one. */
 export function repeatWorkout(sourceId: string): Workout | undefined {
   const src = state.workouts.find((x) => x.id === sourceId);
   if (!src) return undefined;
@@ -1292,10 +1123,12 @@ export function repeatWorkout(sourceId: string): Workout | undefined {
 }
 
 export function resetLocalData(): void {
+  stopListeners();
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);
   localStorage.removeItem(REMINDERS_KEY);
-  localStorage.removeItem(QUEUE_KEY);
+  pings = [];
+  dismissals = [];
   state = {
     workouts: [],
     gyms: [],
@@ -1311,7 +1144,6 @@ export function resetLocalData(): void {
 export function __getStateForTests(): StoreState {
   return structuredClone(state);
 }
-
 export function __replaceStateForTests(next: StoreState): void {
   state = structuredClone(next);
   persist();

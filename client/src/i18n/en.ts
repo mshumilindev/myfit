@@ -1,13 +1,13 @@
 /**
  * Base dictionary — copy taken VERBATIM from the design boards
- * (My Fit — All States, S-01…S-50). Other locales must match this shape;
+ * (Spotter — All States, S-01…S-50). Other locales must match this shape;
  * TypeScript enforces completeness via the Strings type in index.ts.
  */
 export const en = {
   locale: 'English',
 
   // Auth (S-01…S-06)
-  appName: 'My Fit',
+  appName: 'Spotter',
   backAction: 'Back',
   menuAction: 'Menu',
   reorder: 'Reorder',
@@ -20,7 +20,7 @@ export const en = {
   password: 'Password',
   signIn: 'Sign in',
   signingIn: 'Signing in…',
-  newHereCreate: 'New here? Create an account',
+  newHereCreate: 'New here? Ask your admin for an invite link.',
   haveAccountSignIn: 'Already have an account? Sign in',
   wrongCredentials: 'Wrong username or password',
   tooManyAttempts: 'Too many failed attempts. Try again in 15 minutes.',
@@ -28,7 +28,7 @@ export const en = {
     "Can't reach the server. The first sign-in needs a connection — offline logging works after that.",
   retry: 'Retry',
   createYourAccount: 'Create your account',
-  signupNote: 'Your log is private to your account. Free while My Fit is in beta.',
+  signupNote: 'Your log is private to your account. Free while Spotter is in beta.',
   username: 'Username',
   firstName: 'First name',
   lastName: 'Last name',
@@ -246,7 +246,7 @@ export const en = {
   filters: 'Filters',
   availableHere: 'Available here',
   nExercises: (n: number) => `${n} ${n === 1 ? 'exercise' : 'exercises'}`,
-  noItemHere: (item: string) => `No ${String(item).toLowerCase()} here`,
+  noItemHere: (item: string) => `No ${item.toLowerCase()} here`,
   filtersCombineNote:
     'Filters combine: muscle and equipment and what this gym has. An exercise the gym can’t equip stays visible at 45% rather than disappearing — you may know better.',
   byMuscle: 'By muscle',
@@ -262,7 +262,7 @@ export const en = {
   primaryGreySub: (n: number) =>
     `Primary in brass, secondary in grey · ${n} ${n === 1 ? 'session' : 'sessions'}`,
   allHere: (n: number): string => (n === 2 ? 'Both here' : 'All here'),
-  noItemShort: (item: string) => `No ${String(item).toLowerCase()}`,
+  noItemShort: (item: string) => `No ${item.toLowerCase()}`,
   needsCol: 'Needs',
   statusCol: 'Status',
   gymCol: 'Gym',
@@ -478,7 +478,7 @@ export const en = {
   },
   equipmentAll: 'All equipment',
   bodyweightShort: 'BW',
-  onbInvited: (name: string) => `${name} invited you to My Fit and already set up your profile.`,
+  onbInvited: (name: string) => `${name} invited you to Spotter and already set up your profile.`,
   onbTitle: "Four steps and you're lifting.",
   onbBody:
     'Account, photo, gym, first set. Under two minutes — and the last step is a real session, not a summary.',

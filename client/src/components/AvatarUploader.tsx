@@ -4,7 +4,10 @@
  * surface instead of inventing separate photo controls.
  */
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { getToken } from '../api';
+import { doc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
+import { currentUid } from '../api';
+import { db, storage } from '../firebase';
 import { useT } from '../i18n';
 import { Icon, Spinner } from '../ui';
 import { Avatar } from './Avatar';
@@ -200,15 +203,15 @@ export function AvatarUploader({
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(t.error))), 'image/jpeg', 0.86);
       });
-      const res = await fetch('/api/profile/me/avatar', {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${getToken() ?? ''}`,
-          'Content-Type': 'image/jpeg',
-        },
-        body: blob,
+      const uid = currentUid();
+      if (!uid) throw new Error(t.error);
+      // Upload to Storage (access-gated by storage.rules), then flag the photo
+      // on the user's own doc so `hasPhoto` persists across devices.
+      await uploadBytes(ref(storage, `avatars/${uid}/photo`), blob, {
+        contentType: 'image/jpeg',
+        cacheControl: 'no-store',
       });
-      if (!res.ok) throw new Error(`upload ${res.status}`);
+      await updateDoc(doc(db, 'users', uid), { avatarExt: 'jpg', updatedAt: Date.now() });
       clearPicked();
       onUploaded();
     } catch (e) {

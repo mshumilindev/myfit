@@ -1,6 +1,6 @@
 /** Onboarding — design O-01…O-09. Four steps ending inside a live session. */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { request, setAuth, getToken, HttpError } from '../api';
+import { callFn, signInWithPayload, currentUid, HttpError, type AuthPayload } from '../api';
 import { startWorkout, upsertGym, getCurrentPositionOnce } from '../store';
 import {
   searchGyms,
@@ -85,7 +85,7 @@ export function OnboardingView({
   }
 
   useEffect(() => {
-    request<InviteInfo>('GET', `/api/auth/invite/${token}`)
+    callFn<InviteInfo>('invitePreview', { token })
       .then((i) => {
         setInfo(i);
         if (i.state === 'valid') {
@@ -106,7 +106,7 @@ export function OnboardingView({
     );
   }
 
-  const resumable = saved !== null && !!getToken();
+  const resumable = saved !== null && !!currentUid();
   if (info === 'error' || (info.state !== 'valid' && !resumable)) {
     const when =
       info !== 'error' && (info.claimedAt ?? info.revokedAt ?? info.expiresAt)
@@ -122,7 +122,7 @@ export function OnboardingView({
             className="btn btn-primary btn-big"
             disabled={requested}
             onClick={() => {
-              void request('POST', `/api/auth/invite/${token}/request-new`).catch(() => {});
+              void callFn('requestNewInvite', { token }).catch(() => {});
               setRequested(true);
             }}
           >
@@ -158,13 +158,7 @@ export function OnboardingView({
     setBusy(true);
     setError(null);
     try {
-      const res = await request<{
-        token: string;
-        username: string;
-        email: string | null;
-        role: 'member' | 'trainer' | 'admin';
-        name?: string;
-      }>('POST', '/api/auth/claim', {
+      const res = await callFn<AuthPayload>('claim', {
         token,
         password,
         username: name,
@@ -172,7 +166,7 @@ export function OnboardingView({
         lastName,
         email,
       });
-      setAuth(res.token, res.name ?? res.username, res.role);
+      await signInWithPayload(res);
       return true;
     } catch (e) {
       if (e instanceof HttpError && e.status === 409) setError(t.onbEmailTaken);
@@ -313,7 +307,7 @@ export function OnboardingView({
             disabled={busy || firstName.trim().length < 2 || password.length < 6}
             onClick={async () => {
               // Already claimed on a previous run → just advance.
-              if (getToken() && loadResume(token)) {
+              if (currentUid() && loadResume(token)) {
                 setStep(2);
                 persist({ step: 2 });
                 return;

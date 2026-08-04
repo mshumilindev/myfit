@@ -1,5 +1,5 @@
 /* =========================================================================
-   My Fit — design system (graphite & brass)
+   Spotter — design system (graphite & brass)
    Source of truth: Дизайн варіанти проєкту.zip → BUILD-SPEC.md + S-01…S-50.
    Tokens and component classes mirror the boards; do not hard-code hexes
    in components — consume the variables below.

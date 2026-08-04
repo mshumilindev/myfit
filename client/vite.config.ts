@@ -23,8 +23,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'My Fit',
-        short_name: 'My Fit',
+        name: 'Spotter',
+        short_name: 'Spotter',
         description: 'Everything you lift, in one place.',
         lang: 'en',
         start_url: '/',

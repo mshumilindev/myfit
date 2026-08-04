@@ -1,6 +1,6 @@
 /** Admin — design AD-01…AD-06. People table, invites, assignments. */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { request, getToken, getUsername } from '../api';
+import { callFn, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Dialog, Icon, Sheet, Spinner } from '../ui';
@@ -61,7 +61,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   const [online, setOnline] = useState(() => navigator.onLine);
 
   const refresh = useCallback(() => {
-    request<{ people: Person[] }>('GET', '/api/admin/people')
+    callFn<{ people: Person[] }>('adminPeople')
       .then((d) => {
         setPeople(d.people);
         setLoad('ready');
@@ -295,13 +295,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                           onClick={(e) => {
                             e.stopPropagation();
                             void act(async () => {
-                              const r = await request<{
-                                invite: { token: string; expires_at: number };
-                              }>('POST', `/api/admin/users/${p.id}/invite`);
+                              const r = await callFn<{
+                                invite: { token: string; expiresAt: number };
+                              }>('adminIssueInvite', { id: p.id });
                               setLinkFor({
                                 person: p,
                                 token: r.invite.token,
-                                expiresAt: r.invite.expires_at,
+                                expiresAt: r.invite.expiresAt,
                               });
                             });
                           }}
@@ -423,11 +423,11 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 const p = menuFor;
                 setMenuFor(null);
                 void act(async () => {
-                  const r = await request<{ invite: { token: string; expires_at: number } }>(
-                    'POST',
-                    `/api/admin/users/${p.id}/reset`,
+                  const r = await callFn<{ invite: { token: string; expiresAt: number } }>(
+                    'adminResetPassword',
+                    { id: p.id },
                   );
-                  setLinkFor({ person: p, token: r.invite.token, expiresAt: r.invite.expires_at });
+                  setLinkFor({ person: p, token: r.invite.token, expiresAt: r.invite.expiresAt });
                 });
               }}
             >
@@ -442,14 +442,14 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   const p = menuFor;
                   setMenuFor(null);
                   void act(async () => {
-                    const r = await request<{ invite: { token: string; expires_at: number } }>(
-                      'POST',
-                      `/api/admin/users/${p.id}/invite`,
+                    const r = await callFn<{ invite: { token: string; expiresAt: number } }>(
+                      'adminIssueInvite',
+                      { id: p.id },
                     );
                     setLinkFor({
                       person: p,
                       token: r.invite.token,
-                      expiresAt: r.invite.expires_at,
+                      expiresAt: r.invite.expiresAt,
                     });
                   });
                 }}
@@ -461,7 +461,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                 onClick={() => {
                   const p = menuFor;
                   setMenuFor(null);
-                  void act(() => request('POST', `/api/admin/invites/${p.invite!.token}/revoke`));
+                  void act(() => callFn('adminRevokeInvite', { token: p.invite!.token }));
                 }}
               >
                 <Icon name="eraser" /> {t.adminRevoke}
@@ -474,13 +474,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
               const p = menuFor;
               setMenuFor(null);
               void (async () => {
-                const res = await fetch(`/api/admin/users/${p.id}/export`, {
-                  headers: { Authorization: `Bearer ${getToken() ?? ''}` },
+                const data = await callFn('adminExportUser', { id: p.id });
+                const blob = new Blob([JSON.stringify(data, null, 2)], {
+                  type: 'application/json',
                 });
-                const blob = await res.blob();
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `myfit-${p.name}.json`;
+                a.download = `spotter-${p.name}.json`;
                 a.click();
               })();
             }}
@@ -494,10 +494,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
               const p = menuFor;
               setMenuFor(null);
               void act(() =>
-                request(
-                  'POST',
-                  `/api/admin/users/${p.id}/${p.status === 'suspended' ? 'unsuspend' : 'suspend'}`,
-                ),
+                callFn(p.status === 'suspended' ? 'adminUnsuspend' : 'adminSuspend', { id: p.id }),
               );
             }}
           >
@@ -676,10 +673,10 @@ function NewPersonDialog(props: {
             setBusy(true);
             setError(null);
             try {
-              const r = await request<{
+              const r = await callFn<{
                 person: Person;
-                invite: { token: string; expires_at: number };
-              }>('POST', '/api/admin/users', {
+                invite: { token: string; expiresAt: number };
+              }>('adminCreateUser', {
                 name: fullPersonName(firstName, lastName),
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
@@ -688,7 +685,7 @@ function NewPersonDialog(props: {
                 trainerId: role === 'member' ? trainerId : null,
                 role,
               });
-              props.onCreated(r.person, r.invite.token, r.invite.expires_at);
+              props.onCreated(r.person, r.invite.token, r.invite.expiresAt);
             } catch (e) {
               setError(e instanceof Error ? e.message : t.error);
             } finally {
@@ -830,9 +827,7 @@ function AssignTrainerDialog(props: {
           onClick={async () => {
             setBusy(true);
             try {
-              await request('POST', `/api/admin/users/${props.person.id}/trainer`, {
-                trainerId: sel,
-              });
+              await callFn('adminAssignTrainer', { id: props.person.id, trainerId: sel });
               props.onDone();
             } finally {
               setBusy(false);
@@ -895,7 +890,8 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
             setBusy(true);
             setError(null);
             try {
-              await request('PUT', `/api/admin/users/${props.person.id}`, {
+              await callFn('adminEditUser', {
+                id: props.person.id,
                 name: fullPersonName(firstName, lastName),
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
@@ -939,7 +935,7 @@ function DeleteDialog(props: { person: Person; onClose: () => void; onDone: () =
             onClick={async () => {
               setBusy(true);
               try {
-                await request('DELETE', `/api/admin/users/${p.id}`);
+                await callFn('adminDeleteUser', { id: p.id });
                 props.onDone();
               } finally {
                 setBusy(false);

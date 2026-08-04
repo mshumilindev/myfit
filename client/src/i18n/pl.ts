@@ -19,7 +19,7 @@ const serie = (n: number): string => {
 export const pl: Strings = {
   locale: 'Polski',
 
-  appName: 'My Fit',
+  appName: 'Spotter',
   backAction: 'Wstecz',
   menuAction: 'Menu',
   reorder: 'Zmień kolejność',
@@ -32,7 +32,7 @@ export const pl: Strings = {
   password: 'Hasło',
   signIn: 'Zaloguj się',
   signingIn: 'Logowanie…',
-  newHereCreate: 'Nowy tutaj? Załóż konto',
+  newHereCreate: 'Nowy tutaj? Poproś admina o link zaproszenia.',
   haveAccountSignIn: 'Masz już konto? Zaloguj się',
   wrongCredentials: 'Błędna nazwa lub hasło',
   tooManyAttempts: 'Zbyt wiele nieudanych prób. Spróbuj za 15 minut.',
@@ -40,7 +40,7 @@ export const pl: Strings = {
     'Brak połączenia z serwerem. Pierwsze logowanie wymaga internetu — potem zapis offline działa.',
   retry: 'Ponów',
   createYourAccount: 'Załóż swoje konto',
-  signupNote: 'Twój dziennik jest prywatny dla twojego konta. Za darmo, póki My Fit jest w becie.',
+  signupNote: 'Twój dziennik jest prywatny dla twojego konta. Za darmo, póki Spotter jest w becie.',
   username: 'Nazwa użytkownika',
   firstName: 'Imię',
   lastName: 'Nazwisko',
@@ -243,7 +243,7 @@ export const pl: Strings = {
   filters: 'Filtry',
   availableHere: 'Dostępne tutaj',
   nExercises: (n: number) => `${n} ${n === 1 ? 'ćwiczenie' : n < 5 ? 'ćwiczenia' : 'ćwiczeń'}`,
-  noItemHere: (item: string) => `Brak tutaj: ${String(item).toLowerCase()}`,
+  noItemHere: (item: string) => `Brak tutaj: ${item.toLowerCase()}`,
   filtersCombineNote:
     'Filtry się łączą: mięsień i sprzęt i to, co ma ta siłownia. Ćwiczenie, którego siłownia nie wyposaży, zostaje widoczne na 45%, zamiast znikać — możesz wiedzieć lepiej.',
   byMuscle: 'Wg mięśni',
@@ -258,7 +258,7 @@ export const pl: Strings = {
     'Inwentarz to, co odhaczyłeś na każdej siłowni — nikt go nie audytuje. Siłownia bez inwentarza nigdy nie jest oznaczana jako niepełna.',
   primaryGreySub: (n: number) => `Główny mosiądzem, drugorzędne szarością · sesje: ${n}`,
   allHere: (n: number) => (n === 2 ? 'Oba są' : 'Wszystko jest'),
-  noItemShort: (item: string) => `Brak: ${String(item).toLowerCase()}`,
+  noItemShort: (item: string) => `Brak: ${item.toLowerCase()}`,
   needsCol: 'Potrzebuje',
   statusCol: 'Stan',
   gymCol: 'Siłownia',
@@ -470,7 +470,7 @@ export const pl: Strings = {
   },
   equipmentAll: 'Cały sprzęt',
   bodyweightShort: 'MC',
-  onbInvited: (name) => `${name} zaprosił cię do My Fit i już ustawił twój profil.`,
+  onbInvited: (name) => `${name} zaprosił cię do Spotter i już ustawił twój profil.`,
   onbTitle: 'Cztery kroki i trenujesz.',
   onbBody:
     'Konto, zdjęcie, siłownia, pierwsza seria. Mniej niż dwie minuty — a ostatni krok to prawdziwa sesja.',

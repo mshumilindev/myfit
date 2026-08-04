@@ -1,0 +1,135 @@
+rules_version = '2';
+
+// Spotter — Firestore security rules.
+//
+// Auth is bridged from the app's own bcrypt credential store via Firebase
+// custom tokens (see functions/src/auth.ts). Each token carries a `role` claim
+// ('member' | 'trainer' | 'admin'), so rules can gate by role. All privileged
+// / cross-user work (admin, trainer, invites, role/assignment changes, audited
+// reads) runs in Cloud Functions with the Admin SDK, which bypasses these rules
+// — so the client-facing rules below only ever need to grant a user access to
+// their OWN data plus the shared catalog.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function uid() {
+      return request.auth.uid;
+    }
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    function role() {
+      return isSignedIn() && 'role' in request.auth.token
+        ? request.auth.token.role
+        : 'member';
+    }
+    function isAdmin() {
+      return role() == 'admin';
+    }
+    function isTrainerOrAdmin() {
+      return role() == 'trainer' || role() == 'admin';
+    }
+
+    // --- Users: public-ish profile document ---------------------------------
+    // Sensitive credentials (password hash) live in /credentials, never here.
+    match /users/{userId} {
+      // A signed-in user reads their own profile. Cross-user profile reads for
+      // admins/trainers go through Cloud Functions (Admin SDK), not the client.
+      allow get: if isSelf(userId);
+      allow list: if false;
+      // Accounts are created only by the auth functions.
+      allow create, delete: if false;
+      // Self may edit only display-name and avatar fields. Username/email
+      // (uniqueness) and role/status/trainer (privilege) change via functions.
+      allow update: if isSelf(userId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['firstName', 'lastName', 'avatarExt', 'updatedAt']);
+
+      // Tracker data — a workout is one document with nested exercises/sets.
+      match /workouts/{workoutId} {
+        allow read, write: if isSelf(userId);
+      }
+      match /gyms/{gymId} {
+        allow read, write: if isSelf(userId);
+      }
+      match /pings/{pingId} {
+        allow read, write: if isSelf(userId);
+      }
+      match /reminderDismissals/{dismissId} {
+        allow read, write: if isSelf(userId);
+      }
+
+      // Notices: read your own; mark-as-read is the only client write.
+      match /notices/{noticeId} {
+        allow read: if isSelf(userId);
+        allow update: if isSelf(userId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);
+        allow create, delete: if false;
+      }
+
+      // Audit log of who read your data — read-only to you.
+      match /audit/{entryId} {
+        allow read: if isSelf(userId);
+        allow write: if false;
+      }
+
+      // Trainer notes about a member — the member reads their own; trainers and
+      // admins read/write via functions.
+      match /trainerNotes/{noteId} {
+        allow read: if isSelf(userId);
+        allow write: if false;
+      }
+    }
+
+    // --- Credentials & uniqueness indexes: functions only -------------------
+    match /credentials/{userId} {
+      allow read, write: if false;
+    }
+    match /usernames/{usernameLower} {
+      allow read, write: if false;
+    }
+    match /emails/{emailLower} {
+      allow read, write: if false;
+    }
+    match /invites/{token} {
+      allow read, write: if false;
+    }
+
+    // --- Shared exercise catalog -------------------------------------------
+    match /exerciseCatalog/{entryId} {
+      allow read: if isSignedIn();
+      allow create, update: if isTrainerOrAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // --- Programs -----------------------------------------------------------
+    // Items are embedded in the program document (an array), like workouts.
+    match /programs/{programId} {
+      allow read: if isSignedIn() && (
+        resource.data.authorId == uid()
+        || (
+          exists(/databases/$(database)/documents/assignments/$(uid()))
+          && get(/databases/$(database)/documents/assignments/$(uid())).data.programId == programId
+        )
+      );
+      allow create: if isSignedIn() && request.resource.data.authorId == uid();
+      allow update: if isSignedIn()
+        && resource.data.authorId == uid()
+        && request.resource.data.authorId == uid();
+      allow delete: if isSignedIn() && resource.data.authorId == uid();
+    }
+
+    // Program assignments: readable by the member and by trainers/admins;
+    // written only by functions (single-active invariant + notice fan-out).
+    match /assignments/{memberId} {
+      allow read: if isSelf(memberId) || isTrainerOrAdmin();
+      allow write: if false;
+    }
+
+    // Anything not matched above is denied by default.
+  }
+}
