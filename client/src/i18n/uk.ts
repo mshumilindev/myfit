@@ -322,6 +322,8 @@ export const uk: Strings = {
   prev: (v) => `мин. ${v}`,
   ghostHint: 'Заповнено з минулого разу · торкнись числа, щоб підправити',
   timedGhostHint: 'Заповнено зручний дефолт · торкнись числа, щоб підправити',
+  warmupMarkerTitle: 'Коли готовий — вперед',
+  warmupMarkerBody: 'Лише мітка — без сетів, хвилин чи ваги.',
   rest: 'Відпочинок',
   skip: 'Пропустити',
   newRecordToast: (name, v) => `Новий рекорд · ${name} ${v}`,

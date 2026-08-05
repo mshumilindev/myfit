@@ -318,6 +318,8 @@ export const et: Strings = {
   prev: (v) => `eelm. ${v}`,
   ghostHint: 'Eeltäidetud eelmisest korrast · puuduta numbrit, et kohendada',
   timedGhostHint: 'Eeltäidetud kasuliku väärtusega · puuduta numbrit, et kohendada',
+  warmupMarkerTitle: 'Kui valmis — edasi',
+  warmupMarkerBody: 'Lihtsalt märgis — ilma seeriate, minutite või raskuseta.',
   rest: 'Puhkus',
   skip: 'Jäta vahele',
   newRecordToast: (name, v) => `Uus rekord · ${name} ${v}`,

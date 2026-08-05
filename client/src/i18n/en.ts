@@ -327,6 +327,8 @@ export const en = {
   prev: (v: string) => `prev ${v}`,
   ghostHint: 'Prefilled from last time · tap a number to nudge it',
   timedGhostHint: 'Prefilled with a useful default · tap a number to adjust it',
+  warmupMarkerTitle: 'Ready when you are',
+  warmupMarkerBody: 'Just a marker — no sets, minutes or weight to log.',
   rest: 'Rest',
   skip: 'Skip',
   newRecordToast: (name: string, v: string) => `New record · ${name} ${v}`,

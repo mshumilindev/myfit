@@ -323,6 +323,8 @@ export const pl: Strings = {
   prev: (v) => `poprz. ${v}`,
   ghostHint: 'Wypełnione z ostatniego razu · dotknij liczby, by ją poprawić',
   timedGhostHint: 'Wypełnione użyteczną wartością · dotknij liczby, by ją poprawić',
+  warmupMarkerTitle: 'Gdy gotowy — ruszaj',
+  warmupMarkerBody: 'Tylko znacznik — bez serii, minut i ciężaru.',
   rest: 'Przerwa',
   skip: 'Pomiń',
   newRecordToast: (name, v) => `Nowy rekord · ${name} ${v}`,

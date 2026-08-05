@@ -910,6 +910,23 @@ describe('F-03 session UI', () => {
     expect(run.sets[0].durationMin).toBe(20);
     expect(run.sets[0].distanceKm).toBe(2);
   });
+
+  it('inserts a warm-up marker card with no sets to log', async () => {
+    __replaceStateForTests(sampleStore());
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Warm-up' }));
+
+    expect(screen.getByText('Ready when you are')).toBeTruthy();
+    expect(screen.getByText(/Just a marker/)).toBeTruthy();
+    const warmup = __getStateForTests()
+      .workouts.find((w) => w.id === 'open')!
+      .exercises.find((e) => e.kind === 'warmup')!;
+    expect(warmup).toBeTruthy();
+    expect(warmup.sets).toHaveLength(0);
+  });
 });
 
 // TODO(firebase): auth is now signInWithCustomToken via callables; rework.

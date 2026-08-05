@@ -21,6 +21,7 @@ import {
   groupRounds,
   isStrengthExercise,
   isTimedExercise,
+  isMarkerExercise,
   knownExercises,
   perHandFactor,
   muscleSetsInWorkout,
@@ -181,6 +182,7 @@ export function SessionView(props: {
   const sortedExercises = [...workout.exercises].sort((a, b) => a.position - b.position);
   const activeExerciseId =
     sortedExercises.find((ex) => {
+      if (isMarkerExercise(ex)) return false;
       const planned = Math.max(0, ex.plannedSets ?? 0);
       return planned > 0 ? ex.sets.length < planned : ex.sets.length === 0;
     })?.id ??
@@ -289,6 +291,7 @@ export function SessionView(props: {
 
   /** One-line reading of a finished exercise (SS-3): «3 × 8 · 75 kg». */
   function pastSummary(ex: Exercise): string {
+    if (isMarkerExercise(ex)) return t.warmupMarkerTitle;
     if (isTimedExercise(ex)) {
       const min = ex.sets.reduce((n, s) => n + (s.durationMin ?? 0), 0);
       return `${Math.round(min)} ${t.minShort}`;
@@ -349,13 +352,14 @@ export function SessionView(props: {
     const timedSheetGhost: GhostValues = { ...ghost, ...timedGhost };
     const prev = prevLift(ex.name, workout!.id);
     const kind = exerciseKind(ex);
-    const timed = isTimedExercise(ex);
+    const marker = isMarkerExercise(ex);
+    const timed = isTimedExercise(ex) && !marker;
     const planned = Math.max(0, ex.plannedSets ?? 0);
     const completed = planned > 0 && ex.sets.length >= planned;
-    const directLogBlocked = !timed && planned > 0 && ghost.weight === null;
+    const directLogBlocked = !timed && !marker && planned > 0 && ghost.weight === null;
     const muscles = resolveMuscles(ex);
     const equipment = equipmentFor(ex);
-    const showChips = !timed && (muscles.primary !== null || equipment.length > 0);
+    const showChips = !timed && !marker && (muscles.primary !== null || equipment.length > 0);
     const groupDone = grp !== null && ex.sets.length >= grp.round;
     const showGhost = !grp || grp.active;
     const rowCls = grp ? ' rrow' : '';
@@ -366,8 +370,8 @@ export function SessionView(props: {
         className={`exercise-card${completed ? ' completed' : ''}${
           !grp && activeExerciseId === ex.id ? ' active' : ''
         }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
-          ex.sets.length === 0 ? ' empty-card' : ''
-        }`}
+          marker ? ' warmup-marker' : ''
+        }${ex.sets.length === 0 && !marker ? ' empty-card' : ''}`}
         onDragOver={(e) => {
           if (!grp && dragId.current && dragId.current !== ex.id) e.preventDefault();
         }}
@@ -455,8 +459,8 @@ export function SessionView(props: {
               >
                 {ex.name}
               </button>
-              {timed && <span className="prev">{t.exerciseKindNames[kind]}</span>}
-              {!grp && !timed && prev && (
+              {(timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>}
+              {!grp && !timed && !marker && prev && (
                 <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
               )}
               {!grp && planned > 0 && (
@@ -509,7 +513,17 @@ export function SessionView(props: {
             )}
           </div>
         )}
-        {timed ? (
+        {marker ? (
+          <div className="warmup-marker-body">
+            <span className="warmup-marker-icon" aria-hidden>
+              <Icon name="flame" weight="fill" />
+            </span>
+            <div className="warmup-marker-copy">
+              <span className="warmup-marker-title">{t.warmupMarkerTitle}</span>
+              <span className="warmup-marker-sub">{t.warmupMarkerBody}</span>
+            </div>
+          </div>
+        ) : timed ? (
           <>
             <div className="set-grid header timed">
               <span>#</span>
@@ -682,7 +696,7 @@ export function SessionView(props: {
             </div>
           </>
         )}
-        {ex.sets.length === 0 && live && (
+        {ex.sets.length === 0 && live && !marker && (
           <div className="ghost-hint">
             {directLogBlocked
               ? t.progWeightRequired
@@ -728,7 +742,7 @@ export function SessionView(props: {
   }
 
   function requestFinish(): void {
-    const empty = workout!.exercises.find((e) => e.sets.length === 0);
+    const empty = workout!.exercises.find((e) => e.sets.length === 0 && !isMarkerExercise(e));
     if (empty) {
       setDialog({ kind: 'finish-warn', emptyName: empty.name });
     } else {
@@ -1750,7 +1764,7 @@ function AddExerciseSheet(props: {
         )}
       </div>
       {/* One row of four large kind buttons. Strength opens the search below;
-          the three timed kinds log a session of that kind directly. */}
+          Warm-up inserts a marker card; Cardio / Cool-down log a timed entry. */}
       <div className="kind-grid">
         <button
           className={`kind-card${kind === 'strength' ? ' active' : ''}`}

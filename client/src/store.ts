@@ -125,6 +125,10 @@ export function isStrengthExercise(ex: Exercise): boolean {
 export function isTimedExercise(ex: Exercise): boolean {
   return exerciseKind(ex) !== 'strength';
 }
+/** Warm-up as an exercise kind is a session marker — no sets to log. */
+export function isMarkerExercise(ex: Exercise): boolean {
+  return exerciseKind(ex) === 'warmup';
+}
 
 // --- Set types & drops (design DS-1…DS-4, EQ-4) ----------------------------
 

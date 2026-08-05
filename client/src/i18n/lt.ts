@@ -331,6 +331,8 @@ export const lt: Strings = {
   prev: (v) => `ankst. ${v}`,
   ghostHint: 'Užpildyta iš praėjusio karto · paliesk skaičių, kad pakoreguotum',
   timedGhostHint: 'Užpildyta naudinga reikšme · paliesk skaičių, kad pakoreguotum',
+  warmupMarkerTitle: 'Kai pasiruošęs — pirmyn',
+  warmupMarkerBody: 'Tik žyma — be serijų, minučių ar svorio.',
   rest: 'Poilsis',
   skip: 'Praleisti',
   newRecordToast: (name, v) => `Naujas rekordas · ${name} ${v}`,
