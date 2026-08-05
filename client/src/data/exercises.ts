@@ -1265,10 +1265,115 @@ const DB_EQUIP_BY_NAME = new Map<string, EquipmentId | null>(
   DB_ROWS.map((r) => [r[0].toLowerCase(), r[1]]),
 );
 
+/**
+ * Equipment for curated entries the DB cannot match by name (its names differ:
+ * "Dumbbell Fly" vs "Dumbbell Flyes"). Equipment drives the per-hand factor and
+ * the gym-inventory check, so a blank here silently under-counts volume.
+ */
 const EXTRA_EQUIP: Record<string, EquipmentId> = {
   'bent-over-row': 'barbell',
   'leg-curl': 'machine',
   'calf-raise': 'body',
+  // chest
+  'bench-press': 'barbell',
+  'incline-bench-press': 'barbell',
+  'decline-bench-press': 'barbell',
+  'dumbbell-fly': 'dumbbell',
+  'incline-dumbbell-fly': 'dumbbell',
+  'pec-deck': 'machine',
+  'chest-press-machine': 'machine',
+  'push-up': 'body',
+  'weighted-push-up': 'body',
+  'dips-chest': 'body',
+  pullover: 'dumbbell',
+  // back
+  deadlift: 'barbell',
+  'pull-up': 'body',
+  'weighted-pull-up': 'body',
+  'lat-pulldown': 'cable',
+  'close-grip-pulldown': 'cable',
+  'barbell-row': 'barbell',
+  'pendlay-row': 'barbell',
+  'seated-cable-row': 'cable',
+  't-bar-row': 'barbell',
+  'chest-supported-row': 'machine',
+  'machine-row': 'machine',
+  'rack-pull': 'barbell',
+  'back-extension': 'body',
+  'inverted-row': 'body',
+  'dead-hang': 'body',
+  // shoulders
+  'overhead-press': 'barbell',
+  'arnold-press': 'dumbbell',
+  'lateral-raise': 'dumbbell',
+  'cable-lateral-raise': 'cable',
+  'front-raise': 'dumbbell',
+  'rear-delt-fly': 'dumbbell',
+  'upright-row': 'barbell',
+  'machine-shoulder-press': 'machine',
+  'reverse-pec-deck': 'machine',
+  // arms
+  'dumbbell-curl': 'dumbbell',
+  'hammer-curl': 'dumbbell',
+  'concentration-curl': 'dumbbell',
+  'cable-curl': 'cable',
+  'close-grip-bench': 'barbell',
+  'dips-triceps': 'body',
+  'rope-pushdown': 'cable',
+  'overhead-triceps-extension': 'dumbbell',
+  'skull-crusher': 'ezBar',
+  'triceps-kickback': 'dumbbell',
+  'wrist-curl': 'barbell',
+  'reverse-curl': 'barbell',
+  // legs & glutes
+  'back-squat': 'barbell',
+  'front-squat': 'barbell',
+  'bulgarian-split-squat': 'dumbbell',
+  lunge: 'dumbbell',
+  'walking-lunge': 'dumbbell',
+  'reverse-lunge': 'dumbbell',
+  'step-up': 'dumbbell',
+  'leg-extension': 'machine',
+  'sissy-squat': 'body',
+  'pause-squat': 'barbell',
+  'pistol-squat': 'body',
+  'nordic-curl': 'body',
+  'stiff-leg-deadlift': 'barbell',
+  'hip-thrust': 'barbell',
+  'glute-bridge': 'body',
+  'cable-kickback': 'cable',
+  'hip-abduction': 'machine',
+  'hip-adduction': 'machine',
+  'kettlebell-swing': 'kettlebell',
+  'standing-calf-raise': 'body',
+  'calf-press': 'machine',
+  // core
+  'side-plank': 'body',
+  crunch: 'body',
+  'hanging-knee-raise': 'body',
+  'leg-raise': 'body',
+  'ab-wheel': 'other',
+  'bird-dog': 'body',
+  'mountain-climbers': 'body',
+  woodchopper: 'cable',
+  'hyperextension-oblique': 'dumbbell',
+  // full body & cardio
+  thruster: 'barbell',
+  burpee: 'body',
+  'turkish-get-up': 'kettlebell',
+  'battle-ropes': 'other',
+  'box-jump': 'body',
+  'wall-ball': 'medicineBall',
+  'medicine-ball-slam': 'medicineBall',
+  'treadmill-run': 'machine',
+  'treadmill-walk-incline': 'machine',
+  'stationary-bike': 'machine',
+  'rowing-machine': 'machine',
+  elliptical: 'machine',
+  'stair-climber': 'machine',
+  'assault-bike': 'machine',
+  'ski-erg': 'machine',
+  'jump-rope': 'other',
 };
 
 const CURATED_EN = new Set(EXERCISE_CATALOG.map((e) => e.names[0].toLowerCase()));
@@ -1352,6 +1457,15 @@ for (const ex of [...CURATED, ...DB_ENTRIES]) {
     const key = n.trim().toLowerCase();
     if (key && !BY_NAME.has(key)) BY_NAME.set(key, ex);
   }
+}
+
+/**
+ * English catalog name for a name typed in any locale; the input is returned
+ * untouched for names the catalog does not know.
+ */
+export function canonicalExerciseName(name: string): string {
+  const key = name.trim().toLowerCase();
+  return BY_NAME.get(key)?.names[0] ?? name.trim();
 }
 
 // --- Server catalog: custom exercises authored by admins/trainers -----------

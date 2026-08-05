@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { StoreState } from '../client/src/store';
 import type { Exercise, SetEntry, Workout } from '../client/src/types';
 import {
@@ -57,7 +58,7 @@ import {
   updateExerciseMeta,
 } from '../client/src/store';
 import { setRole } from '../client/src/api';
-import { customExercises, registerCustomExercise } from '../client/src/data/exercises';
+import { CURATED, customExercises, registerCustomExercise } from '../client/src/data/exercises';
 
 function state(patch: Partial<StoreState> = {}): StoreState {
   return {
@@ -413,9 +414,39 @@ describe('EQ per-hand loading (perHandFactor)', () => {
     expect(perHandFactor({ name: 'Lat Pulldown', equipment: ['cable'] })).toBe(1);
     expect(perHandFactor({ name: 'Triceps Pushdown', equipment: ['cable'] })).toBe(1);
     expect(perHandFactor({ name: 'Seated Cable Row', equipment: ['cable'] })).toBe(1);
+    expect(perHandFactor({ name: 'Cable Crunch', equipment: ['cable'] })).toBe(1);
+    expect(perHandFactor({ name: 'Rope Crunch', equipment: ['cable'] })).toBe(1);
+    expect(perHandFactor({ name: 'Cable Lateral Raise', equipment: ['cable'] })).toBe(1);
     expect(perHandFactor({ name: 'Cable Pec Fly', equipment: ['cable'] })).toBe(2);
     expect(perHandFactor({ name: 'Cable Fly', equipment: ['cable'] })).toBe(2);
     expect(perHandFactor({ name: 'Cable Crossover', equipment: ['cable'] })).toBe(2);
+    // Plural spelling and the two-stack presses used to slip through the regex.
+    expect(perHandFactor({ name: 'Flat Bench Cable Flyes', equipment: ['cable'] })).toBe(2);
+    expect(perHandFactor({ name: 'Cable Iron Cross', equipment: ['cable'] })).toBe(2);
+    expect(perHandFactor({ name: 'Cable Chest Press', equipment: ['cable'] })).toBe(2);
+    expect(perHandFactor({ name: 'Single-Arm Cable Crossover', equipment: ['cable'] })).toBe(1);
+  });
+
+  it('doubles kettlebell pairs but not single-bell moves', () => {
+    expect(perHandFactor({ name: 'Kettlebell Swing', equipment: ['kettlebell'] })).toBe(1);
+    expect(perHandFactor({ name: 'Goblet Squat', equipment: ['kettlebell'] })).toBe(1);
+    expect(perHandFactor({ name: 'Two-Arm Kettlebell Row', equipment: ['kettlebell'] })).toBe(2);
+    expect(perHandFactor({ name: 'Double Kettlebell Jerk', equipment: ['kettlebell'] })).toBe(2);
+  });
+
+  it('classifies by the English catalog name, whatever locale the set was logged in', () => {
+    // uk name of Cable Crossover — two stacks, so still ×2.
+    expect(perHandFactor({ name: 'Зведення рук у кросовері', equipment: [] })).toBe(2);
+    // uk name of Cable Crunch — one stack.
+    expect(perHandFactor({ name: 'Скручування на блоці', equipment: [] })).toBe(1);
+  });
+
+  it('keeps the client and Cloud Functions copies of per-side.json identical', () => {
+    const read = (p: string) => readFileSync(new URL(p, import.meta.url), 'utf8');
+    expect(JSON.parse(read('../functions/src/data/per-side.json'))).toEqual({
+      ...JSON.parse(read('../client/src/data/per-side.json')),
+      _comment: expect.any(String),
+    });
   });
 
   it('leaves barbell and machine moves at ×1', () => {
@@ -501,6 +532,19 @@ describe('MG muscle resolution and per-muscle volume', () => {
 });
 
 describe('EQ equipment resolution', () => {
+  it('gives every curated exercise equipment, in any locale', () => {
+    const blank = CURATED.filter((e) => !e.equipment).map((e) => e.id);
+    expect(blank).toEqual([]);
+    // Locale does not change the resolution: uk name of Dumbbell Fly.
+    expect(equipmentFor({ name: 'Розведення гантелей лежачи', equipment: [] })).toEqual([
+      'dumbbell',
+    ]);
+    expect(perHandFactor({ name: 'Розведення гантелей лежачи', equipment: [] })).toBe(2);
+    // One dumbbell shared by both hands — equipment says dumbbell, volume is ×1.
+    expect(perHandFactor({ name: 'Concentration Curl', equipment: [] })).toBe(1);
+    expect(perHandFactor({ name: 'Пуловер з гантеллю', equipment: [] })).toBe(1);
+  });
+
   it('prefers the exercise’s own equipment then the catalog, and lists a workout’s kit', () => {
     expect(equipmentFor({ name: 'Whatever', equipment: ['cable'] })).toEqual(['cable']);
     registerCustomExercise({

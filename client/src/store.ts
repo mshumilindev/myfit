@@ -36,12 +36,14 @@ import {
   type Workout,
 } from './types';
 import {
+  canonicalExerciseName,
   muscleInfoByName,
   registerCustomExercise,
   registerCustomExercises,
   type CustomExercise,
   type MuscleGroup,
 } from './data/exercises';
+import PER_SIDE from './data/per-side.json';
 import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
@@ -148,20 +150,30 @@ export function setVolumeKg(s: SetEntry): number {
 }
 
 /**
- * Per-side entry doubling (unchanged from the pre-Firebase store):
- *  - Dumbbells double by default; single-dumbbell / one-arm variants stay ×1.
- *  - Cables: single-stack ×1; bilateral two-cable moves (fly, crossover) ×2.
+ * Per-side entry doubling: ×2 means the logged weight is one side's load.
+ *  - `per-side.json` decides first — the only place a move is classified by hand.
+ *  - Dumbbells / kettlebell pairs: ×2, unless one implement is shared by both hands.
+ *  - Cables: one stack ×1 (a cable crunch is not doubled); two-stack moves ×2.
+ * Names are matched on the English catalog name, so the factor does not depend
+ * on the interface language the set was logged in.
  */
 const ONE_ARM_NAME = /\b(one|single)[- ](arm|hand|leg)\b|unilateral|одн(ією|у|ой)\s*рук/i;
-const SINGLE_DUMBBELL = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
-const BILATERAL_CABLE = /\bflye?\b|cross[- ]?over|pec\b/i;
+const SINGLE_IMPLEMENT = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
+const BILATERAL_CABLE = /\bfly(e|es|s)?\b|cross[- ]?over|\biron cross\b|\bpec\b/i;
+const PAIRED_KETTLEBELL = /\bdouble\b|two[- ]arm|two kettlebells|alternating|seesaw/i;
+const TWO_SIDED = new Set(PER_SIDE.twoSided);
+const ONE_SIDED = new Set(PER_SIDE.oneSided);
 
 export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number {
-  const eq = equipmentFor(ex);
   const name = ex.name;
-  if (ONE_ARM_NAME.test(name)) return 1;
-  if (eq.includes('dumbbell')) return SINGLE_DUMBBELL.test(name) ? 1 : 2;
-  if (eq.includes('cable')) return BILATERAL_CABLE.test(name) ? 2 : 1;
+  const canon = canonicalExerciseName(name).toLowerCase();
+  if (ONE_SIDED.has(canon) || ONE_SIDED.has(name.trim().toLowerCase())) return 1;
+  if (TWO_SIDED.has(canon) || TWO_SIDED.has(name.trim().toLowerCase())) return 2;
+  if (ONE_ARM_NAME.test(name) || ONE_ARM_NAME.test(canon)) return 1;
+  const eq = equipmentFor(ex);
+  if (eq.includes('dumbbell')) return SINGLE_IMPLEMENT.test(canon) ? 1 : 2;
+  if (eq.includes('kettlebell')) return PAIRED_KETTLEBELL.test(canon) ? 2 : 1;
+  if (eq.includes('cable')) return BILATERAL_CABLE.test(canon) ? 2 : 1;
   return 1;
 }
 

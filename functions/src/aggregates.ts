@@ -7,6 +7,7 @@
  */
 import { db } from './lib';
 import EQUIPMENT_BY_NAME from './data/equipment-by-name.json';
+import PER_SIDE from './data/per-side.json';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -77,17 +78,29 @@ export function equipmentFor(ex: Pick<StoredExercise, 'name' | 'equipment'>): st
   return [];
 }
 
-/** Per-side entry doubling — same rules as client `perHandFactor`. */
+/**
+ * Per-side entry doubling — same rules and same data as client `perHandFactor`.
+ * The client resolves localized names to their English catalog name first; here
+ * the name is matched as stored, so `per-side.json` also lists the localized
+ * variants of hand-classified moves.
+ */
 const ONE_ARM_NAME = /\b(one|single)[- ](arm|hand|leg)\b|unilateral|одн(ією|у|ой)\s*рук/i;
-const SINGLE_DUMBBELL = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
-const BILATERAL_CABLE = /\bflye?\b|cross[- ]?over|pec\b/i;
+const SINGLE_IMPLEMENT = /goblet|pull[- ]?over|two[- ]?hand|both hands|svend|\bskull\s*crusher\b/i;
+const BILATERAL_CABLE = /\bfly(e|es|s)?\b|cross[- ]?over|\biron cross\b|\bpec\b/i;
+const PAIRED_KETTLEBELL = /\bdouble\b|two[- ]arm|two kettlebells|alternating|seesaw/i;
+const TWO_SIDED = new Set(PER_SIDE.twoSided);
+const ONE_SIDED = new Set(PER_SIDE.oneSided);
 
 export function perHandFactor(ex: Pick<StoredExercise, 'name' | 'equipment'>): number {
-  const eq = equipmentFor(ex);
   const name = ex.name ?? '';
+  const key = name.trim().toLowerCase();
+  if (ONE_SIDED.has(key)) return 1;
+  if (TWO_SIDED.has(key)) return 2;
   if (ONE_ARM_NAME.test(name)) return 1;
-  if (eq.includes('dumbbell')) return SINGLE_DUMBBELL.test(name) ? 1 : 2;
-  if (eq.includes('cable')) return BILATERAL_CABLE.test(name) ? 2 : 1;
+  const eq = equipmentFor(ex);
+  if (eq.includes('dumbbell')) return SINGLE_IMPLEMENT.test(key) ? 1 : 2;
+  if (eq.includes('kettlebell')) return PAIRED_KETTLEBELL.test(key) ? 2 : 1;
+  if (eq.includes('cable')) return BILATERAL_CABLE.test(key) ? 2 : 1;
   return 1;
 }
 
