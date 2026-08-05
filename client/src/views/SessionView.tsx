@@ -83,13 +83,22 @@ import { getRole } from '../api';
 
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
 
+/** Ghost-row proposal; timed exercises carry duration/distance instead of kg. */
+type GhostValues = {
+  reps: number;
+  weight: number | null;
+  durationMin?: number;
+  distanceKm?: number | null;
+};
+
 type SheetState =
   | { kind: 'add' }
   | {
       kind: 'edit';
       exId: string;
       set: SetEntry | null;
-      ghost: { reps: number; weight: number | null };
+      /** Prefill for a not-yet-logged set: what the ghost row is proposing. */
+      ghost: GhostValues;
     }
   | { kind: 'menu'; exId: string }
   | { kind: 'group-menu'; groupId: string }
@@ -218,31 +227,45 @@ export function SessionView(props: {
     return best?.id === s.id;
   }
 
-  function logGhost(
-    ex: Exercise,
-    v: { reps: number; weight: number | null },
-    type: SetType = 'working',
-  ): void {
+  /**
+   * Append a brand-new set. Takes the whole entry so set type, drops and the
+   * timed fields survive — the sheet can create any kind of set, not just a
+   * plain working one.
+   */
+  function logNewSet(ex: Exercise, vals: Omit<SetEntry, 'id' | 'position'>): void {
     const base = Math.max(
       baseline.get(ex.name.toLowerCase()) ?? 0,
       ...ex.sets.filter((s) => setTypeOf(s) !== 'warmup').map((s) => s.weight ?? 0),
     );
     const id = uuid();
-    upsertSet(workout!.id, ex.id, {
-      id,
+    upsertSet(workout!.id, ex.id, { ...vals, id });
+    setRecentSetId(id);
+    const type: SetType = vals.type ?? (vals.isWarmup ? 'warmup' : 'working');
+    if (type === 'working' && vals.weight !== null && vals.weight > base && base > 0) {
+      props.shell.toast({
+        kind: 'ok',
+        icon: 'trophy',
+        text: t.newRecordToast(ex.name, `${vals.weight} kg × ${vals.reps}`),
+      });
+    }
+  }
+
+  function logGhost(
+    ex: Exercise,
+    v: { reps: number; weight: number | null },
+    type: SetType = 'working',
+  ): void {
+    logNewSet(ex, {
       reps: v.reps,
       weight: v.weight,
       isWarmup: type === 'warmup',
       type,
+      drops: [],
+      durationMin: null,
+      distanceKm: null,
+      calories: null,
+      rpe: null,
     });
-    setRecentSetId(id);
-    if (type === 'working' && v.weight !== null && v.weight > base && base > 0) {
-      props.shell.toast({
-        kind: 'ok',
-        icon: 'trophy',
-        text: t.newRecordToast(ex.name, `${v.weight} kg × ${v.reps}`),
-      });
-    }
   }
 
   /** DS-2 · “Add a drop”: append a lighter part to the last logged set. */
@@ -323,6 +346,7 @@ export function SessionView(props: {
   function renderCard(ex: Exercise, grp: GroupCtx | null) {
     const ghost = ghostFor(ex);
     const timedGhost = timedGhostFor(ex);
+    const timedSheetGhost: GhostValues = { ...ghost, ...timedGhost };
     const prev = prevLift(ex.name, workout!.id);
     const kind = exerciseKind(ex);
     const timed = isTimedExercise(ex);
@@ -498,7 +522,9 @@ export function SessionView(props: {
                 <button
                   key={s.id}
                   className="set-row timed"
-                  onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
+                  onClick={() =>
+                    setSheet({ kind: 'edit', exId: ex.id, set: s, ghost: timedSheetGhost })
+                  }
                 >
                   <span className="idx">{i + 1}</span>
                   <span className="val">{s.durationMin ?? 0}</span>
@@ -510,13 +536,17 @@ export function SessionView(props: {
                 <span className="idx">{ex.sets.length + 1}</span>
                 <button
                   className="gval"
-                  onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
+                  onClick={() =>
+                    setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
+                  }
                 >
                   {timedGhost.durationMin}
                 </button>
                 <button
                   className="gval"
-                  onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
+                  onClick={() =>
+                    setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
+                  }
                 >
                   {timedGhost.distanceKm ?? '—'}
                 </button>
@@ -672,7 +702,7 @@ export function SessionView(props: {
     v: { durationMin: number; distanceKm: number | null },
   ): void {
     const kind = exerciseKind(ex);
-    upsertSet(workout!.id, ex.id, {
+    logNewSet(ex, {
       reps: 0,
       weight: null,
       isWarmup: kind === 'warmup',
@@ -1353,7 +1383,7 @@ export function SessionView(props: {
             if (sheet.set) {
               upsertSet(workout.id, ex.id, { ...vals, id: sheet.set.id });
             } else {
-              logGhost(ex, { reps: vals.reps, weight: vals.weight });
+              logNewSet(ex, vals);
             }
             setSheet(null);
           }}
@@ -2191,7 +2221,7 @@ function Stepper(props: {
 function SetEditorSheet(props: {
   exercise: Exercise;
   set: SetEntry | null;
-  ghost: { reps: number; weight: number | null };
+  ghost: GhostValues;
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
   onClose: () => void;
@@ -2205,9 +2235,14 @@ function SetEditorSheet(props: {
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
   const [weight, setWeight] = useState(props.set?.weight ?? props.ghost.weight ?? 0);
   const [durationMin, setDurationMin] = useState(
-    props.set?.durationMin ?? props.exercise.plannedDurationMin ?? (kind === 'cardio' ? 20 : 8),
+    props.set?.durationMin ??
+      props.ghost.durationMin ??
+      props.exercise.plannedDurationMin ??
+      (kind === 'cardio' ? 20 : 8),
   );
-  const [distanceKm, setDistanceKm] = useState(props.set?.distanceKm ?? 0);
+  const [distanceKm, setDistanceKm] = useState(
+    props.set?.distanceKm ?? props.ghost.distanceKm ?? 0,
+  );
   const [calories, setCalories] = useState(props.set?.calories ?? 0);
   const [rpe, setRpe] = useState(props.set?.rpe ?? 0);
   // Bodyweight = weight stored as null (pull-ups, dips, planks…).

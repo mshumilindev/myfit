@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../client/src/App';
@@ -865,6 +865,50 @@ describe('F-03 session UI', () => {
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
     await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
     expect(screen.getByText('Bench press · 1 sets')).toBeTruthy();
+  });
+
+  it('keeps the chosen set type and its drops when logging a brand-new set', async () => {
+    __replaceStateForTests(sampleStore());
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+
+    // Open the editor straight from the ghost row (no set logged yet).
+    await userEvent.click(screen.getByRole('button', { name: '8' }));
+    const dialog = screen.getByRole('dialog');
+
+    await userEvent.click(within(dialog).getByRole('button', { name: /Set type/ }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^Dropset/ }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /Add another drop/ }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Log' }));
+
+    const bench = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0];
+    expect(bench.sets).toHaveLength(2);
+    const logged = bench.sets[1];
+    expect(logged.type).toBe('drop');
+    expect(logged.drops).toHaveLength(1);
+  });
+
+  it('keeps duration and distance when logging a brand-new timed entry', async () => {
+    const s = sampleStore();
+    s.workouts[0].exercises.push({
+      id: 'run',
+      name: 'Treadmill',
+      kind: 'cardio',
+      position: 1,
+      sets: [],
+    });
+    __replaceStateForTests(s);
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+
+    await userEvent.click(screen.getByRole('button', { name: '20' }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Log' }));
+
+    const run = __getStateForTests()
+      .workouts.find((w) => w.id === 'open')!
+      .exercises.find((e) => e.id === 'run')!;
+    expect(run.sets).toHaveLength(1);
+    expect(run.sets[0].durationMin).toBe(20);
+    expect(run.sets[0].distanceKm).toBe(2);
   });
 });
 
