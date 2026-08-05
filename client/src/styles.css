@@ -1911,6 +1911,7 @@ i > svg {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   padding: 13px 14px;
+  width: 100%;
 }
 
 .exercise-card.completed {
@@ -1965,15 +1966,16 @@ i > svg {
 
 .set-grid {
   display: grid;
-  grid-template-columns: 18px 1fr 1fr 62px;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 62px;
   gap: 8px;
   align-items: center;
+  width: 100%;
 }
 
 .set-grid.timed,
 .set-row.timed,
 .ghost-row.timed {
-  grid-template-columns: 18px 1fr 1fr 44px;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 44px;
 }
 
 .set-grid.header {
@@ -1986,7 +1988,7 @@ i > svg {
 
 .set-row {
   display: grid;
-  grid-template-columns: 18px 1fr 1fr 62px;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 62px;
   gap: 8px;
   align-items: center;
   padding: 7px 8px;
@@ -2037,7 +2039,7 @@ i > svg {
 
 .ghost-row {
   display: grid;
-  grid-template-columns: 18px 1fr 1fr 62px;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 62px;
   gap: 8px;
   align-items: center;
   margin-top: 10px;
@@ -2045,6 +2047,7 @@ i > svg {
   border-top: 1px solid var(--color-divider);
   font-size: 16px;
   font-variant-numeric: tabular-nums;
+  width: 100%;
 }
 
 .ghost-row .idx {
@@ -3117,8 +3120,9 @@ i > svg {
 .session-live .set-grid,
 .session-live .set-row,
 .session-live .ghost-row {
-  grid-template-columns: 18px 1fr 1fr 62px;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 62px;
   gap: var(--space-3);
+  width: 100%;
 }
 
 .session-live .ghost-row {
@@ -3232,10 +3236,12 @@ i > svg {
 .steppers {
   display: flex;
   gap: 10px;
+  width: 100%;
 }
 
 .stepper {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   background: var(--color-bg);
   border-radius: var(--radius-md);
   padding: 10px 12px;
@@ -3266,13 +3272,30 @@ i > svg {
   cursor: pointer;
   padding: 0 10px;
   line-height: 1.3;
+  flex: none;
 }
 
 .stepper .row .val {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
   text-align: center;
   font-size: 24px;
   font-variant-numeric: tabular-nums;
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.stepper .row input.val::-webkit-outer-spin-button,
+.stepper .row input.val::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .toggle-row {
@@ -9405,7 +9428,8 @@ i > svg {
 
   .session-live .exercise-card,
   .session-past .exercise-card {
-    max-width: 620px;
+    max-width: none;
+    width: 100%;
     border-radius: 0;
     background: transparent;
     padding: 0;
@@ -9429,7 +9453,8 @@ i > svg {
   .session-past .set-grid,
   .session-past .set-row,
   .session-past .ghost-row {
-    grid-template-columns: 44px 1fr 1fr 1fr 90px;
+    grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 90px;
+    width: 100%;
   }
 
   .session-live .set-grid.header span:last-child,
@@ -9755,7 +9780,7 @@ i > svg {
   .session-live .exercise-card,
   .session-past .exercise-card {
     width: 100%;
-    max-width: 720px;
+    max-width: none;
     border-radius: var(--radius-md);
     background: var(--color-surface);
     padding: 18px 20px;
@@ -9767,8 +9792,8 @@ i > svg {
   .session-live .session-body > *,
   .session-past .session-body > * {
     width: 100%;
-    max-width: 720px;
-    margin-inline: auto;
+    max-width: none;
+    margin-inline: 0;
   }
 
   /* The ⋮ menu sits in the card's top-right corner, not inline with the name;
@@ -11149,7 +11174,7 @@ h6 {
 
 .drop-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 62px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 62px;
   gap: var(--space-3);
   align-items: center;
   font-size: 14px;
@@ -11160,6 +11185,7 @@ h6 {
   padding: 0;
   text-align: left;
   cursor: pointer;
+  width: 100%;
 }
 
 .drop-row .kind {
@@ -11317,14 +11343,34 @@ h6 {
 .dropedit-rows {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.drop-part {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
+  width: 100%;
+}
+
+.drop-part-lab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
 }
 
 .dropedit-grid {
   display: grid;
-  grid-template-columns: 60px 1fr 1fr 34px;
+  grid-template-columns: 60px minmax(0, 1fr) minmax(0, 1fr) 34px;
   gap: var(--space-3);
   align-items: center;
+  width: 100%;
 }
 
 .dropedit-grid.header {
@@ -12020,8 +12066,9 @@ h6 {
   .session-past .exercise-card .set-grid.header,
   .session-past .exercise-card .set-row,
   .session-past .exercise-card .ghost-row {
-    grid-template-columns: 34px 1fr 1fr 120px 90px;
+    grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 90px;
     gap: var(--space-4);
+    width: 100%;
   }
 
   .session-live .exercise-card .set-row .kind,
@@ -12053,8 +12100,9 @@ h6 {
 
   .session-live .exercise-card .drop-row,
   .session-past .exercise-card .drop-row {
-    grid-template-columns: 1fr 1fr 120px 90px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 90px;
     gap: var(--space-4);
+    width: 100%;
   }
 
   .session-live .exercise-card .drop-row .kind,

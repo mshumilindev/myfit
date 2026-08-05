@@ -2079,6 +2079,115 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
   { type: 'reverse-drop', icon: 'caret-line-up' },
 ];
 
+/**
+ * − / value / + control. The value is editable; clearing it stays empty while
+ * typing (never snaps to 0 mid-edit). Empty blur keeps the previous number.
+ */
+function Stepper(props: {
+  label: string;
+  value: number;
+  step: number;
+  min?: number;
+  max?: number;
+  focused?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  decimals?: number;
+  onFocus?: () => void;
+  onChange: (n: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const min = props.min ?? 0;
+  const max = props.max ?? Number.POSITIVE_INFINITY;
+  const decimals = props.decimals ?? 0;
+
+  function format(n: number): string {
+    if (decimals <= 0) return String(n);
+    const fixed = n.toFixed(decimals);
+    return fixed.replace(/\.?0+$/, '') || '0';
+  }
+
+  const shown = draft !== null ? draft : format(props.value);
+
+  function clamp(n: number): number {
+    const rounded = decimals > 0 ? Number(n.toFixed(decimals)) : Math.round(n);
+    return Math.min(max, Math.max(min, rounded));
+  }
+
+  function bump(dir: -1 | 1): void {
+    const fromDraft =
+      draft !== null && draft.trim() !== '' && Number.isFinite(Number(draft))
+        ? Number(draft)
+        : props.value;
+    setDraft(null);
+    props.onChange(clamp(fromDraft + dir * props.step));
+  }
+
+  function commit(raw: string): void {
+    setDraft(null);
+    if (raw.trim() === '') return; // keep previous — empty is allowed while editing
+    const n = Number(raw.replace(',', '.'));
+    if (!Number.isFinite(n)) return;
+    props.onChange(clamp(n));
+  }
+
+  return (
+    <div
+      className={`stepper${props.focused ? ' focused' : ''}${props.disabled ? ' disabled' : ''}`}
+      onClick={() => !props.disabled && props.onFocus?.()}
+    >
+      <div className="lab">{props.label}</div>
+      <div className="row">
+        {props.disabled && props.placeholder ? (
+          <span className="val">{props.placeholder}</span>
+        ) : (
+          <>
+            <button
+              type="button"
+              aria-label="−"
+              disabled={props.disabled}
+              onClick={(e) => {
+                e.stopPropagation();
+                bump(-1);
+              }}
+            >
+              −
+            </button>
+            <input
+              className="val"
+              inputMode={decimals > 0 ? 'decimal' : 'numeric'}
+              disabled={props.disabled}
+              value={shown}
+              onFocus={() => {
+                props.onFocus?.();
+                setDraft(format(props.value));
+              }}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={() => commit(draft ?? '')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                }
+              }}
+            />
+            <button
+              type="button"
+              aria-label="+"
+              disabled={props.disabled}
+              onClick={(e) => {
+                e.stopPropagation();
+                bump(1);
+              }}
+            >
+              +
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SetEditorSheet(props: {
   exercise: Exercise;
   set: SetEntry | null;
@@ -2150,6 +2259,63 @@ function SetEditorSheet(props: {
     );
   }
 
+  function patchDrop(i: number, patch: Partial<DropEntry>): void {
+    setDropsState((list) => list.map((x, xi) => (xi === i ? { ...x, ...patch } : x)));
+  }
+
+  function addDropPart(): void {
+    const prevPart = drops[drops.length - 1] ?? { reps, weight: bw ? null : weight };
+    setDropsState((list) => [
+      ...list,
+      {
+        reps: Math.max(1, prevPart.reps - (type === 'drop' ? 2 : 3)),
+        weight:
+          prevPart.weight === null
+            ? null
+            : Math.max(
+                0,
+                type === 'drop'
+                  ? Math.round((prevPart.weight * 0.75) / 5) * 5
+                  : prevPart.weight + 5,
+              ),
+      },
+    ]);
+  }
+
+  function strengthSteppers(
+    partReps: number,
+    partWeight: number | null,
+    onReps: (n: number) => void,
+    onWeight: (n: number) => void,
+    focusKey: 'reps' | 'weight' | null,
+  ) {
+    return (
+      <div className="steppers">
+        <Stepper
+          label={t.reps}
+          value={partReps}
+          step={1}
+          min={0}
+          focused={focusKey === 'reps'}
+          onFocus={() => setFocused('reps')}
+          onChange={onReps}
+        />
+        <Stepper
+          label={t.weightKg}
+          value={partWeight ?? 0}
+          step={2.5}
+          min={0}
+          decimals={2}
+          focused={focusKey === 'weight'}
+          disabled={bw}
+          placeholder={t.bodyweightShort}
+          onFocus={() => setFocused('weight')}
+          onChange={onWeight}
+        />
+      </div>
+    );
+  }
+
   // --- DS-1: the four types, one list --------------------------------------
   if (!timed && view === 'type') {
     return (
@@ -2190,130 +2356,6 @@ function SetEditorSheet(props: {
     );
   }
 
-  // --- DS-3: a drop set grows a row per drop --------------------------------
-  if (!timed && isDropType) {
-    return (
-      <Sheet onClose={props.onClose}>
-        <div className="dropedit-head">
-          <h4>{t.setN(idx, props.exercise.name)}</h4>
-          <button
-            className="type-badge"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-            onClick={() => setView('type')}
-          >
-            <Icon name={type === 'drop' ? 'caret-line-down' : 'caret-line-up'} />
-            {type === 'drop' ? t.dropBadge : t.reverseBadge}
-          </button>
-        </div>
-        <div className="dropedit-rows">
-          <div className="dropedit-grid header">
-            <span />
-            <span>{t.repsCol}</span>
-            <span>{t.kgCol}</span>
-            <span />
-          </div>
-          <div className="dropedit-grid">
-            <span className="lab">{t.startLabel}</span>
-            <input
-              className="input"
-              type="number"
-              value={reps}
-              onChange={(e) => setReps(Math.max(0, Number(e.target.value) || 0))}
-            />
-            <input
-              className="input"
-              type="number"
-              value={bw ? '' : weight}
-              onChange={(e) => setWeight(Math.max(0, Number(e.target.value) || 0))}
-            />
-            <span />
-          </div>
-          {drops.map((d, i) => (
-            <div key={i} className="dropedit-grid">
-              <span className="lab">{t.dropRowN(i + 1)}</span>
-              <input
-                className="input"
-                type="number"
-                value={d.reps}
-                onChange={(e) =>
-                  setDropsState((list) =>
-                    list.map((x, xi) =>
-                      xi === i ? { ...x, reps: Math.max(0, Number(e.target.value) || 0) } : x,
-                    ),
-                  )
-                }
-              />
-              <input
-                className="input"
-                type="number"
-                value={d.weight ?? ''}
-                onChange={(e) =>
-                  setDropsState((list) =>
-                    list.map((x, xi) =>
-                      xi === i ? { ...x, weight: Math.max(0, Number(e.target.value) || 0) } : x,
-                    ),
-                  )
-                }
-              />
-              <button
-                className="drop-trash"
-                aria-label={t.delete}
-                onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
-              >
-                <Icon name="trash" />
-              </button>
-            </div>
-          ))}
-        </div>
-        <button
-          className="dropedit-add"
-          onClick={() => {
-            const prevPart = drops[drops.length - 1] ?? { reps, weight: bw ? null : weight };
-            setDropsState((list) => [
-              ...list,
-              {
-                reps: Math.max(1, prevPart.reps - (type === 'drop' ? 2 : 3)),
-                weight:
-                  prevPart.weight === null
-                    ? null
-                    : Math.max(
-                        0,
-                        type === 'drop'
-                          ? Math.round((prevPart.weight * 0.75) / 5) * 5
-                          : prevPart.weight + 5,
-                      ),
-              },
-            ]);
-          }}
-        >
-          <Icon name="plus" />
-          <span className="n">{t.addAnotherDrop}</span>
-          <span className="m">{t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}</span>
-        </button>
-        {type === 'reverse-drop' && (
-          <div className="sheet-note">
-            <Icon name="caret-line-up" />
-            <p>{t.reverseNote}</p>
-          </div>
-        )}
-        <div className="sheet-actions">
-          {props.onDelete && (
-            <button className="danger-outline" style={{ minHeight: 44 }} onClick={props.onDelete}>
-              <Icon name="trash" />
-              {t.deleteSet}
-            </button>
-          )}
-          <button className="btn btn-secondary grow" onClick={props.onClose}>
-            {t.cancel}
-          </button>
-          <button className="btn btn-primary grow" onClick={save}>
-            {props.set ? t.save : t.log}
-          </button>
-        </div>
-      </Sheet>
-    );
-  }
-
   return (
     <Sheet onClose={props.onClose}>
       <div className="sheet-head">
@@ -2325,86 +2367,96 @@ function SetEditorSheet(props: {
       {timed ? (
         <>
           <div className="steppers">
-            <div
-              className={`stepper${focused === 'duration' ? ' focused' : ''}`}
-              onClick={() => setFocused('duration')}
-            >
-              <div className="lab">{t.durationMinutes}</div>
-              <div className="row">
-                <button onClick={() => setDurationMin((v) => Math.max(1, v - 1))}>−</button>
-                <span className="val">{durationMin}</span>
-                <button onClick={() => setDurationMin((v) => v + 1)}>+</button>
-              </div>
-            </div>
-            <div
-              className={`stepper${focused === 'distance' ? ' focused' : ''}`}
-              onClick={() => setFocused('distance')}
-            >
-              <div className="lab">{t.distanceKm}</div>
-              <div className="row">
-                <button onClick={() => setDistanceKm((v) => Math.max(0, +(v - 0.1).toFixed(1)))}>
-                  −
-                </button>
-                <span className="val">{distanceKm}</span>
-                <button onClick={() => setDistanceKm((v) => +(v + 0.1).toFixed(1))}>+</button>
-              </div>
-            </div>
+            <Stepper
+              label={t.durationMinutes}
+              value={durationMin}
+              step={1}
+              min={1}
+              focused={focused === 'duration'}
+              onFocus={() => setFocused('duration')}
+              onChange={setDurationMin}
+            />
+            <Stepper
+              label={t.distanceKm}
+              value={distanceKm}
+              step={0.1}
+              min={0}
+              decimals={1}
+              focused={focused === 'distance'}
+              onFocus={() => setFocused('distance')}
+              onChange={setDistanceKm}
+            />
           </div>
           <div className="steppers secondary-steppers">
-            <div className="stepper">
-              <div className="lab">{t.calories}</div>
-              <div className="row">
-                <button onClick={() => setCalories((v) => Math.max(0, v - 10))}>−</button>
-                <span className="val">{calories}</span>
-                <button onClick={() => setCalories((v) => v + 10)}>+</button>
-              </div>
-            </div>
-            <div className="stepper">
-              <div className="lab">{t.rpe}</div>
-              <div className="row">
-                <button onClick={() => setRpe((v) => Math.max(0, +(v - 0.5).toFixed(1)))}>−</button>
-                <span className="val">{rpe}</span>
-                <button onClick={() => setRpe((v) => Math.min(10, +(v + 0.5).toFixed(1)))}>
-                  +
-                </button>
-              </div>
-            </div>
+            <Stepper label={t.calories} value={calories} step={10} min={0} onChange={setCalories} />
+            <Stepper
+              label={t.rpe}
+              value={rpe}
+              step={0.5}
+              min={0}
+              max={10}
+              decimals={1}
+              onChange={setRpe}
+            />
           </div>
         </>
       ) : (
         <>
-          <div className="steppers">
-            <div
-              className={`stepper${focused === 'reps' ? ' focused' : ''}`}
-              onClick={() => setFocused('reps')}
-            >
-              <div className="lab">{t.reps}</div>
-              <div className="row">
-                <button onClick={() => setReps((r) => Math.max(1, r - 1))}>−</button>
-                <span className="val">{reps}</span>
-                <button onClick={() => setReps((r) => r + 1)}>+</button>
-              </div>
-            </div>
-            <div
-              className={`stepper${focused === 'weight' ? ' focused' : ''}${bw ? ' disabled' : ''}`}
-              onClick={() => !bw && setFocused('weight')}
-            >
-              <div className="lab">{t.weightKg}</div>
-              <div className="row">
-                {bw ? (
-                  <span className="val">{t.bodyweightShort}</span>
-                ) : (
-                  <>
-                    <button onClick={() => setWeight((w) => Math.max(0, +(w - 2.5).toFixed(2)))}>
-                      −
-                    </button>
-                    <span className="val">{weight}</span>
-                    <button onClick={() => setWeight((w) => +(w + 2.5).toFixed(2))}>+</button>
-                  </>
+          {isDropType ? (
+            <div className="dropedit-rows">
+              <div className="drop-part">
+                <div className="drop-part-lab">{t.startLabel}</div>
+                {strengthSteppers(
+                  reps,
+                  bw ? null : weight,
+                  setReps,
+                  setWeight,
+                  focused === 'reps' || focused === 'weight' ? focused : null,
                 )}
               </div>
+              {drops.map((d, i) => (
+                <div key={i} className="drop-part">
+                  <div className="drop-part-lab">
+                    <span>{t.dropRowN(i + 1)}</span>
+                    <button
+                      type="button"
+                      className="drop-trash"
+                      aria-label={t.delete}
+                      onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </div>
+                  {strengthSteppers(
+                    d.reps,
+                    d.weight,
+                    (n) => patchDrop(i, { reps: n }),
+                    (n) => patchDrop(i, { weight: n }),
+                    null,
+                  )}
+                </div>
+              ))}
+              <button type="button" className="dropedit-add" onClick={addDropPart}>
+                <Icon name="plus" />
+                <span className="n">{t.addAnotherDrop}</span>
+                <span className="m">{t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}</span>
+              </button>
+              {type === 'reverse-drop' && (
+                <div className="sheet-note">
+                  <Icon name="caret-line-up" />
+                  <p>{t.reverseNote}</p>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            strengthSteppers(
+              reps,
+              bw ? null : weight,
+              setReps,
+              setWeight,
+              focused === 'reps' || focused === 'weight' ? focused : null,
+            )
+          )}
           <button className="toggle-row" onClick={() => setBw((x) => !x)}>
             <Icon name="barbell" />
             <span className="lab">{t.bodyweightSet}</span>
