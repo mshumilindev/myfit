@@ -371,7 +371,7 @@ export function SessionView(props: {
           !grp && activeExerciseId === ex.id ? ' active' : ''
         }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
           marker ? ' warmup-marker' : ''
-        }${ex.sets.length === 0 && !marker ? ' empty-card' : ''}`}
+        }`}
         onDragOver={(e) => {
           if (!grp && dragId.current && dragId.current !== ex.id) e.preventDefault();
         }}

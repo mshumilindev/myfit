@@ -911,6 +911,22 @@ describe('F-03 session UI', () => {
     expect(run.sets[0].distanceKm).toBe(2);
   });
 
+  it('keeps an exercise with no logged sets on the exercise-card layout', () => {
+    const s = sampleStore();
+    s.workouts[0].exercises.push({ id: 'fresh', name: 'Cable Crunch', position: 1, sets: [] });
+    __replaceStateForTests(s);
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+
+    const cards = [...container.querySelectorAll('.exercise-card')];
+    expect(cards).toHaveLength(2);
+    // `.empty-card` is the shared empty-state box (flex, align-items: flex-start);
+    // on an exercise card it collapsed the set table to its content width.
+    expect(cards.some((c) => c.classList.contains('empty-card'))).toBe(false);
+    const fresh = cards[1];
+    expect(fresh.querySelector('.set-grid.header')).toBeTruthy();
+    expect(fresh.querySelector('.ghost-row')).toBeTruthy();
+  });
+
   it('inserts a warm-up marker card with no sets to log', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
