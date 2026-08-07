@@ -13410,3 +13410,54 @@ h6 {
   flex-direction: column;
   gap: var(--space-2);
 }
+
+/* --- Pinned overlay headers (phone) ---------------------------------------
+   Screens opened over the hub hide the tab bar, so their top block is the only
+   way out. It stays on screen while the content scrolls under it. Desktop is
+   untouched: the rail is always there, and the session panes already split. */
+
+@media (max-width: 719px) {
+  .screen > .hist-head,
+  .screen > .exlib-top,
+  .screen > .profile-top,
+  .session-screen .session-top,
+  /* The live toolbar sets position: relative earlier — match its weight. */
+  .session-live .session-top.live-toolbar,
+  .onb-shell > .onb-top {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+  }
+
+  /* Full-bleed over the .screen gutter, so cards pass under the header
+     instead of beside it. The offset swallows the scroll container's 12px top
+     padding — otherwise content shows through the strip above the header. */
+  .screen > .hist-head,
+  .screen > .exlib-top,
+  .screen > .profile-top {
+    top: -12px;
+    margin: -12px -20px 0;
+    padding: 12px 20px 10px;
+    background: var(--color-bg);
+  }
+
+  .onb-shell > .onb-top {
+    padding-bottom: 10px;
+    background: var(--color-bg);
+  }
+
+  /* The live hero paints its own background; the past-session bar does not. */
+  .session-past .session-top {
+    background: var(--color-bg);
+  }
+
+  /* Photo heroes are too tall to pin — float the control that matters. */
+  .exd .exd-back,
+  .gym-detail .hero-back {
+    position: fixed;
+    top: calc(var(--safe-top) + 12px);
+    /* Follow the app column when the shell is centred (wide phones). */
+    left: calc(max(0px, (100vw - 640px) / 2) + 16px);
+    z-index: 25;
+  }
+}
