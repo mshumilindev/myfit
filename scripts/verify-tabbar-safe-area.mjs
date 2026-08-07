@@ -14,6 +14,8 @@ import { extname, join, normalize } from 'node:path';
 
 const DIST = join(process.cwd(), 'client/dist');
 const SAFE_BOTTOM = 34;
+// Tab bar trims the safe-area inset (dead-band under labels felt too tall).
+const EXPECTED_PAD = Math.max(8, SAFE_BOTTOM - 16);
 const SAFE_TOP = 59;
 const TOLERANCE_PX = 3;
 
@@ -193,11 +195,12 @@ async function main() {
     if (!assertClose('no gap under .tabbar box', m.gapTabbarToViewport, 0)) failed++;
     // Padding under labels === safe-area only (not 22+34)
     const padBottom = parseFloat(m.tabbar.paddingBottom);
-    if (!assertClose('tabbar padding-bottom == safe-area', padBottom, SAFE_BOTTOM)) failed++;
+    if (!assertClose('tabbar padding-bottom == trimmed safe-area', padBottom, EXPECTED_PAD))
+      failed++;
     // Labels sit above button padding (6px) + safe-area. Old bug was
     // padding-bottom = 22+safe (~56) → label gap ≈ 62+ and tabbar ≈ 110+.
     const buttonPad = 6;
-    const expectedLabelGap = SAFE_BOTTOM + buttonPad;
+    const expectedLabelGap = EXPECTED_PAD + buttonPad;
     if (m.label) {
       if (
         !assertClose('label→bottom gap == safe + btn pad', m.label.gapToViewport, expectedLabelGap)

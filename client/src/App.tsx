@@ -10,6 +10,7 @@ import {
 } from './api';
 import { db } from './firebase';
 import { getOpenWorkout, startSyncLoop, useStore, retrySync, discardBlockingChange } from './store';
+import { useFlag } from './data/flags';
 import { SpotterMark } from './brand/SpotterMark';
 import { useT } from './i18n';
 import {
@@ -57,6 +58,21 @@ const ExerciseLibraryView = lazy(() =>
     default: module.ExerciseLibraryView,
   })),
 );
+const ExerciseDetailView = lazy(() =>
+  import('./views/ExerciseDetailView').then((module) => ({
+    default: module.ExerciseDetailView,
+  })),
+);
+const SettingsView = lazy(() =>
+  import('./views/SettingsView').then((module) => ({
+    default: module.SettingsView,
+  })),
+);
+const HistoryListView = lazy(() =>
+  import('./views/HistoryListView').then((module) => ({
+    default: module.HistoryListView,
+  })),
+);
 const GymDetailView = lazy(() =>
   import('./views/GymDetailView').then((module) => ({ default: module.GymDetailView })),
 );
@@ -73,6 +89,9 @@ export type Overlay =
   | { screen: 'session'; workoutId: string }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
+  | { screen: 'exercise-detail'; name: string }
+  | { screen: 'settings' }
+  | { screen: 'history' }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
   | { screen: 'library' }
@@ -125,9 +144,13 @@ function toHash(tab: Tab, overlay: Overlay): string {
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
+  if (overlay?.screen === 'exercise-detail')
+    return `#/exercise-detail/${encodeURIComponent(overlay.name)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
   if (overlay?.screen === 'library') return '#/exercises';
+  if (overlay?.screen === 'settings') return '#/settings';
+  if (overlay?.screen === 'history') return '#/history';
   if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
@@ -144,10 +167,17 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
       tab: 'today',
       overlay: { screen: 'exercise-history', name: decodeURIComponent(parts[1]) },
     };
+  if (head === 'exercise-detail' && parts[1])
+    return {
+      tab: 'programs',
+      overlay: { screen: 'exercise-detail', name: decodeURIComponent(parts[1]) },
+    };
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
   if (head === 'me') return { tab: 'me', overlay: null };
   if (head === 'exercises') return { tab: 'progress', overlay: { screen: 'library' } };
+  if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
+  if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -308,13 +338,23 @@ export function App() {
   const tabs = tabsForRole(role, t);
   const tabAllowed = tabs.some((x) => x.id === tab);
   const effectiveTab = tabAllowed ? tab : defaultTabForRole(role);
+  const exOn = useFlag('exerciseFeature');
+
+  // Feature-flag / role guards, applied in render (no setState-in-effect): an
+  // overlay the current user may not open is treated as absent, so the tab
+  // behind shows through instead of a blank screen. The Ex-feature library and
+  // detail require the flag; Settings requires admin.
+  const overlayBlocked =
+    (!exOn && (overlay?.screen === 'library' || overlay?.screen === 'exercise-detail')) ||
+    (overlay?.screen === 'settings' && role !== 'admin');
+  const activeOverlay = overlayBlocked ? null : overlay;
 
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(effectiveTab, overlay);
+    const next = toHash(effectiveTab, activeOverlay);
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
-  }, [authed, joinToken, effectiveTab, overlay]);
+  }, [authed, joinToken, effectiveTab, activeOverlay]);
 
   // URL hash → state (browser back/forward).
   useEffect(() => {
@@ -372,11 +412,12 @@ export function App() {
       {desktopRail && (
         <Rail
           tab={effectiveTab}
-          overlayOpen={overlay !== null}
+          overlayOpen={activeOverlay !== null}
           goTab={goTab}
           openWorkoutStartedAt={open?.startedAt}
           syncStatus={store.syncStatus}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
+          onOpenSettings={() => setOverlay({ screen: 'settings' })}
         />
       )}
       <div className="main-col">
@@ -390,50 +431,63 @@ export function App() {
         {authed && notices.some((n) => !n.read) && (
           <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
         )}
-        {open && overlay?.screen !== 'session' && overlay?.screen !== 'past-workout' && (
-          <LiveHero
-            workout={open}
-            gym={store.gyms.find((g) => g.id === open.gymId) ?? null}
-            gyms={store.gyms}
-            offline={store.syncStatus === 'offline'}
-            queued={store.queue.length}
-            onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
-            mode={effectiveTab === 'today' ? 'today' : 'compact'}
-          />
-        )}
+        {open &&
+          activeOverlay?.screen !== 'session' &&
+          activeOverlay?.screen !== 'past-workout' && (
+            <LiveHero
+              workout={open}
+              gym={store.gyms.find((g) => g.id === open.gymId) ?? null}
+              gyms={store.gyms}
+              offline={store.syncStatus === 'offline'}
+              queued={store.queue.length}
+              onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
+              mode={effectiveTab === 'today' ? 'today' : 'compact'}
+            />
+          )}
         <Suspense fallback={<ScreenFallback />}>
-          {overlay?.screen === 'session' && (
-            <SessionView workoutId={overlay.workoutId} shell={shell} onClose={closeOverlay} />
+          {activeOverlay?.screen === 'session' && (
+            <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
           )}
-          {overlay?.screen === 'past-workout' && (
+          {activeOverlay?.screen === 'past-workout' && (
             <SessionView
-              workoutId={overlay.workoutId}
+              workoutId={activeOverlay.workoutId}
               past
-              startAdd={overlay.startAdd}
+              startAdd={activeOverlay.startAdd}
               shell={shell}
               onClose={closeOverlay}
             />
           )}
-          {overlay?.screen === 'exercise-history' && (
-            <ExerciseHistoryView name={overlay.name} onClose={closeOverlay} />
+          {activeOverlay?.screen === 'exercise-history' && (
+            <ExerciseHistoryView name={activeOverlay.name} onClose={closeOverlay} />
           )}
-          {overlay?.screen === 'library' && <ExerciseLibraryView onClose={closeOverlay} />}
-          {overlay?.screen === 'gym' && (
+          {activeOverlay?.screen === 'library' && exOn && (
+            <ExerciseLibraryView shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'exercise-detail' && exOn && (
+            <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'settings' && role === 'admin' && (
+            <SettingsView onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'history' && (
+            <HistoryListView shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'gym' && (
             <GymDetailView
-              gymId={overlay.gymId}
-              candName={overlay.name}
-              candLat={overlay.lat}
-              candLng={overlay.lng}
-              candAddress={overlay.address}
+              gymId={activeOverlay.gymId}
+              candName={activeOverlay.name}
+              candLat={activeOverlay.lat}
+              candLng={activeOverlay.lng}
+              candAddress={activeOverlay.address}
               shell={shell}
               onClose={closeOverlay}
             />
           )}
-          {overlay?.screen === 'profile' && (
-            <ProfileView userId={overlay.userId} shell={shell} onClose={closeOverlay} />
+          {activeOverlay?.screen === 'profile' && (
+            <ProfileView userId={activeOverlay.userId} shell={shell} onClose={closeOverlay} />
           )}
         </Suspense>
-        {!overlay && (
+        {!activeOverlay && (
           <>
             <Suspense fallback={<ScreenFallback />}>
               {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
@@ -525,6 +579,7 @@ function Rail(props: {
   openWorkoutStartedAt?: number;
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
   onOpenProfile: () => void;
+  onOpenSettings: () => void;
 }) {
   const { t } = useT();
   const live = props.openWorkoutStartedAt !== undefined;
@@ -559,6 +614,17 @@ function Rail(props: {
           {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
+      {role === 'admin' && (
+        <button
+          className="rail-item"
+          aria-label={t.settingsTitle}
+          title={t.settingsTitle}
+          onClick={props.onOpenSettings}
+        >
+          <Icon name="gear" />
+          <span className="rail-label">{t.settingsTitle}</span>
+        </button>
+      )}
       <div className="rail-foot">
         <div className="rail-lang">
           <LanguageSelector />

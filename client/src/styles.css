@@ -71,6 +71,14 @@
   --space-2: 5.6px;
   --space-3: 8.4px;
   --space-4: 11.2px;
+  --space-5: 14px;
+  /* Media placeholders (design --frame/--frame2): local, offline, no network. */
+  --frame:
+    radial-gradient(70% 90% at 50% 20%, rgba(217, 162, 79, 0.14), transparent 60%),
+    linear-gradient(165deg, #2b2f36 0%, #1a1d22 55%, #111316 100%);
+  --frame2:
+    radial-gradient(80% 80% at 30% 25%, rgba(120, 140, 170, 0.16), transparent 62%),
+    linear-gradient(200deg, #282b31, #141619);
   --space-6: 16.8px;
   --space-8: 22.4px;
 
@@ -1111,9 +1119,10 @@ i > svg {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA
-     that inset is --safe-bottom only — never 22px + safe-area (was ~56–70px). */
-  padding: 8px 12px var(--safe-bottom);
+  /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA the
+     full safe-area under the labels reads as a dead band, so trim it (keeping a
+     small floor for home-indicator clearance) — never 22px + safe-area. */
+  padding: 8px 12px max(8px, calc(var(--safe-bottom) - 16px));
   background: var(--color-bg);
   box-shadow: 0 -1px 0 var(--color-divider);
   z-index: 30;
@@ -12692,4 +12701,709 @@ h6 {
   .session-live .exercise-card .exercise-chips .echip i {
     font-size: 11px;
   }
+}
+
+/* ==========================================================================
+   Exercise detail (DET-1 phone, DET-2 web) — design "Ex feature"
+   ========================================================================== */
+.exd {
+  padding: 0;
+  gap: 0;
+}
+.exd-header {
+  position: relative;
+  flex: none;
+}
+.exd-video {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: 0;
+  background: var(--frame);
+  overflow: hidden;
+}
+.exd-video.phone {
+  height: 220px;
+}
+.exd-video.\31 6-9 {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+}
+.exd-video.clip {
+  cursor: pointer;
+  padding: 0;
+}
+.exd-video.none .exd-house,
+.exd-video.stills {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+.exd-back {
+  position: absolute;
+  left: var(--space-4);
+  top: var(--space-3);
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(10, 11, 13, 0.55);
+  display: grid;
+  place-items: center;
+  color: var(--color-neutral-200);
+  cursor: pointer;
+}
+.exd-back .ui-icon {
+  font-size: 17px;
+}
+.exd-playbtn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  background: rgba(10, 11, 13, 0.5);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.5);
+}
+.exd-playbtn .ui-icon {
+  font-size: 24px;
+  color: var(--color-accent-100);
+}
+.exd-scrub {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.exd-time {
+  font-size: 10px;
+  color: rgba(233, 234, 236, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+.exd-track {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(233, 234, 236, 0.25);
+}
+.exd-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+.exd-mute {
+  font-size: 13px;
+  color: rgba(233, 234, 236, 0.8);
+}
+.exd-provider {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--gutter);
+  background: var(--color-surface);
+  box-shadow: 0 1px 0 var(--color-divider);
+}
+.exd-provider .ui-icon {
+  font-size: 14px;
+  color: var(--color-neutral-500);
+}
+.exd-provider-txt {
+  flex: 1;
+  font-size: 10px;
+  color: var(--color-neutral-600);
+}
+.exd-open {
+  border: 0;
+  background: none;
+  font-size: 10px;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+.exd-body {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-4) var(--gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.exd-title {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.025em;
+}
+.exd-title.lg {
+  font-size: 30px;
+}
+.exd-chips {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+.exd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--color-neutral-900);
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+.exd-chip.primary {
+  color: var(--color-neutral-300);
+}
+.exd-chip .ui-icon {
+  font-size: 11px;
+}
+.exd-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exd-label {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--color-neutral-600);
+}
+.exd.desktop .exd-label {
+  text-transform: uppercase;
+}
+.exd-cues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exd-cue {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 13px;
+  color: var(--color-neutral-300);
+  line-height: 1.5;
+}
+.exd-bullet {
+  font-size: 6px;
+  color: var(--color-accent);
+  margin-top: 6px;
+  flex: none;
+}
+.exd-stills {
+  display: flex;
+  gap: var(--space-2);
+}
+.exd-still {
+  flex: 1;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+.exd-stills.big .exd-still {
+  aspect-ratio: 4 / 5;
+}
+.exd-still-label {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  font-size: 9px;
+  color: rgba(233, 234, 236, 0.75);
+}
+.exd-stills-cap {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+}
+.exd-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+.exd-tile {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+.exd-tile-num {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.exd-tile-num.ok {
+  color: var(--color-ok);
+}
+.exd-tile-label {
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.exd-add {
+  margin-top: auto;
+  min-height: 50px;
+  font-size: 15px;
+  gap: var(--space-3);
+}
+
+/* --- desktop two-pane (DET-2) --- */
+.exd.desktop {
+  padding: var(--space-5) var(--gutter) var(--space-8);
+  gap: var(--space-4);
+}
+.exd-back-top {
+  flex: none;
+  align-self: flex-start;
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-neutral-300);
+  font-size: 19px;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: -6px;
+}
+.exd-panes {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+  gap: var(--space-8);
+}
+.exd-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.exd-left .exd-provider {
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+.exd-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.exd-crumb {
+  font-size: 13px;
+  color: var(--color-neutral-500);
+}
+.exd.desktop .exd-tile-num {
+  font-size: 30px;
+}
+.exd.desktop .exd-tiles {
+  gap: var(--space-3);
+}
+.exd-actions {
+  margin-top: auto;
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+.exd-actions .btn {
+  min-height: 48px;
+  padding: 0 var(--space-6);
+}
+
+/* ==========================================================================
+   Exercise gallery (LIB-1 phone list, LIB-2 web poster grid) — "Ex feature"
+   ========================================================================== */
+.exg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.exg:not(.desktop) .exg-sub {
+  display: none;
+}
+.exg-sub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.exg-filters {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.exg-search {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+.exg-search .ui-icon {
+  font-size: 15px;
+  color: var(--color-neutral-500);
+}
+.exg-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: 14px;
+  outline: none;
+}
+.exg-search input::placeholder {
+  color: var(--color-neutral-600);
+}
+.exg-seg-chip {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--color-surface);
+  color: var(--color-neutral-500);
+}
+.exg-seg-chip.active {
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.exg-vocab {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* phone list (LIB-1) */
+.exg-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exg-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.exg-thumb {
+  width: 78px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  flex: none;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--frame);
+}
+.exg-thumb.stills,
+.exg-thumb.none {
+  background: var(--color-neutral-900);
+}
+.exg-play {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.85);
+}
+.exg-len {
+  position: absolute;
+  right: 5px;
+  bottom: 4px;
+  font-size: 8px;
+  color: rgba(233, 234, 236, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+.exg-imgglyph {
+  font-size: 20px;
+  color: var(--color-neutral-700);
+}
+.exg-row-body {
+  flex: 1;
+  min-width: 0;
+}
+.exg-name {
+  font-size: 15px;
+}
+.exg-muscles {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+}
+.exg-equip {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  margin-top: 4px;
+}
+.exg-stills-tag {
+  color: var(--color-neutral-500);
+}
+.exg-row.off,
+.exg-card.off {
+  opacity: 0.45;
+}
+
+/* desktop poster grid (LIB-2) */
+.exg-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+.exg-card {
+  border: 0;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+  display: block;
+}
+.exg.desktop .exg-thumb {
+  width: auto;
+  height: 120px;
+  border-radius: 0;
+}
+.exg.desktop .exg-play {
+  font-size: 34px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.exg.desktop .exg-len {
+  right: 8px;
+  bottom: 6px;
+  font-size: 9px;
+}
+.exg.desktop .exg-imgglyph {
+  font-size: 28px;
+}
+.exg-card-body {
+  padding: var(--space-4);
+}
+.exg.desktop .exg-name {
+  font-size: 14px;
+}
+.exg.desktop .exg-muscles {
+  font-size: 10px;
+  margin-top: 3px;
+}
+
+/* ==========================================================================
+   Programs ⇄ Exercises tab switcher (AC-LIBTAB-01/02) + tab body toggle
+   ========================================================================== */
+.prog-tabs {
+  display: inline-flex;
+  gap: var(--space-5);
+  align-items: center;
+}
+.prog-tabs button {
+  border: 0;
+  background: none;
+  padding: 6px 2px;
+  font-size: 15px;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+.prog-tabs button.active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
+}
+/* Hide the programs body while the Exercises tab is active — kept mounted so
+   the week strip, list and any draft are preserved (AC-LIBTAB-04). */
+.programs-page.show-exercises > *:not(.programs-top):not(.exg-tabwrap) {
+  display: none;
+}
+.exg-tabwrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+@media (max-width: 719.98px) {
+  .prog-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: 3px;
+  }
+  .prog-tabs button {
+    border-bottom: 0;
+    border-radius: calc(var(--radius-md) - 2px);
+    padding: 8px 0;
+    text-align: center;
+    font-size: 13px;
+  }
+  .prog-tabs button.active {
+    background: var(--color-accent-900);
+    color: var(--color-accent);
+  }
+}
+.programs-top .prog-tabs {
+  margin-right: auto;
+  margin-left: var(--space-6);
+}
+@media (max-width: 719.98px) {
+  .programs-top .prog-tabs {
+    margin-left: 0;
+  }
+}
+
+/* Author view hides its top bar by design. Only when the Exercises tab is
+   enabled do we reveal it — as a slim switcher-only bar, with the duplicate
+   "Programs" title suppressed (the left list already carries it). */
+.programs-author-page.programs-has-tabs > .programs-top {
+  display: flex;
+  padding: 12px 20px 10px;
+  align-items: center;
+  flex: none;
+}
+.programs-author-page.programs-has-tabs > .programs-top > div:first-child {
+  display: none;
+}
+.programs-author-page.programs-has-tabs > .programs-top .prog-tabs {
+  margin-left: 0;
+}
+.programs-author-page .exg-tabwrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 20px 20px;
+}
+
+/* ==========================================================================
+   App settings (admin, web) — feature flags
+   ========================================================================== */
+.settings-view .hist-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.settings-sub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  margin-top: 2px;
+}
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 560px;
+}
+.settings-group-label {
+  margin: 0 0 var(--space-2);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+.settings-row-text {
+  flex: 1;
+  min-width: 0;
+}
+.settings-row-name {
+  font-size: 14px;
+  color: var(--color-text);
+}
+.settings-row-desc {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+.ff-toggle {
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--color-divider);
+  background: var(--color-neutral-900);
+  position: relative;
+  cursor: pointer;
+  transition: background 140ms ease;
+  padding: 0;
+}
+.ff-toggle .ff-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--color-neutral-500);
+  transition:
+    transform 140ms ease,
+    background 140ms ease;
+}
+.ff-toggle.on {
+  background: var(--color-accent-900);
+  border-color: var(--color-accent-800);
+}
+.ff-toggle.on .ff-knob {
+  transform: translateX(18px);
+  background: var(--color-accent);
+}
+
+/* Full-history link under the Today preview + the history list page */
+.td-history-all {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-2);
+  padding: 6px 2px;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: 13px;
+  cursor: pointer;
+}
+.td-history-all .ui-icon {
+  font-size: 13px;
+}
+.hist-list .hist-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.hist-list-sub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  margin-top: 2px;
+}
+.hist-month {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.hist-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }

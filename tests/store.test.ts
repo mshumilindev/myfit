@@ -59,6 +59,7 @@ import {
 } from '../client/src/store';
 import { setRole } from '../client/src/api';
 import { CURATED, customExercises, registerCustomExercise } from '../client/src/data/exercises';
+import { setFlag } from '../client/src/data/flags';
 
 function state(patch: Partial<StoreState> = {}): StoreState {
   return {
@@ -292,6 +293,11 @@ describe('F-05 Gyms and reminders store', () => {
       value: { getCurrentPosition },
     });
 
+    // Presence is behind a flag that ships off: no flag, no location request.
+    recordPresence();
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+
+    setFlag('gymPresence', true);
     recordPresence();
     recordPresence();
 
@@ -300,6 +306,7 @@ describe('F-05 Gyms and reminders store', () => {
   });
 
   it('ignores presence without gyms, coarse GPS and outside radius', () => {
+    setFlag('gymPresence', true);
     recordPresence();
     expect(localStorage.getItem('spotter.lastPingAt')).toBeNull();
 
@@ -377,6 +384,33 @@ describe('F-06 Derived progress/history data', () => {
 
     const repeated = repeatWorkout('past');
     expect(repeated?.exercises.map((e) => e.name)).toEqual(['Squat']);
+  });
+
+  it('scores records on the parent set only — a heavier drop never counts', () => {
+    const past = workout({
+      id: 'drops',
+      exercises: [
+        {
+          id: 'e1',
+          name: 'Squat',
+          position: 0,
+          sets: [
+            {
+              id: 'a',
+              reps: 8,
+              weight: 100,
+              isWarmup: false,
+              position: 0,
+              type: 'reverse-drop',
+              drops: [{ reps: 3, weight: 140 }],
+            },
+          ],
+        },
+      ],
+    });
+    __replaceStateForTests(state({ workouts: [past] }));
+
+    expect(recordWeight('squat')).toBe(100);
   });
 
   it('returns safe fallbacks for missing history', () => {

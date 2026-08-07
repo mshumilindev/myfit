@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
 import type { ExerciseKind, Gym } from '../types';
 import { callFn } from '../api';
+import { useFlag } from '../data/flags';
 import {
   addExercise,
   backfillWorkout,
@@ -100,6 +101,7 @@ function useNowTick(active: boolean): number {
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
+  const presenceOn = useFlag('gymPresence');
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
@@ -126,7 +128,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const firstLoad = store.workouts.length === 0 && store.lastSyncAt === null && !!store.queue;
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
 
-  const reminder = store.reminders[0];
+  const reminder = presenceOn ? store.reminders[0] : undefined;
   const queuedIds = new Set(
     store.queue.map((q) => q.url.match(/workouts\/([0-9a-f-]+)/)?.[1]).filter(Boolean),
   );
@@ -468,6 +470,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   </button>
                 ))}
               </div>
+              {finished.length > 5 && (
+                <button
+                  className="td-history-all"
+                  onClick={() => shell.openOverlay({ screen: 'history' })}
+                >
+                  {t.seeAllHistory}
+                  <Icon name="arrow-up-right" />
+                </button>
+              )}
             </div>
           </>
         ) : hasHistory ? (
@@ -595,6 +606,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   </button>
                 ))}
               </div>
+              {finished.length > 5 && (
+                <button
+                  className="td-history-all"
+                  onClick={() => shell.openOverlay({ screen: 'history' })}
+                >
+                  {t.seeAllHistory}
+                  <Icon name="arrow-up-right" />
+                </button>
+              )}
             </div>
           </>
         ) : (

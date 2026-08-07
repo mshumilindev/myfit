@@ -20,6 +20,8 @@ import {
 import type { MuscleGroup } from '../data/exercises';
 import { ConfirmDialog, Icon, RowListSkeleton } from '../ui';
 import { useT } from '../i18n';
+import { ExerciseGallery, type GalleryState } from '../components/ExerciseGallery';
+import { useFlag } from '../data/flags';
 import type { Shell } from '../App';
 import { weekDayStatuses, programOutlook, type DayCell } from '../data/programDays';
 
@@ -124,6 +126,40 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   const didPickInitialProgram = useRef(false);
   const dragItem = useRef<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  // Programs / Exercises tab (AC-LIBTAB). Gallery filter state is lifted so it
+  // survives tab switches; the programs body stays mounted (hidden) so the
+  // week strip, program list and any draft are never reset (AC-LIBTAB-04).
+  const exFlag = useFlag('exerciseFeature');
+  const [progTab, setProgTab] = useState<'programs' | 'exercises'>('programs');
+  const [galState, setGalState] = useState<GalleryState>({
+    q: '',
+    hasVideo: false,
+    scope: 'all',
+  });
+  const showExercises = exFlag && progTab === 'exercises';
+  const progTabsEl = exFlag && (
+    <div className="prog-tabs" role="tablist">
+      <button
+        role="tab"
+        className={progTab === 'programs' ? 'active' : ''}
+        onClick={() => setProgTab('programs')}
+      >
+        {t.programsTabLabel}
+      </button>
+      <button
+        role="tab"
+        className={progTab === 'exercises' ? 'active' : ''}
+        onClick={() => setProgTab('exercises')}
+      >
+        {t.exercisesTabLabel}
+      </button>
+    </div>
+  );
+  const exercisesTabEl = showExercises && (
+    <div className="exg-tabwrap">
+      <ExerciseGallery shell={shell} state={galState} onState={setGalState} />
+    </div>
+  );
 
   const load = useCallback(() => {
     if (role === 'member') {
@@ -545,12 +581,13 @@ export function ProgramsView({ shell }: { shell: Shell }) {
         ? Math.round(assignment.adherence * 100)
         : null;
     return (
-      <div className="screen programs-page">
+      <div className={`screen programs-page${showExercises ? ' show-exercises' : ''}`}>
         <div className="programs-top">
           <div>
             <div className="kicker">{t.training}</div>
             <h2 className="title-26">{t.progTitle}</h2>
           </div>
+          {progTabsEl}
         </div>
 
         {!memberLoaded && !failed && (
@@ -1038,12 +1075,17 @@ export function ProgramsView({ shell }: { shell: Shell }) {
             </div>
           </section>
         )}
+        {exercisesTabEl}
       </div>
     );
   }
 
   return (
-    <div className="screen programs-page programs-author-page">
+    <div
+      className={`screen programs-page programs-author-page${
+        exFlag ? ' programs-has-tabs' : ''
+      }${showExercises ? ' show-exercises' : ''}`}
+    >
       <div className="programs-top">
         <div>
           <div className="kicker">
@@ -1051,6 +1093,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
           </div>
           <h2 className="title-26">{t.progTitle}</h2>
         </div>
+        {progTabsEl}
         <div className="program-actions">
           {role === 'member' ? (
             <button className="btn btn-secondary" onClick={exitMemberEditing}>
@@ -1692,6 +1735,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
           onConfirm={() => void removeProgram(selectedId)}
         />
       )}
+      {exercisesTabEl}
     </div>
   );
 }

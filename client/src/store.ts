@@ -44,6 +44,7 @@ import {
   type MuscleGroup,
 } from './data/exercises';
 import PER_SIDE from './data/per-side.json';
+import { isFlagOn } from './data/flags';
 import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
@@ -675,6 +676,9 @@ const LAST_PING_KEY = 'spotter.lastPingAt';
 const PING_EVERY_MS = 5 * 60 * 1000;
 
 export function recordPresence(): void {
+  // Off by default: no location pings unless the gym-presence flag is on, so
+  // living next to a gym never fabricates a "log this visit" prompt.
+  if (!isFlagOn('gymPresence')) return;
   if (state.gyms.length === 0 || !('geolocation' in navigator)) return;
   const last = Number(localStorage.getItem(LAST_PING_KEY) ?? 0);
   if (Date.now() - last < PING_EVERY_MS) return;
@@ -987,8 +991,12 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
     if (w.id === excludeWorkoutId) continue;
     for (const e of w.exercises) {
       if (!isStrengthExercise(e) || e.name.trim().toLowerCase() !== needle) continue;
-      for (const s of e.sets)
-        if (setTypeOf(s) !== 'warmup' && setTopWeight(s) > max) max = setTopWeight(s);
+      // AC-DS-07: records consider the parent entry only — a drop (even a
+      // heavier reverse-drop) can never set or break a record.
+      for (const s of e.sets) {
+        const parent = s.weight ?? 0;
+        if (setTypeOf(s) !== 'warmup' && parent > max) max = parent;
+      }
     }
   }
   return max;

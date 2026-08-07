@@ -48,6 +48,7 @@ import { Envelope } from '@phosphor-icons/react/Envelope';
 import { Eye } from '@phosphor-icons/react/Eye';
 import { Flame } from '@phosphor-icons/react/Flame';
 import { Globe } from '@phosphor-icons/react/Globe';
+import { Gear } from '@phosphor-icons/react/Gear';
 import { House } from '@phosphor-icons/react/House';
 import { ImageSquare } from '@phosphor-icons/react/ImageSquare';
 import { Info } from '@phosphor-icons/react/Info';
@@ -61,6 +62,9 @@ import { MapPinLine } from '@phosphor-icons/react/MapPinLine';
 import { PencilSimple } from '@phosphor-icons/react/PencilSimple';
 import { Phone } from '@phosphor-icons/react/Phone';
 import { Play } from '@phosphor-icons/react/Play';
+import { PlayCircle } from '@phosphor-icons/react/PlayCircle';
+import { YoutubeLogo } from '@phosphor-icons/react/YoutubeLogo';
+import { SpeakerSimpleSlash } from '@phosphor-icons/react/SpeakerSimpleSlash';
 import { Plus } from '@phosphor-icons/react/Plus';
 import { QrCode } from '@phosphor-icons/react/QrCode';
 import { CaretLineDown } from '@phosphor-icons/react/CaretLineDown';
@@ -134,6 +138,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   eye: Eye,
   flame: Flame,
   globe: Globe,
+  gear: Gear,
   house: House,
   'image-square': ImageSquare,
   info: Info,
@@ -148,6 +153,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'pencil-simple': PencilSimple,
   phone: Phone,
   play: Play,
+  'play-circle': PlayCircle,
+  'youtube-logo': YoutubeLogo,
+  'speaker-simple-slash': SpeakerSimpleSlash,
   plus: Plus,
   'qr-code': QrCode,
   'caret-line-down': CaretLineDown,
