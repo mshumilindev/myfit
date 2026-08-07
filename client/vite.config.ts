@@ -21,6 +21,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // The injected registerSW.js only registers; it never reloads a page that
+      // is already running an old bundle. src/pwaUpdate.ts does both.
+      injectRegister: false,
       includeAssets: [
         'favicon.ico',
         'favicon/**/*',
@@ -74,6 +77,14 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Explicit because injectRegister: false turns off the plugin's
+        // autoUpdate defaults — without these a new build waits forever.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        // Sends already-open pages to the new build (public/sw-refresh.js).
+        importScripts: ['/sw-refresh.js'],
+        globIgnores: ['sw-refresh.js'],
         // App shell is precached; API goes network-only (the app has its own
         // offline queue in localStorage, so we must never serve stale API data).
         navigateFallback: '/index.html',

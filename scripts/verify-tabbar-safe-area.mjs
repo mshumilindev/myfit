@@ -13,9 +13,14 @@ import { readFileSync, existsSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 
 const DIST = join(process.cwd(), 'client/dist');
-const SAFE_BOTTOM = 34;
+// Android (0), iPhone SE-era home button (0), iPad (21), iPhone with a home
+// indicator (34). The bar must sit flush at every one of them.
+const INSETS = [0, 21, 34];
 // Tab bar trims the safe-area inset (dead-band under labels felt too tall).
-const EXPECTED_PAD = Math.max(8, SAFE_BOTTOM - 16);
+const expectedPad = (inset) => Math.max(8, inset - 16);
+// What the eye actually judges: empty screen below the tab labels. The old
+// build shipped ~74px here (22px mock indicator + safe-area + dead band).
+const MAX_VISIBLE_GAP = 30;
 const SAFE_TOP = 59;
 const TOLERANCE_PX = 3;
 
@@ -105,14 +110,9 @@ function assertClose(name, actual, expected, tol = TOLERANCE_PX) {
   return ok;
 }
 
-async function main() {
-  if (!existsSync(join(DIST, 'index.html'))) {
-    console.error('client/dist missing — run npm run build -w client first');
-    process.exit(2);
-  }
-
-  const { server, base } = await startStaticServer();
-  const browser = await chromium.launch({ headless: true });
+async function checkInset(browser, base, css, safeBottom) {
+  console.log(`\n=== safe-area-inset-bottom: ${safeBottom}px ===`);
+  const EXPECTED_PAD = expectedPad(safeBottom);
   const context = await browser.newContext({
     ...devices['iPhone 14 Pro'],
   });
@@ -122,7 +122,7 @@ async function main() {
   const cdp = await page.context().newCDPSession(page);
   try {
     await cdp.send('Emulation.setSafeAreaInsetsOverride', {
-      insets: { top: SAFE_TOP, left: 0, right: 0, bottom: SAFE_BOTTOM },
+      insets: { top: SAFE_TOP, left: 0, right: 0, bottom: safeBottom },
     });
   } catch (err) {
     console.warn('setSafeAreaInsetsOverride unavailable, injecting CSS vars instead:', err.message);
@@ -132,7 +132,7 @@ async function main() {
         s.textContent = `:root{--safe-top:${top}px!important;--safe-bottom:${bottom}px!important}`;
         document.documentElement.appendChild(s);
       },
-      [SAFE_TOP, SAFE_BOTTOM],
+      [SAFE_TOP, safeBottom],
     );
   }
 
@@ -151,12 +151,12 @@ async function main() {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<link rel="stylesheet" href="${base}/assets/${await findCss(base)}"/>
+<link rel="stylesheet" href="${base}/assets/${css}"/>
 <style>
   /* Ensure vars win even if CDP insets don't propagate to env() */
   :root {
     --safe-top: ${SAFE_TOP}px;
-    --safe-bottom: ${SAFE_BOTTOM}px;
+    --safe-bottom: ${safeBottom}px;
   }
 </style>
 </head>
@@ -206,7 +206,16 @@ async function main() {
         !assertClose('label→bottom gap == safe + btn pad', m.label.gapToViewport, expectedLabelGap)
       )
         failed++;
-      if (m.label.gapToViewport >= SAFE_BOTTOM + 22 + buttonPad - 1) {
+      // The number the user sees: empty screen below the labels.
+      if (m.label.gapToViewport > MAX_VISIBLE_GAP) {
+        console.log(
+          `FAIL  visible dead band under labels: ${m.label.gapToViewport}px (max ${MAX_VISIBLE_GAP})`,
+        );
+        failed++;
+      } else {
+        console.log(`OK  visible dead band ${m.label.gapToViewport.toFixed(1)}px`);
+      }
+      if (m.label.gapToViewport >= safeBottom + 22 + buttonPad - 1) {
         console.log(
           `FAIL  label gap ${m.label.gapToViewport} looks like 22px+safe-area double-count`,
         );
@@ -217,7 +226,7 @@ async function main() {
       failed++;
     }
     // Tabbar total ≈ 8 + ~48 content + safe (≈90). Double-count was ≈110+.
-    if (m.tabbar.height > SAFE_BOTTOM + 70) {
+    if (m.tabbar.height > safeBottom + 70) {
       console.log(`FAIL  tabbar too tall: ${m.tabbar.height} (suspected double inset)`);
       failed++;
     } else {
@@ -225,14 +234,34 @@ async function main() {
     }
     // Hard reject the previous live formula max(22px, safe) when safe is large
     // is OK; reject calc(22px + safe) which this padding must never equal.
-    if (padBottom >= SAFE_BOTTOM + 20) {
+    if (padBottom >= safeBottom + 20) {
       console.log(`FAIL  padding-bottom ${padBottom} includes extra ~22px`);
       failed++;
     }
   }
 
+  await context.close();
+  return failed;
+}
+
+async function main() {
+  if (!existsSync(join(DIST, 'index.html'))) {
+    console.error('client/dist missing — run npm run build -w client first');
+    process.exit(2);
+  }
+
+  const { server, base } = await startStaticServer();
+  const browser = await chromium.launch({ headless: true });
+  const css = await findCss(base);
+
+  let failed = 0;
+  for (const inset of INSETS) {
+    failed += await checkInset(browser, base, css, inset);
+  }
+
   await browser.close();
   server.close();
+  console.log(failed ? `\n${failed} FAIL` : '\nall insets OK');
   process.exit(failed ? 1 : 0);
 }
 

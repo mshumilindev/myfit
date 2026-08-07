@@ -13,6 +13,7 @@ import {
   fmtSetSnack,
   fmtTonnes,
   LOCALES,
+  setLocale,
 } from './index';
 
 const dicts = { en, uk, pl, lt, et };
@@ -107,8 +108,17 @@ describe('formatters', () => {
   });
 
   it('should format sets in design order (85 × 8; snackbar 8 × 80 kg)', () => {
+    setLocale('en');
     expect(fmtSet(85, 8)).toBe('85 × 8');
-    expect(fmtSet(null, 8)).toBe('0 × 8');
+    // No weight means a bodyweight set, which the boards label BW — never 0.
+    expect(fmtSet(null, 8)).toBe('BW × 8');
     expect(fmtSetSnack(8, 80)).toBe('8 × 80 kg');
+    expect(fmtSetSnack(8, null)).toBe('8 × BW');
+  });
+
+  it('should label bodyweight sets in the active locale', () => {
+    setLocale('uk');
+    expect(fmtSet(null, 8)).toBe(`${uk.bodyweightShort} × 8`);
+    setLocale('en');
   });
 });

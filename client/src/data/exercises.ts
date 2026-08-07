@@ -1233,15 +1233,6 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
     'Sõudmine ettekallutatult',
   ),
   x(
-    'leg-curl',
-    'hamstrings',
-    'Leg Curl',
-    'Згинання ніг',
-    'Uginanie nóg',
-    'Kojų lenkimas',
-    'Jalgade painutus',
-  ),
-  x(
     'calf-raise',
     'calves',
     'Calf Raise',
