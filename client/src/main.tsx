@@ -7,7 +7,6 @@ import { App } from './App';
 import { getLocale } from './i18n';
 import { startAutoUpdate } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
-import { ViewportProbe } from './components/ViewportProbe';
 import { ServerBusyOverlay } from './ui';
 
 document.documentElement.lang = getLocale();
@@ -26,6 +25,5 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
     <ServerBusyOverlay />
-    <ViewportProbe />
   </StrictMode>,
 );
