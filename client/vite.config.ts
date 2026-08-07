@@ -1,8 +1,21 @@
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/** Shown by the on-device layout probe so a screenshot names its own build. */
+function buildId(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+  } catch {
+    return 'dev';
+  }
+}
+
 export default defineConfig({
+  define: {
+    __BUILD_ID__: JSON.stringify(`${buildId()}·${new Date().toISOString().slice(11, 16)}`),
+  },
   build: {
     rollupOptions: {
       output: {
