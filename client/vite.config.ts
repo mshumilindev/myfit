@@ -57,7 +57,9 @@ export default defineConfig({
         start_url: '/?homescreen=v2',
         scope: '/',
         display: 'standalone',
-        display_override: ['standalone', 'minimal-ui'],
+        // No minimal-ui fallback: a browser that picks it reserves room for a
+        // toolbar the window never draws.
+        display_override: ['standalone'],
         orientation: 'portrait-primary',
         background_color: '#fbf3e6',
         theme_color: '#16171a',

@@ -12,7 +12,12 @@
     <meta name="application-name" content="Spotter" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Not black-translucent: iOS then sizes the standalone window to
+         "screen − status bar" but still draws it from the top, leaving that
+         height as a dead band under the tab bar (measured 62px on a 956px
+         screen). Opaque status bar = window starts below it and reaches the
+         bottom edge. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Spotter" />
     <meta name="format-detection" content="telephone=no" />
     <meta property="og:title" content="Spotter" />

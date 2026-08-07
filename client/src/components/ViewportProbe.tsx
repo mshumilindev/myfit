@@ -10,6 +10,12 @@ import { useEffect, useState } from 'react';
 import { isStandaloneDisplay } from '../pwaInstall';
 import { measureViewport } from '../viewportFit';
 
+const DISPLAY_MODES = ['standalone', 'fullscreen', 'minimal-ui', 'browser'] as const;
+
+function displayMode(): string {
+  return DISPLAY_MODES.find((m) => window.matchMedia(`(display-mode: ${m})`).matches) ?? '?';
+}
+
 function readProbe(): string {
   const { innerHeight, visualHeight, clientHeight } = measureViewport();
   const bar = document.querySelector('.tabbar');
@@ -18,11 +24,12 @@ function readProbe(): string {
   return [
     __BUILD_ID__,
     `ih${Math.round(innerHeight)}`,
+    `sh${window.screen.height}`,
     `vv${visualHeight === null ? '-' : Math.round(visualHeight)}`,
     `ch${clientHeight}`,
-    `sh${window.screen.height}`,
     `gap${rect ? Math.round(innerHeight - rect.bottom) : '-'}`,
     `pad${pad ?? '-'}`,
+    `dm:${displayMode()}`,
     `st${isStandaloneDisplay() ? 1 : 0}`,
   ].join(' ');
 }
@@ -31,15 +38,17 @@ export function ViewportProbe() {
   const [text, setText] = useState('');
 
   useEffect(() => {
+    // The tab bar only mounts once auth and the first sync settle, so keep
+    // sampling until its numbers are in rather than for a fixed few seconds.
+    const timer = window.setInterval(() => {
+      setText(readProbe());
+      if (document.querySelector('.tabbar')) window.clearInterval(timer);
+    }, 500);
     const tick = () => setText(readProbe());
     tick();
-    // The tab bar mounts after the first paint; keep sampling for a moment.
-    const timer = window.setInterval(tick, 1000);
-    const stop = window.setTimeout(() => window.clearInterval(timer), 10_000);
     window.addEventListener('orientationchange', tick);
     return () => {
       window.clearInterval(timer);
-      window.clearTimeout(stop);
       window.removeEventListener('orientationchange', tick);
     };
   }, []);
