@@ -26,6 +26,8 @@ import { Archive } from '@phosphor-icons/react/Archive';
 import { Barbell } from '@phosphor-icons/react/Barbell';
 import { Export } from '@phosphor-icons/react/Export';
 import { CalendarBlank } from '@phosphor-icons/react/CalendarBlank';
+import { CalendarCheck } from '@phosphor-icons/react/CalendarCheck';
+import { ForkKnife } from '@phosphor-icons/react/ForkKnife';
 import { Camera } from '@phosphor-icons/react/Camera';
 import { Cards } from '@phosphor-icons/react/Cards';
 import { CaretLeft } from '@phosphor-icons/react/CaretLeft';
@@ -118,6 +120,8 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   barbell: Barbell,
   export: Export,
   'calendar-blank': CalendarBlank,
+  'calendar-check': CalendarCheck,
+  'fork-knife': ForkKnife,
   camera: Camera,
   'caret-left': CaretLeft,
   'caret-right': CaretRight,

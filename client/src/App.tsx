@@ -68,6 +68,11 @@ const SettingsView = lazy(() =>
     default: module.SettingsView,
   })),
 );
+const TemplatesView = lazy(() =>
+  import('./views/TemplatesView').then((module) => ({
+    default: module.TemplatesView,
+  })),
+);
 const HistoryListView = lazy(() =>
   import('./views/HistoryListView').then((module) => ({
     default: module.HistoryListView,
@@ -92,6 +97,7 @@ export type Overlay =
   | { screen: 'exercise-detail'; name: string }
   | { screen: 'settings' }
   | { screen: 'history' }
+  | { screen: 'templates' }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
   | { screen: 'library' }
@@ -151,6 +157,7 @@ function toHash(tab: Tab, overlay: Overlay): string {
   if (overlay?.screen === 'library') return '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
+  if (overlay?.screen === 'templates') return '#/templates';
   if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
@@ -178,6 +185,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'exercises') return { tab: 'progress', overlay: { screen: 'library' } };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
+  if (head === 'templates') return { tab: 'progress', overlay: { screen: 'templates' } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -469,6 +477,9 @@ export function App() {
           )}
           {activeOverlay?.screen === 'history' && (
             <HistoryListView shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'templates' && (
+            <TemplatesView shell={shell} onClose={closeOverlay} />
           )}
           {activeOverlay?.screen === 'gym' && (
             <GymDetailView

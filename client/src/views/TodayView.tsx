@@ -13,7 +13,7 @@ import {
   dismissReminder,
   logVisitAsWorkout,
   muscleSetsInWorkout,
-  repeatWorkout,
+  resolveMuscles,
   startWorkout,
   topSet,
   workoutDayReadout,
@@ -48,6 +48,12 @@ function weekStartOf(ts: number): number {
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
   return d.getTime();
+}
+
+/** minutes-since-midnight → "HH:MM" (pure; tabular clock). */
+function hhmm(min: number): string {
+  const m = ((min % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 
 const BAR_COLORS = [
@@ -143,6 +149,41 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
+
+  // "Likely today" prediction (Today plaque): the usual split + start time for
+  // this weekday, from history. Hidden mid-session or without weekday history.
+  const prediction = (() => {
+    if (open) return null;
+    const dow = new Date(now).getDay();
+    const sameDow = finished
+      .filter((w) => new Date(w.startedAt).getDay() === dow)
+      .sort((a, b) => b.startedAt - a.startedAt);
+    if (sameDow.length === 0) return null;
+    const recent = sameDow[0];
+    const readout = workoutDayReadout(recent);
+    const dayLabel = recent.dayName || (readout ? dayReadoutLabel(readout, t) : null);
+    if (!dayLabel) return null;
+    const mins = sameDow
+      .map((w) => {
+        const d = new Date(w.startedAt);
+        return d.getHours() * 60 + d.getMinutes();
+      })
+      .sort((a, b) => a - b);
+    const startMin = mins[Math.floor(mins.length / 2)];
+    // Muscle groups in the order they were trained that day (first exercise
+    // first), not by set count.
+    const seen = new Set<MuscleGroup>();
+    const order: MuscleGroup[] = [];
+    for (const e of [...recent.exercises].sort((a, b) => a.position - b.position)) {
+      if (e.sets.length === 0) continue;
+      const { primary } = resolveMuscles(e);
+      if (!primary || primary === 'cardio' || seen.has(primary)) continue;
+      seen.add(primary);
+      order.push(primary);
+    }
+    const muscles = order.slice(0, 5).map((m) => t.muscleGroups[m]);
+    return { dayLabel, startMin, mealMin: startMin - 105, muscles };
+  })();
   const firstLoad = store.workouts.length === 0 && store.lastSyncAt === null && !!store.queue;
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
 
@@ -190,7 +231,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   for (let c = thisWeek; weeksSet.has(c); c -= WEEK_MS) runWeeks++;
   const streakDays = runWeeks * 7;
 
-  const templates = finished.slice(0, 2);
   const livePlannedSets = open
     ? open.exercises.reduce((sum, ex) => {
         if ((ex.plannedSets ?? 0) > 0) return sum + (ex.plannedSets ?? 0);
@@ -398,6 +438,29 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         {banners}
         {programCard}
 
+        {prediction && (
+          <div className="likely-plaque">
+            <div className="lp-head">
+              <Icon name="calendar-check" />
+              <span className="lp-kicker">{t.likelyToday}</span>
+              <span className="lp-from">{t.likelyFromHistory}</span>
+            </div>
+            <div className="lp-body">
+              <div className="lp-day-row">
+                <span className="lp-day">{t.likelyDayTitle(prediction.dayLabel)}</span>
+                <span className="lp-time">~{hhmm(prediction.startMin)}</span>
+              </div>
+              {prediction.muscles.length > 0 && (
+                <div className="lp-lifts">{prediction.muscles.join(' · ')}</div>
+              )}
+            </div>
+            <div className="lp-meal">
+              <Icon name="fork-knife" />
+              <span>{t.likelyMeal(hhmm(prediction.mealMin))}</span>
+            </div>
+          </div>
+        )}
+
         {!open && hasHistory && (
           <div className="td-start-ctas mobile-only">
             <button className="btn btn-primary td-start-cta" onClick={startSession}>
@@ -409,6 +472,20 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               {t.logPastSession}
             </button>
           </div>
+        )}
+
+        {!open && hasHistory && (
+          <button
+            className="td-templates-link"
+            onClick={() => shell.openOverlay({ screen: 'templates' })}
+          >
+            <Icon name="cards" />
+            <span className="tl-body">
+              <span className="tl-title">{t.templates}</span>
+              <span className="tl-sub">{t.templatesSaved(finished.length)}</span>
+            </span>
+            <Icon name="arrow-right" className="tl-go" />
+          </button>
         )}
 
         {open ? (
@@ -699,44 +776,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       </div>
 
       <aside className="pane-side">
-        <div className="section-label section-divide td-templates-label">{t.templates}</div>
-        {templates.length > 0 ? (
-          templates.map((w) => {
-            const names = w.exercises
-              .map((e) => e.name.trim())
-              .filter(Boolean)
-              .slice(0, 4)
-              .join(' · ');
-            const stats = `${workoutSets(w)} ${t.sets} · ${fmtKg(workoutVolumeKg(w))}${
-              w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''
-            }`;
-            return (
-              <button
-                key={w.id}
-                className="td-tpl"
-                aria-label={`${t.loadTemplate}: ${fmtDayMonth(w.startedAt, locale)}`}
-                onClick={() => {
-                  const nw = repeatWorkout(w.id);
-                  if (nw) shell.openOverlay({ screen: 'session', workoutId: nw.id });
-                }}
-              >
-                <span className="td-tpl-date">{fmtShortDate(w.startedAt, locale)}</span>
-                <span className="td-tpl-body">
-                  <span className="n">{sessionTitle(w)}</span>
-                  {names && <span className="ex">{names}</span>}
-                  <span className="meta">{stats}</span>
-                </span>
-                <span className="td-tpl-action">
-                  <Icon name="arrow-counter-clockwise" />
-                  <span className="visually-hidden">{t.loadTemplate}</span>
-                </span>
-              </button>
-            );
-          })
-        ) : (
-          <div className="td-tpl-empty">{t.templatesHint}</div>
-        )}
-
         {records.length > 0 && (
           <>
             <div className="section-label section-divide">{t.records}</div>
