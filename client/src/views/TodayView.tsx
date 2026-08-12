@@ -1,14 +1,17 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
-import type { ExerciseKind, Gym } from '../types';
+import type { ExerciseKind, Gym, Workout } from '../types';
 import { callFn } from '../api';
 import { useFlag } from '../data/flags';
+import { MuscleChip } from '../components/Muscle';
+import type { MuscleGroup } from '../data/exercises';
 import {
   addExercise,
   backfillWorkout,
   dismissReminder,
   logVisitAsWorkout,
+  muscleSetsInWorkout,
   repeatWorkout,
   startWorkout,
   topSet,
@@ -102,6 +105,13 @@ function useNowTick(active: boolean): number {
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
+  const suggestOn = true; // muscle readouts are always on (not flagged)
+  const sessionMuscles = (w: Workout): MuscleGroup[] =>
+    [...muscleSetsInWorkout(w).entries()]
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([m]) => m)
+      .slice(0, 4);
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
@@ -426,6 +436,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       <th>{t.colSets}</th>
                       <th>{t.volumeCol}</th>
                       <th>{t.duration}</th>
+                      {suggestOn && <th>{t.musclesCol}</th>}
                       <th className="td-history-dots"></th>
                     </tr>
                   </thead>
@@ -443,6 +454,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <td>{workoutSets(w)}</td>
                         <td>{fmtKg(workoutVolumeKg(w))}</td>
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
+                        {suggestOn && (
+                          <td className="td-muscles">
+                            {sessionMuscles(w).map((m) => (
+                              <MuscleChip key={m} muscle={m} tone="secondary" />
+                            ))}
+                          </td>
+                        )}
                         <td className="td-history-dots">
                           <Icon name="dots-three" />
                         </td>
@@ -465,6 +483,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
                         {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
                       </div>
+                      {suggestOn && sessionMuscles(w).length > 0 && (
+                        <div className="recent-muscles">
+                          {sessionMuscles(w).map((m) => (
+                            <MuscleChip key={m} muscle={m} tone="secondary" />
+                          ))}
+                        </div>
+                      )}
                     </span>
                     <Icon name="arrow-up-right" className="go" />
                   </button>
@@ -544,6 +569,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       <th>{t.colSets}</th>
                       <th>{t.volumeCol}</th>
                       <th>{t.duration}</th>
+                      {suggestOn && <th>{t.musclesCol}</th>}
                       <th className="td-history-dots"></th>
                     </tr>
                   </thead>
@@ -573,6 +599,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <td>{workoutSets(w)}</td>
                         <td>{fmtKg(workoutVolumeKg(w))}</td>
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
+                        {suggestOn && (
+                          <td className="td-muscles">
+                            {sessionMuscles(w).map((m) => (
+                              <MuscleChip key={m} muscle={m} tone="secondary" />
+                            ))}
+                          </td>
+                        )}
                         <td className="td-history-dots">
                           <Icon name="dots-three" />
                         </td>
@@ -601,6 +634,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
                         {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
                       </div>
+                      {suggestOn && sessionMuscles(w).length > 0 && (
+                        <div className="recent-muscles">
+                          {sessionMuscles(w).map((m) => (
+                            <MuscleChip key={m} muscle={m} tone="secondary" />
+                          ))}
+                        </div>
+                      )}
                     </span>
                     <Icon name="arrow-up-right" className="go" />
                   </button>

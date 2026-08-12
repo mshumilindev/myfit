@@ -59,10 +59,12 @@ import {
   EquipChip,
   MuscleChip,
   MuscleIcon,
+  MuscleSetChip,
   MUSCLE_IDS,
   equipmentIconName,
 } from '../components/Muscle';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
+import { dayFromCounts, exerciseDay, weekdayDay, type TrainingDay } from '../data/daySuggest';
 import { muscleInfoByName, secondaryMusclesOf, type MuscleGroup } from '../data/exercises';
 import {
   fmtClock,
@@ -78,8 +80,8 @@ import {
   useT,
 } from '../i18n';
 import { ConfirmDialog, Dialog, EmptyState, Icon, Sheet, Switch, useIsDesktop } from '../ui';
-import { LOCALE_IDS } from '../i18n';
-import { searchCatalog } from '../data/exercises';
+import { LOCALE_IDS, fmtWeekday } from '../i18n';
+import { CURATED, searchCatalog } from '../data/exercises';
 import { getRole } from '../api';
 
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
@@ -122,6 +124,8 @@ export function SessionView(props: {
 }) {
   const { t, locale } = useT();
   const store = useStore();
+  // Day-aware suggestions & muscle readouts are always on (not flagged).
+  const suggestOn = true;
   const workout = store.workouts.find((w) => w.id === props.workoutId);
   const [sheet, setSheet] = useState<SheetState>(null);
   const [dialog, setDialog] = useState<DialogState>(null);
@@ -851,6 +855,23 @@ export function SessionView(props: {
             </div>
           )}
         </div>
+        {suggestOn &&
+          (() => {
+            const entries = [...muscleSetsInWorkout(workout).entries()]
+              .filter(([, n]) => n > 0)
+              .sort((a, b) => b[1] - a[1]);
+            if (entries.length === 0) return null;
+            return (
+              <div className="muscles-worked">
+                <div className="section-label">{t.muscleGroupsWorked}</div>
+                <div className="mworked-row">
+                  {entries.map(([m, n]) => (
+                    <MuscleSetChip key={m} muscle={m} count={n} />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         {prSet && (
           <div className="pr-panel">
             <div className="head">
@@ -998,6 +1019,27 @@ export function SessionView(props: {
             )}
           </div>
         )}
+
+        {suggestOn &&
+          (() => {
+            const counts = muscleSetsInWorkout(workout);
+            const entries = [...counts.entries()]
+              .filter(([, n]) => n > 0)
+              .sort((a, b) => b[1] - a[1]);
+            if (entries.length === 0) return null;
+            return (
+              <div className="muscles-worked">
+                <div className="section-label">
+                  {props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}
+                </div>
+                <div className="mworked-row">
+                  {entries.map(([m, n]) => (
+                    <MuscleSetChip key={m} muscle={m} count={n} />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
         <div className="session-body">
           {workout.autoFinished && (
@@ -1367,6 +1409,7 @@ export function SessionView(props: {
         <AddExerciseSheet
           workout={workout}
           gym={gym}
+          suggestions={suggestOn}
           onPick={(name, kind, meta) => {
             addExercise(
               workout.id,
@@ -1380,7 +1423,9 @@ export function SessionView(props: {
                   }
                 : {},
             );
-            setSheet(null);
+            // Day-aware strength suggestions stay open for multiple adds; timed
+            // one-off rows are complete after the pick.
+            if (!suggestOn || kind !== 'strength') setSheet(null);
           }}
           onClose={() => setSheet(null)}
         />
@@ -1665,10 +1710,12 @@ interface NewExerciseMeta {
 function AddExerciseSheet(props: {
   workout: Workout;
   gym: Gym | null;
+  suggestions?: boolean;
   onPick: (name: string, kind: ExerciseKind, meta?: NewExerciseMeta) => void;
   onClose: () => void;
 }) {
   const { t, locale } = useT();
+  const [nowTs] = useState(() => Date.now());
   const [q, setQ] = useState('');
   const [kind, setKind] = useState<ExerciseKind>('strength');
   const [equip, setEquip] = useState<EquipmentId | undefined>(undefined);
@@ -1735,6 +1782,120 @@ function AddExerciseSheet(props: {
   function availability(equipment: EquipmentId | null | undefined): EquipmentId | null {
     if (!checkGym || !hasInventory || !equipment) return null;
     return props.gym!.inventory!.includes(equipment) ? null : equipment;
+  }
+
+  // --- Day-aware picker (Ex suggestions, AC-1) -----------------------------
+  if (props.suggestions) {
+    const counts = muscleSetsInWorkout(props.workout);
+    const loggedDay = dayFromCounts(counts);
+    const inferredDay = loggedDay ?? weekdayDay(new Date(nowTs).getDay());
+    const from: 'logged' | 'weekday' = loggedDay ? 'logged' : 'weekday';
+    const DAY_LABEL: Record<TrainingDay, string> = {
+      push: t.dayPush,
+      pull: t.dayPull,
+      legs: t.dayLegs,
+      core: t.dayCore,
+      full: t.dayFull,
+    };
+    type Cand = {
+      id: string;
+      name: string;
+      primary: MuscleGroup;
+      secondary: MuscleGroup[];
+      equipment: EquipmentId | null;
+      day: TrainingDay | null;
+    };
+    const inSession = new Set(props.workout.exercises.map((e) => e.name.trim().toLowerCase()));
+    const all: Cand[] = CURATED.filter((c) => c.muscle !== 'cardio')
+      .map((c) => ({
+        id: c.id,
+        name: c.names[li] ?? c.names[0],
+        primary: c.muscle as MuscleGroup,
+        secondary: secondaryMusclesOf(c),
+        equipment: (c.equipment ?? null) as EquipmentId | null,
+        day: exerciseDay(c.muscle as MuscleGroup),
+      }))
+      .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
+    const visible = needle ? all.filter((x) => x.name.toLowerCase().includes(needle)) : all;
+    const suggested = visible.filter((x) => x.day === inferredDay).slice(0, 4);
+    const suggestedIds = new Set(suggested.map((x) => x.id));
+    const rest = visible
+      .filter((x) => !suggestedIds.has(x.id))
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const noneToSuggest =
+      suggested.length === 0 && all.filter((x) => x.day === inferredDay).length === 0;
+
+    const pick = (x: Cand) =>
+      props.onPick(x.name, 'strength', {
+        primaryMuscle: x.primary,
+        secondaryMuscles: x.secondary,
+        equipment: x.equipment ? [x.equipment] : [],
+      });
+    const row = (x: Cand, isSug: boolean) => (
+      <button key={x.id} className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
+        <span className="add-main">
+          <span className="add-name">{x.name}</span>
+          <span className="add-tokens">
+            <MuscleChip muscle={x.primary} tone="primary" />
+            {x.secondary.map((m) => (
+              <MuscleChip key={m} muscle={m} tone="secondary" />
+            ))}
+          </span>
+        </span>
+        {!isSug && x.day && <span className="add-day">{DAY_LABEL[x.day]}</span>}
+      </button>
+    );
+
+    return (
+      <Sheet onClose={props.onClose}>
+        <div className="add-head">
+          <div className="add-banner">
+            <div className="add-banner-title">{t.looksLikeDay(DAY_LABEL[inferredDay])}</div>
+            <div className="add-banner-reason">
+              {from === 'logged'
+                ? t.reasonFromLogged
+                : t.reasonUsualSplit(fmtWeekday(nowTs, locale))}
+            </div>
+          </div>
+          <button className="btn btn-primary add-done" onClick={props.onClose}>
+            {t.pickerDone}
+          </button>
+        </div>
+        <div className="searchbar">
+          <Icon name="magnifying-glass" />
+          <input
+            autoFocus
+            value={q}
+            placeholder={t.searchExercises}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        <div className="kind-grid three">
+          {TIMED_KINDS.map((id) => (
+            <button
+              key={id}
+              className="kind-card"
+              onClick={() => props.onPick(t.defaultTimedExerciseNames[id], id)}
+            >
+              <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'clock'} />
+              <span>{t.exerciseKindNames[id]}</span>
+            </button>
+          ))}
+        </div>
+        {noneToSuggest ? (
+          <div className="add-note">{t.addedUsualLifts(DAY_LABEL[inferredDay])}</div>
+        ) : suggested.length > 0 ? (
+          <div className="add-section">
+            <div className="section-label">{t.suggestedLabel}</div>
+            <div className="add-rows">{suggested.map((x) => row(x, true))}</div>
+          </div>
+        ) : null}
+        <div className="add-section">
+          <div className="section-label">{t.allExercisesLabel}</div>
+          <div className="add-rows">{rest.map((x) => row(x, false))}</div>
+        </div>
+      </Sheet>
+    );
   }
 
   return (

@@ -192,6 +192,21 @@ export function MuscleChip({
   );
 }
 
+/**
+ * Muscle token with a set count (Ex suggestions AC-2/AC-3): the system
+ * body-figure icon (worked region in brass) + the muscle name + count.
+ */
+export function MuscleSetChip({ muscle, count }: { muscle: MuscleGroup; count?: number }) {
+  if (muscle === 'cardio') return null;
+  return (
+    <span className="mworked-chip">
+      <MuscleIcon muscle={muscle} variant="chip" tone="primary" />
+      <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
+      {count !== undefined && <span className="mworked-count">{count}</span>}
+    </span>
+  );
+}
+
 /** Equipment ids → phosphor icon names used by the design's graphite chips. */
 const EQUIP_PH_ICON: Record<string, string> = {
   barbell: 'barbell',
