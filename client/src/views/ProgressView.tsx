@@ -321,7 +321,9 @@ export function ProgressView({ store }: { store: Store }) {
                 return (
                   <button
                     key={name}
-                    className={`record-row${selected?.[0] === name ? ' selected' : ''}`}
+                    className={`record-row${
+                      showDesktopDetail && selected?.[0] === name ? ' selected' : ''
+                    }`}
                     onClick={() => setSelectedName(name)}
                   >
                     <span className="n">{name}</span>
