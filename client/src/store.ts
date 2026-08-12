@@ -575,6 +575,41 @@ export function renameExercise(workoutId: string, exerciseId: string, name: stri
   saveWorkout(workoutId);
 }
 
+/**
+ * Replace (substitute) an exercise in place: swap its identity — name, kind and
+ * muscle/equipment tags — while keeping its logged sets. Muscles/equipment come
+ * from the explicit meta if given, else from the catalogue for the new name.
+ * Used by the "Replace" action (live session and day history alike).
+ */
+export function replaceExercise(
+  workoutId: string,
+  exerciseId: string,
+  name: string,
+  kind: ExerciseKind,
+  meta?: {
+    primaryMuscle?: MuscleGroup | null;
+    secondaryMuscles?: MuscleGroup[];
+    equipment?: string[];
+  },
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  const ex = w?.exercises.find((e) => e.id === exerciseId);
+  if (!w || !ex) return;
+  const info = muscleInfoByName(name);
+  const primaryMuscle =
+    meta?.primaryMuscle ?? (info && info.primary !== 'cardio' ? info.primary : null);
+  const secondaryMuscles = meta?.secondaryMuscles ?? info?.secondary ?? [];
+  const equipment = meta?.equipment ?? (info?.equipment ? [info.equipment] : []);
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) =>
+      e.id === exerciseId
+        ? { ...e, name: name.trim(), kind, primaryMuscle, secondaryMuscles, equipment }
+        : e,
+    ),
+  });
+  saveWorkout(workoutId);
+}
+
 export function deleteExercise(workoutId: string, exerciseId: string): void {
   const w = state.workouts.find((x) => x.id === workoutId);
   if (!w) return;
@@ -593,19 +628,10 @@ export function upsertSet(
   const existing = set.id ? ex.sets.find((s) => s.id === set.id) : undefined;
   const type: SetType = set.type ?? (set.isWarmup ? 'warmup' : 'working');
   const loggedAt = set.loggedAt ?? existing?.loggedAt ?? Date.now();
-  // Rest before this set, captured at log time so it persists in history
-  // (AC-2.10). Kept as-is on edits; derived from the previous set on new ones.
-  const prevSet = existing
-    ? undefined
-    : [...ex.sets].sort((a, b) => a.position - b.position).at(-1);
-  const restSec =
-    set.restSec !== undefined
-      ? set.restSec
-      : existing
-        ? (existing.restSec ?? null)
-        : prevSet?.loggedAt != null
-          ? Math.max(0, Math.round((loggedAt - prevSet.loggedAt) / 1000))
-          : null;
+  // Rest is derived at display time from the real gaps between set timestamps
+  // (loggedAt), never stored — the previously stored per-set restSec values were
+  // computed incorrectly. Keep an explicit value only if a caller passes one.
+  const restSec = set.restSec !== undefined ? set.restSec : null;
   const full: SetEntry = {
     id: set.id ?? uuid(),
     reps: set.reps,
@@ -667,9 +693,9 @@ export function duplicateSet(workoutId: string, exerciseId: string, setId: strin
     ...src,
     id: uuid(),
     drops: src.drops ? src.drops.map((d) => ({ ...d })) : [],
-    // Rest for the copy counts from the moment of duplication (AC-1.5).
+    // Rest is derived from timestamps at display time; don't store it.
     loggedAt: dupAt,
-    restSec: src.loggedAt != null ? Math.max(0, Math.round((dupAt - src.loggedAt) / 1000)) : null,
+    restSec: null,
   };
   ordered.splice(srcIdx + 1, 0, copy);
   const renumbered = ordered.map((s, i) => ({ ...s, position: i }));
@@ -688,6 +714,39 @@ export function duplicateSet(workoutId: string, exerciseId: string, setId: strin
 export function restMs(prevLoggedAt?: number | null, loggedAt?: number | null): number | null {
   if (!prevLoggedAt || !loggedAt) return null;
   return Math.max(0, loggedAt - prevLoggedAt);
+}
+
+/**
+ * One-time cleanup: the per-set `restSec` values stored by older builds were
+ * computed incorrectly. Rest is now derived from real set timestamps at display
+ * time, so clear every stored value. Idempotent — guarded by a local flag and
+ * only rewrites workouts that actually carry stale rest.
+ */
+const REST_CLEARED_KEY = 'spotter.restCleared.v1';
+export function clearStoredRest(): void {
+  try {
+    if (localStorage.getItem(REST_CLEARED_KEY)) return;
+  } catch {
+    /* private mode — attempt the cleanup anyway */
+  }
+  // Wait until workouts have actually loaded, so we don't set the flag on an
+  // empty first snapshot and skip the real cleanup.
+  if (state.workouts.length === 0) return;
+  for (const w of state.workouts) {
+    if (!w.exercises.some((e) => e.sets.some((s) => s.restSec != null))) continue;
+    const exercises = w.exercises.map((e) =>
+      e.sets.some((s) => s.restSec != null)
+        ? { ...e, sets: e.sets.map((s) => (s.restSec != null ? { ...s, restSec: null } : s)) }
+        : e,
+    );
+    patchWorkout(w.id, { exercises });
+    saveWorkout(w.id);
+  }
+  try {
+    localStorage.setItem(REST_CLEARED_KEY, '1');
+  } catch {
+    /* ignore */
+  }
 }
 
 export function deleteSet(workoutId: string, exerciseId: string, setId: string): void {
@@ -764,6 +823,12 @@ export function dismissWeighInToday(dayKey: string): void {
 export function latestWeight(bm: BodyMetrics): WeightEntry | null {
   if (bm.weights.length === 0) return null;
   return bm.weights.reduce((a, b) => (b.at >= a.at ? b : a));
+}
+
+/** Body v1 §3.2: required-metric completeness — height + at least one weigh-in.
+ *  Drives the blocking profile-completion gate for returning users. */
+export function bodyMetricsComplete(bm: BodyMetrics): boolean {
+  return !!bm.heightCm && bm.heightCm > 0 && bm.weights.length > 0;
 }
 
 /** BMI from height (cm) + weight (kg); null if height missing/invalid. */
@@ -958,6 +1023,7 @@ export function startSyncLoop(): () => void {
         recomputeReminders();
         markSynced(snap.metadata.fromCache, snap.metadata.hasPendingWrites);
         applyAutoFinish();
+        clearStoredRest();
       },
       onWriteError,
     ),

@@ -110,14 +110,18 @@ function TrendChart({
 export function BodyMetricsSection({
   readOnly,
   roleTag,
+  data,
 }: {
   readOnly: boolean;
   /** e.g. "Admin · view" / "Trainer · view" for the read-only lock banner. */
   roleTag?: string;
+  /** Another user's metrics for admin/trainer read-only view (§1/6a.4). When
+   *  omitted the section shows the signed-in user's own store data. */
+  data?: BodyMetrics;
 }) {
   const { t, locale } = useT();
   const store = useStore();
-  const bm: BodyMetrics = store.bodyMetrics;
+  const bm: BodyMetrics = data ?? store.bodyMetrics;
   const [sheet, setSheet] = useState<SheetState>(null);
 
   const latest = latestWeight(bm);
@@ -313,7 +317,7 @@ export function BodyMetricsSection({
   );
 }
 
-function WeightSheet({
+export function WeightSheet({
   state,
   onClose,
 }: {
@@ -382,5 +386,79 @@ function WeightSheet({
         </button>
       </div>
     </Sheet>
+  );
+}
+
+/**
+ * Blocking profile-completion gate (Body v1 §3.2). A returning user missing the
+ * required metrics (height + a current weight) sees this full-screen instead of
+ * the app until both are filled. Framed as setup continuation, never an error —
+ * calm graphite/brass, no red, positive copy.
+ */
+export function ProfileCompletionGate() {
+  const { t } = useT();
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [nowTs] = useState(() => Date.now());
+
+  const h = num(height);
+  const w = num(weight);
+  const ready = h != null && h > 0 && w != null && w > 0;
+
+  const finish = () => {
+    if (!ready) return;
+    updateBodyMetrics({ heightCm: h });
+    addWeight(w, nowTs);
+  };
+
+  return (
+    <div className="body-gate">
+      <div className="body-gate-brand">
+        <Icon name="barbell" />
+        <span>{t.appName}</span>
+      </div>
+      <div className="body-gate-body">
+        <span className="body-gate-badge">
+          <Icon name="ruler" />
+        </span>
+        <h1 className="body-gate-title">{t.bmGateTitle}</h1>
+        <p className="body-gate-lead">{t.bmGateLead}</p>
+        <div className="body-gate-fields">
+          <label className="bm-field">
+            <span className="bm-field-label">{t.bmHeight}</span>
+            <div className="bm-field-in">
+              <input
+                className="input"
+                inputMode="numeric"
+                autoFocus
+                value={height}
+                placeholder="178"
+                onChange={(e) => setHeight(e.target.value)}
+              />
+              <span className="bm-field-unit">{'cm'}</span>
+            </div>
+          </label>
+          <label className="bm-field">
+            <span className="bm-field-label">{t.bmGateWeight}</span>
+            <div className="bm-field-in">
+              <input
+                className="input"
+                inputMode="decimal"
+                value={weight}
+                placeholder="84.0"
+                onChange={(e) => setWeight(e.target.value)}
+              />
+              <span className="bm-field-unit">{'kg'}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <div className="body-gate-foot">
+        <button className="btn btn-primary" disabled={!ready} onClick={finish}>
+          {t.bmGateDone}
+        </button>
+        <p className="body-gate-note">{t.bmGateNote}</p>
+      </div>
+    </div>
   );
 }

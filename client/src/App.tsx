@@ -9,7 +9,14 @@ import {
   signOut as apiSignOut,
 } from './api';
 import { db } from './firebase';
-import { getOpenWorkout, startSyncLoop, useStore, retrySync, discardBlockingChange } from './store';
+import {
+  getOpenWorkout,
+  startSyncLoop,
+  useStore,
+  retrySync,
+  discardBlockingChange,
+  bodyMetricsComplete,
+} from './store';
 import { useFlag } from './data/flags';
 import { SpotterMark } from './brand/SpotterMark';
 import { useT } from './i18n';
@@ -29,6 +36,9 @@ import type { SyncError, Notice } from './types';
 
 const OnboardingView = lazy(() =>
   import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
+);
+const ProfileCompletionGate = lazy(() =>
+  import('./components/BodyMetrics').then((module) => ({ default: module.ProfileCompletionGate })),
 );
 const AdminView = lazy(() =>
   import('./views/AdminView').then((module) => ({ default: module.AdminView })),
@@ -406,6 +416,22 @@ export function App() {
     return (
       <div className="app">
         <AuthView onLoggedIn={() => setAuthed(true)} />
+      </div>
+    );
+  }
+
+  // Blocking profile-completion gate (Body v1 §3.2): a returning member whose
+  // required metrics (height + a current weight) are missing must finish them
+  // before the app opens. Only after the first sync resolves, so users who do
+  // have metrics never see it flash; members only (staff accounts pass through).
+  const needsBodySetup =
+    role === 'member' && store.lastSyncAt !== null && !bodyMetricsComplete(store.bodyMetrics);
+  if (needsBodySetup) {
+    return (
+      <div className="app">
+        <Suspense fallback={<ScreenFallback />}>
+          <ProfileCompletionGate />
+        </Suspense>
       </div>
     );
   }

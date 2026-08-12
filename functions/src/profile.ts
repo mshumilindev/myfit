@@ -299,6 +299,13 @@ async function fullProfilePayload(
   const gymsSnap = await db.collection('users').doc(target.id).collection('gyms').get();
   const gyms = gymsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GymDoc, 'id'>) }));
   const gymMap = new Map(gyms.map((g) => [g.id, g]));
+  // Body metrics (§6a.4): the target's own doc, read via Admin SDK so an
+  // authorized admin/trainer can view it read-only despite client rules.
+  const bodySnap = await db.collection('users').doc(target.id).collection('meta').doc('body').get();
+  const bodyRaw = bodySnap.exists ? (bodySnap.data() as Record<string, unknown>) : null;
+  const bodyMetrics = bodyRaw
+    ? { ...bodyRaw, weights: Array.isArray(bodyRaw.weights) ? bodyRaw.weights : [] }
+    : null;
   return {
     viewer: { id: viewer.id, relation, role: viewer.role },
     person: await personJson(target),
@@ -309,6 +316,7 @@ async function fullProfilePayload(
     topExercises: topExercises(workouts),
     notes: await notesFor(target.id),
     audit: relation === 'self' ? await auditFor(target.id) : [],
+    bodyMetrics,
   };
 }
 

@@ -11,6 +11,7 @@ import {
   addExercise,
   backfillWorkout,
   dismissReminder,
+  dismissWeighInToday,
   logVisitAsWorkout,
   muscleSetsInWorkout,
   resolveMuscles,
@@ -32,6 +33,7 @@ import {
   useT,
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
+import { WeightSheet } from '../components/BodyMetrics';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
@@ -122,6 +124,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       .slice(0, 4);
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
+  const [addWeightOpen, setAddWeightOpen] = useState(false);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
 
   /** Session heading: the program day name if it has one, else the weekday. */
@@ -184,6 +187,35 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     const muscles = order.slice(0, 5).map((m) => t.muscleGroups[m]);
     return { dayLabel, startMin, mealMin: startMin - 105, muscles };
   })();
+
+  // Weigh-in reminder (Body metrics §4): on the usual weekday, past the usual
+  // time, if nothing is logged today and not dismissed. Learned from history.
+  const ymd = (ts: number) => {
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  };
+  const weighReminder = (() => {
+    if (open) return null;
+    const ws = store.bodyMetrics.weights;
+    if (ws.length < 2) return null;
+    const dowCount = new Array(7).fill(0);
+    ws.forEach((w) => (dowCount[new Date(w.at).getDay()] += 1));
+    const usualDow = dowCount.indexOf(Math.max(...dowCount));
+    const times = ws.map((w) => new Date(w.at).getHours() * 60 + new Date(w.at).getMinutes());
+    times.sort((a, b) => a - b);
+    const usualMin = times[Math.floor(times.length / 2)];
+    const todayKey = ymd(now);
+    const loggedToday = ws.some((w) => ymd(w.at) === todayKey);
+    const nowD = new Date(now);
+    const nowMin = nowD.getHours() * 60 + nowD.getMinutes();
+    const show =
+      nowD.getDay() === usualDow &&
+      nowMin >= usualMin &&
+      !loggedToday &&
+      store.bodyMetrics.weighInDismissedDay !== todayKey;
+    return show ? { usualMin } : null;
+  })();
+
   const firstLoad = store.workouts.length === 0 && store.lastSyncAt === null && !!store.queue;
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
 
@@ -437,6 +469,24 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {banners}
         {programCard}
+
+        {weighReminder && (
+          <div className="weigh-plaque">
+            <Icon name="scales" />
+            <div className="wp-body">
+              <div className="wp-title">{t.weighTitle}</div>
+              <div className="wp-sub">{t.weighBody(hhmm(weighReminder.usualMin))}</div>
+              <div className="wp-acts">
+                <button className="wp-add" onClick={() => setAddWeightOpen(true)}>
+                  {t.bmAddWeight}
+                </button>
+                <button className="wp-skip" onClick={() => dismissWeighInToday(ymd(now))}>
+                  {t.weighNotToday}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {prediction && (
           <div className="likely-plaque">
@@ -811,6 +861,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: true });
           }}
         />
+      )}
+      {addWeightOpen && (
+        <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
     </div>
   );

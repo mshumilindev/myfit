@@ -9,6 +9,7 @@ import { ConfirmDialog, Icon, LanguageSelector, Switch, ProfileSkeleton } from '
 import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
+import type { BodyMetrics } from '../types';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
 
@@ -78,6 +79,9 @@ interface ProfileData {
   }>;
   notes: Array<{ id: string; text: string; createdAt: number; trainerName: string }>;
   audit: Array<{ at: number; resource: string; readerName: string | null; readerRole: string }>;
+  /** Target user's body metrics for read-only admin/trainer view (§6a.4);
+   *  null when the user has none. */
+  bodyMetrics: BodyMetrics | null;
 }
 
 type Load = ProfileData | 'loading' | 'denied' | 'missing' | 'failed';
@@ -490,7 +494,11 @@ export function ProfileView({
             </div>
           </section>
 
-          {isSelf && <BodyMetricsSection readOnly={false} />}
+          {isSelf ? (
+            <BodyMetricsSection readOnly={false} />
+          ) : (
+            load.bodyMetrics && <BodyMetricsSection readOnly data={load.bodyMetrics} />
+          )}
 
           {!isTrainerView && (
             <section className="profile-section profile-access-section">

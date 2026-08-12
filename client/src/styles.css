@@ -581,74 +581,21 @@ i > svg {
 }
 
 /* O-10 · Profile · avatar & people skeleton. */
+/* Profile skeleton — mirrors the Body-metrics design (§7) 1:1. Blocks are
+   direct flex children on the same 18px rhythm as the real profile page, so
+   the swap to live content causes no reflow. */
 .profile-skel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 18px;
 }
-
-.profile-skel-hero {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 4px 0;
-}
-
-.profile-skel-avatar {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  flex: none;
-}
-
-.profile-skel-id {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-.profile-skel-people {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-skel-person {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 11px 12px;
-  border-radius: var(--radius-md);
+.profile-skel-card {
   background: var(--color-surface);
-}
-
-.profile-skel-person-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  flex: none;
-}
-
-.profile-skel-person-body {
-  flex: 1;
+  border-radius: var(--radius-lg);
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.profile-skel-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: auto;
-}
-
-.profile-skel-row {
-  height: 46px;
-  border-radius: var(--radius-sm);
+  gap: 14px;
 }
 
 .sk-dot {
@@ -3726,6 +3673,17 @@ i > svg {
   background: var(--color-accent-950);
   box-shadow: inset 0 0 0 1px var(--color-accent-800);
   padding-inline: 12px;
+}
+
+/* No transient hover/focus/active state on record rows — only the selected
+   row is highlighted (on touch the focus ring would otherwise stick). */
+.record-row:focus,
+.record-row:focus-visible,
+.record-row:active {
+  outline: none;
+}
+.record-row:not(.selected):hover {
+  background: transparent;
 }
 
 .record-row .n {
@@ -11195,9 +11153,9 @@ h6 {
   box-shadow: none;
 }
 
-/* Grouped drop rows keep their extra indent even with the set-main wrapper. */
+/* Grouped drop rows align to the same left inset as the main set row. */
 .set-wrap:has(.set-row.rrow) > .drops {
-  padding-left: 26px;
+  padding-left: 8px;
 }
 
 .set-row .kind.tdrop {
@@ -11213,36 +11171,47 @@ h6 {
   line-height: 0;
 }
 
+/* Additional (drop) sets share the main set-row's column grid: a leading
+   18px slot for the accent bar (under the set index), then the same
+   reps / weight / label columns, edge-aligned like the first set. */
 .drops {
-  display: flex;
-  gap: var(--space-3);
-  margin-top: var(--space-2);
-  padding-left: 18px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: var(--space-1);
+  padding: 0 8px;
+  align-items: stretch;
 }
 
 .set-row.rrow + .drops,
 .rrow ~ .drops {
-  padding-left: 26px;
+  padding-left: 8px;
+}
+/* In live mode the main set row reserves 36px on the right for the duplicate
+   icon; match that inset so the drop columns line up with the first set. */
+.session-live .drops {
+  padding-right: 36px;
 }
 
 .drops .dbar {
   width: 2px;
   border-radius: 1px;
   background: var(--color-accent-800);
-  flex: none;
+  justify-self: center;
+  align-self: stretch;
 }
 
 .drops .dlist {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  min-width: 0;
 }
 
 .drop-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 62px;
-  gap: var(--space-3);
+  gap: 8px;
   align-items: center;
   font-size: 14px;
   font-variant-numeric: tabular-nums;
@@ -11713,6 +11682,31 @@ h6 {
 
 .pick-row.unavailable {
   opacity: 0.45;
+}
+
+/* Row + optional "tag it" edit button for a user exercise with no muscle data. */
+.pick-row-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.pick-row-wrap .pick-row {
+  flex: 1;
+  min-width: 0;
+}
+.pick-row-edit {
+  flex: none;
+  width: 40px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-accent-300);
+  cursor: pointer;
+}
+.pick-row-edit i {
+  font-size: 16px;
 }
 
 .pick-row .txt {
@@ -13564,6 +13558,39 @@ h6 {
 .session-live .set-rest {
   padding-right: 36px;
 }
+/* Rest shown at the top of a card = time since the previous exercise's last
+   set. Left-aligned, brass, with a divider so it reads as the transition. */
+.set-rest.inter-card {
+  justify-content: flex-start;
+  gap: 6px;
+  color: var(--color-accent-300);
+  padding-left: 8px;
+  margin-bottom: 2px;
+  box-shadow: inset 0 1px 0 var(--color-divider);
+}
+.set-rest.inter-card > .ui-icon {
+  font-size: 13px;
+  color: var(--color-accent-800);
+}
+.session-live .set-rest.inter-card {
+  padding-right: 8px;
+}
+/* "−30s" manual rest trim on the live rest strips. */
+.rest-trim {
+  margin-left: auto;
+  border: none;
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-400);
+  font: inherit;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.ex-resting .rest-trim {
+  margin-left: 8px;
+}
 .set-dup {
   position: absolute;
   top: 50%;
@@ -13584,9 +13611,14 @@ h6 {
   font-size: 15px;
   line-height: 0;
 }
-.set-dup:hover {
-  color: var(--color-accent-800);
-  background: var(--color-neutral-200);
+/* No hover/focus/active state — on touch it sticks after a tap. */
+.set-dup:hover,
+.set-dup:focus,
+.set-dup:focus-visible,
+.set-dup:active {
+  color: var(--color-neutral-500);
+  background: none;
+  outline: none;
 }
 /* Reserve room on the right so the type label never sits under the icon. */
 .session-live .set-main > .set-row {
@@ -13981,6 +14013,140 @@ h6 {
   font-variant-numeric: tabular-nums;
 }
 
+/* Weigh-in reminder — quiet graphite card, brass accent (Body §4.5). Sits
+   above the likely-workout plaque (§4.6). */
+.weigh-plaque {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  padding: 14px 16px;
+}
+.weigh-plaque > .ui-icon {
+  font-size: 18px;
+  color: var(--color-accent);
+  margin-top: 1px;
+}
+.weigh-plaque .wp-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.weigh-plaque .wp-title {
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.weigh-plaque .wp-sub {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.weigh-plaque .wp-acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+}
+.weigh-plaque .wp-add {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: #201a0e;
+}
+.weigh-plaque .wp-skip {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-neutral-500);
+}
+
+/* Blocking profile-completion gate (Body §3.2) — full screen, calm, no red. */
+.body-gate {
+  min-height: 100dvh;
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: calc(30px + var(--safe-top)) 22px calc(24px + var(--safe-bottom));
+  background: var(--color-bg);
+}
+.body-gate-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+.body-gate-brand > .ui-icon {
+  font-size: 20px;
+  color: var(--color-accent);
+}
+.body-gate-body {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+}
+.body-gate-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  display: grid;
+  place-items: center;
+}
+.body-gate-badge > .ui-icon {
+  font-size: 26px;
+}
+.body-gate-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 18px 0 0;
+}
+.body-gate-lead {
+  font-size: 13px;
+  color: var(--color-neutral-400);
+  line-height: 1.55;
+  margin: 9px 0 0;
+  max-width: 36ch;
+}
+.body-gate-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 26px;
+}
+.body-gate-foot {
+  margin-top: auto;
+  padding-top: 26px;
+}
+.body-gate-foot .btn-primary {
+  width: 100%;
+  min-height: 50px;
+  font-size: 15px;
+}
+.body-gate-note {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  text-align: center;
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+
 /* Today → Templates full-width link (opens the Templates screen). */
 .td-templates-link {
   width: 100%;
@@ -14342,4 +14508,37 @@ h6 {
   color: var(--color-danger);
   font-size: 14px;
   cursor: pointer;
+}
+
+/* Onboarding · body-metrics step */
+.onb-bm-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.onb-bm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.onb-bm-label {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.onb-bm-req {
+  color: var(--color-accent);
+}
+.onb-bm-in {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.onb-bm-in .input {
+  flex: 1;
+  min-width: 0;
+}
+.onb-bm-unit {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  flex: none;
 }

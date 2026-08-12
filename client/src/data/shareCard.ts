@@ -235,9 +235,12 @@ export function drawShareCard(canvas: HTMLCanvasElement, m: ShareModel, format: 
     }
   }
 
-  // Muscles strip (skip if it would fall below the frame)
-  if (m.muscles.length > 0 && y + (story ? 78 : 50) < bottomLimit) {
-    y += story ? 78 : 50;
+  // Muscles strip (skip if it would fall below the frame). The chips are drawn
+  // from y − chipH + 14 upward, so the gap must clear the previous row's
+  // baseline + underline (≈18px) plus the 42px chip rise — otherwise the chips
+  // ride up onto the last top-lift row (was overlapping on square).
+  if (m.muscles.length > 0 && y + (story ? 78 : 72) < bottomLimit) {
+    y += story ? 78 : 72;
     let cx = padX;
     ctx.font = `600 26px ${FONT}`;
     const chipH = 56;

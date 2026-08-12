@@ -12,7 +12,6 @@ import {
   deleteWorkout,
   duplicateExercise,
   duplicateSet,
-  restMs,
   equipmentFor,
   est1rm,
   exerciseKind,
@@ -31,6 +30,7 @@ import {
   prevLift,
   recordWeight,
   renameExercise,
+  replaceExercise,
   reopenWorkout,
   resolveMuscles,
   restoreExercise,
@@ -115,6 +115,7 @@ type SheetState =
       ghost: GhostValues;
     }
   | { kind: 'menu'; exId: string }
+  | { kind: 'replace'; exId: string }
   | { kind: 'group-menu'; groupId: string }
   | { kind: 'superset'; exId: string }
   | { kind: 'gym' }
@@ -287,10 +288,18 @@ export function SessionView(props: {
 
   const live = !!workout && workout.finishedAt === null && !props.past;
 
+  // Rest count-ups only tick while the session is live — they must freeze the
+  // moment the workout is finished or discarded (no ticking on a past session).
   useEffect(() => {
+    if (!live) return;
     const iv = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(iv);
-  }, []);
+  }, [live]);
+
+  // Manual "−30s" trim of the live rest clock. Anchored to the set it was
+  // applied against so it auto-resets (derived) the moment a new set lands —
+  // no setState-in-effect needed.
+  const [restCut, setRestCut] = useState<{ at: number; ms: number }>({ at: 0, ms: 0 });
 
   useEffect(() => {
     if (!props.startAdd || startAddConsumed.current || !workout) return;
@@ -339,6 +348,31 @@ export function SessionView(props: {
   const planPercent =
     prescribedSets > 0 ? Math.round((loggedPrescribedSets / prescribedSets) * 100) : 0;
   const sortedExercises = [...workout.exercises].sort((a, b) => a.position - b.position);
+
+  // Rest is derived from the real gaps between set timestamps (loggedAt), in
+  // true chronological order across every exercise. This drives both the
+  // per-set rest line and the rest shown between exercise cards (the gap before
+  // a card's first set = time since the previous card's last set).
+  const allSetsChrono = sortedExercises
+    .flatMap((e) => e.sets.map((s) => ({ exId: e.id, s })))
+    .filter((x) => x.s.loggedAt != null)
+    .sort((a, b) => (a.s.loggedAt as number) - (b.s.loggedAt as number));
+  const restBeforeSet = new Map<string, number>();
+  for (let i = 1; i < allSetsChrono.length; i++) {
+    const gap =
+      (allSetsChrono[i].s.loggedAt as number) - (allSetsChrono[i - 1].s.loggedAt as number);
+    // Ignore absurd gaps (backfilled or resumed-next-day sets).
+    if (gap > 0 && gap < 3 * 3600 * 1000) restBeforeSet.set(allSetsChrono[i].s.id, gap);
+  }
+  const lastChrono = allSetsChrono[allSetsChrono.length - 1] ?? null;
+  const lastLoggedAt = lastChrono ? (lastChrono.s.loggedAt as number) : 0;
+  // The exercise that owns the most-recently logged set — the only one whose
+  // rest is still "running"; a set logged elsewhere ends the previous card's rest.
+  const lastLoggedExId = lastChrono ? lastChrono.exId : null;
+  // The trim only counts while it's still anchored to the current last set.
+  const restCutMs = restCut.at === lastLoggedAt ? restCut.ms : 0;
+  const trimRest = () => setRestCut({ at: lastLoggedAt, ms: restCutMs + 30000 });
+
   const activeExerciseId =
     sortedExercises.find((ex) => {
       if (isMarkerExercise(ex)) return false;
@@ -757,18 +791,18 @@ export function SessionView(props: {
                 const type = setTypeOf(s);
                 const drops = setDrops(s);
                 const idx = grp ? `R${i + 1}` : `${i + 1}`;
-                // Actual rest before this set (AC-2.6) — quiet, from the 2nd on.
-                // Prefer the value captured at log time so it survives in
-                // history (AC-2.10); fall back to deriving it from timestamps.
-                const restBefore =
-                  s.restSec != null
-                    ? s.restSec * 1000
-                    : i > 0
-                      ? restMs(sortedSets[i - 1].loggedAt, s.loggedAt)
-                      : null;
+                // Rest before this set — the real gap to the previously logged
+                // set anywhere in the session (chronological). For a card's
+                // first set that gap is the rest since the previous exercise, so
+                // it renders as an "between cards" marker at the top of the card.
+                const restBefore = restBeforeSet.get(s.id) ?? null;
+                const interCard = i === 0;
                 const restLine =
                   restBefore !== null && restBefore > 0 ? (
-                    <div className="set-rest">{t.restLabel(mmss(restBefore))}</div>
+                    <div className={`set-rest${interCard ? ' inter-card' : ''}`}>
+                      {interCard && <Icon name="timer" />}
+                      {t.restLabel(mmss(restBefore))}
+                    </div>
                   ) : null;
                 const dupBtn = live ? (
                   <button
@@ -857,15 +891,20 @@ export function SessionView(props: {
                   </div>
                 );
               })}
+              {/* Live rest count-up only on the exercise that owns the most
+                  recent set — logging in another card ends this one's rest. */}
               {live &&
-                ex.sets.length > 0 &&
+                ex.id === lastLoggedExId &&
+                lastLoggedAt > 0 &&
                 (() => {
-                  const lastLogged = Math.max(0, ...ex.sets.map((s) => s.loggedAt ?? 0));
-                  if (!lastLogged) return null;
+                  const restNow = Math.max(0, now - lastLoggedAt - restCutMs);
                   return (
                     <div className="ex-resting">
                       <Icon name="timer" />
-                      <span>{t.restingSince(mmss(Math.max(0, now - lastLogged)))}</span>
+                      <span>{t.restingSince(mmss(restNow))}</span>
+                      <button type="button" className="rest-trim" onClick={trimRest}>
+                        {'−30s'}
+                      </button>
                     </div>
                   );
                 })()}
@@ -1289,13 +1328,9 @@ export function SessionView(props: {
         {live &&
           (() => {
             const activeEx = sortedExercises.find((e) => e.id === activeExerciseId) ?? null;
-            const lastLogged = Math.max(
-              0,
-              ...workout.exercises.flatMap((e) => e.sets.map((s) => s.loggedAt ?? 0)),
-            );
             const nextSet =
               activeEx && !isMarkerExercise(activeEx) ? activeEx.sets.length + 1 : null;
-            if (!activeEx && !lastLogged) return null;
+            if (!activeEx && !lastLoggedAt) return null;
             return (
               <div className="live-rest">
                 {activeEx && nextSet !== null && (
@@ -1306,11 +1341,16 @@ export function SessionView(props: {
                     <span className="cur-set">{t.setNumber(nextSet)}</span>
                   </div>
                 )}
-                {lastLogged > 0 && (
+                {lastLoggedAt > 0 && (
                   <div className="rest-strip">
                     <Icon name="timer" />
                     <span className="rest-label">{t.restHeaderLabel}</span>
-                    <span className="rest-clock">{mmss(Math.max(0, now - lastLogged))}</span>
+                    <span className="rest-clock">
+                      {mmss(Math.max(0, now - lastLoggedAt - restCutMs))}
+                    </span>
+                    <button type="button" className="rest-trim" onClick={trimRest}>
+                      {'−30s'}
+                    </button>
                   </div>
                 )}
               </div>
@@ -1726,7 +1766,6 @@ export function SessionView(props: {
         <AddExerciseSheet
           workout={workout}
           gym={gym}
-          suggestions={suggestOn}
           onPick={(name, kind, meta) => {
             addExercise(
               workout.id,
@@ -1740,9 +1779,22 @@ export function SessionView(props: {
                   }
                 : {},
             );
-            // Day-aware strength suggestions stay open for multiple adds; timed
-            // one-off rows are complete after the pick.
-            if (!suggestOn || kind !== 'strength') setSheet(null);
+            // Single-add: one pick adds the exercise and closes the picker.
+            // Re-open to add another (same exercise allowed, e.g. circuits).
+            setSheet(null);
+          }}
+          onClose={() => setSheet(null)}
+        />
+      )}
+
+      {sheet?.kind === 'replace' && (
+        <AddExerciseSheet
+          workout={workout}
+          gym={gym}
+          replacing
+          onPick={(name, kind, meta) => {
+            replaceExercise(workout.id, sheet.exId, name, kind, meta);
+            setSheet(null);
           }}
           onClose={() => setSheet(null)}
         />
@@ -1785,14 +1837,10 @@ export function SessionView(props: {
               <div className="sheet-label">{t.exerciseMenuTitle(ex.name, ex.sets.length)}</div>
               <button
                 className="menu-item"
-                onClick={() => {
-                  setRenaming(ex.id);
-                  setRenameVal(ex.name);
-                  setSheet(null);
-                }}
+                onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
               >
-                <Icon name="pencil-simple" />
-                {t.rename}
+                <Icon name="swap" />
+                {t.replaceExercise}
               </button>
               <button
                 className="menu-item"
@@ -2030,6 +2078,9 @@ function AddExerciseSheet(props: {
   workout: Workout;
   gym: Gym | null;
   suggestions?: boolean;
+  /** Substitute an existing exercise rather than add a new one — the pick swaps
+   *  the target's identity and keeps its sets. */
+  replacing?: boolean;
   onPick: (name: string, kind: ExerciseKind, meta?: NewExerciseMeta) => void;
   onClose: () => void;
 }) {
@@ -2270,6 +2321,7 @@ function AddExerciseSheet(props: {
 
   return (
     <Sheet onClose={props.onClose}>
+      {props.replacing && <div className="sheet-label">{t.replaceExercise}</div>}
       <div className="searchbar">
         <Icon name="magnifying-glass" />
         <input
@@ -2387,39 +2439,53 @@ function AddExerciseSheet(props: {
         <div className="pick-rows">
           {historyMatches.map((m) => {
             const missing = availability(m.info?.equipment ?? null);
+            // My own logged exercise with no muscle/equipment data yet — offer to
+            // tag it (opens the meta editor prefilled with its name).
+            const untagged = !m.info;
             return (
-              <button
-                key={m.name}
-                className={`pick-row${missing ? ' unavailable' : ''}`}
-                onClick={() => props.onPick(m.name, kind)}
-              >
-                {m.info && m.info.primary !== 'cardio' ? (
-                  <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
-                ) : (
-                  <span style={{ width: 13 }} />
-                )}
-                <span className="txt">
-                  <span className="n">{m.name}</span>
-                  {missing ? (
-                    <span className="s warn">{t.noItemHere(t.equipmentNames[missing])}</span>
-                  ) : m.info ? (
-                    <span className="s">
-                      {[m.info.primary, ...m.info.secondary]
-                        .filter((x) => x !== 'cardio')
-                        .map((x) => t.muscleGroups[x])
-                        .join(' · ')}
-                    </span>
-                  ) : m.last ? (
-                    <span className="s">{t.lastLift(fmtSet(m.last.weight, m.last.reps))}</span>
-                  ) : null}
-                </span>
-                {m.info?.equipment && (
-                  <span className="eq">
-                    <Icon name={equipmentIconName(m.info.equipment)} />
-                    {t.equipmentNames[m.info.equipment]}
+              <div key={m.name} className={`pick-row-wrap${untagged ? ' taggable' : ''}`}>
+                <button
+                  className={`pick-row${missing ? ' unavailable' : ''}`}
+                  onClick={() => props.onPick(m.name, kind)}
+                >
+                  {m.info && m.info.primary !== 'cardio' ? (
+                    <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
+                  ) : (
+                    <span style={{ width: 13 }} />
+                  )}
+                  <span className="txt">
+                    <span className="n">{m.name}</span>
+                    {missing ? (
+                      <span className="s warn">{t.noItemHere(t.equipmentNames[missing])}</span>
+                    ) : m.info ? (
+                      <span className="s">
+                        {[m.info.primary, ...m.info.secondary]
+                          .filter((x) => x !== 'cardio')
+                          .map((x) => t.muscleGroups[x])
+                          .join(' · ')}
+                      </span>
+                    ) : m.last ? (
+                      <span className="s">{t.lastLift(fmtSet(m.last.weight, m.last.reps))}</span>
+                    ) : null}
                   </span>
+                  {m.info?.equipment && (
+                    <span className="eq">
+                      <Icon name={equipmentIconName(m.info.equipment)} />
+                      {t.equipmentNames[m.info.equipment]}
+                    </span>
+                  )}
+                </button>
+                {untagged && (
+                  <button
+                    className="pick-row-edit"
+                    aria-label={t.tagExercise}
+                    title={t.tagExercise}
+                    onClick={() => setCreating(m.name)}
+                  >
+                    <Icon name="pencil-simple" />
+                  </button>
                 )}
-              </button>
+              </div>
             );
           })}
           {catalog.map((c) => {

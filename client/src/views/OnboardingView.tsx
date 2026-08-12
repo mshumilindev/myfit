@@ -1,7 +1,13 @@
-/** Onboarding — design O-01…O-09. Four steps ending inside a live session. */
-import { useEffect, useMemo, useRef, useState } from 'react';
+/** Onboarding — design O-01…O-09. Steps end inside a live session. */
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { callFn, signInWithPayload, currentUid, HttpError, type AuthPayload } from '../api';
-import { startWorkout, upsertGym, getCurrentPositionOnce } from '../store';
+import {
+  addWeight,
+  startWorkout,
+  updateBodyMetrics,
+  upsertGym,
+  getCurrentPositionOnce,
+} from '../store';
 import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   searchGyms,
@@ -136,18 +142,18 @@ export function OnboardingView({
 
   const railBars = (upTo: number) => (
     <div className="onb-rail" aria-hidden>
-      {[1, 2, 3, 4].map((i) => (
+      {[1, 2, 3, 4, 5].map((i) => (
         <span key={i} className={`bar${i <= upTo ? ' on' : ''}`} />
       ))}
     </div>
   );
-  const stepNames = ['', t.onbWho, t.onbFace, t.onbGymStep, t.onbReady];
+  const stepNames = ['', t.onbWho, t.onbFace, t.onbGymStep, t.onbBodyStep, t.onbReady];
   const rail = (
     <div className="onb-steptop">
       {railBars(Math.max(step, 1))}
       <div className="row">
-        <span className="k">{t.onbStepOf(Math.min(step, 4))}</span>
-        <span className="k right">{stepNames[Math.min(step, 4)]}</span>
+        <span className="k">{t.onbStepOf(Math.min(step, 5))}</span>
+        <span className="k right">{stepNames[Math.min(step, 5)]}</span>
       </div>
     </div>
   );
@@ -365,6 +371,16 @@ export function OnboardingView({
       )}
 
       {step === 4 && (
+        <BodyStep
+          rail={rail}
+          onContinue={() => {
+            setStep(5);
+            persist({ step: 5 });
+          }}
+        />
+      )}
+
+      {step === 5 && (
         <div className="onb-final">
           {gym?.gymName && gym.gymLat !== undefined && gym.gymLng !== undefined && (
             <div className="onb-final-bg">
@@ -440,6 +456,83 @@ function AvatarStep({ rail, onDone }: { rail: React.ReactNode; onDone: (had: boo
           </>
         }
       />
+    </div>
+  );
+}
+
+// --- Step 4: body metrics — height + current weight required, rest optional --
+
+function bmNum(s: string): number | null {
+  const v = parseFloat(s.replace(',', '.'));
+  return Number.isFinite(v) ? v : null;
+}
+
+function BodyStep({ rail, onContinue }: { rail: ReactNode; onContinue: () => void }) {
+  const { t } = useT();
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [goal, setGoal] = useState('');
+  const [bodyFat, setBodyFat] = useState('');
+  const [muscle, setMuscle] = useState('');
+  const h = bmNum(height);
+  const w = bmNum(weight);
+  const ready = h != null && h > 0 && w != null && w > 0;
+
+  const row = (
+    label: string,
+    unit: string,
+    value: string,
+    set: (v: string) => void,
+    req?: boolean,
+  ) => (
+    <label className="onb-bm-field">
+      <span className="onb-bm-label">
+        {label}
+        {req && <span className="onb-bm-req"> *</span>}
+      </span>
+      <span className="onb-bm-in">
+        <input
+          className="input"
+          inputMode="decimal"
+          placeholder="—"
+          value={value}
+          onChange={(e) => set(e.target.value)}
+        />
+        <span className="onb-bm-unit">{unit}</span>
+      </span>
+    </label>
+  );
+
+  return (
+    <div className="onb-card">
+      {rail}
+      <h2 className="display sm">{t.onbBodyLead}</h2>
+      <p className="lead">{t.onbBodyNote}</p>
+      <div className="onb-bm-two">
+        {row(t.bmHeight, 'cm', height, setHeight, true)}
+        {row(t.bmCurrentWeight, 'kg', weight, setWeight, true)}
+      </div>
+      <div className="onb-bm-two">
+        {row(t.bmGoal, 'kg', goal, setGoal)}
+        {row(t.bmBodyFat, '%', bodyFat, setBodyFat)}
+      </div>
+      {row(t.bmMuscle, 'kg', muscle, setMuscle)}
+      <button
+        className="btn btn-primary btn-big"
+        disabled={!ready}
+        onClick={() => {
+          updateBodyMetrics({
+            heightCm: h,
+            goalWeightKg: bmNum(goal),
+            bodyFatPct: bmNum(bodyFat),
+            muscleKg: bmNum(muscle),
+          });
+          addWeight(w as number, Date.now());
+          onContinue();
+        }}
+      >
+        {t.onbContinue} <Icon name="arrow-right" />
+      </button>
     </div>
   );
 }

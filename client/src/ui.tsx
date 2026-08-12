@@ -22,6 +22,7 @@ import { ArrowCounterClockwise } from '@phosphor-icons/react/ArrowCounterClockwi
 import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
 import { ArrowUpRight } from '@phosphor-icons/react/ArrowUpRight';
 import { ArrowsClockwise } from '@phosphor-icons/react/ArrowsClockwise';
+import { ArrowsLeftRight } from '@phosphor-icons/react/ArrowsLeftRight';
 import { Archive } from '@phosphor-icons/react/Archive';
 import { Barbell } from '@phosphor-icons/react/Barbell';
 import { Export } from '@phosphor-icons/react/Export';
@@ -87,6 +88,7 @@ import { Rows } from '@phosphor-icons/react/Rows';
 import { Toolbox } from '@phosphor-icons/react/Toolbox';
 import { WaveSine } from '@phosphor-icons/react/WaveSine';
 import { Scales } from '@phosphor-icons/react/Scales';
+import { Ruler } from '@phosphor-icons/react/Ruler';
 import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
 import { SignOut } from '@phosphor-icons/react/SignOut';
 import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
@@ -116,6 +118,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrow-right': ArrowRight,
   'arrow-up-right': ArrowUpRight,
   'arrows-clockwise': ArrowsClockwise,
+  swap: ArrowsLeftRight,
   archive: Archive,
   barbell: Barbell,
   export: Export,
@@ -180,6 +183,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   toolbox: Toolbox,
   'wave-sine': WaveSine,
   scales: Scales,
+  ruler: Ruler,
   'shield-check': ShieldCheck,
   'sign-out': SignOut,
   star: Star,
@@ -312,33 +316,65 @@ export function RowListSkeleton({
 }
 
 /** O-10 · Profile · avatar & people skeleton. */
+/**
+ * Profile skeleton — taken 1:1 from the Body-metrics design (§7). Same blocks,
+ * sizes and order as the real page: identity card (avatar, 3 photo actions,
+ * name line, 3 identity fields) → section label → weight-hero card →
+ * Height+BMI two-up → weight-trend chart → labelled ~4 recent-entry rows →
+ * 3×2 optional-composition grid → settings rows. Neutral shimmer, no reflow.
+ */
 export function ProfileSkeleton() {
+  const md = 'var(--radius-md)';
+  const lg = 'var(--radius-lg)';
   return (
     <div className="profile-skel" aria-hidden role="presentation">
-      <div className="profile-skel-hero">
-        <div className="sk profile-skel-avatar" />
-        <div className="profile-skel-id">
-          <div className="sk" style={{ width: '55%', height: 18 }} />
-          <div className="sk" style={{ width: '42%', height: 12 }} />
-          <div className="sk" style={{ width: 72, height: 22, borderRadius: 999 }} />
+      {/* Identity card */}
+      <div className="profile-skel-card">
+        <div
+          className="sk"
+          style={{ width: 96, height: 96, borderRadius: '50%', alignSelf: 'center' }}
+        />
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div className="sk" style={{ flex: 1, height: 40, borderRadius: md }} />
+          <div className="sk" style={{ flex: 1, height: 40, borderRadius: md }} />
+          <div className="sk" style={{ flex: 1, height: 40, borderRadius: md }} />
         </div>
+        <div className="sk" style={{ width: '60%', height: 22 }} />
+        <div className="sk" style={{ width: '100%', height: 44, borderRadius: md }} />
+        <div className="sk" style={{ width: '100%', height: 44, borderRadius: md }} />
+        <div className="sk" style={{ width: '100%', height: 44, borderRadius: md }} />
       </div>
-      <div className="sk" style={{ width: 160, height: 10 }} />
-      <div className="profile-skel-people">
-        {[0, 1].map((i) => (
-          <div key={i} className="profile-skel-person">
-            <div className="sk profile-skel-person-avatar" />
-            <div className="profile-skel-person-body">
-              <div className="sk" style={{ width: '46%', height: 14 }} />
-              <div className="sk" style={{ width: '62%', height: 11 }} />
-            </div>
-          </div>
+
+      {/* Body-metrics section label */}
+      <div className="sk" style={{ width: '40%', height: 12 }} />
+      {/* Weight-hero card */}
+      <div className="sk" style={{ width: '100%', height: 118, borderRadius: lg }} />
+      {/* Height + BMI two-up */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div className="sk" style={{ height: 78, borderRadius: md }} />
+        <div className="sk" style={{ height: 78, borderRadius: md }} />
+      </div>
+      {/* Weight-trend chart */}
+      <div className="sk" style={{ width: '100%', height: 150, borderRadius: lg }} />
+      {/* Recent entries: label + 4 rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="sk" style={{ width: '35%', height: 12 }} />
+        <div className="sk" style={{ height: 20 }} />
+        <div className="sk" style={{ height: 20 }} />
+        <div className="sk" style={{ height: 20 }} />
+        <div className="sk" style={{ height: 20 }} />
+      </div>
+      {/* Optional-composition grid 3×2 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="sk" style={{ height: 64, borderRadius: md }} />
         ))}
       </div>
-      <div className="profile-skel-rows">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="sk profile-skel-row" />
-        ))}
+      {/* Settings rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="sk" style={{ height: 20 }} />
+        <div className="sk" style={{ height: 20 }} />
+        <div className="sk" style={{ height: 20 }} />
       </div>
     </div>
   );
