@@ -533,6 +533,7 @@ export const et: Strings = {
   volumeThisWeek: 'Maht sel nädalal',
   estimated1rm: 'Hinnanguline 1RM',
   records: 'Rekordid',
+  recordsOther: 'Muu',
   moreSessionsTitle: (n) =>
     n <= 1 ? 'Veel üks treening' : n === 2 ? 'Veel kaks treeningut' : `Veel ${n} treeningut`,
   progressLocked: (n) =>

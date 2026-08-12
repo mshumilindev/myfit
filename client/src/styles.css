@@ -3649,6 +3649,25 @@ i > svg {
   vertical-align: middle;
 }
 
+/* Records grouped by primary muscle: a small icon + name subheader per group. */
+.record-group + .record-group {
+  margin-top: 14px;
+}
+.record-group-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+}
+.record-group-head > .ui-icon {
+  font-size: 14px;
+  color: var(--color-accent-800);
+}
+
 .record-row {
   display: flex;
   gap: 12px;

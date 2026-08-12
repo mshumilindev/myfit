@@ -537,6 +537,7 @@ export const uk: Strings = {
   volumeThisWeek: 'Обʼєм цього тижня',
   estimated1rm: 'Оцінка 1ПМ',
   records: 'Рекорди',
+  recordsOther: 'Інше',
   moreSessionsTitle: (n) =>
     n <= 1 ? 'Ще одне тренування' : n === 2 ? 'Ще два тренування' : `Ще ${n} тренування`,
   progressLocked: (n) =>

@@ -545,6 +545,7 @@ export const lt: Strings = {
   volumeThisWeek: 'Apimtis šią savaitę',
   estimated1rm: 'Numatomas 1RM',
   records: 'Rekordai',
+  recordsOther: 'Kita',
   moreSessionsTitle: (n) =>
     n <= 1 ? 'Dar viena treniruotė' : n === 2 ? 'Dar dvi treniruotės' : `Dar ${n} treniruotės`,
   progressLocked: (n) =>

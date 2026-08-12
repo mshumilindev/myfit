@@ -536,6 +536,7 @@ export const pl: Strings = {
   volumeThisWeek: 'Objętość w tym tygodniu',
   estimated1rm: 'Szacowane 1RM',
   records: 'Rekordy',
+  recordsOther: 'Inne',
   moreSessionsTitle: (n) =>
     n <= 1 ? 'Jeszcze jeden trening' : n === 2 ? 'Jeszcze dwa treningi' : `Jeszcze ${n} treningi`,
   progressLocked: (n) =>

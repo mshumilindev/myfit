@@ -545,6 +545,7 @@ export const en = {
   volumeThisWeek: 'Volume this week',
   estimated1rm: 'Estimated 1RM',
   records: 'Records',
+  recordsOther: 'Other',
   moreSessionsTitle: (n: number): string =>
     n <= 1 ? 'One more session' : n === 2 ? 'Two more sessions' : `${n} more sessions`,
   progressLocked: (n: number) =>

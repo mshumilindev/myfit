@@ -6,13 +6,14 @@ import {
   exerciseVolumeKg,
   missingAtGym,
   muscleVolumeKg,
+  resolveMuscles,
   topSet,
   workoutVolumeKg,
   type useStore,
 } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
 import { EmptyState, Icon } from '../ui';
-import { EquipChip, MuscleChip, MuscleIcon } from '../components/Muscle';
+import { EquipChip, MuscleChip, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 
 type Store = ReturnType<typeof useStore>;
@@ -66,7 +67,14 @@ export function ProgressView({ store }: { store: Store }) {
   // Exercise stats: records + 1RM series for the two most frequent lifts.
   const byName = new Map<
     string,
-    { count: number; recW: number; recReps: number; lastTs: number; recTs: number }
+    {
+      count: number;
+      recW: number;
+      recReps: number;
+      lastTs: number;
+      recTs: number;
+      primary: MuscleGroup | null;
+    }
   >();
   for (const w of finished) {
     for (const e of w.exercises) {
@@ -74,9 +82,18 @@ export function ProgressView({ store }: { store: Store }) {
       if (!key) continue;
       const top = topSet(e.sets);
       if (!top || (top.weight ?? 0) === 0) continue;
-      const cur = byName.get(key) ?? { count: 0, recW: 0, recReps: 0, lastTs: 0, recTs: 0 };
+      const cur = byName.get(key) ?? {
+        count: 0,
+        recW: 0,
+        recReps: 0,
+        lastTs: 0,
+        recTs: 0,
+        primary: null as MuscleGroup | null,
+      };
       cur.count++;
       cur.lastTs = Math.max(cur.lastTs, w.startedAt);
+      // Group by the exercise's PRIMARY muscle only (secondary ignored).
+      if (!cur.primary) cur.primary = resolveMuscles(e).primary;
       if ((top.weight ?? 0) > cur.recW) {
         cur.recW = top.weight ?? 0;
         cur.recReps = top.reps;
@@ -104,6 +121,27 @@ export function ProgressView({ store }: { store: Store }) {
     (a, b) => b[1].count - a[1].count || b[1].recW - a[1].recW,
   );
   const selected = records.find(([name]) => name === selectedName) ?? records[0] ?? null;
+
+  // Records grouped under their PRIMARY muscle group (subheaders + icon), in
+  // the canonical muscle order; anything without a known primary lands last.
+  type RecordEntry = (typeof records)[number];
+  const recordGroups: { muscle: MuscleGroup | null; rows: RecordEntry[] }[] = (() => {
+    const byMuscle = new Map<MuscleGroup | 'other', RecordEntry[]>();
+    for (const entry of records) {
+      const p = entry[1].primary;
+      const key: MuscleGroup | 'other' = p && p !== 'cardio' ? p : 'other';
+      const list = byMuscle.get(key) ?? [];
+      list.push(entry);
+      byMuscle.set(key, list);
+    }
+    const order: (MuscleGroup | 'other')[] = [...MUSCLE_IDS, 'other'];
+    return order
+      .map((m) => ({
+        muscle: (m === 'other' ? null : m) as MuscleGroup | null,
+        rows: (byMuscle.get(m) ?? []).sort((a, b) => b[1].recW - a[1].recW),
+      }))
+      .filter((g) => g.rows.length > 0);
+  })();
   const selectedSessions = selected
     ? finished
         .map((workout) => {
@@ -319,26 +357,38 @@ export function ProgressView({ store }: { store: Store }) {
               )}
             </div>
             <div>
-              {records.map(([name, r]) => {
-                const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
-                return (
-                  <button
-                    key={name}
-                    className={`record-row${
-                      showDesktopDetail && selected?.[0] === name ? ' selected' : ''
-                    }`}
-                    onClick={() => setSelectedName(name)}
-                  >
-                    <span className="n">{name}</span>
-                    <span className="v">{r.recW} kg</span>
-                    {wksAgo < 2 ? (
-                      <span className="tag tag-ok">{t.record}</span>
+              {recordGroups.map((group) => (
+                <div key={group.muscle ?? 'other'} className="record-group">
+                  <div className="record-group-head">
+                    {group.muscle ? (
+                      <MuscleIcon muscle={group.muscle} variant="chip" tone="secondary" />
                     ) : (
-                      <span className="when num">{t.wksAgo(wksAgo)}</span>
+                      <Icon name="barbell" />
                     )}
-                  </button>
-                );
-              })}
+                    <span>{group.muscle ? t.muscleGroups[group.muscle] : t.recordsOther}</span>
+                  </div>
+                  {group.rows.map(([name, r]) => {
+                    const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
+                    return (
+                      <button
+                        key={name}
+                        className={`record-row${
+                          showDesktopDetail && selected?.[0] === name ? ' selected' : ''
+                        }`}
+                        onClick={() => setSelectedName(name)}
+                      >
+                        <span className="n">{name}</span>
+                        <span className="v">{r.recW} kg</span>
+                        {wksAgo < 2 ? (
+                          <span className="tag tag-ok">{t.record}</span>
+                        ) : (
+                          <span className="when num">{t.wksAgo(wksAgo)}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         )}
