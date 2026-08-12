@@ -97,9 +97,12 @@ export function ProgressView({ store }: { store: Store }) {
     return { name, pts };
   });
 
-  const records = [...byName.entries()]
-    .sort((a, b) => b[1].count - a[1].count || b[1].recW - a[1].recW)
-    .slice(0, 3);
+  // Every lift with a recorded top set — the Records tab lists them all-time.
+  // Ordered by how often it's trained (so the default selection has the richest
+  // chart on desktop), then by the heavier record.
+  const records = [...byName.entries()].sort(
+    (a, b) => b[1].count - a[1].count || b[1].recW - a[1].recW,
+  );
   const selected = records.find(([name]) => name === selectedName) ?? records[0] ?? null;
   const selectedSessions = selected
     ? finished
