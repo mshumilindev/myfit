@@ -45,6 +45,7 @@ import {
 } from './data/exercises';
 import PER_SIDE from './data/per-side.json';
 import { isFlagOn } from './data/flags';
+import { describeDay, type DayReadout } from './data/daySuggest';
 import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
@@ -288,6 +289,26 @@ export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
     m.set(primary, (m.get(primary) ?? 0) + e.sets.length);
   }
   return m;
+}
+
+/**
+ * A session's day read from the muscle GROUPS trained (Ex suggestions): one
+ * group → that muscle, one split → Push/Pull/Legs, several across splits → the
+ * groups listed, many → full body. Groups are ordered by the exercise trained
+ * first, so the main lift leads. Used to name logged sessions in lists (program
+ * sessions keep their own day name instead).
+ */
+export function workoutDayReadout(w: Workout): DayReadout | null {
+  const order: MuscleGroup[] = [];
+  const counts = new Map<MuscleGroup, number>();
+  for (const e of [...w.exercises].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))) {
+    if (!isStrengthExercise(e)) continue;
+    const { primary } = resolveMuscles(e);
+    if (!primary || primary === 'cardio') continue;
+    if (!counts.has(primary)) order.push(primary);
+    counts.set(primary, (counts.get(primary) ?? 0) + Math.max(1, e.sets.length));
+  }
+  return describeDay(order.map((m) => [m, counts.get(m) as number]));
 }
 
 export function muscleVolumeKg(workouts: Workout[]): Map<MuscleGroup, number> {

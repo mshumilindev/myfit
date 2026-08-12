@@ -299,6 +299,7 @@ export const et: Strings = {
   dayFull: 'Kogu keha',
   looksLikeDay: (day: string) => `Tundub olevat ${day} päev`,
   reasonFromLogged: 'selle põhjal, mis on juba logitud',
+  reasonRecent: 'sinu viimaste treeningute põhjal',
   reasonUsualSplit: (weekday: string) => `sinu tavapärane split (${weekday})`,
   addedUsualLifts: (day: string) => `Tavapärased harjutused on juba lisatud (${day})`,
   suggestedLabel: 'Soovitatud',

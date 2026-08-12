@@ -5,8 +5,9 @@
  */
 import { useMemo } from 'react';
 import type { Shell } from '../App';
-import { useStore, workoutSets, workoutVolumeKg } from '../store';
+import { useStore, workoutDayReadout, workoutSets, workoutVolumeKg } from '../store';
 import { fmtDurationHM, fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
+import { dayReadoutLabel } from '../data/daySuggest';
 import { Icon } from '../ui';
 
 export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
@@ -43,8 +44,11 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
     return [...map.values()];
   }, [finished, locale]);
 
-  const title = (w: { dayName?: string | null; startedAt: number }) =>
-    w.dayName || fmtWeekday(w.startedAt, locale);
+  const title = (w: (typeof finished)[number]) => {
+    if (w.dayName) return w.dayName;
+    const r = workoutDayReadout(w);
+    return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
+  };
 
   return (
     <div className="screen hist-list" style={{ gap: 'var(--space-5)' }}>

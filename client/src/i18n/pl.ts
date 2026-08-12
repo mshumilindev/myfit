@@ -304,6 +304,7 @@ export const pl: Strings = {
   dayFull: 'Całe ciało',
   looksLikeDay: (day: string) => `Wygląda na dzień: ${day}`,
   reasonFromLogged: 'na podstawie tego, co już zapisano',
+  reasonRecent: 'na podstawie ostatnich treningów',
   reasonUsualSplit: (weekday: string) => `twój zwykły split (${weekday})`,
   addedUsualLifts: (day: string) => `Dodano już zwykłe ćwiczenia (${day})`,
   suggestedLabel: 'Sugestie',

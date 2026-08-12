@@ -64,7 +64,7 @@ import {
   equipmentIconName,
 } from '../components/Muscle';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
-import { dayFromCounts, exerciseDay, weekdayDay, type TrainingDay } from '../data/daySuggest';
+import { describeDay, exerciseDay, type TrainingDay } from '../data/daySuggest';
 import { muscleInfoByName, secondaryMusclesOf, type MuscleGroup } from '../data/exercises';
 import {
   fmtClock,
@@ -1786,29 +1786,63 @@ function AddExerciseSheet(props: {
 
   // --- Day-aware picker (Ex suggestions, AC-1) -----------------------------
   if (props.suggestions) {
-    const counts = muscleSetsInWorkout(props.workout);
-    const loggedDay = dayFromCounts(counts);
+    // Read the day from the muscle GROUPS trained — never a hardcoded guess:
+    //   • one dominant group        → name it ("Back"),
+    //   • several in one split       → the split ("Pull"),
+    //   • several across splits      → the actual groups ("Shoulders + Back"),
+    //   • many groups                → full body.
+    // Reference: this session's own logged exercises, else the most recent
+    // session on this weekday, else the most recent session overall. Groups are
+    // ordered by the exercise trained first, so the main lift leads the label.
     const weekday = new Date(props.workout.startedAt).getDay();
-    // "Usual {weekday} split" is learned from the member's own past sessions on
-    // this weekday, not a fixed guess. The hardcoded map is only a last resort.
-    let usualDay: TrainingDay | null = null;
-    if (!loggedDay) {
-      const hist = new Map<MuscleGroup, number>();
-      for (const w of store.workouts) {
-        if (w.finishedAt === null || w.id === props.workout.id) continue;
-        if (new Date(w.startedAt).getDay() !== weekday) continue;
-        for (const [m, n] of muscleSetsInWorkout(w)) hist.set(m, (hist.get(m) ?? 0) + n);
+    const past = store.workouts
+      .filter((w) => w.finishedAt !== null && w.id !== props.workout.id)
+      .sort((a, b) => b.startedAt - a.startedAt);
+    const orderedGroups = (w: Workout, requireSet: boolean): [MuscleGroup, number][] => {
+      const order: MuscleGroup[] = [];
+      const counts = new Map<MuscleGroup, number>();
+      for (const e of [...w.exercises].sort((a, b) => a.position - b.position)) {
+        if (requireSet && e.sets.length === 0) continue;
+        const p = resolveMuscles(e).primary;
+        if (!p || p === 'cardio') continue;
+        if (!counts.has(p)) order.push(p);
+        counts.set(p, (counts.get(p) ?? 0) + Math.max(1, e.sets.length));
       }
-      usualDay = dayFromCounts(hist);
+      return order.map((m) => [m, counts.get(m) as number]);
+    };
+    let refGroups = orderedGroups(props.workout, true);
+    let from: 'logged' | 'weekday' | 'overall' | null = refGroups.length ? 'logged' : null;
+    if (!refGroups.length) {
+      const sameWd = past.find((w) => new Date(w.startedAt).getDay() === weekday);
+      if (sameWd) {
+        refGroups = orderedGroups(sameWd, false);
+        if (refGroups.length) from = 'weekday';
+      }
+      if (!refGroups.length && past[0]) {
+        refGroups = orderedGroups(past[0], false);
+        if (refGroups.length) from = 'overall';
+      }
     }
-    const inferredDay = loggedDay ?? usualDay ?? weekdayDay(weekday);
-    const from: 'logged' | 'weekday' = loggedDay ? 'logged' : 'weekday';
+    const readout = describeDay(refGroups);
     const DAY_LABEL: Record<TrainingDay, string> = {
       push: t.dayPush,
       pull: t.dayPull,
       legs: t.dayLegs,
       core: t.dayCore,
       full: t.dayFull,
+    };
+    const dayLabel = !readout
+      ? ''
+      : readout.kind === 'split'
+        ? DAY_LABEL[readout.split]
+        : readout.kind === 'full'
+          ? t.dayFull
+          : readout.groups.map((m) => t.muscleGroups[m]).join(' + ');
+    const matchesReadout = (primary: MuscleGroup): boolean => {
+      if (!readout) return false;
+      if (readout.kind === 'split') return exerciseDay(primary) === readout.split;
+      if (readout.kind === 'full') return true;
+      return readout.groups.includes(primary);
     };
     type Cand = {
       id: string;
@@ -1830,13 +1864,13 @@ function AddExerciseSheet(props: {
       }))
       .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
     const visible = needle ? all.filter((x) => x.name.toLowerCase().includes(needle)) : all;
-    const suggested = visible.filter((x) => x.day === inferredDay).slice(0, 4);
+    const suggested = readout ? visible.filter((x) => matchesReadout(x.primary)).slice(0, 4) : [];
     const suggestedIds = new Set(suggested.map((x) => x.id));
     const rest = visible
       .filter((x) => !suggestedIds.has(x.id))
       .sort((a, b) => a.name.localeCompare(b.name));
     const noneToSuggest =
-      suggested.length === 0 && all.filter((x) => x.day === inferredDay).length === 0;
+      !!readout && suggested.length === 0 && !all.some((x) => matchesReadout(x.primary));
 
     const pick = (x: Cand) =>
       props.onPick(x.name, 'strength', {
@@ -1862,14 +1896,18 @@ function AddExerciseSheet(props: {
     return (
       <Sheet onClose={props.onClose}>
         <div className="add-head">
-          <div className="add-banner">
-            <div className="add-banner-title">{t.looksLikeDay(DAY_LABEL[inferredDay])}</div>
-            <div className="add-banner-reason">
-              {from === 'logged'
-                ? t.reasonFromLogged
-                : t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))}
+          {readout && (
+            <div className="add-banner">
+              <div className="add-banner-title">{t.looksLikeDay(dayLabel)}</div>
+              <div className="add-banner-reason">
+                {from === 'logged'
+                  ? t.reasonFromLogged
+                  : from === 'weekday'
+                    ? t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))
+                    : t.reasonRecent}
+              </div>
             </div>
-          </div>
+          )}
           <button className="btn btn-primary add-done" onClick={props.onClose}>
             {t.pickerDone}
           </button>
@@ -1896,7 +1934,7 @@ function AddExerciseSheet(props: {
           ))}
         </div>
         {noneToSuggest ? (
-          <div className="add-note">{t.addedUsualLifts(DAY_LABEL[inferredDay])}</div>
+          <div className="add-note">{t.addedUsualLifts(dayLabel)}</div>
         ) : suggested.length > 0 ? (
           <div className="add-section">
             <div className="section-label">{t.suggestedLabel}</div>

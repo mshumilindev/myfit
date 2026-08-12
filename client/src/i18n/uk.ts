@@ -303,6 +303,7 @@ export const uk: Strings = {
   dayFull: 'Все тіло',
   looksLikeDay: (day: string) => `Схоже на день: ${day}`,
   reasonFromLogged: 'за тим, що вже залоговано',
+  reasonRecent: 'за твоїми останніми тренуваннями',
   reasonUsualSplit: (weekday: string) => `твій звичний спліт (${weekday})`,
   addedUsualLifts: (day: string) => `Ти вже додав звичні вправи (${day})`,
   suggestedLabel: 'Пропозиції',

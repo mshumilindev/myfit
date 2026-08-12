@@ -312,6 +312,7 @@ export const lt: Strings = {
   dayFull: 'Visas kūnas',
   looksLikeDay: (day: string) => `Panašu į dieną: ${day}`,
   reasonFromLogged: 'pagal tai, kas jau įrašyta',
+  reasonRecent: 'pagal paskutines treniruotes',
   reasonUsualSplit: (weekday: string) => `tavo įprastas splitas (${weekday})`,
   addedUsualLifts: (day: string) => `Jau pridėti įprasti pratimai (${day})`,
   suggestedLabel: 'Siūloma',

@@ -5,6 +5,7 @@ import type { ExerciseKind, Gym, Workout } from '../types';
 import { callFn } from '../api';
 import { useFlag } from '../data/flags';
 import { MuscleChip } from '../components/Muscle';
+import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
   addExercise,
@@ -15,6 +16,7 @@ import {
   repeatWorkout,
   startWorkout,
   topSet,
+  workoutDayReadout,
   workoutSets,
   workoutVolumeKg,
   type useStore,
@@ -117,8 +119,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
 
   /** Session heading: the program day name if it has one, else the weekday. */
-  const sessionTitle = (w: { dayName?: string | null; startedAt: number }) =>
-    w.dayName || fmtWeekday(w.startedAt, locale);
+  // Program sessions keep their own day name; logged sessions are named by the
+  // muscle groups trained ("Back + Shoulders", "Legs", "Chest"), weekday only
+  // as a last resort (Ex suggestions).
+  const sessionTitle = (w: Workout) => {
+    if (w.dayName) return w.dayName;
+    const r = workoutDayReadout(w);
+    return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
+  };
 
   function beginSession(gymId: string | null) {
     setStartPicker(false);

@@ -309,6 +309,7 @@ export const en = {
   dayFull: 'Full body',
   looksLikeDay: (day: string) => `Looks like ${day} day`,
   reasonFromLogged: "from what you've logged so far",
+  reasonRecent: 'based on your recent training',
   reasonUsualSplit: (weekday: string) => `your usual ${weekday} split`,
   addedUsualLifts: (day: string) => `You've added the usual ${day} lifts`,
   suggestedLabel: 'Suggested',

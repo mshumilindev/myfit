@@ -9247,7 +9247,7 @@ i > svg {
   }
 
   .today-live-mode .pane-main {
-    max-width: 980px;
+    max-width: none;
   }
 }
 
@@ -9481,7 +9481,7 @@ i > svg {
   }
 
   .session-live .plan-progress {
-    max-width: 720px;
+    max-width: none;
   }
 
   .session-live .exercise-card,
@@ -12210,7 +12210,7 @@ h6 {
   .session-past .ss-block,
   .session-live .past-ex-card,
   .session-live .ss-block {
-    max-width: 720px;
+    max-width: none;
   }
 
   .session-past .past-ex-card {
@@ -13462,6 +13462,7 @@ h6 {
 .add-done {
   flex: none;
   min-height: 40px;
+  margin-left: auto;
 }
 .kind-grid.three {
   grid-template-columns: repeat(3, 1fr);
