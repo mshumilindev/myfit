@@ -361,7 +361,7 @@ export function ProgressView({ store }: { store: Store }) {
                 <div key={group.muscle ?? 'other'} className="record-group">
                   <div className="record-group-head">
                     {group.muscle ? (
-                      <MuscleIcon muscle={group.muscle} variant="chip" tone="secondary" />
+                      <MuscleIcon muscle={group.muscle} variant="row" tone="primary" />
                     ) : (
                       <Icon name="barbell" />
                     )}

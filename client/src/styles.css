@@ -3649,23 +3649,29 @@ i > svg {
   vertical-align: middle;
 }
 
-/* Records grouped by primary muscle: a small icon + name subheader per group. */
+/* Records grouped by primary muscle: a prominent icon + name subheader per
+   group, so it clearly leads the rows below rather than getting lost. */
 .record-group + .record-group {
-  margin-top: 14px;
+  margin-top: 22px;
 }
 .record-group-head {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 2px 0 6px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent-300);
+  gap: 10px;
+  padding: 6px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-accent-100);
+}
+.record-group-head > svg {
+  height: 24px;
+  width: auto;
+  flex: none;
 }
 .record-group-head > .ui-icon {
-  font-size: 14px;
-  color: var(--color-accent-800);
+  font-size: 19px;
+  color: var(--color-accent);
 }
 
 .record-row {
