@@ -3662,6 +3662,9 @@ i > svg {
   font-size: 15px;
   text-align: left;
   cursor: pointer;
+  /* No mobile tap flash, and no animated fade when a row becomes selected. */
+  -webkit-tap-highlight-color: transparent;
+  transition: none;
 }
 
 .record-row:last-child {
@@ -3675,15 +3678,25 @@ i > svg {
   padding-inline: 12px;
 }
 
-/* No transient hover/focus/active state on record rows — only the selected
-   row is highlighted (on touch the focus ring would otherwise stick). */
+/* Only the selected row is ever highlighted — kill every transient
+   hover / focus / focus-visible / active state (they stick on touch). */
 .record-row:focus,
 .record-row:focus-visible,
 .record-row:active {
   outline: none;
 }
-.record-row:not(.selected):hover {
+.record-row:not(.selected):hover,
+.record-row:not(.selected):active,
+.record-row:not(.selected):focus,
+.record-row:not(.selected):focus-visible {
   background: transparent;
+  box-shadow: 0 1px 0 var(--color-divider);
+}
+.record-row:last-child:not(.selected):hover,
+.record-row:last-child:not(.selected):active,
+.record-row:last-child:not(.selected):focus,
+.record-row:last-child:not(.selected):focus-visible {
+  box-shadow: none;
 }
 
 .record-row .n {
@@ -13606,6 +13619,7 @@ h6 {
   border-radius: var(--radius-sm);
   cursor: pointer;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 .set-dup i {
   font-size: 15px;

@@ -628,10 +628,25 @@ export function upsertSet(
   const existing = set.id ? ex.sets.find((s) => s.id === set.id) : undefined;
   const type: SetType = set.type ?? (set.isWarmup ? 'warmup' : 'working');
   const loggedAt = set.loggedAt ?? existing?.loggedAt ?? Date.now();
-  // Rest is derived at display time from the real gaps between set timestamps
-  // (loggedAt), never stored — the previously stored per-set restSec values were
-  // computed incorrectly. Keep an explicit value only if a caller passes one.
-  const restSec = set.restSec !== undefined ? set.restSec : null;
+  // Rest before a NEW set = the real gap to the most-recently logged set
+  // anywhere in the workout (so rest between exercise cards is captured too),
+  // stamped once at log time. Edits keep their existing value; absurd gaps
+  // (backfilled / resumed-next-day) are dropped.
+  const restSec =
+    set.restSec !== undefined
+      ? set.restSec
+      : existing
+        ? (existing.restSec ?? null)
+        : (() => {
+            const prevMax = Math.max(
+              0,
+              ...ex.sets.map((s) => s.loggedAt ?? 0),
+              ...w.exercises.flatMap((e) => e.sets.map((s) => s.loggedAt ?? 0)),
+            );
+            if (!prevMax || prevMax >= loggedAt) return null;
+            const gap = Math.round((loggedAt - prevMax) / 1000);
+            return gap > 0 && gap < 3 * 3600 ? gap : null;
+          })();
   const full: SetEntry = {
     id: set.id ?? uuid(),
     reps: set.reps,
@@ -693,9 +708,12 @@ export function duplicateSet(workoutId: string, exerciseId: string, setId: strin
     ...src,
     id: uuid(),
     drops: src.drops ? src.drops.map((d) => ({ ...d })) : [],
-    // Rest is derived from timestamps at display time; don't store it.
+    // Rest for the copy = gap since the set it was duplicated from (AC-1.5).
     loggedAt: dupAt,
-    restSec: null,
+    restSec:
+      src.loggedAt != null
+        ? Math.min(3 * 3600, Math.max(0, Math.round((dupAt - src.loggedAt) / 1000)))
+        : null,
   };
   ordered.splice(srcIdx + 1, 0, copy);
   const renumbered = ordered.map((s, i) => ({ ...s, position: i }));
@@ -722,7 +740,7 @@ export function restMs(prevLoggedAt?: number | null, loggedAt?: number | null): 
  * time, so clear every stored value. Idempotent — guarded by a local flag and
  * only rewrites workouts that actually carry stale rest.
  */
-const REST_CLEARED_KEY = 'spotter.restCleared.v1';
+const REST_CLEARED_KEY = 'spotter.restCleared.v2';
 export function clearStoredRest(): void {
   try {
     if (localStorage.getItem(REST_CLEARED_KEY)) return;

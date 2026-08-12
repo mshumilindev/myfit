@@ -349,25 +349,15 @@ export function SessionView(props: {
     prescribedSets > 0 ? Math.round((loggedPrescribedSets / prescribedSets) * 100) : 0;
   const sortedExercises = [...workout.exercises].sort((a, b) => a.position - b.position);
 
-  // Rest is derived from the real gaps between set timestamps (loggedAt), in
-  // true chronological order across every exercise. This drives both the
-  // per-set rest line and the rest shown between exercise cards (the gap before
-  // a card's first set = time since the previous card's last set).
+  // The most-recently logged set across the whole session — drives the live
+  // rest clock and marks the only exercise whose rest is still "running" (a set
+  // logged elsewhere ends the previous card's rest).
   const allSetsChrono = sortedExercises
     .flatMap((e) => e.sets.map((s) => ({ exId: e.id, s })))
     .filter((x) => x.s.loggedAt != null)
     .sort((a, b) => (a.s.loggedAt as number) - (b.s.loggedAt as number));
-  const restBeforeSet = new Map<string, number>();
-  for (let i = 1; i < allSetsChrono.length; i++) {
-    const gap =
-      (allSetsChrono[i].s.loggedAt as number) - (allSetsChrono[i - 1].s.loggedAt as number);
-    // Ignore absurd gaps (backfilled or resumed-next-day sets).
-    if (gap > 0 && gap < 3 * 3600 * 1000) restBeforeSet.set(allSetsChrono[i].s.id, gap);
-  }
   const lastChrono = allSetsChrono[allSetsChrono.length - 1] ?? null;
   const lastLoggedAt = lastChrono ? (lastChrono.s.loggedAt as number) : 0;
-  // The exercise that owns the most-recently logged set — the only one whose
-  // rest is still "running"; a set logged elsewhere ends the previous card's rest.
   const lastLoggedExId = lastChrono ? lastChrono.exId : null;
   // The trim only counts while it's still anchored to the current last set.
   const restCutMs = restCut.at === lastLoggedAt ? restCut.ms : 0;
@@ -791,11 +781,12 @@ export function SessionView(props: {
                 const type = setTypeOf(s);
                 const drops = setDrops(s);
                 const idx = grp ? `R${i + 1}` : `${i + 1}`;
-                // Rest before this set — the real gap to the previously logged
-                // set anywhere in the session (chronological). For a card's
-                // first set that gap is the rest since the previous exercise, so
-                // it renders as an "between cards" marker at the top of the card.
-                const restBefore = restBeforeSet.get(s.id) ?? null;
+                // Rest before this set, captured at log time (gap to the
+                // previously logged set anywhere in the session). Cleared for
+                // old workouts whose values were computed incorrectly. For a
+                // card's first set the gap is the rest since the previous
+                // exercise, so it renders as a "between cards" marker on top.
+                const restBefore = s.restSec != null ? s.restSec * 1000 : null;
                 const interCard = i === 0;
                 const restLine =
                   restBefore !== null && restBefore > 0 ? (
