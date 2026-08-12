@@ -431,19 +431,17 @@ export function App() {
         {authed && notices.some((n) => !n.read) && (
           <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
         )}
-        {open &&
-          activeOverlay?.screen !== 'session' &&
-          activeOverlay?.screen !== 'past-workout' && (
-            <LiveHero
-              workout={open}
-              gym={store.gyms.find((g) => g.id === open.gymId) ?? null}
-              gyms={store.gyms}
-              offline={store.syncStatus === 'offline'}
-              queued={store.queue.length}
-              onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
-              mode={effectiveTab === 'today' ? 'today' : 'compact'}
-            />
-          )}
+        {open && activeOverlay?.screen !== 'session' && (
+          <LiveHero
+            workout={open}
+            gym={store.gyms.find((g) => g.id === open.gymId) ?? null}
+            gyms={store.gyms}
+            offline={store.syncStatus === 'offline'}
+            queued={store.queue.length}
+            onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
+            mode={effectiveTab === 'today' ? 'today' : 'compact'}
+          />
+        )}
         <Suspense fallback={<ScreenFallback />}>
           {activeOverlay?.screen === 'session' && (
             <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />

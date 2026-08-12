@@ -51,9 +51,13 @@ export function describeDay(ordered: Array<[MuscleGroup, number]>): DayReadout |
   let groups = withSets.filter(([, n]) => n >= max * 0.34).map(([m]) => m);
   if (groups.length === 0) groups = [withSets[0][0]];
   const splits = [...new Set(groups.map((m) => exerciseDay(m)).filter(Boolean))] as TrainingDay[];
+  // "Full body" means spanning the main areas (push + pull + legs) — NOT just
+  // hitting many muscles inside one area. A thorough leg day (quads, hamstrings,
+  // glutes) is still Legs, and legs + core is Legs + Core, never Full body.
+  const mainSplits = splits.filter((s) => s === 'push' || s === 'pull' || s === 'legs');
   if (groups.length === 1) return { kind: 'muscle', groups };
   if (splits.length === 1) return { kind: 'split', groups, split: splits[0] };
-  if (groups.length >= 4 || splits.length >= 3) return { kind: 'full', groups };
+  if (mainSplits.length >= 3) return { kind: 'full', groups };
   return { kind: 'mixed', groups };
 }
 
@@ -64,6 +68,7 @@ interface DayLabelStrings {
   dayLegs: string;
   dayCore: string;
   dayFull: string;
+  dayUpper: string;
   muscleGroups: Record<MuscleGroup, string>;
 }
 export function dayReadoutLabel(r: DayReadout, t: DayLabelStrings): string {
@@ -76,7 +81,29 @@ export function dayReadoutLabel(r: DayReadout, t: DayLabelStrings): string {
   };
   if (r.kind === 'split') return DAY[r.split];
   if (r.kind === 'full') return t.dayFull;
-  return r.groups.map((m) => t.muscleGroups[m]).join(' + ');
+  // mixed: collapse each split-cluster — a split with ≥2 worked muscles reads
+  // as the split name ("Legs"), a lone muscle keeps its own name ("Core").
+  const order: TrainingDay[] = [];
+  const bySplit = new Map<TrainingDay, MuscleGroup[]>();
+  for (const m of r.groups) {
+    const s = (exerciseDay(m) ?? 'full') as TrainingDay;
+    if (!bySplit.has(s)) {
+      bySplit.set(s, []);
+      order.push(s);
+    }
+    (bySplit.get(s) as MuscleGroup[]).push(m);
+  }
+  // Chest AND Back together read as Upper body (the two big upper groups) — a
+  // big+small pair like Chest + Biceps does NOT. Core is appended if trained.
+  if (r.groups.includes('chest') && r.groups.includes('back')) {
+    return bySplit.has('core') ? `${t.dayUpper} + ${DAY.core}` : t.dayUpper;
+  }
+  return order
+    .map((s) => {
+      const ms = bySplit.get(s) as MuscleGroup[];
+      return ms.length >= 2 ? DAY[s] : t.muscleGroups[ms[0]];
+    })
+    .join(' + ');
 }
 
 /** The training day with the most logged sets, or null when nothing is logged. */

@@ -96,15 +96,24 @@ export function LiveHero({
         <div className="live-hero-body">{body}</div>
       )}
       <div className="live-hero-actions">
-        {!closed && (
-          <button className="live-attach" onClick={() => setPicker(true)}>
+        {!closed && mode === 'session' && (
+          <button
+            className="live-attach icon-only"
+            onClick={() => setPicker(true)}
+            aria-label={gym ? t.changeGym : t.liveAttach}
+            title={gym ? t.changeGym : t.liveAttach}
+          >
             <Icon name="map-pin" />
-            {gym ? t.changeGym : t.liveAttach}
           </button>
         )}
         {mode !== 'session' && (
-          <button className="live-resume" onClick={onResume}>
-            {closed ? t.liveReopen : t.liveResume}
+          <button
+            className="live-resume icon-only"
+            onClick={onResume}
+            aria-label={closed ? t.liveReopen : t.liveResume}
+            title={closed ? t.liveReopen : t.liveResume}
+          >
+            <Icon name={closed ? 'arrow-clockwise' : 'play'} weight="fill" />
           </button>
         )}
         {actions}

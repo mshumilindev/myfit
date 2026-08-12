@@ -24,6 +24,16 @@ export interface SetEntry {
   calories?: number | null;
   rpe?: number | null;
   position: number;
+  /**
+   * When this set was logged (ms epoch). Written on log/duplicate; drives the
+   * live rest count-ups. Absent on older data.
+   */
+  loggedAt?: number | null;
+  /**
+   * Actual rest before this set, in seconds, captured at log time so it
+   * survives as part of the saved set history (independent of loggedAt).
+   */
+  restSec?: number | null;
 }
 
 export type ExerciseKind = 'strength' | 'cardio' | 'warmup' | 'cooldown';

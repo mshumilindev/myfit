@@ -5,9 +5,17 @@
  */
 import { useMemo } from 'react';
 import type { Shell } from '../App';
-import { useStore, workoutDayReadout, workoutSets, workoutVolumeKg } from '../store';
+import {
+  muscleSetsInWorkout,
+  useStore,
+  workoutDayReadout,
+  workoutSets,
+  workoutVolumeKg,
+} from '../store';
 import { fmtDurationHM, fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
+import type { MuscleGroup } from '../data/exercises';
+import { MuscleChip } from '../components/Muscle';
 import { Icon } from '../ui';
 
 export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
@@ -50,6 +58,13 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };
 
+  const sessionMuscles = (w: (typeof finished)[number]): MuscleGroup[] =>
+    [...muscleSetsInWorkout(w).entries()]
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([m]) => m)
+      .slice(0, 4);
+
   return (
     <div className="screen hist-list" style={{ gap: 'var(--space-5)' }}>
       <div className="hist-head">
@@ -82,6 +97,13 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
                       {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
                       {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
                     </div>
+                    {sessionMuscles(w).length > 0 && (
+                      <div className="recent-muscles">
+                        {sessionMuscles(w).map((m) => (
+                          <MuscleChip key={m} muscle={m} tone="secondary" />
+                        ))}
+                      </div>
+                    )}
                   </span>
                   <Icon name="arrow-up-right" className="go" />
                 </button>

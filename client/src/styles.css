@@ -1790,14 +1790,16 @@ i > svg {
 .session-top .back {
   width: 36px;
   height: 36px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-neutral-300);
   font-size: 20px;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 0;
 }
 
 .session-live .session-top .back {
@@ -9292,6 +9294,7 @@ i > svg {
 @media (min-width: 720px) {
   .session-screen .session-top,
   .session-screen .stats-strip,
+  .session-screen .muscles-worked,
   .session-screen .session-body {
     max-width: none;
     width: auto;
@@ -11185,10 +11188,16 @@ h6 {
   box-shadow: none;
 }
 
-.set-wrap > .set-row {
+.set-wrap > .set-main > .set-row,
+.set-line > .set-main > .set-row {
   /* Keep horizontal inset so record/hover tint don't sit flush. */
   padding: 7px 8px;
   box-shadow: none;
+}
+
+/* Grouped drop rows keep their extra indent even with the set-main wrapper. */
+.set-wrap:has(.set-row.rrow) > .drops {
+  padding-left: 26px;
 }
 
 .set-row .kind.tdrop {
@@ -13528,4 +13537,375 @@ h6 {
 }
 .td-muscles .mchip {
   margin-right: 4px;
+}
+
+/* --- Live-session power features: Duplicate · Rest timer · Share ---------- */
+
+/* Duplicate control + rest caption on each logged set row. */
+.set-main {
+  position: relative;
+}
+.set-line {
+  display: block;
+}
+.set-rest {
+  /* Its own row between sets — same height as a set row — right-aligned over
+     the Working/Record column, clearing the duplicate icon in live mode. */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+.session-live .set-rest {
+  padding-right: 36px;
+}
+.set-dup {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  color: var(--color-neutral-500);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+}
+.set-dup i {
+  font-size: 15px;
+  line-height: 0;
+}
+.set-dup:hover {
+  color: var(--color-accent-800);
+  background: var(--color-neutral-200);
+}
+/* Reserve room on the right so the type label never sits under the icon. */
+.session-live .set-main > .set-row {
+  padding-right: 36px;
+}
+
+/* Per-exercise rest count-up (AC-2.8). */
+.ex-resting {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 2px;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.ex-resting > .ui-icon {
+  font-size: 13px;
+  color: var(--color-accent-800);
+  position: relative;
+  top: 0.5px; /* optical-center the glyph against the small caption text */
+}
+.ex-resting > span {
+  line-height: 1;
+}
+
+/* Live "next up" + running rest count-up (AC-2.7).
+   A cohesive bar that butts against the hero (no gap) and stays pinned to the
+   top of the viewport while the exercise list scrolls under it. */
+.live-rest {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+/* No gap to cancel here — .session-live .pane-main already has gap:0, so the
+   bar sits flush under the hero. (A negative margin would tuck it under the
+   pinned, opaque hero.) */
+/* Pin the live-session hero to the top of the scroll, matching the compact
+   hero that stays fixed above every other page during a session. A solid
+   ground keeps scrolled content from bleeding through the translucent photo. */
+.session-live .session-top.live-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  background: var(--color-bg);
+}
+/* Current exercise + which set is next — a graphite twin of the Rest panel:
+   same height, same icon column, distinct tone. */
+.current-strip,
+.rest-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 8px var(--gutter);
+}
+.current-strip {
+  background: var(--color-neutral-900);
+}
+.current-strip > .ui-icon {
+  font-size: 16px;
+  color: var(--color-accent-400);
+  flex: none;
+}
+.current-strip .cur-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  flex: none;
+}
+.current-strip .cur-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.current-strip .cur-set {
+  flex: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent-200);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.rest-strip {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.rest-strip > .ui-icon {
+  font-size: 16px;
+  flex: none;
+}
+.rest-strip .rest-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent-200);
+}
+.rest-strip .rest-clock {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+/* Content that isn't inside a card needs the same side gutter as everything
+   else (in live/past the scroll container itself has no horizontal padding). */
+.session-screen .muscles-worked {
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+
+/* Summary: primary Share CTA + Edit/Done row. */
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.share-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.share-cta i {
+  font-size: 17px;
+  line-height: 0;
+}
+
+/* Share bottom sheet (AC-3.2). */
+.share-sheet .share-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 12px;
+}
+.share-sheet .share-head h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+.share-format {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--color-neutral-200);
+  border-radius: 999px;
+  padding: 3px;
+}
+.share-format button {
+  border: none;
+  background: none;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-neutral-600);
+  cursor: pointer;
+}
+.share-format button.on {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.share-preview {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0 14px;
+}
+.share-canvas {
+  display: block;
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+  width: auto;
+  height: auto;
+}
+.share-preview.story .share-canvas {
+  max-height: 46vh;
+  max-width: 100%;
+}
+.share-preview.square .share-canvas {
+  max-height: 40vh;
+  max-width: 100%;
+}
+.share-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+.share-actions .grow {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.share-actions .grow i {
+  font-size: 17px;
+  line-height: 0;
+}
+.share-icon-btn {
+  width: 48px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.share-icon-btn i {
+  font-size: 18px;
+  line-height: 0;
+}
+
+/* --- Session Finish/Discard + hero gym control --------------------------- */
+
+/* Change gym: icon-only square pinned to the hero's top-right in a session. */
+.live-attach.icon-only {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+}
+/* Reserve room for the top-right gym icon — mobile only. On desktop the hero
+   body is a relative flex item, where `right` would shift it under the rail. */
+@media (max-width: 719px) {
+  .session-live .session-live-hero .live-hero-body {
+    padding-right: 56px;
+  }
+}
+
+/* Bottom row: Discard shrinks to a square icon; Finish fills the width. */
+.session-discard-row {
+  margin-top: auto;
+  padding-top: var(--space-5);
+  display: flex;
+  gap: var(--space-3);
+  align-items: stretch;
+  justify-content: stretch;
+}
+.session-discard-btn.icon-only {
+  flex: none;
+  width: 46px;
+  min-height: 46px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+}
+.session-finish-docked {
+  flex: 1;
+  min-height: 46px;
+  gap: 8px;
+}
+.session-finish-docked i {
+  font-size: 16px;
+}
+
+/* Floating Finish button, shown until the Discard row scrolls into view. */
+.session-finish-fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--safe-bottom) + 24px);
+  z-index: 40;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: var(--color-accent);
+  color: #16171a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+  cursor: pointer;
+}
+.session-finish-fab i {
+  font-size: 26px;
+  line-height: 0;
+}
+.session-finish-fab:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Compact/today hub: Resume as an icon-only button (Change gym is dropped). */
+.live-resume.icon-only {
+  width: 40px;
+  min-width: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.live-resume.icon-only i {
+  font-size: 16px;
+  line-height: 0;
+}
+/* Only the compact Resume icon sits on the right now, so give the label/timer
+   more room than the old two-button reservation. */
+.live-hero:not(.session-live-hero) .live-hero-body {
+  right: 60px;
+}
+
+/* Desktop session hero: keep Change gym a square icon (the base desktop rule
+   makes it 34×40), and drop the back button — the rail handles navigation. */
+@media (min-width: 720px) {
+  .session-live .session-live-hero .live-attach.icon-only {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+  .session-live .session-top.live-toolbar > .back {
+    display: none;
+  }
 }

@@ -576,6 +576,20 @@ export function upsertSet(
   if (!w || !ex) return;
   const existing = set.id ? ex.sets.find((s) => s.id === set.id) : undefined;
   const type: SetType = set.type ?? (set.isWarmup ? 'warmup' : 'working');
+  const loggedAt = set.loggedAt ?? existing?.loggedAt ?? Date.now();
+  // Rest before this set, captured at log time so it persists in history
+  // (AC-2.10). Kept as-is on edits; derived from the previous set on new ones.
+  const prevSet = existing
+    ? undefined
+    : [...ex.sets].sort((a, b) => a.position - b.position).at(-1);
+  const restSec =
+    set.restSec !== undefined
+      ? set.restSec
+      : existing
+        ? (existing.restSec ?? null)
+        : prevSet?.loggedAt != null
+          ? Math.max(0, Math.round((loggedAt - prevSet.loggedAt) / 1000))
+          : null;
   const full: SetEntry = {
     id: set.id ?? uuid(),
     reps: set.reps,
@@ -588,6 +602,9 @@ export function upsertSet(
     calories: set.calories ?? null,
     rpe: set.rpe ?? null,
     position: existing ? existing.position : ex.sets.length,
+    // Rest timer (AC-2.1): stamp new sets; keep the original stamp on edits.
+    loggedAt,
+    restSec,
   };
   const sets = existing ? ex.sets.map((s) => (s.id === full.id ? full : s)) : [...ex.sets, full];
   patchWorkout(workoutId, {
@@ -614,6 +631,47 @@ export function addDropToSet(
         ? 'reverse-drop'
         : 'drop';
   upsertSet(workoutId, exerciseId, { ...s, id: s.id, type, drops: [...(s.drops ?? []), drop] });
+}
+
+/**
+ * Duplicate set (AC-1): deep-copy the whole set object — including its type
+ * and all drops — assign a fresh id + rest timestamp, splice it in right after
+ * the source, and renumber positions. Returns the new set's id.
+ */
+export function duplicateSet(workoutId: string, exerciseId: string, setId: string): string | null {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  const ex = w?.exercises.find((e) => e.id === exerciseId);
+  const src = ex?.sets.find((s) => s.id === setId);
+  if (!w || !ex || !src) return null;
+  const ordered = [...ex.sets].sort((a, b) => a.position - b.position);
+  const srcIdx = ordered.findIndex((s) => s.id === setId);
+  if (srcIdx < 0) return null;
+  const dupAt = Date.now();
+  const copy: SetEntry = {
+    ...src,
+    id: uuid(),
+    drops: src.drops ? src.drops.map((d) => ({ ...d })) : [],
+    // Rest for the copy counts from the moment of duplication (AC-1.5).
+    loggedAt: dupAt,
+    restSec: src.loggedAt != null ? Math.max(0, Math.round((dupAt - src.loggedAt) / 1000)) : null,
+  };
+  ordered.splice(srcIdx + 1, 0, copy);
+  const renumbered = ordered.map((s, i) => ({ ...s, position: i }));
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets: renumbered } : e)),
+  });
+  saveWorkout(workoutId);
+  return copy.id;
+}
+
+/**
+ * Actual rest before a set: the real elapsed time between the two set logs
+ * (AC-2.2). Matches the live "since last set" count-up. Null when a stamp is
+ * missing.
+ */
+export function restMs(prevLoggedAt?: number | null, loggedAt?: number | null): number | null {
+  if (!prevLoggedAt || !loggedAt) return null;
+  return Math.max(0, loggedAt - prevLoggedAt);
 }
 
 export function deleteSet(workoutId: string, exerciseId: string, setId: string): void {

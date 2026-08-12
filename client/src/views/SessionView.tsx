@@ -11,6 +11,8 @@ import {
   deleteSet,
   deleteWorkout,
   duplicateExercise,
+  duplicateSet,
+  restMs,
   equipmentFor,
   est1rm,
   exerciseKind,
@@ -49,6 +51,7 @@ import {
   workoutEquipment,
   workoutSets,
   workoutVolumeKg,
+  workoutDayReadout,
   reorderExercises,
   type SupersetGroup,
 } from '../store';
@@ -64,7 +67,8 @@ import {
   equipmentIconName,
 } from '../components/Muscle';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
-import { describeDay, exerciseDay, type TrainingDay } from '../data/daySuggest';
+import { describeDay, dayReadoutLabel, exerciseDay, type TrainingDay } from '../data/daySuggest';
+import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
 import { muscleInfoByName, secondaryMusclesOf, type MuscleGroup } from '../data/exercises';
 import {
   fmtClock,
@@ -85,6 +89,13 @@ import { CURATED, searchCatalog } from '../data/exercises';
 import { getRole } from '../api';
 
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
+
+/** m:ss for rest durations (pure — safe in render). */
+function mmss(ms: number): string {
+  const total = Math.max(0, Math.round(ms / 1000));
+  const m = Math.floor(total / 60);
+  return `${m}:${String(total % 60).padStart(2, '0')}`;
+}
 
 /** Ghost-row proposal; timed exercises carry duration/distance instead of kg. */
 type GhostValues = {
@@ -111,9 +122,133 @@ type SheetState =
 
 type DialogState =
   | { kind: 'del-ex'; exId: string }
-  | { kind: 'finish-warn'; emptyName: string }
+  | { kind: 'finish-warn'; emptyName: string | null }
   | { kind: 'del-workout' }
   | null;
+
+/**
+ * Share-summary bottom sheet (AC-3.2): live canvas preview, format toggle,
+ * and native-share / save / copy. Drawing is offline and separate from the
+ * live UI. Defined at module scope so it isn't re-created each render.
+ */
+function ShareSheet(props: {
+  model: ShareModel;
+  isDesktop: boolean;
+  t: ReturnType<typeof useT>['t'];
+  shell: Shell;
+  onClose: () => void;
+}) {
+  const { t, model } = props;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [format, setFormat] = useState<ShareFormat>(props.isDesktop ? 'square' : 'story');
+  const [busy, setBusy] = useState(false);
+  const fileName = 'workout.png';
+
+  useEffect(() => {
+    if (canvasRef.current) drawShareCard(canvasRef.current, model, format);
+  }, [model, format]);
+
+  async function withBlob(fn: (b: Blob) => void | Promise<void>): Promise<void> {
+    const cv = canvasRef.current;
+    if (!cv) return;
+    setBusy(true);
+    try {
+      const b = await cardBlob(cv);
+      if (b) await fn(b);
+    } catch {
+      /* user cancelled the share, or unsupported */
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function download(b: Blob): void {
+    const url = URL.createObjectURL(b);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function nativeShare(b: Blob): Promise<void> {
+    const file = new File([b], fileName, { type: 'image/png' });
+    if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+      await navigator.share({ files: [file], title: model.title });
+    } else {
+      download(b);
+    }
+  }
+
+  async function copy(b: Blob): Promise<void> {
+    if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]);
+      props.shell.toast({ kind: 'ok', icon: 'copy', text: t.shareCopied });
+    } else {
+      download(b);
+    }
+  }
+
+  return (
+    <Sheet className="share-sheet" onClose={props.onClose}>
+      <div className="share-head">
+        <h3>{t.shareSheetTitle}</h3>
+        <div className="share-format" role="tablist">
+          <button className={format === 'story' ? 'on' : ''} onClick={() => setFormat('story')}>
+            {t.shareFormatStory}
+          </button>
+          <button className={format === 'square' ? 'on' : ''} onClick={() => setFormat('square')}>
+            {t.shareFormatSquare}
+          </button>
+        </div>
+      </div>
+      <div className={`share-preview ${format}`}>
+        <canvas ref={canvasRef} className="share-canvas" />
+      </div>
+      <div className="share-actions">
+        {props.isDesktop ? (
+          <button
+            className="btn btn-primary grow"
+            disabled={busy}
+            onClick={() => withBlob(download)}
+          >
+            <Icon name="download-simple" />
+            {t.shareDownload}
+          </button>
+        ) : (
+          <button
+            className="btn btn-primary grow"
+            disabled={busy}
+            onClick={() => withBlob(nativeShare)}
+          >
+            <Icon name="export" />
+            {t.shareToStories}
+          </button>
+        )}
+        {!props.isDesktop && (
+          <button
+            className="btn btn-secondary share-icon-btn"
+            disabled={busy}
+            onClick={() => withBlob(download)}
+            aria-label={t.shareSaveImage}
+            title={t.shareSaveImage}
+          >
+            <Icon name="download-simple" />
+          </button>
+        )}
+        <button
+          className="btn btn-secondary share-icon-btn"
+          disabled={busy}
+          onClick={() => withBlob(copy)}
+          aria-label={t.shareCopy}
+          title={t.shareCopy}
+        >
+          <Icon name="copy" />
+        </button>
+      </div>
+    </Sheet>
+  );
+}
 
 export function SessionView(props: {
   workoutId: string;
@@ -134,6 +269,13 @@ export function SessionView(props: {
   const [renameVal, setRenameVal] = useState('');
   const [summary, setSummary] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  /** Share-summary bottom sheet open (AC-3.2). */
+  const [shareOpen, setShareOpen] = useState(false);
+  /** Whether the Discard row is on screen — docks Finish beside it vs. the FAB. */
+  const [discardInView, setDiscardInView] = useState(
+    () => typeof IntersectionObserver === 'undefined',
+  );
+  const discardRef = useRef<HTMLDivElement>(null);
   /** Past workout cards start collapsed for reading (SS-3). */
   const [expandedPast, setExpandedPast] = useState<string[]>([]);
   /** The set logged most recently in this visit — its row reads “just now”. */
@@ -155,6 +297,19 @@ export function SessionView(props: {
     startAddConsumed.current = true;
     setSheet({ kind: 'add' });
   }, [props.startAdd, workout]);
+
+  // Finish docks beside Discard when that row is on screen, otherwise floats
+  // as a corner FAB.
+  useEffect(() => {
+    const el = discardRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => setDiscardInView(e.isIntersecting), {
+      threshold: 0.2,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [live, workout?.autoFinished, summary]);
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -286,6 +441,14 @@ export function SessionView(props: {
     };
     addDropToSet(workout!.id, ex.id, last.id, drop);
     setRecentSetId(last.id);
+  }
+
+  /** AC-1: one-tap deep copy of a logged set, inserted right after it. */
+  function duplicateSetAction(ex: Exercise, s: SetEntry): void {
+    const newId = duplicateSet(workout!.id, ex.id, s.id);
+    if (!newId) return;
+    setRecentSetId(newId);
+    props.shell.toast({ kind: 'ok', icon: 'copy', text: t.setDuplicated });
   }
 
   function equipmentLabelOf(id: string): string {
@@ -594,9 +757,32 @@ export function SessionView(props: {
                 const type = setTypeOf(s);
                 const drops = setDrops(s);
                 const idx = grp ? `R${i + 1}` : `${i + 1}`;
+                // Actual rest before this set (AC-2.6) — quiet, from the 2nd on.
+                // Prefer the value captured at log time so it survives in
+                // history (AC-2.10); fall back to deriving it from timestamps.
+                const restBefore =
+                  s.restSec != null
+                    ? s.restSec * 1000
+                    : i > 0
+                      ? restMs(sortedSets[i - 1].loggedAt, s.loggedAt)
+                      : null;
+                const restLine =
+                  restBefore !== null && restBefore > 0 ? (
+                    <div className="set-rest">{t.restLabel(mmss(restBefore))}</div>
+                  ) : null;
+                const dupBtn = live ? (
+                  <button
+                    type="button"
+                    className="set-dup"
+                    title={t.duplicateSet}
+                    aria-label={t.duplicateSet}
+                    onClick={() => duplicateSetAction(ex, s)}
+                  >
+                    <Icon name="copy" />
+                  </button>
+                ) : null;
                 const row = (
                   <button
-                    key={drops.length > 0 ? undefined : s.id}
                     className={`set-row${rowCls}${type === 'warmup' ? ' warm' : ''}${
                       rec ? ' record' : ''
                     }`}
@@ -621,10 +807,24 @@ export function SessionView(props: {
                     )}
                   </button>
                 );
-                if (drops.length === 0) return row;
+                if (drops.length === 0) {
+                  return (
+                    <div key={s.id} className="set-line">
+                      {restLine}
+                      <div className="set-main">
+                        {row}
+                        {dupBtn}
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <div key={s.id} className="set-wrap">
-                    {row}
+                    {restLine}
+                    <div className="set-main">
+                      {row}
+                      {dupBtn}
+                    </div>
                     <div className="drops">
                       <div className="dbar" />
                       <div className="dlist">
@@ -657,6 +857,18 @@ export function SessionView(props: {
                   </div>
                 );
               })}
+              {live &&
+                ex.sets.length > 0 &&
+                (() => {
+                  const lastLogged = Math.max(0, ...ex.sets.map((s) => s.loggedAt ?? 0));
+                  if (!lastLogged) return null;
+                  return (
+                    <div className="ex-resting">
+                      <Icon name="timer" />
+                      <span>{t.restingSince(mmss(Math.max(0, now - lastLogged)))}</span>
+                    </div>
+                  );
+                })()}
               {showGhost && (
                 <div className={`ghost-row${rowCls}`}>
                   <span className="idx">{grp ? `R${ex.sets.length + 1}` : ex.sets.length + 1}</span>
@@ -745,13 +957,61 @@ export function SessionView(props: {
     return parts.join(' · ');
   }
 
+  /** Gather local workout data into the share-card model (AC-3.4, privacy AC-3.6). */
+  function buildShareModel(): ShareModel {
+    const w = workout!;
+    const readout = workoutDayReadout(w);
+    const title = w.dayName || (readout ? dayReadoutLabel(readout, t) : t.sessionDone);
+    const prSet = w.exercises
+      .flatMap((e) => e.sets.map((s) => ({ e, s })))
+      .filter(({ e, s }) => isRecordSet(e, s))
+      .sort((a, b) => (b.s.weight ?? 0) - (a.s.weight ?? 0))[0];
+    const top = w.exercises
+      .filter((e) => isStrengthExercise(e) && e.sets.length > 0)
+      .map((e) => ({ e, vol: exerciseVolumeKg(e) }))
+      .sort((a, b) => b.vol - a.vol)
+      .slice(0, 3)
+      .map(({ e }) => {
+        const best = topSet(e.sets);
+        return {
+          name: e.name,
+          detail: best ? fmtSet(best.weight, best.reps) : `${e.sets.length} ${t.sets}`,
+        };
+      });
+    const muscleNames = t.muscleGroups as Record<string, string>;
+    const muscles = [...muscleSetsInWorkout(w).entries()]
+      .filter(([, n]) => n > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([m, n]) => ({ name: muscleNames[m] ?? m, count: n }));
+    return {
+      brand: t.appName,
+      tagline: t.shareCardTagline,
+      title,
+      date: fmtFullDate(w.startedAt, locale),
+      gym: gymName ?? null,
+      heroValue: fmtTonnes(volume),
+      heroLabel: t.shareTotalVolume,
+      stats: [
+        { label: t.duration, value: fmtDurationHM((w.finishedAt ?? now) - w.startedAt) },
+        { label: t.setsStat, value: String(sets) },
+        { label: t.exercises, value: String(w.exercises.length) },
+      ],
+      record: prSet
+        ? { name: t.newRecord, detail: `${prSet.e.name} · ${prSet.s.weight} kg × ${prSet.s.reps}` }
+        : null,
+      top,
+      topLabel: t.shareTopExercises,
+      muscles,
+      autoFinished: w.autoFinished,
+      autoLabel: t.closedAutomatically,
+    };
+  }
+
   function requestFinish(): void {
+    // Always confirm — "are you ready to finish?" — and warn about any empty
+    // exercise that would be dropped.
     const empty = workout!.exercises.find((e) => e.sets.length === 0 && !isMarkerExercise(e));
-    if (empty) {
-      setDialog({ kind: 'finish-warn', emptyName: empty.name });
-    } else {
-      doFinish();
-    }
+    setDialog({ kind: 'finish-warn', emptyName: empty ? empty.name : null });
   }
 
   function doFinish(): void {
@@ -830,7 +1090,7 @@ export function SessionView(props: {
         <div className="stat-grid">
           <div className="cell">
             <div className="v">
-              {fmtDurationHM((workout.finishedAt ?? Date.now()) - workout.startedAt)}
+              {fmtDurationHM((workout.finishedAt ?? now) - workout.startedAt)}
             </div>
             <div className="l">{t.duration}</div>
           </div>
@@ -907,14 +1167,29 @@ export function SessionView(props: {
             </div>
           </div>
         )}
-        <div className="sheet-actions" style={{ marginTop: 'auto' }}>
-          <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
-            {t.editSession}
+        <div className="summary-actions" style={{ marginTop: 'auto' }}>
+          <button className="btn btn-primary grow share-cta" onClick={() => setShareOpen(true)}>
+            <Icon name="export" />
+            {t.shareWorkout}
           </button>
-          <button className="btn btn-primary grow" onClick={props.onClose}>
-            {t.done}
-          </button>
+          <div className="sheet-actions">
+            <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
+              {t.editSession}
+            </button>
+            <button className="btn btn-secondary grow" onClick={props.onClose}>
+              {t.done}
+            </button>
+          </div>
         </div>
+        {shareOpen && (
+          <ShareSheet
+            model={buildShareModel()}
+            isDesktop={isDesktop}
+            t={t}
+            shell={props.shell}
+            onClose={() => setShareOpen(false)}
+          />
+        )}
       </div>
     );
   }
@@ -945,15 +1220,6 @@ export function SessionView(props: {
               offline={store.syncStatus === 'offline'}
               queued={store.queue.length}
               mode="session"
-              actions={
-                <button
-                  className="btn btn-secondary"
-                  disabled={entries === 0}
-                  onClick={requestFinish}
-                >
-                  {t.finish}
-                </button>
-              }
             />
           )}
           <button className="back" onClick={props.onClose} aria-label={t.backAction}>
@@ -1019,6 +1285,37 @@ export function SessionView(props: {
             )}
           </div>
         )}
+
+        {live &&
+          (() => {
+            const activeEx = sortedExercises.find((e) => e.id === activeExerciseId) ?? null;
+            const lastLogged = Math.max(
+              0,
+              ...workout.exercises.flatMap((e) => e.sets.map((s) => s.loggedAt ?? 0)),
+            );
+            const nextSet =
+              activeEx && !isMarkerExercise(activeEx) ? activeEx.sets.length + 1 : null;
+            if (!activeEx && !lastLogged) return null;
+            return (
+              <div className="live-rest">
+                {activeEx && nextSet !== null && (
+                  <div className="current-strip">
+                    <Icon name="barbell" />
+                    <span className="cur-label">{t.currentKicker}</span>
+                    <span className="cur-name">{activeEx.name}</span>
+                    <span className="cur-set">{t.setNumber(nextSet)}</span>
+                  </div>
+                )}
+                {lastLogged > 0 && (
+                  <div className="rest-strip">
+                    <Icon name="timer" />
+                    <span className="rest-label">{t.restHeaderLabel}</span>
+                    <span className="rest-clock">{mmss(Math.max(0, now - lastLogged))}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
         {suggestOn &&
           (() => {
@@ -1301,13 +1598,22 @@ export function SessionView(props: {
                 {props.past ? t.addToSession : t.addExercise}
               </button>
               {live && !workout.autoFinished && (
-                <div className="session-discard-row">
+                <div className="session-discard-row" ref={discardRef}>
                   <button
-                    className="btn session-discard-btn"
+                    className="btn session-discard-btn icon-only"
                     onClick={() => setDialog({ kind: 'del-workout' })}
+                    aria-label={t.discardSession}
+                    title={t.discardSession}
                   >
                     <Icon name="trash" />
-                    {t.discardSession}
+                  </button>
+                  <button
+                    className="btn btn-primary session-finish-docked"
+                    disabled={entries === 0}
+                    onClick={requestFinish}
+                  >
+                    <Icon name="check" />
+                    {t.finish}
                   </button>
                 </div>
               )}
@@ -1315,6 +1621,17 @@ export function SessionView(props: {
           )}
         </div>
       </div>
+      {live && !workout.autoFinished && !discardInView && !isDesktop && (
+        <button
+          className="session-finish-fab"
+          disabled={entries === 0}
+          onClick={requestFinish}
+          aria-label={t.finish}
+          title={t.finish}
+        >
+          <Icon name="check" />
+        </button>
+      )}
       {showSessionSide && live && (
         <aside className="pane-side desktop-only session-side">
           <div className="section-label">{t.workedSoFar}</div>
@@ -1669,12 +1986,14 @@ export function SessionView(props: {
             </>
           }
         >
-          {t.finishEmptyWarning(
-            dialog.emptyName,
-            sets,
-            fmtTonnes(volume),
-            fmtDayMonth(workout.startedAt, locale),
-          )}
+          {dialog.emptyName
+            ? t.finishEmptyWarning(
+                dialog.emptyName,
+                sets,
+                fmtTonnes(volume),
+                fmtDayMonth(workout.startedAt, locale),
+              )
+            : t.finishCleanBody(sets, fmtTonnes(volume), fmtDayMonth(workout.startedAt, locale))}
         </Dialog>
       )}
 
