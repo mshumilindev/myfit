@@ -1715,7 +1715,7 @@ function AddExerciseSheet(props: {
   onClose: () => void;
 }) {
   const { t, locale } = useT();
-  const [nowTs] = useState(() => Date.now());
+  const store = useStore();
   const [q, setQ] = useState('');
   const [kind, setKind] = useState<ExerciseKind>('strength');
   const [equip, setEquip] = useState<EquipmentId | undefined>(undefined);
@@ -1788,7 +1788,20 @@ function AddExerciseSheet(props: {
   if (props.suggestions) {
     const counts = muscleSetsInWorkout(props.workout);
     const loggedDay = dayFromCounts(counts);
-    const inferredDay = loggedDay ?? weekdayDay(new Date(nowTs).getDay());
+    const weekday = new Date(props.workout.startedAt).getDay();
+    // "Usual {weekday} split" is learned from the member's own past sessions on
+    // this weekday, not a fixed guess. The hardcoded map is only a last resort.
+    let usualDay: TrainingDay | null = null;
+    if (!loggedDay) {
+      const hist = new Map<MuscleGroup, number>();
+      for (const w of store.workouts) {
+        if (w.finishedAt === null || w.id === props.workout.id) continue;
+        if (new Date(w.startedAt).getDay() !== weekday) continue;
+        for (const [m, n] of muscleSetsInWorkout(w)) hist.set(m, (hist.get(m) ?? 0) + n);
+      }
+      usualDay = dayFromCounts(hist);
+    }
+    const inferredDay = loggedDay ?? usualDay ?? weekdayDay(weekday);
     const from: 'logged' | 'weekday' = loggedDay ? 'logged' : 'weekday';
     const DAY_LABEL: Record<TrainingDay, string> = {
       push: t.dayPush,
@@ -1854,7 +1867,7 @@ function AddExerciseSheet(props: {
             <div className="add-banner-reason">
               {from === 'logged'
                 ? t.reasonFromLogged
-                : t.reasonUsualSplit(fmtWeekday(nowTs, locale))}
+                : t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))}
             </div>
           </div>
           <button className="btn btn-primary add-done" onClick={props.onClose}>
