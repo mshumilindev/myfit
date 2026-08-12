@@ -14028,3 +14028,318 @@ h6 {
   display: flex;
   flex-direction: column;
 }
+
+/* --- Profile: Body metrics ------------------------------------------------ */
+.bm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.bm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.bm-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  background: var(--color-neutral-900);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.bm-lock i {
+  font-size: 13px;
+  color: var(--color-accent);
+}
+
+/* Hero weigh-in card */
+.bm-hero {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(155deg, var(--color-accent-900), var(--color-surface) 72%);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bm-hero-kicker {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+}
+.bm-hero-weight {
+  font-size: 40px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.bm-hero-when {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.bm-hero-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.bm-hero-row .bm-dot {
+  color: var(--color-neutral-700);
+}
+.bm-delta.up {
+  color: var(--color-neutral-300);
+}
+.bm-delta.down {
+  color: var(--color-ok-text);
+}
+.bm-togoal {
+  color: var(--color-neutral-400);
+}
+.bm-add {
+  align-self: flex-start;
+  margin-top: 14px;
+  min-height: 42px;
+  gap: 8px;
+}
+
+.bm-empty {
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.bm-empty-t {
+  font-size: 15px;
+}
+.bm-empty-b {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  line-height: 1.5;
+  max-width: 34ch;
+}
+.bm-empty-cta {
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font-size: 13px;
+  padding: 0;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+/* Height + BMI two-up, and the composition grid */
+.bm-two-up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.bm-comp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+.bm-metric {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+.bm-metric-in {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.bm-metric-in .input {
+  width: 100%;
+  min-height: 32px;
+  padding: 3px 6px;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.bm-metric-val {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.bm-metric-unit {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  flex: none;
+}
+.bm-metric-label {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+  margin-top: 6px;
+}
+.bm-bmi .bm-metric-in {
+  align-items: center;
+  gap: 8px;
+}
+.bm-bmi-band {
+  font-size: 11px;
+  color: var(--color-accent-200);
+}
+
+/* Trend chart */
+.bm-trend {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.bm-trend-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.bm-trend-sub {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+}
+.bm-chart {
+  width: 100%;
+  height: 96px;
+  display: block;
+}
+.bm-chart-line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.bm-chart-goal {
+  stroke: var(--color-neutral-600);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  vector-effect: non-scaling-stroke;
+}
+.bm-chart-dot {
+  fill: var(--color-accent);
+}
+.bm-trend-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recent entries */
+.bm-entries {
+  display: flex;
+  flex-direction: column;
+}
+.bm-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  box-shadow: inset 0 -1px 0 var(--color-divider);
+  font-variant-numeric: tabular-nums;
+}
+.bm-entry-date {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  flex: 1;
+  min-width: 0;
+}
+.bm-entry-w {
+  font-size: 15px;
+}
+.bm-entry-d {
+  font-size: 11px;
+  width: 64px;
+  text-align: right;
+}
+.bm-entry-d.up {
+  color: var(--color-neutral-400);
+}
+.bm-entry-d.down {
+  color: var(--color-ok-text);
+}
+.bm-entry-d.muted {
+  color: var(--color-neutral-700);
+}
+.bm-entry-edit {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1px solid var(--color-neutral-800);
+  border-radius: var(--radius-sm);
+  color: var(--color-neutral-500);
+  cursor: pointer;
+}
+.bm-entry-edit i {
+  font-size: 13px;
+}
+
+/* Add / edit weight sheet */
+.bm-sheet-title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.bm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  flex: 1;
+}
+.bm-field-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.bm-field-in {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.bm-field-in .input {
+  flex: 1;
+}
+.bm-field-unit {
+  font-size: 13px;
+  color: var(--color-neutral-500);
+}
+.bm-field-row {
+  display: flex;
+  gap: 12px;
+}
+.bm-sheet-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.bm-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-danger);
+  background: transparent;
+  color: var(--color-danger);
+  font-size: 14px;
+  cursor: pointer;
+}

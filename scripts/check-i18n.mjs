@@ -87,7 +87,7 @@ function staticStringValues(text) {
 const baseKeys = topLevelKeys(read(path.join(localeDir, 'en.ts')));
 const baseStaticValues = staticStringValues(read(path.join(localeDir, 'en.ts')));
 const failures = [];
-const allowedIdentical = new Set(['appName', 'menuAction', 'adminQr', 'min', 'kg']);
+const allowedIdentical = new Set(['appName', 'menuAction', 'adminQr', 'min', 'kg', 'bmBmi']);
 for (const file of localeFiles.slice(1)) {
   const text = read(path.join(localeDir, file));
   const keys = topLevelKeys(text);

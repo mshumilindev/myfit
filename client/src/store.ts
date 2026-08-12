@@ -23,6 +23,7 @@ import {
 import { db } from './firebase';
 import {
   AUTO_FINISH_MS,
+  type BodyMetrics,
   type DropEntry,
   type Exercise,
   type ExerciseKind,
@@ -33,6 +34,7 @@ import {
   type SetType,
   type SyncStatus,
   type SyncError,
+  type WeightEntry,
   type Workout,
 } from './types';
 import {
@@ -51,11 +53,16 @@ import { currentUid, getRole } from './api';
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
 const REMINDERS_KEY = 'spotter.reminders';
+const BODY_KEY = 'spotter.body';
+
+const EMPTY_BODY: BodyMetrics = { weights: [] };
 
 export interface StoreState {
   workouts: Workout[];
   gyms: Gym[];
   reminders: Reminder[];
+  /** Own body metrics (weigh-ins, height, optional composition). */
+  bodyMetrics: BodyMetrics;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
   queue: QueuedMutation[];
   syncStatus: SyncStatus;
@@ -76,6 +83,7 @@ let state: StoreState = {
   workouts: load<Workout[]>(STATE_KEY, []),
   gyms: load<Gym[]>(GYMS_KEY, []),
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
+  bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   queue: [],
   syncStatus: 'pending',
   syncError: null,
@@ -97,6 +105,7 @@ function persist(): void {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
+    localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
   }
@@ -400,6 +409,13 @@ function writeGymDoc(g: Gym): void {
   const uid = currentUid();
   if (!uid) return;
   setDoc(doc(db, 'users', uid, 'gyms', g.id), { ...g, updatedAt: Date.now() }).catch(onWriteError);
+}
+function writeBodyDoc(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  // JSON round-trip drops `undefined` (Firestore rejects it).
+  const clean = JSON.parse(JSON.stringify({ ...state.bodyMetrics, updatedAt: Date.now() }));
+  setDoc(doc(db, 'users', uid, 'meta', 'body'), clean).catch(onWriteError);
 }
 function deleteGymDoc(id: string): void {
   const uid = currentUid();
@@ -709,6 +725,54 @@ export function deleteGym(id: string): void {
   deleteGymDoc(id);
 }
 
+// --- Body metrics ----------------------------------------------------------
+
+function commitBody(patch: Partial<BodyMetrics>): void {
+  setState({ bodyMetrics: { ...state.bodyMetrics, ...patch }, syncStatus: bumpPending() });
+  writeBodyDoc();
+}
+
+export function addWeight(weight: number, at: number): void {
+  const entry: WeightEntry = { id: uuid(), at, weight };
+  commitBody({ weights: [...state.bodyMetrics.weights, entry].sort((a, b) => a.at - b.at) });
+}
+
+export function editWeight(id: string, weight: number, at: number): void {
+  commitBody({
+    weights: state.bodyMetrics.weights
+      .map((w) => (w.id === id ? { ...w, weight, at } : w))
+      .sort((a, b) => a.at - b.at),
+  });
+}
+
+export function removeWeight(id: string): void {
+  commitBody({ weights: state.bodyMetrics.weights.filter((w) => w.id !== id) });
+}
+
+/** Height + optional composition (body fat, muscle, goal, waist/chest/hip). */
+export function updateBodyMetrics(
+  patch: Partial<Omit<BodyMetrics, 'weights' | 'updatedAt' | 'weighInDismissedDay'>>,
+): void {
+  commitBody(patch);
+}
+
+export function dismissWeighInToday(dayKey: string): void {
+  commitBody({ weighInDismissedDay: dayKey });
+}
+
+/** Latest weigh-in (by time), or null. */
+export function latestWeight(bm: BodyMetrics): WeightEntry | null {
+  if (bm.weights.length === 0) return null;
+  return bm.weights.reduce((a, b) => (b.at >= a.at ? b : a));
+}
+
+/** BMI from height (cm) + weight (kg); null if height missing/invalid. */
+export function bmiValue(heightCm?: number | null, weightKg?: number | null): number | null {
+  if (!heightCm || heightCm <= 0 || !weightKg || weightKg <= 0) return null;
+  const m = heightCm / 100;
+  return weightKg / (m * m);
+}
+
 export function dismissReminder(r: Reminder): void {
   dismissals = [...dismissals, { gymId: r.gymId, visitStart: r.visitStart }];
   setState({
@@ -904,6 +968,18 @@ export function startSyncLoop(): () => void {
       (snap) => {
         state = { ...state, gyms: snap.docs.map((d) => d.data() as Gym) };
         recomputeReminders();
+        emit();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'body'),
+      (snap) => {
+        const data = snap.exists() ? (snap.data() as BodyMetrics) : EMPTY_BODY;
+        state = { ...state, bodyMetrics: { ...data, weights: data.weights ?? [] } };
+        persist();
         emit();
       },
       onWriteError,
@@ -1230,12 +1306,14 @@ export function resetLocalData(): void {
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);
   localStorage.removeItem(REMINDERS_KEY);
+  localStorage.removeItem(BODY_KEY);
   pings = [];
   dismissals = [];
   state = {
     workouts: [],
     gyms: [],
     reminders: [],
+    bodyMetrics: EMPTY_BODY,
     queue: [],
     syncStatus: 'pending',
     syncError: null,

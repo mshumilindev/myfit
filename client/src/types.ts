@@ -69,6 +69,30 @@ export interface Workout {
   exercises: Exercise[];
 }
 
+/** One weigh-in (no notes). */
+export interface WeightEntry {
+  id: string;
+  /** ms epoch of the weigh-in (date + time). */
+  at: number;
+  /** kg */
+  weight: number;
+}
+
+/** Body metrics for one user — height, optional composition, weigh-in log. */
+export interface BodyMetrics {
+  heightCm?: number | null;
+  goalWeightKg?: number | null;
+  bodyFatPct?: number | null;
+  muscleKg?: number | null;
+  waistCm?: number | null;
+  chestCm?: number | null;
+  hipCm?: number | null;
+  weights: WeightEntry[];
+  /** Local date key (YYYY-MM-DD) the Today weigh-in reminder was dismissed. */
+  weighInDismissedDay?: string | null;
+  updatedAt?: number;
+}
+
 export interface Gym {
   id: string;
   name: string;

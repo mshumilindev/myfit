@@ -8,6 +8,7 @@ import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Switch, ProfileSkeleton } from '../ui';
 import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
+import { BodyMetricsSection } from '../components/BodyMetrics';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
 
@@ -488,6 +489,8 @@ export function ProfileView({
               </div>
             </div>
           </section>
+
+          {isSelf && <BodyMetricsSection readOnly={false} />}
 
           {!isTrainerView && (
             <section className="profile-section profile-access-section">
