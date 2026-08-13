@@ -1,38 +1,45 @@
 /**
- * Exercise library (design LIB-1 phone, LIB-2 web). A thin overlay wrapper —
- * back + title + the shared ExerciseGallery. The Library/My-exercises tab is
- * URL-addressable (#/exercises and #/exercises/mine), so it comes in from the
- * route and switching it navigates (persistent, shareable).
+ * Exercises tab (design LIB-1/LIB-2, AC-LIBTAB). A peer tab of Programs — it
+ * shares the `programs-page` chrome and the Programs/Exercises switcher, and
+ * swaps in the shared ExerciseGallery as its content. No back button: it is a
+ * first-class tab, not a pushed overlay. The "New exercise" action lives in the
+ * gallery's content header (mirrored by "New program" in the program editor
+ * header), and the All-exercises / My-exercises split lives one level down as
+ * subtabs inside the gallery.
  */
 import { useT } from '../i18n';
-import { Icon } from '../ui';
+import { getRole } from '../api';
 import { ExerciseGallery } from '../components/ExerciseGallery';
+import { ProgramsTabs } from '../components/ProgramsTabs';
 import type { Shell } from '../App';
 
 export function ExerciseLibraryView({
   shell,
   libTab,
-  onClose,
+  onLibTab,
+  onProgramsTab,
 }: {
   shell: Shell;
-  libTab?: 'mine';
-  onClose: () => void;
+  libTab: 'library' | 'mine';
+  onLibTab: (t: 'library' | 'mine') => void;
+  onProgramsTab: (exercises: boolean) => void;
 }) {
   const { t } = useT();
+  const role = getRole();
   return (
-    <div className="screen exlib">
-      <div className="exlib-top">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
+    <div className="screen programs-page programs-author-page programs-has-tabs show-exercises exlib-tab">
+      <div className="programs-top">
+        <div>
+          <div className="kicker">
+            {role === 'admin' ? t.roleAdmin : role === 'trainer' ? t.roleTrainer : t.training}
+          </div>
+          <h2 className="title-26">{t.exercisesTabLabel}</h2>
+        </div>
+        <ProgramsTabs active="exercises" onSelect={onProgramsTab} />
       </div>
-      <ExerciseGallery
-        shell={shell}
-        libTab={libTab ?? 'library'}
-        onLibTab={(next) =>
-          shell.openOverlay({ screen: 'library', libTab: next === 'mine' ? 'mine' : undefined })
-        }
-      />
+      <div className="exg-tabwrap">
+        <ExerciseGallery shell={shell} libTab={libTab} onLibTab={onLibTab} />
+      </div>
     </div>
   );
 }

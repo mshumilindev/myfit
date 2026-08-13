@@ -930,6 +930,10 @@ export const en = {
   exerciseLabel: 'Exercise',
   progMemberEmpty: 'Build your own week, or wait for a trainer to assign one.',
   progNoItems: 'No exercises on this day yet.',
+  progEmptyDayBody: (day: string) =>
+    `Add lifts to build ${day}, or copy another day's work over. Rest days can stay empty.`,
+  progAddExercise: 'Add exercise',
+  progCopyDayHere: 'Copy a day here',
   progSets: 'Sets',
   progReps: 'Reps',
   progDuration: 'Duration',
@@ -1031,6 +1035,26 @@ export const en = {
   progActivate: 'Activate',
   progArchive: 'Archive',
   progWeekStrip: 'Program week',
+  progPlannedWeekCaption: (weekday: string) => `Planned week · today is ${weekday}`,
+  progSuggestKicker: 'Suggested for you',
+  progSuggestNewTitle: 'Ready to build your program',
+  progSuggestNewBody:
+    "You've logged enough that Spotter can turn your week into a repeatable program — no manual setup.",
+  progSuggestNewCta: 'Build my program',
+  progSuggestDriftedTitle: 'Your program has drifted',
+  progSuggestDriftedBody:
+    "The last few weeks don't match your current program. Spotter can rebuild it from what you're actually doing.",
+  progSuggestDriftedCta: 'Review & replace',
+  progSuggestNotNow: 'Not now',
+  progSuggestSheetTitle: 'Create your program',
+  progSuggestOptWeek: 'Weekly split only',
+  progSuggestOptWeekBody:
+    'Just the training days by weekday — no exercises. You fill each day yourself.',
+  progSuggestOptLifts: "Weekdays + last week's lifts",
+  progSuggestOptLiftsBody:
+    'The same weekday split, prefilled with the exercises from your most recent training week.',
+  progSuggestCreate: 'Create program',
+  progSuggestCreatedToast: 'Program ready — review and save',
   progPrescriptionRule: 'Prescription is sets, reps and equipment. Weight comes from history.',
   progCopyDay: 'Copy day to',
   progCopyChoose: 'Choose day',

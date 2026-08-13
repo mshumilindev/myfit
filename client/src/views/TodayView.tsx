@@ -1,8 +1,9 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import type { ExerciseKind, Gym, Workout } from '../types';
-import { callFn } from '../api';
+import { callFn, getRole } from '../api';
+import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
 import { MuscleChip } from '../components/Muscle';
 import { dayReadoutLabel } from '../data/daySuggest';
@@ -58,6 +59,17 @@ function hhmm(min: number): string {
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 
+function compactProgramDaySummary(items: ProgramItem[]): string {
+  const strength = items.filter((item) => item.kind === 'strength');
+  if (strength.length === 0) {
+    const totalMin = items.reduce((sum, item) => sum + (item.durationMin ?? 10), 0);
+    return `${totalMin} min`;
+  }
+  const sets = strength.reduce((sum, item) => sum + item.sets, 0);
+  const reps = strength.length === 1 ? strength[0].reps : null;
+  return reps ? `${sets} × ${reps}` : String(sets);
+}
+
 const BAR_COLORS = [
   'var(--color-neutral-800)',
   'var(--color-neutral-800)',
@@ -92,6 +104,7 @@ interface ProgramAssignment {
     name: string;
     weeks: number;
     daysPerWeek: number;
+    dayNames?: Record<string, string>;
     items: ProgramItem[];
   };
   assignedBy: string | null;
@@ -112,6 +125,11 @@ function useNowTick(active: boolean): number {
   return now;
 }
 
+/** "Not now" cooldown for the Suggest-a-program banner (AC-3.2: reappears no
+ *  more than once every 1–2 weeks). Local, device-only — a transient nudge. */
+const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
+const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
+
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
@@ -125,6 +143,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
+  // Suggest-a-program banner state (AC · "Suggest Program Banner").
+  const [progSheetOpen, setProgSheetOpen] = useState(false);
+  const [progChoice, setProgChoice] = useState<'week' | 'week-lifts'>('week-lifts');
+  const [, setProgDismissTick] = useState(0);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
 
   /** Session heading: the program day name if it has one, else the weekday. */
@@ -149,9 +171,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const open = store.workouts.find((w) => w.finishedAt === null);
   const now = useNowTick(!!open);
+  const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
+  const programReadiness = useMemo(() => programSuggestionReadiness(finished), [finished]);
 
   // "Likely today" prediction (Today plaque): the usual split + start time for
   // this weekday, from history. Hidden mid-session or without weekday history.
@@ -329,6 +353,84 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     );
   }
 
+  // Suggest a program (AC): members with enough history, never mid-session or
+  // for read-only staff. "New" when there's no program; "drifted" when the last
+  // few weeks diverge from the current one. Dismissal has a 1–2 week cooldown.
+  const suggest = ((): { variant: 'new' | 'drifted' } | null => {
+    // Anyone who trains on their own Today (members + a solo admin/owner); never
+    // a trainer viewing clients, and never mid-session.
+    if (getRole() === 'trainer' || open) return null;
+    if (!programReadiness.ready) return null;
+    let dismissedAt = 0;
+    try {
+      dismissedAt = Number(localStorage.getItem(SUGGEST_DISMISS_KEY) || 0);
+    } catch {
+      /* ignore */
+    }
+    if (dismissedAt && now - dismissedAt < SUGGEST_COOLDOWN_MS) return null;
+    if (!assignment) return { variant: 'new' };
+    const recent = finished.slice(0, 9);
+    const recentEx = new Set(recent.flatMap((w) => w.exercises.map((e) => e.name.toLowerCase())));
+    const progEx = new Set(assignment.program.items.map((i) => i.name.toLowerCase()));
+    if (progEx.size === 0 || recentEx.size === 0) return null;
+    let overlap = 0;
+    recentEx.forEach((e) => {
+      if (progEx.has(e)) overlap += 1;
+    });
+    return overlap / recentEx.size < 0.5 ? { variant: 'drifted' } : null;
+  })();
+
+  function dismissSuggest() {
+    try {
+      localStorage.setItem(SUGGEST_DISMISS_KEY, String(now));
+    } catch {
+      /* ignore */
+    }
+    setProgDismissTick((n) => n + 1);
+  }
+
+  function createProgramFromHistory() {
+    setProgramSeed(buildProgramSeed(finished, progChoice === 'week-lifts', t.progNew));
+    try {
+      localStorage.setItem(SUGGEST_DISMISS_KEY, String(now));
+    } catch {
+      /* ignore */
+    }
+    setProgSheetOpen(false);
+    setProgDismissTick((n) => n + 1);
+    shell.toast({ kind: 'ok', icon: 'check-circle', text: t.progSuggestCreatedToast });
+    shell.goTab('programs');
+  }
+
+  const suggestBanner = suggest && (
+    <div className="prog-banner fade-in">
+      <span className="prog-sheen" aria-hidden />
+      <div className="prog-banner-row">
+        <span className="prog-banner-icon">
+          <Icon name="sparkle" weight="bold" />
+        </span>
+        <div className="prog-banner-main">
+          <span className="prog-banner-kicker">{t.progSuggestKicker}</span>
+          <div className="prog-banner-title">
+            {suggest.variant === 'drifted' ? t.progSuggestDriftedTitle : t.progSuggestNewTitle}
+          </div>
+          <div className="prog-banner-body">
+            {suggest.variant === 'drifted' ? t.progSuggestDriftedBody : t.progSuggestNewBody}
+          </div>
+          <div className="prog-banner-acts">
+            <button className="prog-banner-cta" onClick={() => setProgSheetOpen(true)}>
+              <Icon name="check" weight="bold" />
+              {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
+            </button>
+            <button className="prog-banner-skip" onClick={dismissSuggest}>
+              {t.progSuggestNotNow}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const programCard = !open && assignment && (
     <section className="today-program-card">
       <div className="program-card-head">
@@ -354,10 +456,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             ...new Set(items.flatMap((item) => item.equipment ?? [])),
           ] as EquipmentId[];
           const hasPlan = items.length > 0;
+          const dayName = assignment.program.dayNames?.[day] || t.progDay(day);
+          const setCount = items.reduce(
+            (sum, item) => sum + (item.kind === 'strength' ? item.sets : 1),
+            0,
+          );
+          const summary =
+            items.length === 1
+              ? compactProgramDaySummary(items)
+              : t.progDayWorkoutSummary(items.length, setCount);
           return (
             <button
               key={day}
-              className={`program-start-day${hasPlan ? ' planned' : ''}`}
+              className={`program-start-day${hasPlan ? ' planned' : ''}${day === todayWeekday ? ' is-today' : ''}`}
               disabled={!hasPlan}
               onClick={() => startProgramDay(day)}
             >
@@ -365,7 +476,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <span>{t.weekDayLetters[day - 1]}</span>
                 {hasPlan ? <Icon name="play" /> : <span>+</span>}
               </span>
-              <strong>{hasPlan ? t.progStart(day) : t.progRestDay}</strong>
+              <strong>{hasPlan ? dayName : t.progRestDay}</strong>
+              {hasPlan && <span className="program-start-summary">{summary}</span>}
               {equipment.length > 0 && (
                 <span className="program-start-equipment">
                   {equipment.slice(0, 4).map((id) => (
@@ -468,6 +580,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           ))}
 
         {banners}
+        {suggestBanner}
         {programCard}
 
         {weighReminder && (
@@ -864,6 +977,39 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       )}
       {addWeightOpen && (
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
+      )}
+      {progSheetOpen && (
+        <Sheet onClose={() => setProgSheetOpen(false)} className="prog-suggest-sheet">
+          <div className="ps-title">{t.progSuggestSheetTitle}</div>
+          <button
+            className={`ps-opt${progChoice === 'week' ? ' sel' : ''}`}
+            onClick={() => setProgChoice('week')}
+          >
+            <div className="ps-opt-body">
+              <div className="ps-opt-title">{t.progSuggestOptWeek}</div>
+              <div className="ps-opt-sub">{t.progSuggestOptWeekBody}</div>
+            </div>
+            {progChoice === 'week' && <Icon name="check-circle" weight="fill" />}
+          </button>
+          <button
+            className={`ps-opt${progChoice === 'week-lifts' ? ' sel' : ''}`}
+            onClick={() => setProgChoice('week-lifts')}
+          >
+            <div className="ps-opt-body">
+              <div className="ps-opt-title">{t.progSuggestOptLifts}</div>
+              <div className="ps-opt-sub">{t.progSuggestOptLiftsBody}</div>
+            </div>
+            {progChoice === 'week-lifts' && <Icon name="check-circle" weight="fill" />}
+          </button>
+          <div className="ps-acts">
+            <button className="btn btn-secondary" onClick={() => setProgSheetOpen(false)}>
+              {t.cancel}
+            </button>
+            <button className="btn btn-primary" onClick={createProgramFromHistory}>
+              {t.progSuggestCreate}
+            </button>
+          </div>
+        </Sheet>
       )}
     </div>
   );

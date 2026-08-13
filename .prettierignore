@@ -12,6 +12,9 @@ package-lock.json
 client/public/
 docs/design/boards/
 My Fit - FINAL.html
+_feature-programs-week/
+_sync/
+_to_delete/
 
 # Зовнішні конфіги, чутливі до форматування
 cloudflare/config.example.yml

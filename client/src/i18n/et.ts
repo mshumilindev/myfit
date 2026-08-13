@@ -870,6 +870,10 @@ export const et: Strings = {
   exerciseLabel: 'Harjutus',
   progMemberEmpty: 'Pane oma nädal kokku või oota treeneri programmi.',
   progNoItems: 'Sellel päeval pole veel harjutusi.',
+  progEmptyDayBody: (day: string) =>
+    `Lisa harjutusi, et täita ${day}, või kopeeri teise päeva töö. Puhkepäevad võivad jääda tühjaks.`,
+  progAddExercise: 'Lisa harjutus',
+  progCopyDayHere: 'Kopeeri päev siia',
   progSets: 'Seeriad',
   progReps: 'Kordused',
   progDuration: 'Kestus',
@@ -973,6 +977,26 @@ export const et: Strings = {
   progActivate: 'Aktiveeri',
   progArchive: 'Arhiveeri',
   progWeekStrip: 'Programmi nädal',
+  progPlannedWeekCaption: (weekday: string) => `Planeeritud nädal · täna ${weekday}`,
+  progSuggestKicker: 'Soovitatud sulle',
+  progSuggestNewTitle: 'Aeg oma programm üles ehitada',
+  progSuggestNewBody:
+    'Oled piisavalt loginud, et Spotter saaks su nädalast korduva programmi teha — ilma käsitsi seadistamata.',
+  progSuggestNewCta: 'Ehita mu programm',
+  progSuggestDriftedTitle: 'Su programm on kõrvale kaldunud',
+  progSuggestDriftedBody:
+    'Viimased nädalad ei kattu praeguse programmiga. Spotter saab selle uuesti üles ehitada selle põhjal, mida sa tegelikult teed.',
+  progSuggestDriftedCta: 'Vaata üle ja asenda',
+  progSuggestNotNow: 'Mitte praegu',
+  progSuggestSheetTitle: 'Loo programm',
+  progSuggestOptWeek: 'Ainult nädalajaotus',
+  progSuggestOptWeekBody:
+    'Ainult treeningpäevad nädalapäeva järgi — ilma harjutusteta. Iga päeva täidad ise.',
+  progSuggestOptLifts: 'Nädalapäevad + eelmise nädala harjutused',
+  progSuggestOptLiftsBody:
+    'Sama nädalajaotus, täidetud harjutustega su viimasest treeningnädalast.',
+  progSuggestCreate: 'Loo programm',
+  progSuggestCreatedToast: 'Programm valmis — vaata üle ja salvesta',
   progPrescriptionRule: 'Ettekirjutus on seeriad, kordused ja varustus. Raskus tuleb ajaloost.',
   progCopyDay: 'Kopeeri päev kohta',
   progCopyChoose: 'Vali päev',

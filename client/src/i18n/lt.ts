@@ -881,6 +881,10 @@ export const lt: Strings = {
   exerciseLabel: 'Pratimas',
   progMemberEmpty: 'Susidėliok savo savaitę arba palauk trenerio programos.',
   progNoItems: 'Šią dieną pratimų dar nėra.',
+  progEmptyDayBody: (day: string) =>
+    `Pridėk pratimų dienai ${day} arba nukopijuok kitos dienos darbą. Poilsio dienos gali likti tuščios.`,
+  progAddExercise: 'Pridėti pratimą',
+  progCopyDayHere: 'Kopijuoti dieną čia',
   progSets: 'Serijos',
   progReps: 'Kartojimai',
   progDuration: 'Trukmė',
@@ -984,6 +988,26 @@ export const lt: Strings = {
   progActivate: 'Aktyvuoti',
   progArchive: 'Archyvuoti',
   progWeekStrip: 'Programos savaitė',
+  progPlannedWeekCaption: (weekday: string) => `Suplanuota savaitė · šiandien ${weekday}`,
+  progSuggestKicker: 'Siūloma tau',
+  progSuggestNewTitle: 'Metas sudaryti tavo programą',
+  progSuggestNewBody:
+    'Jau pakankamai užfiksavai, kad Spotter paverstų tavo savaitę pasikartojančia programa — be rankinio nustatymo.',
+  progSuggestNewCta: 'Sudaryti programą',
+  progSuggestDriftedTitle: 'Tavo programa nukrypo',
+  progSuggestDriftedBody:
+    'Pastarosios savaitės nesutampa su dabartine programa. Spotter gali ją atkurti pagal tai, ką iš tikrųjų darai.',
+  progSuggestDriftedCta: 'Peržiūrėti ir pakeisti',
+  progSuggestNotNow: 'Ne dabar',
+  progSuggestSheetTitle: 'Sukurti programą',
+  progSuggestOptWeek: 'Tik dienų suskirstymas',
+  progSuggestOptWeekBody:
+    'Tik treniruočių dienos pagal savaitės dieną — be pratimų. Kiekvieną dieną užpildai pats.',
+  progSuggestOptLifts: 'Savaitės dienos + praėjusios savaitės pratimai',
+  progSuggestOptLiftsBody:
+    'Tas pats dienų suskirstymas, užpildytas pratimais iš paskutinės treniruočių savaitės.',
+  progSuggestCreate: 'Sukurti programą',
+  progSuggestCreatedToast: 'Programa paruošta — peržiūrėk ir išsaugok',
   progPrescriptionRule:
     'Nurodymas yra serijos, pakartojimai ir įranga. Svoris imamas iš istorijos.',
   progCopyDay: 'Kopijuoti dieną į',

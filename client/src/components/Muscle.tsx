@@ -1,10 +1,21 @@
 /**
- * Muscle-group silhouettes and chips (design MG-1, EQ-1).
- * One silhouette, one highlighted region: at chip size the mark locates —
- * upper body, arms, legs — and the word beside it carries the precision.
- * It is never used without its label.
+ * Muscle groups — chips and anatomical figures (design MG-1, EQ-1, RICH).
+ *
+ * Anatomical figures are now rendered from the `body-muscles` library's SVG
+ * path data (FRONT_MUSCLES / BACK_MUSCLES), painted in the app palette: worked
+ * regions in brass (primary) or grey (secondary), the rest of the body recedes.
+ * The full human appears where the design has room (exercise detail); everywhere
+ * else the figure auto-crops to the relevant body part — an arm for a biceps
+ * curl, the legs for a squat, the back for a row — so the mark always shows the
+ * work on a recognisable piece of the body.
+ *
+ * The tiny label chips (≤15 px) keep the crisp geometric locator mark: real
+ * anatomy is an unreadable blob at that size, and the word beside it carries the
+ * precision. `MuscleIcon` therefore renders a library figure at figure/row/full
+ * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
 import type { CSSProperties } from 'react';
+import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { t as strings } from '../i18n';
@@ -46,20 +57,507 @@ const TONES: Record<Tone, [string, string, string]> = {
   onAccent: ['var(--color-accent-700)', 'var(--color-accent-700)', 'var(--color-accent-300)'],
 };
 
-export type MuscleIconVariant = 'chip' | 'chipLg' | 'row' | 'figure' | 'full';
+// ─────────────────────────────────────────────────────────────────────────────
+// body-muscles bridge: app muscle groups → library muscle IDs, crop regions,
+// and the palette that paints the shared silhouette.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type BView = 'front' | 'back';
+type Region = 'full' | 'upper' | 'lower' | 'arms' | 'torso';
+
+/** Path list per view, extracted once from the library's data exports. */
+const VIEW_PATHS: Record<BView, { id: string; path: string }[]> = {
+  front: FRONT_MUSCLES.map((m) => ({ id: m.id, path: m.path })),
+  back: BACK_MUSCLES.map((m) => ({ id: m.id, path: m.path })),
+};
+
+const ALL_IDS: Record<BView, string[]> = {
+  front: VIEW_PATHS.front.map((m) => m.id),
+  back: VIEW_PATHS.back.map((m) => m.id),
+};
+
+/** App group → library muscle IDs, split by anatomical view. */
+type LibMap = { front: string[]; back: string[] };
+const LIB: Record<Exclude<MuscleGroup, 'cardio'>, LibMap> = {
+  chest: {
+    front: ['chest-upper-left', 'chest-upper-right', 'chest-lower-left', 'chest-lower-right'],
+    back: [],
+  },
+  back: {
+    front: [],
+    back: [
+      'lats-upper-left',
+      'lats-mid-left',
+      'lats-lower-left',
+      'lats-upper-right',
+      'lats-mid-right',
+      'lats-lower-right',
+      'traps-upper-left',
+      'traps-mid-left',
+      'traps-lower-left',
+      'traps-upper-right',
+      'traps-mid-right',
+      'traps-lower-right',
+      'lower-back-erectors-left',
+      'lower-back-ql-left',
+      'lower-back-erectors-right',
+      'lower-back-ql-right',
+      'spine',
+    ],
+  },
+  shoulders: {
+    front: [
+      'shoulder-front-left',
+      'shoulder-side-left',
+      'shoulder-front-right',
+      'shoulder-side-right',
+    ],
+    back: ['deltoid-rear-left', 'deltoid-rear-right'],
+  },
+  biceps: {
+    front: ['biceps-left', 'biceps-right'],
+    back: [],
+  },
+  triceps: {
+    front: [],
+    back: [
+      'triceps-long-left',
+      'triceps-lateral-left',
+      'triceps-long-right',
+      'triceps-lateral-right',
+    ],
+  },
+  forearms: {
+    front: ['forearm-left', 'forearm-right'],
+    back: [
+      'forearm-flexors-left',
+      'forearm-extensors-left',
+      'forearm-flexors-right',
+      'forearm-extensors-right',
+    ],
+  },
+  core: {
+    front: [
+      'abs-upper-left',
+      'abs-upper-right',
+      'abs-lower-left',
+      'abs-lower-right',
+      'obliques-left',
+      'obliques-right',
+      'serratus-anterior-left',
+      'serratus-anterior-right',
+    ],
+    back: [],
+  },
+  quads: {
+    front: ['quads-left', 'quads-right', 'adductors-left', 'adductors-right'],
+    back: [],
+  },
+  hamstrings: {
+    front: [],
+    back: [
+      'hamstrings-medial-left',
+      'hamstrings-lateral-left',
+      'hamstrings-medial-right',
+      'hamstrings-lateral-right',
+    ],
+  },
+  glutes: {
+    front: [],
+    back: [
+      'gluteus-maximus-left',
+      'gluteus-medius-left',
+      'gluteus-maximus-right',
+      'gluteus-medius-right',
+    ],
+  },
+  calves: {
+    front: ['tibialis-anterior-left', 'tibialis-anterior-right'],
+    back: [
+      'calves-gastroc-medial-left',
+      'calves-gastroc-lateral-left',
+      'calves-soleus-left',
+      'calves-gastroc-medial-right',
+      'calves-gastroc-lateral-right',
+      'calves-soleus-right',
+    ],
+  },
+  // fullbody is handled specially (whole silhouette lights up).
+  fullbody: { front: [], back: [] },
+};
+
+/** Which single silhouette best shows a group, and how tightly to crop it. */
+const GROUP_VIEW: Record<Exclude<MuscleGroup, 'cardio'>, BView> = {
+  chest: 'front',
+  shoulders: 'front',
+  biceps: 'front',
+  forearms: 'front',
+  core: 'front',
+  quads: 'front',
+  back: 'back',
+  triceps: 'back',
+  hamstrings: 'back',
+  glutes: 'back',
+  calves: 'back',
+  fullbody: 'front',
+};
+const GROUP_REGION: Record<Exclude<MuscleGroup, 'cardio'>, Region> = {
+  biceps: 'arms',
+  triceps: 'arms',
+  forearms: 'arms',
+  chest: 'upper',
+  shoulders: 'upper',
+  core: 'upper',
+  back: 'upper',
+  quads: 'lower',
+  hamstrings: 'lower',
+  glutes: 'lower',
+  calves: 'lower',
+  fullbody: 'full',
+};
+
+/** Crop windows in the library's own coordinate space (front x0–32, back x37–69). */
+const VIEWBOX: Record<BView, Record<Region, string>> = {
+  front: {
+    full: '-1.5 -2 34.5 96.5',
+    upper: '-0.5 9 32.5 44.5',
+    torso: '6 9 20 39',
+    arms: '-2.5 10 36.5 43',
+    lower: '4.5 36 22.5 59.5',
+  },
+  back: {
+    full: '35 -2 35.5 96.6',
+    upper: '36.4 3.5 32.2 41.5',
+    torso: '36.4 3.5 32.2 41.5',
+    arms: '34 12 37.5 40.5',
+    lower: '41 36.5 23 59',
+  },
+};
+
+/** Muscles drawn for a cropped region (keeps compact figures light). */
+const REGION_IDS: Record<BView, Record<Region, string[]>> = {
+  front: {
+    full: ALL_IDS.front,
+    arms: [
+      'shoulder-front-left',
+      'shoulder-side-left',
+      'shoulder-front-right',
+      'shoulder-side-right',
+      'biceps-left',
+      'biceps-right',
+      'forearm-left',
+      'forearm-right',
+      'elbow-left',
+      'elbow-right',
+      'hand-left',
+      'hand-right',
+      'chest-upper-left',
+      'chest-upper-right',
+      'chest-lower-left',
+      'chest-lower-right',
+      'abs-upper-left',
+      'abs-upper-right',
+    ],
+    upper: [
+      'neck-left',
+      'neck-right',
+      'shoulder-front-left',
+      'shoulder-side-left',
+      'shoulder-front-right',
+      'shoulder-side-right',
+      'biceps-left',
+      'biceps-right',
+      'forearm-left',
+      'forearm-right',
+      'chest-upper-left',
+      'chest-upper-right',
+      'chest-lower-left',
+      'chest-lower-right',
+      'abs-upper-left',
+      'abs-upper-right',
+      'abs-lower-left',
+      'abs-lower-right',
+      'obliques-left',
+      'obliques-right',
+      'serratus-anterior-left',
+      'serratus-anterior-right',
+      'hip-flexor-left',
+      'hip-flexor-right',
+    ],
+    torso: [
+      'chest-upper-left',
+      'chest-upper-right',
+      'chest-lower-left',
+      'chest-lower-right',
+      'abs-upper-left',
+      'abs-upper-right',
+      'abs-lower-left',
+      'abs-lower-right',
+      'obliques-left',
+      'obliques-right',
+      'serratus-anterior-left',
+      'serratus-anterior-right',
+      'neck-left',
+      'neck-right',
+    ],
+    lower: [
+      'quads-left',
+      'quads-right',
+      'adductors-left',
+      'adductors-right',
+      'hip-flexor-left',
+      'hip-flexor-right',
+      'knee-left',
+      'knee-right',
+      'tibialis-anterior-left',
+      'tibialis-anterior-right',
+      'foot-left',
+      'foot-right',
+    ],
+  },
+  back: {
+    full: ALL_IDS.back,
+    arms: [
+      'deltoid-rear-left',
+      'deltoid-rear-right',
+      'triceps-long-left',
+      'triceps-lateral-left',
+      'triceps-long-right',
+      'triceps-lateral-right',
+      'forearm-flexors-left',
+      'forearm-extensors-left',
+      'forearm-flexors-right',
+      'forearm-extensors-right',
+      'hand-back-left',
+      'hand-back-right',
+      'lats-upper-left',
+      'lats-upper-right',
+      'lats-mid-left',
+      'lats-mid-right',
+    ],
+    upper: [
+      'nape',
+      'traps-upper-left',
+      'traps-mid-left',
+      'traps-lower-left',
+      'traps-upper-right',
+      'traps-mid-right',
+      'traps-lower-right',
+      'lats-upper-left',
+      'lats-mid-left',
+      'lats-lower-left',
+      'lats-upper-right',
+      'lats-mid-right',
+      'lats-lower-right',
+      'deltoid-rear-left',
+      'deltoid-rear-right',
+      'triceps-long-left',
+      'triceps-lateral-left',
+      'triceps-long-right',
+      'triceps-lateral-right',
+      'spine',
+      'lower-back-erectors-left',
+      'lower-back-erectors-right',
+      'lower-back-ql-left',
+      'lower-back-ql-right',
+    ],
+    torso: [
+      'nape',
+      'traps-upper-left',
+      'traps-mid-left',
+      'traps-lower-left',
+      'traps-upper-right',
+      'traps-mid-right',
+      'traps-lower-right',
+      'lats-upper-left',
+      'lats-mid-left',
+      'lats-lower-left',
+      'lats-upper-right',
+      'lats-mid-right',
+      'lats-lower-right',
+      'spine',
+      'lower-back-erectors-left',
+      'lower-back-erectors-right',
+      'lower-back-ql-left',
+      'lower-back-ql-right',
+    ],
+    lower: [
+      'gluteus-maximus-left',
+      'gluteus-medius-left',
+      'gluteus-maximus-right',
+      'gluteus-medius-right',
+      'hamstrings-medial-left',
+      'hamstrings-lateral-left',
+      'hamstrings-medial-right',
+      'hamstrings-lateral-right',
+      'knee-back-left',
+      'knee-back-right',
+      'calves-gastroc-medial-left',
+      'calves-gastroc-lateral-left',
+      'calves-soleus-left',
+      'calves-gastroc-medial-right',
+      'calves-gastroc-lateral-right',
+      'calves-soleus-right',
+      'foot-back-left',
+      'foot-back-right',
+    ],
+  },
+};
+
+const DIM = 'var(--color-neutral-800)';
+const DIM_STROKE = 'var(--color-neutral-900)';
+
+/** Highlight colour for a tone (primary = brass, secondary = grey …). */
+function highlightColor(tone: Tone): string {
+  return TONES[tone][2];
+}
+
+type IdSet = Set<string>;
+
+/**
+ * One anatomical silhouette (front or back), cropped to `region`, with the
+ * `prim` muscles in the highlight colour, `sec` in grey, the rest dimmed.
+ */
+function BodySvg({
+  view,
+  region,
+  prim,
+  sec,
+  hl,
+  full = false,
+  width,
+  height,
+  title,
+}: {
+  view: BView;
+  region: Region;
+  prim: IdSet;
+  sec: IdSet;
+  hl: string;
+  full?: boolean;
+  width?: number | string;
+  height?: number | string;
+  title?: string;
+}) {
+  const drawIds = REGION_IDS[view][region];
+  const drawSet = region === 'full' ? null : new Set(drawIds);
+  return (
+    <svg
+      viewBox={VIEWBOX[view][region]}
+      width={width}
+      height={height}
+      style={{
+        display: 'block',
+        flex: region === 'full' ? 1 : 'none',
+        minWidth: 0,
+        width: width === undefined ? '100%' : undefined,
+        height: 'auto',
+      }}
+      aria-hidden={title ? undefined : true}
+      role={title ? 'img' : undefined}
+      aria-label={title}
+    >
+      {VIEW_PATHS[view].map(({ id, path }) => {
+        if (drawSet && !drawSet.has(id)) return null;
+        const on = full || prim.has(id);
+        const se = !on && sec.has(id);
+        const fill = on ? hl : se ? 'var(--color-neutral-500)' : DIM;
+        const active = on || se;
+        return (
+          <path
+            key={id}
+            d={path}
+            fill={fill}
+            stroke={active ? 'var(--color-bg)' : DIM_STROKE}
+            strokeWidth={active ? 0.25 : 0.12}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+/** Collect library IDs for a set of groups, on one view. */
+function idsForGroups(groups: MuscleGroup[], view: BView): IdSet {
+  const s: IdSet = new Set();
+  for (const g of groups) {
+    if (g === 'cardio') continue;
+    for (const id of LIB[g][view]) s.add(id);
+  }
+  return s;
+}
+
+export type MuscleFigureView = 'front' | 'back' | 'both' | 'auto';
+
+/**
+ * Anatomical body figure driven by `body-muscles` data. Renders the front
+ * and/or back silhouette (per `view`) cropped to `region`, with primary muscles
+ * in brass and secondary in grey. `view="auto"` shows only the silhouette(s)
+ * that actually carry worked muscles.
+ */
+export function MuscleFigure({
+  primary,
+  secondary = [],
+  view = 'auto',
+  region = 'full',
+  tone = 'primary',
+  width,
+  className,
+}: {
+  primary: MuscleGroup[];
+  secondary?: MuscleGroup[];
+  view?: MuscleFigureView;
+  region?: Region;
+  tone?: Tone;
+  width?: number | string;
+  className?: string;
+}) {
+  const full = primary.includes('fullbody');
+  const groups = [...primary, ...secondary];
+
+  let views: BView[];
+  if (view === 'front' || view === 'back') views = [view];
+  else if (view === 'both' || full) views = ['front', 'back'];
+  else {
+    const hasFront = groups.some((g) => g !== 'cardio' && LIB[g].front.length > 0);
+    const hasBack = groups.some((g) => g !== 'cardio' && LIB[g].back.length > 0);
+    views = hasFront && hasBack ? ['front', 'back'] : hasBack ? ['back'] : ['front'];
+  }
+
+  const hl = highlightColor(tone);
+  return (
+    <div className={className ? `bodymap ${className}` : 'bodymap'} style={{ width }}>
+      {views.map((v) => (
+        <BodySvg
+          key={v}
+          view={v}
+          region={region}
+          prim={idsForGroups(primary, v)}
+          sec={idsForGroups(secondary, v)}
+          hl={hl}
+          full={full}
+        />
+      ))}
+    </div>
+  );
+}
+
+export type MuscleIconVariant = 'chip' | 'chipLg' | 'chipFig' | 'row' | 'figure' | 'full';
 
 const SIZES: Record<MuscleIconVariant, [number, number]> = {
   chip: [8, 13],
   chipLg: [9, 15],
+  chipFig: [16, 25],
   row: [13, 22],
   figure: [13, 22],
   full: [15, 26],
 };
 
 /**
- * Inline SVG silhouette. `chip`/`row` subset the figure to the relevant half
- * (torso+arms for upper-body groups, torso+legs for lower); `figure`/`full`
- * draw the whole body with the head.
+ * Muscle mark. At figure/row/full sizes it renders a library-driven anatomical
+ * figure auto-cropped to the group's body part (an arm for biceps, legs for
+ * quads …). At chip/chipLg sizes it renders the crisp geometric locator mark —
+ * real anatomy does not read below ~16 px and these always sit beside a label.
  */
 export function MuscleIcon({
   muscle,
@@ -73,15 +571,53 @@ export function MuscleIcon({
   className?: string;
 }) {
   if (muscle === 'cardio') return null;
+
+  // Larger variants: real anatomy from the library, cropped to the body part.
+  if (variant === 'chipFig' || variant === 'row' || variant === 'figure' || variant === 'full') {
+    const [w, h] = SIZES[variant];
+    const view = GROUP_VIEW[muscle];
+    const region = GROUP_REGION[muscle];
+    const full = muscle === 'fullbody';
+    return (
+      <BodySvg
+        view={view}
+        region={region}
+        prim={full ? new Set() : new Set(LIB[muscle][view])}
+        sec={new Set()}
+        hl={highlightColor(tone)}
+        full={full}
+        width={w}
+        height={h}
+      />
+    );
+  }
+
+  return <GeoMuscleMark muscle={muscle} variant={variant} tone={tone} className={className} />;
+}
+
+/**
+ * Compact geometric locator mark for chip sizes (design MG-1). One silhouette,
+ * one highlighted region: at chip size the mark locates — upper body, arms,
+ * legs — and the word beside it carries the precision.
+ */
+function GeoMuscleMark({
+  muscle,
+  variant,
+  tone,
+  className,
+}: {
+  muscle: MuscleGroup;
+  variant: 'chip' | 'chipLg';
+  tone: Tone;
+  className?: string;
+}) {
   const [w, h] = SIZES[variant];
   const [dim, region, hl] = TONES[tone];
   const bg = 'var(--color-bg)';
-  const whole = variant === 'figure' || variant === 'full';
   const upper = UPPER.includes(muscle);
   const full = muscle === 'fullbody';
-  const showHead = whole;
-  const showArms = whole || full || upper;
-  const showLegs = whole || full || !upper;
+  const showArms = full || upper;
+  const showLegs = full || !upper;
 
   const torsoFill = full
     ? hl
@@ -102,7 +638,6 @@ export function MuscleIcon({
       style={{ width: w, height: h, display: 'block', flex: 'none' }}
       aria-hidden
     >
-      {showHead && <circle cx="10" cy="3.4" r="2.6" fill={full ? hl : dim} />}
       <rect x="6" y="7" width="8" height="10" rx="2" fill={torsoFill} />
       {showArms && (
         <>
@@ -173,96 +708,11 @@ export function MuscleIcon({
 }
 
 /**
- * Anatomical muscle map for the exercise detail (design RICH). Two silhouettes
- * — front and back — where every worked region is coloured: primary muscles in
- * brass, secondary in grey, everything else recedes into the body. Bundled SVG,
- * no runtime network. Muscle bellies are stylised (rounded shapes over a body
- * outline) rather than a medical illustration, so they read at ~120 px while
- * still locating the work precisely; the chips beside it carry the names.
+ * Anatomical muscle map for the exercise detail (design RICH). Full front and/or
+ * back silhouette from `body-muscles`: every worked region coloured — primary in
+ * brass, secondary in grey, the rest recedes. Only the view(s) that carry worked
+ * muscles are shown, so an upper-body lift never draws empty legs beside it.
  */
-const BRASS = 'var(--color-accent)';
-const GREY = 'var(--color-neutral-500)';
-const DIM = 'var(--color-neutral-800)';
-const SIL = 'var(--color-neutral-900)';
-
-/** Shared body outline (dim) — head, torso, arms, legs — drawn behind muscles. */
-function BodySilhouette() {
-  return (
-    <g fill={SIL}>
-      <circle cx="50" cy="17" r="11" />
-      <rect x="45" y="26" width="10" height="7" />
-      <path d="M31 35 Q50 30 69 35 L64 96 Q50 101 36 96 Z" />
-      <path d="M35 92 L65 92 L63 116 Q50 122 37 116 Z" />
-      <rect x="17" y="38" width="11" height="38" rx="5.5" />
-      <rect x="72" y="38" width="11" height="38" rx="5.5" />
-      <rect x="16" y="74" width="9.5" height="32" rx="4.5" />
-      <rect x="74.5" y="74" width="9.5" height="32" rx="4.5" />
-      <rect x="34" y="114" width="13.5" height="50" rx="6.5" />
-      <rect x="52.5" y="114" width="13.5" height="50" rx="6.5" />
-      <rect x="35" y="162" width="11.5" height="44" rx="5.5" />
-      <rect x="53.5" y="162" width="11.5" height="44" rx="5.5" />
-    </g>
-  );
-}
-
-function FrontBody({ col }: { col: (g: MuscleGroup) => string }) {
-  return (
-    <svg viewBox="0 0 100 214" style={{ width: '100%', display: 'block' }} aria-hidden>
-      <BodySilhouette />
-      {/* shoulders (deltoids) */}
-      <circle cx="24" cy="43" r="7.5" fill={col('shoulders')} />
-      <circle cx="76" cy="43" r="7.5" fill={col('shoulders')} />
-      {/* chest (pecs) */}
-      <path d="M35 43 Q42 40 48 43 L48 56 Q41 59 35 55 Z" fill={col('chest')} />
-      <path d="M65 43 Q58 40 52 43 L52 56 Q59 59 65 55 Z" fill={col('chest')} />
-      {/* biceps */}
-      <ellipse cx="22.5" cy="55" rx="5" ry="9" fill={col('biceps')} />
-      <ellipse cx="77.5" cy="55" rx="5" ry="9" fill={col('biceps')} />
-      {/* forearms */}
-      <ellipse cx="20.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
-      <ellipse cx="79.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
-      {/* core (abs + obliques) */}
-      <rect x="43" y="60" width="14" height="30" rx="3" fill={col('core')} />
-      {/* quads */}
-      <ellipse cx="40.5" cy="134" rx="6.5" ry="22" fill={col('quads')} />
-      <ellipse cx="59.5" cy="134" rx="6.5" ry="22" fill={col('quads')} />
-      {/* calves (front) */}
-      <ellipse cx="40.5" cy="182" rx="5" ry="16" fill={col('calves')} />
-      <ellipse cx="59.5" cy="182" rx="5" ry="16" fill={col('calves')} />
-    </svg>
-  );
-}
-
-function BackBody({ col }: { col: (g: MuscleGroup) => string }) {
-  return (
-    <svg viewBox="0 0 100 214" style={{ width: '100%', display: 'block' }} aria-hidden>
-      <BodySilhouette />
-      {/* rear deltoids */}
-      <circle cx="24" cy="43" r="7.5" fill={col('shoulders')} />
-      <circle cx="76" cy="43" r="7.5" fill={col('shoulders')} />
-      {/* back — traps, lats, lower back */}
-      <path d="M41 36 L59 36 L56 50 L44 50 Z" fill={col('back')} />
-      <path d="M37 51 L63 51 L59 82 L41 82 Z" fill={col('back')} />
-      <rect x="43" y="82" width="14" height="10" rx="3" fill={col('back')} />
-      {/* triceps */}
-      <ellipse cx="22.5" cy="55" rx="5" ry="9" fill={col('triceps')} />
-      <ellipse cx="77.5" cy="55" rx="5" ry="9" fill={col('triceps')} />
-      {/* forearms */}
-      <ellipse cx="20.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
-      <ellipse cx="79.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
-      {/* glutes */}
-      <ellipse cx="42" cy="104" rx="8" ry="7" fill={col('glutes')} />
-      <ellipse cx="58" cy="104" rx="8" ry="7" fill={col('glutes')} />
-      {/* hamstrings */}
-      <ellipse cx="40.5" cy="136" rx="6.5" ry="20" fill={col('hamstrings')} />
-      <ellipse cx="59.5" cy="136" rx="6.5" ry="20" fill={col('hamstrings')} />
-      {/* calves (back) */}
-      <ellipse cx="40.5" cy="181" rx="6" ry="18" fill={col('calves')} />
-      <ellipse cx="59.5" cy="181" rx="6" ry="18" fill={col('calves')} />
-    </svg>
-  );
-}
-
 export function MuscleBodyFigure({
   primary,
   secondary,
@@ -272,16 +722,8 @@ export function MuscleBodyFigure({
   secondary: MuscleGroup[];
   width?: number;
 }) {
-  const full = primary.includes('fullbody');
-  const pr = new Set<MuscleGroup>(primary);
-  const se = new Set<MuscleGroup>(secondary);
-  const col = (g: MuscleGroup): string => (full || pr.has(g) ? BRASS : se.has(g) ? GREY : DIM);
-
   return (
-    <div className="bodymap" style={{ width }}>
-      <FrontBody col={col} />
-      <BackBody col={col} />
-    </div>
+    <MuscleFigure primary={primary} secondary={secondary} view="auto" region="full" width={width} />
   );
 }
 
@@ -298,8 +740,10 @@ export function MuscleChip({
 }) {
   if (muscle === 'cardio') return null;
   return (
-    <span className={`mchip${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}>
-      <MuscleIcon muscle={muscle} variant={size === 'lg' ? 'chipLg' : 'chip'} tone={tone} />
+    <span
+      className={`mchip mchip-fig${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}
+    >
+      <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
       {strings().muscleGroups[muscle]}
     </span>
   );
@@ -312,8 +756,8 @@ export function MuscleChip({
 export function MuscleSetChip({ muscle, count }: { muscle: MuscleGroup; count?: number }) {
   if (muscle === 'cardio') return null;
   return (
-    <span className="mworked-chip">
-      <MuscleIcon muscle={muscle} variant="chip" tone="primary" />
+    <span className="mworked-chip mworked-chip-fig">
+      <MuscleIcon muscle={muscle} variant="chipFig" tone="primary" />
       <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
       {count !== undefined && <span className="mworked-count">{count}</span>}
     </span>

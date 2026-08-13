@@ -12541,9 +12541,16 @@ h6 {
     grid-column: 1;
   }
 
+  /* Day head (MONDAY · DAY 1 + Copy day / Add exercise) spans the full editor
+     width so the day-control buttons sit flush with the right content edge —
+     above the rail — matching the design. The rail then starts on the next row. */
+  .programs-author-page .program-day > .program-day-head {
+    grid-column: 1 / -1;
+  }
+
   .programs-author-page .program-day > .program-day-rail {
     grid-column: 2;
-    grid-row: 1 / span 30;
+    grid-row: 2 / span 30;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -13111,27 +13118,38 @@ h6 {
   color: var(--color-neutral-500);
 }
 
-/* Library / My-exercises tabs. */
+/* All / My-exercises SUBtabs. One level below the Programs↔Exercises tabs, so
+   they read as a compact segmented control rather than top-level underline
+   tabs. */
 .exg-tabs {
   display: inline-flex;
-  gap: var(--space-5);
+  gap: 2px;
   align-items: center;
+  align-self: flex-start;
+  padding: 3px;
+  background: var(--color-neutral-900);
+  border-radius: 999px;
 }
 .exg-tabs button {
   border: 0;
   background: none;
-  padding: 6px 2px;
-  font-size: 15px;
+  padding: 5px 13px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--color-neutral-500);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
 }
 .exg-tabs button.active {
   color: var(--color-text);
-  border-bottom-color: var(--color-accent);
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 .exg-tabcount {
   font-size: 11px;
@@ -13400,21 +13418,25 @@ h6 {
    ========================================================================== */
 .prog-tabs {
   display: inline-flex;
-  gap: var(--space-5);
+  gap: 26px;
   align-items: center;
 }
+/* The 14px bottom padding + matching negative margin push the underline down to
+   the header's divider, so the active tab reads as sitting on the rule (design). */
 .prog-tabs button {
   border: 0;
   background: none;
-  padding: 6px 2px;
+  padding: 0 0 14px;
+  margin-bottom: -14px;
   font-size: 15px;
+  line-height: 1.55;
   color: var(--color-neutral-500);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  box-shadow: inset 0 -2px 0 transparent;
 }
 .prog-tabs button.active {
   color: var(--color-text);
-  border-bottom-color: var(--color-accent);
+  box-shadow: inset 0 -2px 0 var(--color-accent);
 }
 /* Hide the programs body while the Exercises tab is active — kept mounted so
    the week strip, list and any draft are preserved (AC-LIBTAB-04). */
@@ -13440,12 +13462,15 @@ h6 {
     border-bottom: 0;
     border-radius: calc(var(--radius-md) - 2px);
     padding: 8px 0;
+    margin-bottom: 0;
+    box-shadow: none;
     text-align: center;
     font-size: 13px;
   }
   .prog-tabs button.active {
     background: var(--color-accent-900);
     color: var(--color-accent);
+    box-shadow: none;
   }
 }
 .programs-top .prog-tabs {
@@ -13461,11 +13486,15 @@ h6 {
 /* Author view hides its top bar by design. Only when the Exercises tab is
    enabled do we reveal it — as a slim switcher-only bar, with the duplicate
    "Programs" title suppressed (the left list already carries it). */
+/* Design PG-01b: 55px header, 16px/28px padding, faint full-width divider at its
+   bottom edge. The active tab's brass underline sits directly ON that divider
+   (see .prog-tabs button below), not floating above it. */
 .programs-author-page.programs-has-tabs > .programs-top {
   display: flex;
-  padding: 12px 20px 10px;
+  padding: 16px 28px;
   align-items: center;
   flex: none;
+  box-shadow: 0 1px 0 var(--color-divider);
 }
 .programs-author-page.programs-has-tabs > .programs-top > div:first-child {
   display: none;
@@ -15453,5 +15482,960 @@ button.badge {
   }
   .exl-new {
     min-height: 44px;
+  }
+}
+
+/* ── Programs ↔ Exercises peer tab: no layout shift ──────────────────────────
+   The Exercises tab is framed by the same programs-page chrome; match its
+   filter rail to the Programs left-list width so switching the peer tab never
+   shifts the main content. Desktop only (the rail is hidden on phone). */
+.programs-author-page .exg-tabwrap .exl {
+  height: 100%;
+}
+@media (min-width: 720px) {
+  .programs-author-page .exg-tabwrap .exl-rail {
+    width: 330px;
+    box-sizing: border-box;
+    padding: 2px 20px 24px 0;
+  }
+  .programs-author-page .exg-tabwrap .exl-main {
+    padding-left: 20px;
+  }
+}
+
+/* Ongoing (no fixed weeks): inline "no end date" toggle in the editor meta row. */
+.program-openended-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+}
+.program-week-ongoing .active {
+  color: var(--color-accent);
+}
+
+/* Muscle name-chips now carry a real anatomical part-figure; keep the pill
+   from growing too tall around the larger mark. */
+.mchip-fig,
+.mworked-chip-fig {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.mchip-fig > svg,
+.mworked-chip-fig > svg {
+  flex: none;
+}
+
+/* ── Layout stability & sidebars ─────────────────────────────────────────────
+   Reserve the scrollbar gutter so switching tabs/screens (a taller page gaining
+   a scrollbar) never shifts the content horizontally. */
+.screen {
+  scrollbar-gutter: stable;
+}
+
+/* Sidebars stick while there is height headroom, so filters/day-rail stay in
+   view as the main column scrolls (desktop only — rails collapse on phone). */
+@media (min-width: 720px) {
+  .exl-rail,
+  .program-day-rail {
+    position: sticky;
+    top: var(--space-4);
+    align-self: flex-start;
+    max-height: calc(100vh - var(--space-6));
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* "Has video only" is a mode switch, not a filter facet — set it apart from the
+   filter groups above it in the rail. */
+.exl-rail .exl-toggle {
+  margin-top: 4px;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Weekday strip: mark the real current weekday (today), distinct from the day
+   being edited (design "dateless week" AC-2.1). */
+.program-week-slot.is-today {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.program-week-strip-compact .program-week-slot.is-today {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+/* ── Programs: dateless-week strip v2 ────────────────────────────────────────
+   Compact day cards: 3-letter label, day name (muted for rest), and an accent
+   underline (ok = training, muted = rest). Today = accent fill; the day being
+   edited = accent ring. Scoped to the author page so member strips are
+   untouched. */
+.program-week-caption {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+  margin-bottom: 11px;
+}
+.program-week-strip-v2 {
+  display: flex;
+  gap: 6px;
+}
+.programs-author-page .program-week-strip-v2 .program-week-slot {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-neutral-900);
+  padding: 14px 9px 11px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.program-week-strip-v2 .pws-day {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.program-week-strip-v2 .pws-name {
+  font-size: 14px;
+  margin-top: 7px;
+  line-height: 1.25;
+  color: var(--color-neutral-300);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.program-week-strip-v2 .program-week-slot.rest .pws-name {
+  color: var(--color-neutral-700);
+}
+.program-week-strip-v2 .pws-bar {
+  height: 2px;
+  border-radius: 2px;
+  margin: 9px 10px 0;
+  background: var(--color-accent);
+}
+.program-week-strip-v2 .program-week-slot.rest .pws-bar {
+  background: var(--color-neutral-800);
+}
+/* real today — accent fill + brass ring (design) */
+.programs-author-page .program-week-strip-v2 .program-week-slot.is-today {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.program-week-strip-v2 .program-week-slot.is-today .pws-day {
+  color: var(--color-accent-300);
+}
+.program-week-strip-v2 .program-week-slot.is-today .pws-name {
+  color: var(--color-accent-100);
+}
+.program-week-strip-v2 .program-week-slot.is-today .pws-bar {
+  background: var(--color-accent);
+}
+/* day being edited — accent ring (works alongside the today fill) */
+.programs-author-page .program-week-strip-v2 .program-week-slot.today {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+.programs-author-page .program-week-strip-v2 .program-week-slot:hover,
+.programs-author-page .program-week-strip-v2 .program-week-slot:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+
+/* The dateless-week caption is a direct child of the padding-less editor on
+   desktop, so give it the same 34px horizontal inset as the head and strip
+   (otherwise it sits flush against the sidebar divider). */
+@media (min-width: 720px) {
+  .programs-author-page .program-week-caption {
+    padding: 20px 34px 0;
+    margin-bottom: 0;
+  }
+  .programs-author-page .program-week-strip.program-week-strip-v2 {
+    padding-top: 10px;
+  }
+}
+
+/* ── Programs: empty day (design "programs redesign") ────────────────────────
+   Centered card that fills the day column: icon tile, title, one line of body,
+   and Add-exercise / Copy-a-day-here actions. */
+.program-day-empty {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  text-align: center;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: 24px;
+}
+.pde-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  background: var(--color-neutral-900);
+  display: grid;
+  place-items: center;
+}
+.pde-icon i {
+  font-size: 24px;
+  color: var(--color-neutral-600);
+  line-height: 0;
+}
+.pde-title {
+  font-size: 15px;
+  color: var(--color-neutral-300);
+}
+.pde-body {
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  max-width: 38ch;
+  line-height: 1.5;
+}
+.pde-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+.pde-actions .btn {
+  min-height: 40px;
+  font-size: 13px;
+  gap: 7px;
+}
+.pde-copy {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.pde-copy select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── Programs editor: final pixel-polish to the redesign board ───────────────── */
+@media (min-width: 720px) {
+  /* Title 28px (board). */
+  .programs-author-page .program-title-input {
+    font-size: 28px;
+    letter-spacing: -0.025em;
+  }
+  /* Day grid gap + rail exactly as the board (1fr / 260px, 30px gap). */
+  .programs-author-page .program-day {
+    column-gap: 30px;
+  }
+  /* Week-number bars: 20px tall (board). */
+  .programs-author-page .program-weeks-detail .program-week-bar {
+    height: 20px;
+    border-radius: 4px;
+  }
+  /* Selected (being-edited) weekday: 1px brass ring (board), distinct from the
+     accent-900 fill of the real today. */
+  .programs-author-page .program-week-strip-v2 .program-week-slot.today {
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+  /* Day-name input: 280px, 44px tall, 14px (board). */
+  .programs-author-page .program-day-name-input {
+    max-width: 280px;
+    min-height: 44px;
+    font-size: 14px;
+  }
+}
+
+/* ── Today: "Suggest a program" banner (unique brass treatment) ─────────────── */
+.prog-banner {
+  position: relative;
+  flex: none;
+  border-radius: var(--radius-lg);
+  padding: 16px 16px 15px;
+  overflow: hidden;
+  background: radial-gradient(
+    120% 140% at 100% 0%,
+    var(--color-accent-800) 0%,
+    var(--color-accent-900) 34%,
+    #1b1a16 70%,
+    var(--color-surface) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px var(--color-accent-700),
+    var(--shadow-md);
+}
+.prog-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(217, 162, 79, 0.14) 50%,
+    transparent 60%
+  );
+  pointer-events: none;
+  transform: translateX(-30%);
+  animation: progSheen 5.5s ease-in-out infinite;
+}
+@keyframes progSheen {
+  0%,
+  72% {
+    transform: translateX(-60%);
+  }
+  88%,
+  100% {
+    transform: translateX(60%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prog-sheen {
+    animation: none;
+  }
+}
+.prog-banner-row {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.prog-banner-icon {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: rgba(10, 11, 13, 0.4);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.prog-banner-icon i {
+  font-size: 19px;
+  color: var(--color-accent);
+  line-height: 0;
+}
+.prog-banner-main {
+  flex: 1;
+  min-width: 0;
+}
+.prog-banner-kicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+}
+.prog-banner-title {
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  margin-top: 4px;
+  color: var(--color-accent-100);
+}
+.prog-banner-body {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-accent-200);
+  opacity: 0.85;
+  margin-top: 5px;
+}
+.prog-banner-acts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.prog-banner-cta {
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  border: none;
+  color: #1a130a;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+.prog-banner-cta i {
+  font-size: 14px;
+}
+.prog-banner-skip {
+  min-height: 38px;
+  padding: 0 10px;
+  background: none;
+  border: none;
+  color: var(--color-accent-200);
+  font-size: 13px;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+/* Suggest-a-program choice sheet */
+.prog-suggest-sheet .ps-title {
+  font-size: 17px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.prog-suggest-sheet .ps-opt {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 15px;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  margin-top: 10px;
+}
+.prog-suggest-sheet .ps-opt.sel {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.prog-suggest-sheet .ps-opt-body {
+  flex: 1;
+  min-width: 0;
+}
+.prog-suggest-sheet .ps-opt-title {
+  font-size: 14px;
+}
+.prog-suggest-sheet .ps-opt-sub {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+}
+.prog-suggest-sheet .ps-opt.sel .ps-opt-sub {
+  color: var(--color-accent-200);
+}
+.prog-suggest-sheet .ps-opt > i {
+  font-size: 20px;
+  color: var(--color-accent);
+  line-height: 0;
+}
+.prog-suggest-sheet .ps-acts {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* Selected (being-edited) day reads like today minus the fill: brass label,
+   bright name, brass underline (design PG-01b — today = filled tint, selected =
+   outline, but both are "active"). */
+.programs-author-page .program-week-strip-v2 .program-week-slot.today .pws-day,
+.programs-author-page .program-week-strip-v2 .program-week-slot.is-today .pws-day {
+  color: var(--color-accent-300);
+}
+.programs-author-page .program-week-strip-v2 .program-week-slot.today .pws-name,
+.programs-author-page .program-week-strip-v2 .program-week-slot.is-today .pws-name {
+  color: var(--color-text);
+}
+.programs-author-page .program-week-strip-v2 .program-week-slot.today .pws-bar,
+.programs-author-page .program-week-strip-v2 .program-week-slot.is-today .pws-bar {
+  background: var(--color-accent);
+}
+
+/* Program footer: destructive/commit actions (Delete · Save) split from the
+   management actions (Assign · Duplicate · Activate) by a hairline (design). */
+.program-footer-sep {
+  width: 1px;
+  height: 24px;
+  flex: none;
+  background: var(--color-divider);
+  margin: 0 4px;
+}
+
+/* ==========================================================================
+   Programs ↔ Exercises · design parity + cross-page consistency
+   Every value below is measured from the design board (PG-01b / PR-03c), so
+   the two peer tabs share one set of metrics: content insets, sidebar width
+   and padding, full-height sidebar rules, and button sizing.
+   ========================================================================== */
+
+/* --- Programs: typography corrected to the design ------------------------ */
+
+/* Design: 28px / 400 / -0.7px. The app was rendering the title semibold. */
+.programs-author-page .program-title-input {
+  font-weight: 400;
+}
+
+/* Design: the list column title is optically tightened like the page title. */
+.programs-author-page .program-list-title {
+  letter-spacing: -0.6px;
+}
+
+/* Design week slot: 80px tall, with the day name at 14px — the generic
+   `slot span` rule was shrinking the name to the 10px weekday-label size. */
+.programs-author-page .program-week-strip .program-week-slot {
+  height: 80px;
+}
+
+.programs-author-page .program-week-strip .program-week-slot .pws-name {
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+/* --- Buttons: one size across both pages (design: 13px) ------------------ */
+.program-footer .btn,
+.program-footer .danger-outline {
+  font-size: 13px;
+}
+
+/* --- Exercises: same chrome as Programs ---------------------------------- */
+
+/* Programs puts its sidebar flush against the page edge and lets the editor
+   own its inset. The Exercises wrapper was adding its own 20px gutter, which
+   pushed the rail (and therefore all content) 20px right of the Programs
+   column. Zero it and let rail/main carry the padding, exactly like Programs.
+   Scrolling moves to the two columns so the rail rule runs the full height.
+   Desktop only — on phone there is no rail, so the wrapper keeps its own
+   gutter and stays the scroll container. */
+@media (min-width: 720px) {
+  .programs-author-page .exg-tabwrap {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .programs-author-page .exg-tabwrap .exl-shell {
+    height: 100%;
+    align-items: stretch;
+  }
+}
+
+@media (min-width: 720px) {
+  /* Matches .programs-author-page .program-list: 330px wide, 26px/20px inner
+     padding, and a 1px rule down the full height of the column. */
+  .programs-author-page .exg-tabwrap .exl-rail {
+    width: 330px;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 26px 20px;
+    box-shadow: 1px 0 0 var(--color-divider);
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+
+  /* Matches the program editor's 24px/34px content inset, so the Exercises
+     heading starts on the same x as the program title. */
+  .programs-author-page .exg-tabwrap .exl-main {
+    height: 100%;
+    padding: 24px 34px;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Page heading parity with the program title (design: 28px / 400 / -0.7px). */
+.programs-author-page .exg-tabwrap .exl-head h2 {
+  font-weight: 400;
+  letter-spacing: -0.7px;
+}
+
+/* --- Exercise cards: media fills the card ------------------------------- */
+
+/* Every card is the same height and every thumbnail is the same square. The
+   media is a fixed 1:1 box (never absorbs slack, so images can't end up
+   different heights), and the body reserves a row for each optional element —
+   muscles line and badge row — so a card missing them is not shorter. */
+.exl-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.exl-card .exl-media {
+  flex: none;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+}
+
+.exl-card .exl-cardbody {
+  flex: none;
+}
+
+.exl-card .exl-cardmus {
+  min-height: 12px;
+}
+
+.exl-card .exl-cardbadges {
+  min-height: 13px;
+}
+
+/* Empty day: the design's placeholder card fills the editor's remaining height
+   rather than leaving a void above the footer. Only the empty state stretches —
+   a day with exercises keeps its natural, content-sized rows. */
+@media (min-width: 960px) {
+  .programs-author-page .program-day:has(> .program-day-empty) {
+    align-content: stretch;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .programs-author-page .program-day > .program-day-empty {
+    height: 100%;
+  }
+}
+
+/* Exercises rail = Programs sidebar: a 24px column title, then the search
+   field, then the browsable content (filters here, the program list there).
+   Values copied from .program-list-title / .programs-author-page .program-search. */
+@media (min-width: 720px) {
+  .programs-author-page .exg-tabwrap .exl-rail-title {
+    /* Programs spaces its head from the search by 16px (8px margin + the 8px
+       list gap). The rail's column gap already contributes --space-5, so take
+       that off to land the search field on exactly the same y on both tabs. */
+    margin-bottom: calc(16px - var(--space-5));
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: -0.6px;
+    font-weight: 500;
+    text-transform: none;
+    color: var(--color-text);
+  }
+
+  .programs-author-page .exg-tabwrap .exl-rail > .exl-search {
+    flex: none;
+    min-width: 0;
+    min-height: 49px;
+    margin-bottom: 6px;
+    padding: 0 13px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+}
+
+/* "New exercise" matches "New program": brass-outlined primary, 38px tall,
+   same 8px icon gap. */
+.exl-new {
+  min-height: 38px;
+  gap: 8px;
+}
+
+/* Sidebar column title: the Programs head is a 32px row (title + "＋" button),
+   so the Exercises rail title has to occupy the same 32px — otherwise the
+   heading and the search below it jump when switching between the two tabs. */
+@media (min-width: 720px) {
+  .programs-author-page .exg-tabwrap .exl-rail-title {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+  }
+}
+
+/* ==========================================================================
+   Exercise detail · fixed media + breathing room
+   ========================================================================== */
+
+/* Photos are reference material, not decoration: show the whole frame rather
+   than cropping it, inside a fixed box so every exercise page is laid out the
+   same regardless of the source image's aspect. */
+.exd-video.photo img {
+  object-fit: contain;
+}
+
+.exd-formphoto {
+  background: var(--color-neutral-900);
+}
+
+.exd-formphoto img {
+  object-fit: contain;
+}
+
+@media (min-width: 960px) {
+  /* Same 34px page inset as Programs and Exercises. */
+  .screen.exd.desktop {
+    padding: 14px 34px 24px;
+  }
+
+  /* A fixed hero box — the 16:9 ratio made it 628px tall on a wide window. */
+  .exd.desktop .exd-left .exd-video {
+    height: 420px;
+    aspect-ratio: auto;
+  }
+
+  /* Sections were separated by less space than the gap inside them, which is
+     what made labels look glued to the block above. */
+  .exd.desktop .exd-left,
+  .exd.desktop .exd-right {
+    gap: var(--space-8);
+  }
+
+  .exd.desktop .exd-section {
+    gap: var(--space-4);
+  }
+}
+
+/* Phone: same reasoning, smaller scale — the section gap must stay larger than
+   the gap between a label and its own content. */
+@media (max-width: 959.98px) {
+  .exd .exd-left,
+  .exd .exd-right {
+    gap: var(--space-6);
+  }
+
+  .exd .exd-section {
+    gap: var(--space-3);
+  }
+
+  .exd-video.phone {
+    height: 240px;
+  }
+}
+
+/* ==========================================================================
+   Phone: Programs and Exercises spacing
+   The rail is hidden here, so the wrapper carries the page gutter and remains
+   the scroll container. One gutter value across both tabs keeps the pages
+   consistent, and the vertical rhythm separates blocks rather than gluing the
+   search, subtabs and grid together.
+   ========================================================================== */
+@media (max-width: 719.98px) {
+  .programs-author-page.programs-has-tabs > .programs-top {
+    padding: 12px 16px;
+  }
+
+  .programs-author-page .exg-tabwrap {
+    padding: var(--space-4) 16px calc(var(--space-6) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .programs-author-page .exg-tabwrap .exl-main {
+    gap: var(--space-4);
+    padding: 0;
+  }
+
+  /* The tab strip is a full-width pill here; give it room from the heading
+     above and the search below it. */
+  .exl-main > .exg-tabs {
+    margin: var(--space-2) 0;
+  }
+
+  .exl-searchrow {
+    gap: var(--space-3);
+  }
+
+  /* Two columns of squares on a phone, with a gutter that matches the page. */
+  .exl-grid {
+    gap: var(--space-3);
+  }
+}
+
+/* ==========================================================================
+   Programs · "No end date" switch + collision fixes
+   ========================================================================== */
+
+/* Real switch instead of a native checkbox, reusing the library toggle's look.
+   The native input stays in the DOM (keyboard + a11y) but is not painted. */
+.prog-switch-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1;
+}
+
+.prog-switch-field input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prog-switch-field .exl-switch {
+  align-self: center;
+}
+
+.prog-switch-field.on .exl-switch {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+
+.prog-switch-field.on .exl-switch::after {
+  transform: translateX(15px);
+  background: var(--color-accent);
+}
+
+.prog-switch-field:focus-within .exl-switch {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The meta row mixes 12px text, number inputs and now a 19px-tall switch —
+   centre everything on one line so nothing sits high or low. */
+.program-meta-edit {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  align-items: center;
+}
+
+.program-meta-edit > * {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The open-ended toggle is inline in this row, so drop the standalone spacing. */
+.program-meta-edit .program-openended {
+  margin-top: 0;
+}
+
+@media (min-width: 960px) {
+  /* The empty-day card fills its row, so without a bottom inset it ended up
+     flush against the footer note — the two boxes read as colliding. */
+  .programs-author-page .program-day {
+    padding-bottom: var(--space-6);
+  }
+
+  .programs-author-page .program-footer {
+    margin-top: var(--space-3);
+  }
+}
+
+/* Below 960px the day area is a bordered card again: keep it clear of the week
+   strip above and the footer below instead of butting against them. */
+@media (max-width: 959.98px) {
+  .programs-author-page .program-week-strip {
+    margin-bottom: var(--space-5);
+  }
+
+  .programs-author-page .program-day {
+    padding: var(--space-5);
+  }
+
+  .programs-author-page .program-day-head {
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+
+  .programs-author-page .program-day-tools {
+    row-gap: var(--space-3);
+  }
+
+  .programs-author-page .program-footer {
+    margin-top: var(--space-5);
+  }
+
+  .programs-author-page .program-day-empty {
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+/* Screen-reader-only text (visually hidden, still announced). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Ongoing programs show "∞ weeks" in the same slot the number occupies, so
+   switching between a fixed length and ongoing never reflows the meta row. */
+.program-weeks-field {
+  gap: 4px;
+}
+
+/* The number and the infinity mark occupy an identical, fixed box, so toggling
+   Ongoing swaps the glyph without moving anything after it in the row. */
+/* Pinned in px, not ch: the input renders at 12px and the glyph at 14px, so a
+   ch-based width resolved differently for each and still moved the row by 1px. */
+.program-weeks-field > input,
+.program-weeks-inf {
+  width: 22px;
+  min-width: 22px;
+  flex: none;
+  padding: 0;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+}
+
+.program-weeks-inf {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-neutral-200);
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Programs · phone / narrow layout
+   The desktop two-pane chrome collapses here. Two problems this fixes:
+   a `1fr` column whose automatic minimum was wider than the viewport (so the
+   right edge of every pane was clipped), and card-inside-card-inside-card —
+   the page itself is the container, so the panes carry no surface of their own.
+   ========================================================================== */
+@media (max-width: 959.98px) {
+  .programs-page .program-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Grid/flex children default to min-width:auto, which is what let the panes
+     grow past the screen. */
+  .programs-page .program-layout > *,
+  .programs-page .program-editor > * {
+    min-width: 0;
+  }
+
+  .programs-page .program-list,
+  .programs-page .program-editor,
+  .programs-page .program-day {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .programs-page .program-day {
+    padding-top: var(--space-5);
+    padding-bottom: 0;
+  }
+
+  .program-io {
+    flex-wrap: wrap;
+  }
+
+  .program-io .btn {
+    flex: 1 1 46%;
+  }
+}
+
+/* Phone week strip (design PR-02): 59px slots, 10px labels and 10px day names,
+   9px/5px padding — the 14px desktop name truncates to "R…" at this width. */
+@media (max-width: 959.98px) {
+  .programs-author-page .program-week-strip .program-week-slot {
+    height: 59px;
+    padding: 9px 5px;
+    border-radius: 10px;
+  }
+
+  .programs-author-page .program-week-strip .program-week-slot .pws-name {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .programs-author-page .program-week-strip .program-week-slot .pws-day {
+    font-size: 10px;
+  }
+
+  .programs-author-page .program-week-strip .pws-bar {
+    margin: 6px 4px 0;
   }
 }

@@ -283,33 +283,33 @@ export function ExerciseGallery({
       label: t.equipmentNames[s.equip],
       clear: () => set({ equip: undefined }),
     });
-  // Classification filters only apply to the library tab (custom exercises
-  // carry none), so their chips never show on My exercises.
-  if (!isMine && s.category)
+  // One filter set drives both subtabs, so every active facet stays visible and
+  // removable regardless of which subtab is showing.
+  if (s.category)
     active.push({
       key: 'ca',
       label: t.categoryNames[s.category],
       clear: () => set({ category: undefined }),
     });
-  if (!isMine && s.mechanic)
+  if (s.mechanic)
     active.push({
       key: 'mc',
       label: t.mechanicNames[s.mechanic],
       clear: () => set({ mechanic: undefined }),
     });
-  if (!isMine && s.force)
+  if (s.force)
     active.push({
       key: 'fo',
       label: t.forceNames[s.force],
       clear: () => set({ force: undefined }),
     });
-  if (!isMine && s.level)
+  if (s.level)
     active.push({
       key: 'lv',
       label: t.levelNames[s.level],
       clear: () => set({ level: undefined }),
     });
-  if (!isMine && s.hasVideo)
+  if (s.hasVideo)
     active.push({ key: 'hv', label: t.libHasVideoOnly, clear: () => set({ hasVideo: false }) });
 
   const activeChips =
@@ -514,17 +514,19 @@ export function ExerciseGallery({
           {musclesText(r)}
           {r.curated ? ` · ${t.libNoClassInline}` : ''}
         </div>
-        {!r.curated && (r.mechanic || r.equipment) && (
-          <div className="exl-cardbadges">
-            {r.mechanic && <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>}
-            {r.equipment && (
-              <span className="badge b-eq sm">
-                <Icon name={equipmentIconName(r.equipment)} />
-                {t.equipmentNames[r.equipment]}
-              </span>
-            )}
-          </div>
-        )}
+        {/* Always rendered, even when empty: it reserves its own row so a card
+            without badges is exactly as tall as one with them. */}
+        <div className="exl-cardbadges">
+          {!r.curated && r.mechanic && (
+            <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>
+          )}
+          {!r.curated && r.equipment && (
+            <span className="badge b-eq sm">
+              <Icon name={equipmentIconName(r.equipment)} />
+              {t.equipmentNames[r.equipment]}
+            </span>
+          )}
+        </div>
       </div>
     </button>
   );
@@ -562,42 +564,10 @@ export function ExerciseGallery({
     </button>
   );
 
-  // Filters that apply to custom exercises (only muscle + equipment).
-  const mineGroups = (
-    <>
-      <div>
-        <div className="exl-group-label">{t.muscleGroupsLabel}</div>
-        <div className="exl-chips">
-          {MUSCLE_IDS.map((m) =>
-            chip(
-              s.muscle === m,
-              t.muscleGroups[m],
-              () => set({ muscle: s.muscle === m ? undefined : m }),
-              `mu-${m}`,
-            ),
-          )}
-        </div>
-      </div>
-      <div>
-        <div className="exl-group-label">{t.equipmentLabelField}</div>
-        <div className="exl-chips">
-          {EQUIPMENT_IDS.map((id) =>
-            chip(
-              s.equip === id,
-              t.equipmentNames[id],
-              () => set({ equip: s.equip === id ? undefined : id }),
-              `eq-${id}`,
-              'b-eq',
-            ),
-          )}
-        </div>
-      </div>
-    </>
-  );
-
-  // One "New exercise" button, same design + behaviour everywhere.
+  // One "New exercise" button, same design + behaviour everywhere. Uses the
+  // primary (brass-outlined) style so it reads identically to "New program".
   const newBtn = canEdit ? (
-    <button className="btn btn-secondary exl-new" onClick={openCreate}>
+    <button className="btn btn-primary exl-new" onClick={openCreate}>
       <Icon name="plus" />
       {t.libCreateExercise}
     </button>
@@ -668,14 +638,54 @@ export function ExerciseGallery({
       <div className="exl-mrows">{shown.map(listRow)}</div>
     );
 
+  // Library / My-exercises subtabs. They live under the content heading (not in
+  // the rail), mirroring how Programs stacks its title and switcher.
+  const subTabs = (
+    <div className="exg-tabs" role="tablist">
+      <button
+        role="tab"
+        aria-selected={tab === 'library'}
+        className={tab === 'library' ? 'active' : ''}
+        onClick={() => setTab('library')}
+      >
+        {t.libTabLibrary}
+      </button>
+      <button
+        role="tab"
+        aria-selected={tab === 'mine'}
+        className={tab === 'mine' ? 'active' : ''}
+        onClick={() => setTab('mine')}
+      >
+        {t.libTabMine}
+        {mine.length > 0 && <span className="exg-tabcount">{mine.length}</span>}
+      </button>
+    </div>
+  );
+
+  const searchField = (
+    <label className="exl-search">
+      <Icon name="magnifying-glass" />
+      <input
+        ref={searchRef}
+        value={s.q}
+        placeholder={t.searchExercises}
+        onChange={(e) => set({ q: e.target.value })}
+      />
+    </label>
+  );
+
   // Shared shell for both tabs: filter rail (desktop) / filter sheet (phone),
   // header with the New-exercise button, search, active chips, list, pager.
+  // On desktop the rail mirrors the Programs sidebar — title, then search, then
+  // the browsable content. On phone the rail is hidden, so search stays in the
+  // main column next to the filter-sheet trigger.
   const galleryMain = (
     <div className="exl-shell">
       <aside className="exl-rail">
         <div className="exl-rail-title">{t.libFiltersLabel}</div>
-        {isMine ? mineGroups : groups}
-        {!isMine && videoToggle}
+        {isDesktop && searchField}
+        {groups}
+        {videoToggle}
       </aside>
       <div className="exl-main">
         <div className="exl-head">
@@ -687,17 +697,10 @@ export function ExerciseGallery({
           </div>
           {newBtn}
         </div>
-        <div className="exl-searchrow">
-          <label className="exl-search">
-            <Icon name="magnifying-glass" />
-            <input
-              ref={searchRef}
-              value={s.q}
-              placeholder={t.searchExercises}
-              onChange={(e) => set({ q: e.target.value })}
-            />
-          </label>
-          {!isDesktop && (
+        {subTabs}
+        {!isDesktop && (
+          <div className="exl-searchrow">
+            {searchField}
             <button
               className={`exl-funnel${active.length > 0 ? ' on' : ''}`}
               onClick={() => setShowFilters(true)}
@@ -705,8 +708,8 @@ export function ExerciseGallery({
             >
               <Icon name="funnel-simple" />
             </button>
-          )}
-        </div>
+          </div>
+        )}
         {activeChips}
         {body}
         {pager}
@@ -716,24 +719,6 @@ export function ExerciseGallery({
 
   return (
     <div className={`exl${isDesktop ? ' desktop' : ''}`}>
-      <div className="exg-tabs" role="tablist">
-        <button
-          role="tab"
-          className={tab === 'library' ? 'active' : ''}
-          onClick={() => setTab('library')}
-        >
-          {t.libTabLibrary}
-        </button>
-        <button
-          role="tab"
-          className={tab === 'mine' ? 'active' : ''}
-          onClick={() => setTab('mine')}
-        >
-          {t.libTabMine}
-          {mine.length > 0 && <span className="exg-tabcount">{mine.length}</span>}
-        </button>
-      </div>
-
       {galleryMain}
 
       {showFilters && (
@@ -749,8 +734,8 @@ export function ExerciseGallery({
             <span className="t">{t.libFiltersLabel}</span>
           </div>
           <div className="exl-fsheet">
-            {isMine ? mineGroups : groups}
-            {!isMine && videoToggle}
+            {groups}
+            {videoToggle}
           </div>
         </Sheet>
       )}

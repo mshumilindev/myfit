@@ -875,6 +875,10 @@ export const pl: Strings = {
   exerciseLabel: 'Ćwiczenie',
   progMemberEmpty: 'Ułóż własny tydzień albo poczekaj na program od trenera.',
   progNoItems: 'Ten dzień nie ma jeszcze ćwiczeń.',
+  progEmptyDayBody: (day: string) =>
+    `Dodaj ćwiczenia, aby zbudować ${day}, lub skopiuj pracę z innego dnia. Dni odpoczynku mogą pozostać puste.`,
+  progAddExercise: 'Dodaj ćwiczenie',
+  progCopyDayHere: 'Skopiuj dzień tutaj',
   progSets: 'Serie',
   progReps: 'Powtórzenia',
   progDuration: 'Czas',
@@ -977,6 +981,26 @@ export const pl: Strings = {
   progActivate: 'Aktywuj',
   progArchive: 'Archiwizuj',
   progWeekStrip: 'Tydzień programu',
+  progPlannedWeekCaption: (weekday: string) => `Zaplanowany tydzień · dziś ${weekday}`,
+  progSuggestKicker: 'Sugerowane dla Ciebie',
+  progSuggestNewTitle: 'Czas zbudować Twój program',
+  progSuggestNewBody:
+    'Masz już dość zapisów, aby Spotter zamienił Twój tydzień w powtarzalny program — bez ręcznej konfiguracji.',
+  progSuggestNewCta: 'Zbuduj mój program',
+  progSuggestDriftedTitle: 'Twój program się rozjechał',
+  progSuggestDriftedBody:
+    'Ostatnie tygodnie nie pasują do obecnego programu. Spotter może odbudować go z tego, co faktycznie robisz.',
+  progSuggestDriftedCta: 'Przejrzyj i zamień',
+  progSuggestNotNow: 'Nie teraz',
+  progSuggestSheetTitle: 'Utwórz program',
+  progSuggestOptWeek: 'Tylko podział na dni',
+  progSuggestOptWeekBody:
+    'Tylko dni treningowe wg dnia tygodnia — bez ćwiczeń. Każdy dzień wypełniasz sam.',
+  progSuggestOptLifts: 'Dni tygodnia + ćwiczenia z ostatniego tygodnia',
+  progSuggestOptLiftsBody:
+    'Ten sam podział na dni, wypełniony ćwiczeniami z Twojego ostatniego tygodnia treningowego.',
+  progSuggestCreate: 'Utwórz program',
+  progSuggestCreatedToast: 'Program gotowy — przejrzyj i zapisz',
   progPrescriptionRule: 'Plan to serie, powtórzenia i sprzęt. Ciężar pochodzi z historii.',
   progCopyDay: 'Kopiuj dzień do',
   progCopyChoose: 'Wybierz dzień',

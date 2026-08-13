@@ -51,8 +51,10 @@ import { Envelope } from '@phosphor-icons/react/Envelope';
 import { Eye } from '@phosphor-icons/react/Eye';
 import { Flame } from '@phosphor-icons/react/Flame';
 import { Globe } from '@phosphor-icons/react/Globe';
+import { FloppyDisk } from '@phosphor-icons/react/FloppyDisk';
 import { Gear } from '@phosphor-icons/react/Gear';
 import { House } from '@phosphor-icons/react/House';
+import { Lightning } from '@phosphor-icons/react/Lightning';
 import { ImageSquare } from '@phosphor-icons/react/ImageSquare';
 import { Info } from '@phosphor-icons/react/Info';
 import { Key } from '@phosphor-icons/react/Key';
@@ -90,6 +92,7 @@ import { WaveSine } from '@phosphor-icons/react/WaveSine';
 import { Scales } from '@phosphor-icons/react/Scales';
 import { Ruler } from '@phosphor-icons/react/Ruler';
 import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
+import { Sparkle } from '@phosphor-icons/react/Sparkle';
 import { SignOut } from '@phosphor-icons/react/SignOut';
 import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
 import { Star } from '@phosphor-icons/react/Star';
@@ -185,6 +188,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   scales: Scales,
   ruler: Ruler,
   'shield-check': ShieldCheck,
+  sparkle: Sparkle,
+  lightning: Lightning,
+  'floppy-disk': FloppyDisk,
   'sign-out': SignOut,
   star: Star,
   'squares-four': SquaresFour,

@@ -154,7 +154,9 @@ function tabsForRole(role: NavRole, t: NavLabels): NavItem[] {
 }
 
 /** Serialize the current screen to a URL hash so a refresh restores it. */
-function toHash(tab: Tab, overlay: Overlay): string {
+function toHash(tab: Tab, overlay: Overlay, programsExercises: boolean, libMine: boolean): string {
+  if (!overlay && tab === 'programs' && programsExercises)
+    return libMine ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'session') return '#/session';
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
@@ -192,11 +194,10 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
   if (head === 'me') return { tab: 'me', overlay: null };
-  if (head === 'exercises')
-    return {
-      tab: 'progress',
-      overlay: { screen: 'library', libTab: parts[1] === 'mine' ? 'mine' : undefined },
-    };
+  // Exercises is a peer tab of Programs, not an overlay (AC-LIBTAB): route it to
+  // the programs tab; the exercises sub-tab is read separately via
+  // `exercisesFromHash` so a refresh on #/exercises lands there.
+  if (head === 'exercises') return { tab: 'programs', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'templates') return { tab: 'progress', overlay: { screen: 'templates' } };
@@ -205,6 +206,15 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
   if ((TABS as string[]).includes(head)) return { tab: head as Tab, overlay: null };
   return { tab: 'today', overlay: null };
+}
+
+/** Read the Exercises peer-tab state from the hash (#/exercises[/mine]). Kept
+ *  separate from fromHash so it can be applied without threading it through the
+ *  overlay stack. */
+function exercisesFromHash(hash: string): { exercises: boolean; mine: boolean } {
+  const parts = hash.replace(/^#\/?/, '').split('/');
+  if (parts[0] === 'exercises') return { exercises: true, mine: parts[1] === 'mine' };
+  return { exercises: false, mine: false };
 }
 
 export function App() {
@@ -270,6 +280,14 @@ export function App() {
     return m ? m[1] : null;
   });
   const [tab, setTab] = useState<Tab>(() => fromHash(window.location.hash).tab);
+  // Programs ↔ Exercises peer-tab lives in App (not ProgramsView) so it survives
+  // opening an exercise-detail overlay, which unmounts the tab content.
+  const [programsExercises, setProgramsExercises] = useState<boolean>(
+    () => exercisesFromHash(window.location.hash).exercises,
+  );
+  const [libMine, setLibMine] = useState<boolean>(
+    () => exercisesFromHash(window.location.hash).mine,
+  );
   // Overlay navigation keeps a stack of parents: the back button on an overlay
   // returns to the screen it was opened from (session → exercise history →
   // back lands on the session again), never blindly through browser history.
@@ -347,17 +365,14 @@ export function App() {
   };
 
   /** Back from an overlay: pop to the logical parent screen, not history. When
-   *  there's no remembered parent (deep link / refreshed URL), fall back to a
-   *  sensible parent per screen — e.g. an exercise detail returns to the
-   *  library, not the tab behind it. */
+   *  there's no remembered parent (deep link / refreshed URL), fall back to the
+   *  tab behind the overlay. An exercise detail opened from the Exercises tab
+   *  returns there because that peer-tab state lives in App and is preserved
+   *  while the overlay is open. */
   const closeOverlay = useCallback(() => {
     setOverlayNav((n) => {
       if (n.stack.length > 0) {
         return { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) };
-      }
-      const scr = n.cur?.screen;
-      if (scr === 'exercise-detail' || scr === 'exercise-history') {
-        return { cur: { screen: 'library' }, stack: [] };
       }
       return { cur: null, stack: [] };
     });
@@ -380,16 +395,19 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(effectiveTab, activeOverlay);
+    const next = toHash(effectiveTab, activeOverlay, programsExercises, libMine);
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
-  }, [authed, joinToken, effectiveTab, activeOverlay]);
+  }, [authed, joinToken, effectiveTab, activeOverlay, programsExercises, libMine]);
 
   // URL hash → state (browser back/forward).
   useEffect(() => {
     if (!authed || joinToken) return;
     const onPop = () => {
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
+      const ex = exercisesFromHash(window.location.hash);
       setTab(ht);
+      setProgramsExercises(ex.exercises);
+      setLibMine(ex.mine);
       setOverlayNav({
         cur:
           ho?.screen === 'session' && !ho.workoutId
@@ -448,7 +466,16 @@ export function App() {
 
   const goTab = (x: Tab) => {
     setOverlay(null);
+    // Landing on a top-level tab always shows that tab's primary content, so a
+    // stale Exercises peer-tab never leaks across a Programs re-entry.
+    setProgramsExercises(false);
     setTab(x);
+  };
+  /** Switch the Programs ↔ Exercises peer tab in place (no overlay). */
+  const goProgramsTab = (exercises: boolean) => {
+    setOverlay(null);
+    setProgramsExercises(exercises);
+    setTab('programs');
   };
 
   return (
@@ -502,13 +529,6 @@ export function App() {
           {activeOverlay?.screen === 'exercise-history' && (
             <ExerciseHistoryView name={activeOverlay.name} onClose={closeOverlay} />
           )}
-          {activeOverlay?.screen === 'library' && (
-            <ExerciseLibraryView
-              shell={shell}
-              libTab={activeOverlay.libTab}
-              onClose={closeOverlay}
-            />
-          )}
           {activeOverlay?.screen === 'exercise-detail' && (
             <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
           )}
@@ -552,7 +572,17 @@ export function App() {
                     onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
                   />
                 ))}
-              {effectiveTab === 'programs' && <ProgramsView shell={shell} />}
+              {effectiveTab === 'programs' &&
+                (programsExercises ? (
+                  <ExerciseLibraryView
+                    shell={shell}
+                    libTab={libMine ? 'mine' : 'library'}
+                    onLibTab={(next) => setLibMine(next === 'mine')}
+                    onProgramsTab={goProgramsTab}
+                  />
+                ) : (
+                  <ProgramsView shell={shell} onProgramsTab={goProgramsTab} />
+                ))}
               {effectiveTab === 'me' && (
                 <ProfileView
                   userId="me"
@@ -567,7 +597,7 @@ export function App() {
                 <button
                   key={x.id}
                   className={effectiveTab === x.id ? 'active' : ''}
-                  onClick={() => setTab(x.id)}
+                  onClick={() => goTab(x.id)}
                 >
                   <Icon name={x.icon} />
                   <span>{x.label}</span>

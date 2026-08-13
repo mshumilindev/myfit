@@ -11,6 +11,8 @@ export default tseslint.config(
       '**/.vite/',
       '**/node_modules/',
       '**/coverage/',
+      '_sync/',
+      '_to_delete/',
       'functions/lib/',
       'cloudflare/',
       'docs/design/boards/',

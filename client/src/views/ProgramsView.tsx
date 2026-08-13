@@ -9,6 +9,8 @@ import { programToCsv, type ProgramItemLike } from '../data/programCsv';
 import type { ExerciseKind } from '../types';
 import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { MuscleChip, MuscleIcon, equipmentIconName } from '../components/Muscle';
+import { ProgramsTabs } from '../components/ProgramsTabs';
+import { takeProgramSeed } from '../data/programSeed';
 import {
   addExercise,
   backfillWorkout,
@@ -97,13 +99,32 @@ function shortDayLabel(name: string): string {
   return cleaned.length > 18 ? `${cleaned.slice(0, 17)}...` : cleaned;
 }
 
-export function ProgramsView({ shell }: { shell: Shell }) {
+export function ProgramsView({
+  shell,
+  onProgramsTab,
+}: {
+  shell: Shell;
+  /** Switch the Programs ↔ Exercises peer tab (owned by App so it survives
+   *  opening an exercise-detail overlay). */
+  onProgramsTab?: (exercises: boolean) => void;
+}) {
   const { t } = useT();
   const store = useStore();
   const role = getRole();
+  const initialSeed = useMemo(() => takeProgramSeed(), []);
   const [programs, setPrograms] = useState<Program[] | null>(null);
   const [clients, setClients] = useState<ClientOption[]>([]);
-  const [draft, setDraft] = useState<Program>(() => freshProgram(t.progNew));
+  const [draft, setDraft] = useState<Program>(() =>
+    initialSeed
+      ? {
+          ...freshProgram(initialSeed.name),
+          weeks: initialSeed.weeks,
+          daysPerWeek: initialSeed.daysPerWeek,
+          dayNames: initialSeed.dayNames,
+          items: normalizeItems(initialSeed.items as unknown as ProgramItem[]),
+        }
+      : freshProgram(t.progNew),
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(1);
   const [programQuery, setProgramQuery] = useState('');
@@ -114,7 +135,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   const [pickedItemIds, setPickedItemIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [memberEditing, setMemberEditing] = useState(false);
+  const [memberEditing, setMemberEditing] = useState(role === 'member' && !!initialSeed);
   const [memberDetailOpen, setMemberDetailOpen] = useState(false);
   const [memberLoaded, setMemberLoaded] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
@@ -132,22 +153,15 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   }, [selectedId]);
   const dragItem = useRef<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  // Consume a program seed handed off from the Today "Suggest a program" banner
+  // in the initial state, so the editor opens prefilled on the first render.
   // Programs / Exercises tab (AC-LIBTAB). Gallery filter state is lifted so it
   // survives tab switches; the programs body stays mounted (hidden) so the
   // week strip, program list and any draft are never reset (AC-LIBTAB-04).
-  // Programs page + a launcher into the standalone Exercise library. The
-  // library is its own routed screen (#/exercises, persistent URL), so the
-  // "Exercises" tab navigates there rather than embedding a gallery.
-  const progTabsEl = (
-    <div className="prog-tabs" role="tablist">
-      <button role="tab" className="active" aria-selected>
-        {t.programsTabLabel}
-      </button>
-      <button role="tab" onClick={() => shell.openOverlay({ screen: 'library' })}>
-        {t.exercisesTabLabel}
-      </button>
-    </div>
-  );
+  // Programs ↔ Exercises peer tabs (AC-LIBTAB). Selecting "Exercises" swaps the
+  // page content in place (App renders the gallery framed by this same chrome),
+  // rather than pushing an overlay with a back button.
+  const progTabsEl = <ProgramsTabs active="programs" onSelect={(ex) => onProgramsTab?.(ex)} />;
 
   const load = useCallback(() => {
     if (role === 'member') {
@@ -211,6 +225,11 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   }, [role]);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => i + 1), []);
+  // Weekday strip (design "dateless week"): short 3-letter labels (MON…SUN) and
+  // a real "today" marker on the current weekday (Mon=1…Sun=7), independent of
+  // which day is being edited.
+  const dayAbbr = (d: number) => (t.weekDayNames[d - 1] ?? '').slice(0, 3).toUpperCase();
+  const todayWeekday = useMemo(() => ((new Date(outlookNow).getDay() + 6) % 7) + 1, [outlookNow]);
   const programMatches = useMemo(() => {
     const q = programQuery.trim().toLowerCase();
     if (!q) return programs ?? [];
@@ -681,7 +700,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                       className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
                       onClick={() => setMemberDetailOpen(true)}
                     >
-                      <span>{t.weekDayLetters[day - 1]}</span>
+                      <span>{dayAbbr(day)}</span>
                       <strong>{count > 0 ? count : '+'}</strong>
                     </button>
                   );
@@ -715,7 +734,9 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                     })}
                   </span>
                   <em>
-                    {t.progWeekShort(assignment?.week ?? 1)} / {active.weeks}
+                    {active.weeks === 0
+                      ? t.progOpenEnded
+                      : `${t.progWeekShort(assignment?.week ?? 1)} / ${active.weeks}`}
                   </em>
                 </span>
                 {adherence !== null && <span className="tag tag-ok">{adherence}%</span>}
@@ -734,7 +755,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                       className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
                       onClick={() => setMemberDetailOpen(true)}
                     >
-                      <span>{t.weekDayLetters[day - 1]}</span>
+                      <span>{dayAbbr(day)}</span>
                       <strong>{count > 0 ? count : '+'}</strong>
                     </button>
                   );
@@ -751,7 +772,8 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                   <Icon name="dots-three-vertical" />
                 </span>
                 <span className="s">
-                  {t.progDaysCount(active.daysPerWeek)} · {t.progWeeksCount(active.weeks)}
+                  {t.progDaysCount(active.daysPerWeek)} ·{' '}
+                  {active.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(active.weeks)}
                 </span>
                 <span className="program-member-list-meta">
                   <span>{t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}</span>
@@ -860,8 +882,11 @@ export function ProgramsView({ shell }: { shell: Shell }) {
               {days.map((day) => {
                 const count = active.items.filter((item) => item.day === day).length;
                 return (
-                  <div key={day} className={`program-week-slot${count > 0 ? ' filled' : ''}`}>
-                    <span>{t.weekDayLetters[day - 1]}</span>
+                  <div
+                    key={day}
+                    className={`program-week-slot${count > 0 ? ' filled' : ''}${day === todayWeekday ? ' is-today' : ''}`}
+                  >
+                    <span>{dayAbbr(day)}</span>
                     <strong>{count > 0 ? count : '+'}</strong>
                   </div>
                 );
@@ -1077,18 +1102,13 @@ export function ProgramsView({ shell }: { shell: Shell }) {
           <h2 className="title-26">{t.progTitle}</h2>
         </div>
         {progTabsEl}
-        <div className="program-actions">
-          {role === 'member' ? (
+        {role === 'member' && (
+          <div className="program-actions">
             <button className="btn btn-secondary" onClick={exitMemberEditing}>
               {t.cancel}
             </button>
-          ) : (
-            <button className="btn btn-secondary" onClick={newProgram}>
-              <Icon name="plus" />
-              {t.progNew}
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className={`program-layout${role === 'member' ? ' solo' : ''}`}>
@@ -1143,7 +1163,8 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                   </span>
                 </span>
                 <span className="s">
-                  {t.progWeeksCount(program.weeks)} · {t.progDaysCount(program.daysPerWeek)}
+                  {program.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(program.weeks)} ·{' '}
+                  {t.progDaysCount(program.daysPerWeek)}
                   {program.status === 'active' ? ` · ${t.progWeekShort(currentProgramWeek)}` : ''}
                 </span>
               </button>
@@ -1185,18 +1206,43 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                   </span>
                 </div>
                 <div className="program-meta-edit">
-                  <label>
-                    <input
-                      value={draft.weeks}
-                      type="number"
-                      min={1}
-                      max={52}
-                      onChange={(e) =>
-                        setDraft((p) => ({ ...p, weeks: Number(e.target.value) || 1 }))
-                      }
-                      aria-label={t.progWeeks}
-                    />
+                  <label className="program-weeks-field">
+                    {/* Ongoing shows an infinity mark in the number's place and
+                        keeps the "weeks" word, so the row never changes width. */}
+                    {draft.weeks === 0 ? (
+                      <span className="program-weeks-inf" title={t.progOpenEnded}>
+                        <span aria-hidden>∞</span>
+                        <span className="sr-only">{t.progOpenEnded}</span>
+                      </span>
+                    ) : (
+                      <input
+                        value={draft.weeks}
+                        type="number"
+                        min={0}
+                        max={52}
+                        onChange={(e) =>
+                          setDraft((p) => ({ ...p, weeks: Number(e.target.value) || 1 }))
+                        }
+                        aria-label={t.progWeeks}
+                      />
+                    )}
                     <span>{t.progWeeksWord(draft.weeks)}</span>
+                  </label>
+                  <span>·</span>
+                  {/* Same switch as the library's "Has video only" toggle, so a
+                      boolean reads the same way everywhere in the app. */}
+                  <label
+                    className={`program-openended program-openended-inline prog-switch-field${
+                      draft.weeks === 0 ? ' on' : ''
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={draft.weeks === 0}
+                      onChange={(e) => setDraft((p) => ({ ...p, weeks: e.target.checked ? 0 : 8 }))}
+                    />
+                    <span className="exl-switch" aria-hidden />
+                    {t.progNoEndDate}
                   </label>
                   <span>·</span>
                   <label>
@@ -1222,39 +1268,34 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                   <span>{t.progCreatedBy(getUsername() ?? t.adminYou)}</span>
                 </div>
               </div>
-              <div className="program-head-actions">
-                <button
-                  className="btn btn-secondary btn-sm"
-                  disabled={draft.items.length === 0}
-                  onClick={duplicateProgram}
-                >
-                  <Icon name="copy" />
-                  {t.progDuplicate}
-                </button>
-                {role !== 'member' && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    disabled={!selectedId}
-                    onClick={() => setAssignOpen(true)}
-                  >
-                    <Icon name="user-focus" />
-                    {t.progAssign}
+              {role !== 'member' && (
+                <div className="program-head-actions">
+                  <button className="btn btn-primary" onClick={newProgram}>
+                    <Icon name="plus" />
+                    {t.progNew}
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="program-weeks program-weeks-detail" aria-label={t.progPlanProgress}>
-              {Array.from({ length: Math.max(1, draft.weeks) }, (_, i) => i + 1).map((wk) => (
-                <span key={wk} className="program-week-cell">
-                  <span
-                    className={`program-week-bar${wk === currentProgramWeek ? ' current' : wk < currentProgramWeek ? ' past' : ''}`}
-                  />
-                  <span className={wk === currentProgramWeek ? 'active' : ''}>
-                    {wk === 1 ? t.progWeekShort(1) : wk}
-                  </span>
+              {draft.weeks === 0 ? (
+                <span className="program-week-cell program-week-ongoing">
+                  <span className="program-week-bar current" />
+                  <span className="active">{t.progOpenEnded}</span>
                 </span>
-              ))}
+              ) : (
+                Array.from({ length: Math.max(1, draft.weeks) }, (_, i) => i + 1).map((wk) => (
+                  <span key={wk} className="program-week-cell">
+                    <span
+                      className={`program-week-bar${wk === currentProgramWeek ? ' current' : wk < currentProgramWeek ? ' past' : ''}`}
+                    />
+                    <span className={wk === currentProgramWeek ? 'active' : ''}>
+                      {wk === 1 ? t.progWeekShort(1) : wk}
+                    </span>
+                  </span>
+                ))
+              )}
             </div>
           </div>
 
@@ -1279,12 +1320,16 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 placeholder={draft.weeks === 0 ? t.progOpenEnded : undefined}
                 onChange={(e) => setDraft((p) => ({ ...p, weeks: Number(e.target.value) || 1 }))}
               />
-              <label className="program-openended">
+              {/* Phone/narrow twin of the header toggle — same switch. */}
+              <label
+                className={`program-openended prog-switch-field${draft.weeks === 0 ? ' on' : ''}`}
+              >
                 <input
                   type="checkbox"
                   checked={draft.weeks === 0}
                   onChange={(e) => setDraft((p) => ({ ...p, weeks: e.target.checked ? 0 : 8 }))}
                 />
+                <span className="exl-switch" aria-hidden />
                 {t.progNoEndDate}
               </label>
             </label>
@@ -1318,22 +1363,22 @@ export function ProgramsView({ shell }: { shell: Shell }) {
             </button>
           </div>
 
-          <div className="program-week-strip" aria-label={t.progWeekStrip}>
+          <div className="program-week-caption">
+            {t.progPlannedWeekCaption(t.weekDayNames[todayWeekday - 1] ?? '')}
+          </div>
+          <div className="program-week-strip program-week-strip-v2" aria-label={t.progWeekStrip}>
             {days.map((day) => {
               const count = draft.items.filter((item) => item.day === day).length;
+              const rest = count === 0;
               return (
                 <button
                   key={day}
-                  className={`program-week-slot${selectedDay === day ? ' today' : ''}${count > 0 ? ' filled' : ''}`}
+                  className={`program-week-slot${selectedDay === day ? ' today' : ''}${day === todayWeekday ? ' is-today' : ''}${rest ? ' rest' : ' filled'}`}
                   onClick={() => setSelectedDay(day)}
-                >
-                  <span>{t.weekDayLetters[day - 1]}</span>
-                  <strong>
-                    {count > 0 ? (dayLabels.get(day) ?? t.progDay(day)) : t.progRestShort}
-                  </strong>
-                  <em>
-                    {count > 0
-                      ? t.progDayWorkoutSummary(
+                  title={
+                    rest
+                      ? t.progRestDay
+                      : t.progDayWorkoutSummary(
                           count,
                           draft.items
                             .filter((item) => item.day === day)
@@ -1342,8 +1387,13 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                               0,
                             ),
                         )
-                      : t.progRestDay}
-                  </em>
+                  }
+                >
+                  <span className="pws-day">{dayAbbr(day)}</span>
+                  <span className="pws-name">
+                    {rest ? t.progRestShort : (dayLabels.get(day) ?? t.progDay(day))}
+                  </span>
+                  <span className="pws-bar" aria-hidden />
                 </button>
               );
             })}
@@ -1395,7 +1445,44 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 </button>
               </div>
             </div>
-            {selectedDayItems.length === 0 && <div className="detail-muted">{t.progNoItems}</div>}
+            {selectedDayItems.length === 0 && (
+              <div className="program-day-empty">
+                <span className="pde-icon">
+                  <Icon name="barbell" />
+                </span>
+                <div className="pde-title">{t.progNoItems.replace(/[.]\s*$/, '')}</div>
+                <div className="pde-body">
+                  {t.progEmptyDayBody(t.weekDayNames[selectedDay - 1] ?? '')}
+                </div>
+                <div className="pde-actions">
+                  <button className="btn btn-primary" onClick={() => addItem(selectedDay)}>
+                    <Icon name="plus" />
+                    {t.progAddExercise}
+                  </button>
+                  <label className="btn btn-secondary pde-copy">
+                    <Icon name="copy" />
+                    {t.progCopyDayHere}
+                    <select
+                      aria-label={t.progCopyDay}
+                      value=""
+                      onChange={(e) => {
+                        const target = Number(e.target.value);
+                        if (target) copyDayTo(target);
+                      }}
+                    >
+                      <option value="">{t.progCopyDay}</option>
+                      {days
+                        .filter((day) => day !== selectedDay)
+                        .map((day) => (
+                          <option key={day} value={day}>
+                            {t.progDay(day)}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+            )}
             {selectedDayItems.length > 0 && (
               <div className="program-table-head" aria-hidden>
                 <span>{t.exerciseLabel}</span>
@@ -1649,10 +1736,18 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 disabled={!selectedId}
                 onClick={() => setAssignOpen(true)}
               >
-                <Icon name="user" />
+                <Icon name="user-focus" />
                 {t.progAssign}
               </button>
             )}
+            <button
+              className="btn btn-secondary"
+              disabled={draft.items.length === 0}
+              onClick={duplicateProgram}
+            >
+              <Icon name="copy" />
+              {t.progDuplicate}
+            </button>
             {selectedId && draft.status !== 'active' && (
               <button
                 className="btn btn-secondary"
@@ -1663,14 +1758,17 @@ export function ProgramsView({ shell }: { shell: Shell }) {
                 }
                 onClick={() => setStatus('active')}
               >
+                <Icon name="lightning" />
                 {t.progActivate}
               </button>
             )}
             {selectedId && draft.status === 'active' && (
               <button className="btn btn-secondary" onClick={() => setStatus('archived')}>
+                <Icon name="archive" />
                 {t.progArchive}
               </button>
             )}
+            <span className="program-footer-sep" aria-hidden />
             <button
               className="danger-outline"
               disabled={!selectedId}
@@ -1684,6 +1782,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
               disabled={saving || !draft.name.trim()}
               onClick={save}
             >
+              <Icon name="floppy-disk" />
               {saving ? t.saving : t.save}
             </button>
           </div>
