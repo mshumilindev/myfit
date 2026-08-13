@@ -4035,6 +4035,40 @@ i > svg {
   margin-top: 3px;
 }
 
+.muscle-history-screen {
+  gap: var(--space-6);
+}
+
+.muscle-history-screen .hist-head {
+  align-items: center;
+}
+
+.mh-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mh-title > svg {
+  width: 30px;
+  height: 30px;
+  flex: none;
+}
+
+.mh-title > div {
+  min-width: 0;
+}
+
+.mh-title .title-26 {
+  line-height: 1.08;
+}
+
+.mh-title .sub {
+  line-height: 1.35;
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
