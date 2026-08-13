@@ -2,7 +2,16 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
-import { HttpError, callFn, currentUid, setUsername, trackMutation } from '../api';
+import {
+  HttpError,
+  cacheFresh,
+  cachePeek,
+  cacheSet,
+  callFn,
+  currentUid,
+  setUsername,
+  trackMutation,
+} from '../api';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Switch, ProfileSkeleton } from '../ui';
@@ -86,6 +95,9 @@ interface ProfileData {
 
 type Load = ProfileData | 'loading' | 'denied' | 'missing' | 'failed';
 
+/** How long a cached profile is served without re-hitting the backend. */
+const PROFILE_TTL_MS = 3 * 60 * 1000;
+
 export function ProfileView({
   userId,
   shell,
@@ -98,10 +110,10 @@ export function ProfileView({
   embedded?: boolean;
 }) {
   const { t, locale } = useT();
-  const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => ({
-    userId,
-    value: 'loading',
-  }));
+  const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => {
+    const cached = cachePeek<ProfileData>(`profile.${userId}`);
+    return { userId, value: cached ? cached.data : 'loading' };
+  });
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
   const [editUsername, setEditUsername] = useState('');
@@ -119,7 +131,12 @@ export function ProfileView({
   const [avatarRefresh, setAvatarRefresh] = useState(0);
   const [profileEditing, setProfileEditing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
-  const load = loaded.userId === userId ? loaded.value : 'loading';
+  // While the fetch for a newly-opened profile is in flight, fall back to any
+  // cached copy so the page paints instantly instead of flashing a skeleton.
+  const load: Load =
+    loaded.userId === userId
+      ? loaded.value
+      : (cachePeek<ProfileData>(`profile.${userId}`)?.data ?? 'loading');
   const isSelf = typeof load === 'object' && load.viewer.relation === 'self';
   const isTrainerView = typeof load === 'object' && load.viewer.relation === 'trainer';
   const canEditDetails =
@@ -129,8 +146,15 @@ export function ProfileView({
 
   useEffect(() => {
     let alive = true;
+    const cacheKey = `profile.${userId}`;
+    const cached = cachePeek<ProfileData>(cacheKey);
+    // The render already shows the cached copy (see `load` above). Serve it and
+    // skip the call when it's still fresh — a navigate-away-and-back within the
+    // window costs nothing (AC: fewer reads).
+    if (cacheFresh(cached, PROFILE_TTL_MS)) return;
     callFn<ProfileData>('profileUser', { id: userId })
       .then((data) => {
+        cacheSet(cacheKey, data);
         if (alive) setLoaded({ userId, value: data });
         if (alive && (data.viewer.relation === 'self' || data.viewer.relation === 'admin')) {
           setEditFirstName(data.person.firstName);
@@ -149,6 +173,13 @@ export function ProfileView({
       alive = false;
     };
   }, [userId]);
+
+  // Persist fresh profile data to state + cache together, so an edit keeps the
+  // cache current (no stale re-read on the next open).
+  const commitProfile = (value: ProfileData) => {
+    cacheSet(`profile.${userId}`, value);
+    setLoaded({ userId, value });
+  };
 
   function resetProfileFields(data: ProfileData) {
     setEditFirstName(data.person.firstName);
@@ -182,7 +213,7 @@ export function ProfileView({
       setEditFirstName(next.person.firstName);
       setEditLastName(next.person.lastName ?? '');
       setEditUsername(next.person.username);
-      setLoaded({ userId, value: next });
+      commitProfile(next);
       setProfileEditing(false);
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
     } catch (e) {
@@ -198,7 +229,7 @@ export function ProfileView({
     try {
       await callFn('adminChangeRole', { id: load.person.id, role: next });
       const fresh = await callFn<ProfileData>('profileUser', { id: load.person.id });
-      setLoaded({ userId, value: fresh });
+      commitProfile(fresh);
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
     } catch (e) {
       shell.toast({
@@ -216,10 +247,7 @@ export function ProfileView({
       if (previewUrl) seedAvatarCache(load.person.id, previewUrl, next);
       return next;
     });
-    setLoaded({
-      userId,
-      value: { ...load, person: { ...load.person, avatar: true } },
-    });
+    commitProfile({ ...load, person: { ...load.person, avatar: true } });
     shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileAvatarUpdated });
   }
 
@@ -235,10 +263,7 @@ export function ProfileView({
       );
       invalidateAvatarCache(uid);
     }
-    setLoaded({
-      userId,
-      value: { ...load, person: { ...load.person, avatar: false } },
-    });
+    commitProfile({ ...load, person: { ...load.person, avatar: false } });
     setAvatarRefresh((n) => n + 1);
     shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileAvatarRemoved });
   }
@@ -273,7 +298,7 @@ export function ProfileView({
     try {
       await callFn('trainerAddNote', { id: load.person.id, text });
       const next = await callFn<ProfileData>('profileUser', { id: userId });
-      setLoaded({ userId, value: next });
+      commitProfile(next);
       setTrainerNote('');
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileNoteSaved });
     } catch (e) {

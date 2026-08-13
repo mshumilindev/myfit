@@ -1,6 +1,6 @@
 /** Admin — design AD-01…AD-06. People table, invites, assignments. */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { callFn, getUsername } from '../api';
+import { cachePeek, cacheSet, callFn, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
 import { Dialog, Icon, Sheet } from '../ui';
@@ -43,8 +43,9 @@ function inviteLink(token: string): string {
 
 export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
-  const [people, setPeople] = useState<Person[]>([]);
-  const [load, setLoad] = useState<Load>('loading');
+  const cachedPeople = cachePeek<Person[]>('adminPeople');
+  const [people, setPeople] = useState<Person[]>(cachedPeople?.data ?? []);
+  const [load, setLoad] = useState<Load>(cachedPeople ? 'ready' : 'loading');
   const [filter, setFilter] = useState<Filter>('all');
   const [q, setQ] = useState('');
   const [creating, setCreating] = useState<null | 'member' | 'trainer'>(null);
@@ -63,19 +64,27 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   const refresh = useCallback(() => {
     callFn<{ people: Person[] }>('adminPeople')
       .then((d) => {
+        cacheSet('adminPeople', d.people);
         setPeople(d.people);
         setLoad('ready');
       })
       .catch(() => setLoad((s) => (s === 'loading' ? 'failed' : s)));
   }, []);
 
-  // AC-ADMIN-02: live status updates without manual refresh.
+  // AC-ADMIN-02: live status updates without manual refresh. The poll pauses
+  // while the tab is hidden (no point spending calls on a roster nobody's
+  // looking at) and fires once on return to foreground.
   useEffect(() => {
     refresh();
     const iv = setInterval(() => {
+      if (document.hidden) return;
       refresh();
       setNow(Date.now());
     }, 15_000);
+    const onVis = () => {
+      if (!document.hidden) refresh();
+    };
+    document.addEventListener('visibilitychange', onVis);
     const tick = setInterval(() => setNow(Date.now()), 1000);
     const on = () => setOnline(true);
     const off = () => setOnline(false);
@@ -84,6 +93,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
     return () => {
       clearInterval(iv);
       clearInterval(tick);
+      document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('online', on);
       window.removeEventListener('offline', off);
     };

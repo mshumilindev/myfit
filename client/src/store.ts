@@ -39,9 +39,11 @@ import {
 } from './types';
 import {
   canonicalExerciseName,
+  isBuiltInExercise,
   muscleInfoByName,
   registerCustomExercise,
   registerCustomExercises,
+  customExercises,
   type CustomExercise,
   type MuscleGroup,
 } from './data/exercises';
@@ -1165,6 +1167,37 @@ export function saveCatalogExercise(meta: {
     .catch(onWriteError);
 }
 
+/** Edit a custom catalog exercise. Handles rename (id = lowercased name): if the
+ *  name changed, the old doc is removed and a new one written. */
+export function updateCatalogExercise(
+  oldId: string,
+  meta: {
+    name: string;
+    kind?: string;
+    primaryMuscle: MuscleGroup | null;
+    secondaryMuscles: MuscleGroup[];
+    equipment: string[];
+  },
+): void {
+  const role = getRole();
+  if (role !== 'admin' && role !== 'trainer') return;
+  const newId = meta.name.trim().toLowerCase();
+  if (newId !== oldId) {
+    registerCustomExercises(customExercises().filter((e) => e.id !== oldId));
+    deleteDoc(doc(db, 'exerciseCatalog', oldId)).catch(onWriteError);
+  }
+  saveCatalogExercise(meta);
+}
+
+/** Delete a custom catalog exercise (optimistic local remove + Firestore). */
+export function deleteCatalogExercise(id: string): void {
+  const role = getRole();
+  if (role !== 'admin' && role !== 'trainer') return;
+  registerCustomExercises(customExercises().filter((e) => e.id !== id));
+  emit();
+  deleteDoc(doc(db, 'exerciseCatalog', id)).catch(onWriteError);
+}
+
 export function updateExerciseMeta(
   workoutId: string,
   exerciseId: string,
@@ -1243,6 +1276,54 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
 export function est1rm(weight: number, reps: number): number {
   return Math.round(weight * (1 + reps / 30));
 }
+export interface MyExercise {
+  /** Catalogue id, or `logged-<name>` for a history-only user exercise. */
+  id: string;
+  name: string;
+  primaryMuscle: MuscleGroup | null;
+  secondaryMuscles: MuscleGroup[];
+  equipment: string[];
+  /** 'catalog' = saved to exerciseCatalog (editable + deletable);
+   *  'logged'  = created ad-hoc in a session, not yet in the catalogue. */
+  source: 'catalog' | 'logged';
+}
+
+/**
+ * The user's own exercises: everything they created — both saved catalogue
+ * entries AND names they logged ad-hoc that aren't built-in library lifts.
+ * The latter is why manually-created exercises show up even if they were never
+ * written to the shared catalogue.
+ */
+export function myExercises(): MyExercise[] {
+  const out: MyExercise[] = customExercises().map((e) => ({
+    id: e.id,
+    name: e.name,
+    primaryMuscle: e.primaryMuscle,
+    secondaryMuscles: e.secondaryMuscles,
+    equipment: e.equipment,
+    source: 'catalog' as const,
+  }));
+  const seen = new Set(out.map((e) => e.name.trim().toLowerCase()));
+  for (const w of state.workouts) {
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e)) continue;
+      const key = e.name.trim().toLowerCase();
+      if (!key || seen.has(key) || isBuiltInExercise(e.name)) continue;
+      seen.add(key);
+      const rm = resolveMuscles(e);
+      out.push({
+        id: `logged-${key}`,
+        name: e.name.trim(),
+        primaryMuscle: rm.primary,
+        secondaryMuscles: rm.secondary,
+        equipment: (e.equipment ?? []) as string[],
+        source: 'logged',
+      });
+    }
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function knownExercises(): { name: string; last?: PrevLift }[] {
   const seen = new Map<string, PrevLift | undefined>();
   for (const w of state.workouts) {

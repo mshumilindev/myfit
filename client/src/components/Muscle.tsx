@@ -172,6 +172,119 @@ export function MuscleIcon({
   );
 }
 
+/**
+ * Anatomical muscle map for the exercise detail (design RICH). Two silhouettes
+ * — front and back — where every worked region is coloured: primary muscles in
+ * brass, secondary in grey, everything else recedes into the body. Bundled SVG,
+ * no runtime network. Muscle bellies are stylised (rounded shapes over a body
+ * outline) rather than a medical illustration, so they read at ~120 px while
+ * still locating the work precisely; the chips beside it carry the names.
+ */
+const BRASS = 'var(--color-accent)';
+const GREY = 'var(--color-neutral-500)';
+const DIM = 'var(--color-neutral-800)';
+const SIL = 'var(--color-neutral-900)';
+
+/** Shared body outline (dim) — head, torso, arms, legs — drawn behind muscles. */
+function BodySilhouette() {
+  return (
+    <g fill={SIL}>
+      <circle cx="50" cy="17" r="11" />
+      <rect x="45" y="26" width="10" height="7" />
+      <path d="M31 35 Q50 30 69 35 L64 96 Q50 101 36 96 Z" />
+      <path d="M35 92 L65 92 L63 116 Q50 122 37 116 Z" />
+      <rect x="17" y="38" width="11" height="38" rx="5.5" />
+      <rect x="72" y="38" width="11" height="38" rx="5.5" />
+      <rect x="16" y="74" width="9.5" height="32" rx="4.5" />
+      <rect x="74.5" y="74" width="9.5" height="32" rx="4.5" />
+      <rect x="34" y="114" width="13.5" height="50" rx="6.5" />
+      <rect x="52.5" y="114" width="13.5" height="50" rx="6.5" />
+      <rect x="35" y="162" width="11.5" height="44" rx="5.5" />
+      <rect x="53.5" y="162" width="11.5" height="44" rx="5.5" />
+    </g>
+  );
+}
+
+function FrontBody({ col }: { col: (g: MuscleGroup) => string }) {
+  return (
+    <svg viewBox="0 0 100 214" style={{ width: '100%', display: 'block' }} aria-hidden>
+      <BodySilhouette />
+      {/* shoulders (deltoids) */}
+      <circle cx="24" cy="43" r="7.5" fill={col('shoulders')} />
+      <circle cx="76" cy="43" r="7.5" fill={col('shoulders')} />
+      {/* chest (pecs) */}
+      <path d="M35 43 Q42 40 48 43 L48 56 Q41 59 35 55 Z" fill={col('chest')} />
+      <path d="M65 43 Q58 40 52 43 L52 56 Q59 59 65 55 Z" fill={col('chest')} />
+      {/* biceps */}
+      <ellipse cx="22.5" cy="55" rx="5" ry="9" fill={col('biceps')} />
+      <ellipse cx="77.5" cy="55" rx="5" ry="9" fill={col('biceps')} />
+      {/* forearms */}
+      <ellipse cx="20.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
+      <ellipse cx="79.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
+      {/* core (abs + obliques) */}
+      <rect x="43" y="60" width="14" height="30" rx="3" fill={col('core')} />
+      {/* quads */}
+      <ellipse cx="40.5" cy="134" rx="6.5" ry="22" fill={col('quads')} />
+      <ellipse cx="59.5" cy="134" rx="6.5" ry="22" fill={col('quads')} />
+      {/* calves (front) */}
+      <ellipse cx="40.5" cy="182" rx="5" ry="16" fill={col('calves')} />
+      <ellipse cx="59.5" cy="182" rx="5" ry="16" fill={col('calves')} />
+    </svg>
+  );
+}
+
+function BackBody({ col }: { col: (g: MuscleGroup) => string }) {
+  return (
+    <svg viewBox="0 0 100 214" style={{ width: '100%', display: 'block' }} aria-hidden>
+      <BodySilhouette />
+      {/* rear deltoids */}
+      <circle cx="24" cy="43" r="7.5" fill={col('shoulders')} />
+      <circle cx="76" cy="43" r="7.5" fill={col('shoulders')} />
+      {/* back — traps, lats, lower back */}
+      <path d="M41 36 L59 36 L56 50 L44 50 Z" fill={col('back')} />
+      <path d="M37 51 L63 51 L59 82 L41 82 Z" fill={col('back')} />
+      <rect x="43" y="82" width="14" height="10" rx="3" fill={col('back')} />
+      {/* triceps */}
+      <ellipse cx="22.5" cy="55" rx="5" ry="9" fill={col('triceps')} />
+      <ellipse cx="77.5" cy="55" rx="5" ry="9" fill={col('triceps')} />
+      {/* forearms */}
+      <ellipse cx="20.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
+      <ellipse cx="79.5" cy="87" rx="4.5" ry="12" fill={col('forearms')} />
+      {/* glutes */}
+      <ellipse cx="42" cy="104" rx="8" ry="7" fill={col('glutes')} />
+      <ellipse cx="58" cy="104" rx="8" ry="7" fill={col('glutes')} />
+      {/* hamstrings */}
+      <ellipse cx="40.5" cy="136" rx="6.5" ry="20" fill={col('hamstrings')} />
+      <ellipse cx="59.5" cy="136" rx="6.5" ry="20" fill={col('hamstrings')} />
+      {/* calves (back) */}
+      <ellipse cx="40.5" cy="181" rx="6" ry="18" fill={col('calves')} />
+      <ellipse cx="59.5" cy="181" rx="6" ry="18" fill={col('calves')} />
+    </svg>
+  );
+}
+
+export function MuscleBodyFigure({
+  primary,
+  secondary,
+  width = 128,
+}: {
+  primary: MuscleGroup[];
+  secondary: MuscleGroup[];
+  width?: number;
+}) {
+  const full = primary.includes('fullbody');
+  const pr = new Set<MuscleGroup>(primary);
+  const se = new Set<MuscleGroup>(secondary);
+  const col = (g: MuscleGroup): string => (full || pr.has(g) ? BRASS : se.has(g) ? GREY : DIM);
+
+  return (
+    <div className="bodymap" style={{ width }}>
+      <FrontBody col={col} />
+      <BackBody col={col} />
+    </div>
+  );
+}
+
 /** Graphite muscle chip: silhouette + label (EQ-1). `lg` is the history
  * header size (EQ-3): 11 px text, 9×15 mark, primary label near-white. */
 export function MuscleChip({
@@ -220,6 +333,7 @@ const EQUIP_PH_ICON: Record<string, string> = {
   exerciseBall: 'circle',
   ezBar: 'barbell',
   foamRoll: 'cylinder',
+  suspension: 'person-simple',
   bench: 'rows',
   rack: 'frame-corners',
   other: 'toolbox',

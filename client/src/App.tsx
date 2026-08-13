@@ -17,7 +17,6 @@ import {
   discardBlockingChange,
   bodyMetricsComplete,
 } from './store';
-import { useFlag } from './data/flags';
 import { SpotterMark } from './brand/SpotterMark';
 import { useT } from './i18n';
 import {
@@ -110,7 +109,7 @@ export type Overlay =
   | { screen: 'templates' }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
-  | { screen: 'library' }
+  | { screen: 'library'; libTab?: 'mine' }
   | null;
 
 export interface Shell {
@@ -164,7 +163,8 @@ function toHash(tab: Tab, overlay: Overlay): string {
     return `#/exercise-detail/${encodeURIComponent(overlay.name)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
-  if (overlay?.screen === 'library') return '#/exercises';
+  if (overlay?.screen === 'library')
+    return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'templates') return '#/templates';
@@ -192,7 +192,11 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
   if (head === 'me') return { tab: 'me', overlay: null };
-  if (head === 'exercises') return { tab: 'progress', overlay: { screen: 'library' } };
+  if (head === 'exercises')
+    return {
+      tab: 'progress',
+      overlay: { screen: 'library', libTab: parts[1] === 'mine' ? 'mine' : undefined },
+    };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'templates') return { tab: 'progress', overlay: { screen: 'templates' } };
@@ -281,11 +285,13 @@ export function App() {
   /** Open an overlay, remembering the current one as its logical parent.
    * Passing null resets the whole overlay stack (used when switching tabs). */
   const setOverlay = useCallback((o: Overlay) => {
-    setOverlayNav((n) =>
-      o === null
-        ? { cur: null, stack: [] }
-        : { cur: o, stack: n.cur === null ? n.stack : [...n.stack, n.cur] },
-    );
+    setOverlayNav((n) => {
+      if (o === null) return { cur: null, stack: [] };
+      // Navigating within the same screen (e.g. switching the library's tab)
+      // replaces the current overlay instead of stacking a new parent.
+      if (n.cur && n.cur.screen === o.screen) return { cur: o, stack: n.stack };
+      return { cur: o, stack: n.cur === null ? n.stack : [...n.stack, n.cur] };
+    });
   }, []);
   const [toasts, setToasts] = useState<Array<ToastState & { id: number }>>([]);
   const [snack, setSnack] = useState<SnackState | null>(null);
@@ -340,13 +346,21 @@ export function App() {
     queueLength: store.queue.length,
   };
 
-  /** Back from an overlay: pop to the logical parent screen, not history. */
+  /** Back from an overlay: pop to the logical parent screen, not history. When
+   *  there's no remembered parent (deep link / refreshed URL), fall back to a
+   *  sensible parent per screen — e.g. an exercise detail returns to the
+   *  library, not the tab behind it. */
   const closeOverlay = useCallback(() => {
-    setOverlayNav((n) =>
-      n.stack.length > 0
-        ? { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) }
-        : { cur: null, stack: [] },
-    );
+    setOverlayNav((n) => {
+      if (n.stack.length > 0) {
+        return { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) };
+      }
+      const scr = n.cur?.screen;
+      if (scr === 'exercise-detail' || scr === 'exercise-history') {
+        return { cur: { screen: 'library' }, stack: [] };
+      }
+      return { cur: null, stack: [] };
+    });
   }, []);
   const removeToast = useCallback((id: number) => {
     setToasts((list) => list.filter((x) => x.id !== id));
@@ -356,15 +370,11 @@ export function App() {
   const tabs = tabsForRole(role, t);
   const tabAllowed = tabs.some((x) => x.id === tab);
   const effectiveTab = tabAllowed ? tab : defaultTabForRole(role);
-  const exOn = useFlag('exerciseFeature');
-
-  // Feature-flag / role guards, applied in render (no setState-in-effect): an
-  // overlay the current user may not open is treated as absent, so the tab
-  // behind shows through instead of a blank screen. The Ex-feature library and
-  // detail require the flag; Settings requires admin.
-  const overlayBlocked =
-    (!exOn && (overlay?.screen === 'library' || overlay?.screen === 'exercise-detail')) ||
-    (overlay?.screen === 'settings' && role !== 'admin');
+  // Role guards, applied in render (no setState-in-effect): an overlay the
+  // current user may not open is treated as absent, so the tab behind shows
+  // through instead of a blank screen. Settings requires admin. The exercise
+  // library and detail are always available (no longer flag-gated).
+  const overlayBlocked = overlay?.screen === 'settings' && role !== 'admin';
   const activeOverlay = overlayBlocked ? null : overlay;
 
   // State → URL hash, so a refresh lands on the same screen.
@@ -492,10 +502,14 @@ export function App() {
           {activeOverlay?.screen === 'exercise-history' && (
             <ExerciseHistoryView name={activeOverlay.name} onClose={closeOverlay} />
           )}
-          {activeOverlay?.screen === 'library' && exOn && (
-            <ExerciseLibraryView shell={shell} onClose={closeOverlay} />
+          {activeOverlay?.screen === 'library' && (
+            <ExerciseLibraryView
+              shell={shell}
+              libTab={activeOverlay.libTab}
+              onClose={closeOverlay}
+            />
           )}
-          {activeOverlay?.screen === 'exercise-detail' && exOn && (
+          {activeOverlay?.screen === 'exercise-detail' && (
             <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
           )}
           {activeOverlay?.screen === 'settings' && role === 'admin' && (

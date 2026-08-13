@@ -28,6 +28,35 @@ const UID_KEY = 'spotter.uid';
 
 export type Role = 'member' | 'trainer' | 'admin';
 
+/**
+ * Tiny localStorage cache for cloud-function reads (profiles, rosters, clients).
+ * These come from callable functions, not Firestore listeners, so they aren't
+ * covered by the offline persistence layer — without this, opening "Me" or an
+ * admin/trainer roster re-hit the backend every time. Views seed from the cache
+ * for an instant, offline-friendly paint and can gate the network refetch on
+ * `at` so a quick navigate-away-and-back doesn't spend another call.
+ */
+const CACHE_PREFIX = 'spotter.cache.';
+export function cachePeek<T>(key: string): { at: number; data: T } | null {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + key);
+    return raw ? (JSON.parse(raw) as { at: number; data: T }) : null;
+  } catch {
+    return null;
+  }
+}
+export function cacheSet<T>(key: string, data: T): void {
+  try {
+    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ at: Date.now(), data }));
+  } catch {
+    /* quota / private mode — the cache is best-effort */
+  }
+}
+/** True when a cached entry exists and is younger than maxAgeMs. */
+export function cacheFresh(entry: { at: number } | null, maxAgeMs: number): boolean {
+  return !!entry && Date.now() - entry.at < maxAgeMs;
+}
+
 export function getUsername(): string | null {
   return localStorage.getItem(USERNAME_KEY);
 }

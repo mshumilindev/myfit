@@ -20,8 +20,6 @@ import {
 import type { MuscleGroup } from '../data/exercises';
 import { ConfirmDialog, Icon, RowListSkeleton } from '../ui';
 import { useT } from '../i18n';
-import { ExerciseGallery, type GalleryState } from '../components/ExerciseGallery';
-import { useFlag } from '../data/flags';
 import type { Shell } from '../App';
 import { weekDayStatuses, programOutlook, type DayCell } from '../data/programDays';
 
@@ -124,40 +122,30 @@ export function ProgramsView({ shell }: { shell: Shell }) {
   const [confirmDeleteProgram, setConfirmDeleteProgram] = useState(false);
   const [outlookNow] = useState(() => Date.now());
   const didPickInitialProgram = useRef(false);
+  // Mirror the selection in a ref so `load` can read it for the initial-pick
+  // guard WITHOUT taking it as a dependency — otherwise every selection change
+  // re-ran the effect and re-fetched the whole authored-programs collection
+  // from Firestore (a full read per click). Selecting a program is local.
+  const selectedIdRef = useRef(selectedId);
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
   const dragItem = useRef<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   // Programs / Exercises tab (AC-LIBTAB). Gallery filter state is lifted so it
   // survives tab switches; the programs body stays mounted (hidden) so the
   // week strip, program list and any draft are never reset (AC-LIBTAB-04).
-  const exFlag = useFlag('exerciseFeature');
-  const [progTab, setProgTab] = useState<'programs' | 'exercises'>('programs');
-  const [galState, setGalState] = useState<GalleryState>({
-    q: '',
-    hasVideo: false,
-    scope: 'all',
-  });
-  const showExercises = exFlag && progTab === 'exercises';
-  const progTabsEl = exFlag && (
+  // Programs page + a launcher into the standalone Exercise library. The
+  // library is its own routed screen (#/exercises, persistent URL), so the
+  // "Exercises" tab navigates there rather than embedding a gallery.
+  const progTabsEl = (
     <div className="prog-tabs" role="tablist">
-      <button
-        role="tab"
-        className={progTab === 'programs' ? 'active' : ''}
-        onClick={() => setProgTab('programs')}
-      >
+      <button role="tab" className="active" aria-selected>
         {t.programsTabLabel}
       </button>
-      <button
-        role="tab"
-        className={progTab === 'exercises' ? 'active' : ''}
-        onClick={() => setProgTab('exercises')}
-      >
+      <button role="tab" onClick={() => shell.openOverlay({ screen: 'library' })}>
         {t.exercisesTabLabel}
       </button>
-    </div>
-  );
-  const exercisesTabEl = showExercises && (
-    <div className="exg-tabwrap">
-      <ExerciseGallery shell={shell} state={galState} onState={setGalState} />
     </div>
   );
 
@@ -195,14 +183,14 @@ export function ProgramsView({ shell }: { shell: Shell }) {
           .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
         setFailed(false);
         setPrograms(list);
-        if (!didPickInitialProgram.current && !selectedId && list[0]) {
+        if (!didPickInitialProgram.current && !selectedIdRef.current && list[0]) {
           didPickInitialProgram.current = true;
           setSelectedId(list[0].id);
           setDraft({ ...list[0], items: normalizeItems(list[0].items) });
         }
       })
       .catch(() => setFailed(true));
-  }, [role, selectedId]);
+  }, [role]);
 
   useEffect(() => {
     load();
@@ -581,7 +569,7 @@ export function ProgramsView({ shell }: { shell: Shell }) {
         ? Math.round(assignment.adherence * 100)
         : null;
     return (
-      <div className={`screen programs-page${showExercises ? ' show-exercises' : ''}`}>
+      <div className="screen programs-page">
         <div className="programs-top">
           <div>
             <div className="kicker">{t.training}</div>
@@ -1075,17 +1063,12 @@ export function ProgramsView({ shell }: { shell: Shell }) {
             </div>
           </section>
         )}
-        {exercisesTabEl}
       </div>
     );
   }
 
   return (
-    <div
-      className={`screen programs-page programs-author-page${
-        exFlag ? ' programs-has-tabs' : ''
-      }${showExercises ? ' show-exercises' : ''}`}
-    >
+    <div className={`screen programs-page programs-author-page programs-has-tabs`}>
       <div className="programs-top">
         <div>
           <div className="kicker">
@@ -1735,7 +1718,6 @@ export function ProgramsView({ shell }: { shell: Shell }) {
           onConfirm={() => void removeProgram(selectedId)}
         />
       )}
-      {exercisesTabEl}
     </div>
   );
 }

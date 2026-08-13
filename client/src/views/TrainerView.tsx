@@ -1,6 +1,6 @@
 /** Trainer — design TR-01…TR-04. Assigned clients only, read-only. */
 import { useCallback, useEffect, useState } from 'react';
-import { callFn } from '../api';
+import { cachePeek, cacheSet, callFn } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { Icon, RowListSkeleton } from '../ui';
 import { Avatar } from '../components/Avatar';
@@ -24,25 +24,37 @@ interface Client {
 
 export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
   const { t, locale } = useT();
-  const [clients, setClients] = useState<Client[] | null>(null);
+  const cachedClients = cachePeek<Client[]>('trainerClients');
+  const [clients, setClients] = useState<Client[] | null>(cachedClients?.data ?? null);
   const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     callFn<{ clients: Client[] }>('trainerClients')
-      .then((d) => setClients(d.clients))
+      .then((d) => {
+        cacheSet('trainerClients', d.clients);
+        setClients(d.clients);
+      })
       .catch(() => setFailed(true));
   }, []);
 
-  // AC-TRAINER-06: live sessions update without manual refresh.
+  // AC-TRAINER-06: live sessions update without manual refresh. Pause the poll
+  // while the tab is hidden and refetch once on return to foreground.
   useEffect(() => {
     refresh();
-    const iv = setInterval(refresh, 15_000);
+    const iv = setInterval(() => {
+      if (!document.hidden) refresh();
+    }, 15_000);
+    const onVis = () => {
+      if (!document.hidden) refresh();
+    };
+    document.addEventListener('visibilitychange', onVis);
     const tick = setInterval(() => setNow(Date.now()), 1000);
     return () => {
       clearInterval(iv);
       clearInterval(tick);
+      document.removeEventListener('visibilitychange', onVis);
     };
   }, [refresh]);
 

@@ -1869,6 +1869,16 @@ export function SessionView(props: {
               <button
                 className="menu-item"
                 onClick={() => {
+                  props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
+                  setSheet(null);
+                }}
+              >
+                <Icon name="info" />
+                {t.detailsAction}
+              </button>
+              <button
+                className="menu-item"
+                onClick={() => {
                   props.shell.openOverlay({ screen: 'exercise-history', name: ex.name });
                   setSheet(null);
                 }}

@@ -18,6 +18,7 @@ export type EquipmentId =
   | 'exerciseBall'
   | 'ezBar'
   | 'foamRoll'
+  | 'suspension'
   | 'other';
 
 export const EQUIPMENT_IDS: EquipmentId[] = [
@@ -32,6 +33,7 @@ export const EQUIPMENT_IDS: EquipmentId[] = [
   'exerciseBall',
   'ezBar',
   'foamRoll',
+  'suspension',
   'other',
 ];
 

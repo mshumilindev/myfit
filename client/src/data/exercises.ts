@@ -4,6 +4,7 @@
  * Names tuple order: [en, uk, pl, lt, et].
  */
 import DB_RAW from './exercises.db.json';
+import RICH_RAW from './exercises.rich.json';
 import type { EquipmentId } from './equipment';
 
 export type MuscleGroup =
@@ -29,1219 +30,202 @@ export interface CatalogExercise {
   equipment?: EquipmentId | null;
 }
 
-const x = (
-  id: string,
-  muscle: MuscleGroup,
-  en: string,
-  uk: string,
-  pl: string,
-  lt: string,
-  et: string,
-): CatalogExercise => ({ id, muscle, names: [en, uk, pl, lt, et] });
+export type ExerciseForce = 'push' | 'pull' | 'static';
+export type ExerciseLevel = 'beginner' | 'intermediate' | 'expert';
+export type ExerciseMechanic = 'compound' | 'isolation';
+export type ExerciseCategory =
+  | 'strength'
+  | 'stretching'
+  | 'plyometrics'
+  | 'strongman'
+  | 'powerlifting'
+  | 'cardio'
+  | 'olympic weightlifting';
+
+export interface RichExercise {
+  id: string;
+  name: string;
+  force: ExerciseForce | null;
+  level: ExerciseLevel | null;
+  mechanic: ExerciseMechanic | null;
+  category: ExerciseCategory | null;
+  equipment: EquipmentId | null;
+  primaryMuscles: MuscleGroup[];
+  secondaryMuscles: MuscleGroup[];
+  instructions: string[];
+  images: string[];
+}
+
+const x = (id: string, muscle: MuscleGroup, en: string): CatalogExercise => ({
+  id,
+  muscle,
+  names: [en, en, en, en, en],
+});
 
 export const EXERCISE_CATALOG: CatalogExercise[] = [
   // --- Chest ---------------------------------------------------------------
-  x(
-    'bench-press',
-    'chest',
-    'Bench Press',
-    'Жим штанги лежачи',
-    'Wyciskanie sztangi leżąc',
-    'Štangos spaudimas gulint',
-    'Kangi surumine lamades',
-  ),
-  x(
-    'incline-bench-press',
-    'chest',
-    'Incline Bench Press',
-    'Жим штанги на похилій лаві',
-    'Wyciskanie sztangi na ławce skośnej',
-    'Spaudimas nuožulniame suole',
-    'Kangi surumine kaldpingil',
-  ),
-  x(
-    'decline-bench-press',
-    'chest',
-    'Decline Bench Press',
-    'Жим штанги вниз головою',
-    'Wyciskanie sztangi głową w dół',
-    'Spaudimas žemyn pasvirusiame suole',
-    'Kangi surumine langpingil',
-  ),
-  x(
-    'dumbbell-bench-press',
-    'chest',
-    'Dumbbell Bench Press',
-    'Жим гантелей лежачи',
-    'Wyciskanie hantli leżąc',
-    'Hantelių spaudimas gulint',
-    'Hantlite surumine lamades',
-  ),
-  x(
-    'incline-dumbbell-press',
-    'chest',
-    'Incline Dumbbell Press',
-    'Жим гантелей на похилій лаві',
-    'Wyciskanie hantli na ławce skośnej',
-    'Hantelių spaudimas nuožulniai',
-    'Hantlite surumine kaldpingil',
-  ),
-  x(
-    'dumbbell-fly',
-    'chest',
-    'Dumbbell Fly',
-    'Розведення гантелей лежачи',
-    'Rozpiętki z hantlami',
-    'Hantelių skėtimas gulint',
-    'Hantlite lahtiviimine lamades',
-  ),
-  x(
-    'incline-dumbbell-fly',
-    'chest',
-    'Incline Dumbbell Fly',
-    'Розведення гантелей на похилій лаві',
-    'Rozpiętki na ławce skośnej',
-    'Hantelių skėtimas nuožulniai',
-    'Hantlite lahtiviimine kaldpingil',
-  ),
-  x(
-    'cable-crossover',
-    'chest',
-    'Cable Crossover',
-    'Зведення рук у кросовері',
-    'Krzyżowanie linek wyciągu',
-    'Trosų sukryžiavimas',
-    'Plokitõmbed risti',
-  ),
-  x(
-    'pec-deck',
-    'chest',
-    'Pec Deck (Machine Fly)',
-    'Метелик (тренажер)',
-    'Motylek (maszyna)',
-    'Peteliškė (treniruoklis)',
-    'Liblikas (masin)',
-  ),
-  x(
-    'chest-press-machine',
-    'chest',
-    'Chest Press Machine',
-    'Жим від грудей у тренажері',
-    'Wyciskanie na maszynie',
-    'Krūtinės spaudimas treniruokliu',
-    'Rinnalt surumise masin',
-  ),
-  x(
-    'push-up',
-    'chest',
-    'Push-Up',
-    'Віджимання від підлоги',
-    'Pompki',
-    'Atsispaudimai',
-    'Kätekõverdused',
-  ),
-  x(
-    'weighted-push-up',
-    'chest',
-    'Weighted Push-Up',
-    'Віджимання з обтяженням',
-    'Pompki z obciążeniem',
-    'Atsispaudimai su svoriu',
-    'Kätekõverdused raskusega',
-  ),
-  x(
-    'dips-chest',
-    'chest',
-    'Chest Dips',
-    'Віджимання на брусах (груди)',
-    'Dipy na poręczach (klatka)',
-    'Atsispaudimai ant lygiagrečių (krūtinė)',
-    'Dipid rööbaspuudel (rind)',
-  ),
-  x(
-    'smith-bench-press',
-    'chest',
-    'Smith Machine Bench Press',
-    'Жим лежачи в Сміті',
-    'Wyciskanie w maszynie Smitha',
-    'Spaudimas Smito treniruoklyje',
-    'Surumine Smithi masinas',
-  ),
-  x(
-    'svend-press',
-    'chest',
-    'Svend Press',
-    'Жим Свенда',
-    'Wyciskanie Svenda',
-    'Svendo spaudimas',
-    'Svendi surumine',
-  ),
-  x(
-    'floor-press',
-    'chest',
-    'Floor Press',
-    'Жим з підлоги',
-    'Wyciskanie z podłogi',
-    'Spaudimas nuo grindų',
-    'Põrandalt surumine',
-  ),
-  x(
-    'pullover',
-    'chest',
-    'Dumbbell Pullover',
-    'Пуловер з гантеллю',
-    'Przenoszenie hantla za głowę',
-    'Hantelio perkėlimas už galvos',
-    'Hantli ülekanne pea taha',
-  ),
+  x('bench-press', 'chest', 'Bench Press'),
+  x('incline-bench-press', 'chest', 'Incline Bench Press'),
+  x('decline-bench-press', 'chest', 'Decline Bench Press'),
+  x('dumbbell-bench-press', 'chest', 'Dumbbell Bench Press'),
+  x('incline-dumbbell-press', 'chest', 'Incline Dumbbell Press'),
+  x('dumbbell-fly', 'chest', 'Dumbbell Fly'),
+  x('incline-dumbbell-fly', 'chest', 'Incline Dumbbell Fly'),
+  x('cable-crossover', 'chest', 'Cable Crossover'),
+  x('pec-deck', 'chest', 'Pec Deck (Machine Fly)'),
+  x('chest-press-machine', 'chest', 'Chest Press Machine'),
+  x('push-up', 'chest', 'Push-Up'),
+  x('weighted-push-up', 'chest', 'Weighted Push-Up'),
+  x('dips-chest', 'chest', 'Chest Dips'),
+  x('smith-bench-press', 'chest', 'Smith Machine Bench Press'),
+  x('svend-press', 'chest', 'Svend Press'),
+  x('floor-press', 'chest', 'Floor Press'),
+  x('pullover', 'chest', 'Dumbbell Pullover'),
 
   // --- Back ----------------------------------------------------------------
-  x('deadlift', 'back', 'Deadlift', 'Станова тяга', 'Martwy ciąg', 'Mirties trauka', 'Jõutõmme'),
-  x(
-    'romanian-deadlift',
-    'hamstrings',
-    'Romanian Deadlift',
-    'Румунська тяга',
-    'Rumuński martwy ciąg',
-    'Rumuniška trauka',
-    'Rumeenia jõutõmme',
-  ),
-  x(
-    'sumo-deadlift',
-    'back',
-    'Sumo Deadlift',
-    'Станова тяга сумо',
-    'Martwy ciąg sumo',
-    'Sumo trauka',
-    'Sumo jõutõmme',
-  ),
-  x(
-    'pull-up',
-    'back',
-    'Pull-Up',
-    'Підтягування',
-    'Podciąganie nachwytem',
-    'Prisitraukimai',
-    'Lõuatõmbed',
-  ),
-  x(
-    'chin-up',
-    'back',
-    'Chin-Up',
-    'Підтягування зворотним хватом',
-    'Podciąganie podchwytem',
-    'Prisitraukimai atvirkštiniu suėmimu',
-    'Lõuatõmbed althaardes',
-  ),
-  x(
-    'weighted-pull-up',
-    'back',
-    'Weighted Pull-Up',
-    'Підтягування з обтяженням',
-    'Podciąganie z obciążeniem',
-    'Prisitraukimai su svoriu',
-    'Lõuatõmbed raskusega',
-  ),
-  x(
-    'lat-pulldown',
-    'back',
-    'Lat Pulldown',
-    'Тяга верхнього блока',
-    'Ściąganie drążka wyciągu górnego',
-    'Viršutinio bloko trauka',
-    'Ülalt alla tõmbamine plokil',
-  ),
-  x(
-    'close-grip-pulldown',
-    'back',
-    'Close-Grip Pulldown',
-    'Тяга верхнього блока вузьким хватом',
-    'Ściąganie wyciągu wąskim chwytem',
-    'Bloko trauka siauru suėmimu',
-    'Plokitõmme kitsa haardega',
-  ),
-  x(
-    'barbell-row',
-    'back',
-    'Barbell Row',
-    'Тяга штанги в нахилі',
-    'Wiosłowanie sztangą',
-    'Štangos trauka pasilenkus',
-    'Kangi sõudmine ettekallutatult',
-  ),
-  x(
-    'pendlay-row',
-    'back',
-    'Pendlay Row',
-    'Тяга Пендлея',
-    'Wiosłowanie Pendlaya',
-    'Pendlay trauka',
-    'Pendlay sõudmine',
-  ),
-  x(
-    'dumbbell-row',
-    'back',
-    'One-Arm Dumbbell Row',
-    'Тяга гантелі однією рукою',
-    'Wiosłowanie hantlem jednorącz',
-    'Hantelio trauka viena ranka',
-    'Hantli sõudmine ühe käega',
-  ),
-  x(
-    'seated-cable-row',
-    'back',
-    'Seated Cable Row',
-    'Тяга нижнього блока сидячи',
-    'Wiosłowanie na wyciągu siedząc',
-    'Apatinio bloko trauka sėdint',
-    'Istudes plokitõmme',
-  ),
-  x(
-    't-bar-row',
-    'back',
-    'T-Bar Row',
-    'Тяга Т-грифа',
-    'Wiosłowanie sztangą T',
-    'T-grifo trauka',
-    'T-kangi sõudmine',
-  ),
-  x(
-    'chest-supported-row',
-    'back',
-    'Chest-Supported Row',
-    'Тяга з упором грудьми',
-    'Wiosłowanie z podparciem klatki',
-    'Trauka atsirėmus krūtine',
-    'Sõudmine rinnatoega',
-  ),
-  x(
-    'machine-row',
-    'back',
-    'Machine Row',
-    'Тяга в тренажері',
-    'Wiosłowanie na maszynie',
-    'Trauka treniruokliu',
-    'Sõudmine masinal',
-  ),
-  x(
-    'straight-arm-pulldown',
-    'back',
-    'Straight-Arm Pulldown',
-    'Тяга блока прямими руками',
-    'Przyciąganie prostymi rękami',
-    'Bloko trauka tiesiomis rankomis',
-    'Sirgete kätega plokitõmme',
-  ),
-  x(
-    'rack-pull',
-    'back',
-    'Rack Pull',
-    'Тяга з плінтів',
-    'Martwy ciąg ze stojaków',
-    'Trauka nuo stovų',
-    'Jõutõmme alustelt',
-  ),
-  x(
-    'good-morning',
-    'hamstrings',
-    'Good Morning',
-    'Нахили зі штангою («Доброго ранку»)',
-    'Skłony ze sztangą (Good Morning)',
-    'Pasilenkimai su štanga (Good Morning)',
-    'Kummardused kangiga (Good Morning)',
-  ),
-  x(
-    'back-extension',
-    'back',
-    'Back Extension',
-    'Гіперекстензія',
-    'Wznosy tułowia (hiperekstensja)',
-    'Hiperekstenzija',
-    'Hüperekstensioon',
-  ),
-  x(
-    'shrug',
-    'back',
-    'Barbell Shrug',
-    'Шраги зі штангою',
-    'Szrugsy ze sztangą',
-    'Pečių gūžčiojimas su štanga',
-    'Õlakehitused kangiga',
-  ),
-  x(
-    'dumbbell-shrug',
-    'back',
-    'Dumbbell Shrug',
-    'Шраги з гантелями',
-    'Szrugsy z hantlami',
-    'Gūžčiojimas su hanteliais',
-    'Õlakehitused hantlitega',
-  ),
-  x(
-    'inverted-row',
-    'back',
-    'Inverted Row',
-    'Австралійські підтягування',
-    'Wiosłowanie w podporze (australian row)',
-    'Atvirkštinė trauka',
-    'Ümberpööratud sõudmine',
-  ),
+  x('deadlift', 'back', 'Deadlift'),
+  x('romanian-deadlift', 'hamstrings', 'Romanian Deadlift'),
+  x('sumo-deadlift', 'back', 'Sumo Deadlift'),
+  x('pull-up', 'back', 'Pull-Up'),
+  x('chin-up', 'back', 'Chin-Up'),
+  x('weighted-pull-up', 'back', 'Weighted Pull-Up'),
+  x('lat-pulldown', 'back', 'Lat Pulldown'),
+  x('close-grip-pulldown', 'back', 'Close-Grip Pulldown'),
+  x('barbell-row', 'back', 'Barbell Row'),
+  x('pendlay-row', 'back', 'Pendlay Row'),
+  x('dumbbell-row', 'back', 'One-Arm Dumbbell Row'),
+  x('seated-cable-row', 'back', 'Seated Cable Row'),
+  x('t-bar-row', 'back', 'T-Bar Row'),
+  x('chest-supported-row', 'back', 'Chest-Supported Row'),
+  x('machine-row', 'back', 'Machine Row'),
+  x('straight-arm-pulldown', 'back', 'Straight-Arm Pulldown'),
+  x('rack-pull', 'back', 'Rack Pull'),
+  x('good-morning', 'hamstrings', 'Good Morning'),
+  x('back-extension', 'back', 'Back Extension'),
+  x('shrug', 'back', 'Barbell Shrug'),
+  x('dumbbell-shrug', 'back', 'Dumbbell Shrug'),
+  x('inverted-row', 'back', 'Inverted Row'),
 
   // --- Shoulders -----------------------------------------------------------
-  x(
-    'overhead-press',
-    'shoulders',
-    'Overhead Press',
-    'Жим штанги стоячи',
-    'Wyciskanie żołnierskie (OHP)',
-    'Štangos spaudimas stovint',
-    'Kangi surumine üles seistes',
-  ),
-  x(
-    'seated-dumbbell-press',
-    'shoulders',
-    'Seated Dumbbell Press',
-    'Жим гантелей сидячи',
-    'Wyciskanie hantli siedząc',
-    'Hantelių spaudimas sėdint',
-    'Hantlite surumine istudes',
-  ),
-  x(
-    'arnold-press',
-    'shoulders',
-    'Arnold Press',
-    'Жим Арнольда',
-    'Wyciskanie Arnolda',
-    'Arnoldo spaudimas',
-    'Arnoldi surumine',
-  ),
-  x(
-    'push-press',
-    'shoulders',
-    'Push Press',
-    'Швунг жимовий',
-    'Push press',
-    'Push press',
-    'Push press',
-  ),
-  x(
-    'lateral-raise',
-    'shoulders',
-    'Lateral Raise',
-    'Махи гантелями в сторони',
-    'Wznosy hantli bokiem',
-    'Hantelių kėlimas į šonus',
-    'Hantlite tõsted kõrvale',
-  ),
-  x(
-    'cable-lateral-raise',
-    'shoulders',
-    'Cable Lateral Raise',
-    'Махи в сторони на блоці',
-    'Wznosy bokiem na wyciągu',
-    'Kėlimas į šoną ant bloko',
-    'Tõsted kõrvale plokil',
-  ),
-  x(
-    'front-raise',
-    'shoulders',
-    'Front Raise',
-    'Підйом гантелей перед собою',
-    'Wznosy hantli przodem',
-    'Hantelių kėlimas priešais save',
-    'Hantlite tõsted ette',
-  ),
-  x(
-    'rear-delt-fly',
-    'shoulders',
-    'Rear Delt Fly',
-    'Розведення на задні дельти',
-    'Odwrotne rozpiętki',
-    'Užpakalinių deltų skėtimas',
-    'Tagumise õlaosa lahtiviimine',
-  ),
-  x(
-    'face-pull',
-    'shoulders',
-    'Face Pull',
-    'Тяга канату до обличчя',
-    'Face pull (przyciąganie liny do twarzy)',
-    'Virvės trauka į veidą',
-    'Trossitõmme näo suunas',
-  ),
-  x(
-    'upright-row',
-    'shoulders',
-    'Upright Row',
-    'Тяга штанги до підборіддя',
-    'Podciąganie sztangi wzdłuż tułowia',
-    'Štangos trauka iki smakro',
-    'Kangitõmme lõuani',
-  ),
-  x(
-    'machine-shoulder-press',
-    'shoulders',
-    'Machine Shoulder Press',
-    'Жим у тренажері на плечі',
-    'Wyciskanie na maszynie (barki)',
-    'Pečių spaudimas treniruokliu',
-    'Õlasurumise masin',
-  ),
-  x(
-    'reverse-pec-deck',
-    'shoulders',
-    'Reverse Pec Deck',
-    'Зворотний метелик',
-    'Odwrotny motylek',
-    'Atvirkštinė peteliškė',
-    'Tagurpidi liblikas',
-  ),
+  x('overhead-press', 'shoulders', 'Overhead Press'),
+  x('seated-dumbbell-press', 'shoulders', 'Seated Dumbbell Press'),
+  x('arnold-press', 'shoulders', 'Arnold Press'),
+  x('push-press', 'shoulders', 'Push Press'),
+  x('lateral-raise', 'shoulders', 'Lateral Raise'),
+  x('cable-lateral-raise', 'shoulders', 'Cable Lateral Raise'),
+  x('front-raise', 'shoulders', 'Front Raise'),
+  x('rear-delt-fly', 'shoulders', 'Rear Delt Fly'),
+  x('face-pull', 'shoulders', 'Face Pull'),
+  x('upright-row', 'shoulders', 'Upright Row'),
+  x('machine-shoulder-press', 'shoulders', 'Machine Shoulder Press'),
+  x('reverse-pec-deck', 'shoulders', 'Reverse Pec Deck'),
 
   // --- Biceps --------------------------------------------------------------
-  x(
-    'barbell-curl',
-    'biceps',
-    'Barbell Curl',
-    'Згинання рук зі штангою',
-    'Uginanie ramion ze sztangą',
-    'Rankų lenkimas su štanga',
-    'Kangi biitsepsipainutus',
-  ),
-  x(
-    'ez-bar-curl',
-    'biceps',
-    'EZ-Bar Curl',
-    'Згинання рук з EZ-грифом',
-    'Uginanie ze sztangą łamaną',
-    'Lenkimas su EZ grifu',
-    'EZ-kangi painutus',
-  ),
-  x(
-    'dumbbell-curl',
-    'biceps',
-    'Dumbbell Curl',
-    'Згинання рук з гантелями',
-    'Uginanie ramion z hantlami',
-    'Rankų lenkimas su hanteliais',
-    'Hantlite biitsepsipainutus',
-  ),
-  x(
-    'hammer-curl',
-    'biceps',
-    'Hammer Curl',
-    'Молоткові згинання',
-    'Uginanie młotkowe',
-    'Plaktukiniai lenkimai',
-    'Haamerpainutus',
-  ),
-  x(
-    'incline-curl',
-    'biceps',
-    'Incline Dumbbell Curl',
-    'Згинання на похилій лаві',
-    'Uginanie na ławce skośnej',
-    'Lenkimas ant nuožulnaus suolo',
-    'Painutused kaldpingil',
-  ),
-  x(
-    'preacher-curl',
-    'biceps',
-    'Preacher Curl',
-    'Згинання на лаві Скотта',
-    'Uginanie na modlitewniku',
-    'Lenkimas ant Skoto suolo',
-    'Scotti pingil painutus',
-  ),
-  x(
-    'concentration-curl',
-    'biceps',
-    'Concentration Curl',
-    'Концентроване згинання',
-    'Uginanie koncentryczne',
-    'Koncentruotas lenkimas',
-    'Kontsentreeritud painutus',
-  ),
-  x(
-    'cable-curl',
-    'biceps',
-    'Cable Curl',
-    'Згинання рук на блоці',
-    'Uginanie na wyciągu',
-    'Lenkimas ant bloko',
-    'Plokil painutus',
-  ),
-  x(
-    'spider-curl',
-    'biceps',
-    'Spider Curl',
-    'Павучі згинання',
-    'Uginanie spider',
-    'Voro lenkimai',
-    'Ämblikpainutus',
-  ),
+  x('barbell-curl', 'biceps', 'Barbell Curl'),
+  x('ez-bar-curl', 'biceps', 'EZ-Bar Curl'),
+  x('dumbbell-curl', 'biceps', 'Dumbbell Curl'),
+  x('hammer-curl', 'biceps', 'Hammer Curl'),
+  x('incline-curl', 'biceps', 'Incline Dumbbell Curl'),
+  x('preacher-curl', 'biceps', 'Preacher Curl'),
+  x('concentration-curl', 'biceps', 'Concentration Curl'),
+  x('cable-curl', 'biceps', 'Cable Curl'),
+  x('spider-curl', 'biceps', 'Spider Curl'),
 
   // --- Triceps -------------------------------------------------------------
-  x(
-    'close-grip-bench',
-    'triceps',
-    'Close-Grip Bench Press',
-    'Жим вузьким хватом',
-    'Wyciskanie wąskim chwytem',
-    'Spaudimas siauru suėmimu',
-    'Kitsa haardega surumine',
-  ),
-  x(
-    'dips-triceps',
-    'triceps',
-    'Triceps Dips',
-    'Віджимання на брусах (трицепс)',
-    'Dipy (triceps)',
-    'Atsispaudimai ant lygiagrečių (tricepsas)',
-    'Dipid (triitseps)',
-  ),
-  x(
-    'bench-dips',
-    'triceps',
-    'Bench Dips',
-    'Зворотні віджимання від лави',
-    'Pompki tyłem o ławkę',
-    'Atsispaudimai atbulomis nuo suolo',
-    'Dipid pingi najal',
-  ),
-  x(
-    'triceps-pushdown',
-    'triceps',
-    'Triceps Pushdown',
-    'Розгинання рук на блоці',
-    'Prostowanie ramion na wyciągu',
-    'Rankų tiesimas ant bloko',
-    'Triitsepsi allasurumine plokil',
-  ),
-  x(
-    'rope-pushdown',
-    'triceps',
-    'Rope Pushdown',
-    'Розгинання з канатом',
-    'Prostowanie z liną',
-    'Tiesimas su virve',
-    'Trossiga allasurumine',
-  ),
-  x(
-    'overhead-triceps-extension',
-    'triceps',
-    'Overhead Triceps Extension',
-    'Французький жим стоячи (з-за голови)',
-    'Wyciskanie francuskie zza głowy',
-    'Prancūziškas spaudimas virš galvos',
-    'Triitsepsi sirutus pea tagant',
-  ),
-  x(
-    'skull-crusher',
-    'triceps',
-    'Skull Crusher',
-    'Французький жим лежачи',
-    'Wyciskanie francuskie leżąc',
-    'Prancūziškas spaudimas gulint',
-    'Prantsuse surumine lamades',
-  ),
-  x(
-    'triceps-kickback',
-    'triceps',
-    'Triceps Kickback',
-    'Розгинання руки в нахилі',
-    'Kickback (prostowanie w opadzie)',
-    'Rankos tiesimas pasilenkus',
-    'Triitsepsi tahatõuge',
-  ),
+  x('close-grip-bench', 'triceps', 'Close-Grip Bench Press'),
+  x('dips-triceps', 'triceps', 'Triceps Dips'),
+  x('bench-dips', 'triceps', 'Bench Dips'),
+  x('triceps-pushdown', 'triceps', 'Triceps Pushdown'),
+  x('rope-pushdown', 'triceps', 'Rope Pushdown'),
+  x('overhead-triceps-extension', 'triceps', 'Overhead Triceps Extension'),
+  x('skull-crusher', 'triceps', 'Skull Crusher'),
+  x('triceps-kickback', 'triceps', 'Triceps Kickback'),
 
   // --- Forearms ------------------------------------------------------------
-  x(
-    'wrist-curl',
-    'forearms',
-    'Wrist Curl',
-    'Згинання зап’ясть',
-    'Uginanie nadgarstków',
-    'Riešų lenkimas',
-    'Randmepainutus',
-  ),
-  x(
-    'reverse-curl',
-    'forearms',
-    'Reverse Curl',
-    'Зворотні згинання',
-    'Uginanie nachwytem',
-    'Atvirkštiniai lenkimai',
-    'Painutus pealthaardes',
-  ),
-  x(
-    'farmers-walk',
-    'forearms',
-    "Farmer's Walk",
-    'Прогулянка фермера',
-    'Spacer farmera',
-    'Ūkininko ėjimas',
-    'Talumehe kõnd',
-  ),
-  x(
-    'dead-hang',
-    'forearms',
-    'Dead Hang',
-    'Вис на перекладині',
-    'Zwis na drążku',
-    'Kabėjimas ant skersinio',
-    'Rippumine kangil',
-  ),
+  x('wrist-curl', 'forearms', 'Wrist Curl'),
+  x('reverse-curl', 'forearms', 'Reverse Curl'),
+  x('farmers-walk', 'forearms', "Farmer's Walk"),
+  x('dead-hang', 'forearms', 'Dead Hang'),
 
   // --- Quads / legs --------------------------------------------------------
-  x(
-    'back-squat',
-    'quads',
-    'Back Squat',
-    'Присідання зі штангою',
-    'Przysiad ze sztangą',
-    'Pritūpimai su štanga',
-    'Kükk kangiga seljal',
-  ),
-  x(
-    'front-squat',
-    'quads',
-    'Front Squat',
-    'Фронтальні присідання',
-    'Przysiad przedni',
-    'Priekiniai pritūpimai',
-    'Eeskükk',
-  ),
-  x(
-    'goblet-squat',
-    'quads',
-    'Goblet Squat',
-    'Гоблет-присідання',
-    'Przysiad goblet',
-    'Goblet pritūpimai',
-    'Pokaalkükk',
-  ),
-  x(
-    'smith-squat',
-    'quads',
-    'Smith Machine Squat',
-    'Присідання в Сміті',
-    'Przysiad w Smith machine',
-    'Pritūpimai Smito treniruoklyje',
-    'Kükk Smithi masinas',
-  ),
-  x(
-    'hack-squat',
-    'quads',
-    'Hack Squat',
-    'Гак-присідання',
-    'Hack przysiad',
-    'Hack pritūpimai',
-    'Hack-kükk',
-  ),
-  x(
-    'leg-press',
-    'quads',
-    'Leg Press',
-    'Жим ногами',
-    'Wyciskanie nogami',
-    'Kojų spaudimas',
-    'Jalapress',
-  ),
-  x(
-    'bulgarian-split-squat',
-    'quads',
-    'Bulgarian Split Squat',
-    'Болгарські випади',
-    'Przysiad bułgarski',
-    'Bulgariški įtūpstai',
-    'Bulgaaria kükk',
-  ),
-  x('lunge', 'quads', 'Lunge', 'Випади', 'Wykroki', 'Įtūpstai', 'Väljaasted'),
-  x(
-    'walking-lunge',
-    'quads',
-    'Walking Lunge',
-    'Випади в русі',
-    'Wykroki chodzone',
-    'Įtūpstai einant',
-    'Kõndivad väljaasted',
-  ),
-  x(
-    'reverse-lunge',
-    'quads',
-    'Reverse Lunge',
-    'Зворотні випади',
-    'Wykroki w tył',
-    'Atbuliniai įtūpstai',
-    'Tagurpidi väljaasted',
-  ),
-  x(
-    'step-up',
-    'quads',
-    'Step-Up',
-    'Зашагування на тумбу',
-    'Wejścia na skrzynię',
-    'Užlipimai ant dėžės',
-    'Astumised kastile',
-  ),
-  x(
-    'leg-extension',
-    'quads',
-    'Leg Extension',
-    'Розгинання ніг у тренажері',
-    'Prostowanie nóg na maszynie',
-    'Kojų tiesimas treniruokliu',
-    'Jalasirutus masinal',
-  ),
-  x(
-    'sissy-squat',
-    'quads',
-    'Sissy Squat',
-    'Сісі-присідання',
-    'Sissy squat',
-    'Sissy pritūpimai',
-    'Sissy-kükk',
-  ),
-  x(
-    'box-squat',
-    'quads',
-    'Box Squat',
-    'Присідання на ящик',
-    'Przysiad na skrzynię',
-    'Pritūpimai ant dėžės',
-    'Kükk kastile',
-  ),
-  x(
-    'pause-squat',
-    'quads',
-    'Pause Squat',
-    'Присідання з паузою',
-    'Przysiad z pauzą',
-    'Pritūpimai su pauze',
-    'Pausiga kükk',
-  ),
-  x(
-    'pistol-squat',
-    'quads',
-    'Pistol Squat',
-    'Присідання «пістолетик»',
-    'Przysiad na jednej nodze (pistolet)',
-    'Pritūpimai ant vienos kojos',
-    'Püstolkükk',
-  ),
+  x('back-squat', 'quads', 'Back Squat'),
+  x('front-squat', 'quads', 'Front Squat'),
+  x('goblet-squat', 'quads', 'Goblet Squat'),
+  x('smith-squat', 'quads', 'Smith Machine Squat'),
+  x('hack-squat', 'quads', 'Hack Squat'),
+  x('leg-press', 'quads', 'Leg Press'),
+  x('bulgarian-split-squat', 'quads', 'Bulgarian Split Squat'),
+  x('lunge', 'quads', 'Lunge'),
+  x('walking-lunge', 'quads', 'Walking Lunge'),
+  x('reverse-lunge', 'quads', 'Reverse Lunge'),
+  x('step-up', 'quads', 'Step-Up'),
+  x('leg-extension', 'quads', 'Leg Extension'),
+  x('sissy-squat', 'quads', 'Sissy Squat'),
+  x('box-squat', 'quads', 'Box Squat'),
+  x('pause-squat', 'quads', 'Pause Squat'),
+  x('pistol-squat', 'quads', 'Pistol Squat'),
 
   // --- Hamstrings / glutes -------------------------------------------------
-  x(
-    'leg-curl',
-    'hamstrings',
-    'Lying Leg Curl',
-    'Згинання ніг лежачи',
-    'Uginanie nóg leżąc',
-    'Kojų lenkimas gulint',
-    'Jalapainutus lamades',
-  ),
-  x(
-    'seated-leg-curl',
-    'hamstrings',
-    'Seated Leg Curl',
-    'Згинання ніг сидячи',
-    'Uginanie nóg siedząc',
-    'Kojų lenkimas sėdint',
-    'Jalapainutus istudes',
-  ),
-  x(
-    'nordic-curl',
-    'hamstrings',
-    'Nordic Hamstring Curl',
-    'Нордичні згинання',
-    'Nordic curl',
-    'Šiaurietiški lenkimai',
-    'Põhjamaine reiepainutus',
-  ),
-  x(
-    'stiff-leg-deadlift',
-    'hamstrings',
-    'Stiff-Leg Deadlift',
-    'Тяга на прямих ногах',
-    'Martwy ciąg na prostych nogach',
-    'Trauka tiesiomis kojomis',
-    'Sirgete jalgadega jõutõmme',
-  ),
-  x(
-    'hip-thrust',
-    'glutes',
-    'Hip Thrust',
-    'Сідничний міст зі штангою',
-    'Hip thrust',
-    'Klubų kėlimas su štanga',
-    'Puusatõste kangiga',
-  ),
-  x(
-    'glute-bridge',
-    'glutes',
-    'Glute Bridge',
-    'Сідничний міст',
-    'Mostek biodrowy',
-    'Sėdmenų tiltelis',
-    'Tuharasild',
-  ),
-  x(
-    'cable-kickback',
-    'glutes',
-    'Cable Glute Kickback',
-    'Відведення ноги назад на блоці',
-    'Odwodzenie nogi w tył na wyciągu',
-    'Kojos atitraukimas atgal ant bloko',
-    'Jala tahatõuge plokil',
-  ),
-  x(
-    'hip-abduction',
-    'glutes',
-    'Hip Abduction Machine',
-    'Розведення ніг у тренажері',
-    'Odwodzenie nóg na maszynie',
-    'Kojų skėtimas treniruokliu',
-    'Puusade eemaldusmasin',
-  ),
-  x(
-    'hip-adduction',
-    'glutes',
-    'Hip Adduction Machine',
-    'Зведення ніг у тренажері',
-    'Przywodzenie nóg na maszynie',
-    'Kojų suvedimas treniruokliu',
-    'Puusade lähendusmasin',
-  ),
-  x(
-    'kettlebell-swing',
-    'glutes',
-    'Kettlebell Swing',
-    'Махи гирею',
-    'Wymachy kettlebell',
-    'Svarsčio mostai',
-    'Sangpommi hood',
-  ),
+  x('leg-curl', 'hamstrings', 'Lying Leg Curl'),
+  x('seated-leg-curl', 'hamstrings', 'Seated Leg Curl'),
+  x('nordic-curl', 'hamstrings', 'Nordic Hamstring Curl'),
+  x('stiff-leg-deadlift', 'hamstrings', 'Stiff-Leg Deadlift'),
+  x('hip-thrust', 'glutes', 'Hip Thrust'),
+  x('glute-bridge', 'glutes', 'Glute Bridge'),
+  x('cable-kickback', 'glutes', 'Cable Glute Kickback'),
+  x('hip-abduction', 'glutes', 'Hip Abduction Machine'),
+  x('hip-adduction', 'glutes', 'Hip Adduction Machine'),
+  x('kettlebell-swing', 'glutes', 'Kettlebell Swing'),
 
   // --- Calves --------------------------------------------------------------
-  x(
-    'standing-calf-raise',
-    'calves',
-    'Standing Calf Raise',
-    'Підйоми на носки стоячи',
-    'Wspięcia na palce stojąc',
-    'Stiebimasis ant pirštų stovint',
-    'Säärt tõsted seistes',
-  ),
-  x(
-    'seated-calf-raise',
-    'calves',
-    'Seated Calf Raise',
-    'Підйоми на носки сидячи',
-    'Wspięcia na palce siedząc',
-    'Stiebimasis sėdint',
-    'Sääretõsted istudes',
-  ),
-  x(
-    'calf-press',
-    'calves',
-    'Calf Press (Leg Press)',
-    'Жим носками в платформі',
-    'Wspięcia na suwnicy',
-    'Blauzdų spaudimas kojų preso',
-    'Sääred jalapressil',
-  ),
+  x('standing-calf-raise', 'calves', 'Standing Calf Raise'),
+  x('seated-calf-raise', 'calves', 'Seated Calf Raise'),
+  x('calf-press', 'calves', 'Calf Press (Leg Press)'),
 
   // --- Core ----------------------------------------------------------------
-  x('plank', 'core', 'Plank', 'Планка', 'Deska (plank)', 'Lenta', 'Plank'),
-  x(
-    'side-plank',
-    'core',
-    'Side Plank',
-    'Бічна планка',
-    'Deska boczna',
-    'Šoninė lenta',
-    'Külgplank',
-  ),
-  x(
-    'crunch',
-    'core',
-    'Crunch',
-    'Скручування',
-    'Brzuszki (spięcia)',
-    'Susisukimai',
-    'Kõhulihaste kripsud',
-  ),
-  x(
-    'cable-crunch',
-    'core',
-    'Cable Crunch',
-    'Скручування на блоці',
-    'Spięcia na wyciągu (allahy)',
-    'Susisukimai ant bloko',
-    'Kripsud plokil',
-  ),
-  x(
-    'sit-up',
-    'core',
-    'Sit-Up',
-    'Підйоми корпусу',
-    'Siady z leżenia',
-    'Atsisėdimai',
-    'Istessetõusud',
-  ),
-  x(
-    'hanging-leg-raise',
-    'core',
-    'Hanging Leg Raise',
-    'Підйоми ніг у висі',
-    'Unoszenie nóg w zwisie',
-    'Kojų kėlimas kabant',
-    'Jalatõsted rippes',
-  ),
-  x(
-    'hanging-knee-raise',
-    'core',
-    'Hanging Knee Raise',
-    'Підйоми колін у висі',
-    'Unoszenie kolan w zwisie',
-    'Kelių kėlimas kabant',
-    'Põlvetõsted rippes',
-  ),
-  x(
-    'leg-raise',
-    'core',
-    'Lying Leg Raise',
-    'Підйоми ніг лежачи',
-    'Unoszenie nóg leżąc',
-    'Kojų kėlimas gulint',
-    'Jalatõsted lamades',
-  ),
-  x(
-    'russian-twist',
-    'core',
-    'Russian Twist',
-    'Скручування сидячи з поворотом',
-    'Skręty tułowia (russian twist)',
-    'Liemens sukimai sėdint',
-    'Keretwistid istudes',
-  ),
-  x(
-    'ab-wheel',
-    'core',
-    'Ab Wheel Rollout',
-    'Ролик для преса',
-    'Kółko do brzucha (rollout)',
-    'Pilvo ratukas',
-    'Kõhurulli rullimine',
-  ),
-  x(
-    'dead-bug',
-    'core',
-    'Dead Bug',
-    'Мертвий жук',
-    'Martwy robak (dead bug)',
-    'Negyvas vabalas',
-    'Surnud putukas',
-  ),
-  x('bird-dog', 'core', 'Bird Dog', 'Птах-собака', 'Bird dog', 'Paukštis-šuo', 'Linnukoer'),
-  x(
-    'mountain-climbers',
-    'core',
-    'Mountain Climbers',
-    'Скелелаз',
-    'Wspinaczka górska (mountain climbers)',
-    'Kalnų kopikas',
-    'Mägironija',
-  ),
-  x(
-    'pallof-press',
-    'core',
-    'Pallof Press',
-    'Жим Паллофа',
-    'Pallof press',
-    'Pallof spaudimas',
-    'Pallofi surumine',
-  ),
-  x(
-    'woodchopper',
-    'core',
-    'Cable Woodchopper',
-    'Дроворуб на блоці',
-    'Drwal na wyciągu',
-    'Medkirtys ant bloko',
-    'Puuraiumine plokil',
-  ),
-  x(
-    'hyperextension-oblique',
-    'core',
-    'Side Bend',
-    'Нахили в сторони',
-    'Skłony boczne',
-    'Lenkimai į šoną',
-    'Küljekallutused',
-  ),
+  x('plank', 'core', 'Plank'),
+  x('side-plank', 'core', 'Side Plank'),
+  x('crunch', 'core', 'Crunch'),
+  x('cable-crunch', 'core', 'Cable Crunch'),
+  x('sit-up', 'core', 'Sit-Up'),
+  x('hanging-leg-raise', 'core', 'Hanging Leg Raise'),
+  x('hanging-knee-raise', 'core', 'Hanging Knee Raise'),
+  x('leg-raise', 'core', 'Lying Leg Raise'),
+  x('russian-twist', 'core', 'Russian Twist'),
+  x('ab-wheel', 'core', 'Ab Wheel Rollout'),
+  x('dead-bug', 'core', 'Dead Bug'),
+  x('bird-dog', 'core', 'Bird Dog'),
+  x('mountain-climbers', 'core', 'Mountain Climbers'),
+  x('pallof-press', 'core', 'Pallof Press'),
+  x('woodchopper', 'core', 'Cable Woodchopper'),
+  x('hyperextension-oblique', 'core', 'Side Bend'),
 
   // --- Full body / olympic -------------------------------------------------
-  x(
-    'clean-and-jerk',
-    'fullbody',
-    'Clean and Jerk',
-    'Поштовх',
-    'Podrzut',
-    'Nutraukimas ir išstūmimas',
-    'Rebimine ja tõukamine',
-  ),
-  x('snatch', 'fullbody', 'Snatch', 'Ривок', 'Rwanie', 'Rovimas', 'Rebimine'),
-  x(
-    'power-clean',
-    'fullbody',
-    'Power Clean',
-    'Взяття на груди в стійку',
-    'Zarzut siłowy',
-    'Jėgos užsimetimas',
-    'Jõuvõte rinnale',
-  ),
-  x('thruster', 'fullbody', 'Thruster', 'Трастер', 'Thruster', 'Trasteris', 'Truster'),
-  x('burpee', 'fullbody', 'Burpee', 'Берпі', 'Burpees', 'Burpis', 'Burpee'),
-  x(
-    'turkish-get-up',
-    'fullbody',
-    'Turkish Get-Up',
-    'Турецький підйом',
-    'Tureckie wstawanie',
-    'Turkiškas atsikėlimas',
-    'Türgi ülestõus',
-  ),
-  x(
-    'sled-push',
-    'fullbody',
-    'Sled Push',
-    'Штовхання санчат',
-    'Pchanie sań',
-    'Rogučių stūmimas',
-    'Kelgu lükkamine',
-  ),
-  x(
-    'battle-ropes',
-    'fullbody',
-    'Battle Ropes',
-    'Канати',
-    'Liny treningowe',
-    'Kovos virvės',
-    'Lahingutrossid',
-  ),
-  x(
-    'box-jump',
-    'fullbody',
-    'Box Jump',
-    'Стрибки на тумбу',
-    'Wskoki na skrzynię',
-    'Šuoliai ant dėžės',
-    'Hüpped kastile',
-  ),
-  x(
-    'wall-ball',
-    'fullbody',
-    'Wall Ball',
-    'Кидки м’яча в стіну',
-    'Wall ball (rzuty piłką)',
-    'Kamuolio metimai į sieną',
-    'Palliheited vastu seina',
-  ),
-  x(
-    'medicine-ball-slam',
-    'fullbody',
-    'Medicine Ball Slam',
-    'Кидки медбола в підлогу',
-    'Uderzenia piłką lekarską',
-    'Medicininio kamuolio metimai',
-    'Topispalli löögid',
-  ),
+  x('clean-and-jerk', 'fullbody', 'Clean and Jerk'),
+  x('snatch', 'fullbody', 'Snatch'),
+  x('power-clean', 'fullbody', 'Power Clean'),
+  x('thruster', 'fullbody', 'Thruster'),
+  x('burpee', 'fullbody', 'Burpee'),
+  x('turkish-get-up', 'fullbody', 'Turkish Get-Up'),
+  x('sled-push', 'fullbody', 'Sled Push'),
+  x('battle-ropes', 'fullbody', 'Battle Ropes'),
+  x('box-jump', 'fullbody', 'Box Jump'),
+  x('wall-ball', 'fullbody', 'Wall Ball'),
+  x('medicine-ball-slam', 'fullbody', 'Medicine Ball Slam'),
 
   // --- Cardio --------------------------------------------------------------
-  x(
-    'treadmill-run',
-    'cardio',
-    'Treadmill Run',
-    'Біг на доріжці',
-    'Bieg na bieżni',
-    'Bėgimas takeliu',
-    'Jooks jooksulindil',
-  ),
-  x(
-    'treadmill-walk-incline',
-    'cardio',
-    'Incline Treadmill Walk',
-    'Ходьба в гору на доріжці',
-    'Marsz pod górę na bieżni',
-    'Ėjimas įkalne takeliu',
-    'Kõnd kaldega lindil',
-  ),
-  x(
-    'stationary-bike',
-    'cardio',
-    'Stationary Bike',
-    'Велотренажер',
-    'Rower stacjonarny',
-    'Dviračio treniruoklis',
-    'Veloergomeeter',
-  ),
-  x(
-    'rowing-machine',
-    'cardio',
-    'Rowing Machine',
-    'Гребний тренажер',
-    'Ergometr wioślarski',
-    'Irklavimo treniruoklis',
-    'Sõudeergomeeter',
-  ),
-  x(
-    'elliptical',
-    'cardio',
-    'Elliptical',
-    'Орбітрек',
-    'Orbitrek',
-    'Elipsinis treniruoklis',
-    'Elliptiline trenažöör',
-  ),
-  x(
-    'stair-climber',
-    'cardio',
-    'Stair Climber',
-    'Степер (сходи)',
-    'Schodki (stair climber)',
-    'Laiptų treniruoklis',
-    'Trepironija masin',
-  ),
-  x('assault-bike', 'cardio', 'Assault Bike', 'Ейр-байк', 'Air bike', 'Oro dviratis', 'Õhuratas'),
-  x(
-    'ski-erg',
-    'cardio',
-    'Ski Erg',
-    'Скі-ергометр',
-    'Ski erg',
-    'Slidinėjimo ergometras',
-    'Suusaergomeeter',
-  ),
-  x(
-    'bent-over-row',
-    'back',
-    'Bent-over Row',
-    'Тяга в нахилі',
-    'Wiosłowanie w opadzie',
-    'Trauka pasilenkus',
-    'Sõudmine ettekallutatult',
-  ),
-  x(
-    'calf-raise',
-    'calves',
-    'Calf Raise',
-    'Підйоми на носки',
-    'Wspięcia na palce',
-    'Kėlimasis ant pirštų galų',
-    'Päkkadele tõus',
-  ),
-  x('jump-rope', 'cardio', 'Jump Rope', 'Скакалка', 'Skakanka', 'Šokdynė', 'Hüppenöör'),
+  x('treadmill-run', 'cardio', 'Treadmill Run'),
+  x('treadmill-walk-incline', 'cardio', 'Incline Treadmill Walk'),
+  x('stationary-bike', 'cardio', 'Stationary Bike'),
+  x('rowing-machine', 'cardio', 'Rowing Machine'),
+  x('elliptical', 'cardio', 'Elliptical'),
+  x('stair-climber', 'cardio', 'Stair Climber'),
+  x('assault-bike', 'cardio', 'Assault Bike'),
+  x('ski-erg', 'cardio', 'Ski Erg'),
+  x('bent-over-row', 'back', 'Bent-over Row'),
+  x('leg-curl', 'hamstrings', 'Leg Curl'),
+  x('calf-raise', 'calves', 'Calf Raise'),
+  x('jump-rope', 'cardio', 'Jump Rope'),
 ];
 
 // --- free-exercise-db import (public domain, 873 entries) -------------------
@@ -1250,11 +234,21 @@ export const EXERCISE_CATALOG: CatalogExercise[] = [
 
 type DbRow = [string, EquipmentId | null, MuscleGroup];
 const DB_ROWS = DB_RAW as DbRow[];
+const RICH_EXERCISES = RICH_RAW as RichExercise[];
+
+const RICH_BY_ID = new Map<string, RichExercise>(RICH_EXERCISES.map((e) => [e.id, e]));
+const RICH_BY_NAME = new Map<string, RichExercise>(
+  RICH_EXERCISES.map((e) => [e.name.trim().toLowerCase(), e]),
+);
 
 /** Curated EN name (lowercased) → equipment, learned from the DB by name. */
-const DB_EQUIP_BY_NAME = new Map<string, EquipmentId | null>(
-  DB_ROWS.map((r) => [r[0].toLowerCase(), r[1]]),
-);
+const DB_EQUIP_BY_NAME = new Map<string, EquipmentId | null>([
+  ...DB_ROWS.map((r): [string, EquipmentId | null] => [r[0].toLowerCase(), r[1]]),
+  ...RICH_EXERCISES.map((r): [string, EquipmentId | null] => [
+    r.name.trim().toLowerCase(),
+    r.equipment,
+  ]),
+]);
 
 /**
  * Equipment for curated entries the DB cannot match by name (its names differ:
@@ -1368,6 +362,21 @@ const EXTRA_EQUIP: Record<string, EquipmentId> = {
 };
 
 const CURATED_EN = new Set(EXERCISE_CATALOG.map((e) => e.names[0].toLowerCase()));
+const RICH_EN = new Set(RICH_EXERCISES.map((e) => e.name.trim().toLowerCase()));
+
+function richPrimary(rich: RichExercise): MuscleGroup {
+  return rich.primaryMuscles[0] ?? (rich.category === 'cardio' ? 'cardio' : 'fullbody');
+}
+
+function richAsCatalogEntry(rich: RichExercise): CatalogExercise {
+  const primary = richPrimary(rich);
+  return {
+    id: rich.id,
+    muscle: primary,
+    names: [rich.name, rich.name, rich.name, rich.name, rich.name],
+    equipment: rich.equipment,
+  };
+}
 
 /** Curated entries enriched with equipment where the DB knows the same name. */
 export const CURATED: CatalogExercise[] = EXERCISE_CATALOG.map((e) => ({
@@ -1376,15 +385,22 @@ export const CURATED: CatalogExercise[] = EXERCISE_CATALOG.map((e) => ({
     e.equipment ?? EXTRA_EQUIP[e.id] ?? DB_EQUIP_BY_NAME.get(e.names[0].toLowerCase()) ?? null,
 }));
 
-/** DB rows as catalog entries (EN name in every slot), minus curated dupes. */
+/** Rich DB records as catalog entries (EN name in every slot), minus curated dupes. */
+const RICH_ENTRIES: CatalogExercise[] = RICH_EXERCISES.filter(
+  (r) => !CURATED_EN.has(r.name.trim().toLowerCase()),
+).map(richAsCatalogEntry);
+
+/** Compact DB rows stay as a back-compat fallback when rich data is missing. */
 const DB_ENTRIES: CatalogExercise[] = DB_ROWS.filter(
-  (r) => !CURATED_EN.has(r[0].toLowerCase()),
+  (r) => !CURATED_EN.has(r[0].toLowerCase()) && !RICH_EN.has(r[0].toLowerCase()),
 ).map((r, i) => ({
   id: `db-${i}`,
   muscle: r[2],
   names: [r[0], r[0], r[0], r[0], r[0]],
   equipment: r[1],
 }));
+
+export const BUILT_IN_CATALOG: CatalogExercise[] = [...CURATED, ...RICH_ENTRIES, ...DB_ENTRIES];
 
 // --- Muscle metadata (design MG/EQ) -----------------------------------------
 // An exercise carries one primary group and any number of secondary ones
@@ -1428,6 +444,8 @@ const SECONDARY_RULES: Array<[RegExp, MuscleGroup, MuscleGroup[]]> = [
 export function secondaryMusclesOf(ex: CatalogExercise): MuscleGroup[] {
   const custom = CUSTOM_SECONDARIES(ex.id);
   if (custom) return custom;
+  const rich = RICH_BY_ID.get(ex.id) ?? RICH_BY_NAME.get(ex.names[0].trim().toLowerCase());
+  if (rich) return rich.secondaryMuscles;
   const explicit = SECONDARY_BY_ID[ex.id];
   if (explicit) return explicit;
   for (const [re, primary, secondaries] of SECONDARY_RULES) {
@@ -1443,11 +461,22 @@ export interface MuscleInfo {
 }
 
 const BY_NAME = new Map<string, CatalogExercise>();
-for (const ex of [...CURATED, ...DB_ENTRIES]) {
+for (const ex of BUILT_IN_CATALOG) {
   for (const n of ex.names) {
     const key = n.trim().toLowerCase();
     if (key && !BY_NAME.has(key)) BY_NAME.set(key, ex);
   }
+}
+
+// Back-compat for historical entries logged before exercise names became
+// English-only data. Keep this tiny: new names should stay English.
+const LEGACY_NAME_ALIASES: Record<string, string> = {
+  'розведення гантелей лежачи': 'Dumbbell Fly',
+  'пуловер з гантеллю': 'Dumbbell Pullover',
+};
+for (const [alias, canonical] of Object.entries(LEGACY_NAME_ALIASES)) {
+  const ex = BY_NAME.get(canonical.toLowerCase());
+  if (ex) BY_NAME.set(alias, ex);
 }
 
 /**
@@ -1457,6 +486,22 @@ for (const ex of [...CURATED, ...DB_ENTRIES]) {
 export function canonicalExerciseName(name: string): string {
   const key = name.trim().toLowerCase();
   return BY_NAME.get(key)?.names[0] ?? name.trim();
+}
+
+/** True when the name is a built-in library exercise (curated or free-db). */
+export function isBuiltInExercise(name: string): boolean {
+  return BY_NAME.has(name.trim().toLowerCase());
+}
+
+export function richExerciseById(id: string | null | undefined): RichExercise | null {
+  return id ? (RICH_BY_ID.get(id) ?? null) : null;
+}
+
+export function richExerciseByName(name: string | null | undefined): RichExercise | null {
+  if (!name) return null;
+  const key = name.trim().toLowerCase();
+  const ex = BY_NAME.get(key);
+  return (ex ? RICH_BY_ID.get(ex.id) : null) ?? RICH_BY_NAME.get(key) ?? null;
 }
 
 // --- Server catalog: custom exercises authored by admins/trainers -----------
@@ -1538,6 +583,14 @@ export function muscleInfoByName(name: string): MuscleInfo | null {
   }
   const ex = BY_NAME.get(key);
   if (!ex) return null;
+  const rich = RICH_BY_ID.get(ex.id) ?? RICH_BY_NAME.get(ex.names[0].trim().toLowerCase());
+  if (rich) {
+    return {
+      primary: richPrimary(rich),
+      secondary: rich.secondaryMuscles,
+      equipment: rich.equipment,
+    };
+  }
   return {
     primary: ex.muscle,
     secondary: secondaryMusclesOf(ex),
@@ -1559,10 +612,9 @@ export function searchCatalog(
   if (!q && equipment === undefined && muscle === undefined) return [];
   const custom = customList.map(customAsCatalogEntry);
   // Browsing by filter only (no typed query) draws from the hand-verified
-  // curated list + the user's own custom exercises. The free-exercise-db long
-  // tail has noisy muscle tags (a power clean listed as "hamstrings"), so it is
-  // only reached when the user explicitly types a name to search for.
-  const base = q ? [...custom, ...CURATED, ...DB_ENTRIES] : [...custom, ...CURATED];
+  // curated list + the user's own custom exercises. The rich free-exercise-db
+  // import has cleaned muscle tags, so the long tail is safe to browse.
+  const base = [...custom, ...BUILT_IN_CATALOG];
   let pool =
     equipment === undefined ? base : base.filter((e) => (e.equipment ?? null) === equipment);
   if (muscle !== undefined) {

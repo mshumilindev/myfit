@@ -11,7 +11,6 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
   useFlagsVersion(); // re-render when a flag changes
 
   const meta: Record<string, { label: string; desc: string }> = {
-    exerciseFeature: { label: t.flagExerciseFeature, desc: t.flagExerciseFeatureDesc },
     gymPresence: { label: t.flagGymPresence, desc: t.flagGymPresenceDesc },
   };
 

@@ -12774,6 +12774,16 @@ h6 {
   cursor: pointer;
   padding: 0;
 }
+.exd-video.photo {
+  background: var(--color-neutral-900);
+}
+.exd-video.photo img,
+.exg-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .exd-video.none .exd-house,
 .exd-video.stills {
   display: grid;
@@ -12905,6 +12915,10 @@ h6 {
 .exd-chip.primary {
   color: var(--color-neutral-300);
 }
+.exd-chip.meta {
+  color: var(--color-accent-200);
+  background: var(--color-accent-950);
+}
 .exd-chip .ui-icon {
   font-size: 11px;
 }
@@ -12939,6 +12953,29 @@ h6 {
   color: var(--color-accent);
   margin-top: 6px;
   flex: none;
+}
+.exd-instructions {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-neutral-300);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.exd-instructions li + li {
+  margin-top: 8px;
+}
+.exd-photos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.exd-photos img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-900);
 }
 .exd-stills {
   display: flex;
@@ -13073,6 +13110,105 @@ h6 {
   font-size: 12px;
   color: var(--color-neutral-500);
 }
+
+/* Library / My-exercises tabs. */
+.exg-tabs {
+  display: inline-flex;
+  gap: var(--space-5);
+  align-items: center;
+}
+.exg-tabs button {
+  border: 0;
+  background: none;
+  padding: 6px 2px;
+  font-size: 15px;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.exg-tabs button.active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
+}
+.exg-tabcount {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-200);
+  background: var(--color-accent-900);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+/* My exercises tab. */
+.exg-mine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exg-mine-create {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-accent-700);
+  background: var(--color-accent-950);
+  color: var(--color-accent-200);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.exg-mine-empty {
+  padding: 22px 14px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-neutral-500);
+}
+.exg-mine-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.exg-mine-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+.exg-mine-acts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+.exg-mine-act {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-neutral-300);
+  cursor: pointer;
+}
+.exg-mine-act.danger {
+  color: var(--color-danger);
+}
+.exg-mine-act i {
+  font-size: 16px;
+}
 .exg-filters {
   display: flex;
   gap: var(--space-3);
@@ -13174,6 +13310,20 @@ h6 {
 .exg-imgglyph {
   font-size: 20px;
   color: var(--color-neutral-700);
+}
+.exg-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.exg-badges span {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-500);
+  font-size: 9px;
+  line-height: 1.3;
 }
 .exg-row-body {
   flex: 1;
@@ -14580,4 +14730,728 @@ h6 {
   font-size: 12px;
   color: var(--color-neutral-500);
   flex: none;
+}
+
+/* ==========================================================================
+   Exercise Library v2 — badge grammar + filter rail + gallery (LIB/RICH/SPARSE)
+   Design: "Spotter - Exercise Library.dc.html". Badges are the shared token
+   system; the library composes a left filter rail (desktop) or a filter sheet
+   (phone) with a paginated 4-col card grid / list of rows.
+   ========================================================================== */
+
+/* --- badge grammar ------------------------------------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.badge.sm {
+  font-size: 9px;
+  padding: 2px 7px;
+}
+.badge i,
+.badge .ui-icon {
+  font-size: 11px;
+}
+.badge.sm i,
+.badge.sm .ui-icon {
+  font-size: 9px;
+}
+.b-cat {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+}
+.b-mech {
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-300);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.b-eq {
+  background: var(--color-surface);
+  color: var(--color-neutral-400);
+}
+.b-mus {
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-500);
+}
+.b-mus-pri {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+}
+.b-ghost {
+  background: transparent;
+  color: var(--color-neutral-600);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+button.badge {
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+}
+.badge.is-active {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+
+@keyframes exl-shimmer {
+  0% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0.35;
+  }
+}
+.exl-sk {
+  animation: exl-shimmer 1.6s ease-in-out infinite;
+  background: var(--color-neutral-900);
+  border-radius: var(--radius-sm);
+}
+
+/* --- root ---------------------------------------------------------------- */
+.exl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+/* --- desktop: filter rail + main ---------------------------------------- */
+.exl-shell {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+.exl-rail {
+  width: 236px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: 2px 24px 24px 2px;
+  box-shadow: inset -1px 0 0 var(--color-divider);
+}
+.exl-rail-title {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+.exl-group-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+  margin-bottom: 8px;
+}
+.exl-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.exl-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.exl-switch {
+  width: 34px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--color-neutral-800);
+  position: relative;
+  flex: none;
+  transition: background 0.15s;
+}
+.exl-switch::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--color-neutral-500);
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+.exl-toggle.on .exl-switch {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.exl-toggle.on .exl-switch::after {
+  transform: translateX(15px);
+  background: var(--color-accent);
+}
+
+.exl-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-left: 40px;
+}
+.exl-head {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+}
+.exl-head-l {
+  flex: 1;
+  min-width: 0;
+}
+.exl-head h2 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.025em;
+}
+.exl-cov {
+  margin: var(--space-2) 0 0;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.exl-new {
+  min-height: 40px;
+  font-size: 13px;
+  gap: 7px;
+  flex: none;
+}
+
+.exl-searchrow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.exl-search {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+.exl-search .ui-icon {
+  font-size: 15px;
+  color: var(--color-neutral-500);
+}
+.exl-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: 13px;
+  outline: none;
+}
+.exl-search input::placeholder {
+  color: var(--color-neutral-600);
+}
+.exl-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.exl-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  align-content: start;
+}
+@media (max-width: 1180px) {
+  .exl-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.exl-card {
+  border: 0;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+  display: block;
+}
+.exl-card.curated {
+  opacity: 0.92;
+}
+.exl-media {
+  height: 120px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--color-neutral-900);
+}
+.exl-media.clip {
+  background: var(--frame);
+}
+.exl-media.clip.alt {
+  background: var(--frame2);
+}
+.exl-media.photo {
+  background: var(--photo);
+}
+.exl-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.exl-play {
+  font-size: 34px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.exl-glyph {
+  font-size: 28px;
+  color: var(--color-neutral-500);
+}
+.exl-noneglyph {
+  font-size: 26px;
+  color: var(--color-neutral-700);
+}
+.exl-len {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  font-size: 9px;
+  color: rgba(233, 234, 236, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+.exl-cardbody {
+  padding: var(--space-4);
+}
+.exl-cardname {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.exl-cardmus {
+  font-size: 10px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+}
+.exl-card.curated .exl-cardmus {
+  color: var(--color-neutral-600);
+}
+.exl-cardbadges {
+  display: flex;
+  gap: 4px;
+  margin-top: 7px;
+  flex-wrap: wrap;
+}
+
+.exl-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: var(--space-5) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+.exl-pagebtn,
+.exl-pagenum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-neutral-300);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.exl-pagebtn .ui-icon {
+  font-size: 16px;
+}
+.exl-pagebtn .ui-icon.flip {
+  transform: scaleX(-1);
+}
+.exl-pagebtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.exl-pagenum.active {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.exl-pagegap {
+  min-width: 22px;
+  text-align: center;
+  color: var(--color-neutral-600);
+  font-size: 13px;
+  align-self: flex-end;
+  padding-bottom: 6px;
+}
+
+/* --- phone: header + search + rows -------------------------------------- */
+.exl-mhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.exl-mhead h2 {
+  margin: 0;
+  flex: 1;
+  font-size: 26px;
+  letter-spacing: -0.025em;
+}
+.exl-mnew {
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: 20px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+}
+.exl-msearch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
+.exl-msearch .ui-icon {
+  font-size: 15px;
+  color: var(--color-neutral-500);
+}
+.exl-msearch input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-size: 14px;
+  outline: none;
+}
+.exl-msearch input::placeholder {
+  color: var(--color-neutral-600);
+}
+.exl-funnel {
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.exl-funnel.on {
+  color: var(--color-accent);
+}
+.exl-mrows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exl-mrow {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.exl-mrow.curated {
+  opacity: 0.92;
+}
+.exl-mthumb {
+  width: 72px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  flex: none;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--color-neutral-900);
+}
+.exl-mthumb.clip {
+  background: var(--frame);
+}
+.exl-mthumb.clip.alt {
+  background: var(--frame2);
+}
+.exl-mthumb.photo {
+  background: var(--photo);
+}
+.exl-mthumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.exl-mthumb .exl-play {
+  font-size: 22px;
+}
+.exl-mthumb .exl-glyph {
+  font-size: 19px;
+}
+.exl-mthumb .exl-noneglyph {
+  font-size: 18px;
+}
+.exl-mbody {
+  flex: 1;
+  min-width: 0;
+}
+.exl-mname {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.exl-mmus {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 2px;
+}
+.exl-mnote {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+  margin-top: 5px;
+}
+.exl-mbadges {
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+/* --- mobile filter sheet ------------------------------------------------- */
+.exl-fsheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.exl-fsheet .exl-group-label {
+  margin-bottom: 6px;
+}
+
+/* --- Exercise detail v2 (RICH / SPARSE) ---------------------------------- */
+.exd-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+}
+.exd-muscles-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.exd-figure {
+  width: 52px;
+  flex: none;
+}
+.exd.desktop .exd-figure {
+  width: 56px;
+}
+.exd-mcols {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.exd-mrow-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.exd-mlegend {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+}
+.exd-formphotos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.exd-formphotos.single {
+  grid-template-columns: 1fr;
+}
+.exd-formphoto {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--photo);
+}
+.exd-formphoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.exd-photo-label {
+  position: absolute;
+  left: 6px;
+  bottom: 5px;
+  font-size: 10px;
+  color: rgba(233, 234, 236, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.exd-sparse {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.exd-sparse .ui-icon {
+  font-size: 16px;
+  color: var(--color-neutral-500);
+  margin-top: 1px;
+  flex: none;
+}
+.exd-sparse p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--color-neutral-400);
+}
+.exd-note {
+  font-size: 10px;
+  color: var(--color-neutral-600);
+}
+.exd-instr-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.exd-instr {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-neutral-300);
+  line-height: 1.5;
+}
+.exd-instr-n {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  font-size: 10px;
+  display: grid;
+  place-items: center;
+}
+.exd-tiles.n2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.exd-tiles.n4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.exd.desktop .exd-tiles.n4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.exd-avail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--color-ok);
+  margin-top: 10px;
+}
+.exd-avail .ui-icon {
+  font-size: 13px;
+}
+.exd-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.exd-video.none .exd-house .ui-icon {
+  font-size: 46px;
+  color: var(--color-neutral-700);
+}
+/* Anatomical muscle map (front + back) on the exercise detail. */
+.bodymap {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+.bodymap > svg {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Unified library shell — phone hides the rail (filters live in the sheet) and
+   shows a funnel button beside the search. */
+.exl-funnel {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.exl-funnel .ui-icon {
+  font-size: 16px;
+}
+.exl-funnel.on {
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+@media (max-width: 719.98px) {
+  .exl-rail {
+    display: none;
+  }
+  .exl-main {
+    padding-left: 0;
+  }
+  .exl-head h2 {
+    font-size: 24px;
+  }
+  .exl-new {
+    min-height: 44px;
+  }
 }

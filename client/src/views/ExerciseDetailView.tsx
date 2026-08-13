@@ -1,25 +1,34 @@
 /**
- * Exercise detail (design DET-1 phone, DET-2 web; MEDIA-1…5).
+ * Exercise detail (design RICH / SPARSE; MEDIA-1…5).
  *
- * Video is the header — muted, tap-to-play, never autoplaying with sound
- * (AC-DET-01). The provider is named on a bar directly beneath it with an
- * Open link to the source (AC-DET-02). Form stills render as an ordered
- * set-up → bottom → drive → lockout sequence (AC-DET-03). Cues are the app's
- * own copy; muscles and equipment follow the chip grammar (AC-DET-04). Desktop
- * is media-left / text-right, phone stacks (AC-DET-05). "Add to today's
- * session" is the primary action — the page is a route into logging, not a
- * dead end (AC-DET-06).
+ * The page reads the full record and degrades gracefully. A base lift (RICH)
+ * shows classification badges (category/mechanic/force/level/equipment), the
+ * muscle silhouette with primary in brass and secondary in grey, the public-
+ * domain form photos (landscape), numbered instructions and the derived
+ * history block. A curated-only lift (SPARSE) drops every absent block — no
+ * dash, no empty card — keeps name + primary muscle + equipment, shows a single
+ * quiet explainer, and still renders history (it is derived from logs, not the
+ * base record). The media header degrades video → form photo → barbell glyph;
+ * a greyed player never appears. "Add to today's session" makes the page a
+ * route into logging, not a dead end (AC-DET-06).
  */
-import { canonicalExerciseName, muscleInfoByName, type MuscleGroup } from '../data/exercises';
-import { equipmentIconName, equipmentLabel } from '../components/Muscle';
+import { useMemo } from 'react';
+import {
+  canonicalExerciseName,
+  muscleInfoByName,
+  richExerciseByName,
+  type MuscleGroup,
+} from '../data/exercises';
+import { equipmentIconName, equipmentLabel, MuscleBodyFigure } from '../components/Muscle';
 import { clipLen, clipSourceUrl, exerciseMedia } from '../data/exerciseMedia';
-import { addExercise, recordWeight, startWorkout, topSet, useStore } from '../store';
+import { addExercise, est1rm, recordWeight, startWorkout, topSet, useStore } from '../store';
 import { useT } from '../i18n';
 import { Icon, useIsDesktop } from '../ui';
-import { HouseGraphic } from '../components/HouseGraphic';
 import type { Shell } from '../App';
 
-const STILL_KEYS = ['stillSetup', 'stillBottom', 'stillDrive', 'stillLockout'] as const;
+const hideBroken = (e: { currentTarget: HTMLImageElement }) => {
+  e.currentTarget.style.display = 'none';
+};
 
 export function ExerciseDetailView({
   name,
@@ -36,12 +45,25 @@ export function ExerciseDetailView({
 
   const canonical = canonicalExerciseName(name);
   const info = muscleInfoByName(canonical);
+  const rich = richExerciseByName(canonical);
   const media = exerciseMedia(canonical);
-  const primary: MuscleGroup | null = info && info.primary !== 'cardio' ? info.primary : null;
-  const secondary = info?.secondary ?? [];
-  const equipment = info?.equipment ?? null;
+  const curated = !rich;
 
-  // History (AC-DET reuses the same figures as the history screen).
+  const equipment = info?.equipment ?? rich?.equipment ?? null;
+  const category = rich?.category ?? null;
+  const mechanic = rich?.mechanic ?? null;
+  const force = rich?.force ?? null;
+  const level = rich?.level ?? null;
+
+  const infoPrimary: MuscleGroup | null = info && info.primary !== 'cardio' ? info.primary : null;
+  const primaries: MuscleGroup[] = (
+    rich?.primaryMuscles?.length ? rich.primaryMuscles : infoPrimary ? [infoPrimary] : []
+  ).filter((m) => m !== 'cardio');
+  const secondaries: MuscleGroup[] = (
+    rich?.secondaryMuscles?.length ? rich.secondaryMuscles : (info?.secondary ?? [])
+  ).filter((m) => m !== 'cardio');
+
+  // History (derived from logs — independent of the base record).
   const sessions = store.workouts
     .filter((w) => w.finishedAt !== null)
     .map((w) => {
@@ -54,6 +76,20 @@ export function ExerciseDetailView({
     .filter((x): x is NonNullable<typeof x> => x !== null);
   const record = recordWeight(canonical);
   const lastTop = sessions[0]?.top.weight ?? 0;
+  const est = sessions.reduce((max, s) => Math.max(max, est1rm(s.top.weight ?? 0, s.top.reps)), 0);
+
+  const homeGym = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const w of store.workouts)
+      if (w.gymId) counts.set(w.gymId, (counts.get(w.gymId) ?? 0) + 1);
+    return (
+      [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([id]) => store.gyms.find((g) => g.id === id))
+        .find((g) => !!g?.inventory && g.inventory.length > 0) ?? null
+    );
+  }, [store.workouts, store.gyms]);
+  const available = !!equipment && !!homeGym?.inventory && homeGym.inventory.includes(equipment);
 
   function addToSession() {
     const open = store.workouts.find((w) => w.finishedAt === null);
@@ -64,69 +100,123 @@ export function ExerciseDetailView({
 
   const openSource = () => window.open(clipSourceUrl(canonical), '_blank', 'noopener');
 
-  // --- shared pieces --------------------------------------------------------
-  const chips = (
-    <div className="exd-chips">
-      {primary && <span className="exd-chip primary">{t.muscleGroups[primary]}</span>}
-      {secondary.map((m) => (
-        <span key={m} className="exd-chip">
-          {t.muscleGroups[m]}
-        </span>
-      ))}
+  // --- classification badges (RICH) / equipment-only (SPARSE) ---------------
+  const badgesRow = (
+    <div className="exd-badges">
+      {category && <span className="badge b-cat">{t.categoryNames[category]}</span>}
+      {mechanic && <span className="badge b-mech">{t.mechanicNames[mechanic]}</span>}
+      {force && <span className="badge b-mech">{t.forceNames[force]}</span>}
+      {level && <span className="badge b-mech">{t.levelNames[level]}</span>}
       {equipment && (
-        <span className="exd-chip">
+        <span className="badge b-eq">
           <Icon name={equipmentIconName(equipment)} />
-          {equipmentLabel(equipment)}
+          {t.equipmentNames[equipment]}
         </span>
       )}
     </div>
   );
 
-  const cues = media.cues && media.cues.length > 0 && (
+  const musclesSection = (primaries.length > 0 || secondaries.length > 0) && (
     <div className="exd-section">
-      <h6 className="exd-label">{t.cuesLabel}</h6>
-      <div className="exd-cues">
-        {media.cues.map((c, i) => (
-          <div className="exd-cue" key={i}>
-            <Icon name="circle" weight="fill" className="exd-bullet" />
-            <span>{c}</span>
+      <h6 className="exd-label">{t.musclesWorkedLabel}</h6>
+      <div className="exd-muscles-row">
+        <MuscleBodyFigure
+          primary={primaries}
+          secondary={secondaries}
+          width={isDesktop ? 148 : 128}
+        />
+        <div className="exd-mcols">
+          {primaries.length > 0 && (
+            <div className="exd-mrow-badges">
+              {primaries.map((m) => (
+                <span key={m} className="badge b-mus-pri">
+                  {t.muscleGroups[m]}
+                </span>
+              ))}
+            </div>
+          )}
+          {secondaries.length > 0 && (
+            <div className="exd-mrow-badges">
+              {secondaries.map((m) => (
+                <span key={m} className="badge b-mus">
+                  {t.muscleGroups[m]}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="exd-mlegend">{curated ? t.sparseMusclesNote : t.musclesLegend}</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const instructions = rich && rich.instructions.length > 0 && (
+    <div className="exd-section">
+      <h6 className="exd-label">{t.instructionsLabel}</h6>
+      <div className="exd-instr-list">
+        {rich.instructions.map((step, i) => (
+          <div className="exd-instr" key={i}>
+            <span className="exd-instr-n">{i + 1}</span>
+            <span>{step}</span>
           </div>
         ))}
       </div>
     </div>
   );
 
-  const historyTiles = (
+  const formPhotos = rich && rich.images.length > 0 && (
     <div className="exd-section">
-      <h6 className="exd-label">{t.yourHistory}</h6>
-      <div className="exd-tiles">
-        <div className="exd-tile">
-          <div className="exd-tile-num ok">{record > 0 ? record : '—'}</div>
-          <div className="exd-tile-label">{t.recordKg}</div>
-        </div>
-        <div className="exd-tile">
-          <div className="exd-tile-num">{lastTop > 0 ? lastTop : '—'}</div>
-          <div className="exd-tile-label">{t.lastTop}</div>
-        </div>
-        <div className="exd-tile">
-          <div className="exd-tile-num">{sessions.length}</div>
-          <div className="exd-tile-label">{t.detailSessions}</div>
-        </div>
+      <h6 className="exd-label">{t.formPhotosLabel}</h6>
+      <div className={`exd-formphotos${rich.images.length === 1 ? ' single' : ''}`}>
+        {rich.images.slice(0, 2).map((src, i) => (
+          <div className="exd-formphoto" key={src}>
+            <img src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} onError={hideBroken} />
+            <span className="exd-photo-label">{i === 0 ? t.photoStart : t.photoEnd}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 
-  const stillTiles = (count: number, big: boolean) => (
-    <div className={`exd-stills${big ? ' big' : ''}`}>
-      {STILL_KEYS.slice(0, count).map((k, i) => (
-        <div
-          key={k}
-          className="exd-still"
-          style={{ background: i % 2 === 1 ? 'var(--frame2)' : 'var(--frame)' }}
-        >
-          <span className="exd-still-label">{t[k]}</span>
+  const sparseExplainer = curated && (
+    <div className="exd-sparse">
+      <Icon name="info" />
+      <p>{t.sparseExplainer}</p>
+    </div>
+  );
+
+  const historySection = (
+    <div className="exd-section">
+      <h6 className="exd-label">{t.detailFromHistory}</h6>
+      <div className={`exd-tiles ${curated ? 'n2' : 'n4'}`}>
+        <div className="exd-tile">
+          <div className="exd-tile-num ok">{record > 0 ? record : '—'}</div>
+          <div className="exd-tile-label">{t.recordKg}</div>
         </div>
-      ))}
+        {!curated && (
+          <div className="exd-tile">
+            <div className="exd-tile-num">{est > 0 ? est : '—'}</div>
+            <div className="exd-tile-label">{t.est1rmLabel}</div>
+          </div>
+        )}
+        <div className="exd-tile">
+          <div className="exd-tile-num">{sessions.length}</div>
+          <div className="exd-tile-label">{t.detailSessions}</div>
+        </div>
+        {!curated && (
+          <div className="exd-tile">
+            <div className="exd-tile-num">{lastTop > 0 ? lastTop : '—'}</div>
+            <div className="exd-tile-label">{t.lastTop}</div>
+          </div>
+        )}
+      </div>
+      {curated && <div className="exd-note">{t.historyDerivedNote}</div>}
+      {!curated && available && equipment && (
+        <div className="exd-avail">
+          <Icon name="check-circle" weight="bold" />
+          {t.availableAtGymLine(equipmentLabel(equipment))}
+        </div>
+      )}
     </div>
   );
 
@@ -143,40 +233,57 @@ export function ExerciseDetailView({
     </div>
   );
 
-  // --- video / media header -------------------------------------------------
+  // --- media header: video → form photo → barbell glyph ---------------------
   const renderVideo = (ratio: '16-9' | 'phone') => {
-    if (media.kind === 'none') {
+    if (media.kind === 'clip') {
+      const len = media.clip ? clipLen(media.clip.lenSec) : '';
       return (
-        <div className={`exd-video none ${ratio}`}>
-          <div className="exd-house">
-            <HouseGraphic size={ratio === '16-9' ? 160 : 120} />
-          </div>
+        <button
+          className={`exd-video clip ${ratio}`}
+          onClick={openSource}
+          aria-label={t.openAction}
+        >
+          <span className="exd-playbtn">
+            <Icon name="play" weight="fill" />
+          </span>
+          <span className="exd-scrub">
+            <span className="exd-time">0:00</span>
+            <span className="exd-track">
+              <span className="exd-fill" />
+            </span>
+            <span className="exd-time">{len}</span>
+            <Icon name="speaker-simple-slash" className="exd-mute" />
+          </span>
+        </button>
+      );
+    }
+    if (rich?.images[0]) {
+      return (
+        <div className={`exd-video photo ${ratio}`}>
+          <img src={rich.images[0]} alt="" onError={hideBroken} />
         </div>
       );
     }
-    if (media.kind === 'stills') {
-      // Stills promoted to the header — no play button (AC-MEDIA-02).
-      return <div className={`exd-video stills ${ratio}`}>{stillTiles(4, true)}</div>;
-    }
-    const len = media.clip ? clipLen(media.clip.lenSec) : '';
     return (
-      <button className={`exd-video clip ${ratio}`} onClick={openSource} aria-label={t.openAction}>
-        <span className="exd-playbtn">
-          <Icon name="play" weight="fill" />
-        </span>
-        <span className="exd-scrub">
-          <span className="exd-time">0:00</span>
-          <span className="exd-track">
-            <span className="exd-fill" />
-          </span>
-          <span className="exd-time">{len}</span>
-          <Icon name="speaker-simple-slash" className="exd-mute" />
-        </span>
-      </button>
+      <div className={`exd-video none ${ratio}`}>
+        <div className="exd-house">
+          <Icon name="barbell" />
+        </div>
+      </div>
     );
   };
 
-  // --- phone (DET-1) --------------------------------------------------------
+  const titleRow = (lg: boolean) => (
+    <div>
+      <div className="exd-title-row">
+        <h2 className={`exd-title${lg ? ' lg' : ''}`}>{canonical}</h2>
+        {curated && <span className="badge b-ghost">{t.libCuratedTag}</span>}
+      </div>
+      {badgesRow}
+    </div>
+  );
+
+  // --- phone (RICH-1 / SPARSE-1) --------------------------------------------
   if (!isDesktop) {
     return (
       <div className="screen exd">
@@ -188,19 +295,12 @@ export function ExerciseDetailView({
         </div>
         {providerBar}
         <div className="exd-body">
-          <div>
-            <h2 className="exd-title">{canonical}</h2>
-            {chips}
-          </div>
-          {media.kind === 'clip' && media.stills > 0 && (
-            <div className="exd-section">
-              <h6 className="exd-label">{t.formSequence}</h6>
-              {stillTiles(3, false)}
-              <div className="exd-stills-cap">{t.stillsMediaCaption}</div>
-            </div>
-          )}
-          {cues}
-          {historyTiles}
+          {titleRow(false)}
+          {musclesSection}
+          {sparseExplainer}
+          {instructions}
+          {formPhotos}
+          {historySection}
           <button className="btn btn-primary exd-add" onClick={addToSession}>
             <Icon name="plus" />
             {t.addToTodaySession}
@@ -210,7 +310,7 @@ export function ExerciseDetailView({
     );
   }
 
-  // --- desktop (DET-2) — media left, text right ----------------------------
+  // --- desktop (RICH-2 / SPARSE) — media left, text right -------------------
   return (
     <div className="screen exd desktop">
       <button className="back exd-back-top" onClick={onClose} aria-label={t.backAction}>
@@ -218,23 +318,19 @@ export function ExerciseDetailView({
       </button>
       <div className="exd-panes">
         <div className="exd-left">
-          {renderVideo('16-9')}
-          {providerBar}
-          {media.stills > 0 && (
-            <div className="exd-section">
-              <h6 className="exd-label">{t.formStillsLabel}</h6>
-              {stillTiles(4, false)}
-            </div>
-          )}
-        </div>
-        <div className="exd-right">
           <div className="exd-crumb">
             {t.exercisesTabLabel} / {canonical}
           </div>
-          <h2 className="exd-title lg">{canonical}</h2>
-          {chips}
-          {cues}
-          {historyTiles}
+          {renderVideo('16-9')}
+          {providerBar}
+          {formPhotos}
+        </div>
+        <div className="exd-right">
+          {titleRow(true)}
+          {musclesSection}
+          {sparseExplainer}
+          {instructions}
+          {historySection}
           <div className="exd-actions">
             <button
               className="btn btn-secondary"
@@ -243,6 +339,7 @@ export function ExerciseDetailView({
               {t.fullHistory}
             </button>
             <button className="btn btn-primary" onClick={addToSession}>
+              <Icon name="plus" />
               {t.addToTodaySession}
             </button>
           </div>
