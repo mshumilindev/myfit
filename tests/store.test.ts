@@ -511,6 +511,24 @@ describe('EQ set and exercise volume', () => {
     expect(setRepsTotal(dropSet)).toBe(15);
   });
 
+  it('counts bodyweight sets as zero external load in total volume', () => {
+    expect(setVolumeKg(set({ reps: 10, weight: null }))).toBe(0);
+    expect(setVolumeKg(set({ reps: 10, weight: 0 }))).toBe(0);
+    expect(
+      setVolumeKg(
+        set({
+          reps: 8,
+          weight: 0,
+          type: 'drop',
+          drops: [
+            { reps: 6, weight: null },
+            { reps: 4, weight: 5 },
+          ],
+        }),
+      ),
+    ).toBe(20);
+  });
+
   it('applies the per-hand factor to a whole exercise and drops warm-up sets', () => {
     const curl = ex({
       name: 'Dumbbell Curl',

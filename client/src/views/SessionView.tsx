@@ -2949,7 +2949,7 @@ function SetEditorSheet(props: {
         : {
             reps,
             // Bodyweight, whether toggled or just left at 0, is stored as null
-            // so it reads as "BW" and is valued at the member's bodyweight.
+            // so it reads as "BW" while total volume keeps external load at 0.
             weight: bw || weight === 0 ? null : weight,
             isWarmup: type === 'warmup',
             type,

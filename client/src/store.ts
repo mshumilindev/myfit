@@ -157,24 +157,10 @@ export function setDrops(s: SetEntry): DropEntry[] {
 export function setRepsTotal(s: SetEntry): number {
   return s.reps + setDrops(s).reduce((n, d) => n + d.reps, 0);
 }
-/**
- * Latest logged bodyweight in kg, or 0 if the user has never weighed in.
- * Bodyweight sets carry no external load (weight is BW / null / 0); to count
- * them in volume summaries we value each rep at the member's most recent
- * bodyweight — the single figure they maintain in their profile.
- */
-export function bodyweightKg(): number {
-  let latest: { at: number; weight: number } | undefined;
-  for (const w of state.bodyMetrics?.weights ?? []) if (!latest || w.at > latest.at) latest = w;
-  return latest?.weight ?? 0;
-}
-
 export function setVolumeKg(s: SetEntry): number {
   if (setTypeOf(s) === 'warmup') return 0;
-  // A bodyweight set is stored as null (or a leftover 0); value it at the
-  // member's latest bodyweight so bodyweight work still counts toward volume.
-  const bw = bodyweightKg();
-  const load = (w: number | null): number => (w == null || w === 0 ? bw : w);
+  // Null/0 means bodyweight in the UI, but contributes no external load to total volume.
+  const load = (w: number | null): number => w ?? 0;
   return load(s.weight) * s.reps + setDrops(s).reduce((v, d) => v + load(d.weight) * d.reps, 0);
 }
 
