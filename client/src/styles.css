@@ -16204,12 +16204,18 @@ button.badge {
    search, subtabs and grid together.
    ========================================================================== */
 @media (max-width: 719.98px) {
+  .screen.programs-author-page.programs-has-tabs,
+  .screen.exd {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .programs-author-page.programs-has-tabs > .programs-top {
-    padding: 12px 16px;
+    padding: 12px 0;
   }
 
   .programs-author-page .exg-tabwrap {
-    padding: var(--space-4) 16px calc(var(--space-6) + env(safe-area-inset-bottom));
+    padding: var(--space-4) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
 
