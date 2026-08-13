@@ -16,7 +16,7 @@
     "@fontsource/inter": "^5.2.5",
     "@phosphor-icons/react": "^2.1.10",
     "body-muscles": "^1.0.0",
-    "firebase": "^11.3.0",
+    "firebase": "^12.17.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
