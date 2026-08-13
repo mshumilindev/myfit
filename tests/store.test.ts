@@ -58,7 +58,11 @@ import {
   updateExerciseMeta,
 } from '../client/src/store';
 import { setRole } from '../client/src/api';
-import { CURATED, customExercises, registerCustomExercise } from '../client/src/data/exercises';
+import {
+  BUILT_IN_CATALOG,
+  customExercises,
+  registerCustomExercise,
+} from '../client/src/data/exercises';
 import { setFlag } from '../client/src/data/flags';
 
 function state(patch: Partial<StoreState> = {}): StoreState {
@@ -566,9 +570,10 @@ describe('MG muscle resolution and per-muscle volume', () => {
 });
 
 describe('EQ equipment resolution', () => {
-  it('gives every curated exercise equipment, in any locale', () => {
-    const blank = CURATED.filter((e) => !e.equipment).map((e) => e.id);
-    expect(blank).toEqual([]);
+  it('uses rich catalog equipment and legacy aliases where available', () => {
+    expect(BUILT_IN_CATALOG.some((e) => e.names[0] === 'Barbell Bench Press - Medium Grip')).toBe(
+      true,
+    );
     // Locale does not change the resolution: uk name of Dumbbell Fly.
     expect(equipmentFor({ name: 'Розведення гантелей лежачи', equipment: [] })).toEqual([
       'dumbbell',

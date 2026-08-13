@@ -128,6 +128,28 @@ type NavLabels = Pick<
   'today' | 'progress' | 'gyms' | 'progTitle' | 'adminPeople' | 'trClientsTab' | 'navMe'
 >;
 type NavItem = { id: Tab; icon: string; label: string };
+const EDGE_BACK_START_PX = 28;
+const EDGE_BACK_LOCK_PX = 18;
+const EDGE_BACK_TRIGGER_PX = 72;
+const EDGE_BACK_MAX_VERTICAL_PX = 52;
+const EDGE_BACK_DOMINANCE = 1.8;
+const EDGE_BACK_EXCLUDE_SELECTOR = [
+  'a',
+  'button',
+  'input',
+  'select',
+  'textarea',
+  '[contenteditable="true"]',
+  '[role="button"]',
+  '[data-no-edge-swipe]',
+  '.tabbar',
+  '.rail',
+  '.sheet',
+  '.scrim',
+  '.dialog-scrim',
+  '.exd-lightbox',
+  '.toast-holder',
+].join(',');
 
 function defaultTabForRole(role: NavRole): Tab {
   return role === 'trainer' ? 'people' : 'today';
@@ -391,6 +413,20 @@ export function App() {
   // library and detail are always available (no longer flag-gated).
   const overlayBlocked = overlay?.screen === 'settings' && role !== 'admin';
   const activeOverlay = overlayBlocked ? null : overlay;
+  const canEdgeSwipeBack =
+    authed &&
+    !joinToken &&
+    !desktopRail &&
+    (activeOverlay !== null || (effectiveTab === 'programs' && programsExercises));
+  const edgeSwipeBack = () => {
+    if (activeOverlay !== null) {
+      closeOverlay();
+      return;
+    }
+    if (effectiveTab === 'programs' && programsExercises) setProgramsExercises(false);
+  };
+
+  useEdgeSwipeBack(canEdgeSwipeBack, edgeSwipeBack);
 
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
@@ -644,6 +680,108 @@ function useDesktopRail(): boolean {
   }, []);
 
   return matches;
+}
+
+function isEdgeSwipeExcluded(target: EventTarget | null): boolean {
+  if (typeof Element === 'undefined' || !(target instanceof Element)) return false;
+  return target.closest(EDGE_BACK_EXCLUDE_SELECTOR) !== null;
+}
+
+function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
+  const onBackRef = useRef(onBack);
+
+  useEffect(() => {
+    onBackRef.current = onBack;
+  }, [onBack]);
+
+  useEffect(() => {
+    if (!enabled || typeof window === 'undefined') return;
+
+    let startX = 0;
+    let startY = 0;
+    let startTime = 0;
+    let tracking = false;
+    let locked = false;
+    let cancelled = false;
+
+    const reset = () => {
+      tracking = false;
+      locked = false;
+      cancelled = false;
+    };
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1 || isEdgeSwipeExcluded(event.target)) return;
+      const touch = event.touches[0];
+      if (!touch || touch.clientX > EDGE_BACK_START_PX) return;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      startTime = Date.now();
+      tracking = true;
+      locked = false;
+      cancelled = false;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (!tracking || cancelled || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      if (!touch) return;
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      if (dx < -8) {
+        reset();
+        return;
+      }
+      if (!locked) {
+        if (absY > 10 && absY > absX) {
+          cancelled = true;
+          tracking = false;
+          return;
+        }
+        if (dx > EDGE_BACK_LOCK_PX && absX > absY * EDGE_BACK_DOMINANCE) locked = true;
+      }
+      if (locked && event.cancelable) event.preventDefault();
+    };
+
+    const onTouchEnd = (event: TouchEvent) => {
+      if (!tracking || cancelled) {
+        reset();
+        return;
+      }
+      const touch = event.changedTouches[0];
+      if (!touch) {
+        reset();
+        return;
+      }
+      const dx = touch.clientX - startX;
+      const absY = Math.abs(touch.clientY - startY);
+      const elapsed = Date.now() - startTime;
+      const intentional =
+        locked &&
+        dx >= EDGE_BACK_TRIGGER_PX &&
+        absY <= EDGE_BACK_MAX_VERTICAL_PX &&
+        dx > absY * EDGE_BACK_DOMINANCE;
+      const fastIntentional = dx >= 52 && elapsed < 280 && dx > absY * 2;
+
+      if (intentional || fastIntentional) onBackRef.current();
+      reset();
+    };
+
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', reset, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', reset);
+    };
+  }, [enabled]);
 }
 
 /**

@@ -2,12 +2,10 @@
  * Exercise gallery (design LIB-1 phone list, LIB-2 web filter-rail + grid).
  *
  * Web is a left filter rail (muscle group · category · mechanic/force · level ·
- * equipment + a "has video only" toggle) beside a paginated 4-column card grid;
+ * equipment) beside a paginated 4-column card grid;
  * phone is a search bar with a filter sheet over a list of rows. Every card
- * previews its media — a video poster with play glyph + length when a clip
- * exists, the real form photo (public-domain, landscape) when the base record
- * has one, else a barbell glyph; a curated-only lift (no base classification)
- * dims, drops its badges and says "no classification" (AC-2.5). Classification
+ * previews its media — the real form photo (public-domain, landscape) when the
+ * base record has one, else a barbell glyph. Classification
  * badges use the shared token grammar (b-cat/b-mech/b-eq/b-mus). The catalogue
  * is bundled static data — pagination + lazy images keep the DOM and image
  * bandwidth small; nothing here touches Firestore. A card opens the detail.
@@ -28,7 +26,6 @@ import {
   type MuscleGroup,
 } from '../data/exercises';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
-import { clipLen, exerciseMedia } from '../data/exerciseMedia';
 import {
   deleteCatalogExercise,
   knownExercises,
@@ -44,7 +41,7 @@ import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { equipmentIconName, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import type { Shell } from '../App';
 
-type MediaKind = 'clip' | 'photo' | 'none';
+type MediaKind = 'photo' | 'none';
 
 interface Row {
   key: string;
@@ -57,10 +54,7 @@ interface Row {
   force: ExerciseForce | null;
   level: ExerciseLevel | null;
   kind: MediaKind;
-  lenSec: number;
   image: string | null;
-  /** No base classification record — dimmed, badge-less (design AC-2.5). */
-  curated: boolean;
   /** Present on My-exercises rows — the source record for edit/delete. */
   mineRef?: MyExercise;
 }
@@ -106,9 +100,8 @@ export interface GalleryState {
   mechanic?: ExerciseMechanic;
   force?: ExerciseForce;
   level?: ExerciseLevel;
-  hasVideo: boolean;
 }
-const DEFAULT_STATE: GalleryState = { q: '', hasVideo: false };
+const DEFAULT_STATE: GalleryState = { q: '' };
 
 export function ExerciseGallery({
   shell,
@@ -160,7 +153,6 @@ export function ExerciseGallery({
     const out: Row[] = [];
     const seen = new Set<string>();
     for (const c of BUILT_IN_CATALOG) {
-      const m = exerciseMedia(c.id);
       const rich = richExerciseByName(c.names[0]);
       const image = rich?.images?.[0] ?? null;
       out.push({
@@ -173,17 +165,14 @@ export function ExerciseGallery({
         mechanic: rich?.mechanic ?? null,
         force: rich?.force ?? null,
         level: rich?.level ?? null,
-        kind: m.kind === 'clip' ? 'clip' : image ? 'photo' : 'none',
-        lenSec: m.clip?.lenSec ?? 0,
+        kind: image ? 'photo' : 'none',
         image,
-        curated: !rich,
       });
       for (const n of c.names) seen.add(n.toLowerCase());
     }
     for (const k of knownExercises()) {
       if (seen.has(k.name.toLowerCase())) continue;
       const info = muscleInfoByName(k.name);
-      const m = exerciseMedia(k.name);
       const rich = richExerciseByName(k.name);
       const image = rich?.images?.[0] ?? null;
       out.push({
@@ -196,10 +185,8 @@ export function ExerciseGallery({
         mechanic: rich?.mechanic ?? null,
         force: rich?.force ?? null,
         level: rich?.level ?? null,
-        kind: m.kind === 'clip' ? 'clip' : image ? 'photo' : 'none',
-        lenSec: m.clip?.lenSec ?? 0,
+        kind: image ? 'photo' : 'none',
         image,
-        curated: !rich,
       });
     }
     return out;
@@ -217,15 +204,14 @@ export function ExerciseGallery({
             (s.category === undefined || r.category === s.category) &&
             (s.mechanic === undefined || r.mechanic === s.mechanic) &&
             (s.force === undefined || r.force === s.force) &&
-            (s.level === undefined || r.level === s.level) &&
-            (!s.hasVideo || r.kind === 'clip'),
+            (s.level === undefined || r.level === s.level),
         )
         .sort((a, b) => a.name.localeCompare(b.name)),
-    [rows, needle, s.muscle, s.equip, s.category, s.mechanic, s.force, s.level, s.hasVideo],
+    [rows, needle, s.muscle, s.equip, s.category, s.mechanic, s.force, s.level],
   );
 
   const total = rows.length;
-  const richCount = rows.filter((r) => !r.curated).length;
+  const richCount = rows.filter((r) => r.image).length;
 
   // My exercises share the same shell/filters; classification fields are null,
   // so only name + muscle + equipment filter them.
@@ -241,9 +227,7 @@ export function ExerciseGallery({
     force: null,
     level: null,
     kind: 'none',
-    lenSec: 0,
     image: null,
-    curated: true,
     mineRef: e,
   }));
   const mineMatches = mineRows
@@ -309,9 +293,6 @@ export function ExerciseGallery({
       label: t.levelNames[s.level],
       clear: () => set({ level: undefined }),
     });
-  if (s.hasVideo)
-    active.push({ key: 'hv', label: t.libHasVideoOnly, clear: () => set({ hasVideo: false }) });
-
   const activeChips =
     active.length > 0 ? (
       <div className="exl-active">
@@ -416,29 +397,11 @@ export function ExerciseGallery({
     </>
   );
 
-  const videoToggle = (
-    <button
-      className={`exl-toggle${s.hasVideo ? ' on' : ''}`}
-      onClick={() => set({ hasVideo: !s.hasVideo })}
-    >
-      <span className="exl-switch" />
-      {t.libHasVideoOnly}
-    </button>
-  );
-
   // --- media thumbnail (shared card + row) ----------------------------------
   const media = (r: Row, i: number, cls: 'exl-media' | 'exl-mthumb') => {
-    if (r.kind === 'clip') {
-      return (
-        <div className={`${cls} clip${i % 2 === 1 ? ' alt' : ''}`}>
-          <Icon name="play-circle" weight="fill" className="exl-play" />
-          {r.lenSec > 0 && <span className="exl-len">{clipLen(r.lenSec)}</span>}
-        </div>
-      );
-    }
     if (r.kind === 'photo') {
       return (
-        <div className={`${cls} photo`}>
+        <div className={`${cls} photo${i % 2 === 1 ? ' alt' : ''}`}>
           {r.image && (
             <img
               src={r.image}
@@ -499,28 +462,18 @@ export function ExerciseGallery({
     ) : null;
 
   const card = (r: Row, i: number) => (
-    <button
-      key={r.key}
-      className={`exl-card${r.curated ? ' curated' : ''}`}
-      onClick={() => open(r)}
-    >
+    <button key={r.key} className="exl-card" onClick={() => open(r)}>
       {media(r, i, 'exl-media')}
       <div className="exl-cardbody">
         <div className="exl-cardname">
           <span>{r.name}</span>
-          {r.curated && <span className="badge b-ghost sm">{t.libCuratedTag}</span>}
         </div>
-        <div className="exl-cardmus">
-          {musclesText(r)}
-          {r.curated ? ` · ${t.libNoClassInline}` : ''}
-        </div>
+        <div className="exl-cardmus">{musclesText(r)}</div>
         {/* Always rendered, even when empty: it reserves its own row so a card
             without badges is exactly as tall as one with them. */}
         <div className="exl-cardbadges">
-          {!r.curated && r.mechanic && (
-            <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>
-          )}
-          {!r.curated && r.equipment && (
+          {r.mechanic && <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>}
+          {r.equipment && (
             <span className="badge b-eq sm">
               <Icon name={equipmentIconName(r.equipment)} />
               {t.equipmentNames[r.equipment]}
@@ -532,34 +485,23 @@ export function ExerciseGallery({
   );
 
   const listRow = (r: Row, i: number) => (
-    <button
-      key={r.key}
-      className={`exl-mrow${r.curated ? ' curated' : ''}`}
-      onClick={() => open(r)}
-    >
+    <button key={r.key} className="exl-mrow" onClick={() => open(r)}>
       {media(r, i, 'exl-mthumb')}
       <div className="exl-mbody">
         <div className="exl-mname">
           <span>{r.name}</span>
-          {r.curated && <span className="badge b-ghost sm">{t.libCuratedTag}</span>}
         </div>
         <div className="exl-mmus">{musclesText(r)}</div>
-        {r.curated ? (
-          <div className="exl-mnote">
-            {(r.equipment ? `${t.equipmentNames[r.equipment]} · ` : '') + t.libNoClassInline}
-          </div>
-        ) : (
-          <div className="exl-mbadges">
-            {r.mechanic && <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>}
-            {r.force && <span className="badge b-mus sm">{t.forceNames[r.force]}</span>}
-            {r.equipment && (
-              <span className="badge b-eq sm">
-                <Icon name={equipmentIconName(r.equipment)} />
-                {t.equipmentNames[r.equipment]}
-              </span>
-            )}
-          </div>
-        )}
+        <div className="exl-mbadges">
+          {r.mechanic && <span className="badge b-mech sm">{t.mechanicNames[r.mechanic]}</span>}
+          {r.force && <span className="badge b-mus sm">{t.forceNames[r.force]}</span>}
+          {r.equipment && (
+            <span className="badge b-eq sm">
+              <Icon name={equipmentIconName(r.equipment)} />
+              {t.equipmentNames[r.equipment]}
+            </span>
+          )}
+        </div>
       </div>
     </button>
   );
@@ -685,7 +627,6 @@ export function ExerciseGallery({
         <div className="exl-rail-title">{t.libFiltersLabel}</div>
         {isDesktop && searchField}
         {groups}
-        {videoToggle}
       </aside>
       <div className="exl-main">
         <div className="exl-head">
@@ -733,10 +674,7 @@ export function ExerciseGallery({
             </button>
             <span className="t">{t.libFiltersLabel}</span>
           </div>
-          <div className="exl-fsheet">
-            {groups}
-            {videoToggle}
-          </div>
+          <div className="exl-fsheet">{groups}</div>
         </Sheet>
       )}
 

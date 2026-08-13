@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, access, readdir, rm } from 'node:fs/promises';
+import { mkdir, writeFile, access, readdir, rm, rename } from 'node:fs/promises';
 import path from 'node:path';
 import prettier from 'prettier';
 
@@ -6,7 +6,6 @@ const SOURCE_URL =
   'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json';
 const IMAGE_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
 const ROOT = process.cwd();
-const EXERCISES_TS = path.join(ROOT, 'client/src/data/exercises.ts');
 const OUT_JSON = path.join(ROOT, 'client/src/data/exercises.rich.json');
 const OUT_IMAGES = path.join(ROOT, 'client/public/exercise-img');
 
@@ -57,23 +56,6 @@ const VALID_CATEGORIES = new Set([
   'cardio',
   'olympic weightlifting',
 ]);
-
-function decodeStringLiteral(raw) {
-  return Function(`"use strict"; return (${raw});`)();
-}
-
-async function curatedNameToId() {
-  const src = await readFile(EXERCISES_TS, 'utf8');
-  const out = new Map();
-  const re =
-    /x\(\s*(["'])(?<id>(?:\\.|(?!\1).)*)\1\s*,\s*(["'])(?<muscle>(?:\\.|(?!\3).)*)\3\s*,\s*(?<name>(["'])(?:\\.|(?!\6).)*\6)\s*\)/gs;
-  for (const m of src.matchAll(re)) {
-    const id = decodeStringLiteral(m.groups.id ? `'${m.groups.id.replace(/'/g, "\\'")}'` : "''");
-    const name = decodeStringLiteral(m.groups.name);
-    if (name) out.set(name.trim().toLowerCase(), id);
-  }
-  return out;
-}
 
 function unique(xs) {
   return [...new Set(xs.filter(Boolean))];
@@ -129,9 +111,27 @@ async function downloadImage(relativePath, localPath) {
   return true;
 }
 
-function normalizeRecord(raw, curated, unmappedMuscles, unmappedEquipment) {
+async function ensureImageDir(id) {
+  await mkdir(OUT_IMAGES, { recursive: true });
+  const wanted = path.join(OUT_IMAGES, id);
+  const entries = await readdir(OUT_IMAGES, { withFileTypes: true });
+  const existing = entries.find(
+    (entry) => entry.isDirectory() && entry.name.toLowerCase() === id.toLowerCase(),
+  );
+  if (existing && existing.name !== id) {
+    const current = path.join(OUT_IMAGES, existing.name);
+    const tmp = path.join(OUT_IMAGES, `${id}.__case_tmp_${Date.now()}`);
+    await rename(current, tmp);
+    await rename(tmp, wanted);
+  } else {
+    await mkdir(wanted, { recursive: true });
+  }
+  return wanted;
+}
+
+function normalizeRecord(raw, unmappedMuscles, unmappedEquipment) {
   const name = String(raw.name ?? '').trim();
-  const id = curated.get(name.toLowerCase()) ?? String(raw.id ?? '').trim();
+  const id = String(raw.id ?? '').trim();
   const category = cleanEnum(raw.category, VALID_CATEGORIES);
   const primaryMuscles = mapMuscles(raw.primaryMuscles, unmappedMuscles);
   const secondaryMuscles = mapMuscles(raw.secondaryMuscles, unmappedMuscles).filter(
@@ -156,7 +156,6 @@ function normalizeRecord(raw, curated, unmappedMuscles, unmappedEquipment) {
 }
 
 async function main() {
-  const curated = await curatedNameToId();
   const unmappedMuscles = new Set();
   const unmappedEquipment = new Set();
 
@@ -170,10 +169,11 @@ async function main() {
   const rich = [];
   const expectedImageDirs = new Set();
   for (const item of raw) {
-    const rec = normalizeRecord(item, curated, unmappedMuscles, unmappedEquipment);
+    const rec = normalizeRecord(item, unmappedMuscles, unmappedEquipment);
     expectedImageDirs.add(rec.id);
+    const imageDir = await ensureImageDir(rec.id);
     for (let i = 0; i < rec._rawImages.length; i++) {
-      const localPath = path.join(OUT_IMAGES, rec.id, `${i}.jpg`);
+      const localPath = path.join(imageDir, `${i}.jpg`);
       const didDownload = await downloadImage(rec._rawImages[i], localPath);
       if (didDownload) downloaded++;
       else reused++;
@@ -203,10 +203,8 @@ async function main() {
   const withMechanic = rich.filter((r) => r.mechanic).length;
   const withInstructions = rich.filter((r) => r.instructions.length > 0).length;
   const withImages = rich.filter((r) => r.images.length > 0).length;
-  const curatedMatches = rich.filter((r) => curated.has(r.name.toLowerCase())).length;
 
   console.log(`rich exercises: ${rich.length}`);
-  console.log(`curated overlaps: ${curatedMatches}`);
   console.log(`with force: ${withForce}`);
   console.log(`with mechanic: ${withMechanic}`);
   console.log(`with instructions: ${withInstructions}`);

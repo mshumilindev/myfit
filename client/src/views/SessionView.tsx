@@ -85,7 +85,7 @@ import {
 } from '../i18n';
 import { ConfirmDialog, Dialog, EmptyState, Icon, Sheet, Switch, useIsDesktop } from '../ui';
 import { LOCALE_IDS, fmtWeekday } from '../i18n';
-import { CURATED, searchCatalog } from '../data/exercises';
+import { BUILT_IN_CATALOG, searchCatalog } from '../data/exercises';
 import { getRole } from '../api';
 
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
@@ -2224,7 +2224,7 @@ function AddExerciseSheet(props: {
       day: TrainingDay | null;
     };
     const inSession = new Set(props.workout.exercises.map((e) => e.name.trim().toLowerCase()));
-    const all: Cand[] = CURATED.filter((c) => c.muscle !== 'cardio')
+    const all: Cand[] = BUILT_IN_CATALOG.filter((c) => c.muscle !== 'cardio')
       .map((c) => ({
         id: c.id,
         name: c.names[li] ?? c.names[0],

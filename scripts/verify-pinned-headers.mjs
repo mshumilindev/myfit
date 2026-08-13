@@ -97,12 +97,12 @@ const CASES = [
     </div>`,
   },
   {
-    name: 'exercise detail — floating back over the video (.exd-back)',
+    name: 'exercise detail — floating back over the media (.exd-back)',
     pinned: '.exd-back',
     fixed: true,
     html: `<div class="screen exd">
       <div class="exd-header">
-        <div class="exd-video phone" style="height:220px"></div>
+        <div class="exd-media phone" style="height:220px"></div>
         <button class="exd-back">B</button>
       </div>
       <div class="exd-body">${rows(40)}</div>

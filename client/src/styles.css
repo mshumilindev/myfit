@@ -12762,7 +12762,7 @@ h6 {
   position: relative;
   flex: none;
 }
-.exd-video {
+.exd-media {
   position: relative;
   display: block;
   width: 100%;
@@ -12770,29 +12770,29 @@ h6 {
   background: var(--frame);
   overflow: hidden;
 }
-.exd-video.phone {
+button.exd-media {
+  padding: 0;
+  cursor: zoom-in;
+}
+.exd-media.phone {
   height: 220px;
 }
-.exd-video.\31 6-9 {
+.exd-media.\31 6-9 {
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-md);
 }
-.exd-video.clip {
-  cursor: pointer;
-  padding: 0;
-}
-.exd-video.photo {
+.exd-media.photo {
   background: var(--color-neutral-900);
 }
-.exd-video.photo img,
+.exd-media.photo img,
 .exg-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.exd-video.none .exd-house,
-.exd-video.stills {
+.exd-media.none .exd-house,
+.exd-media.stills {
   display: grid;
   place-items: center;
   height: 100%;
@@ -12813,79 +12813,6 @@ h6 {
 }
 .exd-back .ui-icon {
   font-size: 17px;
-}
-.exd-playbtn {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  border-radius: 999px;
-  background: rgba(10, 11, 13, 0.5);
-  display: grid;
-  place-items: center;
-  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.5);
-}
-.exd-playbtn .ui-icon {
-  font-size: 24px;
-  color: var(--color-accent-100);
-}
-.exd-scrub {
-  position: absolute;
-  left: var(--gutter);
-  right: var(--gutter);
-  bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-.exd-time {
-  font-size: 10px;
-  color: rgba(233, 234, 236, 0.8);
-  font-variant-numeric: tabular-nums;
-}
-.exd-track {
-  flex: 1;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(233, 234, 236, 0.25);
-}
-.exd-fill {
-  display: block;
-  width: 0;
-  height: 100%;
-  background: var(--color-accent);
-  border-radius: 2px;
-}
-.exd-mute {
-  font-size: 13px;
-  color: rgba(233, 234, 236, 0.8);
-}
-.exd-provider {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px var(--gutter);
-  background: var(--color-surface);
-  box-shadow: 0 1px 0 var(--color-divider);
-}
-.exd-provider .ui-icon {
-  font-size: 14px;
-  color: var(--color-neutral-500);
-}
-.exd-provider-txt {
-  flex: 1;
-  font-size: 10px;
-  color: var(--color-neutral-600);
-}
-.exd-open {
-  border: 0;
-  background: none;
-  font-size: 10px;
-  color: var(--color-accent);
-  cursor: pointer;
 }
 .exd-body {
   flex: 1;
@@ -13071,10 +12998,6 @@ h6 {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-.exd-left .exd-provider {
-  border-radius: var(--radius-sm);
-  box-shadow: none;
 }
 .exd-right {
   display: flex;
@@ -15024,9 +14947,6 @@ button.badge {
   color: var(--color-text);
   display: block;
 }
-.exl-card.curated {
-  opacity: 0.92;
-}
 .exl-media {
   height: 120px;
   position: relative;
@@ -15034,12 +14954,6 @@ button.badge {
   place-items: center;
   overflow: hidden;
   background: var(--color-neutral-900);
-}
-.exl-media.clip {
-  background: var(--frame);
-}
-.exl-media.clip.alt {
-  background: var(--frame2);
 }
 .exl-media.photo {
   background: var(--photo);
@@ -15051,10 +14965,6 @@ button.badge {
   height: 100%;
   object-fit: cover;
 }
-.exl-play {
-  font-size: 34px;
-  color: rgba(255, 255, 255, 0.9);
-}
 .exl-glyph {
   font-size: 28px;
   color: var(--color-neutral-500);
@@ -15062,14 +14972,6 @@ button.badge {
 .exl-noneglyph {
   font-size: 26px;
   color: var(--color-neutral-700);
-}
-.exl-len {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-  font-size: 9px;
-  color: rgba(233, 234, 236, 0.7);
-  font-variant-numeric: tabular-nums;
 }
 .exl-cardbody {
   padding: var(--space-4);
@@ -15084,9 +14986,6 @@ button.badge {
   font-size: 10px;
   color: var(--color-neutral-500);
   margin-top: 3px;
-}
-.exl-card.curated .exl-cardmus {
-  color: var(--color-neutral-600);
 }
 .exl-cardbadges {
   display: flex;
@@ -15221,9 +15120,6 @@ button.badge {
   cursor: pointer;
   color: var(--color-text);
 }
-.exl-mrow.curated {
-  opacity: 0.92;
-}
 .exl-mthumb {
   width: 72px;
   height: 60px;
@@ -15235,12 +15131,6 @@ button.badge {
   place-items: center;
   background: var(--color-neutral-900);
 }
-.exl-mthumb.clip {
-  background: var(--frame);
-}
-.exl-mthumb.clip.alt {
-  background: var(--frame2);
-}
 .exl-mthumb.photo {
   background: var(--photo);
 }
@@ -15250,9 +15140,6 @@ button.badge {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-.exl-mthumb .exl-play {
-  font-size: 22px;
 }
 .exl-mthumb .exl-glyph {
   font-size: 19px;
@@ -15344,8 +15231,11 @@ button.badge {
   position: relative;
   aspect-ratio: 3 / 2;
   border-radius: var(--radius-sm);
+  border: 0;
+  padding: 0;
   overflow: hidden;
   background: var(--photo);
+  cursor: zoom-in;
 }
 .exd-formphoto img {
   width: 100%;
@@ -15434,9 +15324,110 @@ button.badge {
   gap: 8px;
   flex-wrap: wrap;
 }
-.exd-video.none .exd-house .ui-icon {
+.exd-media.none .exd-house .ui-icon {
   font-size: 46px;
   color: var(--color-neutral-700);
+}
+.exd-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: rgba(5, 6, 8, 0.96);
+  color: var(--color-text);
+}
+.exd-lightbox-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-out;
+}
+.exd-lightbox-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-4) var(--space-3);
+}
+.exd-lightbox-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: var(--color-neutral-300);
+}
+.exd-lightbox-close {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-neutral-200);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.exd-lightbox-close .ui-icon {
+  font-size: 18px;
+}
+.exd-lightbox-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+}
+.exd-lightbox-stage img {
+  display: block;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.exd-lightbox-controls {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+}
+.exd-lightbox-controls button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-neutral-200);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.exd-lightbox-controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.exd-lightbox-controls .ui-icon {
+  font-size: 18px;
+}
+.exd-lightbox-controls span {
+  min-width: 48px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  font-variant-numeric: tabular-nums;
 }
 /* Anatomical muscle map (front + back) on the exercise detail. */
 .bodymap {
@@ -15547,14 +15538,6 @@ button.badge {
     overflow-y: auto;
     scrollbar-gutter: stable;
   }
-}
-
-/* "Has video only" is a mode switch, not a filter facet — set it apart from the
-   filter groups above it in the rail. */
-.exl-rail .exl-toggle {
-  margin-top: 4px;
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--color-divider);
 }
 
 /* Weekday strip: mark the real current weekday (today), distinct from the day
@@ -16143,7 +16126,7 @@ button.badge {
 /* Photos are reference material, not decoration: show the whole frame rather
    than cropping it, inside a fixed box so every exercise page is laid out the
    same regardless of the source image's aspect. */
-.exd-video.photo img {
+.exd-media.photo img {
   object-fit: contain;
 }
 
@@ -16162,7 +16145,7 @@ button.badge {
   }
 
   /* A fixed hero box — the 16:9 ratio made it 628px tall on a wide window. */
-  .exd.desktop .exd-left .exd-video {
+  .exd.desktop .exd-left .exd-media {
     height: 420px;
     aspect-ratio: auto;
   }
@@ -16187,11 +16170,15 @@ button.badge {
     gap: var(--space-6);
   }
 
+  .exd-body {
+    padding-bottom: calc(var(--space-8) * 2 + env(safe-area-inset-bottom));
+  }
+
   .exd .exd-section {
     gap: var(--space-3);
   }
 
-  .exd-video.phone {
+  .exd-media.phone {
     height: 240px;
   }
 }
@@ -16232,6 +16219,12 @@ button.badge {
 
   .exl-searchrow {
     gap: var(--space-3);
+  }
+
+  .exl-searchrow .exl-search {
+    min-width: 0;
+    min-height: 44px;
+    box-sizing: border-box;
   }
 
   /* Two columns of squares on a phone, with a gutter that matches the page. */

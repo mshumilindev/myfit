@@ -1229,8 +1229,7 @@ export function ProgramsView({
                     <span>{t.progWeeksWord(draft.weeks)}</span>
                   </label>
                   <span>·</span>
-                  {/* Same switch as the library's "Has video only" toggle, so a
-                      boolean reads the same way everywhere in the app. */}
+                  {/* Reuse the compact switch treatment for this boolean row. */}
                   <label
                     className={`program-openended program-openended-inline prog-switch-field${
                       draft.weeks === 0 ? ' on' : ''

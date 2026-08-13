@@ -339,8 +339,6 @@ export const en = {
     `${client}’s gym — ${gym} — has no ${item.toLowerCase()}. They’ll see the same warning on the day and can swap it themselves.`,
   exercisesTitle: 'Exercises',
   inLibraryMatch: (n: number, m: number) => `${n} in your library · ${m} match`,
-  inLibraryVideos: (n: number, v: number) =>
-    `${n} in the library · ${v} with a demonstration video`,
   newExercise: 'New exercise',
   muscleGroupsWorked: 'Muscle groups worked',
   musclesWorkedLabel: 'Muscles worked',
@@ -375,7 +373,7 @@ export const en = {
   settingsFeaturesLabel: 'Features',
   flagExerciseFeature: 'Exercise library & detail',
   flagExerciseFeatureDesc:
-    'Media gallery, exercise pages with video, and the Exercises tab on Programs.',
+    'Exercise gallery, rich exercise pages, and the Exercises tab on Programs.',
   lastTop: 'Last top',
   detailSessions: 'Sessions',
   yourHistory: 'Your history',
@@ -384,17 +382,14 @@ export const en = {
   instructionsLabel: 'Instructions',
   photosLabel: 'Photos',
   stillsOnly: 'stills only',
-  hasVideoFilter: 'Has video',
   // --- Exercise library v2 (LIB / RICH / SPARSE) ---------------------------
   libCoverage: (total: number, rich: number) =>
-    `${total} in the library · ${rich} with instructions & photos · a handful with a demonstration video`,
+    `${total} in the library · ${rich} with instructions & photos`,
   libMineCount: (n: number) => `${n} custom ${n === 1 ? 'exercise' : 'exercises'}`,
   libFiltersLabel: 'Filters',
   libCategoryLabel: 'Category',
   libLevelLabel: 'Level',
   libMechForceLabel: 'Mechanic · Force',
-  libHasVideoOnly: 'Has video only',
-  libCuratedTag: 'curated',
   libNoClassInline: 'no classification',
   musclesLegend: 'brass = primary · grey = secondary',
   formPhotosLabel: 'Form photos · public domain',
@@ -403,9 +398,6 @@ export const en = {
   detailFromHistory: 'From your history',
   est1rmLabel: 'Est 1RM',
   availableAtGymLine: (equip: string) => `Available at your gym — ${equip} in inventory`,
-  sparseExplainer:
-    'No classification, instructions or photos yet for this lift. Those blocks are hidden — they’ll appear automatically once the full data import covers it.',
-  sparseMusclesNote: 'Primary from our mapping · no secondary set on curated lifts',
   historyDerivedNote:
     'History always works — it’s derived from what you log, not from the base record.',
   pagePrev: 'Previous',
@@ -429,10 +421,7 @@ export const en = {
   } as Record<string, string>,
   mechanicNames: { compound: 'Compound', isolation: 'Isolation' } as Record<string, string>,
   openAction: 'Open',
-  openSource: 'Open source',
   addToTodaySession: "Add to today's session",
-  demonstration: 'Demonstration',
-  embeddedAttribution: 'embedded with attribution',
   formSequence: 'Form · start → bottom → drive',
   formStillsLabel: 'Form stills',
   stillsMediaCaption: 'Stills · media',

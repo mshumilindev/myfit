@@ -852,7 +852,7 @@
     ]
   },
   {
-    "id": "barbell-curl",
+    "id": "Barbell_Curl",
     "name": "Barbell Curl",
     "force": "pull",
     "level": "beginner",
@@ -868,7 +868,7 @@
       "Slowly begin to bring the bar back to starting position as your breathe in.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/barbell-curl/0.jpg", "/exercise-img/barbell-curl/1.jpg"]
+    "images": ["/exercise-img/Barbell_Curl/0.jpg", "/exercise-img/Barbell_Curl/1.jpg"]
   },
   {
     "id": "Barbell_Curls_Lying_Against_An_Incline",
@@ -1157,7 +1157,7 @@
     ]
   },
   {
-    "id": "shrug",
+    "id": "Barbell_Shrug",
     "name": "Barbell Shrug",
     "force": "pull",
     "level": "beginner",
@@ -1172,7 +1172,7 @@
       "Slowly return to the starting position as you breathe in.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/shrug/0.jpg", "/exercise-img/shrug/1.jpg"]
+    "images": ["/exercise-img/Barbell_Shrug/0.jpg", "/exercise-img/Barbell_Shrug/1.jpg"]
   },
   {
     "id": "Barbell_Shrug_Behind_The_Back",
@@ -1376,7 +1376,7 @@
     ]
   },
   {
-    "id": "bench-dips",
+    "id": "Bench_Dips",
     "name": "Bench Dips",
     "force": "push",
     "level": "beginner",
@@ -1391,7 +1391,7 @@
       "Using your triceps to bring your torso up again, lift yourself back to the starting position.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/bench-dips/0.jpg", "/exercise-img/bench-dips/1.jpg"]
+    "images": ["/exercise-img/Bench_Dips/0.jpg", "/exercise-img/Bench_Dips/1.jpg"]
   },
   {
     "id": "Bench_Jump",
@@ -1994,7 +1994,7 @@
     "images": ["/exercise-img/Box_Skip/0.jpg", "/exercise-img/Box_Skip/1.jpg"]
   },
   {
-    "id": "box-squat",
+    "id": "Box_Squat",
     "name": "Box Squat",
     "force": "push",
     "level": "intermediate",
@@ -2009,7 +2009,7 @@
       "With your back, shoulders, and core tight, push your knees and butt out and you begin your descent. Sit back with your hips until you are seated on the box. Ideally, your shins should be perpendicular to the ground. Pause when you reach the box, and relax the hip flexors. Never bounce off of a box.",
       "Keeping the weight on your heels and pushing your feet and knees out, drive upward off of the box as you lead the movement with your head. Continue upward, maintaining tightness head to toe."
     ],
-    "images": ["/exercise-img/box-squat/0.jpg", "/exercise-img/box-squat/1.jpg"]
+    "images": ["/exercise-img/Box_Squat/0.jpg", "/exercise-img/Box_Squat/1.jpg"]
   },
   {
     "id": "Box_Squat_with_Bands",
@@ -2167,7 +2167,7 @@
     "images": ["/exercise-img/Cable_Chest_Press/0.jpg", "/exercise-img/Cable_Chest_Press/1.jpg"]
   },
   {
-    "id": "cable-crossover",
+    "id": "Cable_Crossover",
     "name": "Cable Crossover",
     "force": "push",
     "level": "beginner",
@@ -2183,10 +2183,10 @@
       "Return your arms back to the starting position as you breathe out. Make sure to use the same arc of motion used to lower the weights.",
       "Hold for a second at the starting position and repeat the movement for the prescribed amount of repetitions."
     ],
-    "images": ["/exercise-img/cable-crossover/0.jpg", "/exercise-img/cable-crossover/1.jpg"]
+    "images": ["/exercise-img/Cable_Crossover/0.jpg", "/exercise-img/Cable_Crossover/1.jpg"]
   },
   {
-    "id": "cable-crunch",
+    "id": "Cable_Crunch",
     "name": "Cable Crunch",
     "force": "pull",
     "level": "beginner",
@@ -2203,7 +2203,7 @@
       "Slowly return to the starting position as you inhale. Tip: Make sure that you keep constant tension on the abs throughout the movement. Also, do not choose a weight so heavy that the lower back handles the brunt of the work.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/cable-crunch/0.jpg", "/exercise-img/cable-crunch/1.jpg"]
+    "images": ["/exercise-img/Cable_Crunch/0.jpg", "/exercise-img/Cable_Crunch/1.jpg"]
   },
   {
     "id": "Cable_Deadlifts",
@@ -3176,7 +3176,7 @@
     ]
   },
   {
-    "id": "chin-up",
+    "id": "Chin-Up",
     "name": "Chin-Up",
     "force": "pull",
     "level": "beginner",
@@ -3192,7 +3192,7 @@
       "After a second of squeezing the biceps in the contracted position, slowly lower your torso back to the starting position; when your arms are fully extended. Breathe in as you perform this portion of the movement.",
       "Repeat this motion for the prescribed amount of repetitions."
     ],
-    "images": ["/exercise-img/chin-up/0.jpg", "/exercise-img/chin-up/1.jpg"]
+    "images": ["/exercise-img/Chin-Up/0.jpg", "/exercise-img/Chin-Up/1.jpg"]
   },
   {
     "id": "Circus_Bell",
@@ -3232,7 +3232,7 @@
     "images": ["/exercise-img/Clean/0.jpg", "/exercise-img/Clean/1.jpg"]
   },
   {
-    "id": "clean-and-jerk",
+    "id": "Clean_and_Jerk",
     "name": "Clean and Jerk",
     "force": "push",
     "level": "expert",
@@ -3251,7 +3251,7 @@
       "Drive through the heels create as much speed and force as possible, and be sure to move your head out of the way as the bar leaves the shoulders.",
       "At this moment as the feet leave the floor, the feet must be placed into the receiving position as quickly as possible. In the brief moment the feet are not actively driving against the platform, the athletes effort to push the bar up will drive them down. The feet should be split, with one foot forward, and one foot back. Receive the bar with the arms locked out overhead. Return to a standing position."
     ],
-    "images": ["/exercise-img/clean-and-jerk/0.jpg", "/exercise-img/clean-and-jerk/1.jpg"]
+    "images": ["/exercise-img/Clean_and_Jerk/0.jpg", "/exercise-img/Clean_and_Jerk/1.jpg"]
   },
   {
     "id": "Clean_and_Press",
@@ -3793,7 +3793,7 @@
     "images": ["/exercise-img/Dancers_Stretch/0.jpg", "/exercise-img/Dancers_Stretch/1.jpg"]
   },
   {
-    "id": "dead-bug",
+    "id": "Dead_Bug",
     "name": "Dead Bug",
     "force": "pull",
     "level": "beginner",
@@ -3811,7 +3811,7 @@
       "Stay tight and return the working leg to the starting position.",
       "Repeat on the opposite side, alternating until the set is complete."
     ],
-    "images": ["/exercise-img/dead-bug/0.jpg", "/exercise-img/dead-bug/1.jpg"]
+    "images": ["/exercise-img/Dead_Bug/0.jpg", "/exercise-img/Dead_Bug/1.jpg"]
   },
   {
     "id": "Deadlift_with_Bands",
@@ -4407,7 +4407,7 @@
     ]
   },
   {
-    "id": "dumbbell-bench-press",
+    "id": "Dumbbell_Bench_Press",
     "name": "Dumbbell Bench Press",
     "force": "push",
     "level": "beginner",
@@ -4424,8 +4424,8 @@
       "Repeat the movement for the prescribed amount of repetitions of your training program."
     ],
     "images": [
-      "/exercise-img/dumbbell-bench-press/0.jpg",
-      "/exercise-img/dumbbell-bench-press/1.jpg"
+      "/exercise-img/Dumbbell_Bench_Press/0.jpg",
+      "/exercise-img/Dumbbell_Bench_Press/1.jpg"
     ]
   },
   {
@@ -4888,7 +4888,7 @@
     ]
   },
   {
-    "id": "dumbbell-shrug",
+    "id": "Dumbbell_Shrug",
     "name": "Dumbbell Shrug",
     "force": "pull",
     "level": "beginner",
@@ -4903,7 +4903,7 @@
       "Lower the dumbbells back to the original position.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/dumbbell-shrug/0.jpg", "/exercise-img/dumbbell-shrug/1.jpg"]
+    "images": ["/exercise-img/Dumbbell_Shrug/0.jpg", "/exercise-img/Dumbbell_Shrug/1.jpg"]
   },
   {
     "id": "Dumbbell_Side_Bend",
@@ -5274,7 +5274,7 @@
     ]
   },
   {
-    "id": "ez-bar-curl",
+    "id": "EZ-Bar_Curl",
     "name": "EZ-Bar Curl",
     "force": "pull",
     "level": "beginner",
@@ -5290,7 +5290,7 @@
       "Then inhale and slowly lower the bar back to the starting position.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/ez-bar-curl/0.jpg", "/exercise-img/ez-bar-curl/1.jpg"]
+    "images": ["/exercise-img/EZ-Bar_Curl/0.jpg", "/exercise-img/EZ-Bar_Curl/1.jpg"]
   },
   {
     "id": "EZ-Bar_Skullcrusher",
@@ -5311,7 +5311,7 @@
     "images": ["/exercise-img/EZ-Bar_Skullcrusher/0.jpg", "/exercise-img/EZ-Bar_Skullcrusher/1.jpg"]
   },
   {
-    "id": "face-pull",
+    "id": "Face_Pull",
     "name": "Face Pull",
     "force": "pull",
     "level": "intermediate",
@@ -5323,10 +5323,10 @@
     "instructions": [
       "Facing a high pulley with a rope or dual handles attached, pull the weight directly towards your face, separating your hands as you do so. Keep your upper arms parallel to the ground."
     ],
-    "images": ["/exercise-img/face-pull/0.jpg", "/exercise-img/face-pull/1.jpg"]
+    "images": ["/exercise-img/Face_Pull/0.jpg", "/exercise-img/Face_Pull/1.jpg"]
   },
   {
-    "id": "farmers-walk",
+    "id": "Farmers_Walk",
     "name": "Farmer's Walk",
     "force": null,
     "level": "intermediate",
@@ -5340,7 +5340,7 @@
       "After gripping the handles, lift them up by driving through your heels, keeping your back straight and your head up.",
       "Walk taking short, quick steps, and don't forget to breathe. Move for a given distance, typically 50-100 feet, as fast as possible."
     ],
-    "images": ["/exercise-img/farmers-walk/0.jpg", "/exercise-img/farmers-walk/1.jpg"]
+    "images": ["/exercise-img/Farmers_Walk/0.jpg", "/exercise-img/Farmers_Walk/1.jpg"]
   },
   {
     "id": "Fast_Skipping",
@@ -5489,7 +5489,7 @@
     ]
   },
   {
-    "id": "floor-press",
+    "id": "Floor_Press",
     "name": "Floor Press",
     "force": "push",
     "level": "intermediate",
@@ -5503,7 +5503,7 @@
       "Lower the bar towards the bottom of your chest or upper stomach, squeezing the bar and attempting to pull it apart as you do so. Ensure that you tuck your elbows throughout the movement. Lower the bar until your upper arm contacts the ground and pause, preventing any slamming or bouncing of the weight.",
       "Press the bar back up as fast as you can, keeping the bar, your wrists, and elbows in line as you do so."
     ],
-    "images": ["/exercise-img/floor-press/0.jpg", "/exercise-img/floor-press/1.jpg"]
+    "images": ["/exercise-img/Floor_Press/0.jpg", "/exercise-img/Floor_Press/1.jpg"]
   },
   {
     "id": "Floor_Press_with_Chains",
@@ -5996,7 +5996,7 @@
     "images": ["/exercise-img/Glute_Kickback/0.jpg", "/exercise-img/Glute_Kickback/1.jpg"]
   },
   {
-    "id": "goblet-squat",
+    "id": "Goblet_Squat",
     "name": "Goblet Squat",
     "force": "push",
     "level": "beginner",
@@ -6010,10 +6010,10 @@
       "Squat down between your legs until your hamstrings are on your calves. Keep your chest and head up and your back straight.",
       "At the bottom position, pause and use your elbows to push your knees out. Return to the starting position, and repeat for 10-20 repetitions."
     ],
-    "images": ["/exercise-img/goblet-squat/0.jpg", "/exercise-img/goblet-squat/1.jpg"]
+    "images": ["/exercise-img/Goblet_Squat/0.jpg", "/exercise-img/Goblet_Squat/1.jpg"]
   },
   {
-    "id": "good-morning",
+    "id": "Good_Morning",
     "name": "Good Morning",
     "force": "push",
     "level": "intermediate",
@@ -6027,7 +6027,7 @@
       "Begin by bending at the hips, moving them back as you bend over to near parallel. Keep your back arched and your cervical spine in proper alignment.",
       "Reverse the motion by extending through the hips with your glutes and hamstrings. Continue until you have returned to the starting position."
     ],
-    "images": ["/exercise-img/good-morning/0.jpg", "/exercise-img/good-morning/1.jpg"]
+    "images": ["/exercise-img/Good_Morning/0.jpg", "/exercise-img/Good_Morning/1.jpg"]
   },
   {
     "id": "Good_Morning_off_Pins",
@@ -6105,7 +6105,7 @@
     "images": ["/exercise-img/Groiners/0.jpg", "/exercise-img/Groiners/1.jpg"]
   },
   {
-    "id": "hack-squat",
+    "id": "Hack_Squat",
     "name": "Hack Squat",
     "force": "push",
     "level": "beginner",
@@ -6123,7 +6123,7 @@
       "Begin to raise the unit as you exhale by pushing the floor with mainly with the heel of your foot as you straighten the legs again and go back to the starting position.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/hack-squat/0.jpg", "/exercise-img/hack-squat/1.jpg"]
+    "images": ["/exercise-img/Hack_Squat/0.jpg", "/exercise-img/Hack_Squat/1.jpg"]
   },
   {
     "id": "Hammer_Curls",
@@ -6320,7 +6320,7 @@
     ]
   },
   {
-    "id": "hanging-leg-raise",
+    "id": "Hanging_Leg_Raise",
     "name": "Hanging Leg Raise",
     "force": "pull",
     "level": "expert",
@@ -6335,7 +6335,7 @@
       "Go back slowly to the starting position as you breathe in.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/hanging-leg-raise/0.jpg", "/exercise-img/hanging-leg-raise/1.jpg"]
+    "images": ["/exercise-img/Hanging_Leg_Raise/0.jpg", "/exercise-img/Hanging_Leg_Raise/1.jpg"]
   },
   {
     "id": "Hanging_Pike",
@@ -6733,7 +6733,7 @@
     ]
   },
   {
-    "id": "incline-curl",
+    "id": "Incline_Dumbbell_Curl",
     "name": "Incline Dumbbell Curl",
     "force": "pull",
     "level": "beginner",
@@ -6748,7 +6748,10 @@
       "Slowly begin to bring the dumbbells back to starting position as your breathe in.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/incline-curl/0.jpg", "/exercise-img/incline-curl/1.jpg"]
+    "images": [
+      "/exercise-img/Incline_Dumbbell_Curl/0.jpg",
+      "/exercise-img/Incline_Dumbbell_Curl/1.jpg"
+    ]
   },
   {
     "id": "Incline_Dumbbell_Flyes",
@@ -6797,7 +6800,7 @@
     ]
   },
   {
-    "id": "incline-dumbbell-press",
+    "id": "Incline_Dumbbell_Press",
     "name": "Incline Dumbbell Press",
     "force": "push",
     "level": "beginner",
@@ -6816,8 +6819,8 @@
       "When you are done, place the dumbbells back on your thighs and then on the floor. This is the safest manner to release the dumbbells."
     ],
     "images": [
-      "/exercise-img/incline-dumbbell-press/0.jpg",
-      "/exercise-img/incline-dumbbell-press/1.jpg"
+      "/exercise-img/Incline_Dumbbell_Press/0.jpg",
+      "/exercise-img/Incline_Dumbbell_Press/1.jpg"
     ]
   },
   {
@@ -7049,7 +7052,7 @@
     ]
   },
   {
-    "id": "inverted-row",
+    "id": "Inverted_Row",
     "name": "Inverted Row",
     "force": "pull",
     "level": "beginner",
@@ -7065,7 +7068,7 @@
       "Pause at the top of the motion, and return yourself to the start position.",
       "Repeat for the desired number of repetitions."
     ],
-    "images": ["/exercise-img/inverted-row/0.jpg", "/exercise-img/inverted-row/1.jpg"]
+    "images": ["/exercise-img/Inverted_Row/0.jpg", "/exercise-img/Inverted_Row/1.jpg"]
   },
   {
     "id": "Inverted_Row_with_Straps",
@@ -8115,7 +8118,7 @@
     "images": ["/exercise-img/Leg_Lift/0.jpg", "/exercise-img/Leg_Lift/1.jpg"]
   },
   {
-    "id": "leg-press",
+    "id": "Leg_Press",
     "name": "Leg Press",
     "force": "push",
     "level": "beginner",
@@ -8131,7 +8134,7 @@
       "Pushing mainly with the heels of your feet and using the quadriceps go back to the starting position as you exhale.",
       "Repeat for the recommended amount of repetitions and ensure to lock the safety pins properly once you are done. You do not want that platform falling on you fully loaded."
     ],
-    "images": ["/exercise-img/leg-press/0.jpg", "/exercise-img/leg-press/1.jpg"]
+    "images": ["/exercise-img/Leg_Press/0.jpg", "/exercise-img/Leg_Press/1.jpg"]
   },
   {
     "id": "Leg_Pull-In",
@@ -9253,7 +9256,7 @@
     "images": ["/exercise-img/Monster_Walk/0.jpg", "/exercise-img/Monster_Walk/1.jpg"]
   },
   {
-    "id": "mountain-climbers",
+    "id": "Mountain_Climbers",
     "name": "Mountain Climbers",
     "force": "pull",
     "level": "beginner",
@@ -9266,7 +9269,7 @@
       "Begin in a pushup position, with your weight supported by your hands and toes. Flexing the knee and hip, bring one leg until the knee is approximately under the hip. This will be your starting position.",
       "Explosively reverse the positions of your legs, extending the bent leg until the leg is straight and supported by the toe, and bringing the other foot up with the hip and knee flexed. Repeat in an alternating fashion for 20-30 seconds."
     ],
-    "images": ["/exercise-img/mountain-climbers/0.jpg", "/exercise-img/mountain-climbers/1.jpg"]
+    "images": ["/exercise-img/Mountain_Climbers/0.jpg", "/exercise-img/Mountain_Climbers/1.jpg"]
   },
   {
     "id": "Moving_Claw_Series",
@@ -9796,7 +9799,7 @@
     ]
   },
   {
-    "id": "dumbbell-row",
+    "id": "One-Arm_Dumbbell_Row",
     "name": "One-Arm Dumbbell Row",
     "force": "pull",
     "level": "beginner",
@@ -9814,7 +9817,10 @@
       "Repeat the movement for the specified amount of repetitions.",
       "Switch sides and repeat again with the other arm."
     ],
-    "images": ["/exercise-img/dumbbell-row/0.jpg", "/exercise-img/dumbbell-row/1.jpg"]
+    "images": [
+      "/exercise-img/One-Arm_Dumbbell_Row/0.jpg",
+      "/exercise-img/One-Arm_Dumbbell_Row/1.jpg"
+    ]
   },
   {
     "id": "One-Arm_Flat_Bench_Dumbbell_Flye",
@@ -10428,7 +10434,7 @@
     "images": ["/exercise-img/Overhead_Triceps/0.jpg", "/exercise-img/Overhead_Triceps/1.jpg"]
   },
   {
-    "id": "pallof-press",
+    "id": "Pallof_Press",
     "name": "Pallof Press",
     "force": "pull",
     "level": "beginner",
@@ -10445,7 +10451,7 @@
       "Hold the repetition for several seconds before returning to the starting position.",
       "At the conclusion of the set, repeat facing the other direction."
     ],
-    "images": ["/exercise-img/pallof-press/0.jpg", "/exercise-img/pallof-press/1.jpg"]
+    "images": ["/exercise-img/Pallof_Press/0.jpg", "/exercise-img/Pallof_Press/1.jpg"]
   },
   {
     "id": "Pallof_Press_With_Rotation",
@@ -10696,7 +10702,7 @@
     "images": ["/exercise-img/Piriformis-SMR/0.jpg", "/exercise-img/Piriformis-SMR/1.jpg"]
   },
   {
-    "id": "plank",
+    "id": "Plank",
     "name": "Plank",
     "force": "static",
     "level": "beginner",
@@ -10709,7 +10715,7 @@
       "Get into a prone position on the floor, supporting your weight on your toes and your forearms. Your arms are bent and directly below the shoulder.",
       "Keep your body straight at all times, and hold this position as long as possible. To increase difficulty, an arm or leg can be raised."
     ],
-    "images": ["/exercise-img/plank/0.jpg", "/exercise-img/plank/1.jpg"]
+    "images": ["/exercise-img/Plank/0.jpg", "/exercise-img/Plank/1.jpg"]
   },
   {
     "id": "Plate_Pinch",
@@ -10849,7 +10855,7 @@
     ]
   },
   {
-    "id": "power-clean",
+    "id": "Power_Clean",
     "name": "Power Clean",
     "force": "pull",
     "level": "intermediate",
@@ -10884,7 +10890,7 @@
       "Squat down with the elbows fully extended until the bar touches the floor.",
       "Start over at Phase 1 and repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/power-clean/0.jpg", "/exercise-img/power-clean/1.jpg"]
+    "images": ["/exercise-img/Power_Clean/0.jpg", "/exercise-img/Power_Clean/1.jpg"]
   },
   {
     "id": "Power_Clean_from_Blocks",
@@ -11014,7 +11020,7 @@
     "images": ["/exercise-img/Power_Stairs/0.jpg", "/exercise-img/Power_Stairs/1.jpg"]
   },
   {
-    "id": "preacher-curl",
+    "id": "Preacher_Curl",
     "name": "Preacher Curl",
     "force": "pull",
     "level": "beginner",
@@ -11030,7 +11036,7 @@
       "As you exhale, use the biceps to curl the weight up until your biceps is fully contracted and the bar is at shoulder height. Squeeze the biceps hard and hold this position for a second.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/preacher-curl/0.jpg", "/exercise-img/preacher-curl/1.jpg"]
+    "images": ["/exercise-img/Preacher_Curl/0.jpg", "/exercise-img/Preacher_Curl/1.jpg"]
   },
   {
     "id": "Preacher_Hammer_Dumbbell_Curl",
@@ -11144,7 +11150,7 @@
     "images": ["/exercise-img/Pullups/0.jpg", "/exercise-img/Pullups/1.jpg"]
   },
   {
-    "id": "push-press",
+    "id": "Push_Press",
     "name": "Push Press",
     "force": "push",
     "level": "expert",
@@ -11154,7 +11160,7 @@
     "primaryMuscles": ["shoulders"],
     "secondaryMuscles": ["quads", "triceps"],
     "instructions": [],
-    "images": ["/exercise-img/push-press/0.jpg", "/exercise-img/push-press/1.jpg"]
+    "images": ["/exercise-img/Push_Press/0.jpg", "/exercise-img/Push_Press/1.jpg"]
   },
   {
     "id": "Push_Press_-_Behind_the_Neck",
@@ -11987,7 +11993,7 @@
     ]
   },
   {
-    "id": "romanian-deadlift",
+    "id": "Romanian_Deadlift",
     "name": "Romanian Deadlift",
     "force": "pull",
     "level": "intermediate",
@@ -12003,7 +12009,7 @@
       "Once you are standing completely straight up, lower the bar by pushing the hips back, only slightly bending the knees, unlike when squatting. Tip: Take a deep breath at the start of the movement and keep your chest up. Hold your breath as you lower and exhale as you complete the movement.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/romanian-deadlift/0.jpg", "/exercise-img/romanian-deadlift/1.jpg"]
+    "images": ["/exercise-img/Romanian_Deadlift/0.jpg", "/exercise-img/Romanian_Deadlift/1.jpg"]
   },
   {
     "id": "Romanian_Deadlift_from_Deficit",
@@ -12171,7 +12177,7 @@
     "images": ["/exercise-img/Running_Treadmill/0.jpg", "/exercise-img/Running_Treadmill/1.jpg"]
   },
   {
-    "id": "russian-twist",
+    "id": "Russian_Twist",
     "name": "Russian Twist",
     "force": "pull",
     "level": "intermediate",
@@ -12187,7 +12193,7 @@
       "Hold the contraction for a second and move back to the starting position while breathing out. Now move to the opposite side performing the same techniques you applied to the right side.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/russian-twist/0.jpg", "/exercise-img/russian-twist/1.jpg"]
+    "images": ["/exercise-img/Russian_Twist/0.jpg", "/exercise-img/Russian_Twist/1.jpg"]
   },
   {
     "id": "Sandbag_Load",
@@ -12464,7 +12470,7 @@
     ]
   },
   {
-    "id": "seated-calf-raise",
+    "id": "Seated_Calf_Raise",
     "name": "Seated Calf Raise",
     "force": "push",
     "level": "beginner",
@@ -12481,7 +12487,7 @@
       "Raise the heels by extending the ankles as high as possible as you contract the calves and breathe out. Hold the top contraction for a second.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/seated-calf-raise/0.jpg", "/exercise-img/seated-calf-raise/1.jpg"]
+    "images": ["/exercise-img/Seated_Calf_Raise/0.jpg", "/exercise-img/Seated_Calf_Raise/1.jpg"]
   },
   {
     "id": "Seated_Calf_Stretch",
@@ -12617,7 +12623,7 @@
     ]
   },
   {
-    "id": "seated-dumbbell-press",
+    "id": "Seated_Dumbbell_Press",
     "name": "Seated Dumbbell Press",
     "force": "push",
     "level": "beginner",
@@ -12635,8 +12641,8 @@
       "Repeat for the recommended amount of repetitions."
     ],
     "images": [
-      "/exercise-img/seated-dumbbell-press/0.jpg",
-      "/exercise-img/seated-dumbbell-press/1.jpg"
+      "/exercise-img/Seated_Dumbbell_Press/0.jpg",
+      "/exercise-img/Seated_Dumbbell_Press/1.jpg"
     ]
   },
   {
@@ -12797,7 +12803,7 @@
     ]
   },
   {
-    "id": "seated-leg-curl",
+    "id": "Seated_Leg_Curl",
     "name": "Seated Leg Curl",
     "force": "pull",
     "level": "beginner",
@@ -12813,7 +12819,7 @@
       "Slowly return to the starting position as you breathe in.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/seated-leg-curl/0.jpg", "/exercise-img/seated-leg-curl/1.jpg"]
+    "images": ["/exercise-img/Seated_Leg_Curl/0.jpg", "/exercise-img/Seated_Leg_Curl/1.jpg"]
   },
   {
     "id": "Seated_Leg_Tucks",
@@ -13653,7 +13659,7 @@
     "images": ["/exercise-img/Sit_Squats/0.jpg", "/exercise-img/Sit_Squats/1.jpg"]
   },
   {
-    "id": "sit-up",
+    "id": "Sit-Up",
     "name": "Sit-Up",
     "force": "pull",
     "level": "beginner",
@@ -13669,7 +13675,7 @@
       "Once you feel the contraction for a second, lower your upper body back down to the starting position while inhaling.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/sit-up/0.jpg", "/exercise-img/sit-up/1.jpg"]
+    "images": ["/exercise-img/Sit-Up/0.jpg", "/exercise-img/Sit-Up/1.jpg"]
   },
   {
     "id": "Skating",
@@ -13745,7 +13751,7 @@
     ]
   },
   {
-    "id": "sled-push",
+    "id": "Sled_Push",
     "name": "Sled Push",
     "force": "push",
     "level": "beginner",
@@ -13758,7 +13764,7 @@
       "Load your pushing sled with the desired weight.",
       "Take an athletic posture, leaning into the sled with your arms fully extended, grasping the handles. Push the sled as fast as possible, focusing on extending your hips and knees to strengthen your posterior chain."
     ],
-    "images": ["/exercise-img/sled-push/0.jpg", "/exercise-img/sled-push/1.jpg"]
+    "images": ["/exercise-img/Sled_Push/0.jpg", "/exercise-img/Sled_Push/1.jpg"]
   },
   {
     "id": "Sled_Reverse_Flye",
@@ -13860,7 +13866,7 @@
     ]
   },
   {
-    "id": "smith-bench-press",
+    "id": "Smith_Machine_Bench_Press",
     "name": "Smith Machine Bench Press",
     "force": "push",
     "level": "beginner",
@@ -13876,7 +13882,10 @@
       "Repeat the movement for the prescribed amount of repetitions.",
       "When you are done, lock the bar back in the rack."
     ],
-    "images": ["/exercise-img/smith-bench-press/0.jpg", "/exercise-img/smith-bench-press/1.jpg"]
+    "images": [
+      "/exercise-img/Smith_Machine_Bench_Press/0.jpg",
+      "/exercise-img/Smith_Machine_Bench_Press/1.jpg"
+    ]
   },
   {
     "id": "Smith_Machine_Bent_Over_Row",
@@ -14143,7 +14152,7 @@
     ]
   },
   {
-    "id": "smith-squat",
+    "id": "Smith_Machine_Squat",
     "name": "Smith Machine Squat",
     "force": "push",
     "level": "beginner",
@@ -14160,7 +14169,7 @@
       "Begin to raise the bar as you exhale by pushing the floor with the heel of your foot as you straighten the legs again and go back to the starting position.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/smith-squat/0.jpg", "/exercise-img/smith-squat/1.jpg"]
+    "images": ["/exercise-img/Smith_Machine_Squat/0.jpg", "/exercise-img/Smith_Machine_Squat/1.jpg"]
   },
   {
     "id": "Smith_Machine_Stiff-Legged_Deadlift",
@@ -14231,7 +14240,7 @@
     ]
   },
   {
-    "id": "snatch",
+    "id": "Snatch",
     "name": "Snatch",
     "force": "pull",
     "level": "intermediate",
@@ -14249,7 +14258,7 @@
       "Now in a very quick but powerful motion, you have to get your body under the barbell when it has reached a high enough point where it can be controlled and drop while locking your arms and holding the barbell overhead as you assume a squat position.",
       "Finalize the movement by rising up out of the squat position to finish the lift. At the end of the lift both feet should be on line and the arms fully extended holding the barbell overhead."
     ],
-    "images": ["/exercise-img/snatch/0.jpg", "/exercise-img/snatch/1.jpg"]
+    "images": ["/exercise-img/Snatch/0.jpg", "/exercise-img/Snatch/1.jpg"]
   },
   {
     "id": "Snatch_Balance",
@@ -14443,7 +14452,7 @@
     "images": ["/exercise-img/Spider_Crawl/0.jpg", "/exercise-img/Spider_Crawl/1.jpg"]
   },
   {
-    "id": "spider-curl",
+    "id": "Spider_Curl",
     "name": "Spider Curl",
     "force": "pull",
     "level": "beginner",
@@ -14461,7 +14470,7 @@
       "Slowly begin to bring the barbell back to the starting position as your breathe in. .",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/spider-curl/0.jpg", "/exercise-img/spider-curl/1.jpg"]
+    "images": ["/exercise-img/Spider_Curl/0.jpg", "/exercise-img/Spider_Curl/1.jpg"]
   },
   {
     "id": "Spinal_Stretch",
@@ -15897,7 +15906,7 @@
     ]
   },
   {
-    "id": "straight-arm-pulldown",
+    "id": "Straight-Arm_Pulldown",
     "name": "Straight-Arm Pulldown",
     "force": "pull",
     "level": "beginner",
@@ -15914,8 +15923,8 @@
       "Repeat for the recommended amount of repetitions."
     ],
     "images": [
-      "/exercise-img/straight-arm-pulldown/0.jpg",
-      "/exercise-img/straight-arm-pulldown/1.jpg"
+      "/exercise-img/Straight-Arm_Pulldown/0.jpg",
+      "/exercise-img/Straight-Arm_Pulldown/1.jpg"
     ]
   },
   {
@@ -15940,7 +15949,7 @@
     ]
   },
   {
-    "id": "sumo-deadlift",
+    "id": "Sumo_Deadlift",
     "name": "Sumo Deadlift",
     "force": "pull",
     "level": "intermediate",
@@ -15955,7 +15964,7 @@
       "As the bar passes through the knees, lean back and drive the hips into the bar, pulling your shoulder blades together.",
       "Return the weight to the ground by bending at the hips and controlling the weight on the way down."
     ],
-    "images": ["/exercise-img/sumo-deadlift/0.jpg", "/exercise-img/sumo-deadlift/1.jpg"]
+    "images": ["/exercise-img/Sumo_Deadlift/0.jpg", "/exercise-img/Sumo_Deadlift/1.jpg"]
   },
   {
     "id": "Sumo_Deadlift_with_Bands",
@@ -16175,7 +16184,7 @@
     ]
   },
   {
-    "id": "svend-press",
+    "id": "Svend_Press",
     "name": "Svend Press",
     "force": "push",
     "level": "beginner",
@@ -16190,7 +16199,7 @@
       "Squeeze the plates between your palms and extend your arms directly out in front of you in a controlled motion.",
       "Pause at the top of the motion, and then slowly return to the starting position."
     ],
-    "images": ["/exercise-img/svend-press/0.jpg", "/exercise-img/svend-press/1.jpg"]
+    "images": ["/exercise-img/Svend_Press/0.jpg", "/exercise-img/Svend_Press/1.jpg"]
   },
   {
     "id": "T-Bar_Row_with_Handle",
@@ -16442,7 +16451,7 @@
     ]
   },
   {
-    "id": "triceps-pushdown",
+    "id": "Triceps_Pushdown",
     "name": "Triceps Pushdown",
     "force": "push",
     "level": "beginner",
@@ -16458,7 +16467,7 @@
       "After a second hold at the contracted position, bring the bar slowly up to the starting point. Breathe in as you perform this step.",
       "Repeat for the recommended amount of repetitions."
     ],
-    "images": ["/exercise-img/triceps-pushdown/0.jpg", "/exercise-img/triceps-pushdown/1.jpg"]
+    "images": ["/exercise-img/Triceps_Pushdown/0.jpg", "/exercise-img/Triceps_Pushdown/1.jpg"]
   },
   {
     "id": "Triceps_Pushdown_-_Rope_Attachment",

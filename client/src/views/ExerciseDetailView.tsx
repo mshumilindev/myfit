@@ -5,14 +5,12 @@
  * shows classification badges (category/mechanic/force/level/equipment), the
  * muscle silhouette with primary in brass and secondary in grey, the public-
  * domain form photos (landscape), numbered instructions and the derived
- * history block. A curated-only lift (SPARSE) drops every absent block — no
- * dash, no empty card — keeps name + primary muscle + equipment, shows a single
- * quiet explainer, and still renders history (it is derived from logs, not the
- * base record). The media header degrades video → form photo → barbell glyph;
- * a greyed player never appears. "Add to today's session" makes the page a
- * route into logging, not a dead end (AC-DET-06).
+ * history block. Custom/history-only lifts still render gracefully from logged
+ * metadata. The media header degrades form photo → barbell glyph. "Add to
+ * today's session" makes the page a route into logging, not a dead end
+ * (AC-DET-06).
  */
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   canonicalExerciseName,
   muscleInfoByName,
@@ -20,7 +18,6 @@ import {
   type MuscleGroup,
 } from '../data/exercises';
 import { equipmentIconName, equipmentLabel, MuscleBodyFigure } from '../components/Muscle';
-import { clipLen, clipSourceUrl, exerciseMedia } from '../data/exerciseMedia';
 import { addExercise, est1rm, recordWeight, startWorkout, topSet, useStore } from '../store';
 import { useT } from '../i18n';
 import { Icon, useIsDesktop } from '../ui';
@@ -29,6 +26,8 @@ import type { Shell } from '../App';
 const hideBroken = (e: { currentTarget: HTMLImageElement }) => {
   e.currentTarget.style.display = 'none';
 };
+
+type DetailPhoto = { src: string; label: string };
 
 export function ExerciseDetailView({
   name,
@@ -42,12 +41,13 @@ export function ExerciseDetailView({
   const { t } = useT();
   const store = useStore();
   const isDesktop = useIsDesktop();
+  const [photo, setPhoto] = useState<DetailPhoto | null>(null);
+  const [photoZoom, setPhotoZoom] = useState(1);
 
   const canonical = canonicalExerciseName(name);
   const info = muscleInfoByName(canonical);
   const rich = richExerciseByName(canonical);
-  const media = exerciseMedia(canonical);
-  const curated = !rich;
+  const hasBaseRecord = !!rich;
 
   const equipment = info?.equipment ?? rich?.equipment ?? null;
   const category = rich?.category ?? null;
@@ -91,6 +91,20 @@ export function ExerciseDetailView({
   }, [store.workouts, store.gyms]);
   const available = !!equipment && !!homeGym?.inventory && homeGym.inventory.includes(equipment);
 
+  useEffect(() => {
+    if (!photo) return undefined;
+    const prev = document.body.style.overflow;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPhoto(null);
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [photo]);
+
   function addToSession() {
     const open = store.workouts.find((w) => w.finishedAt === null);
     const w = open ?? startWorkout(null);
@@ -98,9 +112,12 @@ export function ExerciseDetailView({
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
 
-  const openSource = () => window.open(clipSourceUrl(canonical), '_blank', 'noopener');
+  function openPhoto(next: DetailPhoto) {
+    setPhoto(next);
+    setPhotoZoom(1);
+  }
 
-  // --- classification badges (RICH) / equipment-only (SPARSE) ---------------
+  // --- classification badges ------------------------------------------------
   const badgesRow = (
     <div className="exd-badges">
       {category && <span className="badge b-cat">{t.categoryNames[category]}</span>}
@@ -144,7 +161,7 @@ export function ExerciseDetailView({
               ))}
             </div>
           )}
-          <div className="exd-mlegend">{curated ? t.sparseMusclesNote : t.musclesLegend}</div>
+          <div className="exd-mlegend">{t.musclesLegend}</div>
         </div>
       </div>
     </div>
@@ -169,31 +186,29 @@ export function ExerciseDetailView({
       <h6 className="exd-label">{t.formPhotosLabel}</h6>
       <div className={`exd-formphotos${rich.images.length === 1 ? ' single' : ''}`}>
         {rich.images.slice(0, 2).map((src, i) => (
-          <div className="exd-formphoto" key={src}>
+          <button
+            className="exd-formphoto"
+            key={src}
+            onClick={() => openPhoto({ src, label: i === 0 ? t.photoStart : t.photoEnd })}
+            aria-label={`${t.openAction}: ${i === 0 ? t.photoStart : t.photoEnd}`}
+          >
             <img src={src} alt="" loading={i === 0 ? 'eager' : 'lazy'} onError={hideBroken} />
             <span className="exd-photo-label">{i === 0 ? t.photoStart : t.photoEnd}</span>
-          </div>
+          </button>
         ))}
       </div>
-    </div>
-  );
-
-  const sparseExplainer = curated && (
-    <div className="exd-sparse">
-      <Icon name="info" />
-      <p>{t.sparseExplainer}</p>
     </div>
   );
 
   const historySection = (
     <div className="exd-section">
       <h6 className="exd-label">{t.detailFromHistory}</h6>
-      <div className={`exd-tiles ${curated ? 'n2' : 'n4'}`}>
+      <div className={`exd-tiles ${hasBaseRecord ? 'n4' : 'n2'}`}>
         <div className="exd-tile">
           <div className="exd-tile-num ok">{record > 0 ? record : '—'}</div>
           <div className="exd-tile-label">{t.recordKg}</div>
         </div>
-        {!curated && (
+        {hasBaseRecord && (
           <div className="exd-tile">
             <div className="exd-tile-num">{est > 0 ? est : '—'}</div>
             <div className="exd-tile-label">{t.est1rmLabel}</div>
@@ -203,15 +218,14 @@ export function ExerciseDetailView({
           <div className="exd-tile-num">{sessions.length}</div>
           <div className="exd-tile-label">{t.detailSessions}</div>
         </div>
-        {!curated && (
+        {hasBaseRecord && (
           <div className="exd-tile">
             <div className="exd-tile-num">{lastTop > 0 ? lastTop : '—'}</div>
             <div className="exd-tile-label">{t.lastTop}</div>
           </div>
         )}
       </div>
-      {curated && <div className="exd-note">{t.historyDerivedNote}</div>}
-      {!curated && available && equipment && (
+      {available && equipment && (
         <div className="exd-avail">
           <Icon name="check-circle" weight="bold" />
           {t.availableAtGymLine(equipmentLabel(equipment))}
@@ -220,52 +234,21 @@ export function ExerciseDetailView({
     </div>
   );
 
-  const providerBar = media.kind === 'clip' && media.clip && (
-    <div className="exd-provider">
-      <Icon name="youtube-logo" />
-      <span className="exd-provider-txt">
-        {t.demonstration} · {media.clip.provider}
-        {isDesktop ? ` · ${t.embeddedAttribution}` : ''}
-      </span>
-      <button className="exd-open" onClick={openSource}>
-        {isDesktop ? t.openSource : t.openAction}
-      </button>
-    </div>
-  );
-
-  // --- media header: video → form photo → barbell glyph ---------------------
-  const renderVideo = (ratio: '16-9' | 'phone') => {
-    if (media.kind === 'clip') {
-      const len = media.clip ? clipLen(media.clip.lenSec) : '';
+  // --- media header: form photo → barbell glyph ----------------------------
+  const renderMedia = (ratio: '16-9' | 'phone') => {
+    if (rich?.images[0]) {
       return (
         <button
-          className={`exd-video clip ${ratio}`}
-          onClick={openSource}
-          aria-label={t.openAction}
+          className={`exd-media photo ${ratio}`}
+          onClick={() => openPhoto({ src: rich.images[0], label: canonical })}
+          aria-label={`${t.openAction}: ${canonical}`}
         >
-          <span className="exd-playbtn">
-            <Icon name="play" weight="fill" />
-          </span>
-          <span className="exd-scrub">
-            <span className="exd-time">0:00</span>
-            <span className="exd-track">
-              <span className="exd-fill" />
-            </span>
-            <span className="exd-time">{len}</span>
-            <Icon name="speaker-simple-slash" className="exd-mute" />
-          </span>
+          <img src={rich.images[0]} alt="" onError={hideBroken} />
         </button>
       );
     }
-    if (rich?.images[0]) {
-      return (
-        <div className={`exd-video photo ${ratio}`}>
-          <img src={rich.images[0]} alt="" onError={hideBroken} />
-        </div>
-      );
-    }
     return (
-      <div className={`exd-video none ${ratio}`}>
+      <div className={`exd-media none ${ratio}`}>
         <div className="exd-house">
           <Icon name="barbell" />
         </div>
@@ -277,9 +260,50 @@ export function ExerciseDetailView({
     <div>
       <div className="exd-title-row">
         <h2 className={`exd-title${lg ? ' lg' : ''}`}>{canonical}</h2>
-        {curated && <span className="badge b-ghost">{t.libCuratedTag}</span>}
       </div>
       {badgesRow}
+    </div>
+  );
+
+  const lightbox = photo && (
+    <div className="exd-lightbox" role="dialog" aria-modal="true">
+      <button className="exd-lightbox-scrim" onClick={() => setPhoto(null)} aria-label={t.cancel} />
+      <div className="exd-lightbox-top">
+        <div className="exd-lightbox-title">{photo.label}</div>
+        <button className="exd-lightbox-close" onClick={() => setPhoto(null)} aria-label={t.cancel}>
+          <Icon name="x" />
+        </button>
+      </div>
+      <div className="exd-lightbox-stage">
+        <img
+          src={photo.src}
+          alt=""
+          draggable={false}
+          onDoubleClick={() => setPhotoZoom((z) => (z > 1 ? 1 : 2.5))}
+          style={{
+            width: photoZoom > 1 ? `${Math.round(photoZoom * 100)}vw` : undefined,
+            maxWidth: photoZoom === 1 ? 'calc(100vw - 32px)' : 'none',
+            maxHeight: photoZoom === 1 ? 'calc(100dvh - 140px)' : 'none',
+          }}
+        />
+      </div>
+      <div className="exd-lightbox-controls">
+        <button
+          onClick={() => setPhotoZoom((z) => Math.max(1, Number((z - 0.5).toFixed(1))))}
+          aria-label="Zoom out"
+          disabled={photoZoom <= 1}
+        >
+          −
+        </button>
+        <span>{Math.round(photoZoom * 100)}%</span>
+        <button
+          onClick={() => setPhotoZoom((z) => Math.min(3, Number((z + 0.5).toFixed(1))))}
+          aria-label="Zoom in"
+          disabled={photoZoom >= 3}
+        >
+          <Icon name="plus" />
+        </button>
+      </div>
     </div>
   );
 
@@ -288,16 +312,14 @@ export function ExerciseDetailView({
     return (
       <div className="screen exd">
         <div className="exd-header">
-          {renderVideo('phone')}
+          {renderMedia('phone')}
           <button className="exd-back" onClick={onClose} aria-label={t.backAction}>
             <Icon name="caret-left" />
           </button>
         </div>
-        {providerBar}
         <div className="exd-body">
           {titleRow(false)}
           {musclesSection}
-          {sparseExplainer}
           {instructions}
           {formPhotos}
           {historySection}
@@ -306,6 +328,7 @@ export function ExerciseDetailView({
             {t.addToTodaySession}
           </button>
         </div>
+        {lightbox}
       </div>
     );
   }
@@ -321,14 +344,12 @@ export function ExerciseDetailView({
           <div className="exd-crumb">
             {t.exercisesTabLabel} / {canonical}
           </div>
-          {renderVideo('16-9')}
-          {providerBar}
+          {renderMedia('16-9')}
           {formPhotos}
         </div>
         <div className="exd-right">
           {titleRow(true)}
           {musclesSection}
-          {sparseExplainer}
           {instructions}
           {historySection}
           <div className="exd-actions">
@@ -345,6 +366,7 @@ export function ExerciseDetailView({
           </div>
         </div>
       </div>
+      {lightbox}
     </div>
   );
 }
