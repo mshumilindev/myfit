@@ -66,6 +66,8 @@ export interface Workout {
   gymId?: string | null;
   /** Program day name this session came from (e.g. "Push day"); null if none. */
   dayName?: string | null;
+  /** Muscle-only program-day targets that should guide exercise suggestions. */
+  targetMuscles?: string[];
   exercises: Exercise[];
 }
 

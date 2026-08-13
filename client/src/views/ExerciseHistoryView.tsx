@@ -4,8 +4,17 @@ import { muscleInfoByName } from '../data/exercises';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
 import { Icon } from '../ui';
 import { EquipChip, MuscleChip } from '../components/Muscle';
+import type { Shell } from '../App';
 
-export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: () => void }) {
+export function ExerciseHistoryView({
+  name,
+  shell,
+  onClose,
+}: {
+  name: string;
+  shell: Shell;
+  onClose: () => void;
+}) {
   const { t, locale } = useT();
   const store = useStore();
   const needle = name.trim().toLowerCase();
@@ -52,10 +61,21 @@ export function ExerciseHistoryView({ name, onClose }: { name: string; onClose: 
               <>
                 <div className="hist-chips">
                   {info && info.primary !== 'cardio' && (
-                    <MuscleChip muscle={info.primary} tone="primary" size="lg" />
+                    <MuscleChip
+                      muscle={info.primary}
+                      tone="primary"
+                      size="lg"
+                      onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
+                    />
                   )}
                   {info?.secondary.map((m) => (
-                    <MuscleChip key={m} muscle={m} tone="secondary" size="lg" />
+                    <MuscleChip
+                      key={m}
+                      muscle={m}
+                      tone="secondary"
+                      size="lg"
+                      onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
+                    />
                   ))}
                   {needs.map((id) => (
                     <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />

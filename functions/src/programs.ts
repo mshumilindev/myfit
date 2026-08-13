@@ -30,6 +30,7 @@ interface ProgramDoc {
   daysPerWeek: number;
   status: 'draft' | 'active' | 'archived';
   dayNames: Record<string, string>;
+  targetMuscles?: Record<string, string[]>;
   items: Array<{ day: number }>;
   updatedAt: number;
 }
@@ -97,7 +98,11 @@ export const setProgramStatus = onCall(async (req) => {
   if (!p || p.authorId !== uid) throw new HttpsError('permission-denied', 'not yours');
   if (status === 'active') {
     for (let day = 1; day <= p.daysPerWeek; day++) {
-      if (!(p.items ?? []).some((it) => Number(it.day) === day))
+      const key = String(day);
+      const hasItems = (p.items ?? []).some((it) => Number(it.day) === day);
+      const hasTargets =
+        Array.isArray(p.targetMuscles?.[key]) && (p.targetMuscles?.[key] ?? []).length > 0;
+      if (!hasItems && !hasTargets)
         throw new HttpsError('failed-precondition', 'incomplete', { day });
     }
   }

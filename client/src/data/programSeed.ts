@@ -5,7 +5,8 @@
  * module-level value (not the synced store) because it's a transient, local
  * navigation payload — taken exactly once.
  */
-import type { Workout, ExerciseKind } from '../types';
+import type { Exercise, Workout, ExerciseKind } from '../types';
+import { muscleInfoByName, type MuscleGroup } from './exercises';
 
 export interface ProgramSeedItem {
   id: string;
@@ -24,6 +25,7 @@ export interface ProgramSeed {
   weeks: number;
   daysPerWeek: number;
   dayNames: Record<string, string>;
+  targetMuscles: Record<string, MuscleGroup[]>;
   items: ProgramSeedItem[];
 }
 
@@ -47,6 +49,16 @@ export function takeProgramSeed(): ProgramSeed | null {
   return s;
 }
 
+/** Read without clearing; safe for React Strict Mode's duplicate dev renders. */
+export function peekProgramSeed(): ProgramSeed | null {
+  return pending;
+}
+
+/** Clear only after the Programs view has committed its initial draft. */
+export function clearProgramSeed(seed: ProgramSeed | null): void {
+  if (seed && pending === seed) pending = null;
+}
+
 /** Mon=1 … Sun=7 from a ms timestamp. */
 function weekday(ms: number): number {
   const d = new Date(ms).getDay();
@@ -60,6 +72,23 @@ function hasPlanworthyLift(w: Workout): boolean {
     }
     return ex.name.trim().length > 0 && (ex.sets.length > 0 || (ex.plannedSets ?? 0) > 0);
   });
+}
+
+function primaryMuscleOf(ex: Exercise): MuscleGroup | null {
+  const primary = ex.primaryMuscle ?? muscleInfoByName(ex.name)?.primary ?? null;
+  return primary && primary !== 'cardio' ? (primary as MuscleGroup) : null;
+}
+
+function targetMusclesForWorkout(w: Workout): MuscleGroup[] {
+  const order: MuscleGroup[] = [];
+  const counts = new Map<MuscleGroup, number>();
+  for (const ex of [...w.exercises].sort((a, b) => a.position - b.position)) {
+    const primary = primaryMuscleOf(ex);
+    if (!primary) continue;
+    if (!counts.has(primary)) order.push(primary);
+    counts.set(primary, (counts.get(primary) ?? 0) + Math.max(1, ex.sets.length));
+  }
+  return order.sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0)).slice(0, 4);
 }
 
 /**
@@ -98,6 +127,7 @@ export function buildProgramSeed(
   const recent = [...finished].sort((a, b) => b.startedAt - a.startedAt).slice(0, 14);
 
   const dayNames: Record<string, string> = {};
+  const targetMuscles: Record<string, MuscleGroup[]> = {};
   const trainedDays = new Set<number>();
   const latestByDay = new Map<number, Workout>();
   for (const w of recent) {
@@ -108,6 +138,10 @@ export function buildProgramSeed(
   }
 
   const items: ProgramSeedItem[] = [];
+  for (const [day, w] of latestByDay) {
+    const muscles = targetMusclesForWorkout(w);
+    if (muscles.length) targetMuscles[String(day)] = muscles;
+  }
   if (withLifts) {
     for (const [day, w] of latestByDay) {
       let position = 0;
@@ -136,5 +170,5 @@ export function buildProgramSeed(
   }
 
   const daysPerWeek = Math.max(1, Math.min(7, trainedDays.size));
-  return { name, weeks: 8, daysPerWeek, dayNames, items };
+  return { name, weeks: 8, daysPerWeek, dayNames, targetMuscles, items };
 }

@@ -146,18 +146,28 @@ export function ExerciseDetailView({
           {primaries.length > 0 && (
             <div className="exd-mrow-badges">
               {primaries.map((m) => (
-                <span key={m} className="badge b-mus-pri">
+                <button
+                  key={m}
+                  type="button"
+                  className="badge b-mus-pri"
+                  onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
+                >
                   {t.muscleGroups[m]}
-                </span>
+                </button>
               ))}
             </div>
           )}
           {secondaries.length > 0 && (
             <div className="exd-mrow-badges">
               {secondaries.map((m) => (
-                <span key={m} className="badge b-mus">
+                <button
+                  key={m}
+                  type="button"
+                  className="badge b-mus"
+                  onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
+                >
                   {t.muscleGroups[m]}
-                </span>
+                </button>
               ))}
             </div>
           )}
@@ -290,7 +300,7 @@ export function ExerciseDetailView({
       <div className="exd-lightbox-controls">
         <button
           onClick={() => setPhotoZoom((z) => Math.max(1, Number((z - 0.5).toFixed(1))))}
-          aria-label="Zoom out"
+          aria-label={t.zoomOut}
           disabled={photoZoom <= 1}
         >
           −
@@ -298,7 +308,7 @@ export function ExerciseDetailView({
         <span>{Math.round(photoZoom * 100)}%</span>
         <button
           onClick={() => setPhotoZoom((z) => Math.min(3, Number((z + 0.5).toFixed(1))))}
-          aria-label="Zoom in"
+          aria-label={t.zoomIn}
           disabled={photoZoom >= 3}
         >
           <Icon name="plus" />

@@ -733,15 +733,38 @@ export function MuscleChip({
   muscle,
   tone = 'primary',
   size = 'sm',
+  onClick,
 }: {
   muscle: MuscleGroup;
   tone?: Tone;
   size?: 'sm' | 'lg';
+  onClick?: (muscle: MuscleGroup) => void;
 }) {
   if (muscle === 'cardio') return null;
+  const interactive = !!onClick;
   return (
     <span
       className={`mchip mchip-fig${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={
+        interactive
+          ? (event) => {
+              event.stopPropagation();
+              onClick(muscle);
+            }
+          : undefined
+      }
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              event.stopPropagation();
+              onClick(muscle);
+            }
+          : undefined
+      }
     >
       <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
       {strings().muscleGroups[muscle]}
@@ -753,10 +776,41 @@ export function MuscleChip({
  * Muscle token with a set count (Ex suggestions AC-2/AC-3): the system
  * body-figure icon (worked region in brass) + the muscle name + count.
  */
-export function MuscleSetChip({ muscle, count }: { muscle: MuscleGroup; count?: number }) {
+export function MuscleSetChip({
+  muscle,
+  count,
+  onClick,
+}: {
+  muscle: MuscleGroup;
+  count?: number;
+  onClick?: (muscle: MuscleGroup) => void;
+}) {
   if (muscle === 'cardio') return null;
+  const interactive = !!onClick;
   return (
-    <span className="mworked-chip mworked-chip-fig">
+    <span
+      className="mworked-chip mworked-chip-fig"
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onClick={
+        interactive
+          ? (event) => {
+              event.stopPropagation();
+              onClick(muscle);
+            }
+          : undefined
+      }
+      onKeyDown={
+        interactive
+          ? (event) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return;
+              event.preventDefault();
+              event.stopPropagation();
+              onClick(muscle);
+            }
+          : undefined
+      }
+    >
       <MuscleIcon muscle={muscle} variant="chipFig" tone="primary" />
       <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
       {count !== undefined && <span className="mworked-count">{count}</span>}

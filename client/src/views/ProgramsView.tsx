@@ -8,9 +8,9 @@ import { ProgramAssignDialog } from './ProgramAssignDialog';
 import { programToCsv, type ProgramItemLike } from '../data/programCsv';
 import type { ExerciseKind } from '../types';
 import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
-import { MuscleChip, MuscleIcon, equipmentIconName } from '../components/Muscle';
+import { MUSCLE_IDS, MuscleChip, MuscleIcon, equipmentIconName } from '../components/Muscle';
 import { ProgramsTabs } from '../components/ProgramsTabs';
-import { takeProgramSeed } from '../data/programSeed';
+import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import {
   addExercise,
   backfillWorkout,
@@ -48,6 +48,10 @@ interface Program {
   status: 'draft' | 'active' | 'archived';
   authorId: string;
   dayNames: Record<string, string>;
+  /** Per-day target muscle groups. Lets a day prescribe *what to train* (e.g.
+   *  Chest, Triceps) without naming specific lifts; on the day these drive the
+   *  suggested exercises. Keyed by weekday number as a string, like dayNames. */
+  targetMuscles: Record<string, MuscleGroup[]>;
   items: ProgramItem[];
 }
 
@@ -78,6 +82,7 @@ function freshProgram(name: string): Program {
     status: 'draft',
     authorId: '',
     dayNames: {},
+    targetMuscles: {},
     items: [],
   };
 }
@@ -91,6 +96,27 @@ function normalizeItems(items: ProgramItem[]): ProgramItem[] {
       seen.set(item.day, next + 1);
       return { ...item, position: next, equipment: item.equipment ?? [] };
     });
+}
+
+/** Coerce a stored (or legacy/absent) target-muscle map to a clean shape so the
+ *  editor and Firestore never carry stray values. */
+function sanitizeTargetMuscles(tm: unknown): Record<string, MuscleGroup[]> {
+  const out: Record<string, MuscleGroup[]> = {};
+  if (tm && typeof tm === 'object') {
+    for (const [day, v] of Object.entries(tm as Record<string, unknown>)) {
+      if (Array.isArray(v)) {
+        const cleaned = v.filter((x): x is MuscleGroup => typeof x === 'string');
+        if (cleaned.length) out[day] = cleaned;
+      }
+    }
+  }
+  return out;
+}
+
+/** A program document straight from Firestore, with the fields the editor needs
+ *  guaranteed present (older programs predate target muscles). */
+function normalizeProgram<T extends Program>(p: T): T {
+  return { ...p, targetMuscles: sanitizeTargetMuscles(p.targetMuscles) };
 }
 
 function shortDayLabel(name: string): string {
@@ -111,7 +137,7 @@ export function ProgramsView({
   const { t } = useT();
   const store = useStore();
   const role = getRole();
-  const initialSeed = useMemo(() => takeProgramSeed(), []);
+  const initialSeed = useMemo(() => peekProgramSeed(), []);
   const [programs, setPrograms] = useState<Program[] | null>(null);
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [draft, setDraft] = useState<Program>(() =>
@@ -121,6 +147,7 @@ export function ProgramsView({
           weeks: initialSeed.weeks,
           daysPerWeek: initialSeed.daysPerWeek,
           dayNames: initialSeed.dayNames,
+          targetMuscles: sanitizeTargetMuscles(initialSeed.targetMuscles),
           items: normalizeItems(initialSeed.items as unknown as ProgramItem[]),
         }
       : freshProgram(t.progNew),
@@ -153,8 +180,9 @@ export function ProgramsView({
   }, [selectedId]);
   const dragItem = useRef<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  // Consume a program seed handed off from the Today "Suggest a program" banner
-  // in the initial state, so the editor opens prefilled on the first render.
+  useEffect(() => {
+    clearProgramSeed(initialSeed);
+  }, [initialSeed]);
   // Programs / Exercises tab (AC-LIBTAB). Gallery filter state is lifted so it
   // survives tab switches; the programs body stays mounted (hidden) so the
   // week strip, program list and any draft are never reset (AC-LIBTAB-04).
@@ -173,10 +201,10 @@ export function ProgramsView({
             data.assignment
               ? {
                   ...data.assignment,
-                  program: {
+                  program: normalizeProgram({
                     ...data.assignment.program,
                     items: normalizeItems(data.assignment.program.items),
-                  },
+                  }),
                 }
               : null,
           );
@@ -193,7 +221,7 @@ export function ProgramsView({
     getDocs(query(collection(db, 'programs'), where('authorId', '==', uid)))
       .then((snap) => {
         const list = snap.docs
-          .map((d) => d.data() as Program & { updatedAt?: number })
+          .map((d) => normalizeProgram(d.data() as Program & { updatedAt?: number }))
           .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
         setFailed(false);
         setPrograms(list);
@@ -285,6 +313,18 @@ export function ProgramsView({
       if (name.trim()) dayNames[String(day)] = name;
       else delete dayNames[String(day)];
       return { ...p, dayNames };
+    });
+  }
+
+  function toggleTargetMuscle(day: number, muscle: MuscleGroup) {
+    setDraft((p) => {
+      const targetMuscles = { ...p.targetMuscles };
+      const key = String(day);
+      const cur = targetMuscles[key] ?? [];
+      const next = cur.includes(muscle) ? cur.filter((m) => m !== muscle) : [...cur, muscle];
+      if (next.length) targetMuscles[key] = next;
+      else delete targetMuscles[key];
+      return { ...p, targetMuscles };
     });
   }
 
@@ -467,6 +507,10 @@ export function ProgramsView({
       return {
         ...p,
         items: normalizeItems([...p.items.filter((item) => item.day !== targetDay), ...copied]),
+        targetMuscles: {
+          ...p.targetMuscles,
+          [String(targetDay)]: [...(p.targetMuscles[String(selectedDay)] ?? [])],
+        },
       };
     });
     setSelectedDay(targetDay);
@@ -508,6 +552,7 @@ export function ProgramsView({
         daysPerWeek,
         status: draft.status ?? 'draft',
         dayNames: draft.dayNames ?? {},
+        targetMuscles: sanitizeTargetMuscles(draft.targetMuscles),
         items,
         updatedAt: Date.now(),
       };
@@ -1229,7 +1274,6 @@ export function ProgramsView({
                     <span>{t.progWeeksWord(draft.weeks)}</span>
                   </label>
                   <span>·</span>
-                  {/* Reuse the compact switch treatment for this boolean row. */}
                   <label
                     className={`program-openended program-openended-inline prog-switch-field${
                       draft.weeks === 0 ? ' on' : ''
@@ -1444,6 +1488,30 @@ export function ProgramsView({
                 </button>
               </div>
             </div>
+
+            {/* Per-day target muscles: build a day from what it trains, with or
+                without naming lifts. On the day these drive suggested exercises. */}
+            <div className="program-day-targets">
+              <div className="field-label">{t.progTargetMuscles}</div>
+              <div className="exl-chips">
+                {MUSCLE_IDS.map((m) => {
+                  const on = (draft.targetMuscles?.[String(selectedDay)] ?? []).includes(m);
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      className={`badge b-mus${on ? ' is-active' : ''}`}
+                      aria-pressed={on}
+                      onClick={() => toggleTargetMuscle(selectedDay, m)}
+                    >
+                      {t.muscleGroups[m]}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="program-day-targets-hint">{t.progTargetHint}</div>
+            </div>
+
             {selectedDayItems.length === 0 && (
               <div className="program-day-empty">
                 <span className="pde-icon">
@@ -1560,6 +1628,18 @@ export function ProgramsView({
                       placeholder={t.addExercise}
                       onChange={(e) => patchItem(item.id, { name: e.target.value })}
                     />
+                    {item.name.trim() && (
+                      <button
+                        className="pir-history"
+                        aria-label={t.openHistory}
+                        title={t.openHistory}
+                        onClick={() =>
+                          shell.openOverlay({ screen: 'exercise-history', name: item.name })
+                        }
+                      >
+                        <Icon name="clock-counter-clockwise" />
+                      </button>
+                    )}
                     {item.kind === 'strength' && (
                       <button
                         className={`pdr-drop pir-droplast${item.dropLast ? '' : ' off'}`}
@@ -1681,10 +1761,14 @@ export function ProgramsView({
                     <h6>{t.thisDayCovers}</h6>
                     <div className="rail-chips">
                       {dayMuscles.map((m) => (
-                        <span key={m} className="fchip" style={{ cursor: 'default' }}>
+                        <button
+                          key={m}
+                          className="fchip"
+                          onClick={() => shell.openOverlay({ screen: 'muscle-history', muscle: m })}
+                        >
                           <MuscleIcon muscle={m} variant="chip" tone="primary" />
                           {t.muscleGroups[m]}
-                        </span>
+                        </button>
                       ))}
                     </div>
                     <p className="rail-note">{t.dayCoversNote}</p>

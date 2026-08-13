@@ -138,7 +138,9 @@ export function drawShareCard(canvas: HTMLCanvasElement, m: ShareModel, format: 
   ctx.letterSpacing = '3px';
   ctx.fillText(m.heroLabel.toUpperCase(), padX, y);
   ctx.restore();
-  y += story ? 130 : 100;
+  // Clear the hero value's full cap height below the label so the big tonnage
+  // never rides up into the "TOTAL VOLUME" line.
+  y += story ? 168 : 130;
   ctx.fillStyle = C.text;
   ctx.font = `800 ${story ? 176 : 128}px ${FONT}`;
   ctx.fillText(m.heroValue, padX, y);

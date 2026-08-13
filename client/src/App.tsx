@@ -32,6 +32,7 @@ import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
 import type { SyncError, Notice } from './types';
+import type { MuscleGroup } from './data/exercises';
 
 const OnboardingView = lazy(() =>
   import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
@@ -60,6 +61,11 @@ const SessionView = lazy(() =>
 const ExerciseHistoryView = lazy(() =>
   import('./views/ExerciseHistoryView').then((module) => ({
     default: module.ExerciseHistoryView,
+  })),
+);
+const MuscleHistoryView = lazy(() =>
+  import('./views/MuscleHistoryView').then((module) => ({
+    default: module.MuscleHistoryView,
   })),
 );
 const ExerciseLibraryView = lazy(() =>
@@ -104,6 +110,7 @@ export type Overlay =
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
   | { screen: 'exercise-detail'; name: string }
+  | { screen: 'muscle-history'; muscle: MuscleGroup }
   | { screen: 'settings' }
   | { screen: 'history' }
   | { screen: 'templates' }
@@ -185,6 +192,7 @@ function toHash(tab: Tab, overlay: Overlay, programsExercises: boolean, libMine:
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
   if (overlay?.screen === 'exercise-detail')
     return `#/exercise-detail/${encodeURIComponent(overlay.name)}`;
+  if (overlay?.screen === 'muscle-history') return `#/muscle/${encodeURIComponent(overlay.muscle)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
   if (overlay?.screen === 'library')
@@ -212,6 +220,11 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return {
       tab: 'programs',
       overlay: { screen: 'exercise-detail', name: decodeURIComponent(parts[1]) },
+    };
+  if (head === 'muscle' && parts[1])
+    return {
+      tab: 'progress',
+      overlay: { screen: 'muscle-history', muscle: decodeURIComponent(parts[1]) as MuscleGroup },
     };
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
@@ -563,10 +576,13 @@ export function App() {
             />
           )}
           {activeOverlay?.screen === 'exercise-history' && (
-            <ExerciseHistoryView name={activeOverlay.name} onClose={closeOverlay} />
+            <ExerciseHistoryView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
           )}
           {activeOverlay?.screen === 'exercise-detail' && (
             <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'muscle-history' && (
+            <MuscleHistoryView muscle={activeOverlay.muscle} shell={shell} onClose={closeOverlay} />
           )}
           {activeOverlay?.screen === 'settings' && role === 'admin' && (
             <SettingsView onClose={closeOverlay} />
@@ -596,7 +612,7 @@ export function App() {
           <>
             <Suspense fallback={<ScreenFallback />}>
               {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
-              {effectiveTab === 'progress' && <ProgressView store={store} />}
+              {effectiveTab === 'progress' && <ProgressView store={store} shell={shell} />}
               {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}
               {effectiveTab === 'people' &&
                 (role === 'trainer' ? (

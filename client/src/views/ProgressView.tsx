@@ -15,6 +15,7 @@ import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
 import { EmptyState, Icon } from '../ui';
 import { EquipChip, MuscleChip, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
+import type { Shell } from '../App';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -27,7 +28,7 @@ function weekStart(ts: number): number {
   return d.getTime();
 }
 
-export function ProgressView({ store }: { store: Store }) {
+export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
   const { t, locale } = useT();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
@@ -35,6 +36,8 @@ export function ProgressView({ store }: { store: Store }) {
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
+  const openMuscleHistory = (muscle: MuscleGroup) =>
+    shell.openOverlay({ screen: 'muscle-history', muscle });
 
   // Weekly volume, current week last, 10 columns.
   const thisWeek = weekStart(nowTs);
@@ -231,6 +234,7 @@ export function ProgressView({ store }: { store: Store }) {
                 setSelMuscle(m);
                 const candidate = ranked.find(([name]) => muscleInfoByName(name)?.primary === m);
                 if (candidate) setSelectedName(candidate[0]);
+                if (!showDesktopDetail) openMuscleHistory(m);
               }}
             >
               {row}
@@ -361,11 +365,21 @@ export function ProgressView({ store }: { store: Store }) {
                 <div key={group.muscle ?? 'other'} className="record-group">
                   <div className="record-group-head">
                     {group.muscle ? (
-                      <MuscleIcon muscle={group.muscle} variant="row" tone="primary" />
+                      <button
+                        className="record-group-muscle"
+                        onClick={() => openMuscleHistory(group.muscle as MuscleGroup)}
+                      >
+                        <MuscleIcon muscle={group.muscle} variant="row" tone="primary" />
+                      </button>
                     ) : (
                       <Icon name="barbell" />
                     )}
-                    <span>{group.muscle ? t.muscleGroups[group.muscle] : t.recordsOther}</span>
+                    <button
+                      className="record-group-title"
+                      onClick={() => group.muscle && openMuscleHistory(group.muscle)}
+                    >
+                      {group.muscle ? t.muscleGroups[group.muscle] : t.recordsOther}
+                    </button>
                   </div>
                   {group.rows.map(([name, r]) => {
                     const wksAgo = Math.floor((nowTs - r.recTs) / WEEK_MS);
@@ -375,7 +389,10 @@ export function ProgressView({ store }: { store: Store }) {
                         className={`record-row${
                           showDesktopDetail && selected?.[0] === name ? ' selected' : ''
                         }`}
-                        onClick={() => setSelectedName(name)}
+                        onClick={() => {
+                          if (showDesktopDetail) setSelectedName(name);
+                          else shell.openOverlay({ screen: 'exercise-history', name });
+                        }}
                       >
                         <span className="n">{name}</span>
                         <span className="v">{r.recW} kg</span>
@@ -397,7 +414,15 @@ export function ProgressView({ store }: { store: Store }) {
       {showDesktopDetail && selected && selectedRecord && (
         <section className="progress-detail-pane">
           <div>
-            <h3>{selected[0]}</h3>
+            <div className="progress-detail-title">
+              <h3>{selected[0]}</h3>
+              <button
+                className="link"
+                onClick={() => shell.openOverlay({ screen: 'exercise-history', name: selected[0] })}
+              >
+                {t.fullHistory}
+              </button>
+            </div>
             {(() => {
               const info = muscleInfoByName(selected[0]);
               const needs = exerciseNeeds(selected[0]);
@@ -406,10 +431,21 @@ export function ProgressView({ store }: { store: Store }) {
               return (
                 <div className="hist-chips" style={{ alignItems: 'center' }}>
                   {info && info.primary !== 'cardio' && (
-                    <MuscleChip muscle={info.primary} tone="primary" size="lg" />
+                    <MuscleChip
+                      muscle={info.primary}
+                      tone="primary"
+                      size="lg"
+                      onClick={openMuscleHistory}
+                    />
                   )}
                   {info?.secondary.map((m) => (
-                    <MuscleChip key={m} muscle={m} tone="secondary" size="lg" />
+                    <MuscleChip
+                      key={m}
+                      muscle={m}
+                      tone="secondary"
+                      size="lg"
+                      onClick={openMuscleHistory}
+                    />
                   ))}
                   {needs.map((id) => (
                     <EquipChip key={id} id={id} style={{ padding: '4px 9px', fontSize: 11 }} />

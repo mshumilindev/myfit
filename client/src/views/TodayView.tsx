@@ -105,6 +105,8 @@ interface ProgramAssignment {
     weeks: number;
     daysPerWeek: number;
     dayNames?: Record<string, string>;
+    /** Per-day target muscle groups (muscle-only or mixed days). */
+    targetMuscles?: Record<string, MuscleGroup[]>;
     items: ProgramItem[];
   };
   assignedBy: string | null;
@@ -145,6 +147,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [addWeightOpen, setAddWeightOpen] = useState(false);
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
   const [progSheetOpen, setProgSheetOpen] = useState(false);
+  const openMuscleHistory = (muscle: MuscleGroup) =>
+    shell.openOverlay({ screen: 'muscle-history', muscle });
   const [progChoice, setProgChoice] = useState<'week' | 'week-lifts'>('week-lifts');
   const [, setProgDismissTick] = useState(0);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
@@ -177,10 +181,25 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const hasHistory = finished.length > 0;
   const programReadiness = useMemo(() => programSuggestionReadiness(finished), [finished]);
 
+  // Already trained today? Once a session for the current calendar day is
+  // logged, the "what to do today" suggestion has served its purpose.
+  const trainedToday = (() => {
+    const n = new Date(now);
+    return finished.some((w) => {
+      const d = new Date(w.startedAt);
+      return (
+        d.getFullYear() === n.getFullYear() &&
+        d.getMonth() === n.getMonth() &&
+        d.getDate() === n.getDate()
+      );
+    });
+  })();
+
   // "Likely today" prediction (Today plaque): the usual split + start time for
-  // this weekday, from history. Hidden mid-session or without weekday history.
+  // this weekday, from history. Hidden mid-session, without weekday history, or
+  // once today's session is already logged.
   const prediction = (() => {
-    if (open) return null;
+    if (open || trainedToday) return null;
     const dow = new Date(now).getDay();
     const sameDow = finished
       .filter((w) => new Date(w.startedAt).getDay() === dow)
@@ -317,17 +336,21 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     const items = assignment.program.items
       .filter((item) => item.day === day)
       .sort((a, b) => a.position - b.position);
-    const w = startWorkout(null);
-    for (const item of items) {
-      addExercise(w.id, item.name, item.kind, {
-        plannedSets: item.kind === 'strength' ? item.sets : 1,
-        plannedReps: item.kind === 'strength' ? item.reps : null,
-        plannedDurationMin: item.kind === 'strength' ? null : (item.durationMin ?? 10),
-        equipment: item.equipment,
-        // A prescribed superset arrives grouped (EQ-2 → SS-1).
-        groupId: item.groupId ?? null,
-        groupOrder: item.groupOrder ?? null,
-      });
+    const dayName = assignment.program.dayNames?.[String(day)] || t.progDay(day);
+    const targetMuscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+    const w = startWorkout(null, { dayName, targetMuscles });
+    if (items.length > 0) {
+      for (const item of items) {
+        addExercise(w.id, item.name, item.kind, {
+          plannedSets: item.kind === 'strength' ? item.sets : 1,
+          plannedReps: item.kind === 'strength' ? item.reps : null,
+          plannedDurationMin: item.kind === 'strength' ? null : (item.durationMin ?? 10),
+          equipment: item.equipment,
+          // A prescribed superset arrives grouped (EQ-2 → SS-1).
+          groupId: item.groupId ?? null,
+          groupOrder: item.groupOrder ?? null,
+        });
+      }
     }
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
@@ -455,16 +478,21 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           const equipment = [
             ...new Set(items.flatMap((item) => item.equipment ?? [])),
           ] as EquipmentId[];
-          const hasPlan = items.length > 0;
+          const dayMuscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+          // A day is a real training day if it prescribes lifts OR names target
+          // muscles (a muscle-only day — we suggest the lifts on the day).
+          const hasPlan = items.length > 0 || dayMuscles.length > 0;
           const dayName = assignment.program.dayNames?.[day] || t.progDay(day);
           const setCount = items.reduce(
             (sum, item) => sum + (item.kind === 'strength' ? item.sets : 1),
             0,
           );
           const summary =
-            items.length === 1
-              ? compactProgramDaySummary(items)
-              : t.progDayWorkoutSummary(items.length, setCount);
+            items.length === 0 && dayMuscles.length > 0
+              ? dayMuscles.map((m) => t.muscleGroups[m]).join(' · ')
+              : items.length === 1
+                ? compactProgramDaySummary(items)
+                : t.progDayWorkoutSummary(items.length, setCount);
           return (
             <button
               key={day}
@@ -705,7 +733,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         {suggestOn && (
                           <td className="td-muscles">
                             {sessionMuscles(w).map((m) => (
-                              <MuscleChip key={m} muscle={m} tone="secondary" />
+                              <MuscleChip
+                                key={m}
+                                muscle={m}
+                                tone="secondary"
+                                onClick={openMuscleHistory}
+                              />
                             ))}
                           </td>
                         )}
@@ -734,7 +767,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       {suggestOn && sessionMuscles(w).length > 0 && (
                         <div className="recent-muscles">
                           {sessionMuscles(w).map((m) => (
-                            <MuscleChip key={m} muscle={m} tone="secondary" />
+                            <MuscleChip
+                              key={m}
+                              muscle={m}
+                              tone="secondary"
+                              onClick={openMuscleHistory}
+                            />
                           ))}
                         </div>
                       )}
@@ -850,7 +888,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         {suggestOn && (
                           <td className="td-muscles">
                             {sessionMuscles(w).map((m) => (
-                              <MuscleChip key={m} muscle={m} tone="secondary" />
+                              <MuscleChip
+                                key={m}
+                                muscle={m}
+                                tone="secondary"
+                                onClick={openMuscleHistory}
+                              />
                             ))}
                           </td>
                         )}
@@ -885,7 +928,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       {suggestOn && sessionMuscles(w).length > 0 && (
                         <div className="recent-muscles">
                           {sessionMuscles(w).map((m) => (
-                            <MuscleChip key={m} muscle={m} tone="secondary" />
+                            <MuscleChip
+                              key={m}
+                              muscle={m}
+                              tone="secondary"
+                              onClick={openMuscleHistory}
+                            />
                           ))}
                         </div>
                       )}
@@ -945,11 +993,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             {records.map(([name, r]) => {
               const recent = now - r.recTs < 14 * DAY_MS;
               return (
-                <div key={name} className="record-row">
+                <button
+                  key={name}
+                  className="record-row"
+                  onClick={() => shell.openOverlay({ screen: 'exercise-history', name })}
+                >
                   <span className="n">{name}</span>
                   <span className="v">{r.recW} kg</span>
                   {recent && <span className="tag tag-ok">{t.record}</span>}
-                </div>
+                </button>
               );
             })}
           </>

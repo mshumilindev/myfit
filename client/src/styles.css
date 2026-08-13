@@ -22,6 +22,13 @@
   --color-accent-800: #5b4420;
   --color-accent-900: #342713;
 
+  --color-rest-200: #d9f3ff;
+  --color-rest-300: #b8e9fb;
+  --color-rest-400: #83d3ee;
+  --color-rest-700: #24738d;
+  --color-rest-800: #164a5c;
+  --color-rest-900: #102b36;
+
   --color-neutral-100: #f5f6f7;
   --color-neutral-200: #e6e8ea;
   --color-neutral-300: #d0d3d6;
@@ -323,7 +330,7 @@ i > svg {
   border: none;
   padding: 0;
   font-size: 12px;
-  color: var(--color-neutral-600);
+  color: var(--color-rest-300);
   cursor: pointer;
 }
 
@@ -2695,6 +2702,37 @@ i > svg {
   font-size: 13px;
 }
 
+.program-item-row .pir-name {
+  position: relative;
+}
+
+.program-item-row .pir-history {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-neutral-500);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.program-item-row .pir-history:hover,
+.program-item-row .pir-history:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-accent-200);
+  outline: none;
+}
+
+.program-item-row .pir-name > .input {
+  padding-right: 40px;
+}
+
 .program-item-row .trash {
   width: 34px;
   height: 34px;
@@ -3672,6 +3710,33 @@ i > svg {
 .record-group-head > .ui-icon {
   font-size: 19px;
   color: var(--color-accent);
+}
+.record-group-muscle,
+.record-group-title {
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.record-group-muscle:focus-visible,
+.record-group-title:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.progress-detail-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.progress-detail-title h3 {
+  margin: 0;
 }
 
 .record-row {
@@ -6960,9 +7025,16 @@ i > svg {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  width: 100%;
   min-height: 52px;
   padding: 10px 12px;
+  border: 0;
+  background: none;
   box-shadow: inset 0 -1px 0 var(--color-divider);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 .profile-row:last-child {
   box-shadow: none;
@@ -11027,6 +11099,24 @@ h6 {
   font-size: 11px;
   line-height: 0;
 }
+.mchip[role='button'],
+.mworked-chip[role='button'],
+.inline-drill {
+  cursor: pointer;
+}
+.mchip[role='button']:focus-visible,
+.mworked-chip[role='button']:focus-visible,
+.inline-drill:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.inline-drill {
+  color: inherit;
+  text-decoration: none;
+}
+.inline-drill:hover {
+  color: var(--color-accent-200);
+}
 
 .exercise-chips {
   display: flex;
@@ -13698,22 +13788,20 @@ button.exd-media {
 .session-live .set-rest {
   padding-right: 36px;
 }
-/* Rest shown at the top of a card = time since the previous exercise's last
-   set. Left-aligned, brass, with a divider so it reads as the transition. */
 .set-rest.inter-card {
   justify-content: flex-start;
   gap: 6px;
-  color: var(--color-accent-300);
+  color: var(--color-rest-300);
   padding-left: 8px;
   margin-bottom: 2px;
   box-shadow: inset 0 1px 0 var(--color-divider);
 }
 .set-rest.inter-card > .ui-icon {
   font-size: 13px;
-  color: var(--color-accent-800);
+  color: var(--color-rest-400);
 }
 .session-live .set-rest.inter-card {
-  padding-right: 8px;
+  padding-right: 36px;
 }
 /* "−30s" manual rest trim on the live rest strips. */
 .rest-trim {
@@ -13742,7 +13830,7 @@ button.exd-media {
   place-items: center;
   border: none;
   background: none;
-  color: var(--color-neutral-500);
+  color: var(--color-rest-300);
   border-radius: var(--radius-sm);
   cursor: pointer;
   padding: 0;
@@ -13780,7 +13868,7 @@ button.exd-media {
 }
 .ex-resting > .ui-icon {
   font-size: 13px;
-  color: var(--color-accent-800);
+  color: var(--color-rest-400);
   position: relative;
   top: 0.5px; /* optical-center the glyph against the small caption text */
 }
@@ -13854,8 +13942,8 @@ button.exd-media {
   border-radius: 999px;
 }
 .rest-strip {
-  background: var(--color-accent-900);
-  color: var(--color-accent-200);
+  background: var(--color-rest-900);
+  color: var(--color-rest-200);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 .rest-strip > .ui-icon {
@@ -13866,13 +13954,13 @@ button.exd-media {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-accent-200);
+  color: var(--color-rest-300);
 }
 .rest-strip .rest-clock {
   font-size: 16px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--color-text);
+  color: var(--color-rest-200);
 }
 
 /* Content that isn't inside a card needs the same side gutter as everything
@@ -16289,6 +16377,32 @@ button.badge {
 /* The open-ended toggle is inline in this row, so drop the standalone spacing. */
 .program-meta-edit .program-openended {
   margin-top: 0;
+}
+
+.program-day-targets {
+  display: grid;
+  gap: 10px;
+  padding: 12px 0 16px;
+}
+
+.program-day-targets .exl-chips {
+  gap: 8px;
+}
+
+.program-day-targets .badge {
+  min-height: 32px;
+}
+
+.program-day-targets .badge.is-active {
+  border-color: var(--color-accent-600);
+  color: var(--color-accent-100);
+  background: rgba(217, 162, 79, 0.16);
+}
+
+.program-day-targets-hint {
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 @media (min-width: 960px) {

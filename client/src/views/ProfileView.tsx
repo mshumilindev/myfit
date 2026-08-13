@@ -742,7 +742,13 @@ export function ProfileView({
               ) : (
                 <div className="profile-list">
                   {load.topExercises.map((ex) => (
-                    <div key={ex.name} className="profile-row">
+                    <button
+                      key={ex.name}
+                      className="profile-row"
+                      onClick={() =>
+                        shell.openOverlay({ screen: 'exercise-history', name: ex.name })
+                      }
+                    >
                       <span>
                         <span className="n">{ex.name}</span>
                         <span className="s">
@@ -753,7 +759,7 @@ export function ProfileView({
                         <span className="n">{fmtTonnes(ex.volumeKg)}</span>
                         <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}

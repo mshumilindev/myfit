@@ -376,8 +376,36 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                         <span>
                           <strong>{fmtDayMonth(workout.startedAt, locale)}</strong>
                           <small>
-                            {workout.exercises.map((exercise) => exercise.name).join(' · ') ||
-                              t.noExercisesYet}
+                            {workout.exercises.length > 0
+                              ? workout.exercises.map((exercise, index) => (
+                                  <span key={exercise.id}>
+                                    {index > 0 && ' · '}
+                                    <span
+                                      className="inline-drill"
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        shell.openOverlay({
+                                          screen: 'exercise-history',
+                                          name: exercise.name,
+                                        });
+                                      }}
+                                      onKeyDown={(event) => {
+                                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        shell.openOverlay({
+                                          screen: 'exercise-history',
+                                          name: exercise.name,
+                                        });
+                                      }}
+                                    >
+                                      {exercise.name}
+                                    </span>
+                                  </span>
+                                ))
+                              : t.noExercisesYet}
                           </small>
                         </span>
                         <span>

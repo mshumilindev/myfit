@@ -69,7 +69,14 @@ import {
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { describeDay, dayReadoutLabel, exerciseDay, type TrainingDay } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
-import { muscleInfoByName, secondaryMusclesOf, type MuscleGroup } from '../data/exercises';
+import {
+  BUILT_IN_CATALOG,
+  muscleInfoByName,
+  richExerciseById,
+  searchCatalog,
+  secondaryMusclesOf,
+  type MuscleGroup,
+} from '../data/exercises';
 import {
   fmtClock,
   fmtDayMonth,
@@ -85,10 +92,10 @@ import {
 } from '../i18n';
 import { ConfirmDialog, Dialog, EmptyState, Icon, Sheet, Switch, useIsDesktop } from '../ui';
 import { LOCALE_IDS, fmtWeekday } from '../i18n';
-import { BUILT_IN_CATALOG, searchCatalog } from '../data/exercises';
 import { getRole } from '../api';
 
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
+const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
 /** m:ss for rest durations (pure — safe in render). */
 function mmss(ms: number): string {
@@ -287,6 +294,8 @@ export function SessionView(props: {
   const startAddConsumed = useRef(false);
 
   const live = !!workout && workout.finishedAt === null && !props.past;
+  const openMuscleHistory = (muscle: MuscleGroup) =>
+    props.shell.openOverlay({ screen: 'muscle-history', muscle });
 
   // Rest count-ups only tick while the session is live — they must freeze the
   // moment the workout is finished or discarded (no ticking on a past session).
@@ -690,9 +699,11 @@ export function SessionView(props: {
         )}
         {showChips && (
           <div className="exercise-chips">
-            {muscles.primary && <MuscleChip muscle={muscles.primary} tone="primary" />}
+            {muscles.primary && (
+              <MuscleChip muscle={muscles.primary} tone="primary" onClick={openMuscleHistory} />
+            )}
             {muscles.secondary.map((m) => (
-              <MuscleChip key={m} muscle={m} tone="secondary" />
+              <MuscleChip key={m} muscle={m} tone="secondary" onClick={openMuscleHistory} />
             ))}
             {equipment.map((id) => (
               <EquipChip key={id} id={id} />
@@ -1084,9 +1095,9 @@ export function SessionView(props: {
     if (prevW) {
       for (const e of workout.exercises) {
         if (!isStrengthExercise(e)) continue;
-        const vol = e.sets.reduce((s, x) => s + (x.weight ?? 0) * x.reps, 0);
+        const vol = exerciseVolumeKg(e);
         const prevEx = prevW.exercises.find((p) => p.name.toLowerCase() === e.name.toLowerCase());
-        const prevVol = prevEx ? prevEx.sets.reduce((s, x) => s + (x.weight ?? 0) * x.reps, 0) : 0;
+        const prevVol = prevEx ? exerciseVolumeKg(prevEx) : 0;
         compare.push({
           name: e.name,
           v: fmtKg(vol),
@@ -1156,7 +1167,7 @@ export function SessionView(props: {
                 <div className="section-label">{t.muscleGroupsWorked}</div>
                 <div className="mworked-row">
                   {entries.map(([m, n]) => (
-                    <MuscleSetChip key={m} muscle={m} count={n} />
+                    <MuscleSetChip key={m} muscle={m} count={n} onClick={openMuscleHistory} />
                   ))}
                 </div>
               </div>
@@ -1362,7 +1373,7 @@ export function SessionView(props: {
                 </div>
                 <div className="mworked-row">
                   {entries.map(([m, n]) => (
-                    <MuscleSetChip key={m} muscle={m} count={n} />
+                    <MuscleSetChip key={m} muscle={m} count={n} onClick={openMuscleHistory} />
                   ))}
                 </div>
               </div>
@@ -2162,9 +2173,10 @@ function AddExerciseSheet(props: {
     //   • several in one split       → the split ("Pull"),
     //   • several across splits      → the actual groups ("Shoulders + Back"),
     //   • many groups                → full body.
-    // Reference: this session's own logged exercises, else the most recent
-    // session on this weekday, else the most recent session overall. Groups are
-    // ordered by the exercise trained first, so the main lift leads the label.
+    // Reference: program-day targets, else this session's own logged exercises,
+    // else the most recent session on this weekday, else the most recent session
+    // overall. Groups are ordered by the exercise trained first, so the main
+    // lift leads the label.
     const weekday = new Date(props.workout.startedAt).getDay();
     const past = store.workouts
       .filter((w) => w.finishedAt !== null && w.id !== props.workout.id)
@@ -2181,8 +2193,17 @@ function AddExerciseSheet(props: {
       }
       return order.map((m) => [m, counts.get(m) as number]);
     };
-    let refGroups = orderedGroups(props.workout, true);
-    let from: 'logged' | 'weekday' | 'overall' | null = refGroups.length ? 'logged' : null;
+    const programTargets = (props.workout.targetMuscles ?? []).filter((m): m is MuscleGroup =>
+      PICKER_TARGET_MUSCLES.has(m),
+    );
+    let refGroups: [MuscleGroup, number][] = programTargets.map((m) => [m, 1]);
+    let from: 'program' | 'logged' | 'weekday' | 'overall' | null = refGroups.length
+      ? 'program'
+      : null;
+    if (!refGroups.length) {
+      refGroups = orderedGroups(props.workout, true);
+      if (refGroups.length) from = 'logged';
+    }
     if (!refGroups.length) {
       const sameWd = past.find((w) => new Date(w.startedAt).getDay() === weekday);
       if (sameWd) {
@@ -2235,7 +2256,38 @@ function AddExerciseSheet(props: {
       }))
       .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
     const visible = needle ? all.filter((x) => x.name.toLowerCase().includes(needle)) : all;
-    const suggested = readout ? visible.filter((x) => matchesReadout(x.primary)).slice(0, 4) : [];
+    const targetSet = new Set(refGroups.map(([m]) => m));
+    const suggestionScore = (x: Cand): number => {
+      const rich = richExerciseById(x.id);
+      let score = 0;
+      if (targetSet.has(x.primary)) score += 80;
+      for (const m of x.secondary) {
+        if (targetSet.has(m)) score += 18;
+      }
+      if (rich?.category === 'strength') score += 18;
+      else if (rich?.category === 'powerlifting') score += 10;
+      else if (rich?.category === 'stretching') score -= 20;
+      else if (rich?.category === 'plyometrics') score -= 8;
+      if (rich?.level === 'beginner') score += 8;
+      else if (rich?.level === 'intermediate') score += 5;
+      else if (rich?.level === 'expert') score -= 8;
+      if (
+        x.equipment === 'body' ||
+        x.equipment === 'dumbbell' ||
+        x.equipment === 'barbell' ||
+        x.equipment === 'cable' ||
+        x.equipment === 'machine'
+      ) {
+        score += 4;
+      }
+      return score - x.name.length / 100;
+    };
+    const suggested = readout
+      ? visible
+          .filter((x) => matchesReadout(x.primary))
+          .sort((a, b) => suggestionScore(b) - suggestionScore(a) || a.name.localeCompare(b.name))
+          .slice(0, 4)
+      : [];
     const suggestedIds = new Set(suggested.map((x) => x.id));
     const rest = visible
       .filter((x) => !suggestedIds.has(x.id))
@@ -2273,9 +2325,11 @@ function AddExerciseSheet(props: {
               <div className="add-banner-reason">
                 {from === 'logged'
                   ? t.reasonFromLogged
-                  : from === 'weekday'
-                    ? t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))
-                    : t.reasonRecent}
+                  : from === 'program'
+                    ? t.reasonProgramTarget
+                    : from === 'weekday'
+                      ? t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))
+                      : t.reasonRecent}
               </div>
             </div>
           )}
@@ -2894,7 +2948,9 @@ function SetEditorSheet(props: {
           }
         : {
             reps,
-            weight: bw ? null : weight,
+            // Bodyweight, whether toggled or just left at 0, is stored as null
+            // so it reads as "BW" and is valued at the member's bodyweight.
+            weight: bw || weight === 0 ? null : weight,
             isWarmup: type === 'warmup',
             type,
             drops: isDropType ? drops : [],

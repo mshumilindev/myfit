@@ -537,6 +537,14 @@ export function ExerciseGallery({
           <div className="exg-mine-acts">
             <button
               className="exg-mine-act"
+              aria-label={t.openHistory}
+              title={t.openHistory}
+              onClick={() => shell.openOverlay({ screen: 'exercise-history', name: r.name })}
+            >
+              <Icon name="clock-counter-clockwise" />
+            </button>
+            <button
+              className="exg-mine-act"
               aria-label={t.edit}
               title={t.edit}
               onClick={() =>
