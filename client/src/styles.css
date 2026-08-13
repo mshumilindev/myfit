@@ -16399,8 +16399,15 @@ button.badge {
     border: 0;
     border-radius: 0;
     background: transparent;
+    box-shadow: none;
     padding-left: 0;
     padding-right: 0;
+  }
+
+  .programs-author-page .program-list {
+    padding-bottom: var(--space-5);
+    margin-bottom: var(--space-5);
+    box-shadow: 0 1px 0 var(--color-divider);
   }
 
   .programs-page .program-day {
