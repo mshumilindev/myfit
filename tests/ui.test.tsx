@@ -857,7 +857,7 @@ describe('F-03 session UI', () => {
     cleanup();
     __replaceStateForTests(s);
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
-    await userEvent.click(screen.getByRole('button', { name: /1880record/ }));
+    await userEvent.click(screen.getByRole('button', { name: /1880\.0record/ }));
     expect(screen.getByText('Set 1 · Bench press')).toBeTruthy();
 
     cleanup();

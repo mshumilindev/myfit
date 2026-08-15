@@ -13812,21 +13812,20 @@ button.exd-media {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 6px;
   min-height: 30px;
   padding: 0 8px;
   font-size: 10px;
   letter-spacing: 0.02em;
-  color: var(--color-neutral-600);
+  color: var(--color-rest-300);
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 .session-live .set-rest {
   padding-right: 36px;
 }
 .set-rest.inter-card {
-  justify-content: flex-start;
-  gap: 6px;
   color: var(--color-rest-300);
-  padding-left: 8px;
   margin-bottom: 2px;
   box-shadow: inset 0 1px 0 var(--color-divider);
 }
@@ -13864,7 +13863,7 @@ button.exd-media {
   place-items: center;
   border: none;
   background: none;
-  color: var(--color-rest-300);
+  color: var(--color-neutral-500);
   border-radius: var(--radius-sm);
   cursor: pointer;
   padding: 0;
@@ -13892,13 +13891,15 @@ button.exd-media {
 .ex-resting {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   margin: 10px 0 2px;
-  padding-left: 18px;
+  padding: 0 8px 0 18px;
   font-size: 11px;
   line-height: 1;
-  color: var(--color-neutral-500);
+  color: var(--color-rest-300);
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 .ex-resting > .ui-icon {
   font-size: 13px;

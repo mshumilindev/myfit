@@ -104,6 +104,14 @@ function mmss(ms: number): string {
   return `${m}:${String(total % 60).padStart(2, '0')}`;
 }
 
+function fmtWeightValue(kg: number): string {
+  return kg.toFixed(1);
+}
+
+function fmtWeightKg(kg: number): string {
+  return `${fmtWeightValue(kg)} kg`;
+}
+
 /** Ghost-row proposal; timed exercises carry duration/distance instead of kg. */
 type GhostValues = {
   reps: number;
@@ -323,7 +331,8 @@ export function SessionView(props: {
     if (!el) return;
     if (typeof IntersectionObserver === 'undefined') return;
     const io = new IntersectionObserver(([e]) => setDiscardInView(e.isIntersecting), {
-      threshold: 0.2,
+      rootMargin: '0px 0px 96px 0px',
+      threshold: 0,
     });
     io.observe(el);
     return () => io.disconnect();
@@ -439,7 +448,7 @@ export function SessionView(props: {
       props.shell.toast({
         kind: 'ok',
         icon: 'trophy',
-        text: t.newRecordToast(ex.name, `${vals.weight} kg × ${vals.reps}`),
+        text: t.newRecordToast(ex.name, `${fmtWeightKg(vals.weight)} × ${vals.reps}`),
       });
     }
   }
@@ -498,7 +507,7 @@ export function SessionView(props: {
     }
     const top = topSet(ex.sets) ?? ex.sets[ex.sets.length - 1];
     if (!top) return `0 ${t.sets}`;
-    const w = top.weight === null ? t.bodyweightShort : `${top.weight} kg`;
+    const w = top.weight === null ? t.bodyweightShort : fmtWeightKg(top.weight);
     return `${ex.sets.length} × ${top.reps} · ${w}`;
   }
 
@@ -830,8 +839,8 @@ export function SessionView(props: {
                       {s.weight === null
                         ? t.bodyweightShort
                         : isDesktop
-                          ? `${s.weight} kg`
-                          : s.weight}
+                          ? fmtWeightKg(s.weight)
+                          : fmtWeightValue(s.weight)}
                     </span>
                     {setKindLabel(ex, s, grp)}
                     {isDesktop && (
@@ -875,8 +884,8 @@ export function SessionView(props: {
                               {d.weight === null
                                 ? t.bodyweightShort
                                 : isDesktop
-                                  ? `${d.weight} kg`
-                                  : d.weight}
+                                  ? fmtWeightKg(d.weight)
+                                  : fmtWeightValue(d.weight)}
                             </span>
                             <span className="kind">
                               {isDesktop ? t.dropRowN(di + 1) : t.dropN(di + 1)}
@@ -923,7 +932,7 @@ export function SessionView(props: {
                     className="gval"
                     onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
                   >
-                    {ghost.weight ?? '—'}
+                    {ghost.weight === null ? '—' : fmtWeightValue(ghost.weight)}
                   </button>
                   {isDesktop && <span className="kind">{grp ? '' : t.setTypeWorking}</span>}
                   <button
@@ -1038,7 +1047,10 @@ export function SessionView(props: {
         { label: t.exercises, value: String(w.exercises.length) },
       ],
       record: prSet
-        ? { name: t.newRecord, detail: `${prSet.e.name} · ${prSet.s.weight} kg × ${prSet.s.reps}` }
+        ? {
+            name: t.newRecord,
+            detail: `${prSet.e.name} · ${fmtWeightKg(prSet.s.weight ?? 0)} × ${prSet.s.reps}`,
+          }
         : null,
       top,
       topLabel: t.shareTopExercises,
@@ -1180,7 +1192,7 @@ export function SessionView(props: {
               <span>{t.newRecord}</span>
             </div>
             <div className="big">
-              {prSet.e.name} · {prSet.s.weight} kg × {prSet.s.reps}
+              {prSet.e.name} · {fmtWeightKg(prSet.s.weight ?? 0)} × {prSet.s.reps}
             </div>
             <div className="sub">
               {t.prevBest(
@@ -1547,7 +1559,13 @@ export function SessionView(props: {
                                       {e.sets.length} / {rounds}
                                     </td>
                                     <td className="num dim">
-                                      {prevL ? `${prevL.reps} × ${prevL.weight ?? '—'}` : '—'}
+                                      {prevL
+                                        ? `${prevL.reps} × ${
+                                            prevL.weight === null
+                                              ? '—'
+                                              : fmtWeightValue(prevL.weight)
+                                          }`
+                                        : '—'}
                                     </td>
                                   </tr>
                                 );
@@ -1748,7 +1766,7 @@ export function SessionView(props: {
               <span className="n">{r.name}</span>
               <span className="v">
                 {r.prev!.reps}
-                {r.prev!.weight !== null ? ` · ${r.prev!.weight} kg` : ''}
+                {r.prev!.weight !== null ? ` · ${fmtWeightKg(r.prev!.weight)}` : ''}
               </span>
             </div>
           ))}
