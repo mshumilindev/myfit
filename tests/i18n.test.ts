@@ -4,6 +4,7 @@ import {
   LOCALE_IDS,
   fmtClock,
   fmtDayMonth,
+  fmtBodyWeightKg,
   fmtDurationHM,
   fmtDurationHuman,
   fmtFullDate,
@@ -69,6 +70,7 @@ describe('F-02 i18n', () => {
     expect(fmtSessionClock(65_000)).toBe('1:05');
     expect(fmtDurationHuman(65 * 60000)).toBe('1h 5m');
     expect(fmtKg(4980)).toContain('kg');
+    expect(fmtBodyWeightKg(100.8)).toBe('100.8 kg');
     expect(fmtTonnes(2100)).toBe('2.1 t');
     expect(fmtSet(85, 8)).toBe('85 × 8');
     expect(fmtSetSnack(8, 80)).toBe('8 × 80 kg');

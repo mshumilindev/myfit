@@ -187,6 +187,13 @@ export function fmtKg(kg: number): string {
   return `${rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} kg`;
 }
 
+/** Body weight kg keeps the decimal the user logged: "100.8 kg", "100 kg". */
+export function fmtBodyWeightKg(kg: number): string {
+  const rounded = Math.round(kg * 10) / 10;
+  const text = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  return `${text} kg`;
+}
+
 export function fmtTonnes(kg: number): string {
   return `${(kg / 1000).toFixed(1)} t`;
 }

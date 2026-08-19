@@ -5,6 +5,7 @@ import { pl } from './pl';
 import { lt } from './lt';
 import { et } from './et';
 import {
+  fmtBodyWeightKg,
   fmtDurationHM,
   fmtDurationHuman,
   fmtKg,
@@ -93,6 +94,13 @@ describe('formatters', () => {
     expect(fmtKg(4980)).toBe('4\u2009980 kg');
     expect(fmtKg(700)).toBe('700 kg');
     expect(fmtKg(1385)).toBe('1\u2009385 kg');
+  });
+
+  it('should keep one decimal for body weight when needed', () => {
+    expect(fmtBodyWeightKg(100)).toBe('100 kg');
+    expect(fmtBodyWeightKg(100.8)).toBe('100.8 kg');
+    expect(fmtBodyWeightKg(0.04)).toBe('0 kg');
+    expect(fmtBodyWeightKg(0.05)).toBe('0.1 kg');
   });
 
   it('should format tonnes to one decimal (2.1 t)', () => {

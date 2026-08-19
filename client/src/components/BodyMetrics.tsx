@@ -15,7 +15,7 @@ import {
   useStore,
 } from '../store';
 import type { BodyMetrics, WeightEntry } from '../types';
-import { fmtKg, useT } from '../i18n';
+import { fmtBodyWeightKg, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField } from './PickerFields';
 
@@ -143,7 +143,8 @@ export function BodyMetricsSection({
             ? t.bmBandOver
             : t.bmBandObese;
 
-  const fmtDelta = (d: number) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${fmtKg(Math.abs(d))}`;
+  const fmtDelta = (d: number) =>
+    `${d > 0 ? '+' : d < 0 ? '−' : ''}${fmtBodyWeightKg(Math.abs(d))}`;
   const fmtDateTime = (ts: number) =>
     new Intl.DateTimeFormat(locale, {
       day: 'numeric',
@@ -167,7 +168,7 @@ export function BodyMetricsSection({
       {latest ? (
         <div className="bm-hero">
           <div className="bm-hero-kicker">{t.bmCurrentWeight}</div>
-          <div className="bm-hero-weight">{fmtKg(latest.weight)}</div>
+          <div className="bm-hero-weight">{fmtBodyWeightKg(latest.weight)}</div>
           <div className="bm-hero-when">{fmtDateTime(latest.at)}</div>
           <div className="bm-hero-row">
             {deltaAll != null && deltaAll !== 0 && (
@@ -179,7 +180,9 @@ export function BodyMetricsSection({
               <>
                 <span className="bm-dot">·</span>
                 <span className="bm-togoal">
-                  {Math.abs(toGoal) < 0.05 ? t.bmAtGoal : t.bmToGoal(fmtKg(Math.abs(toGoal)))}
+                  {Math.abs(toGoal) < 0.05
+                    ? t.bmAtGoal
+                    : t.bmToGoal(fmtBodyWeightKg(Math.abs(toGoal)))}
                 </span>
               </>
             )}
@@ -231,7 +234,7 @@ export function BodyMetricsSection({
           <TrendChart entries={sorted} goal={bm.goalWeightKg} />
           <div className="bm-trend-foot">
             <span>{fmtDateTime(latest!.at)}</span>
-            {bm.goalWeightKg != null && <span>{t.bmGoalKg(fmtKg(bm.goalWeightKg))}</span>}
+            {bm.goalWeightKg != null && <span>{t.bmGoalKg(fmtBodyWeightKg(bm.goalWeightKg))}</span>}
           </div>
         </div>
       )}
@@ -245,7 +248,7 @@ export function BodyMetricsSection({
             return (
               <div key={e.id} className="bm-entry">
                 <span className="bm-entry-date">{fmtDateTime(e.at)}</span>
-                <span className="bm-entry-w">{fmtKg(e.weight)}</span>
+                <span className="bm-entry-w">{fmtBodyWeightKg(e.weight)}</span>
                 {d != null && d !== 0 ? (
                   <span className={`bm-entry-d${d < 0 ? ' down' : ' up'}`}>{fmtDelta(d)}</span>
                 ) : (
