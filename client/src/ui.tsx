@@ -400,6 +400,50 @@ function activeAnchor(): HTMLElement | null {
   return document.activeElement instanceof HTMLElement ? document.activeElement : null;
 }
 
+function isTextEditableElement(el: Element | null): boolean {
+  if (!(el instanceof HTMLElement)) return false;
+  if (el.isContentEditable) return true;
+  return (
+    el instanceof HTMLInputElement ||
+    el instanceof HTMLTextAreaElement ||
+    el instanceof HTMLSelectElement
+  );
+}
+
+function useMobileSheetKeyboardMode(sheetRef: RefObject<HTMLElement | null>): boolean {
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+    const isPhone = () => !window.matchMedia || !window.matchMedia('(min-width: 720px)').matches;
+    const focusedInsideSheet = () => {
+      const active = document.activeElement;
+      return !!sheetRef.current?.contains(active) && isTextEditableElement(active);
+    };
+    const update = () => {
+      setExpanded(isPhone() && focusedInsideSheet());
+    };
+
+    update();
+    const frame = window.requestAnimationFrame(update);
+    window.addEventListener('focusin', update);
+    window.addEventListener('focusout', update);
+    window.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('resize', update);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('focusin', update);
+      window.removeEventListener('focusout', update);
+      window.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('resize', update);
+    };
+  }, [sheetRef]);
+
+  return expanded;
+}
+
 function useFixedPanelPosition(
   kind: 'sheet' | 'popover',
   anchorRef?: RefObject<HTMLElement | null>,
@@ -534,16 +578,22 @@ export function Sheet(props: {
   className?: string;
 }) {
   const { t } = useT();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const keyboardMode = useMobileSheetKeyboardMode(sheetRef);
   const style = useFixedPanelPosition(
     'sheet',
     undefined,
     props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
   );
+  const classes = ['sheet', keyboardMode ? 'sheet-keyboard-expanded' : '', props.className]
+    .filter(Boolean)
+    .join(' ');
   return (
     <Portal>
       <div className="scrim" onClick={props.onClose} />
       <div
-        className={`sheet${props.className ? ` ${props.className}` : ''}`}
+        ref={sheetRef}
+        className={classes}
         role="dialog"
         style={props.padded === false ? { ...style, padding: '14px 12px 26px', gap: 2 } : style}
       >

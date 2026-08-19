@@ -41,6 +41,7 @@ import {
   workoutCardioDistanceKm,
   workoutCardioMinutes,
   workoutVolumeKg,
+  estimatedOneRepMaxSet,
   perHandFactor,
   setVolumeKg,
   setRepsTotal,
@@ -385,6 +386,15 @@ describe('F-06 Derived progress/history data', () => {
     expect(recordWeight('squat', 'past')).toBe(0);
     expect(knownExercises()).toEqual([{ name: 'Squat', last: { reps: 5, weight: 110 } }]);
     expect(est1rm(100, 6)).toBe(120);
+    expect(est1rm(75, 20)).toBe(0);
+    expect(
+      estimatedOneRepMaxSet([
+        { id: 'heavy', reps: 1, weight: 120, isWarmup: false, position: 0 },
+        { id: 'best', reps: 8, weight: 100, isWarmup: false, position: 1 },
+        { id: 'too-many-reps', reps: 20, weight: 75, isWarmup: false, position: 2 },
+        { id: 'warm', reps: 5, weight: 130, isWarmup: true, position: 3 },
+      ]),
+    ).toMatchObject({ id: 'best' });
 
     const repeated = repeatWorkout('past');
     expect(repeated?.exercises.map((e) => e.name)).toEqual(['Squat']);

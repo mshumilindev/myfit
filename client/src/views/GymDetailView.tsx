@@ -299,9 +299,6 @@ export function GymDetailView({
 
         {isSaved && (
           <>
-            <div className="detail-meta-row">
-              <span>{t.radiusM(gym!.radiusM)}</span>
-            </div>
             <button className="danger-outline detail-delete" onClick={() => setConfirmDel(true)}>
               <Icon name="trash" />
               {t.delete}

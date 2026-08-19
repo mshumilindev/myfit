@@ -158,16 +158,18 @@ const EDGE_BACK_EXCLUDE_SELECTOR = [
   '.toast-holder',
 ].join(',');
 
-function defaultTabForRole(role: NavRole): Tab {
-  return role === 'trainer' ? 'people' : 'today';
+function defaultTab(): Tab {
+  return 'today';
 }
 
 function tabsForRole(role: NavRole, t: NavLabels): NavItem[] {
   if (role === 'trainer') {
     return [
+      { id: 'today', icon: 'house', label: t.today },
+      { id: 'progress', icon: 'chart-line-up', label: t.progress },
+      { id: 'programs', icon: 'list-checks', label: t.progTitle },
+      { id: 'gyms', icon: 'map-pin', label: t.gyms },
       { id: 'people', icon: 'user-focus', label: t.trClientsTab },
-      { id: 'programs', icon: 'cards', label: t.progTitle },
-      { id: 'me', icon: 'user', label: t.navMe },
     ];
   }
 
@@ -391,7 +393,7 @@ export function App() {
     },
     signOut: () => {
       setOverlay(null);
-      setTab(defaultTabForRole(getRole()));
+      setTab(defaultTab());
       void apiSignOut();
       setAuthed(false);
       window.history.replaceState(null, '', '#/today');
@@ -419,7 +421,7 @@ export function App() {
   const role = getRole();
   const tabs = tabsForRole(role, t);
   const tabAllowed = tabs.some((x) => x.id === tab);
-  const effectiveTab = tabAllowed ? tab : defaultTabForRole(role);
+  const effectiveTab = tabAllowed ? tab : defaultTab();
   // Role guards, applied in render (no setState-in-effect): an overlay the
   // current user may not open is treated as absent, so the tab behind shows
   // through instead of a blank screen. Settings requires admin. The exercise
@@ -618,6 +620,7 @@ export function App() {
                 (role === 'trainer' ? (
                   <TrainerView
                     onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
+                    onOpenMe={() => setOverlay({ screen: 'profile', userId: 'me' })}
                   />
                 ) : (
                   <AdminView
@@ -640,7 +643,7 @@ export function App() {
                   userId="me"
                   shell={shell}
                   embedded
-                  onClose={() => setTab(defaultTabForRole(role))}
+                  onClose={() => setTab(defaultTab())}
                 />
               )}
             </Suspense>

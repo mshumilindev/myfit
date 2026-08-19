@@ -1,6 +1,6 @@
 /** Trainer — design TR-01…TR-04. Assigned clients only, read-only. */
 import { useCallback, useEffect, useState } from 'react';
-import { cachePeek, cacheSet, callFn } from '../api';
+import { cachePeek, cacheSet, callFn, currentUid, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { Icon, RowListSkeleton } from '../ui';
 import { Avatar } from '../components/Avatar';
@@ -14,6 +14,7 @@ interface Client {
   liveStartedAt: number | null;
   liveSets: number;
   liveVolumeKg: number;
+  totalSessions?: number;
   weekSessions: number;
   weekVolumeKg: number;
   weekDeltaPct?: number | null;
@@ -22,7 +23,13 @@ interface Client {
   dormantDays: number | null;
 }
 
-export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => void }) {
+export function TrainerView({
+  onOpenProfile,
+  onOpenMe,
+}: {
+  onOpenProfile: (id: string) => void;
+  onOpenMe: () => void;
+}) {
   const { t, locale } = useT();
   const cachedClients = cachePeek<Client[]>('trainerClients');
   const [clients, setClients] = useState<Client[] | null>(cachedClients?.data ?? null);
@@ -60,12 +67,11 @@ export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => 
 
   const liveCount = (clients ?? []).filter((c) => c.live).length;
   const selected = clients?.find((c) => c.id === selectedId) ?? clients?.[0] ?? null;
+  const selfName = getUsername() ?? t.navMe;
+  const selfUid = currentUid() ?? undefined;
 
   return (
     <div className="screen trainer-page">
-      <div className="tr-readonly-bar">
-        <Icon name="eye" /> {t.trReadOnlyBar}
-      </div>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <div className="kicker">{t.roleTrainer}</div>
@@ -96,6 +102,16 @@ export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => 
       {clients !== null && clients.length > 0 && (
         <div className="trainer-workspace">
           <div className="trainer-client-list">
+            <button className="tr-client-card trainer-self-card selected" onClick={onOpenMe}>
+              <span className="tr-card-thumb">
+                <Avatar userId={selfUid} name={selfName} hasPhoto size={52} />
+              </span>
+              <span className="body">
+                <span className="n">{selfName}</span>
+                <span className="s">{t.roleTrainer}</span>
+              </span>
+              <Icon name="caret-right" className="go" />
+            </button>
             {clients.map((c) => (
               <button
                 key={c.id}
@@ -156,7 +172,7 @@ export function TrainerView({ onOpenProfile }: { onOpenProfile: (id: string) => 
                     <Avatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={30} />
                     <span>{c.name}</span>
                   </span>
-                  <span>{c.weekSessions}</span>
+                  <span>{c.totalSessions ?? c.weekSessions}</span>
                   <span>{fmtTonnes(c.weekVolumeKg)}</span>
                   <span className={deltaClass(c.weekDeltaPct)}>{deltaText(c.weekDeltaPct)}</span>
                   <span>{programText(c)}</span>
@@ -257,8 +273,9 @@ function deltaClass(value: number | null | undefined): string {
 
 function deltaText(value: number | null | undefined): string {
   if (value === null || value === undefined) return '—';
-  if (value === 0) return '0%';
-  return `${value > 0 ? '+' : ''}${value}%`;
+  const rounded = Math.round(value * 10) / 10;
+  if (rounded === 0) return '0%';
+  return `${rounded > 0 ? '+' : ''}${rounded}%`;
 }
 
 function programText(c: Client): string {

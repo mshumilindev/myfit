@@ -1,6 +1,7 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
 import { useEffect, useState } from 'react';
 import {
+  estimatedOneRepMaxSet,
   est1rm,
   exerciseNeeds,
   exerciseVolumeKg,
@@ -74,6 +75,7 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
       count: number;
       recW: number;
       recReps: number;
+      recE1rm: number;
       lastTs: number;
       recTs: number;
       primary: MuscleGroup | null;
@@ -89,6 +91,7 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
         count: 0,
         recW: 0,
         recReps: 0,
+        recE1rm: 0,
         lastTs: 0,
         recTs: 0,
         primary: null as MuscleGroup | null,
@@ -102,6 +105,8 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
         cur.recReps = top.reps;
         cur.recTs = w.startedAt;
       }
+      const e1rmTop = estimatedOneRepMaxSet(e.sets);
+      if (e1rmTop) cur.recE1rm = Math.max(cur.recE1rm, est1rm(e1rmTop.weight ?? 0, e1rmTop.reps));
       byName.set(key, cur);
     }
   }
@@ -110,9 +115,10 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
     const pts: { ts: number; rm: number }[] = [];
     for (const w of [...finished].reverse()) {
       const e = w.exercises.find((x) => x.name.trim() === name);
-      const top = e && topSet(e.sets);
-      if (top && (top.weight ?? 0) > 0)
+      const top = e && estimatedOneRepMaxSet(e.sets);
+      if (top) {
         pts.push({ ts: w.startedAt, rm: est1rm(top.weight ?? 0, top.reps) });
+      }
     }
     return { name, pts };
   });
@@ -149,7 +155,9 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
     ? finished
         .map((workout) => {
           const exercise = workout.exercises.find((item) => item.name.trim() === selected[0]);
-          const top = exercise ? topSet(exercise.sets) : null;
+          const top = exercise
+            ? (estimatedOneRepMaxSet(exercise.sets) ?? topSet(exercise.sets))
+            : null;
           return exercise && top ? { workout, exercise, top } : null;
         })
         .filter((item): item is NonNullable<typeof item> => item !== null)
@@ -157,7 +165,14 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
     : [];
   const latest = selectedSessions[0] ?? null;
   const selectedRecord = selected?.[1] ?? null;
-  const selectedRecordRm = selectedRecord ? est1rm(selectedRecord.recW, selectedRecord.recReps) : 0;
+  const selectedRecordRm = selectedRecord?.recE1rm ?? 0;
+  const selectedE1rmPoints = selectedSessions
+    .map((item) => {
+      const top = estimatedOneRepMaxSet(item.exercise.sets);
+      return top ? { rm: est1rm(top.weight ?? 0, top.reps) } : null;
+    })
+    .filter((item): item is { rm: number } => item !== null)
+    .reverse();
   const latestVolume = latest ? exerciseVolumeKg(latest.exercise) : 0;
   const selectedSince = selectedSessions.length
     ? fmtDayMonth(selectedSessions[selectedSessions.length - 1].workout.startedAt, locale)
@@ -460,7 +475,7 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
               <div className="l">{t.recordKg}</div>
             </div>
             <div className="cell">
-              <div className="v">{selectedRecordRm}</div>
+              <div className="v">{selectedRecordRm > 0 ? selectedRecordRm : '—'}</div>
               <div className="l">{t.est1rm}</div>
             </div>
             <div className="cell">
@@ -478,13 +493,7 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
             <div className="progress-detail-chart">
               <svg viewBox="0 0 400 130" preserveAspectRatio="none">
                 <polyline
-                  points={polyline(
-                    [...selectedSessions].reverse().map((item) => ({
-                      rm: est1rm(item.top.weight ?? 0, item.top.reps),
-                    })),
-                    400,
-                    130,
-                  )}
+                  points={polyline(selectedE1rmPoints, 400, 130)}
                   fill="none"
                   stroke="var(--color-accent)"
                   strokeWidth="2"

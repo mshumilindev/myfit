@@ -32,7 +32,11 @@ export const trainerClients = onCall(async (req) => {
       const workouts = await listUserWorkouts(u.id);
       const last = lastSession(workouts);
       const weekWs = workouts.filter((w) => w.startedAt >= now - 7 * DAY);
+      const prevWeekWs = workouts.filter(
+        (w) => w.startedAt < now - 7 * DAY && w.startedAt >= now - 14 * DAY,
+      );
       const weekVol = weekWs.reduce((v, w) => v + workoutStrengthStats(w).volumeKg, 0);
+      const prevWeekVol = prevWeekWs.reduce((v, w) => v + workoutStrengthStats(w).volumeKg, 0);
       const liveW = last.live ? workouts[0] : null;
       const liveStats = liveW ? workoutStrengthStats(liveW) : null;
       return {
@@ -44,8 +48,10 @@ export const trainerClients = onCall(async (req) => {
         liveStartedAt: last.liveStartedAt,
         liveSets: liveStats?.sets ?? 0,
         liveVolumeKg: liveStats?.volumeKg ?? 0,
+        totalSessions: workouts.length,
         weekSessions: weekWs.length,
         weekVolumeKg: weekVol,
+        weekDeltaPct: prevWeekVol > 0 ? ((weekVol - prevWeekVol) / prevWeekVol) * 100 : null,
         dormantDays: last.at && now - last.at > 30 * DAY ? Math.floor((now - last.at) / DAY) : null,
       };
     }),

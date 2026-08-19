@@ -84,7 +84,7 @@ interface ProfileData {
     sessions: number;
     lastAt: number;
     volumeKg: number;
-    bestE1rm: number;
+    bestE1rm: number | null;
   }>;
   notes: Array<{ id: string; text: string; createdAt: number; trainerName: string }>;
   audit: Array<{ at: number; resource: string; readerName: string | null; readerRole: string }>;
@@ -334,22 +334,12 @@ export function ProfileView({
     isSelf ? 'profile-self' : '',
     profileEditing ? 'profile-editing' : '',
     passwordEditing ? 'profile-password-editing' : '',
-    typeof load === 'object' && load.viewer.relation === 'trainer' ? 'profile-trainer-view' : '',
   ]
     .filter(Boolean)
     .join(' ');
 
   return (
     <div className={pageClass}>
-      {typeof load === 'object' && load.viewer.relation === 'trainer' && (
-        <div className="tr-readonly-bar">
-          <Icon name="eye" />
-          <span style={{ flex: 1 }}>{t.trReadOnlyBar}</span>
-          <button className="btn btn-secondary" onClick={() => shell.goTab('programs')}>
-            {t.trAssignProgram}
-          </button>
-        </div>
-      )}
       <div className="profile-top">
         {!embedded && (
           <button className="profile-back" onClick={onClose} aria-label={t.backAction}>
@@ -358,13 +348,7 @@ export function ProfileView({
         )}
         <div>
           <div className="kicker">{t.profileTitle}</div>
-          <h2 className="title-26">
-            {embedded && isSelf
-              ? t.navMe
-              : load === 'loading'
-                ? t.profileTitle
-                : profileName(load, t)}
-          </h2>
+          <h2 className="title-26">{load === 'loading' ? t.profileTitle : profileName(load, t)}</h2>
         </div>
       </div>
 
@@ -522,7 +506,9 @@ export function ProfileView({
           {isSelf ? (
             <BodyMetricsSection readOnly={false} />
           ) : (
-            load.bodyMetrics && <BodyMetricsSection readOnly data={load.bodyMetrics} />
+            load.bodyMetrics && (
+              <BodyMetricsSection readOnly data={load.bodyMetrics} showReadOnlyBadge={false} />
+            )
           )}
 
           {!isTrainerView && (
@@ -668,13 +654,6 @@ export function ProfileView({
             </section>
           )}
 
-          {!isTrainerView && (
-            <p className="profile-privacy-note">
-              <Icon name="shield-check" />
-              {t.profileDirectPrivateNote}
-            </p>
-          )}
-
           {load.viewer.relation === 'trainer' && <TrainerLivePanel load={load} />}
 
           <section className="profile-stats">
@@ -755,9 +734,11 @@ export function ProfileView({
                           {ex.sessions} · {ex.sets} {t.sets}
                         </span>
                       </span>
-                      <span>
+                      <span className="profile-row-metric">
                         <span className="n">{fmtTonnes(ex.volumeKg)}</span>
-                        <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
+                        {ex.bestE1rm !== null && ex.bestE1rm > 0 ? (
+                          <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
+                        ) : null}
                       </span>
                     </button>
                   ))}
@@ -813,7 +794,6 @@ export function ProfileView({
                             {g.sessions} · {fmtTonnes(g.volumeKg)} ·{' '}
                             {g.lastSessionAt ? fmtDayMonth(g.lastSessionAt, locale) : t.stNever}
                           </span>
-                          <span>{t.radiusM(g.radiusM)}</span>
                         </div>
                         <span className="profile-gym-coords">
                           {g.lat.toFixed(5)}, {g.lng.toFixed(5)}

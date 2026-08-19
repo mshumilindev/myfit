@@ -1280,8 +1280,17 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
   }
   return max;
 }
+export const E1RM_MAX_REPS = 10;
+
 export function est1rm(weight: number, reps: number): number {
+  if (weight <= 0 || reps < 1 || reps > E1RM_MAX_REPS) return 0;
   return Math.round(weight * (1 + reps / 30));
+}
+
+export function estimatedOneRepMaxSet(sets: SetEntry[]): SetEntry | undefined {
+  return [...sets]
+    .filter((s) => setTypeOf(s) !== 'warmup' && est1rm(s.weight ?? 0, s.reps) > 0)
+    .sort((a, b) => est1rm(b.weight ?? 0, b.reps) - est1rm(a.weight ?? 0, a.reps))[0];
 }
 export interface MyExercise {
   /** Catalogue id, or `logged-<name>` for a history-only user exercise. */

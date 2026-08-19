@@ -26,6 +26,7 @@ import {
   listUserWorkouts,
   workoutStrengthStats,
   exerciseVolumeKg,
+  estimatedOneRepMaxKg,
   type StoredWorkout,
 } from './aggregates';
 
@@ -213,7 +214,7 @@ function topExercises(workouts: StoredWorkout[]) {
       sessions: Set<string>;
       lastAt: number;
       volumeKg: number;
-      bestE1rm: number;
+      bestE1rm: number | null;
     }
   >();
   for (const w of workouts) {
@@ -227,13 +228,14 @@ function topExercises(workouts: StoredWorkout[]) {
         sessions: new Set<string>(),
         lastAt: 0,
         volumeKg: 0,
-        bestE1rm: 0,
+        bestE1rm: null,
       };
       agg.volumeKg += exerciseVolumeKg(e);
       for (const s of e.sets ?? []) {
         agg.sets++;
-        // e1RM uses the entered (per-side) load, not the doubled volume weight.
-        agg.bestE1rm = Math.max(agg.bestE1rm, (s.weight ?? 0) * (1 + (s.reps ?? 0) / 30));
+        // e1RM uses entered load, but only from plausible working sets.
+        const estimate = estimatedOneRepMaxKg(s);
+        if (estimate !== null) agg.bestE1rm = Math.max(agg.bestE1rm ?? 0, estimate);
       }
       agg.sessions.add(w.id);
       agg.lastAt = Math.max(agg.lastAt, w.startedAt);

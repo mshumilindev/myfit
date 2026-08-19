@@ -18,7 +18,15 @@ import {
   type MuscleGroup,
 } from '../data/exercises';
 import { equipmentIconName, equipmentLabel, MuscleBodyFigure } from '../components/Muscle';
-import { addExercise, est1rm, recordWeight, startWorkout, topSet, useStore } from '../store';
+import {
+  addExercise,
+  estimatedOneRepMaxSet,
+  est1rm,
+  recordWeight,
+  startWorkout,
+  topSet,
+  useStore,
+} from '../store';
 import { useT } from '../i18n';
 import { Icon, useIsDesktop } from '../ui';
 import type { Shell } from '../App';
@@ -70,7 +78,7 @@ export function ExerciseDetailView({
       const ex = w.exercises.find(
         (e) => e.name.trim().toLowerCase() === canonical.trim().toLowerCase(),
       );
-      const top = ex && topSet(ex.sets);
+      const top = ex && (estimatedOneRepMaxSet(ex.sets) ?? topSet(ex.sets));
       return ex && top ? { ts: w.startedAt, top } : null;
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);

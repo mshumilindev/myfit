@@ -10,6 +10,7 @@ import EQUIPMENT_BY_NAME from './data/equipment-by-name.json';
 import PER_SIDE from './data/per-side.json';
 
 const DAY = 24 * 60 * 60 * 1000;
+const E1RM_MAX_REPS = 10;
 
 export interface StoredDrop {
   reps?: number;
@@ -119,6 +120,13 @@ export function workoutStrengthStats(w: StoredWorkout): { sets: number; volumeKg
     volumeKg += exerciseVolumeKg(e);
   }
   return { sets, volumeKg };
+}
+
+export function estimatedOneRepMaxKg(s: StoredSet): number | null {
+  const reps = s.reps ?? 0;
+  const weight = s.weight ?? 0;
+  if (setTypeOf(s) === 'warmup' || weight <= 0 || reps < 1 || reps > E1RM_MAX_REPS) return null;
+  return weight * (1 + reps / 30);
 }
 
 export async function listUserWorkouts(uid: string, limit?: number): Promise<StoredWorkout[]> {

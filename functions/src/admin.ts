@@ -49,6 +49,19 @@ async function usersById(id: string): Promise<UserDoc | null> {
   return s.exists ? { id, ...(s.data() as Omit<UserDoc, 'id'>) } : null;
 }
 
+async function validateTrainerAssignment(
+  subjectId: string,
+  trainerId: unknown,
+): Promise<string | null> {
+  if (trainerId === null || trainerId === undefined || trainerId === '') return null;
+  if (!isId(trainerId)) throw new HttpsError('invalid-argument', 'trainer required');
+  if (trainerId === subjectId) throw new HttpsError('invalid-argument', 'cannot train yourself');
+  const tr = await usersById(trainerId);
+  if (!tr || tr.role !== 'trainer') throw new HttpsError('invalid-argument', 'not a trainer');
+  if (tr.status !== 'active') throw new HttpsError('invalid-argument', 'trainer must be active');
+  return trainerId;
+}
+
 /** Revoke any outstanding invite of this kind, then issue a fresh one. */
 async function issueInvite(
   userId: string,
@@ -199,6 +212,7 @@ export const adminCreateUser = onCall(async (req) => {
   const mail = email.trim().toLowerCase();
 
   const id = newId();
+  const assignedTrainerId = await validateTrainerAssignment(id, trainerId);
   const baseName =
     explicitUsername ||
     (typeof name === 'string' && name.trim().length >= 2
@@ -240,7 +254,7 @@ export const adminCreateUser = onCall(async (req) => {
       lastName: names.lastName,
       role: role as Role,
       status: 'invited',
-      trainerId: role === 'member' && isId(trainerId) ? trainerId : null,
+      trainerId: assignedTrainerId,
       avatarExt: null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -355,22 +369,22 @@ export const adminAssignTrainer = onCall(async (req) => {
   if (!isId(id)) throw new HttpsError('invalid-argument', 'id required');
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
-  if (trainerId !== null) {
-    const tr = await usersById(trainerId);
-    if (!tr || tr.role !== 'trainer') throw new HttpsError('invalid-argument', 'not a trainer');
-  }
+  const assignedTrainerId = await validateTrainerAssignment(u.id, trainerId);
   const prevTrainer = u.trainerId;
-  await db.collection('users').doc(u.id).update({ trainerId, updatedAt: Date.now() });
+  await db
+    .collection('users')
+    .doc(u.id)
+    .update({ trainerId: assignedTrainerId, updatedAt: Date.now() });
   const adminName = displayName(admin);
   const memberName = displayName(u);
-  if (trainerId !== null) {
-    const trRow = (await usersById(trainerId))!;
+  if (assignedTrainerId !== null) {
+    const trRow = (await usersById(assignedTrainerId))!;
     await createNotice(u.id, 'trainer-assigned', adminName, displayName(trRow));
-    await createNotice(trainerId, 'client-assigned', adminName, memberName);
+    await createNotice(assignedTrainerId, 'client-assigned', adminName, memberName);
   } else {
     await createNotice(u.id, 'trainer-removed', adminName, null);
   }
-  if (prevTrainer && prevTrainer !== trainerId) {
+  if (prevTrainer && prevTrainer !== assignedTrainerId) {
     await createNotice(prevTrainer, 'client-removed', adminName, memberName);
   }
   return { ok: true };

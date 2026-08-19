@@ -251,7 +251,6 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                     </div>
                     <div className="meta">
                       <span>{savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}</span>
-                      <span>{t.radiusM(g.radiusM)}</span>
                     </div>
                   </div>
                 </div>
@@ -361,7 +360,6 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
               <section className="gyms-panel">
                 <div className="gyms-panel-head">
                   <span>{t.lastSessions}</span>
-                  <span>{t.radiusM(selectedGym.radiusM)}</span>
                 </div>
                 {selectedSessions.length > 0 ? (
                   <div className="gyms-session-table">

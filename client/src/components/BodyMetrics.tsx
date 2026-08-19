@@ -111,6 +111,7 @@ export function BodyMetricsSection({
   readOnly,
   roleTag,
   data,
+  showReadOnlyBadge = true,
 }: {
   readOnly: boolean;
   /** e.g. "Admin · view" / "Trainer · view" for the read-only lock banner. */
@@ -118,6 +119,7 @@ export function BodyMetricsSection({
   /** Another user's metrics for admin/trainer read-only view (§1/6a.4). When
    *  omitted the section shows the signed-in user's own store data. */
   data?: BodyMetrics;
+  showReadOnlyBadge?: boolean;
 }) {
   const { t, locale } = useT();
   const store = useStore();
@@ -154,7 +156,7 @@ export function BodyMetricsSection({
     <section className="profile-section bm-section">
       <div className="bm-head">
         <div className="field-label">{t.bmTitle}</div>
-        {readOnly && (
+        {readOnly && showReadOnlyBadge && (
           <span className="bm-lock">
             <Icon name="lock-simple" />
             {roleTag ?? t.bmReadOnly}

@@ -305,7 +305,7 @@ describe.skip('F-02/F-08 shell views and design states', () => {
       }),
     );
     const onOpenProfile = vi.fn();
-    render(<TrainerView onOpenProfile={onOpenProfile} />);
+    render(<TrainerView onOpenProfile={onOpenProfile} onOpenMe={vi.fn()} />);
 
     await userEvent.click(await screen.findByRole('button', { name: /Client User/ }));
 

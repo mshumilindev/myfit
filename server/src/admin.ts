@@ -43,6 +43,17 @@ function uniqueUsername(base: string): string {
   return candidate;
 }
 
+function validateTrainerAssignment(subjectId: string, trainerId: unknown): string | null {
+  if (trainerId === null || trainerId === undefined || trainerId === '') return null;
+  if (!isId(trainerId)) throw new Error('trainer required');
+  if (trainerId === subjectId) throw new Error('cannot train yourself');
+  const tr = db.prepare('SELECT role, status FROM users WHERE id = ?').get(trainerId) as
+    { role: string; status: string } | undefined;
+  if (!tr || tr.role !== 'trainer') throw new Error('not a trainer');
+  if (tr.status !== 'active') throw new Error('trainer must be active');
+  return trainerId;
+}
+
 function latestInvite(userId: string): InviteRow | undefined {
   return db
     .prepare(
@@ -221,6 +232,12 @@ adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
     }
   }
   const id = crypto.randomUUID();
+  let assignedTrainerId: string | null;
+  try {
+    assignedTrainerId = validateTrainerAssignment(id, trainerId);
+  } catch (e) {
+    return res.status(400).json({ error: e instanceof Error ? e.message : 'bad trainer' });
+  }
   const username =
     explicitUsername ||
     uniqueUsername(
@@ -232,16 +249,7 @@ adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
     `INSERT INTO users
        (id, username, email, password_hash, created_at, role, status, trainer_id, first_name, last_name)
      VALUES (?, ?, ?, '', ?, ?, 'invited', ?, ?, ?)`,
-  ).run(
-    id,
-    username,
-    mail,
-    Date.now(),
-    role,
-    role === 'member' && isId(trainerId) ? trainerId : null,
-    names.firstName,
-    names.lastName,
-  );
+  ).run(id, username, mail, Date.now(), role, assignedTrainerId, names.firstName, names.lastName);
   const inv = issueInvite(id, req.userId!, 'invite');
   res.json({
     person: personJson(db.prepare('SELECT * FROM users WHERE id = ?').get(id) as UserRow),
@@ -314,24 +322,25 @@ adminRouter.post('/users/:id/trainer', (req: AuthedRequest, res: Response) => {
   const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id) as
     UserRow | undefined;
   if (!u) return res.status(404).json({ error: 'not found' });
-  if (trainerId !== null) {
-    const tr = db.prepare('SELECT role FROM users WHERE id = ?').get(trainerId) as
-      { role: string } | undefined;
-    if (!tr || tr.role !== 'trainer') return res.status(400).json({ error: 'not a trainer' });
+  let assignedTrainerId: string | null;
+  try {
+    assignedTrainerId = validateTrainerAssignment(u.id, trainerId);
+  } catch (e) {
+    return res.status(400).json({ error: e instanceof Error ? e.message : 'bad trainer' });
   }
   const prevTrainer = u.trainer_id;
-  db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, u.id);
+  db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(assignedTrainerId, u.id);
   // Notify the affected people (AC-ROLE-10). Assignments name the admin.
   const admin = actorName(req.userId!);
   const memberName = displayName(u);
-  if (trainerId !== null) {
-    const trRow = db.prepare('SELECT * FROM users WHERE id = ?').get(trainerId) as UserRow;
+  if (assignedTrainerId !== null) {
+    const trRow = db.prepare('SELECT * FROM users WHERE id = ?').get(assignedTrainerId) as UserRow;
     createNotice(u.id, 'trainer-assigned', admin, displayName(trRow));
-    createNotice(trainerId, 'client-assigned', admin, memberName);
+    createNotice(assignedTrainerId, 'client-assigned', admin, memberName);
   } else {
     createNotice(u.id, 'trainer-removed', admin, null);
   }
-  if (prevTrainer && prevTrainer !== trainerId) {
+  if (prevTrainer && prevTrainer !== assignedTrainerId) {
     createNotice(prevTrainer, 'client-removed', admin, memberName);
   }
   res.json({ ok: true });

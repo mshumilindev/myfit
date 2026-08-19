@@ -46,6 +46,19 @@ trainerRouter.get('/clients', (req: AuthedRequest, res: Response) => {
             WHERE w.user_id = ? AND w.started_at >= ?`,
         )
         .get(u.id, now - 7 * DAY) as { sessions: number; vol: number };
+      const prevWeek = db
+        .prepare(
+          `SELECT COUNT(DISTINCT w.id) AS sessions,
+                  COALESCE(SUM(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.reps * COALESCE(s.weight,0) ELSE 0 END),0) AS vol
+             FROM workouts w
+             LEFT JOIN exercises e ON e.workout_id = w.id
+             LEFT JOIN sets s ON s.exercise_id = e.id
+            WHERE w.user_id = ? AND w.started_at < ? AND w.started_at >= ?`,
+        )
+        .get(u.id, now - 7 * DAY, now - 14 * DAY) as { sessions: number; vol: number };
+      const total = db
+        .prepare('SELECT COUNT(*) AS sessions FROM workouts WHERE user_id = ?')
+        .get(u.id) as { sessions: number };
       const liveStats =
         last?.finished_at === null
           ? (db
@@ -65,8 +78,10 @@ trainerRouter.get('/clients', (req: AuthedRequest, res: Response) => {
         liveStartedAt: last?.finished_at === null ? last.started_at : null,
         liveSets: liveStats?.sets ?? 0,
         liveVolumeKg: liveStats?.vol ?? 0,
+        totalSessions: total.sessions,
         weekSessions: week.sessions,
         weekVolumeKg: week.vol,
+        weekDeltaPct: prevWeek.vol > 0 ? ((week.vol - prevWeek.vol) / prevWeek.vol) * 100 : null,
         dormantDays:
           last && now - last.started_at > 30 * DAY
             ? Math.floor((now - last.started_at) / DAY)

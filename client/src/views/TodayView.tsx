@@ -971,9 +971,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
             {!open && store.gyms.length === 0 && (
               <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
-                <Icon name="map-pin" />
-                <span style={{ flex: 1, textAlign: 'left' }}>{t.addGymHint}</span>
-                <span style={{ color: 'var(--color-accent)', fontSize: 12 }}>{t.add}</span>
+                <span className="gym-hint-icon">
+                  <Icon name="map-pin" />
+                </span>
+                <span className="gym-hint-copy">{t.addGymHint}</span>
+                <span className="gym-hint-action">{t.add}</span>
               </button>
             )}
           </div>

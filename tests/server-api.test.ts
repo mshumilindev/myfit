@@ -300,8 +300,13 @@ describe('F-01 Auth', () => {
     expect((db.prepare('SELECT COUNT(*) AS n FROM audit_log').get() as { n: number }).n).toBe(1);
   });
 
-  it('lets admins create invited admins from the role field', async () => {
+  it('lets admins create invited admins and assign active trainers to any role', async () => {
     const admin = await register('owner', 'owner@example.com');
+    await register('coach', 'coach@example.com');
+    const trainerId = (
+      db.prepare('SELECT id FROM users WHERE email = ?').get('coach@example.com') as { id: string }
+    ).id;
+    db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
     const created = await req<{
       person: { id: string; role: string; status: string; trainerId: string | null };
       invite: { token: string };
@@ -314,7 +319,7 @@ describe('F-01 Auth', () => {
         username: 'sofia',
         email: 'sofia@example.com',
         role: 'admin',
-        trainerId: 'ignored-for-admin',
+        trainerId,
       },
       admin.token,
     );
@@ -323,7 +328,7 @@ describe('F-01 Auth', () => {
     expect(created.data.person).toMatchObject({
       role: 'admin',
       status: 'invited',
-      trainerId: null,
+      trainerId,
     });
     expect(created.data.invite.token).toEqual(expect.any(String));
     expect(
@@ -331,7 +336,81 @@ describe('F-01 Auth', () => {
         role: string;
         trainer_id: string | null;
       },
-    ).toEqual({ role: 'admin', trainer_id: null });
+    ).toEqual({ role: 'admin', trainer_id: trainerId });
+
+    const otherTrainer = await req<{
+      person: { id: string; role: string; trainerId: string | null };
+    }>(
+      'POST',
+      '/api/admin/users',
+      {
+        firstName: 'Ihor',
+        lastName: 'Melnyk',
+        username: 'ihor',
+        email: 'ihor@example.com',
+        role: 'trainer',
+        trainerId,
+      },
+      admin.token,
+    );
+    expect(otherTrainer.status).toBe(200);
+    expect(otherTrainer.data.person).toMatchObject({ role: 'trainer', trainerId });
+
+    expect(
+      (await req('POST', `/api/admin/users/${trainerId}/trainer`, { trainerId }, admin.token))
+        .status,
+    ).toBe(400);
+  });
+
+  it('reports trainer client totals and week-over-week movement', async () => {
+    const trainer = await register('coach', 'coach@example.com');
+    await register('member', 'member@example.com');
+    const ids = Object.fromEntries(
+      (
+        db.prepare('SELECT id, email FROM users').all() as Array<{
+          id: string;
+          email: string;
+        }>
+      ).map((u) => [u.email, u.id]),
+    );
+    const trainerId = ids['coach@example.com'];
+    const memberId = ids['member@example.com'];
+    db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
+    db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, memberId);
+
+    const now = Date.now();
+    const insertWorkout = (id: string, startedAt: number, reps: number, weight: number) => {
+      db.prepare(
+        'INSERT INTO workouts (id, user_id, started_at, finished_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+      ).run(id, memberId, startedAt, startedAt + 3600_000, now);
+      db.prepare(
+        'INSERT INTO exercises (id, workout_id, name, position, updated_at) VALUES (?, ?, ?, ?, ?)',
+      ).run(`${id}-ex`, id, 'Bench Press', 0, now);
+      db.prepare(
+        'INSERT INTO sets (id, exercise_id, reps, weight, position, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+      ).run(`${id}-set`, `${id}-ex`, reps, weight, 0, now);
+    };
+
+    insertWorkout('current-a', now - 1 * 24 * 3600_000, 10, 10);
+    insertWorkout('current-b', now - 2 * 24 * 3600_000, 10, 20);
+    insertWorkout('previous-a', now - 9 * 24 * 3600_000, 10, 10);
+
+    const res = await req<{
+      clients: Array<{
+        totalSessions: number;
+        weekSessions: number;
+        weekVolumeKg: number;
+        weekDeltaPct: number | null;
+      }>;
+    }>('GET', '/api/trainer/clients', undefined, trainer.token);
+
+    expect(res.status).toBe(200);
+    expect(res.data.clients[0]).toMatchObject({
+      totalSessions: 3,
+      weekSessions: 2,
+      weekVolumeKg: 300,
+      weekDeltaPct: 200,
+    });
   });
 
   it('serves direct profile links only to the owner, an admin or the assigned trainer', async () => {
@@ -500,6 +579,38 @@ describe('F-01 Auth', () => {
     expect(audited.data.audit.map((a) => a.readerName)).toEqual(
       expect.arrayContaining(['owner', 'coach']),
     );
+  });
+
+  it('estimates 1RM only from plausible working sets', async () => {
+    const member = await register('member', 'member@example.com');
+    const memberId = (
+      db.prepare('SELECT id FROM users WHERE email = ?').get('member@example.com') as { id: string }
+    ).id;
+    const now = Date.now();
+
+    db.prepare(
+      'INSERT INTO workouts (id, user_id, started_at, finished_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    ).run('workout-e1rm', memberId, now - 3600_000, now, now);
+    db.prepare(
+      'INSERT INTO exercises (id, workout_id, name, position, updated_at) VALUES (?, ?, ?, ?, ?)',
+    ).run('exercise-e1rm', 'workout-e1rm', 'Bench Press', 0, now);
+    db.prepare(
+      'INSERT INTO sets (id, exercise_id, reps, weight, is_warmup, position, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run('valid-e1rm', 'exercise-e1rm', 8, 100, 0, 0, now);
+    db.prepare(
+      'INSERT INTO sets (id, exercise_id, reps, weight, is_warmup, position, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run('high-rep-e1rm', 'exercise-e1rm', 20, 75, 0, 1, now);
+    db.prepare(
+      'INSERT INTO sets (id, exercise_id, reps, weight, is_warmup, position, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    ).run('warmup-e1rm', 'exercise-e1rm', 5, 130, 1, 2, now);
+
+    const own = await req<{
+      topExercises: Array<{ name: string; bestE1rm: number | null }>;
+    }>('GET', '/api/profile/users/me', undefined, member.token);
+
+    expect(own.status).toBe(200);
+    expect(own.data.topExercises[0]).toMatchObject({ name: 'Bench Press' });
+    expect(own.data.topExercises[0].bestE1rm).toBeCloseTo(126.67, 2);
   });
 });
 

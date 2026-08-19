@@ -99,7 +99,10 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
     };
   }, [refresh]);
 
-  const trainers = useMemo(() => people.filter((p) => p.role === 'trainer'), [people]);
+  const trainers = useMemo(
+    () => people.filter((p) => p.role === 'trainer' && p.status === 'active'),
+    [people],
+  );
   const needle = q.trim().toLowerCase();
   const filtered = useMemo(
     () =>
@@ -406,17 +409,15 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
           >
             <Icon name="arrow-up-right" /> {t.adminOpenProfile}
           </button>
-          {menuFor.role === 'member' && (
-            <button
-              className="menu-item"
-              onClick={() => {
-                setAssignFor(menuFor);
-                setMenuFor(null);
-              }}
-            >
-              <Icon name="arrows-clockwise" /> {t.adminChangeTrainer}
-            </button>
-          )}
+          <button
+            className="menu-item"
+            onClick={() => {
+              setAssignFor(menuFor);
+              setMenuFor(null);
+            }}
+          >
+            <Icon name="arrows-clockwise" /> {t.adminChangeTrainer}
+          </button>
           <button
             className="menu-item"
             onClick={() => {
@@ -634,7 +635,7 @@ function NewPersonDialog(props: {
           ))}
         </div>
       </div>
-      {role === 'member' && props.trainers.length > 0 && (
+      {props.trainers.length > 0 && (
         <div className="assign-list">
           <div className="field-label">{t.adminAssignedTrainer}</div>
           <button
@@ -692,7 +693,7 @@ function NewPersonDialog(props: {
                 lastName: lastName.trim(),
                 username: username.trim(),
                 email: email.trim(),
-                trainerId: role === 'member' ? trainerId : null,
+                trainerId,
                 role,
               });
               props.onCreated(r.person, r.invite.token, r.invite.expiresAt);
@@ -804,19 +805,21 @@ function AssignTrainerDialog(props: {
       </div>
       <p className="detail-muted">{t.adminTrainerNote}</p>
       <div className="assign-list">
-        {props.trainers.map((tr) => (
-          <button
-            key={tr.id}
-            className={`gym-pick-row${sel === tr.id ? ' suggested' : ''}`}
-            onClick={() => setSel(tr.id)}
-          >
-            <Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />
-            <span className="body">
-              <span className="n">{tr.name}</span>
-              <span className="s">{t.adminClients(tr.clientCount)}</span>
-            </span>
-          </button>
-        ))}
+        {props.trainers
+          .filter((tr) => tr.id !== props.person.id)
+          .map((tr) => (
+            <button
+              key={tr.id}
+              className={`gym-pick-row${sel === tr.id ? ' suggested' : ''}`}
+              onClick={() => setSel(tr.id)}
+            >
+              <Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />
+              <span className="body">
+                <span className="n">{tr.name}</span>
+                <span className="s">{t.adminClients(tr.clientCount)}</span>
+              </span>
+            </button>
+          ))}
         <button
           className={`gym-pick-row${sel === null ? ' suggested' : ''}`}
           onClick={() => setSel(null)}

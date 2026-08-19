@@ -245,7 +245,15 @@ function topExercises(userId: string) {
               COUNT(DISTINCT w.id) AS sessions,
               MAX(w.started_at) AS lastAt,
               COALESCE(SUM(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN s.reps * COALESCE(s.weight, 0) ELSE 0 END), 0) AS volumeKg,
-              MAX(CASE WHEN COALESCE(e.kind, 'strength') = 'strength' THEN COALESCE(s.weight, 0) * (1 + s.reps / 30.0) ELSE 0 END) AS bestE1rm
+              MAX(CASE
+                    WHEN COALESCE(e.kind, 'strength') = 'strength'
+                     AND COALESCE(s.is_warmup, 0) <> 1
+                     AND COALESCE(s.type, 'working') <> 'warmup'
+                     AND COALESCE(s.weight, 0) > 0
+                     AND s.reps BETWEEN 1 AND 10
+                    THEN COALESCE(s.weight, 0) * (1 + s.reps / 30.0)
+                    ELSE NULL
+                  END) AS bestE1rm
          FROM exercises e
          JOIN workouts w ON w.id = e.workout_id
          LEFT JOIN sets s ON s.exercise_id = e.id
@@ -261,7 +269,7 @@ function topExercises(userId: string) {
     sessions: number;
     lastAt: number;
     volumeKg: number;
-    bestE1rm: number;
+    bestE1rm: number | null;
   }>;
 }
 
