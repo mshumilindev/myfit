@@ -469,10 +469,7 @@ export function ProfileView({
                   </div>
                 </div>
               ) : (
-                <div className="detail-muted">
-                  @{load.person.username}
-                  {load.person.email ? ` · ${load.person.email}` : ''}
-                </div>
+                <div className="detail-muted">@{load.person.username}</div>
               )}
               <div className="profile-meta-grid">
                 <span>
@@ -547,11 +544,6 @@ export function ProfileView({
                   <span>{t.password}</span>
                   <Icon name="arrow-right" className="profile-setting-caret" />
                 </button>
-                <div className="profile-setting-row static">
-                  <Icon name="envelope" />
-                  <span>{t.email}</span>
-                  <span>{load.person.email ?? '—'}</span>
-                </div>
               </section>
               <button
                 className="profile-setting-row profile-signout"

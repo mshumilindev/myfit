@@ -492,7 +492,8 @@ export const pl: Strings = {
   setsStat: 'Serie',
   movedStat: 'Przeniesiono',
   newRecord: 'Nowy rekord',
-  prevBest: (v, rm) => `Poprzedni rekord ${v} · szacowane 1RM do ${rm} kg`,
+  prevBest: (v, rm) =>
+    rm ? `Poprzedni rekord ${v} · szacowane 1RM do ${rm} kg` : `Poprzedni rekord ${v}`,
   comparedToLast: 'W porównaniu z ostatnim treningiem',
   sessionVolume: 'Objętość treningu',
   editSession: 'Edytuj',
@@ -509,7 +510,7 @@ export const pl: Strings = {
   setNumber: (n: number) => `Seria ${n}`,
   shareWorkout: 'Udostępnij trening',
   shareSheetTitle: 'Udostępnij trening',
-  shareToStories: 'Do relacji',
+  shareToStories: 'Udostępnij',
   shareSaveImage: 'Zapisz obraz',
   shareCopy: 'Kopiuj',
   shareCopied: 'Skopiowano',

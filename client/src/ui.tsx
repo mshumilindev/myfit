@@ -422,21 +422,29 @@ function useMobileSheetKeyboardMode(sheetRef: RefObject<HTMLElement | null>): bo
       return !!sheetRef.current?.contains(active) && isTextEditableElement(active);
     };
     const update = () => {
+      const vv = window.visualViewport;
+      const top = vv?.offsetTop ?? 0;
+      const height = vv?.height ?? window.innerHeight;
+      sheetRef.current?.style.setProperty('--sheet-keyboard-top', `${Math.max(0, top)}px`);
+      sheetRef.current?.style.setProperty('--sheet-keyboard-height', `${Math.round(height)}px`);
       setExpanded(isPhone() && focusedInsideSheet());
     };
+    const updateAfterFocusSettles = () => window.setTimeout(update, 160);
 
     update();
     const frame = window.requestAnimationFrame(update);
     window.addEventListener('focusin', update);
-    window.addEventListener('focusout', update);
+    window.addEventListener('focusout', updateAfterFocusSettles);
     window.addEventListener('resize', update);
+    window.visualViewport?.addEventListener('scroll', update);
     window.visualViewport?.addEventListener('resize', update);
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('focusin', update);
-      window.removeEventListener('focusout', update);
+      window.removeEventListener('focusout', updateAfterFocusSettles);
       window.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('scroll', update);
       window.visualViewport?.removeEventListener('resize', update);
     };
   }, [sheetRef]);

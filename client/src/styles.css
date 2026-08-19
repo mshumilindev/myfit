@@ -874,8 +874,9 @@ i > svg {
 
 @media (max-width: 719px) {
   .sheet.sheet-keyboard-expanded {
-    top: 0;
-    height: 100dvh;
+    top: var(--sheet-keyboard-top, 0px);
+    bottom: auto;
+    height: var(--sheet-keyboard-height, 100dvh);
     max-height: none;
     border-radius: 0;
     padding-top: max(var(--space-4), var(--safe-top));
@@ -13452,23 +13453,21 @@ button.exd-media {
   margin-bottom: 2px;
   box-shadow: inset 0 1px 0 var(--color-divider);
 }
-.set-rest.inter-card > .ui-icon {
-  font-size: 13px;
-  color: var(--color-rest-400);
-}
 .session-live .set-rest.inter-card {
   padding-right: 36px;
 }
-/* "−30s" manual rest trim on the live rest strips. */
+/* Manual rest trim on the live rest strips. */
 .rest-trim {
   margin-left: auto;
   border: none;
   background: var(--color-neutral-200);
   color: var(--color-neutral-400);
   font: inherit;
-  font-size: 11px;
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
-  padding: 4px 9px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border-radius: 999px;
   cursor: pointer;
 }

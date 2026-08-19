@@ -501,7 +501,8 @@ export const lt: Strings = {
   setsStat: 'Serijos',
   movedStat: 'Pakelta',
   newRecord: 'Naujas rekordas',
-  prevBest: (v, rm) => `Ankstesnis rekordas ${v} · numatomas 1RM iki ${rm} kg`,
+  prevBest: (v, rm) =>
+    rm ? `Ankstesnis rekordas ${v} · numatomas 1RM iki ${rm} kg` : `Ankstesnis rekordas ${v}`,
   comparedToLast: 'Palyginti su praėjusia treniruote',
   sessionVolume: 'Treniruotės apimtis',
   editSession: 'Redaguoti',
@@ -518,7 +519,7 @@ export const lt: Strings = {
   setNumber: (n: number) => `Serija ${n}`,
   shareWorkout: 'Dalytis treniruote',
   shareSheetTitle: 'Dalytis treniruote',
-  shareToStories: 'Į istorijas',
+  shareToStories: 'Dalytis',
   shareSaveImage: 'Išsaugoti vaizdą',
   shareCopy: 'Kopijuoti',
   shareCopied: 'Nukopijuota',

@@ -489,7 +489,8 @@ export const et: Strings = {
   setsStat: 'Seeriad',
   movedStat: 'Tõstetud',
   newRecord: 'Uus rekord',
-  prevBest: (v, rm) => `Eelmine rekord ${v} · hinnanguline 1RM kuni ${rm} kg`,
+  prevBest: (v, rm) =>
+    rm ? `Eelmine rekord ${v} · hinnanguline 1RM kuni ${rm} kg` : `Eelmine rekord ${v}`,
   comparedToLast: 'Võrreldes eelmise treeninguga',
   sessionVolume: 'Treeningu maht',
   editSession: 'Muuda',
@@ -506,7 +507,7 @@ export const et: Strings = {
   setNumber: (n: number) => `Seeria ${n}`,
   shareWorkout: 'Jaga treeningut',
   shareSheetTitle: 'Jaga treeningut',
-  shareToStories: 'Lugudesse',
+  shareToStories: 'Jaga',
   shareSaveImage: 'Salvesta pilt',
   shareCopy: 'Kopeeri',
   shareCopied: 'Kopeeritud',

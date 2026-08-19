@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -313,7 +313,7 @@ export function SessionView(props: {
     return () => clearInterval(iv);
   }, [live]);
 
-  // Manual "−30s" trim of the live rest clock. Anchored to the set it was
+  // Manual trim of the live rest clock. Anchored to the set it was
   // applied against so it auto-resets (derived) the moment a new set lands —
   // no setState-in-effect needed.
   const [restCut, setRestCut] = useState<{ at: number; ms: number }>({ at: 0, ms: 0 });
@@ -324,14 +324,14 @@ export function SessionView(props: {
     setSheet({ kind: 'add' });
   }, [props.startAdd, workout]);
 
-  // Finish docks beside Discard when that row is on screen, otherwise floats
-  // as a corner FAB.
+  // Finish docks beside Discard when any part of that row is on screen. The
+  // corner FAB returns only after the docked row has fully left the viewport.
   useEffect(() => {
     const el = discardRef.current;
     if (!el) return;
     if (typeof IntersectionObserver === 'undefined') return;
     const io = new IntersectionObserver(([e]) => setDiscardInView(e.isIntersecting), {
-      rootMargin: '0px 0px 96px 0px',
+      rootMargin: '0px',
       threshold: 0,
     });
     io.observe(el);
@@ -811,7 +811,6 @@ export function SessionView(props: {
                 const restLine =
                   restBefore !== null && restBefore > 0 ? (
                     <div className={`set-rest${interCard ? ' inter-card' : ''}`}>
-                      {interCard && <Icon name="timer" />}
                       {t.restLabel(mmss(restBefore))}
                     </div>
                   ) : null;
@@ -913,8 +912,13 @@ export function SessionView(props: {
                     <div className="ex-resting">
                       <Icon name="timer" />
                       <span>{t.restingSince(mmss(restNow))}</span>
-                      <button type="button" className="rest-trim" onClick={trimRest}>
-                        {'−30s'}
+                      <button
+                        type="button"
+                        className="rest-trim"
+                        onClick={trimRest}
+                        aria-label="Trim rest"
+                      >
+                        <span aria-hidden>{'−'}</span>
                       </button>
                     </div>
                   );
@@ -1195,10 +1199,13 @@ export function SessionView(props: {
               {prSet.e.name} · {fmtWeightKg(prSet.s.weight ?? 0)} × {prSet.s.reps}
             </div>
             <div className="sub">
-              {t.prevBest(
-                `${baseline.get(prSet.e.name.toLowerCase()) ?? 0} kg`,
-                est1rm(prSet.s.weight ?? 0, prSet.s.reps),
-              )}
+              {(() => {
+                const estimated = est1rm(prSet.s.weight ?? 0, prSet.s.reps);
+                return t.prevBest(
+                  `${baseline.get(prSet.e.name.toLowerCase()) ?? 0} kg`,
+                  estimated > 0 ? estimated : null,
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1362,8 +1369,13 @@ export function SessionView(props: {
                     <span className="rest-clock">
                       {mmss(Math.max(0, now - lastLoggedAt - restCutMs))}
                     </span>
-                    <button type="button" className="rest-trim" onClick={trimRest}>
-                      {'−30s'}
+                    <button
+                      type="button"
+                      className="rest-trim"
+                      onClick={trimRest}
+                      aria-label="Trim rest"
+                    >
+                      <span aria-hidden>{'−'}</span>
                     </button>
                   </div>
                 )}
@@ -1657,6 +1669,12 @@ export function SessionView(props: {
                 <Icon name="plus" />
                 {props.past ? t.addToSession : t.addExercise}
               </button>
+              {props.past && (
+                <button className="btn btn-primary share-cta" onClick={() => setShareOpen(true)}>
+                  <Icon name="export" />
+                  {t.shareWorkout}
+                </button>
+              )}
               {live && !workout.autoFinished && (
                 <div className="session-discard-row" ref={discardRef}>
                   <button
@@ -1691,6 +1709,15 @@ export function SessionView(props: {
         >
           <Icon name="check" />
         </button>
+      )}
+      {shareOpen && !summary && (
+        <ShareSheet
+          model={buildShareModel()}
+          shell={props.shell}
+          isDesktop={isDesktop}
+          t={t}
+          onClose={() => setShareOpen(false)}
+        />
       )}
       {showSessionSide && live && (
         <aside className="pane-side desktop-only session-side">
@@ -1786,6 +1813,7 @@ export function SessionView(props: {
         <AddExerciseSheet
           workout={workout}
           gym={gym}
+          suggestions={!props.past && workout.exercises.length === 0}
           onPick={(name, kind, meta) => {
             addExercise(
               workout.id,
@@ -2122,6 +2150,7 @@ function AddExerciseSheet(props: {
   const [muscle, setMuscle] = useState<MuscleGroup | undefined>(undefined);
   const [checkGym, setCheckGym] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const pointerPickHandled = useRef(false);
   // Admins/trainers creating a brand-new exercise set its muscles + equipment
   // here, and it is written to the shared server catalog (EQ-4).
   const [creating, setCreating] = useState<string | null>(null);
@@ -2183,6 +2212,22 @@ function AddExerciseSheet(props: {
     if (!checkGym || !hasInventory || !equipment) return null;
     return props.gym!.inventory!.includes(equipment) ? null : equipment;
   }
+
+  const pickOnPointerDown =
+    (fn: () => void) =>
+    (e: PointerEvent<HTMLButtonElement>): void => {
+      if (e.pointerType === 'mouse') return;
+      e.preventDefault();
+      pointerPickHandled.current = true;
+      fn();
+      window.setTimeout(() => {
+        pointerPickHandled.current = false;
+      }, 500);
+    };
+  const pickOnClick = (fn: () => void) => (): void => {
+    if (pointerPickHandled.current) return;
+    fn();
+  };
 
   // --- Day-aware picker (Ex suggestions, AC-1) -----------------------------
   if (props.suggestions) {
@@ -2320,7 +2365,12 @@ function AddExerciseSheet(props: {
         equipment: x.equipment ? [x.equipment] : [],
       });
     const row = (x: Cand, isSug: boolean) => (
-      <button key={x.id} className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
+      <button
+        key={x.id}
+        className={`add-row${isSug ? ' suggested' : ''}`}
+        onPointerDown={pickOnPointerDown(() => pick(x))}
+        onClick={pickOnClick(() => pick(x))}
+      >
         <span className="add-main">
           <span className="add-name">{x.name}</span>
           <span className="add-tokens">
@@ -2519,7 +2569,8 @@ function AddExerciseSheet(props: {
               <div key={m.name} className={`pick-row-wrap${untagged ? ' taggable' : ''}`}>
                 <button
                   className={`pick-row${missing ? ' unavailable' : ''}`}
-                  onClick={() => props.onPick(m.name, kind)}
+                  onPointerDown={pickOnPointerDown(() => props.onPick(m.name, kind))}
+                  onClick={pickOnClick(() => props.onPick(m.name, kind))}
                 >
                   {m.info && m.info.primary !== 'cardio' ? (
                     <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
@@ -2569,7 +2620,8 @@ function AddExerciseSheet(props: {
               <button
                 key={c.id}
                 className={`pick-row${missing ? ' unavailable' : ''}`}
-                onClick={() => props.onPick(name, kind)}
+                onPointerDown={pickOnPointerDown(() => props.onPick(name, kind))}
+                onClick={pickOnClick(() => props.onPick(name, kind))}
               >
                 {c.muscle !== 'cardio' ? (
                   <MuscleIcon muscle={c.muscle} variant="figure" tone="primary" />
@@ -2600,9 +2652,12 @@ function AddExerciseSheet(props: {
       {q.trim() && !exact && (
         <button
           className="result-row create"
-          onClick={() =>
-            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind)
-          }
+          onPointerDown={pickOnPointerDown(() =>
+            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind),
+          )}
+          onClick={pickOnClick(() =>
+            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind),
+          )}
         >
           <Icon name="plus" />
           {t.createExercise(q.trim())}

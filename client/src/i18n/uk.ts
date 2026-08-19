@@ -493,7 +493,8 @@ export const uk: Strings = {
   setsStat: 'Підходи',
   movedStat: 'Піднято',
   newRecord: 'Новий рекорд',
-  prevBest: (v, rm) => `Попередній рекорд ${v} · оцінка 1ПМ до ${rm} кг`,
+  prevBest: (v, rm) =>
+    rm ? `Попередній рекорд ${v} · оцінка 1ПМ до ${rm} кг` : `Попередній рекорд ${v}`,
   comparedToLast: 'Порівняно з минулим тренуванням',
   sessionVolume: 'Обʼєм тренування',
   editSession: 'Редагувати',
@@ -510,7 +511,7 @@ export const uk: Strings = {
   setNumber: (n: number) => `Підхід ${n}`,
   shareWorkout: 'Поділитися',
   shareSheetTitle: 'Поділитися тренуванням',
-  shareToStories: 'У Stories',
+  shareToStories: 'Поділитися',
   shareSaveImage: 'Зберегти зображення',
   shareCopy: 'Копіювати',
   shareCopied: 'Скопійовано',

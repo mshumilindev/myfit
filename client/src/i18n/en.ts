@@ -538,7 +538,8 @@ export const en = {
   setsStat: 'Sets',
   movedStat: 'Moved',
   newRecord: 'New record',
-  prevBest: (v: string, rm: number) => `Previous best ${v} · estimated 1RM up to ${rm} kg`,
+  prevBest: (v: string, rm: number | null) =>
+    rm ? `Previous best ${v} · estimated 1RM up to ${rm} kg` : `Previous best ${v}`,
   comparedToLast: 'Compared to last session',
   sessionVolume: 'Session volume',
   editSession: 'Edit session',
@@ -555,7 +556,7 @@ export const en = {
   setNumber: (n: number) => `Set ${n}`,
   shareWorkout: 'Share workout',
   shareSheetTitle: 'Share workout',
-  shareToStories: 'Share to Stories',
+  shareToStories: 'Share',
   shareSaveImage: 'Save image',
   shareCopy: 'Copy',
   shareCopied: 'Copied',
