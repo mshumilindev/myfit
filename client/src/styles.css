@@ -18033,3 +18033,41 @@ button.badge {
     display: none;
   }
 }
+
+/* --- Timed exercise: live count-up timer (Start → count-up, Stop → log) --- */
+.timed-timer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+.timed-timer.start {
+  justify-content: center;
+  padding: 11px;
+  border: 1px dashed color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 14px;
+  cursor: pointer;
+}
+.timed-timer.start:hover {
+  background: rgba(230, 170, 64, 0.06);
+}
+.timed-timer.running {
+  justify-content: space-between;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+.timed-timer .tt-count {
+  font-size: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+.timed-timer .tt-stop {
+  min-width: 96px;
+}

@@ -1,8 +1,9 @@
 /**
- * Set type (design DS-1): working · warm-up · dropset · reverse dropset.
+ * Set type (design DS-1 + SD-1): working · warm-up · dropset · reverse dropset ·
+ * static-dynamic (a TUT-driven timed hold, logged as weight + hold seconds).
  * A drop/reverse-drop is still ONE set; its parts live in `drops`.
  */
-export type SetType = 'working' | 'warmup' | 'drop' | 'reverse-drop';
+export type SetType = 'working' | 'warmup' | 'drop' | 'reverse-drop' | 'static-dynamic';
 
 /** One drop inside a drop/reverse-drop set (after the start weight). */
 export interface DropEntry {

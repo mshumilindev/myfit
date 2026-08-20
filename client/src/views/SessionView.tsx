@@ -97,6 +97,12 @@ import { getRole } from '../api';
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
+/** m:ss for a static-dynamic hold time stored as fractional minutes. */
+function fmtHold(min: number | null | undefined): string {
+  const sec = Math.round((min ?? 0) * 60);
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+}
+
 /** m:ss for rest durations (pure — safe in render). */
 function mmss(ms: number): string {
   const total = Math.max(0, Math.round(ms / 1000));
@@ -279,6 +285,8 @@ export function SessionView(props: {
   const suggestOn = true;
   const workout = store.workouts.find((w) => w.id === props.workoutId);
   const [sheet, setSheet] = useState<SheetState>(null);
+  // Live count-up timer for a timed exercise (TIMED-1/2): Start → count-up, Stop → log held time.
+  const [timing, setTiming] = useState<{ exId: string; startedAt: number } | null>(null);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const dragId = useRef<string | null>(null);
@@ -523,6 +531,14 @@ export function SessionView(props: {
   /** Kind cell of one strength set row (working/warm-up/drop/record…). */
   function setKindLabel(ex: Exercise, s: SetEntry, grp: GroupCtx | null) {
     const type = setTypeOf(s);
+    if (type === 'static-dynamic') {
+      return (
+        <span className="kind tsd">
+          <Icon name="wave-sine" />
+          {isDesktop ? t.setTypeStaticDynamic : t.setSDShort}
+        </span>
+      );
+    }
     if (type === 'drop' || type === 'reverse-drop') {
       return (
         <span className="kind tdrop">
@@ -782,6 +798,20 @@ export function SessionView(props: {
                   {props.past ? t.add : t.log}
                 </button>
               </div>
+              {live &&
+                (timing?.exId === ex.id ? (
+                  <div className="timed-timer running">
+                    <span className="tt-count num">{mmss(now - timing.startedAt)}</span>
+                    <button className="btn btn-primary tt-stop" onClick={() => stopTiming(ex)}>
+                      {t.timerStop}
+                    </button>
+                  </div>
+                ) : (
+                  <button className="timed-timer start" onClick={() => startTiming(ex)}>
+                    <Icon name="timer" />
+                    {t.timerStart}
+                  </button>
+                ))}
             </div>
           </>
         ) : (
@@ -833,7 +863,9 @@ export function SessionView(props: {
                     onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
                   >
                     <span className="idx">{idx}</span>
-                    <span className="val">{s.reps}</span>
+                    <span className="val">
+                      {type === 'static-dynamic' ? fmtHold(s.durationMin) : s.reps}
+                    </span>
                     <span className="val">
                       {s.weight === null
                         ? t.bodyweightShort
@@ -979,6 +1011,25 @@ export function SessionView(props: {
         )}
       </div>
     );
+  }
+
+  function startTiming(ex: Exercise): void {
+    setTiming({ exId: ex.id, startedAt: Date.now() });
+  }
+  function stopTiming(ex: Exercise): void {
+    if (!timing || timing.exId !== ex.id) return;
+    const min = Math.max(0, (Date.now() - timing.startedAt) / 60000);
+    const kind = exerciseKind(ex);
+    logNewSet(ex, {
+      reps: 0,
+      weight: null,
+      isWarmup: kind === 'warmup',
+      durationMin: Math.round(min * 100) / 100,
+      distanceKm: null,
+      calories: null,
+      rpe: null,
+    });
+    setTiming(null);
   }
 
   function logTimedGhost(
@@ -2846,6 +2897,7 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
   { type: 'warmup', icon: 'fire' },
   { type: 'drop', icon: 'caret-line-down' },
   { type: 'reverse-drop', icon: 'caret-line-up' },
+  { type: 'static-dynamic', icon: 'wave-sine' },
 ];
 
 /**
@@ -2986,6 +3038,11 @@ function SetEditorSheet(props: {
   const [rpe, setRpe] = useState(props.set?.rpe ?? 0);
   // Bodyweight = weight stored as null (pull-ups, dips, planks…).
   const [bw, setBw] = useState(props.set ? props.set.weight === null : false);
+  const [holdSec, setHoldSec] = useState(
+    props.set && setTypeOf(props.set) === 'static-dynamic' && props.set.durationMin != null
+      ? Math.round(props.set.durationMin * 60)
+      : 35,
+  );
   const [openedAt] = useState(() => Date.now());
   const [focused, setFocused] = useState<'reps' | 'weight' | 'duration' | 'distance'>(
     timed ? 'duration' : 'weight',
@@ -2996,6 +3053,7 @@ function SetEditorSheet(props: {
         .findIndex((s) => s.id === props.set!.id) + 1
     : props.exercise.sets.length + 1;
   const isDropType = type === 'drop' || type === 'reverse-drop';
+  const isSD = type === 'static-dynamic';
   const dropRepsTotal = reps + drops.reduce((n, d) => n + d.reps, 0);
   const dropKgTotal =
     (bw ? 0 : weight) * reps + drops.reduce((v, d) => v + (d.weight ?? 0) * d.reps, 0);
@@ -3005,6 +3063,7 @@ function SetEditorSheet(props: {
     warmup: { name: t.setTypeWarmup, hint: t.excludedFromVolume },
     drop: { name: t.setTypeDrop, hint: t.weightFalls },
     'reverse-drop': { name: t.setTypeReverse, hint: t.weightClimbs },
+    'static-dynamic': { name: t.setTypeStaticDynamic, hint: t.setTypeSDHint },
   };
 
   function save(): void {
@@ -3020,14 +3079,15 @@ function SetEditorSheet(props: {
             rpe: rpe > 0 ? rpe : null,
           }
         : {
-            reps,
+            // A static-dynamic set is one weighted hold: reps 1, TUT in durationMin.
+            reps: isSD ? 1 : reps,
             // Bodyweight, whether toggled or just left at 0, is stored as null
             // so it reads as "BW" while total volume keeps external load at 0.
             weight: bw || weight === 0 ? null : weight,
             isWarmup: type === 'warmup',
             type,
             drops: isDropType ? drops : [],
-            durationMin: null,
+            durationMin: isSD ? holdSec / 60 : null,
             distanceKm: null,
             calories: null,
             rpe: null,
@@ -3178,7 +3238,31 @@ function SetEditorSheet(props: {
         </>
       ) : (
         <>
-          {isDropType ? (
+          {isSD ? (
+            <div className="steppers">
+              <Stepper
+                label={t.weightKg}
+                value={weight}
+                step={2.5}
+                min={0}
+                decimals={2}
+                focused={focused === 'weight'}
+                disabled={bw}
+                placeholder={t.bodyweightShort}
+                onFocus={() => setFocused('weight')}
+                onChange={setWeight}
+              />
+              <Stepper
+                label={t.holdSecLabel}
+                value={holdSec}
+                step={5}
+                min={5}
+                focused={focused === 'duration'}
+                onFocus={() => setFocused('duration')}
+                onChange={setHoldSec}
+              />
+            </div>
+          ) : isDropType ? (
             <div className="dropedit-rows">
               <div className="drop-part">
                 <div className="drop-part-lab">{t.startLabel}</div>
@@ -3247,7 +3331,9 @@ function SetEditorSheet(props: {
                     ? 'fire'
                     : type === 'drop'
                       ? 'caret-line-down'
-                      : 'caret-line-up'
+                      : type === 'reverse-drop'
+                        ? 'caret-line-up'
+                        : 'wave-sine'
               }
             />
             <span className="lab">{t.setTypeLabel}</span>
