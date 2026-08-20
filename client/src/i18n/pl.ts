@@ -797,6 +797,8 @@ export const pl: Strings = {
   profileAvatarRemoved: 'Zdjęcie usunięte',
   profileAvatarType: 'Użyj obrazu JPEG, PNG albo WebP.',
   profileAvatarTooBig: 'Obraz musi mieć maksymalnie 10 MB.',
+  profTabOverview: 'Przegląd',
+  profTabBody: 'Ciało',
   profileSettings: 'Ustawienia',
   profileUnits: 'Jednostki',
   profileUnitsKg: 'kg',

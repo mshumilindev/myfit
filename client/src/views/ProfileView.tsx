@@ -126,6 +126,7 @@ export function ProfileView({
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordEditing, setPasswordEditing] = useState(false);
   const [trainerNote, setTrainerNote] = useState('');
+  const [ptab, setPtab] = useState<'overview' | 'body' | 'settings'>('overview');
   const [savingNote, setSavingNote] = useState(false);
   const [noteError, setNoteError] = useState<string | null>(null);
   const [avatarRefresh, setAvatarRefresh] = useState(0);
@@ -500,15 +501,34 @@ export function ProfileView({
             </div>
           </section>
 
-          {isSelf ? (
-            <BodyMetricsSection readOnly={false} />
-          ) : (
-            load.bodyMetrics && (
-              <BodyMetricsSection readOnly data={load.bodyMetrics} showReadOnlyBadge={false} />
-            )
-          )}
+          <div className="seg3 profile-subtabs">
+            <button
+              className={ptab === 'overview' ? 'active' : ''}
+              onClick={() => setPtab('overview')}
+            >
+              {t.profTabOverview}
+            </button>
+            <button className={ptab === 'body' ? 'active' : ''} onClick={() => setPtab('body')}>
+              {t.profTabBody}
+            </button>
+            <button
+              className={ptab === 'settings' ? 'active' : ''}
+              onClick={() => setPtab('settings')}
+            >
+              {t.profileSettings}
+            </button>
+          </div>
 
-          {!isTrainerView && (
+          {ptab === 'body' &&
+            (isSelf ? (
+              <BodyMetricsSection readOnly={false} />
+            ) : (
+              load.bodyMetrics && (
+                <BodyMetricsSection readOnly data={load.bodyMetrics} showReadOnlyBadge={false} />
+              )
+            ))}
+
+          {ptab === 'settings' && !isTrainerView && (
             <section className="profile-section profile-access-section">
               <div className="field-label">{t.profWhoSees}</div>
               {load.access.length === 0 ? (
@@ -527,7 +547,7 @@ export function ProfileView({
             </section>
           )}
 
-          {isSelf && (
+          {ptab === 'settings' && isSelf && (
             <>
               <div className="field-label profile-mobile-settings-title">{t.profileSettings}</div>
               <div className="profile-lang">
@@ -555,18 +575,21 @@ export function ProfileView({
             </>
           )}
 
-          {isAdminViewer && load.person.id !== load.viewer.id && load.person.role !== 'admin' && (
-            <button className="toggle-row" onClick={() => void toggleTrainer()}>
-              <Icon name="barbell" />
-              <span className="lab">
-                <div>{t.profileTrainerPriv}</div>
-                <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
-                  {t.profileTrainerPrivHint}
-                </div>
-              </span>
-              <Switch on={load.person.role === 'trainer'} />
-            </button>
-          )}
+          {ptab === 'settings' &&
+            isAdminViewer &&
+            load.person.id !== load.viewer.id &&
+            load.person.role !== 'admin' && (
+              <button className="toggle-row" onClick={() => void toggleTrainer()}>
+                <Icon name="barbell" />
+                <span className="lab">
+                  <div>{t.profileTrainerPriv}</div>
+                  <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
+                    {t.profileTrainerPrivHint}
+                  </div>
+                </span>
+                <Switch on={load.person.role === 'trainer'} />
+              </button>
+            )}
 
           {profileError && (
             <div className="error-card profile-error">
@@ -575,7 +598,7 @@ export function ProfileView({
             </div>
           )}
 
-          {isSelf && (
+          {ptab === 'settings' && isSelf && (
             <section className="profile-section profile-security">
               <div>
                 <div className="profile-stat-heading">
@@ -646,197 +669,205 @@ export function ProfileView({
             </section>
           )}
 
-          {load.viewer.relation === 'trainer' && <TrainerLivePanel load={load} />}
+          {ptab === 'overview' && (
+            <>
+              {load.viewer.relation === 'trainer' && <TrainerLivePanel load={load} />}
 
-          <section className="profile-stats">
-            <StatGroup title={t.profileStatsActivity} icon="calendar-blank">
-              <Stat
-                icon="calendar-blank"
-                value={String(load.summary.sessions)}
-                label={t.adminSessions}
-              />
-              <Stat
-                icon="chart-line-up"
-                value={String(load.summary.sessions30)}
-                label={t.profileSessions30}
-              />
-              <Stat
-                icon="arrows-clockwise"
-                value={String(load.summary.perWeek30)}
-                label={t.adminPerWeek}
-              />
-              {load.summary.liveSessions > 0 && (
-                <Stat
-                  icon="play"
-                  value={String(load.summary.liveSessions)}
-                  label={t.profileLive}
-                  accent
-                />
-              )}
-            </StatGroup>
+              <section className="profile-stats">
+                <StatGroup title={t.profileStatsActivity} icon="calendar-blank">
+                  <Stat
+                    icon="calendar-blank"
+                    value={String(load.summary.sessions)}
+                    label={t.adminSessions}
+                  />
+                  <Stat
+                    icon="chart-line-up"
+                    value={String(load.summary.sessions30)}
+                    label={t.profileSessions30}
+                  />
+                  <Stat
+                    icon="arrows-clockwise"
+                    value={String(load.summary.perWeek30)}
+                    label={t.adminPerWeek}
+                  />
+                  {load.summary.liveSessions > 0 && (
+                    <Stat
+                      icon="play"
+                      value={String(load.summary.liveSessions)}
+                      label={t.profileLive}
+                      accent
+                    />
+                  )}
+                </StatGroup>
 
-            <StatGroup title={t.profileStatsLoad} icon="flame">
-              <Stat
-                icon="trophy"
-                value={fmtTonnes(load.summary.volumeKg)}
-                label={t.profileLifetime}
-              />
-              <Stat
-                icon="chart-line"
-                value={fmtTonnes(load.summary.volume30)}
-                label={t.adminVol30}
-              />
-              <Stat icon="flame" value={fmtTonnes(load.summary.volume7)} label={t.profileWeek} />
-            </StatGroup>
+                <StatGroup title={t.profileStatsLoad} icon="flame">
+                  <Stat
+                    icon="trophy"
+                    value={fmtTonnes(load.summary.volumeKg)}
+                    label={t.profileLifetime}
+                  />
+                  <Stat
+                    icon="chart-line"
+                    value={fmtTonnes(load.summary.volume30)}
+                    label={t.adminVol30}
+                  />
+                  <Stat
+                    icon="flame"
+                    value={fmtTonnes(load.summary.volume7)}
+                    label={t.profileWeek}
+                  />
+                </StatGroup>
 
-            <StatGroup title={t.profileStatsStructure} icon="barbell">
-              <Stat icon="list-plus" value={String(load.summary.sets)} label={t.setsStat} />
-              <Stat icon="barbell" value={String(load.summary.exercises)} label={t.exercises} />
-              <Stat
-                icon="timer"
-                value={fmtDurationHM(load.summary.durationMs)}
-                label={t.duration}
-              />
-              <Stat
-                icon="clock"
-                value={String(Math.round(load.summary.cardioMinutes))}
-                label={t.cardioMinutes}
-              />
-            </StatGroup>
-          </section>
+                <StatGroup title={t.profileStatsStructure} icon="barbell">
+                  <Stat icon="list-plus" value={String(load.summary.sets)} label={t.setsStat} />
+                  <Stat icon="barbell" value={String(load.summary.exercises)} label={t.exercises} />
+                  <Stat
+                    icon="timer"
+                    value={fmtDurationHM(load.summary.durationMs)}
+                    label={t.duration}
+                  />
+                  <Stat
+                    icon="clock"
+                    value={String(Math.round(load.summary.cardioMinutes))}
+                    label={t.cardioMinutes}
+                  />
+                </StatGroup>
+              </section>
 
-          <section className="profile-columns">
-            <div className="profile-section">
-              <div className="field-label">{t.profileTopExercises}</div>
-              {load.topExercises.length === 0 ? (
-                <div className="detail-muted">{t.profileNoTraining}</div>
-              ) : (
-                <div className="profile-list">
-                  {load.topExercises.map((ex) => (
-                    <button
-                      key={ex.name}
-                      className="profile-row"
-                      onClick={() =>
-                        shell.openOverlay({ screen: 'exercise-history', name: ex.name })
-                      }
-                    >
-                      <span>
-                        <span className="n">{ex.name}</span>
-                        <span className="s">
-                          {ex.sessions} · {ex.sets} {t.sets}
-                        </span>
-                      </span>
-                      <span className="profile-row-metric">
-                        <span className="n">{fmtTonnes(ex.volumeKg)}</span>
-                        {ex.bestE1rm !== null && ex.bestE1rm > 0 ? (
-                          <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
-                        ) : null}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="profile-section">
-              <div className="field-label">{t.profileGyms}</div>
-              {load.gyms.length === 0 ? (
-                <div className="detail-muted">{t.profileNoGyms}</div>
-              ) : (
-                <div className="profile-gym-list">
-                  {load.gyms.map((g) => (
-                    <div
-                      key={g.id}
-                      className="gym-card tappable profile-gym-card"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() =>
-                        shell.openOverlay({
-                          screen: 'gym',
-                          gymId: g.id,
-                          name: g.name,
-                          lat: g.lat,
-                          lng: g.lng,
-                        })
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          shell.openOverlay({
-                            screen: 'gym',
-                            gymId: g.id,
-                            name: g.name,
-                            lat: g.lat,
-                            lng: g.lng,
-                          });
-                        }
-                      }}
-                    >
-                      <span className="thumb">
-                        <GymThumb name={g.name} lat={g.lat} lng={g.lng} />
-                      </span>
-                      <div className="gym-card-body">
-                        <div className="head">
-                          <span className="n">{g.name}</span>
-                          {g.favorite ? (
-                            <span className="tag tag-accent">{t.pickGymFavourite}</span>
-                          ) : null}
-                        </div>
-                        <div className="meta">
+              <section className="profile-columns">
+                <div className="profile-section">
+                  <div className="field-label">{t.profileTopExercises}</div>
+                  {load.topExercises.length === 0 ? (
+                    <div className="detail-muted">{t.profileNoTraining}</div>
+                  ) : (
+                    <div className="profile-list">
+                      {load.topExercises.map((ex) => (
+                        <button
+                          key={ex.name}
+                          className="profile-row"
+                          onClick={() =>
+                            shell.openOverlay({ screen: 'exercise-history', name: ex.name })
+                          }
+                        >
                           <span>
-                            {g.sessions} · {fmtTonnes(g.volumeKg)} ·{' '}
-                            {g.lastSessionAt ? fmtDayMonth(g.lastSessionAt, locale) : t.stNever}
+                            <span className="n">{ex.name}</span>
+                            <span className="s">
+                              {ex.sessions} · {ex.sets} {t.sets}
+                            </span>
                           </span>
-                        </div>
-                        <span className="profile-gym-coords">
-                          {g.lat.toFixed(5)}, {g.lng.toFixed(5)}
-                        </span>
-                      </div>
+                          <span className="profile-row-metric">
+                            <span className="n">{fmtTonnes(ex.volumeKg)}</span>
+                            {ex.bestE1rm !== null && ex.bestE1rm > 0 ? (
+                              <span className="s">{Math.round(ex.bestE1rm)} kg e1RM</span>
+                            ) : null}
+                          </span>
+                        </button>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          </section>
 
-          <section className="profile-section profile-recent-section">
-            <div className="field-label">{t.adminRecent}</div>
-            {load.sessions.length === 0 ? (
-              <div className="detail-muted">{t.profileNoTraining}</div>
-            ) : (
-              <div className="detail-sessions profile-sessions">
-                {load.sessions.slice(0, 12).map((s) => (
-                  <button
-                    key={s.id}
-                    className="row"
-                    onClick={() =>
-                      shell.openOverlay({
-                        screen: s.live ? 'session' : 'past-workout',
-                        workoutId: s.id,
-                      })
-                    }
-                  >
-                    <span>{fmtDayMonth(s.startedAt, locale)}</span>
-                    <span>{s.gymName ?? '—'}</span>
-                    <span>
-                      {s.sets} · {fmtTonnes(s.volumeKg)}
-                    </span>
-                    <span className="profile-session-ex">
-                      {s.live
-                        ? t.stTrainingNow
-                        : s.durationMs
-                          ? fmtDurationHM(s.durationMs)
-                          : s.autoFinished
-                            ? t.autoClosed
-                            : ''}
-                      {s.exerciseNames.length > 0 ? ` · ${s.exerciseNames.join(', ')}` : ''}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
+                <div className="profile-section">
+                  <div className="field-label">{t.profileGyms}</div>
+                  {load.gyms.length === 0 ? (
+                    <div className="detail-muted">{t.profileNoGyms}</div>
+                  ) : (
+                    <div className="profile-gym-list">
+                      {load.gyms.map((g) => (
+                        <div
+                          key={g.id}
+                          className="gym-card tappable profile-gym-card"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() =>
+                            shell.openOverlay({
+                              screen: 'gym',
+                              gymId: g.id,
+                              name: g.name,
+                              lat: g.lat,
+                              lng: g.lng,
+                            })
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              shell.openOverlay({
+                                screen: 'gym',
+                                gymId: g.id,
+                                name: g.name,
+                                lat: g.lat,
+                                lng: g.lng,
+                              });
+                            }
+                          }}
+                        >
+                          <span className="thumb">
+                            <GymThumb name={g.name} lat={g.lat} lng={g.lng} />
+                          </span>
+                          <div className="gym-card-body">
+                            <div className="head">
+                              <span className="n">{g.name}</span>
+                              {g.favorite ? (
+                                <span className="tag tag-accent">{t.pickGymFavourite}</span>
+                              ) : null}
+                            </div>
+                            <div className="meta">
+                              <span>
+                                {g.sessions} · {fmtTonnes(g.volumeKg)} ·{' '}
+                                {g.lastSessionAt ? fmtDayMonth(g.lastSessionAt, locale) : t.stNever}
+                              </span>
+                            </div>
+                            <span className="profile-gym-coords">
+                              {g.lat.toFixed(5)}, {g.lng.toFixed(5)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
 
-          {load.viewer.relation === 'self' && (
+              <section className="profile-section profile-recent-section">
+                <div className="field-label">{t.adminRecent}</div>
+                {load.sessions.length === 0 ? (
+                  <div className="detail-muted">{t.profileNoTraining}</div>
+                ) : (
+                  <div className="detail-sessions profile-sessions">
+                    {load.sessions.slice(0, 12).map((s) => (
+                      <button
+                        key={s.id}
+                        className="row"
+                        onClick={() =>
+                          shell.openOverlay({
+                            screen: s.live ? 'session' : 'past-workout',
+                            workoutId: s.id,
+                          })
+                        }
+                      >
+                        <span>{fmtDayMonth(s.startedAt, locale)}</span>
+                        <span>{s.gymName ?? '—'}</span>
+                        <span>
+                          {s.sets} · {fmtTonnes(s.volumeKg)}
+                        </span>
+                        <span className="profile-session-ex">
+                          {s.live
+                            ? t.stTrainingNow
+                            : s.durationMs
+                              ? fmtDurationHM(s.durationMs)
+                              : s.autoFinished
+                                ? t.autoClosed
+                                : ''}
+                          {s.exerciseNames.length > 0 ? ` · ${s.exerciseNames.join(', ')}` : ''}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
+
+          {ptab === 'settings' && load.viewer.relation === 'self' && (
             <section className="profile-section profile-audit-section">
               <div className="field-label">{t.profileAuditReads}</div>
               {load.audit.length === 0 ? (
@@ -862,7 +893,7 @@ export function ProfileView({
             </section>
           )}
 
-          {(load.notes.length > 0 || load.viewer.relation === 'trainer') && (
+          {ptab === 'overview' && (load.notes.length > 0 || load.viewer.relation === 'trainer') && (
             <section className="profile-section profile-notes-section">
               <div className="field-label">
                 {load.viewer.relation === 'trainer' ? t.trNotes : t.profileNotes}

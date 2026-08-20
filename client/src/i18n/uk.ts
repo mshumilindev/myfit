@@ -797,6 +797,8 @@ export const uk: Strings = {
   profileAvatarRemoved: 'Фото видалено',
   profileAvatarType: 'Використай JPEG, PNG або WebP.',
   profileAvatarTooBig: 'Зображення має бути не більше 10 MB.',
+  profTabOverview: 'Огляд',
+  profTabBody: 'Тіло',
   profileSettings: 'Налаштування',
   profileUnits: 'Одиниці',
   profileUnitsKg: 'кг',

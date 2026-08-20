@@ -803,6 +803,8 @@ export const lt: Strings = {
   profileAvatarRemoved: 'Nuotrauka pašalinta',
   profileAvatarType: 'Naudok JPEG, PNG arba WebP vaizdą.',
   profileAvatarTooBig: 'Vaizdas turi būti ne didesnis kaip 10 MB.',
+  profTabOverview: 'Apžvalga',
+  profTabBody: 'Kūnas',
   profileSettings: 'Nustatymai',
   profileUnits: 'Vienetai',
   profileUnitsKg: 'kg',

@@ -847,6 +847,8 @@ export const en = {
   profileAvatarRemoved: 'Photo removed',
   profileAvatarType: 'Use a JPEG, PNG or WebP image.',
   profileAvatarTooBig: 'The image must be 10 MB or smaller.',
+  profTabOverview: 'Overview',
+  profTabBody: 'Body',
   profileSettings: 'Settings',
   profileUnits: 'Units',
   profileUnitsKg: 'kg',

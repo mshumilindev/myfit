@@ -792,6 +792,8 @@ export const et: Strings = {
   profileAvatarRemoved: 'Foto eemaldatud',
   profileAvatarType: 'Kasuta JPEG, PNG või WebP pilti.',
   profileAvatarTooBig: 'Pilt peab olema kuni 10 MB.',
+  profTabOverview: 'Ülevaade',
+  profTabBody: 'Keha',
   profileSettings: 'Seaded',
   profileUnits: 'Ühikud',
   profileUnitsKg: 'kg',

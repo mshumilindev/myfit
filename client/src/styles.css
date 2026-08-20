@@ -18071,3 +18071,9 @@ button.badge {
 .timed-timer .tt-stop {
   min-width: 96px;
 }
+
+/* Profile: sub-tabs (Overview / Body / Settings) */
+.profile-subtabs {
+  margin: 4px 0 6px;
+  flex: none;
+}
