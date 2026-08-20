@@ -17,6 +17,8 @@ import { EmptyState, Icon } from '../ui';
 import { EquipChip, MuscleChip, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
+import { FeatsView } from '../components/FeatsView';
+import { TrendsView } from '../components/TrendsView';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -29,12 +31,28 @@ function weekStart(ts: number): number {
   return d.getTime();
 }
 
-export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
+export function ProgressView({
+  store,
+  shell,
+  sub,
+  onSub,
+  featSub,
+  onFeatSub,
+}: {
+  store: Store;
+  shell: Shell;
+  sub: 'progress' | 'trends' | 'feats';
+  onSub: (s: 'progress' | 'trends' | 'feats') => void;
+  featSub: 'achievements' | 'standards';
+  onFeatSub: (s: 'achievements' | 'standards') => void;
+}) {
   const { t, locale } = useT();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [seg, setSeg] = useState<'total' | 'muscle' | 'records'>('total');
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
+  const ptab = sub;
+  const setPtab = onSub;
   const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const openMuscleHistory = (muscle: MuscleGroup) =>
@@ -287,12 +305,62 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
     </div>
   );
 
+  const pTabs = (
+    <div className="prog-tabs progress-subtabs" role="tablist">
+      <button
+        role="tab"
+        aria-selected={ptab === 'progress'}
+        className={ptab === 'progress' ? 'active' : ''}
+        onClick={() => setPtab('progress')}
+      >
+        {t.progress}
+      </button>
+      <button
+        role="tab"
+        aria-selected={ptab === 'trends'}
+        className={ptab === 'trends' ? 'active' : ''}
+        onClick={() => setPtab('trends')}
+      >
+        {t.trendsTab}
+      </button>
+      <button
+        role="tab"
+        aria-selected={ptab === 'feats'}
+        className={ptab === 'feats' ? 'active' : ''}
+        onClick={() => setPtab('feats')}
+      >
+        {t.featsTab}
+      </button>
+    </div>
+  );
+
+  if (ptab === 'feats' || ptab === 'trends') {
+    return (
+      <div className="screen progress-page progress-alt">
+        <div className="progress-tabbar">{pTabs}</div>
+        <div className="progress-alt-body">
+          {ptab === 'feats' ? (
+            <FeatsView
+              finished={finished}
+              body={store.bodyMetrics}
+              sub={featSub}
+              onSub={onFeatSub}
+            />
+          ) : (
+            <TrendsView finished={finished} body={store.bodyMetrics} />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (finished.length < 3) {
     return (
       <div className="screen progress-page progress-locked">
         <div className="progress-head">
           <h2 className="headline">{t.progress}</h2>
         </div>
+        <div className="progress-tabbar">{pTabs}</div>
         <div className="progress-locked-layout">
           <section className="progress-weekly-panel">
             <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
@@ -314,6 +382,7 @@ export function ProgressView({ store, shell }: { store: Store; shell: Shell }) {
   return (
     <div className="screen progress-page progress-filled">
       <h2 className="visually-hidden">{t.progress}</h2>
+      <div className="progress-tabbar">{pTabs}</div>
       <section className="progress-summary-pane">
         <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
         {segControl}

@@ -57,6 +57,8 @@ export async function programProgress(memberId: string) {
   const asg = asgSnap.data() as AssignmentDoc;
   const p = await programById(asg.programId);
   if (!p) return null;
+  // A draft/archived program stays off the member's Today until activated.
+  if (p.status !== 'active') return null;
   const by = await usersById(asg.assignedBy);
   const workouts = await listUserWorkouts(memberId);
   const done = workouts.filter((w) => w.startedAt >= asg.startedAt && w.finishedAt !== null).length;
@@ -158,6 +160,7 @@ export const assignProgram = onCall(async (req) => {
     assignedBy: uid,
     startedAt,
   });
+  await db.collection('programs').doc(p.id).update({ status: 'active', updatedAt: Date.now() });
   if (memberId !== uid) {
     await createNotice(
       memberId,

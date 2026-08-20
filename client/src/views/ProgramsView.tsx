@@ -157,6 +157,8 @@ export function ProgramsView({
   const [programQuery, setProgramQuery] = useState('');
   const [assignClientIds, setAssignClientIds] = useState<string[]>([]);
   const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
+  /** How many members currently have THIS program as their active assignment. */
+  const [assignedCount, setAssignedCount] = useState(0);
   const [ignoredEquipWarn, setIgnoredEquipWarn] = useState<string[]>([]);
   /** EQ-5 · rows picked for “Group selected as superset”. */
   const [pickedItemIds, setPickedItemIds] = useState<string[]>([]);
@@ -252,6 +254,40 @@ export function ProgramsView({
       .catch(() => setClients([]));
   }, [role]);
 
+  // Real "assigned to N members" — count active assignments pointing at this
+  // program, not the whole client roster. Trainers/admins may read assignments.
+  function refreshAssignedCount(programId = selectedId): void {
+    if (!programId || role === 'member') {
+      setAssignedCount(0);
+      return;
+    }
+    getDocs(query(collection(db, 'assignments'), where('programId', '==', programId)))
+      .then((snap) => setAssignedCount(snap.size))
+      .catch(() => setAssignedCount(0));
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedId || role === 'member') {
+      Promise.resolve().then(() => {
+        if (!cancelled) setAssignedCount(0);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    getDocs(query(collection(db, 'assignments'), where('programId', '==', selectedId)))
+      .then((snap) => {
+        if (!cancelled) setAssignedCount(snap.size);
+      })
+      .catch(() => {
+        if (!cancelled) setAssignedCount(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId, role]);
+
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => i + 1), []);
   // Weekday strip (design "dateless week"): short 3-letter labels (MON…SUN) and
   // a real "today" marker on the current weekday (Mon=1…Sun=7), independent of
@@ -295,6 +331,15 @@ export function ProgramsView({
     return labels;
   }, [days, draft.items, draft.dayNames]);
   const selectedDayLabel = dayLabels.get(selectedDay) ?? t.progDay(selectedDay);
+
+  // A day counts as a training day when it prescribes anything at all: exact
+  // exercises, target muscles, or just a name. Only fully blank days are rest.
+  const isTrainingDay = (day: number) =>
+    draft.items.some((it) => it.day === day) ||
+    (draft.targetMuscles?.[day]?.length ?? 0) > 0 ||
+    !!draft.dayNames?.[day]?.trim();
+  // "N days a week" is derived, never typed — it's the count of training days.
+  const trainingDayCount = days.filter(isTrainingDay).length;
 
   function selectProgram(program: Program) {
     setSelectedId(program.id);
@@ -527,7 +572,7 @@ export function ProgramsView({
     try {
       const rawW = Number(draft.weeks);
       const weeks = rawW === 0 ? 0 : Math.max(1, Math.min(52, rawW || 8));
-      const daysPerWeek = Math.max(1, Math.min(7, Number(draft.daysPerWeek) || 3));
+      const daysPerWeek = Math.max(1, days.filter(isTrainingDay).length);
       const items = draft.items
         .filter((i) => i.name.trim())
         .map((i, idx) => ({
@@ -576,6 +621,7 @@ export function ProgramsView({
       })(),
     );
     setAssignClientIds([]);
+    refreshAssignedCount();
   }
 
   async function removeProgram(id: string) {
@@ -1288,23 +1334,11 @@ export function ProgramsView({
                     {t.progNoEndDate}
                   </label>
                   <span>·</span>
-                  <label>
-                    <input
-                      value={draft.daysPerWeek}
-                      type="number"
-                      min={1}
-                      max={7}
-                      onChange={(e) =>
-                        setDraft((p) => ({ ...p, daysPerWeek: Number(e.target.value) || 1 }))
-                      }
-                      aria-label={t.progDaysPerWeek}
-                    />
-                    <span>{t.progDaysAWeekWord(draft.daysPerWeek)}</span>
-                  </label>
+                  <span aria-label={t.progDaysPerWeek}>{t.progDaysCount(trainingDayCount)}</span>
                   {selectedId && (
                     <>
                       <span>·</span>
-                      <span>{t.progAssignedMembers(clients.length)}</span>
+                      <span>{t.progAssignedMembers(assignedCount)}</span>
                     </>
                   )}
                   <span>·</span>
@@ -1376,19 +1410,10 @@ export function ProgramsView({
                 {t.progNoEndDate}
               </label>
             </label>
-            <label className="field-block">
+            <div className="field-block">
               <span className="field-label">{t.progDaysPerWeek}</span>
-              <input
-                className="input"
-                type="number"
-                min={1}
-                max={7}
-                value={draft.daysPerWeek}
-                onChange={(e) =>
-                  setDraft((p) => ({ ...p, daysPerWeek: Number(e.target.value) || 1 }))
-                }
-              />
-            </label>
+              <div className="input program-days-readonly">{t.progDaysCount(trainingDayCount)}</div>
+            </div>
           </div>
 
           <div className="program-io">
@@ -1412,7 +1437,7 @@ export function ProgramsView({
           <div className="program-week-strip program-week-strip-v2" aria-label={t.progWeekStrip}>
             {days.map((day) => {
               const count = draft.items.filter((item) => item.day === day).length;
-              const rest = count === 0;
+              const rest = !isTrainingDay(day);
               return (
                 <button
                   key={day}
@@ -1449,10 +1474,16 @@ export function ProgramsView({
                   {t.progDayLine(t.weekDayNames[selectedDay - 1], selectedDayLabel)}
                 </div>
                 <input
-                  className="input program-day-name-input"
+                  className={`input program-day-name-input${
+                    isTrainingDay(selectedDay) && !draft.dayNames?.[selectedDay]?.trim()
+                      ? ' needs-value'
+                      : ''
+                  }`}
                   value={draft.dayNames?.[selectedDay] ?? ''}
                   placeholder={t.progDayNamePlaceholder}
                   maxLength={40}
+                  required
+                  aria-required="true"
                   onChange={(e) => setDayName(selectedDay, e.target.value)}
                 />
                 <div className="program-day-sub">
@@ -1825,7 +1856,7 @@ export function ProgramsView({
             )}
             <button
               className="btn btn-secondary"
-              disabled={draft.items.length === 0}
+              disabled={trainingDayCount === 0}
               onClick={duplicateProgram}
             >
               <Icon name="copy" />
@@ -1835,9 +1866,15 @@ export function ProgramsView({
               <button
                 className="btn btn-secondary"
                 disabled={
-                  !Array.from({ length: draft.daysPerWeek }, (_, i) => i + 1).every((day) =>
-                    draft.items.some((it) => it.day === day),
-                  )
+                  trainingDayCount === 0 ||
+                  !days
+                    .filter(isTrainingDay)
+                    .every(
+                      (day) =>
+                        !!draft.dayNames?.[day]?.trim() &&
+                        (draft.items.some((it) => it.day === day) ||
+                          (draft.targetMuscles?.[day]?.length ?? 0) > 0),
+                    )
                 }
                 onClick={() => setStatus('active')}
               >

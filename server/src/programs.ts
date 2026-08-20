@@ -147,6 +147,8 @@ export function programProgress(memberId: string): {
   const p = db.prepare('SELECT * FROM programs WHERE id = ?').get(asg.program_id) as
     ProgramRow | undefined;
   if (!p) return null;
+  // A draft/archived program stays off the member's Today until activated.
+  if (p.status !== 'active') return null;
   const by = db.prepare('SELECT username FROM users WHERE id = ?').get(asg.assigned_by) as
     { username: string } | undefined;
   const done = (
@@ -347,6 +349,10 @@ programsRouter.post(
          program_id = excluded.program_id, assigned_by = excluded.assigned_by,
          started_at = excluded.started_at`,
     ).run(memberId, p.id, req.userId, startedAt);
+    db.prepare("UPDATE programs SET status = 'active', updated_at = ? WHERE id = ?").run(
+      Date.now(),
+      p.id,
+    );
     // Notify the member and name who did it (AC-ASSIGN-05, AC-PLAN-11) — never
     // for a member self-assigning their own plan.
     if (memberId !== req.userId) {

@@ -61,6 +61,14 @@ service cloud.firestore {
       match /meta/{docId} {
         allow read, write: if isSelf(userId);
       }
+
+      // Spotter Nutrition — user's own nutrition data (separate service, shared account).
+      match /nutritionEntries/{entryId} {
+        allow read, write: if isSelf(userId);
+      }
+      match /nutritionFoods/{foodId} {
+        allow read, write: if isSelf(userId);
+      }
       match /pings/{pingId} {
         allow read, write: if isSelf(userId);
       }

@@ -185,9 +185,20 @@ function tabsForRole(role: NavRole, t: NavLabels): NavItem[] {
 }
 
 /** Serialize the current screen to a URL hash so a refresh restores it. */
-function toHash(tab: Tab, overlay: Overlay, programsExercises: boolean, libMine: boolean): string {
+function toHash(
+  tab: Tab,
+  overlay: Overlay,
+  programsExercises: boolean,
+  libMine: boolean,
+  progressSub: 'progress' | 'trends' | 'feats',
+  featSub: 'achievements' | 'standards',
+): string {
   if (!overlay && tab === 'programs' && programsExercises)
     return libMine ? '#/exercises/mine' : '#/exercises';
+  if (!overlay && tab === 'progress') {
+    if (progressSub === 'trends') return '#/trends';
+    if (progressSub === 'feats') return featSub === 'standards' ? '#/feats/standards' : '#/feats';
+  }
   if (overlay?.screen === 'session') return '#/session';
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
@@ -235,6 +246,8 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   // the programs tab; the exercises sub-tab is read separately via
   // `exercisesFromHash` so a refresh on #/exercises lands there.
   if (head === 'exercises') return { tab: 'programs', overlay: null };
+  // Progress sub-tabs are peer URLs of #/progress (read separately below).
+  if (head === 'trends' || head === 'feats') return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'templates') return { tab: 'progress', overlay: { screen: 'templates' } };
@@ -252,6 +265,18 @@ function exercisesFromHash(hash: string): { exercises: boolean; mine: boolean } 
   const parts = hash.replace(/^#\/?/, '').split('/');
   if (parts[0] === 'exercises') return { exercises: true, mine: parts[1] === 'mine' };
   return { exercises: false, mine: false };
+}
+
+/** Read the Progress sub-tab (#/trends, #/feats[/standards]) from the hash. */
+function progressFromHash(hash: string): {
+  sub: 'progress' | 'trends' | 'feats';
+  featSub: 'achievements' | 'standards';
+} {
+  const parts = hash.replace(/^#\/?/, '').split('/');
+  if (parts[0] === 'trends') return { sub: 'trends', featSub: 'achievements' };
+  if (parts[0] === 'feats')
+    return { sub: 'feats', featSub: parts[1] === 'standards' ? 'standards' : 'achievements' };
+  return { sub: 'progress', featSub: 'achievements' };
 }
 
 export function App() {
@@ -325,6 +350,14 @@ export function App() {
   const [libMine, setLibMine] = useState<boolean>(
     () => exercisesFromHash(window.location.hash).mine,
   );
+  // Progress sub-tabs (Progress · Trends · Feats) + the Feats sub-tab, kept in
+  // App so each has its own URL (#/trends, #/feats, #/feats/standards).
+  const [progressSub, setProgressSub] = useState<'progress' | 'trends' | 'feats'>(
+    () => progressFromHash(window.location.hash).sub,
+  );
+  const [featSub, setFeatSub] = useState<'achievements' | 'standards'>(
+    () => progressFromHash(window.location.hash).featSub,
+  );
   // Overlay navigation keeps a stack of parents: the back button on an overlay
   // returns to the screen it was opened from (session → exercise history →
   // back lands on the session again), never blindly through browser history.
@@ -381,6 +414,9 @@ export function App() {
     goTab: (x) => {
       setOverlay(null);
       setTab(x);
+      // Tapping the Progress rail item lands on the Progress sub-tab, not a
+      // remembered Trends/Feats sub.
+      if (x === 'progress') setProgressSub('progress');
     },
     toast: (tst) => {
       toastSeq.current += 1;
@@ -446,9 +482,25 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(effectiveTab, activeOverlay, programsExercises, libMine);
+    const next = toHash(
+      effectiveTab,
+      activeOverlay,
+      programsExercises,
+      libMine,
+      progressSub,
+      featSub,
+    );
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
-  }, [authed, joinToken, effectiveTab, activeOverlay, programsExercises, libMine]);
+  }, [
+    authed,
+    joinToken,
+    effectiveTab,
+    activeOverlay,
+    programsExercises,
+    libMine,
+    progressSub,
+    featSub,
+  ]);
 
   // URL hash → state (browser back/forward).
   useEffect(() => {
@@ -456,9 +508,12 @@ export function App() {
     const onPop = () => {
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const ex = exercisesFromHash(window.location.hash);
+      const ps = progressFromHash(window.location.hash);
       setTab(ht);
       setProgramsExercises(ex.exercises);
       setLibMine(ex.mine);
+      setProgressSub(ps.sub);
+      setFeatSub(ps.featSub);
       setOverlayNav({
         cur:
           ho?.screen === 'session' && !ho.workoutId
@@ -614,7 +669,16 @@ export function App() {
           <>
             <Suspense fallback={<ScreenFallback />}>
               {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
-              {effectiveTab === 'progress' && <ProgressView store={store} shell={shell} />}
+              {effectiveTab === 'progress' && (
+                <ProgressView
+                  store={store}
+                  shell={shell}
+                  sub={progressSub}
+                  onSub={setProgressSub}
+                  featSub={featSub}
+                  onFeatSub={setFeatSub}
+                />
+              )}
               {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}
               {effectiveTab === 'people' &&
                 (role === 'trainer' ? (

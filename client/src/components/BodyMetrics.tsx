@@ -41,6 +41,18 @@ function num(s: string): number | null {
 
 type SheetState = { kind: 'add' } | { kind: 'edit'; entry: WeightEntry } | null;
 
+/** Age in whole years from an ISO date-of-birth (YYYY-MM-DD), or null. */
+function ageFromDob(dob?: string | null): number | null {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a -= 1;
+  return a >= 0 && a < 120 ? a : null;
+}
+
 /** Editable numeric field with a unit suffix (or a static value when read-only). */
 function MetricInput(props: {
   label: string;
@@ -132,6 +144,7 @@ export function BodyMetricsSection({
   const deltaAll = latest && first ? latest.weight - first.weight : null;
   const toGoal = latest && bm.goalWeightKg != null ? latest.weight - bm.goalWeightKg : null;
   const bmi = bmiValue(bm.heightCm, latest?.weight);
+  const bmAge = ageFromDob(bm.dob);
   const bmiBand =
     bmi == null
       ? ''
@@ -222,6 +235,42 @@ export function BodyMetricsSection({
           <div className="bm-metric-label">
             {t.bmBmi} · {t.bmApprox}
           </div>
+        </div>
+      </div>
+
+      <div className="bm-about">
+        <div className="bm-about-field">
+          <div className="section-label">{t.sex}</div>
+          <div className="seg3 bm-sex-seg">
+            <button
+              className={bm.sex === 'male' ? 'active' : ''}
+              disabled={readOnly}
+              onClick={() => !readOnly && updateBodyMetrics({ sex: 'male' })}
+            >
+              {t.sexMale}
+            </button>
+            <button
+              className={bm.sex === 'female' ? 'active' : ''}
+              disabled={readOnly}
+              onClick={() => !readOnly && updateBodyMetrics({ sex: 'female' })}
+            >
+              {t.sexFemale}
+            </button>
+          </div>
+        </div>
+        <div className="bm-about-field">
+          <div className="section-label">
+            {t.birthday}
+            {bmAge != null && <span className="bm-age">{t.ageYears(bmAge)}</span>}
+          </div>
+          <input
+            type="date"
+            className="bm-dob"
+            value={bm.dob ?? ''}
+            disabled={readOnly}
+            max="2020-12-31"
+            onChange={(e) => updateBodyMetrics({ dob: e.target.value || null })}
+          />
         </div>
       </div>
 

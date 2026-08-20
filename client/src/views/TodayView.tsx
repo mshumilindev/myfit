@@ -1,6 +1,9 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { useEffect, useMemo, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
 import type { Shell } from '../App';
+import { db } from '../firebase';
+import { computeTrends } from '../trends';
 import type { ExerciseKind, Gym, Workout } from '../types';
 import { callFn, getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
@@ -131,6 +134,27 @@ function useNowTick(active: boolean): number {
  *  more than once every 1–2 weeks). Local, device-only — a transient nudge. */
 const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
+const ANALYSIS_DISMISS_KEY = 'spotter.analysisNudge.dismissedAt';
+const ANALYSIS_COOLDOWN_MS = 4 * 24 * 60 * 60 * 1000;
+// Cache the assigned program so Today paints instantly and only revalidates in
+// the background (no full cold fetch on every visit).
+const PROGRAM_CACHE_KEY = 'spotter.programMine';
+function readProgramCache(): ProgramAssignment | null {
+  try {
+    const raw = localStorage.getItem(PROGRAM_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as ProgramAssignment) : null;
+  } catch {
+    return null;
+  }
+}
+function writeProgramCache(a: ProgramAssignment | null): void {
+  try {
+    if (a) localStorage.setItem(PROGRAM_CACHE_KEY, JSON.stringify(a));
+    else localStorage.removeItem(PROGRAM_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
@@ -151,7 +175,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     shell.openOverlay({ screen: 'muscle-history', muscle });
   const [progChoice, setProgChoice] = useState<'week' | 'week-lifts'>('week-lifts');
   const [, setProgDismissTick] = useState(0);
-  const [assignment, setAssignment] = useState<ProgramAssignment | null>(null);
+  const [assignment, setAssignment] = useState<ProgramAssignment | null>(() => readProgramCache());
+  // A draft program can be assigned, but shouldn't surface on Today until it's
+  // activated. When we can read the program doc (author/self) we honour its
+  // status; when we can't (member of a trainer's plan) we default to showing.
+  const [assignedActive, setAssignedActive] = useState(true);
 
   /** Session heading: the program day name if it has one, else the weekday. */
   // Program sessions keep their own day name; logged sessions are named by the
@@ -193,6 +221,23 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         d.getDate() === n.getDate()
       );
     });
+  })();
+
+  // Which weekdays (1=Mon…7=Sun) already have a logged session in the CURRENT
+  // Mon–Sun week — drives the "done" marks on the program calendar.
+  const weekTrainedDays = (() => {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const weekStart = d.getTime();
+    const weekEnd = weekStart + 7 * DAY_MS;
+    const set = new Set<number>();
+    for (const w of finished) {
+      if (w.startedAt >= weekStart && w.startedAt < weekEnd) {
+        set.add(((new Date(w.startedAt).getDay() + 6) % 7) + 1);
+      }
+    }
+    return set;
   })();
 
   // "Likely today" prediction (Today plaque): the usual split + start time for
@@ -327,9 +372,33 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   useEffect(() => {
     callFn<{ assignment: ProgramAssignment | null }>('programMine')
-      .then((data) => setAssignment(data.assignment))
-      .catch(() => setAssignment(null));
+      .then((data) => {
+        setAssignment(data.assignment);
+        writeProgramCache(data.assignment);
+      })
+      .catch(() => {
+        /* keep whatever was cached — don't blank the card on a transient error */
+      });
   }, []);
+
+  useEffect(() => {
+    if (!assignment) {
+      setAssignedActive(true);
+      return;
+    }
+    let alive = true;
+    getDoc(doc(db, 'programs', assignment.program.id))
+      .then((snap) => {
+        if (!alive) return;
+        const status = snap.exists() ? (snap.data() as { status?: string }).status : undefined;
+        // Unknown/unreadable → keep showing; only a readable non-active hides it.
+        setAssignedActive(status === undefined ? true : status === 'active');
+      })
+      .catch(() => alive && setAssignedActive(true));
+    return () => {
+      alive = false;
+    };
+  }, [assignment]);
 
   function startProgramDay(day: number) {
     if (!assignment) return;
@@ -454,21 +523,195 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     </div>
   );
 
-  const programCard = !open && assignment && (
+  // Analysis nudge (Today → Trends): surfaces when Spotter has flagged actual
+  // issues (warn-tone insights). Dismissible with a short cooldown.
+  const analysisNudge = ((): { count: number; level: string; labels: string[] } | null => {
+    if (getRole() === 'trainer' || open) return null;
+    let dismissedAt = 0;
+    try {
+      dismissedAt = Number(localStorage.getItem(ANALYSIS_DISMISS_KEY) || 0);
+    } catch {
+      /* ignore */
+    }
+    if (dismissedAt && now - dismissedAt < ANALYSIS_COOLDOWN_MS) return null;
+    const res = computeTrends(finished, store.bodyMetrics, now);
+    // A "quick win" is something to FIX — risks and warnings. FYI stats and
+    // on-track wins are not counted.
+    const actionable = res.insights.filter((i) => i.level === 'risk' || i.level === 'warn');
+    if (!res.ready || actionable.length === 0) return null;
+    // Name the actual top cards so the banner mirrors what Trends shows.
+    const labels = actionable
+      .slice(0, 3)
+      .map((i) => i.headline || i.kicker || '')
+      .filter(Boolean);
+    return { count: actionable.length, level: actionable[0].level, labels };
+  })();
+
+  function dismissAnalysis() {
+    try {
+      localStorage.setItem(ANALYSIS_DISMISS_KEY, String(now));
+    } catch {
+      /* ignore */
+    }
+    setProgDismissTick((n) => n + 1);
+  }
+
+  function openTrends() {
+    window.location.hash = '#/trends';
+  }
+
+  const analysisBanner = analysisNudge != null && (
+    <div className={`prog-banner analysis-banner lvl-${analysisNudge.level} fade-in`}>
+      <span className="prog-sheen" aria-hidden />
+      <div className="prog-banner-row">
+        <span className="prog-banner-icon">
+          <Icon name="chart-line-up" weight="bold" />
+        </span>
+        <div className="prog-banner-main">
+          <span className="prog-banner-kicker">{t.todayAnalysisKicker}</span>
+          <div className="prog-banner-title">{t.todayAnalysisTitle(analysisNudge.count)}</div>
+          <div className="prog-banner-body">
+            {analysisNudge.labels.length > 0
+              ? t.todayAnalysisBodyList(analysisNudge.labels.join(' · '))
+              : t.todayAnalysisBody}
+          </div>
+          <div className="prog-banner-acts">
+            <button className="prog-banner-cta" onClick={openTrends}>
+              <Icon name="arrow-right" weight="bold" />
+              {t.todayAnalysisCta}
+            </button>
+            <button className="prog-banner-skip" onClick={dismissAnalysis}>
+              {t.todayAnalysisDismiss}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // When a program is assigned, today's session comes FROM THE PROGRAM (not
+  // history). This plaque sits above the program card and is reworded away from
+  // "likely" / "from your history".
+  const programTodayPlan = (() => {
+    if (open || !assignment || !assignedActive || trainedToday) return null;
+    const day = todayWeekday;
+    const items = assignment.program.items.filter((i) => i.day === day);
+    const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+    if (items.length === 0 && muscles.length === 0) return null;
+    const dayName = assignment.program.dayNames?.[day] || t.progDay(day);
+    const labels = muscles.length > 0 ? muscles.map((m) => t.muscleGroups[m]) : [];
+    // Usual start time + meal hint for this weekday, still learned from history.
+    const dow = new Date(now).getDay();
+    const sameDow = finished.filter((w) => new Date(w.startedAt).getDay() === dow);
+    let startMin: number | null = null;
+    let mealMin: number | null = null;
+    if (sameDow.length > 0) {
+      const mins = sameDow
+        .map((w) => {
+          const d = new Date(w.startedAt);
+          return d.getHours() * 60 + d.getMinutes();
+        })
+        .sort((a, b) => a - b);
+      startMin = mins[Math.floor(mins.length / 2)];
+      mealMin = startMin - 105;
+    }
+    return { dayName, labels, startMin, mealMin };
+  })();
+
+  const programTodayBanner = programTodayPlan && (
+    <div className="prog-banner today-plan-banner">
+      <div className="prog-banner-row">
+        <span className="prog-banner-icon">
+          <Icon name="calendar-check" weight="bold" />
+        </span>
+        <div className="prog-banner-main">
+          <span className="prog-banner-kicker">{t.todayPlanKicker}</span>
+          {/* Day name + muscles duplicate the heading/cards on web, so they stay
+              mobile-only (shown on web only when there's no timing to show). */}
+          <div className={`tp-identity${programTodayPlan.startMin != null ? ' mobile-only' : ''}`}>
+            <div className="tp-day">{programTodayPlan.dayName}</div>
+            {programTodayPlan.labels.length > 0 && (
+              <div className="tp-muscles">{programTodayPlan.labels.join(' · ')}</div>
+            )}
+          </div>
+          {(programTodayPlan.startMin != null || programTodayPlan.mealMin != null) && (
+            <div className="tp-timing">
+              {programTodayPlan.startMin != null && (
+                <div className="tp-stat">
+                  <span className="tp-stat-ico">
+                    <Icon name="clock-countdown" weight="bold" />
+                  </span>
+                  <span className="tp-stat-val">~{hhmm(programTodayPlan.startMin)}</span>
+                  <span className="tp-stat-lab">{t.todayPlanStart}</span>
+                </div>
+              )}
+              {programTodayPlan.mealMin != null && (
+                <div className="tp-stat">
+                  <span className="tp-stat-ico">
+                    <Icon name="fork-knife" weight="bold" />
+                  </span>
+                  <span className="tp-stat-val">~{hhmm(programTodayPlan.mealMin)}</span>
+                  <span className="tp-stat-lab">{t.todayPlanEat}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Weekly progress from actual history (matches the calendar's done marks) —
+  // the server's post-assignment count reads 0 right after activation.
+  const programWeek = (() => {
+    if (!assignment) return { done: 0, total: 0, pct: 0 };
+    const days = Array.from({ length: 7 }, (_, i) => i + 1).filter((day) => {
+      const items = assignment.program.items.filter((it) => it.day === day);
+      const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+      return items.length > 0 || muscles.length > 0;
+    });
+    const done = days.filter((d) => weekTrainedDays.has(d)).length;
+    return {
+      done,
+      total: days.length,
+      pct: days.length ? Math.round((done / days.length) * 100) : 0,
+    };
+  })();
+
+  const programCard = !open && assignment && assignedActive && (
     <section className="today-program-card">
       <div className="program-card-head">
         <Icon name="copy" />
-        <div>
+        <div className="pch-text">
           <div className="field-label">{t.progTitle}</div>
           <div className="n">{assignment.program.name}</div>
           <div className="s">
-            {t.progWeekN(assignment.week)} · {t.progSessions(assignment.done, assignment.total)}
+            {assignment.program.weeks !== 0 ? `${t.progWeekN(assignment.week)} · ` : ''}
+            {t.progSessions(programWeek.done, programWeek.total)}
             {assignment.assignedBy ? ` · ${t.progAssignedBy(assignment.assignedBy)}` : ''}
           </div>
         </div>
-        {assignment.adherence !== null && (
-          <span className="tag tag-ok">{Math.round(assignment.adherence * 100)}%</span>
-        )}
+        <div
+          className={`pch-progress lvl-${
+            programWeek.pct >= 100
+              ? 'done'
+              : programWeek.pct >= 60
+                ? 'ok'
+                : programWeek.pct > 0
+                  ? 'warn'
+                  : 'none'
+          }`}
+        >
+          <div className="pch-top">
+            <span className="pch-pct num">{programWeek.pct}%</span>
+            <span className="pch-count num">
+              {programWeek.done}/{programWeek.total}
+            </span>
+          </div>
+          <div className="pch-bar">
+            <span className="pch-bar-fill" style={{ width: `${programWeek.pct}%` }} />
+          </div>
+        </div>
       </div>
       <div className="program-day-actions">
         {Array.from({ length: 7 }, (_, i) => i + 1).map((day) => {
@@ -493,16 +736,47 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               : items.length === 1
                 ? compactProgramDaySummary(items)
                 : t.progDayWorkoutSummary(items.length, setCount);
+          const isToday = day === todayWeekday;
+          const done = weekTrainedDays.has(day);
+          const missed = hasPlan && !done && day < todayWeekday;
+          // Only today is actionable — and only while it hasn't been trained yet.
+          const canStart = isToday && hasPlan && !trainedToday && !done;
+          const state = !hasPlan
+            ? 'rest'
+            : done
+              ? 'done'
+              : isToday
+                ? 'today'
+                : missed
+                  ? 'missed'
+                  : 'upcoming';
           return (
             <button
               key={day}
-              className={`program-start-day${hasPlan ? ' planned' : ''}${day === todayWeekday ? ' is-today' : ''}`}
-              disabled={!hasPlan}
-              onClick={() => startProgramDay(day)}
+              className={`program-start-day${hasPlan ? ' planned' : ''}${
+                isToday ? ' is-today' : ''
+              }${done ? ' is-done' : ''}${missed ? ' is-missed' : ''}${
+                canStart ? ' can-start' : ''
+              } state-${state}`}
+              disabled={!canStart}
+              aria-disabled={!canStart}
+              onClick={() => canStart && startProgramDay(day)}
             >
               <span className="program-start-top">
-                <span>{t.weekDayLetters[day - 1]}</span>
-                {hasPlan ? <Icon name="play" /> : <span>+</span>}
+                <span className="program-start-dow">{t.weekDayLetters[day - 1]}</span>
+                <span className="program-start-mark">
+                  {done ? (
+                    <Icon name="check-circle" weight="fill" />
+                  ) : canStart ? (
+                    <Icon name="play" />
+                  ) : missed ? (
+                    <Icon name="warning-circle" weight="fill" />
+                  ) : hasPlan ? (
+                    <span className="program-start-dot" aria-hidden />
+                  ) : (
+                    <span className="program-start-plus">+</span>
+                  )}
+                </span>
               </span>
               <strong>{hasPlan ? dayName : t.progRestDay}</strong>
               {hasPlan && <span className="program-start-summary">{summary}</span>}
@@ -513,6 +787,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   ))}
                 </span>
               )}
+              <span className="program-start-bar" aria-hidden />
             </button>
           );
         })}
@@ -573,6 +848,20 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     </>
   );
 
+  // With an assigned program, the page title becomes today's day name (or Rest).
+  const todayHeading = (() => {
+    if (assignment && assignedActive) {
+      const day = todayWeekday;
+      const items = assignment.program.items.filter((i) => i.day === day);
+      const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+      if (items.length > 0 || muscles.length > 0) {
+        return assignment.program.dayNames?.[day] || t.progDay(day);
+      }
+      return t.progRestDay;
+    }
+    return t.today;
+  })();
+
   return (
     <div className={`screen paned${open ? ' today-live-mode' : ''}`}>
       <div className="pane-main">
@@ -582,7 +871,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <div className="td-topbar">
               <div>
                 <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
-                <h2>{t.today}</h2>
+                <h2>{todayHeading}</h2>
               </div>
               <div className="td-topbar-actions">
                 <SyncChip store={store} />
@@ -608,8 +897,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           ))}
 
         {banners}
+        {analysisBanner}
         {suggestBanner}
+        {programTodayBanner}
         {programCard}
+        {!open && !(assignment && assignedActive) && hasHistory && (
+          <div className="today-weekstrip-card">
+            <WeekStrip />
+          </div>
+        )}
 
         {weighReminder && (
           <div className="weigh-plaque">
@@ -629,7 +925,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
-        {prediction && (
+        {prediction && !(assignment && assignedActive) && (
           <div className="likely-plaque">
             <div className="lp-head">
               <Icon name="calendar-check" />
@@ -811,10 +1107,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div className="v">{t.statDays(streakDays)}</div>
                 <div className="l">{t.statStreak}</div>
               </div>
-            </div>
-
-            <div className="mobile-only">
-              <WeekStrip />
             </div>
 
             <div>

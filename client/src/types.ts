@@ -82,6 +82,10 @@ export interface WeightEntry {
 
 /** Body metrics for one user — height, optional composition, weigh-in log. */
 export interface BodyMetrics {
+  /** Biological sex — drives strength-standard classification. */
+  sex?: 'male' | 'female';
+  /** Date of birth (ISO YYYY-MM-DD). */
+  dob?: string | null;
   heightCm?: number | null;
   goalWeightKg?: number | null;
   bodyFatPct?: number | null;

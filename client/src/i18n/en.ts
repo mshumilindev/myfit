@@ -1103,6 +1103,120 @@ export const en = {
   updateReady: 'A new version is ready — reload to update',
   reload: 'Reload',
   error: 'Error',
+
+  // Progress sub-tabs + Feats
+  trendsTab: 'Trends',
+  featsTab: 'Feats',
+  trendsSoon: 'Trends land here soon.',
+  featsOf: (n: number, total: number) => `${n} of ${total}`,
+  featsNextMilestone: 'next milestone',
+  featsToGo: (x: string) => `${x} to go`,
+  featsWorth: (name: string, total: string) =>
+    `You’ve lifted a ${name}’s worth of iron — ${total} total.`,
+  featsUnlocked: (d: string) => `Unlocked ${d}`,
+  featsLifetime: 'Lifetime volume',
+  featsNext: 'Milestone',
+  featsEmptyTitle: 'No feats yet',
+  featsEmptyBody: 'Finish sessions — volume adds up fast.',
+  featsClose: 'Close',
+  // --- Trends (Progress → Trends tab) --------------------------------------
+  trendsEmptyTitle: 'No trends yet',
+  trendsEmptyBody: 'Finish a few sessions and insights show up here.',
+  trendVolumeKicker: 'Weekly volume',
+  trendStrengthKicker: 'Main lift · e1RM',
+  trendBalanceKicker: 'Upper / lower',
+  trendFrequencyKicker: 'Consistency',
+  trendPlateauKicker: 'Plateau watch',
+  trendPrKicker: 'PR cadence',
+  trendRelKicker: 'Strength-to-bodyweight',
+  trendPerWeek: '/ wk',
+  trendWeek: 'week',
+  trendWeeks: 'weeks',
+  trendNeedWeeks: (n: number) => `Need ${n}+ weeks of data`,
+  trendVolumeNote: (d: number | null) =>
+    d == null
+      ? 'Your weekly average so far.'
+      : d >= 5
+        ? `Up ${d}% vs the previous 4 weeks — building well.`
+        : d <= -5
+          ? `Down ${Math.abs(d)}% vs the previous 4 weeks — could be a deload.`
+          : 'Holding steady over the last month.',
+  trendStrengthNote: (lift: string, toClub: number, club: number) =>
+    `${lift} — ${toClub} kg from the ${club} kg club.`,
+  trendStrengthNoteMax: (lift: string) => `${lift} — your strongest lift.`,
+  trendBalanceEven: 'Upper and lower are well balanced.',
+  trendBalanceNote: (light: string) => `Skewed — your ${light} body is getting less work.`,
+  muscleSplit: { upper: 'upper', lower: 'lower' } as Record<'upper' | 'lower', string>,
+  trendFrequencyNote: (thisWeek: number, usual: number) =>
+    `${thisWeek} this week vs your usual ${usual}/wk.`,
+  trendPlateauWarn: (lift: string, weeks: number) =>
+    `No new e1RM on ${lift} for ${weeks} weeks — deload or switch it up.`,
+  trendPlateauOk: (lift: string) => `${lift} is still trending up — keep pushing.`,
+  trendPrNote: (weeks: number, recent: number) =>
+    weeks === 0
+      ? `Fresh PR this week${recent > 1 ? ` — ${recent} in the last month.` : '.'}`
+      : `${weeks} weeks since your last PR${recent > 0 ? ` — ${recent} in the last month.` : '.'}`,
+  trendPrNone: 'No personal records yet — they are coming.',
+  trendRelNote: (lift: string, e1rm: number, bw: number) =>
+    `${e1rm} kg on ${lift} at ${bw} kg bodyweight.`,
+  featsEarned: 'Earned',
+  featsUpcoming: 'Upcoming',
+  featsAllDone: 'All earned',
+  featsAchievements: 'Achievements',
+  featsStandards: 'Standards',
+  stdBodyweight: 'Bodyweight',
+  stdMen: 'Men',
+  stdWomen: 'Women',
+  stdEstMax: 'est. max',
+  stdYouTrain: 'Your disciplines',
+  stdNotYet: 'Not training yet',
+  stdNotStarted: 'not started',
+  stdNow: 'Now',
+  stdBelowRank: 'below III',
+  stdMaxRank: 'Top rank — МСМК!',
+  stdNeedWeight: 'Add a weigh-in to rank your lifts by bodyweight class.',
+  stdClassUpTo: (n: string) => `up to ${n} kg`,
+  stdSource:
+    'Ranks: raw amateur norms (WPF kRAWa). Levels: Strength Level community data. Estimated from your best set at your bodyweight.',
+  sex: 'Sex',
+  sexMale: 'Male',
+  sexFemale: 'Female',
+  rankShort: { III: 'III', II: 'II', I: 'I', KMS: 'CMS', MS: 'MS', MSMK: 'MSIC' } as Record<
+    string,
+    string
+  >,
+  lvlShort: { beg: 'Beg', nov: 'Nov', int: 'Int', adv: 'Adv', eli: 'Elite' } as Record<
+    string,
+    string
+  >,
+  stdRankTag: 'Rank',
+  stdLevelTag: 'Level',
+  stdEditProfile: 'Edit profile',
+  stdAnd: ' and ',
+  stdBelowFirst: (x: string) => `below ${x}`,
+  stdMaxReached: 'Top reached!',
+  stdNeedProfileTitle: 'Finish your profile first',
+  stdNeedProfileBody: (x: string) =>
+    `Standards are scaled to your body — add your ${x} in Profile to see them.`,
+  stdOpenProfile: 'Open profile',
+  birthday: 'Birthday',
+  ageYears: (n: number) => `${n} yrs`,
+  trendsLead: 'What your training needs — the most lacking thing first.',
+  trendsNeedTitle: 'Analysis needs a bit more history',
+  trendsNeedBody: 'Log 3+ weeks and the first insights — balance, timing, plateaus — appear here.',
+  todayAnalysisKicker: 'Training check',
+  todayAnalysisTitle: (n: number) => `${n} quick win${n === 1 ? '' : 's'} spotted`,
+  todayAnalysisBody:
+    'Spotter looked over your recent sessions and flagged a few things worth tuning — muscle balance, rest, and progression. Here\u2019s how to fix them.',
+  todayAnalysisBodyList: (items: string) => `Spotter flagged ${items}. Here’s how to fix them.`,
+  todayPlanEat: 'Eat ~1h45m before',
+  todayPlanStart: 'Usual start',
+  todayPlanKicker: 'On your plan today',
+  likelyFromProgram: 'from your program',
+  todayAnalysisCta: 'Open Trends',
+  todayAnalysisDismiss: 'Got it',
+  trendsClearTitle: 'All clear',
+  trendsClearBody: 'Nothing to flag right now — your training looks balanced. Keep it up.',
 };
 
 export type Strings = typeof en;
