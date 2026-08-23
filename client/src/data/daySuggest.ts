@@ -37,19 +37,19 @@ export type DayReadout =
 
 /**
  * Describe a session's day from its ordered (group, set-count) list:
- *   - one significant group        → that muscle ("Back"),
+ *   - one group                     → that muscle ("Back"),
  *   - several in the same split     → the split ("Pull"),
  *   - several across splits         → the actual groups ("Shoulders + Back"),
  *   - many groups / ≥3 splits       → full body.
- * A group counts as significant when it has ≥ ~a third of the top group's sets,
- * so incidental accessory work never renames the day.
+ * Every muscle group that got at least one logged set is counted — the day name
+ * reflects everything trained (so a real Core block shows as "Back + Core").
+ * The split-grouping below still keeps areas distinct: Core is never folded into
+ * Back, a thorough leg day stays "Legs", etc.
  */
 export function describeDay(ordered: Array<[MuscleGroup, number]>): DayReadout | null {
   const withSets = ordered.filter(([, n]) => n > 0);
   if (withSets.length === 0) return null;
-  const max = Math.max(...withSets.map(([, n]) => n));
-  let groups = withSets.filter(([, n]) => n >= max * 0.34).map(([m]) => m);
-  if (groups.length === 0) groups = [withSets[0][0]];
+  const groups = withSets.map(([m]) => m);
   const splits = [...new Set(groups.map((m) => exerciseDay(m)).filter(Boolean))] as TrainingDay[];
   // "Full body" means spanning the main areas (push + pull + legs) — NOT just
   // hitting many muscles inside one area. A thorough leg day (quads, hamstrings,

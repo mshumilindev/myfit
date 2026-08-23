@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -1455,6 +1455,40 @@ export function SessionView(props: {
             );
           })()}
 
+        {/* Program-day coverage (past view): for a session started from a program
+            day, tick each target muscle group that got at least one logged set
+            (green check) and cross the ones that were skipped (red cross). */}
+        {props.past &&
+          (() => {
+            const seen = new Set<string>();
+            const targets = (workout.targetMuscles ?? []).filter(
+              (m): m is MuscleGroup =>
+                PICKER_TARGET_MUSCLES.has(m) && (seen.has(m) ? false : (seen.add(m), true)),
+            );
+            if (targets.length === 0) return null;
+            const worked = muscleSetsInWorkout(workout);
+            return (
+              <div className="muscles-worked program-targets">
+                <div className="section-label">{t.programTargetsLabel}</div>
+                <div className="ptarget-row">
+                  {targets.map((m) => {
+                    const done = (worked.get(m) ?? 0) > 0;
+                    return (
+                      <span
+                        key={m}
+                        className={`ptarget ${done ? 'done' : 'skipped'}`}
+                        title={done ? t.targetWorked : t.targetSkipped}
+                      >
+                        <Icon name={done ? 'check-circle' : 'x-circle'} />
+                        {t.muscleGroups[m]}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
         <div className="session-body">
           {workout.autoFinished && (
             <div className="notice-accent">
@@ -2201,7 +2235,6 @@ function AddExerciseSheet(props: {
   const [muscle, setMuscle] = useState<MuscleGroup | undefined>(undefined);
   const [checkGym, setCheckGym] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const pointerPickHandled = useRef(false);
   // Admins/trainers creating a brand-new exercise set its muscles + equipment
   // here, and it is written to the shared server catalog (EQ-4).
   const [creating, setCreating] = useState<string | null>(null);
@@ -2264,21 +2297,10 @@ function AddExerciseSheet(props: {
     return props.gym!.inventory!.includes(equipment) ? null : equipment;
   }
 
-  const pickOnPointerDown =
-    (fn: () => void) =>
-    (e: PointerEvent<HTMLButtonElement>): void => {
-      if (e.pointerType === 'mouse') return;
-      e.preventDefault();
-      pointerPickHandled.current = true;
-      fn();
-      window.setTimeout(() => {
-        pointerPickHandled.current = false;
-      }, 500);
-    };
-  const pickOnClick = (fn: () => void) => (): void => {
-    if (pointerPickHandled.current) return;
-    fn();
-  };
+  // Exercise rows are picked with a plain onClick: a native click fires only on
+  // a genuine tap (press + release without scrolling), so dragging to scroll the
+  // list never selects a row. No pointerdown handling — that fired on touch-start
+  // and grabbed a pick the moment a scroll began.
 
   // --- Day-aware picker (Ex suggestions, AC-1) -----------------------------
   if (props.suggestions) {
@@ -2416,12 +2438,7 @@ function AddExerciseSheet(props: {
         equipment: x.equipment ? [x.equipment] : [],
       });
     const row = (x: Cand, isSug: boolean) => (
-      <button
-        key={x.id}
-        className={`add-row${isSug ? ' suggested' : ''}`}
-        onPointerDown={pickOnPointerDown(() => pick(x))}
-        onClick={pickOnClick(() => pick(x))}
-      >
+      <button key={x.id} className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
         <span className="add-main">
           <span className="add-name">{x.name}</span>
           <span className="add-tokens">
@@ -2620,8 +2637,7 @@ function AddExerciseSheet(props: {
               <div key={m.name} className={`pick-row-wrap${untagged ? ' taggable' : ''}`}>
                 <button
                   className={`pick-row${missing ? ' unavailable' : ''}`}
-                  onPointerDown={pickOnPointerDown(() => props.onPick(m.name, kind))}
-                  onClick={pickOnClick(() => props.onPick(m.name, kind))}
+                  onClick={() => props.onPick(m.name, kind)}
                 >
                   {m.info && m.info.primary !== 'cardio' ? (
                     <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
@@ -2671,8 +2687,7 @@ function AddExerciseSheet(props: {
               <button
                 key={c.id}
                 className={`pick-row${missing ? ' unavailable' : ''}`}
-                onPointerDown={pickOnPointerDown(() => props.onPick(name, kind))}
-                onClick={pickOnClick(() => props.onPick(name, kind))}
+                onClick={() => props.onPick(name, kind)}
               >
                 {c.muscle !== 'cardio' ? (
                   <MuscleIcon muscle={c.muscle} variant="figure" tone="primary" />
@@ -2703,12 +2718,9 @@ function AddExerciseSheet(props: {
       {q.trim() && !exact && (
         <button
           className="result-row create"
-          onPointerDown={pickOnPointerDown(() =>
-            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind),
-          )}
-          onClick={pickOnClick(() =>
-            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind),
-          )}
+          onClick={() =>
+            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind)
+          }
         >
           <Icon name="plus" />
           {t.createExercise(q.trim())}

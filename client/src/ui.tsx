@@ -37,6 +37,7 @@ import { Carrot } from '@phosphor-icons/react/Carrot';
 import { ChartLine } from '@phosphor-icons/react/ChartLine';
 import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
 import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
+import { XCircle } from '@phosphor-icons/react/XCircle';
 import { Clock } from '@phosphor-icons/react/Clock';
 import { ClockCountdown } from '@phosphor-icons/react/ClockCountdown';
 import { CloudSlash } from '@phosphor-icons/react/CloudSlash';
@@ -203,6 +204,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'upload-simple': UploadSimple,
   'warning-circle': WarningCircle,
   x: X,
+  'x-circle': XCircle,
 };
 
 export function Icon({

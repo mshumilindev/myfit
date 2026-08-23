@@ -13328,6 +13328,42 @@ button.exd-media {
   color: var(--color-neutral-500);
 }
 
+/* program-day coverage (past view): green check = target worked, red cross = skipped */
+.ptarget-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.ptarget {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid transparent;
+}
+.ptarget .ui-icon {
+  font-size: 13px;
+  flex: none;
+}
+.ptarget.done {
+  background: var(--color-ok-tint);
+  border-color: var(--color-ok-line);
+  color: var(--color-ok-text);
+}
+.ptarget.done .ui-icon {
+  color: var(--color-ok);
+}
+.ptarget.skipped {
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-line);
+  color: var(--color-danger-text);
+}
+.ptarget.skipped .ui-icon {
+  color: var(--color-danger);
+}
+
 /* day-aware picker */
 .add-head {
   display: flex;
