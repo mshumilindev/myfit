@@ -13,7 +13,6 @@ import {
   newToken,
   displayName,
   parseNameInput,
-  emailRef,
   usernameRef,
   createNotice,
   recordAudit,
@@ -24,7 +23,6 @@ import { listUserWorkouts, volume30d, lastSession, workoutStrengthStats } from '
 
 const DAY = 24 * 60 * 60 * 1000;
 const INVITE_TTL = 7 * DAY;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_MAX = 64;
 
 const isId = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 64;
@@ -110,7 +108,6 @@ export interface PersonJson {
   username: string;
   firstName: string;
   lastName: string | null;
-  email: string | null;
   role: string;
   status: string;
   trainerId: string | null;
@@ -162,7 +159,6 @@ async function buildPerson(u: UserDoc): Promise<PersonJson> {
     username: u.username,
     firstName: (u.firstName ?? displayName(u)) as string,
     lastName: u.lastName ?? null,
-    email: u.email,
     role: u.role,
     status: u.status,
     trainerId: u.trainerId,
@@ -199,57 +195,31 @@ export const adminPeople = onCall(async (req) => {
 export const adminCreateUser = onCall(async (req) => {
   const { user: admin } = await requireRole(req, ['admin']);
   const body = (req.data ?? {}) as Record<string, unknown>;
-  const { name, email, trainerId = null, role = 'member' } = body;
+  const { trainerId = null, role = 'member' } = body;
   const names = parseNameInput(body);
   const explicitUsername = cleanUsername(body.username);
   if (names.firstName.length < 2) throw new HttpsError('invalid-argument', 'first name required');
-  if (explicitUsername && explicitUsername.length < 2)
+  if (explicitUsername.length < 2)
     throw new HttpsError('invalid-argument', 'valid username required');
-  if (typeof email !== 'string' || !EMAIL_RE.test(email.trim().toLowerCase()))
-    throw new HttpsError('invalid-argument', 'valid email required');
   if (role !== 'member' && role !== 'trainer' && role !== 'admin')
     throw new HttpsError('invalid-argument', 'role must be member, trainer or admin');
-  const mail = email.trim().toLowerCase();
 
   const id = newId();
   const assignedTrainerId = await validateTrainerAssignment(id, trainerId);
-  const baseName =
-    explicitUsername ||
-    (typeof name === 'string' && name.trim().length >= 2
-      ? name
-      : `${mail.split('@')[0]}-${id.slice(0, 6)}`);
-  let username = baseName.trim().slice(0, USERNAME_MAX) || 'user';
+  const username = explicitUsername;
 
   // Reserve identity + create the invited (password-less) account atomically.
   await db.runTransaction(async (tx) => {
-    const emailSnap = await tx.get(emailRef(mail));
-    if (emailSnap.exists) {
-      const holder = await usersById((emailSnap.data() as { userId: string }).userId);
-      throw new HttpsError('already-exists', 'email taken', {
+    const uSnap = await tx.get(usernameRef(username.toLowerCase()));
+    if (uSnap.exists) {
+      const holder = await usersById((uSnap.data() as { userId: string }).userId);
+      throw new HttpsError('already-exists', 'username taken', {
         holder: holder ? displayName(holder) : null,
       });
-    }
-    if (explicitUsername) {
-      const uSnap = await tx.get(usernameRef(username.toLowerCase()));
-      if (uSnap.exists) {
-        const holder = await usersById((uSnap.data() as { userId: string }).userId);
-        throw new HttpsError('already-exists', 'username taken', {
-          holder: holder ? displayName(holder) : null,
-        });
-      }
-    } else {
-      // Auto-generated: probe a few suffixes for a free username.
-      let suffix = 2;
-
-      while ((await tx.get(usernameRef(username.toLowerCase()))).exists && suffix < 50) {
-        username = `${baseName.slice(0, USERNAME_MAX - 3)}-${suffix++}`;
-      }
     }
     const doc: Omit<UserDoc, 'id'> = {
       username,
       usernameLower: username.toLowerCase(),
-      email: mail,
-      emailLower: mail,
       firstName: names.firstName,
       lastName: names.lastName,
       role: role as Role,
@@ -261,7 +231,6 @@ export const adminCreateUser = onCall(async (req) => {
     };
     tx.set(db.collection('users').doc(id), doc);
     tx.set(usernameRef(username.toLowerCase()), { userId: id });
-    tx.set(emailRef(mail), { userId: id });
   });
 
   const invite = await issueInvite(id, admin.id, 'invite');
@@ -310,11 +279,6 @@ export const adminEditUser = onCall(async (req) => {
   const username = cleanUsername(body.username) || u.username;
   const nextFirst = names.firstName || u.firstName || '';
   const nextLast = names.firstName ? names.lastName : u.lastName;
-  const email = body.email;
-  const nextMail =
-    typeof email === 'string' && EMAIL_RE.test(email.trim().toLowerCase())
-      ? email.trim().toLowerCase()
-      : u.email;
   if (username.length < 2) throw new HttpsError('invalid-argument', 'valid username required');
   if (nextFirst.length < 2) throw new HttpsError('invalid-argument', 'first name required');
 
@@ -329,31 +293,16 @@ export const adminEditUser = onCall(async (req) => {
         });
       }
     }
-    if (nextMail && nextMail !== u.emailLower) {
-      const eSnap = await tx.get(emailRef(nextMail));
-      if (eSnap.exists) {
-        const holder = await usersById((eSnap.data() as { userId: string }).userId);
-        throw new HttpsError('already-exists', 'email taken', {
-          holder: holder ? displayName(holder) : null,
-        });
-      }
-    }
     tx.update(db.collection('users').doc(u.id), {
       firstName: nextFirst,
       lastName: nextLast,
       username,
       usernameLower: nameLower,
-      email: nextMail,
-      emailLower: nextMail,
       updatedAt: Date.now(),
     });
     if (nameLower !== u.usernameLower) {
       if (u.usernameLower) tx.delete(usernameRef(u.usernameLower));
       tx.set(usernameRef(nameLower), { userId: u.id });
-    }
-    if (nextMail !== u.emailLower) {
-      if (u.emailLower) tx.delete(emailRef(u.emailLower));
-      if (nextMail) tx.set(emailRef(nextMail), { userId: u.id });
     }
   });
   return { ok: true };
@@ -447,7 +396,6 @@ export const adminDeleteUser = onCall(async (req) => {
   for (const d of trainees.docs) batch.update(d.ref, { trainerId: null });
   // Their reservations + invites + assignment.
   if (u.usernameLower) batch.delete(usernameRef(u.usernameLower));
-  if (u.emailLower) batch.delete(emailRef(u.emailLower));
   batch.delete(db.collection('credentials').doc(id));
   batch.delete(db.collection('assignments').doc(id));
   const invites = await db.collection('invites').where('userId', '==', id).get();
@@ -546,7 +494,6 @@ export const adminExportUser = onCall(async (req) => {
       username: u.username,
       firstName: u.firstName,
       lastName: u.lastName,
-      email: u.email,
     },
     workouts,
     gyms,

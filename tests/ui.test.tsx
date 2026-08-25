@@ -225,7 +225,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
                   username: 'admin',
                   firstName: 'Admin',
                   lastName: 'User',
-                  email: 'admin@example.com',
                   role: 'admin',
                   status: 'active',
                   trainerId: null,
@@ -244,7 +243,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
                   username: 'client',
                   firstName: 'Client',
                   lastName: 'User',
-                  email: 'client@example.com',
                   role: 'member',
                   status: 'active',
                   trainerId: null,
@@ -327,7 +325,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
                 username: 'demo',
                 firstName: 'Demo',
                 lastName: 'User',
-                email: 'demo@example.com',
                 role: 'member',
                 status: 'active',
                 joinedAt: Date.now() - 30 * 24 * 3600_000,
@@ -423,7 +420,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
       firstName: string,
       lastName: string | null,
       username: string,
-      email: string,
       avatar: boolean,
     ) => ({
       viewer: { id: 'u1', relation: 'self', role: 'member' },
@@ -433,7 +429,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
         username,
         firstName,
         lastName,
-        email,
         role: 'member',
         status: 'active',
         joinedAt: Date.now() - 30 * 24 * 3600_000,
@@ -465,10 +460,7 @@ describe.skip('F-02/F-08 shell views and design states', () => {
     });
     const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
       if (url.endsWith('/api/profile/users/me')) {
-        return new Response(
-          JSON.stringify(profile('Demo', 'User', 'demo', 'demo@example.com', true)),
-          { status: 200 },
-        );
+        return new Response(JSON.stringify(profile('Demo', 'User', 'demo', true)), { status: 200 });
       }
       if (url.endsWith('/api/profile/me') && init?.method === 'PUT') {
         expect(JSON.parse(String(init.body))).toEqual({
@@ -476,10 +468,9 @@ describe.skip('F-02/F-08 shell views and design states', () => {
           lastName: 'User',
           username: 'edited-user',
         });
-        return new Response(
-          JSON.stringify(profile('Edited', 'User', 'edited-user', 'demo@example.com', true)),
-          { status: 200 },
-        );
+        return new Response(JSON.stringify(profile('Edited', 'User', 'edited-user', true)), {
+          status: 200,
+        });
       }
       if (url.endsWith('/api/profile/me/password') && init?.method === 'PUT') {
         expect(JSON.parse(String(init.body))).toEqual({
@@ -540,7 +531,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
         username: 'demo',
         firstName: 'Demo',
         lastName: 'User',
-        email: 'demo@example.com',
         role: 'member',
         status: 'active',
         joinedAt: Date.now(),
@@ -626,7 +616,6 @@ describe.skip('F-02/F-08 shell views and design states', () => {
         username: 'client',
         firstName: 'Client',
         lastName: 'User',
-        email: 'client@example.com',
         role: 'member',
         status: 'active',
         joinedAt: Date.now() - 30 * 24 * 3600_000,

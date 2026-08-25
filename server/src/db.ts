@@ -9,7 +9,7 @@ db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id            TEXT PRIMARY KEY,
   username      TEXT NOT NULL UNIQUE,
-  email         TEXT UNIQUE,
+  email         TEXT UNIQUE, -- legacy, kept nullable for old DB files
   password_hash TEXT NOT NULL,
   created_at    INTEGER NOT NULL
 );
@@ -237,14 +237,15 @@ db.exec(
 );
 
 // --- Migrations for existing databases -----------------------------------
-// users.email додано пізніше; легасі-акаунти можуть мати NULL (вхід за іменем,
-// email додається через POST /api/auth/email).
+// users.email is a retired legacy column. Keep it nullable so old DB files open,
+// but wipe values; identity is username-only now.
 const userCols = db.prepare('PRAGMA table_info(users)').all() as {
   name: string;
 }[];
 if (!userCols.some((c) => c.name === 'email')) {
   db.exec('ALTER TABLE users ADD COLUMN email TEXT');
 }
+db.exec('UPDATE users SET email = NULL WHERE email IS NOT NULL');
 db.exec(
   'CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL',
 );
@@ -267,6 +268,7 @@ UPDATE users
 export interface UserRow {
   id: string;
   username: string;
+  /** Legacy nullable column; new code keeps it empty. */
   email: string | null;
   password_hash: string;
   created_at: number;

@@ -1,7 +1,7 @@
 /**
  * Auth Cloud Functions — bcrypt credential store ↔ Firebase custom tokens.
  * Public self-serve register is closed; new accounts only via invite → claim.
- * Also: login, status, invite preview, request-new, set-email.
+ * Also: login, status, invite preview, request-new.
  */
 import { onCall } from 'firebase-functions/v2/https';
 import {
@@ -9,13 +9,10 @@ import {
   authAdmin,
   authPayload,
   displayName,
-  emailRef,
   hashPassword,
   HttpsError,
-  loadUser,
   mintToken,
   parseNameInput,
-  requireAuth,
   usernameRef,
   validPassword,
   verifyPassword,
@@ -24,15 +21,6 @@ import {
 } from './lib';
 
 const USERNAME_MAX = 64;
-const EMAIL_MAX = 254;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function normEmail(raw: string): string {
-  return raw.trim().toLowerCase();
-}
-function isValidEmail(email: string): boolean {
-  return email.length <= EMAIL_MAX && EMAIL_RE.test(email);
-}
 
 interface InviteDoc {
   token: string;
@@ -110,12 +98,12 @@ export const register = onCall(async () => {
 
 export const login = onCall(async (req) => {
   const body = (req.data ?? {}) as Record<string, unknown>;
-  const identifierRaw = (body.identifier ?? body.username ?? body.email) as unknown;
+  const identifierRaw = (body.identifier ?? body.username) as unknown;
   const { password } = body;
   if (typeof identifierRaw !== 'string' || typeof password !== 'string') {
-    throw new HttpsError('invalid-argument', 'Email (or username) and password are required.');
+    throw new HttpsError('invalid-argument', 'Username and password are required.');
   }
-  if (password.length > 72 || identifierRaw.length > EMAIL_MAX) {
+  if (password.length > 72 || identifierRaw.length > USERNAME_MAX) {
     throw new HttpsError('unauthenticated', 'Wrong username or password.');
   }
   const ip = req.rawRequest?.ip;
@@ -127,8 +115,8 @@ export const login = onCall(async (req) => {
     );
   }
   const idLower = identifierRaw.trim().toLowerCase();
-  const [uSnap, eSnap] = await Promise.all([usernameRef(idLower).get(), emailRef(idLower).get()]);
-  const userId = (uSnap.exists ? uSnap.data() : eSnap.exists ? eSnap.data() : null) as {
+  const uSnap = await usernameRef(idLower).get();
+  const userId = (uSnap.exists ? uSnap.data() : null) as {
     userId: string;
   } | null;
   if (!userId) {
@@ -184,7 +172,6 @@ export const invitePreview = onCall(async (req) => {
     name: user ? displayName(user) : null,
     firstName: user?.firstName ?? null,
     lastName: user?.lastName ?? null,
-    email: user?.email ?? null,
     expiresAt: inv.expiresAt,
     claimedAt: inv.claimedAt,
     revokedAt: inv.revokedAt,
@@ -195,7 +182,7 @@ export const invitePreview = onCall(async (req) => {
 
 export const claim = onCall(async (req) => {
   const body = (req.data ?? {}) as Record<string, unknown>;
-  const { token, password, username, email } = body;
+  const { token, password, username } = body;
   if (typeof token !== 'string' || typeof password !== 'string') {
     throw new HttpsError('invalid-argument', 'token and password are required');
   }
@@ -220,29 +207,21 @@ export const claim = onCall(async (req) => {
     typeof username === 'string' && username.trim().length >= 2
       ? username.trim().slice(0, USERNAME_MAX)
       : current.username;
-  const mail =
-    typeof email === 'string' && isValidEmail(normEmail(email)) ? normEmail(email) : current.email;
   if (!firstName || firstName.length < 2) {
     throw new HttpsError('invalid-argument', 'First name: 2 to 64 characters.');
   }
 
   const nameLower = name.toLowerCase();
   const updated = await db.runTransaction<UserDoc>(async (tx) => {
-    // Re-check uniqueness for any changed username/email.
+    // Re-check uniqueness for any changed username.
     if (nameLower !== current.usernameLower) {
       const u = await tx.get(usernameRef(nameLower));
-      if (u.exists) throw new HttpsError('already-exists', 'That name or email is already taken.');
-    }
-    if (mail && mail !== current.emailLower) {
-      const e = await tx.get(emailRef(mail));
-      if (e.exists) throw new HttpsError('already-exists', 'That name or email is already taken.');
+      if (u.exists) throw new HttpsError('already-exists', 'That username is already taken.');
     }
     const next: UserDoc = {
       ...current,
       username: name,
       usernameLower: nameLower,
-      email: mail,
-      emailLower: mail,
       firstName,
       lastName,
       status: 'active' as Status,
@@ -255,10 +234,6 @@ export const claim = onCall(async (req) => {
     if (nameLower !== current.usernameLower) {
       if (current.usernameLower) tx.delete(usernameRef(current.usernameLower));
       tx.set(usernameRef(nameLower), { userId: inv.userId });
-    }
-    if (mail !== current.emailLower) {
-      if (current.emailLower) tx.delete(emailRef(current.emailLower));
-      if (mail) tx.set(emailRef(mail), { userId: inv.userId });
     }
     tx.update(invRef, { claimedAt: Date.now() });
     return next;
@@ -288,29 +263,4 @@ export const requestNewInvite = onCall(async (req) => {
   if (!(await ref.get()).exists) throw new HttpsError('not-found', 'unknown link');
   await ref.update({ reRequestedAt: Date.now() });
   return { ok: true };
-});
-
-// --- set / change own email -------------------------------------------------
-
-export const setEmail = onCall(async (req) => {
-  const uid = requireAuth(req);
-  const email = (req.data ?? {}).email as unknown;
-  if (typeof email !== 'string') throw new HttpsError('invalid-argument', 'Email is required.');
-  const mail = normEmail(email);
-  if (!isValidEmail(mail))
-    throw new HttpsError('invalid-argument', "That email doesn't look complete.");
-  const current = await loadUser(uid);
-  if (mail === current.emailLower) return { email: mail };
-  await db.runTransaction(async (tx) => {
-    const e = await tx.get(emailRef(mail));
-    if (e.exists) throw new HttpsError('already-exists', 'That email is already taken.');
-    tx.update(db.collection('users').doc(uid), {
-      email: mail,
-      emailLower: mail,
-      updatedAt: Date.now(),
-    });
-    if (current.emailLower) tx.delete(emailRef(current.emailLower));
-    tx.set(emailRef(mail), { userId: uid });
-  });
-  return { email: mail };
 });

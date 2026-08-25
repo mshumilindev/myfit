@@ -30,7 +30,6 @@ interface ProfileData {
     username: string;
     firstName: string;
     lastName: string | null;
-    email: string | null;
     role: 'member' | 'trainer' | 'admin';
     status: 'active' | 'invited' | 'suspended';
     joinedAt: number;

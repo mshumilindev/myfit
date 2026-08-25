@@ -19,7 +19,6 @@ const DAY = 24 * 60 * 60 * 1000;
 const INVITE_TTL = 7 * DAY;
 
 const isId = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 64;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_MAX = 64;
 
 function cleanUsername(value: unknown): string {
@@ -29,18 +28,6 @@ function cleanUsername(value: unknown): string {
 function newToken(): string {
   // 128 bits, hex — AC-INVITE-02.
   return crypto.randomBytes(16).toString('hex');
-}
-
-function uniqueUsername(base: string): string {
-  const cleaned = base.trim().slice(0, USERNAME_MAX) || 'user';
-  let candidate = cleaned;
-  let suffix = 2;
-  while (db.prepare('SELECT id FROM users WHERE username = ?').get(candidate)) {
-    const tail = `-${suffix}`;
-    candidate = `${cleaned.slice(0, USERNAME_MAX - tail.length)}${tail}`;
-    suffix += 1;
-  }
-  return candidate;
 }
 
 function validateTrainerAssignment(subjectId: string, trainerId: unknown): string | null {
@@ -115,7 +102,6 @@ export interface PersonJson {
   username: string;
   firstName: string;
   lastName: string | null;
-  email: string | null;
   role: string;
   status: string;
   trainerId: string | null;
@@ -176,7 +162,6 @@ function personJson(u: UserRow): PersonJson {
     name: displayName(u),
     username: u.username,
     ...nameParts(u),
-    email: u.email,
     role: u.role,
     status: u.status,
     trainerId: u.trainer_id,
@@ -201,35 +186,23 @@ adminRouter.get('/people', (_req: AuthedRequest, res: Response) => {
 
 /** AD-02: create a user + invite link in one step. */
 adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
-  const { name, email, trainerId = null, role = 'member' } = req.body ?? {};
+  const { trainerId = null, role = 'member' } = req.body ?? {};
   const names = parseNameInput(req.body ?? {});
   const explicitUsername = cleanUsername((req.body ?? {}).username);
   if (names.firstName.length < 2) {
     return res.status(400).json({ error: 'first name required' });
   }
-  if (explicitUsername && explicitUsername.length < 2) {
+  if (explicitUsername.length < 2) {
     return res.status(400).json({ error: 'valid username required' });
-  }
-  if (typeof email !== 'string' || !EMAIL_RE.test(email.trim().toLowerCase())) {
-    return res.status(400).json({ error: 'valid email required' });
   }
   if (role !== 'member' && role !== 'trainer' && role !== 'admin') {
     return res.status(400).json({ error: 'role must be member, trainer or admin' });
   }
-  const mail = email.trim().toLowerCase();
-  const existing = db.prepare('SELECT * FROM users WHERE email = ?').get(mail) as
-    UserRow | undefined;
-  if (existing) {
-    // AC-ADMIN-13: name the existing holder.
-    return res.status(409).json({ error: 'email taken', holder: displayName(existing) });
-  }
-  if (explicitUsername) {
-    const usernameTaken = db
-      .prepare('SELECT * FROM users WHERE username = ?')
-      .get(explicitUsername) as UserRow | undefined;
-    if (usernameTaken) {
-      return res.status(409).json({ error: 'username taken', holder: displayName(usernameTaken) });
-    }
+  const usernameTaken = db
+    .prepare('SELECT * FROM users WHERE username = ?')
+    .get(explicitUsername) as UserRow | undefined;
+  if (usernameTaken) {
+    return res.status(409).json({ error: 'username taken', holder: displayName(usernameTaken) });
   }
   const id = crypto.randomUUID();
   let assignedTrainerId: string | null;
@@ -238,18 +211,12 @@ adminRouter.post('/users', (req: AuthedRequest, res: Response) => {
   } catch (e) {
     return res.status(400).json({ error: e instanceof Error ? e.message : 'bad trainer' });
   }
-  const username =
-    explicitUsername ||
-    uniqueUsername(
-      typeof name === 'string' && name.trim().length >= 2
-        ? name
-        : `${mail.split('@')[0]}-${id.slice(0, 6)}`,
-    );
+  const username = explicitUsername;
   db.prepare(
     `INSERT INTO users
-       (id, username, email, password_hash, created_at, role, status, trainer_id, first_name, last_name)
-     VALUES (?, ?, ?, '', ?, ?, 'invited', ?, ?, ?)`,
-  ).run(id, username, mail, Date.now(), role, assignedTrainerId, names.firstName, names.lastName);
+       (id, username, password_hash, created_at, role, status, trainer_id, first_name, last_name)
+     VALUES (?, ?, '', ?, ?, 'invited', ?, ?, ?)`,
+  ).run(id, username, Date.now(), role, assignedTrainerId, names.firstName, names.lastName);
   const inv = issueInvite(id, req.userId!, 'invite');
   res.json({
     person: personJson(db.prepare('SELECT * FROM users WHERE id = ?').get(id) as UserRow),
@@ -288,21 +255,13 @@ adminRouter.put('/users/:id', (req: AuthedRequest, res: Response) => {
   const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id) as
     UserRow | undefined;
   if (!u) return res.status(404).json({ error: 'not found' });
-  const { email } = req.body ?? {};
   const names = parseNameInput(req.body ?? {});
   const username = cleanUsername((req.body ?? {}).username) || u.username;
   const nextFirst = names.firstName || nameParts(u).firstName;
   const nextLast = names.firstName ? names.lastName : nameParts(u).lastName;
-  const nextMail =
-    typeof email === 'string' && EMAIL_RE.test(email.trim().toLowerCase())
-      ? email.trim().toLowerCase()
-      : u.email;
   if (username.length < 2) {
     return res.status(400).json({ error: 'valid username required' });
   }
-  const dupe = db.prepare('SELECT * FROM users WHERE email = ? AND id != ?').get(nextMail, u.id) as
-    UserRow | undefined;
-  if (dupe) return res.status(409).json({ error: 'email taken', holder: displayName(dupe) });
   const usernameDupe = db
     .prepare('SELECT * FROM users WHERE username = ? AND id != ?')
     .get(username, u.id) as UserRow | undefined;
@@ -310,9 +269,12 @@ adminRouter.put('/users/:id', (req: AuthedRequest, res: Response) => {
     return res.status(409).json({ error: 'username taken', holder: displayName(usernameDupe) });
   }
   if (nextFirst.length < 2) return res.status(400).json({ error: 'first name required' });
-  db.prepare(
-    'UPDATE users SET first_name = ?, last_name = ?, username = ?, email = ? WHERE id = ?',
-  ).run(nextFirst, nextLast, username, nextMail, u.id);
+  db.prepare('UPDATE users SET first_name = ?, last_name = ?, username = ? WHERE id = ?').run(
+    nextFirst,
+    nextLast,
+    username,
+    u.id,
+  );
   res.json({ ok: true });
 });
 
@@ -483,7 +445,6 @@ adminRouter.get('/users/:id/export', (req: AuthedRequest, res: Response) => {
       name: displayName(u),
       username: u.username,
       ...nameParts(u),
-      email: u.email,
     },
     workouts: full,
     gyms: db.prepare('SELECT * FROM gyms WHERE user_id = ?').all(u.id),

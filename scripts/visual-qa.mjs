@@ -218,30 +218,21 @@ const program = {
 };
 
 const people = [
-  person('admin1', 'Admin User', 'admin', 'Admin', 'User', 'admin@example.com', 'admin', {
+  person('admin1', 'Admin User', 'admin', 'Admin', 'User', 'admin', {
     volume30: 11_000,
   }),
-  person(
-    'member1',
-    'Marta Kovalenko',
-    'marta',
-    'Marta',
-    'Kovalenko',
-    'marta@example.com',
-    'member',
-    {
-      trainerId: 'trainer1',
-      trainerName: 'Olha Sydorenko',
-      lastSessionAt: now - 3_600_000,
-      live: true,
-      liveStartedAt: now - 24 * 60_000,
-      volume30: 42_800,
-    },
-  ),
-  person('trainer1', 'Olha Sydorenko', 'olha', 'Olha', 'Sydorenko', 'olha@example.com', 'trainer', {
+  person('member1', 'Marta Kovalenko', 'marta', 'Marta', 'Kovalenko', 'member', {
+    trainerId: 'trainer1',
+    trainerName: 'Olha Sydorenko',
+    lastSessionAt: now - 3_600_000,
+    live: true,
+    liveStartedAt: now - 24 * 60_000,
+    volume30: 42_800,
+  }),
+  person('trainer1', 'Olha Sydorenko', 'olha', 'Olha', 'Sydorenko', 'trainer', {
     clientCount: 2,
   }),
-  person('invite1', 'Sofia Kravets', 'sofia', 'Sofia', 'Kravets', 'sofia@example.com', 'member', {
+  person('invite1', 'Sofia Kravets', 'sofia', 'Sofia', 'Kravets', 'member', {
     status: 'invited',
     invite: {
       state: 'sent',
@@ -253,14 +244,13 @@ const people = [
   }),
 ];
 
-function person(id, name, username, firstName, lastName, email, role, patch = {}) {
+function person(id, name, username, firstName, lastName, role, patch = {}) {
   return {
     id,
     name,
     username,
     firstName,
     lastName,
-    email,
     role,
     status: 'active',
     trainerId: null,
@@ -527,7 +517,6 @@ async function setup(page, role, username, state) {
         body.username,
         body.firstName,
         body.lastName ?? null,
-        body.email,
         body.role,
         {
           trainerId: body.trainerId ?? null,
@@ -727,7 +716,6 @@ async function snapOnboarding(browser, name, hash, viewport, action, opts = {}) 
           name: 'Marta Kovalenko',
           firstName: 'Marta',
           lastName: 'Kovalenko',
-          email: 'marta@example.com',
           expiresAt: now - 86_400_000,
           claimedAt: null,
           revokedAt: null,
@@ -742,7 +730,6 @@ async function snapOnboarding(browser, name, hash, viewport, action, opts = {}) 
         name: 'Marta Kovalenko',
         firstName: 'Marta',
         lastName: 'Kovalenko',
-        email: 'marta@example.com',
         expiresAt: now + 6 * 86_400_000,
         claimedAt: null,
         revokedAt: null,
@@ -756,7 +743,6 @@ async function snapOnboarding(browser, name, hash, viewport, action, opts = {}) 
         username: 'marta',
         name: 'Marta Kovalenko',
         role: 'member',
-        email: 'marta@example.com',
       },
     });
   });
@@ -1033,7 +1019,6 @@ const scenarios = [
       await page.getByPlaceholder('First name').fill('Iryna');
       await page.getByPlaceholder('Last name').fill('Shevchenko');
       await page.getByPlaceholder('Username').fill('iryna');
-      await page.getByPlaceholder('Email').fill('iryna@example.com');
       await page.getByRole('button', { name: /^Save$/ }).click();
       await page.getByText('Account created').waitFor();
     },
@@ -1269,7 +1254,6 @@ const report = [
       await page.getByText('Create your account').waitFor();
       await page.getByPlaceholder('First name').fill('M');
       await page.getByPlaceholder('Username').fill('m');
-      await page.getByPlaceholder('Email').fill('marta@');
       await page.getByPlaceholder(/Password/).fill('123');
       for (const input of await page.locator('input').all()) await input.blur();
       await page.getByText('6 characters minimum').waitFor();

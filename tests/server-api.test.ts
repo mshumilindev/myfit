@@ -20,14 +20,17 @@ async function req<T>(
   return { status: res.status, data: res.body as T };
 }
 
-async function register(username = 'mykola', email = 'me@example.com') {
-  const r = await req<{ token: string; username: string; email: string }>(
-    'POST',
-    '/api/auth/register',
-    { username, email, password: 'secret123' },
-  );
+async function register(username = 'mykola') {
+  const r = await req<{ token: string; username: string }>('POST', '/api/auth/register', {
+    username,
+    password: 'secret123',
+  });
   expect(r.status).toBe(200);
   return r.data;
+}
+
+function userId(username: string) {
+  return (db.prepare('SELECT id FROM users WHERE username = ?').get(username) as { id: string }).id;
 }
 
 beforeEach(() => {
@@ -46,31 +49,20 @@ beforeEach(() => {
 });
 
 describe('F-01 Auth', () => {
-  it('registers with normalized email, rejects invalid input and duplicate identities', async () => {
+  it('registers with username, rejects invalid input and duplicate username', async () => {
     expect((await req('GET', '/api/auth/status')).data).toEqual({ registered: false });
     expect(
-      (await req('POST', '/api/auth/register', { username: 'm', email: 'bad', password: '123' }))
-        .status,
+      (await req('POST', '/api/auth/register', { username: 'm', password: '123' })).status,
     ).toBe(400);
 
-    const auth = await register(' mykola ', 'Me@Example.COM');
-    expect(auth).toMatchObject({ username: 'mykola', email: 'me@example.com' });
+    const auth = await register(' mykola ');
+    expect(auth).toMatchObject({ username: 'mykola' });
     expect((await req('GET', '/api/auth/status')).data).toEqual({ registered: true });
 
     expect(
       (
         await req('POST', '/api/auth/register', {
           username: 'mykola',
-          email: 'other@example.com',
-          password: 'secret123',
-        })
-      ).status,
-    ).toBe(409);
-    expect(
-      (
-        await req('POST', '/api/auth/register', {
-          username: 'olena',
-          email: 'me@example.com',
           password: 'secret123',
         })
       ).status,
@@ -81,11 +73,10 @@ describe('F-01 Auth', () => {
       name: string;
       firstName: string;
       lastName: string | null;
-      email: string;
     }>('POST', '/api/auth/register', {
+      username: 'ada',
       firstName: 'Ada',
       lastName: 'Lovelace',
-      email: 'ada@example.com',
       password: 'secret123',
     });
     expect(named.status).toBe(200);
@@ -93,13 +84,12 @@ describe('F-01 Auth', () => {
       name: 'Ada Lovelace',
       firstName: 'Ada',
       lastName: 'Lovelace',
-      email: 'ada@example.com',
     });
     expect(named.data.username).toBe('ada');
   });
 
-  it('logs in by email or username and rate-limits repeated failures', async () => {
-    const { token } = await register('mykola', 'me@example.com');
+  it('logs in by username and rate-limits repeated failures', async () => {
+    await register('mykola');
 
     expect((await req('POST', '/api/auth/login', { identifier: 'me@example.com' })).status).toBe(
       400,
@@ -120,25 +110,19 @@ describe('F-01 Auth', () => {
           password: 'secret123',
         })
       ).status,
-    ).toBe(200);
+    ).toBe(401);
     expect(
       (await req('POST', '/api/auth/login', { username: 'mykola', password: 'secret123' })).status,
     ).toBe(200);
-    expect((await req('POST', '/api/auth/email', { email: 'new@example.com' })).status).toBe(401);
-    expect((await req('POST', '/api/auth/email', { email: 'bad' }, token)).status).toBe(400);
-    expect((await req('POST', '/api/auth/email', {}, token)).status).toBe(400);
-    expect(
-      (await req('POST', '/api/auth/email', { email: 'New@Example.com' }, token)).data,
-    ).toEqual({ email: 'new@example.com' });
     expect((await req('GET', '/api/tracker/state', undefined, 'bad-token')).status).toBe(401);
     const badSub = jwt.sign({ sub: 42 }, 'test-secret', { algorithm: 'HS256' });
     expect((await req('GET', '/api/tracker/state', undefined, badSub)).status).toBe(401);
-    db.prepare("UPDATE users SET status = 'suspended' WHERE email = ?").run('new@example.com');
+    db.prepare("UPDATE users SET status = 'suspended' WHERE username = ?").run('mykola');
     expect(
       (await req('POST', '/api/auth/login', { identifier: 'mykola', password: 'secret123' }))
         .status,
     ).toBe(403);
-    db.prepare("UPDATE users SET status = 'active' WHERE email = ?").run('new@example.com');
+    db.prepare("UPDATE users SET status = 'active' WHERE username = ?").run('mykola');
     expect(
       (await req('POST', '/api/auth/login', { identifier: 'mykola', password: 'wrong' })).status,
     ).toBe(401);
@@ -152,25 +136,15 @@ describe('F-01 Auth', () => {
   });
 
   it('exposes invite state, claims valid links and marks re-requested dead links', async () => {
-    const admin = await register('owner', 'owner@example.com');
-    const adminId = (
-      db.prepare('SELECT id FROM users WHERE email = ?').get('owner@example.com') as { id: string }
-    ).id;
+    const admin = await register('owner');
+    const adminId = userId('owner');
     const invitedId = crypto.randomUUID();
     const token = 'invite-token';
     const now = Date.now();
     db.prepare(
-      `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      invitedId,
-      'Invited Member',
-      'invited@example.com',
-      '__pending__',
-      now,
-      'member',
-      'invited',
-    );
+      `INSERT INTO users (id, username, password_hash, created_at, role, status)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(invitedId, 'Invited Member', '__pending__', now, 'member', 'invited');
     db.prepare(
       `INSERT INTO invites (token, user_id, created_by, kind, created_at, expires_at)
        VALUES (?, ?, ?, 'invite', ?, ?)`,
@@ -180,26 +154,23 @@ describe('F-01 Auth', () => {
       state: 'valid',
       inviter: 'owner',
       name: 'Invited Member',
-      email: 'invited@example.com',
     });
     expect((await req('GET', '/api/auth/invite/missing')).status).toBe(404);
     expect((await req('POST', '/api/auth/claim', { token })).status).toBe(400);
     expect((await req('POST', '/api/auth/claim', { token, password: '123' })).status).toBe(400);
 
-    const claimed = await req<{ token: string; username: string; email: string; role: string }>(
+    const claimed = await req<{ token: string; username: string; role: string }>(
       'POST',
       '/api/auth/claim',
       {
         token,
         username: 'Claimed Member',
-        email: 'Claimed@Example.com',
         password: 'secret123',
       },
     );
     expect(claimed.status).toBe(200);
     expect(claimed.data).toMatchObject({
       username: 'Claimed Member',
-      email: 'claimed@example.com',
       role: 'member',
     });
     expect((await req('POST', '/api/auth/claim', { token, password: 'secret123' })).status).toBe(
@@ -208,7 +179,7 @@ describe('F-01 Auth', () => {
     expect(
       (
         await req('POST', '/api/auth/login', {
-          identifier: 'claimed@example.com',
+          identifier: 'Claimed Member',
           password: 'secret123',
         })
       ).status,
@@ -225,9 +196,9 @@ describe('F-01 Auth', () => {
 
     const otherId = crypto.randomUUID();
     db.prepare(
-      `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    ).run(otherId, 'Other', 'other@example.com', '__pending__', now, 'member', 'invited');
+      `INSERT INTO users (id, username, password_hash, created_at, role, status)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(otherId, 'Other', '__pending__', now, 'member', 'invited');
     for (const [suffix, patch, expectedState] of [
       ['expired', { expires_at: now - 1 }, 'expired'],
       ['revoked', { revoked_at: now }, 'revoked'],
@@ -249,21 +220,17 @@ describe('F-01 Auth', () => {
   });
 
   it('rejects duplicate invite claims and enforces role gates plus audit logging', async () => {
-    const admin = await register('owner', 'owner@example.com');
-    const member = await register('member', 'member@example.com');
-    const adminId = (
-      db.prepare('SELECT id FROM users WHERE email = ?').get('owner@example.com') as { id: string }
-    ).id;
-    const memberId = (
-      db.prepare('SELECT id FROM users WHERE email = ?').get('member@example.com') as { id: string }
-    ).id;
+    const admin = await register('owner');
+    const member = await register('member');
+    const adminId = userId('owner');
+    const memberId = userId('member');
     const invitedId = crypto.randomUUID();
     const token = 'dupe-token';
     const now = Date.now();
     db.prepare(
-      `INSERT INTO users (id, username, email, password_hash, created_at, role, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    ).run(invitedId, 'Invited', 'new@example.com', '__pending__', now, 'member', 'invited');
+      `INSERT INTO users (id, username, password_hash, created_at, role, status)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(invitedId, 'Invited', '__pending__', now, 'member', 'invited');
     db.prepare(
       `INSERT INTO invites (token, user_id, created_by, kind, created_at, expires_at)
        VALUES (?, ?, ?, 'invite', ?, ?)`,
@@ -274,7 +241,6 @@ describe('F-01 Auth', () => {
         await req('POST', '/api/auth/claim', {
           token,
           username: 'member',
-          email: 'new@example.com',
           password: 'secret123',
         })
       ).status,
@@ -301,11 +267,9 @@ describe('F-01 Auth', () => {
   });
 
   it('lets admins create invited admins and assign active trainers to any role', async () => {
-    const admin = await register('owner', 'owner@example.com');
-    await register('coach', 'coach@example.com');
-    const trainerId = (
-      db.prepare('SELECT id FROM users WHERE email = ?').get('coach@example.com') as { id: string }
-    ).id;
+    const admin = await register('owner');
+    await register('coach');
+    const trainerId = userId('coach');
     db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
     const created = await req<{
       person: { id: string; role: string; status: string; trainerId: string | null };
@@ -317,7 +281,6 @@ describe('F-01 Auth', () => {
         firstName: 'Sofia',
         lastName: 'Kravets',
         username: 'sofia',
-        email: 'sofia@example.com',
         role: 'admin',
         trainerId,
       },
@@ -347,7 +310,6 @@ describe('F-01 Auth', () => {
         firstName: 'Ihor',
         lastName: 'Melnyk',
         username: 'ihor',
-        email: 'ihor@example.com',
         role: 'trainer',
         trainerId,
       },
@@ -363,18 +325,18 @@ describe('F-01 Auth', () => {
   });
 
   it('reports trainer client totals and week-over-week movement', async () => {
-    const trainer = await register('coach', 'coach@example.com');
-    await register('member', 'member@example.com');
+    const trainer = await register('coach');
+    await register('member');
     const ids = Object.fromEntries(
       (
-        db.prepare('SELECT id, email FROM users').all() as Array<{
+        db.prepare('SELECT id, username FROM users').all() as Array<{
           id: string;
-          email: string;
+          username: string;
         }>
-      ).map((u) => [u.email, u.id]),
+      ).map((u) => [u.username, u.id]),
     );
-    const trainerId = ids['coach@example.com'];
-    const memberId = ids['member@example.com'];
+    const trainerId = ids.coach;
+    const memberId = ids.member;
     db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
     db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, memberId);
 
@@ -414,21 +376,21 @@ describe('F-01 Auth', () => {
   });
 
   it('serves direct profile links only to the owner, an admin or the assigned trainer', async () => {
-    const admin = await register('owner', 'owner@example.com');
-    const member = await register('member', 'member@example.com');
-    const trainer = await register('coach', 'coach@example.com');
-    const stranger = await register('stranger', 'stranger@example.com');
+    const admin = await register('owner');
+    const member = await register('member');
+    const trainer = await register('coach');
+    const stranger = await register('stranger');
     const ids = Object.fromEntries(
       (
-        db.prepare('SELECT id, email FROM users').all() as Array<{
+        db.prepare('SELECT id, username FROM users').all() as Array<{
           id: string;
-          email: string;
+          username: string;
         }>
-      ).map((u) => [u.email, u.id]),
+      ).map((u) => [u.username, u.id]),
     );
-    const memberId = ids['member@example.com'];
-    const trainerId = ids['coach@example.com'];
-    const strangerId = ids['stranger@example.com'];
+    const memberId = ids.member;
+    const trainerId = ids.coach;
+    const strangerId = ids.stranger;
     const now = Date.now();
     db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
     db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, memberId);
@@ -455,7 +417,7 @@ describe('F-01 Auth', () => {
     ).run('note-profile', trainerId, memberId, 'Keep depth consistent.', now);
 
     const own = await req<{
-      person: { id: string; name: string; email: string };
+      person: { id: string; name: string };
       summary: { volumeKg: number; cardioMinutes: number };
       gyms: Array<{ name: string; lat: number; lng: number; radiusM: number; sessions: number }>;
       topExercises: Array<{ name: string }>;
@@ -476,7 +438,7 @@ describe('F-01 Auth', () => {
     expect(own.data.notes[0].text).toBe('Keep depth consistent.');
 
     const edited = await req<{
-      person: { name: string; username: string; email: string };
+      person: { name: string; username: string };
     }>(
       'PUT',
       '/api/profile/me',
@@ -487,7 +449,6 @@ describe('F-01 Auth', () => {
     expect(edited.data.person).toMatchObject({
       name: 'Member Edited',
       username: 'member-edited',
-      email: 'member@example.com',
     });
     expect(
       (
@@ -582,10 +543,8 @@ describe('F-01 Auth', () => {
   });
 
   it('estimates 1RM only from plausible working sets', async () => {
-    const member = await register('member', 'member@example.com');
-    const memberId = (
-      db.prepare('SELECT id FROM users WHERE email = ?').get('member@example.com') as { id: string }
-    ).id;
+    const member = await register('member');
+    const memberId = userId('member');
     const now = Date.now();
 
     db.prepare(
@@ -919,7 +878,7 @@ describe('F-03/F-05 Tracker API', () => {
         )
       ).status,
     ).toBe(200);
-    const other = await register('olena', 'olena@example.com');
+    const other = await register('olena');
     expect(
       (
         await req(
@@ -1034,19 +993,19 @@ describe('F-03/F-05 Tracker API', () => {
 
 describe('F-09 Programs API', () => {
   it('lets a trainer author, order and assign a program to their own client', async () => {
-    await register('owner', 'owner@example.com');
-    const trainer = await register('coach', 'coach@example.com');
-    const member = await register('member', 'member@example.com');
+    await register('owner');
+    const trainer = await register('coach');
+    const member = await register('member');
     const ids = Object.fromEntries(
       (
-        db.prepare('SELECT id, email FROM users').all() as Array<{
+        db.prepare('SELECT id, username FROM users').all() as Array<{
           id: string;
-          email: string;
+          username: string;
         }>
-      ).map((u) => [u.email, u.id]),
+      ).map((u) => [u.username, u.id]),
     );
-    const trainerId = ids['coach@example.com'];
-    const memberId = ids['member@example.com'];
+    const trainerId = ids.coach;
+    const memberId = ids.member;
     db.prepare("UPDATE users SET role = 'trainer' WHERE id = ?").run(trainerId);
     db.prepare('UPDATE users SET trainer_id = ? WHERE id = ?').run(trainerId, memberId);
 

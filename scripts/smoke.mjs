@@ -47,47 +47,33 @@ check(
 
 r = await req('POST', '/api/auth/register', {
   username: 'mykola',
-  email: 'mykola@example.com',
   password: '123',
 });
 check('register: short password rejected', r.status === 400);
 
-r = await req('POST', '/api/auth/register', { username: 'mykola', password: 'secret123' });
-check('register: missing email rejected', r.status === 400);
+r = await req('POST', '/api/auth/register', { username: 'm', password: 'secret123' });
+check('register: short username rejected', r.status === 400);
 
 r = await req('POST', '/api/auth/register', {
   username: 'mykola',
-  email: 'not-an-email',
-  password: 'secret123',
-});
-check('register: bad email rejected', r.status === 400);
-
-r = await req('POST', '/api/auth/register', {
-  username: 'mykola',
-  email: 'Mykola@Example.com',
   password: 'secret123',
 });
 check(
-  'register: ok, email normalized',
-  r.status === 200 &&
-    !!r.data.token &&
-    r.data.username === 'mykola' &&
-    r.data.email === 'mykola@example.com',
+  'register: ok',
+  r.status === 200 && !!r.data.token && r.data.username === 'mykola',
   JSON.stringify(r.data),
 );
 token = r.data.token;
 
-// Sign-up is open (multi-user product) — but names/emails are unique.
+// Sign-up is open (multi-user product) — but usernames are unique.
 r = await req('POST', '/api/auth/register', {
   username: 'mykola',
-  email: 'other@example.com',
   password: 'hackhack',
 });
 check('register: duplicate username → 409', r.status === 409);
 
 r = await req('POST', '/api/auth/register', {
   username: 'second',
-  email: 'second@example.com',
   password: 'hackhack',
 });
 check(
@@ -100,19 +86,19 @@ r = await req('POST', '/api/auth/login', { identifier: 'mykola', password: 'wron
 check('login: wrong password → 401', r.status === 401);
 
 r = await req('POST', '/api/auth/login', {
-  identifier: 'MYKOLA@example.com',
+  identifier: 'missing@example.com',
   password: 'secret123',
 });
-check('login: by email (case-insensitive) ok', r.status === 200 && !!r.data.token);
+check('login: unknown identifier rejected', r.status === 401);
 
 r = await req('POST', '/api/auth/login', { identifier: 'mykola', password: 'secret123' });
 check('login: by username ok', r.status === 200 && !!r.data.token);
 
 // brute force limiter: окремий identifier, щоб не заблокувати реальний акаунт у цьому ж прогоні
 for (let i = 0; i < 10; i++) {
-  await req('POST', '/api/auth/login', { identifier: 'ghost@example.com', password: 'nope00' });
+  await req('POST', '/api/auth/login', { identifier: 'ghost', password: 'nope00' });
 }
-r = await req('POST', '/api/auth/login', { identifier: 'ghost@example.com', password: 'nope00' });
+r = await req('POST', '/api/auth/login', { identifier: 'ghost', password: 'nope00' });
 check('login: brute force → 429', r.status === 429, JSON.stringify(r));
 
 r = await req('GET', '/api/tracker/state', undefined, null);

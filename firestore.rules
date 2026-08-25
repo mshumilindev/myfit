@@ -43,8 +43,8 @@ service cloud.firestore {
       allow list: if false;
       // Accounts are created only by the auth functions.
       allow create, delete: if false;
-      // Self may edit only display-name and avatar fields. Username/email
-      // (uniqueness) and role/status/trainer (privilege) change via functions.
+      // Self may edit only display-name and avatar fields. Username (uniqueness)
+      // and role/status/trainer (privilege) change via functions.
       allow update: if isSelf(userId)
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['firstName', 'lastName', 'avatarExt', 'updatedAt']);
@@ -103,9 +103,6 @@ service cloud.firestore {
       allow read, write: if false;
     }
     match /usernames/{usernameLower} {
-      allow read, write: if false;
-    }
-    match /emails/{emailLower} {
       allow read, write: if false;
     }
     match /invites/{token} {

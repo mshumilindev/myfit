@@ -2,7 +2,7 @@
  * In-product notices (AC-ROLE-10, AC-ASSIGN-05, AC-PLAN-11). A notice is a
  * per-user record generated when someone else acts on them — a program is
  * assigned or replaced, a role or trainer changes. Assigned/replaced notices
- * name the person responsible. No email round-trip.
+ * name the person responsible. No external message round-trip.
  */
 import { Router, type Response } from 'express';
 import crypto from 'node:crypto';

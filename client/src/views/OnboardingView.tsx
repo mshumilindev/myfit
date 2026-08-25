@@ -1,6 +1,6 @@
 /** Onboarding — design O-01…O-09. Steps end inside a live session. */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { callFn, signInWithPayload, currentUid, HttpError, type AuthPayload } from '../api';
+import { callFn, signInWithPayload, currentUid, type AuthPayload } from '../api';
 import {
   addWeight,
   startWorkout,
@@ -32,7 +32,6 @@ interface InviteInfo {
   name: string | null;
   firstName: string | null;
   lastName: string | null;
-  email: string | null;
   expiresAt: number;
   claimedAt: number | null;
   revokedAt: number | null;
@@ -43,7 +42,6 @@ interface Resume {
   name: string;
   firstName?: string;
   lastName?: string;
-  email: string;
   gymId?: string;
   gymName?: string;
   gymLat?: number;
@@ -77,7 +75,6 @@ export function OnboardingView({
   const [step, setStep] = useState(saved?.step ?? 0);
   const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
   const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
-  const [email, setEmail] = useState(saved?.email ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -87,8 +84,8 @@ export function OnboardingView({
 
   // AC-ONB-06: persist on every meaningful change.
   function persist(patch: Partial<Resume>): void {
-    const cur = loadResume(token) ?? { step, name, firstName, lastName, email };
-    const next = { ...cur, step, name, firstName, lastName, email, ...patch };
+    const cur = loadResume(token) ?? { step, name, firstName, lastName };
+    const next = { ...cur, step, name, firstName, lastName, ...patch };
     localStorage.setItem(resumeKey(token), JSON.stringify(next));
   }
 
@@ -100,7 +97,6 @@ export function OnboardingView({
           const invited = splitPersonName(i.name ?? '');
           setFirstName((n) => n || i.firstName || invited.firstName);
           setLastName((n) => n || i.lastName || invited.lastName);
-          setEmail((e) => e || i.email || '');
         }
       })
       .catch(() => setInfo('error'));
@@ -168,13 +164,11 @@ export function OnboardingView({
         username: name,
         firstName,
         lastName,
-        email,
       });
       await signInWithPayload(res);
       return true;
     } catch (e) {
-      if (e instanceof HttpError && e.status === 409) setError(t.onbEmailTaken);
-      else setError(e instanceof Error ? e.message : t.error);
+      setError(e instanceof Error ? e.message : t.error);
       return false;
     } finally {
       setBusy(false);
@@ -280,14 +274,6 @@ export function OnboardingView({
             onChange={(e) => setLastName(e.target.value)}
           />
           <input
-            className="input"
-            type="email"
-            placeholder={t.email}
-            value={email}
-            onBlur={() => persist({})}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
             className={`input${error ? ' error' : ''}`}
             type="password"
             placeholder={t.passwordMin}
@@ -354,7 +340,6 @@ export function OnboardingView({
                 name,
                 firstName,
                 lastName,
-                email,
                 gymId: g.id,
                 gymName: g.name,
                 gymLat: g.lat,
@@ -362,7 +347,7 @@ export function OnboardingView({
               });
               persist({ step: 4, gymId: g.id, gymName: g.name, gymLat: g.lat, gymLng: g.lng });
             } else {
-              setGym({ step: 4, name, firstName, lastName, email });
+              setGym({ step: 4, name, firstName, lastName });
               persist({ step: 4, gymId: undefined, gymName: undefined });
             }
             setStep(4);

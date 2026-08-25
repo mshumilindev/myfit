@@ -12,7 +12,6 @@ interface Person {
   username: string;
   firstName: string;
   lastName: string | null;
-  email: string | null;
   role: 'member' | 'trainer' | 'admin';
   status: 'active' | 'invited' | 'suspended';
   trainerId: string | null;
@@ -113,7 +112,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         if (
           needle &&
           !p.name.toLowerCase().includes(needle) &&
-          !(p.email ?? '').toLowerCase().includes(needle)
+          !p.username.toLowerCase().includes(needle)
         )
           return false;
         return true;
@@ -247,7 +246,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
               <div className="n">
                 <span className="nm">{me.name}</span>
               </div>
-              <div className="e">{me.email}</div>
+              <div className="e">@{me.username}</div>
             </div>
           </div>
           <span className={`col-role tag ${me.role === 'member' ? 'tag-neutral' : 'tag-accent'}`}>
@@ -299,7 +298,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
                   <Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
                   <div>
                     <div className="n">{p.name}</div>
-                    <div className="e">{p.email}</div>
+                    <div className="e">@{p.username}</div>
                     {p.invite?.reRequestedAt && p.status === 'invited' && (
                       <div className="rerequest">
                         {t.adminAskedNewLink(fmtDayMonth(p.invite.reRequestedAt, locale))}{' '}
@@ -425,7 +424,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
               setMenuFor(null);
             }}
           >
-            <Icon name="pencil-simple" /> {t.adminEditNameEmail}
+            <Icon name="pencil-simple" /> {t.adminEditUserDetails}
           </button>
           {menuFor.status !== 'invited' && (
             <button
@@ -574,7 +573,6 @@ function NewPersonDialog(props: {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [trainerId, setTrainerId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -601,13 +599,6 @@ function NewPersonDialog(props: {
         placeholder={t.username}
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        className={`input${error ? ' error' : ''}`}
-        type="email"
-        placeholder={t.email}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
       />
       <div className="admin-role-field">
         <div className="field-label">{t.adminColRole}</div>
@@ -674,12 +665,7 @@ function NewPersonDialog(props: {
         </button>
         <button
           className="btn btn-primary grow"
-          disabled={
-            busy ||
-            firstName.trim().length < 2 ||
-            username.trim().length < 2 ||
-            !email.includes('@')
-          }
+          disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
           onClick={async () => {
             setBusy(true);
             setError(null);
@@ -692,7 +678,6 @@ function NewPersonDialog(props: {
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
                 username: username.trim(),
-                email: email.trim(),
                 trainerId,
                 role,
               });
@@ -866,7 +851,7 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
   return (
     <Sheet onClose={props.onClose}>
       <div className="sheet-head">
-        <span className="t">{t.adminEditNameEmail}</span>
+        <span className="t">{t.adminEditUserDetails}</span>
       </div>
       <input
         className="input"

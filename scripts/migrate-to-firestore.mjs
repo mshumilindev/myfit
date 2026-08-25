@@ -98,8 +98,6 @@ async function migrate() {
     await set(fdb.collection('users').doc(u.id), {
       username: u.username,
       usernameLower: (u.username || '').toLowerCase(),
-      email: u.email ?? null,
-      emailLower: u.email ? u.email.toLowerCase() : null,
       firstName,
       lastName,
       role: u.role || 'member',
@@ -114,7 +112,6 @@ async function migrate() {
     }
     if (u.username)
       await set(fdb.collection('usernames').doc(u.username.toLowerCase()), { userId: u.id });
-    if (u.email) await set(fdb.collection('emails').doc(u.email.toLowerCase()), { userId: u.id });
 
     // Workouts → one nested document each.
     const workouts = rows('SELECT * FROM workouts WHERE user_id = ?', u.id);

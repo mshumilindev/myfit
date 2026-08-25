@@ -67,7 +67,6 @@ test('F-01/F-02/F-08 auth, shell and language', async ({ page }) => {
   await page.getByPlaceholder('First name').fill('Demo');
   await page.getByPlaceholder('Last name').fill('User');
   await page.getByPlaceholder('Username').fill('demo');
-  await page.getByPlaceholder('Email').fill('Demo@Example.com');
   await page.getByPlaceholder('Password (min. 6 characters)').fill('secret123');
   await page.getByRole('button', { name: 'Create account' }).click();
 
@@ -83,11 +82,10 @@ test('F-01/F-02/F-08 auth, shell and language', async ({ page }) => {
 test('F-03/F-04 session logging, ghost row, finish and recent history', async ({ page }) => {
   const auth = await api<{ token: string }>('POST', '/api/auth/register', {
     username: 'demo',
-    email: 'demo@example.com',
     password: 'secret123',
   });
   await page.goto(BASE);
-  await page.getByPlaceholder('Email or username').fill('demo@example.com');
+  await page.getByPlaceholder('Username').fill('demo');
   await page.getByPlaceholder('Password').fill('secret123');
   await page.getByRole('button', { name: 'Sign in' }).click();
 
@@ -116,7 +114,6 @@ test('F-03/F-04 session logging, ghost row, finish and recent history', async ({
 test('F-05/F-06 gyms, reminders and progress locked state', async ({ page }) => {
   const auth = await api<{ token: string }>('POST', '/api/auth/register', {
     username: 'demo',
-    email: 'demo@example.com',
     password: 'secret123',
   });
   const gym = crypto.randomUUID();
@@ -137,7 +134,7 @@ test('F-05/F-06 gyms, reminders and progress locked state', async ({ page }) => 
   }
 
   await page.goto(BASE);
-  await page.getByPlaceholder('Email or username').fill('demo@example.com');
+  await page.getByPlaceholder('Username').fill('demo');
   await page.getByPlaceholder('Password').fill('secret123');
   await page.getByRole('button', { name: 'Sign in' }).click();
 
@@ -157,12 +154,12 @@ test('W-04 desktop pages keep the whole content lane scrollable', async ({ page 
   await api<{ token: string }>('POST', '/api/auth/register', {
     firstName: 'Demo',
     lastName: 'User',
-    email: 'desktop@example.com',
+    username: 'desktop',
     password: 'secret123',
   });
 
   await page.goto(BASE);
-  await page.getByPlaceholder('Email or username').fill('desktop@example.com');
+  await page.getByPlaceholder('Username').fill('desktop');
   await page.getByPlaceholder('Password').fill('secret123');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.getByRole('button', { name: /Demo User/ }).click();

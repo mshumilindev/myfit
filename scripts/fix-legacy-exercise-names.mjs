@@ -54,7 +54,7 @@ function canonical(name) {
 
 function userLabel(user) {
   const data = user.data();
-  return data.username || data.email || user.id;
+  return data.username || user.id;
 }
 
 const usersSnap = uidFilter

@@ -90,8 +90,6 @@ export interface UserDoc {
   id: string;
   username: string;
   usernameLower: string;
-  email: string | null;
-  emailLower: string | null;
   firstName: string | null;
   lastName: string | null;
   role: Role;
@@ -220,15 +218,12 @@ export async function recordAudit(
   });
 }
 
-// --- Uniqueness (username / email) -----------------------------------------
-// Reservation docs in /usernames/{lower} and /emails/{lower} hold { userId }.
+// --- Uniqueness (username) --------------------------------------------------
+// Reservation docs in /usernames/{lower} hold { userId }.
 // Reserve/replace/release run inside transactions in the auth/admin functions.
 
 export function usernameRef(lower: string) {
   return db.collection('usernames').doc(lower);
-}
-export function emailRef(lower: string) {
-  return db.collection('emails').doc(lower);
 }
 
 export { HttpsError };

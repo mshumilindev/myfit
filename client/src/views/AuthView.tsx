@@ -86,7 +86,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
 
         <input
           className="input"
-          placeholder={t.emailOrUsername}
+          placeholder={t.username}
           value={identifier}
           autoComplete="username"
           disabled={unreachable || busy || locked}

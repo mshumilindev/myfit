@@ -17,17 +17,7 @@ authRouter.use(apiRateLimit);
 const PASSWORD_MIN = 6;
 /** bcrypt uses only the first 72 bytes; longer input is silently truncated, so we reject it. */
 const PASSWORD_MAX = 72;
-const EMAIL_MAX = 254;
 const USERNAME_MAX = 64;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function normEmail(raw: string): string {
-  return raw.trim().toLowerCase();
-}
-
-function isValidEmail(email: string): boolean {
-  return email.length <= EMAIL_MAX && EMAIL_RE.test(email);
-}
 
 function isValidPassword(password: string): boolean {
   return password.length >= PASSWORD_MIN && password.length <= PASSWORD_MAX;
@@ -41,21 +31,8 @@ function authPayload(user: UserRow) {
     name: displayName(user),
     firstName: parts.firstName,
     lastName: parts.lastName,
-    email: user.email,
     role: user.role,
   };
-}
-
-function uniqueUsername(base: string): string {
-  const cleaned = base.trim().slice(0, USERNAME_MAX) || 'user';
-  let candidate = cleaned;
-  let suffix = 2;
-  while (db.prepare('SELECT id FROM users WHERE username = ?').get(candidate)) {
-    const tail = `-${suffix}`;
-    candidate = `${cleaned.slice(0, USERNAME_MAX - tail.length)}${tail}`;
-    suffix += 1;
-  }
-  return candidate;
 }
 
 // --- Brute-force limiter (in-memory, per ip+identifier) ------------------
@@ -102,19 +79,17 @@ function sign(userId: string): string {
 
 /** Sign-up is open to anyone (multi-user product). */
 authRouter.post('/register', (req: Request, res: Response) => {
-  const { username, email, password } = req.body ?? {};
-  if (typeof email !== 'string' || typeof password !== 'string') {
-    return res.status(400).json({ error: 'First name, email and password are required.' });
+  const { username, password } = req.body ?? {};
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).json({ error: 'First name, username and password are required.' });
   }
   const names = parseNameInput(req.body ?? {});
-  const legacyUsername = typeof username === 'string' ? username.trim().slice(0, USERNAME_MAX) : '';
-  const name = legacyUsername || uniqueUsername(normEmail(email).split('@')[0] ?? names.firstName);
-  const mail = normEmail(email);
+  const name = username.trim().slice(0, USERNAME_MAX);
   if (names.firstName.length < 2 || names.firstName.length > USERNAME_MAX) {
     return res.status(400).json({ error: 'First name: 2 to 64 characters.' });
   }
-  if (!isValidEmail(mail)) {
-    return res.status(400).json({ error: "That email doesn't look complete." });
+  if (name.length < 2) {
+    return res.status(400).json({ error: 'Username: 2 to 64 characters.' });
   }
   if (!isValidPassword(password)) {
     return res
@@ -122,18 +97,17 @@ authRouter.post('/register', (req: Request, res: Response) => {
       .json({ error: `Password: ${PASSWORD_MIN} to ${PASSWORD_MAX} characters.` });
   }
   // Sign-up is open to anyone (design BUILD-SPEC: multi-user product).
-  const taken = db
-    .prepare('SELECT id FROM users WHERE username = ? OR email = ?')
-    .get(name, mail) as { id: string } | undefined;
+  const taken = db.prepare('SELECT id FROM users WHERE username = ?').get(name) as
+    { id: string } | undefined;
   if (taken) {
-    return res.status(409).json({ error: 'That username or email is already taken.' });
+    return res.status(409).json({ error: 'That username is already taken.' });
   }
   // The first account on a fresh instance is the admin (AC-ROLE bootstrap).
   const isFirst = (db.prepare('SELECT COUNT(*) AS n FROM users').get() as { n: number }).n === 0;
   const user: UserRow = {
     id: crypto.randomUUID(),
     username: name,
-    email: mail,
+    email: null,
     password_hash: bcrypt.hashSync(password, 10),
     created_at: Date.now(),
     role: isFirst ? 'admin' : 'member',
@@ -144,12 +118,11 @@ authRouter.post('/register', (req: Request, res: Response) => {
     last_name: names.lastName,
   };
   db.prepare(
-    `INSERT INTO users (id, username, email, password_hash, created_at, role, status, first_name, last_name)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (id, username, password_hash, created_at, role, status, first_name, last_name)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     user.id,
     user.username,
-    user.email,
     user.password_hash,
     user.created_at,
     user.role,
@@ -160,15 +133,15 @@ authRouter.post('/register', (req: Request, res: Response) => {
   res.json(authPayload(user));
 });
 
-/** Login with email or username (legacy accounts may have no email yet). */
+/** Login with username. */
 authRouter.post('/login', (req: Request, res: Response) => {
   const body = req.body ?? {};
-  const identifierRaw = body.identifier ?? body.username ?? body.email;
+  const identifierRaw = body.identifier ?? body.username;
   const { password } = body;
   if (typeof identifierRaw !== 'string' || typeof password !== 'string') {
-    return res.status(400).json({ error: 'Email (or username) and password are required.' });
+    return res.status(400).json({ error: 'Username and password are required.' });
   }
-  if (password.length > PASSWORD_MAX || identifierRaw.length > EMAIL_MAX) {
+  if (password.length > PASSWORD_MAX || identifierRaw.length > USERNAME_MAX) {
     return res.status(400).json({ error: 'Wrong username or password.' });
   }
   const key = limiterKey(req, identifierRaw);
@@ -176,9 +149,8 @@ authRouter.post('/login', (req: Request, res: Response) => {
     return res.status(429).json({ error: 'Too many failed attempts. Try again in 15 minutes.' });
   }
   const identifier = identifierRaw.trim();
-  const user = db
-    .prepare('SELECT * FROM users WHERE username = ? OR email = ?')
-    .get(identifier, identifier.toLowerCase()) as UserRow | undefined;
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(identifier) as
+    UserRow | undefined;
   if (!user || !user.password_hash || !bcrypt.compareSync(password, user.password_hash)) {
     recordFailure(key);
     return res.status(401).json({ error: 'Wrong username or password.' });
@@ -216,7 +188,6 @@ authRouter.get('/invite/:token', (req: Request, res: Response) => {
     name: user ? displayName(user) : null,
     firstName: parts.firstName || null,
     lastName: parts.lastName,
-    email: user?.email ?? null,
     expiresAt: inv.expires_at,
     claimedAt: inv.claimed_at,
     revokedAt: inv.revoked_at,
@@ -225,7 +196,7 @@ authRouter.get('/invite/:token', (req: Request, res: Response) => {
 
 /** Claim an invite: set password, bind to the pre-created id (AC-INVITE-08). */
 authRouter.post('/claim', (req: Request, res: Response) => {
-  const { token, password, username, email } = req.body ?? {};
+  const { token, password, username } = req.body ?? {};
   if (typeof token !== 'string' || typeof password !== 'string') {
     return res.status(400).json({ error: 'token and password are required' });
   }
@@ -250,20 +221,18 @@ authRouter.post('/claim', (req: Request, res: Response) => {
     typeof username === 'string' && username.trim().length >= 2
       ? username.trim().slice(0, USERNAME_MAX)
       : user.username;
-  const mail =
-    typeof email === 'string' && isValidEmail(normEmail(email)) ? normEmail(email) : user.email;
   const dupe = db
-    .prepare('SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?')
-    .get(name, mail, user.id) as { id: string } | undefined;
+    .prepare('SELECT id FROM users WHERE username = ? AND id != ?')
+    .get(name, user.id) as { id: string } | undefined;
   if (!firstName || firstName.length < 2) {
     return res.status(400).json({ error: 'First name: 2 to 64 characters.' });
   }
-  if (dupe) return res.status(409).json({ error: 'That name or email is already taken.' });
+  if (dupe) return res.status(409).json({ error: 'That username is already taken.' });
   db.prepare(
     `UPDATE users
-        SET password_hash = ?, status = 'active', username = ?, email = ?, first_name = ?, last_name = ?
+        SET password_hash = ?, status = 'active', username = ?, first_name = ?, last_name = ?
       WHERE id = ?`,
-  ).run(bcrypt.hashSync(password, 10), name, mail, firstName, lastName, user.id);
+  ).run(bcrypt.hashSync(password, 10), name, firstName, lastName, user.id);
   db.prepare('UPDATE invites SET claimed_at = ? WHERE token = ?').run(now, token);
   const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id) as UserRow;
   res.json(authPayload(updated));
@@ -279,20 +248,6 @@ authRouter.post('/invite/:token/request-new', (req: Request, res: Response) => {
     req.params.token,
   );
   res.json({ ok: true });
-});
-
-/** Set or change email on an existing account (legacy accounts created before emails). */
-authRouter.post('/email', requireAuth, (req: AuthedRequest, res: Response) => {
-  const { email } = req.body ?? {};
-  if (typeof email !== 'string') {
-    return res.status(400).json({ error: 'Email is required.' });
-  }
-  const mail = normEmail(email);
-  if (!isValidEmail(mail)) {
-    return res.status(400).json({ error: "That email doesn't look complete." });
-  }
-  db.prepare('UPDATE users SET email = ? WHERE id = ?').run(mail, req.userId);
-  res.json({ email: mail });
 });
 
 /** Tells the client whether the one-and-only account exists yet. */
