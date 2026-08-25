@@ -2302,6 +2302,79 @@ function AddExerciseSheet(props: {
   // list never selects a row. No pointerdown handling — that fired on touch-start
   // and grabbed a pick the moment a scroll began.
 
+  function renderFilterPanel() {
+    if (kind !== 'strength' || !filtersOpen) return null;
+    return (
+      <div className="filter-panel">
+        <div className="filter-group">
+          <div className="filter-group-label">{t.muscleGroupsLabel}</div>
+          <div className="filter-chips lg">
+            {MUSCLE_IDS.map((m) => (
+              <button
+                key={m}
+                className={`fchip lg${muscle === m ? ' active' : ''}`}
+                onClick={() => setMuscle((x) => (x === m ? undefined : m))}
+              >
+                <MuscleIcon
+                  muscle={m}
+                  variant="chipLg"
+                  tone={muscle === m ? 'onAccent' : 'secondary'}
+                />
+                {t.muscleGroups[m]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="filter-group">
+          <div className="filter-group-label">{t.equipmentLabelField}</div>
+          <div className="filter-chips lg">
+            {EQUIPMENT_IDS.map((id) => (
+              <button
+                key={id}
+                className={`fchip lg${equip === id ? ' active' : ''}`}
+                onClick={() => setEquip((x) => (x === id ? undefined : id))}
+              >
+                <Icon name={equipmentIconName(id)} />
+                {t.equipmentNames[id]}
+              </button>
+            ))}
+          </div>
+        </div>
+        {hasInventory && (
+          <button
+            className={`fchip lg${checkGym ? ' active' : ''}`}
+            onClick={() => setCheckGym((x) => !x)}
+          >
+            {t.availableHere}
+            {checkGym && <Icon className="x" name="x" />}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  function renderActiveFilters() {
+    if (kind !== 'strength' || filtersOpen || (!muscle && !equip)) return null;
+    return (
+      <div className="filter-chips">
+        {muscle && (
+          <button className="fchip active" onClick={() => setMuscle(undefined)}>
+            <MuscleIcon muscle={muscle} variant="chip" tone="onAccent" />
+            {t.muscleGroups[muscle]}
+            <Icon className="x" name="x" />
+          </button>
+        )}
+        {equip && (
+          <button className="fchip active" onClick={() => setEquip(undefined)}>
+            <Icon name={equipmentIconName(equip)} />
+            {t.equipmentNames[equip]}
+            <Icon className="x" name="x" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
   // --- Day-aware picker (Ex suggestions, AC-1) -----------------------------
   if (props.suggestions) {
     // Read the day from the muscle GROUPS trained — never a hardcoded guess:
@@ -2391,7 +2464,12 @@ function AddExerciseSheet(props: {
         day: exerciseDay(c.muscle as MuscleGroup),
       }))
       .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
-    const visible = needle ? all.filter((x) => x.name.toLowerCase().includes(needle)) : all;
+    const visible = all.filter(
+      (x) =>
+        (needle ? x.name.toLowerCase().includes(needle) : true) &&
+        (muscle === undefined || x.primary === muscle || x.secondary.includes(muscle)) &&
+        (equip === undefined || x.equipment === equip),
+    );
     const targetSet = new Set(refGroups.map(([m]) => m));
     const suggestionScore = (x: Cand): number => {
       const rich = richExerciseById(x.id);
@@ -2481,7 +2559,16 @@ function AddExerciseSheet(props: {
             placeholder={t.searchExercises}
             onChange={(e) => setQ(e.target.value)}
           />
+          <button
+            className="searchbar-funnel"
+            onClick={() => setFiltersOpen((x) => !x)}
+            aria-label={t.filters}
+          >
+            <Icon name="funnel-simple" />
+          </button>
         </div>
+        {renderFilterPanel()}
+        {renderActiveFilters()}
         <div className="kind-grid three">
           {TIMED_KINDS.map((id) => (
             <button
@@ -2558,71 +2645,8 @@ function AddExerciseSheet(props: {
           </button>
         ))}
       </div>
-      {kind === 'strength' && filtersOpen && (
-        <div className="filter-panel">
-          <div className="filter-group">
-            <div className="filter-group-label">{t.muscleGroupsLabel}</div>
-            <div className="filter-chips lg">
-              {MUSCLE_IDS.map((m) => (
-                <button
-                  key={m}
-                  className={`fchip lg${muscle === m ? ' active' : ''}`}
-                  onClick={() => setMuscle((x) => (x === m ? undefined : m))}
-                >
-                  <MuscleIcon
-                    muscle={m}
-                    variant="chipLg"
-                    tone={muscle === m ? 'onAccent' : 'secondary'}
-                  />
-                  {t.muscleGroups[m]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="filter-group">
-            <div className="filter-group-label">{t.equipmentLabelField}</div>
-            <div className="filter-chips lg">
-              {EQUIPMENT_IDS.map((id) => (
-                <button
-                  key={id}
-                  className={`fchip lg${equip === id ? ' active' : ''}`}
-                  onClick={() => setEquip((x) => (x === id ? undefined : id))}
-                >
-                  <Icon name={equipmentIconName(id)} />
-                  {t.equipmentNames[id]}
-                </button>
-              ))}
-            </div>
-          </div>
-          {hasInventory && (
-            <button
-              className={`fchip lg${checkGym ? ' active' : ''}`}
-              onClick={() => setCheckGym((x) => !x)}
-            >
-              {t.availableHere}
-              {checkGym && <Icon className="x" name="x" />}
-            </button>
-          )}
-        </div>
-      )}
-      {kind === 'strength' && !filtersOpen && (muscle || equip) && (
-        <div className="filter-chips">
-          {muscle && (
-            <button className="fchip active" onClick={() => setMuscle(undefined)}>
-              <MuscleIcon muscle={muscle} variant="chip" tone="onAccent" />
-              {t.muscleGroups[muscle]}
-              <Icon className="x" name="x" />
-            </button>
-          )}
-          {equip && (
-            <button className="fchip active" onClick={() => setEquip(undefined)}>
-              <Icon name={equipmentIconName(equip)} />
-              {t.equipmentNames[equip]}
-              <Icon className="x" name="x" />
-            </button>
-          )}
-        </div>
-      )}
+      {renderFilterPanel()}
+      {renderActiveFilters()}
       {kind === 'strength' && totalCount > 0 && (
         <h6 className="pick-count">{t.nExercises(totalCount)}</h6>
       )}
