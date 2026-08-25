@@ -20,7 +20,7 @@ import {
 import { fmtDayMonth, useT } from '../i18n';
 import { fullPersonName, splitPersonName } from '../name';
 import { SpotterMark } from '../brand/SpotterMark';
-import { Icon, LanguageSelector, ScreenSkeleton } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { Avatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
@@ -61,6 +61,51 @@ function loadResume(token: string): Resume | null {
   }
 }
 
+/**
+ * Landing skeleton (O-01) — mirrors the real landing card block-for-block so the
+ * invite-preview gate resolves into the landing with no layout shift. Blocks are
+ * sized from the real type scale (wordmark 48px, display title 2×34px, lead
+ * 2×16px, 52px CTA, footnote, inviter). Onboarding always opens on the landing,
+ * so this is the only gate skeleton the flow needs.
+ */
+function OnbLandingSkeleton() {
+  return (
+    <div className="onb-shell" role="status" aria-busy="true">
+      <div className="onb-top">
+        <span />
+        <LanguageSelector />
+      </div>
+      <div className="onb-card landing onb-skel" aria-hidden>
+        <div className="sk onb-skel-mark" />
+        <div className="onb-skel-title">
+          <span className="sk" />
+          <span className="sk" />
+        </div>
+        <div className="onb-skel-lead">
+          <span className="sk" />
+          <span className="sk" />
+        </div>
+        <div className="onb-rail">
+          {Array.from({ length: 4 }, (_, i) => (
+            <span key={i} className={`bar${i === 0 ? ' on' : ''}`} />
+          ))}
+        </div>
+        <div className="sk onb-skel-btn" />
+        <div className="onb-skel-foot">
+          <span className="sk" />
+        </div>
+        <div className="onb-inviter">
+          <span className="sk onb-skel-avatar" />
+          <span className="onb-skel-inviter">
+            <span className="sk" />
+            <span className="sk" />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function OnboardingView({
   token,
   onDone,
@@ -72,8 +117,11 @@ export function OnboardingView({
   const [info, setInfo] = useState<InviteInfo | null | 'error'>(null);
   const saved = useMemo(() => loadResume(token), [token]);
   const savedName = splitPersonName(saved?.name ?? '');
-  // 0 = landing, 1..4 = steps.
-  const [step, setStep] = useState(saved?.step ?? 0);
+  // 0 = landing, 1..4 = steps. Every open starts on the landing screen — the
+  // saved data still prefills the fields and the one-time claim below is never
+  // re-run (the step-1 handler detects an existing account and just advances) —
+  // so a half-finished invite reopens at step 0, not mid-flow.
+  const [step, setStep] = useState(0);
   const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
   const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
   const [password, setPassword] = useState('');
@@ -104,7 +152,7 @@ export function OnboardingView({
   }, [token]);
 
   if (info === null) {
-    return <ScreenSkeleton />;
+    return <OnbLandingSkeleton />;
   }
 
   const resumable = saved !== null && !!currentUid();
@@ -213,7 +261,7 @@ export function OnboardingView({
   return (
     <div className="onb-shell">
       <div className="onb-top">
-        {step > 1 ? (
+        {step > 0 ? (
           <button
             className="back"
             aria-label={t.onbBack}
@@ -527,6 +575,19 @@ function BodyStep({ rail, onContinue }: { rail: ReactNode; onContinue: () => voi
 
 // --- Step 3: gym (O-05) — nearby first, search, never blocks on permission --
 
+/** Placeholder gym card — same box as .onb-gym-card (110px photo + two lines). */
+function GymCardSkeleton() {
+  return (
+    <div className="onb-gym-card skeleton" aria-hidden>
+      <span className="sk photo" />
+      <span className="body">
+        <span className="sk n" />
+        <span className="sk s" />
+      </span>
+    </div>
+  );
+}
+
 function GymStep({
   rail,
   onPick,
@@ -540,6 +601,11 @@ function GymStep({
   const [denied, setDenied] = useState(false);
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [nearby, setNearby] = useState<PlaceResult[]>([]);
+  // The query each list currently reflects — a marker, not a flag, so the
+  // loading state is derived (no setState in an effect body). `nearby` is loaded
+  // once `nearbyDone` flips; `results` belong to `searchedNeedle`.
+  const [nearbyDone, setNearbyDone] = useState(false);
+  const [searchedNeedle, setSearchedNeedle] = useState('');
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -561,9 +627,14 @@ function GymStep({
     const deb = setTimeout(() => {
       void searchGyms(needle, coords, {}, [], ctrl.signal, {
         onResults: (m) => {
-          if (!ctrl.signal.aborted) setResults([...m]);
+          if (!ctrl.signal.aborted) {
+            setResults([...m]);
+            setSearchedNeedle(needle);
+          }
         },
         onProvider: () => {},
+      }).finally(() => {
+        if (!ctrl.signal.aborted) setSearchedNeedle(needle);
       });
     }, 350);
     return () => {
@@ -580,6 +651,8 @@ function GymStep({
         if (!ctrl.signal.aborted) setNearby([...m]);
       },
       onProvider: () => {},
+    }).finally(() => {
+      if (!ctrl.signal.aborted) setNearbyDone(true);
     });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -594,7 +667,13 @@ function GymStep({
     return [...nearby].sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
   }, [nearby, coords]);
   const showNearby = needle.length < 2;
-  const list = showNearby ? nearbySorted : sorted;
+  // Loading is derived, never stored: nearby is pending until located + fetched;
+  // a search is pending until its results are the ones for the current query.
+  // While pending we show skeleton cards and hold the near-header so nothing pops.
+  const searchPending = !showNearby && searchedNeedle !== needle;
+  const list = showNearby ? nearbySorted : searchPending ? [] : sorted;
+  const nearbyLoading = showNearby && !denied && !nearbyDone;
+  const showSkeleton = (nearbyLoading || searchPending) && list.length === 0;
 
   return (
     <div className="onb-card">
@@ -615,30 +694,32 @@ function GymStep({
           <span>{t.locationBlockedBody}</span>
         </div>
       )}
-      {showNearby && list.length > 0 && (
+      {showNearby && !denied && (list.length > 0 || nearbyLoading) && (
         <div className="onb-near">
           <Icon name="crosshair" />
           <span>{t.onbNearYou(fmtDistance(2000))}</span>
         </div>
       )}
       <div className="onb-gym-list">
-        {list.slice(0, 4).map((r) => {
-          const d = coords ? haversineM(coords, r) : null;
-          return (
-            <button key={r.key} className="onb-gym-card" onClick={() => onPick(r)}>
-              <span className="photo">
-                <GymThumb name={r.name} lat={r.lat} lng={r.lng} size={120} />
-              </span>
-              <span className="body">
-                <span className="n">{r.name}</span>
-                <span className="s">
-                  {r.address ?? ''}
-                  {d !== null ? `${r.address ? ' · ' : ''}${fmtDistance(d)}` : ''}
-                </span>
-              </span>
-            </button>
-          );
-        })}
+        {showSkeleton
+          ? Array.from({ length: 3 }, (_, i) => <GymCardSkeleton key={i} />)
+          : list.slice(0, 4).map((r) => {
+              const d = coords ? haversineM(coords, r) : null;
+              return (
+                <button key={r.key} className="onb-gym-card" onClick={() => onPick(r)}>
+                  <span className="photo">
+                    <GymThumb name={r.name} lat={r.lat} lng={r.lng} size={120} />
+                  </span>
+                  <span className="body">
+                    <span className="n">{r.name}</span>
+                    <span className="s">
+                      {r.address ?? ''}
+                      {d !== null ? `${r.address ? ' · ' : ''}${fmtDistance(d)}` : ''}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
       </div>
       <button className="footer-link" onClick={() => onPick(null)}>
         {t.onbSkipGym}

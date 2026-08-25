@@ -8565,6 +8565,96 @@ i > svg {
   color: var(--color-neutral-500);
 }
 
+/* Gym card skeleton — same box as the real card so results swap in with no
+   shift: 110px photo, then two text lines in the 11px/13px padded body. */
+.onb-gym-card.skeleton {
+  cursor: default;
+}
+.onb-gym-card.skeleton:hover {
+  border-color: var(--color-divider);
+}
+.onb-gym-card.skeleton .photo {
+  height: 110px;
+  border-radius: 0;
+}
+.onb-gym-card.skeleton .n {
+  height: 15px;
+  width: 58%;
+}
+.onb-gym-card.skeleton .s {
+  height: 11px;
+  width: 84%;
+}
+
+/* Onboarding landing skeleton (O-01) — mirrors the real landing card, block for
+   block, so the invite preview resolves into it without a hint of layout shift.
+   Structural spacing (max-width, gap, padding, bottom anchor) comes from the
+   real .onb-card.landing rules; only these leaf blocks need sizing. */
+.onb-skel-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+}
+.onb-skel-title {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.onb-skel-title .sk {
+  height: 34px; /* two lines of h1.display (34px / 1.12) ≈ 76px */
+}
+.onb-skel-title .sk:first-child {
+  width: 92%;
+}
+.onb-skel-title .sk:last-child {
+  width: 56%;
+}
+.onb-skel-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.onb-skel-lead .sk {
+  height: 16px; /* two lines of .lead (14px / 1.6) */
+}
+.onb-skel-lead .sk:last-child {
+  width: 66%;
+}
+.onb-skel-btn {
+  height: 52px; /* .onb-card .btn-big min-height */
+  border-radius: var(--radius-lg);
+}
+.onb-skel-foot {
+  display: flex;
+  justify-content: center;
+}
+.onb-skel-foot .sk {
+  height: 11px; /* .footnote */
+  width: 72%;
+}
+.onb-skel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex: none;
+}
+.onb-skel-inviter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.onb-skel-inviter .sk {
+  height: 11px;
+}
+.onb-skel-inviter .sk:first-child {
+  width: 90%;
+}
+.onb-skel-inviter .sk:last-child {
+  width: 60%;
+}
+
 .admin-table .admin-row .who > div {
   min-width: 0;
 }
