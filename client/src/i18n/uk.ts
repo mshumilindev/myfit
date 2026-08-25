@@ -1014,7 +1014,7 @@ export const uk: Strings = {
   progCopyDay: 'Скопіювати день у',
   progCopyChoose: 'Обери день',
   progEquipment: 'Обладнання',
-  progRestShort: 'Відпочинок',
+  progRestShort: 'Відпоч.',
   progRestDay: 'День відпочинку',
   progPlanProgress: 'Прогрес плану',
   progSetsDone: (done, total) => `${done} / ${total} підходів`,

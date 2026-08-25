@@ -682,6 +682,24 @@ export function Toast({
   );
 }
 
+/**
+ * "New build is live" plate — persists (no auto-dismiss) until the user taps
+ * Reload. Raised by the service-worker update signal (see pwaUpdate); the app
+ * renders it in the toast holder when a replacement worker has taken control.
+ */
+export function UpdatePlate() {
+  const { t } = useT();
+  return (
+    <div className="toast update" role="alert">
+      <Icon name="arrows-clockwise" />
+      <span className="update-text">{t.updateReady}</span>
+      <button className="update-reload" onClick={() => window.location.reload()}>
+        {t.reload}
+      </button>
+    </div>
+  );
+}
+
 export function Switch({ on }: { on: boolean }) {
   // Presentational only: the enclosing .toggle-row button owns the click, so
   // the switch must not also handle it (double toggle would cancel out).

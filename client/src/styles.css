@@ -743,8 +743,8 @@ i > svg {
   position: fixed;
   left: 18px;
   right: 18px;
-  /* Clears MFTabs content (~56px) + home-indicator inset. */
-  bottom: calc(64px + var(--safe-bottom));
+  /* Top of screen, clearing the status-bar / notch safe-area inset. */
+  top: calc(12px + var(--safe-top));
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -781,6 +781,31 @@ i > svg {
 .toast.danger i {
   color: var(--color-danger);
   font-size: 17px;
+}
+
+/* "New build is live" plate — persists until the user taps Reload. */
+.toast.update {
+  background: var(--color-surface);
+  color: var(--color-neutral-200);
+  border: 1px solid var(--color-neutral-800);
+}
+.toast.update i {
+  color: var(--color-accent);
+  font-size: 17px;
+  flex: none;
+}
+.toast.update .update-text {
+  flex: 1;
+}
+.toast.update .update-reload {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  flex: none;
 }
 
 .snackbar {
@@ -4707,7 +4732,7 @@ i > svg {
   .toast-holder {
     left: auto;
     right: 24px;
-    bottom: 24px;
+    top: calc(24px + var(--safe-top));
     width: 400px;
   }
 
@@ -15497,13 +15522,18 @@ button.badge {
   color: var(--color-neutral-600);
 }
 .program-week-strip-v2 .pws-name {
-  font-size: 14px;
+  font-size: 12px;
   margin-top: 7px;
-  line-height: 1.25;
+  line-height: 1.2;
   color: var(--color-neutral-300);
-  white-space: nowrap;
+  /* Wrap to at most two lines and break long words, so a long rest label or a
+     custom day name degrades gracefully instead of ellipsizing to "Odpoc…". */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .program-week-strip-v2 .program-week-slot.rest .pws-name {
   color: var(--color-neutral-700);

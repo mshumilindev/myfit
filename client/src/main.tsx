@@ -5,7 +5,7 @@ import '@fontsource/inter/500.css';
 import './styles.css';
 import { App } from './App';
 import { getLocale } from './i18n';
-import { startAutoUpdate } from './pwaUpdate';
+import { startAutoUpdate, markUpdateReady } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
 import { ServerBusyOverlay } from './ui';
 
@@ -16,7 +16,7 @@ if ('serviceWorker' in navigator) {
   void startAutoUpdate({
     container: navigator.serviceWorker,
     doc: document,
-    reload: () => window.location.reload(),
+    onUpdateReady: markUpdateReady,
     now: () => Date.now(),
   });
 }

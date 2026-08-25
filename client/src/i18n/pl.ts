@@ -1014,7 +1014,7 @@ export const pl: Strings = {
   progCopyDay: 'Kopiuj dzień do',
   progCopyChoose: 'Wybierz dzień',
   progEquipment: 'Sprzęt',
-  progRestShort: 'Odpoczynek',
+  progRestShort: 'Wolne',
   progRestDay: 'Dzień odpoczynku',
   progPlanProgress: 'Postęp planu',
   progSetsDone: (done, total) => `${done} / ${total} serii`,

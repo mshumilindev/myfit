@@ -1,4 +1,12 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import {
   getRole,
@@ -24,10 +32,12 @@ import {
   LanguageSelector,
   Snackbar,
   Toast,
+  UpdatePlate,
   ScreenSkeleton,
   type SnackState,
   type ToastState,
 } from './ui';
+import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -383,6 +393,8 @@ export function App() {
   }, []);
   const [toasts, setToasts] = useState<Array<ToastState & { id: number }>>([]);
   const [snack, setSnack] = useState<SnackState | null>(null);
+  // A fresh build took control → show the reload plate until the user reloads.
+  const updateReady = useSyncExternalStore(subscribeUpdateReady, isUpdateReady);
   const desktopRail = useDesktopRail();
   const snackSeq = useRef(0);
   const toastSeq = useRef(0);
@@ -726,6 +738,7 @@ export function App() {
           </>
         )}
         <div className="toast-holder">
+          {updateReady && <UpdatePlate />}
           {snack && <Snackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
           {toasts.map((tst) => (
             <Toast key={tst.id} toast={tst} id={tst.id} onExpire={removeToast} />

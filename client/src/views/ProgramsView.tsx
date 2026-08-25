@@ -724,14 +724,8 @@ export function ProgramsView({
               <div className="n">{t.progNone}</div>
               <div className="s">{t.progMemberEmpty}</div>
             </div>
-            <button className="program-route" onClick={() => startMemberDraft(1)}>
-              <Icon name="calendar-blank" />
-              <div className="body">
-                <div className="n">{t.progRoutePlanWeek}</div>
-                <div className="s">{t.progRoutePlanWeekBody}</div>
-              </div>
-              <Icon name="arrow-right" className="go" />
-            </button>
+            {/* One entry into the builder — weeks are editable inside (1…N or
+                open-ended), so a separate "plan one week" route was redundant. */}
             <button className="program-route" onClick={() => startMemberDraft(8)}>
               <Icon name="squares-four" />
               <div className="body">

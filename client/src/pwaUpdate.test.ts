@@ -3,7 +3,7 @@ import { FOREGROUND_CHECK_MS, startAutoUpdate, type PwaUpdateDeps } from './pwaU
 
 interface Harness {
   deps: PwaUpdateDeps;
-  reload: ReturnType<typeof vi.fn>;
+  onUpdateReady: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
   register: ReturnType<typeof vi.fn>;
   fireControllerChange: () => void;
@@ -37,10 +37,10 @@ function harness(opts: { controlled?: boolean; registerFails?: boolean } = {}): 
     },
   } as unknown as PwaUpdateDeps['doc'];
 
-  const reload = vi.fn();
+  const onUpdateReady = vi.fn();
   return {
-    deps: { container, doc, reload, now: () => clock },
-    reload,
+    deps: { container, doc, onUpdateReady, now: () => clock },
+    onUpdateReady,
     update,
     register,
     fireControllerChange: () => controllerListeners.forEach((cb) => cb()),
@@ -62,29 +62,29 @@ describe('startAutoUpdate', () => {
     vi.restoreAllMocks();
   });
 
-  it('reloads when a replacement worker takes control', async () => {
+  it('signals update-ready when a replacement worker takes control', async () => {
     const h = harness({ controlled: true });
     await startAutoUpdate(h.deps);
     h.fireControllerChange();
-    expect(h.reload).toHaveBeenCalledTimes(1);
+    expect(h.onUpdateReady).toHaveBeenCalledTimes(1);
   });
 
-  it('does not reload when the first worker ever claims the page', async () => {
+  it('does not signal when the first worker ever claims the page', async () => {
     const h = harness({ controlled: false });
     await startAutoUpdate(h.deps);
     h.fireControllerChange();
-    expect(h.reload).not.toHaveBeenCalled();
-    // The worker that replaces it must still trigger a reload.
+    expect(h.onUpdateReady).not.toHaveBeenCalled();
+    // The worker that replaces it must still raise the signal.
     h.fireControllerChange();
-    expect(h.reload).toHaveBeenCalledTimes(1);
+    expect(h.onUpdateReady).toHaveBeenCalledTimes(1);
   });
 
-  it('reloads once even if control changes repeatedly', async () => {
+  it('signals once even if control changes repeatedly', async () => {
     const h = harness({ controlled: true });
     await startAutoUpdate(h.deps);
     h.fireControllerChange();
     h.fireControllerChange();
-    expect(h.reload).toHaveBeenCalledTimes(1);
+    expect(h.onUpdateReady).toHaveBeenCalledTimes(1);
   });
 
   it('checks for a new build when the app returns to the foreground', async () => {
@@ -123,8 +123,8 @@ describe('startAutoUpdate', () => {
     h.advance(FOREGROUND_CHECK_MS);
     h.fireVisibility();
     expect(h.update).not.toHaveBeenCalled();
-    // Control changes still reload — the old worker may hand over at any time.
+    // Control changes still signal — the old worker may hand over at any time.
     h.fireControllerChange();
-    expect(h.reload).toHaveBeenCalledTimes(1);
+    expect(h.onUpdateReady).toHaveBeenCalledTimes(1);
   });
 });
