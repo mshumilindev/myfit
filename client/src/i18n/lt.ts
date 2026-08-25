@@ -641,10 +641,10 @@ export const lt: Strings = {
   onbInvited: (name) => `${name} pakvietė tave į Spotter ir jau paruošė profilį.`,
   onbTitle: 'Keturi žingsniai — ir treniruojiesi.',
   onbBody:
-    'Paskyra, nuotrauka, salė, pirmoji serija. Mažiau nei dvi minutės — paskutinis žingsnis yra tikra sesija.',
+    'Paskyra, nuotrauka, salė, kūno rodikliai. Mažiau nei dvi minutės — tada pirma tikra sesija.',
   onbStart: 'Pradėti',
   onbLinkValid: (date) => `Nuoroda galioja iki ${date} · vienas panaudojimas`,
-  onbStepOf: (n) => `${n} žingsnis iš 5`,
+  onbStepOf: (n) => `${n} žingsnis iš 4`,
   onbWho: 'Kas tu',
   onbWhoLead: 'Užrašykime tavo vardą.',
   onbPrefilled: 'Vardas iš pakvietimo — pataisyk, jei netikslu',

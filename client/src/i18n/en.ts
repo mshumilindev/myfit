@@ -680,11 +680,10 @@ export const en = {
   bodyweightShort: 'BW',
   onbInvited: (name: string) => `${name} invited you to Spotter and already set up your profile.`,
   onbTitle: "Four steps and you're lifting.",
-  onbBody:
-    'Account, photo, gym, first set. Under two minutes — and the last step is a real session, not a summary.',
+  onbBody: 'Account, photo, gym, body numbers. Under two minutes — then your first real session.',
   onbStart: 'Start',
   onbLinkValid: (date: string) => `Link valid until ${date} · one use`,
-  onbStepOf: (n: number) => `Step ${n} of 5`,
+  onbStepOf: (n: number) => `Step ${n} of 4`,
   onbWho: 'Who you are',
   onbWhoLead: "Let's get your name on the account.",
   onbPrefilled: "Name came from your invite — change it if it's wrong",

@@ -5877,10 +5877,26 @@ i > svg {
 .onb-inviter {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
+  width: 100%;
+  margin-top: 2px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 42%, var(--color-divider));
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent) 9%, transparent),
+      transparent 60%
+    ),
+    var(--color-surface-2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   font-size: 13px;
   line-height: 1.5;
   color: var(--color-neutral-300);
+}
+.onb-inviter .avatar {
+  flex: 0 0 auto;
 }
 .onb-rail {
   display: flex;

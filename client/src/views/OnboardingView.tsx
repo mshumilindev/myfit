@@ -24,6 +24,7 @@ import { Icon, LanguageSelector, ScreenSkeleton } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { Avatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
+import { InstallShortcut } from './InstallShortcut';
 
 interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
@@ -136,20 +137,21 @@ export function OnboardingView({
     );
   }
 
+  const totalSteps = 4;
   const railBars = (upTo: number) => (
     <div className="onb-rail" aria-hidden>
-      {[1, 2, 3, 4, 5].map((i) => (
+      {Array.from({ length: totalSteps }, (_, index) => index + 1).map((i) => (
         <span key={i} className={`bar${i <= upTo ? ' on' : ''}`} />
       ))}
     </div>
   );
-  const stepNames = ['', t.onbWho, t.onbFace, t.onbGymStep, t.onbBodyStep, t.onbReady];
+  const stepNames = ['', t.onbWho, t.onbFace, t.onbGymStep, t.onbBodyStep];
   const rail = (
     <div className="onb-steptop">
-      {railBars(Math.max(step, 1))}
+      {railBars(Math.min(Math.max(step, 1), totalSteps))}
       <div className="row">
-        <span className="k">{t.onbStepOf(Math.min(step, 5))}</span>
-        <span className="k right">{stepNames[Math.min(step, 5)]}</span>
+        <span className="k">{t.onbStepOf(Math.min(step, totalSteps))}</span>
+        <span className="k right">{stepNames[Math.min(step, totalSteps)]}</span>
       </div>
     </div>
   );
@@ -230,12 +232,6 @@ export function OnboardingView({
 
       {step === 0 && (
         <div className="onb-card landing">
-          {info.inviter && (
-            <div className="onb-inviter">
-              <Avatar name={info.inviter} size={40} />
-              <span>{t.onbInvited(info.inviter)}</span>
-            </div>
-          )}
           <SpotterMark size={48} variant="tight" className="onb-wordmark" />
           <h2 className="display">{t.onbTitle}</h2>
           <p className="lead">{t.onbBody}</p>
@@ -249,9 +245,16 @@ export function OnboardingView({
           >
             {t.onbStart} <Icon name="arrow-right" />
           </button>
+          <InstallShortcut />
           <div className="footnote center">
             {t.onbLinkValid(fmtDayMonth(info.expiresAt, locale))}
           </div>
+          {info.inviter && (
+            <div className="onb-inviter">
+              <Avatar name={info.inviter} size={40} />
+              <span>{t.onbInvited(info.inviter)}</span>
+            </div>
+          )}
         </div>
       )}
 

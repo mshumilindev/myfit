@@ -632,10 +632,10 @@ export const pl: Strings = {
   onbInvited: (name) => `${name} zaprosił cię do Spotter i już ustawił twój profil.`,
   onbTitle: 'Cztery kroki i trenujesz.',
   onbBody:
-    'Konto, zdjęcie, siłownia, pierwsza seria. Mniej niż dwie minuty — a ostatni krok to prawdziwa sesja.',
+    'Konto, zdjęcie, siłownia, parametry ciała. Mniej niż dwie minuty — potem pierwsza prawdziwa sesja.',
   onbStart: 'Zacznij',
   onbLinkValid: (date) => `Link ważny do ${date} · jedno użycie`,
-  onbStepOf: (n) => `Krok ${n} z 5`,
+  onbStepOf: (n) => `Krok ${n} z 4`,
   onbWho: 'Kim jesteś',
   onbWhoLead: 'Zapiszmy twoje imię na koncie.',
   onbPrefilled: 'Imię pochodzi z zaproszenia — popraw, jeśli coś się nie zgadza',
