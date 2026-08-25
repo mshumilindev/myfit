@@ -5,6 +5,7 @@
  * on the next call. Cross-user reads (detail/export) are audited.
  */
 import { onCall } from 'firebase-functions/v2/https';
+import type { DocumentReference, WriteBatch } from 'firebase-admin/firestore';
 import {
   db,
   requireRole,
@@ -100,6 +101,51 @@ async function latestInvite(userId: string): Promise<InviteDoc | null> {
     .filter((i) => i.kind === 'invite')
     .sort((a, b) => b.createdAt - a.createdAt);
   return invites[0] ?? null;
+}
+
+async function commitBatch(batch: WriteBatch, writes: number): Promise<void> {
+  if (writes > 0) await batch.commit();
+}
+
+async function flushIfFull(
+  batch: WriteBatch,
+  writes: number,
+): Promise<{ batch: WriteBatch; writes: number }> {
+  if (writes < 450) return { batch, writes };
+  await batch.commit();
+  return { batch: db.batch(), writes: 0 };
+}
+
+async function queueDelete(
+  state: { batch: WriteBatch; writes: number },
+  ref: DocumentReference,
+): Promise<{ batch: WriteBatch; writes: number }> {
+  state.batch.delete(ref);
+  return flushIfFull(state.batch, state.writes + 1);
+}
+
+async function queueUpdate(
+  state: { batch: WriteBatch; writes: number },
+  ref: DocumentReference,
+  data: Record<string, unknown>,
+): Promise<{ batch: WriteBatch; writes: number }> {
+  state.batch.update(ref, data);
+  return flushIfFull(state.batch, state.writes + 1);
+}
+
+async function deleteTrainerAuthoredNotes(
+  state: { batch: WriteBatch; writes: number },
+  trainerId: string,
+): Promise<{ batch: WriteBatch; writes: number }> {
+  const users = await db.collection('users').select().get();
+  for (const user of users.docs) {
+    const notes = await user.ref
+      .collection('trainerNotes')
+      .where('trainerId', '==', trainerId)
+      .get();
+    for (const note of notes.docs) state = await queueDelete(state, note.ref);
+  }
+  return state;
 }
 
 export interface PersonJson {
@@ -390,27 +436,28 @@ export const adminDeleteUser = onCall(async (req) => {
   const u = await usersById(id);
   if (!u) throw new HttpsError('not-found', 'not found');
 
+  let state = { batch: db.batch(), writes: 0 };
   // Detach trainees.
   const trainees = await db.collection('users').where('trainerId', '==', id).get();
-  const batch = db.batch();
-  for (const d of trainees.docs) batch.update(d.ref, { trainerId: null });
+  for (const d of trainees.docs) state = await queueUpdate(state, d.ref, { trainerId: null });
   // Their reservations + invites + assignment.
-  if (u.usernameLower) batch.delete(usernameRef(u.usernameLower));
-  batch.delete(db.collection('credentials').doc(id));
-  batch.delete(db.collection('assignments').doc(id));
+  if (u.usernameLower) state = await queueDelete(state, usernameRef(u.usernameLower));
+  state = await queueDelete(state, db.collection('credentials').doc(id));
+  state = await queueDelete(state, db.collection('assignments').doc(id));
   const invites = await db.collection('invites').where('userId', '==', id).get();
-  for (const d of invites.docs) batch.delete(d.ref);
-  // Trainer notes this user authored (across other members).
-  const authoredNotes = await db.collectionGroup('trainerNotes').where('trainerId', '==', id).get();
-  for (const d of authoredNotes.docs) batch.delete(d.ref);
+  for (const d of invites.docs) state = await queueDelete(state, d.ref);
+  // Trainer notes this user authored across other members. This intentionally
+  // walks user subcollections instead of collectionGroup('trainerNotes') so
+  // deletion does not depend on a production index existing.
+  state = await deleteTrainerAuthoredNotes(state, id);
   // Programs they authored + assignments pointing at those programs.
   const programs = await db.collection('programs').where('authorId', '==', id).get();
   for (const p of programs.docs) {
-    batch.delete(p.ref);
+    state = await queueDelete(state, p.ref);
     const assigned = await db.collection('assignments').where('programId', '==', p.id).get();
-    for (const a of assigned.docs) batch.delete(a.ref);
+    for (const a of assigned.docs) state = await queueDelete(state, a.ref);
   }
-  await batch.commit();
+  await commitBatch(state.batch, state.writes);
   // Nuke the user doc + all subcollections (workouts/gyms/notices/audit/...).
   await db.recursiveDelete(db.collection('users').doc(id));
   return { ok: true };

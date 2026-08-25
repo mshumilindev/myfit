@@ -57,6 +57,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
     token: string;
     expiresAt: number;
   } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [online, setOnline] = useState(() => navigator.onLine);
 
@@ -151,10 +152,12 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
   async function act(fn: () => Promise<unknown>): Promise<void> {
     // AC-ADMIN-12: refuse rather than queue when offline.
     if (!navigator.onLine) return;
+    setActionError(null);
     try {
       await fn();
       refresh();
-    } catch {
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : t.error);
       refresh();
     }
   }
@@ -178,6 +181,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         <div className="banner danger-ring">
           <Icon name="cloud-slash" />
           <span>{t.adminOffline}</span>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="banner danger-ring">
+          <Icon name="warning-circle" />
+          <span>{actionError}</span>
         </div>
       )}
 
@@ -503,9 +513,15 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
             onClick={() => {
               const p = menuFor;
               setMenuFor(null);
-              void act(() =>
-                callFn(p.status === 'suspended' ? 'adminUnsuspend' : 'adminSuspend', { id: p.id }),
-              );
+              const nextStatus = p.status === 'suspended' ? 'active' : 'suspended';
+              void act(async () => {
+                await callFn(p.status === 'suspended' ? 'adminUnsuspend' : 'adminSuspend', {
+                  id: p.id,
+                });
+                setPeople((rows) =>
+                  rows.map((row) => (row.id === p.id ? { ...row, status: nextStatus } : row)),
+                );
+              });
             }}
           >
             <Icon name="cloud-slash" />
@@ -550,6 +566,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         <DeleteDialog
           person={deleteFor}
           onClose={() => setDeleteFor(null)}
+          onError={(message) => setActionError(message)}
           onDone={() => {
             setDeleteFor(null);
             refresh();
@@ -912,7 +929,12 @@ function EditDialog(props: { person: Person; onClose: () => void; onDone: () => 
 
 // --- Delete with typed name (AD-05, AC-ADMIN-10) -----------------------------
 
-function DeleteDialog(props: { person: Person; onClose: () => void; onDone: () => void }) {
+function DeleteDialog(props: {
+  person: Person;
+  onClose: () => void;
+  onDone: () => void;
+  onError: (message: string) => void;
+}) {
   const { t } = useT();
   const [typed, setTyped] = useState('');
   const [busy, setBusy] = useState(false);
@@ -935,6 +957,9 @@ function DeleteDialog(props: { person: Person; onClose: () => void; onDone: () =
               try {
                 await callFn('adminDeleteUser', { id: p.id });
                 props.onDone();
+              } catch (e) {
+                props.onError(e instanceof Error ? e.message : t.error);
+                props.onClose();
               } finally {
                 setBusy(false);
               }
