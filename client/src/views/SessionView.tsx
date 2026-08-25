@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -148,6 +148,15 @@ type DialogState =
   | { kind: 'del-workout' }
   | null;
 
+export function rectHasVisiblePixels(
+  rect: Pick<DOMRectReadOnly, 'top' | 'right' | 'bottom' | 'left'>,
+  viewport: { width: number; height: number },
+): boolean {
+  return (
+    rect.right > 0 && rect.bottom > 0 && rect.left < viewport.width && rect.top < viewport.height
+  );
+}
+
 /**
  * Share-summary bottom sheet (AC-3.2): live canvas preview, format toggle,
  * and native-share / save / copy. Drawing is offline and separate from the
@@ -295,11 +304,11 @@ export function SessionView(props: {
   const [now, setNow] = useState(() => Date.now());
   /** Share-summary bottom sheet open (AC-3.2). */
   const [shareOpen, setShareOpen] = useState(false);
-  /** Whether the Discard row is on screen — docks Finish beside it vs. the FAB. */
-  const [discardInView, setDiscardInView] = useState(
+  /** Whether the inline Finish button is on screen — it owns visibility over the FAB. */
+  const [dockedFinishInView, setDockedFinishInView] = useState(
     () => typeof IntersectionObserver === 'undefined',
   );
-  const discardRef = useRef<HTMLDivElement>(null);
+  const dockedFinishRef = useRef<HTMLButtonElement>(null);
   /** Past workout cards start collapsed for reading (SS-3). */
   const [expandedPast, setExpandedPast] = useState<string[]>([]);
   /** The set logged most recently in this visit — its row reads “just now”. */
@@ -332,16 +341,40 @@ export function SessionView(props: {
     setSheet({ kind: 'add' });
   }, [props.startAdd, workout]);
 
-  // Finish docks beside Discard when any part of that row is on screen. The
-  // corner FAB returns only after the docked row has fully left the viewport.
-  useEffect(() => {
-    const el = discardRef.current;
+  // On mobile the floating Finish is mutually exclusive with the inline Finish:
+  // hide the FAB as soon as any pixel of the inline button enters the viewport,
+  // and show it again only when the inline button is fully outside.
+  useLayoutEffect(() => {
+    const el = dockedFinishRef.current;
     if (!el) return;
-    if (typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => setDiscardInView(e.isIntersecting), {
-      rootMargin: '0px',
-      threshold: 0,
-    });
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) {
+        setDockedFinishInView(true);
+        return;
+      }
+      const width = window.innerWidth || document.documentElement.clientWidth;
+      const height = window.innerHeight || document.documentElement.clientHeight;
+      setDockedFinishInView(rectHasVisiblePixels(rect, { width, height }));
+    };
+    measure();
+    if (typeof IntersectionObserver === 'undefined') {
+      window.addEventListener('scroll', measure, { passive: true });
+      window.addEventListener('resize', measure);
+      return () => {
+        window.removeEventListener('scroll', measure);
+        window.removeEventListener('resize', measure);
+      };
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        setDockedFinishInView(e.intersectionRect.width > 0 && e.intersectionRect.height > 0);
+      },
+      {
+        rootMargin: '0px',
+        threshold: 0,
+      },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, [live, workout?.autoFinished, summary]);
@@ -1761,7 +1794,7 @@ export function SessionView(props: {
                 </button>
               )}
               {live && !workout.autoFinished && (
-                <div className="session-discard-row" ref={discardRef}>
+                <div className="session-discard-row">
                   <button
                     className="btn session-discard-btn icon-only"
                     onClick={() => setDialog({ kind: 'del-workout' })}
@@ -1771,6 +1804,7 @@ export function SessionView(props: {
                     <Icon name="trash" />
                   </button>
                   <button
+                    ref={dockedFinishRef}
                     className="btn btn-primary session-finish-docked"
                     disabled={entries === 0}
                     onClick={requestFinish}
@@ -1784,7 +1818,7 @@ export function SessionView(props: {
           )}
         </div>
       </div>
-      {live && !workout.autoFinished && !discardInView && !isDesktop && (
+      {live && !workout.autoFinished && !dockedFinishInView && !isDesktop && (
         <button
           className="session-finish-fab"
           disabled={entries === 0}

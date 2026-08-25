@@ -13957,7 +13957,7 @@ button.exd-media {
   font-size: 16px;
 }
 
-/* Floating Finish button, shown until the Discard row scrolls into view. */
+/* Floating Finish button, shown only while the inline Finish is fully off-screen. */
 .session-finish-fab {
   position: fixed;
   right: 20px;
