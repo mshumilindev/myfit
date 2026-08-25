@@ -30,6 +30,9 @@ interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
   kind: 'invite' | 'reset';
   inviter: string | null;
+  inviterId: string | null;
+  inviterAvatar: boolean;
+  inviterAvatarUrl: string | null;
   name: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -299,7 +302,16 @@ export function OnboardingView({
           </div>
           {info.inviter && (
             <div className="onb-inviter">
-              <Avatar name={info.inviter} size={40} />
+              {info.inviterAvatarUrl ? (
+                <img className="avatar lighten" src={info.inviterAvatarUrl} alt="" />
+              ) : (
+                <Avatar
+                  userId={info.inviterId ?? undefined}
+                  name={info.inviter}
+                  hasPhoto={info.inviterAvatar}
+                  size={40}
+                />
+              )}
               <span>{t.onbInvited(info.inviter)}</span>
             </div>
           )}

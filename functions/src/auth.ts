@@ -8,6 +8,7 @@ import {
   db,
   authAdmin,
   authPayload,
+  bucket,
   displayName,
   hashPassword,
   HttpsError,
@@ -39,6 +40,21 @@ function inviteState(inv: InviteDoc): 'valid' | 'expired' | 'claimed' | 'revoked
   if (inv.claimedAt) return 'claimed';
   if (Date.now() > inv.expiresAt) return 'expired';
   return 'valid';
+}
+
+async function inviterAvatarDataUrl(userId: string, hasAvatar: boolean): Promise<string | null> {
+  if (!hasAvatar) return null;
+  try {
+    const file = bucket.file(`avatars/${userId}/photo`);
+    const [metadata] = await file.getMetadata();
+    const size = Number(metadata.size ?? 0);
+    if (size <= 0 || size > 512 * 1024) return null;
+    const [buffer] = await file.download();
+    const contentType = metadata.contentType || 'image/jpeg';
+    return `data:${contentType};base64,${buffer.toString('base64')}`;
+  } catch {
+    return null;
+  }
 }
 
 // --- Brute-force limiter (Firestore-backed) --------------------------------
@@ -165,10 +181,14 @@ export const invitePreview = onCall(async (req) => {
   const inviter = iSnap.exists
     ? ({ id: inv.createdBy, ...(iSnap.data() as object) } as UserDoc)
     : null;
+  const inviterAvatar = !!inviter?.avatarExt;
   return {
     state: inviteState(inv),
     kind: inv.kind,
     inviter: inviter ? displayName(inviter) : null,
+    inviterId: inviter?.id ?? null,
+    inviterAvatar,
+    inviterAvatarUrl: inviter ? await inviterAvatarDataUrl(inviter.id, inviterAvatar) : null,
     name: user ? displayName(user) : null,
     firstName: user?.firstName ?? null,
     lastName: user?.lastName ?? null,
