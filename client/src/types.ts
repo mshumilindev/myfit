@@ -97,6 +97,8 @@ export interface BodyMetrics {
   weights: WeightEntry[];
   /** Local date key (YYYY-MM-DD) the Today weigh-in reminder was dismissed. */
   weighInDismissedDay?: string | null;
+  /** Count days with nothing logged as rest days (keeps the streak alive). */
+  restCountsSkipped?: boolean;
   updatedAt?: number;
 }
 
@@ -125,6 +127,23 @@ export interface Reminder {
 }
 
 /** A queued offline mutation = one HTTP request to replay later. */
+/** How light a rest/recovery period is. 'active' = deloaded training still in
+ *  the gym; 'off' = fully away from the gym (e.g. a vacation). */
+export type RestMode = 'active' | 'off';
+
+/** A planned rest / recovery / vacation window. Its days count as rest days in
+ *  statistics (not missed) and keep the consistency streak alive. */
+export interface RestPeriod {
+  id: string;
+  /** Inclusive day keys: Math.floor(ts / 86400000). */
+  startDay: number;
+  endDay: number;
+  mode: RestMode;
+  createdAt: number;
+  note?: string | null;
+  updatedAt?: number;
+}
+
 export interface QueuedMutation {
   id: string;
   method: 'PUT' | 'POST' | 'DELETE';

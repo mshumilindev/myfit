@@ -30,6 +30,8 @@ import {
   type Gym,
   type QueuedMutation,
   type Reminder,
+  type RestMode,
+  type RestPeriod,
   type SetEntry,
   type SetType,
   type SyncStatus,
@@ -56,6 +58,7 @@ const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
 const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
+const REST_KEY = 'spotter.restPeriods';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -63,6 +66,8 @@ export interface StoreState {
   workouts: Workout[];
   gyms: Gym[];
   reminders: Reminder[];
+  /** Planned rest / recovery / vacation windows. */
+  restPeriods: RestPeriod[];
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
@@ -85,6 +90,7 @@ let state: StoreState = {
   workouts: load<Workout[]>(STATE_KEY, []),
   gyms: load<Gym[]>(GYMS_KEY, []),
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
+  restPeriods: load<RestPeriod[]>(REST_KEY, []),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   queue: [],
   syncStatus: 'pending',
@@ -107,6 +113,7 @@ function persist(): void {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
+    localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
@@ -893,6 +900,125 @@ export function dismissWeighInToday(dayKey: string): void {
   commitBody({ weighInDismissedDay: dayKey });
 }
 
+// --- Rest / recovery periods (deloads, vacations) --------------------------
+const REST_DAY_MS = 86_400_000;
+/** Local-calendar day bucket: the index of the LOCAL Y-M-D of `ts`, so day
+ *  boundaries follow the user's own midnight (not UTC). Consistent for
+ *  workouts, rest periods and the date picker alike. */
+export const dayKey = (ts: number): number => {
+  const d = new Date(ts);
+  return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / REST_DAY_MS);
+};
+
+function writeRestPeriodDoc(r: RestPeriod): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'restPeriods', r.id), { ...r, updatedAt: Date.now() }).catch(
+    onWriteError,
+  );
+}
+function deleteRestPeriodDoc(id: string): void {
+  const uid = currentUid();
+  if (!uid) return;
+  deleteDoc(doc(db, 'users', uid, 'restPeriods', id)).catch(onWriteError);
+}
+
+/** Start (or schedule) a rest period covering [startDay, endDay] inclusive. */
+export function startRestPeriod(input: {
+  mode: RestMode;
+  startDay: number;
+  endDay: number;
+  note?: string | null;
+}): RestPeriod {
+  const period: RestPeriod = {
+    id: uuid(),
+    startDay: Math.min(input.startDay, input.endDay),
+    endDay: Math.max(input.startDay, input.endDay),
+    mode: input.mode,
+    createdAt: Date.now(),
+    note: input.note ?? null,
+  };
+  setState({ restPeriods: [period, ...state.restPeriods], syncStatus: bumpPending() });
+  writeRestPeriodDoc(period);
+  return period;
+}
+
+/** Interrupt a rest period: stop it from today on (the days already rested up to
+ *  yesterday stay counted). If it hasn't started resting any earlier day yet
+ *  (began today or is scheduled), remove it entirely. */
+export function endRestPeriod(id: string, now: number = Date.now()): void {
+  const today = dayKey(now);
+  const period = state.restPeriods.find((r) => r.id === id);
+  if (!period) return;
+  if (period.startDay >= today) {
+    deleteRestPeriod(id);
+    return;
+  }
+  const list = state.restPeriods.map((r) => (r.id === id ? { ...r, endDay: today - 1 } : r));
+  setState({ restPeriods: list, syncStatus: bumpPending() });
+  const updated = list.find((r) => r.id === id);
+  if (updated) writeRestPeriodDoc(updated);
+}
+
+export function deleteRestPeriod(id: string): void {
+  setState({
+    restPeriods: state.restPeriods.filter((r) => r.id !== id),
+    syncStatus: bumpPending(),
+  });
+  deleteRestPeriodDoc(id);
+}
+
+/** The rest period covering `now`, if any (most recently created wins). */
+export function activeRestPeriod(now: number = Date.now()): RestPeriod | null {
+  const d = dayKey(now);
+  return (
+    [...state.restPeriods]
+      .filter((r) => r.startDay <= d && d <= r.endDay)
+      .sort((a, b) => b.createdAt - a.createdAt)[0] ?? null
+  );
+}
+
+/** Every day key covered by any rest period. */
+export function restDayKeys(periods: RestPeriod[] = state.restPeriods): Set<number> {
+  const set = new Set<number>();
+  for (const r of periods) for (let d = r.startDay; d <= r.endDay; d++) set.add(d);
+  return set;
+}
+
+/** Toggle whether unlogged days count as rest (keeping the streak alive). */
+export function setRestCountsSkipped(on: boolean): void {
+  commitBody({ restCountsSkipped: on });
+}
+
+/**
+ * Consistency streak in days: the unbroken run of days back from today where
+ * each day was trained OR is a rest day (a rest period, or -- when the pref is
+ * on -- any unlogged day). Today with nothing logged yet does not break it, and
+ * rest days keep the chain alive, so a planned week off or a vacation never
+ * resets the streak.
+ */
+export function consistencyStreak(now: number = Date.now()): number {
+  const finished = state.workouts.filter((w) => w.finishedAt !== null);
+  if (finished.length === 0) return 0;
+  const trained = new Set(finished.map((w) => dayKey(w.startedAt)));
+  const rests = restDayKeys();
+  const countSkipped = !!state.bodyMetrics.restCountsSkipped;
+  const today = dayKey(now);
+  const firstDay = Math.min(...finished.map((w) => dayKey(w.startedAt)));
+  let streak = 0;
+  for (let d = today; d >= firstDay; d--) {
+    if (trained.has(d) || rests.has(d) || (countSkipped && d < today)) {
+      streak += 1;
+    } else if (d === today) {
+      // today, nothing logged yet -- don't break the chain, don't count it
+      continue;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
 /** Latest weigh-in (by time), or null. */
 export function latestWeight(bm: BodyMetrics): WeightEntry | null {
   if (bm.weights.length === 0) return null;
@@ -1111,6 +1237,18 @@ export function startSyncLoop(): () => void {
         emit();
       },
       onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'restPeriods'),
+      (snap) => {
+        state = { ...state, restPeriods: snap.docs.map((d) => d.data() as RestPeriod) };
+        persist();
+        emit();
+      },
+      // Soft: if the restPeriods rule isn't deployed yet, don't block all sync.
+      () => undefined,
     ),
   );
   unsubs.push(
@@ -1538,12 +1676,14 @@ export function resetLocalData(): void {
   localStorage.removeItem(GYMS_KEY);
   localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(BODY_KEY);
+  localStorage.removeItem(REST_KEY);
   pings = [];
   dismissals = [];
   state = {
     workouts: [],
     gyms: [],
     reminders: [],
+    restPeriods: [],
     bodyMetrics: EMPTY_BODY,
     queue: [],
     syncStatus: 'pending',

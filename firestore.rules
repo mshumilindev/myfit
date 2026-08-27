@@ -56,6 +56,10 @@ service cloud.firestore {
       match /gyms/{gymId} {
         allow read, write: if isSelf(userId);
       }
+      // Rest / recovery / vacation periods — own read/write only.
+      match /restPeriods/{periodId} {
+        allow read, write: if isSelf(userId);
+      }
       // Body metrics (weigh-ins, height, composition). Own read/write only;
       // admin/trainer cross-user reads go through functions (Admin SDK).
       match /meta/{docId} {

@@ -13,10 +13,16 @@ import { MuscleChip, withMuscleBreak } from '../components/Muscle';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
+  activeRestPeriod,
   addExercise,
   backfillWorkout,
+  consistencyStreak,
+  dayKey,
   dismissReminder,
   dismissWeighInToday,
+  endRestPeriod,
+  setRestCountsSkipped,
+  startRestPeriod,
   logVisitAsWorkout,
   muscleWorkSorted,
   resolveMuscles,
@@ -39,7 +45,7 @@ import {
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
-import { Icon, Sheet } from '../ui';
+import { Icon, Sheet, Switch } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -167,6 +173,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [addWeightOpen, setAddWeightOpen] = useState(false);
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
   const [progSheetOpen, setProgSheetOpen] = useState(false);
+  const [restSheetOpen, setRestSheetOpen] = useState(false);
   const openMuscleHistory = (muscle: MuscleGroup) =>
     shell.openOverlay({ screen: 'muscle-history', muscle });
   const [progChoice, setProgChoice] = useState<'week' | 'week-lifts'>('week-lifts');
@@ -212,6 +219,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       ),
     [store.workouts, pbNow],
   );
+  const activeRest = activeRestPeriod(pbNow);
   const playName = (pl: Play) =>
     pl.name ?? (pl.readout ? dayReadoutLabel(pl.readout, t) : t.playUntitled);
   const programReadiness = useMemo(() => programSuggestionReadiness(finished), [finished]);
@@ -353,10 +361,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const maxWeek = Math.max(...weeks, 1);
   const deltaPct = weeks[8] > 0 ? Math.round(((weeks[9] - weeks[8]) / weeks[8]) * 100) : null;
 
-  const weeksSet = new Set(finished.map((w) => weekStartOf(w.startedAt)));
-  let runWeeks = 0;
-  for (let c = thisWeek; weeksSet.has(c); c -= WEEK_MS) runWeeks++;
-  const streakDays = runWeeks * 7;
+  const streakDays = consistencyStreak(pbNow);
 
   const livePlannedSets = open
     ? open.exercises.reduce((sum, ex) => {
@@ -883,6 +888,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               <div className="td-topbar-actions">
                 <SyncChip store={store} />
                 <div className="td-header-ctas">
+                  {!activeRest && (
+                    <button className="btn btn-secondary" onClick={() => setRestSheetOpen(true)}>
+                      <Icon name="clock-countdown" />
+                      {t.restStartCta}
+                    </button>
+                  )}
                   <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
                     <Icon name="arrow-counter-clockwise" />
                     {t.logPastSession}
@@ -904,6 +915,47 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           ))}
 
         {banners}
+        {!open && activeRest && (
+          <div className={`td-recovery ${activeRest.mode}`}>
+            <div className="tr-head">
+              <span className="tr-kicker">
+                <Icon name="clock-countdown" />
+                {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
+              </span>
+              <span className="tr-day">
+                {t.restDayOf(
+                  Math.min(
+                    dayKey(pbNow) - activeRest.startDay + 1,
+                    activeRest.endDay - activeRest.startDay + 1,
+                  ),
+                  activeRest.endDay - activeRest.startDay + 1,
+                )}
+              </span>
+            </div>
+            <div className="tr-bar">
+              <span
+                className="tr-fill"
+                style={{
+                  width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
+                }}
+              />
+            </div>
+            <div className="tr-note">
+              {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
+            </div>
+            <div className="tr-acts">
+              {activeRest.mode === 'active' && (
+                <button className="btn btn-primary tr-light" onClick={startSession}>
+                  <Icon name="play" />
+                  {t.restStartLight}
+                </button>
+              )}
+              <button className="btn btn-secondary" onClick={() => endRestPeriod(activeRest.id)}>
+                {t.restEndNow}
+              </button>
+            </div>
+          </div>
+        )}
         {analysisBanner}
         {suggestBanner}
         {programTodayBanner}
@@ -965,6 +1017,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               <Icon name="arrow-counter-clockwise" />
               {t.logPastSession}
             </button>
+            {!activeRest && (
+              <button
+                className="btn btn-secondary td-rest-cta"
+                onClick={() => setRestSheetOpen(true)}
+              >
+                <Icon name="clock-countdown" />
+                {t.restStartCta}
+              </button>
+            )}
           </div>
         )}
 
@@ -1353,6 +1414,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       {addWeightOpen && (
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
+      {restSheetOpen && <RestSheet store={store} onClose={() => setRestSheetOpen(false)} />}
       {progSheetOpen && (
         <Sheet onClose={() => setProgSheetOpen(false)} className="prog-suggest-sheet">
           <div className="ps-title">{t.progSuggestSheetTitle}</div>
@@ -1391,6 +1453,76 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 }
 
 /** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
+function RestSheet({ store, onClose }: { store: Store; onClose: () => void }) {
+  const { t } = useT();
+  const [mode, setMode] = useState<'active' | 'off'>('active');
+  const iso = (d: Date) => {
+    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return z.toISOString().slice(0, 10);
+  };
+  const today = new Date();
+  const [from, setFrom] = useState(iso(today));
+  const [to, setTo] = useState(iso(new Date(today.getTime() + 6 * 86400000)));
+  const dk = (ymd: string) => {
+    const [y, m, d] = ymd.split('-').map(Number);
+    return dayKey(new Date(y, m - 1, d).getTime());
+  };
+  const days = Math.max(1, dk(to) - dk(from) + 1);
+  const start = () => {
+    startRestPeriod({ mode, startDay: dk(from), endDay: dk(to) });
+    onClose();
+  };
+  return (
+    <Sheet onClose={onClose} className="rest-sheet">
+      <div className="ps-title">{t.restStartTitle}</div>
+      <div className="rest-modes">
+        {(['active', 'off'] as const).map((m) => (
+          <button
+            key={m}
+            className={`rest-mode${mode === m ? ' active' : ''}`}
+            onClick={() => setMode(m)}
+          >
+            <span className="rm-name">{m === 'active' ? t.restModeActive : t.restModeOff}</span>
+            <span className="rm-desc">
+              {m === 'active' ? t.restModeActiveDesc : t.restModeOffDesc}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="rest-dates">
+        <label className="rest-date">
+          <span>{t.restFrom}</span>
+          <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
+        </label>
+        <label className="rest-date">
+          <span>{t.restTo}</span>
+          <input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} />
+        </label>
+      </div>
+      <div className="rest-len">{t.restLength(days)}</div>
+      <button
+        type="button"
+        className="toggle-row rest-skip"
+        onClick={() => setRestCountsSkipped(!store.bodyMetrics.restCountsSkipped)}
+      >
+        <span className="trs-copy">
+          <span className="trs-title">{t.restCountSkipped}</span>
+          <span className="trs-sub">{t.restCountSkippedSub}</span>
+        </span>
+        <Switch on={!!store.bodyMetrics.restCountsSkipped} />
+      </button>
+      <div className="rest-actions">
+        <button className="btn btn-secondary" onClick={onClose}>
+          {t.cancel}
+        </button>
+        <button className="btn btn-primary" onClick={start}>
+          {t.restStartAction}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
 function BackfillSheet(props: {
   gyms: Gym[];
   onClose: () => void;
