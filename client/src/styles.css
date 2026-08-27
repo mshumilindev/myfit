@@ -18294,3 +18294,391 @@ button.badge {
   margin: 4px 0 6px;
   flex: none;
 }
+
+/* --- Playbook (learned routines) ----------------------------------------- */
+/* Day-type accent, shared by the Today preview chips and the Playbook cards. */
+.pb-play,
+.td-pb-chip {
+  --day: var(--color-neutral-600);
+}
+[data-day='push'] {
+  --day: #d9a24f;
+}
+[data-day='pull'] {
+  --day: #6fa8c9;
+}
+[data-day='legs'] {
+  --day: #7cba86;
+}
+[data-day='core'] {
+  --day: #b98ad0;
+}
+[data-day='full'] {
+  --day: #c8a86a;
+}
+
+/* Today: prominent Playbook entry (replaces the plain templates link). */
+.td-playbook {
+  display: grid;
+  gap: 13px;
+  flex: none;
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  border: 1px solid var(--color-accent-800);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(217, 162, 79, 0.16), transparent 55%),
+    var(--color-surface);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.td-pb-glow {
+  position: absolute;
+  inset: -40% -30% auto auto;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(217, 162, 79, 0.18), transparent 70%);
+  pointer-events: none;
+}
+.td-pb-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  position: relative;
+}
+.td-pb-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-accent-100);
+}
+.td-pb-kicker i {
+  color: var(--color-accent);
+  font-size: 17px;
+}
+.td-pb-tag {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.td-pb-plays {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.td-pb-chip {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.045);
+  border-left: 3px solid var(--day);
+  min-width: 0;
+}
+.td-pb-chip .n {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40vw;
+}
+.td-pb-chip .c {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.td-pb-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-accent-200);
+  position: relative;
+}
+.td-pb-go i {
+  font-size: 14px;
+}
+@media (hover: hover) {
+  .td-playbook:hover {
+    border-color: var(--color-accent-700);
+  }
+  .td-playbook:hover .td-pb-go {
+    color: var(--color-accent);
+  }
+}
+
+/* Playbook tab body */
+.pb-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  /* Mobile: the screen carries the 16px side gutter; keep only the vertical
+     inset. Desktop override below matches the Exercises/Programs content inset
+     (.exl-main) so the Playbook heading lines up with those pages. */
+  padding: var(--space-4) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+@media (min-width: 720px) {
+  .pb-body {
+    padding: 24px 34px 40px;
+    scrollbar-gutter: stable;
+  }
+}
+.pb-sub {
+  font-size: 13px;
+  color: var(--color-neutral-500);
+}
+.pb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--color-neutral-500);
+}
+.pb-empty i {
+  font-size: 30px;
+  color: var(--color-neutral-600);
+}
+.pb-plays {
+  display: grid;
+  gap: 14px;
+}
+
+/* One synthesized play */
+.pb-play {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 18px 16px 20px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+}
+.pb-play::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  background: var(--day);
+}
+.pb-play-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pb-play-id {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.pb-play-name {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+.pb-play-meta {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.pb-start {
+  flex: none;
+  min-height: 38px;
+  padding-inline: 16px;
+  gap: 7px;
+  font-size: 14px;
+}
+
+/* Exercise list */
+.pb-ex-list {
+  display: flex;
+  flex-direction: column;
+}
+.pb-ex {
+  display: grid;
+  grid-template-columns: 20px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-top: 1px solid var(--color-divider);
+}
+.pb-ex:first-child {
+  border-top: 0;
+}
+.pb-ex-i {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-600);
+  text-align: center;
+}
+.pb-ex-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--color-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.pb-ex-star {
+  color: var(--day);
+  font-size: 8px;
+  line-height: 1;
+  flex: none;
+}
+.pb-ex-scheme {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-200);
+  background: var(--color-accent-900);
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.pb-ex-wt {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-500);
+  min-width: 52px;
+  text-align: right;
+}
+
+/* Muscle coverage */
+.pb-cover {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pb-cover-label,
+.pb-ideas-label {
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.pb-cover-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* Idea chips */
+.pb-ideas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 2px;
+}
+.pb-idea {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-neutral-300);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  padding: 5px 11px;
+}
+.pb-idea i {
+  font-size: 13px;
+  color: var(--color-accent-300);
+}
+.pb-idea.warn {
+  border-color: var(--color-accent-800);
+  color: var(--color-accent-100);
+}
+.pb-idea.warn i {
+  color: var(--color-accent);
+}
+
+/* Repeat a past session */
+.pb-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pb-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pb-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.pb-recent-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.pb-recent-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.pb-recent-ex {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pb-recent-date {
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.pb-recent-row .go {
+  color: var(--color-neutral-600);
+  font-size: 15px;
+  flex: none;
+}
+@media (hover: hover) {
+  .pb-recent-row:hover,
+  .pb-play:hover {
+    border-color: var(--color-neutral-700);
+  }
+}
+
+/* Three peer tabs (Programs / Playbook / Exercises) on mobile. */
+@media (max-width: 719.98px) {
+  .prog-tabs {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}

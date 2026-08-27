@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import type { Shell } from '../App';
 import { db } from '../firebase';
 import { computeTrends } from '../trends';
+import { computePlaybook, type Play } from '../playbook';
 import type { ExerciseKind, Gym, Workout } from '../types';
 import { callFn, getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
@@ -202,6 +203,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
+  const [pbNow] = useState(() => Date.now());
+  const playbook = useMemo(
+    () =>
+      computePlaybook(
+        store.workouts.filter((w) => w.finishedAt !== null),
+        pbNow,
+      ),
+    [store.workouts, pbNow],
+  );
+  const playName = (pl: Play) =>
+    pl.name ?? (pl.readout ? dayReadoutLabel(pl.readout, t) : t.playUntitled);
   const programReadiness = useMemo(() => programSuggestionReadiness(finished), [finished]);
 
   // Already trained today? Once a session for the current calendar day is
@@ -956,15 +968,37 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
-        {!open && hasHistory && (
-          <button
-            className="td-templates-link"
-            onClick={() => shell.openOverlay({ screen: 'templates' })}
-          >
+        {!open && hasHistory && playbook.plays.length > 0 && (
+          <button className="td-playbook" onClick={() => shell.goPlaybook()}>
+            <span className="td-pb-glow" aria-hidden />
+            <span className="td-pb-head">
+              <span className="td-pb-kicker">
+                <Icon name="cards" />
+                {t.playbook}
+              </span>
+              <span className="td-pb-tag">{t.playbookTagline}</span>
+            </span>
+            <span className="td-pb-plays">
+              {playbook.plays.slice(0, 3).map((pl) => (
+                <span className="td-pb-chip" key={pl.id} data-day={pl.dayType ?? 'other'}>
+                  <span className="n">{playName(pl)}</span>
+                  <span className="c">{t.playbookExCount(pl.exercises.length)}</span>
+                </span>
+              ))}
+            </span>
+            <span className="td-pb-go">
+              {t.playbookOpen}
+              <Icon name="arrow-right" />
+            </span>
+          </button>
+        )}
+
+        {!open && hasHistory && playbook.plays.length === 0 && (
+          <button className="td-templates-link" onClick={() => shell.goPlaybook()}>
             <Icon name="cards" />
             <span className="tl-body">
-              <span className="tl-title">{t.templates}</span>
-              <span className="tl-sub">{t.templatesSaved(finished.length)}</span>
+              <span className="tl-title">{t.playbook}</span>
+              <span className="tl-sub">{t.playbookTagline}</span>
             </span>
             <Icon name="arrow-right" className="tl-go" />
           </button>

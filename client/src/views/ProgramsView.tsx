@@ -9,7 +9,7 @@ import { programToCsv, type ProgramItemLike } from '../data/programCsv';
 import type { ExerciseKind } from '../types';
 import { EquipmentIcon, EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { MUSCLE_IDS, MuscleChip, MuscleIcon, equipmentIconName } from '../components/Muscle';
-import { ProgramsTabs } from '../components/ProgramsTabs';
+import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { clearProgramSeed, peekProgramSeed } from '../data/programSeed';
 import {
   addExercise,
@@ -132,7 +132,7 @@ export function ProgramsView({
   shell: Shell;
   /** Switch the Programs ↔ Exercises peer tab (owned by App so it survives
    *  opening an exercise-detail overlay). */
-  onProgramsTab?: (exercises: boolean) => void;
+  onProgramsTab?: (peer: ProgramsPeer) => void;
 }) {
   const { t } = useT();
   const store = useStore();
@@ -191,7 +191,7 @@ export function ProgramsView({
   // Programs ↔ Exercises peer tabs (AC-LIBTAB). Selecting "Exercises" swaps the
   // page content in place (App renders the gallery framed by this same chrome),
   // rather than pushing an overlay with a back button.
-  const progTabsEl = <ProgramsTabs active="programs" onSelect={(ex) => onProgramsTab?.(ex)} />;
+  const progTabsEl = <ProgramsTabs active="programs" onSelect={(peer) => onProgramsTab?.(peer)} />;
 
   const load = useCallback(() => {
     if (role === 'member') {

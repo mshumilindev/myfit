@@ -10,7 +10,7 @@
 import { useT } from '../i18n';
 import { getRole } from '../api';
 import { ExerciseGallery } from '../components/ExerciseGallery';
-import { ProgramsTabs } from '../components/ProgramsTabs';
+import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import type { Shell } from '../App';
 
 export function ExerciseLibraryView({
@@ -22,7 +22,7 @@ export function ExerciseLibraryView({
   shell: Shell;
   libTab: 'library' | 'mine';
   onLibTab: (t: 'library' | 'mine') => void;
-  onProgramsTab: (exercises: boolean) => void;
+  onProgramsTab: (peer: ProgramsPeer) => void;
 }) {
   const { t } = useT();
   const role = getRole();

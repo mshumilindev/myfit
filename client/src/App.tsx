@@ -43,6 +43,7 @@ import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
 import type { SyncError, Notice } from './types';
 import type { MuscleGroup } from './data/exercises';
+import type { ProgramsPeer } from './components/ProgramsTabs';
 
 const OnboardingView = lazy(() =>
   import('./views/OnboardingView').then((module) => ({ default: module.OnboardingView })),
@@ -93,9 +94,9 @@ const SettingsView = lazy(() =>
     default: module.SettingsView,
   })),
 );
-const TemplatesView = lazy(() =>
-  import('./views/TemplatesView').then((module) => ({
-    default: module.TemplatesView,
+const PlaybookView = lazy(() =>
+  import('./views/PlaybookView').then((module) => ({
+    default: module.PlaybookView,
   })),
 );
 const HistoryListView = lazy(() =>
@@ -123,7 +124,6 @@ export type Overlay =
   | { screen: 'muscle-history'; muscle: MuscleGroup }
   | { screen: 'settings' }
   | { screen: 'history' }
-  | { screen: 'templates' }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
   | { screen: 'library'; libTab?: 'mine' }
@@ -132,6 +132,7 @@ export type Overlay =
 export interface Shell {
   openOverlay: (o: Overlay) => void;
   goTab: (t: Tab) => void;
+  goPlaybook: () => void;
   toast: (t: ToastState) => void;
   snack: (s: SnackState) => void;
   signOut: () => void;
@@ -198,13 +199,15 @@ function tabsForRole(role: NavRole, t: NavLabels): NavItem[] {
 function toHash(
   tab: Tab,
   overlay: Overlay,
-  programsExercises: boolean,
+  programsPeer: ProgramsPeer,
   libMine: boolean,
   progressSub: 'progress' | 'trends' | 'feats',
   featSub: 'achievements' | 'standards',
 ): string {
-  if (!overlay && tab === 'programs' && programsExercises)
-    return libMine ? '#/exercises/mine' : '#/exercises';
+  if (!overlay && tab === 'programs') {
+    if (programsPeer === 'exercises') return libMine ? '#/exercises/mine' : '#/exercises';
+    if (programsPeer === 'playbook') return '#/playbook';
+  }
   if (!overlay && tab === 'progress') {
     if (progressSub === 'trends') return '#/trends';
     if (progressSub === 'feats') return featSub === 'standards' ? '#/feats/standards' : '#/feats';
@@ -222,7 +225,6 @@ function toHash(
     return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
-  if (overlay?.screen === 'templates') return '#/templates';
   if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
@@ -252,15 +254,15 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'profile' && parts[1])
     return { tab: 'today', overlay: { screen: 'profile', userId: decodeURIComponent(parts[1]) } };
   if (head === 'me') return { tab: 'me', overlay: null };
-  // Exercises is a peer tab of Programs, not an overlay (AC-LIBTAB): route it to
-  // the programs tab; the exercises sub-tab is read separately via
-  // `exercisesFromHash` so a refresh on #/exercises lands there.
-  if (head === 'exercises') return { tab: 'programs', overlay: null };
+  // Playbook and Exercises are peer tabs of Programs, not overlays (AC-LIBTAB):
+  // route them to the programs tab; which peer is active is read separately via
+  // `peerFromHash` so a refresh on #/playbook or #/exercises lands there.
+  if (head === 'exercises' || head === 'playbook' || head === 'templates')
+    return { tab: 'programs', overlay: null };
   // Progress sub-tabs are peer URLs of #/progress (read separately below).
   if (head === 'trends' || head === 'feats') return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
-  if (head === 'templates') return { tab: 'progress', overlay: { screen: 'templates' } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -271,10 +273,11 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
 /** Read the Exercises peer-tab state from the hash (#/exercises[/mine]). Kept
  *  separate from fromHash so it can be applied without threading it through the
  *  overlay stack. */
-function exercisesFromHash(hash: string): { exercises: boolean; mine: boolean } {
+function peerFromHash(hash: string): { peer: ProgramsPeer; mine: boolean } {
   const parts = hash.replace(/^#\/?/, '').split('/');
-  if (parts[0] === 'exercises') return { exercises: true, mine: parts[1] === 'mine' };
-  return { exercises: false, mine: false };
+  if (parts[0] === 'exercises') return { peer: 'exercises', mine: parts[1] === 'mine' };
+  if (parts[0] === 'playbook' || parts[0] === 'templates') return { peer: 'playbook', mine: false };
+  return { peer: 'programs', mine: false };
 }
 
 /** Read the Progress sub-tab (#/trends, #/feats[/standards]) from the hash. */
@@ -354,12 +357,10 @@ export function App() {
   const [tab, setTab] = useState<Tab>(() => fromHash(window.location.hash).tab);
   // Programs ↔ Exercises peer-tab lives in App (not ProgramsView) so it survives
   // opening an exercise-detail overlay, which unmounts the tab content.
-  const [programsExercises, setProgramsExercises] = useState<boolean>(
-    () => exercisesFromHash(window.location.hash).exercises,
+  const [programsPeer, setProgramsPeer] = useState<ProgramsPeer>(
+    () => peerFromHash(window.location.hash).peer,
   );
-  const [libMine, setLibMine] = useState<boolean>(
-    () => exercisesFromHash(window.location.hash).mine,
-  );
+  const [libMine, setLibMine] = useState<boolean>(() => peerFromHash(window.location.hash).mine);
   // Progress sub-tabs (Progress · Trends · Feats) + the Feats sub-tab, kept in
   // App so each has its own URL (#/trends, #/feats, #/feats/standards).
   const [progressSub, setProgressSub] = useState<'progress' | 'trends' | 'feats'>(
@@ -430,6 +431,11 @@ export function App() {
       // remembered Trends/Feats sub.
       if (x === 'progress') setProgressSub('progress');
     },
+    goPlaybook: () => {
+      setOverlay(null);
+      setProgramsPeer('playbook');
+      setTab('programs');
+    },
     toast: (tst) => {
       toastSeq.current += 1;
       const id = toastSeq.current;
@@ -480,13 +486,13 @@ export function App() {
     authed &&
     !joinToken &&
     !desktopRail &&
-    (activeOverlay !== null || (effectiveTab === 'programs' && programsExercises));
+    (activeOverlay !== null || (effectiveTab === 'programs' && programsPeer !== 'programs'));
   const edgeSwipeBack = () => {
     if (activeOverlay !== null) {
       closeOverlay();
       return;
     }
-    if (effectiveTab === 'programs' && programsExercises) setProgramsExercises(false);
+    if (effectiveTab === 'programs' && programsPeer !== 'programs') setProgramsPeer('programs');
   };
 
   useEdgeSwipeBack(canEdgeSwipeBack, edgeSwipeBack);
@@ -494,36 +500,20 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(
-      effectiveTab,
-      activeOverlay,
-      programsExercises,
-      libMine,
-      progressSub,
-      featSub,
-    );
+    const next = toHash(effectiveTab, activeOverlay, programsPeer, libMine, progressSub, featSub);
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
-  }, [
-    authed,
-    joinToken,
-    effectiveTab,
-    activeOverlay,
-    programsExercises,
-    libMine,
-    progressSub,
-    featSub,
-  ]);
+  }, [authed, joinToken, effectiveTab, activeOverlay, programsPeer, libMine, progressSub, featSub]);
 
   // URL hash → state (browser back/forward).
   useEffect(() => {
     if (!authed || joinToken) return;
     const onPop = () => {
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
-      const ex = exercisesFromHash(window.location.hash);
+      const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
       setTab(ht);
-      setProgramsExercises(ex.exercises);
-      setLibMine(ex.mine);
+      setProgramsPeer(pk.peer);
+      setLibMine(pk.mine);
       setProgressSub(ps.sub);
       setFeatSub(ps.featSub);
       setOverlayNav({
@@ -585,14 +575,14 @@ export function App() {
   const goTab = (x: Tab) => {
     setOverlay(null);
     // Landing on a top-level tab always shows that tab's primary content, so a
-    // stale Exercises peer-tab never leaks across a Programs re-entry.
-    setProgramsExercises(false);
+    // stale peer tab (Playbook/Exercises) never leaks across a Programs re-entry.
+    setProgramsPeer('programs');
     setTab(x);
   };
-  /** Switch the Programs ↔ Exercises peer tab in place (no overlay). */
-  const goProgramsTab = (exercises: boolean) => {
+  /** Switch the Programs · Playbook · Exercises peer tab in place (no overlay). */
+  const goProgramsPeer = (peer: ProgramsPeer) => {
     setOverlay(null);
-    setProgramsExercises(exercises);
+    setProgramsPeer(peer);
     setTab('programs');
   };
 
@@ -659,9 +649,6 @@ export function App() {
           {activeOverlay?.screen === 'history' && (
             <HistoryListView shell={shell} onClose={closeOverlay} />
           )}
-          {activeOverlay?.screen === 'templates' && (
-            <TemplatesView shell={shell} onClose={closeOverlay} />
-          )}
           {activeOverlay?.screen === 'gym' && (
             <GymDetailView
               gymId={activeOverlay.gymId}
@@ -704,15 +691,17 @@ export function App() {
                   />
                 ))}
               {effectiveTab === 'programs' &&
-                (programsExercises ? (
+                (programsPeer === 'exercises' ? (
                   <ExerciseLibraryView
                     shell={shell}
                     libTab={libMine ? 'mine' : 'library'}
                     onLibTab={(next) => setLibMine(next === 'mine')}
-                    onProgramsTab={goProgramsTab}
+                    onProgramsTab={goProgramsPeer}
                   />
+                ) : programsPeer === 'playbook' ? (
+                  <PlaybookView shell={shell} onProgramsTab={goProgramsPeer} />
                 ) : (
-                  <ProgramsView shell={shell} onProgramsTab={goProgramsTab} />
+                  <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
                 ))}
               {effectiveTab === 'me' && (
                 <ProfileView
