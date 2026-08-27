@@ -116,6 +116,55 @@ const MAJOR: MuscleGroup[] = [
   'calves',
   'core',
 ];
+
+// Coarse training AREAS -- the finer groups roll up so the balance read matches
+// how a lifter actually thinks ("Back", not "lats vs traps vs a near-empty
+// generic back"). The legacy generic `back` rolls into Back so retagged/custom
+// logs still count. This is the "generalize" half of the two-level muscle read.
+interface Area {
+  key: string;
+  label: string;
+  members: MuscleGroup[];
+}
+const AREAS: Area[] = [
+  { key: 'chest', label: 'Chest', members: ['chest'] },
+  { key: 'back', label: 'Back', members: ['back', 'lats', 'traps', 'lower_back'] },
+  { key: 'shoulders', label: 'Shoulders', members: ['shoulders'] },
+  { key: 'arms', label: 'Arms', members: ['biceps', 'triceps', 'forearms'] },
+  {
+    key: 'legs',
+    label: 'Legs',
+    members: ['quads', 'hamstrings', 'glutes', 'calves', 'adductors', 'abductors'],
+  },
+  { key: 'core', label: 'Core', members: ['core'] },
+];
+// The "drill-down" half: notable sub-muscles people commonly skip inside an
+// otherwise well-trained area -- the "lots of back but no lower back" nudge.
+const AREA_GAPS: { area: string; member: MuscleGroup; hint: string }[] = [
+  { area: 'back', member: 'lower_back', hint: 'add a hinge (deadlifts or back extensions)' },
+  { area: 'legs', member: 'hamstrings', hint: 'add a hinge or leg curl' },
+  { area: 'legs', member: 'calves', hint: 'add calf raises' },
+];
+
+interface AreaSets {
+  key: string;
+  label: string;
+  sets: number;
+  members: Map<MuscleGroup, number>;
+}
+/** Roll a per-muscle set map up into the coarse areas above. */
+function areaSetsFrom(perMuscle: Map<MuscleGroup, number>): AreaSets[] {
+  return AREAS.map((a) => {
+    const members = new Map<MuscleGroup, number>();
+    let sets = 0;
+    for (const m of a.members) {
+      const n = perMuscle.get(m) ?? 0;
+      if (n > 0) members.set(m, n);
+      sets += n;
+    }
+    return { key: a.key, label: a.label, sets, members };
+  });
+}
 const MUSCLE_NAME: Record<string, string> = {
   chest: 'chest',
   back: 'back',
@@ -304,20 +353,22 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
     );
   }
 
-  // ---- MUSCLE LIST: least + most trained (4 weeks) ----------------------
+  // ---- MUSCLE LIST: least + most trained AREAS (4 weeks) ----------------
+  // Rolled up to coarse areas (Back = lats+traps+lower_back+generic back, etc.)
+  // so the finer split can't misread as "you barely train back" just because
+  // the generic `back` tag is near-empty. A drill-down gap tip follows.
   {
-    const sets = new Map<MuscleGroup, number>();
+    const perMuscle = new Map<MuscleGroup, number>();
     for (const w of win(30))
-      for (const [m, n] of muscleSetsInWorkout(w)) sets.set(m, (sets.get(m) ?? 0) + n);
-    const trained = MAJOR.filter((m) => (sets.get(m) ?? 0) > 0).sort(
-      (a, b) => (sets.get(a) ?? 0) - (sets.get(b) ?? 0),
-    );
-    if (trained.length >= 4) {
-      const maxAll = Math.max(...trained.map((m) => sets.get(m) ?? 0), 1);
-      const least = trained.slice(0, 3);
-      const counts = trained.map((m) => sets.get(m) ?? 0).sort((a, b) => a - b);
+      for (const [m, n] of muscleSetsInWorkout(w)) perMuscle.set(m, (perMuscle.get(m) ?? 0) + n);
+    const areas = areaSetsFrom(perMuscle).filter((a) => a.sets > 0);
+    if (areas.length >= 4) {
+      const byVol = [...areas].sort((a, b) => a.sets - b.sets);
+      const maxAll = Math.max(...areas.map((a) => a.sets), 1);
+      const least = byVol.slice(0, 3);
+      const counts = byVol.map((a) => a.sets).sort((a, b) => a - b);
       const median = counts[Math.floor(counts.length / 2)];
-      const worstN = sets.get(least[0]) ?? 0;
+      const worstN = least[0].sets;
       const risk = median > 0 && worstN < 0.5 * median;
       insights.push({
         key: 'least',
@@ -325,27 +376,53 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: risk ? 'risk' : 'warn',
         severity: risk ? 95 : 70,
         kicker: 'Least-trained · 4 wk',
-        detail: `${MUSCLE_LABEL[least[0]]} lag — add one exercise.`,
-        muscles: least.map((m, i) => ({
-          label: MUSCLE_LABEL[m],
-          frac: Math.max(0.08, (sets.get(m) ?? 0) / maxAll),
+        detail: `${least[0].label} lags — add a set or two.`,
+        muscles: least.map((a, i) => ({
+          label: a.label,
+          frac: Math.max(0.08, a.sets / maxAll),
           worst: i === 0,
         })),
       });
-      const most = [...trained].reverse().slice(0, 3);
+      const most = [...byVol].reverse().slice(0, 3);
       insights.push({
         key: 'most',
         type: 'muscleList',
         level: 'info',
         severity: 56,
         kicker: 'Most-trained · 4 wk',
-        detail: `${MUSCLE_LABEL[most[0]]} gets the most work lately.`,
-        muscles: most.map((m) => ({
-          label: MUSCLE_LABEL[m],
-          frac: Math.max(0.08, (sets.get(m) ?? 0) / maxAll),
+        detail: `${most[0].label} gets the most work lately.`,
+        muscles: most.map((a) => ({
+          label: a.label,
+          frac: Math.max(0.08, a.sets / maxAll),
           worst: false,
         })),
       });
+
+      // Drill-down: a well-trained area with a notable neglected sub-muscle
+      // (e.g. plenty of back volume but almost no lower-back).
+      const areaByKey = new Map(areas.map((a) => [a.key, a]));
+      let gap: { label: string; member: MuscleGroup; hint: string; areaSets: number } | null = null;
+      for (const g of AREA_GAPS) {
+        const a = areaByKey.get(g.area);
+        if (!a || a.sets < 8) continue;
+        const memberSets = a.members.get(g.member) ?? 0;
+        if (memberSets < 0.12 * a.sets && (!gap || a.sets > gap.areaSets))
+          gap = { label: a.label, member: g.member, hint: g.hint, areaSets: a.sets };
+      }
+      if (gap) {
+        const area = gap.label.toLowerCase();
+        const sub = MUSCLE_NAME[gap.member];
+        insights.push({
+          key: `gap:${gap.member}`,
+          type: 'tip',
+          level: 'warn',
+          severity: 82,
+          attention: true,
+          icon: 'warning-circle',
+          headline: `Lots of ${area}, little ${sub}`,
+          detail: `Plenty of ${area} volume but barely any ${sub} — ${gap.hint}.`,
+        });
+      }
     }
   }
 
@@ -734,24 +811,28 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
       return a > 14 && a <= 90;
     }))
       for (const [m, n] of muscleSetsInWorkout(w)) hist.set(m, (hist.get(m) ?? 0) + n);
-    let stale: MuscleGroup | null = null;
+    // Roll up to areas so "Back on pause" fires only when the whole back area
+    // (lats/traps/lower_back included) goes quiet -- not when a near-empty
+    // generic `back` tag drops while lats/traps carry on.
+    const recentByArea = new Map(areaSetsFrom(recent).map((a) => [a.key, a.sets]));
+    let stale: { label: string } | null = null;
     let staleN = 0;
-    for (const m of MAJOR) {
-      const h = hist.get(m) ?? 0;
-      if (h >= 6 && (recent.get(m) ?? 0) === 0 && h > staleN) {
-        staleN = h;
-        stale = m;
+    for (const a of areaSetsFrom(hist)) {
+      if (a.sets >= 8 && (recentByArea.get(a.key) ?? 0) === 0 && a.sets > staleN) {
+        staleN = a.sets;
+        stale = { label: a.label };
       }
     }
     if (stale) {
+      const area = stale.label.toLowerCase();
       insights.push({
         key: 'stale',
         type: 'tip',
         level: 'warn',
         severity: 62,
         icon: 'warning-circle',
-        headline: `${MUSCLE_LABEL[stale]} on pause`,
-        detail: `No ${MUSCLE_NAME[stale]} work in 2 weeks — you used to train it regularly.`,
+        headline: `${stale.label} on pause`,
+        detail: `No ${area} work in 2 weeks — you used to train it regularly.`,
       });
     }
   }
