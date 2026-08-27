@@ -26,6 +26,7 @@ import {
   knownExercises,
   perHandFactor,
   muscleSetsInWorkout,
+  muscleWorkSorted,
   nextSupersetLetter,
   prevLift,
   recordWeight,
@@ -65,6 +66,7 @@ import {
   MuscleSetChip,
   MUSCLE_IDS,
   equipmentIconName,
+  withMuscleBreak,
 } from '../components/Muscle';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { describeDay, dayReadoutLabel, exerciseDay, type TrainingDay } from '../data/daySuggest';
@@ -761,6 +763,9 @@ export function SessionView(props: {
             {muscles.primary && (
               <MuscleChip muscle={muscles.primary} tone="primary" onClick={openMuscleHistory} />
             )}
+            {muscles.primary && muscles.secondary.length > 0 && (
+              <span className="chip-break" aria-hidden />
+            )}
             {muscles.secondary.map((m) => (
               <MuscleChip key={m} muscle={m} tone="secondary" onClick={openMuscleHistory} />
             ))}
@@ -1259,16 +1264,20 @@ export function SessionView(props: {
         </div>
         {suggestOn &&
           (() => {
-            const entries = [...muscleSetsInWorkout(workout).entries()]
-              .filter(([, n]) => n > 0)
-              .sort((a, b) => b[1] - a[1]);
+            const entries = muscleWorkSorted(workout);
             if (entries.length === 0) return null;
             return (
               <div className="muscles-worked">
                 <div className="section-label">{t.muscleGroupsWorked}</div>
                 <div className="mworked-row">
-                  {entries.map(([m, n]) => (
-                    <MuscleSetChip key={m} muscle={m} count={n} onClick={openMuscleHistory} />
+                  {withMuscleBreak(entries, (x) => (
+                    <MuscleSetChip
+                      key={x.muscle}
+                      muscle={x.muscle}
+                      count={x.sets}
+                      tone={x.primary ? 'primary' : 'secondary'}
+                      onClick={openMuscleHistory}
+                    />
                   ))}
                 </div>
               </div>
@@ -1356,124 +1365,123 @@ export function SessionView(props: {
       className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}`}
     >
       <div className="pane-main">
-        <div className={`session-top${live ? ' live-toolbar' : ''}`}>
-          {live && (
-            <LiveHero
-              workout={workout}
-              gym={gym}
-              gyms={store.gyms}
-              offline={store.syncStatus === 'offline'}
-              queued={store.queue.length}
-              mode="session"
-            />
-          )}
-          <button className="back" onClick={props.onClose} aria-label={t.backAction}>
-            <Icon name="caret-left" />
-          </button>
-          {!live && (
-            <div className="mid">
-              <div className="kicker">{kicker}</div>
-              {workout.finishedAt === null ? (
-                <div className="clock">
-                  {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
-                </div>
-              ) : (
-                <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
-              )}
-              <button className="past-gym-row" onClick={() => setSheet({ kind: 'gym' })}>
-                <Icon name="map-pin" />
-                <span>{gym ? gym.name : t.addGymToSession}</span>
-                <Icon name="pencil-simple" className="edit" />
-              </button>
-            </div>
-          )}
-          {live ? null : workout.autoFinished ? (
-            <button className="btn btn-secondary" onClick={() => reopenWorkout(workout.id)}>
-              {t.reopen}
+        <div className="session-head-wrap">
+          <div className={`session-top${live ? ' live-toolbar' : ''}`}>
+            {live && (
+              <LiveHero
+                workout={workout}
+                gym={gym}
+                gyms={store.gyms}
+                offline={store.syncStatus === 'offline'}
+                queued={store.queue.length}
+                mode="session"
+              />
+            )}
+            <button className="back" onClick={props.onClose} aria-label={t.backAction}>
+              <Icon name="caret-left" />
             </button>
-          ) : (
-            <button
-              className="trash"
-              onClick={() => setDialog({ kind: 'del-workout' })}
-              aria-label={t.deleteWorkout}
-            >
-              <Icon name="trash" />
-            </button>
-          )}
-        </div>
-
-        {live && (
-          <div className="stats-strip">
-            <div>
-              <div className="v">{sets}</div>
-              <div className="l">{t.sets}</div>
-            </div>
-            <div>
-              <div className="v">{fmtTonnes(volume)}</div>
-              <div className="l">{t.moved}</div>
-            </div>
-            <div>
-              <div className="v">{workout.exercises.length}</div>
-              <div className="l">{t.exercises}</div>
-            </div>
-            {cardioMinutes > 0 && (
-              <div>
-                <div className="v">{Math.round(cardioMinutes)}</div>
-                <div className="l">{t.cardioMinutes}</div>
+            {!live && (
+              <div className="mid">
+                <div className="kicker">{kicker}</div>
+                {workout.finishedAt === null ? (
+                  <div className="clock">
+                    {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
+                  </div>
+                ) : (
+                  <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
+                )}
+                <button className="past-gym-row" onClick={() => setSheet({ kind: 'gym' })}>
+                  <Icon name="map-pin" />
+                  <span>{gym ? gym.name : t.addGymToSession}</span>
+                  <Icon name="pencil-simple" className="edit" />
+                </button>
               </div>
             )}
-            {cardioDistance > 0 && (
-              <div>
-                <div className="v">{cardioDistance.toFixed(1)}</div>
-                <div className="l">{t.distanceKmCol}</div>
-              </div>
+            {live ? null : workout.autoFinished ? (
+              <button className="btn btn-secondary" onClick={() => reopenWorkout(workout.id)}>
+                {t.reopen}
+              </button>
+            ) : (
+              <button
+                className="trash"
+                onClick={() => setDialog({ kind: 'del-workout' })}
+                aria-label={t.deleteWorkout}
+              >
+                <Icon name="trash" />
+              </button>
             )}
           </div>
-        )}
 
-        {live &&
-          (() => {
-            const activeEx = sortedExercises.find((e) => e.id === activeExerciseId) ?? null;
-            const nextSet =
-              activeEx && !isMarkerExercise(activeEx) ? activeEx.sets.length + 1 : null;
-            if (!activeEx && !lastLoggedAt) return null;
-            return (
-              <div className="live-rest">
-                {activeEx && nextSet !== null && (
-                  <div className="current-strip">
-                    <Icon name="barbell" />
-                    <span className="cur-label">{t.currentKicker}</span>
-                    <span className="cur-name">{activeEx.name}</span>
-                    <span className="cur-set">{t.setNumber(nextSet)}</span>
-                  </div>
-                )}
-                {lastLoggedAt > 0 && (
-                  <div className="rest-strip">
-                    <Icon name="timer" />
-                    <span className="rest-label">{t.restHeaderLabel}</span>
-                    <span className="rest-clock">
-                      {mmss(Math.max(0, now - lastLoggedAt - restCutMs))}
-                    </span>
-                    <button
-                      type="button"
-                      className="rest-trim"
-                      onClick={trimRest}
-                      aria-label="Trim rest"
-                    >
-                      <span aria-hidden>{'−'}</span>
-                    </button>
-                  </div>
-                )}
+          {live && (
+            <div className="stats-strip">
+              <div>
+                <div className="v">{sets}</div>
+                <div className="l">{t.sets}</div>
               </div>
-            );
-          })()}
+              <div>
+                <div className="v">{fmtTonnes(volume)}</div>
+                <div className="l">{t.moved}</div>
+              </div>
+              <div>
+                <div className="v">{workout.exercises.length}</div>
+                <div className="l">{t.exercises}</div>
+              </div>
+              {cardioMinutes > 0 && (
+                <div>
+                  <div className="v">{Math.round(cardioMinutes)}</div>
+                  <div className="l">{t.cardioMinutes}</div>
+                </div>
+              )}
+              {cardioDistance > 0 && (
+                <div>
+                  <div className="v">{cardioDistance.toFixed(1)}</div>
+                  <div className="l">{t.distanceKmCol}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {live &&
+            (() => {
+              const activeEx = sortedExercises.find((e) => e.id === activeExerciseId) ?? null;
+              const nextSet =
+                activeEx && !isMarkerExercise(activeEx) ? activeEx.sets.length + 1 : null;
+              if (!activeEx && !lastLoggedAt) return null;
+              return (
+                <div className="live-rest">
+                  {activeEx && nextSet !== null && (
+                    <div className="current-strip">
+                      <Icon name="barbell" />
+                      <span className="cur-label">{t.currentKicker}</span>
+                      <span className="cur-name">{activeEx.name}</span>
+                      <span className="cur-set">{t.setNumber(nextSet)}</span>
+                    </div>
+                  )}
+                  {lastLoggedAt > 0 && (
+                    <div className="rest-strip">
+                      <Icon name="timer" />
+                      <span className="rest-label">{t.restHeaderLabel}</span>
+                      <span className="rest-clock">
+                        {mmss(Math.max(0, now - lastLoggedAt - restCutMs))}
+                      </span>
+                      <button
+                        type="button"
+                        className="rest-trim"
+                        onClick={trimRest}
+                        aria-label="Trim rest"
+                      >
+                        <span aria-hidden>{'−'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+        </div>
 
         {suggestOn &&
           (() => {
-            const counts = muscleSetsInWorkout(workout);
-            const entries = [...counts.entries()]
-              .filter(([, n]) => n > 0)
-              .sort((a, b) => b[1] - a[1]);
+            const entries = muscleWorkSorted(workout);
             if (entries.length === 0) return null;
             return (
               <div className="muscles-worked">
@@ -1481,8 +1489,14 @@ export function SessionView(props: {
                   {props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}
                 </div>
                 <div className="mworked-row">
-                  {entries.map(([m, n]) => (
-                    <MuscleSetChip key={m} muscle={m} count={n} onClick={openMuscleHistory} />
+                  {withMuscleBreak(entries, (x) => (
+                    <MuscleSetChip
+                      key={x.muscle}
+                      muscle={x.muscle}
+                      count={x.sets}
+                      tone={x.primary ? 'primary' : 'secondary'}
+                      onClick={openMuscleHistory}
+                    />
                   ))}
                 </div>
               </div>

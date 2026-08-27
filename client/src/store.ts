@@ -281,27 +281,74 @@ export interface ResolvedMuscles {
 export function resolveMuscles(
   ex: Pick<Exercise, 'name' | 'primaryMuscle' | 'secondaryMuscles' | 'kind'>,
 ): ResolvedMuscles {
+  // A named exercise in the catalog — BUILT-IN or CUSTOM — resolves from the
+  // catalog, the source of truth, not from the muscles snapshotted onto the log
+  // at add time. This is what lets a catalog change — the finer muscle split, or
+  // editing a custom exercise's muscles — flow into every past session, the
+  // muscles-worked readout and the trends with no per-log migration. The stored
+  // primaryMuscle is trusted only for an ad-hoc exercise with no catalog entry.
+  const info = (ex.kind ?? 'strength') === 'strength' ? muscleInfoByName(ex.name) : null;
+  if (info && info.primary !== 'cardio') {
+    return { primary: info.primary, secondary: info.secondary };
+  }
   if (ex.primaryMuscle) {
     return {
       primary: ex.primaryMuscle as MuscleGroup,
       secondary: (ex.secondaryMuscles ?? []) as MuscleGroup[],
     };
   }
-  if ((ex.kind ?? 'strength') !== 'strength') return { primary: null, secondary: [] };
-  const info = muscleInfoByName(ex.name);
-  if (!info || info.primary === 'cardio') return { primary: null, secondary: [] };
-  return { primary: info.primary, secondary: info.secondary };
+  return { primary: null, secondary: [] };
 }
 
-export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
-  const m = new Map<MuscleGroup, number>();
+/** Per-muscle work in a workout, best-practice fractional set counting: the
+ *  primary mover earns a full set, each secondary/synergist earns half
+ *  (SECONDARY_SET_WEIGHT). `primary` flags whether the muscle was ever a direct
+ *  target in the session, so the UI can tone it brass (primary) vs grey
+ *  (secondary-only). Load volume (kg) and day inference stay primary-only —
+ *  splitting tonnage across synergists double-counts, and half-credited
+ *  synergists would make the day label noisy. */
+export const SECONDARY_SET_WEIGHT = 0.5;
+
+export interface MuscleWork {
+  sets: number;
+  primary: boolean;
+}
+
+export function muscleWorkInWorkout(w: Workout): Map<MuscleGroup, MuscleWork> {
+  const m = new Map<MuscleGroup, MuscleWork>();
+  const bump = (g: MuscleGroup, sets: number, isPrimary: boolean): void => {
+    const cur = m.get(g) ?? { sets: 0, primary: false };
+    cur.sets += sets;
+    cur.primary = cur.primary || isPrimary;
+    m.set(g, cur);
+  };
   for (const e of w.exercises) {
     if (!isStrengthExercise(e)) continue;
-    const { primary } = resolveMuscles(e);
-    if (!primary) continue;
-    m.set(primary, (m.get(primary) ?? 0) + e.sets.length);
+    const n = e.sets.length;
+    if (n === 0) continue;
+    const { primary, secondary } = resolveMuscles(e);
+    if (primary) bump(primary, n, true);
+    for (const s of secondary) if (s !== primary) bump(s, n * SECONDARY_SET_WEIGHT, false);
   }
   return m;
+}
+
+/** Fractional set counts per muscle (see muscleWorkInWorkout). */
+export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
+  const out = new Map<MuscleGroup, number>();
+  for (const [g, v] of muscleWorkInWorkout(w)) out.set(g, v.sets);
+  return out;
+}
+
+/** Worked muscles for display: primary (direct) groups first, then
+ *  secondary-only, each block ordered by set count. */
+export function muscleWorkSorted(
+  w: Workout,
+): { muscle: MuscleGroup; sets: number; primary: boolean }[] {
+  return [...muscleWorkInWorkout(w).entries()]
+    .filter(([, v]) => v.sets > 0)
+    .map(([muscle, v]) => ({ muscle, sets: v.sets, primary: v.primary }))
+    .sort((a, b) => Number(b.primary) - Number(a.primary) || b.sets - a.sets);
 }
 
 /**
@@ -1155,7 +1202,12 @@ export function saveCatalogExercise(meta: {
   const role = getRole();
   if (role !== 'admin' && role !== 'trainer') return;
   const id = meta.name.trim().toLowerCase();
-  registerCustomExercise({ id: `pending-${id}`, ...meta });
+  // Optimistic register under the REAL id (upsert by id). The previous code
+  // registered a `pending-<id>` twin and only added the real id after the server
+  // confirmed — with no emit — so the list showed BOTH until a reload let the
+  // server snapshot replace it. One entry under the real id: edit is live, no
+  // duplicate; the snapshot reconciles it afterwards.
+  registerCustomExercise({ id, ...meta });
   emit();
   const uid = currentUid();
   if (!uid) return;
@@ -1169,9 +1221,7 @@ export function saveCatalogExercise(meta: {
     equipment: meta.equipment,
     createdBy: uid,
     updatedAt: Date.now(),
-  })
-    .then(() => registerCustomExercise({ id, ...meta }))
-    .catch(onWriteError);
+  }).catch(onWriteError);
 }
 
 /** Edit a custom catalog exercise. Handles rename (id = lowercased name): if the

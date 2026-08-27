@@ -10,15 +10,24 @@ import type { EquipmentId } from './equipment';
 export type MuscleGroup =
   | 'chest'
   | 'back'
+  // Finer back split (RICH import — free-exercise-db distinguishes these).
+  // `back` stays valid for legacy/custom logs; the catalog now emits the finer
+  // groups. Every group below has an anatomical region in the body-muscles lib.
+  | 'lats'
+  | 'traps'
+  | 'lower_back'
   | 'shoulders'
   | 'biceps'
   | 'triceps'
   | 'forearms'
   | 'quads'
+  | 'adductors'
   | 'hamstrings'
   | 'glutes'
+  | 'abductors'
   | 'calves'
   | 'core'
+  | 'neck'
   | 'fullbody'
   | 'cardio';
 

@@ -243,6 +243,12 @@ export const pl: Strings = {
     glutes: 'Pośladki',
     calves: 'Łydki',
     core: 'Brzuch',
+    lats: 'Najszersze',
+    traps: 'Czworoboczne',
+    lower_back: 'Dolny grzbiet',
+    adductors: 'Przywodziciele',
+    abductors: 'Odwodziciele',
+    neck: 'Kark',
     fullbody: 'Całe ciało',
     cardio: 'Cardio',
   } as Record<string, string>,
@@ -311,7 +317,7 @@ export const pl: Strings = {
     (empty ? empty + ' w tym tygodniu bez pracy' : '') +
     (empty && top ? ', ' : '') +
     (top ? top + ' — ' + share + ' całości' : '') +
-    '. Stwierdzenie, nie ocena — nie ma stopnia za balans.',
+    '.',
   whereYouCanDoIt: 'Gdzie to zrobisz',
   inventoryNote:
     'Inwentarz to, co odhaczyłeś na każdej siłowni — nikt go nie audytuje. Siłownia bez inwentarza nigdy nie jest oznaczana jako niepełna.',

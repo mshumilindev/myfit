@@ -10,15 +10,17 @@ const OUT_JSON = path.join(ROOT, 'client/src/data/exercises.rich.json');
 const OUT_IMAGES = path.join(ROOT, 'client/public/exercise-img');
 
 const MUSCLE_MAP = new Map([
-  ['lats', ['back']],
-  ['traps', ['back']],
-  ['middle back', ['back']],
-  ['lower back', ['back']],
+  // Finer mapping (matches the expanded MuscleGroup union). "middle back" folds
+  // into traps — the body-muscles library has no distinct rhomboid region.
+  ['lats', ['lats']],
+  ['traps', ['traps']],
+  ['middle back', ['traps']],
+  ['lower back', ['lower_back']],
   ['abdominals', ['core']],
   ['quadriceps', ['quads']],
-  ['adductors', ['quads']],
-  ['abductors', ['glutes']],
-  ['neck', []],
+  ['adductors', ['adductors']],
+  ['abductors', ['abductors']],
+  ['neck', ['neck']],
   ['chest', ['chest']],
   ['shoulders', ['shoulders']],
   ['biceps', ['biceps']],

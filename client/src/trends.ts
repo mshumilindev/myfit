@@ -85,18 +85,34 @@ export interface TrendsResult {
 }
 
 const PUSH: MuscleGroup[] = ['chest', 'shoulders', 'triceps'];
-const PULL: MuscleGroup[] = ['back', 'biceps', 'forearms'];
-const UPPER: MuscleGroup[] = ['chest', 'back', 'shoulders', 'biceps', 'triceps', 'forearms'];
-const LOWER: MuscleGroup[] = ['quads', 'hamstrings', 'glutes', 'calves'];
+const PULL: MuscleGroup[] = ['back', 'lats', 'traps', 'lower_back', 'biceps', 'forearms'];
+const UPPER: MuscleGroup[] = [
+  'chest',
+  'back',
+  'lats',
+  'traps',
+  'lower_back',
+  'shoulders',
+  'biceps',
+  'triceps',
+  'forearms',
+  'neck',
+];
+const LOWER: MuscleGroup[] = ['quads', 'adductors', 'hamstrings', 'glutes', 'abductors', 'calves'];
 const MAJOR: MuscleGroup[] = [
   'chest',
   'back',
+  'lats',
+  'traps',
+  'lower_back',
   'shoulders',
   'biceps',
   'triceps',
   'quads',
+  'adductors',
   'hamstrings',
   'glutes',
+  'abductors',
   'calves',
   'core',
 ];

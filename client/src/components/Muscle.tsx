@@ -14,7 +14,7 @@
  * precision. `MuscleIcon` therefore renders a library figure at figure/row/full
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
@@ -24,27 +24,37 @@ import { Icon } from '../ui';
 /** Muscles in the vocabulary order of the filter bar (MG-5). */
 export const MUSCLE_IDS: Exclude<MuscleGroup, 'cardio'>[] = [
   'quads',
+  'adductors',
   'hamstrings',
   'glutes',
+  'abductors',
   'calves',
   'chest',
   'back',
+  'lats',
+  'traps',
+  'lower_back',
   'shoulders',
   'biceps',
   'triceps',
   'core',
   'forearms',
+  'neck',
   'fullbody',
 ];
 
 const UPPER: MuscleGroup[] = [
   'chest',
   'back',
+  'lats',
+  'traps',
+  'lower_back',
   'shoulders',
   'biceps',
   'triceps',
   'forearms',
   'core',
+  'neck',
 ];
 
 type Tone = 'primary' | 'secondary' | 'muted' | 'onAccent';
@@ -105,6 +115,39 @@ const LIB: Record<Exclude<MuscleGroup, 'cardio'>, LibMap> = {
       'spine',
     ],
   },
+  // Finer back groups — subsets of the coarse `back` region above.
+  lats: {
+    front: [],
+    back: [
+      'lats-upper-left',
+      'lats-mid-left',
+      'lats-lower-left',
+      'lats-upper-right',
+      'lats-mid-right',
+      'lats-lower-right',
+    ],
+  },
+  traps: {
+    front: [],
+    back: [
+      'traps-upper-left',
+      'traps-mid-left',
+      'traps-lower-left',
+      'traps-upper-right',
+      'traps-mid-right',
+      'traps-lower-right',
+    ],
+  },
+  lower_back: {
+    front: [],
+    back: [
+      'lower-back-erectors-left',
+      'lower-back-ql-left',
+      'lower-back-erectors-right',
+      'lower-back-ql-right',
+      'spine',
+    ],
+  },
   shoulders: {
     front: [
       'shoulder-front-left',
@@ -150,7 +193,11 @@ const LIB: Record<Exclude<MuscleGroup, 'cardio'>, LibMap> = {
     back: [],
   },
   quads: {
-    front: ['quads-left', 'quads-right', 'adductors-left', 'adductors-right'],
+    front: ['quads-left', 'quads-right'],
+    back: [],
+  },
+  adductors: {
+    front: ['adductors-left', 'adductors-right'],
     back: [],
   },
   hamstrings: {
@@ -164,12 +211,12 @@ const LIB: Record<Exclude<MuscleGroup, 'cardio'>, LibMap> = {
   },
   glutes: {
     front: [],
-    back: [
-      'gluteus-maximus-left',
-      'gluteus-medius-left',
-      'gluteus-maximus-right',
-      'gluteus-medius-right',
-    ],
+    back: ['gluteus-maximus-left', 'gluteus-maximus-right'],
+  },
+  // Hip abductors ≈ gluteus medius.
+  abductors: {
+    front: [],
+    back: ['gluteus-medius-left', 'gluteus-medius-right'],
   },
   calves: {
     front: ['tibialis-anterior-left', 'tibialis-anterior-right'],
@@ -181,6 +228,10 @@ const LIB: Record<Exclude<MuscleGroup, 'cardio'>, LibMap> = {
       'calves-gastroc-lateral-right',
       'calves-soleus-right',
     ],
+  },
+  neck: {
+    front: ['neck-left', 'neck-right'],
+    back: ['nape'],
   },
   // fullbody is handled specially (whole silhouette lights up).
   fullbody: { front: [], back: [] },
@@ -194,10 +245,16 @@ const GROUP_VIEW: Record<Exclude<MuscleGroup, 'cardio'>, BView> = {
   forearms: 'front',
   core: 'front',
   quads: 'front',
+  adductors: 'front',
+  neck: 'front',
   back: 'back',
+  lats: 'back',
+  traps: 'back',
+  lower_back: 'back',
   triceps: 'back',
   hamstrings: 'back',
   glutes: 'back',
+  abductors: 'back',
   calves: 'back',
   fullbody: 'front',
 };
@@ -209,9 +266,15 @@ const GROUP_REGION: Record<Exclude<MuscleGroup, 'cardio'>, Region> = {
   shoulders: 'upper',
   core: 'upper',
   back: 'upper',
+  lats: 'upper',
+  traps: 'upper',
+  lower_back: 'upper',
+  neck: 'full',
   quads: 'lower',
+  adductors: 'lower',
   hamstrings: 'lower',
   glutes: 'lower',
+  abductors: 'lower',
   calves: 'lower',
   fullbody: 'full',
 };
@@ -621,7 +684,13 @@ function GeoMuscleMark({
 
   const torsoFill = full
     ? hl
-    : muscle === 'chest' || muscle === 'back' || muscle === 'core'
+    : muscle === 'chest' ||
+        muscle === 'back' ||
+        muscle === 'lats' ||
+        muscle === 'traps' ||
+        muscle === 'lower_back' ||
+        muscle === 'core' ||
+        muscle === 'neck'
       ? region
       : dim;
   const armFill = full
@@ -776,20 +845,51 @@ export function MuscleChip({
  * Muscle token with a set count (Ex suggestions AC-2/AC-3): the system
  * body-figure icon (worked region in brass) + the muscle name + count.
  */
+/** Sets shown to one decimal, trailing ".0" trimmed (fractional secondary
+ *  counting yields values like 4.5). */
+function fmtSetCount(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+/**
+ * Render a muscle-chip list (items sorted primary-first) with a line break
+ * before the first secondary chip, so on mobile the secondary (grey) muscles
+ * wrap to their own row. The `.chip-break` is a zero-height full-width flex
+ * item, active only at the mobile breakpoint (see styles.css).
+ */
+export function withMuscleBreak<T extends { primary: boolean }>(
+  items: T[],
+  renderChip: (x: T) => ReactNode,
+): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let broke = false;
+  items.forEach((x, i) => {
+    if (!broke && !x.primary && i > 0) {
+      nodes.push(<span key="__mbreak" className="chip-break" aria-hidden />);
+      broke = true;
+    }
+    nodes.push(renderChip(x));
+  });
+  return nodes;
+}
+
 export function MuscleSetChip({
   muscle,
   count,
+  tone = 'primary',
   onClick,
 }: {
   muscle: MuscleGroup;
   count?: number;
+  /** brass when the muscle was a direct (primary) target, grey when secondary-only. */
+  tone?: 'primary' | 'secondary';
   onClick?: (muscle: MuscleGroup) => void;
 }) {
   if (muscle === 'cardio') return null;
   const interactive = !!onClick;
   return (
     <span
-      className="mworked-chip mworked-chip-fig"
+      className={`mworked-chip mworked-chip-fig${tone === 'secondary' ? ' secondary' : ''}`}
       role={interactive ? 'button' : undefined}
       tabIndex={interactive ? 0 : undefined}
       onClick={
@@ -811,9 +911,9 @@ export function MuscleSetChip({
           : undefined
       }
     >
-      <MuscleIcon muscle={muscle} variant="chipFig" tone="primary" />
+      <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
       <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
-      {count !== undefined && <span className="mworked-count">{count}</span>}
+      {count !== undefined && <span className="mworked-count">{fmtSetCount(count)}</span>}
     </span>
   );
 }

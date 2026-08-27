@@ -247,6 +247,12 @@ export const en = {
     glutes: 'Glutes',
     calves: 'Calves',
     core: 'Core',
+    lats: 'Lats',
+    traps: 'Traps',
+    lower_back: 'Lower back',
+    adductors: 'Adductors',
+    abductors: 'Abductors',
+    neck: 'Neck',
     fullbody: 'Full body',
     cardio: 'Cardio',
   } as Record<string, string>,
@@ -315,7 +321,7 @@ export const en = {
     (empty ? empty + ' had nothing this week' : '') +
     (empty && top ? ', ' : '') +
     (top ? top + ' had ' + share + ' of everything' : '') +
-    '. Stated, not scored — there is no balance grade.',
+    '.',
   whereYouCanDoIt: 'Where you can do it',
   inventoryNote:
     'Inventory is what you ticked on each gym — nobody audits it. A gym with no inventory set is never flagged as missing anything.',

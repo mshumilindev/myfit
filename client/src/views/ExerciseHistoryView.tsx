@@ -85,6 +85,14 @@ export function ExerciseHistoryView({
             );
           })()}
         </div>
+        <button
+          className="btn btn-secondary"
+          style={{ minHeight: 36, fontSize: 13, flex: 'none', padding: '0 14px', gap: 6 }}
+          onClick={() => shell.openOverlay({ screen: 'exercise-detail', name })}
+        >
+          <Icon name="cards" />
+          {t.detailsAction}
+        </button>
       </div>
 
       <div className="stat-grid">

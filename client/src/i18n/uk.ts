@@ -243,6 +243,12 @@ export const uk: Strings = {
     glutes: 'Сідниці',
     calves: 'Литки',
     core: 'Прес',
+    lats: 'Широчайші',
+    traps: 'Трапеції',
+    lower_back: 'Поперек',
+    adductors: 'Привідні',
+    abductors: 'Відвідні',
+    neck: 'Шия',
     fullbody: 'Все тіло',
     cardio: 'Кардіо',
   } as Record<string, string>,
@@ -311,7 +317,7 @@ export const uk: Strings = {
     (empty ? empty + ' цього тижня без роботи' : '') +
     (empty && top ? ', ' : '') +
     (top ? top + ' — ' + share + ' всього' : '') +
-    '. Констатація, не оцінка — балів за баланс немає.',
+    '.',
   whereYouCanDoIt: 'Де це можна робити',
   inventoryNote:
     'Інвентар — це те, що ти відмітив у кожному залі; ніхто його не перевіряє. Зал без інвентаря ніколи не позначається як неповний.',

@@ -8,7 +8,7 @@ import type { ExerciseKind, Gym, Workout } from '../types';
 import { callFn, getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
-import { MuscleChip } from '../components/Muscle';
+import { MuscleChip, withMuscleBreak } from '../components/Muscle';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
@@ -17,7 +17,7 @@ import {
   dismissReminder,
   dismissWeighInToday,
   logVisitAsWorkout,
-  muscleSetsInWorkout,
+  muscleWorkSorted,
   resolveMuscles,
   startWorkout,
   topSet,
@@ -160,12 +160,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
-  const sessionMuscles = (w: Workout): MuscleGroup[] =>
-    [...muscleSetsInWorkout(w).entries()]
-      .filter(([, n]) => n > 0)
-      .sort((a, b) => b[1] - a[1])
-      .map(([m]) => m)
-      .slice(0, 4);
+  const sessionMuscles = (w: Workout) => muscleWorkSorted(w);
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
@@ -1028,11 +1023,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
                         {suggestOn && (
                           <td className="td-muscles">
-                            {sessionMuscles(w).map((m) => (
+                            {withMuscleBreak(sessionMuscles(w), (x) => (
                               <MuscleChip
-                                key={m}
-                                muscle={m}
-                                tone="secondary"
+                                key={x.muscle}
+                                muscle={x.muscle}
+                                tone={x.primary ? 'primary' : 'secondary'}
                                 onClick={openMuscleHistory}
                               />
                             ))}
@@ -1062,11 +1057,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       </div>
                       {suggestOn && sessionMuscles(w).length > 0 && (
                         <div className="recent-muscles">
-                          {sessionMuscles(w).map((m) => (
+                          {withMuscleBreak(sessionMuscles(w), (x) => (
                             <MuscleChip
-                              key={m}
-                              muscle={m}
-                              tone="secondary"
+                              key={x.muscle}
+                              muscle={x.muscle}
+                              tone={x.primary ? 'primary' : 'secondary'}
                               onClick={openMuscleHistory}
                             />
                           ))}
@@ -1179,11 +1174,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
                         {suggestOn && (
                           <td className="td-muscles">
-                            {sessionMuscles(w).map((m) => (
+                            {withMuscleBreak(sessionMuscles(w), (x) => (
                               <MuscleChip
-                                key={m}
-                                muscle={m}
-                                tone="secondary"
+                                key={x.muscle}
+                                muscle={x.muscle}
+                                tone={x.primary ? 'primary' : 'secondary'}
                                 onClick={openMuscleHistory}
                               />
                             ))}
@@ -1219,11 +1214,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       </div>
                       {suggestOn && sessionMuscles(w).length > 0 && (
                         <div className="recent-muscles">
-                          {sessionMuscles(w).map((m) => (
+                          {withMuscleBreak(sessionMuscles(w), (x) => (
                             <MuscleChip
-                              key={m}
-                              muscle={m}
-                              tone="secondary"
+                              key={x.muscle}
+                              muscle={x.muscle}
+                              tone={x.primary ? 'primary' : 'secondary'}
                               onClick={openMuscleHistory}
                             />
                           ))}

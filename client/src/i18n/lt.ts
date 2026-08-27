@@ -252,6 +252,12 @@ export const lt: Strings = {
     glutes: 'Sėdmenys',
     calves: 'Blauzdos',
     core: 'Presas',
+    lats: 'Platieji',
+    traps: 'Trapeciniai',
+    lower_back: 'Apatinė nugara',
+    adductors: 'Pritraukiamieji',
+    abductors: 'Atitraukiamieji',
+    neck: 'Kaklas',
     fullbody: 'Visas kūnas',
     cardio: 'Kardio',
   } as Record<string, string>,
@@ -320,7 +326,7 @@ export const lt: Strings = {
     (empty ? empty + ' šią savaitę be darbo' : '') +
     (empty && top ? ', ' : '') +
     (top ? top + ' — ' + share + ' visko' : '') +
-    '. Konstatuota, ne įvertinta — balanso pažymio nėra.',
+    '.',
   whereYouCanDoIt: 'Kur tai gali daryti',
   inventoryNote:
     'Inventorius — tai, ką pažymėjai kiekvienoje salėje; niekas jo netikrina. Salė be inventoriaus niekada nežymima kaip stokojanti.',

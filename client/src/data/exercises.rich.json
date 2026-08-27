@@ -80,7 +80,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": "foamRoll",
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie face down with one leg on a foam roll.",
@@ -97,7 +97,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie on your back with your feet raised towards the ceiling.",
@@ -244,7 +244,7 @@
     "category": "plyometrics",
     "equipment": null,
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "Assume a comfortable stance with one foot slightly in front of the other.",
       "Begin by pushing off with the front leg, driving the opposite knee forward and as high as possible before landing. Attempt to cover as much distance to each side with each bound.",
@@ -329,7 +329,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["biceps", "calves", "forearms", "glutes", "back"],
+    "secondaryMuscles": ["biceps", "calves", "forearms", "glutes", "lower_back", "traps"],
     "instructions": [
       "Place two kettlebells between your feet. To get in the starting position, push your butt back and look straight ahead.",
       "Clean one kettlebell to your shoulder and hold on to the other kettlebell in a hanging position. Clean the kettlebell to your shoulder by extending through the legs and hips as you pull the kettlebell towards your shoulders. Rotate your wrist as you do so.",
@@ -368,8 +368,8 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "kettlebell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Place two kettlebells in front of your feet. Bend your knees slightly and push your butt out as much as possible. As you bend over to get into the starting position grab both kettlebells by the handles.",
       "Pull one kettlebell off of the floor while holding on to the other kettlebell. Retract the shoulder blade of the working side, as you flex the elbow, drawing the kettlebell towards your stomach or rib cage.",
@@ -388,8 +388,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "kettlebell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core", "biceps", "chest", "triceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["core", "biceps", "chest", "lats", "triceps"],
     "instructions": [
       "Place two kettlebells on the floor about shoulder width apart. Position yourself on your toes and your hands as though you were doing a pushup, with the body straight and extended. Use the handles of the kettlebells to support your upper body. You may need to position your feet wide for support.",
       "Push one kettlebell into the floor and row the other kettlebell, retracting the shoulder blade of the working side as you flex the elbow, pulling it to your side.",
@@ -462,7 +462,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back", "triceps"],
+    "secondaryMuscles": ["traps", "triceps"],
     "instructions": [
       "Place a bar on the ground behind the head of an incline bench.",
       "Lay on the bench face down. With a pronated grip, pick the barbell up from the floor. Flex the elbows, performing a reverse curl to bring the bar near your chest. This will be your starting position.",
@@ -480,7 +480,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Stand up and extend your arms straight out by the sides. The arms should be parallel to the floor and perpendicular (90-degree angle) to your torso. This will be your starting position.",
       "Slowly start to make circles of about 1 foot in diameter with each outstretched arm. Breathe normally as you perform the movement.",
@@ -535,7 +535,7 @@
     "mechanic": "compound",
     "category": "strongman",
     "equipment": "other",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["biceps", "forearms", "glutes", "hamstrings", "quads"],
     "instructions": [
       "This trainer is effective for developing Atlas Stone strength for those who don't have access to stones, and are typically made from bar ends or heavy pipe.",
@@ -553,8 +553,18 @@
     "mechanic": "compound",
     "category": "strongman",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core", "quads", "biceps", "calves", "forearms", "glutes", "hamstrings"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": [
+      "core",
+      "adductors",
+      "biceps",
+      "calves",
+      "forearms",
+      "glutes",
+      "hamstrings",
+      "traps",
+      "quads"
+    ],
     "instructions": [
       "Begin with the atlas stone between your feet. Bend at the hips to wrap your arms vertically around the Atlas Stone, attempting to get your fingers underneath the stone. Many stones will have a small flat portion on the bottom, which will make the stone easier to hold.",
       "Pulling the stone into your torso, drive through the back half of your feet to pull the stone from the ground.",
@@ -571,8 +581,8 @@
     "mechanic": "compound",
     "category": "strongman",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "traps", "quads"],
     "instructions": [
       "Approach the bar so that it is centered over your feet. You feet should be about hip width apart. Bend at the hip to grip the bar at shoulder width, allowing your shoulder blades to protract. Typically, you would use an over/under grip.",
       "With your feet and your grip set, take a big breath and then lower your hips and flex the knees until your shins contact the bar. Look forward with your head, keep your chest up and your back arched, and begin driving through the heels to move the weight upward.",
@@ -590,7 +600,7 @@
     "category": "strength",
     "equipment": "bands",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back", "triceps"],
+    "secondaryMuscles": ["traps", "triceps"],
     "instructions": [
       "Run a band around a stationary post like that of a squat rack.",
       "Grab the band by the handles and stand back so that the tension in the band rises.",
@@ -613,7 +623,7 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Load a sled with the desired weight, attaching a rope or straps to the sled that you can hold onto.",
       "Begin the exercise by moving backwards for a given distance. Leaning back, extend through the legs for short steps to move as quickly as possible."
@@ -685,8 +695,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core", "forearms"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["core", "forearms", "traps"],
     "instructions": [
       "Choke the band around the center of the pullup bar. You can use different bands to provide varying levels of assistance.",
       "Pull the end of the band down, and place one bent knee into the loop, ensuring it won't slip out. Take a medium to wide grip on the bar. This will be your starting position.",
@@ -707,7 +717,7 @@
     "category": "powerlifting",
     "equipment": "bands",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back"],
+    "secondaryMuscles": ["glutes", "lower_back"],
     "instructions": [
       "Using a 41 inch band, stand on one end, spreading your feet a small amount. Bend at the hips to loop the end of the band behind your neck. This will be your starting position.",
       "Keeping your legs straight, extend through the hips to come to a near vertical position.",
@@ -724,7 +734,7 @@
     "category": "powerlifting",
     "equipment": "bands",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back"],
+    "secondaryMuscles": ["glutes", "lower_back"],
     "instructions": [
       "Loop the band around a post. Standing a little ways away, loop the opposite end around the neck. Your hands can help hold the band in position.",
       "Begin by bending at the hips, getting your butt back as far as possible. Keep your back flat and bend forward to about 90 degrees. Your knees should be only slightly bent.",
@@ -743,7 +753,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "bands",
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Anchor a band around a solid post or other object.",
@@ -764,7 +774,7 @@
     "category": "strength",
     "equipment": "bands",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Begin with your arms extended straight out in front of you, holding the band with both hands.",
       "Initiate the movement by performing a reverse fly motion, moving your hands out laterally to your sides.",
@@ -799,7 +809,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["back", "shoulders"],
+    "secondaryMuscles": ["lower_back", "shoulders"],
     "instructions": [
       "For this exercise you will need to get into a pushup position, but instead of having your hands of the floor, you will be grabbing on to an Olympic barbell (loaded with 5-10 lbs on each side) instead. This will be your starting position.",
       "While keeping a slight arch on your back, lift your hips and roll the barbell towards your feet as you exhale. Tip: As you perform the movement, your glutes should be coming up, you should be keeping the abs tight and should maintain your back posture at all times. Also your arms should be staying perpendicular to the floor throughout the movement. If you don't, you will work out your shoulders and back more than the abs.",
@@ -817,7 +827,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["back", "shoulders"],
+    "secondaryMuscles": ["lower_back", "shoulders"],
     "instructions": [
       "Hold an Olympic barbell loaded with 5-10lbs on each side and kneel on the floor.",
       "Now place the barbell on the floor in front of you so that you are on all your hands and knees (as in a kneeling push up position). This will be your starting position.",
@@ -899,8 +909,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "lats", "traps", "quads"],
     "instructions": [
       "Stand in front of a loaded barbell.",
       "While keeping the back as straight as possible, bend your knees, bend forward and grasp the bar using a medium (shoulder width) overhand grip. This will be the starting position of the exercise. Tip: If it is difficult to hold on to the bar with this grip, alternate your grip or use wrist straps.",
@@ -919,7 +929,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first set the bar on a rack just above shoulder level. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
       "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
@@ -1078,7 +1088,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["biceps", "back"],
+    "secondaryMuscles": ["biceps", "lats", "traps"],
     "instructions": [
       "Stand up straight while holding a barbell using a wide (higher than shoulder width) and overhand (palms facing your body) grip.",
       "Bend knees slightly and bend over as you keep the natural arch of your back. Let the arms hang in front of you as they hold the bar. Once your torso is parallel to the floor, flare the elbows out and away from your body. Tip: Your torso and your arms should resemble the letter \"T\". Now you are ready to begin the exercise.",
@@ -1100,7 +1110,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["glutes", "hamstrings", "back", "shoulders"],
+    "secondaryMuscles": ["glutes", "hamstrings", "lats", "shoulders"],
     "instructions": [
       "Place a loaded barbell on the ground, near the end of a bench. Kneel with both legs on the bench, and take a medium to narrow grip on the barbell. This will be your starting position.",
       "To begin, extend through the hips to slowly roll the bar forward. As you roll out, flex the shoulder to roll the bar above your head. Ensure that your arms remain extended throughout the movement.",
@@ -1164,7 +1174,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Stand up straight with your feet at shoulder width as you hold a barbell with both hands in front of you using a pronated grip (palms facing the thighs). Tip: Your hands should be a little wider than shoulder width apart. You can use wrist wraps for this exercise for a better grip. This will be your starting position.",
@@ -1182,7 +1192,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["forearms"],
     "instructions": [
       "Stand up straight with your feet at shoulder width as you hold a barbell with both hands behind your back using a pronated grip (palms facing back). Tip: Your hands should be a little wider than shoulder width apart. You can use wrist wraps for this exercise for better grip. This will be your starting position.",
@@ -1204,7 +1214,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lower_back"],
     "instructions": [
       "Stand up straight while holding a barbell placed on the back of your shoulders (slightly below the neck). Your feet should be shoulder width apart. This will be your starting position.",
       "While keeping your back straight and your head up, bend only at the waist to the right as far as possible. Breathe in as you bend to the side. Then hold for a second and come back up to the starting position as you exhale. Tip: Keep the rest of the body stationary.",
@@ -1222,7 +1232,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "hamstrings", "lower_back"],
     "instructions": [
       "Stand up straight while holding a barbell placed on the back of your shoulders (slightly below the neck). Your feet should be placed wide apart with the foot of the lead leg angled out to the side. This will be your starting position.",
       "Lower your body towards the side of your angled foot by bending the knee and hip of your lead leg and while keeping the opposite leg only slightly bent. Breathe in as you lower your body.",
@@ -1243,7 +1253,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first set the bar on a rack to just below shoulder level. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
       "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
@@ -1263,7 +1273,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first place a flat bench or a box behind you. The flat bench is used to teach you to set your hips back and to hit depth.",
       "Then, set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
@@ -1421,7 +1431,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["chest", "forearms", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "forearms", "lats", "shoulders"],
     "instructions": [
       "Begin by lying on the bench, getting your head beyond the bar if possible. Tuck your feet underneath you and arch your back. Using the bar to help support your weight, lift your shoulder off the bench and retract them, squeezing the shoulder blades together. Use your feet to drive your traps into the bench. Maintain this tight body position throughout the movement.",
       "However wide your grip, it should cover the ring on the bar. Pull the bar out of the rack without protracting your shoulders. Focus on squeezing the bar and trying to pull it apart.",
@@ -1466,7 +1476,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["chest", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "lats", "shoulders"],
     "instructions": [
       "Adjust the leader chain, shortening it to the desired length.Place the chains on the sleeves of the bar.",
       "Lying on the bench, get your head beyond the bar if possible. Tuck your feet underneath you and arch your back. Using the bar to help support your weight, lift your shoulder off the bench and retract them, squeezing the shoulder blades together. Use your feet to drive your traps into the bench. Maintain this tight body position throughout the movement. However wide your grip, it should cover the ring on the bar.",
@@ -1504,8 +1514,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "shoulders"],
     "instructions": [
       "Holding a barbell with a pronated grip (palms facing down), bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up. The barbell should hang directly in front of you as your arms hang perpendicular to the floor and your torso. This is your starting position.",
       "Now, while keeping the torso stationary, breathe out and lift the barbell to you. Keep the elbows close to the body and only use the forearms to hold the weight. At the top contracted position, squeeze the back muscles and hold for a brief pause.",
@@ -1548,7 +1558,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lower_back", "traps"],
     "instructions": [
       "Select a weight and hold the handle of the low pulley with your right hand.",
       "Bend at the waist until your torso is nearly parallel to the floor. Your legs should be slightly bent with your left hand placed on your lower left thigh. Your right arm should be hanging from your shoulder in front of you and with a slight bend at the elbow. This will be your starting position.",
@@ -1569,8 +1579,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "lower_back"],
     "instructions": [
       "Put weight on one of the ends of an Olympic barbell. Make sure that you either place the other end of the barbell in the corner of two walls; or put a heavy object on the ground so the barbell cannot slide backward.",
       "Bend forward until your torso is as close to parallel with the floor as you can and keep your knees slightly bent.",
@@ -1592,8 +1602,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Put weight on one of the ends of an Olympic barbell. Make sure that you either place the other end of the barbell in the corner of two walls; or put a heavy object on the ground so the barbell cannot slide backward.",
       "Bend forward until your torso is as close to parallel with the floor as you can and keep your knees slightly bent.",
@@ -1615,8 +1625,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "shoulders"],
     "instructions": [
       "With a dumbbell in each hand (palms facing your torso), bend your knees slightly and bring your torso forward by bending at the waist; as you bend make sure to keep your back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up. The weights should hang directly in front of you as your arms hang perpendicular to the floor and your torso. This is your starting position.",
       "While keeping the torso stationary, lift the dumbbells to your side (as you breathe out), keeping the elbows close to the body (do not exert any force with the forearm other than holding the weights). On the top contracted position, squeeze the back muscles and hold for a second.",
@@ -1636,8 +1646,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "With a dumbbell in each hand (palms facing each other), bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up. The weights should hang directly in front of you as your arms hang perpendicular to the floor and your torso. This is your starting position.",
       "While keeping the torso stationary, lift the dumbbells to your side as you breathe out, squeezing your shoulder blades together. On the top contracted position, squeeze the back muscles and hold for a second.",
@@ -1658,7 +1668,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["glutes", "hamstrings", "back", "quads", "shoulders", "triceps"],
+    "secondaryMuscles": ["glutes", "hamstrings", "lower_back", "quads", "shoulders", "triceps"],
     "instructions": [
       "Clean a kettlebell to your shoulder. Clean the kettlebell to your shoulders by extending through the legs and hips as you raise the kettlebell towards your shoulder. The wrist should rotate as you do so. This will be your starting position.",
       "Begin my leaning to the side opposite the kettlebell, continuing until you are able to touch the ground with your free hand, keeping your eyes on the kettlebell. As you do so, press the weight vertically be extending through the elbow, keeping your arm perpendicular to the ground.",
@@ -1674,7 +1684,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": ["chest", "shoulders", "triceps"],
     "instructions": [
       "Lie on a flat bench with a barbell using a shoulder grip width.",
@@ -1697,7 +1707,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["chest"],
-    "secondaryMuscles": ["back", "shoulders", "triceps"],
+    "secondaryMuscles": ["lats", "shoulders", "triceps"],
     "instructions": [
       "Place a dumbbell standing up on a flat bench.",
       "Ensuring that the dumbbell stays securely placed at the top of the bench, lie perpendicular to the bench (torso across it as in forming a cross) with only your shoulders lying on the surface. Hips should be below the bench and legs bent with feet firmly on the floor. The head will be off the bench as well.",
@@ -1771,7 +1781,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["chest", "forearms", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "forearms", "lats", "shoulders"],
     "instructions": [
       "Begin by lying on the bench, getting your head beyond the bar if possible. One to five boards, made out of 2x6's, can be screwed together and held in place by a training partner, bands, or just tucked under your shirt.",
       "Tuck your feet underneath you and arch your back. Using the bar to help support your weight, lift your shoulder off the bench and retract them, squeezing the shoulder blades together. Use your feet to drive your traps into the bench. Maintain this tight body position throughout the movement.",
@@ -1844,8 +1854,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Begin by taking a medium to wide grip on a pull-up apparatus with your palms facing away from you. From a hanging position, tuck your knees to your chest, leaning back and getting your legs over your side of the pull-up apparatus. This will be your starting position.",
       "Beginning with your arms straight, flex the elbows and retract the shoulder blades to raise your body up until your legs contact the pull-up apparatus.",
@@ -1963,7 +1973,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "calves"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "quads"],
     "instructions": [
       "Assume a relaxed stance facing the box or platform approximately an arm's length away. Arms should be down at the sides and legs slightly bent.",
       "Using the arms to aid in the initial burst, jump upward and forward, landing with feet simultaneously on top of the box or platform.",
@@ -1983,7 +1993,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "calves"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "quads"],
     "instructions": [
       "You will need several boxes lined up about 8 feet apart.",
       "Begin facing the first box with one leg slightly behind the other.",
@@ -2002,7 +2012,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["adductors", "calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "The box squat allows you to squat to desired depth and develop explosive strength in the squat movement. Begin in a power rack with a box at the appropriate height behind you. Typically, you would aim for a box height that brings you to a parallel squat, but you can train higher or lower if desired.",
       "Begin by stepping under the bar and placing it across the back of the shoulders. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders. Remove the bar from the rack, creating a tight arch in your lower back, and step back into position. Place your feet wider for more emphasis on the back, glutes, adductors, and hamstrings, or closer together for more quad development. Keep your head facing forward.",
@@ -2020,7 +2030,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings", "back"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Begin in a power rack with a box at the appropriate height behind you. Set up the bands on the sleeves, secured to either band pegs, the rack, or dumbbells so that there is appropriate tension. If dumbbells are used, secure them so that they don't move. Also, ensure that the dumbbells you are using are heavy enough for the bands that you are using. Additional plates can be used to hold the dumbbells down. If more tension is needed, you can either widen the base on the floor or choke the bands. Typically, you would aim for a box height that brings you to a parallel squat, but you can train higher or lower if desired.",
       "Begin by stepping under the bar and placing it across the back of the shoulders. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders. Remove the bar from the rack, creating a tight arch in your lower back, and step back into position. Place your feet wider for more emphasis on the back, glutes, adductors, and hamstrings, or closer together for more quad development. Keep your head facing forward.",
@@ -2041,7 +2051,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings", "back"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Begin in a power rack with a box at the appropriate height behind you. Typically, you would aim for a box height that brings you to a parallel squat, but you can train higher or lower if desired.",
       "To set up the chains, begin by looping the leader chain over the sleeves of the bar. The heavy chain should be attached using a snap hook. Adjust the length of the lead chain so that a few links are still on the floor at the top of the movement.",
@@ -2214,7 +2224,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Move the cables to the bottom of the towers and select an appropriate weight. Stand directly in between the uprights.",
       "To begin, squat down be flexing your hips and knees until you can reach the handles.",
@@ -2275,7 +2285,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie on incline an bench facing away from a high pulley machine that has a straight bar attachment on it.",
@@ -2509,7 +2519,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["biceps", "back"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Sit in the same position on a low pulley row station as you would if you were doing seated cable rows for the back.",
       "Attach a rope to the pulley and grasp it with an overhand grip. Your arms should be extended and parallel to the floor with the elbows flared out.",
@@ -2575,7 +2585,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Stand in the middle of two low pulleys that are opposite to each other and place a flat bench right behind you (in perpendicular fashion to you; the narrow edge of the bench should be the one behind you). Select the weight to be used on each pulley.",
       "Now sit at the edge of the flat bench behind you with your feet placed in front of your knees.",
@@ -2619,7 +2629,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Grasp a cable bar attachment that is attached to a low pulley with a shoulder width or slightly wider overhand (palms facing down) grip.",
@@ -2782,7 +2792,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Position yourself on the calf machine so that the shoulder pads are above your shoulders. Your torso should be straight with the arms extended normally by your side. This will be your starting position.",
@@ -2820,7 +2830,7 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "This event apparatus typically has neutral grip handles, however some have a straight bar that you can approach like a normal deadlift. The apparatus can be loaded with a vehicle or other heavy objects such as tractor tires or kegs.",
       "Center yourself between the handles if you are a strong squatter, or back a couple inches if you are a strong deadlifter. You feet should be about hip width apart. Bend at the hip to grip the handles. With your feet and your grip set, take a big breath and then lower your hips and flex the knees.",
@@ -2855,8 +2865,8 @@
     "mechanic": null,
     "category": "plyometrics",
     "equipment": null,
-    "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["core", "glutes", "calves", "hamstrings"],
+    "primaryMuscles": ["adductors"],
+    "secondaryMuscles": ["core", "abductors", "calves", "glutes", "hamstrings", "quads"],
     "instructions": [
       "Begin with your feet a few inches apart and your left arm up in a relaxed, athletic position.",
       "With your right foot, quick step behind and pull the knee up.",
@@ -2872,8 +2882,8 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Position yourself on the floor on your hands and knees.",
       "Pull your belly in and round your spine, lower back, shoulders, and neck, letting your head drop.",
@@ -2889,7 +2899,7 @@
     "mechanic": "compound",
     "category": "plyometrics",
     "equipment": "medicineBall",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": ["core", "chest", "shoulders"],
     "instructions": [
       "Begin standing while facing a wall or a partner.",
@@ -2947,7 +2957,7 @@
     "category": "stretching",
     "equipment": "other",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["quads"],
+    "secondaryMuscles": ["adductors"],
     "instructions": [
       "Sit upright in a chair and grip the seat on the sides.",
       "Raise one leg, extending the knee, flexing the ankle as you do so.",
@@ -2967,8 +2977,8 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["lower_back"],
     "instructions": [
       "Sit upright on a chair.",
       "Bend to one side with your arm over your head. You can hold onto the chair with your free hand.",
@@ -3147,8 +3157,8 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["glutes"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["glutes", "traps"],
     "instructions": [
       "Get on your hands and knees, walk your hands in front of you.",
       "Lower your buttocks down to sit on your heels. Let your arms drag along the floor as you sit back to stretch your entire spine.",
@@ -3164,8 +3174,8 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": [],
-    "secondaryMuscles": ["back"],
+    "primaryMuscles": ["neck"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Get into a seated position on the floor.",
       "Place both hands at the rear of your head, fingers interlocked, thumbs pointing down and elbows pointing straight ahead. Slowly pull your head down to your chest. Hold for 20-30 seconds."
@@ -3183,8 +3193,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "forearms"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "forearms", "traps"],
     "instructions": [
       "Grab the pull-up bar with the palms facing your torso and a grip closer than the shoulder width.",
       "As you have both arms extended in front of you holding the bar at the chosen grip width, keep your torso as straight as possible while creating a curvature on your lower back and sticking your chest out. This is your starting position. Tip: Keeping the torso as straight as possible maximizes biceps stimulation while minimizing back involvement.",
@@ -3203,7 +3213,7 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "back", "triceps"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "lower_back", "traps", "triceps"],
     "instructions": [
       "The circus bell is an oversized dumbbell with a thick handle. Begin with the dumbbell between your feet, and grip the handle with both hands.",
       "Clean the dumbbell by extending through your hips and knees to deliver the implement to the desired shoulder, letting go with the extra hand.",
@@ -3221,7 +3231,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "With a barbell on the floor close to the shins, take an overhand (or hook) grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
       "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight. Move the weight with control as you continue to above the knees.",
@@ -3240,7 +3258,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["core", "glutes", "hamstrings", "back", "quads", "triceps"],
+    "secondaryMuscles": ["core", "glutes", "hamstrings", "lower_back", "quads", "traps", "triceps"],
     "instructions": [
       "With a barbell on the floor close to the shins, take an overhand or hook grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
       "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight. Move the weight with control as you continue to above the knees.",
@@ -3262,7 +3280,16 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["core", "calves", "glutes", "hamstrings", "back", "quads", "triceps"],
+    "secondaryMuscles": [
+      "core",
+      "calves",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "traps",
+      "quads",
+      "triceps"
+    ],
     "instructions": [
       "Assume a shoulder-width stance, with knees inside the arms. Now while keeping the back flat, bend at the knees and hips so that you can grab the bar with the arms fully extended and a pronated grip that is slightly wider than shoulder width. Point the elbows out to sides. The bar should be close to the shins. Position the shoulders over or slightly ahead of the bar. Establish a flat back posture. This will be your starting position.",
       "Begin to pull the bar by extending the knees. Move your hips forward and raise the shoulders at the same rate while keeping the angle of the back constant; continue to lift the bar straight up while keeping it close to your body.",
@@ -3283,7 +3310,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["forearms", "glutes", "back", "quads"],
+    "secondaryMuscles": ["forearms", "glutes", "lower_back", "traps", "quads"],
     "instructions": [
       "Begin standing with a barbell close to your shins. Your feet should be directly under your hips with your feet turned out slightly. Grip the bar with a double overhand grip or hook grip, about shoulder width apart. Squat down to the bar. Your spine should be in full extension, with a back angle that places your shoulders in front of the bar and your back as vertical as possible.",
       "Begin by driving through the floor through the front of your heels. As the bar travels upward, maintain a constant back angle. Flare your knees out to the side to help keep them out of the bar's path.",
@@ -3300,7 +3327,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "shoulders", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "shoulders", "traps"],
     "instructions": [
       "With a barbell on boxes or stands of the desired height, take an overhand or hook grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
       "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight with the elbows pointed out.",
@@ -3318,7 +3345,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "With a barbell on the floor close to the shins, take an overhand or hook grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
       "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight and elbows out. Move the weight with control as you continue to above the knees.",
@@ -3334,7 +3361,7 @@
     "mechanic": "compound",
     "category": "olympic weightlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["forearms", "shoulders"],
     "instructions": [
       "Begin with a shoulder width, double overhand or hook grip, with the bar hanging at the mid thigh position. Your back should be straight and inclined slightly forward.",
@@ -3480,8 +3507,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Sit down on a pull-down machine with a wide bar attached to the top pulley. Make sure that you adjust the knee pad of the machine to fit your height. These pads will prevent your body from being raised by the resistance attached to the bar.",
       "Grab the bar with the palms facing forward using the prescribed grip. Note on grips: For a wide grip, your hands need to be spaced out at a distance wider than your shoulder width. For a medium grip, your hands need to be spaced out at a distance equal to your shoulder width and for a close grip at a distance smaller than your shoulder width.",
@@ -3564,7 +3591,15 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["core", "biceps", "calves", "forearms", "back", "shoulders"],
+    "secondaryMuscles": [
+      "core",
+      "biceps",
+      "calves",
+      "forearms",
+      "lower_back",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "With the weight loaded, take a zurcher hold on the end of the implement. Place the bar in the crook of the elbow and hold onto your wrist. Try to keep the weight off of the forearms.",
       "Begin by lifting the weight from the ground. Keep a tight, upright posture as you being to walk, taking short, fast steps. Look up and away as you turn in a circle. Do not hold your breath during the event. Continue walking until you complete one or more complete turns."
@@ -3661,8 +3696,8 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["core", "abductors", "glutes", "hamstrings", "quads"],
     "instructions": [
       "Stand with your feet shoulder width apart. This will be your starting position.",
       "Perform a rear lunge by stepping back with one foot and flexing the hips and front knee. As you do so, rotate your torso across the front leg.",
@@ -3764,7 +3799,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Take a dumbbell in each hand with a pronated grip in a standing position. Raise your upper arms so that they are parallel to the floor, allowing your lower arms to hang in the \"scarecrow\" position. This will be your starting position.",
       "To initiate the movement, externally rotate the shoulders to move the upper arm 180 degrees. Keep the upper arms in place, rotating the upper arms until the wrists are directly above the elbows, the forearms perpendicular to the floor.",
@@ -3782,8 +3817,8 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["glutes"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["abductors", "glutes"],
     "instructions": [
       "Sit up on the floor.",
       "Cross your right leg over your left, keeping the knee bent. Your left leg is straight and down on the floor.",
@@ -3821,8 +3856,8 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "traps", "quads"],
     "instructions": [
       "To deadlift with short bands, simply loop them over the bar before you start, and step into them to set up. For long bands, they will need to be anchored to a secure base, such as heavy dumbbells or a rack.",
       "With your feet, and your grip set, take a big breath and then lower your hips and bend the knees until your shins contact the bar. Look forward with your head, keep your chest up and your back arched, and begin driving through the heels to move the weight upward. After the bar passes the knees, aggressively pull the bar back, pulling your shoulder blades together as you drive your hips forward into the bar.",
@@ -3838,8 +3873,8 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "traps", "quads"],
     "instructions": [
       "You can attach the chains to the sleeves of the bar, or just drape the middle over the bar so there is a greater weight increase as you lift.",
       "Approach the bar so that it is centered over your feet. You feet should be about hip width apart. Bend at the hip to grip the bar at shoulder width, allowing your shoulder blades to protract. Typically, you would use an overhand grip or an over/under grip on heavier sets. With your feet, and your grip set, take a big breath and then lower your hips and bend the knees until your shins contact the bar.",
@@ -4097,8 +4132,8 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "traps", "quads"],
     "instructions": [
       "Begin by having a platform or weight plates that you can stand on, usually 1-3 inches in height. Approach the bar so that it is centered over your feet. You feet should be about hip width apart. Bend at the hip to grip the bar at shoulder width, allowing your shoulder blades to protract. Typically, you would use an overhand grip or an over/under grip on heavier sets.",
       "With your feet, and your grip set, take a big breath and then lower your hips and bend the knees until your shins contact the bar. Look forward with your head, keep your chest up and your back arched, and begin driving through the heels to move the weight upward. After the bar passes the knees, aggressively pull the bar back, pulling your shoulder blades together as you drive your hips forward into the bar.",
@@ -4115,7 +4150,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "For this drill you will need two boxes or benches, one 12 to 16 inches high and the other 22 to 26 inches high.",
       "Stand on one of the two boxes with arms at the sides; feet should be together and slightly off the edge as in the depth jump. Place the other box approximately two or three feet in front of and facing the performer.",
@@ -4213,7 +4248,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["biceps", "calves", "forearms", "glutes", "back", "quads"],
+    "secondaryMuscles": ["biceps", "calves", "forearms", "glutes", "lower_back", "quads", "traps"],
     "instructions": [
       "Place two kettlebells between your feet. To get in the starting position, push your butt back and look straight ahead.",
       "Clean one kettlebell to your shoulder and hold on to the other kettlebell.",
@@ -4318,7 +4353,7 @@
     "category": "plyometrics",
     "equipment": "body",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "Begin standing with your knees slightly bent.",
       "Quickly squat a short distance, flexing the hips and knees, and immediately extend to jump for maximum vertical height.",
@@ -4476,7 +4511,15 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "Begin standing with a dumbbell in each hand with your feet shoulder width apart.",
       "Lower the weights to the floor by flexing at the hips and knees, pushing your hips back until the dumbbells reach the floor. This will be your starting position.",
@@ -4533,8 +4576,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "forearms", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "forearms", "lats", "shoulders"],
     "instructions": [
       "Using a neutral grip, lean into an incline bench.",
       "Take a dumbbell in each hand with a neutral grip, beginning with the arms straight. This will be your starting position.",
@@ -4595,7 +4638,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "While holding a dumbbell in one hand, lay with your chest down on a slightly inclined (around 15 degrees when measured from the floor) adjustable bench. The other hand can be used to hold to the leg of the bench for stability.",
       "Position the palm of the hand that is holding the dumbbell in a neutral manner (palms facing your torso) as you keep the arm extended with the elbow slightly bent. This will be your starting position.",
@@ -4731,7 +4774,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["biceps", "back"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Grab a dumbbell and stand up straight with your arm extended in front of you with a slight bend at the elbows and your back straight. This will be your starting position. Tip: The dumbbell should be resting on top of your thigh with the palm of your hands facing your thighs.",
       "Keep the other hand can be kept fully extended to the side, by the waist or grabbing a fixed surface. This will be your starting position.",
@@ -4812,7 +4855,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "This corrective exercise strengthens the muscles that stabilize your shoulder blade. Hold a light weight in each hand, hanging at your sides. Your thumbs should pointing up.",
       "Begin the movement raising your arms out in front of you, about 30 degrees off center. Your arms should be fully extended as you perform the movement.",
@@ -4895,7 +4938,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Stand erect with a dumbbell on each hand (palms facing your torso), arms extended on the sides.",
@@ -4932,7 +4975,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Stand up straight while holding a dumbbell on each hand (palms facing the side of your legs).",
       "Position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up at all times as looking down will get you off balance and also maintain a straight back. This will be your starting position. Note: For the purposes of this discussion we will use the medium stance described above which targets overall development; however you can choose any of the three stances discussed in the foot stances section.",
@@ -4951,7 +4994,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Stand up straight with a flat bench behind you while holding a dumbbell on each hand (palms facing the side of your legs).",
       "Position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up at all times as looking down will get you off balance and also maintain a straight back. This will be your starting position. Note: For the purposes of this discussion we will use the medium stance described above which targets overall development; however you can choose any of the three stances discussed in the foot stances section.",
@@ -5011,7 +5054,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "Stand with your feet shoulder width apart. This will be your starting position.",
@@ -5031,7 +5074,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["chest"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Stand with your hands together, arms extended directly in front of you. This will be your starting position.",
       "Keeping your arms straight, quickly move your arms back as far as possible and back in again, similar to an exaggerated clapping motion. Repeat 5-10 times, increasing speed as you do so."
@@ -5050,7 +5093,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Sit or stand with your feet slightly apart.",
       "Place your hands on your shoulders with your elbows at shoulder level and pointing out.",
@@ -5118,8 +5161,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Get a platform of some sort (it can be an aerobics or calf raise platform) that is around 4-6 inches in height.",
       "Place it on the seat of the cable row machine.",
@@ -5319,7 +5362,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Facing a high pulley with a rope or dual handles attached, pull the weight directly towards your face, separating your hands as you do so. Keep your upper arms parallel to the ground."
     ],
@@ -5334,7 +5377,7 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["forearms"],
-    "secondaryMuscles": ["core", "glutes", "hamstrings", "back", "quads"],
+    "secondaryMuscles": ["core", "glutes", "hamstrings", "lower_back", "quads", "traps"],
     "instructions": [
       "There are various implements that can be used for the farmers walk. These can also be performed with heavy dumbbells or short bars if these implements aren't available. Begin by standing between the implements.",
       "After gripping the handles, lift them up by driving through your heels, keeping your back straight and your head up.",
@@ -5351,7 +5394,7 @@
     "category": "plyometrics",
     "equipment": "body",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "Start in a relaxed position with one leg slightly forward. This will be your starting position.",
       "Skip by executing a step-hop pattern of right-right-step to left-left-step, and so on, alternating back and forth.",
@@ -5707,7 +5750,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "calves"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "quads"],
     "instructions": [
       "Begin with a box of an appropriate height 1-2 feet in front of you. Stand with your feet should width apart. This will be your starting position.",
       "Perform a short squat in preparation for jumping, swinging your arms behind you.",
@@ -5744,7 +5787,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "Set up a row of cones or other small barriers, placing them a few feet apart.",
       "Stand in front of the first cone with your feet shoulder width apart. This will be your starting position.",
@@ -5843,7 +5886,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["chest"],
-    "secondaryMuscles": ["back", "shoulders", "triceps"],
+    "secondaryMuscles": ["lats", "shoulders", "triceps"],
     "instructions": [
       "Lie on a flat bench while holding a barbell using a palms down grip that is about 15 inches apart.",
       "Place the bar on your upper thighs, extend your arms and lock them while keeping a slight bend on the elbows. This will be your starting position.",
@@ -5926,8 +5969,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Either standing or seated on a high bench, grasp two stirrup cables that are attached to the high pulleys. Grab with the opposing hand so your arms are crisscrossed about you and your palms are facing forward.",
       "Keeping your chest up and maintaining a slight arch in your lower back, pull the handles down as if you were doing a regular pulldown. The range of motion will be more of an arc. During the movement, rotate your hands so that in the bottom position your palms face each other rather than forward. Return slowly to the starting position and repeat."
@@ -5945,8 +5988,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Grasp the pull-up bar with a shoulder width underhand grip.",
       "Now hang with your arms fully extended and stick your chest out and lean back. Tip: You will be leaning back throughout the entire movement. This will be your starting position.",
@@ -6021,7 +6064,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["core", "glutes", "back"],
+    "secondaryMuscles": ["core", "glutes", "lower_back"],
     "instructions": [
       "Begin with a bar on a rack at shoulder height. Rack the bar across the rear of your shoulders as you would a power squat, not on top of your shoulders. Keep your back tight, shoulder blades pinched together, and your knees slightly bent. Step back from the rack.",
       "Begin by bending at the hips, moving them back as you bend over to near parallel. Keep your back arched and your cervical spine in proper alignment.",
@@ -6038,7 +6081,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["core", "glutes", "back"],
+    "secondaryMuscles": ["core", "glutes", "lower_back"],
     "instructions": [
       "Begin with a bar on a rack at about the same height as your stomach. Bend over underneath the bar and rack the bar across the rear of your shoulders as you would a power squat, not on top of your shoulders. At the proper height, you should be near parallel to the floor when bent over. Keep your back tight, shoulder blades pinched together, and your knees slightly bent. Keep your back arched and your cervical spine in proper alignment.",
       "Begin the motion by extending through the hips with your glutes and hamstrings, and you are standing with the weight. Slowly lower the weight back to the pins returning to the starting position."
@@ -6057,7 +6100,7 @@
     "category": "strength",
     "equipment": "body",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["biceps", "back"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Hang from a chin-up bar using an underhand grip (palms facing you) that is slightly wider than shoulder width.",
       "Now bend your knees at a 90 degree angle so that the calves are parallel to the floor while the thighs remain perpendicular to it. This will be your starting position.",
@@ -6075,7 +6118,7 @@
     "mechanic": "compound",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Sit on the floor with your knees bent and feet together.",
@@ -6095,7 +6138,7 @@
     "mechanic": "compound",
     "category": "stretching",
     "equipment": "body",
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Begin in a pushup position on the floor. This will be your starting position.",
@@ -6230,7 +6273,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "back", "shoulders"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "Begin with a shoulder width, double overhand or hook grip, with the bar hanging at the mid thigh position. Your back should be straight and inclined slightly forward.",
       "Begin by aggressively extending through the hips, knees and ankles, driving the weight upward. As you do so, shrug your shoulders towards your ears.",
@@ -6247,7 +6298,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "back", "shoulders"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "Begin with a shoulder width, double overhand or hook grip, with the bar hanging just below the knees. Your back should be straight and inclined slightly forward.",
       "Begin by aggressively extending through the hips, knees and ankles, driving the weight upward. As you do so, shrug your shoulders towards your ears. As full extension is achieved, transition into the third pull by aggressively shrugging and flexing the arms with the elbows up and out.",
@@ -6268,7 +6327,16 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["core", "calves", "forearms", "glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": [
+      "core",
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "Begin with a wide grip on the bar, with an overhand or hook grip. The feet should be directly below the hips with the feet turned out. Your knees should be slightly bent, and the torso inclined forward. The spine should be fully extended and the head facing forward. The bar should be at the hips. This will be your starting position.",
       "Aggressively extend through the legs and hips. At peak extension, shrug the shoulders and allow the elbows to flex to the side.",
@@ -6286,7 +6354,16 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["core", "calves", "forearms", "glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": [
+      "core",
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "Begin with a wide grip on the bar, with an overhand or hook grip. The feet should be directly below the hips with the feet turned out. Your knees should be slightly bent, and the torso inclined forward. The spine should be fully extended and the head facing forward. The bar should be just below the knees. This will be your starting position.",
       "Aggressively extend through the legs and hips. At peak extension, shrug the shoulders and allow the elbows to flex to the side.",
@@ -6307,7 +6384,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["core", "glutes", "back"],
+    "secondaryMuscles": ["core", "glutes", "lower_back"],
     "instructions": [
       "Begin with a bar on a rack at about the same height as your stomach. Suspend the bar using chains or suspension straps.",
       "Bend over underneath the bar and rack the bar across the rear of your shoulders as you would a power squat, not on top of your traps. At the proper height, you should be near parallel to the floor when bent over. Keep your back tight, shoulder blades pinched together, and your knees slightly bent. Keep your back arched and your cervical spine in proper alignment.",
@@ -6419,8 +6496,8 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": "body",
-    "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["quads"],
+    "primaryMuscles": ["abductors"],
+    "secondaryMuscles": ["adductors"],
     "instructions": [
       "Position yourself on your hands and knees on the ground. Maintaining good posture, raise one bent knee off of the ground. This will be your starting position.",
       "Keeping the knee in a bent position, rotate the femur in an arc, attempting to make a big circle with your knee.",
@@ -6496,7 +6573,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": "exerciseBall",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["calves", "glutes"],
     "instructions": [
       "Seat yourself on the floor.",
@@ -6513,7 +6590,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes"],
     "instructions": [
       "Lie down on your back and pull both knees up to your chest.",
@@ -6531,7 +6608,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "calves"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes"],
     "instructions": [
       "Set up a row of hurdles or other small barriers, placing them a few feet apart.",
       "Stand in front of the first hurdle with your feet shoulder width apart. This will be your starting position.",
@@ -6548,7 +6625,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes", "hamstrings"],
     "instructions": [
       "Lie face down on a hyperextension bench, tucking your ankles securely under the footpads.",
@@ -6571,7 +6648,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes", "hamstrings"],
     "instructions": [
       "With someone holding down your legs, slide yourself down to the edge a flat bench until your hips hang off the end of the bench. Tip: Your entire upper body should be hanging down towards the floor. Also, you will be in the same position as if you were on a hyperextension bench but the range of motion will be shorter due to the height of the flat bench vs. that of the hyperextension bench.",
@@ -6593,7 +6670,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": "foamRoll",
-    "primaryMuscles": ["glutes"],
+    "primaryMuscles": ["abductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Lay on your side, with the bottom leg placed onto a foam roller between the hip and the knee. The other leg can be crossed in front of you.",
@@ -6655,8 +6732,8 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["lats", "shoulders"],
     "instructions": [
       "Grab a dumbbell in each hand and lie face down on an incline bench that is set to an incline that is approximately 30 degrees.",
       "Let the arms hang to your sides fully extended as they point to the floor.",
@@ -7059,8 +7136,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["lats"],
     "instructions": [
       "Position a bar in a rack to about waist height. You can also use a smith machine.",
       "Take a wider than shoulder width grip on the bar and position yourself hanging underneath the bar. Your body should be straight with your heels on the ground with your arms fully extended. This will be your starting position.",
@@ -7078,8 +7155,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Hang a rope or suspension straps from a rack or other stable object. Grasp the ends and position yourself in a supine position hanging from the ropes. Your body should be straight with your heels on the ground with your arms fully extended. This will be your starting position.",
       "Begin by flexing the elbow, pulling your chest to your hands. Retract your shoulder blades as you perform the movement.",
@@ -7100,7 +7177,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["chest", "glutes", "hamstrings", "back", "quads"],
+    "secondaryMuscles": ["chest", "glutes", "hamstrings", "lower_back", "quads", "traps"],
     "instructions": [],
     "images": ["/exercise-img/Iron_Cross/0.jpg", "/exercise-img/Iron_Cross/1.jpg"]
   },
@@ -7154,7 +7231,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "With your head and neck in a neutral position (normal position with head erect facing forward), place both of your hands on the front side of your head.",
@@ -7176,7 +7253,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "With your head and neck in a neutral position (normal position with head erect facing forward), place your left hand on the left side of your head.",
@@ -7216,7 +7293,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "other",
-    "primaryMuscles": ["glutes"],
+    "primaryMuscles": ["abductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Loop a belt, rope, or band around one of your feet, and swing that leg across your body to the opposite side, keeping the leg extended as you lay on the ground. This will be your starting position.",
@@ -7272,7 +7349,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "Place a barbell on the floor.",
       "Stand in the middle of the bar length wise.",
@@ -7360,7 +7437,7 @@
     "mechanic": "compound",
     "category": "strongman",
     "equipment": "other",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": [
       "core",
       "biceps",
@@ -7368,6 +7445,7 @@
       "forearms",
       "glutes",
       "hamstrings",
+      "traps",
       "quads",
       "shoulders"
     ],
@@ -7408,7 +7486,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back", "quads"],
+    "secondaryMuscles": ["calves", "glutes", "lower_back", "quads", "traps"],
     "instructions": [
       "Place kettlebell between your feet. To get in the starting position, push your butt back and look straight ahead.",
       "Clean the kettlebell to your shoulder. Clean the kettlebell to your shoulders by extending through the legs and hips as you raise the kettlebell towards your shoulder. The wrist should rotate as you do so.",
@@ -7444,7 +7522,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back", "shoulders"],
+    "secondaryMuscles": ["calves", "glutes", "lower_back", "shoulders", "traps"],
     "instructions": [
       "Place kettlebell between your feet. To get in the starting position, push your butt back and look straight ahead.",
       "Clean kettlebell to your shoulder. Clean the kettlebell to your shoulders by extending through the legs and hips as you raise the kettlebell towards your shoulder. The wrist should rotate as you do so.",
@@ -7464,7 +7542,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back"],
+    "secondaryMuscles": ["glutes", "lower_back"],
     "instructions": [
       "Hold a kettlebell by the handle in one hand. Stand on one leg, on the same side that you hold the kettlebell.",
       "Keeping that knee slightly bent, perform a stiff legged deadlift by bending at the hip, extending your free leg behind you for balance.",
@@ -7584,8 +7662,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "kettlebell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["quads", "glutes", "hamstrings", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["adductors", "glutes", "hamstrings", "quads", "shoulders"],
     "instructions": [
       "Place a kettlebell on the ground between your feet. Position your feet in a wide stance, and grasp the kettlebell with two hands. Set your hips back as far as possible, with your knees bent. Keep your chest and head up. This will be your starting position.",
       "Begin by extending the hips and knees, simultaneously pulling the kettlebell to your shoulders, raising your elbows as you do so. Reverse the motion to return to the starting position."
@@ -7678,8 +7756,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core", "biceps", "forearms", "shoulders", "triceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["core", "biceps", "forearms", "traps", "shoulders", "triceps"],
     "instructions": [
       "Grip the rings using a false grip, with the base of your palms on top of the rings.",
       "Begin with a movement swinging your legs backward slightly.",
@@ -7698,7 +7776,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["abductors", "lower_back"],
     "instructions": [
       "Lie down on the floor with your right leg straight. Bend your left leg and lower it across your body, holding the knee down toward the floor with your right hand. (The knee doesn't need to touch the floor if you're tight.)",
       "Place your left arm comfortably beside you and turn your head to the left. Imagine you have a weight tied to your tailbone. let your tailbone fall back toward the floor as your chest reaches in the opposite direction to stretch your lower back. Switch sides."
@@ -7734,7 +7812,7 @@
     "category": "plyometrics",
     "equipment": "body",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "calves"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "quads"],
     "instructions": [
       "Begin in a comfortable standing position with your knees slightly bent. Hold your hands in front of you, palms down with your fingertips together at chest height. This will be your starting position.",
       "Rapidly dip down into a quarter squat and immediately explode upward. Drive the knees towards the chest, attempting to touch them to the palms of the hands.",
@@ -7859,8 +7937,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Select the appropriate weight using a pulley that is above your head. Attach a rope to the cable and kneel a couple of feet away, holding the rope out in front of you with both arms extended. This will be your starting position.",
       "Initiate the movement by flexing the elbows and fully retracting your shoulders, pulling the rope toward your upper chest with your elbows out.",
@@ -7913,8 +7991,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Attach a single handle to a high pulley and make your weight selection.",
       "Kneel in front of the cable tower, taking the cable with one hand with your arm extended. This will be your starting position.",
@@ -7935,7 +8013,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["core", "hamstrings", "back"],
+    "secondaryMuscles": ["core", "hamstrings", "lower_back"],
     "instructions": [
       "Set the bar to the proper height in a power rack. Kneel behind the bar; it may be beneficial to put a mat down to pad your knees. Slide under the bar, racking it across the back of your shoulders. Your shoulder blades should be retracted and the bar tight across your back. Unrack the weight.",
       "With your head looking forward, sit back with your butt until you touch your calves.",
@@ -7952,7 +8030,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["glutes", "back", "shoulders"],
+    "secondaryMuscles": ["glutes", "lower_back", "shoulders"],
     "instructions": [
       "Position a bar into a landmine or securely anchor it in a corner. Load the bar to an appropriate weight.",
       "Raise the bar from the floor, taking it to shoulder height with both hands with your arms extended in front of you. Adopt a wide stance. This will be your starting position.",
@@ -7992,8 +8070,8 @@
     "mechanic": "compound",
     "category": "plyometrics",
     "equipment": "body",
-    "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "primaryMuscles": ["adductors"],
+    "secondaryMuscles": ["abductors", "calves", "glutes", "hamstrings", "quads"],
     "instructions": [
       "Assume a half squat position facing 90 degrees from your direction of travel. This will be your starting position.",
       "Allow your lead leg to do a countermovement inward as you shift your weight to the outside leg.",
@@ -8011,8 +8089,8 @@
     "mechanic": "compound",
     "category": "plyometrics",
     "equipment": "other",
-    "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "primaryMuscles": ["adductors"],
+    "secondaryMuscles": ["abductors", "calves", "glutes", "hamstrings", "quads"],
     "instructions": [
       "Assume a comfortable standing position, with a short box positioned next to you. This will be your starting position.",
       "Quickly dip into a quarter squat to initiate the stretch reflex, and immediately reverse direction to jump up and to the side.",
@@ -8030,8 +8108,8 @@
     "mechanic": "compound",
     "category": "plyometrics",
     "equipment": "other",
-    "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "primaryMuscles": ["adductors"],
+    "secondaryMuscles": ["abductors", "calves", "glutes", "hamstrings", "quads"],
     "instructions": [
       "Position a number of cones in a row several feet apart.",
       "Stand next to the end of the cones, facing 90 degrees to the direction of travel. This will be your starting position.",
@@ -8069,7 +8147,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": "foamRoll",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "While lying on the floor, place a foam roll under your back and to one side, just behind your arm pit. This will be your starting position.",
@@ -8259,8 +8337,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["lats"],
     "instructions": [
       "Load an appropriate weight onto the pins and adjust the seat height so that you can just reach the handles above you. Adjust the knee pad to help keep you down. Grasp the handles with a pronated grip. This will be your starting position.",
       "Pull the handles towards your torso, retracting your shoulder blades as you flex the elbow.",
@@ -8297,8 +8375,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Load an appropriate weight onto the pins and adjust the seat height so that the handles are at chest level. Grasp the handles with either a neutral or pronated grip. This will be your starting position.",
       "Pull the handles towards your torso, retracting your shoulder blades as you flex the elbow.",
@@ -8334,7 +8412,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["forearms"],
     "instructions": [
       "Load the pins to an appropriate weight. Position yourself directly between the handles.",
@@ -8414,7 +8492,16 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["core", "chest", "glutes", "hamstrings", "back", "quads", "triceps"],
+    "secondaryMuscles": [
+      "core",
+      "chest",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "traps",
+      "quads",
+      "triceps"
+    ],
     "instructions": [
       "Begin standing with the log in front of you. Grasp the handles, and begin to clean the log. As you are bent over to start the clean, attempt to get the log as high as possible, pulling it into your chest. Extend through the hips and knees to bring it up to complete the clean.",
       "Push your head back and look up, creating a shelf on your chest to rest the log. Begin the press by dipping, flexing slightly through the knees and reversing the motion. This push press will generate momentum to start the log moving vertically. Continue by extending through the elbows to press the log above your head. There are no strict rules on form, so use whatever techniques you are most efficient with. As the log is pressed, ensure that you push your head through on each repetition, looking forward.",
@@ -8430,8 +8517,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "forearms"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "forearms", "traps"],
     "instructions": [
       "Attach a climbing rope to a high beam or cross member. Below it, ensure that the smith machine bar is locked in place with the safeties and cannot move. Alternatively, a secure box could also be utilized.",
       "Stand on the bar, using the rope to balance yourself. This will be your starting position.",
@@ -8506,7 +8593,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["biceps", "back"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Sit on a low pulley row machine with a rope attachment.",
       "Grab the ends of the rope using a palms-down grip and sit with your back straight and your knees slightly bent. Tip: Keep your back almost completely vertical and your arms fully extended in front of you. This will be your starting position.",
@@ -8543,7 +8630,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "foamRoll",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": [],
     "instructions": [
       "In a seated position, place a foam roll under your lower back. Cross your arms in front of you and protract your shoulders. This will be your starting position.",
@@ -8596,7 +8683,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "other",
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie on your back with your knees bent and the soles of the feet pressed together. Have your partner hold your knees. This will be your starting position.",
@@ -8636,8 +8723,8 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Place a cambered bar underneath an exercise bench.",
       "Lie face down on the exercise bench and grab the bar using a palms down (pronated grip) that is wider than shoulder width. This will be your starting position.",
@@ -8725,7 +8812,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "body",
-    "primaryMuscles": ["glutes"],
+    "primaryMuscles": ["abductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie on your back with your legs extended.",
@@ -8764,7 +8851,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie face down with your whole body straight on a flat bench while holding a weight plate behind your head. Tip: You will need to position yourself so that your shoulders are slightly above the end of a flat bench in order for the upper chest, neck and face to be off the bench. This will be your starting position.",
@@ -8785,7 +8872,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie face up with your whole body straight on a flat bench while holding a weight plate on top of your forehead. Tip: You will need to position yourself so that your shoulders are slightly above the end of a flat bench in order for the traps, neck and head to be off the bench. This will be your starting position.",
@@ -8807,7 +8894,7 @@
     "category": "stretching",
     "equipment": "body",
     "primaryMuscles": ["glutes"],
-    "secondaryMuscles": [],
+    "secondaryMuscles": ["abductors"],
     "instructions": [
       "Lie on your back with your partner kneeling beside you.",
       "Flex the hip of one leg, raising it off of the floor. Rotate the leg so the foot is over the opposite hip, the lower leg perpendicular to your body. Your partner should hold the knee and ankle in place. This will be your starting position.",
@@ -8987,8 +9074,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Load up the T-bar Row Machine with the desired weight and adjust the leg height so that your upper chest is at the top of the pad. Tip: In some machines all you can do is stand on the appropriate step that allows you to be at a height that has the upper chest at the top of the pad.",
       "Lay face down on the pad and grab the handles. You can either use a palms down, palms up, or palms in position depending on what part of your back you want to emphasize.",
@@ -9193,7 +9280,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie facedown on an incline bench while holding a dumbbell in each hand. Your arms should be fully extended hanging down and pointing towards the floor. The palms of your hands should be facing each other. This will be your starting position.",
@@ -9211,8 +9298,8 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["core", "lats", "lower_back"],
     "instructions": [
       "Stand so your feet are shoulder width apart and your hands are on your hips.",
       "Twist at your waist until you feel a stretch. Hold for 10 to 15 seconds, then twist to the other side."
@@ -9227,8 +9314,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Using a spacing that is just about 1 inch wider than shoulder width, grab a pull-up bar with the palms of one hand facing forward and the palms of the other hand facing towards you. This will be your starting position.",
       "Now start to pull yourself up as you exhale. Tip: With the arm that has the palms facing up concentrate on using the back muscles in order to perform the movement. The elbow of that arm should remain close to the torso. With the other arm that has the palms facing forward, the elbows will be away but in line with the torso. You will concentrate on using the lats to pull your body up.",
@@ -9246,7 +9333,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "bands",
-    "primaryMuscles": ["glutes"],
+    "primaryMuscles": ["abductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Place a band around both ankles and another around both knees. There should be enough tension that they are tight when your feet are shoulder width apart.",
@@ -9297,7 +9384,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back", "quads", "shoulders", "triceps"],
+    "secondaryMuscles": ["glutes", "lower_back", "quads", "shoulders", "triceps"],
     "instructions": [
       "Begin with a loaded barbell held at the mid thigh position with a wide grip. The feet should be directly below the hips, with the feet turned out as needed. Lower the hips, with the chest up and the head looking forward. The shoulders should be just in front of the bar. This will be the starting position.",
       "Begin the pull by driving through the front of the heels, raising the bar. Transition into the second pull by extending through the hips knees and ankles, driving the bar up as quickly as possible. The bar should be close to the body.",
@@ -9313,8 +9400,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["core", "biceps", "forearms", "shoulders", "triceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["core", "biceps", "forearms", "traps", "shoulders", "triceps"],
     "instructions": [
       "Grip the rings using a false grip, with the base of your palms on top of the rings. Initiate a pull up by pulling the elbows down to your side, flexing the elbows.",
       "As you reach the top position of the pull-up, pull the rings to your armpits as you roll your shoulders forward, allowing your elbows to move straight back behind you. This puts you into the proper position to continue into the dip portion of the movement.",
@@ -9378,7 +9465,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
       "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
@@ -9401,7 +9488,7 @@
     "category": "strength",
     "equipment": "body",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back"],
+    "secondaryMuscles": ["calves", "glutes", "lower_back"],
     "instructions": [
       "Using the leg pad of a lat pulldown machine or a preacher bench, position yourself so that your ankles are under the pads, knees on the seat, and you are facing away from the machine. You should be upright and maintaining good posture.",
       "This will be your starting position. Lower yourself under control until your knees are almost completely straight.",
@@ -9440,7 +9527,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "other",
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "Using a muscle roller or a rolling pin, place the roller behind your head and against your neck. Make sure that you do not place the roller directly against the spine, but turned slightly so that the roller is pressed against the muscles to either side of the spine. This will be your starting position.",
@@ -9556,7 +9643,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "From a standing position, place a bent arm against a wall or doorway.",
@@ -9575,8 +9662,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "forearms"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "forearms", "lats"],
     "instructions": [
       "For this exercise, start out by placing a towel around a chin up bar.",
       "Grab the chin-up bar with your palm facing you. One hand will be grabbing the chin-up bar and the other will be grabbing the towel.",
@@ -9663,8 +9750,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Select an appropriate weight and adjust the knee pad to help keep you down. Grasp the handle with a pronated grip. This will be your starting position.",
       "Pull the handle down, squeezing your elbow to your side as you flex the elbow.",
@@ -9749,7 +9836,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "other",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": ["biceps"],
     "instructions": [
       "Grab onto a chinup bar with one hand, using a pronated grip. Keep your feet on the floor or a step. Allow the majority of your weight to hang from that hand, while keeping your feet on the ground. Hold for 10-20 seconds and switch sides."
@@ -9765,7 +9852,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["hamstrings", "back"],
+    "secondaryMuscles": ["hamstrings", "lower_back"],
     "instructions": [
       "Start off by lying on the floor.",
       "Extend one leg straight and pull the other knee to your chest. Hold under the knee joint to protect the kneecap.",
@@ -9806,8 +9893,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "shoulders"],
     "instructions": [
       "Choose a flat bench and place a dumbbell on each side of it.",
       "Place the right leg on top of the end of the bench, bend your torso forward from the waist until your upper body is parallel to the floor, and place your right hand on the other end of the bench for support.",
@@ -9902,7 +9989,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back", "shoulders"],
+    "secondaryMuscles": ["glutes", "lower_back", "shoulders", "traps"],
     "instructions": [
       "Place a kettlebell between your feet. As you bend down to grab the kettlebell, push your butt back and keep your eyes looking forward.",
       "Clean the kettlebell to your shoulders by extending through the legs and hips as you raise the kettlebell towards your shoulder. The wrist should rotate as you do so.",
@@ -10045,8 +10132,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "kettlebell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Place a kettlebell in front of your feet. Bend your knees slightly and then push your butt out as much as possible as you bend over to get in the starting position. Grab the kettlebell and pull it to your stomach, retracting your shoulder blade and flexing the elbow. Keep your back straight. Lower and repeat."
     ],
@@ -10064,7 +10151,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back", "triceps"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back", "traps", "triceps"],
     "instructions": [
       "Place a kettlebell between your feet. Bend your knees and push your butt back to get in the proper starting position.",
       "Look straight ahead and swing the kettlebell back between your legs.",
@@ -10127,7 +10214,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back", "shoulders"],
+    "secondaryMuscles": ["calves", "glutes", "lower_back", "shoulders"],
     "instructions": [],
     "images": [
       "/exercise-img/One-Arm_Kettlebell_Swings/0.jpg",
@@ -10142,8 +10229,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Position a bar into a landmine or in a corner to keep it from moving. Load an appropriate weight onto your end.",
       "Stand next to the bar, and take a grip with one hand close to the collar. Using your hips and legs, rise to a standing position.",
@@ -10165,7 +10252,7 @@
     "category": "strength",
     "equipment": "medicineBall",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["back", "shoulders"],
+    "secondaryMuscles": ["lats", "shoulders"],
     "instructions": [
       "Start in a standing position with a staggered, athletic stance. Hold a medicine ball in one hand, on the same side as your back leg. This will be your starting position.",
       "Begin by winding the arm, raising the medicine ball above your head. As you do so, extend through the hips, knees, and ankles to load up for the slam.",
@@ -10186,7 +10273,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["forearms", "glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": ["forearms", "glutes", "lower_back", "quads", "shoulders"],
     "instructions": [
       "Place one kettlebell between your feet.",
       "Grab the handle with one hand and raise the kettlebell rapidly, let it flip so that the ball of the kettlebell lands in the palm of your hand.",
@@ -10227,7 +10314,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["core", "calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["core", "calves", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "Stand to the side of a barbell next to its center. Bend your knees and lower your body until you are able to reach the barbell.",
       "Grasp the bar as if you were grabbing a briefcase (palms facing you since the bar is sideways). You may need a wrist wrap if you are using a significant amount of weight. This is your starting position.",
@@ -10296,7 +10383,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": ["glutes", "lower_back", "quads", "shoulders"],
     "instructions": [
       "Place one kettlebell between your feet. Clean the kettlebell by extending through the legs and hips as you raise the kettlebell towards your shoulders.",
       "Release the kettlebell as it comes up, and let it flip so that the ball of the kettlebell lands in the palms of your hands.",
@@ -10353,7 +10440,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "other",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": ["triceps"],
     "instructions": [
       "Sit upright on the floor with your partner behind you. Raise one arm straight up, and flex the elbow, attempting to touch your hand to your back. Your parner should hold your tricep and wrist. This will be your starting position.",
@@ -10370,7 +10457,7 @@
     "mechanic": "compound",
     "category": "plyometrics",
     "equipment": "medicineBall",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "Hold a medine ball with both hands and stand with your feet at shoulder width. This will be your starting position.",
@@ -10389,7 +10476,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["core", "calves", "glutes", "hamstrings", "back", "shoulders", "triceps"],
+    "secondaryMuscles": [
+      "core",
+      "calves",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "shoulders",
+      "triceps"
+    ],
     "instructions": [
       "Start out by having a barbell in front of you on the floor. Your feet should be wider than shoulder width apart from each other.",
       "Bend the knees and use a pronated grip (palms facing you) to grab the barbell. Your hands should be at a wider than shoulder width apart from each other before lifting. Once you are positioned, lift the barbell up until you can rest it on your chest.",
@@ -10409,7 +10504,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["chest", "forearms", "back", "triceps"],
+    "secondaryMuscles": ["chest", "forearms", "lats", "triceps"],
     "instructions": [
       "Standing straight up, lace your fingers together and open your palms to the ceiling. Keep your shoulders down as you extend your arms up.",
       "To create a full torso stretch, pull your tailbone down and stabilize your torso as you do this. Stretch the muscles on both the front and the back of the torso."
@@ -10425,7 +10520,7 @@
     "category": "stretching",
     "equipment": "body",
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lats"],
     "instructions": [
       "Sit upright on the floor with your partner behind you. Raise one arm straight up, and flex the elbow, attempting to touch your hand to your back. Your parner should hold your elbow and wrist. This will be your starting position.",
       "Attempt to extend the arm straight into the air as your partner prevents you from doing actually doing so.",
@@ -10601,7 +10696,7 @@
     "mechanic": "compound",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": [],
     "instructions": [
       "Lie down with your feet on the floor, heels directly under your knees.",
@@ -10674,7 +10769,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["chest", "forearms", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "forearms", "lats", "traps", "shoulders"],
     "instructions": [
       "Pin presses remove the eccentric phase of the bench press, developing starting strength. They also allow you to train a desired range of motion.",
       "The bench should be set up in a power rack. Set the pins to the desired point in your range of motion, whether it just be lockout or an inch off of your chest. The bar should be moved to the pins and prepared for lifting.",
@@ -10863,7 +10958,16 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "back", "quads", "shoulders", "triceps"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "traps",
+      "quads",
+      "shoulders",
+      "triceps"
+    ],
     "instructions": [
       "Stand with your feet slightly wider than shoulder width apart and toes pointing out slightly.",
       "Squat down and grasp bar with a closed, pronated grip. Your hands should be slightly wider than shoulder width apart outside knees with elbows fully extended.",
@@ -10961,7 +11065,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back", "quads", "shoulders", "triceps"],
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps",
+      "triceps"
+    ],
     "instructions": [
       "Begin with a loaded barbell on the floor. The bar should be close to or touching the shins, and a wide grip should be taken on the bar. The feet should be directly below the hips, with the feet turned out as needed. Lower the hips, with the chest up and the head looking forward. The shoulders should be just in front of the bar. This will be the starting position.",
       "Begin the first pull by driving through the front of the heels, raising the bar from the ground. The back angle should stay the same until the bar passes the knees.",
@@ -10985,8 +11097,9 @@
       "forearms",
       "glutes",
       "hamstrings",
-      "back",
+      "lower_back",
       "shoulders",
+      "traps",
       "triceps"
     ],
     "instructions": [
@@ -11010,7 +11123,15 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["quads", "calves", "glutes", "back", "shoulders"],
+    "secondaryMuscles": [
+      "adductors",
+      "calves",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "In the power stairs, implements are moved up a staircase. For training purposes, these can be performed with a tire or box.",
       "Begin by taking the implement with both hands. Set your feet wide, with your head and chest up. Drive through the ground with your heels, extending your knees and hips to raise the weight from the ground.",
@@ -11123,7 +11244,7 @@
     "category": "strength",
     "equipment": "cable",
     "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["hamstrings", "back"],
+    "secondaryMuscles": ["hamstrings", "lower_back"],
     "instructions": [
       "Begin standing a few feet in front of a low pulley with a rope or handle attached. Face away from the machine, straddling the cable, with your feet set wide apart.",
       "Begin the movement by reaching through your legs as far as possible, bending at the hips. Keep your knees slightly bent. Keeping your arms straight, extend through the hip to stand straight up. Avoid pulling upward through the shoulders; all of the motion should originate through the hips."
@@ -11138,8 +11259,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Grab the pull-up bar with the palms facing forward using the prescribed grip. Note on grips: For a wide grip, your hands need to be spaced out at a distance wider than your shoulder width. For a medium grip, your hands need to be spaced out at a distance equal to your shoulder width and for a close grip at a distance smaller than your shoulder width.",
       "As you have both arms extended in front of you holding the bar at the chosen grip width, bring your torso back around 30 degrees or so while creating a curvature on your lower back and sticking your chest out. This is your starting position.",
@@ -11334,7 +11455,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "exerciseBall",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["shoulders"],
     "instructions": [
       "Start off by rolling your torso forward onto the ball so your hips rest on top of the ball and become the highest point of your body.",
@@ -11401,7 +11522,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["forearms", "back"],
+    "secondaryMuscles": ["forearms", "traps"],
     "instructions": [
       "This drill teaches the delivery of the barbell to the rack position on the shoulders. Begin holding a bar in the scarecrow position, with the upper arms parallel to the floor, and the forearms hanging down. Use a hook grip, with your fingers wrapped over your thumbs.",
       "Begin by rotating the elbows around the bar, delivering the bar to the shoulders. As your elbows come forward, relax your grip. The shoulders should be protracted, providing a shelf for the bar, which should lightly contact the throat.",
@@ -11417,8 +11538,8 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "quads"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "quads", "traps"],
     "instructions": [
       "Set up in a power rack with the bar on the pins. The pins should be set to the desired point; just below the knees, just above, or in the mid thigh position. Attach bands to the base of the rack, or secure them with dumbbells. Attach the other end to the bar. You may need to choke the bands to provide tension.",
       "Position yourself against the bar in proper deadlifting position. Your feet should be under your hips, your grip shoulder width, back arched, and hips back to engage the hamstrings. Since the weight is typically heavy, you may use a mixed grip, a hook grip, or use straps to aid in holding the weight.",
@@ -11437,8 +11558,8 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "traps"],
     "instructions": [
       "Set up in a power rack with the bar on the pins. The pins should be set to the desired point; just below the knees, just above, or in the mid thigh position. Position yourself against the bar in proper deadlifting position. Your feet should be under your hips, your grip shoulder width, back arched, and hips back to engage the hamstrings. Since the weight is typically heavy, you may use a mixed grip, a hook grip, or use straps to aid in holding the weight.",
       "With your head looking forward, extend through the hips and knees, pulling the weight up and back until lockout. Be sure to pull your shoulders back as you complete the movement.",
@@ -11510,7 +11631,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["chest", "forearms", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "forearms", "lats", "traps", "shoulders"],
     "instructions": [
       "Position a bench inside a power rack, with the bar set to the correct height. Begin by anchoring bands either to band pegs or to the top of the rack. Ensure that you will be position properly under the bands. Attach the other end to the barbell.",
       "Lie on the bench, tuck your feet underneath you and arch your back. Using the bar to help support your weight, lift your shoulder off the bench and retract them, squeezing the shoulder blades together. Use your feet to drive your traps into the bench. Maintain this tight body position throughout the movement. However wide your grip, it should cover the ring on the bar.",
@@ -11531,7 +11652,15 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "forearms", "hamstrings", "back"],
+    "secondaryMuscles": [
+      "abductors",
+      "adductors",
+      "calves",
+      "forearms",
+      "glutes",
+      "hamstrings",
+      "lower_back"
+    ],
     "instructions": [
       "Begin in a power rack with a box at the appropriate height behind you. Set up the bands either on band pegs or attached to the top of the rack, ensuring they will be directly above the bar during the squat. Attach the other end to the bar.",
       "Begin by stepping under the bar and placing it across the back of the shoulders. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders. Remove the bar from the rack, creating a tight arch in your lower back, and step back into position. Place your feet wider for more emphasis on the back, glutes, adductors, and hamstrings, or closer together for more quad development. Keep your head facing forward.",
@@ -11551,8 +11680,8 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["glutes", "quads", "calves", "hamstrings"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings", "quads"],
     "instructions": [
       "Set the bar up in a power rack. Attach bands to the top of the rack, using either bands pegs or the frame itself. Attach the other end of the bands to the bar.",
       "Approach the bar so that it is centered over your feet. You feet should be about hip width apart. Bend at the hip to grip the bar at shoulder width, allowing your shoulder blades to protract. Typically, you would use an overhand grip or an over/under grip on heavier sets.",
@@ -11574,7 +11703,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["adductors", "calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Begin in a power rack with the pins and bar set at the appropriate height. After loading the bar, attach bands to the top of the rack, using either pegs or the frame itself. Attach the other end of the bands to the bar.",
       "Begin by stepping under the bar and placing it across the back of the shoulders. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders. Remove the bar from the rack, creating a tight arch in your lower back, and step back into position. Place your feet wide for more emphasis on the back, glutes, adductors, and hamstrings.",
@@ -11595,7 +11724,16 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "calves", "forearms", "back"],
+    "secondaryMuscles": [
+      "abductors",
+      "adductors",
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "quads",
+      "traps"
+    ],
     "instructions": [
       "Begin with a bar loaded on the floor inside of a power rack. Attach bands to the top of the rack, using either pegs or the frame itself. Attach the other end to the barbell.",
       "Approach the bar so that the bar intersects the middle of the feet. The feet should be set very wide, near the collars. Bend at the hips to grip the bar. The arms should be directly below the shoulders, inside the legs, and you can use a pronated grip, a mixed grip, or hook grip. Relax the shoulders, which in effect lengthens your arms.",
@@ -11740,8 +11878,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "shoulders"],
     "instructions": [
       "Stand erect while holding a barbell with a supinated grip (palms facing up).",
       "Bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up. The barbell should hang directly in front of you as your arms hang perpendicular to the floor and your torso. This is your starting position.",
@@ -11868,7 +12006,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "foamRoll",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Lay down with your back on the floor. Place a foam roll underneath your upper back, and cross your arms in front of you, protracting your shoulders. This will be your starting position.",
@@ -11885,7 +12023,7 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["forearms"],
-    "secondaryMuscles": ["core", "calves", "glutes", "hamstrings", "back", "quads"],
+    "secondaryMuscles": ["core", "calves", "glutes", "hamstrings", "lower_back", "quads", "traps"],
     "instructions": [
       "Position the frame at the starting point, and load with the appropriate weight. Standing in the center of the frame, begin by gripping the handles and driving through your heels to lift the frame. Ensure your chest and head are up and your back is straight.",
       "Immediately begin walking briskly with quick, controlled steps. Keep your chest up and head forward, and make sure you continue breathing. Bring the frame to the ground after you have reached the end point."
@@ -11901,7 +12039,7 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["forearms", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "Load the frame with the desired weight. Center yourself between the handles. You feet should be about hip width apart. Bend at the hips to grip the handles, allowing your shoulder blades to protract.",
       "With your feet and your grip set, take a big breath and then lower your hips and flex the knees. Look forward with your head, keep your chest up and your back arched, and begin driving through the heels to move the weight upward. As the weight comes up, pull your shoulder blades together as you drive your hips forward.",
@@ -11977,8 +12115,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Grab the pull-up bar with the palms facing forward using a wide grip.",
       "As you have both arms extended in front of you holding the bar at the chosen grip width, bring your torso back around 30 degrees or so while creating a curvature on your lower back and sticking your chest out. This is your starting position.",
@@ -12001,7 +12139,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back"],
+    "secondaryMuscles": ["calves", "glutes", "lower_back"],
     "instructions": [
       "Put a barbell in front of you on the ground and grab it using a pronated (palms facing down) grip that a little wider than shoulder width. Tip: Depending on the weight used, you may need wrist wraps to perform the exercise and also a raised platform in order to allow for better range of motion.",
       "Bend the knees slightly and keep the shins vertical, hips back and back straight. This will be your starting position.",
@@ -12020,7 +12158,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["forearms", "glutes", "back"],
+    "secondaryMuscles": ["forearms", "glutes", "lower_back", "traps"],
     "instructions": [
       "Begin standing while holding a bar at arm's length in front of you. You can stand on a raised platform to increase the range of motion.",
       "Begin by flexing the knees slightly, and then flex at the hip, moving your butt back as far as possible, lowering the torso as far as flexibility allows. The back should remain in absolute extension at all times, and the bar should remain in contact with the legs. If done properly, there should be heavy tension felt in the hamstrings.",
@@ -12039,8 +12177,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "forearms", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "forearms", "traps", "shoulders"],
     "instructions": [
       "Grab the rope with both hands above your head. Pull down on the rope as you take a small jump.",
       "Wrap the rope around one leg, using your feet to pinch the rope. Reach up as high as possible with your arms, gripping the rope tightly.",
@@ -12093,7 +12231,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "Attach a rope to a high pulley and make your weight selection. Stand a couple feet back from the pulley with your feet staggered and take the rope with both hands. Lean forward from the hip, keeping your back straight, with your arms extended up in front of you. This will be your starting position.",
@@ -12135,7 +12273,7 @@
     "category": "cardio",
     "equipment": "machine",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["biceps", "calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["biceps", "calves", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "To begin, seat yourself on the rower. Make sure that your heels are resting comfortably against the base of the foot pedals and that the straps are secured. Select the program that you wish to use, if applicable. Sit up straight and bend forward at the hips.",
       "There are three phases of movement when using a rower. The first phase is when you come forward on the rower. Your knees are bent and against your chest. Your upper body is leaning slightly forward while still maintaining good posture. Next, push against the foot pedals and extend your legs while bringing your hands to your upper abdominal area, squeezing your shoulders back as you do so. To avoid straining your back, use primarily your leg and hip muscles.",
@@ -12185,7 +12323,7 @@
     "category": "strength",
     "equipment": "body",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lower_back"],
     "instructions": [
       "Lie down on the floor placing your feet either under something that will not move or by having a partner hold them. Your legs should be bent at the knees.",
       "Elevate your upper body so that it creates an imaginary V-shape with your thighs. Your arms should be fully extended in front of you perpendicular to your torso and with the hands clasped. This is the starting position.",
@@ -12211,7 +12349,8 @@
       "forearms",
       "glutes",
       "hamstrings",
-      "back",
+      "lower_back",
+      "traps",
       "shoulders"
     ],
     "instructions": [
@@ -12230,8 +12369,8 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["lats"],
     "instructions": [
       "Take a pronated grip on a pull-up bar.",
       "From a hanging position, raise yourself a few inches without using your arms. Do this by depressing your shoulder girdle in a reverse shrugging motion.",
@@ -12437,8 +12576,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "shoulders"],
     "instructions": [
       "For this exercise you will need access to a low pulley row machine with a V-bar. Note: The V-bar will enable you to have a neutral grip where the palms of your hands face each other. To get into the starting position, first sit down on the machine and place your feet on the front platform or crossbar provided making sure that your knees are slightly bent and not locked.",
       "Lean over as you keep the natural alignment of your back and grab the V-bar handles.",
@@ -12498,7 +12637,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["calves"],
-    "secondaryMuscles": ["hamstrings", "back"],
+    "secondaryMuscles": ["hamstrings", "lower_back"],
     "instructions": [
       "Sit up straight on an exercise mat.",
       "Bend one knee and put that foot on the floor to stabilize the torso.",
@@ -12714,7 +12853,7 @@
     "category": "stretching",
     "equipment": "body",
     "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["quads"],
+    "secondaryMuscles": ["adductors"],
     "instructions": [
       "In a seated position with your knees bent, cross one ankle over the opposite knee. Your partner will stand behind you. Now, lean forward as your partner braces your shoulders with their hands. This will be your starting position.",
       "Attempt to push your torso back for 10-20 seconds, as your partner prevents any actual movement of your torso.",
@@ -12730,7 +12869,7 @@
     "mechanic": "compound",
     "category": "powerlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes"],
     "instructions": [
       "Set up a box in a power rack. The pins should be set at an appropriate height. Begin by stepping under the bar and placing it across the back of the shoulders, not on top of your traps. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders.",
@@ -12787,7 +12926,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "Place a neck strap on the floor at the end of a flat bench. Once you have selected the weights, sit at the end of the flat bench with your feet wider than shoulder width apart from each other. Your toes should be pointed out.",
@@ -12847,8 +12986,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "To get into the starting position, first sit down on the machine and place your feet on the front platform or crossbar provided making sure that your knees are slightly bent and not locked.",
       "Lean over as you keep the natural alignment of your back and grab the single handle attachment with your left arm using a palms-down grip.",
@@ -13071,8 +13210,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Attach a single handle to a low cable.",
       "After selecting the correct weight, stand a couple feet back with a wide-split stance. Your arm should be extended and your shoulder forward. This will be your starting position.",
@@ -13090,7 +13229,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "With shoulders relaxed and arms resting loosely at your sides (or in your lap if you're seated), gently roll your shoulders forward, up, back, and down.",
       "Reverse direction. You can do this exercise alternating shoulders or both at the same time."
@@ -13126,7 +13265,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lats"],
     "instructions": [
       "Relax your arms to your sides and raise your shoulders up toward your ears, then back down."
     ],
@@ -13167,7 +13306,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "hamstrings"],
     "instructions": [
       "Stand to the side of a cone or hurdle.",
       "Begin this drill by hopping sideways over the obstacle, rebounding out of your landing to hop back to where you started.",
@@ -13215,7 +13354,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "In a standing position, hold a pair of dumbbells at your side. This will be your starting position.",
       "Keeping your elbows slightly bent, raise the weights directly in front of you to shoulder height, avoiding any swinging or cheating.",
@@ -13237,7 +13376,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": "body",
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": [],
     "instructions": [
       "Stand next to a chair, which you may hold onto as a support. Stand on one leg. This will be your starting position.",
@@ -13254,7 +13393,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": ["hamstrings"],
     "instructions": [
       "Start off by lying on your right side and bend your right knee in front of you to stabilize the torso.",
@@ -13274,7 +13413,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": [],
+    "primaryMuscles": ["neck"],
     "secondaryMuscles": [],
     "instructions": [
       "Start with your shoulders relaxed, gently tilt your head towards your shoulder.",
@@ -13311,7 +13450,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "hamstrings"],
     "instructions": [
       "Stand to one side of the box with your left foot resting on the middle of it.",
       "To begin, jump up and over to the other side of the box, landing with your right foot on top of the box and your left foot on the floor. Swing your arms to aid your movement.",
@@ -13330,8 +13469,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "forearms", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "forearms", "traps", "shoulders"],
     "instructions": [
       "Grab the pull-up bar with the palms facing forward using a wide grip.",
       "As you have both arms extended in front of you holding the bar at a wide grip, bring your torso back around 30 degrees or so while creating a curvature on your lower back and sticking your chest out. This is your starting position.",
@@ -13352,7 +13491,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["forearms", "back"],
+    "secondaryMuscles": ["forearms", "lats"],
     "instructions": [
       "This stretch works best standing. Cross your left arm over the midline of your body and hold the left wrist in your right hand down at the level of your hips. Start the stretch with a bent left arm.",
       "Slowly straighten, pull, and lift it up to shoulder height, as pictured. Feel this stretch originate in your back, not your shoulders, and don't pull too hard on the shoulders joint. Switch sides."
@@ -13367,7 +13506,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "First lie on your left side, bending your left knee in front of you to stabilize your torso (use your abdominal muscles as well to hold you upright).",
@@ -13387,7 +13526,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["forearms", "back"],
+    "secondaryMuscles": ["forearms", "traps"],
     "instructions": [
       "With a wide stance, hold a dumbell with both hands, grasping the head of the dumbbell instead of the handle. Your arms should be extended and hanging at the waist. This will be your starting position.",
       "Raise the weight until it is above shoulder level, keeping your arms extended. Your torso and hips should remain stationary throughout the movement.",
@@ -13567,7 +13706,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "hamstrings"],
     "instructions": [
       "Arrange a line of cones in front of you. Assume a relaxed standing position, balanced on one leg. Raise the knee of your opposite leg. This will be your starting position.",
       "Hop forward, jumping and landing with the same leg over the cone.",
@@ -13588,7 +13727,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "hamstrings"],
     "instructions": [
       "Stand to the side of a cone or hurdle. To get into the start position, stand on one leg with your knee slightly bent.",
       "To begin, execute a counterjump to hop sideways over the cone.",
@@ -13630,7 +13769,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "hamstrings"],
     "instructions": [
       "Stand to the side of a box with your inside foot on top of it, close to the edge.",
       "Begin by swinging the arms upward as you push through the top leg, jumping upward as high as possible. Attempt to drive the opposite knee upward.",
@@ -13650,7 +13789,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "hamstrings"],
+    "secondaryMuscles": ["abductors", "glutes", "hamstrings"],
     "instructions": [
       "Stand with your feet shoulder width apart. This will be your starting position.",
       "Begin the movement by flexing your knees and hips, sitting back with your hips.",
@@ -13686,7 +13825,7 @@
     "category": "cardio",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "Roller skating is a fun activity which can be effective in improving cardiorespiratory fitness and muscular endurance. It requires relatively good balance and coordination. It is necessary to learn the basics of skating including turning and stopping and to wear protective gear to avoid possible injury.",
       "You can skate at a comfortable pace for 30 minutes straight. If you want a cardio challenge, do interval skating — speed skate two minutes of every five minutes, using the remaining three minutes to recover. A 150 lb person will typically burn about 175 calories in 30 minutes skating at a comfortable pace, similar to brisk walking."
@@ -13718,7 +13857,7 @@
     "category": "strength",
     "equipment": "other",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["calves", "back", "quads"],
+    "secondaryMuscles": ["calves", "traps", "quads"],
     "instructions": [
       "Attach dual handles to a sled connected by a rope or chain. Load the sled to a light weight.",
       "Face the sled, backing up until there is some tension in the line. Hold your hands directly above your head with your elbows extended. This will be your starting position.",
@@ -13792,8 +13931,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Attach dual handles to a sled connected by a rope or chain. Load the sled to an appropriate weight. Face the sled, backing up until there is some tension in the line.",
       "With a handle in each hand, bend the knees slightly, keep your head and chest up, and begin with your arms extended.",
@@ -13811,7 +13950,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["calves", "forearms", "back", "shoulders"],
+    "secondaryMuscles": ["calves", "forearms", "lats", "traps", "shoulders"],
     "instructions": [
       "You will need a tire and a sledgehammer for this exercise. Stand in front of the tire about two feet away from it with a staggered stance. Grip the sledgehammer.",
       "If you are right handed, your left hand should be at the bottom of the handle, and your right hand should be choking up closer to the head.",
@@ -13851,7 +13990,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["shoulders"],
     "instructions": [
       "With the bar at thigh level, load an appropriate weight.",
@@ -13895,8 +14034,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats", "shoulders"],
     "instructions": [
       "Set the barbell attached to the smith machine to a height that is about 2 inches below your knees.",
       "Bend your knees slightly and bring your torso forward, by bending at the waist, while keeping the back straight until it is almost parallel to the floor. Tip: Make sure that you keep the head up.",
@@ -13985,7 +14124,7 @@
     "category": "strength",
     "equipment": "machine",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back", "quads", "shoulders"],
+    "secondaryMuscles": ["glutes", "lower_back", "quads", "shoulders", "traps"],
     "instructions": [
       "Position the bar at knee height and load it to an appropriate weight.",
       "Take a pronated grip on the bar outside of shoulder width and unhook the bar from the machine. Your arms should be fully extended with your head and chest up. Your elbows should be pointed out with your shoulders back and down. Your hips should be back, loading the tension into the hamstrings. This will be your starting position.",
@@ -14071,7 +14210,7 @@
     "category": "strength",
     "equipment": "machine",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["biceps", "back"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "With the bar at thigh level, load an appropriate weight.",
       "Take a wide grip on the bar and unhook the weight, removing your off hand from the bar. Your arm should be extended as you stand up straight with your head and chest up. This will be your starting position.",
@@ -14160,7 +14299,7 @@
     "category": "strength",
     "equipment": "machine",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "To begin, first set the bar on the height that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
       "Hold on to the bar using both arms at each side (palms facing forward), unlock it and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
@@ -14180,7 +14319,7 @@
     "category": "strength",
     "equipment": "machine",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back"],
+    "secondaryMuscles": ["glutes", "lower_back"],
     "instructions": [
       "To begin, set the bar on the smith machine to a height that is around the middle of your thighs. Once the correct height is chosen and the bar is loaded, grasp the bar using a pronated (palms forward) grip that is shoulder width apart. You may need some wrist wraps if using a significant amount of weight.",
       "Lift the bar up by fully extending your arms while keeping your back straight. Stand with your torso straight and your legs spaced using a shoulder width or narrower stance. The knees should be slightly bent. This is your starting position.",
@@ -14201,7 +14340,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["biceps", "shoulders"],
     "instructions": [
       "To begin, set the bar on the smith machine to a height that is around the middle of your thighs. Once the correct height is chosen and the bar is loaded, grasp the bar using a pronated (palms forward) grip that is shoulder width apart. You may need some wrist wraps if using a significant amount of weight.",
@@ -14248,7 +14387,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["biceps", "glutes", "hamstrings", "back", "shoulders", "triceps"],
+    "secondaryMuscles": [
+      "biceps",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "shoulders",
+      "traps",
+      "triceps"
+    ],
     "instructions": [
       "Place your feet at a shoulder width stance with the barbell resting right above the connection between the toes and the rest of the foot.",
       "With a palms facing down grip, bend at the knees and keeping the back flat grab the bar using a wider than shoulder width grip. Bring the hips down and make sure that your body drops as if you were going to sit on a chair. This will be your starting position.",
@@ -14287,7 +14434,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["forearms", "glutes", "back", "quads"],
+    "secondaryMuscles": ["forearms", "glutes", "lower_back", "quads", "traps"],
     "instructions": [
       "The snatch deadlift strengthens the first pull of the snatch. Begin with a wide snatch grip with the barbell placed on the platform. The feet should be directly under the hips, with the feet turned out. Squat down to the bar, keeping the back in absolute extension with the head facing forward.",
       "Initiate the movement by driving through the heels, raising the hips. The back angle should remain the same until the bar passes the knees.",
@@ -14309,8 +14456,9 @@
       "forearms",
       "glutes",
       "hamstrings",
-      "back",
+      "lower_back",
       "shoulders",
+      "traps",
       "triceps"
     ],
     "instructions": [
@@ -14331,7 +14479,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "glutes", "back", "quads"],
+    "secondaryMuscles": ["calves", "glutes", "lower_back", "quads", "traps"],
     "instructions": [
       "With a barbell on the floor close to the shins, take a wide snatch grip. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
       "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight. Move the weight with control as you continue to above the knees.",
@@ -14348,7 +14496,7 @@
     "mechanic": "compound",
     "category": "olympic weightlifting",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["forearms", "shoulders"],
     "instructions": [
       "Begin with a wide grip, with the bar hanging at the mid thigh position. You can use a hook or overhand grip. Your back should be straight and inclined slightly forward.",
@@ -14405,7 +14553,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
       "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
@@ -14480,8 +14628,8 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["lats", "lower_back", "neck"],
     "instructions": [
       "Sit in a chair so your back is straight and your feet planted on the floor.",
       "Interlace your fingers behind your head, elbows out and your chin down.",
@@ -14499,7 +14647,15 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "hamstrings", "back", "shoulders"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "hamstrings",
+      "lower_back",
+      "shoulders",
+      "traps"
+    ],
     "instructions": [
       "With a barbell on the floor close to the shins, take an overhand grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
       "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight. Move the weight with control as you continue to above the knees.",
@@ -14556,7 +14712,16 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["calves", "forearms", "glutes", "back", "quads", "shoulders", "triceps"],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "quads",
+      "shoulders",
+      "traps",
+      "triceps"
+    ],
     "instructions": [
       "Begin with a loaded barbell on the floor. The bar should be close to or touching the shins, and a wide grip should be taken on the bar. The feet should be directly below the hips, with the feet turned out as needed. Lower the hips, with the chest up and the head looking forward. The shoulders should be just in front of the bar. This will be the starting position.",
       "Begin the first pull by driving through the front of the heels, raising the bar from the ground. The back angle should stay the same until the bar passes the knees.",
@@ -14630,7 +14795,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["adductors", "calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Set up the bands on the sleeves, secured to either band pegs, the rack, or dumbbells so that there is appropriate tension.",
       "Begin by stepping under the bar and placing it across the back of the shoulders. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders. Remove the bar from the rack, creating a tight arch in your lower back, and step back into position. Place your feet wide for more emphasis on the back, glutes, adductors, and hamstrings. Keep your head facing forward.",
@@ -14648,7 +14813,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["adductors", "calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "To set up the chains, begin by looping the leader chain over the sleeves of the bar. The heavy chain should be attached using a snap hook. Adjust the length of the lead chain so that a few links are still on the floor at the top of the movement.",
       "Begin by stepping under the bar and placing it across the back of the shoulders. Squeeze your shoulder blades together and rotate your elbows forward, attempting to bend the bar across your shoulders. Remove the bar from the rack, creating a tight arch in your lower back, and step back into position. Place your feet wide for more emphasis on the back, glutes, adductors, and hamstrings. Keep your head facing forward.",
@@ -14666,7 +14831,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "To begin, first set the bar on a rack to just below shoulder level. Position a weight plate on the ground a couple feet back from the rack. Once the bar is loaded, step under it and place the back of your shoulders across it.",
       "Hold on to the bar with both hands and lift it off the rack by first pushing with your legs and at the same time straighten your torso.",
@@ -14691,7 +14856,7 @@
     "category": "strength",
     "equipment": "bands",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "To start out, make sure that the exercise band is at an even split between both the left and right side of the body. To do this, use your hands to grab both sides of the band and place both feet in the middle of the band. Your feet should be shoulder width apart from each other.",
       "When holding the bands, they should be the same height on each side. You should be using a pronated grip (palms facing forward) and have the handles of the bands next to your face for this exercise. This is the starting position.",
@@ -15117,7 +15282,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "dumbbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["biceps", "shoulders"],
     "instructions": [
       "Grasp a dumbbell in each hand with a pronated (palms forward) grip that is slightly less than shoulder width. The dumbbells should be resting on top of your thighs. Your arms should be extended with a slight bend at the elbows and your back should be straight. This will be your starting position.",
@@ -15220,8 +15385,8 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": "body",
-    "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["quads"],
+    "primaryMuscles": ["abductors"],
+    "secondaryMuscles": ["adductors"],
     "instructions": [
       "Begin standing on one leg, holding to a vertical support.",
       "Raise the unsupported knee to 90 degrees. This will be your starting position.",
@@ -15590,7 +15755,7 @@
     "mechanic": "isolation",
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes"],
     "instructions": [
       "Start off with your feet hip-distance apart.",
@@ -15691,7 +15856,7 @@
     "category": "plyometrics",
     "equipment": "medicineBall",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["chest", "back"],
+    "secondaryMuscles": ["chest", "lats"],
     "instructions": [
       "Stand with your feet shoulder width apart holding a medicine ball in both hands. To begin, reach the medicine ball deep behind your head as you bend the knees slightly and lean back.",
       "Violently throw the ball forward, flexing at the hip and using your whole body to complete the movement.",
@@ -15763,7 +15928,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes", "hamstrings"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
@@ -15787,7 +15952,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back"],
+    "secondaryMuscles": ["glutes", "lower_back"],
     "instructions": [
       "Grasp a bar using an overhand grip (palms facing down). You may need some wrist wraps if using a significant amount of weight.",
       "Stand with your torso straight and your legs spaced using a shoulder width or narrower stance. The knees should be slightly bent. This is your starting position.",
@@ -15809,7 +15974,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "back"],
+    "secondaryMuscles": ["glutes", "lower_back"],
     "instructions": [
       "Grasp a couple of dumbbells holding them by your side at arm's length.",
       "Stand with your torso straight and your legs spaced using a shoulder width or narrower stance. The knees should be slightly bent. This is your starting position.",
@@ -15849,8 +16014,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Place a loaded barbell on the end of a bench. Standing on the bench behind the bar, take a medium, pronated grip. Stand with your hips back and chest up, maintaining a neutral spine. This will be your starting position.",
       "Row the bar to your torso by retracting the shoulder blades and flexing the elbows. Use a controlled movement with no jerking.",
@@ -15870,7 +16035,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Place a bar on the ground behind the head of an incline bench.",
       "Lay on the bench face down. With a pronated grip, pick the barbell up from the floor, keeping your arms straight. Allow the bar to hang straight down. This will be your starting position.",
@@ -15891,7 +16056,7 @@
     "category": "strength",
     "equipment": "dumbbell",
     "primaryMuscles": ["chest"],
-    "secondaryMuscles": ["back", "shoulders", "triceps"],
+    "secondaryMuscles": ["lats", "shoulders", "triceps"],
     "instructions": [
       "Place a dumbbell standing up on a flat bench.",
       "Ensuring that the dumbbell stays securely placed at the top of the bench, lie perpendicular to the bench (torso across it as in forming a cross) with only your shoulders lying on the surface. Hips should be below the bench and legs bent with feet firmly on the floor. The head will be off the bench as well.",
@@ -15913,7 +16078,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lats"],
     "secondaryMuscles": [],
     "instructions": [
       "You will start by grabbing the wide bar from the top pulley of a pulldown machine and using a wider than shoulder-width pronated (palms down) grip. Step backwards two feet or so.",
@@ -15936,7 +16101,7 @@
     "category": "plyometrics",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "hamstrings"],
     "instructions": [
       "Stand to the side of a box with your inside foot on top of it, close to the edge.",
       "Begin by swinging the arms upward as you push through the top leg, jumping upward as high as possible. Attempt to drive the opposite knee upward.",
@@ -15957,7 +16122,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["quads", "forearms", "glutes", "back"],
+    "secondaryMuscles": ["adductors", "forearms", "glutes", "lower_back", "traps", "quads"],
     "instructions": [
       "Begin with a bar loaded on the ground. Approach the bar so that the bar intersects the middle of the feet. The feet should be set very wide, near the collars. Bend at the hips to grip the bar. The arms should be directly below the shoulders, inside the legs, and you can use a pronated grip, a mixed grip, or hook grip. Relax the shoulders, which in effect lengthens your arms.",
       "Take a breath, and then lower your hips, looking forward with your head with your chest up. Drive through the floor, spreading your feet apart, with your weight on the back half of your feet. Extend through the hips and knees.",
@@ -15975,7 +16140,7 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["quads", "forearms", "glutes", "back"],
+    "secondaryMuscles": ["adductors", "forearms", "glutes", "lower_back", "traps", "quads"],
     "instructions": [
       "To deadlift with short bands, simply loop them over the bar before you start, and step into them to set up. Ensure that they under the back half of your foot, directly where you are driving into the floor.",
       "Begin with a bar loaded on the ground. Approach the bar so that the bar intersects the middle of the feet. The feet should be set very wide, near the collars. Bend at the hips to grip the bar. The arms should be directly below the shoulders, inside the legs, and you can use a pronated grip, a mixed grip, or hook grip.",
@@ -15997,7 +16162,15 @@
     "category": "powerlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["glutes", "quads", "forearms", "back"],
+    "secondaryMuscles": [
+      "abductors",
+      "adductors",
+      "forearms",
+      "glutes",
+      "lower_back",
+      "traps",
+      "quads"
+    ],
     "instructions": [
       "You can attach the chains to the sleeves of the bar, or just drape the middle over the bar so there is a greater weight increase as you lift. Attempt to keep the ends of the chains away from the plates so you don't hit them when you lower the weight.",
       "Begin with a bar loaded on the ground. Approach the bar so that the bar intersects the middle of the feet. The feet should be set very wide, near the collars. Bend at the hips to grip the bar. The arms should be directly below the shoulders, inside the legs, and you can use a pronated grip, a mixed grip, or hook grip. Relax the shoulders, which in effect lengthens your arms.",
@@ -16018,7 +16191,7 @@
     "mechanic": "compound",
     "category": "stretching",
     "equipment": "body",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["lower_back"],
     "secondaryMuscles": ["glutes", "hamstrings"],
     "instructions": [
       "To begin, lie straight and face down on the floor or exercise mat. Your arms should be fully extended in front of you. This is the starting position.",
@@ -16055,7 +16228,7 @@
     "category": "plyometrics",
     "equipment": "medicineBall",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["chest", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "lats", "shoulders"],
     "instructions": [
       "Lay on the ground on your back with your knees bent. Hold the ball with one hand, extending the arm fully behind your head. This will be your starting position.",
       "Initiate the movement at the shoulder, throwing the ball directly forward of you as you sit up, attempting to go for maximum distance.",
@@ -16075,7 +16248,7 @@
     "category": "plyometrics",
     "equipment": "medicineBall",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["chest", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "lats", "shoulders"],
     "instructions": [
       "Lay on the ground on your back with your knees bent.",
       "Hold the ball with both hands, extending the arms fully behind your head. This will be your starting position.",
@@ -16096,7 +16269,7 @@
     "category": "strength",
     "equipment": "other",
     "primaryMuscles": ["core"],
-    "secondaryMuscles": ["chest", "back", "shoulders"],
+    "secondaryMuscles": ["chest", "lower_back", "shoulders"],
     "instructions": [
       "Adjust the straps so the handles are at an appropriate height, below waist level.",
       "Begin standing and grasping the handles. Lean into the straps, moving to an incline push-up position. This will be your starting position.",
@@ -16153,8 +16326,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Suspend your straps at around chest height. Take a handle in each hand and lean back. Keep your body erect and your head and chest up. Your arms should be fully extended. This will be your starting position.",
       "Begin by flexing the elbow to initiate the movement. Protract your shoulder blades as you do so.",
@@ -16171,7 +16344,7 @@
     "category": "strength",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["glutes", "calves", "hamstrings"],
+    "secondaryMuscles": ["abductors", "adductors", "calves", "glutes", "hamstrings"],
     "instructions": [
       "Suspend your straps so the handles are 18-30 inches from the floor.",
       "Facing away from the setup, place your rear foot into the handle behind you. Keep your head looking forward and your chest up, with your knee slightly bent. This will be your starting position.",
@@ -16209,8 +16382,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "barbell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Position a bar into a landmine or in a corner to keep it from moving. Load an appropriate weight onto your end.",
       "Stand over the bar, and position a Double D row handle around the bar next to the collar. Using your hips and legs, rise to a standing position.",
@@ -16251,7 +16424,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["quads", "calves"],
+    "secondaryMuscles": ["adductors", "calves"],
     "instructions": [
       "Begin in a seated, upright position. Start by extending your legs in front of you in a V.",
       "With your hands on the floor, lean forward as far as possible. Hold for 10 to 20 seconds."
@@ -16266,8 +16439,8 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["glutes"],
-    "secondaryMuscles": [],
+    "primaryMuscles": ["abductors"],
+    "secondaryMuscles": ["glutes"],
     "instructions": [
       "To begin, sit down on the abductor machine and select a weight you are comfortable with. When your legs are positioned properly, grip the handles on each side. Your entire upper body (from the waist up) should be stationary. This is the starting position.",
       "Slowly press against the machine with your legs to move them away from each other while exhaling.",
@@ -16284,7 +16457,7 @@
     "mechanic": "isolation",
     "category": "strength",
     "equipment": "machine",
-    "primaryMuscles": ["quads"],
+    "primaryMuscles": ["adductors"],
     "secondaryMuscles": ["glutes", "hamstrings"],
     "instructions": [
       "To begin, sit down on the adductor machine and select a weight you are comfortable with. When your legs are positioned properly on the leg pads of the machine, grip the handles on each side. Your entire upper body (from the waist up) should be stationary. This is the starting position.",
@@ -16309,8 +16482,9 @@
       "forearms",
       "glutes",
       "hamstrings",
-      "back",
+      "lower_back",
       "shoulders",
+      "traps",
       "triceps"
     ],
     "instructions": [
@@ -16522,7 +16696,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["triceps"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lats"],
     "instructions": [
       "Reach your hand behind your head, grasp your elbow and gently pull. Hold for 10 to 20 seconds, then switch sides."
     ],
@@ -16578,7 +16752,7 @@
     "category": "strength",
     "equipment": "kettlebell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back", "traps"],
     "instructions": [
       "Place two kettlebells between your feet. To get in the starting position, push your butt back and look straight ahead.",
       "Clean the kettlebells to your shoulders by extending through the legs and hips as you raise the kettlebells towards your shoulders. Rotate your wrists as you do so.",
@@ -16634,8 +16808,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "kettlebell",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["traps"],
+    "secondaryMuscles": ["biceps", "lats"],
     "instructions": [
       "Place two kettlebells in front of your feet. Bend your knees slightly and then push your butt out as much as possible as you bend over to get in the starting position.",
       "Grab both kettlebells and pull them to your stomach, retracting your shoulder blades and flexing the elbows. Keep your back straight. Lower and repeat."
@@ -16653,8 +16827,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Sit down on a pull-down machine with a wide bar attached to the top pulley. Adjust the knee pad of the machine to fit your height. These pads will prevent your body from being raised by the resistance attached to the bar.",
       "Grab the pull-down bar with the palms facing your torso (a supinated grip). Make sure that the hands are placed closer than the shoulder width.",
@@ -16676,7 +16850,7 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": [],
     "instructions": [
       "Clasp fingers together with your thumbs pointing down, round your shoulders as you reach your hands forward."
@@ -16692,7 +16866,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["lower_back", "traps"],
     "instructions": [
       "While seated, bend forward to hug your thighs from underneath with both arms.",
       "Keep your knees together and your legs extended out as you bring your chest down to your knees. You can also stretch your middle back by pulling your back away from your knees as your hugging them."
@@ -16708,7 +16882,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["back"],
+    "secondaryMuscles": ["traps"],
     "instructions": [
       "Grasp a barbell with an overhand grip that is slightly less than shoulder width. The bar should be resting on the top of your thighs with your arms extended and a slight bend in your elbows. Your back should also be straight. This will be your starting position.",
       "Now exhale and use the sides of your shoulders to lift the bar, raising your elbows up and to the side. Keep the bar close to your body as you raise it. Continue to lift the bar until it nearly touches your chin. Tip: Your elbows should drive the motion, and should always be higher than your forearms. Remember to keep your torso stationary and pause for a second at the top of the movement.",
@@ -16725,7 +16899,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["shoulders"],
     "instructions": [
       "Grasp a straight bar cable attachment that is attached to a low pulley with a pronated (palms facing your thighs) grip that is slightly less than shoulder width. The bar should be resting on top of your thighs. Your arms should be extended with a slight bend at the elbows and your back should be straight. This will be your starting position.",
@@ -16743,7 +16917,7 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "bands",
-    "primaryMuscles": ["back"],
+    "primaryMuscles": ["traps"],
     "secondaryMuscles": ["shoulders"],
     "instructions": [
       "To begin, stand on an exercise band so that tension begins at arm's length. Grasp the handles using a pronated (palms facing your thighs) grip that is slightly less than shoulder width. The handles should be resting on top of your thighs. Your arms should be extended with a slight bend at the elbows and your back should be straight. This will be your starting position.",
@@ -16765,7 +16939,7 @@
     "category": "stretching",
     "equipment": null,
     "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["chest", "back"],
+    "secondaryMuscles": ["chest", "lats"],
     "instructions": [
       "Extend both hands straight above your head, palms touching.",
       "Slowly push your hands up and back, keeping your back straight."
@@ -16780,8 +16954,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Sit down on a pull-down machine with a V-Bar attached to the top pulley.",
       "Adjust the knee pad of the machine to fit your height. These pads will prevent your body from being raised by the resistance attached to the bar.",
@@ -16800,8 +16974,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Start by placing the middle of the V-bar in the middle of the pull-up bar (assuming that the pull-up station you are using does not have neutral grip handles). The V-Bar handles will be facing down so that you can hang from the pull-up bar through the use of the handles.",
       "Once you securely place the V-bar, take a hold of the bar from each side and hang from it. Stick your chest out and lean yourself back slightly in order to better engage the lats. This will be your starting position.",
@@ -16853,8 +17027,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "exerciseBall",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["glutes", "hamstrings"],
+    "primaryMuscles": ["lower_back"],
+    "secondaryMuscles": ["glutes", "hamstrings", "traps"],
     "instructions": [
       "To begin, lie down on an exercise ball with your torso pressing against the ball and parallel to the floor. The ball of your feet should be pressed against the floor to help keep you balanced. Place a weighted plate under your chin or behind your neck. This is the starting position.",
       "Slowly raise your torso up by bending at the waist and lower back. Remember to exhale during this movement.",
@@ -16937,7 +17111,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Position a lightly loaded barbell across the back of your shoulders. You could also use a weighted vest, sandbag, or other type of resistance for this exercise.",
       "The weight should be light enough that it doesn't slow you down significantly. Your feet should be just outside of shoulder width with your head and chest up. This will be your starting position.",
@@ -16954,8 +17128,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "other",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps"],
     "instructions": [
       "Attach a weight to a dip belt and secure it around your waist. Grab the pull-up bar with the palms of your hands facing forward. For a medium grip, your hands should be spaced at shoulder width. Both arms should be extended in front of you holding the bar at the chosen grip.",
       "You'll want to bring your torso back about 30 degrees while creating a curvature in your lower back and sticking your chest out. This will be your starting position.",
@@ -17034,7 +17208,7 @@
     "category": "strength",
     "equipment": "barbell",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["calves", "glutes", "hamstrings", "back"],
+    "secondaryMuscles": ["calves", "glutes", "hamstrings", "lower_back"],
     "instructions": [
       "This exercise is best performed inside a squat rack for safety purposes. To begin, first set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
       "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
@@ -17057,7 +17231,7 @@
     "category": "olympic weightlifting",
     "equipment": "barbell",
     "primaryMuscles": ["hamstrings"],
-    "secondaryMuscles": ["quads", "glutes", "back"],
+    "secondaryMuscles": ["adductors", "glutes", "lower_back"],
     "instructions": [
       "Begin with a barbell loaded on the floor. Adopt a wide stance, and then bend at the hips to grab the bar. Your hips should be as far back as possible, and your legs nearly straight. Keep your back straight, and your head and chest up. This will be your starting position.",
       "Begin the movement be engaging the hips, driving them forward as you allow the arms to hang straight. Continue until you are standing straight up, and then slowly return the weight to the starting position. For successive reps, the weight need not touch the floor."
@@ -17140,8 +17314,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Sit down on a pull-down machine with a wide bar attached to the top pulley. Make sure that you adjust the knee pad of the machine to fit your height. These pads will prevent your body from being raised by the resistance attached to the bar.",
       "Grab the bar with the palms facing forward using the prescribed grip. Note on grips: For a wide grip, your hands need to be spaced out at a distance wider than shoulder width. For a medium grip, your hands need to be spaced out at a distance equal to your shoulder width and for a close grip at a distance smaller than your shoulder width.",
@@ -17163,8 +17337,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "cable",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Sit down on a pull-down machine with a wide bar attached to the top pulley. Make sure that you adjust the knee pad of the machine to fit your height. These pads will prevent your body from being raised by the resistance attached to the bar.",
       "Grab the bar with the palms facing forward using the prescribed grip. Note on grips: For a wide grip, your hands need to be spaced out at a distance wider than your shoulder width. For a medium grip, your hands need to be spaced out at a distance equal to your shoulder width and for a close grip at a distance smaller than your shoulder width.",
@@ -17186,8 +17360,8 @@
     "mechanic": "compound",
     "category": "strength",
     "equipment": "body",
-    "primaryMuscles": ["back"],
-    "secondaryMuscles": ["biceps", "shoulders"],
+    "primaryMuscles": ["lats"],
+    "secondaryMuscles": ["biceps", "traps", "shoulders"],
     "instructions": [
       "Grab the pull-up bar with the palms facing forward using a wide grip.",
       "As you have both arms extended in front of you holding the bar, bring your torso forward and head so that there is an imaginary line from the pull-up bar to the back of your neck. This is your starting position.",
@@ -17248,8 +17422,8 @@
     "mechanic": null,
     "category": "stretching",
     "equipment": null,
-    "primaryMuscles": ["glutes"],
-    "secondaryMuscles": ["hamstrings", "back"],
+    "primaryMuscles": ["abductors"],
+    "secondaryMuscles": ["glutes", "hamstrings", "lower_back"],
     "instructions": [
       "Lie on your back with your arms extended out to the sides and your legs straight. This will be your starting position.",
       "Lift one leg and quickly cross it over your body, attempting to touch the ground near the opposite hand.",
@@ -17342,7 +17516,15 @@
     "category": "strongman",
     "equipment": "other",
     "primaryMuscles": ["quads"],
-    "secondaryMuscles": ["core", "glutes", "calves", "hamstrings", "back"],
+    "secondaryMuscles": [
+      "core",
+      "abductors",
+      "adductors",
+      "calves",
+      "glutes",
+      "hamstrings",
+      "lower_back"
+    ],
     "instructions": [
       "The yoke is usually done with a yoke apparatus, but is sometimes seen with refrigerators or other heavy objects.",
       "Begin by racking the apparatus across the back of the shoulders. With your head looking forward and back arched, lift the yoke by driving through the heels.",

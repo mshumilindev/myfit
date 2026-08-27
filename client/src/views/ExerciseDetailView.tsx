@@ -13,11 +13,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   canonicalExerciseName,
+  customExercises,
   muscleInfoByName,
   richExerciseByName,
   type MuscleGroup,
 } from '../data/exercises';
 import { equipmentIconName, equipmentLabel, MuscleBodyFigure } from '../components/Muscle';
+import { CustomEditor } from '../components/ExerciseGallery';
 import {
   addExercise,
   estimatedOneRepMaxSet,
@@ -25,9 +27,11 @@ import {
   recordWeight,
   startWorkout,
   topSet,
+  updateCatalogExercise,
   useStore,
 } from '../store';
 import { useT } from '../i18n';
+import { getRole } from '../api';
 import { Icon, useIsDesktop } from '../ui';
 import type { Shell } from '../App';
 
@@ -56,6 +60,13 @@ export function ExerciseDetailView({
   const info = muscleInfoByName(canonical);
   const rich = richExerciseByName(canonical);
   const hasBaseRecord = !!rich;
+
+  // Custom ("My exercises") entry, if any — editable in place. Recomputed each
+  // render so an edit (which emits) refreshes it; not memoised on a stale key.
+  const custom =
+    customExercises().find((e) => e.name.trim().toLowerCase() === canonical.trim().toLowerCase()) ??
+    null;
+  const [editing, setEditing] = useState(false);
 
   const equipment = info?.equipment ?? rich?.equipment ?? null;
   const category = rich?.category ?? null;
@@ -325,6 +336,40 @@ export function ExerciseDetailView({
     </div>
   );
 
+  // Edit affordance — only for a custom ("My exercises") entry, and only for a
+  // role that can author the shared catalog (same gate as the gallery).
+  const canEdit = getRole() === 'admin' || getRole() === 'trainer';
+  const editButton =
+    custom && canEdit ? (
+      <button className="btn btn-secondary" onClick={() => setEditing(true)}>
+        <Icon name="pencil-simple" />
+        {t.libEditExercise}
+      </button>
+    ) : null;
+  const editorSheet =
+    editing && custom ? (
+      <CustomEditor
+        init={{
+          id: custom.id,
+          name: custom.name,
+          primary: custom.primaryMuscle,
+          secondary: custom.secondaryMuscles,
+          equipment: custom.equipment,
+        }}
+        onClose={() => setEditing(false)}
+        onSave={(v) => {
+          updateCatalogExercise(custom.id, {
+            name: v.name.trim(),
+            kind: 'strength',
+            primaryMuscle: v.primary,
+            secondaryMuscles: v.secondary,
+            equipment: v.equipment,
+          });
+          setEditing(false);
+        }}
+      />
+    ) : null;
+
   // --- phone (RICH-1 / SPARSE-1) --------------------------------------------
   if (!isDesktop) {
     return (
@@ -341,12 +386,14 @@ export function ExerciseDetailView({
           {instructions}
           {formPhotos}
           {historySection}
+          {editButton}
           <button className="btn btn-primary exd-add" onClick={addToSession}>
             <Icon name="plus" />
             {t.addToTodaySession}
           </button>
         </div>
         {lightbox}
+        {editorSheet}
       </div>
     );
   }
@@ -377,6 +424,7 @@ export function ExerciseDetailView({
             >
               {t.fullHistory}
             </button>
+            {editButton}
             <button className="btn btn-primary" onClick={addToSession}>
               <Icon name="plus" />
               {t.addToTodaySession}
@@ -385,6 +433,7 @@ export function ExerciseDetailView({
         </div>
       </div>
       {lightbox}
+      {editorSheet}
     </div>
   );
 }

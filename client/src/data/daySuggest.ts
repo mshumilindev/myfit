@@ -15,13 +15,19 @@ const MUSCLE_DAY: Record<string, TrainingDay> = {
   shoulders: 'push',
   triceps: 'push',
   back: 'pull',
+  lats: 'pull',
+  traps: 'pull',
+  lower_back: 'pull',
   biceps: 'pull',
   forearms: 'pull',
   quads: 'legs',
+  adductors: 'legs',
   hamstrings: 'legs',
   glutes: 'legs',
+  abductors: 'legs',
   calves: 'legs',
   core: 'core',
+  // `neck` intentionally omitted — it doesn't belong to a push/pull/legs split.
   fullbody: 'full',
 };
 

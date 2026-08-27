@@ -11693,6 +11693,7 @@ h6 {
 /* --- Progress · by muscle (MG-3/MG-4) ------------------------------------- */
 .seg3 {
   display: flex;
+  flex: none;
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: inset 0 0 0 1px var(--color-neutral-800);
@@ -13464,6 +13465,19 @@ button.exd-media {
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+/* Muscle-chip line break — on mobile, pushes the secondary (grey) chips onto
+   their own row after the primaries; inert on desktop (chips stay inline). */
+.chip-break {
+  display: none;
+}
+@media (max-width: 719px) {
+  .chip-break {
+    display: block;
+    flex-basis: 100%;
+    width: 100%;
+    height: 0;
+  }
+}
 .mworked-chip {
   display: inline-flex;
   align-items: center;
@@ -13476,6 +13490,11 @@ button.exd-media {
 }
 .mworked-count {
   font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-500);
+}
+/* Secondary-only muscle (fractional set counting): dim the label so it reads as
+   assisted, not directly trained — matching the grey figure the icon renders. */
+.mworked-chip.secondary {
   color: var(--color-neutral-500);
 }
 
@@ -13731,10 +13750,16 @@ button.exd-media {
 /* No gap to cancel here — .session-live .pane-main already has gap:0, so the
    bar sits flush under the hero. (A negative margin would tuck it under the
    pinned, opaque hero.) */
-/* Pin the live-session hero to the top of the scroll, matching the compact
-   hero that stays fixed above every other page during a session. A solid
-   ground keeps scrolled content from bleeding through the translucent photo. */
-.session-live .session-top.live-toolbar {
+/* The hero and the current/rest strips pin together to the top of the scroll,
+   so both stay visible while the exercise list scrolls under them. Off a live
+   session the wrapper is display:contents and has no layout effect at all. A
+   solid ground keeps scrolled content from bleeding through the translucent
+   hero photo. */
+.session-head-wrap {
+  display: contents;
+}
+.session-live .session-head-wrap {
+  display: block;
   position: sticky;
   top: 0;
   z-index: 6;
@@ -13957,7 +13982,7 @@ button.exd-media {
   font-size: 16px;
 }
 
-/* Floating Finish button, shown only while the inline Finish is fully off-screen. */
+/* Floating Finish button, shown until the Discard row scrolls into view. */
 .session-finish-fab {
   position: fixed;
   right: 20px;

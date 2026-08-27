@@ -722,7 +722,7 @@ export function ExerciseGallery({
   );
 }
 
-interface CustomEditState {
+export interface CustomEditState {
   id: string | null;
   name: string;
   primary: MuscleGroup | null;
@@ -732,7 +732,7 @@ interface CustomEditState {
 
 /** Create / edit a custom exercise: name + primary + secondary + equipment.
  *  Save is the confirmation step (an edit only lands when Save is pressed). */
-function CustomEditor(props: {
+export function CustomEditor(props: {
   init: CustomEditState;
   onClose: () => void;
   onSave: (v: CustomEditState) => void;

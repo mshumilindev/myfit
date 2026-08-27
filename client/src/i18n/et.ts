@@ -239,6 +239,12 @@ export const et: Strings = {
     glutes: 'Tuharad',
     calves: 'Sääred',
     core: 'Kõhulihased',
+    lats: 'Latid',
+    traps: 'Trapets',
+    lower_back: 'Alaselg',
+    adductors: 'Lähendajad',
+    abductors: 'Eemaldajad',
+    neck: 'Kael',
     fullbody: 'Kogu keha',
     cardio: 'Kardio',
   } as Record<string, string>,
@@ -307,7 +313,7 @@ export const et: Strings = {
     (empty ? empty + ' sel nädalal tööta' : '') +
     (empty && top ? ', ' : '') +
     (top ? top + ' — ' + share + ' kõigest' : '') +
-    '. Väide, mitte hinne — tasakaalu hinnet pole.',
+    '.',
   whereYouCanDoIt: 'Kus seda teha saad',
   inventoryNote:
     'Inventar on see, mille igal saalil linnutasid — keegi ei auditeeri seda. Ilma inventarita saali ei märgita kunagi puudulikuks.',
