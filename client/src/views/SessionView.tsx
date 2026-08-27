@@ -305,9 +305,7 @@ export function SessionView(props: {
   /** Share-summary bottom sheet open (AC-3.2). */
   const [shareOpen, setShareOpen] = useState(false);
   /** Whether the inline Finish button is on screen — it owns visibility over the FAB. */
-  const [dockedFinishInView, setDockedFinishInView] = useState(
-    () => typeof IntersectionObserver === 'undefined',
-  );
+  const [dockedFinishInView, setDockedFinishInView] = useState(false);
   const dockedFinishRef = useRef<HTMLButtonElement>(null);
   /** Past workout cards start collapsed for reading (SS-3). */
   const [expandedPast, setExpandedPast] = useState<string[]>([]);
@@ -344,6 +342,13 @@ export function SessionView(props: {
   // On mobile the floating Finish is mutually exclusive with the inline Finish:
   // hide the FAB as soon as any pixel of the inline button enters the viewport,
   // and show it again only when the inline button is fully outside.
+  //
+  // The session content scrolls inside a height-locked inner container, not the
+  // window. IntersectionObserver with the viewport root is unreliable for such
+  // nested scrollers on iOS WebKit (the callback simply never fires, so the FAB
+  // never hid). Instead we re-measure on scroll, listening in the CAPTURE phase
+  // — scroll events don't bubble, but capture sees them from any scroll
+  // container — throttled to one read per frame.
   useLayoutEffect(() => {
     const el = dockedFinishRef.current;
     if (!el) return;
@@ -357,26 +362,22 @@ export function SessionView(props: {
       const height = window.innerHeight || document.documentElement.clientHeight;
       setDockedFinishInView(rectHasVisiblePixels(rect, { width, height }));
     };
+    let raf = 0;
+    const onScrollOrResize = () => {
+      if (raf) return;
+      raf = window.requestAnimationFrame(() => {
+        raf = 0;
+        measure();
+      });
+    };
     measure();
-    if (typeof IntersectionObserver === 'undefined') {
-      window.addEventListener('scroll', measure, { passive: true });
-      window.addEventListener('resize', measure);
-      return () => {
-        window.removeEventListener('scroll', measure);
-        window.removeEventListener('resize', measure);
-      };
-    }
-    const io = new IntersectionObserver(
-      ([e]) => {
-        setDockedFinishInView(e.intersectionRect.width > 0 && e.intersectionRect.height > 0);
-      },
-      {
-        rootMargin: '0px',
-        threshold: 0,
-      },
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
+    window.addEventListener('resize', onScrollOrResize);
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScrollOrResize, { capture: true });
+      window.removeEventListener('resize', onScrollOrResize);
+    };
   }, [live, workout?.autoFinished, summary]);
 
   // Records BEFORE this workout, per exercise name — for PR detection.
