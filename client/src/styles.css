@@ -752,52 +752,68 @@ i > svg {
   pointer-events: none;
 }
 
-.toast {
+.toast,
+.snackbar,
+.notice {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--color-neutral-600);
   box-shadow: var(--shadow-md);
+  font-size: 13px;
+  color: var(--color-neutral-200);
   pointer-events: auto;
 }
-
-.toast.ok {
-  background: var(--color-ok-tint);
-  color: var(--color-ok-text);
-}
-
-.toast.ok i {
-  color: var(--color-ok);
-  font-size: 17px;
-}
-
-.toast.danger {
-  background: var(--color-danger-tint);
-  color: var(--color-danger-text);
-}
-
-.toast.danger i {
-  color: var(--color-danger);
-  font-size: 17px;
-}
-
-/* "New build is live" plate — persists until the user taps Reload. */
-.toast.update {
-  background: var(--color-surface);
-  color: var(--color-neutral-200);
-  border: 1px solid var(--color-neutral-800);
-}
-.toast.update i {
-  color: var(--color-accent);
+.toast > i,
+.snackbar > i,
+.notice > i {
   font-size: 17px;
   flex: none;
+  color: var(--color-neutral-400);
 }
-.toast.update .update-text {
+
+/* Semantic accent = left bar + icon tint; the card stays the same for every
+   kind, so toast/snackbar/update/notice read as one family (not four looks). */
+.toast.ok {
+  border-left-color: var(--color-ok);
+}
+.toast.ok > i {
+  color: var(--color-ok);
+}
+.toast.danger {
+  border-left-color: var(--color-danger);
+}
+.toast.danger > i {
+  color: var(--color-danger);
+}
+.toast.update {
+  border-left-color: var(--color-accent);
+}
+.toast.update > i {
+  color: var(--color-accent);
+}
+.snackbar {
+  border-left-color: var(--color-accent);
+}
+.snackbar > i {
+  color: var(--color-accent);
+}
+.notice {
+  border-left-color: var(--color-accent);
+}
+.notice > i {
+  color: var(--color-accent);
+}
+
+/* Functional extras (behaviour unchanged). */
+.toast .update-text {
   flex: 1;
 }
-.toast.update .update-reload {
+.toast .update-reload {
   background: none;
   border: none;
   color: var(--color-accent);
@@ -807,30 +823,9 @@ i > svg {
   padding: 0;
   flex: none;
 }
-
-.snackbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 14px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  font-size: 13px;
-  color: var(--color-neutral-300);
-  pointer-events: auto;
-}
-
-.snackbar i {
-  font-size: 16px;
-  color: var(--color-danger);
-  flex: none;
-}
-
 .snackbar .snack-text {
   flex: 1;
 }
-
 .snackbar .snack-undo {
   color: var(--color-accent);
   background: none;
@@ -839,7 +834,6 @@ i > svg {
   cursor: pointer;
   padding: 0;
 }
-
 .snackbar .snack-count {
   font-size: 11px;
   color: var(--color-neutral-600);
@@ -10748,28 +10742,6 @@ h6 {
 }
 
 /* --- Notice strip (AC-ROLE-10, AC-PLAN-11) ------------------------------ */
-.notice-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.notice {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 11px 13px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-divider);
-  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
-}
-
-.notice > i {
-  font-size: 18px;
-  color: var(--color-accent);
-  flex: none;
-}
-
 .notice-text {
   flex: 1;
   min-width: 0;

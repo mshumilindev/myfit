@@ -608,9 +608,6 @@ export function App() {
             onDiscard={discardBlockingChange}
           />
         )}
-        {authed && notices.some((n) => !n.read) && (
-          <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
-        )}
         {open && activeOverlay?.screen !== 'session' && (
           <LiveHero
             workout={open}
@@ -730,6 +727,9 @@ export function App() {
           </nav>
         )}
         <div className="toast-holder">
+          {authed && notices.some((n) => !n.read) && (
+            <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
+          )}
           {updateReady && <UpdatePlate />}
           {snack && <Snackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
           {toasts.map((tst) => (
@@ -989,7 +989,7 @@ function noticeIcon(kind: string): string {
 function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void }) {
   const { t } = useT();
   return (
-    <div className="notice-strip">
+    <>
       {props.notices.map((n) => (
         <div key={n.id} className="notice" role="status">
           <Icon name={noticeIcon(n.kind)} />
@@ -999,6 +999,6 @@ function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void
           </button>
         </div>
       ))}
-    </div>
+    </>
   );
 }
