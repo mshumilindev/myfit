@@ -4,11 +4,41 @@
  * that still names the person (AC-TRAINER-08). No set-writing route (AC-ROLE-05).
  */
 import { onCall } from 'firebase-functions/v2/https';
-import { db, requireRole, HttpsError, newId, displayName, recordAudit, type UserDoc } from './lib';
+import {
+  db,
+  requireRole,
+  HttpsError,
+  newId,
+  newToken,
+  displayName,
+  parseNameInput,
+  usernameRef,
+  createNotice,
+  recordAudit,
+  type UserDoc,
+} from './lib';
 import { memberDetail } from './admin';
 import { listUserWorkouts, workoutStrengthStats, lastSession } from './aggregates';
 
 const DAY = 24 * 60 * 60 * 1000;
+const INVITE_TTL = 7 * DAY;
+const USERNAME_MAX = 64;
+
+function cleanUsername(value: unknown): string {
+  return typeof value === 'string' ? value.trim().slice(0, USERNAME_MAX) : '';
+}
+
+interface InviteDoc {
+  token: string;
+  userId: string;
+  createdBy: string;
+  kind: 'invite';
+  createdAt: number;
+  expiresAt: number;
+  claimedAt: number | null;
+  revokedAt: number | null;
+  reRequestedAt: number | null;
+}
 
 async function usersById(id: string): Promise<UserDoc | null> {
   const s = await db.collection('users').doc(id).get();
@@ -57,6 +87,77 @@ export const trainerClients = onCall(async (req) => {
     }),
   );
   return { clients: rows, serverTime: now };
+});
+
+export const trainerCreateClient = onCall(async (req) => {
+  const { uid, user: trainer } = await requireRole(req, ['trainer']);
+  const body = (req.data ?? {}) as Record<string, unknown>;
+  const names = parseNameInput(body);
+  const username = cleanUsername(body.username);
+  if (names.firstName.length < 2) throw new HttpsError('invalid-argument', 'first name required');
+  if (username.length < 2) throw new HttpsError('invalid-argument', 'valid username required');
+
+  const id = newId();
+  await db.runTransaction(async (tx) => {
+    const uSnap = await tx.get(usernameRef(username.toLowerCase()));
+    if (uSnap.exists) {
+      const holder = await usersById((uSnap.data() as { userId: string }).userId);
+      throw new HttpsError('already-exists', 'username taken', {
+        holder: holder ? displayName(holder) : null,
+      });
+    }
+    const now = Date.now();
+    const doc: Omit<UserDoc, 'id'> = {
+      username,
+      usernameLower: username.toLowerCase(),
+      firstName: names.firstName,
+      lastName: names.lastName,
+      role: 'member',
+      status: 'invited',
+      trainerId: uid,
+      avatarExt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    tx.set(db.collection('users').doc(id), doc);
+    tx.set(usernameRef(username.toLowerCase()), { userId: id });
+  });
+
+  const now = Date.now();
+  const invite: InviteDoc = {
+    token: newToken(),
+    userId: id,
+    createdBy: uid,
+    kind: 'invite',
+    createdAt: now,
+    expiresAt: now + INVITE_TTL,
+    claimedAt: null,
+    revokedAt: null,
+    reRequestedAt: null,
+  };
+  await db.collection('invites').doc(invite.token).set(invite);
+  await createNotice(id, 'trainer-assigned', displayName(trainer), displayName(trainer));
+  const client = (await usersById(id))!;
+  return {
+    client: {
+      id: client.id,
+      name: displayName(client),
+      avatar: false,
+      lastSessionAt: null,
+      live: false,
+      liveStartedAt: null,
+      liveSets: 0,
+      liveVolumeKg: 0,
+      totalSessions: 0,
+      weekSessions: 0,
+      weekVolumeKg: 0,
+      weekDeltaPct: null,
+      programName: null,
+      programWeek: null,
+      dormantDays: null,
+    },
+    invite,
+  };
 });
 
 export const trainerClientDetail = onCall(async (req) => {

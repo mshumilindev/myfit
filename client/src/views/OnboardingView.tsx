@@ -11,6 +11,7 @@ import {
 import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   searchGyms,
+  searchNearbyGyms,
   haversineM,
   fmtDistance,
   cacheAddress,
@@ -33,6 +34,7 @@ interface InviteInfo {
   inviterId: string | null;
   inviterAvatar: boolean;
   inviterAvatarUrl: string | null;
+  username: string | null;
   name: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -44,6 +46,7 @@ interface InviteInfo {
 interface Resume {
   step: number;
   name: string;
+  username?: string;
   firstName?: string;
   lastName?: string;
   gymId?: string;
@@ -127,6 +130,7 @@ export function OnboardingView({
   const [step, setStep] = useState(0);
   const [firstName, setFirstName] = useState(saved?.firstName ?? savedName.firstName);
   const [lastName, setLastName] = useState(saved?.lastName ?? savedName.lastName);
+  const [username, setUsername] = useState(saved?.username ?? '');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -136,8 +140,8 @@ export function OnboardingView({
 
   // AC-ONB-06: persist on every meaningful change.
   function persist(patch: Partial<Resume>): void {
-    const cur = loadResume(token) ?? { step, name, firstName, lastName };
-    const next = { ...cur, step, name, firstName, lastName, ...patch };
+    const cur = loadResume(token) ?? { step, name, username, firstName, lastName };
+    const next = { ...cur, step, name, username, firstName, lastName, ...patch };
     localStorage.setItem(resumeKey(token), JSON.stringify(next));
   }
 
@@ -149,6 +153,7 @@ export function OnboardingView({
           const invited = splitPersonName(i.name ?? '');
           setFirstName((n) => n || i.firstName || invited.firstName);
           setLastName((n) => n || i.lastName || invited.lastName);
+          setUsername((n) => n || i.username || i.name || '');
         }
       })
       .catch(() => setInfo('error'));
@@ -214,7 +219,7 @@ export function OnboardingView({
       const res = await callFn<AuthPayload>('claim', {
         token,
         password,
-        username: name,
+        username: username.trim(),
         firstName,
         lastName,
       });
@@ -337,6 +342,13 @@ export function OnboardingView({
             onChange={(e) => setLastName(e.target.value)}
           />
           <input
+            className="input"
+            placeholder={t.username}
+            value={username}
+            onBlur={() => persist({})}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
             className={`input${error ? ' error' : ''}`}
             type="password"
             placeholder={t.passwordMin}
@@ -357,7 +369,12 @@ export function OnboardingView({
           )}
           <button
             className="btn btn-primary btn-big"
-            disabled={busy || firstName.trim().length < 2 || password.length < 6}
+            disabled={
+              busy ||
+              firstName.trim().length < 2 ||
+              username.trim().length < 2 ||
+              password.length < 6
+            }
             onClick={async () => {
               // Already claimed on a previous run → just advance.
               if (currentUid() && loadResume(token)) {
@@ -401,6 +418,7 @@ export function OnboardingView({
               setGym({
                 step: 4,
                 name,
+                username,
                 firstName,
                 lastName,
                 gymId: g.id,
@@ -410,7 +428,7 @@ export function OnboardingView({
               });
               persist({ step: 4, gymId: g.id, gymName: g.name, gymLat: g.lat, gymLng: g.lng });
             } else {
-              setGym({ step: 4, name, firstName, lastName });
+              setGym({ step: 4, name, username, firstName, lastName });
               persist({ step: 4, gymId: undefined, gymName: undefined });
             }
             setStep(4);
@@ -658,16 +676,14 @@ function GymStep({
   useEffect(() => {
     if (!coords) return;
     const ctrl = new AbortController();
-    void searchGyms(t.nearbyQuery, coords, {}, [], ctrl.signal, {
-      onResults: (m) => {
-        if (!ctrl.signal.aborted) setNearby([...m]);
-      },
-      onProvider: () => {},
-    }).finally(() => {
-      if (!ctrl.signal.aborted) setNearbyDone(true);
-    });
+    void searchNearbyGyms(coords, 2000, [], ctrl.signal)
+      .then((m) => {
+        if (!ctrl.signal.aborted) setNearby(m);
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setNearbyDone(true);
+      });
     return () => ctrl.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coords]);
 
   const sorted = useMemo(() => {

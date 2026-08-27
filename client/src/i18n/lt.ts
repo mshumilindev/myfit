@@ -785,6 +785,8 @@ export const lt: Strings = {
   adminRecent: 'Naujausios sesijos',
   trMyClients: 'Mano klientai',
   trClientsTab: 'Klientai',
+  trAddClient: 'Pridėti klientą',
+  trSendClientLink: 'Nusiųsk šią nuorodą klientui. Slaptažodį jis susikurs per onboardingą.',
   trSummary: (n, live) => `${n} priskirta · ${live} dabar treniruojasi`,
   trReadOnly: (n) =>
     `Tik skaitymui — žiūri ${n} duomenis kaip treneris. Čia nieko negalima redaguoti, o klientas mato, kad profilis buvo atvertas.`,
@@ -792,9 +794,8 @@ export const lt: Strings = {
   trLastSession: (d) => `Paskutinė sesija ${d}`,
   trDormantDays: (d) => `Neaktyvus · ${d} d.`,
   trEmptyTitle: 'Klientų dar nepriskirta',
-  trEmptyBody:
-    'Administratorius nusprendžia, ką treniruoji. Kai žmogus priskiriamas, jis čia pasirodo su visa istorija — tau nieko daryti nereikia.',
-  trFooterNote: 'Klientus priskiria administratorius — kitų žmonių ieškoti negalima.',
+  trEmptyBody: 'Sukurk klientą ir nusiųsk jam pakvietimą. Jo istorija čia atsiras po onboardingo.',
+  trFooterNote: 'Čia matomi tik tavo klientai: sukurti tavęs arba priskirti administratoriaus.',
   trWeekAcrossClients: 'Ši savaitė tarp tavo klientų',
   trClient: 'Klientas',
   trVsLastWeek: 'palyginti su praėjusia savaite',

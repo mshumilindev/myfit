@@ -13,7 +13,7 @@ import type { Gym } from '../types';
 /** Google Places key from Vite env — enables Google photos/hours everywhere. */
 const GOOGLE_KEY = import.meta.env.VITE_GOOGLE_PLACES_KEY as string | undefined;
 
-export type ProviderId = 'local' | 'osm' | 'google' | 'foursquare';
+export type ProviderId = 'local' | 'osm' | 'overpass' | 'google' | 'foursquare';
 
 export interface PlaceResult {
   /** Stable within a provider; used only for React keys before merge. */
@@ -231,6 +231,106 @@ const osmProvider: Provider = async ({ query, coords, signal }) => {
   for (const l of lists) mergeResults(merged, l);
   return merged;
 };
+
+export function bboxAround(coords: Coords, radiusM: number): [number, number, number, number] {
+  const latDelta = radiusM / 111_320;
+  const lngDelta = radiusM / (111_320 * Math.max(0.1, Math.cos((coords.lat * Math.PI) / 180)));
+  return [
+    coords.lat - latDelta,
+    coords.lng - lngDelta,
+    coords.lat + latDelta,
+    coords.lng + lngDelta,
+  ];
+}
+
+async function overpassNearbyGyms(
+  coords: Coords,
+  radiusM: number,
+  signal: AbortSignal,
+): Promise<PlaceResult[]> {
+  const [south, west, north, east] = bboxAround(coords, radiusM);
+  const bbox = `${south},${west},${north},${east}`;
+  const query = `
+    [out:json][timeout:8];
+    (
+      node["name"]["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
+      way["name"]["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
+      relation["name"]["leisure"~"^(fitness_centre|sports_centre)$"](${bbox});
+      node["name"]["amenity"="gym"](${bbox});
+      way["name"]["amenity"="gym"](${bbox});
+      relation["name"]["amenity"="gym"](${bbox});
+      node["name"]["sport"~"^(fitness|gym|weightlifting|crossfit)$"](${bbox});
+      way["name"]["sport"~"^(fitness|gym|weightlifting|crossfit)$"](${bbox});
+      relation["name"]["sport"~"^(fitness|gym|weightlifting|crossfit)$"](${bbox});
+    );
+    out center tags 50;
+  `;
+  const res = await fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    signal,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: new URLSearchParams({ data: query }),
+  });
+  if (!res.ok) throw new Error(`overpass ${res.status}`);
+  const data = (await res.json()) as {
+    elements?: Array<{
+      type: string;
+      id: number;
+      lat?: number;
+      lon?: number;
+      center?: { lat?: number; lon?: number };
+      tags?: Record<string, string | undefined>;
+    }>;
+  };
+  return (data.elements ?? [])
+    .map((el): PlaceResult | null => {
+      const lat = el.lat ?? el.center?.lat;
+      const lng = el.lon ?? el.center?.lon;
+      const name = el.tags?.name?.trim();
+      if (!name || lat === undefined || lng === undefined) return null;
+      const address = [
+        [el.tags?.['addr:street'], el.tags?.['addr:housenumber']].filter(Boolean).join(' '),
+        el.tags?.['addr:city'],
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return {
+        key: `overpass:${el.type}${el.id}`,
+        name,
+        lat,
+        lng,
+        address: address || undefined,
+        externalId: `osm:${el.type}${el.id}`,
+        wikimediaCommons: el.tags?.wikimedia_commons,
+        brandWikidata: el.tags?.['brand:wikidata'],
+        sources: ['overpass'] as ProviderId[],
+      };
+    })
+    .filter((r): r is PlaceResult => !!r)
+    .filter((r) => haversineM(coords, r) <= radiusM)
+    .sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+}
+
+export async function searchNearbyGyms(
+  coords: Coords,
+  radiusM: number,
+  savedGyms: Gym[],
+  signal: AbortSignal,
+): Promise<PlaceResult[]> {
+  const local = savedGyms
+    .filter((g) => haversineM(coords, g) <= radiusM)
+    .map((g) => ({
+      key: `local:${g.id}`,
+      name: g.name,
+      lat: g.lat,
+      lng: g.lng,
+      externalId: `local:${g.id}`,
+      sources: ['local'] as ProviderId[],
+    }));
+  const merged = [...local];
+  mergeResults(merged, await overpassNearbyGyms(coords, radiusM, signal));
+  return merged.sort((a, b) => haversineM(coords, a) - haversineM(coords, b));
+}
 
 async function photonOnce(
   query: string,

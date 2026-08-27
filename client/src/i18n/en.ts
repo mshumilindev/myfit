@@ -827,6 +827,8 @@ export const en = {
   adminRecent: 'Recent sessions',
   trMyClients: 'My clients',
   trClientsTab: 'Clients',
+  trAddClient: 'Add client',
+  trSendClientLink: 'Send this link to your client. They set their own password during onboarding.',
   trSummary: (n: number, live: number) => `${n} assigned · ${live} training now`,
   trReadOnly: (n: string) =>
     `Read-only — you're viewing ${n}'s data as their trainer. Nothing here can be edited, and they can see that you looked.`,
@@ -835,8 +837,8 @@ export const en = {
   trDormantDays: (d: number) => `Dormant · ${d} days`,
   trEmptyTitle: 'No clients assigned yet',
   trEmptyBody:
-    "An admin decides who you train. When someone is assigned they appear here with their full history — you don't need to do anything.",
-  trFooterNote: "An admin assigns your clients — you can't search for other people.",
+    'Create a client and send them an invite. Their history appears here after onboarding.',
+  trFooterNote: 'Only your clients appear here: created by you or assigned by an admin.',
   trWeekAcrossClients: 'This week across your clients',
   trClient: 'Client',
   trVsLastWeek: 'vs last week',

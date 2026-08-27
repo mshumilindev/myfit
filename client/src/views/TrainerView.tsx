@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { cachePeek, cacheSet, callFn, currentUid, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
-import { Icon, RowListSkeleton } from '../ui';
+import { fullPersonName } from '../name';
+import { Icon, RowListSkeleton, Sheet } from '../ui';
 import { Avatar } from '../components/Avatar';
 
 interface Client {
@@ -36,6 +37,12 @@ export function TrainerView({
   const [failed, setFailed] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [linkFor, setLinkFor] = useState<{
+    client: Client;
+    token: string;
+    expiresAt: number;
+  } | null>(null);
 
   const refresh = useCallback(() => {
     callFn<{ clients: Client[] }>('trainerClients')
@@ -78,6 +85,10 @@ export function TrainerView({
           <h2 className="title-26">{t.trMyClients}</h2>
           {clients && <div className="sub">{t.trSummary(clients.length, liveCount)}</div>}
         </div>
+        <button className="btn btn-primary" onClick={() => setCreating(true)}>
+          <Icon name="plus" />
+          {t.trAddClient}
+        </button>
       </div>
 
       {clients === null && !failed && <RowListSkeleton rows={4} withMeta={false} />}
@@ -96,6 +107,10 @@ export function TrainerView({
           <Icon name="barbell" />
           <h4 className="t">{t.trEmptyTitle}</h4>
           <p className="s">{t.trEmptyBody}</p>
+          <button className="btn btn-primary" onClick={() => setCreating(true)}>
+            <Icon name="plus" />
+            {t.trAddClient}
+          </button>
         </div>
       )}
 
@@ -262,6 +277,27 @@ export function TrainerView({
         </div>
       )}
       {clients !== null && clients.length > 0 && <div className="footnote">{t.trFooterNote}</div>}
+      {creating && (
+        <TrainerClientDialog
+          onClose={() => setCreating(false)}
+          onCreated={(client, token, expiresAt) => {
+            const next = [...(clients ?? []), client];
+            cacheSet('trainerClients', next);
+            setClients(next);
+            setCreating(false);
+            setLinkFor({ client, token, expiresAt });
+            refresh();
+          }}
+        />
+      )}
+      {linkFor && (
+        <TrainerInviteDialog
+          client={linkFor.client}
+          token={linkFor.token}
+          expiresAt={linkFor.expiresAt}
+          onClose={() => setLinkFor(null)}
+        />
+      )}
     </div>
   );
 }
@@ -281,6 +317,138 @@ function deltaText(value: number | null | undefined): string {
 function programText(c: Client): string {
   if (!c.programName) return 'None';
   return c.programWeek ? `${c.programName} · wk ${c.programWeek}` : c.programName;
+}
+
+function inviteLink(token: string): string {
+  return `${window.location.origin}${window.location.pathname}#/join/${token}`;
+}
+
+function TrainerClientDialog(props: {
+  onClose: () => void;
+  onCreated: (client: Client, token: string, expiresAt: number) => void;
+}) {
+  const { t } = useT();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <Sheet onClose={props.onClose}>
+      <div className="sheet-head">
+        <span className="t">{t.trAddClient}</span>
+      </div>
+      <input
+        className="input"
+        placeholder={t.firstName}
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+      />
+      <input
+        className="input"
+        placeholder={t.lastName}
+        value={lastName}
+        onChange={(e) => setLastName(e.target.value)}
+      />
+      <input
+        className="input"
+        placeholder={t.username}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
+      {error && (
+        <div className="field-error">
+          <Icon name="warning-circle" />
+          {error}
+        </div>
+      )}
+      <div className="sheet-actions">
+        <button className="btn btn-secondary grow" onClick={props.onClose}>
+          {t.cancel}
+        </button>
+        <button
+          className="btn btn-primary grow"
+          disabled={busy || firstName.trim().length < 2 || username.trim().length < 2}
+          onClick={async () => {
+            setBusy(true);
+            setError(null);
+            try {
+              const r = await callFn<{
+                client: Client;
+                invite: { token: string; expiresAt: number };
+              }>('trainerCreateClient', {
+                name: fullPersonName(firstName, lastName),
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                username: username.trim(),
+              });
+              props.onCreated(r.client, r.invite.token, r.invite.expiresAt);
+            } catch (e) {
+              setError(e instanceof Error ? e.message : t.error);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {t.save}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
+function TrainerInviteDialog(props: {
+  client: Client;
+  token: string;
+  expiresAt: number;
+  onClose: () => void;
+}) {
+  const { t, locale } = useT();
+  const [copied, setCopied] = useState(false);
+  const url = inviteLink(props.token);
+
+  return (
+    <Sheet onClose={props.onClose}>
+      <div className="sheet-head">
+        <span className="t" style={{ color: 'var(--color-ok)' }}>
+          <Icon name="check-circle" weight="fill" /> {t.adminCreated}
+        </span>
+      </div>
+      <div className="h1">{t.adminReadyToClaim(props.client.name)}</div>
+      <p className="detail-muted">{t.trSendClientLink}</p>
+      <div className="field-label">{t.adminInviteLink}</div>
+      <div className="invite-link-line">
+        <div className="invite-link-row">
+          <Icon name="arrow-up-right" />
+          <code>{url.replace(/^https?:\/\//, '')}</code>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            void navigator.clipboard.writeText(url).then(() => setCopied(true));
+          }}
+        >
+          <Icon name="copy" /> {copied ? t.adminCopied : t.adminCopy}
+        </button>
+      </div>
+      <div className="invite-cells">
+        <div className="cell">
+          <div className="l">{t.adminExpiresLabel}</div>
+          <div className="v">{t.adminExpires(fmtDayMonth(props.expiresAt, locale))}</div>
+        </div>
+        <div className="cell">
+          <div className="l">{t.adminUsesLabel}</div>
+          <div className="v">{t.adminSingleUse}</div>
+        </div>
+      </div>
+      <div className="sheet-actions">
+        <button className="btn btn-primary grow" onClick={props.onClose}>
+          {t.adminDone}
+        </button>
+      </div>
+    </Sheet>
+  );
 }
 
 function lastSeenText(

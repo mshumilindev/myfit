@@ -778,6 +778,8 @@ export const pl: Strings = {
   adminRecent: 'Ostatnie sesje',
   trMyClients: 'Moi klienci',
   trClientsTab: 'Klienci',
+  trAddClient: 'Dodaj klienta',
+  trSendClientLink: 'Wyślij ten link klientowi. Hasło ustawi sam podczas onboardingu.',
   trSummary: (n, live) => `${n} przypisanych · ${live} trenuje teraz`,
   trReadOnly: (n) =>
     `Tylko odczyt — oglądasz dane ${n} jako trener. Niczego tutaj nie da się edytować, a klient widzi, że profil został otwarty.`,
@@ -786,8 +788,8 @@ export const pl: Strings = {
   trDormantDays: (d) => `Nieaktywny · ${d} dni`,
   trEmptyTitle: 'Nie przypisano jeszcze klientów',
   trEmptyBody:
-    'Administrator decyduje, kogo prowadzisz. Gdy ktoś zostanie przypisany, pojawi się tutaj z pełną historią — nie musisz nic robić.',
-  trFooterNote: 'Klientów przydziela administrator — nie możesz szukać innych osób.',
+    'Utwórz klienta i wyślij mu zaproszenie. Jego historia pojawi się tutaj po onboardingu.',
+  trFooterNote: 'Tutaj są tylko twoi klienci: utworzeni przez ciebie albo przypisani przez admina.',
   trWeekAcrossClients: 'Ten tydzień u twoich klientów',
   trClient: 'Klient',
   trVsLastWeek: 'vs zeszły tydzień',

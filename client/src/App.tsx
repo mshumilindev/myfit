@@ -482,6 +482,7 @@ export function App() {
   // library and detail are always available (no longer flag-gated).
   const overlayBlocked = overlay?.screen === 'settings' && role !== 'admin';
   const activeOverlay = overlayBlocked ? null : overlay;
+  const showTabbar = !activeOverlay || activeOverlay.screen === 'session';
   const canEdgeSwipeBack =
     authed &&
     !joinToken &&
@@ -712,19 +713,21 @@ export function App() {
                 />
               )}
             </Suspense>
-            <nav className="tabbar">
-              {tabs.map((x) => (
-                <button
-                  key={x.id}
-                  className={effectiveTab === x.id ? 'active' : ''}
-                  onClick={() => goTab(x.id)}
-                >
-                  <Icon name={x.icon} />
-                  <span>{x.label}</span>
-                </button>
-              ))}
-            </nav>
           </>
+        )}
+        {showTabbar && (
+          <nav className="tabbar">
+            {tabs.map((x) => (
+              <button
+                key={x.id}
+                className={effectiveTab === x.id ? 'active' : ''}
+                onClick={() => goTab(x.id)}
+              >
+                <Icon name={x.icon} />
+                <span>{x.label}</span>
+              </button>
+            ))}
+          </nav>
         )}
         <div className="toast-holder">
           {updateReady && <UpdatePlate />}

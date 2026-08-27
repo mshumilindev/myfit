@@ -189,6 +189,7 @@ export const invitePreview = onCall(async (req) => {
     inviterId: inviter?.id ?? null,
     inviterAvatar,
     inviterAvatarUrl: inviter ? await inviterAvatarDataUrl(inviter.id, inviterAvatar) : null,
+    username: user?.username ?? null,
     name: user ? displayName(user) : null,
     firstName: user?.firstName ?? null,
     lastName: user?.lastName ?? null,

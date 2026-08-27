@@ -16,6 +16,7 @@
 import { useMemo, useRef, useState } from 'react';
 import {
   BUILT_IN_CATALOG,
+  canonicalExerciseName,
   muscleInfoByName,
   richExerciseByName,
   secondaryMusclesOf,
@@ -171,7 +172,7 @@ export function ExerciseGallery({
       for (const n of c.names) seen.add(n.toLowerCase());
     }
     for (const k of knownExercises()) {
-      if (seen.has(k.name.toLowerCase())) continue;
+      if (seen.has(canonicalExerciseName(k.name).toLowerCase())) continue;
       const info = muscleInfoByName(k.name);
       const rich = richExerciseByName(k.name);
       const image = rich?.images?.[0] ?? null;

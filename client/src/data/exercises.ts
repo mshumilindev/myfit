@@ -159,6 +159,12 @@ for (const [alias, canonical] of Object.entries(LEGACY_NAME_ALIASES)) {
   if (ex) BY_NAME.set(alias, ex);
 }
 
+function aliasesBuiltIn(name: string): boolean {
+  const key = name.trim().toLowerCase();
+  const hit = BY_NAME.get(key);
+  return !!hit && hit.names[0].trim().toLowerCase() !== key;
+}
+
 /**
  * English catalog name for a name typed in any locale; the input is returned
  * untouched for names the catalog does not know.
@@ -253,6 +259,15 @@ function CUSTOM_SECONDARIES(id: string): MuscleGroup[] | null {
 /** Catalog lookup by (any-locale) exercise name; null for unknown names. */
 export function muscleInfoByName(name: string): MuscleInfo | null {
   const key = name.trim().toLowerCase();
+  if (aliasesBuiltIn(name)) {
+    const ex = BY_NAME.get(key)!;
+    const rich = RICH_BY_ID.get(ex.id) ?? RICH_BY_NAME.get(ex.names[0].trim().toLowerCase());
+    return {
+      primary: rich ? richPrimary(rich) : ex.muscle,
+      secondary: rich?.secondaryMuscles ?? secondaryMusclesOf(ex),
+      equipment: rich?.equipment ?? ex.equipment ?? null,
+    };
+  }
   const custom = customByName.get(key);
   if (custom && custom.primaryMuscle) {
     return {
@@ -290,7 +305,7 @@ export function searchCatalog(
 ): CatalogExercise[] {
   const q = query.trim().toLowerCase();
   if (!q && equipment === undefined && muscle === undefined) return [];
-  const custom = customList.map(customAsCatalogEntry);
+  const custom = customList.filter((e) => !aliasesBuiltIn(e.name)).map(customAsCatalogEntry);
   // Browsing by filter only draws from custom exercises and the rich import.
   const base = [...custom, ...BUILT_IN_CATALOG];
   let pool =

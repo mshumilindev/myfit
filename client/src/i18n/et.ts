@@ -773,6 +773,8 @@ export const et: Strings = {
   adminRecent: 'Viimased treeningud',
   trMyClients: 'Minu kliendid',
   trClientsTab: 'Kliendid',
+  trAddClient: 'Lisa klient',
+  trSendClientLink: 'Saada see link kliendile. Parooli määrab ta onboardingus ise.',
   trSummary: (n, live) => `${n} määratud · ${live} treenib praegu`,
   trReadOnly: (n) =>
     `Ainult lugemiseks — vaatad kasutaja ${n} andmeid tema treenerina. Siin ei saa midagi muuta ja ta näeb, et profiil avati.`,
@@ -780,9 +782,8 @@ export const et: Strings = {
   trLastSession: (d) => `Viimane treening ${d}`,
   trDormantDays: (d) => `Passiivne · ${d} päeva`,
   trEmptyTitle: 'Kliente pole veel määratud',
-  trEmptyBody:
-    'Administraator otsustab, keda sa treenid. Kui keegi määratakse, ilmub ta siia kogu ajalooga — sina ei pea midagi tegema.',
-  trFooterNote: 'Kliendid määrab administraator — teisi inimesi ei saa otsida.',
+  trEmptyBody: 'Loo klient ja saada talle kutse. Tema ajalugu ilmub siia pärast onboardingut.',
+  trFooterNote: 'Siin on ainult sinu kliendid: sinu loodud või administraatori määratud.',
   trWeekAcrossClients: 'See nädal sinu klientide lõikes',
   trClient: 'Klient',
   trVsLastWeek: 'võrreldes eelmise nädalaga',

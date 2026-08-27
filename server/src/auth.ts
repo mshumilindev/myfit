@@ -188,6 +188,7 @@ authRouter.get('/invite/:token', (req: Request, res: Response) => {
     inviterId: inviter?.id ?? null,
     inviterAvatar: !!inviter?.avatar_ext,
     inviterAvatarUrl: null,
+    username: user?.username ?? null,
     name: user ? displayName(user) : null,
     firstName: parts.firstName || null,
     lastName: parts.lastName,
