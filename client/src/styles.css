@@ -12715,7 +12715,7 @@ button.exd-media {
   font-size: 17px;
 }
 .exd-body {
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 0;
   padding: var(--space-4) var(--gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
   display: flex;
