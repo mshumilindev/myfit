@@ -604,6 +604,11 @@ export const lt: Strings = {
   navMe: 'Aš',
   profileTrainerPriv: 'Trenerio teisės',
   profileTrainerPrivHint: 'Suteikia prieigą prie priskirtų klientų ir programų kūrimo.',
+  profileAssignTrainerAction: 'Priskirti trenerį',
+  profileAssignClientsAction: 'Priskirti klientus',
+  profileAssignClientsTitle: (n) => `${n} klientai`,
+  profileAssignClientsHint:
+    'Pasirink žmones, kuriuos šis treneris turi matyti. Treneris gali treniruoti narį, administratorių arba kitą trenerį, bet niekada savęs.',
   trReadonlyBar: 'Gali peržiūrėti kliento duomenis, bet negali redaguoti to, ką jis užfiksavo.',
   trAssignProgram: 'Priskirti programą',
   searchGymEmpty: 'Nieko nerasta — pridėk rankiniu būdu žemiau',

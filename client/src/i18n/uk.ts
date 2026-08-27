@@ -596,6 +596,11 @@ export const uk: Strings = {
   navMe: 'Я',
   profileTrainerPriv: 'Права тренера',
   profileTrainerPrivHint: 'Дає доступ до призначених клієнтів і створення програм.',
+  profileAssignTrainerAction: 'Призначити тренера',
+  profileAssignClientsAction: 'Призначити клієнтів',
+  profileAssignClientsTitle: (n) => `Клієнти для ${n}`,
+  profileAssignClientsHint:
+    'Обери людей, яких має бачити цей тренер. Тренер може тренувати учасника, адміна або іншого тренера, але ніколи себе.',
   trReadonlyBar: 'Ти можеш переглядати дані клієнта, але не редагувати залоговане.',
   trAssignProgram: 'Призначити програму',
   searchGymEmpty: 'Нічого не знайдено — додай вручну нижче',

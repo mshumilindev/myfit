@@ -644,6 +644,11 @@ export const en = {
   navMe: 'Me',
   profileTrainerPriv: 'Trainer privileges',
   profileTrainerPrivHint: 'Grants access to assigned clients and program authoring.',
+  profileAssignTrainerAction: 'Assign trainer',
+  profileAssignClientsAction: 'Assign clients',
+  profileAssignClientsTitle: (n: string) => `Clients for ${n}`,
+  profileAssignClientsHint:
+    'Pick the people this trainer should see. A trainer can coach members, admins, or another trainer, but never themselves.',
   trReadonlyBar: "You can view this client's data but not edit what they logged.",
   trAssignProgram: 'Assign a program',
   searchGymEmpty: 'Nothing found — add it manually below',

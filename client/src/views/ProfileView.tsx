@@ -14,7 +14,7 @@ import {
 } from '../api';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { ConfirmDialog, Icon, LanguageSelector, Switch, ProfileSkeleton } from '../ui';
+import { ConfirmDialog, Icon, LanguageSelector, Sheet, Switch, ProfileSkeleton } from '../ui';
 import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
@@ -33,6 +33,7 @@ interface ProfileData {
     role: 'member' | 'trainer' | 'admin';
     status: 'active' | 'invited' | 'suspended';
     joinedAt: number;
+    trainerId: string | null;
     trainerName: string | null;
     clientCount: number;
     avatar: boolean;
@@ -92,6 +93,18 @@ interface ProfileData {
   bodyMetrics: BodyMetrics | null;
 }
 
+interface AdminPerson {
+  id: string;
+  name: string;
+  username: string;
+  role: 'member' | 'trainer' | 'admin';
+  status: 'active' | 'invited' | 'suspended';
+  trainerId: string | null;
+  trainerName: string | null;
+  clientCount: number;
+  avatar: boolean;
+}
+
 type Load = ProfileData | 'loading' | 'denied' | 'missing' | 'failed';
 
 /** How long a cached profile is served without re-hitting the backend. */
@@ -131,6 +144,11 @@ export function ProfileView({
   const [avatarRefresh, setAvatarRefresh] = useState(0);
   const [profileEditing, setProfileEditing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [assignTrainerOpen, setAssignTrainerOpen] = useState(false);
+  const [assignClientsOpen, setAssignClientsOpen] = useState(false);
+  const [adminPeople, setAdminPeople] = useState<AdminPerson[] | null>(
+    () => cachePeek<AdminPerson[]>('adminPeople')?.data ?? null,
+  );
   // While the fetch for a newly-opened profile is in flight, fall back to any
   // cached copy so the page paints instantly instead of flashing a skeleton.
   const load: Load =
@@ -142,7 +160,7 @@ export function ProfileView({
   const canEditDetails =
     typeof load === 'object' &&
     (load.viewer.relation === 'self' || load.viewer.relation === 'admin');
-  const isAdminViewer = typeof load === 'object' && load.viewer.relation === 'admin';
+  const canAdminManage = typeof load === 'object' && load.viewer.role === 'admin';
 
   useEffect(() => {
     let alive = true;
@@ -180,6 +198,20 @@ export function ProfileView({
     cacheSet(`profile.${userId}`, value);
     setLoaded({ userId, value });
   };
+
+  async function refreshProfile() {
+    if (typeof load !== 'object') return;
+    const fresh = await callFn<ProfileData>('profileUser', { id: load.person.id });
+    commitProfile(fresh);
+  }
+
+  async function ensureAdminPeople(): Promise<AdminPerson[]> {
+    if (adminPeople) return adminPeople;
+    const d = await callFn<{ people: AdminPerson[] }>('adminPeople');
+    cacheSet('adminPeople', d.people);
+    setAdminPeople(d.people);
+    return d.people;
+  }
 
   function resetProfileFields(data: ProfileData) {
     setEditFirstName(data.person.firstName);
@@ -574,8 +606,64 @@ export function ProfileView({
             </>
           )}
 
+          {ptab === 'settings' && canAdminManage && (
+            <section className="profile-section profile-admin-actions">
+              <div className="field-label">{t.adminAssignedTrainer}</div>
+              <button
+                className="toggle-row"
+                onClick={async () => {
+                  try {
+                    await ensureAdminPeople();
+                    setAssignTrainerOpen(true);
+                  } catch (e) {
+                    shell.toast({
+                      kind: 'danger',
+                      icon: 'warning-circle',
+                      text: e instanceof Error ? e.message : t.error,
+                    });
+                  }
+                }}
+              >
+                <Icon name="users-three" />
+                <span className="lab">
+                  <div>{t.profileAssignTrainerAction}</div>
+                  <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
+                    {load.person.trainerName ?? t.adminNoTrainer}
+                  </div>
+                </span>
+                <Icon name="arrow-right" className="profile-setting-caret" />
+              </button>
+              {load.person.role === 'trainer' && (
+                <button
+                  className="toggle-row"
+                  onClick={async () => {
+                    try {
+                      await ensureAdminPeople();
+                      setAssignClientsOpen(true);
+                    } catch (e) {
+                      shell.toast({
+                        kind: 'danger',
+                        icon: 'warning-circle',
+                        text: e instanceof Error ? e.message : t.error,
+                      });
+                    }
+                  }}
+                >
+                  <Icon name="user-plus" />
+                  <span className="lab">
+                    <div>{t.profileAssignClientsAction}</div>
+                    <div style={{ fontSize: 12, color: 'var(--color-neutral-500)', marginTop: 2 }}>
+                      {t.adminClients(load.person.clientCount)}
+                    </div>
+                  </span>
+                  <Icon name="arrow-right" className="profile-setting-caret" />
+                </button>
+              )}
+            </section>
+          )}
+
           {ptab === 'settings' &&
-            isAdminViewer &&
+            canAdminManage &&
             load.person.id !== load.viewer.id &&
             load.person.role !== 'admin' && (
               <button className="toggle-row" onClick={() => void toggleTrainer()}>
@@ -951,7 +1039,199 @@ export function ProfileView({
           }}
         />
       )}
+      {typeof load === 'object' && assignTrainerOpen && adminPeople && (
+        <ProfileAssignTrainerSheet
+          person={load.person}
+          people={adminPeople}
+          onClose={() => setAssignTrainerOpen(false)}
+          onDone={async () => {
+            setAssignTrainerOpen(false);
+            cacheSet('adminPeople', null);
+            setAdminPeople(null);
+            await refreshProfile();
+            shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
+          }}
+        />
+      )}
+      {typeof load === 'object' && assignClientsOpen && adminPeople && (
+        <ProfileAssignClientsSheet
+          trainer={load.person}
+          people={adminPeople}
+          onClose={() => setAssignClientsOpen(false)}
+          onDone={async () => {
+            setAssignClientsOpen(false);
+            cacheSet('adminPeople', null);
+            setAdminPeople(null);
+            await refreshProfile();
+            shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function ProfileAssignTrainerSheet(props: {
+  person: ProfileData['person'];
+  people: AdminPerson[];
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const { t } = useT();
+  const trainers = props.people.filter(
+    (p) => p.role === 'trainer' && p.status === 'active' && p.id !== props.person.id,
+  );
+  const [sel, setSel] = useState<string | null>(props.person.trainerId);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <Sheet onClose={props.onClose}>
+      <div className="sheet-head">
+        <span className="t">{t.adminWhoTrains(props.person.name)}</span>
+      </div>
+      <p className="detail-muted">{t.adminTrainerNote}</p>
+      <div className="assign-list">
+        {trainers.map((tr) => (
+          <button
+            key={tr.id}
+            className={`gym-pick-row${sel === tr.id ? ' suggested' : ''}`}
+            onClick={() => setSel(tr.id)}
+          >
+            <Avatar userId={tr.id} name={tr.name} hasPhoto={tr.avatar} size={34} />
+            <span className="body">
+              <span className="n">{tr.name}</span>
+              <span className="s">{t.adminClients(tr.clientCount)}</span>
+            </span>
+          </button>
+        ))}
+        <button
+          className={`gym-pick-row${sel === null ? ' suggested' : ''}`}
+          onClick={() => setSel(null)}
+        >
+          <span className="body">
+            <span className="n">{t.adminNoTrainer}</span>
+            <span className="s">{t.adminNoTrainerNote}</span>
+          </span>
+        </button>
+      </div>
+      {error && (
+        <div className="field-error">
+          <Icon name="warning-circle" />
+          {error}
+        </div>
+      )}
+      <div className="sheet-actions">
+        <button className="btn btn-secondary grow" onClick={props.onClose}>
+          {t.cancel}
+        </button>
+        <button
+          className="btn btn-primary grow"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            setError(null);
+            try {
+              await callFn('adminAssignTrainer', { id: props.person.id, trainerId: sel });
+              await props.onDone();
+            } catch (e) {
+              setError(e instanceof Error ? e.message : t.error);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {t.adminAssign}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
+function ProfileAssignClientsSheet(props: {
+  trainer: ProfileData['person'];
+  people: AdminPerson[];
+  onClose: () => void;
+  onDone: () => Promise<void>;
+}) {
+  const { t } = useT();
+  const candidates = props.people.filter((p) => p.id !== props.trainer.id);
+  const [selected, setSelected] = useState<Set<string>>(
+    () => new Set(candidates.filter((p) => p.trainerId === props.trainer.id).map((p) => p.id)),
+  );
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <Sheet onClose={props.onClose}>
+      <div className="sheet-head">
+        <span className="t">{t.profileAssignClientsTitle(props.trainer.name)}</span>
+      </div>
+      <p className="detail-muted">{t.profileAssignClientsHint}</p>
+      <div className="assign-list">
+        {candidates.map((p) => {
+          const on = selected.has(p.id);
+          return (
+            <button
+              key={p.id}
+              className={`gym-pick-row${on ? ' suggested' : ''}`}
+              onClick={() =>
+                setSelected((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(p.id)) next.delete(p.id);
+                  else next.add(p.id);
+                  return next;
+                })
+              }
+            >
+              <Avatar userId={p.id} name={p.name} hasPhoto={p.avatar} size={34} />
+              <span className="body">
+                <span className="n">{p.name}</span>
+                <span className="s">{p.trainerName ?? t.adminNoTrainer}</span>
+              </span>
+              <Switch on={on} />
+            </button>
+          );
+        })}
+      </div>
+      {error && (
+        <div className="field-error">
+          <Icon name="warning-circle" />
+          {error}
+        </div>
+      )}
+      <div className="sheet-actions">
+        <button className="btn btn-secondary grow" onClick={props.onClose}>
+          {t.cancel}
+        </button>
+        <button
+          className="btn btn-primary grow"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            setError(null);
+            try {
+              for (const p of candidates) {
+                const shouldHave = selected.has(p.id);
+                const has = p.trainerId === props.trainer.id;
+                if (shouldHave === has) continue;
+                await callFn('adminAssignTrainer', {
+                  id: p.id,
+                  trainerId: shouldHave ? props.trainer.id : null,
+                });
+              }
+              await props.onDone();
+            } catch (e) {
+              setError(e instanceof Error ? e.message : t.error);
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {t.adminAssign}
+        </button>
+      </div>
+    </Sheet>
   );
 }
 

@@ -592,6 +592,11 @@ export const et: Strings = {
   navMe: 'Mina',
   profileTrainerPriv: 'Treeneri õigused',
   profileTrainerPrivHint: 'Annab juurdepääsu määratud klientidele ja programmide loomisele.',
+  profileAssignTrainerAction: 'Määra treener',
+  profileAssignClientsAction: 'Määra kliendid',
+  profileAssignClientsTitle: (n) => `${n} kliendid`,
+  profileAssignClientsHint:
+    'Vali inimesed, keda see treener nägema peaks. Treener võib juhendada liiget, admini või teist treenerit, aga mitte iseennast.',
   trReadonlyBar: 'Näed kliendi andmeid, kuid ei saa muuta tema salvestatut.',
   trAssignProgram: 'Määra programm',
   searchGymEmpty: 'Midagi ei leitud — lisa käsitsi allpool',

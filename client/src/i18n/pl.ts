@@ -595,6 +595,11 @@ export const pl: Strings = {
   navMe: 'Ja',
   profileTrainerPriv: 'Uprawnienia trenera',
   profileTrainerPrivHint: 'Daje dostęp do przypisanych klientów i tworzenia programów.',
+  profileAssignTrainerAction: 'Przypisz trenera',
+  profileAssignClientsAction: 'Przypisz klientów',
+  profileAssignClientsTitle: (n) => `Klienci dla ${n}`,
+  profileAssignClientsHint:
+    'Wybierz osoby, które ten trener ma widzieć. Trener może prowadzić członka, admina albo innego trenera, ale nigdy siebie.',
   trReadonlyBar: 'Możesz przeglądać dane klienta, ale nie edytować tego, co zapisał.',
   trAssignProgram: 'Przypisz program',
   searchGymEmpty: 'Nic nie znaleziono — dodaj ręcznie poniżej',
