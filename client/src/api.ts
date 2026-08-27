@@ -52,6 +52,13 @@ export function cacheSet<T>(key: string, data: T): void {
     /* quota / private mode — the cache is best-effort */
   }
 }
+export function cacheDelete(key: string): void {
+  try {
+    localStorage.removeItem(CACHE_PREFIX + key);
+  } catch {
+    /* quota / private mode — the cache is best-effort */
+  }
+}
 /** True when a cached entry exists and is younger than maxAgeMs. */
 export function cacheFresh(entry: { at: number } | null, maxAgeMs: number): boolean {
   return !!entry && Date.now() - entry.at < maxAgeMs;

@@ -4,6 +4,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
 import {
   HttpError,
+  cacheDelete,
   cacheFresh,
   cachePeek,
   cacheSet,
@@ -1046,7 +1047,7 @@ export function ProfileView({
           onClose={() => setAssignTrainerOpen(false)}
           onDone={async () => {
             setAssignTrainerOpen(false);
-            cacheSet('adminPeople', null);
+            cacheDelete('adminPeople');
             setAdminPeople(null);
             await refreshProfile();
             shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
@@ -1060,7 +1061,7 @@ export function ProfileView({
           onClose={() => setAssignClientsOpen(false)}
           onDone={async () => {
             setAssignClientsOpen(false);
-            cacheSet('adminPeople', null);
+            cacheDelete('adminPeople');
             setAdminPeople(null);
             await refreshProfile();
             shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
