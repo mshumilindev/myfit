@@ -242,8 +242,11 @@ export function ReadinessLens({
       {/* Verdict sits last so it reads as the lead-in to the deeper coach cards
           (fatigue, weak points) that follow directly below it. */}
       <div className="rd-verdict">
-        <div className="rd-lead">{v.lead}</div>
-        {v.why && <div className="rd-why">{v.why}</div>}
+        <Icon name="heartbeat" weight="fill" />
+        <div className="rd-verdict-main">
+          <div className="rd-lead">{v.lead}</div>
+          {v.why && <div className="rd-why">{v.why}</div>}
+        </div>
       </div>
     </div>
   );

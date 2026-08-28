@@ -19414,22 +19414,35 @@ button.badge {
 
 /* full sheet */
 .rd-verdict {
-  padding: 14px 15px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
   border-left: 3px solid var(--color-kcal, var(--color-accent));
   background: color-mix(in srgb, var(--color-kcal, var(--color-accent)) 8%, var(--color-surface));
 }
+.rd-verdict > i {
+  flex: none;
+  font-size: 18px;
+  margin-top: 1px;
+  color: var(--color-kcal, var(--color-accent));
+}
+.rd-verdict-main {
+  min-width: 0;
+}
 .rd-lead {
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: -0.01em;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--color-text);
 }
 .rd-why {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--color-neutral-400);
-  margin-top: 5px;
-  line-height: 1.4;
+  margin-top: 2px;
+  line-height: 1.45;
 }
 .rd-map {
   margin: 4px auto 6px;
@@ -19871,7 +19884,7 @@ button.badge {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 .nudge-card-acts {
   display: flex;
