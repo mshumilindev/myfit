@@ -19679,30 +19679,23 @@ button.badge {
   background: var(--color-accent-900);
   color: var(--color-accent);
 }
+/* Range row (design: a calm settings row, not a boxed input) — the whole row
+   is the control; the value sits right with a caret marking it a picker. */
 .prog-ctrl-sheet .pcs-range {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 14px;
-  padding: 10px 12px;
+  padding: 11px 14px;
   border-radius: var(--radius-md);
   background: var(--color-neutral-800);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-neutral-400);
+  cursor: pointer;
 }
 .prog-ctrl-sheet .pcs-range > i {
   color: var(--color-accent);
   font-size: 15px;
-}
-.prog-ctrl-sheet .pcs-range {
-  cursor: pointer;
-}
-.prog-ctrl-sheet .pcs-range-val {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  color: var(--color-text);
 }
 .prog-ctrl-sheet .pcs-range-sel {
   margin-left: auto;
@@ -19710,28 +19703,30 @@ button.badge {
   display: inline-flex;
   align-items: center;
 }
-.prog-ctrl-sheet .pcs-range-sel > i {
-  position: absolute;
-  right: 8px;
-  color: var(--color-neutral-400);
-  font-size: 13px;
-  pointer-events: none;
-}
 .prog-ctrl-sheet .pcs-range-sel select {
   appearance: none;
   -webkit-appearance: none;
-  border: 1px solid var(--color-neutral-700);
-  background: var(--color-neutral-900);
+  border: none;
+  background: none;
   color: var(--color-text);
   font: inherit;
   font-size: 13px;
-  padding: 7px 30px 7px 12px;
-  border-radius: var(--radius-sm);
+  font-weight: 500;
+  text-align: right;
+  text-align-last: right;
+  padding: 0 22px 0 0;
   cursor: pointer;
 }
+.prog-ctrl-sheet .pcs-range-sel > i {
+  position: absolute;
+  right: 0;
+  color: var(--color-accent);
+  font-size: 16px;
+  pointer-events: none;
+}
 .prog-ctrl-sheet .pcs-range-sel select:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
+  outline: none;
+  color: var(--color-accent);
 }
 
 /* --- Log activity (design feature 6: cardio & recovery + calories) -------- */
