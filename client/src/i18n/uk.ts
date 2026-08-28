@@ -391,6 +391,7 @@ export const uk: Strings = {
   rdReadyIn: (d: number) => `~${d} дн`,
   rdBehind: 'відстає',
   rdState: { recovering: 'відновл.', nearly: 'майже', ready: 'готово', stale: 'відстає' },
+  rdColdStart: 'Залогуй кілька тренувань — і зʼявиться читання готовності.',
   volFine: 'Мʼязи',
   volZones: 'Зони',
   volList: 'Список',

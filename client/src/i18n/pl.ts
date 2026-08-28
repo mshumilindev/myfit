@@ -391,6 +391,7 @@ export const pl: Strings = {
   rdReadyIn: (d: number) => `~${d} dn`,
   rdBehind: 'zaległe',
   rdState: { recovering: 'regen.', nearly: 'prawie', ready: 'gotowe', stale: 'zaległe' },
+  rdColdStart: 'Zaloguj kilka sesji, a odczyt gotowości się pojawi.',
   volFine: 'Mięśnie',
   volZones: 'Strefy',
   volList: 'Lista',

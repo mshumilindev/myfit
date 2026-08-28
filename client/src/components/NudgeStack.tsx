@@ -11,6 +11,7 @@
  * while the stack is open or just after a tap.
  */
 import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '../ui';
 
 export interface Nudge {
@@ -129,38 +130,39 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
         </div>
       )}
 
-      {open && (
-        <div className={`nudge-overlay${closing ? ' closing' : ''}`}>
-          <div className="nudge-scrim" onClick={close} />
-          <div className="nudge-sheet" role="dialog">
-            <div className="nudge-sheet-head">
-              <span className="nudge-sheet-title">{order.length}</span>
-              <button type="button" className="nudge-close" onClick={close} aria-label="Close">
-                <Icon name="x-circle" weight="fill" />
-              </button>
-            </div>
-            <div className="nudge-sheet-scroll">
-              {order.map((n, i) => (
-                <div
-                  key={n.id}
-                  className={`nudge-full tone-${n.tone}`}
-                  style={{ animationDelay: `${i * 55}ms` }}
-                >
-                  <div className="nudge-card-head">
-                    <span className="nudge-ic lg">
-                      <Icon name={n.icon} weight="fill" />
-                    </span>
-                    <span className="nudge-kicker">{n.kicker}</span>
+      {open &&
+        createPortal(
+          <div className={`nudge-overlay${closing ? ' closing' : ''}`}>
+            <div className="nudge-scrim" onClick={close} />
+            <div className="nudge-sheet" role="dialog">
+              <div className="nudge-sheet-head">
+                <button type="button" className="nudge-close" onClick={close} aria-label="Close">
+                  <Icon name="x-circle" weight="fill" />
+                </button>
+              </div>
+              <div className="nudge-sheet-scroll">
+                {order.map((n, i) => (
+                  <div
+                    key={n.id}
+                    className={`nudge-full tone-${n.tone}`}
+                    style={{ animationDelay: `${i * 55}ms` }}
+                  >
+                    <div className="nudge-card-head">
+                      <span className="nudge-ic lg">
+                        <Icon name={n.icon} weight="fill" />
+                      </span>
+                      <span className="nudge-kicker">{n.kicker}</span>
+                    </div>
+                    <div className="nudge-card-title">{n.title}</div>
+                    {n.body && <div className="nudge-card-body">{n.body}</div>}
+                    {n.actions && <div className="nudge-card-acts">{n.actions(close)}</div>}
                   </div>
-                  <div className="nudge-card-title">{n.title}</div>
-                  {n.body && <div className="nudge-card-body">{n.body}</div>}
-                  {n.actions && <div className="nudge-card-acts">{n.actions(close)}</div>}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

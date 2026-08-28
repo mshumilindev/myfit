@@ -59,7 +59,7 @@ import {
 import { muscleFatigue, deloadSuggestion } from '../fatigue';
 import { personalLandmarks } from '../personalize';
 import { muscleReadiness, recoveringMuscles } from '../recovery';
-import { buildReadinessNudge } from '../components/Readiness';
+import { ReadinessCard } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import type { Activity } from '../types';
 import { Icon, Sheet } from '../ui';
@@ -695,8 +695,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // visit, the "likely today" plaque.
   const deloadMuscle = deloadNudge?.muscle ? t.muscleGroups[deloadNudge.muscle] : '';
   const nudges: Nudge[] = [];
-  const readinessNudge = !open ? buildReadinessNudge(finished, now, t) : null;
-  if (readinessNudge) nudges.push(readinessNudge);
   if (deloadNudge) {
     nudges.push({
       id: 'deload',
@@ -1271,6 +1269,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
           </div>
         )}
+        {!open && <ReadinessCard finished={finished} now={now} />}
         <NudgeStack nudges={nudges} />
         {programCard}
         {!open && !(assignment && assignedActive) && hasHistory && (

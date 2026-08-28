@@ -387,6 +387,7 @@ export const et: Strings = {
   rdReadyIn: (d: number) => `~${d} p`,
   rdBehind: 'maas',
   rdState: { recovering: 'taastub', nearly: 'peaaegu', ready: 'valmis', stale: 'maas' },
+  rdColdStart: 'Logi paar treeningut ja valmiduse lugem tekib.',
   volFine: 'Lihased',
   volZones: 'Tsoonid',
   volList: 'Loend',

@@ -19325,13 +19325,36 @@ button.badge {
   margin-bottom: 6px;
 }
 .rd-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-kcal-text, var(--color-neutral-400));
 }
+.rd-kicker svg {
+  font-size: 14px;
+  color: var(--color-kcal, var(--color-accent));
+}
 .rd-counts {
   font-size: 11px;
+  color: var(--color-neutral-500);
+}
+/* Readiness lens (Progress) */
+.rd-lens {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rd-lens .rd-map {
+  margin: 0 auto;
+  max-width: 300px;
+}
+.rd-lens-empty {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 13px;
   color: var(--color-neutral-500);
 }
 .rd-card-lead {
@@ -19528,7 +19551,9 @@ button.badge {
   position: relative;
   display: block;
   width: 100%;
-  height: 66px;
+  /* tall enough to contain the two peek cards (translateY up to 16px) so the
+     rail below gets a real gap instead of the peek overlapping it */
+  height: 80px;
   padding: 0;
   border: none;
   background: none;
@@ -19603,7 +19628,7 @@ button.badge {
 .nudge-rail {
   display: flex;
   gap: 5px;
-  margin: 9px 3px 0;
+  margin: 10px 3px 18px;
   align-items: center;
 }
 .nudge-seg {
@@ -19696,6 +19721,8 @@ button.badge {
   background: rgba(255, 255, 255, 0.12);
 }
 .nudge-sheet-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;

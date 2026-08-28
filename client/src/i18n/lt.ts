@@ -399,6 +399,7 @@ export const lt: Strings = {
   rdReadyIn: (d: number) => `~${d} d`,
   rdBehind: 'atsilieka',
   rdState: { recovering: 'atsigauna', nearly: 'beveik', ready: 'paruošta', stale: 'atsilieka' },
+  rdColdStart: 'Užfiksuok kelias treniruotes ir pasirengimo rodmuo atsiras.',
   volFine: 'Raumenys',
   volZones: 'Zonos',
   volList: 'Sąrašas',

@@ -35,6 +35,7 @@ import {
 import { FeatsView } from '../components/FeatsView';
 import { TrendsView } from '../components/TrendsView';
 import { FixSheet } from '../components/FixSheet';
+import { ReadinessLens } from '../components/Readiness';
 import {
   muscleFatigue,
   deloadSuggestion,
@@ -69,6 +70,10 @@ export function ProgressView({
   onSub,
   featSub,
   onFeatSub,
+  seg,
+  onSeg,
+  lens,
+  onLens,
 }: {
   store: Store;
   shell: Shell;
@@ -76,14 +81,18 @@ export function ProgressView({
   onSub: (s: 'progress' | 'trends' | 'feats') => void;
   featSub: 'achievements' | 'standards';
   onFeatSub: (s: 'achievements' | 'standards') => void;
+  seg: 'total' | 'muscle' | 'volume' | 'records';
+  onSeg: (s: 'total' | 'muscle' | 'volume' | 'records') => void;
+  lens: 'volume' | 'fatigue' | 'readiness';
+  onLens: (l: 'volume' | 'fatigue' | 'readiness') => void;
 }) {
   const { t, locale } = useT();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
-  const [seg, setSeg] = useState<'total' | 'muscle' | 'volume' | 'records'>('total');
+  const setSeg = onSeg;
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
-  const [lens, setLens] = useState<'volume' | 'fatigue'>('volume');
+  const setLens = onLens;
   // Volume read window (days): a rolling week by default, widenable in the sheet.
   const [rangeDays, setRangeDays] = useState(7);
   // Mobile: list<->map choice + the "all controls" sheet, driven by the pill.
@@ -600,8 +609,14 @@ export function ProgressView({
       {showDesktopDetail && seg === 'volume' && (
         <section className="progress-detail-pane vol-map-pane">
           <div className="progress-detail-title">
-            <h3>{lens === 'fatigue' ? t.fatigueTab : t.volumeTab}</h3>
-            <div className="seg2 lens-seg">
+            <h3>
+              {lens === 'fatigue'
+                ? t.fatigueTab
+                : lens === 'readiness'
+                  ? t.readinessKicker
+                  : t.volumeTab}
+            </h3>
+            <div className="seg2 seg3 lens-seg">
               <button
                 className={lens === 'volume' ? 'active' : ''}
                 onClick={() => setLens('volume')}
@@ -614,27 +629,39 @@ export function ProgressView({
               >
                 {t.fatigueTab}
               </button>
+              <button
+                className={lens === 'readiness' ? 'active' : ''}
+                onClick={() => setLens('readiness')}
+              >
+                {t.readinessKicker}
+              </button>
             </div>
           </div>
-          <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
-          {lens === 'fatigue' ? (
-            <div className="vol-legend">
-              {(['fresh', 'moderate', 'high', 'fried'] as FatigueLevel[]).map((l) => (
-                <span key={l} className="vol-leg">
-                  <span className="sw" style={{ background: FATIGUE_COLOR[l] }} />
-                  {t.fatLevel[l]}
-                </span>
-              ))}
-            </div>
+          {lens === 'readiness' ? (
+            <ReadinessLens finished={finished} now={nowTs} />
           ) : (
-            <div className="vol-legend">
-              {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
-                <span key={z} className="vol-leg">
-                  <span className="sw" style={{ background: ZONE_COLOR[z] }} />
-                  {t.volZone[z]}
-                </span>
-              ))}
-            </div>
+            <>
+              <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
+              {lens === 'fatigue' ? (
+                <div className="vol-legend">
+                  {(['fresh', 'moderate', 'high', 'fried'] as FatigueLevel[]).map((l) => (
+                    <span key={l} className="vol-leg">
+                      <span className="sw" style={{ background: FATIGUE_COLOR[l] }} />
+                      {t.fatLevel[l]}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="vol-legend">
+                  {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
+                    <span key={z} className="vol-leg">
+                      <span className="sw" style={{ background: ZONE_COLOR[z] }} />
+                      {t.volZone[z]}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </section>
       )}
@@ -841,6 +868,12 @@ export function ProgressView({
                   >
                     {t.fatigueTab}
                   </button>
+                  <button
+                    className={lens === 'readiness' ? 'on' : ''}
+                    onClick={() => setLens('readiness')}
+                  >
+                    {t.readinessKicker}
+                  </button>
                 </div>
               </div>
               <div className="pcs-row2">
@@ -1028,8 +1061,8 @@ function VolumePanel({
   tuned: TuneSummary;
   desktop: boolean;
   deload: DeloadSuggestion;
-  lens: 'volume' | 'fatigue';
-  onLens: (l: 'volume' | 'fatigue') => void;
+  lens: 'volume' | 'fatigue' | 'readiness';
+  onLens: (l: 'volume' | 'fatigue' | 'readiness') => void;
   fatColors: Partial<Record<MuscleGroup, string>>;
   mapView: boolean;
   onMapView: (m: boolean) => void;
@@ -1151,9 +1184,24 @@ function VolumePanel({
 
       {cold && <div className="vol-cold">{t.volColdStart}</div>}
 
-      {mapView && !desktop ? (
+      {lens === 'readiness' ? (
         <div className="vol-map">
-          <div className="seg2 lens-seg-m">
+          <div className="seg2 seg3 lens-seg-m">
+            <button className="" onClick={() => onLens('volume')}>
+              {t.volumeTab}
+            </button>
+            <button className="" onClick={() => onLens('fatigue')}>
+              {t.fatigueTab}
+            </button>
+            <button className="active" onClick={() => onLens('readiness')}>
+              {t.readinessKicker}
+            </button>
+          </div>
+          <ReadinessLens finished={finished} now={nowTs} />
+        </div>
+      ) : mapView && !desktop ? (
+        <div className="vol-map">
+          <div className="seg2 seg3 lens-seg-m">
             <button className={lens === 'volume' ? 'active' : ''} onClick={() => onLens('volume')}>
               {t.volumeTab}
             </button>
@@ -1162,6 +1210,9 @@ function VolumePanel({
               onClick={() => onLens('fatigue')}
             >
               {t.fatigueTab}
+            </button>
+            <button className="" onClick={() => onLens('readiness')}>
+              {t.readinessKicker}
             </button>
           </div>
           <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : heatColors} />

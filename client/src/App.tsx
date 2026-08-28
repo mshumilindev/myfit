@@ -207,6 +207,8 @@ function toHash(
   libMine: boolean,
   progressSub: 'progress' | 'trends' | 'feats',
   featSub: 'achievements' | 'standards',
+  progressSeg: ProgSeg,
+  volumeLens: VolLens,
 ): string {
   if (!overlay && tab === 'programs') {
     if (programsPeer === 'exercises') return libMine ? '#/exercises/mine' : '#/exercises';
@@ -215,6 +217,11 @@ function toHash(
   if (!overlay && tab === 'progress') {
     if (progressSub === 'trends') return '#/trends';
     if (progressSub === 'feats') return featSub === 'standards' ? '#/feats/standards' : '#/feats';
+    if (progressSeg === 'muscle') return '#/progress/muscle';
+    if (progressSeg === 'records') return '#/progress/records';
+    if (progressSeg === 'volume')
+      return volumeLens === 'volume' ? '#/progress/volume' : `#/progress/volume/${volumeLens}`;
+    return '#/progress';
   }
   if (overlay?.screen === 'session') return '#/session';
   if (overlay?.screen === 'activity') return '#/activity';
@@ -286,16 +293,37 @@ function peerFromHash(hash: string): { peer: ProgramsPeer; mine: boolean } {
   return { peer: 'programs', mine: false };
 }
 
-/** Read the Progress sub-tab (#/trends, #/feats[/standards]) from the hash. */
+export type ProgSeg = 'total' | 'muscle' | 'volume' | 'records';
+export type VolLens = 'volume' | 'fatigue' | 'readiness';
+
+/** Read the Progress sub-tab + volume seg/lens from the hash:
+ *  #/trends, #/feats[/standards], #/progress[/muscle|/volume[/fatigue|/readiness]|/records]. */
 function progressFromHash(hash: string): {
   sub: 'progress' | 'trends' | 'feats';
   featSub: 'achievements' | 'standards';
+  seg: ProgSeg;
+  lens: VolLens;
 } {
   const parts = hash.replace(/^#\/?/, '').split('/');
-  if (parts[0] === 'trends') return { sub: 'trends', featSub: 'achievements' };
+  const base = { seg: 'total' as ProgSeg, lens: 'volume' as VolLens };
+  if (parts[0] === 'trends') return { sub: 'trends', featSub: 'achievements', ...base };
   if (parts[0] === 'feats')
-    return { sub: 'feats', featSub: parts[1] === 'standards' ? 'standards' : 'achievements' };
-  return { sub: 'progress', featSub: 'achievements' };
+    return {
+      sub: 'feats',
+      featSub: parts[1] === 'standards' ? 'standards' : 'achievements',
+      ...base,
+    };
+  if (parts[0] === 'progress') {
+    const seg: ProgSeg = (['muscle', 'volume', 'records'] as string[]).includes(parts[1])
+      ? (parts[1] as ProgSeg)
+      : 'total';
+    const lens: VolLens =
+      seg === 'volume' && (parts[2] === 'fatigue' || parts[2] === 'readiness')
+        ? (parts[2] as VolLens)
+        : 'volume';
+    return { sub: 'progress', featSub: 'achievements', seg, lens };
+  }
+  return { sub: 'progress', featSub: 'achievements', ...base };
 }
 
 export function App() {
@@ -374,6 +402,14 @@ export function App() {
   );
   const [featSub, setFeatSub] = useState<'achievements' | 'standards'>(
     () => progressFromHash(window.location.hash).featSub,
+  );
+  // Progress volume seg + lens live here too, so #/progress/volume/readiness
+  // survives a refresh and deep links land on the right lens.
+  const [progressSeg, setProgressSeg] = useState<ProgSeg>(
+    () => progressFromHash(window.location.hash).seg,
+  );
+  const [volumeLens, setVolumeLens] = useState<VolLens>(
+    () => progressFromHash(window.location.hash).lens,
   );
   // Overlay navigation keeps a stack of parents: the back button on an overlay
   // returns to the screen it was opened from (session → exercise history →
@@ -507,9 +543,29 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(effectiveTab, activeOverlay, programsPeer, libMine, progressSub, featSub);
+    const next = toHash(
+      effectiveTab,
+      activeOverlay,
+      programsPeer,
+      libMine,
+      progressSub,
+      featSub,
+      progressSeg,
+      volumeLens,
+    );
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
-  }, [authed, joinToken, effectiveTab, activeOverlay, programsPeer, libMine, progressSub, featSub]);
+  }, [
+    authed,
+    joinToken,
+    effectiveTab,
+    activeOverlay,
+    programsPeer,
+    libMine,
+    progressSub,
+    featSub,
+    progressSeg,
+    volumeLens,
+  ]);
 
   // URL hash → state (browser back/forward).
   useEffect(() => {
@@ -523,6 +579,8 @@ export function App() {
       setLibMine(pk.mine);
       setProgressSub(ps.sub);
       setFeatSub(ps.featSub);
+      setProgressSeg(ps.seg);
+      setVolumeLens(ps.lens);
       setOverlayNav({
         cur:
           ho?.screen === 'session' && !ho.workoutId
@@ -683,6 +741,10 @@ export function App() {
                   onSub={setProgressSub}
                   featSub={featSub}
                   onFeatSub={setFeatSub}
+                  seg={progressSeg}
+                  onSeg={setProgressSeg}
+                  lens={volumeLens}
+                  onLens={setVolumeLens}
                 />
               )}
               {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}

@@ -394,6 +394,7 @@ export const en = {
   rdReadyIn: (d: number) => `~${d}d`,
   rdBehind: 'behind',
   rdState: { recovering: 'recovering', nearly: 'nearly', ready: 'ready', stale: 'stale' },
+  rdColdStart: 'Log a few sessions and the readiness read fills in.',
   volFine: 'Muscles',
   volZones: 'Zones',
   volList: 'List',
