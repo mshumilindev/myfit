@@ -1463,7 +1463,13 @@ export function SessionView(props: {
                     {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
                   </div>
                 ) : (
-                  <div className="title">{fmtDayMonth(workout.startedAt, locale)}</div>
+                  <div className="title">
+                    {workout.dayName ||
+                      (() => {
+                        const r = workoutDayReadout(workout);
+                        return r ? dayReadoutLabel(r, t) : fmtDayMonth(workout.startedAt, locale);
+                      })()}
+                  </div>
                 )}
                 <button className="past-gym-row" onClick={() => setSheet({ kind: 'gym' })}>
                   <Icon name="map-pin" />
