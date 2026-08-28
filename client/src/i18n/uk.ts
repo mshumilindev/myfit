@@ -352,6 +352,8 @@ export const uk: Strings = {
   progWhyStall: 'Топ-сет застояв — розвантаж і відбудуйся.',
   progWhyFirst: 'Уперше — знайди робочу вагу.',
   fatigueTab: 'Втома',
+  swapAlternatives: 'Заміни',
+  swapMatch: (n: number) => `${n}% збігу`,
   fatLevel: {
     fresh: 'Свіжий',
     moderate: 'Помірна',

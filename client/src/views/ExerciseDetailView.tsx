@@ -18,8 +18,15 @@ import {
   richExerciseByName,
   type MuscleGroup,
 } from '../data/exercises';
-import { equipmentIconName, equipmentLabel, MuscleBodyFigure } from '../components/Muscle';
+import {
+  equipmentIconName,
+  equipmentLabel,
+  MuscleBodyFigure,
+  MuscleSetChip,
+} from '../components/Muscle';
 import { CustomEditor } from '../components/ExerciseGallery';
+import { swapCandidates } from '../swaps';
+import { activeGym } from '../fixit';
 import {
   addExercise,
   estimatedOneRepMaxSet,
@@ -263,6 +270,65 @@ export function ExerciseDetailView({
     </div>
   );
 
+  // --- Smart swaps (design SWAP-1): same-profile alternatives, gym-aware ----
+  const swapGym = activeGym(
+    store.gyms,
+    store.workouts.filter((w) => w.finishedAt !== null),
+  );
+  const swaps = info && info.primary !== 'cardio' ? swapCandidates(canonical, swapGym, 4) : [];
+  const alternativesSection = swaps.length > 0 && (
+    <div className="exd-section">
+      <h6 className="exd-label">{t.swapAlternatives}</h6>
+      <div className="swap-list">
+        {swaps.map((s) => {
+          const pct = Math.round(s.match * 100);
+          const avail = s.bodyweight
+            ? { cls: 'any', icon: 'person-simple', text: t.fixAnywhere }
+            : !swapGym
+              ? {
+                  cls: 'neutral',
+                  icon: 'barbell',
+                  text: s.equipment.map((e) => equipmentLabel(e)).join(' · ') || t.fixAnywhere,
+                }
+              : s.available
+                ? { cls: 'ok', icon: 'check-circle', text: t.fixAtGym(swapGym.name) }
+                : {
+                    cls: 'warn',
+                    icon: 'warning-circle',
+                    text: t.fixMissing(s.missing.map((e) => equipmentLabel(e)).join(' · ')),
+                  };
+          return (
+            <button
+              key={s.name}
+              className="swap-row"
+              onClick={() => shell.openOverlay({ screen: 'exercise-detail', name: s.name })}
+            >
+              <div className="swap-head">
+                <span className="swap-name">{s.name}</span>
+                <span className="swap-match">{t.swapMatch(pct)}</span>
+              </div>
+              <div className="swap-bar">
+                <span style={{ width: `${pct}%` }} />
+              </div>
+              {s.primary && (
+                <div className="swap-meta">
+                  <MuscleSetChip muscle={s.primary} tone="primary" />
+                  {s.secondary.slice(0, 2).map((m) => (
+                    <MuscleSetChip key={m} muscle={m} tone="secondary" />
+                  ))}
+                </div>
+              )}
+              <div className={`swap-avail ${avail.cls}`}>
+                <Icon name={avail.icon} />
+                <span>{avail.text}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   // --- media header: form photo → barbell glyph ----------------------------
   const renderMedia = (ratio: '16-9' | 'phone') => {
     if (rich?.images[0]) {
@@ -386,6 +452,7 @@ export function ExerciseDetailView({
           {instructions}
           {formPhotos}
           {historySection}
+          {alternativesSection}
           {editButton}
           <button className="btn btn-primary exd-add" onClick={addToSession}>
             <Icon name="plus" />
@@ -417,6 +484,7 @@ export function ExerciseDetailView({
           {musclesSection}
           {instructions}
           {historySection}
+          {alternativesSection}
           <div className="exd-actions">
             <button
               className="btn btn-secondary"

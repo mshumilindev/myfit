@@ -348,6 +348,8 @@ export const et: Strings = {
   progWhyStall: 'Tippseeria on seiskunud — tee deload ja taasta.',
   progWhyFirst: 'Esimest korda — leia tööraskus.',
   fatigueTab: 'Väsimus',
+  swapAlternatives: 'Alternatiivid',
+  swapMatch: (n: number) => `${n}% vastavus`,
   fatLevel: {
     fresh: 'Värske',
     moderate: 'Mõõdukas',
