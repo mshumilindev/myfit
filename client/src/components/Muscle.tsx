@@ -932,19 +932,28 @@ function MuscleDrawer({
   onOpen?: (m: MuscleGroup) => void;
   onClose: () => void;
 }) {
+  const interactive = !!onOpen;
   return (
     <Sheet onClose={onClose}>
       <div className="muscle-drawer">
         <div className="section-label">{strings().musclesWorkedLabel}</div>
         <div className="md-list">
           {entries.map((e) => (
-            <MuscleSetChip
+            <div
               key={e.muscle}
-              muscle={e.muscle}
-              count={e.sets}
-              tone={e.primary ? 'primary' : 'secondary'}
-              onClick={onOpen}
-            />
+              className={`md-row${e.primary ? ' primary' : ''}`}
+              role={interactive ? 'button' : undefined}
+              tabIndex={interactive ? 0 : undefined}
+              onClick={interactive ? () => onOpen(e.muscle) : undefined}
+            >
+              <MuscleIcon
+                muscle={e.muscle}
+                variant="chipFig"
+                tone={e.primary ? 'primary' : 'secondary'}
+              />
+              <span className="md-name">{strings().muscleGroups[e.muscle]}</span>
+              <span className="md-count tnum">{fmtSetCount(e.sets)}</span>
+            </div>
           ))}
         </div>
       </div>
@@ -966,7 +975,7 @@ export function MuscleRow({
 }) {
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
-  const moreRef = useRef<HTMLButtonElement>(null);
+  const moreRef = useRef<HTMLSpanElement>(null);
   const key = entries.map((e) => `${e.muscle}:${e.primary ? 1 : 0}`).join(',');
   useLayoutEffect(() => {
     const row = rowRef.current;
@@ -997,9 +1006,15 @@ export function MuscleRow({
     return () => ro.disconnect();
   }, [key]);
   if (entries.length === 0) return null;
+  const openDrawer = (ev: { stopPropagation: () => void }) => {
+    ev.stopPropagation();
+    setOpen(true);
+  };
   return (
     <>
-      <div className="mrow" ref={rowRef}>
+      {/* Stop clicks inside the muscle area from bubbling to the row button
+          (which opens the workout) — chips and "+N more" act on their own. */}
+      <div className="mrow" ref={rowRef} onClick={(e) => e.stopPropagation()}>
         {entries.map((e) => (
           <span key={e.muscle} data-mchip className="mrow-item">
             <MuscleChip
@@ -1009,22 +1024,28 @@ export function MuscleRow({
             />
           </span>
         ))}
-        <button
-          type="button"
+        <span
           className="mrow-more"
+          role="button"
+          tabIndex={0}
           ref={moreRef}
-          onClick={(ev) => {
-            ev.stopPropagation();
-            setOpen(true);
+          onClick={openDrawer}
+          onKeyDown={(ev) => {
+            if (ev.key === 'Enter' || ev.key === ' ') openDrawer(ev);
           }}
         >
           +<span className="n" />
           &nbsp;{strings().moreLabel}
-        </button>
+        </span>
       </div>
       {open &&
         createPortal(
-          <MuscleDrawer entries={entries} onOpen={onOpen} onClose={() => setOpen(false)} />,
+          // React re-parents portal events through the component tree, so the
+          // Sheet's scrim click would otherwise bubble to the row button and
+          // open the workout. Stop it at the portal boundary.
+          <div onClick={(e) => e.stopPropagation()}>
+            <MuscleDrawer entries={entries} onOpen={onOpen} onClose={() => setOpen(false)} />
+          </div>,
           document.body,
         )}
     </>
