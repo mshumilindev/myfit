@@ -1007,7 +1007,88 @@ function deleteActivityDoc(id: string): void {
   deleteDoc(doc(db, 'users', uid, 'activities', id)).catch(onWriteError);
 }
 
-/** Persist a finished (live-timed or backfilled) activity. */
+/** The live (unfinished) activity, if one is running or paused. */
+export function liveActivity(): Activity | null {
+  return state.activities.find((a) => a.finishedAt === null) ?? null;
+}
+
+/** Begin a live activity (design feature 6): a persisted, resumable timer that
+ *  survives closing the page — mirrors how an open workout works. */
+export function startActivity(type: string, category: ActivityCategory): Activity {
+  const now = Date.now();
+  const activity: Activity = {
+    id: uuid(),
+    type,
+    category,
+    startedAt: now,
+    finishedAt: null,
+    durationMin: 0,
+    effort: 'moderate',
+    runningSince: now,
+    accumulatedMs: 0,
+  };
+  setState({
+    activities: [activity, ...state.activities].sort((a, b) => b.startedAt - a.startedAt),
+    syncStatus: bumpPending(),
+  });
+  writeActivityDoc(activity);
+  return activity;
+}
+
+function patchActivity(id: string, patch: Partial<Activity>): void {
+  const list = state.activities.map((a) => (a.id === id ? { ...a, ...patch } : a));
+  setState({ activities: list, syncStatus: bumpPending() });
+  const updated = list.find((a) => a.id === id);
+  if (updated) writeActivityDoc(updated);
+}
+
+/** Pause the live timer, banking the current running segment. */
+export function pauseActivity(id: string, now: number = Date.now()): void {
+  const a = state.activities.find((x) => x.id === id);
+  if (!a || a.finishedAt !== null || !a.runningSince) return;
+  patchActivity(id, {
+    accumulatedMs: (a.accumulatedMs ?? 0) + Math.max(0, now - a.runningSince),
+    runningSince: null,
+  });
+}
+
+/** Resume a paused live timer. */
+export function resumeActivity(id: string, now: number = Date.now()): void {
+  const a = state.activities.find((x) => x.id === id);
+  if (!a || a.finishedAt !== null || a.runningSince) return;
+  patchActivity(id, { runningSince: now });
+}
+
+/** Edit live-activity fields (effort, distance, note). */
+export function updateActivity(
+  id: string,
+  patch: Pick<Partial<Activity>, 'effort' | 'distanceKm' | 'note'>,
+): void {
+  patchActivity(id, patch);
+}
+
+/** Finish a live activity: freeze the clock, store duration & calories. */
+export function finishActivity(
+  id: string,
+  input: { calories?: number | null } = {},
+  now: number = Date.now(),
+): Activity | null {
+  const a = state.activities.find((x) => x.id === id);
+  if (!a) return null;
+  const elapsedMs =
+    (a.accumulatedMs ?? 0) + (a.runningSince ? Math.max(0, now - a.runningSince) : 0);
+  const patch: Partial<Activity> = {
+    finishedAt: now,
+    runningSince: null,
+    accumulatedMs: elapsedMs,
+    durationMin: Math.round((elapsedMs / 60000) * 10) / 10,
+    calories: input.calories ?? a.calories ?? null,
+  };
+  patchActivity(id, patch);
+  return state.activities.find((x) => x.id === id) ?? null;
+}
+
+/** Persist a finished (backfilled) activity in one shot. */
 export function logActivity(input: {
   type: string;
   category: ActivityCategory;
@@ -1045,6 +1126,11 @@ export function deleteActivity(id: string): void {
     syncStatus: bumpPending(),
   });
   deleteActivityDoc(id);
+}
+
+/** Discard a live activity (semantic alias of delete, used by the timer page). */
+export function discardActivity(id: string): void {
+  deleteActivity(id);
 }
 
 /** Activities whose start falls on the given local day key. */

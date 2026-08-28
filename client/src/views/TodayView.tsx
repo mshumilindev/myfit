@@ -261,17 +261,40 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };
 
+  // A live activity is mutually exclusive with a live workout: while one runs,
+  // the other can't be started (design feature 6).
+  const open = store.workouts.find((w) => w.finishedAt === null);
+  const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
+
   function beginSession(gymId: string | null) {
+    if (liveAct) {
+      shell.openOverlay({ screen: 'activity' });
+      return;
+    }
     setStartPicker(false);
     const w = startWorkout(gymId);
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
   function startSession() {
+    if (liveAct) {
+      shell.openOverlay({ screen: 'activity' });
+      return;
+    }
     if (store.gyms.length > 0) setStartPicker(true);
     else beginSession(null);
   }
+  function openActivitySheet() {
+    if (open) {
+      shell.openOverlay({ screen: 'session', workoutId: open.id });
+      return;
+    }
+    if (liveAct) {
+      shell.openOverlay({ screen: 'activity' });
+      return;
+    }
+    setActivityOpen(true);
+  }
 
-  const open = store.workouts.find((w) => w.finishedAt === null);
   const now = useNowTick(!!open);
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
 
@@ -961,18 +984,22 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       {t.restStartCta}
                     </button>
                   )}
-                  <button className="btn btn-secondary" onClick={() => setActivityOpen(true)}>
-                    <Icon name="heartbeat" />
-                    {t.logActivity}
-                  </button>
+                  {!liveAct && (
+                    <button className="btn btn-secondary" onClick={openActivitySheet}>
+                      <Icon name="heartbeat" />
+                      {t.logActivity}
+                    </button>
+                  )}
                   <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
                     <Icon name="arrow-counter-clockwise" />
                     {t.logPastSession}
                   </button>
-                  <button className="btn btn-primary" onClick={startSession}>
-                    <Icon name="play" />
-                    {t.startSessionLabel}
-                  </button>
+                  {!liveAct && (
+                    <button className="btn btn-primary" onClick={startSession}>
+                      <Icon name="play" />
+                      {t.startSessionLabel}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -986,6 +1013,24 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           ))}
 
         {banners}
+        {!open && liveAct && (
+          <button
+            className={`td-resume-activity cat-${activityCategory(liveAct)}`}
+            onClick={() => shell.openOverlay({ screen: 'activity' })}
+          >
+            <span className="tra-icon">
+              <Icon name={activityType(liveAct.type)?.icon ?? 'heartbeat'} weight="fill" />
+            </span>
+            <span className="tra-main">
+              <span className="tra-kicker">{t.actInProgress}</span>
+              <span className="tra-name">{t.actType[liveAct.type] ?? liveAct.type}</span>
+            </span>
+            <span className="tra-cta">
+              {t.actResume}
+              <Icon name="arrow-right" />
+            </span>
+          </button>
+        )}
         {!open && activeRest && (
           <div
             className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
@@ -1104,21 +1149,22 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {!open && hasHistory && (
           <div className="td-start-ctas mobile-only">
-            <button className="btn btn-primary td-start-cta" onClick={startSession}>
-              <Icon name="play" />
-              {t.startSessionLabel}
-            </button>
+            {!liveAct && (
+              <button className="btn btn-primary td-start-cta" onClick={startSession}>
+                <Icon name="play" />
+                {t.startSessionLabel}
+              </button>
+            )}
             <button className="btn btn-secondary td-backfill-cta" onClick={() => setBackfill(true)}>
               <Icon name="arrow-counter-clockwise" />
               {t.logPastSession}
             </button>
-            <button
-              className="btn btn-secondary td-activity-cta"
-              onClick={() => setActivityOpen(true)}
-            >
-              <Icon name="heartbeat" />
-              {t.logActivity}
-            </button>
+            {!liveAct && (
+              <button className="btn btn-secondary td-activity-cta" onClick={openActivitySheet}>
+                <Icon name="heartbeat" />
+                {t.logActivity}
+              </button>
+            )}
             {!activeRest && (
               <button
                 className="btn btn-secondary td-rest-cta"
@@ -1529,14 +1575,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
       {activityOpen && (
-        <ActivitySheet
-          bodyKg={bodyKg}
-          onClose={() => setActivityOpen(false)}
-          onAddWeight={() => {
-            setActivityOpen(false);
-            setAddWeightOpen(true);
-          }}
-        />
+        <ActivitySheet shell={shell} bodyKg={bodyKg} onClose={() => setActivityOpen(false)} />
       )}
       {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
       {progSheetOpen && (

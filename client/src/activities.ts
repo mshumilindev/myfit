@@ -77,6 +77,22 @@ export function durationMin(a: Activity): number {
   return 0;
 }
 
+/** Whether an activity is still live (running or paused). */
+export function isActivityLive(a: Activity): boolean {
+  return a.finishedAt === null;
+}
+
+/** Whether a live activity is currently paused. */
+export function isActivityPaused(a: Activity): boolean {
+  return a.finishedAt === null && !a.runningSince;
+}
+
+/** Live elapsed ms of a running/paused activity (banked + current segment). */
+export function activityElapsedMs(a: Activity, now: number): number {
+  const banked = a.accumulatedMs ?? 0;
+  return banked + (a.runningSince ? Math.max(0, now - a.runningSince) : 0);
+}
+
 const EFFORT_MULT: Record<ActivityEffort, number> = { light: 0.82, moderate: 1, hard: 1.22 };
 
 /**

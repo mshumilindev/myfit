@@ -160,7 +160,7 @@ export interface Activity {
   category: ActivityCategory;
   /** ms epoch the activity started (or the backfilled date). */
   startedAt: number;
-  /** ms epoch it finished; null only while a live timer is running. */
+  /** ms epoch it finished; null only while a live activity is running/paused. */
   finishedAt: number | null;
   /** Final duration in minutes (authoritative once saved). */
   durationMin: number;
@@ -168,6 +168,11 @@ export interface Activity {
   distanceKm?: number | null;
   effort?: ActivityEffort;
   note?: string | null;
+  /** Live-timer bookkeeping (only while finishedAt === null):
+   *  ms epoch of the current running segment's start, or null while paused. */
+  runningSince?: number | null;
+  /** Live-timer bookkeeping: elapsed ms banked from finished segments. */
+  accumulatedMs?: number;
   updatedAt?: number;
 }
 

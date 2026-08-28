@@ -69,6 +69,9 @@ const GymsView = lazy(() =>
 const SessionView = lazy(() =>
   import('./views/SessionView').then((module) => ({ default: module.SessionView })),
 );
+const ActivityView = lazy(() =>
+  import('./views/ActivityView').then((module) => ({ default: module.ActivityView })),
+);
 const ExerciseHistoryView = lazy(() =>
   import('./views/ExerciseHistoryView').then((module) => ({
     default: module.ExerciseHistoryView,
@@ -118,6 +121,7 @@ export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 
 export type Overlay =
   | { screen: 'session'; workoutId: string }
+  | { screen: 'activity' }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
   | { screen: 'exercise-detail'; name: string }
@@ -213,6 +217,7 @@ function toHash(
     if (progressSub === 'feats') return featSub === 'standards' ? '#/feats/standards' : '#/feats';
   }
   if (overlay?.screen === 'session') return '#/session';
+  if (overlay?.screen === 'activity') return '#/activity';
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
@@ -234,6 +239,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   const parts = hash.replace(/^#\/?/, '').split('/');
   const head = parts[0] ?? '';
   if (head === 'session') return { tab: 'today', overlay: { screen: 'session', workoutId: '' } };
+  if (head === 'activity') return { tab: 'today', overlay: { screen: 'activity' } };
   if (head === 'workout' && parts[1])
     return { tab: 'today', overlay: { screen: 'past-workout', workoutId: parts[1] } };
   if (head === 'exercise' && parts[1])
@@ -623,6 +629,7 @@ export function App() {
           {activeOverlay?.screen === 'session' && (
             <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
           )}
+          {activeOverlay?.screen === 'activity' && <ActivityView onClose={closeOverlay} />}
           {activeOverlay?.screen === 'past-workout' && (
             <SessionView
               workoutId={activeOverlay.workoutId}
