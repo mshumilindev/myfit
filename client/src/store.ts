@@ -411,30 +411,74 @@ export function workoutDayReadout(w: Workout): DayReadout | null {
   return describeDay(order.map((m) => [m, counts.get(m) as number]));
 }
 
+/** Weekday (1=Mon…7=Sun) — the program's day-key convention. */
+function programDay(ts: number): number {
+  return ((new Date(ts).getDay() + 6) % 7) + 1;
+}
+
+/** The set of primary muscle groups a session actually trained. */
+function primaryMusclesOf(w: Workout): Set<MuscleGroup> {
+  const s = new Set<MuscleGroup>();
+  for (const e of w.exercises) {
+    if (!isStrengthExercise(e)) continue;
+    const { primary } = resolveMuscles(e);
+    if (primary && primary !== 'cardio') s.add(primary);
+  }
+  return s;
+}
+
+interface CachedAssignment {
+  program: {
+    dayNames?: Record<string, string>;
+    targetMuscles?: Record<string, MuscleGroup[]>;
+    items?: { day: number }[];
+  };
+  week?: number;
+}
+function readAssignment(): CachedAssignment | null {
+  try {
+    const raw = localStorage.getItem('spotter.programMine');
+    return raw ? (JSON.parse(raw) as CachedAssignment) : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
- * The program day name to title a logged session with, or null. A session
- * started from the program carries its own `dayName`. For the others, once a
- * program is in play (the first session that carries a day name marks that
- * moment), sessions on a weekday that the program consistently names inherit
- * that name — so history reads in program terms from the moment it appeared,
- * not as a raw muscle set. Sessions before the program, or on weekdays the
- * program never named (or named more than one way), keep the muscle readout.
+ * The program day name to title a logged session with, or null.
+ *
+ * A session started from the program carries its own `dayName` — used directly.
+ * For the rest, we read the assigned program (cached from Today) and map the
+ * session's weekday to that program day's name — so history reads in program
+ * terms ("Legs 2") rather than a raw muscle set ("Legs"). Guards keep it honest:
+ * only from roughly when the program began (bounded by its current week), and
+ * only when the session's muscles overlap the program day's targets — so an old,
+ * off-program session on the same weekday isn't mislabelled. Without a program
+ * (or on weekdays it doesn't name) it returns null and the caller shows the
+ * muscle readout.
  */
 export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
   if (w.dayName) return w.dayName;
-  let programStart = Infinity;
-  const byDow = new Map<number, Set<string>>();
-  for (const x of workouts) {
-    if (!x.dayName) continue;
-    programStart = Math.min(programStart, x.startedAt);
-    const dow = new Date(x.startedAt).getDay();
-    const set = byDow.get(dow) ?? new Set<string>();
-    set.add(x.dayName);
-    byDow.set(dow, set);
-  }
+  const a = readAssignment();
+  if (!a) return null;
+  const day = programDay(w.startedAt);
+  const name = a.program.dayNames?.[String(day)];
+  if (!name) return null;
+  const targets = a.program.targetMuscles?.[String(day)] ?? [];
+  const hasItems = (a.program.items ?? []).some((i) => i.day === day);
+  if (!hasItems && targets.length === 0) return null; // a rest day, not a session
+  // Only from ~when the program appeared (its current week bounds how far back).
+  const now = workouts.reduce((m, x) => Math.max(m, x.startedAt), w.startedAt);
+  const weeks = Math.max(1, a.week ?? 1);
+  const programStart = now - (weeks + 1) * 7 * 86400000;
   if (w.startedAt < programStart) return null;
-  const names = byDow.get(new Date(w.startedAt).getDay());
-  return names && names.size === 1 ? [...names][0] : null;
+  // When the day names its target muscles, require the session to have trained
+  // at least one of them; a pure exercise day (no targets) is taken on trust.
+  if (targets.length > 0) {
+    const trained = primaryMusclesOf(w);
+    if (!targets.some((m) => trained.has(m))) return null;
+  }
+  return name;
 }
 
 export function muscleVolumeKg(workouts: Workout[]): Map<MuscleGroup, number> {
