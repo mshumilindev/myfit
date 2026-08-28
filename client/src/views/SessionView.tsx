@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -151,15 +151,6 @@ type DialogState =
   | { kind: 'del-workout' }
   | null;
 
-export function rectHasVisiblePixels(
-  rect: Pick<DOMRectReadOnly, 'top' | 'right' | 'bottom' | 'left'>,
-  viewport: { width: number; height: number },
-): boolean {
-  return (
-    rect.right > 0 && rect.bottom > 0 && rect.left < viewport.width && rect.top < viewport.height
-  );
-}
-
 /**
  * Share-summary bottom sheet (AC-3.2): live canvas preview, format toggle,
  * and native-share / save / copy. Drawing is offline and separate from the
@@ -307,9 +298,6 @@ export function SessionView(props: {
   const [now, setNow] = useState(() => Date.now());
   /** Share-summary bottom sheet open (AC-3.2). */
   const [shareOpen, setShareOpen] = useState(false);
-  /** Whether the inline Finish button is on screen — it owns visibility over the FAB. */
-  const [dockedFinishInView, setDockedFinishInView] = useState(false);
-  const dockedFinishRef = useRef<HTMLButtonElement>(null);
   /** Past workout cards start collapsed for reading (SS-3). */
   const [expandedPast, setExpandedPast] = useState<string[]>([]);
   /** The set logged most recently in this visit — its row reads “just now”. */
@@ -341,47 +329,6 @@ export function SessionView(props: {
     startAddConsumed.current = true;
     setSheet({ kind: 'add' });
   }, [props.startAdd, workout]);
-
-  // On mobile the floating Finish is mutually exclusive with the inline Finish:
-  // hide the FAB as soon as any pixel of the inline button enters the viewport,
-  // and show it again only when the inline button is fully outside.
-  //
-  // The session content scrolls inside a height-locked inner container, not the
-  // window. IntersectionObserver with the viewport root is unreliable for such
-  // nested scrollers on iOS WebKit (the callback simply never fires, so the FAB
-  // never hid). Instead we re-measure on scroll, listening in the CAPTURE phase
-  // — scroll events don't bubble, but capture sees them from any scroll
-  // container — throttled to one read per frame.
-  useLayoutEffect(() => {
-    const el = dockedFinishRef.current;
-    if (!el) return;
-    const measure = () => {
-      const rect = el.getBoundingClientRect();
-      if (rect.width === 0 && rect.height === 0) {
-        setDockedFinishInView(true);
-        return;
-      }
-      const width = window.innerWidth || document.documentElement.clientWidth;
-      const height = window.innerHeight || document.documentElement.clientHeight;
-      setDockedFinishInView(rectHasVisiblePixels(rect, { width, height }));
-    };
-    let raf = 0;
-    const onScrollOrResize = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(() => {
-        raf = 0;
-        measure();
-      });
-    };
-    measure();
-    window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
-    window.addEventListener('resize', onScrollOrResize);
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScrollOrResize, { capture: true });
-      window.removeEventListener('resize', onScrollOrResize);
-    };
-  }, [live, workout?.autoFinished, summary]);
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -873,6 +820,34 @@ export function SessionView(props: {
           </>
         ) : (
           <>
+            {target && showGhost && !grp && (
+              <div className={`prog-target st-${target.state}`}>
+                <span className="pt-label">{t.progTarget}</span>
+                <span className="pt-val">
+                  {target.weight === null
+                    ? t.progRepsTarget(target.reps)
+                    : `${fmtWeightValue(target.weight)} × ${target.reps}`}
+                </span>
+                {target.deltaKg > 0 && (
+                  <span className="pt-delta up">+{fmtWeightValue(target.deltaKg)}</span>
+                )}
+                {target.deltaKg < 0 && (
+                  <span className="pt-delta down">{fmtWeightValue(target.deltaKg)}</span>
+                )}
+                {target.state === 'hold' && <span className="pt-tag">{t.progHold}</span>}
+                {target.state === 'stall' && <span className="pt-tag warn">{t.progDeload}</span>}
+                {target.state === 'first' && <span className="pt-tag">{t.progFirst}</span>}
+                <span className="pt-why">
+                  {target.state === 'progress'
+                    ? t.progWhyProgress
+                    : target.state === 'hold'
+                      ? t.progWhyHold
+                      : target.state === 'stall'
+                        ? t.progWhyStall
+                        : t.progWhyFirst}
+                </span>
+              </div>
+            )}
             {!grp && (
               <div className="set-grid header">
                 <span>#</span>
@@ -1012,34 +987,6 @@ export function SessionView(props: {
                     </div>
                   );
                 })()}
-              {target && showGhost && !grp && (
-                <div className={`prog-target st-${target.state}`}>
-                  <span className="pt-label">{t.progTarget}</span>
-                  <span className="pt-val">
-                    {target.weight === null
-                      ? t.progRepsTarget(target.reps)
-                      : `${fmtWeightValue(target.weight)} × ${target.reps}`}
-                  </span>
-                  {target.deltaKg > 0 && (
-                    <span className="pt-delta up">+{fmtWeightValue(target.deltaKg)}</span>
-                  )}
-                  {target.deltaKg < 0 && (
-                    <span className="pt-delta down">{fmtWeightValue(target.deltaKg)}</span>
-                  )}
-                  {target.state === 'hold' && <span className="pt-tag">{t.progHold}</span>}
-                  {target.state === 'stall' && <span className="pt-tag warn">{t.progDeload}</span>}
-                  {target.state === 'first' && <span className="pt-tag">{t.progFirst}</span>}
-                  <span className="pt-why">
-                    {target.state === 'progress'
-                      ? t.progWhyProgress
-                      : target.state === 'hold'
-                        ? t.progWhyHold
-                        : target.state === 'stall'
-                          ? t.progWhyStall
-                          : t.progWhyFirst}
-                  </span>
-                </div>
-              )}
               {showGhost && (
                 <div className={`ghost-row${rowCls}`}>
                   <span className="idx">{grp ? `R${ex.sets.length + 1}` : ex.sets.length + 1}</span>
@@ -1410,6 +1357,34 @@ export function SessionView(props: {
     <div
       className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}`}
     >
+      {live && !workout.autoFinished && !isDesktop && (
+        <svg className="glass-defs" aria-hidden width="0" height="0">
+          <filter
+            id="liquid-glass"
+            x="-30%"
+            y="-30%"
+            width="160%"
+            height="160%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.011 0.011"
+              numOctaves="2"
+              seed="7"
+              result="noise"
+            />
+            <feGaussianBlur in="noise" stdDeviation="1.4" result="soft" />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="soft"
+              scale="52"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+        </svg>
+      )}
       <div className="pane-main">
         <div className="session-head-wrap">
           <div className={`session-top${live ? ' live-toolbar' : ''}`}>
@@ -1841,20 +1816,22 @@ export function SessionView(props: {
                   <p style={{ color: 'var(--color-neutral-500)' }}>{t.supersetHistoryNote}</p>
                 </div>
               )}
-              <button
-                className="btn btn-secondary session-add-btn"
-                onClick={() => setSheet({ kind: 'add' })}
-              >
-                <Icon name="plus" />
-                {props.past ? t.addToSession : t.addExercise}
-              </button>
+              {!(live && !workout.autoFinished && !isDesktop) && (
+                <button
+                  className="btn btn-secondary session-add-btn"
+                  onClick={() => setSheet({ kind: 'add' })}
+                >
+                  <Icon name="plus" />
+                  {props.past ? t.addToSession : t.addExercise}
+                </button>
+              )}
               {props.past && (
                 <button className="btn btn-primary share-cta" onClick={() => setShareOpen(true)}>
                   <Icon name="export" />
                   {t.shareWorkout}
                 </button>
               )}
-              {live && !workout.autoFinished && (
+              {live && !workout.autoFinished && isDesktop && (
                 <div className="session-discard-row">
                   <button
                     className="btn session-discard-btn icon-only"
@@ -1865,7 +1842,6 @@ export function SessionView(props: {
                     <Icon name="trash" />
                   </button>
                   <button
-                    ref={dockedFinishRef}
                     className="btn btn-primary session-finish-docked"
                     disabled={entries === 0}
                     onClick={requestFinish}
@@ -1879,16 +1855,32 @@ export function SessionView(props: {
           )}
         </div>
       </div>
-      {live && !workout.autoFinished && !dockedFinishInView && !isDesktop && (
-        <button
-          className="session-finish-fab"
-          disabled={entries === 0}
-          onClick={requestFinish}
-          aria-label={t.finish}
-          title={t.finish}
-        >
-          <Icon name="check" />
-        </button>
+      {live && !workout.autoFinished && !isDesktop && (
+        <div className="session-pill-wrap">
+          <div className="session-pill">
+            <button
+              className="sp-btn sp-discard"
+              onClick={() => setDialog({ kind: 'del-workout' })}
+              aria-label={t.discardSession}
+              title={t.discardSession}
+            >
+              <Icon name="trash" />
+            </button>
+            <button className="sp-btn sp-add" onClick={() => setSheet({ kind: 'add' })}>
+              <Icon name="plus" weight="bold" />
+              <span>{t.addExercise}</span>
+            </button>
+            <button
+              className="sp-btn sp-finish"
+              disabled={entries === 0}
+              onClick={requestFinish}
+              aria-label={t.finish}
+              title={t.finish}
+            >
+              <Icon name="check" weight="bold" />
+            </button>
+          </div>
+        </div>
       )}
       {shareOpen && !summary && (
         <ShareSheet
