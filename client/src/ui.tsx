@@ -423,11 +423,9 @@ function activeAnchor(): HTMLElement | null {
 function isTextEditableElement(el: Element | null): boolean {
   if (!(el instanceof HTMLElement)) return false;
   if (el.isContentEditable) return true;
-  return (
-    el instanceof HTMLInputElement ||
-    el instanceof HTMLTextAreaElement ||
-    el instanceof HTMLSelectElement
-  );
+  // A <select> opens a native picker, not a text keyboard, so it must NOT put
+  // the sheet into keyboard mode (that's what made the Range picker jump).
+  return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
 }
 
 function useMobileSheetKeyboardMode(sheetRef: RefObject<HTMLElement | null>): boolean {
