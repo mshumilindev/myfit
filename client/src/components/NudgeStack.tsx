@@ -10,7 +10,7 @@
  * overlay (each card in full, staggered in), closable. Auto-advance pauses
  * while the stack is open or just after a tap.
  */
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '../ui';
 
@@ -41,6 +41,29 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   const [rotation, setRotation] = useState(0);
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
+  // The card being dealt from the top of the deck to the back stays mounted and
+  // flies over the deck (peel up → tuck behind), so an advance reads as a real
+  // shuffle instead of a cross-fade. `flyKey` restarts the animation each deal.
+  const [flying, setFlying] = useState<Nudge | null>(null);
+  const [flyKey, setFlyKey] = useState(0);
+
+  // While the sheet is open, lock the background so it can't scroll behind the
+  // scrim. Padding for the removed scrollbar keeps the page from jumping — and
+  // keeps the fixed overlay symmetric, since the scrollbar no longer eats into
+  // its right edge.
+  useEffect(() => {
+    if (!open) return;
+    const sbw = window.innerWidth - document.documentElement.clientWidth;
+    const body = document.body;
+    const prevOverflow = body.style.overflow;
+    const prevPad = body.style.paddingRight;
+    body.style.overflow = 'hidden';
+    if (sbw > 0) body.style.paddingRight = `${sbw}px`;
+    return () => {
+      body.style.overflow = prevOverflow;
+      body.style.paddingRight = prevPad;
+    };
+  }, [open]);
 
   // Most-urgent first — the fixed order for the overlay and the deck's base.
   const items = [...nudges].sort((a, b) => b.priority - a.priority);
@@ -67,6 +90,14 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   const order = rotate(items, rotation);
   const front = order[0];
 
+  // Deal the current top card to the back: it becomes the flyer (peels up and
+  // tucks behind) while the deck rotates the next card up to the front.
+  const advance = () => {
+    setFlying(front);
+    setFlyKey((k) => k + 1);
+    setRotation((r) => r + 1);
+  };
+
   return (
     <div className="nudge-wrap">
       <button
@@ -76,7 +107,8 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
         aria-label={typeof front.title === 'string' ? front.title : front.kicker}
       >
         {order.map((n, i) => {
-          if (i >= MAX_PEEK) return null;
+          // The dealt card is drawn by the flyer, not the deck, until it lands.
+          if (i >= MAX_PEEK || n.id === flying?.id) return null;
           return (
             <span
               key={n.id}
@@ -98,6 +130,22 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
             </span>
           );
         })}
+        {flying && (
+          <span
+            key={flyKey}
+            className={`nudge-mini fly tone-${flying.tone}`}
+            style={{ zIndex: order.length + 5 }}
+            onAnimationEnd={() => setFlying(null)}
+          >
+            <span className="nudge-ic">
+              <Icon name={flying.icon} weight="fill" />
+            </span>
+            <span className="nudge-mini-text">
+              <span className="nudge-kicker">{flying.kicker}</span>
+              <span className="nudge-title">{flying.title}</span>
+            </span>
+          </span>
+        )}
       </button>
 
       {count > 1 && (
@@ -116,7 +164,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
                       animationDuration: `${ROTATE_MS}ms`,
                       animationPlayState: running ? 'running' : 'paused',
                     }}
-                    onAnimationEnd={() => setRotation((r) => r + 1)}
+                    onAnimationEnd={advance}
                   />
                 )}
               </span>

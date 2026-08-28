@@ -469,9 +469,13 @@ export function App() {
     goTab: (x) => {
       setOverlay(null);
       setTab(x);
-      // Tapping the Progress rail item lands on the Progress sub-tab, not a
-      // remembered Trends/Feats sub.
-      if (x === 'progress') setProgressSub('progress');
+      // Tapping Progress lands on its default view (#/progress), never a
+      // remembered Trends/Feats sub, muscle/records segment or volume lens.
+      if (x === 'progress') {
+        setProgressSub('progress');
+        setProgressSeg('total');
+        setVolumeLens('volume');
+      }
     },
     goPlaybook: () => {
       setOverlay(null);
@@ -642,6 +646,12 @@ export function App() {
     // Landing on a top-level tab always shows that tab's primary content, so a
     // stale peer tab (Playbook/Exercises) never leaks across a Programs re-entry.
     setProgramsPeer('programs');
+    // …and Progress opens on its default view, not a remembered sub/segment/lens.
+    if (x === 'progress') {
+      setProgressSub('progress');
+      setProgressSeg('total');
+      setVolumeLens('volume');
+    }
     setTab(x);
   };
   /** Switch the Programs · Playbook · Exercises peer tab in place (no overlay). */

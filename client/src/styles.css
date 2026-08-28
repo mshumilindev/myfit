@@ -19411,7 +19411,6 @@ button.badge {
   border-radius: var(--radius-md);
   border-left: 3px solid var(--color-kcal, var(--color-accent));
   background: color-mix(in srgb, var(--color-kcal, var(--color-accent)) 8%, var(--color-surface));
-  margin-bottom: 14px;
 }
 .rd-lead {
   font-size: 15px;
@@ -19510,7 +19509,6 @@ button.badge {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 14px;
   padding: 13px 14px;
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--color-ok) 9%, var(--color-surface));
@@ -19622,6 +19620,30 @@ button.badge {
   color: var(--color-neutral-500);
   font-size: 16px;
 }
+/* Dealing the top card to the back: peel up off the deck, then tuck behind it
+   as the next card rises to the front. */
+.nudge-mini.fly {
+  transition: none;
+  pointer-events: none;
+  animation: nudge-shuffle 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes nudge-shuffle {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  }
+  32% {
+    transform: translateY(-36px) scale(1.05) rotate(-2.5deg);
+    opacity: 1;
+    box-shadow: 0 20px 38px rgba(0, 0, 0, 0.42);
+  }
+  100% {
+    transform: translateY(16px) scale(0.9) rotate(0deg);
+    opacity: 0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  }
+}
 
 /* Instagram-stories rail under the deck: the active segment stretches and
    fills over the auto-advance interval, then hands off. */
@@ -19637,8 +19659,9 @@ button.badge {
   border-radius: 2px;
   background: var(--color-neutral-800);
   overflow: hidden;
-  /* animate the width swap when the active segment moves */
-  transition: flex-grow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  /* The rail's width swap runs at the same 0.5s as the deck's card switch, so
+     the two read as one motion. */
+  transition: flex-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .nudge-seg.on {
   flex-grow: 1;
@@ -19669,7 +19692,9 @@ button.badge {
   z-index: 60;
   display: grid;
   place-items: center;
-  padding: 10px 16px;
+  /* Same inset on every side; the sheet grows to leave exactly this margin
+     top and bottom when it's tall. */
+  padding: 16px;
 }
 .nudge-scrim {
   position: absolute;
@@ -19682,8 +19707,10 @@ button.badge {
 .nudge-sheet {
   position: relative;
   width: min(460px, 100%);
-  height: 92vh;
-  max-height: 92vh;
+  /* Grow with the cards up to a near-full-height cap, so a full deck leaves the
+     same 16px margin top/bottom as the sides; a short deck just centres. */
+  height: auto;
+  max-height: calc(100dvh - 32px);
   display: flex;
   flex-direction: column;
   animation: nudge-sheet-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards;

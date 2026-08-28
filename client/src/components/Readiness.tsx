@@ -213,10 +213,12 @@ export function ReadinessLens({
   const showList = view !== 'map';
   return (
     <div className="rd-lens">
-      <div className="rd-verdict">
-        <div className="rd-lead">{v.lead}</div>
-        {v.why && <div className="rd-why">{v.why}</div>}
-      </div>
+      {reco.length > 0 && (
+        <div className="rd-reco">
+          <Icon name="check-circle" weight="fill" />
+          <span>{t.rdReco(reco.join(' · '))}</span>
+        </div>
+      )}
       {showMap && (
         <>
           <MuscleHeatmap colors={readinessColors(map)} className="rd-map" />
@@ -237,12 +239,12 @@ export function ReadinessLens({
           ))}
         </div>
       )}
-      {reco.length > 0 && (
-        <div className="rd-reco">
-          <Icon name="check-circle" weight="fill" />
-          <span>{t.rdReco(reco.join(' · '))}</span>
-        </div>
-      )}
+      {/* Verdict sits last so it reads as the lead-in to the deeper coach cards
+          (fatigue, weak points) that follow directly below it. */}
+      <div className="rd-verdict">
+        <div className="rd-lead">{v.lead}</div>
+        {v.why && <div className="rd-why">{v.why}</div>}
+      </div>
     </div>
   );
 }
