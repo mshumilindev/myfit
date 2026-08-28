@@ -67,6 +67,7 @@ import { liftingCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
 import { bandForKg, assistStack, BAND_HEX, type BandRung, type LoadType } from '../loads';
 import { LiveHero } from '../components/LiveHero';
+import { SessionStartCoach } from '../components/SessionStartCoach';
 import { PlateSheet } from '../components/PlateSheet';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -1618,6 +1619,12 @@ export function SessionView(props: {
 
           {workout.exercises.length === 0 ? (
             <div className="session-empty">
+              {live && (
+                <SessionStartCoach
+                  finished={store.workouts.filter((w) => w.finishedAt !== null)}
+                  now={now}
+                />
+              )}
               <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
                 <button
                   className="btn btn-primary"
