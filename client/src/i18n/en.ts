@@ -363,6 +363,9 @@ export const en = {
   progDetail: 'Detail',
   progRange: 'Range',
   progThisWeek: 'This week',
+  volRange7: 'This week',
+  volRange14: 'Last 2 weeks',
+  volRange28: 'Last 4 weeks',
   swapAlternatives: 'Alternatives',
   swapMatch: (n: number) => `${n}% match`,
   fatLevel: {

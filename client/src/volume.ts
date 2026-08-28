@@ -108,6 +108,16 @@ export function zoneLandmark(members: MuscleGroup[]): Landmark {
 }
 
 /**
+ * Landmarks are weekly. When the read window spans several weeks, scale the
+ * MEV/MAV/MRV thresholds by that many weeks so a raw multi-week set count is
+ * compared against a matching multi-week target (days=7 -> unchanged).
+ */
+export function scaleLandmark(lm: Landmark, weeks: number): Landmark {
+  if (weeks === 1) return lm;
+  return { mev: lm.mev * weeks, mav: lm.mav * weeks, mrv: lm.mrv * weeks };
+}
+
+/**
  * Fractional working sets per muscle across the trailing `days` (default 7 --
  * a rolling week, the standard window for a volume read, so a fresh Monday
  * doesn't read as "everything under MEV"). Same currency as the landmarks.
@@ -161,17 +171,19 @@ export function volumeHeatColors(
   days = 7,
 ): Partial<Record<MuscleGroup, string>> {
   const per = weeklyMuscleSets(finished, now, days);
+  const weeks = days / 7;
   const out: Partial<Record<MuscleGroup, string>> = {};
   if (grain === 'fine') {
     for (const m of VOLUME_MUSCLES) {
       const s = per.get(m) ?? 0;
-      if (s > 0) out[m] = ZONE_COLOR[classifyZone(s, LANDMARKS[m] as Landmark)];
+      if (s > 0)
+        out[m] = ZONE_COLOR[classifyZone(s, scaleLandmark(LANDMARKS[m] as Landmark, weeks))];
     }
   } else {
     for (const z of VOLUME_ZONES) {
       const s = zoneSets(per, z.members);
       if (s <= 0) continue;
-      const c = ZONE_COLOR[classifyZone(s, zoneLandmark(z.members))];
+      const c = ZONE_COLOR[classifyZone(s, scaleLandmark(zoneLandmark(z.members), weeks))];
       for (const m of z.members) out[m] = c;
     }
   }

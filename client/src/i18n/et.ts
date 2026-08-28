@@ -355,6 +355,9 @@ export const et: Strings = {
   progDetail: 'Detailsus',
   progRange: 'Vahemik',
   progThisWeek: 'See nädal',
+  volRange7: 'See nädal',
+  volRange14: 'Viimased 2 nädalat',
+  volRange28: 'Viimased 4 nädalat',
   swapAlternatives: 'Alternatiivid',
   swapMatch: (n: number) => `${n}% vastavus`,
   fatLevel: {

@@ -359,6 +359,9 @@ export const pl: Strings = {
   progDetail: 'Szczegóły',
   progRange: 'Zakres',
   progThisWeek: 'Ten tydzień',
+  volRange7: 'Ten tydzień',
+  volRange14: 'Ostatnie 2 tygodnie',
+  volRange28: 'Ostatnie 4 tygodnie',
   swapAlternatives: 'Alternatywy',
   swapMatch: (n: number) => `${n}% dopasowania`,
   fatLevel: {

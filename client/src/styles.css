@@ -19441,7 +19441,11 @@ button.badge {
   /* Room so the last list row clears the floating pill. */
   .progress-summary-pane,
   .progress-alt-body {
-    padding-bottom: calc(76px + max(6px, var(--safe-bottom, 0px)) + 64px);
+    padding-bottom: calc(64px + max(6px, var(--safe-bottom, 0px)));
+  }
+  /* The Volume/Fatigue lens toggle now lives in the pill's sheet. */
+  .lens-seg-m {
+    display: none;
   }
 
   .progress-pill-wrap {
@@ -19455,27 +19459,52 @@ button.badge {
     pointer-events: none;
     z-index: 46;
   }
+  /* Liquid glass: a refracted, frosted backdrop (::before, warped by the SVG
+     displacement — the Apple-like lensing a plain blur can't do) under a
+     graphite tint + specular rim (::after). */
   .progress-pill {
     pointer-events: auto;
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
     max-width: 100%;
-    padding: 7px 7px 7px 15px;
-    border-radius: 99px;
-    font-size: 13px;
+    padding: 10px 10px 10px 19px;
+    border-radius: 999px;
+    font-size: 14px;
     white-space: nowrap;
     color: var(--color-text);
-    background: rgba(31, 33, 37, 0.82);
-    -webkit-backdrop-filter: blur(18px) saturate(1.5);
-    backdrop-filter: blur(18px) saturate(1.5);
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: transparent;
+    border: none;
     box-shadow:
-      0 14px 36px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      0 20px 46px rgba(0, 0, 0, 0.6),
+      0 3px 10px rgba(0, 0, 0, 0.4);
+  }
+  .progress-pill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    -webkit-backdrop-filter: blur(3px) saturate(1.9) brightness(1.08);
+    backdrop-filter: blur(3px) saturate(1.9) brightness(1.08);
+    filter: url(#liquid-glass);
+  }
+  .progress-pill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(52, 54, 60, 0.42), rgba(22, 23, 26, 0.6) 62%);
+    box-shadow:
+      inset 0 1.2px 0.5px rgba(255, 255, 255, 0.5),
+      inset 0 -10px 14px -10px rgba(0, 0, 0, 0.65),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
   .progress-pill > i {
-    font-size: 16px;
+    font-size: 17px;
     color: var(--color-accent);
     flex: none;
   }
@@ -19484,34 +19513,34 @@ button.badge {
   }
   .pp-sep {
     width: 1px;
-    height: 16px;
+    height: 17px;
     flex: none;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.14);
   }
   .pp-seg {
     display: inline-flex;
     gap: 2px;
     padding: 2px;
-    border-radius: 8px;
-    background: #141518;
+    border-radius: 9px;
+    background: rgba(10, 11, 13, 0.55);
   }
   .pp-seg button {
     border: none;
     background: none;
-    font-size: 11px;
-    padding: 4px 9px;
-    border-radius: 6px;
-    color: var(--color-neutral-500);
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 7px;
+    color: var(--color-neutral-400);
     cursor: pointer;
   }
   .pp-seg button.on {
-    background: var(--color-neutral-800);
+    background: rgba(255, 255, 255, 0.14);
     color: var(--color-text);
   }
   .pp-gear {
     flex: none;
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     border: none;
     border-radius: 50%;
     background: var(--color-accent-900);
@@ -19521,7 +19550,7 @@ button.badge {
     cursor: pointer;
   }
   .pp-gear i {
-    font-size: 15px;
+    font-size: 16px;
   }
 }
 
@@ -19589,10 +19618,42 @@ button.badge {
   color: var(--color-accent);
   font-size: 15px;
 }
+.prog-ctrl-sheet .pcs-range {
+  cursor: pointer;
+}
 .prog-ctrl-sheet .pcs-range-val {
   margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 3px;
   color: var(--color-text);
+}
+.prog-ctrl-sheet .pcs-range-sel {
+  margin-left: auto;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.prog-ctrl-sheet .pcs-range-sel > i {
+  position: absolute;
+  right: 8px;
+  color: var(--color-neutral-400);
+  font-size: 13px;
+  pointer-events: none;
+}
+.prog-ctrl-sheet .pcs-range-sel select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--color-neutral-700);
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 30px 7px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.prog-ctrl-sheet .pcs-range-sel select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }

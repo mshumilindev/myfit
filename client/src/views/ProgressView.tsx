@@ -24,6 +24,7 @@ import {
   LANDMARKS,
   VOLUME_MUSCLES,
   VOLUME_ZONES,
+  scaleLandmark,
   weeklyMuscleSets,
   volumeHeatColors,
   zoneLandmark,
@@ -76,6 +77,8 @@ export function ProgressView({
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
   const [lens, setLens] = useState<'volume' | 'fatigue'>('volume');
+  // Volume read window (days): a rolling week by default, widenable in the sheet.
+  const [rangeDays, setRangeDays] = useState(7);
   // Mobile: list<->map choice + the "all controls" sheet, driven by the pill.
   const [mapView, setMapView] = useState(false);
   const [ctrlSheet, setCtrlSheet] = useState(false);
@@ -251,7 +254,7 @@ export function ProgressView({
   const brassColors: Partial<Record<MuscleGroup, string>> = {};
   for (const { m, v } of muscleRows) if (v > 0) brassColors[m] = brassShade(v / maxMuscle);
   // Zone-coloured volume heatmap for the desktop Volume right column.
-  const volHeat = volumeHeatColors(finished, nowTs, volGrain);
+  const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays);
   // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
   const fatMap = muscleFatigue(finished, nowTs);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
@@ -424,6 +427,33 @@ export function ProgressView({
   return (
     <div className="screen progress-page progress-filled">
       <h2 className="visually-hidden">{t.progress}</h2>
+      {/* Liquid-glass refraction filter for the mobile control pill. */}
+      <svg className="glass-defs" aria-hidden width="0" height="0">
+        <filter
+          id="liquid-glass"
+          x="-30%"
+          y="-30%"
+          width="160%"
+          height="160%"
+          colorInterpolationFilters="sRGB"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.011 0.011"
+            numOctaves="2"
+            seed="7"
+            result="noise"
+          />
+          <feGaussianBlur in="noise" stdDeviation="1.4" result="soft" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="soft"
+            scale="52"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </svg>
       <div className="progress-tabbar">{pTabs}</div>
       <section className="progress-summary-pane">
         <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
@@ -437,6 +467,7 @@ export function ProgressView({
             t={t}
             grain={volGrain}
             onGrain={setVolGrain}
+            rangeDays={rangeDays}
             desktop={showDesktopDetail}
             deload={deload}
             lens={lens}
@@ -831,14 +862,22 @@ export function ProgressView({
               </div>
             </>
           )}
-          <div className="pcs-range">
+          <label className="pcs-range">
             <Icon name="calendar-blank" />
             <span>{t.progRange}</span>
-            <span className="pcs-range-val">
-              {t.progThisWeek}
-              <Icon name="caret-right" />
+            <span className="pcs-range-sel">
+              <select
+                value={rangeDays}
+                onChange={(e) => setRangeDays(Number(e.target.value))}
+                aria-label={t.progRange}
+              >
+                <option value={7}>{t.volRange7}</option>
+                <option value={14}>{t.volRange14}</option>
+                <option value={28}>{t.volRange28}</option>
+              </select>
+              <Icon name="caret-down" />
             </span>
-          </div>
+          </label>
         </Sheet>
       )}
     </div>
@@ -955,6 +994,7 @@ function VolumePanel({
   t,
   grain,
   onGrain,
+  rangeDays,
   desktop,
   deload,
   lens,
@@ -968,6 +1008,7 @@ function VolumePanel({
   t: T;
   grain: 'fine' | 'zones';
   onGrain: (g: 'fine' | 'zones') => void;
+  rangeDays: number;
   desktop: boolean;
   deload: DeloadSuggestion;
   lens: 'volume' | 'fatigue';
@@ -983,13 +1024,14 @@ function VolumePanel({
   // Default: most-loaded first (Over -> ... -> None), toggleable.
   const [sortDesc, setSortDesc] = useState(true);
 
-  const perMuscle = weeklyMuscleSets(finished, nowTs);
+  const perMuscle = weeklyMuscleSets(finished, nowTs, rangeDays);
+  const weeks = rangeDays / 7;
   const cold = historyAgeDays(finished, nowTs) < 21;
 
   const rows: VolRow[] =
     grain === 'fine'
       ? VOLUME_MUSCLES.map((m) => {
-          const lm = LANDMARKS[m] as Landmark;
+          const lm = scaleLandmark(LANDMARKS[m] as Landmark, weeks);
           const sets = perMuscle.get(m) ?? 0;
           return {
             key: m,
@@ -1001,7 +1043,7 @@ function VolumePanel({
           };
         })
       : VOLUME_ZONES.map((z) => {
-          const lm = zoneLandmark(z.members);
+          const lm = scaleLandmark(zoneLandmark(z.members), weeks);
           const sets = zoneSets(perMuscle, z.members);
           const names = t.volZoneNames as Record<string, string>;
           return {
@@ -1025,13 +1067,15 @@ function VolumePanel({
   if (grain === 'fine') {
     for (const m of VOLUME_MUSCLES) {
       const sets = perMuscle.get(m) ?? 0;
-      if (sets > 0) heatColors[m] = ZONE_COLOR[classifyZone(sets, LANDMARKS[m] as Landmark)];
+      if (sets > 0)
+        heatColors[m] =
+          ZONE_COLOR[classifyZone(sets, scaleLandmark(LANDMARKS[m] as Landmark, weeks))];
     }
   } else {
     for (const z of VOLUME_ZONES) {
       const sets = zoneSets(perMuscle, z.members);
       if (sets <= 0) continue;
-      const col = ZONE_COLOR[classifyZone(sets, zoneLandmark(z.members))];
+      const col = ZONE_COLOR[classifyZone(sets, scaleLandmark(zoneLandmark(z.members), weeks))];
       for (const m of z.members) heatColors[m] = col;
     }
   }

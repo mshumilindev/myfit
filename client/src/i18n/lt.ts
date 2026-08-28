@@ -368,6 +368,9 @@ export const lt: Strings = {
   progDetail: 'Detalumas',
   progRange: 'Laikotarpis',
   progThisWeek: 'Ši savaitė',
+  volRange7: 'Ši savaitė',
+  volRange14: 'Paskutinės 2 savaitės',
+  volRange28: 'Paskutinės 4 savaitės',
   swapAlternatives: 'Alternatyvos',
   swapMatch: (n: number) => `${n}% atitikmuo`,
   fatLevel: {

@@ -359,6 +359,9 @@ export const uk: Strings = {
   progDetail: 'Деталізація',
   progRange: 'Період',
   progThisWeek: 'Цей тиждень',
+  volRange7: 'Цей тиждень',
+  volRange14: 'Останні 2 тижні',
+  volRange28: 'Останні 4 тижні',
   swapAlternatives: 'Заміни',
   swapMatch: (n: number) => `${n}% збігу`,
   fatLevel: {
