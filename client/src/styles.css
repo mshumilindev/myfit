@@ -19290,6 +19290,91 @@ button.badge {
   margin-top: 2px;
 }
 
+/* Deload / recovery nudge on Today (feature #3). */
+.deload-banner {
+  border-left: 3px solid var(--color-accent);
+}
+.deload-banner.systemic {
+  border-left-color: var(--color-danger);
+}
+.deload-banner .prog-banner-icon {
+  color: var(--color-accent);
+}
+.deload-banner.systemic .prog-banner-icon {
+  color: var(--color-danger);
+}
+
+/* Weak-point radar (feature #2): chronic under-MEV muscles. */
+.weak-card {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--color-accent-600);
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+}
+.weak-head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.weak-head > i {
+  flex: none;
+  font-size: 18px;
+  margin-top: 1px;
+  color: var(--color-accent-600);
+}
+.weak-titles {
+  min-width: 0;
+}
+.weak-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.weak-sub {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-neutral-400);
+  margin-top: 2px;
+}
+.weak-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.weak-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.weak-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.weak-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  flex: none;
+}
+.weak-metric {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.weak-sets {
+  font-size: 11px;
+  color: var(--color-neutral-400);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Smart swaps: same-profile alternatives in exercise detail (design SWAP-1). */
 .swap-list {
   display: flex;

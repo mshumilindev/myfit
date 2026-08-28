@@ -53,8 +53,12 @@ import {
   activityCategory,
   activityWeek,
   liftingCalories,
+  activityRecoveryBias,
   durationMin as activityDurationMin,
 } from '../activities';
+import { muscleFatigue, deloadSuggestion } from '../fatigue';
+import { personalLandmarks } from '../personalize';
+import { muscleReadiness, recoveringMuscles } from '../recovery';
 import type { Activity } from '../types';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
@@ -154,6 +158,8 @@ const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
 const ANALYSIS_DISMISS_KEY = 'spotter.analysisNudge.dismissedAt';
 const ANALYSIS_COOLDOWN_MS = 4 * 24 * 60 * 60 * 1000;
+const DELOAD_DISMISS_KEY = 'spotter.deloadNudge.dismissedAt';
+const DELOAD_COOLDOWN_MS = 4 * 24 * 60 * 60 * 1000;
 // Cache the assigned program so Today paints instantly and only revalidates in
 // the background (no full cold fetch on every visit).
 const PROGRAM_CACHE_KEY = 'spotter.programMine';
@@ -706,6 +712,68 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     </div>
   );
 
+  // Recovery/deload nudge (feature #3): the fatigue read says a muscle is fried
+  // or a lot is piling up, AND the recovery clock agrees enough muscles are
+  // still under-recovered — so it doesn't fire on a well-rested day. Dismissible
+  // with a few days' cooldown.
+  const deloadNudge = (() => {
+    if (open || !hasHistory) return null;
+    let dismissedAt = 0;
+    try {
+      dismissedAt = Number(localStorage.getItem(DELOAD_DISMISS_KEY) || 0);
+    } catch {
+      /* private mode — treat as never dismissed */
+    }
+    if (dismissedAt && now - dismissedAt < DELOAD_COOLDOWN_MS) return null;
+    const pLandmarks = personalLandmarks(finished, now);
+    const dl = deloadSuggestion(
+      muscleFatigue(finished, now, pLandmarks),
+      activityRecoveryBias(store.activities, now),
+    );
+    if (dl.kind === 'none') return null;
+    // Recovery-aware gate: only nudge when the clock also shows muscles unready.
+    const stillRecovering = recoveringMuscles(muscleReadiness(finished, now)).length;
+    if (stillRecovering < 2) return null;
+    return dl;
+  })();
+
+  function dismissDeload() {
+    try {
+      localStorage.setItem(DELOAD_DISMISS_KEY, String(Date.now()));
+    } catch {
+      /* private mode — the nudge simply reappears next session */
+    }
+    setProgDismissTick((n) => n + 1);
+  }
+
+  const deloadBanner = deloadNudge != null && (
+    <div className={`prog-banner deload-banner ${deloadNudge.kind} fade-in`}>
+      <div className="prog-banner-row">
+        <span className="prog-banner-icon">
+          <Icon name="warning-circle" weight="fill" />
+        </span>
+        <div className="prog-banner-main">
+          <span className="prog-banner-kicker">{t.deloadKicker}</span>
+          <div className="prog-banner-title">
+            {deloadNudge.kind === 'systemic'
+              ? t.deloadSystemicTitle
+              : t.deloadLocalTitle(deloadNudge.muscle ? t.muscleGroups[deloadNudge.muscle] : '')}
+          </div>
+          <div className="prog-banner-body">
+            {deloadNudge.kind === 'systemic'
+              ? t.deloadSystemicBody
+              : t.deloadLocalBody(deloadNudge.muscle ? t.muscleGroups[deloadNudge.muscle] : '')}
+          </div>
+          <div className="prog-banner-acts">
+            <button className="prog-banner-skip" onClick={dismissDeload}>
+              {t.todayAnalysisDismiss}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // When a program is assigned, today's session comes FROM THE PROGRAM (not
   // history). This plaque sits above the program card and is reworded away from
   // "likely" / "from your history".
@@ -1115,6 +1183,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
           </div>
         )}
+        {deloadBanner}
         {analysisBanner}
         {suggestBanner}
         {programTodayBanner}

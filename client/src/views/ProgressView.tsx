@@ -49,6 +49,7 @@ import {
   type PersonalLandmark,
   type TuneSummary,
 } from '../personalize';
+import { volumeWeakPoints, type WeakPoint } from '../weakpoints';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -1043,6 +1044,8 @@ function VolumePanel({
   const perMuscle = weeklyMuscleSets(finished, nowTs, rangeDays);
   const weeks = rangeDays / 7;
   const cold = historyAgeDays(finished, nowTs) < 21;
+  // Chronic weak points: muscles under MEV across most of the last 6 weeks.
+  const weakPoints = volumeWeakPoints(finished, nowTs, 6, landmarks);
 
   // Personalised landmark per muscle / zone (falls back to the generic default).
   const lmFor = (m: MuscleGroup): Landmark => landmarks.get(m) ?? (LANDMARKS[m] as Landmark);
@@ -1202,6 +1205,8 @@ function VolumePanel({
 
       {deload.kind !== 'none' && <DeloadCard deload={deload} t={t} />}
 
+      {weakPoints.length > 0 && <WeakPointsCard weak={weakPoints} t={t} onFix={setFixMuscle} />}
+
       {fixMuscle && <FixSheet muscle={fixMuscle} onClose={() => setFixMuscle(null)} />}
     </div>
   );
@@ -1220,6 +1225,45 @@ function DeloadCard({ deload, t }: { deload: DeloadSuggestion; t: T }) {
           {systemic ? t.deloadSystemicTitle : t.deloadLocalTitle(muscle)}
         </div>
         <div className="dl-body">{systemic ? t.deloadSystemicBody : t.deloadLocalBody(muscle)}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Weak-point radar (feature #2): muscles chronically under MEV over the last
+ *  several weeks — a trend, not this week's snapshot. Each offers a one-tap fix. */
+function WeakPointsCard({
+  weak,
+  t,
+  onFix,
+}: {
+  weak: WeakPoint[];
+  t: T;
+  onFix: (m: MuscleGroup) => void;
+}) {
+  return (
+    <div className="weak-card">
+      <div className="weak-head">
+        <Icon name="target" weight="fill" />
+        <div className="weak-titles">
+          <div className="weak-title">{t.weakTitle}</div>
+          <div className="weak-sub">{t.weakSub}</div>
+        </div>
+      </div>
+      <div className="weak-rows">
+        {weak.map((w) => (
+          <div key={w.muscle} className="weak-row">
+            <MuscleIcon muscle={w.muscle} variant="row" tone="muted" />
+            <span className="weak-name">{t.muscleGroups[w.muscle]}</span>
+            <span className="weak-dot" style={{ opacity: 0.35 + w.severity * 0.65 }} />
+            <span className="weak-metric">{t.weakUnder(w.weeksUnder, w.weeksTracked)}</span>
+            <span className="weak-sets">{t.weakAvg(w.avgSets, w.mev)}</span>
+            <button className="vol-fix" onClick={() => onFix(w.muscle)}>
+              <Icon name="plus" weight="bold" />
+              {t.fixCta}
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
