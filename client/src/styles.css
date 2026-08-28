@@ -20049,6 +20049,7 @@ button.badge {
 
 /* --- Live activity page + resume banner (feature 6, ACT-2) ---------------- */
 .act-mode-seg {
+  flex: none;
   width: 100%;
   margin-bottom: 4px;
 }
