@@ -13,7 +13,7 @@ import {
   type useStore,
 } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
-import { EmptyState, Icon } from '../ui';
+import { EmptyState, Icon, Sheet } from '../ui';
 import { EquipChip, MuscleChip, MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
@@ -76,6 +76,9 @@ export function ProgressView({
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
   const [lens, setLens] = useState<'volume' | 'fatigue'>('volume');
+  // Mobile: list<->map choice + the "all controls" sheet, driven by the pill.
+  const [mapView, setMapView] = useState(false);
+  const [ctrlSheet, setCtrlSheet] = useState(false);
   const ptab = sub;
   const setPtab = onSub;
   const showDesktopDetail = useDesktopDetail();
@@ -439,6 +442,8 @@ export function ProgressView({
             lens={lens}
             onLens={setLens}
             fatColors={fatColors}
+            mapView={mapView}
+            onMapView={setMapView}
           />
         )}
         {seg === 'total' && <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />}
@@ -731,8 +736,124 @@ export function ProgressView({
           )}
         </section>
       )}
+
+      {/* Mobile: all Progress controls live on a floating graphite-glass pill
+          (design "Progress Nav Explorations" V4); the gear opens a sheet with
+          every control. Hidden on desktop, where the inline toggles stay. */}
+      <div className="progress-pill-wrap">
+        <div className="progress-pill">
+          <Icon name="chart-line-up" weight="fill" />
+          <span className="pp-label">{segLabel(seg, t)}</span>
+          {seg === 'volume' && (
+            <>
+              <span className="pp-sep" aria-hidden />
+              <span className="pp-seg">
+                <button className={!mapView ? 'on' : ''} onClick={() => setMapView(false)}>
+                  {t.volList}
+                </button>
+                <button className={mapView ? 'on' : ''} onClick={() => setMapView(true)}>
+                  {t.volMap}
+                </button>
+              </span>
+            </>
+          )}
+          <button
+            className="pp-gear"
+            onClick={() => setCtrlSheet(true)}
+            aria-label={t.progControls}
+          >
+            <Icon name="funnel-simple" />
+          </button>
+        </div>
+      </div>
+
+      {ctrlSheet && (
+        <Sheet onClose={() => setCtrlSheet(false)} className="prog-ctrl-sheet">
+          <div className="pcs-title">{t.progControls}</div>
+          <div className="pcs-group">
+            <div className="pcs-lbl">{t.progSection}</div>
+            <div className="seg pcs-seg">
+              {(['total', 'muscle', 'volume', 'records'] as const).map((s) => (
+                <button key={s} className={seg === s ? 'on' : ''} onClick={() => setSeg(s)}>
+                  {segLabel(s, t)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {seg === 'volume' && (
+            <>
+              <div className="pcs-group">
+                <div className="pcs-lbl">{t.progLens}</div>
+                <div className="seg pcs-seg">
+                  <button
+                    className={lens === 'volume' ? 'on' : ''}
+                    onClick={() => setLens('volume')}
+                  >
+                    {t.volumeTab}
+                  </button>
+                  <button
+                    className={lens === 'fatigue' ? 'on' : ''}
+                    onClick={() => setLens('fatigue')}
+                  >
+                    {t.fatigueTab}
+                  </button>
+                </div>
+              </div>
+              <div className="pcs-row2">
+                <div className="pcs-group">
+                  <div className="pcs-lbl">{t.progShowAs}</div>
+                  <div className="seg pcs-seg">
+                    <button className={!mapView ? 'on' : ''} onClick={() => setMapView(false)}>
+                      {t.volList}
+                    </button>
+                    <button className={mapView ? 'on' : ''} onClick={() => setMapView(true)}>
+                      {t.volMap}
+                    </button>
+                  </div>
+                </div>
+                <div className="pcs-group">
+                  <div className="pcs-lbl">{t.progDetail}</div>
+                  <div className="seg pcs-seg">
+                    <button
+                      className={volGrain === 'fine' ? 'on' : ''}
+                      onClick={() => setVolGrain('fine')}
+                    >
+                      {t.volFine}
+                    </button>
+                    <button
+                      className={volGrain === 'zones' ? 'on' : ''}
+                      onClick={() => setVolGrain('zones')}
+                    >
+                      {t.volZones}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="pcs-range">
+            <Icon name="calendar-blank" />
+            <span>{t.progRange}</span>
+            <span className="pcs-range-val">
+              {t.progThisWeek}
+              <Icon name="caret-right" />
+            </span>
+          </div>
+        </Sheet>
+      )}
     </div>
   );
+}
+
+/** Localised label for a Progress section. */
+function segLabel(s: 'total' | 'muscle' | 'volume' | 'records', t: T): string {
+  return s === 'total'
+    ? t.totalLabel
+    : s === 'muscle'
+      ? t.byMuscle
+      : s === 'volume'
+        ? t.volumeTab
+        : t.records;
 }
 
 function ProgressKpi({
@@ -839,6 +960,8 @@ function VolumePanel({
   lens,
   onLens,
   fatColors,
+  mapView,
+  onMapView,
 }: {
   finished: Workout[];
   nowTs: number;
@@ -850,10 +973,12 @@ function VolumePanel({
   lens: 'volume' | 'fatigue';
   onLens: (l: 'volume' | 'fatigue') => void;
   fatColors: Partial<Record<MuscleGroup, string>>;
+  mapView: boolean;
+  onMapView: (m: boolean) => void;
 }) {
-  // On desktop the anatomical map lives in the right column, so the panel shows
-  // only the list; on mobile it toggles list <-> map inline.
-  const [mapView, setMapView] = useState(false);
+  // On desktop the anatomical map lives in the right column; on mobile the list
+  // <-> map choice comes from the floating control pill (mapView prop).
+  const setMapView = onMapView;
   const [fixMuscle, setFixMuscle] = useState<MuscleGroup | null>(null);
   // Default: most-loaded first (Over -> ... -> None), toggleable.
   const [sortDesc, setSortDesc] = useState(true);

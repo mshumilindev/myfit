@@ -356,6 +356,13 @@ export const en = {
   progWhyStall: 'Top set has stalled — deload and rebuild.',
   progWhyFirst: 'First time — find a solid working weight.',
   fatigueTab: 'Fatigue',
+  progControls: 'View',
+  progSection: 'Section',
+  progLens: 'Lens',
+  progShowAs: 'Show as',
+  progDetail: 'Detail',
+  progRange: 'Range',
+  progThisWeek: 'This week',
   swapAlternatives: 'Alternatives',
   swapMatch: (n: number) => `${n}% match`,
   fatLevel: {

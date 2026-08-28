@@ -361,6 +361,13 @@ export const lt: Strings = {
   progWhyStall: 'Viršutinė serija sustojo — sumažink ir atsistatyk.',
   progWhyFirst: 'Pirmą kartą — surask darbinį svorį.',
   fatigueTab: 'Nuovargis',
+  progControls: 'Rodinys',
+  progSection: 'Skiltis',
+  progLens: 'Lęšis',
+  progShowAs: 'Rodyti kaip',
+  progDetail: 'Detalumas',
+  progRange: 'Laikotarpis',
+  progThisWeek: 'Ši savaitė',
   swapAlternatives: 'Alternatyvos',
   swapMatch: (n: number) => `${n}% atitikmuo`,
   fatLevel: {

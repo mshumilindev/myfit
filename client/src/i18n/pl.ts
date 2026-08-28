@@ -352,6 +352,13 @@ export const pl: Strings = {
   progWhyStall: 'Seria szczytowa stanęła — deload i odbuduj.',
   progWhyFirst: 'Pierwszy raz — znajdź roboczy ciężar.',
   fatigueTab: 'Zmęczenie',
+  progControls: 'Widok',
+  progSection: 'Sekcja',
+  progLens: 'Soczewka',
+  progShowAs: 'Pokaż jako',
+  progDetail: 'Szczegóły',
+  progRange: 'Zakres',
+  progThisWeek: 'Ten tydzień',
   swapAlternatives: 'Alternatywy',
   swapMatch: (n: number) => `${n}% dopasowania`,
   fatLevel: {
