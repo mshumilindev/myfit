@@ -169,21 +169,34 @@ export function volumeHeatColors(
   now: number,
   grain: 'fine' | 'zones',
   days = 7,
+  landmarks?: ReadonlyMap<MuscleGroup, Landmark>,
 ): Partial<Record<MuscleGroup, string>> {
   const per = weeklyMuscleSets(finished, now, days);
   const weeks = days / 7;
+  const lmFor = (m: MuscleGroup): Landmark => landmarks?.get(m) ?? (LANDMARKS[m] as Landmark);
+  const zoneLm = (members: MuscleGroup[]): Landmark => {
+    if (!landmarks) return zoneLandmark(members);
+    const out: Landmark = { mev: 0, mav: 0, mrv: 0 };
+    for (const m of members) {
+      const lm = landmarks.get(m) ?? LANDMARKS[m];
+      if (!lm) continue;
+      out.mev += lm.mev;
+      out.mav += lm.mav;
+      out.mrv += lm.mrv;
+    }
+    return out;
+  };
   const out: Partial<Record<MuscleGroup, string>> = {};
   if (grain === 'fine') {
     for (const m of VOLUME_MUSCLES) {
       const s = per.get(m) ?? 0;
-      if (s > 0)
-        out[m] = ZONE_COLOR[classifyZone(s, scaleLandmark(LANDMARKS[m] as Landmark, weeks))];
+      if (s > 0) out[m] = ZONE_COLOR[classifyZone(s, scaleLandmark(lmFor(m), weeks))];
     }
   } else {
     for (const z of VOLUME_ZONES) {
       const s = zoneSets(per, z.members);
       if (s <= 0) continue;
-      const c = ZONE_COLOR[classifyZone(s, scaleLandmark(zoneLandmark(z.members), weeks))];
+      const c = ZONE_COLOR[classifyZone(s, scaleLandmark(zoneLm(z.members), weeks))];
       for (const m of z.members) out[m] = c;
     }
   }

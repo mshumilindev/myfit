@@ -20534,3 +20534,24 @@ button.badge {
   overflow: hidden;
   pointer-events: none;
 }
+
+/* Personalised-landmarks honesty line (next-version: trust the numbers) */
+.vol-tuned {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--color-neutral-500);
+}
+.vol-tuned i {
+  font-size: 14px;
+  color: var(--color-neutral-600);
+  flex: none;
+}
+.vol-tuned.on {
+  color: var(--color-accent-200, var(--color-accent));
+}
+.vol-tuned.on i {
+  color: var(--color-accent);
+}

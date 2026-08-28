@@ -64,12 +64,18 @@ export function stalledMuscles(finished: Workout[], now: number): Set<MuscleGrou
  * from ~70% of MRV up past it; a stalled main lift adds a fixed bump. A muscle
  * with little volume and no stall reads fresh.
  */
-export function muscleFatigue(finished: Workout[], now: number): Map<MuscleGroup, MuscleFatigue> {
+export function muscleFatigue(
+  finished: Workout[],
+  now: number,
+  landmarks?: ReadonlyMap<MuscleGroup, Landmark>,
+): Map<MuscleGroup, MuscleFatigue> {
   const per = weeklyMuscleSets(finished, now);
   const stalled = stalledMuscles(finished, now);
   const out = new Map<MuscleGroup, MuscleFatigue>();
   for (const m of VOLUME_MUSCLES) {
-    const lm = LANDMARKS[m] as Landmark;
+    // Personalised ceiling when available (so a tolerant athlete reads less
+    // fatigued at the same volume, and a deload holds off) — else the default.
+    const lm = landmarks?.get(m) ?? (LANDMARKS[m] as Landmark);
     const sets = per.get(m) ?? 0;
     const volComp = clamp((sets / lm.mrv - 0.7) / 0.45, 0, 1);
     const isSt = stalled.has(m);

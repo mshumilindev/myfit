@@ -386,6 +386,8 @@ export const en = {
   volSetsUnit: ' sets',
   volProductive: 'Productive',
   volColdStart: 'Tracking your volume — ranges fill in as you train.',
+  volTuned: (n: number) => `Ranges tuned to your history · ${n} ${n === 1 ? 'muscle' : 'muscles'}`,
+  volTunedDefault: 'Starting estimates — ranges tune to you as history builds',
   volAllGood: 'Everything sits in its productive range — nice.',
   volBelow: (n: number) => `${n} below MEV — room to add.`,
   volAbove: (n: number) => `${n} over MRV — consider trimming a set.`,

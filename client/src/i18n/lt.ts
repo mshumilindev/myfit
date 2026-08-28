@@ -391,6 +391,8 @@ export const lt: Strings = {
   volSetsUnit: ' set.',
   volProductive: 'Produktyvi',
   volColdStart: 'Sekame tavo apimtį — diapazonai užsipildys treniruojantis.',
+  volTuned: (n: number) => `Diapazonai pritaikyti tavo istorijai · ${n} raumenų`,
+  volTunedDefault: 'Pradinės sąmatos — diapazonai prisitaikys prie tavęs kaupiantis istorijai',
   volAllGood: 'Viskas produktyviame diapazone — puiku.',
   volBelow: (n: number) => `${n} žemiau MEV — yra kur pridėti.`,
   volAbove: (n: number) => `${n} virš MRV — verta numesti seriją.`,

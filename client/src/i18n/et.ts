@@ -379,6 +379,8 @@ export const et: Strings = {
   volSetsUnit: ' seeriat',
   volProductive: 'Produktiivne',
   volColdStart: 'Jälgime su mahtu — vahemikud täituvad treenides.',
+  volTuned: (n: number) => `Vahemikud häälestatud su ajaloole · ${n} lihast`,
+  volTunedDefault: 'Algsed hinnangud — vahemikud häälestuvad sinu järgi ajaloo kogunedes',
   volAllGood: 'Kõik on produktiivses vahemikus — tore.',
   volBelow: (n: number) => `${n} alla MEV — ruumi lisada.`,
   volAbove: (n: number) => `${n} üle MRV — kaalu seeria vähendamist.`,

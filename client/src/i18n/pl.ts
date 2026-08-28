@@ -383,6 +383,8 @@ export const pl: Strings = {
   volSetsUnit: ' serie',
   volProductive: 'Produktywny',
   volColdStart: 'Śledzimy Twoją objętość — zakresy wypełnią się z treningami.',
+  volTuned: (n: number) => `Zakresy dopasowane do Twojej historii · ${n} mięśni`,
+  volTunedDefault: 'Wstępne szacunki — zakresy dopasują się do Ciebie z historią',
   volAllGood: 'Wszystko w zakresie produktywnym — dobrze.',
   volBelow: (n: number) => `${n} poniżej MEV — jest miejsce, by dodać.`,
   volAbove: (n: number) => `${n} powyżej MRV — rozważ ujęcie serii.`,

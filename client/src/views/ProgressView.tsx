@@ -27,7 +27,6 @@ import {
   scaleLandmark,
   weeklyMuscleSets,
   volumeHeatColors,
-  zoneLandmark,
   zoneSets,
   ZONE_COLOR,
   type Landmark,
@@ -44,6 +43,12 @@ import {
   type DeloadSuggestion,
 } from '../fatigue';
 import { activityRecoveryBias } from '../activities';
+import {
+  personalLandmarks,
+  tuneSummary,
+  type PersonalLandmark,
+  type TuneSummary,
+} from '../personalize';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -254,10 +259,14 @@ export function ProgressView({
   // (faint -> full brass). Powers the desktop Total / By-muscle right column.
   const brassColors: Partial<Record<MuscleGroup, string>> = {};
   for (const { m, v } of muscleRows) if (v > 0) brassColors[m] = brassShade(v / maxMuscle);
+  // Volume landmarks tuned to this athlete's own history (falls back to the
+  // generic ranges until there's enough data) — used everywhere the zones read.
+  const pLandmarks = personalLandmarks(finished, nowTs);
+  const tuned = tuneSummary(pLandmarks);
   // Zone-coloured volume heatmap for the desktop Volume right column.
-  const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays);
+  const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays, pLandmarks);
   // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
-  const fatMap = muscleFatigue(finished, nowTs);
+  const fatMap = muscleFatigue(finished, nowTs, pLandmarks);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
   for (const f of fatMap.values()) if (f.sets > 0) fatColors[f.muscle] = FATIGUE_COLOR[f.level];
   const deload = deloadSuggestion(fatMap, activityRecoveryBias(store.activities, nowTs));
@@ -469,6 +478,8 @@ export function ProgressView({
             grain={volGrain}
             onGrain={setVolGrain}
             rangeDays={rangeDays}
+            landmarks={pLandmarks}
+            tuned={tuned}
             desktop={showDesktopDetail}
             deload={deload}
             lens={lens}
@@ -996,6 +1007,8 @@ function VolumePanel({
   grain,
   onGrain,
   rangeDays,
+  landmarks,
+  tuned,
   desktop,
   deload,
   lens,
@@ -1010,6 +1023,8 @@ function VolumePanel({
   grain: 'fine' | 'zones';
   onGrain: (g: 'fine' | 'zones') => void;
   rangeDays: number;
+  landmarks: ReadonlyMap<MuscleGroup, PersonalLandmark>;
+  tuned: TuneSummary;
   desktop: boolean;
   deload: DeloadSuggestion;
   lens: 'volume' | 'fatigue';
@@ -1029,10 +1044,24 @@ function VolumePanel({
   const weeks = rangeDays / 7;
   const cold = historyAgeDays(finished, nowTs) < 21;
 
+  // Personalised landmark per muscle / zone (falls back to the generic default).
+  const lmFor = (m: MuscleGroup): Landmark => landmarks.get(m) ?? (LANDMARKS[m] as Landmark);
+  const zoneLm = (members: MuscleGroup[]): Landmark => {
+    const out: Landmark = { mev: 0, mav: 0, mrv: 0 };
+    for (const m of members) {
+      const lm = landmarks.get(m) ?? LANDMARKS[m];
+      if (!lm) continue;
+      out.mev += lm.mev;
+      out.mav += lm.mav;
+      out.mrv += lm.mrv;
+    }
+    return out;
+  };
+
   const rows: VolRow[] =
     grain === 'fine'
       ? VOLUME_MUSCLES.map((m) => {
-          const lm = scaleLandmark(LANDMARKS[m] as Landmark, weeks);
+          const lm = scaleLandmark(lmFor(m), weeks);
           const sets = perMuscle.get(m) ?? 0;
           return {
             key: m,
@@ -1044,7 +1073,7 @@ function VolumePanel({
           };
         })
       : VOLUME_ZONES.map((z) => {
-          const lm = scaleLandmark(zoneLandmark(z.members), weeks);
+          const lm = scaleLandmark(zoneLm(z.members), weeks);
           const sets = zoneSets(perMuscle, z.members);
           const names = t.volZoneNames as Record<string, string>;
           return {
@@ -1068,15 +1097,13 @@ function VolumePanel({
   if (grain === 'fine') {
     for (const m of VOLUME_MUSCLES) {
       const sets = perMuscle.get(m) ?? 0;
-      if (sets > 0)
-        heatColors[m] =
-          ZONE_COLOR[classifyZone(sets, scaleLandmark(LANDMARKS[m] as Landmark, weeks))];
+      if (sets > 0) heatColors[m] = ZONE_COLOR[classifyZone(sets, scaleLandmark(lmFor(m), weeks))];
     }
   } else {
     for (const z of VOLUME_ZONES) {
       const sets = zoneSets(perMuscle, z.members);
       if (sets <= 0) continue;
-      const col = ZONE_COLOR[classifyZone(sets, scaleLandmark(zoneLandmark(z.members), weeks))];
+      const col = ZONE_COLOR[classifyZone(sets, scaleLandmark(zoneLm(z.members), weeks))];
       for (const m of z.members) heatColors[m] = col;
     }
   }
@@ -1166,6 +1193,11 @@ function VolumePanel({
       <div className="vol-note">
         <Icon name="scales" />
         <p>{summary}</p>
+      </div>
+
+      <div className={`vol-tuned${tuned.tunedCount > 0 ? ' on' : ''}`}>
+        <Icon name={tuned.tunedCount > 0 ? 'user-focus' : 'info'} />
+        <span>{tuned.tunedCount > 0 ? t.volTuned(tuned.tunedCount) : t.volTunedDefault}</span>
       </div>
 
       {deload.kind !== 'none' && <DeloadCard deload={deload} t={t} />}
