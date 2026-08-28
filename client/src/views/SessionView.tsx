@@ -1560,9 +1560,6 @@ export function SessionView(props: {
             );
           })()}
 
-        {/* Energy for this past workout — the same plaque as the finished summary. */}
-        {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
-
         {/* Program-day coverage (past view): for a session started from a program
             day, tick each target muscle group that got at least one logged set
             (green check) and cross the ones that were skipped (red cross). */}
@@ -1855,6 +1852,8 @@ export function SessionView(props: {
                 }
                 return renderCard(single, null);
               })}
+              {/* Energy plaque sits under the exercises, matching their width. */}
+              {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
               {props.past && workout.exercises.some((e) => e.groupId) && (
                 <div className="muscle-note" style={{ boxShadow: 'none' }}>
                   <Icon name="chart-line-up" />

@@ -1249,7 +1249,7 @@ export const uk: Strings = {
   progRestShort: 'Відпоч.',
   progRestDay: 'День відпочинку',
   restDayTitle: 'Сьогодні можна відпочити',
-  restDayNote: 'За програмою сьогодні відновлення. Відпочинь або залогуй легку сесію, якщо є сили.',
+  restDayNote: 'За програмою сьогодні відновлення — тренування не заплановано.',
   progPlanProgress: 'Прогрес плану',
   progSetsDone: (done, total) => `${done} / ${total} підходів`,
   progGhostDivision: 'Повторення йдуть з програми; вага — з твоєї історії.',

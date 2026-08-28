@@ -20035,11 +20035,14 @@ button.badge {
   margin-top: 14px;
 }
 /* The card's CTA takes the banner's own tone (blue readiness, red trends,
-   green playbook, …) instead of the global yellow. Dark tinted label keeps it
-   readable on every tone. */
+   green playbook, …) instead of the global yellow. The tone is darkened a touch
+   so a white label + arrow stay readable on light tones (green, gray) too. */
 .nudge-card-acts .prog-banner-cta {
-  background: var(--tone, var(--color-accent));
-  color: color-mix(in srgb, var(--tone, var(--color-accent)) 24%, #0d0b08);
+  background: color-mix(in srgb, var(--tone, var(--color-accent)) 82%, #05070a);
+  color: #fff;
+}
+.nudge-card-acts .prog-banner-cta i {
+  color: #fff;
 }
 /* Plan/likely timing stats inside a nudge card — the `.today-plan-banner`
    rules don't reach here, so replicate the two-row stat layout, icon toned. */

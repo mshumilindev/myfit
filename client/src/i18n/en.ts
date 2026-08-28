@@ -1298,8 +1298,7 @@ export const en = {
   progRestShort: 'Rest',
   progRestDay: 'Rest day',
   restDayTitle: 'Take it easy today',
-  restDayNote:
-    'Your program has today as recovery. Rest up, or log a light session if you feel good.',
+  restDayNote: 'Your program has today down as recovery — no session planned.',
   progPlanProgress: 'Plan progress',
   progSetsDone: (done: number, total: number) => `${done} / ${total} sets`,
   progGhostDivision: 'Reps come from the program; weight comes from your history.',

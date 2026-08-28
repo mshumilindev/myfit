@@ -1258,8 +1258,7 @@ export const lt: Strings = {
   progRestShort: 'Poilsis',
   progRestDay: 'Poilsio diena',
   restDayTitle: 'Šiandien ramiau',
-  restDayNote:
-    'Pagal programą šiandien poilsis. Pailsėk arba užfiksuok lengvą treniruotę, jei jautiesi gerai.',
+  restDayNote: 'Pagal programą šiandien poilsis — treniruotė neplanuojama.',
   progPlanProgress: 'Plano progresas',
   progSetsDone: (done, total) => `${done} / ${total} serijų`,
   progGhostDivision: 'Pakartojimai ateina iš programos; svoris iš tavo istorijos.',

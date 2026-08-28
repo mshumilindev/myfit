@@ -1250,8 +1250,7 @@ export const pl: Strings = {
   progRestShort: 'Wolne',
   progRestDay: 'Dzień odpoczynku',
   restDayTitle: 'Dziś na luzie',
-  restDayNote:
-    'Program przewiduje dziś regenerację. Odpocznij lub zapisz lekką sesję, jeśli masz siłę.',
+  restDayNote: 'Program przewiduje dziś regenerację — brak zaplanowanej sesji.',
   progPlanProgress: 'Postęp planu',
   progSetsDone: (done, total) => `${done} / ${total} serii`,
   progGhostDivision: 'Powtórzenia pochodzą z programu; ciężar z Twojej historii.',

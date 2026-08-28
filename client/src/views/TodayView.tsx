@@ -648,8 +648,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             close();
           }}
         >
-          <Icon name="arrow-right" weight="bold" />
           {t.todayAnalysisCta}
+          <Icon name="arrow-right" weight="bold" />
         </button>
       ),
     });
@@ -671,8 +671,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             close();
           }}
         >
-          <Icon name="check" weight="bold" />
           {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
+          <Icon name="arrow-right" weight="bold" />
         </button>
       ),
     });
@@ -760,6 +760,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           )}
         </>
       ),
+    });
+  }
+  if (programRestDay) {
+    nudges.push({
+      id: 'restday',
+      tone: 'body',
+      priority: 100,
+      icon: 'clock-countdown',
+      kicker: t.progRestDay,
+      title: t.restDayTitle,
+      body: t.restDayNote,
     });
   }
   if (weighReminder) {
@@ -1183,29 +1194,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       {t.restEndNow}
                     </button>
                   )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {programRestDay && (
-          <div className="prog-banner analysis-banner gem-rest tr-banner off fade-in">
-            <span className="prog-sheen" aria-hidden />
-            <div className="prog-banner-row">
-              <span className="prog-banner-icon">
-                <Icon name="clock-countdown" weight="bold" />
-              </span>
-              <div className="prog-banner-main">
-                <div className="tr-top">
-                  <span className="prog-banner-kicker">{t.progRestDay}</span>
-                </div>
-                <div className="prog-banner-title">{t.restDayTitle}</div>
-                <div className="prog-banner-body">{t.restDayNote}</div>
-                <div className="prog-banner-acts">
-                  <button className="prog-banner-cta" onClick={startSession}>
-                    <Icon name="play" weight="bold" />
-                    {t.restStartLight}
-                  </button>
                 </div>
               </div>
             </div>

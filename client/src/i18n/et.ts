@@ -1246,8 +1246,7 @@ export const et: Strings = {
   progRestShort: 'Puhkus',
   progRestDay: 'Puhkepäev',
   restDayTitle: 'Täna võta rahulikult',
-  restDayNote:
-    'Programm näeb täna ette taastumise. Puhka või logi kerge trenn, kui tunned end hästi.',
+  restDayNote: 'Programm näeb täna ette taastumise — trenni pole plaanis.',
   progPlanProgress: 'Plaani edenemine',
   progSetsDone: (done, total) => `${done} / ${total} seeriat`,
   progGhostDivision: 'Kordused tulevad programmist; raskus sinu ajaloost.',
