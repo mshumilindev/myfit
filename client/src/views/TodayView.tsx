@@ -1606,9 +1606,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       {addWeightOpen && (
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
-      {activityOpen && (
-        <ActivitySheet shell={shell} bodyKg={bodyKg} onClose={() => setActivityOpen(false)} />
-      )}
+      {activityOpen && <ActivitySheet shell={shell} onClose={() => setActivityOpen(false)} />}
       {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
       {progSheetOpen && (
         <Sheet onClose={() => setProgSheetOpen(false)} className="prog-suggest-sheet">

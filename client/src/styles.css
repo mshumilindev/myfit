@@ -49,6 +49,12 @@
   --color-danger-tint: #2c1614;
   --color-danger-line: #7d302b;
 
+  /* Calories / energy — Spotter Nutrition's colour so kcal reads the same across
+     the family. Single source of truth: change these to the nutrition palette. */
+  --color-kcal: #ff8a4c;
+  --color-kcal-text: #ffd0b3;
+  --color-kcal-tint: #2e1a10;
+
   --shadow-sm: 0 0 0 1px #3b3f43;
   --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 0 0 1px #6b7075, 0 18px 44px rgba(0, 0, 0, 0.7);
@@ -19879,11 +19885,11 @@ button.badge {
   align-items: center;
   gap: 6px;
   font-size: 26px;
-  color: var(--color-accent-100, var(--color-accent));
+  color: var(--color-kcal-text);
 }
 .act-kcal i {
   font-size: 22px;
-  color: var(--color-accent);
+  color: var(--color-kcal);
 }
 .act-kcal em {
   font-size: 13px;
@@ -20018,11 +20024,11 @@ button.badge {
   align-items: center;
   gap: 3px;
   font-size: 13px;
-  color: var(--color-accent-200, var(--color-accent));
+  color: var(--color-kcal-text);
 }
 .ta-kcal i {
   font-size: 13px;
-  color: var(--color-accent);
+  color: var(--color-kcal);
 }
 .ta-del {
   flex: none;
@@ -20145,6 +20151,19 @@ button.badge {
 }
 .av-head .back {
   flex: none;
+  width: 34px;
+  height: 34px;
+  padding: 4px;
+  margin-left: -6px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-neutral-300);
+  font-size: 19px;
+  cursor: pointer;
+}
+.av-head .back:hover {
+  background: var(--color-neutral-800);
 }
 .av-head-name {
   display: inline-flex;
@@ -20188,11 +20207,11 @@ button.badge {
   align-items: center;
   gap: 7px;
   font-size: 30px;
-  color: var(--color-accent-100, var(--color-accent));
+  color: var(--color-kcal-text);
 }
 .av-kcal i {
   font-size: 24px;
-  color: var(--color-accent);
+  color: var(--color-kcal);
 }
 .av-kcal em {
   font-size: 14px;
@@ -20226,6 +20245,11 @@ button.badge {
 .av-actions {
   display: flex;
   gap: 10px;
+  align-items: stretch;
+}
+.av-actions .av-discard-btn {
+  flex: none;
+  gap: 6px;
 }
 .av-actions .av-pause {
   flex: 1;
@@ -20233,20 +20257,30 @@ button.badge {
 .av-actions .av-finish {
   flex: 1;
 }
-.av-discard {
-  align-self: center;
-  display: inline-flex;
+
+/* Not-yet-started (idle) state */
+.av-ready {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  border: none;
-  background: none;
-  color: var(--color-neutral-500);
-  font-size: 13px;
-  cursor: pointer;
-  padding: 4px 10px;
+  gap: 16px;
+  padding: 30px 0 10px;
+  text-align: center;
 }
-.av-discard:hover {
-  color: var(--color-danger);
+.av-ready .act-cap {
+  margin: 0;
+  max-width: 32ch;
+}
+.av-start {
+  min-width: 200px;
+  min-height: 52px;
+  font-size: 16px;
+  gap: 8px;
+}
+.av-past {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 /* Weekly energy-out card (feature 6, KCAL) */
@@ -20266,8 +20300,8 @@ button.badge {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--color-accent-900);
-  color: var(--color-accent);
+  background: var(--color-kcal-tint);
+  color: var(--color-kcal);
 }
 .td-energy .te-icon i {
   font-size: 19px;
@@ -20285,7 +20319,7 @@ button.badge {
 .te-val {
   font-size: 22px;
   font-weight: 600;
-  color: var(--color-accent-100, var(--color-text));
+  color: var(--color-kcal-text);
 }
 .te-unit {
   font-size: 12px;
@@ -20295,4 +20329,15 @@ button.badge {
   font-size: 12px;
   color: var(--color-neutral-500);
   font-variant-numeric: tabular-nums;
+}
+
+/* Session calories in stat lines (feature 6) */
+.stat-kcal {
+  color: var(--color-kcal-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* kcal-tinted value in session summary stat grid */
+.stat-grid .cell .v.kcal {
+  color: var(--color-kcal-text);
 }

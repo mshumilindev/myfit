@@ -121,7 +121,7 @@ export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 
 export type Overlay =
   | { screen: 'session'; workoutId: string }
-  | { screen: 'activity' }
+  | { screen: 'activity'; newType?: string }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
   | { screen: 'exercise-detail'; name: string }
@@ -629,7 +629,9 @@ export function App() {
           {activeOverlay?.screen === 'session' && (
             <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
           )}
-          {activeOverlay?.screen === 'activity' && <ActivityView onClose={closeOverlay} />}
+          {activeOverlay?.screen === 'activity' && (
+            <ActivityView newType={activeOverlay.newType} onClose={closeOverlay} />
+          )}
           {activeOverlay?.screen === 'past-workout' && (
             <SessionView
               workoutId={activeOverlay.workoutId}

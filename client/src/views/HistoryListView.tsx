@@ -6,6 +6,7 @@
 import { useMemo } from 'react';
 import type { Shell } from '../App';
 import {
+  deleteActivity,
   latestWeight,
   muscleWorkSorted,
   useStore,
@@ -21,6 +22,7 @@ import {
   activityType,
   activityCategory,
   activityCalories,
+  liftingCalories,
   durationMin as activityDurationMin,
 } from '../activities';
 import type { Activity, Workout } from '../types';
@@ -115,6 +117,17 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
                         {it.w.finishedAt
                           ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
                           : ''}
+                        {(() => {
+                          const kc = it.w.finishedAt
+                            ? liftingCalories((it.w.finishedAt - it.w.startedAt) / 60000, bodyKg)
+                            : null;
+                          return kc != null ? (
+                            <span className="stat-kcal">
+                              {' '}
+                              · ~{kc} {t.kcalShort}
+                            </span>
+                          ) : null;
+                        })()}
                       </div>
                       {sessionMuscles(it.w).length > 0 && (
                         <div className="recent-muscles">
@@ -173,6 +186,14 @@ function ActivityHistRow({
           <Icon name="flame" weight="fill" />~{kcal}
         </span>
       )}
+      <button
+        className="ta-del"
+        onClick={() => deleteActivity(a.id)}
+        aria-label={t.delete}
+        title={t.delete}
+      >
+        <Icon name="trash" />
+      </button>
     </div>
   );
 }

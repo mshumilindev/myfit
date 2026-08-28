@@ -54,8 +54,10 @@ import {
   workoutVolumeKg,
   workoutDayReadout,
   reorderExercises,
+  latestWeight,
   type SupersetGroup,
 } from '../store';
+import { liftingCalories } from '../activities';
 import { LiveHero } from '../components/LiveHero';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -348,6 +350,11 @@ export function SessionView(props: {
   const volume = workoutVolumeKg(workout);
   const cardioMinutes = workoutCardioMinutes(workout);
   const cardioDistance = workoutCardioDistanceKm(workout);
+  // Session energy estimate (feature 6) — shown on the finished-session summary.
+  const sessionKcal = liftingCalories(
+    ((workout.finishedAt ?? now) - workout.startedAt) / 60000,
+    latestWeight(store.bodyMetrics)?.weight ?? null,
+  );
   const gym = store.gyms.find((g) => g.id === workout.gymId) ?? null;
   const gymName = gym?.name;
   const prescribedSets = workout.exercises.reduce((n, e) => n + Math.max(0, e.plannedSets ?? 0), 0);
@@ -1242,6 +1249,12 @@ export function SessionView(props: {
             <div className="v">{fmtTonnes(volume)}</div>
             <div className="l">{t.movedStat}</div>
           </div>
+          {sessionKcal != null && (
+            <div className="cell">
+              <div className="v kcal">~{sessionKcal}</div>
+              <div className="l">{t.kcalShort}</div>
+            </div>
+          )}
           {cardioMinutes > 0 && (
             <div className="cell">
               <div className="v">{Math.round(cardioMinutes)}</div>
