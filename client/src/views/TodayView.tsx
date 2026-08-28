@@ -59,7 +59,7 @@ import {
 import { muscleFatigue, deloadSuggestion } from '../fatigue';
 import { personalLandmarks } from '../personalize';
 import { muscleReadiness, recoveringMuscles } from '../recovery';
-import { ReadinessCard } from '../components/Readiness';
+import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import type { Activity } from '../types';
 import { Icon, Sheet } from '../ui';
@@ -690,10 +690,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     setProgDismissTick((n) => n + 1);
   }
 
-  // The day's advisory cards, collapsed into one deck (recovery / training-check
-  // / program suggestion) instead of a wall of banners.
+  // Every advisory card on Today, collapsed into one deck instead of a wall of
+  // banners: readiness, recovery, training-check, program plan, weigh-in, gym
+  // visit, the "likely today" plaque.
   const deloadMuscle = deloadNudge?.muscle ? t.muscleGroups[deloadNudge.muscle] : '';
   const nudges: Nudge[] = [];
+  const readinessNudge = !open ? buildReadinessNudge(finished, now, t) : null;
+  if (readinessNudge) nudges.push(readinessNudge);
   if (deloadNudge) {
     nudges.push({
       id: 'deload',
@@ -816,48 +819,146 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return { dayName, labels, startMin, mealMin };
   })();
 
-  const programTodayBanner = programTodayPlan && (
-    <div className="prog-banner today-plan-banner">
-      <div className="prog-banner-row">
-        <span className="prog-banner-icon">
-          <Icon name="calendar-check" weight="bold" />
-        </span>
-        <div className="prog-banner-main">
-          <span className="prog-banner-kicker">{t.todayPlanKicker}</span>
-          {/* Day name + muscles duplicate the heading/cards on web, so they stay
-              mobile-only (shown on web only when there's no timing to show). */}
-          <div className={`tp-identity${programTodayPlan.startMin != null ? ' mobile-only' : ''}`}>
-            <div className="tp-day">{programTodayPlan.dayName}</div>
-            {programTodayPlan.labels.length > 0 && (
-              <div className="tp-muscles">{programTodayPlan.labels.join(' · ')}</div>
-            )}
-          </div>
-          {(programTodayPlan.startMin != null || programTodayPlan.mealMin != null) && (
+  // Program plan for today, weigh-in, gym-visit and "likely today" all join the
+  // same deck.
+  if (programTodayPlan) {
+    const p = programTodayPlan;
+    nudges.push({
+      id: 'plan',
+      tone: 'plan',
+      icon: 'calendar-check',
+      kicker: t.todayPlanKicker,
+      title: p.dayName,
+      body: (
+        <>
+          {p.labels.length > 0 && <div className="nudge-muscles">{p.labels.join(' · ')}</div>}
+          {(p.startMin != null || p.mealMin != null) && (
             <div className="tp-timing">
-              {programTodayPlan.startMin != null && (
+              {p.startMin != null && (
                 <div className="tp-stat">
                   <span className="tp-stat-ico">
                     <Icon name="clock-countdown" weight="bold" />
                   </span>
-                  <span className="tp-stat-val">~{hhmm(programTodayPlan.startMin)}</span>
+                  <span className="tp-stat-val">~{hhmm(p.startMin)}</span>
                   <span className="tp-stat-lab">{t.todayPlanStart}</span>
                 </div>
               )}
-              {programTodayPlan.mealMin != null && (
+              {p.mealMin != null && (
                 <div className="tp-stat">
                   <span className="tp-stat-ico">
                     <Icon name="fork-knife" weight="bold" />
                   </span>
-                  <span className="tp-stat-val">~{hhmm(programTodayPlan.mealMin)}</span>
+                  <span className="tp-stat-val">~{hhmm(p.mealMin)}</span>
                   <span className="tp-stat-lab">{t.todayPlanEat}</span>
                 </div>
               )}
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
+        </>
+      ),
+    });
+  }
+  if (weighReminder) {
+    nudges.push({
+      id: 'weigh',
+      tone: 'body',
+      icon: 'scales',
+      kicker: t.weighTitle,
+      title: t.weighBody(hhmm(weighReminder.usualMin)),
+      body: null,
+      actions: (close) => (
+        <>
+          <button
+            className="prog-banner-cta"
+            onClick={() => {
+              setAddWeightOpen(true);
+              close();
+            }}
+          >
+            {t.bmAddWeight}
+          </button>
+          <button
+            className="prog-banner-skip"
+            onClick={() => {
+              dismissWeighInToday(ymd(now));
+              close();
+            }}
+          >
+            {t.weighNotToday}
+          </button>
+        </>
+      ),
+    });
+  }
+  if (reminder && !open) {
+    nudges.push({
+      id: 'visit',
+      tone: 'body',
+      icon: 'map-pin',
+      kicker: reminder.gymName,
+      title: t.unloggedVisit(
+        fmtDurationHuman(reminder.visitEnd - reminder.visitStart),
+        reminder.gymName,
+        fmtDayMonth(reminder.visitStart, locale),
+      ),
+      body: null,
+      actions: (close) => (
+        <>
+          <button
+            className="prog-banner-cta"
+            onClick={() => {
+              const w = logVisitAsWorkout(reminder);
+              close();
+              shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
+            }}
+          >
+            {t.logIt}
+          </button>
+          <button
+            className="prog-banner-skip"
+            onClick={() => {
+              dismissReminder(reminder);
+              close();
+            }}
+          >
+            {t.dismiss}
+          </button>
+        </>
+      ),
+    });
+  }
+  if (prediction && !(assignment && assignedActive)) {
+    nudges.push({
+      id: 'likely',
+      tone: 'plan',
+      icon: 'calendar-check',
+      kicker: t.likelyToday,
+      title: t.likelyDayTitle(prediction.dayLabel),
+      body: (
+        <>
+          {prediction.muscles.length > 0 && (
+            <div className="nudge-muscles">{prediction.muscles.join(' · ')}</div>
+          )}
+          <div className="tp-timing">
+            <div className="tp-stat">
+              <span className="tp-stat-ico">
+                <Icon name="clock-countdown" weight="bold" />
+              </span>
+              <span className="tp-stat-val">~{hhmm(prediction.startMin)}</span>
+              <span className="tp-stat-lab">{t.todayPlanStart}</span>
+            </div>
+            <div className="tp-stat">
+              <span className="tp-stat-ico">
+                <Icon name="fork-knife" weight="bold" />
+              </span>
+              <span className="tp-stat-val">~{hhmm(prediction.mealMin)}</span>
+              <span className="tp-stat-lab">{t.todayPlanEat}</span>
+            </div>
+          </div>
+        </>
+      ),
+    });
+  }
 
   // Weekly progress from actual history (matches the calendar's done marks) —
   // the server's post-assignment count reads 0 right after activation.
@@ -1017,32 +1118,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         </div>
       )}
-      {reminder && !open && (
-        <div className="reminder-card">
-          <Icon name="map-pin" />
-          <div>
-            {t.unloggedVisit(
-              fmtDurationHuman(reminder.visitEnd - reminder.visitStart),
-              reminder.gymName,
-              fmtDayMonth(reminder.visitStart, locale),
-            )}
-            <div className="reminder-actions">
-              <button
-                className="link"
-                onClick={() => {
-                  const w = logVisitAsWorkout(reminder);
-                  shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
-                }}
-              >
-                {t.logIt}
-              </button>
-              <button className="link-muted" onClick={() => dismissReminder(reminder)}>
-                {t.dismiss}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 
@@ -1196,54 +1271,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
           </div>
         )}
-        {!open && <ReadinessCard finished={finished} now={now} />}
         <NudgeStack nudges={nudges} />
-        {programTodayBanner}
         {programCard}
         {!open && !(assignment && assignedActive) && hasHistory && (
           <div className="today-weekstrip-card">
             <WeekStrip />
-          </div>
-        )}
-
-        {weighReminder && (
-          <div className="weigh-plaque">
-            <Icon name="scales" />
-            <div className="wp-body">
-              <div className="wp-title">{t.weighTitle}</div>
-              <div className="wp-sub">{t.weighBody(hhmm(weighReminder.usualMin))}</div>
-              <div className="wp-acts">
-                <button className="wp-add" onClick={() => setAddWeightOpen(true)}>
-                  {t.bmAddWeight}
-                </button>
-                <button className="wp-skip" onClick={() => dismissWeighInToday(ymd(now))}>
-                  {t.weighNotToday}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {prediction && !(assignment && assignedActive) && (
-          <div className="likely-plaque">
-            <div className="lp-head">
-              <Icon name="calendar-check" />
-              <span className="lp-kicker">{t.likelyToday}</span>
-              <span className="lp-from">{t.likelyFromHistory}</span>
-            </div>
-            <div className="lp-body">
-              <div className="lp-day-row">
-                <span className="lp-day">{t.likelyDayTitle(prediction.dayLabel)}</span>
-                <span className="lp-time">~{hhmm(prediction.startMin)}</span>
-              </div>
-              {prediction.muscles.length > 0 && (
-                <div className="lp-lifts">{prediction.muscles.join(' · ')}</div>
-              )}
-            </div>
-            <div className="lp-meal">
-              <Icon name="fork-knife" />
-              <span>{t.likelyMeal(hhmm(prediction.mealMin))}</span>
-            </div>
           </div>
         )}
 

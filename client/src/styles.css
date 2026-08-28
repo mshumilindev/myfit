@@ -19501,16 +19501,11 @@ button.badge {
   color: var(--color-ok);
 }
 
-/* ---- Nudge stack: the day's advisory cards as one collapsible deck ---- */
-.nudge-wrap {
-  position: relative;
+/* ---- Nudge stack: every advisory card as one collapsible deck ---- */
+/* One treatment — left border + soft tint — each type in its own colour. */
+.tone-readiness {
+  --tone: var(--color-kcal, var(--color-accent));
 }
-.nudge-deck {
-  position: relative;
-  height: 76px;
-}
-/* One treatment for every nudge — left border + a soft tint — each in its own
-   colour (--tone set per type). */
 .tone-recovery {
   --tone: var(--color-accent);
 }
@@ -19519,6 +19514,26 @@ button.badge {
 }
 .tone-suggest {
   --tone: var(--color-ok);
+}
+.tone-plan {
+  --tone: var(--color-accent-600, var(--color-accent));
+}
+.tone-body {
+  --tone: var(--color-neutral-400);
+}
+.nudge-wrap {
+  position: relative;
+}
+.nudge-deck {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 66px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
 }
 .nudge-mini {
   position: absolute;
@@ -19535,12 +19550,10 @@ button.badge {
   border-left: 3px solid var(--tone, var(--color-accent));
   background: color-mix(in srgb, var(--tone, var(--color-accent)) 7%, var(--color-surface));
   color: var(--color-text);
-  text-align: left;
-  cursor: pointer;
   transform-origin: 50% 0;
   transition:
-    transform 0.44s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
@@ -19567,6 +19580,9 @@ button.badge {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-neutral-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .nudge-title {
   font-size: 14px;
@@ -19576,61 +19592,128 @@ button.badge {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.nudge-dots {
-  display: flex;
-  gap: 4px;
-  flex: none;
-  align-self: flex-end;
-  margin-bottom: 2px;
-}
-.nudge-dots span {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--color-neutral-700, var(--color-neutral-800));
-}
-.nudge-dots span.on {
-  background: var(--color-neutral-400);
-}
 .nudge-chev {
   flex: none;
   color: var(--color-neutral-500);
   font-size: 16px;
 }
 
-/* expanded overlay — a light lift over the content, not a hard modal */
+/* Instagram-stories rail under the deck: the active segment stretches and
+   fills over the auto-advance interval, then hands off. */
+.nudge-rail {
+  display: flex;
+  gap: 5px;
+  margin: 9px 3px 0;
+  align-items: center;
+}
+.nudge-seg {
+  flex: 0 0 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-neutral-800);
+  overflow: hidden;
+  transition: flex-basis 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nudge-seg.on {
+  flex: 1 1 auto;
+}
+.nudge-seg-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 2px;
+  background: var(--color-neutral-300);
+  animation-name: nudge-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes nudge-fill {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* expanded overlay — the whole stack lifted over the content */
 .nudge-overlay {
   position: fixed;
   inset: 0;
   z-index: 60;
   display: grid;
   place-items: center;
-  padding: 20px;
+  padding: 18px;
 }
 .nudge-scrim {
   position: absolute;
   inset: 0;
-  background: rgba(6, 7, 9, 0.52);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  animation: nudge-scrim-in 0.22s ease forwards;
+  background: rgba(6, 7, 9, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  animation: nudge-scrim-in 0.24s ease forwards;
 }
-.nudge-card {
+.nudge-sheet {
   position: relative;
-  width: min(440px, 100%);
-  background: color-mix(in srgb, var(--tone, var(--color-accent)) 6%, var(--color-surface));
-  border: 1px solid var(--color-divider);
-  border-left: 3px solid var(--tone, var(--color-accent));
-  border-radius: var(--radius-lg, 20px);
-  padding: 20px;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
-  animation: nudge-pop-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  width: min(460px, 100%);
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  animation: nudge-sheet-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .nudge-overlay.closing .nudge-scrim {
-  animation: nudge-scrim-out 0.2s ease forwards;
+  animation: nudge-scrim-out 0.22s ease forwards;
 }
-.nudge-overlay.closing .nudge-card {
-  animation: nudge-pop-out 0.2s ease forwards;
+.nudge-overlay.closing .nudge-sheet {
+  animation: nudge-sheet-out 0.22s ease forwards;
+}
+.nudge-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.nudge-sheet-title {
+  flex: 1;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.nudge-close {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+  color: var(--color-neutral-300);
+  font-size: 22px;
+  cursor: pointer;
+}
+.nudge-close:hover {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.12);
+}
+.nudge-sheet-scroll {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 2px;
+  scrollbar-width: none;
+}
+.nudge-sheet-scroll::-webkit-scrollbar {
+  display: none;
+}
+.nudge-full {
+  background: color-mix(in srgb, var(--tone, var(--color-accent)) 7%, var(--color-surface));
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--tone, var(--color-accent));
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  animation: nudge-deal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 @keyframes nudge-scrim-in {
   from {
@@ -19645,44 +19728,37 @@ button.badge {
     opacity: 0;
   }
 }
-@keyframes nudge-pop-in {
+@keyframes nudge-sheet-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(14px) scale(0.97);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
-@keyframes nudge-pop-out {
+@keyframes nudge-sheet-out {
   to {
     opacity: 0;
-    transform: translateY(6px) scale(0.97);
+    transform: translateY(8px) scale(0.98);
   }
 }
-.nudge-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border: none;
-  background: transparent;
-  color: var(--color-neutral-500);
-  font-size: 22px;
-  cursor: pointer;
-}
-.nudge-close:hover {
-  color: var(--color-text);
+@keyframes nudge-deal {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.96) rotate(-1.2deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .nudge-card-head {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .nudge-card-head .nudge-ic.lg {
   width: 30px;
@@ -19690,52 +19766,34 @@ button.badge {
   border-radius: 9px;
 }
 .nudge-card-title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.3;
 }
 .nudge-card-body {
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--color-neutral-400);
   margin-top: 6px;
+}
+.nudge-muscles {
+  color: var(--color-neutral-300);
+  font-weight: 500;
 }
 .nudge-card-acts {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
-}
-.nudge-card-foot {
-  display: flex;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-divider);
-}
-.nudge-foot-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--color-neutral-800);
-  background: var(--color-bg);
-  color: var(--color-neutral-400);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-}
-.nudge-foot-chip svg {
-  font-size: 14px;
-  color: var(--tone, var(--color-accent));
+  margin-top: 14px;
 }
 @media (prefers-reduced-motion: reduce) {
   .nudge-mini,
+  .nudge-seg,
   .nudge-scrim,
-  .nudge-card {
+  .nudge-sheet,
+  .nudge-full,
+  .nudge-seg-fill {
     transition: none;
     animation-duration: 0.01ms;
   }
