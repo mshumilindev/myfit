@@ -454,6 +454,7 @@ export const pl: Strings = {
   newExercise: 'Nowe ćwiczenie',
   muscleGroupsWorked: 'Przepracowane mięśnie',
   musclesWorkedLabel: 'Mięśnie w pracy',
+  moreLabel: 'więcej',
   programTargetsLabel: 'Cele programu',
   targetWorked: 'Przepracowano',
   targetSkipped: 'Pominięto',

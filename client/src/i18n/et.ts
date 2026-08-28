@@ -450,6 +450,7 @@ export const et: Strings = {
   newExercise: 'Uus harjutus',
   muscleGroupsWorked: 'Töötatud lihased',
   musclesWorkedLabel: 'Lihased töös',
+  moreLabel: 'veel',
   programTargetsLabel: 'Programmi sihtmärgid',
   targetWorked: 'Tehtud',
   targetSkipped: 'Vahele jäetud',

@@ -385,10 +385,25 @@ export function muscleSetsInWorkout(w: Workout): Map<MuscleGroup, number> {
 export function muscleWorkSorted(
   w: Workout,
 ): { muscle: MuscleGroup; sets: number; primary: boolean }[] {
+  // Order muscles the way they were trained: first-worked first. Primaries lead,
+  // secondaries follow, each block in training order (not by set count).
+  const orderIdx = new Map<MuscleGroup, number>();
+  let idx = 0;
+  for (const e of [...w.exercises].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))) {
+    if (!isStrengthExercise(e) || e.sets.length === 0) continue;
+    const { primary, secondary } = resolveMuscles(e);
+    for (const g of primary ? [primary, ...secondary] : secondary) {
+      if (g && g !== 'cardio' && !orderIdx.has(g)) orderIdx.set(g, idx++);
+    }
+  }
   return [...muscleWorkInWorkout(w).entries()]
     .filter(([, v]) => v.sets > 0)
     .map(([muscle, v]) => ({ muscle, sets: v.sets, primary: v.primary }))
-    .sort((a, b) => Number(b.primary) - Number(a.primary) || b.sets - a.sets);
+    .sort(
+      (a, b) =>
+        Number(b.primary) - Number(a.primary) ||
+        (orderIdx.get(a.muscle) ?? 1e9) - (orderIdx.get(b.muscle) ?? 1e9),
+    );
 }
 
 /**

@@ -13885,6 +13885,48 @@ button.exd-media {
   margin-right: 4px;
 }
 
+/* One-line session muscle row (lists): chips clipped to a single line, with a
+   trailing "+N more" chip that opens the full list in a drawer. */
+.mrow {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.mrow-item {
+  flex: none;
+  display: inline-flex;
+}
+.mrow-more {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--color-divider);
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-300);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.muscle-drawer {
+  padding: 2px 2px 10px;
+}
+.muscle-drawer .section-label {
+  margin-bottom: 12px;
+}
+.md-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* --- Live-session power features: Duplicate · Rest timer · Share ---------- */
 
 /* Duplicate control + rest caption on each logged set row. */
@@ -18148,7 +18190,20 @@ button.badge {
   background: var(--color-neutral-700);
 }
 .program-start-day.state-rest .program-start-bar {
-  background: var(--color-neutral-800);
+  background: color-mix(in srgb, var(--color-rest-400) 40%, var(--color-neutral-800));
+}
+/* A rest day reads in the app's rest colour (cyan), matching the rest-day
+   banner — not as an empty grey cell. */
+.program-start-day.state-rest {
+  border-color: color-mix(in srgb, var(--color-rest-400) 32%, var(--color-divider));
+}
+.program-start-day.state-rest .program-start-dow,
+.program-start-day.state-rest strong {
+  color: var(--color-rest-400);
+}
+.program-start-day.state-rest .program-start-dot {
+  background: var(--color-rest-400);
+  opacity: 0.85;
 }
 .program-start-day.state-upcoming .program-start-bar {
   background: var(--color-neutral-700);
@@ -19781,6 +19836,9 @@ button.badge {
 }
 .tone-body {
   --tone: var(--color-neutral-400);
+}
+.tone-rest {
+  --tone: var(--color-rest-400);
 }
 .nudge-wrap {
   position: relative;

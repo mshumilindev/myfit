@@ -462,6 +462,7 @@ export const lt: Strings = {
   newExercise: 'Naujas pratimas',
   muscleGroupsWorked: 'Apkrauti raumenys',
   musclesWorkedLabel: 'Raumenys darbe',
+  moreLabel: 'daugiau',
   programTargetsLabel: 'Programos tikslai',
   targetWorked: 'Apkrauta',
   targetSkipped: 'Praleista',

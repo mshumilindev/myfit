@@ -458,6 +458,7 @@ export const en = {
   newExercise: 'New exercise',
   muscleGroupsWorked: 'Muscle groups worked',
   musclesWorkedLabel: 'Muscles worked',
+  moreLabel: 'more',
   programTargetsLabel: 'Program targets',
   targetWorked: 'Worked',
   targetSkipped: 'Skipped',

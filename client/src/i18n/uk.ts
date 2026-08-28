@@ -454,6 +454,7 @@ export const uk: Strings = {
   newExercise: 'Нова вправа',
   muscleGroupsWorked: "Пропрацьовані м'язи",
   musclesWorkedLabel: "М'язи в роботі",
+  moreLabel: 'ще',
   programTargetsLabel: 'Цілі програми',
   targetWorked: 'Пропрацьовано',
   targetSkipped: 'Пропущено',

@@ -17,7 +17,7 @@ import {
 } from '../store';
 import { fmtDurationHM, fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
-import { MuscleChip, withMuscleBreak } from '../components/Muscle';
+import { MuscleRow } from '../components/Muscle';
 import { Icon } from '../ui';
 import {
   activityType,
@@ -132,15 +132,7 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
                         })()}
                       </div>
                       {sessionMuscles(it.w).length > 0 && (
-                        <div className="recent-muscles">
-                          {withMuscleBreak(sessionMuscles(it.w), (x) => (
-                            <MuscleChip
-                              key={x.muscle}
-                              muscle={x.muscle}
-                              tone={x.primary ? 'primary' : 'secondary'}
-                            />
-                          ))}
-                        </div>
+                        <MuscleRow entries={sessionMuscles(it.w)} />
                       )}
                     </span>
                     <Icon name="arrow-up-right" className="go" />

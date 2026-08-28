@@ -14,12 +14,12 @@
  * precision. `MuscleIcon` therefore renders a library figure at figure/row/full
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
-import type { CSSProperties, ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { t as strings } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, Sheet } from '../ui';
 
 /** Muscles in the vocabulary order of the filter bar (MG-5). */
 export const MUSCLE_IDS: Exclude<MuscleGroup, 'cardio'>[] = [
@@ -915,6 +915,114 @@ export function MuscleChip({
       <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
       {strings().muscleGroups[muscle]}
     </span>
+  );
+}
+
+type MuscleEntry = { muscle: MuscleGroup; sets: number; primary: boolean };
+
+/** The full worked-muscle list (primary then secondary, with set counts) in a
+ *  bottom drawer — opened from the "+N more" chip on a clipped session row. */
+function MuscleDrawer({
+  entries,
+  onOpen,
+  onClose,
+}: {
+  entries: MuscleEntry[];
+  onOpen?: (m: MuscleGroup) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Sheet onClose={onClose}>
+      <div className="muscle-drawer">
+        <div className="section-label">{strings().musclesWorkedLabel}</div>
+        <div className="md-list">
+          {entries.map((e) => (
+            <MuscleSetChip
+              key={e.muscle}
+              muscle={e.muscle}
+              count={e.sets}
+              tone={e.primary ? 'primary' : 'secondary'}
+              onClick={onOpen}
+            />
+          ))}
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
+/**
+ * One-line session muscle row for lists: primaries then secondaries (each in
+ * training order), fitted to a single line — chips that don't fit drop from the
+ * end and a "+N more" chip appears, opening the full list in a drawer.
+ */
+export function MuscleRow({
+  entries,
+  onOpen,
+}: {
+  entries: MuscleEntry[];
+  onOpen?: (m: MuscleGroup) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLButtonElement>(null);
+  const key = entries.map((e) => `${e.muscle}:${e.primary ? 1 : 0}`).join(',');
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    const more = moreRef.current;
+    if (!row) return;
+    const fit = () => {
+      const chips = Array.from(row.querySelectorAll<HTMLElement>('[data-mchip]'));
+      chips.forEach((c) => (c.style.display = ''));
+      if (more) more.style.display = 'none';
+      const fits = () => row.scrollWidth <= row.clientWidth + 1;
+      let hidden = 0;
+      if (!fits() && more) {
+        more.style.display = ''; // reserve room for the "+N more" chip
+        for (let i = chips.length - 1; i >= 0 && !fits(); i--) {
+          chips[i].style.display = 'none';
+          hidden += 1;
+        }
+      }
+      if (more) {
+        more.style.display = hidden > 0 ? '' : 'none';
+        const n = more.querySelector('.n');
+        if (n) n.textContent = String(hidden);
+      }
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [key]);
+  if (entries.length === 0) return null;
+  return (
+    <>
+      <div className="mrow" ref={rowRef}>
+        {entries.map((e) => (
+          <span key={e.muscle} data-mchip className="mrow-item">
+            <MuscleChip
+              muscle={e.muscle}
+              tone={e.primary ? 'primary' : 'secondary'}
+              onClick={onOpen}
+            />
+          </span>
+        ))}
+        <button
+          type="button"
+          className="mrow-more"
+          ref={moreRef}
+          onClick={(ev) => {
+            ev.stopPropagation();
+            setOpen(true);
+          }}
+        >
+          +<span className="n" />
+          &nbsp;{strings().moreLabel}
+        </button>
+      </div>
+      {open && <MuscleDrawer entries={entries} onOpen={onOpen} onClose={() => setOpen(false)} />}
+    </>
   );
 }
 

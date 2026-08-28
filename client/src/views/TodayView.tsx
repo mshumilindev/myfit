@@ -9,7 +9,7 @@ import type { ExerciseKind, Gym, Workout } from '../types';
 import { callFn, getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
-import { MuscleChip, withMuscleBreak } from '../components/Muscle';
+import { MuscleRow } from '../components/Muscle';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
@@ -92,6 +92,8 @@ function compactProgramDaySummary(items: ProgramItem[]): string {
   return reps ? `${sets} × ${reps}` : String(sets);
 }
 
+// Older weeks read as graphite; the five most recent brighten smoothly toward
+// the accent, so recency reads as one clean gradient (no repeated shade).
 const BAR_COLORS = [
   'var(--color-neutral-800)',
   'var(--color-neutral-800)',
@@ -100,9 +102,9 @@ const BAR_COLORS = [
   'var(--color-neutral-800)',
   'var(--color-accent-800)',
   'var(--color-accent-700)',
-  'var(--color-accent-700)',
   'var(--color-accent-600)',
-  'var(--color-accent)',
+  'var(--color-accent-500)',
+  'var(--color-accent-400)',
 ];
 
 interface ProgramItem {
@@ -767,7 +769,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   if (programRestDay) {
     nudges.push({
       id: 'restday',
-      tone: 'body',
+      tone: 'rest',
       priority: 100,
       icon: 'clock-countdown',
       kicker: t.progRestDay,
@@ -1336,14 +1338,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
                         {suggestOn && (
                           <td className="td-muscles">
-                            {withMuscleBreak(sessionMuscles(w), (x) => (
-                              <MuscleChip
-                                key={x.muscle}
-                                muscle={x.muscle}
-                                tone={x.primary ? 'primary' : 'secondary'}
-                                onClick={openMuscleHistory}
-                              />
-                            ))}
+                            <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
                           </td>
                         )}
                         <td className="td-history-dots">
@@ -1370,14 +1365,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       </div>
                       {suggestOn && sessionMuscles(w).length > 0 && (
                         <div className="recent-muscles">
-                          {withMuscleBreak(sessionMuscles(w), (x) => (
-                            <MuscleChip
-                              key={x.muscle}
-                              muscle={x.muscle}
-                              tone={x.primary ? 'primary' : 'secondary'}
-                              onClick={openMuscleHistory}
-                            />
-                          ))}
+                          <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
                         </div>
                       )}
                     </span>
@@ -1510,14 +1498,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
                         {suggestOn && (
                           <td className="td-muscles">
-                            {withMuscleBreak(sessionMuscles(w), (x) => (
-                              <MuscleChip
-                                key={x.muscle}
-                                muscle={x.muscle}
-                                tone={x.primary ? 'primary' : 'secondary'}
-                                onClick={openMuscleHistory}
-                              />
-                            ))}
+                            <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
                           </td>
                         )}
                         <td className="td-history-dots">
@@ -1550,14 +1531,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       </div>
                       {suggestOn && sessionMuscles(w).length > 0 && (
                         <div className="recent-muscles">
-                          {withMuscleBreak(sessionMuscles(w), (x) => (
-                            <MuscleChip
-                              key={x.muscle}
-                              muscle={x.muscle}
-                              tone={x.primary ? 'primary' : 'secondary'}
-                              onClick={openMuscleHistory}
-                            />
-                          ))}
+                          <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
                         </div>
                       )}
                     </span>
