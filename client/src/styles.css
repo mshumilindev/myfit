@@ -9121,6 +9121,13 @@ i > svg {
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-divider);
 }
+/* Inside the main pane the flex gap already sits above the divider, so trim its
+   own top margin — otherwise Weekly Volume / History read looser than Records
+   (which heads its own pane and has no gap above it). */
+.pane-main .td-block-head.section-divide,
+.pane-main .td-history > .section-divide {
+  margin-top: var(--space-2);
+}
 
 /* On desktop the templates label heads its own rail column — no divider. */
 @media (min-width: 720px) {
@@ -19630,17 +19637,22 @@ button.badge {
 @keyframes nudge-shuffle {
   0% {
     transform: translateY(0) scale(1) rotate(0deg);
-    opacity: 1;
+    z-index: 40;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
   }
-  32% {
+  35% {
     transform: translateY(-36px) scale(1.05) rotate(-2.5deg);
-    opacity: 1;
+    z-index: 40;
     box-shadow: 0 20px 38px rgba(0, 0, 0, 0.42);
   }
+  /* At the top of the lift it drops behind the deck (no fade) and slides down
+     into the back of the stack. */
+  36% {
+    z-index: 0;
+  }
   100% {
-    transform: translateY(16px) scale(0.9) rotate(0deg);
-    opacity: 0;
+    transform: translateY(16px) scale(0.88) rotate(0deg);
+    z-index: 0;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
   }
 }
@@ -19690,8 +19702,11 @@ button.badge {
   position: fixed;
   inset: 0;
   z-index: 60;
-  display: grid;
-  place-items: center;
+  /* Flex centring (not grid place-items) so the sheet is genuinely centred —
+     grid's implicit track is justify-start, which left-biases a min() width. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   /* Same inset on every side; the sheet grows to leave exactly this margin
      top and bottom when it's tall. */
   padding: 16px;

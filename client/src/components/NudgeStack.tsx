@@ -10,7 +10,7 @@
  * overlay (each card in full, staggered in), closable. Auto-advance pauses
  * while the stack is open or just after a tap.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '../ui';
 
@@ -46,22 +46,34 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   // shuffle instead of a cross-fade. `flyKey` restarts the animation each deal.
   const [flying, setFlying] = useState<Nudge | null>(null);
   const [flyKey, setFlyKey] = useState(0);
+  // Rotation only runs while the deck is actually on screen — no point cycling
+  // cards the user has scrolled past.
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
 
-  // While the sheet is open, lock the background so it can't scroll behind the
-  // scrim. Padding for the removed scrollbar keeps the page from jumping — and
-  // keeps the fixed overlay symmetric, since the scrollbar no longer eats into
-  // its right edge.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting), {
+      threshold: 0.3,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // While the sheet is open, lock the scrolling screen behind it so it can't
+  // scroll under the scrim and its scrollbar can't skew the centred overlay.
   useEffect(() => {
     if (!open) return;
-    const sbw = window.innerWidth - document.documentElement.clientWidth;
-    const body = document.body;
-    const prevOverflow = body.style.overflow;
-    const prevPad = body.style.paddingRight;
-    body.style.overflow = 'hidden';
-    if (sbw > 0) body.style.paddingRight = `${sbw}px`;
+    const screens = Array.from(document.querySelectorAll<HTMLElement>('.screen'));
+    const prev = screens.map((el) => el.style.overflow);
+    screens.forEach((el) => {
+      el.style.overflow = 'hidden';
+    });
     return () => {
-      body.style.overflow = prevOverflow;
-      body.style.paddingRight = prevPad;
+      screens.forEach((el, i) => {
+        el.style.overflow = prev[i];
+      });
     };
   }, [open]);
 
@@ -71,7 +83,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   // The progress fill drives the advance: it runs while the deck is collapsed,
   // pauses while the overlay is open, and when it completes it flips to the next
   // card. One clock, so the fill and the shuffle can never drift apart.
-  const running = count > 1 && !open;
+  const running = count > 1 && !open && onScreen;
 
   if (count === 0) return null;
 
@@ -99,7 +111,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   };
 
   return (
-    <div className="nudge-wrap">
+    <div className="nudge-wrap" ref={wrapRef}>
       <button
         type="button"
         className="nudge-deck"
@@ -134,7 +146,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
           <span
             key={flyKey}
             className={`nudge-mini fly tone-${flying.tone}`}
-            style={{ zIndex: order.length + 5 }}
+            style={{ zIndex: 40 }}
             onAnimationEnd={() => setFlying(null)}
           >
             <span className="nudge-ic">

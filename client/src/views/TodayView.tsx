@@ -1413,7 +1413,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             )}
 
             <div>
-              <div className="td-block-head">
+              <div className="td-block-head section-divide">
                 <div className="section-label">{t.weeklyVolume}</div>
                 {deltaPct !== null && (
                   <div className="td-delta">
@@ -1502,7 +1502,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               </div>
               {/* Mobile: stacked rows (S-13). */}
               <div className="mobile-only">
-                {finished.slice(0, 5).map((w) => (
+                {finished.slice(0, 3).map((w) => (
                   <button
                     key={w.id}
                     className="recent-row"
@@ -1537,7 +1537,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   </button>
                 ))}
               </div>
-              {finished.length > 5 && (
+              {/* Mobile lists 3, desktop up to 8 — offer the full history
+                  whenever there's more than the mobile count. */}
+              {finished.length > 3 && (
                 <button
                   className="td-history-all"
                   onClick={() => shell.openOverlay({ screen: 'history' })}
