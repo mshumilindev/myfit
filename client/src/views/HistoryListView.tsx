@@ -6,6 +6,7 @@
 import { useMemo } from 'react';
 import type { Shell } from '../App';
 import {
+  latestWeight,
   muscleWorkSorted,
   useStore,
   workoutDayReadout,
@@ -16,16 +17,35 @@ import { fmtDurationHM, fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { MuscleChip, withMuscleBreak } from '../components/Muscle';
 import { Icon } from '../ui';
+import {
+  activityType,
+  activityCategory,
+  activityCalories,
+  durationMin as activityDurationMin,
+} from '../activities';
+import type { Activity, Workout } from '../types';
+
+type HistItem = { kind: 'w'; ts: number; w: Workout } | { kind: 'a'; ts: number; a: Activity };
 
 export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   const { t, locale } = useT();
   const store = useStore();
 
-  const finished = useMemo(
-    () =>
-      store.workouts.filter((w) => w.finishedAt !== null).sort((a, b) => b.startedAt - a.startedAt),
-    [store.workouts],
-  );
+  const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
+
+  // Merge finished workouts and activities into one timeline; activities read
+  // as secondary rows to strength (design feature 6, KCAL feed).
+  const items = useMemo<HistItem[]>(() => {
+    const ws: HistItem[] = store.workouts
+      .filter((w) => w.finishedAt !== null)
+      .map((w) => ({ kind: 'w', ts: w.startedAt, w }));
+    const as: HistItem[] = store.activities
+      .filter((a) => a.finishedAt !== null)
+      .map((a) => ({ kind: 'a', ts: a.startedAt, a }));
+    return [...ws, ...as].sort((x, y) => y.ts - x.ts);
+  }, [store.workouts, store.activities]);
+
+  const workoutCount = items.filter((i) => i.kind === 'w').length;
 
   const groups = useMemo(() => {
     const monthLabel = (ts: number) => {
@@ -37,27 +57,27 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
         return '';
       }
     };
-    const map = new Map<string, { label: string; items: typeof finished }>();
-    for (const w of finished) {
-      const d = new Date(w.startedAt);
+    const map = new Map<string, { label: string; items: HistItem[] }>();
+    for (const it of items) {
+      const d = new Date(it.ts);
       const key = `${d.getFullYear()}-${d.getMonth()}`;
       let g = map.get(key);
       if (!g) {
-        g = { label: monthLabel(w.startedAt), items: [] };
+        g = { label: monthLabel(it.ts), items: [] };
         map.set(key, g);
       }
-      g.items.push(w);
+      g.items.push(it);
     }
     return [...map.values()];
-  }, [finished, locale]);
+  }, [items, locale]);
 
-  const title = (w: (typeof finished)[number]) => {
+  const title = (w: Workout) => {
     if (w.dayName) return w.dayName;
     const r = workoutDayReadout(w);
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };
 
-  const sessionMuscles = (w: (typeof finished)[number]) => muscleWorkSorted(w);
+  const sessionMuscles = (w: Workout) => muscleWorkSorted(w);
 
   return (
     <div className="screen hist-list" style={{ gap: 'var(--space-5)' }}>
@@ -67,48 +87,91 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h2 className="title-26">{t.tdHistory}</h2>
-          <div className="hist-list-sub">{t.historyCount(finished.length)}</div>
+          <div className="hist-list-sub">{t.historyCount(workoutCount)}</div>
         </div>
       </div>
 
-      {finished.length === 0 ? (
+      {items.length === 0 ? (
         <div className="detail-muted">{t.noHistoryYet}</div>
       ) : (
         groups.map((g) => (
           <div className="hist-month" key={g.label}>
             <div className="section-label">{g.label}</div>
             <div className="hist-rows">
-              {g.items.map((w) => (
-                <button
-                  key={w.id}
-                  className="recent-row"
-                  onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: w.id })}
-                >
-                  <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
-                  <span style={{ flex: 1 }}>
-                    <span className="name">{title(w)}</span>
-                    <div className="stats">
-                      {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
-                      {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
-                    </div>
-                    {sessionMuscles(w).length > 0 && (
-                      <div className="recent-muscles">
-                        {withMuscleBreak(sessionMuscles(w), (x) => (
-                          <MuscleChip
-                            key={x.muscle}
-                            muscle={x.muscle}
-                            tone={x.primary ? 'primary' : 'secondary'}
-                          />
-                        ))}
+              {g.items.map((it) =>
+                it.kind === 'w' ? (
+                  <button
+                    key={it.w.id}
+                    className="recent-row"
+                    onClick={() =>
+                      shell.openOverlay({ screen: 'past-workout', workoutId: it.w.id })
+                    }
+                  >
+                    <span className="d">{fmtShortDate(it.w.startedAt, locale)}</span>
+                    <span style={{ flex: 1 }}>
+                      <span className="name">{title(it.w)}</span>
+                      <div className="stats">
+                        {workoutSets(it.w)} {t.sets} · {fmtKg(workoutVolumeKg(it.w))}
+                        {it.w.finishedAt
+                          ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
+                          : ''}
                       </div>
-                    )}
-                  </span>
-                  <Icon name="arrow-up-right" className="go" />
-                </button>
-              ))}
+                      {sessionMuscles(it.w).length > 0 && (
+                        <div className="recent-muscles">
+                          {withMuscleBreak(sessionMuscles(it.w), (x) => (
+                            <MuscleChip
+                              key={x.muscle}
+                              muscle={x.muscle}
+                              tone={x.primary ? 'primary' : 'secondary'}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </span>
+                    <Icon name="arrow-up-right" className="go" />
+                  </button>
+                ) : (
+                  <ActivityHistRow key={it.a.id} a={it.a} bodyKg={bodyKg} t={t} locale={locale} />
+                ),
+              )}
             </div>
           </div>
         ))
+      )}
+    </div>
+  );
+}
+
+/** A finished activity, rendered as a quiet secondary row in the timeline. */
+function ActivityHistRow({
+  a,
+  bodyKg,
+  t,
+  locale,
+}: {
+  a: Activity;
+  bodyKg: number | null;
+  t: ReturnType<typeof useT>['t'];
+  locale: ReturnType<typeof useT>['locale'];
+}) {
+  const cat = activityCategory(a);
+  const kcal = a.calories ?? activityCalories(a, bodyKg);
+  const min = Math.round(activityDurationMin(a));
+  return (
+    <div className={`ta-row cat-${cat}`}>
+      <Icon name={activityType(a.type)?.icon ?? 'heartbeat'} />
+      <span className="ta-main">
+        <span className="ta-name">{t.actType[a.type] ?? a.type}</span>
+        <span className="ta-sub">
+          {fmtShortDate(a.startedAt, locale)} · {min} {t.minShort}
+          {a.distanceKm ? ` · ${a.distanceKm} ${t.kmShort}` : ''} ·{' '}
+          {cat === 'recovery' ? t.actRecovery : t.actConditioning}
+        </span>
+      </span>
+      {kcal != null && (
+        <span className="ta-kcal tnum">
+          <Icon name="flame" weight="fill" />~{kcal}
+        </span>
       )}
     </div>
   );
