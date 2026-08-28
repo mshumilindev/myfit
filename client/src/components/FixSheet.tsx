@@ -65,7 +65,16 @@ export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: ()
           return (
             <div key={c.name} className={`fix-card${added ? ' done' : ''}`}>
               <div className="fix-card-head">
-                <span className="fix-name">{c.name}</span>
+                <button
+                  className="fix-name"
+                  onClick={() => {
+                    window.location.hash = `#/exercise-detail/${encodeURIComponent(c.name)}`;
+                    onClose();
+                  }}
+                >
+                  {c.name}
+                  <Icon name="arrow-right" />
+                </button>
                 <span className="fix-scheme">{c.scheme.label}</span>
               </div>
               {c.primary && (

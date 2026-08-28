@@ -2527,13 +2527,9 @@ function AddExerciseSheet(props: {
       core: t.dayCore,
       full: t.dayFull,
     };
-    const dayLabel = !readout
-      ? ''
-      : readout.kind === 'split'
-        ? DAY_LABEL[readout.split]
-        : readout.kind === 'full'
-          ? t.dayFull
-          : readout.groups.map((m) => t.muscleGroups[m]).join(' + ');
+    // Collapse fine muscles into split names ("Legs + Core"), same as the
+    // history day readout -- not a long "Quads + Hamstrings + Adductors + ..."
+    const dayLabel = readout ? dayReadoutLabel(readout, t) : '';
     const matchesReadout = (primary: MuscleGroup): boolean => {
       if (!readout) return false;
       if (readout.kind === 'split') return exerciseDay(primary) === readout.split;

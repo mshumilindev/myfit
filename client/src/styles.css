@@ -19089,9 +19089,26 @@ button.badge {
 .fix-name {
   flex: 1;
   min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
   font-size: 14px;
   font-weight: 500;
   color: var(--color-text);
+  cursor: pointer;
+}
+.fix-name i {
+  font-size: 12px;
+  color: var(--color-accent);
+  opacity: 0.7;
+  flex: none;
+}
+.fix-name:hover {
+  color: var(--color-accent);
 }
 .fix-scheme {
   flex: none;
