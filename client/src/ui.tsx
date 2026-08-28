@@ -615,14 +615,29 @@ export function Sheet(props: {
     props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
   );
 
-  // Height mode (default = content height, full = near-fullscreen), a live drag
-  // offset that follows the finger on the grabber, and an exit-animation flag so
-  // the drawer slides out before the parent unmounts it.
+  // The sheet is bottom-anchored, so dragging the grabber UP grows its HEIGHT
+  // (top edge rises, bottom stays put); dragging DOWN first shrinks the height
+  // back toward the default, and only once it's below the default does the whole
+  // drawer translate down into the dismiss zone. `heightPx` is the committed
+  // snap height (set after the first drag so height transitions can animate),
+  // `liveH` the height while a finger is down, `drag` the dismiss-zone offset.
   const [mode, setMode] = useState<'default' | 'full'>('default');
+  const [heightPx, setHeightPx] = useState<number | null>(null);
+  const [liveH, setLiveH] = useState<number | null>(null);
   const [drag, setDrag] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [closing, setClosing] = useState(false);
-  const gesture = useRef({ startY: 0, lastY: 0, lastT: 0, vel: 0, active: false });
+  const defaultHRef = useRef(0);
+  const g = useRef({
+    startY: 0,
+    lastY: 0,
+    lastT: 0,
+    vel: 0,
+    active: false,
+    startH: 0,
+    defaultH: 0,
+    fullH: 0,
+  });
 
   const requestClose = useCallback(() => {
     setClosing((c) => {
@@ -633,37 +648,67 @@ export function Sheet(props: {
   }, [props.onClose]);
 
   const onGrabStart = (clientY: number) => {
-    gesture.current = { startY: clientY, lastY: clientY, lastT: Date.now(), vel: 0, active: true };
+    const el = sheetRef.current;
+    if (!el) return;
+    const startH = el.getBoundingClientRect().height;
+    if (mode === 'default') defaultHRef.current = startH;
+    const defaultH = defaultHRef.current || startH;
+    const fullH = Math.max(defaultH, window.innerHeight - 46);
+    g.current = {
+      startY: clientY,
+      lastY: clientY,
+      lastT: Date.now(),
+      vel: 0,
+      active: true,
+      startH,
+      defaultH,
+      fullH,
+    };
     setDragging(true);
   };
   const onGrabMove = (clientY: number) => {
-    const g = gesture.current;
-    if (!g.active) return;
+    const s = g.current;
+    if (!s.active) return;
     const now = Date.now();
-    const dt = now - g.lastT;
-    if (dt > 0) g.vel = (clientY - g.lastY) / dt; // px/ms, +down
-    g.lastY = clientY;
-    g.lastT = now;
-    let dy = clientY - g.startY;
-    // Resist dragging up past the current top (rubber-band); down follows 1:1.
-    if ((mode === 'full' && dy < 0) || (mode === 'default' && dy < 0)) dy *= 0.4;
-    setDrag(dy);
+    const dt = now - s.lastT;
+    if (dt > 0) s.vel = (clientY - s.lastY) / dt; // px/ms, +down
+    s.lastY = clientY;
+    s.lastT = now;
+    const dy = clientY - s.startY;
+    const rawH = s.startH - dy; // up (dy<0) grows, down (dy>0) shrinks
+    if (rawH >= s.defaultH) {
+      // Height zone: grow toward full, with a little rubber-band past it.
+      setLiveH(rawH > s.fullH ? s.fullH + (rawH - s.fullH) * 0.3 : rawH);
+      setDrag(0);
+    } else {
+      // Dismiss zone: height pinned at default, whole sheet slides down.
+      setLiveH(s.defaultH);
+      setDrag(s.defaultH - rawH);
+    }
   };
   const onGrabEnd = () => {
-    const g = gesture.current;
-    if (!g.active) return;
-    g.active = false;
+    const s = g.current;
+    if (!s.active) return;
+    s.active = false;
     setDragging(false);
-    const dy = g.lastY - g.startY; // authoritative, ref-based (not stale state)
-    const flickDown = g.vel > 0.7;
-    const flickUp = g.vel < -0.7;
-    if (mode === 'default') {
-      if (dy > 120 || flickDown) return requestClose();
-      if (dy < -60 || flickUp) setMode('full');
-    } else {
-      if (dy > 260 || (dy > 90 && flickDown)) return requestClose();
-      if (dy > 90 || flickDown) setMode('default');
+    setLiveH(null);
+    const dy = s.lastY - s.startY;
+    const rawH = s.startH - dy;
+    const flickDown = s.vel > 0.7;
+    const flickUp = s.vel < -0.7;
+    if (rawH < s.defaultH) {
+      // Ended in the dismiss zone: close on a big pull or a downward flick.
+      const dismiss = s.defaultH - rawH;
+      if (dismiss > 100 || flickDown) return requestClose();
+      setMode('default');
+      setHeightPx(s.defaultH);
+      setDrag(0);
+      return;
     }
+    // Height zone: snap to full or default by where it crossed the midpoint.
+    const toFull = rawH > (s.defaultH + s.fullH) / 2 || flickUp;
+    setMode(toFull ? 'full' : 'default');
+    setHeightPx(toFull ? s.fullH : s.defaultH);
     setDrag(0);
   };
 
@@ -680,10 +725,15 @@ export function Sheet(props: {
 
   const baseStyle =
     props.padded === false ? { ...style, padding: '14px 12px 26px', gap: 2 } : { ...style };
-  // Closing slides fully out (transition carries it from its current spot);
-  // otherwise follow the finger while the grabber is dragged.
-  if (closing) (baseStyle as CSSProperties).transform = 'translateY(100%)';
-  else if (drag !== 0) (baseStyle as CSSProperties).transform = `translateY(${drag}px)`;
+  const cssStyle = baseStyle as CSSProperties;
+  if (closing) {
+    // Slide fully out; the transform transition carries it from its current spot.
+    cssStyle.transform = 'translateY(100%)';
+  } else {
+    const h = liveH ?? heightPx;
+    if (h != null) cssStyle.height = `${h}px`;
+    if (drag !== 0) cssStyle.transform = `translateY(${drag}px)`;
+  }
 
   return (
     <Portal>
