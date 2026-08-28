@@ -3368,7 +3368,7 @@ function SetEditorSheet(props: {
   // --- DS-1: the four types, one list --------------------------------------
   if (!timed && view === 'type') {
     return (
-      <Sheet onClose={() => setView('main')}>
+      <Sheet onClose={props.onClose}>
         <div className="sheet-head">
           <span className="t">{t.setN(idx, props.exercise.name)}</span>
         </div>
@@ -3408,7 +3408,7 @@ function SetEditorSheet(props: {
   // --- Load type (Load-entry C): weight · assist · band --------------------
   if (!timed && view === 'load') {
     return (
-      <Sheet onClose={() => setView('main')}>
+      <Sheet onClose={props.onClose}>
         <div className="sheet-head">
           <span className="t">{t.loadTypeLabel}</span>
         </div>
