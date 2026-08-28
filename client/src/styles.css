@@ -901,10 +901,11 @@ i > svg {
     height 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
 }
-/* Following the finger — no easing, and no re-entry animation mid-drag. */
+/* Following the finger — no easing. (Do NOT toggle `animation` here: setting it
+   to none and back re-triggers the slide-in on release, which makes the sheet
+   jump down to the bottom and replay. Only the transition is suppressed.) */
 .sheet.sheet-dragging {
   transition: none;
-  animation: none;
 }
 /* Expanded to (near) full screen via a grabber drag-up. */
 .sheet.sheet-full {
