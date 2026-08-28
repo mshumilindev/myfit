@@ -948,7 +948,8 @@ i > svg {
   /* The grabber owns vertical drags; keep the browser from scrolling instead. */
   touch-action: none;
   /* A fatter invisible target so the thin grabber is easy to grab and drag. */
-  padding: 6px 0 2px;
+  padding: 14px 0 12px;
+  margin: -6px 0 -4px;
   cursor: grab;
 }
 .sheet-dragging .sheet-chrome {
