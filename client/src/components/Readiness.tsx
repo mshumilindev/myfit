@@ -132,14 +132,6 @@ function ReadinessStrip({ rows }: { rows: MuscleReadiness[] }) {
           </span>
         </span>
       ))}
-      <button
-        type="button"
-        className="rd-chip rd-more"
-        onClick={() => (window.location.hash = READINESS_LENS_HASH)}
-      >
-        {t.rdDetails}
-        <Icon name="caret-right" />
-      </button>
     </div>
   );
 }
@@ -172,6 +164,7 @@ export function buildReadinessNudge(finished: Workout[], now: number, t: T): Nud
   return {
     id: 'readiness',
     tone: 'readiness',
+    priority: 80,
     icon: 'heartbeat',
     kicker: t.readinessKicker,
     title: verdict(map, t).lead,

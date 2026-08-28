@@ -10,13 +10,15 @@
  * overlay (each card in full, staggered in), closable. Auto-advance pauses
  * while the stack is open or just after a tap.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '../ui';
 
 export interface Nudge {
   id: string;
   tone: 'readiness' | 'recovery' | 'analysis' | 'suggest' | 'plan' | 'body';
+  /** Higher = more urgent. Orders the overlay (fixed) and the deck. */
+  priority: number;
   icon: string;
   kicker: string;
   title: ReactNode;
@@ -40,16 +42,13 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
 
-  const count = nudges.length;
-  // The deck advances only while collapsed; opening the stack pauses it, and it
-  // resumes the moment the overlay closes.
+  // Most-urgent first — the fixed order for the overlay and the deck's base.
+  const items = [...nudges].sort((a, b) => b.priority - a.priority);
+  const count = items.length;
+  // The progress fill drives the advance: it runs while the deck is collapsed,
+  // pauses while the overlay is open, and when it completes it flips to the next
+  // card. One clock, so the fill and the shuffle can never drift apart.
   const running = count > 1 && !open;
-
-  useEffect(() => {
-    if (!running) return;
-    const iv = window.setInterval(() => setRotation((r) => r + 1), ROTATE_MS);
-    return () => window.clearInterval(iv);
-  }, [running]);
 
   if (count === 0) return null;
 
@@ -65,7 +64,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
     }, EXIT_MS);
   };
 
-  const order = rotate(nudges, rotation);
+  const order = rotate(items, rotation);
   const front = order[0];
 
   return (
@@ -105,7 +104,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
         <div className="nudge-rail" aria-hidden>
           {/* Segments keep their fixed positions; the active fill moves to the
               currently-shown card as the deck advances (Instagram-stories style). */}
-          {nudges.map((n) => {
+          {items.map((n) => {
             const active = n.id === front.id;
             return (
               <span key={n.id} className={`nudge-seg${active ? ' on' : ''}`}>
@@ -117,6 +116,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
                       animationDuration: `${ROTATE_MS}ms`,
                       animationPlayState: running ? 'running' : 'paused',
                     }}
+                    onAnimationEnd={() => setRotation((r) => r + 1)}
                   />
                 )}
               </span>
@@ -136,7 +136,9 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
                 </button>
               </div>
               <div className="nudge-sheet-scroll">
-                {order.map((n, i) => (
+                {/* Fixed importance order in the overlay — independent of the
+                    deck's current rotation. */}
+                {items.map((n, i) => (
                   <div
                     key={n.id}
                     className={`nudge-full tone-${n.tone}`}

@@ -18,8 +18,6 @@ import {
   backfillWorkout,
   consistencyStreak,
   dayKey,
-  dismissReminder,
-  dismissWeighInToday,
   endRestPeriod,
   startRestPeriod,
   latestWeight,
@@ -53,12 +51,8 @@ import {
   activityCategory,
   activityWeek,
   liftingCalories,
-  activityRecoveryBias,
   durationMin as activityDurationMin,
 } from '../activities';
-import { muscleFatigue, deloadSuggestion } from '../fatigue';
-import { personalLandmarks } from '../personalize';
-import { muscleReadiness, recoveringMuscles } from '../recovery';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import type { Activity } from '../types';
@@ -158,10 +152,6 @@ function useNowTick(active: boolean): number {
  *  more than once every 1–2 weeks). Local, device-only — a transient nudge. */
 const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
-const ANALYSIS_DISMISS_KEY = 'spotter.analysisNudge.dismissedAt';
-const ANALYSIS_COOLDOWN_MS = 4 * 24 * 60 * 60 * 1000;
-const DELOAD_DISMISS_KEY = 'spotter.deloadNudge.dismissedAt';
-const DELOAD_COOLDOWN_MS = 4 * 24 * 60 * 60 * 1000;
 // Cache the assigned program so Today paints instantly and only revalidates in
 // the background (no full cold fetch on every visit).
 const PROGRAM_CACHE_KEY = 'spotter.programMine';
@@ -597,15 +587,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return overlap / recentEx.size < 0.5 ? { variant: 'drifted' } : null;
   })();
 
-  function dismissSuggest() {
-    try {
-      localStorage.setItem(SUGGEST_DISMISS_KEY, String(now));
-    } catch {
-      /* ignore */
-    }
-    setProgDismissTick((n) => n + 1);
-  }
-
   function createProgramFromHistory() {
     setProgramSeed(buildProgramSeed(finished, progChoice === 'week-lifts', t.progNew));
     try {
@@ -620,16 +601,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   }
 
   // Analysis nudge (Today → Trends): surfaces when Spotter has flagged actual
-  // issues (warn-tone insights). Dismissible with a short cooldown.
+  // issues (risk/warn insights) — joins the deck, no separate dismiss.
   const analysisNudge = ((): { count: number; level: string; labels: string[] } | null => {
     if (getRole() === 'trainer' || open) return null;
-    let dismissedAt = 0;
-    try {
-      dismissedAt = Number(localStorage.getItem(ANALYSIS_DISMISS_KEY) || 0);
-    } catch {
-      /* ignore */
-    }
-    if (dismissedAt && now - dismissedAt < ANALYSIS_COOLDOWN_MS) return null;
     const res = computeTrends(finished, store.bodyMetrics, now);
     // A "quick win" is something to FIX — risks and warnings. FYI stats and
     // on-track wins are not counted.
@@ -643,87 +617,22 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return { count: actionable.length, level: actionable[0].level, labels };
   })();
 
-  function dismissAnalysis() {
-    try {
-      localStorage.setItem(ANALYSIS_DISMISS_KEY, String(now));
-    } catch {
-      /* ignore */
-    }
-    setProgDismissTick((n) => n + 1);
-  }
-
   function openTrends() {
     window.location.hash = '#/trends';
   }
 
-  // Recovery/deload nudge (feature #3): the fatigue read says a muscle is fried
-  // or a lot is piling up, AND the recovery clock agrees enough muscles are
-  // still under-recovered — so it doesn't fire on a well-rested day. Dismissible
-  // with a few days' cooldown.
-  const deloadNudge = (() => {
-    if (open || !hasHistory) return null;
-    let dismissedAt = 0;
-    try {
-      dismissedAt = Number(localStorage.getItem(DELOAD_DISMISS_KEY) || 0);
-    } catch {
-      /* private mode — treat as never dismissed */
-    }
-    if (dismissedAt && now - dismissedAt < DELOAD_COOLDOWN_MS) return null;
-    const pLandmarks = personalLandmarks(finished, now);
-    const dl = deloadSuggestion(
-      muscleFatigue(finished, now, pLandmarks),
-      activityRecoveryBias(store.activities, now),
-    );
-    if (dl.kind === 'none') return null;
-    // Recovery-aware gate: only nudge when the clock also shows muscles unready.
-    const stillRecovering = recoveringMuscles(muscleReadiness(finished, now)).length;
-    if (stillRecovering < 2) return null;
-    return dl;
-  })();
-
-  function dismissDeload() {
-    try {
-      localStorage.setItem(DELOAD_DISMISS_KEY, String(Date.now()));
-    } catch {
-      /* private mode — the nudge simply reappears next session */
-    }
-    setProgDismissTick((n) => n + 1);
-  }
-
   // Every advisory card on Today, collapsed into one deck instead of a wall of
-  // banners: readiness, recovery, training-check, program plan, weigh-in, gym
-  // visit, the "likely today" plaque.
-  const deloadMuscle = deloadNudge?.muscle ? t.muscleGroups[deloadNudge.muscle] : '';
+  // banners: readiness, training-check, program plan, weigh-in, gym visit, the
+  // "likely today" plaque. Each carries a `priority` (higher = more urgent) that
+  // fixes its order in the deck and the expanded overlay.
   const nudges: Nudge[] = [];
   const readinessNudge = !open ? buildReadinessNudge(finished, now, t) : null;
   if (readinessNudge) nudges.push(readinessNudge);
-  if (deloadNudge) {
-    nudges.push({
-      id: 'deload',
-      tone: 'recovery',
-      icon: 'warning-circle',
-      kicker: t.deloadKicker,
-      title:
-        deloadNudge.kind === 'systemic' ? t.deloadSystemicTitle : t.deloadLocalTitle(deloadMuscle),
-      body:
-        deloadNudge.kind === 'systemic' ? t.deloadSystemicBody : t.deloadLocalBody(deloadMuscle),
-      actions: (close) => (
-        <button
-          className="prog-banner-skip"
-          onClick={() => {
-            dismissDeload();
-            close();
-          }}
-        >
-          {t.todayAnalysisDismiss}
-        </button>
-      ),
-    });
-  }
   if (analysisNudge) {
     nudges.push({
       id: 'analysis',
       tone: 'analysis',
+      priority: 60,
       icon: 'chart-line-up',
       kicker: t.todayAnalysisKicker,
       title: t.todayAnalysisTitle(analysisNudge.count),
@@ -732,27 +641,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           ? t.todayAnalysisBodyList(analysisNudge.labels.join(' · '))
           : t.todayAnalysisBody,
       actions: (close) => (
-        <>
-          <button
-            className="prog-banner-cta"
-            onClick={() => {
-              openTrends();
-              close();
-            }}
-          >
-            <Icon name="arrow-right" weight="bold" />
-            {t.todayAnalysisCta}
-          </button>
-          <button
-            className="prog-banner-skip"
-            onClick={() => {
-              dismissAnalysis();
-              close();
-            }}
-          >
-            {t.todayAnalysisDismiss}
-          </button>
-        </>
+        <button
+          className="prog-banner-cta"
+          onClick={() => {
+            openTrends();
+            close();
+          }}
+        >
+          <Icon name="arrow-right" weight="bold" />
+          {t.todayAnalysisCta}
+        </button>
       ),
     });
   }
@@ -760,32 +658,22 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     nudges.push({
       id: 'suggest',
       tone: 'suggest',
+      priority: 50,
       icon: 'sparkle',
       kicker: t.progSuggestKicker,
       title: suggest.variant === 'drifted' ? t.progSuggestDriftedTitle : t.progSuggestNewTitle,
       body: suggest.variant === 'drifted' ? t.progSuggestDriftedBody : t.progSuggestNewBody,
       actions: (close) => (
-        <>
-          <button
-            className="prog-banner-cta"
-            onClick={() => {
-              setProgSheetOpen(true);
-              close();
-            }}
-          >
-            <Icon name="check" weight="bold" />
-            {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
-          </button>
-          <button
-            className="prog-banner-skip"
-            onClick={() => {
-              dismissSuggest();
-              close();
-            }}
-          >
-            {t.progSuggestNotNow}
-          </button>
-        </>
+        <button
+          className="prog-banner-cta"
+          onClick={() => {
+            setProgSheetOpen(true);
+            close();
+          }}
+        >
+          <Icon name="check" weight="bold" />
+          {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
+        </button>
       ),
     });
   }
@@ -826,6 +714,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     nudges.push({
       id: 'plan',
       tone: 'plan',
+      priority: 100,
       icon: 'calendar-check',
       kicker: t.todayPlanKicker,
       title: p.dayName,
@@ -862,31 +751,21 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     nudges.push({
       id: 'weigh',
       tone: 'body',
+      priority: 70,
       icon: 'scales',
       kicker: t.weighTitle,
       title: t.weighBody(hhmm(weighReminder.usualMin)),
       body: null,
       actions: (close) => (
-        <>
-          <button
-            className="prog-banner-cta"
-            onClick={() => {
-              setAddWeightOpen(true);
-              close();
-            }}
-          >
-            {t.bmAddWeight}
-          </button>
-          <button
-            className="prog-banner-skip"
-            onClick={() => {
-              dismissWeighInToday(ymd(now));
-              close();
-            }}
-          >
-            {t.weighNotToday}
-          </button>
-        </>
+        <button
+          className="prog-banner-cta"
+          onClick={() => {
+            setAddWeightOpen(true);
+            close();
+          }}
+        >
+          {t.bmAddWeight}
+        </button>
       ),
     });
   }
@@ -894,6 +773,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     nudges.push({
       id: 'visit',
       tone: 'body',
+      priority: 90,
       icon: 'map-pin',
       kicker: reminder.gymName,
       title: t.unloggedVisit(
@@ -903,27 +783,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       ),
       body: null,
       actions: (close) => (
-        <>
-          <button
-            className="prog-banner-cta"
-            onClick={() => {
-              const w = logVisitAsWorkout(reminder);
-              close();
-              shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
-            }}
-          >
-            {t.logIt}
-          </button>
-          <button
-            className="prog-banner-skip"
-            onClick={() => {
-              dismissReminder(reminder);
-              close();
-            }}
-          >
-            {t.dismiss}
-          </button>
-        </>
+        <button
+          className="prog-banner-cta"
+          onClick={() => {
+            const w = logVisitAsWorkout(reminder);
+            close();
+            shell.openOverlay({ screen: 'past-workout', workoutId: w.id });
+          }}
+        >
+          {t.logIt}
+        </button>
       ),
     });
   }
@@ -931,6 +800,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     nudges.push({
       id: 'likely',
       tone: 'plan',
+      priority: 95,
       icon: 'calendar-check',
       kicker: t.likelyToday,
       title: t.likelyDayTitle(prediction.dayLabel),
@@ -963,6 +833,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     nudges.push({
       id: 'playbook',
       tone: 'suggest',
+      priority: 40,
       icon: 'cards',
       kicker: t.playbook,
       title: t.playbookTagline,
