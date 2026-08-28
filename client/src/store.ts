@@ -1172,12 +1172,12 @@ export function setGlobalWeightUnit(unit: DisplayUnit): void {
 }
 /** The display unit for a lift/machine: its override, else the account default. */
 export function exerciseUnit(name: string): DisplayUnit {
-  return state.exerciseUnits[name.trim().toLowerCase()] ?? state.weightUnit;
+  return (state.exerciseUnits ?? {})[name.trim().toLowerCase()] ?? state.weightUnit;
 }
 /** Set (or clear, when it matches the account default) the unit for a machine. */
 export function setExerciseUnit(name: string, unit: DisplayUnit): void {
   const key = name.trim().toLowerCase();
-  const next = { ...state.exerciseUnits };
+  const next = { ...(state.exerciseUnits ?? {}) };
   if (unit === state.weightUnit) delete next[key];
   else next[key] = unit;
   setState({ exerciseUnits: next });
@@ -1188,14 +1188,14 @@ export function setExerciseUnit(name: string, unit: DisplayUnit): void {
  *  or a resistance band (colour → estimated kg). Derived from the exercise
  *  unless the user has pinned an override. */
 export function loadTypeFor(ex: Pick<Exercise, 'name' | 'equipment'>): LoadType {
-  const override = state.exerciseLoadTypes[ex.name.trim().toLowerCase()];
+  const override = (state.exerciseLoadTypes ?? {})[ex.name.trim().toLowerCase()];
   if (override) return override;
   return deriveLoadType(ex.name, equipmentFor(ex));
 }
 /** Pin a load type for a lift; null restores the derived default. */
 export function setExerciseLoadType(name: string, type: LoadType | null): void {
   const key = name.trim().toLowerCase();
-  const next = { ...state.exerciseLoadTypes };
+  const next = { ...(state.exerciseLoadTypes ?? {}) };
   if (type === null) delete next[key];
   else next[key] = type;
   setState({ exerciseLoadTypes: next });
@@ -1245,8 +1245,8 @@ export function consistencyStreak(now: number = Date.now()): number {
 }
 
 /** Latest weigh-in (by time), or null. */
-export function latestWeight(bm: BodyMetrics): WeightEntry | null {
-  if (bm.weights.length === 0) return null;
+export function latestWeight(bm: BodyMetrics | null | undefined): WeightEntry | null {
+  if (!bm?.weights?.length) return null;
   return bm.weights.reduce((a, b) => (b.at >= a.at ? b : a));
 }
 
