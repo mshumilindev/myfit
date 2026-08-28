@@ -17399,6 +17399,9 @@ button.badge {
 .analysis-banner.gem-emerald {
   --gem: var(--color-ok, #4caf7d);
 }
+.analysis-banner.gem-rest {
+  --gem: #6fb1d6;
+}
 .analysis-banner .prog-banner-icon {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gem) 55%, transparent);
   color: var(--gem);
@@ -17409,6 +17412,20 @@ button.badge {
 .analysis-banner .prog-banner-cta {
   background: var(--gem);
   color: #14110c;
+}
+/* Texts and the secondary button follow the banner's own colour, a lighter
+   shade — so every banner reads as one family tinted to its meaning (blue
+   recovery, ruby check, amber plan) rather than four different looks. */
+.analysis-banner .prog-banner-title {
+  color: color-mix(in srgb, var(--gem) 26%, #ffffff);
+}
+.analysis-banner .prog-banner-body {
+  color: color-mix(in srgb, var(--gem) 42%, var(--color-neutral-300));
+  opacity: 1;
+}
+.analysis-banner .prog-banner-skip {
+  color: color-mix(in srgb, var(--gem) 50%, var(--color-neutral-300));
+  opacity: 1;
 }
 
 /* --- Analysis cards v2: diverse content (bars · muscle list · tips) -------- */
@@ -18656,72 +18673,39 @@ button.badge {
 }
 
 /* --- Rest / recovery week ------------------------------------------------- */
-.td-recovery {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 18px;
-  border-radius: var(--radius-md);
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(111, 168, 201, 0.16), transparent 55%),
-    var(--color-surface);
-  border: 1px solid var(--color-divider);
-  border-left: 3px solid var(--color-rest-400, #6fa8c9);
+/* Recovery / rest banner — shares the .prog-banner + .analysis-banner
+   composition (gradient, sheen, tinted icon/kicker/title/body/buttons) so it
+   sits in the same family as the check and plan banners, just blue. The bits
+   below are the rest-only extras: the day badge and the progress bar, both
+   tinted to the banner's gem. */
+.tr-banner.off {
+  --gem: #86a4b8;
 }
-.td-recovery.off {
-  border-left-color: var(--color-neutral-500);
-}
-.tr-head {
+.tr-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
 }
-.tr-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--color-text);
-}
-.tr-kicker i {
-  color: var(--color-rest-300, #8fc0dc);
-  font-size: 17px;
-}
 .tr-day {
-  font-size: 12px;
+  flex: none;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: var(--color-neutral-400);
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--gem) 60%, var(--color-neutral-300));
 }
 .tr-bar {
   height: 6px;
+  margin-top: 10px;
   border-radius: 999px;
-  background: var(--color-neutral-800);
+  background: color-mix(in srgb, var(--gem) 16%, var(--color-neutral-800));
   overflow: hidden;
 }
 .tr-fill {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: var(--color-rest-400, #6fa8c9);
-}
-.tr-note {
-  font-size: 13px;
-  color: var(--color-neutral-400);
-  line-height: 1.45;
-}
-.tr-acts {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.tr-acts .btn {
-  min-height: 38px;
-}
-.tr-light {
-  gap: 7px;
+  background: var(--gem);
 }
 
 /* Start-rest sheet */

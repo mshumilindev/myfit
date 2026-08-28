@@ -916,43 +916,67 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {banners}
         {!open && activeRest && (
-          <div className={`td-recovery ${activeRest.mode}`}>
-            <div className="tr-head">
-              <span className="tr-kicker">
-                <Icon name="clock-countdown" />
-                {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
+          <div
+            className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
+          >
+            <span className="prog-sheen" aria-hidden />
+            <div className="prog-banner-row">
+              <span className="prog-banner-icon">
+                <Icon name="clock-countdown" weight="bold" />
               </span>
-              <span className="tr-day">
-                {t.restDayOf(
-                  Math.min(
-                    dayKey(pbNow) - activeRest.startDay + 1,
-                    activeRest.endDay - activeRest.startDay + 1,
-                  ),
-                  activeRest.endDay - activeRest.startDay + 1,
-                )}
-              </span>
-            </div>
-            <div className="tr-bar">
-              <span
-                className="tr-fill"
-                style={{
-                  width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
-                }}
-              />
-            </div>
-            <div className="tr-note">
-              {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
-            </div>
-            <div className="tr-acts">
-              {activeRest.mode === 'active' && (
-                <button className="btn btn-primary tr-light" onClick={startSession}>
-                  <Icon name="play" />
-                  {t.restStartLight}
-                </button>
-              )}
-              <button className="btn btn-secondary" onClick={() => endRestPeriod(activeRest.id)}>
-                {t.restEndNow}
-              </button>
+              <div className="prog-banner-main">
+                <div className="tr-top">
+                  <span className="prog-banner-kicker">
+                    {activeRest.mode === 'active' ? t.restModeActive : t.restModeOff}
+                  </span>
+                  <span className="tr-day">
+                    {t.restDayOf(
+                      Math.min(
+                        dayKey(pbNow) - activeRest.startDay + 1,
+                        activeRest.endDay - activeRest.startDay + 1,
+                      ),
+                      activeRest.endDay - activeRest.startDay + 1,
+                    )}
+                  </span>
+                </div>
+                <div className="prog-banner-title">
+                  {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
+                </div>
+                <div className="tr-bar">
+                  <span
+                    className="tr-fill"
+                    style={{
+                      width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="prog-banner-body">
+                  {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
+                </div>
+                <div className="prog-banner-acts">
+                  {activeRest.mode === 'active' ? (
+                    <>
+                      <button className="prog-banner-cta" onClick={startSession}>
+                        <Icon name="play" weight="bold" />
+                        {t.restStartLight}
+                      </button>
+                      <button
+                        className="prog-banner-skip"
+                        onClick={() => endRestPeriod(activeRest.id)}
+                      >
+                        {t.restEndNow}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="prog-banner-cta"
+                      onClick={() => endRestPeriod(activeRest.id)}
+                    >
+                      {t.restEndNow}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
