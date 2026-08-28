@@ -1243,19 +1243,29 @@ function VolumePanel({
         </div>
       )}
 
-      <div className="vol-note">
-        <Icon name="scales" />
-        <p>{summary}</p>
-      </div>
-
-      <div className={`vol-tuned${tuned.tunedCount > 0 ? ' on' : ''}`}>
-        <Icon name={tuned.tunedCount > 0 ? 'user-focus' : 'info'} />
-        <span>{tuned.tunedCount > 0 ? t.volTuned(tuned.tunedCount) : t.volTunedDefault}</span>
-      </div>
-
-      {deload.kind !== 'none' && <DeloadCard deload={deload} t={t} />}
-
-      {weakPoints.length > 0 && <WeakPointsCard weak={weakPoints} t={t} onFix={setFixMuscle} />}
+      {/* Coaching cards kept together in one block instead of scattered: the
+          volume summary + personalisation note (only on the volume lens, where
+          they mean something) then the deload and weak-point nudges. */}
+      {(lens === 'volume' || deload.kind !== 'none' || weakPoints.length > 0) && (
+        <div className="coach-group">
+          {lens === 'volume' && (
+            <>
+              <div className="vol-note">
+                <Icon name="scales" />
+                <p>{summary}</p>
+              </div>
+              <div className={`vol-tuned${tuned.tunedCount > 0 ? ' on' : ''}`}>
+                <Icon name={tuned.tunedCount > 0 ? 'user-focus' : 'info'} />
+                <span>
+                  {tuned.tunedCount > 0 ? t.volTuned(tuned.tunedCount) : t.volTunedDefault}
+                </span>
+              </div>
+            </>
+          )}
+          {deload.kind !== 'none' && <DeloadCard deload={deload} t={t} />}
+          {weakPoints.length > 0 && <WeakPointsCard weak={weakPoints} t={t} onFix={setFixMuscle} />}
+        </div>
+      )}
 
       {fixMuscle && <FixSheet muscle={fixMuscle} onClose={() => setFixMuscle(null)} />}
     </div>

@@ -959,6 +959,37 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       ),
     });
   }
+  if (!open && hasHistory && playbook.plays.length > 0) {
+    nudges.push({
+      id: 'playbook',
+      tone: 'suggest',
+      icon: 'cards',
+      kicker: t.playbook,
+      title: t.playbookTagline,
+      body: (
+        <div className="nudge-plays">
+          {playbook.plays.slice(0, 3).map((pl) => (
+            <span className="td-pb-chip" key={pl.id} data-day={pl.dayType ?? 'other'}>
+              <span className="n">{playName(pl)}</span>
+              <span className="c">{t.playbookExCount(pl.exercises.length)}</span>
+            </span>
+          ))}
+        </div>
+      ),
+      actions: (close) => (
+        <button
+          className="prog-banner-cta"
+          onClick={() => {
+            close();
+            shell.goPlaybook();
+          }}
+        >
+          {t.playbookOpen}
+          <Icon name="arrow-right" weight="bold" />
+        </button>
+      ),
+    });
+  }
 
   // Weekly progress from actual history (matches the calendar's done marks) —
   // the server's post-assignment count reads 0 right after activation.
@@ -1340,31 +1371,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               </button>
             </div>
           </div>
-        )}
-
-        {!open && hasHistory && playbook.plays.length > 0 && (
-          <button className="td-playbook" onClick={() => shell.goPlaybook()}>
-            <span className="td-pb-glow" aria-hidden />
-            <span className="td-pb-head">
-              <span className="td-pb-kicker">
-                <Icon name="cards" />
-                {t.playbook}
-              </span>
-              <span className="td-pb-tag">{t.playbookTagline}</span>
-            </span>
-            <span className="td-pb-plays">
-              {playbook.plays.slice(0, 3).map((pl) => (
-                <span className="td-pb-chip" key={pl.id} data-day={pl.dayType ?? 'other'}>
-                  <span className="n">{playName(pl)}</span>
-                  <span className="c">{t.playbookExCount(pl.exercises.length)}</span>
-                </span>
-              ))}
-            </span>
-            <span className="td-pb-go">
-              {t.playbookOpen}
-              <Icon name="arrow-right" />
-            </span>
-          </button>
         )}
 
         {!open && hasHistory && playbook.plays.length === 0 && (

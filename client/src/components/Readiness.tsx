@@ -5,6 +5,7 @@
  * of the most relevant muscles) whose "Full read" opens the Progress readiness
  * lens; `ReadinessLens` is that full body-map read.
  */
+import { useLayoutEffect, useRef } from 'react';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
 import { MuscleHeatmap, MuscleIcon } from './Muscle';
@@ -94,33 +95,70 @@ function ReadinessRow({ r }: { r: MuscleReadiness }) {
   );
 }
 
-/** Body of the readiness nudge in the stack: the per-muscle list + one
- *  recommendation. The verdict lead is the nudge's title, so it isn't repeated. */
+/** Chips + a trailing "Full read"; chips that don't fit drop from the end so the
+ *  row never ends on a half-clipped chip and never scrolls. Full read opens the
+ *  Progress readiness lens. */
+function ReadinessStrip({ rows }: { rows: MuscleReadiness[] }) {
+  const { t } = useT();
+  const ref = useRef<HTMLDivElement>(null);
+  const key = rows.map((r) => r.muscle).join(',');
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      const chips = Array.from(el.querySelectorAll<HTMLElement>('[data-chip]'));
+      chips.forEach((c) => (c.style.display = ''));
+      for (let i = chips.length - 1; i >= 0 && el.scrollWidth > el.clientWidth; i--) {
+        chips[i].style.display = 'none';
+      }
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [key]);
+  return (
+    <div className="rd-strip" ref={ref}>
+      {rows.map((r) => (
+        <span key={r.muscle} className="rd-chip" data-chip>
+          <MuscleIcon
+            muscle={r.muscle}
+            variant="row"
+            tone={r.daysSince === null ? 'muted' : 'primary'}
+          />
+          <span className="rd-chip-name">{t.muscleGroups[r.muscle]}</span>
+          <span className="rd-chip-pct tnum" style={{ color: READINESS_COLOR[r.state] }}>
+            {round(r.readiness * 100)}%
+          </span>
+        </span>
+      ))}
+      <button
+        type="button"
+        className="rd-chip rd-more"
+        onClick={() => (window.location.hash = READINESS_LENS_HASH)}
+      >
+        {t.rdDetails}
+        <Icon name="caret-right" />
+      </button>
+    </div>
+  );
+}
+
+/** Body of the readiness nudge — the compact read it had as a standalone card:
+ *  the ready/recovering counts and a strip of the most relevant muscles, with
+ *  "Full read" into the Progress readiness lens. */
 function ReadinessNudgeBody({ finished, now }: { finished: Workout[]; now: number }) {
   const { t } = useT();
   const map = muscleReadiness(finished, now);
-  const rows = orderedRows(map);
-  const stale = staleMuscles(map)
-    .slice(0, 3)
-    .map((r) => t.muscleGroups[r.muscle]);
-  const ready = readyMuscles(map)
-    .filter((m) => map.get(m)?.state === 'ready')
-    .slice(0, 3)
-    .map((m) => t.muscleGroups[m]);
-  const reco = ready.length ? ready : stale;
+  const readyN = readyMuscles(map).filter((m) => map.get(m)?.state === 'ready').length;
+  const cooling = recoveringMuscles(map).length;
+  const strip = orderedRows(map).slice(0, 8);
   return (
-    <div className="rd-lens">
-      <div className="rd-list">
-        {rows.map((r) => (
-          <ReadinessRow key={r.muscle} r={r} />
-        ))}
+    <div className="rd-nudge">
+      <div className="rd-counts tnum">
+        {t.rdReadyN(readyN)} · {t.rdCoolingN(cooling)}
       </div>
-      {reco.length > 0 && (
-        <div className="rd-reco">
-          <Icon name="check-circle" weight="fill" />
-          <span>{t.rdReco(reco.join(' · '))}</span>
-        </div>
-      )}
+      <ReadinessStrip rows={strip} />
     </div>
   );
 }

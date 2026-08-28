@@ -19808,6 +19808,27 @@ button.badge {
   color: var(--color-neutral-300);
   font-weight: 500;
 }
+.nudge-plays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rd-nudge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rd-nudge .rd-counts {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+/* Coaching cards grouped in one block on Progress (not scattered). */
+.coach-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
 .nudge-card-acts {
   display: flex;
   align-items: center;

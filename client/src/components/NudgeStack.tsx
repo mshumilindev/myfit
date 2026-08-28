@@ -25,8 +25,7 @@ export interface Nudge {
   actions?: (close: () => void) => ReactNode;
 }
 
-const ROTATE_MS = 30000; // never flip faster than every 30s
-const RESUME_MS = 15000; // settle time after a manual interaction
+const ROTATE_MS = 15000; // advance the deck every 15s
 const MAX_PEEK = 3; // cards drawn in the collapsed deck (front + 2 behind)
 const EXIT_MS = 240;
 
@@ -40,34 +39,25 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
   const [rotation, setRotation] = useState(0);
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
-  const [paused, setPaused] = useState(false);
 
   const count = nudges.length;
-  const running = count > 1 && !open && !paused;
+  // The deck advances only while collapsed; opening the stack pauses it, and it
+  // resumes the moment the overlay closes.
+  const running = count > 1 && !open;
 
-  // Slow auto-advance: shuffle the front card to the back.
   useEffect(() => {
     if (!running) return;
     const iv = window.setInterval(() => setRotation((r) => r + 1), ROTATE_MS);
     return () => window.clearInterval(iv);
   }, [running]);
 
-  // A recent tap pauses the shuffle for a beat, then lifts on its own.
-  useEffect(() => {
-    if (!paused) return;
-    const t = window.setTimeout(() => setPaused(false), RESUME_MS);
-    return () => window.clearTimeout(t);
-  }, [paused]);
-
   if (count === 0) return null;
 
   const openStack = () => {
-    setPaused(true);
     setClosing(false);
     setOpen(true);
   };
   const close = () => {
-    setPaused(true);
     setClosing(true);
     window.setTimeout(() => {
       setOpen(false);
@@ -113,20 +103,25 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
 
       {count > 1 && (
         <div className="nudge-rail" aria-hidden>
-          {order.map((n, i) => (
-            <span key={n.id} className={`nudge-seg${i === 0 ? ' on' : ''}`}>
-              {i === 0 && (
-                <span
-                  key={rotation}
-                  className="nudge-seg-fill"
-                  style={{
-                    animationDuration: `${ROTATE_MS}ms`,
-                    animationPlayState: running ? 'running' : 'paused',
-                  }}
-                />
-              )}
-            </span>
-          ))}
+          {/* Segments keep their fixed positions; the active fill moves to the
+              currently-shown card as the deck advances (Instagram-stories style). */}
+          {nudges.map((n) => {
+            const active = n.id === front.id;
+            return (
+              <span key={n.id} className={`nudge-seg${active ? ' on' : ''}`}>
+                {active && (
+                  <span
+                    key={rotation}
+                    className="nudge-seg-fill"
+                    style={{
+                      animationDuration: `${ROTATE_MS}ms`,
+                      animationPlayState: running ? 'running' : 'paused',
+                    }}
+                  />
+                )}
+              </span>
+            );
+          })}
         </div>
       )}
 
