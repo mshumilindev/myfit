@@ -58,13 +58,14 @@ import {
   exerciseUnit,
   setExerciseUnit,
   loadTypeFor,
+  setExerciseLoadType,
   bandLibraryFor,
   type DisplayUnit,
   type SupersetGroup,
 } from '../store';
 import { liftingCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
-import { bandForKg, assistStack, BAND_HEX, type BandRung } from '../loads';
+import { bandForKg, assistStack, BAND_HEX, type BandRung, type LoadType } from '../loads';
 import { LiveHero } from '../components/LiveHero';
 import { PlateSheet } from '../components/PlateSheet';
 import { GymPicker } from '../components/GymPicker';
@@ -3182,13 +3183,15 @@ function SetEditorSheet(props: {
   const timed = isTimedExercise(props.exercise);
   const kind = exerciseKind(props.exercise);
   // Load type (Load-entry C): assist (negative kg help) / band (colour→kg
-  // estimate) / plain weight. The weight field morphs accordingly.
-  const loadType = loadTypeFor(props.exercise);
-  const isAssist = loadType === 'assist';
-  const isBand = loadType === 'band';
+  // estimate) / plain weight. Derived from the exercise, but the athlete can
+  // pin it here (a pull-up bar vs an assist machine vs a band) — local state so
+  // the sheet morphs instantly, and persisted as a per-exercise override.
   const bandLib = props.bandLibrary;
   const defaultBandKg = bandLib[Math.min(1, bandLib.length - 1)]?.kg ?? 0;
-  const [view, setView] = useState<'main' | 'type'>('main');
+  const [loadType, setLoadTypeState] = useState<LoadType>(() => loadTypeFor(props.exercise));
+  const isAssist = loadType === 'assist';
+  const isBand = loadType === 'band';
+  const [view, setView] = useState<'main' | 'type' | 'load'>('main');
   const [type, setType] = useState<SetType>(props.set ? setTypeOf(props.set) : 'working');
   const [drops, setDropsState] = useState<DropEntry[]>(props.set?.drops ?? []);
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
@@ -3236,6 +3239,27 @@ function SetEditorSheet(props: {
   const currentBand: BandRung | null = isBand
     ? (bandForKg(weight, bandLib) ?? bandLib[Math.min(1, bandLib.length - 1)] ?? null)
     : null;
+  // Pick a load type: persist the override and re-seed the weight so the value
+  // makes sense for the new mode (negative help, a band estimate, or plain).
+  const pickLoadType = (lt: LoadType): void => {
+    setLoadTypeState(lt);
+    setExerciseLoadType(props.exercise.name, lt);
+    if (lt === 'assist') {
+      setBw(false);
+      if (weight >= 0) setWeight(-16);
+    } else if (lt === 'band') {
+      setBw(false);
+      if (weight <= 0) setWeight(defaultBandKg);
+    } else if (weight < 0) {
+      setWeight(0);
+    }
+    setView('main');
+  };
+  const LOAD_ROWS: { key: LoadType; icon: string; name: string; hint: string }[] = [
+    { key: 'weight', icon: 'barbell', name: t.loadWeight, hint: t.loadWeightHint },
+    { key: 'assist', icon: 'scales', name: t.loadAssist, hint: t.loadAssistHint },
+    { key: 'band', icon: 'wave-sine', name: t.loadBand, hint: t.loadBandHint },
+  ];
   const idx = props.set
     ? [...props.exercise.sets]
         .sort((a, b) => a.position - b.position)
@@ -3376,6 +3400,38 @@ function SetEditorSheet(props: {
             <strong>{t.dropNoteStrong}</strong>
             {t.dropNote2}
           </p>
+        </div>
+      </Sheet>
+    );
+  }
+
+  // --- Load type (Load-entry C): weight · assist · band --------------------
+  if (!timed && view === 'load') {
+    return (
+      <Sheet onClose={() => setView('main')}>
+        <div className="sheet-head">
+          <span className="t">{t.loadTypeLabel}</span>
+        </div>
+        {LOAD_ROWS.map((row, i) => (
+          <button
+            key={row.key}
+            className={`stype-row${i === LOAD_ROWS.length - 1 ? ' last' : ''}`}
+            onClick={() => pickLoadType(row.key)}
+          >
+            <Icon name={row.icon} />
+            <span className="n">{row.name}</span>
+            {loadType === row.key ? (
+              <span className="stype-check">
+                <Icon name="check" />
+              </span>
+            ) : (
+              <span className="hint">{row.hint}</span>
+            )}
+          </button>
+        ))}
+        <div className="sheet-note" style={{ marginTop: 'var(--space-3)' }}>
+          <Icon name="info" />
+          <p>{t.loadTypeNote}</p>
         </div>
       </Sheet>
     );
@@ -3613,6 +3669,13 @@ function SetEditorSheet(props: {
               <Switch on={bw} />
             </button>
           )}
+          <button className="toggle-row" onClick={() => setView('load')}>
+            <Icon name={isAssist ? 'scales' : isBand ? 'wave-sine' : 'barbell'} />
+            <span className="lab">{t.loadTypeLabel}</span>
+            <span className="toggle-value">
+              {isAssist ? t.loadAssist : isBand ? t.loadBand : t.loadWeight}
+            </span>
+          </button>
           <button className="toggle-row" onClick={() => setView('type')}>
             <Icon
               name={

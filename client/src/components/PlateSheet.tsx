@@ -24,47 +24,41 @@ import {
 /** Weight value without a unit suffix — integer when whole, else 1 decimal. */
 const fmtW = (kg: number): string => (Number.isInteger(kg) ? String(kg) : kg.toFixed(1));
 
-/** Disc height (px) scaled by denomination for the barbell drawing. */
-function discHeight(denom: number, unit: PlateUnit): number {
+/** Plate height (px) scaled by weight for the barbell drawing. */
+function plateHeight(denom: number, unit: PlateUnit): number {
   const kg = unit === 'kg' ? denom : lbToKg(denom);
-  return Math.round(18 + Math.min(kg, 25) * 2.1); // ~20px (0.5 kg) → ~70px (25 kg)
+  return Math.round(44 + Math.min(kg, 25) * 2.1); // ~45px (0.5 kg) → ~97px (25 kg)
 }
 
+/**
+ * Barbell drawing (design "Load entry"): a long central grip with the loaded
+ * plates stacked outboard on both sides — heaviest nearest the collar — capped
+ * by sleeves and end caps. Flexbox, mirroring the design's `.bb` component, so
+ * the bar reads as a barbell rather than a stubby dumbbell.
+ */
 function Barbell({ perSide, unit }: { perSide: number[]; unit: PlateUnit }) {
-  const discW = 11;
-  const gap = 2;
-  const stackW = perSide.length * (discW + gap) + 22;
-  const W = Math.max(200, stackW * 2 + 40);
-  const H = 84;
-  const mid = H / 2;
-  const cx = W / 2;
-  const disc = (side: 1 | -1) =>
-    perSide.map((d, i) => {
-      const h = discHeight(d, unit);
-      const x = cx + side * (14 + i * (discW + gap)) - (side === 1 ? 0 : discW);
-      return (
-        <rect
-          key={`${side}-${i}`}
-          x={x}
-          y={mid - h / 2}
-          width={discW}
-          height={h}
-          rx={2}
-          fill={plateColor(d, unit)}
-          stroke="rgba(0,0,0,0.35)"
-          strokeWidth="0.6"
-        />
-      );
-    });
+  const plate = (d: number, key: string) => (
+    <span
+      key={key}
+      className="pl-bb-plate"
+      style={{ height: plateHeight(d, unit), background: plateColor(d, unit) }}
+    />
+  );
   return (
-    <svg className="pl-bar" viewBox={`0 0 ${W} ${H}`} width="100%" height={H} aria-hidden>
-      {/* bar shaft */}
-      <rect x={cx - stackW} y={mid - 3} width={stackW * 2} height={6} rx={3} fill="#6b727c" />
-      {/* centre knurl */}
-      <rect x={cx - 20} y={mid - 4} width={40} height={8} rx={2} fill="#8a9099" />
-      {disc(1)}
-      {disc(-1)}
-    </svg>
+    <div className="pl-bb" aria-hidden>
+      <div className="pl-bb-stack">
+        <span className="pl-bb-cap" />
+        <span className="pl-bb-sleeve" />
+        {/* left side mirrors the right: smallest outboard, heaviest by the collar */}
+        {[...perSide].reverse().map((d, i) => plate(d, `l${i}`))}
+        <span className="pl-bb-collar" />
+        <span className="pl-bb-grip" />
+        <span className="pl-bb-collar" />
+        {perSide.map((d, i) => plate(d, `r${i}`))}
+        <span className="pl-bb-sleeve" />
+        <span className="pl-bb-cap" />
+      </div>
+    </div>
   );
 }
 
