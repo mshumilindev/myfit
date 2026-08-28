@@ -10,7 +10,11 @@ import {
   upsertGym,
   getCurrentPositionOnce,
   workoutVolumeKg,
+  bandLibraryFor,
+  setGymBandLibrary,
 } from '../store';
+import { BAND_HEX, type BandRung } from '../loads';
+import type { Gym } from '../types';
 import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   resolveAddress,
@@ -28,6 +32,63 @@ import { RouteMap } from '../components/RouteMap';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const hhmm = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)}`;
+
+/**
+ * Band library editor (Load-entry C-5): a colour → estimated-kg map, set once
+ * per gym and reused by every band exercise there. Seeds from the gym's saved
+ * library or the sensible defaults.
+ */
+function BandLibraryCard({ gym }: { gym: Gym }) {
+  const { t } = useT();
+  const [rungs, setRungs] = useState<BandRung[]>(() => bandLibraryFor(gym).map((r) => ({ ...r })));
+  const [saved, setSaved] = useState(false);
+  const dirty = JSON.stringify(rungs) !== JSON.stringify(bandLibraryFor(gym));
+  return (
+    <div className="detail-card band-lib-card">
+      <div className="detail-card-head">
+        <span className="label">
+          <Icon name="scales" /> {t.bandLibTitle}
+        </span>
+      </div>
+      <div className="detail-muted band-lib-hint">{t.bandLibHint}</div>
+      <div className="band-lib-rows">
+        {rungs.map((r, i) => (
+          <div className="band-lib-row" key={r.color}>
+            <span className="band-dot" style={{ background: BAND_HEX[r.color] }} />
+            <span className="band-lib-name">{t.bandColor(r.color)}</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step={0.5}
+              value={r.kg}
+              onChange={(e) => {
+                const kg = Math.max(0, Number(e.target.value) || 0);
+                setRungs((list) => list.map((x, xi) => (xi === i ? { ...x, kg } : x)));
+                setSaved(false);
+              }}
+            />
+            <span className="band-lib-unit">{t.kgCol.toLowerCase()}</span>
+          </div>
+        ))}
+      </div>
+      <button
+        className="btn btn-secondary band-lib-save"
+        disabled={!dirty}
+        onClick={() => {
+          setGymBandLibrary(
+            gym.id,
+            [...rungs].sort((a, b) => a.kg - b.kg),
+          );
+          setSaved(true);
+        }}
+      >
+        <Icon name="check" />
+        {saved && !dirty ? t.bandLibSaved : t.bandLibSave}
+      </button>
+    </div>
+  );
+}
 
 export function GymDetailView({
   gymId,
@@ -296,6 +357,8 @@ export function GymDetailView({
           ) : (
             <div className="detail-muted">{t.gymNoStats}</div>
           ))}
+
+        {isSaved && gym && <BandLibraryCard gym={gym} />}
 
         {isSaved && (
           <>

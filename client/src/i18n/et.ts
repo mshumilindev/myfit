@@ -570,6 +570,11 @@ export const et: Strings = {
         purple: 'Lilla',
       }) as Record<string, string>
     )[c] ?? c,
+  bandLibTitle: 'Kummide teek',
+  bandLibHint:
+    'Määra korra jõusaali kohta — värv → takistus. Kasutatakse iga kummiharjutuse jaoks siin.',
+  bandLibSave: 'Salvesta',
+  bandLibSaved: 'Salvestatud',
   kcalShort: 'kal.',
   logActivity: 'Tegevus',
   actPickCap: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',

@@ -582,6 +582,11 @@ export const lt: Strings = {
         purple: 'Violetinė',
       }) as Record<string, string>
     )[c] ?? c,
+  bandLibTitle: 'Gumų biblioteka',
+  bandLibHint:
+    'Nustatyk kartą salei — spalva → pasipriešinimas. Naudojama visiems gumų pratimams čia.',
+  bandLibSave: 'Išsaugoti',
+  bandLibSaved: 'Išsaugota',
   kcalShort: 'kal.',
   logActivity: 'Veikla',
   actPickCap: 'Kardio ir atsigavimas taip pat skaičiuojami — Spotter mato visą krūvį.',

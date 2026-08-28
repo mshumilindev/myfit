@@ -618,6 +618,10 @@ export const en = {
         purple: 'Purple',
       }) as Record<string, string>
     )[c] ?? c,
+  bandLibTitle: 'Band library',
+  bandLibHint: 'Set once per gym — colour → resistance. Used for every band exercise here.',
+  bandLibSave: 'Save library',
+  bandLibSaved: 'Saved',
   kcalShort: 'kcal',
   logActivity: 'Log activity',
   actPickCap: 'Cardio & recovery count too — so Spotter sees your whole load.',

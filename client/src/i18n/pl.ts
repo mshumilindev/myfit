@@ -574,6 +574,10 @@ export const pl: Strings = {
         purple: 'Fioletowa',
       }) as Record<string, string>
     )[c] ?? c,
+  bandLibTitle: 'Biblioteka gum',
+  bandLibHint: 'Ustaw raz dla siłowni — kolor → opór. Używane w każdym ćwiczeniu z gumą.',
+  bandLibSave: 'Zapisz',
+  bandLibSaved: 'Zapisano',
   kcalShort: 'kal.',
   logActivity: 'Aktywność',
   actPickCap: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',

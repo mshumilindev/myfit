@@ -575,6 +575,10 @@ export const uk: Strings = {
         purple: 'Фіолетова',
       }) as Record<string, string>
     )[c] ?? c,
+  bandLibTitle: 'Бібліотека резинок',
+  bandLibHint: 'Задай раз для залу — колір → опір. Для кожної вправи з резинкою тут.',
+  bandLibSave: 'Зберегти',
+  bandLibSaved: 'Збережено',
   kcalShort: 'ккал',
   logActivity: 'Активність',
   actPickCap: 'Кардіо й відновлення теж рахуються — щоб Spotter бачив усе навантаження.',
