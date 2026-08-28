@@ -55,9 +55,13 @@ import {
   workoutDayReadout,
   reorderExercises,
   latestWeight,
+  exerciseUnit,
+  setExerciseUnit,
+  type DisplayUnit,
   type SupersetGroup,
 } from '../store';
 import { liftingCalories } from '../activities';
+import { kgToLb, lbToKg } from '../plates';
 import { LiveHero } from '../components/LiveHero';
 import { PlateSheet } from '../components/PlateSheet';
 import { GymPicker } from '../components/GymPicker';
@@ -3183,7 +3187,19 @@ function SetEditorSheet(props: {
   // Plate calculator (Load-entry A): offered on barbell lifts to work out what
   // goes on the bar for the entered weight.
   const [plateOpen, setPlateOpen] = useState(false);
-  const isBarbell = equipmentFor(props.exercise).includes('barbell');
+  const equip = equipmentFor(props.exercise);
+  const isBarbell = equip.includes('barbell');
+  // Per-exercise weight unit (Load-entry B): log in the unit the machine is
+  // labelled in; storage stays canonical kg.
+  const unitEligible =
+    !timed && (isBarbell || equip.includes('dumbbell') || equip.includes('machine'));
+  const [unit, setUnitState] = useState<DisplayUnit>(() => exerciseUnit(props.exercise.name));
+  const setUnit = (u: DisplayUnit) => {
+    setUnitState(u);
+    setExerciseUnit(props.exercise.name, u);
+  };
+  const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
+  const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
   const idx = props.set
     ? [...props.exercise.sets]
         .sort((a, b) => a.position - b.position)
@@ -3274,16 +3290,16 @@ function SetEditorSheet(props: {
           onChange={onReps}
         />
         <Stepper
-          label={t.weightKg}
-          value={partWeight ?? 0}
-          step={2.5}
+          label={unit === 'lb' ? t.weightLb : t.weightKg}
+          value={toDisp(partWeight ?? 0)}
+          step={unit === 'lb' ? 5 : 2.5}
           min={0}
-          decimals={2}
+          decimals={unit === 'lb' ? 1 : 2}
           focused={focusKey === 'weight'}
           disabled={bw}
           placeholder={t.bodyweightShort}
           onFocus={() => setFocused('weight')}
-          onChange={onWeight}
+          onChange={(v) => onWeight(fromDisp(v))}
         />
       </div>
     );
@@ -3378,16 +3394,16 @@ function SetEditorSheet(props: {
           {isSD ? (
             <div className="steppers">
               <Stepper
-                label={t.weightKg}
-                value={weight}
-                step={2.5}
+                label={unit === 'lb' ? t.weightLb : t.weightKg}
+                value={toDisp(weight)}
+                step={unit === 'lb' ? 5 : 2.5}
                 min={0}
-                decimals={2}
+                decimals={unit === 'lb' ? 1 : 2}
                 focused={focused === 'weight'}
                 disabled={bw}
                 placeholder={t.bodyweightShort}
                 onFocus={() => setFocused('weight')}
-                onChange={setWeight}
+                onChange={(v) => setWeight(fromDisp(v))}
               />
               <Stepper
                 label={t.holdSecLabel}
@@ -3454,6 +3470,22 @@ function SetEditorSheet(props: {
               focused === 'reps' || focused === 'weight' ? focused : null,
             )
           )}
+          {unitEligible && !bw && (
+            <div className="toggle-row unit-row">
+              <Icon name="scales" />
+              <span className="lab">{t.unitLabel}</span>
+              <div className="seg2 unit-seg">
+                {(['kg', 'lb'] as DisplayUnit[]).map((u) => (
+                  <button key={u} className={unit === u ? 'active' : ''} onClick={() => setUnit(u)}>
+                    {u}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          {unitEligible && unit === 'lb' && !bw && weight > 0 && (
+            <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
+          )}
           {isBarbell && !bw && (
             <button className="toggle-row" onClick={() => setPlateOpen(true)}>
               <Icon name="barbell" />
@@ -3504,6 +3536,7 @@ function SetEditorSheet(props: {
       {plateOpen && (
         <PlateSheet
           targetKg={weight}
+          initialUnit={unit}
           onApply={(kg) => {
             setWeight(kg);
             setBw(false);

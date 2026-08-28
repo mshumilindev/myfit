@@ -70,13 +70,14 @@ function Barbell({ perSide, unit }: { perSide: number[]; unit: PlateUnit }) {
 
 export function PlateSheet(props: {
   targetKg: number;
+  initialUnit?: PlateUnit;
   onApply: (kg: number) => void;
   onClose: () => void;
 }) {
   const { t } = useT();
   const [mode, setMode] = useState<'solve' | 'build'>('solve');
-  const [unit, setUnit] = useState<PlateUnit>('kg');
-  const [barKg, setBarKg] = useState(20);
+  const [unit, setUnit] = useState<PlateUnit>(props.initialUnit ?? 'kg');
+  const [barKg, setBarKg] = useState(props.initialUnit === 'lb' ? lbToKg(45) : 20);
   const [collar, setCollar] = useState(false);
   const [target, setTarget] = useState(props.targetKg > 0 ? props.targetKg : 60);
   const [built, setBuilt] = useState<number[]>([]);

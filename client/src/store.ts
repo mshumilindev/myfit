@@ -63,8 +63,13 @@ const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const REST_KEY = 'spotter.restPeriods';
 const ACTIVITIES_KEY = 'spotter.activities';
+const EX_UNIT_KEY = 'spotter.exerciseUnits';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
+
+/** Per-exercise weight display unit (Load-entry B). Storage stays canonical kg;
+ *  this only changes how the weight is shown/entered for a given lift/machine. */
+export type DisplayUnit = 'kg' | 'lb';
 
 export interface StoreState {
   workouts: Workout[];
@@ -74,6 +79,8 @@ export interface StoreState {
   restPeriods: RestPeriod[];
   /** Logged non-lifting activities (cardio & recovery). */
   activities: Activity[];
+  /** Per-exercise display unit ('lb' overrides; absent = kg). Local only. */
+  exerciseUnits: Record<string, DisplayUnit>;
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
@@ -98,6 +105,7 @@ let state: StoreState = {
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
+  exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   queue: [],
   syncStatus: 'pending',
@@ -122,6 +130,7 @@ function persist(): void {
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
+    localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
@@ -1133,6 +1142,20 @@ export function discardActivity(id: string): void {
   deleteActivity(id);
 }
 
+// --- Per-exercise weight unit (Load-entry B) -------------------------------
+/** The display unit chosen for a lift/machine (defaults to kg). */
+export function exerciseUnit(name: string): DisplayUnit {
+  return state.exerciseUnits[name.trim().toLowerCase()] ?? 'kg';
+}
+/** Set (or clear, when 'kg') the display unit for a lift/machine. */
+export function setExerciseUnit(name: string, unit: DisplayUnit): void {
+  const key = name.trim().toLowerCase();
+  const next = { ...state.exerciseUnits };
+  if (unit === 'kg') delete next[key];
+  else next[key] = unit;
+  setState({ exerciseUnits: next });
+}
+
 /** Activities whose start falls on the given local day key. */
 export function activitiesOnDay(day: number, list: Activity[] = state.activities): Activity[] {
   return list.filter((a) => dayKey(a.startedAt) === day);
@@ -1167,8 +1190,8 @@ export function consistencyStreak(now: number = Date.now()): number {
 }
 
 /** Latest weigh-in (by time), or null. */
-export function latestWeight(bm: BodyMetrics | null | undefined): WeightEntry | null {
-  if (!bm?.weights?.length) return null;
+export function latestWeight(bm: BodyMetrics): WeightEntry | null {
+  if (bm.weights.length === 0) return null;
   return bm.weights.reduce((a, b) => (b.at >= a.at ? b : a));
 }
 
@@ -1842,6 +1865,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
+  localStorage.removeItem(EX_UNIT_KEY);
   pings = [];
   dismissals = [];
   state = {
@@ -1850,6 +1874,7 @@ export function resetLocalData(): void {
     reminders: [],
     restPeriods: [],
     activities: [],
+    exerciseUnits: {},
     bodyMetrics: EMPTY_BODY,
     queue: [],
     syncStatus: 'pending',
