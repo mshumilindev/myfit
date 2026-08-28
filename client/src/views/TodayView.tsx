@@ -24,6 +24,7 @@ import {
   deleteActivity,
   logVisitAsWorkout,
   muscleWorkSorted,
+  programDayNameFor,
   resolveMuscles,
   startWorkout,
   topSet,
@@ -256,7 +257,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // muscle groups trained ("Back + Shoulders", "Legs", "Chest"), weekday only
   // as a last resort (Ex suggestions).
   const sessionTitle = (w: Workout) => {
-    if (w.dayName) return w.dayName;
+    const dn = programDayNameFor(w, store.workouts);
+    if (dn) return dn;
     const r = workoutDayReadout(w);
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };

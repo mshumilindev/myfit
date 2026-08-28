@@ -411,6 +411,32 @@ export function workoutDayReadout(w: Workout): DayReadout | null {
   return describeDay(order.map((m) => [m, counts.get(m) as number]));
 }
 
+/**
+ * The program day name to title a logged session with, or null. A session
+ * started from the program carries its own `dayName`. For the others, once a
+ * program is in play (the first session that carries a day name marks that
+ * moment), sessions on a weekday that the program consistently names inherit
+ * that name — so history reads in program terms from the moment it appeared,
+ * not as a raw muscle set. Sessions before the program, or on weekdays the
+ * program never named (or named more than one way), keep the muscle readout.
+ */
+export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
+  if (w.dayName) return w.dayName;
+  let programStart = Infinity;
+  const byDow = new Map<number, Set<string>>();
+  for (const x of workouts) {
+    if (!x.dayName) continue;
+    programStart = Math.min(programStart, x.startedAt);
+    const dow = new Date(x.startedAt).getDay();
+    const set = byDow.get(dow) ?? new Set<string>();
+    set.add(x.dayName);
+    byDow.set(dow, set);
+  }
+  if (w.startedAt < programStart) return null;
+  const names = byDow.get(new Date(w.startedAt).getDay());
+  return names && names.size === 1 ? [...names][0] : null;
+}
+
 export function muscleVolumeKg(workouts: Workout[]): Map<MuscleGroup, number> {
   const m = new Map<MuscleGroup, number>();
   for (const w of workouts) {

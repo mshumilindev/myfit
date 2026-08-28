@@ -9,6 +9,7 @@ import {
   deleteActivity,
   latestWeight,
   muscleWorkSorted,
+  programDayNameFor,
   useStore,
   workoutDayReadout,
   workoutSets,
@@ -74,7 +75,8 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
   }, [items, locale]);
 
   const title = (w: Workout) => {
-    if (w.dayName) return w.dayName;
+    const dn = programDayNameFor(w, store.workouts);
+    if (dn) return dn;
     const r = workoutDayReadout(w);
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };

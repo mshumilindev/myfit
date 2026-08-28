@@ -53,6 +53,7 @@ import {
   workoutSets,
   workoutVolumeKg,
   workoutDayReadout,
+  programDayNameFor,
   reorderExercises,
   latestWeight,
   exerciseUnit,
@@ -1140,7 +1141,9 @@ export function SessionView(props: {
   function buildShareModel(): ShareModel {
     const w = workout!;
     const readout = workoutDayReadout(w);
-    const title = w.dayName || (readout ? dayReadoutLabel(readout, t) : t.sessionDone);
+    const title =
+      programDayNameFor(w, store.workouts) ||
+      (readout ? dayReadoutLabel(readout, t) : t.sessionDone);
     const prSet = w.exercises
       .flatMap((e) => e.sets.map((s) => ({ e, s })))
       .filter(({ e, s }) => isRecordSet(e, s))
@@ -1464,7 +1467,7 @@ export function SessionView(props: {
                   </div>
                 ) : (
                   <div className="title">
-                    {workout.dayName ||
+                    {programDayNameFor(workout, store.workouts) ||
                       (() => {
                         const r = workoutDayReadout(workout);
                         return r ? dayReadoutLabel(r, t) : fmtDayMonth(workout.startedAt, locale);
