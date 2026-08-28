@@ -3,6 +3,7 @@
  * Every surface here mirrors the boards; keep visual changes in styles.css.
  */
 import {
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -613,21 +614,90 @@ export function Sheet(props: {
     undefined,
     props.className?.split(/\s+/).includes('assign-sheet') ? 760 : undefined,
   );
-  const classes = ['sheet', keyboardMode ? 'sheet-keyboard-expanded' : '', props.className]
+
+  // Height mode (default = content height, full = near-fullscreen), a live drag
+  // offset that follows the finger on the grabber, and an exit-animation flag so
+  // the drawer slides out before the parent unmounts it.
+  const [mode, setMode] = useState<'default' | 'full'>('default');
+  const [drag, setDrag] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const gesture = useRef({ startY: 0, lastY: 0, lastT: 0, vel: 0, active: false });
+
+  const requestClose = useCallback(() => {
+    setClosing((c) => {
+      if (c) return c;
+      window.setTimeout(props.onClose, 240);
+      return true;
+    });
+  }, [props.onClose]);
+
+  const onGrabStart = (clientY: number) => {
+    gesture.current = { startY: clientY, lastY: clientY, lastT: Date.now(), vel: 0, active: true };
+    setDragging(true);
+  };
+  const onGrabMove = (clientY: number) => {
+    const g = gesture.current;
+    if (!g.active) return;
+    const now = Date.now();
+    const dt = now - g.lastT;
+    if (dt > 0) g.vel = (clientY - g.lastY) / dt; // px/ms, +down
+    g.lastY = clientY;
+    g.lastT = now;
+    let dy = clientY - g.startY;
+    // Resist dragging up past the current top (rubber-band); down follows 1:1.
+    if ((mode === 'full' && dy < 0) || (mode === 'default' && dy < 0)) dy *= 0.4;
+    setDrag(dy);
+  };
+  const onGrabEnd = () => {
+    const g = gesture.current;
+    if (!g.active) return;
+    g.active = false;
+    setDragging(false);
+    const dy = g.lastY - g.startY; // authoritative, ref-based (not stale state)
+    const flickDown = g.vel > 0.7;
+    const flickUp = g.vel < -0.7;
+    if (mode === 'default') {
+      if (dy > 120 || flickDown) return requestClose();
+      if (dy < -60 || flickUp) setMode('full');
+    } else {
+      if (dy > 260 || (dy > 90 && flickDown)) return requestClose();
+      if (dy > 90 || flickDown) setMode('default');
+    }
+    setDrag(0);
+  };
+
+  const classes = [
+    'sheet',
+    keyboardMode ? 'sheet-keyboard-expanded' : '',
+    mode === 'full' ? 'sheet-full' : '',
+    dragging ? 'sheet-dragging' : '',
+    closing ? 'sheet-closing' : '',
+    props.className,
+  ]
     .filter(Boolean)
     .join(' ');
+
+  const baseStyle =
+    props.padded === false ? { ...style, padding: '14px 12px 26px', gap: 2 } : { ...style };
+  // Closing slides fully out (transition carries it from its current spot);
+  // otherwise follow the finger while the grabber is dragged.
+  if (closing) (baseStyle as CSSProperties).transform = 'translateY(100%)';
+  else if (drag !== 0) (baseStyle as CSSProperties).transform = `translateY(${drag}px)`;
+
   return (
     <Portal>
-      <div className="scrim" onClick={props.onClose} />
-      <div
-        ref={sheetRef}
-        className={classes}
-        role="dialog"
-        style={props.padded === false ? { ...style, padding: '14px 12px 26px', gap: 2 } : style}
-      >
-        <div className="sheet-chrome">
+      <div className={`scrim${closing ? ' scrim-closing' : ''}`} onClick={requestClose} />
+      <div ref={sheetRef} className={classes} role="dialog" style={baseStyle}>
+        <div
+          className="sheet-chrome"
+          onTouchStart={(e) => onGrabStart(e.touches[0].clientY)}
+          onTouchMove={(e) => onGrabMove(e.touches[0].clientY)}
+          onTouchEnd={onGrabEnd}
+          onTouchCancel={onGrabEnd}
+        >
           <div className="grabber" />
-          <button className="sheet-close" onClick={props.onClose} aria-label={t.cancel}>
+          <button className="sheet-close" onClick={requestClose} aria-label={t.cancel}>
             <Icon name="x" />
           </button>
         </div>

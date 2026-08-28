@@ -854,11 +854,29 @@ i > svg {
   inset: 0;
   background: rgba(10, 11, 13, 0.6);
   z-index: 50;
+  animation: scrimIn 0.22s ease both;
+}
+.scrim.scrim-closing {
+  animation: scrimOut 0.22s ease forwards;
+}
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scrimOut {
+  to {
+    opacity: 0;
+  }
 }
 
 .sheet {
   /* Phone: a bottom drawer with rounded shoulders and a grabber (S-18,
-     SS-2/DS-1/DS-3) — content-height, never a full screen. */
+     SS-2/DS-1/DS-3). Content-height by default; drag the grabber to expand to
+     full or flick down to dismiss. */
   position: fixed;
   left: 0;
   right: 0;
@@ -875,6 +893,44 @@ i > svg {
   height: auto;
   max-height: calc(100dvh - 46px);
   overflow-y: auto;
+  /* 'backwards' (not 'both') so the finished slide-in does NOT keep overriding
+     the inline drag transform via forwards-fill. */
+  animation: sheetIn 0.26s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  transition:
+    transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1),
+    height 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+/* Following the finger — no easing, and no re-entry animation mid-drag. */
+.sheet.sheet-dragging {
+  transition: none;
+  animation: none;
+}
+/* Expanded to (near) full screen via a grabber drag-up. */
+.sheet.sheet-full {
+  height: calc(100dvh - var(--safe-top, 0px) - 8px);
+  max-height: none;
+}
+/* Slide out before the parent unmounts — the inline transform:translateY(100%)
+   (set while closing) rides the transform transition down from wherever the
+   sheet currently sits, so a flick-dismiss stays continuous. */
+.sheet.sheet-closing {
+  animation: none;
+}
+@keyframes sheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@media (min-width: 720px) {
+  /* Desktop panels aren't bottom drawers — don't slide or drag them. */
+  .sheet {
+    animation: none;
+    transition: none;
+  }
 }
 
 .sheet.backfill-sheet {
@@ -888,6 +944,14 @@ i > svg {
   align-items: center;
   justify-content: center;
   flex: none;
+  /* The grabber owns vertical drags; keep the browser from scrolling instead. */
+  touch-action: none;
+  /* A fatter invisible target so the thin grabber is easy to grab and drag. */
+  padding: 6px 0 2px;
+  cursor: grab;
+}
+.sheet-dragging .sheet-chrome {
+  cursor: grabbing;
 }
 
 .sheet-chrome .grabber {
