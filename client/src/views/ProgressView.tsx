@@ -14,9 +14,23 @@ import {
 } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
 import { EmptyState, Icon } from '../ui';
-import { EquipChip, MuscleChip, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
+import { EquipChip, MuscleChip, MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
+import type { Workout } from '../types';
+import {
+  classifyZone,
+  historyAgeDays,
+  LANDMARKS,
+  VOLUME_MUSCLES,
+  VOLUME_ZONES,
+  weeklyMuscleSets,
+  zoneLandmark,
+  zoneSets,
+  ZONE_COLOR,
+  type Landmark,
+  type Zone,
+} from '../volume';
 import { FeatsView } from '../components/FeatsView';
 import { TrendsView } from '../components/TrendsView';
 
@@ -49,7 +63,7 @@ export function ProgressView({
   const { t, locale } = useT();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
-  const [seg, setSeg] = useState<'total' | 'muscle' | 'records'>('total');
+  const [seg, setSeg] = useState<'total' | 'muscle' | 'volume' | 'records'>('total');
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const ptab = sub;
   const setPtab = onSub;
@@ -292,12 +306,15 @@ export function ProgressView({
   );
 
   const segControl = (
-    <div className="seg3">
+    <div className="seg3 seg4">
       <button className={seg === 'total' ? 'active' : ''} onClick={() => setSeg('total')}>
         {t.totalLabel}
       </button>
       <button className={seg === 'muscle' ? 'active' : ''} onClick={() => setSeg('muscle')}>
         {t.byMuscle}
+      </button>
+      <button className={seg === 'volume' ? 'active' : ''} onClick={() => setSeg('volume')}>
+        {t.volumeTab}
       </button>
       <button className={seg === 'records' ? 'active' : ''} onClick={() => setSeg('records')}>
         {t.records}
@@ -388,6 +405,7 @@ export function ProgressView({
         {segControl}
         {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
         {seg === 'muscle' && muscleNote}
+        {seg === 'volume' && <VolumePanel finished={finished} nowTs={nowTs} t={t} />}
         {seg === 'total' && <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />}
 
         {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
@@ -692,6 +710,167 @@ function UnlockDots({ finishedCount, label }: { finishedCount: number; label: st
 function equipLabel(id: string, t: ReturnType<typeof useT>['t']): string {
   const names = t.equipmentNames as Record<string, string>;
   return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+}
+
+type T = ReturnType<typeof useT>['t'];
+
+/** Fractional sets to one decimal, trailing ".0" trimmed. */
+function fmtSets(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+interface VolRow {
+  key: string;
+  label: string;
+  muscle?: MuscleGroup;
+  sets: number;
+  lm: Landmark;
+  zone: Zone;
+}
+
+/**
+ * Volume landmarks (design VOL-1..3): each muscle's trailing-week working sets
+ * against its MEV/MAV/MRV range, as a zoned bar list or an anatomical heatmap,
+ * at fine (17-group) or coarse (6-zone) grain.
+ */
+function VolumePanel({ finished, nowTs, t }: { finished: Workout[]; nowTs: number; t: T }) {
+  const [grain, setGrain] = useState<'fine' | 'zones'>('fine');
+  const [mapView, setMapView] = useState(false);
+
+  const perMuscle = weeklyMuscleSets(finished, nowTs);
+  const cold = historyAgeDays(finished, nowTs) < 21;
+
+  const rows: VolRow[] =
+    grain === 'fine'
+      ? VOLUME_MUSCLES.map((m) => {
+          const lm = LANDMARKS[m] as Landmark;
+          const sets = perMuscle.get(m) ?? 0;
+          return {
+            key: m,
+            label: t.muscleGroups[m],
+            muscle: m,
+            sets,
+            lm,
+            zone: classifyZone(sets, lm),
+          };
+        })
+      : VOLUME_ZONES.map((z) => {
+          const lm = zoneLandmark(z.members);
+          const sets = zoneSets(perMuscle, z.members);
+          const names = t.volZoneNames as Record<string, string>;
+          return {
+            key: z.key,
+            label: names[z.key] ?? z.label,
+            sets,
+            lm,
+            zone: classifyZone(sets, lm),
+          };
+        });
+
+  // Heatmap: paint every muscle by its (fine or zone) classification colour.
+  const heatColors: Partial<Record<MuscleGroup, string>> = {};
+  if (grain === 'fine') {
+    for (const m of VOLUME_MUSCLES) {
+      const sets = perMuscle.get(m) ?? 0;
+      if (sets > 0) heatColors[m] = ZONE_COLOR[classifyZone(sets, LANDMARKS[m] as Landmark)];
+    }
+  } else {
+    for (const z of VOLUME_ZONES) {
+      const sets = zoneSets(perMuscle, z.members);
+      if (sets <= 0) continue;
+      const col = ZONE_COLOR[classifyZone(sets, zoneLandmark(z.members))];
+      for (const m of z.members) heatColors[m] = col;
+    }
+  }
+
+  const belowCount = rows.filter((r) => r.zone === 'under' || r.zone === 'none').length;
+  const overCount = rows.filter((r) => r.zone === 'over').length;
+  const summary =
+    overCount > 0 ? t.volAbove(overCount) : belowCount > 0 ? t.volBelow(belowCount) : t.volAllGood;
+
+  return (
+    <div className="vol-panel">
+      <div className="vol-controls">
+        <div className="seg2">
+          <button className={grain === 'fine' ? 'active' : ''} onClick={() => setGrain('fine')}>
+            {t.volFine}
+          </button>
+          <button className={grain === 'zones' ? 'active' : ''} onClick={() => setGrain('zones')}>
+            {t.volZones}
+          </button>
+        </div>
+        <div className="seg2">
+          <button className={!mapView ? 'active' : ''} onClick={() => setMapView(false)}>
+            {t.volList}
+          </button>
+          <button className={mapView ? 'active' : ''} onClick={() => setMapView(true)}>
+            {t.volMap}
+          </button>
+        </div>
+      </div>
+
+      {cold && <div className="vol-cold">{t.volColdStart}</div>}
+
+      {mapView ? (
+        <div className="vol-map">
+          <MuscleHeatmap colors={heatColors} />
+          <div className="vol-legend">
+            {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
+              <span key={z} className="vol-leg">
+                <span className="sw" style={{ background: ZONE_COLOR[z] }} />
+                {t.volZone[z]}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="vol-rows">
+          {rows.map((r) => (
+            <VolumeRow key={r.key} row={r} t={t} />
+          ))}
+        </div>
+      )}
+
+      <div className="vol-note">
+        <Icon name="scales" />
+        <p>{summary}</p>
+      </div>
+    </div>
+  );
+}
+
+function VolumeRow({ row, t }: { row: VolRow; t: T }) {
+  const { lm, sets, zone } = row;
+  const scaleMax = Math.max(lm.mrv * 1.3, sets * 1.05, lm.mrv + 2);
+  const pct = (v: number) => `${Math.max(0, Math.min(100, (v / scaleMax) * 100))}%`;
+  return (
+    <div className={`vol-row z-${zone}`}>
+      <div className="vol-row-head">
+        {row.muscle && (
+          <MuscleIcon muscle={row.muscle} variant="row" tone={sets > 0 ? 'primary' : 'muted'} />
+        )}
+        <span className="vol-name">{row.label}</span>
+        <span className="vol-sets">
+          {fmtSets(sets)}
+          <em>{t.volSetsUnit}</em>
+        </span>
+        <span className={`vol-tag z-${zone}`}>{t.volZone[zone]}</span>
+      </div>
+      <div className="vol-bar">
+        <span className="vz vz-under" style={{ width: pct(lm.mev) }} />
+        <span className="vz vz-prod" style={{ width: pct(lm.mav - lm.mev) }} />
+        <span className="vz vz-high" style={{ width: pct(lm.mrv - lm.mav) }} />
+        <span className="vz vz-over" style={{ width: pct(scaleMax - lm.mrv) }} />
+        <span className="vol-marker" style={{ left: pct(Math.min(sets, scaleMax)) }} />
+      </div>
+      <div className="vol-cap">
+        <span className="vol-cap-prod">
+          {t.volProductive} {lm.mev}&ndash;{lm.mav}
+        </span>
+        <span className="vol-cap-mrv">MRV {lm.mrv}</span>
+      </div>
+    </div>
+  );
 }
 
 function getDesktopDetailMatch(): boolean {

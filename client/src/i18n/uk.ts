@@ -329,6 +329,32 @@ export const uk: Strings = {
     'Фільтри поєднуються: м’яз і обладнання і те, що є в цьому залі. Вправа, яку зал не може обладнати, лишається видимою на 45%, а не зникає — тобі видніше.',
   byMuscle: 'За м’язами',
   totalLabel: 'Разом',
+  volumeTab: 'Обʼєм',
+  volFine: 'Детально',
+  volZones: 'Зони',
+  volList: 'Список',
+  volMap: 'Мапа',
+  volSetsUnit: ' сет.',
+  volProductive: 'Продуктивний',
+  volColdStart: 'Відстежуємо твій обʼєм — діапазони заповняться з тренуваннями.',
+  volAllGood: 'Усе в продуктивному діапазоні — добре.',
+  volBelow: (n: number) => `${n} нижче MEV — є куди додати.`,
+  volAbove: (n: number) => `${n} вище MRV — варто зрізати сет.`,
+  volZone: {
+    none: 'Немає',
+    under: 'Мало',
+    productive: 'Продуктивно',
+    high: 'Багато',
+    over: 'Забагато',
+  },
+  volZoneNames: {
+    chest: 'Груди',
+    back: 'Спина',
+    shoulders: 'Плечі',
+    arms: 'Руки',
+    legs: 'Ноги',
+    core: 'Корпус',
+  },
   muscleWeekNote: (empty: string | null, top: string | null, share: string | null) =>
     (empty ? empty + ' цього тижня без роботи' : '') +
     (empty && top ? ', ' : '') +

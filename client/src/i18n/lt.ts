@@ -338,6 +338,32 @@ export const lt: Strings = {
     'Filtrai jungiasi: raumuo ir įranga ir tai, ką turi ši salė. Pratimas, kurio salė negali aprūpinti, lieka matomas 45% ryškumu, o ne dingsta — gal žinai geriau.',
   byMuscle: 'Pagal raumenis',
   totalLabel: 'Iš viso',
+  volumeTab: 'Apimtis',
+  volFine: 'Detaliai',
+  volZones: 'Zonos',
+  volList: 'Sąrašas',
+  volMap: 'Žemėlapis',
+  volSetsUnit: ' set.',
+  volProductive: 'Produktyvi',
+  volColdStart: 'Sekame tavo apimtį — diapazonai užsipildys treniruojantis.',
+  volAllGood: 'Viskas produktyviame diapazone — puiku.',
+  volBelow: (n: number) => `${n} žemiau MEV — yra kur pridėti.`,
+  volAbove: (n: number) => `${n} virš MRV — verta numesti seriją.`,
+  volZone: {
+    none: 'Nėra',
+    under: 'Mažai',
+    productive: 'Produktyvu',
+    high: 'Daug',
+    over: 'Per daug',
+  },
+  volZoneNames: {
+    chest: 'Krūtinė',
+    back: 'Nugara',
+    shoulders: 'Pečiai',
+    arms: 'Rankos',
+    legs: 'Kojos',
+    core: 'Liemuo',
+  },
   muscleWeekNote: (empty: string | null, top: string | null, share: string | null) =>
     (empty ? empty + ' šią savaitę be darbo' : '') +
     (empty && top ? ', ' : '') +

@@ -550,6 +550,83 @@ function idsForGroups(groups: MuscleGroup[], view: BView): IdSet {
   return s;
 }
 
+/**
+ * Reverse map: library path id -> the fine app group that owns it. Built from
+ * LIB over the FINE groups only, so the coarse `back` union (which repeats the
+ * lats/traps/lower_back ids) never shadows them. Drives the volume heatmap.
+ */
+const HEAT_FINE: Exclude<MuscleGroup, 'cardio'>[] = [
+  'chest',
+  'lats',
+  'traps',
+  'lower_back',
+  'shoulders',
+  'biceps',
+  'triceps',
+  'forearms',
+  'core',
+  'quads',
+  'adductors',
+  'hamstrings',
+  'glutes',
+  'abductors',
+  'calves',
+  'neck',
+];
+const ID_TO_GROUP: Record<BView, Record<string, MuscleGroup>> = (() => {
+  const out: Record<BView, Record<string, MuscleGroup>> = { front: {}, back: {} };
+  for (const g of HEAT_FINE) {
+    for (const v of ['front', 'back'] as BView[]) {
+      for (const id of LIB[g][v]) out[v][id] = g;
+    }
+  }
+  return out;
+})();
+
+/**
+ * Volume heatmap (design VOL-3): full front + back silhouette with each muscle
+ * painted the caller's colour (its volume zone), the rest of the body dimmed.
+ * Reuses the shared body-muscles path data -- the same figure as everywhere
+ * else, seen through a volume lens.
+ */
+export function MuscleHeatmap({
+  colors,
+  width,
+  className,
+}: {
+  colors: Partial<Record<MuscleGroup, string>>;
+  width?: number | string;
+  className?: string;
+}) {
+  return (
+    <div className={className ? `bodymap ${className}` : 'bodymap'} style={{ width }}>
+      {(['front', 'back'] as BView[]).map((view) => (
+        <svg
+          key={view}
+          viewBox={VIEWBOX[view].full}
+          style={{ display: 'block', flex: 1, minWidth: 0, width: '100%', height: 'auto' }}
+          aria-hidden
+        >
+          {VIEW_PATHS[view].map(({ id, path }) => {
+            const g = ID_TO_GROUP[view][id];
+            const c = g ? colors[g] : undefined;
+            const active = !!c;
+            return (
+              <path
+                key={id}
+                d={path}
+                fill={c ?? DIM}
+                stroke={active ? 'var(--color-bg)' : DIM_STROKE}
+                strokeWidth={active ? 0.25 : 0.12}
+              />
+            );
+          })}
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 export type MuscleFigureView = 'front' | 'back' | 'both' | 'auto';
 
 /**

@@ -329,6 +329,32 @@ export const pl: Strings = {
     'Filtry się łączą: mięsień i sprzęt i to, co ma ta siłownia. Ćwiczenie, którego siłownia nie wyposaży, zostaje widoczne na 45%, zamiast znikać — możesz wiedzieć lepiej.',
   byMuscle: 'Wg mięśni',
   totalLabel: 'Razem',
+  volumeTab: 'Objętość',
+  volFine: 'Szczegółowo',
+  volZones: 'Strefy',
+  volList: 'Lista',
+  volMap: 'Mapa',
+  volSetsUnit: ' serie',
+  volProductive: 'Produktywny',
+  volColdStart: 'Śledzimy Twoją objętość — zakresy wypełnią się z treningami.',
+  volAllGood: 'Wszystko w zakresie produktywnym — dobrze.',
+  volBelow: (n: number) => `${n} poniżej MEV — jest miejsce, by dodać.`,
+  volAbove: (n: number) => `${n} powyżej MRV — rozważ ujęcie serii.`,
+  volZone: {
+    none: 'Brak',
+    under: 'Za mało',
+    productive: 'Produktywnie',
+    high: 'Dużo',
+    over: 'Za dużo',
+  },
+  volZoneNames: {
+    chest: 'Klatka',
+    back: 'Plecy',
+    shoulders: 'Barki',
+    arms: 'Ramiona',
+    legs: 'Nogi',
+    core: 'Core',
+  },
   muscleWeekNote: (empty: string | null, top: string | null, share: string | null) =>
     (empty ? empty + ' w tym tygodniu bez pracy' : '') +
     (empty && top ? ', ' : '') +

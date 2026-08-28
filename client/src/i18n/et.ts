@@ -325,6 +325,32 @@ export const et: Strings = {
     'Filtrid liituvad: lihas ja varustus ja see, mis sellel saalil on. Harjutus, mida saal ei varusta, jääb 45% nähtavaks, mitte ei kao — sina võid teada paremini.',
   byMuscle: 'Lihaste kaupa',
   totalLabel: 'Kokku',
+  volumeTab: 'Maht',
+  volFine: 'Täpselt',
+  volZones: 'Tsoonid',
+  volList: 'Loend',
+  volMap: 'Kaart',
+  volSetsUnit: ' seeriat',
+  volProductive: 'Produktiivne',
+  volColdStart: 'Jälgime su mahtu — vahemikud täituvad treenides.',
+  volAllGood: 'Kõik on produktiivses vahemikus — tore.',
+  volBelow: (n: number) => `${n} alla MEV — ruumi lisada.`,
+  volAbove: (n: number) => `${n} üle MRV — kaalu seeria vähendamist.`,
+  volZone: {
+    none: 'Puudub',
+    under: 'Vähe',
+    productive: 'Produktiivne',
+    high: 'Palju',
+    over: 'Liiga palju',
+  },
+  volZoneNames: {
+    chest: 'Rind',
+    back: 'Selg',
+    shoulders: 'Õlad',
+    arms: 'Käed',
+    legs: 'Jalad',
+    core: 'Keha',
+  },
   muscleWeekNote: (empty: string | null, top: string | null, share: string | null) =>
     (empty ? empty + ' sel nädalal tööta' : '') +
     (empty && top ? ', ' : '') +

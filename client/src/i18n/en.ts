@@ -333,6 +333,32 @@ export const en = {
     'Filters combine: muscle and equipment and what this gym has. An exercise the gym can’t equip stays visible at 45% rather than disappearing — you may know better.',
   byMuscle: 'By muscle',
   totalLabel: 'Total',
+  volumeTab: 'Volume',
+  volFine: 'Fine',
+  volZones: 'Zones',
+  volList: 'List',
+  volMap: 'Map',
+  volSetsUnit: ' sets',
+  volProductive: 'Productive',
+  volColdStart: 'Tracking your volume — ranges fill in as you train.',
+  volAllGood: 'Everything sits in its productive range — nice.',
+  volBelow: (n: number) => `${n} below MEV — room to add.`,
+  volAbove: (n: number) => `${n} over MRV — consider trimming a set.`,
+  volZone: {
+    none: 'None',
+    under: 'Under',
+    productive: 'Productive',
+    high: 'High',
+    over: 'Over',
+  },
+  volZoneNames: {
+    chest: 'Chest',
+    back: 'Back',
+    shoulders: 'Shoulders',
+    arms: 'Arms',
+    legs: 'Legs',
+    core: 'Core',
+  },
   muscleWeekNote: (empty: string | null, top: string | null, share: string | null) =>
     (empty ? empty + ' had nothing this week' : '') +
     (empty && top ? ', ' : '') +
