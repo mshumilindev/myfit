@@ -69,6 +69,7 @@ import {
   withMuscleBreak,
 } from '../components/Muscle';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
+import { nextTarget, topHistory } from '../progression';
 import { describeDay, dayReadoutLabel, exerciseDay, type TrainingDay } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
 import {
@@ -621,6 +622,23 @@ export function SessionView(props: {
     const muscles = resolveMuscles(ex);
     const equipment = equipmentFor(ex);
     const showChips = !timed && !marker && (muscles.primary !== null || equipment.length > 0);
+    // Progression target from this lift's own history (design PROG-1).
+    const target =
+      live && !timed && !marker && isStrengthExercise(ex)
+        ? nextTarget(
+            topHistory(
+              store.workouts.filter((w) => w.finishedAt !== null),
+              ex.name,
+              workout!.startedAt,
+            ),
+            {
+              plannedReps: ex.plannedReps,
+              equipment,
+              primary: muscles.primary,
+              bodyweight: ghost.weight === null,
+            },
+          )
+        : null;
     const groupDone = grp !== null && ex.sets.length >= grp.round;
     const showGhost = !grp || grp.active;
     const rowCls = grp ? ' rrow' : '';
@@ -994,6 +1012,34 @@ export function SessionView(props: {
                     </div>
                   );
                 })()}
+              {target && showGhost && !grp && (
+                <div className={`prog-target st-${target.state}`}>
+                  <span className="pt-label">{t.progTarget}</span>
+                  <span className="pt-val">
+                    {target.weight === null
+                      ? t.progRepsTarget(target.reps)
+                      : `${fmtWeightValue(target.weight)} × ${target.reps}`}
+                  </span>
+                  {target.deltaKg > 0 && (
+                    <span className="pt-delta up">+{fmtWeightValue(target.deltaKg)}</span>
+                  )}
+                  {target.deltaKg < 0 && (
+                    <span className="pt-delta down">{fmtWeightValue(target.deltaKg)}</span>
+                  )}
+                  {target.state === 'hold' && <span className="pt-tag">{t.progHold}</span>}
+                  {target.state === 'stall' && <span className="pt-tag warn">{t.progDeload}</span>}
+                  {target.state === 'first' && <span className="pt-tag">{t.progFirst}</span>}
+                  <span className="pt-why">
+                    {target.state === 'progress'
+                      ? t.progWhyProgress
+                      : target.state === 'hold'
+                        ? t.progWhyHold
+                        : target.state === 'stall'
+                          ? t.progWhyStall
+                          : t.progWhyFirst}
+                  </span>
+                </div>
+              )}
               {showGhost && (
                 <div className={`ghost-row${rowCls}`}>
                   <span className="idx">{grp ? `R${ex.sets.length + 1}` : ex.sets.length + 1}</span>
