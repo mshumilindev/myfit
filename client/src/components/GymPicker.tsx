@@ -19,6 +19,11 @@ import { useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { GymThumb } from './GymThumb';
 
+/** "You're here" is only honest when you're basically at the door — the gym's
+ *  own radiusM is a wider presence geofence (100m+), so 50m away shouldn't read
+ *  as "here". Beyond this we show the distance instead. */
+const HERE_LABEL_M = 40;
+
 /** Nearest-within-radius → nearest overall → first saved. */
 export function suggestGymId(gyms: Gym[], coords: Coords | null): string | null {
   if (coords && gyms.length) {
@@ -140,7 +145,7 @@ export function GymPicker({
               <span className="body">
                 <span className="n">{g.name}</span>
                 <span className="s">
-                  {isSug && d !== null && d <= g.radiusM
+                  {isSug && d !== null && d <= Math.min(g.radiusM, HERE_LABEL_M)
                     ? t.pickGymHere
                     : d !== null
                       ? fmtDistance(d)
