@@ -118,6 +118,17 @@ export function activityCalories(a: Activity, bodyKg: number | null | undefined)
   return estimateCalories(t, durationMin(a), bodyKg, a.effort ?? 'moderate');
 }
 
+/**
+ * Rough calories for a lifting session over its wall-clock duration. A blended
+ * MET (~4.0) accounts for the long rests between sets, so the number reads as
+ * an honest "energy out", not a peak-effort figure. Null without a body weight.
+ */
+const LIFT_MET = 4.0;
+export function liftingCalories(minutes: number, bodyKg: number | null | undefined): number | null {
+  if (!bodyKg || bodyKg <= 0 || minutes <= 0) return null;
+  return Math.round(LIFT_MET * bodyKg * (minutes / 60));
+}
+
 export interface ActivityWeek {
   conditioningMin: number;
   recoveryMin: number;

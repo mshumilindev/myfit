@@ -51,6 +51,8 @@ import {
   activityType,
   activityCalories,
   activityCategory,
+  activityWeek,
+  liftingCalories,
   durationMin as activityDurationMin,
 } from '../activities';
 import type { Activity } from '../types';
@@ -419,6 +421,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   // --- Aggregates for the stat grid, weekly bars and records (W-04) --------
   const totalVolKg = finished.reduce((v, w) => v + workoutVolumeKg(w), 0);
+
+  // Weekly energy out (design feature 6, KCAL): lifting (session wall-clock) +
+  // conditioning activities, split so cardio reads as a peer to strength.
+  const weekAgoTs = now - WEEK_MS;
+  const liftKcalWeek = finished
+    .filter((w) => w.finishedAt !== null && w.startedAt >= weekAgoTs)
+    .reduce((s, w) => s + (liftingCalories((w.finishedAt! - w.startedAt) / 60000, bodyKg) ?? 0), 0);
+  const cardioKcalWeek = activityWeek(store.activities, now, bodyKg).conditioningKcal;
+  const energyOut = {
+    lift: Math.round(liftKcalWeek),
+    cardio: Math.round(cardioKcalWeek),
+    total: Math.round(liftKcalWeek + cardioKcalWeek),
+  };
   const byName = new Map<string, { recW: number; recReps: number; recTs: number }>();
   for (const w of finished) {
     for (const e of w.exercises) {
@@ -1352,6 +1367,23 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div className="l">{t.statStreak}</div>
               </div>
             </div>
+
+            {energyOut.total > 0 && (
+              <div className="td-energy">
+                <span className="te-icon">
+                  <Icon name="flame" weight="fill" />
+                </span>
+                <div className="te-body">
+                  <div className="te-top">
+                    <span className="te-val tnum">~{energyOut.total.toLocaleString(locale)}</span>
+                    <span className="te-unit">{t.kcalOut}</span>
+                  </div>
+                  <div className="te-split">
+                    {t.energyLifting(energyOut.lift)} · {t.energyCardio(energyOut.cardio)}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <div className="td-block-head">
