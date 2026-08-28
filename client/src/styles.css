@@ -13894,6 +13894,17 @@ button.exd-media {
   gap: 5px;
   overflow: hidden;
   margin-top: 6px;
+  /* Constrain to the parent so overflow is detectable — otherwise the row grows
+     to its content and the fit pass never fires. */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+/* Let the flexible cell that holds a muscle row actually shrink. */
+.recent-row,
+.recent-row > span,
+.td-muscles {
+  min-width: 0;
 }
 .mrow-item {
   flex: none;
@@ -18189,21 +18200,37 @@ button.badge {
   border-radius: 3px;
   background: var(--color-neutral-700);
 }
-.program-start-day.state-rest .program-start-bar {
-  background: color-mix(in srgb, var(--color-rest-400) 40%, var(--color-neutral-800));
-}
-/* A rest day reads in the app's rest colour (cyan), matching the rest-day
-   banner — not as an empty grey cell. */
+/* A rest day is fully the app's rest colour (cyan) — border, letter, name and
+   dot — so it reads as intentional rest, not an empty grey cell. The active
+   (today's) rest day is brighter than the others and wins over the gold
+   is-today ring. */
 .program-start-day.state-rest {
-  border-color: color-mix(in srgb, var(--color-rest-400) 32%, var(--color-divider));
+  border-color: color-mix(in srgb, var(--color-rest-300) 44%, var(--color-divider));
 }
 .program-start-day.state-rest .program-start-dow,
-.program-start-day.state-rest strong {
-  color: var(--color-rest-400);
+.program-start-day.state-rest strong,
+.program-start-day.state-rest .program-start-summary {
+  color: var(--color-rest-300);
+}
+.program-start-day.state-rest .program-start-bar {
+  background: color-mix(in srgb, var(--color-rest-300) 45%, var(--color-neutral-800));
 }
 .program-start-day.state-rest .program-start-dot {
-  background: var(--color-rest-400);
-  opacity: 0.85;
+  background: var(--color-rest-300);
+  opacity: 0.8;
+}
+.program-start-day.state-rest.is-today {
+  border-color: var(--color-rest-200);
+  box-shadow: inset 0 0 0 1px var(--color-rest-200);
+}
+.program-start-day.state-rest.is-today .program-start-dow,
+.program-start-day.state-rest.is-today strong,
+.program-start-day.state-rest.is-today .program-start-summary {
+  color: var(--color-rest-200);
+}
+.program-start-day.state-rest.is-today .program-start-dot {
+  background: var(--color-rest-200);
+  opacity: 1;
 }
 .program-start-day.state-upcoming .program-start-bar {
   background: var(--color-neutral-700);
