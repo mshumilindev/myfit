@@ -33,6 +33,7 @@ import {
 } from '../volume';
 import { FeatsView } from '../components/FeatsView';
 import { TrendsView } from '../components/TrendsView';
+import { FixSheet } from '../components/FixSheet';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -736,6 +737,7 @@ interface VolRow {
 function VolumePanel({ finished, nowTs, t }: { finished: Workout[]; nowTs: number; t: T }) {
   const [grain, setGrain] = useState<'fine' | 'zones'>('fine');
   const [mapView, setMapView] = useState(false);
+  const [fixMuscle, setFixMuscle] = useState<MuscleGroup | null>(null);
 
   const perMuscle = weeklyMuscleSets(finished, nowTs);
   const cold = historyAgeDays(finished, nowTs) < 21;
@@ -826,7 +828,7 @@ function VolumePanel({ finished, nowTs, t }: { finished: Workout[]; nowTs: numbe
       ) : (
         <div className="vol-rows">
           {rows.map((r) => (
-            <VolumeRow key={r.key} row={r} t={t} />
+            <VolumeRow key={r.key} row={r} t={t} onFix={setFixMuscle} />
           ))}
         </div>
       )}
@@ -835,14 +837,18 @@ function VolumePanel({ finished, nowTs, t }: { finished: Workout[]; nowTs: numbe
         <Icon name="scales" />
         <p>{summary}</p>
       </div>
+
+      {fixMuscle && <FixSheet muscle={fixMuscle} onClose={() => setFixMuscle(null)} />}
     </div>
   );
 }
 
-function VolumeRow({ row, t }: { row: VolRow; t: T }) {
+function VolumeRow({ row, t, onFix }: { row: VolRow; t: T; onFix: (m: MuscleGroup) => void }) {
   const { lm, sets, zone } = row;
   const scaleMax = Math.max(lm.mrv * 1.3, sets * 1.05, lm.mrv + 2);
   const pct = (v: number) => `${Math.max(0, Math.min(100, (v / scaleMax) * 100))}%`;
+  // A lagging muscle earns a one-tap fix (design FIX-1).
+  const canFix = !!row.muscle && (zone === 'under' || zone === 'none');
   return (
     <div className={`vol-row z-${zone}`}>
       <div className="vol-row-head">
@@ -850,6 +856,12 @@ function VolumeRow({ row, t }: { row: VolRow; t: T }) {
           <MuscleIcon muscle={row.muscle} variant="row" tone={sets > 0 ? 'primary' : 'muted'} />
         )}
         <span className="vol-name">{row.label}</span>
+        {canFix && (
+          <button className="vol-fix" onClick={() => onFix(row.muscle as MuscleGroup)}>
+            <Icon name="plus" weight="bold" />
+            {t.fixCta}
+          </button>
+        )}
         <span className="vol-sets">
           {fmtSets(sets)}
           <em>{t.volSetsUnit}</em>
