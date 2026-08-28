@@ -976,6 +976,7 @@ export function MuscleRow({
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLSpanElement>(null);
+  const nRef = useRef<HTMLSpanElement>(null);
   const key = entries.map((e) => `${e.muscle}:${e.primary ? 1 : 0}`).join(',');
   useLayoutEffect(() => {
     const row = rowRef.current;
@@ -996,8 +997,7 @@ export function MuscleRow({
       }
       if (more) {
         more.style.display = hidden > 0 ? '' : 'none';
-        const n = more.querySelector('.n');
-        if (n) n.textContent = String(hidden);
+        if (nRef.current) nRef.current.textContent = String(hidden);
       }
     };
     fit();
@@ -1034,7 +1034,7 @@ export function MuscleRow({
             if (ev.key === 'Enter' || ev.key === ' ') openDrawer(ev);
           }}
         >
-          +<span className="n" />
+          +<span className="n" ref={nRef} />
           &nbsp;{strings().moreLabel}
         </span>
       </div>

@@ -13938,6 +13938,12 @@ button.exd-media {
 .md-list {
   display: flex;
   flex-direction: column;
+  /* When the full list is long (up to ~18 groups) it must scroll inside the
+     sheet — otherwise the tail falls past the bottom edge and can't be seen. */
+  overflow-y: auto;
+  max-height: calc(100dvh - 172px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 /* One muscle per row, with an anatomical body-map icon at ~2x the chip size. */
 .md-row {
