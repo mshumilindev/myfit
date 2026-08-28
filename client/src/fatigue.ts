@@ -97,11 +97,21 @@ export interface DeloadSuggestion {
 }
 
 /** Read the fatigue map into a deload suggestion: one fried muscle -> a local
- *  cut; many hot muscles -> a systemic recovery week; otherwise nothing. */
-export function deloadSuggestion(fat: Map<MuscleGroup, MuscleFatigue>): DeloadSuggestion {
+ *  cut; many hot muscles -> a systemic recovery week; otherwise nothing.
+ *
+ *  `recoveryBias` (design feature 6) lets logged activities feed the model:
+ *  recovery-dominant weeks (>0) raise the systemic trigger so a deload holds
+ *  off; conditioning piled on top of lifting (<0) lowers it a touch. */
+export function deloadSuggestion(
+  fat: Map<MuscleGroup, MuscleFatigue>,
+  recoveryBias = 0,
+): DeloadSuggestion {
   const fried = [...fat.values()].filter((f) => f.level === 'fried');
   const high = [...fat.values()].filter((f) => f.level === 'high' || f.level === 'fried');
-  if (fried.length >= 3 || high.length >= 5) {
+  const shift = Math.round(clamp(recoveryBias, -1, 1));
+  const friedTrigger = 3 + shift;
+  const highTrigger = 5 + shift;
+  if (fried.length >= friedTrigger || high.length >= highTrigger) {
     return { kind: 'systemic', muscle: null, friedCount: fried.length, highCount: high.length };
   }
   if (fried.length >= 1) {

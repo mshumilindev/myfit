@@ -144,6 +144,33 @@ export interface RestPeriod {
   updatedAt?: number;
 }
 
+/** Non-lifting load (design feature 6). Conditioning adds systemic load;
+ *  recovery (massage, sauna, cold, mobility) counts as recovery. */
+export type ActivityCategory = 'conditioning' | 'recovery';
+
+/** Effort dial that nudges the MET-based calorie estimate. */
+export type ActivityEffort = 'light' | 'moderate' | 'hard';
+
+/** One logged activity — a cardio or recovery session, timed live or backfilled. */
+export interface Activity {
+  id: string;
+  /** Catalog key (see ACTIVITY_TYPES); unknown keys degrade gracefully. */
+  type: string;
+  /** Denormalised category so the feed survives catalog changes. */
+  category: ActivityCategory;
+  /** ms epoch the activity started (or the backfilled date). */
+  startedAt: number;
+  /** ms epoch it finished; null only while a live timer is running. */
+  finishedAt: number | null;
+  /** Final duration in minutes (authoritative once saved). */
+  durationMin: number;
+  calories?: number | null;
+  distanceKm?: number | null;
+  effort?: ActivityEffort;
+  note?: string | null;
+  updatedAt?: number;
+}
+
 export interface QueuedMutation {
   id: string;
   method: 'PUT' | 'POST' | 'DELETE';

@@ -19733,3 +19733,248 @@ button.badge {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
 }
+
+/* --- Log activity (design feature 6: cardio & recovery + calories) -------- */
+.act-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.act-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.act-title i {
+  color: var(--color-accent);
+  font-size: 20px;
+}
+.act-cap {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-neutral-400);
+  max-width: 42ch;
+}
+.act-group {
+  margin-top: 16px;
+}
+.act-group-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-neutral-500);
+  margin-bottom: 9px;
+}
+.act-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.act-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-neutral-800);
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+.act-tile i {
+  font-size: 22px;
+  color: var(--color-accent);
+}
+.act-tile.cat-recovery i {
+  color: var(--color-rest-300);
+}
+.act-tile:hover,
+.act-tile:focus-visible {
+  border-color: var(--color-neutral-600);
+  background: var(--color-neutral-800);
+  outline: none;
+}
+@media (max-width: 719.98px) {
+  .act-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Run / timer screen */
+.act-run {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.act-run-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.act-back {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--color-neutral-800);
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.act-run-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+.act-run-name i {
+  font-size: 20px;
+  color: var(--color-accent);
+}
+.act-run.cat-recovery .act-run-name i {
+  color: var(--color-rest-300);
+}
+.act-cat-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+}
+.act-cat-badge.cat-recovery {
+  background: var(--color-rest-900);
+  color: var(--color-rest-300);
+}
+.act-cat-badge i {
+  font-size: 12px;
+}
+
+.act-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0 8px;
+}
+.act-clock {
+  font-size: 54px;
+  line-height: 1;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+.act-kcal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 26px;
+  color: var(--color-accent-100, var(--color-accent));
+}
+.act-kcal i {
+  font-size: 22px;
+  color: var(--color-accent);
+}
+.act-kcal em {
+  font-size: 13px;
+  font-style: normal;
+  color: var(--color-neutral-400);
+}
+.act-kcal.sm {
+  font-size: 18px;
+}
+.act-kcal.sm i {
+  font-size: 16px;
+}
+.act-noweight {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px dashed var(--color-neutral-700);
+  background: none;
+  color: var(--color-neutral-300);
+  font-size: 13px;
+  cursor: pointer;
+}
+.act-noweight i:first-child {
+  color: var(--color-accent);
+}
+
+.act-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+.act-field-label {
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+.act-min {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.act-min input {
+  width: 88px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-neutral-700);
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.act-min em {
+  font-style: normal;
+  color: var(--color-neutral-500);
+}
+.act-manual {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.act-effort {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.act-effort-seg {
+  width: 100%;
+}
+.act-effort-seg button {
+  flex: 1;
+}
+
+.act-run-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.act-manual-toggle {
+  flex: none;
+}
+.act-run-actions .btn-primary {
+  flex: 1;
+}

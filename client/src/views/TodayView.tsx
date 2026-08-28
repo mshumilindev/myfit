@@ -22,6 +22,7 @@ import {
   dismissWeighInToday,
   endRestPeriod,
   startRestPeriod,
+  latestWeight,
   logVisitAsWorkout,
   muscleWorkSorted,
   resolveMuscles,
@@ -44,6 +45,7 @@ import {
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
+import { ActivitySheet } from '../components/ActivitySheet';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
@@ -173,6 +175,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
   const [progSheetOpen, setProgSheetOpen] = useState(false);
   const [restSheetOpen, setRestSheetOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
+  const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
   const openMuscleHistory = (muscle: MuscleGroup) =>
     shell.openOverlay({ screen: 'muscle-history', muscle });
   const [progChoice, setProgChoice] = useState<'week' | 'week-lifts'>('week-lifts');
@@ -893,6 +897,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       {t.restStartCta}
                     </button>
                   )}
+                  <button className="btn btn-secondary" onClick={() => setActivityOpen(true)}>
+                    <Icon name="heartbeat" />
+                    {t.logActivity}
+                  </button>
                   <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
                     <Icon name="arrow-counter-clockwise" />
                     {t.logPastSession}
@@ -1039,6 +1047,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <button className="btn btn-secondary td-backfill-cta" onClick={() => setBackfill(true)}>
               <Icon name="arrow-counter-clockwise" />
               {t.logPastSession}
+            </button>
+            <button
+              className="btn btn-secondary td-activity-cta"
+              onClick={() => setActivityOpen(true)}
+            >
+              <Icon name="heartbeat" />
+              {t.logActivity}
             </button>
             {!activeRest && (
               <button
@@ -1436,6 +1451,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       )}
       {addWeightOpen && (
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
+      )}
+      {activityOpen && (
+        <ActivitySheet
+          bodyKg={bodyKg}
+          onClose={() => setActivityOpen(false)}
+          onAddWeight={() => {
+            setActivityOpen(false);
+            setAddWeightOpen(true);
+          }}
+        />
       )}
       {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
       {progSheetOpen && (

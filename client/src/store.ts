@@ -23,6 +23,9 @@ import {
 import { db } from './firebase';
 import {
   AUTO_FINISH_MS,
+  type Activity,
+  type ActivityCategory,
+  type ActivityEffort,
   type BodyMetrics,
   type DropEntry,
   type Exercise,
@@ -59,6 +62,7 @@ const GYMS_KEY = 'spotter.gyms';
 const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const REST_KEY = 'spotter.restPeriods';
+const ACTIVITIES_KEY = 'spotter.activities';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -68,6 +72,8 @@ export interface StoreState {
   reminders: Reminder[];
   /** Planned rest / recovery / vacation windows. */
   restPeriods: RestPeriod[];
+  /** Logged non-lifting activities (cardio & recovery). */
+  activities: Activity[];
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
@@ -91,6 +97,7 @@ let state: StoreState = {
   gyms: load<Gym[]>(GYMS_KEY, []),
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
+  activities: load<Activity[]>(ACTIVITIES_KEY, []),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   queue: [],
   syncStatus: 'pending',
@@ -114,6 +121,7 @@ function persist(): void {
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
+    localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
@@ -985,6 +993,65 @@ export function restDayKeys(periods: RestPeriod[] = state.restPeriods): Set<numb
   return set;
 }
 
+// --- Activities (design feature 6: cardio & recovery + calories) -----------
+function writeActivityDoc(a: Activity): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'activities', a.id), { ...a, updatedAt: Date.now() }).catch(
+    onWriteError,
+  );
+}
+function deleteActivityDoc(id: string): void {
+  const uid = currentUid();
+  if (!uid) return;
+  deleteDoc(doc(db, 'users', uid, 'activities', id)).catch(onWriteError);
+}
+
+/** Persist a finished (live-timed or backfilled) activity. */
+export function logActivity(input: {
+  type: string;
+  category: ActivityCategory;
+  startedAt: number;
+  finishedAt: number | null;
+  durationMin: number;
+  calories?: number | null;
+  distanceKm?: number | null;
+  effort?: ActivityEffort;
+  note?: string | null;
+}): Activity {
+  const activity: Activity = {
+    id: uuid(),
+    type: input.type,
+    category: input.category,
+    startedAt: input.startedAt,
+    finishedAt: input.finishedAt,
+    durationMin: Math.round(input.durationMin * 10) / 10,
+    calories: input.calories ?? null,
+    distanceKm: input.distanceKm ?? null,
+    effort: input.effort ?? 'moderate',
+    note: input.note ?? null,
+  };
+  setState({
+    activities: [activity, ...state.activities].sort((a, b) => b.startedAt - a.startedAt),
+    syncStatus: bumpPending(),
+  });
+  writeActivityDoc(activity);
+  return activity;
+}
+
+export function deleteActivity(id: string): void {
+  setState({
+    activities: state.activities.filter((a) => a.id !== id),
+    syncStatus: bumpPending(),
+  });
+  deleteActivityDoc(id);
+}
+
+/** Activities whose start falls on the given local day key. */
+export function activitiesOnDay(day: number, list: Activity[] = state.activities): Activity[] {
+  return list.filter((a) => dayKey(a.startedAt) === day);
+}
+
 /**
  * Consistency streak in days: the unbroken run of days back from today where
  * each day was trained OR counts as rest. Unlogged past days always count as
@@ -1242,6 +1309,23 @@ export function startSyncLoop(): () => void {
         emit();
       },
       // Soft: if the restPeriods rule isn't deployed yet, don't block all sync.
+      () => undefined,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'activities'),
+      (snap) => {
+        state = {
+          ...state,
+          activities: snap.docs
+            .map((d) => d.data() as Activity)
+            .sort((a, b) => b.startedAt - a.startedAt),
+        };
+        persist();
+        emit();
+      },
+      // Soft: if the activities rule isn't deployed yet, don't block all sync.
       () => undefined,
     ),
   );
@@ -1671,6 +1755,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
+  localStorage.removeItem(ACTIVITIES_KEY);
   pings = [];
   dismissals = [];
   state = {
@@ -1678,6 +1763,7 @@ export function resetLocalData(): void {
     gyms: [],
     reminders: [],
     restPeriods: [],
+    activities: [],
     bodyMetrics: EMPTY_BODY,
     queue: [],
     syncStatus: 'pending',

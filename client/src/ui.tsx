@@ -104,6 +104,15 @@ import { UploadSimple } from '@phosphor-icons/react/UploadSimple';
 import { User } from '@phosphor-icons/react/User';
 import { UserFocus } from '@phosphor-icons/react/UserFocus';
 import { WarningCircle } from '@phosphor-icons/react/WarningCircle';
+import { Heartbeat } from '@phosphor-icons/react/Heartbeat';
+import { PersonSimpleRun } from '@phosphor-icons/react/PersonSimpleRun';
+import { Bicycle } from '@phosphor-icons/react/Bicycle';
+import { PersonSimpleSwim } from '@phosphor-icons/react/PersonSimpleSwim';
+import { PersonSimpleWalk } from '@phosphor-icons/react/PersonSimpleWalk';
+import { PersonSimpleTaiChi } from '@phosphor-icons/react/PersonSimpleTaiChi';
+import { HandHeart } from '@phosphor-icons/react/HandHeart';
+import { Snowflake } from '@phosphor-icons/react/Snowflake';
+import { ClockCounterClockwise } from '@phosphor-icons/react/ClockCounterClockwise';
 import { X } from '@phosphor-icons/react/X';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
@@ -203,6 +212,15 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'download-simple': DownloadSimple,
   'upload-simple': UploadSimple,
   'warning-circle': WarningCircle,
+  heartbeat: Heartbeat,
+  'person-simple-run': PersonSimpleRun,
+  bicycle: Bicycle,
+  'person-simple-swim': PersonSimpleSwim,
+  'person-simple-walk': PersonSimpleWalk,
+  'person-simple-tai-chi': PersonSimpleTaiChi,
+  'hand-heart': HandHeart,
+  snowflake: Snowflake,
+  'clock-counter-clockwise': ClockCounterClockwise,
   x: X,
   'x-circle': XCircle,
 };
