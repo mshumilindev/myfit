@@ -138,7 +138,7 @@ export interface ActivityWeek {
 
 /** Trailing-window rollup of conditioning vs recovery minutes and kcal. */
 export function activityWeek(
-  activities: Activity[],
+  activities: Activity[] | null | undefined,
   now: number,
   bodyKg: number | null | undefined,
   days = 7,
@@ -150,7 +150,7 @@ export function activityWeek(
     conditioningKcal: 0,
     count: 0,
   };
-  for (const a of activities) {
+  for (const a of activities ?? []) {
     if (a.startedAt < since) continue;
     out.count++;
     const min = durationMin(a);
@@ -170,7 +170,11 @@ export function activityWeek(
  * negative = conditioning-heavy on top of lifting, so trigger a touch sooner.
  * Bounded to [-1, 1]; ~1 recovery-point per 3h of recovery work.
  */
-export function activityRecoveryBias(activities: Activity[], now: number, days = 7): number {
+export function activityRecoveryBias(
+  activities: Activity[] | null | undefined,
+  now: number,
+  days = 7,
+): number {
   const w = activityWeek(activities, now, null, days);
   const raw = (w.recoveryMin * 1.2 - w.conditioningMin) / 180;
   return Math.max(-1, Math.min(1, raw));

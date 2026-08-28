@@ -153,6 +153,15 @@ type DialogState =
   | { kind: 'del-workout' }
   | null;
 
+export function rectHasVisiblePixels(
+  rect: Pick<DOMRect, 'top' | 'right' | 'bottom' | 'left'>,
+  viewport: { width: number; height: number },
+): boolean {
+  return (
+    rect.right > 0 && rect.bottom > 0 && rect.left < viewport.width && rect.top < viewport.height
+  );
+}
+
 /**
  * Share-summary bottom sheet (AC-3.2): live canvas preview, format toggle,
  * and native-share / save / copy. Drawing is offline and separate from the

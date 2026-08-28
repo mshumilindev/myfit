@@ -1167,8 +1167,8 @@ export function consistencyStreak(now: number = Date.now()): number {
 }
 
 /** Latest weigh-in (by time), or null. */
-export function latestWeight(bm: BodyMetrics): WeightEntry | null {
-  if (bm.weights.length === 0) return null;
+export function latestWeight(bm: BodyMetrics | null | undefined): WeightEntry | null {
+  if (!bm?.weights?.length) return null;
   return bm.weights.reduce((a, b) => (b.at >= a.at ? b : a));
 }
 
