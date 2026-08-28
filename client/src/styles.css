@@ -20555,3 +20555,204 @@ button.badge {
 .vol-tuned.on i {
   color: var(--color-accent);
 }
+
+/* --- Plate calculator (Load-entry A) ------------------------------------- */
+.plate-sheet {
+  gap: var(--space-3);
+}
+.pl-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pl-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+.pl-title i {
+  font-size: 20px;
+  color: var(--color-accent);
+}
+.pl-mode {
+  flex: none;
+  width: 168px;
+}
+.pl-mode button {
+  flex: 1;
+}
+.pl-target {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+.pl-target-in {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.pl-target-in input {
+  width: 96px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-neutral-700);
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.pl-target-in em {
+  font-style: normal;
+  color: var(--color-neutral-500);
+}
+.pl-bar {
+  display: block;
+  margin: 4px 0;
+}
+.pl-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.pl-total {
+  font-size: 30px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+.pl-total em {
+  font-size: 15px;
+  font-style: normal;
+  color: var(--color-neutral-500);
+}
+.pl-perside {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pl-per-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-neutral-500);
+}
+.pl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--color-neutral-700);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.pl-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+.pl-closest {
+  font-size: 12px;
+  color: var(--color-accent-200, var(--color-accent));
+}
+.pl-rack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+}
+.pl-rack-plate {
+  position: relative;
+  min-width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 8px;
+  color: #16171a;
+  font-weight: 700;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+.pl-rack-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--color-accent);
+  color: #16171a;
+  font-size: 11px;
+  display: grid;
+  place-items: center;
+}
+.pl-rack-clear {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--color-neutral-700);
+  border-radius: 8px;
+  background: none;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+}
+.pl-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pl-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pl-ctl-label {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.pl-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pl-optchip {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--color-neutral-700);
+  background: none;
+  color: var(--color-neutral-300);
+  font-size: 13px;
+  cursor: pointer;
+}
+.pl-optchip.on {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-accent-900);
+}
+.pl-ctl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pl-unit {
+  width: 120px;
+}
+.pl-unit button {
+  flex: 1;
+}
+.pl-apply {
+  min-height: 50px;
+  gap: 8px;
+}

@@ -59,6 +59,7 @@ import {
 } from '../store';
 import { liftingCalories } from '../activities';
 import { LiveHero } from '../components/LiveHero';
+import { PlateSheet } from '../components/PlateSheet';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
 import {
@@ -152,15 +153,6 @@ type DialogState =
   | { kind: 'finish-warn'; emptyName: string | null }
   | { kind: 'del-workout' }
   | null;
-
-export function rectHasVisiblePixels(
-  rect: Pick<DOMRect, 'top' | 'right' | 'bottom' | 'left'>,
-  viewport: { width: number; height: number },
-): boolean {
-  return (
-    rect.right > 0 && rect.bottom > 0 && rect.left < viewport.width && rect.top < viewport.height
-  );
-}
 
 /**
  * Share-summary bottom sheet (AC-3.2): live canvas preview, format toggle,
@@ -3188,6 +3180,10 @@ function SetEditorSheet(props: {
   const [focused, setFocused] = useState<'reps' | 'weight' | 'duration' | 'distance'>(
     timed ? 'duration' : 'weight',
   );
+  // Plate calculator (Load-entry A): offered on barbell lifts to work out what
+  // goes on the bar for the entered weight.
+  const [plateOpen, setPlateOpen] = useState(false);
+  const isBarbell = equipmentFor(props.exercise).includes('barbell');
   const idx = props.set
     ? [...props.exercise.sets]
         .sort((a, b) => a.position - b.position)
@@ -3458,6 +3454,15 @@ function SetEditorSheet(props: {
               focused === 'reps' || focused === 'weight' ? focused : null,
             )
           )}
+          {isBarbell && !bw && (
+            <button className="toggle-row" onClick={() => setPlateOpen(true)}>
+              <Icon name="barbell" />
+              <span className="lab">{t.plateTitle}</span>
+              <span className="toggle-value">
+                {fmtWeightValue(weight)} {t.kgCol.toLowerCase()}
+              </span>
+            </button>
+          )}
           <button className="toggle-row" onClick={() => setBw((x) => !x)}>
             <Icon name="barbell" />
             <span className="lab">{t.bodyweightSet}</span>
@@ -3496,6 +3501,16 @@ function SetEditorSheet(props: {
           {props.set ? t.save : t.log}
         </button>
       </div>
+      {plateOpen && (
+        <PlateSheet
+          targetKg={weight}
+          onApply={(kg) => {
+            setWeight(kg);
+            setBw(false);
+          }}
+          onClose={() => setPlateOpen(false)}
+        />
+      )}
     </Sheet>
   );
 }
