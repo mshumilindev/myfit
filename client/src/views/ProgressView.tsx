@@ -533,7 +533,9 @@ export function ProgressView({
 
       {showDesktopDetail && seg === 'volume' && (
         <section className="progress-detail-pane vol-map-pane">
-          <div className="section-label">{t.volumeTab}</div>
+          <div className="progress-detail-title">
+            <h3>{t.volumeTab}</h3>
+          </div>
           <MuscleHeatmap colors={volHeat} />
           <div className="vol-legend">
             {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
@@ -548,7 +550,9 @@ export function ProgressView({
 
       {showDesktopDetail && (seg === 'muscle' || seg === 'total') && (
         <section className="progress-detail-pane vol-map-pane">
-          <div className="section-label">{t.volumeThisWeek}</div>
+          <div className="progress-detail-title">
+            <h3>{t.volumeThisWeek}</h3>
+          </div>
           <MuscleHeatmap colors={brassColors} />
           <div className="brass-legend">
             <span className="brass-grad" aria-hidden />

@@ -18895,22 +18895,19 @@ button.badge {
   border-radius: 3px;
 }
 
-/* Desktop right-column body map (Volume / By-muscle / Total). */
+/* Desktop right-column body map (Volume / By-muscle / Total). Shares the
+   Records detail-pane chrome (same 28px title + 30/36 padding); only the figure
+   and legend are centred. */
 .vol-map-pane {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding-top: 8px;
-}
-.vol-map-pane .section-label {
-  align-self: flex-start;
+  gap: 20px;
 }
 .vol-map-pane .bodymap {
+  align-self: center;
   max-width: 340px;
   gap: 12px;
 }
 .vol-map-pane .vol-legend {
+  align-self: center;
   justify-content: center;
 }
 .brass-legend {
