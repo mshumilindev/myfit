@@ -193,7 +193,11 @@ export function drawShareCard(canvas: HTMLCanvasElement, m: ShareModel, format: 
     ctx.font = `700 24px ${FONT}`;
     ctx.save();
     ctx.letterSpacing = '2px';
-    ctx.fillText('★ ' + m.record.name.toUpperCase(), padX + 34, y + (story ? 50 : 46));
+    ctx.fillText(
+      ellipsize(ctx, '★ ' + m.record.name.toUpperCase(), innerW - 68),
+      padX + 34,
+      y + (story ? 50 : 46),
+    );
     ctx.restore();
     ctx.fillStyle = C.text;
     ctx.font = `700 ${story ? 44 : 36}px ${FONT}`;
@@ -219,10 +223,14 @@ export function drawShareCard(canvas: HTMLCanvasElement, m: ShareModel, format: 
     for (const ex of m.top.slice(0, story ? 3 : 2)) {
       if (y + rowH > bottomLimit) break;
       y += rowH;
+      // Measure the weight first, then cap the name to whatever space is left —
+      // a long lift name can never run under the result and hide it.
+      ctx.font = `500 ${story ? 32 : 28}px ${FONT}`;
+      const detailW = ctx.measureText(ex.detail).width;
       ctx.fillStyle = C.text;
       ctx.font = `600 ${story ? 34 : 30}px ${FONT}`;
       ctx.textAlign = 'left';
-      ctx.fillText(ellipsize(ctx, ex.name, innerW * 0.62), padX, y);
+      ctx.fillText(ellipsize(ctx, ex.name, innerW - detailW - 24), padX, y);
       ctx.fillStyle = C.muted;
       ctx.font = `500 ${story ? 32 : 28}px ${FONT}`;
       ctx.textAlign = 'right';

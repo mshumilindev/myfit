@@ -13902,6 +13902,12 @@ button.exd-media {
 .session-live .set-main > .set-row {
   padding-right: 36px;
 }
+/* Give the header and the ghost (unfilled) row the same right gutter, so their
+   reps / weight / type columns line up exactly with the logged rows above. */
+.session-live .set-grid.header,
+.session-live .ghost-row {
+  padding-right: 36px;
+}
 
 /* Per-exercise rest count-up (AC-2.8). */
 .ex-resting {
@@ -19414,35 +19420,22 @@ button.badge {
 
 /* full sheet */
 .rd-verdict {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
+  padding: 14px 15px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-divider);
   border-left: 3px solid var(--color-kcal, var(--color-accent));
   background: color-mix(in srgb, var(--color-kcal, var(--color-accent)) 8%, var(--color-surface));
 }
-.rd-verdict > i {
-  flex: none;
-  font-size: 18px;
-  margin-top: 1px;
-  color: var(--color-kcal, var(--color-accent));
-}
-.rd-verdict-main {
-  min-width: 0;
-}
 .rd-lead {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 .rd-why {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--color-neutral-400);
-  margin-top: 2px;
-  line-height: 1.45;
+  margin-top: 5px;
+  line-height: 1.4;
 }
 .rd-map {
   margin: 4px auto 6px;
@@ -19884,7 +19877,7 @@ button.badge {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 14px;
 }
 .nudge-card-acts {
   display: flex;

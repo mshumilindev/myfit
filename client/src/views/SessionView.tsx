@@ -339,11 +339,6 @@ export function SessionView(props: {
     return () => clearInterval(iv);
   }, [live]);
 
-  // Manual trim of the live rest clock. Anchored to the set it was
-  // applied against so it auto-resets (derived) the moment a new set lands —
-  // no setState-in-effect needed.
-  const [restCut, setRestCut] = useState<{ at: number; ms: number }>({ at: 0, ms: 0 });
-
   useEffect(() => {
     if (!props.startAdd || startAddConsumed.current || !workout) return;
     startAddConsumed.current = true;
@@ -394,9 +389,6 @@ export function SessionView(props: {
   const lastChrono = allSetsChrono[allSetsChrono.length - 1] ?? null;
   const lastLoggedAt = lastChrono ? (lastChrono.s.loggedAt as number) : 0;
   const lastLoggedExId = lastChrono ? lastChrono.exId : null;
-  // The trim only counts while it's still anchored to the current last set.
-  const restCutMs = restCut.at === lastLoggedAt ? restCut.ms : 0;
-  const trimRest = () => setRestCut({ at: lastLoggedAt, ms: restCutMs + 30000 });
 
   const activeExerciseId =
     sortedExercises.find((ex) => {
@@ -1015,19 +1007,11 @@ export function SessionView(props: {
                 ex.id === lastLoggedExId &&
                 lastLoggedAt > 0 &&
                 (() => {
-                  const restNow = Math.max(0, now - lastLoggedAt - restCutMs);
+                  const restNow = Math.max(0, now - lastLoggedAt);
                   return (
                     <div className="ex-resting">
                       <Icon name="timer" />
                       <span>{t.restingSince(mmss(restNow))}</span>
-                      <button
-                        type="button"
-                        className="rest-trim"
-                        onClick={trimRest}
-                        aria-label="Trim rest"
-                      >
-                        <span aria-hidden>{'−'}</span>
-                      </button>
                     </div>
                   );
                 })()}
@@ -1520,29 +1504,22 @@ export function SessionView(props: {
               if (!activeEx && !lastLoggedAt) return null;
               return (
                 <div className="live-rest">
-                  {activeEx && nextSet !== null && (
+                  {/* The current-exercise plaque stays pinned here between the
+                      hero and the rest clock — shown whenever there's an active
+                      exercise, with the set number only when it applies. */}
+                  {activeEx && (
                     <div className="current-strip">
                       <Icon name="barbell" />
                       <span className="cur-label">{t.currentKicker}</span>
                       <span className="cur-name">{activeEx.name}</span>
-                      <span className="cur-set">{t.setNumber(nextSet)}</span>
+                      {nextSet !== null && <span className="cur-set">{t.setNumber(nextSet)}</span>}
                     </div>
                   )}
                   {lastLoggedAt > 0 && (
                     <div className="rest-strip">
                       <Icon name="timer" />
                       <span className="rest-label">{t.restHeaderLabel}</span>
-                      <span className="rest-clock">
-                        {mmss(Math.max(0, now - lastLoggedAt - restCutMs))}
-                      </span>
-                      <button
-                        type="button"
-                        className="rest-trim"
-                        onClick={trimRest}
-                        aria-label="Trim rest"
-                      >
-                        <span aria-hidden>{'−'}</span>
-                      </button>
+                      <span className="rest-clock">{mmss(Math.max(0, now - lastLoggedAt))}</span>
                     </div>
                   )}
                 </div>
