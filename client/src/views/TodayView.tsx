@@ -59,6 +59,7 @@ import {
 import { muscleFatigue, deloadSuggestion } from '../fatigue';
 import { personalLandmarks } from '../personalize';
 import { muscleReadiness, recoveringMuscles } from '../recovery';
+import { ReadinessCard } from '../components/Readiness';
 import type { Activity } from '../types';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
@@ -1183,6 +1184,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
           </div>
         )}
+        {!open && <ReadinessCard finished={finished} now={now} />}
         {deloadBanner}
         {analysisBanner}
         {suggestBanner}

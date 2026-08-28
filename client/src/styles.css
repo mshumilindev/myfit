@@ -19304,6 +19304,204 @@ button.badge {
   color: var(--color-danger);
 }
 
+/* Readiness coach (feature #1): Today card + full sheet. */
+.rd-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--color-kcal, var(--color-accent));
+  background: color-mix(in srgb, var(--color-kcal, var(--color-accent)) 6%, var(--color-surface));
+  color: var(--color-text);
+  cursor: pointer;
+}
+.rd-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.rd-kicker {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-kcal-text, var(--color-neutral-400));
+}
+.rd-counts {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+.rd-card-lead {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+.rd-strip {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.rd-strip::-webkit-scrollbar {
+  display: none;
+}
+.rd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 6px 10px 6px 7px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-neutral-800);
+  font-size: 12px;
+}
+.rd-chip svg {
+  width: 18px;
+  height: 18px;
+}
+.rd-chip-name {
+  color: var(--color-neutral-400);
+}
+.rd-chip-pct {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rd-more {
+  color: var(--color-neutral-400);
+  gap: 3px;
+  padding: 6px 8px 6px 12px;
+}
+.rd-more svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* full sheet */
+.rd-verdict {
+  padding: 14px 15px;
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-kcal, var(--color-accent));
+  background: color-mix(in srgb, var(--color-kcal, var(--color-accent)) 8%, var(--color-surface));
+  margin-bottom: 14px;
+}
+.rd-lead {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.rd-why {
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+.rd-map {
+  margin: 4px auto 6px;
+  max-width: 300px;
+}
+.rd-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 8px 0 12px;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+.rd-leg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rd-leg .sw {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.rd-list {
+  display: flex;
+  flex-direction: column;
+}
+.rd-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--color-neutral-900, var(--color-divider));
+}
+.rd-row:last-child {
+  border-bottom: none;
+}
+.rd-row svg {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+.rd-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rd-days {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+}
+.rd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 108px;
+  justify-content: flex-end;
+}
+.rd-bar {
+  width: 56px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-neutral-800);
+  overflow: hidden;
+  flex: none;
+}
+.rd-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+.rd-badge em {
+  font-style: normal;
+  font-weight: 700;
+  width: 34px;
+  text-align: right;
+}
+.rd-reco {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-ok) 9%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-ok) 28%, var(--color-divider));
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.rd-reco svg {
+  flex: none;
+  font-size: 18px;
+  color: var(--color-ok);
+}
+
 /* Weak-point radar (feature #2): chronic under-MEV muscles. */
 .weak-card {
   padding: 12px 14px;

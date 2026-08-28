@@ -147,3 +147,36 @@ export function recoveringMuscles(map: Map<MuscleGroup, MuscleReadiness>): Muscl
     .filter((r) => r.state === 'recovering' || r.state === 'nearly')
     .sort((a, b) => a.readiness - b.readiness);
 }
+
+/** Muscles trained long enough ago that they're recovered AND under-stimulated. */
+export function staleMuscles(map: Map<MuscleGroup, MuscleReadiness>): MuscleReadiness[] {
+  return [...map.values()].filter((r) => r.state === 'stale' && r.daysSince !== null);
+}
+
+/** CSS colour per readiness state: recovering (ruby) → ready (green), stale
+ *  in the lazurite recovery/energy hue. Mirrors the fatigue scale's family. */
+export const READINESS_COLOR: Record<ReadyState, string> = {
+  recovering: 'var(--color-danger)',
+  nearly: 'var(--color-accent)',
+  ready: 'var(--color-ok)',
+  stale: 'var(--color-kcal)',
+};
+
+/** Heatmap tints for the muscles trained in the window (others stay dim). */
+export function readinessColors(
+  map: Map<MuscleGroup, MuscleReadiness>,
+): Partial<Record<MuscleGroup, string>> {
+  const out: Partial<Record<MuscleGroup, string>> = {};
+  for (const r of map.values()) if (r.daysSince !== null) out[r.muscle] = READINESS_COLOR[r.state];
+  return out;
+}
+
+export type ReadinessMood = 'fresh' | 'mixed' | 'cooked';
+
+/** A coarse read of the whole body for the day's headline. */
+export function readinessMood(map: Map<MuscleGroup, MuscleReadiness>): ReadinessMood {
+  const cooling = recoveringMuscles(map).length;
+  if (cooling === 0) return 'fresh';
+  if (cooling >= 4) return 'cooked';
+  return 'mixed';
+}

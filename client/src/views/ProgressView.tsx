@@ -1244,7 +1244,7 @@ function WeakPointsCard({
   return (
     <div className="weak-card">
       <div className="weak-head">
-        <Icon name="target" weight="fill" />
+        <Icon name="user-focus" weight="fill" />
         <div className="weak-titles">
           <div className="weak-title">{t.weakTitle}</div>
           <div className="weak-sub">{t.weakSub}</div>
