@@ -49,11 +49,11 @@
   --color-danger-tint: #2c1614;
   --color-danger-line: #7d302b;
 
-  /* Calories / energy — Spotter Nutrition's colour so kcal reads the same across
-     the family. Single source of truth: change these to the nutrition palette. */
-  --color-kcal: #ff8a4c;
-  --color-kcal-text: #ffd0b3;
-  --color-kcal-tint: #2e1a10;
+  /* Calories / energy — Spotter Nutrition's lazurite palette (its kcal ring is
+     var(--acc) = #3d84c9), so kcal reads the same across the family. */
+  --color-kcal: #3d84c9;
+  --color-kcal-text: #cbe0f6;
+  --color-kcal-tint: #132738;
 
   --shadow-sm: 0 0 0 1px #3b3f43;
   --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0, 0, 0, 0.6);
