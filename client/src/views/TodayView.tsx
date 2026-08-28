@@ -707,6 +707,21 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return { dayName, labels, startMin, mealMin };
   })();
 
+  // A program rest day: an active plan is assigned but this weekday prescribes
+  // no work — and nothing's been logged yet, nor is a rest period already running.
+  const programRestDay =
+    !open &&
+    !activeRest &&
+    !!assignment &&
+    assignedActive &&
+    !trainedToday &&
+    (() => {
+      const day = todayWeekday;
+      const items = assignment.program.items.filter((i) => i.day === day);
+      const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
+      return items.length === 0 && muscles.length === 0;
+    })();
+
   // Program plan for today, weigh-in, gym-visit and "likely today" all join the
   // same deck.
   if (programTodayPlan) {
@@ -1168,6 +1183,29 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       {t.restEndNow}
                     </button>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {programRestDay && (
+          <div className="prog-banner analysis-banner gem-rest tr-banner off fade-in">
+            <span className="prog-sheen" aria-hidden />
+            <div className="prog-banner-row">
+              <span className="prog-banner-icon">
+                <Icon name="clock-countdown" weight="bold" />
+              </span>
+              <div className="prog-banner-main">
+                <div className="tr-top">
+                  <span className="prog-banner-kicker">{t.progRestDay}</span>
+                </div>
+                <div className="prog-banner-title">{t.restDayTitle}</div>
+                <div className="prog-banner-body">{t.restDayNote}</div>
+                <div className="prog-banner-acts">
+                  <button className="prog-banner-cta" onClick={startSession}>
+                    <Icon name="play" weight="bold" />
+                    {t.restStartLight}
+                  </button>
                 </div>
               </div>
             </div>

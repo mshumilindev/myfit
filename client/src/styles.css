@@ -21285,6 +21285,33 @@ button.badge {
   color: var(--color-neutral-500);
   margin-top: -8px;
 }
+/* Live-session energy: an activity-style flame counter, but shorter so it sits
+   quietly under the session content rather than competing with it. */
+.live-energy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 14px auto 6px;
+  padding: 8px 16px;
+  font-size: 19px;
+  color: var(--color-kcal-text);
+  font-variant-numeric: tabular-nums;
+}
+.live-energy i {
+  color: var(--color-kcal);
+  font-size: 17px;
+}
+.live-energy em {
+  font-size: 12px;
+  font-style: normal;
+  color: var(--color-neutral-400);
+}
+/* The finished/past energy plaque fills its column. */
+.session-energy {
+  width: 100%;
+}
+
 .av-kcal {
   display: inline-flex;
   align-items: center;

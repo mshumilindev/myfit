@@ -644,7 +644,7 @@ export const et: Strings = {
   actDiscard: 'Loobu',
   actDiscardTitle: 'Loobu tegevusest?',
   actDiscardBody: 'Seda tegevust ei salvestata.',
-  kcalOut: 'kcal · nädal',
+  kcalOut: 'kcal · viimased 7 päeva',
   energyLifting: (n: number) => `${n} jõusaal`,
   energyCardio: (n: number) => `${n} kardio`,
   actStart: 'Alusta',
@@ -1245,6 +1245,9 @@ export const et: Strings = {
   progEquipment: 'Varustus',
   progRestShort: 'Puhkus',
   progRestDay: 'Puhkepäev',
+  restDayTitle: 'Täna võta rahulikult',
+  restDayNote:
+    'Programm näeb täna ette taastumise. Puhka või logi kerge trenn, kui tunned end hästi.',
   progPlanProgress: 'Plaani edenemine',
   progSetsDone: (done, total) => `${done} / ${total} seeriat`,
   progGhostDivision: 'Kordused tulevad programmist; raskus sinu ajaloost.',

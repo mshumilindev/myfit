@@ -647,7 +647,7 @@ export const pl: Strings = {
   actDiscard: 'Odrzuć',
   actDiscardTitle: 'Odrzucić aktywność?',
   actDiscardBody: 'Ta aktywność nie zostanie zapisana.',
-  kcalOut: 'kcal · tydzień',
+  kcalOut: 'kcal · ostatnie 7 dni',
   energyLifting: (n: number) => `${n} siłowo`,
   energyCardio: (n: number) => `${n} cardio`,
   actStart: 'Start',
@@ -1249,6 +1249,9 @@ export const pl: Strings = {
   progEquipment: 'Sprzęt',
   progRestShort: 'Wolne',
   progRestDay: 'Dzień odpoczynku',
+  restDayTitle: 'Dziś na luzie',
+  restDayNote:
+    'Program przewiduje dziś regenerację. Odpocznij lub zapisz lekką sesję, jeśli masz siłę.',
   progPlanProgress: 'Postęp planu',
   progSetsDone: (done, total) => `${done} / ${total} serii`,
   progGhostDivision: 'Powtórzenia pochodzą z programu; ciężar z Twojej historii.',

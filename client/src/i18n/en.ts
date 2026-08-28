@@ -691,7 +691,7 @@ export const en = {
   actDiscard: 'Discard',
   actDiscardTitle: 'Discard activity?',
   actDiscardBody: "This activity won't be saved.",
-  kcalOut: 'kcal out · week',
+  kcalOut: 'kcal · last 7 days',
   energyLifting: (n: number) => `${n} lifting`,
   energyCardio: (n: number) => `${n} cardio`,
   actStart: 'Start',
@@ -1297,6 +1297,9 @@ export const en = {
   progEquipment: 'Equipment',
   progRestShort: 'Rest',
   progRestDay: 'Rest day',
+  restDayTitle: 'Take it easy today',
+  restDayNote:
+    'Your program has today as recovery. Rest up, or log a light session if you feel good.',
   progPlanProgress: 'Plan progress',
   progSetsDone: (done: number, total: number) => `${done} / ${total} sets`,
   progGhostDivision: 'Reps come from the program; weight comes from your history.',

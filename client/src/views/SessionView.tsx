@@ -68,6 +68,7 @@ import { kgToLb, lbToKg } from '../plates';
 import { bandForKg, assistStack, BAND_HEX, type BandRung, type LoadType } from '../loads';
 import { LiveHero } from '../components/LiveHero';
 import { SessionStartCoach } from '../components/SessionStartCoach';
+import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -339,6 +340,18 @@ export function SessionView(props: {
     const iv = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(iv);
   }, [live]);
+
+  // Adding an exercise scrolls the content down to it (and the live energy
+  // counter beneath), so the new card doesn't stay hidden below the fold.
+  const contentBottomRef = useRef<HTMLDivElement | null>(null);
+  const prevExCount = useRef(workout?.exercises.length ?? 0);
+  const exCount = workout?.exercises.length ?? 0;
+  useEffect(() => {
+    if (exCount > prevExCount.current) {
+      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+    prevExCount.current = exCount;
+  }, [exCount]);
 
   useEffect(() => {
     if (!props.startAdd || startAddConsumed.current || !workout) return;
@@ -1271,12 +1284,6 @@ export function SessionView(props: {
             <div className="v">{fmtTonnes(volume)}</div>
             <div className="l">{t.movedStat}</div>
           </div>
-          {sessionKcal != null && (
-            <div className="cell">
-              <div className="v kcal">~{sessionKcal}</div>
-              <div className="l">{t.kcalShort}</div>
-            </div>
-          )}
           {cardioMinutes > 0 && (
             <div className="cell">
               <div className="v">{Math.round(cardioMinutes)}</div>
@@ -1290,6 +1297,7 @@ export function SessionView(props: {
             </div>
           )}
         </div>
+        {sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
         {suggestOn &&
           (() => {
             const entries = muscleWorkSorted(workout);
@@ -1551,6 +1559,9 @@ export function SessionView(props: {
               </div>
             );
           })()}
+
+        {/* Energy for this past workout — the same plaque as the finished summary. */}
+        {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
 
         {/* Program-day coverage (past view): for a session started from a program
             day, tick each target muscle group that got at least one logged set
@@ -1885,6 +1896,9 @@ export function SessionView(props: {
                   </button>
                 </div>
               )}
+              {/* Live energy counter — quietly under all the session content. */}
+              {live && sessionKcal != null && <LiveEnergyCounter kcal={sessionKcal} />}
+              <div ref={contentBottomRef} aria-hidden />
             </>
           )}
         </div>

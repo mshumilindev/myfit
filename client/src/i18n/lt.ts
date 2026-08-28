@@ -656,7 +656,7 @@ export const lt: Strings = {
   actDiscard: 'Atmesti',
   actDiscardTitle: 'Atmesti veiklą?',
   actDiscardBody: 'Ši veikla nebus išsaugota.',
-  kcalOut: 'kcal · savaitė',
+  kcalOut: 'kcal · pastarosios 7 d.',
   energyLifting: (n: number) => `${n} jėga`,
   energyCardio: (n: number) => `${n} kardio`,
   actStart: 'Pradėti',
@@ -1257,6 +1257,9 @@ export const lt: Strings = {
   progEquipment: 'Įranga',
   progRestShort: 'Poilsis',
   progRestDay: 'Poilsio diena',
+  restDayTitle: 'Šiandien ramiau',
+  restDayNote:
+    'Pagal programą šiandien poilsis. Pailsėk arba užfiksuok lengvą treniruotę, jei jautiesi gerai.',
   progPlanProgress: 'Plano progresas',
   progSetsDone: (done, total) => `${done} / ${total} serijų`,
   progGhostDivision: 'Pakartojimai ateina iš programos; svoris iš tavo istorijos.',
