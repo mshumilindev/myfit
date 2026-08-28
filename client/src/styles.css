@@ -19344,12 +19344,11 @@ button.badge {
   display: flex;
   gap: 8px;
   margin-top: 12px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  flex-wrap: nowrap;
 }
-.rd-strip::-webkit-scrollbar {
-  display: none;
+.rd-more {
+  margin-left: auto;
 }
 .rd-chip {
   display: inline-flex;
@@ -19500,6 +19499,246 @@ button.badge {
   flex: none;
   font-size: 18px;
   color: var(--color-ok);
+}
+
+/* ---- Nudge stack: the day's advisory cards as one collapsible deck ---- */
+.nudge-wrap {
+  position: relative;
+}
+.nudge-deck {
+  position: relative;
+  height: 76px;
+}
+/* One treatment for every nudge — left border + a soft tint — each in its own
+   colour (--tone set per type). */
+.tone-recovery {
+  --tone: var(--color-accent);
+}
+.tone-analysis {
+  --tone: var(--color-danger);
+}
+.tone-suggest {
+  --tone: var(--color-ok);
+}
+.nudge-mini {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--tone, var(--color-accent));
+  background: color-mix(in srgb, var(--tone, var(--color-accent)) 7%, var(--color-surface));
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  transform-origin: 50% 0;
+  transition:
+    transform 0.44s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.44s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+.nudge-ic {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  background: color-mix(in srgb, var(--tone, var(--color-accent)) 16%, transparent);
+  color: var(--tone, var(--color-accent));
+}
+.nudge-mini-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nudge-kicker {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-neutral-500);
+}
+.nudge-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nudge-dots {
+  display: flex;
+  gap: 4px;
+  flex: none;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+.nudge-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-neutral-700, var(--color-neutral-800));
+}
+.nudge-dots span.on {
+  background: var(--color-neutral-400);
+}
+.nudge-chev {
+  flex: none;
+  color: var(--color-neutral-500);
+  font-size: 16px;
+}
+
+/* expanded overlay — a light lift over the content, not a hard modal */
+.nudge-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.nudge-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 7, 9, 0.52);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  animation: nudge-scrim-in 0.22s ease forwards;
+}
+.nudge-card {
+  position: relative;
+  width: min(440px, 100%);
+  background: color-mix(in srgb, var(--tone, var(--color-accent)) 6%, var(--color-surface));
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--tone, var(--color-accent));
+  border-radius: var(--radius-lg, 20px);
+  padding: 20px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+  animation: nudge-pop-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.nudge-overlay.closing .nudge-scrim {
+  animation: nudge-scrim-out 0.2s ease forwards;
+}
+.nudge-overlay.closing .nudge-card {
+  animation: nudge-pop-out 0.2s ease forwards;
+}
+@keyframes nudge-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes nudge-scrim-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes nudge-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nudge-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+}
+.nudge-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-500);
+  font-size: 22px;
+  cursor: pointer;
+}
+.nudge-close:hover {
+  color: var(--color-text);
+}
+.nudge-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.nudge-card-head .nudge-ic.lg {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+.nudge-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.nudge-card-body {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--color-neutral-400);
+  margin-top: 6px;
+}
+.nudge-card-acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.nudge-card-foot {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-divider);
+}
+.nudge-foot-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--color-neutral-800);
+  background: var(--color-bg);
+  color: var(--color-neutral-400);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.nudge-foot-chip svg {
+  font-size: 14px;
+  color: var(--tone, var(--color-accent));
+}
+@media (prefers-reduced-motion: reduce) {
+  .nudge-mini,
+  .nudge-scrim,
+  .nudge-card {
+    transition: none;
+    animation-duration: 0.01ms;
+  }
 }
 
 /* Weak-point radar (feature #2): chronic under-MEV muscles. */

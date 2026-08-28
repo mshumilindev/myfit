@@ -60,6 +60,7 @@ import { muscleFatigue, deloadSuggestion } from '../fatigue';
 import { personalLandmarks } from '../personalize';
 import { muscleReadiness, recoveringMuscles } from '../recovery';
 import { ReadinessCard } from '../components/Readiness';
+import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import type { Activity } from '../types';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
@@ -618,35 +619,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     shell.goTab('programs');
   }
 
-  const suggestBanner = suggest && (
-    <div className="prog-banner fade-in">
-      <span className="prog-sheen" aria-hidden />
-      <div className="prog-banner-row">
-        <span className="prog-banner-icon">
-          <Icon name="sparkle" weight="bold" />
-        </span>
-        <div className="prog-banner-main">
-          <span className="prog-banner-kicker">{t.progSuggestKicker}</span>
-          <div className="prog-banner-title">
-            {suggest.variant === 'drifted' ? t.progSuggestDriftedTitle : t.progSuggestNewTitle}
-          </div>
-          <div className="prog-banner-body">
-            {suggest.variant === 'drifted' ? t.progSuggestDriftedBody : t.progSuggestNewBody}
-          </div>
-          <div className="prog-banner-acts">
-            <button className="prog-banner-cta" onClick={() => setProgSheetOpen(true)}>
-              <Icon name="check" weight="bold" />
-              {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
-            </button>
-            <button className="prog-banner-skip" onClick={dismissSuggest}>
-              {t.progSuggestNotNow}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   // Analysis nudge (Today → Trends): surfaces when Spotter has flagged actual
   // issues (warn-tone insights). Dismissible with a short cooldown.
   const analysisNudge = ((): { count: number; level: string; labels: string[] } | null => {
@@ -684,35 +656,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     window.location.hash = '#/trends';
   }
 
-  const analysisBanner = analysisNudge != null && (
-    <div className={`prog-banner analysis-banner lvl-${analysisNudge.level} fade-in`}>
-      <span className="prog-sheen" aria-hidden />
-      <div className="prog-banner-row">
-        <span className="prog-banner-icon">
-          <Icon name="chart-line-up" weight="bold" />
-        </span>
-        <div className="prog-banner-main">
-          <span className="prog-banner-kicker">{t.todayAnalysisKicker}</span>
-          <div className="prog-banner-title">{t.todayAnalysisTitle(analysisNudge.count)}</div>
-          <div className="prog-banner-body">
-            {analysisNudge.labels.length > 0
-              ? t.todayAnalysisBodyList(analysisNudge.labels.join(' · '))
-              : t.todayAnalysisBody}
-          </div>
-          <div className="prog-banner-acts">
-            <button className="prog-banner-cta" onClick={openTrends}>
-              <Icon name="arrow-right" weight="bold" />
-              {t.todayAnalysisCta}
-            </button>
-            <button className="prog-banner-skip" onClick={dismissAnalysis}>
-              {t.todayAnalysisDismiss}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   // Recovery/deload nudge (feature #3): the fatigue read says a muscle is fried
   // or a lot is piling up, AND the recovery clock agrees enough muscles are
   // still under-recovered — so it doesn't fire on a well-rested day. Dismissible
@@ -747,33 +690,102 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     setProgDismissTick((n) => n + 1);
   }
 
-  const deloadBanner = deloadNudge != null && (
-    <div className={`prog-banner deload-banner ${deloadNudge.kind} fade-in`}>
-      <div className="prog-banner-row">
-        <span className="prog-banner-icon">
-          <Icon name="warning-circle" weight="fill" />
-        </span>
-        <div className="prog-banner-main">
-          <span className="prog-banner-kicker">{t.deloadKicker}</span>
-          <div className="prog-banner-title">
-            {deloadNudge.kind === 'systemic'
-              ? t.deloadSystemicTitle
-              : t.deloadLocalTitle(deloadNudge.muscle ? t.muscleGroups[deloadNudge.muscle] : '')}
-          </div>
-          <div className="prog-banner-body">
-            {deloadNudge.kind === 'systemic'
-              ? t.deloadSystemicBody
-              : t.deloadLocalBody(deloadNudge.muscle ? t.muscleGroups[deloadNudge.muscle] : '')}
-          </div>
-          <div className="prog-banner-acts">
-            <button className="prog-banner-skip" onClick={dismissDeload}>
-              {t.todayAnalysisDismiss}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // The day's advisory cards, collapsed into one deck (recovery / training-check
+  // / program suggestion) instead of a wall of banners.
+  const deloadMuscle = deloadNudge?.muscle ? t.muscleGroups[deloadNudge.muscle] : '';
+  const nudges: Nudge[] = [];
+  if (deloadNudge) {
+    nudges.push({
+      id: 'deload',
+      tone: 'recovery',
+      icon: 'warning-circle',
+      kicker: t.deloadKicker,
+      title:
+        deloadNudge.kind === 'systemic' ? t.deloadSystemicTitle : t.deloadLocalTitle(deloadMuscle),
+      body:
+        deloadNudge.kind === 'systemic' ? t.deloadSystemicBody : t.deloadLocalBody(deloadMuscle),
+      actions: (close) => (
+        <button
+          className="prog-banner-skip"
+          onClick={() => {
+            dismissDeload();
+            close();
+          }}
+        >
+          {t.todayAnalysisDismiss}
+        </button>
+      ),
+    });
+  }
+  if (analysisNudge) {
+    nudges.push({
+      id: 'analysis',
+      tone: 'analysis',
+      icon: 'chart-line-up',
+      kicker: t.todayAnalysisKicker,
+      title: t.todayAnalysisTitle(analysisNudge.count),
+      body:
+        analysisNudge.labels.length > 0
+          ? t.todayAnalysisBodyList(analysisNudge.labels.join(' · '))
+          : t.todayAnalysisBody,
+      actions: (close) => (
+        <>
+          <button
+            className="prog-banner-cta"
+            onClick={() => {
+              openTrends();
+              close();
+            }}
+          >
+            <Icon name="arrow-right" weight="bold" />
+            {t.todayAnalysisCta}
+          </button>
+          <button
+            className="prog-banner-skip"
+            onClick={() => {
+              dismissAnalysis();
+              close();
+            }}
+          >
+            {t.todayAnalysisDismiss}
+          </button>
+        </>
+      ),
+    });
+  }
+  if (suggest) {
+    nudges.push({
+      id: 'suggest',
+      tone: 'suggest',
+      icon: 'sparkle',
+      kicker: t.progSuggestKicker,
+      title: suggest.variant === 'drifted' ? t.progSuggestDriftedTitle : t.progSuggestNewTitle,
+      body: suggest.variant === 'drifted' ? t.progSuggestDriftedBody : t.progSuggestNewBody,
+      actions: (close) => (
+        <>
+          <button
+            className="prog-banner-cta"
+            onClick={() => {
+              setProgSheetOpen(true);
+              close();
+            }}
+          >
+            <Icon name="check" weight="bold" />
+            {suggest.variant === 'drifted' ? t.progSuggestDriftedCta : t.progSuggestNewCta}
+          </button>
+          <button
+            className="prog-banner-skip"
+            onClick={() => {
+              dismissSuggest();
+              close();
+            }}
+          >
+            {t.progSuggestNotNow}
+          </button>
+        </>
+      ),
+    });
+  }
 
   // When a program is assigned, today's session comes FROM THE PROGRAM (not
   // history). This plaque sits above the program card and is reworded away from
@@ -1185,9 +1197,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
         {!open && <ReadinessCard finished={finished} now={now} />}
-        {deloadBanner}
-        {analysisBanner}
-        {suggestBanner}
+        <NudgeStack nudges={nudges} />
         {programTodayBanner}
         {programCard}
         {!open && !(assignment && assignedActive) && hasHistory && (

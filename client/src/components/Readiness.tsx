@@ -4,7 +4,7 @@
  * cooking, what's ready-and-behind. A compact card for Today plus a full sheet
  * with the body map, the per-muscle list and one recommendation.
  */
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Icon, Sheet } from '../ui';
 import { useT } from '../i18n';
 import { MuscleHeatmap, MuscleIcon } from './Muscle';
@@ -61,6 +61,51 @@ function orderedRows(map: Map<MuscleGroup, MuscleReadiness>): MuscleReadiness[] 
   return [...map.values()]
     .filter((r) => r.daysSince !== null) // only muscles trained in the window
     .sort((a, b) => rank[a.state] - rank[b.state] || a.readiness - b.readiness);
+}
+
+/** One row of muscle chips + a trailing "Full read". No scroll: chips that
+ *  don't fit are dropped from the end, so the row always ends cleanly on the
+ *  "Full read" affordance rather than a half-clipped chip. */
+function ReadinessStrip({ rows }: { rows: MuscleReadiness[] }) {
+  const { t } = useT();
+  const ref = useRef<HTMLDivElement>(null);
+  const key = rows.map((r) => r.muscle).join(',');
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      const chips = Array.from(el.querySelectorAll<HTMLElement>('[data-chip]'));
+      chips.forEach((c) => (c.style.display = ''));
+      for (let i = chips.length - 1; i >= 0 && el.scrollWidth > el.clientWidth; i--) {
+        chips[i].style.display = 'none';
+      }
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [key]);
+  return (
+    <div className="rd-strip" ref={ref}>
+      {rows.map((r) => (
+        <span key={r.muscle} className="rd-chip" data-chip>
+          <MuscleIcon
+            muscle={r.muscle}
+            variant="row"
+            tone={r.daysSince === null ? 'muted' : 'primary'}
+          />
+          <span className="rd-chip-name">{t.muscleGroups[r.muscle]}</span>
+          <span className="rd-chip-pct tnum" style={{ color: READINESS_COLOR[r.state] }}>
+            {round(r.readiness * 100)}%
+          </span>
+        </span>
+      ))}
+      <span className="rd-chip rd-more">
+        {t.rdDetails}
+        <Icon name="caret-right" />
+      </span>
+    </div>
+  );
 }
 
 function ReadinessRow({ r }: { r: MuscleReadiness }) {
@@ -152,7 +197,8 @@ export function ReadinessCard({ finished, now }: { finished: Workout[]; now: num
   const cooling = recoveringMuscles(map).length;
   const readyN = readyMuscles(map).filter((m) => map.get(m)?.state === 'ready').length;
   // Strip: what's cooking first (that's the actionable bit), then a couple ready.
-  const strip = orderedRows(map).slice(0, 5);
+  // Render up to 8; the strip drops any that don't fit the row.
+  const strip = orderedRows(map).slice(0, 8);
 
   return (
     <>
@@ -164,25 +210,7 @@ export function ReadinessCard({ finished, now }: { finished: Workout[]; now: num
           </span>
         </div>
         <div className="rd-card-lead">{v.lead}</div>
-        <div className="rd-strip">
-          {strip.map((r) => (
-            <span key={r.muscle} className="rd-chip">
-              <MuscleIcon
-                muscle={r.muscle}
-                variant="row"
-                tone={r.daysSince === null ? 'muted' : 'primary'}
-              />
-              <span className="rd-chip-name">{t.muscleGroups[r.muscle]}</span>
-              <span className="rd-chip-pct tnum" style={{ color: READINESS_COLOR[r.state] }}>
-                {round(r.readiness * 100)}%
-              </span>
-            </span>
-          ))}
-          <span className="rd-chip rd-more">
-            {t.rdDetails}
-            <Icon name="caret-right" />
-          </span>
-        </div>
+        <ReadinessStrip rows={strip} />
       </button>
       {open && <ReadinessSheet map={map} onClose={() => setOpen(false)} />}
     </>
