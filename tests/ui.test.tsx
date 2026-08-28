@@ -979,7 +979,20 @@ describe('F-06 progress and history UI', () => {
   }
 
   it('renders filled Progress metrics after three sessions', () => {
-    render(<ProgressView store={richStore()} />);
+    render(
+      <ProgressView
+        store={richStore()}
+        shell={shell}
+        sub="progress"
+        onSub={vi.fn()}
+        featSub="achievements"
+        onFeatSub={vi.fn()}
+        seg="total"
+        onSeg={vi.fn()}
+        lens="volume"
+        onLens={vi.fn()}
+      />,
+    );
 
     expect(screen.getByText('Volume this week')).toBeTruthy();
     expect(screen.getByText('Estimated 1RM')).toBeTruthy();
