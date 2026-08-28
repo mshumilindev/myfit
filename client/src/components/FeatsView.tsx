@@ -83,14 +83,21 @@ export function FeatsView({
   );
 
   const subTabs = (
-    <div className="seg3 feat-subtabs">
+    <div className="exg-tabs feat-subtabs" role="tablist">
       <button
+        role="tab"
+        aria-selected={sub === 'achievements'}
         className={sub === 'achievements' ? 'active' : ''}
         onClick={() => onSub('achievements')}
       >
         {t.featsAchievements}
       </button>
-      <button className={sub === 'standards' ? 'active' : ''} onClick={() => onSub('standards')}>
+      <button
+        role="tab"
+        aria-selected={sub === 'standards'}
+        className={sub === 'standards' ? 'active' : ''}
+        onClick={() => onSub('standards')}
+      >
         {t.featsStandards}
       </button>
     </div>

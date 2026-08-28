@@ -16987,12 +16987,7 @@ button.badge {
 }
 .feat-subtabs {
   align-self: flex-start;
-  min-width: 260px;
-}
-@media (max-width: 719.98px) {
-  .feat-subtabs {
-    width: 100%;
-  }
+  margin-bottom: var(--space-2);
 }
 
 /* --- Standards (Заліки) --------------------------------------------------- */
