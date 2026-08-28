@@ -23,6 +23,7 @@ import {
   endRestPeriod,
   startRestPeriod,
   latestWeight,
+  deleteActivity,
   logVisitAsWorkout,
   muscleWorkSorted,
   resolveMuscles,
@@ -46,6 +47,13 @@ import {
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet } from '../components/ActivitySheet';
+import {
+  activityType,
+  activityCalories,
+  activityCategory,
+  durationMin as activityDurationMin,
+} from '../activities';
+import type { Activity } from '../types';
 import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
@@ -162,6 +170,62 @@ function writeProgramCache(a: ProgramAssignment | null): void {
   } catch {
     /* ignore */
   }
+}
+
+/** Recent logged activities (design feature 6, KCAL feed): cardio & recovery
+ *  as secondary rows to strength, each with its calorie estimate. */
+function RecentActivityList({
+  activities,
+  bodyKg,
+  t,
+  locale,
+}: {
+  activities: Activity[];
+  bodyKg: number | null;
+  t: ReturnType<typeof useT>['t'];
+  locale: ReturnType<typeof useT>['locale'];
+}) {
+  const recent = [...activities].sort((a, b) => b.startedAt - a.startedAt).slice(0, 5);
+  if (recent.length === 0) return null;
+  return (
+    <div className="td-activity-list">
+      <div className="section-label" style={{ marginBottom: 8 }}>
+        {t.recentActivity}
+      </div>
+      {recent.map((a) => {
+        const type = activityType(a.type);
+        const cat = activityCategory(a);
+        const kcal = activityCalories(a, bodyKg);
+        const min = Math.round(activityDurationMin(a));
+        return (
+          <div key={a.id} className={`ta-row cat-${cat}`}>
+            <Icon name={type?.icon ?? 'heartbeat'} />
+            <span className="ta-main">
+              <span className="ta-name">{t.actType[a.type] ?? a.type}</span>
+              <span className="ta-sub">
+                {fmtShortDate(a.startedAt, locale)} · {min} {t.minShort}
+                {a.distanceKm ? ` · ${a.distanceKm} ${t.kmShort}` : ''} ·{' '}
+                {cat === 'recovery' ? t.actRecovery : t.actConditioning}
+              </span>
+            </span>
+            {kcal != null && (
+              <span className="ta-kcal tnum">
+                <Icon name="flame" weight="fill" />~{kcal}
+              </span>
+            )}
+            <button
+              className="ta-del"
+              onClick={() => deleteActivity(a.id)}
+              aria-label={t.delete}
+              title={t.delete}
+            >
+              <Icon name="trash" />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
@@ -1214,6 +1278,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <Icon name="arrow-up-right" />
                 </button>
               )}
+              <RecentActivityList
+                activities={store.activities}
+                bodyKg={bodyKg}
+                t={t}
+                locale={locale}
+              />
             </div>
           </>
         ) : hasHistory ? (
@@ -1371,6 +1441,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <Icon name="arrow-up-right" />
                 </button>
               )}
+              <RecentActivityList
+                activities={store.activities}
+                bodyKg={bodyKg}
+                t={t}
+                locale={locale}
+              />
             </div>
           </>
         ) : (

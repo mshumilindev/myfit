@@ -113,6 +113,7 @@ import { PersonSimpleTaiChi } from '@phosphor-icons/react/PersonSimpleTaiChi';
 import { HandHeart } from '@phosphor-icons/react/HandHeart';
 import { Snowflake } from '@phosphor-icons/react/Snowflake';
 import { ClockCounterClockwise } from '@phosphor-icons/react/ClockCounterClockwise';
+import { FlowerLotus } from '@phosphor-icons/react/FlowerLotus';
 import { X } from '@phosphor-icons/react/X';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
@@ -221,6 +222,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'hand-heart': HandHeart,
   snowflake: Snowflake,
   'clock-counter-clockwise': ClockCounterClockwise,
+  yoga: FlowerLotus,
   x: X,
   'x-circle': XCircle,
 };

@@ -51,6 +51,7 @@ export const ACTIVITY_TYPES: ActivityType[] = [
   },
   { key: 'hiit', category: 'conditioning', icon: 'lightning', met: 8.0 },
   { key: 'cardio', category: 'conditioning', icon: 'heartbeat', met: 6.0 },
+  { key: 'yoga', category: 'recovery', icon: 'yoga', met: 2.5 },
   { key: 'mobility', category: 'recovery', icon: 'person-simple-tai-chi', met: 2.3 },
   { key: 'massage', category: 'recovery', icon: 'hand-heart', met: 1.3 },
   { key: 'sauna', category: 'recovery', icon: 'fire', met: 1.5 },
