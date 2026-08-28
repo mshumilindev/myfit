@@ -1430,7 +1430,7 @@ export function SessionView(props: {
       )}
       <div className="pane-main">
         <div className="session-head-wrap">
-          <div className={`session-top${live ? ' live-toolbar' : ''}`}>
+          <div className={`session-top${live ? ' live-toolbar' : ' past-hero'}`}>
             {live && (
               <LiveHero
                 workout={workout}
@@ -1440,6 +1440,17 @@ export function SessionView(props: {
                 queued={store.queue.length}
                 mode="session"
               />
+            )}
+            {!live && (
+              <div className="past-hero-bg" aria-hidden>
+                <GymThumb
+                  name={gym?.name ?? ''}
+                  lat={gym?.lat ?? 0}
+                  lng={gym?.lng ?? 0}
+                  size={320}
+                />
+                <span className="past-hero-scrim" />
+              </div>
             )}
             <button className="back" onClick={props.onClose} aria-label={t.backAction}>
               <Icon name="caret-left" />

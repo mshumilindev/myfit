@@ -5,7 +5,6 @@
  * of the most relevant muscles) whose "Full read" opens the Progress readiness
  * lens; `ReadinessLens` is that full body-map read.
  */
-import { useLayoutEffect, useRef } from 'react';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
 import { MuscleHeatmap, MuscleIcon } from './Muscle';
@@ -95,35 +94,17 @@ function ReadinessRow({ r }: { r: MuscleReadiness }) {
   );
 }
 
-/** Chips + a trailing "Full read"; chips that don't fit drop from the end so the
- *  row never ends on a half-clipped chip and never scrolls. Full read opens the
- *  Progress readiness lens. */
+/** Exactly three muscle chips in one even row — a fixed 3-up grid, no scroll.
+ *  Full read (below) opens the Progress readiness lens. */
 function ReadinessStrip({ rows }: { rows: MuscleReadiness[] }) {
   const { t } = useT();
-  const ref = useRef<HTMLDivElement>(null);
-  const key = rows.map((r) => r.muscle).join(',');
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const fit = () => {
-      const chips = Array.from(el.querySelectorAll<HTMLElement>('[data-chip]'));
-      chips.forEach((c) => (c.style.display = ''));
-      for (let i = chips.length - 1; i >= 0 && el.scrollWidth > el.clientWidth; i--) {
-        chips[i].style.display = 'none';
-      }
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [key]);
   return (
-    <div className="rd-strip" ref={ref}>
-      {rows.map((r) => (
-        <span key={r.muscle} className="rd-chip" data-chip>
+    <div className="rd-strip">
+      {rows.slice(0, 3).map((r) => (
+        <span key={r.muscle} className="rd-chip">
           <MuscleIcon
             muscle={r.muscle}
-            variant="row"
+            variant="chip"
             tone={r.daysSince === null ? 'muted' : 'primary'}
           />
           <span className="rd-chip-name">{t.muscleGroups[r.muscle]}</span>
@@ -144,7 +125,7 @@ function ReadinessNudgeBody({ finished, now }: { finished: Workout[]; now: numbe
   const map = muscleReadiness(finished, now);
   const readyN = readyMuscles(map).filter((m) => map.get(m)?.state === 'ready').length;
   const cooling = recoveringMuscles(map).length;
-  const strip = orderedRows(map).slice(0, 8);
+  const strip = orderedRows(map).slice(0, 3);
   return (
     <div className="rd-nudge">
       <div className="rd-counts tnum">
