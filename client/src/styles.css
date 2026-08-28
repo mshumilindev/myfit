@@ -22,12 +22,14 @@
   --color-accent-800: #5b4420;
   --color-accent-900: #342713;
 
-  --color-rest-200: #d9f3ff;
-  --color-rest-300: #b8e9fb;
-  --color-rest-400: #83d3ee;
-  --color-rest-700: #24738d;
-  --color-rest-800: #164a5c;
-  --color-rest-900: #102b36;
+  /* Blue topaz — a saturated azure, clearly bluer than the ok-green so rest
+     never reads as "done". */
+  --color-rest-200: #d3edfb;
+  --color-rest-300: #93d4f2;
+  --color-rest-400: #33a8e0;
+  --color-rest-700: #1c6f9a;
+  --color-rest-800: #134a68;
+  --color-rest-900: #0e2a3b;
 
   --color-neutral-100: #f5f6f7;
   --color-neutral-200: #e6e8ea;
@@ -13910,19 +13912,20 @@ button.exd-media {
   flex: none;
   display: inline-flex;
 }
+/* Sized like a muscle chip, styled like the Fix button (accent-tinted pill). */
 .mrow-more {
   flex: none;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  padding: 4px 11px;
+  padding: 5px 10px;
   border-radius: 999px;
-  border: 1px solid var(--color-divider);
-  background: var(--color-neutral-900);
-  color: var(--color-neutral-300);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-divider));
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
   font: inherit;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
 }
@@ -18205,31 +18208,33 @@ button.badge {
    (today's) rest day is brighter than the others and wins over the gold
    is-today ring. */
 .program-start-day.state-rest {
-  border-color: color-mix(in srgb, var(--color-rest-300) 44%, var(--color-divider));
+  border-color: color-mix(in srgb, var(--color-rest-400) 50%, var(--color-divider));
 }
 .program-start-day.state-rest .program-start-dow,
 .program-start-day.state-rest strong,
-.program-start-day.state-rest .program-start-summary {
-  color: var(--color-rest-300);
+.program-start-day.state-rest .program-start-summary,
+.program-start-day.state-rest .program-start-plus {
+  color: var(--color-rest-400);
 }
 .program-start-day.state-rest .program-start-bar {
-  background: color-mix(in srgb, var(--color-rest-300) 45%, var(--color-neutral-800));
+  background: color-mix(in srgb, var(--color-rest-400) 50%, var(--color-neutral-800));
 }
 .program-start-day.state-rest .program-start-dot {
-  background: var(--color-rest-300);
-  opacity: 0.8;
+  background: var(--color-rest-400);
+  opacity: 0.85;
 }
 .program-start-day.state-rest.is-today {
-  border-color: var(--color-rest-200);
-  box-shadow: inset 0 0 0 1px var(--color-rest-200);
+  border-color: var(--color-rest-300);
+  box-shadow: inset 0 0 0 1px var(--color-rest-300);
 }
 .program-start-day.state-rest.is-today .program-start-dow,
 .program-start-day.state-rest.is-today strong,
-.program-start-day.state-rest.is-today .program-start-summary {
-  color: var(--color-rest-200);
+.program-start-day.state-rest.is-today .program-start-summary,
+.program-start-day.state-rest.is-today .program-start-plus {
+  color: var(--color-rest-300);
 }
 .program-start-day.state-rest.is-today .program-start-dot {
-  background: var(--color-rest-200);
+  background: var(--color-rest-300);
   opacity: 1;
 }
 .program-start-day.state-upcoming .program-start-bar {

@@ -15,6 +15,7 @@
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
@@ -1021,7 +1022,11 @@ export function MuscleRow({
           &nbsp;{strings().moreLabel}
         </button>
       </div>
-      {open && <MuscleDrawer entries={entries} onOpen={onOpen} onClose={() => setOpen(false)} />}
+      {open &&
+        createPortal(
+          <MuscleDrawer entries={entries} onOpen={onOpen} onClose={() => setOpen(false)} />,
+          document.body,
+        )}
     </>
   );
 }
