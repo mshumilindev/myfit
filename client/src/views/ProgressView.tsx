@@ -35,6 +35,13 @@ import {
 import { FeatsView } from '../components/FeatsView';
 import { TrendsView } from '../components/TrendsView';
 import { FixSheet } from '../components/FixSheet';
+import {
+  muscleFatigue,
+  deloadSuggestion,
+  FATIGUE_COLOR,
+  type FatigueLevel,
+  type DeloadSuggestion,
+} from '../fatigue';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -68,6 +75,7 @@ export function ProgressView({
   const [seg, setSeg] = useState<'total' | 'muscle' | 'volume' | 'records'>('total');
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
+  const [lens, setLens] = useState<'volume' | 'fatigue'>('volume');
   const ptab = sub;
   const setPtab = onSub;
   const showDesktopDetail = useDesktopDetail();
@@ -241,6 +249,11 @@ export function ProgressView({
   for (const { m, v } of muscleRows) if (v > 0) brassColors[m] = brassShade(v / maxMuscle);
   // Zone-coloured volume heatmap for the desktop Volume right column.
   const volHeat = volumeHeatColors(finished, nowTs, volGrain);
+  // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
+  const fatMap = muscleFatigue(finished, nowTs);
+  const fatColors: Partial<Record<MuscleGroup, string>> = {};
+  for (const f of fatMap.values()) if (f.sets > 0) fatColors[f.muscle] = FATIGUE_COLOR[f.level];
+  const deload = deloadSuggestion(fatMap);
   const weekTotal = [...volThisWeek.values()].reduce((a, b) => a + b, 0);
   const emptyMuscles = muscleRows.filter((r) => r.v === 0).map((r) => t.muscleGroups[r.m]);
   const topMuscle = muscleRows.length > 0 && muscleRows[0].v > 0 ? muscleRows[0] : null;
@@ -422,6 +435,10 @@ export function ProgressView({
             grain={volGrain}
             onGrain={setVolGrain}
             desktop={showDesktopDetail}
+            deload={deload}
+            lens={lens}
+            onLens={setLens}
+            fatColors={fatColors}
           />
         )}
         {seg === 'total' && <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />}
@@ -534,17 +551,42 @@ export function ProgressView({
       {showDesktopDetail && seg === 'volume' && (
         <section className="progress-detail-pane vol-map-pane">
           <div className="progress-detail-title">
-            <h3>{t.volumeTab}</h3>
+            <h3>{lens === 'fatigue' ? t.fatigueTab : t.volumeTab}</h3>
+            <div className="seg2 lens-seg">
+              <button
+                className={lens === 'volume' ? 'active' : ''}
+                onClick={() => setLens('volume')}
+              >
+                {t.volumeTab}
+              </button>
+              <button
+                className={lens === 'fatigue' ? 'active' : ''}
+                onClick={() => setLens('fatigue')}
+              >
+                {t.fatigueTab}
+              </button>
+            </div>
           </div>
-          <MuscleHeatmap colors={volHeat} />
-          <div className="vol-legend">
-            {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
-              <span key={z} className="vol-leg">
-                <span className="sw" style={{ background: ZONE_COLOR[z] }} />
-                {t.volZone[z]}
-              </span>
-            ))}
-          </div>
+          <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
+          {lens === 'fatigue' ? (
+            <div className="vol-legend">
+              {(['fresh', 'moderate', 'high', 'fried'] as FatigueLevel[]).map((l) => (
+                <span key={l} className="vol-leg">
+                  <span className="sw" style={{ background: FATIGUE_COLOR[l] }} />
+                  {t.fatLevel[l]}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="vol-legend">
+              {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
+                <span key={z} className="vol-leg">
+                  <span className="sw" style={{ background: ZONE_COLOR[z] }} />
+                  {t.volZone[z]}
+                </span>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -793,6 +835,10 @@ function VolumePanel({
   grain,
   onGrain,
   desktop,
+  deload,
+  lens,
+  onLens,
+  fatColors,
 }: {
   finished: Workout[];
   nowTs: number;
@@ -800,11 +846,17 @@ function VolumePanel({
   grain: 'fine' | 'zones';
   onGrain: (g: 'fine' | 'zones') => void;
   desktop: boolean;
+  deload: DeloadSuggestion;
+  lens: 'volume' | 'fatigue';
+  onLens: (l: 'volume' | 'fatigue') => void;
+  fatColors: Partial<Record<MuscleGroup, string>>;
 }) {
   // On desktop the anatomical map lives in the right column, so the panel shows
   // only the list; on mobile it toggles list <-> map inline.
   const [mapView, setMapView] = useState(false);
   const [fixMuscle, setFixMuscle] = useState<MuscleGroup | null>(null);
+  // Default: most-loaded first (Over -> ... -> None), toggleable.
+  const [sortDesc, setSortDesc] = useState(true);
 
   const perMuscle = weeklyMuscleSets(finished, nowTs);
   const cold = historyAgeDays(finished, nowTs) < 21;
@@ -835,6 +887,13 @@ function VolumePanel({
             zone: classifyZone(sets, lm),
           };
         });
+
+  // Sort by how hard the muscle is pushed against its ceiling (sets / MRV), so
+  // Over sits at the top by default; the button flips the direction.
+  const sortedRows = [...rows].sort((a, b) => {
+    const d = a.sets / a.lm.mrv - b.sets / b.lm.mrv;
+    return sortDesc ? -d : d;
+  });
 
   // Heatmap: paint every muscle by its (fine or zone) classification colour.
   const heatColors: Partial<Record<MuscleGroup, string>> = {};
@@ -878,25 +937,57 @@ function VolumePanel({
             </button>
           </div>
         )}
+        {!(mapView && !desktop) && (
+          <button
+            className={`vol-sort${sortDesc ? '' : ' asc'}`}
+            onClick={() => setSortDesc((s) => !s)}
+            aria-label={t.volSort}
+            title={t.volSort}
+          >
+            <Icon name="caret-line-down" />
+          </button>
+        )}
       </div>
 
       {cold && <div className="vol-cold">{t.volColdStart}</div>}
 
       {mapView && !desktop ? (
         <div className="vol-map">
-          <MuscleHeatmap colors={heatColors} />
-          <div className="vol-legend">
-            {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
-              <span key={z} className="vol-leg">
-                <span className="sw" style={{ background: ZONE_COLOR[z] }} />
-                {t.volZone[z]}
-              </span>
-            ))}
+          <div className="seg2 lens-seg-m">
+            <button className={lens === 'volume' ? 'active' : ''} onClick={() => onLens('volume')}>
+              {t.volumeTab}
+            </button>
+            <button
+              className={lens === 'fatigue' ? 'active' : ''}
+              onClick={() => onLens('fatigue')}
+            >
+              {t.fatigueTab}
+            </button>
           </div>
+          <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : heatColors} />
+          {lens === 'fatigue' ? (
+            <div className="vol-legend">
+              {(['fresh', 'moderate', 'high', 'fried'] as FatigueLevel[]).map((l) => (
+                <span key={l} className="vol-leg">
+                  <span className="sw" style={{ background: FATIGUE_COLOR[l] }} />
+                  {t.fatLevel[l]}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="vol-legend">
+              {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
+                <span key={z} className="vol-leg">
+                  <span className="sw" style={{ background: ZONE_COLOR[z] }} />
+                  {t.volZone[z]}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <div className="vol-rows">
-          {rows.map((r) => (
+          {sortedRows.map((r) => (
             <VolumeRow key={r.key} row={r} t={t} onFix={setFixMuscle} />
           ))}
         </div>
@@ -907,7 +998,27 @@ function VolumePanel({
         <p>{summary}</p>
       </div>
 
+      {deload.kind !== 'none' && <DeloadCard deload={deload} t={t} />}
+
       {fixMuscle && <FixSheet muscle={fixMuscle} onClose={() => setFixMuscle(null)} />}
+    </div>
+  );
+}
+
+/** Deload nudge (design FAT-2): a single fried muscle earns a local cut; a lot
+ *  of accumulated fatigue earns a lighter recovery week. */
+function DeloadCard({ deload, t }: { deload: DeloadSuggestion; t: T }) {
+  const systemic = deload.kind === 'systemic';
+  const muscle = deload.muscle ? t.muscleGroups[deload.muscle] : '';
+  return (
+    <div className={`deload-card ${deload.kind}`}>
+      <Icon name="warning-circle" weight="fill" />
+      <div className="dl-main">
+        <div className="dl-title">
+          {systemic ? t.deloadSystemicTitle : t.deloadLocalTitle(muscle)}
+        </div>
+        <div className="dl-body">{systemic ? t.deloadSystemicBody : t.deloadLocalBody(muscle)}</div>
+      </div>
     </div>
   );
 }

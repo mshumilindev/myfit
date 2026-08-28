@@ -18927,6 +18927,84 @@ button.badge {
   );
 }
 
+/* Volume <-> Fatigue lens toggle (sits in the map pane's header). */
+.lens-seg {
+  flex: none;
+  width: auto;
+}
+.lens-seg button {
+  flex: none;
+  padding: 5px 12px;
+  font-size: 11px;
+}
+/* Same toggle above the mobile inline map. */
+.lens-seg-m {
+  flex: none;
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto 6px;
+}
+
+/* Sort direction toggle in the volume controls. */
+.vol-sort {
+  flex: none;
+  width: 38px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-400);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.vol-sort i {
+  font-size: 16px;
+  transition: transform 0.15s ease;
+}
+.vol-sort.asc i {
+  transform: rotate(180deg);
+}
+
+/* Deload nudge (design FAT-2). */
+.deload-card {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 7%, var(--color-surface));
+}
+.deload-card.systemic {
+  border-left-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-surface));
+}
+.deload-card > i {
+  flex: none;
+  font-size: 18px;
+  margin-top: 1px;
+  color: var(--color-accent);
+}
+.deload-card.systemic > i {
+  color: var(--color-danger);
+}
+.dl-main {
+  min-width: 0;
+}
+.dl-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.dl-body {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-neutral-400);
+  margin-top: 2px;
+}
+
 .vol-note {
   display: flex;
   align-items: flex-start;
