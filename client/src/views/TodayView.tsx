@@ -980,7 +980,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   })();
 
   return (
-    <div className={`screen paned${open ? ' today-live-mode' : ''}`}>
+    <div
+      className={`screen paned${open ? ' today-live-mode' : ''}${
+        !open && !liveAct && hasHistory ? ' today-has-pill' : ''
+      }`}
+    >
       <div className="pane-main">
         {open && <h2 className="visually-hidden">{t.today}</h2>}
         {!open &&
@@ -1162,33 +1166,66 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
-        {!open && hasHistory && (
-          <div className="td-start-ctas mobile-only">
-            {!liveAct && (
-              <button className="btn btn-primary td-start-cta" onClick={startSession}>
-                <Icon name="play" />
-                {t.startSessionLabel}
-              </button>
-            )}
-            <button className="btn btn-secondary td-backfill-cta" onClick={() => setBackfill(true)}>
-              <Icon name="arrow-counter-clockwise" />
-              {t.logPastSession}
-            </button>
-            {!liveAct && (
-              <button className="btn btn-secondary td-activity-cta" onClick={openActivitySheet}>
-                <Icon name="heartbeat" />
-                {t.logActivity}
-              </button>
-            )}
-            {!activeRest && (
-              <button
-                className="btn btn-secondary td-rest-cta"
-                onClick={() => setRestSheetOpen(true)}
+        {!open && !liveAct && hasHistory && (
+          <div className="td-pill-wrap">
+            <svg className="glass-defs" aria-hidden width="0" height="0">
+              <filter
+                id="liquid-glass"
+                x="-30%"
+                y="-30%"
+                width="160%"
+                height="160%"
+                colorInterpolationFilters="sRGB"
               >
-                <Icon name="clock-countdown" />
-                {t.restStartCta}
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.011 0.011"
+                  numOctaves="2"
+                  seed="7"
+                  result="noise"
+                />
+                <feGaussianBlur in="noise" stdDeviation="1.4" result="soft" />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="soft"
+                  scale="52"
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                />
+              </filter>
+            </svg>
+            <div className="td-pill">
+              {!activeRest && (
+                <button
+                  className="tp-btn"
+                  onClick={() => setRestSheetOpen(true)}
+                  aria-label={t.restStartCta}
+                  title={t.restStartCta}
+                >
+                  <Icon name="clock-countdown" />
+                </button>
+              )}
+              <button
+                className="tp-btn"
+                onClick={() => setBackfill(true)}
+                aria-label={t.logPastSession}
+                title={t.logPastSession}
+              >
+                <Icon name="arrow-counter-clockwise" />
               </button>
-            )}
+              <button
+                className="tp-btn"
+                onClick={openActivitySheet}
+                aria-label={t.logActivity}
+                title={t.logActivity}
+              >
+                <Icon name="heartbeat" />
+              </button>
+              <button className="tp-start" onClick={startSession}>
+                <Icon name="play" weight="fill" />
+                <span>{t.startSessionLabel}</span>
+              </button>
+            </div>
           </div>
         )}
 
