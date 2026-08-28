@@ -53,6 +53,7 @@ import {
   type MuscleGroup,
 } from './data/exercises';
 import PER_SIDE from './data/per-side.json';
+import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
 import { describeDay, type DayReadout } from './data/daySuggest';
 import { currentUid, getRole } from './api';
@@ -64,6 +65,8 @@ const BODY_KEY = 'spotter.body';
 const REST_KEY = 'spotter.restPeriods';
 const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
+const EX_LOAD_KEY = 'spotter.exerciseLoads';
+const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -79,8 +82,14 @@ export interface StoreState {
   restPeriods: RestPeriod[];
   /** Logged non-lifting activities (cardio & recovery). */
   activities: Activity[];
-  /** Per-exercise display unit ('lb' overrides; absent = kg). Local only. */
+  /** Account-wide weight unit (Load-entry B): the default everything is shown
+   *  in. Defaults to kg; a per-exercise entry overrides it for one machine. */
+  weightUnit: DisplayUnit;
+  /** Per-exercise display unit override (absent = use weightUnit). Local only. */
   exerciseUnits: Record<string, DisplayUnit>;
+  /** Per-exercise load-type override (Load-entry C). Absent = derive from the
+   *  exercise (equipment + name). Local only. */
+  exerciseLoadTypes: Record<string, LoadType>;
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
@@ -105,7 +114,9 @@ let state: StoreState = {
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
+  weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
+  exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   queue: [],
   syncStatus: 'pending',
@@ -130,7 +141,9 @@ function persist(): void {
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
+    localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
+    localStorage.setItem(EX_LOAD_KEY, JSON.stringify(state.exerciseLoadTypes));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
@@ -217,6 +230,9 @@ export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number 
 }
 
 export function exerciseVolumeKg(ex: Exercise): number {
+  // Assist (negative help) and band (estimate) loads never count as real
+  // tonnage — they'd otherwise subtract from or inflate the total (Load-entry C).
+  if (loadTypeFor(ex) !== 'weight') return 0;
   return ex.sets.reduce((v, s) => v + setVolumeKg(s), 0) * perHandFactor(ex);
 }
 
@@ -1142,18 +1158,57 @@ export function discardActivity(id: string): void {
   deleteActivity(id);
 }
 
-// --- Per-exercise weight unit (Load-entry B) -------------------------------
-/** The display unit chosen for a lift/machine (defaults to kg). */
-export function exerciseUnit(name: string): DisplayUnit {
-  return state.exerciseUnits[name.trim().toLowerCase()] ?? 'kg';
+// --- Weight unit (Load-entry B) --------------------------------------------
+/** The account-wide weight unit (kg unless the user picked lb in their profile). */
+export function globalWeightUnit(): DisplayUnit {
+  return state.weightUnit;
 }
-/** Set (or clear, when 'kg') the display unit for a lift/machine. */
+/** Set the account-wide weight unit. Per-exercise overrides equal to it are
+ *  pruned so they don't linger as no-ops. */
+export function setGlobalWeightUnit(unit: DisplayUnit): void {
+  const next: Record<string, DisplayUnit> = {};
+  for (const [k, v] of Object.entries(state.exerciseUnits)) if (v !== unit) next[k] = v;
+  setState({ weightUnit: unit, exerciseUnits: next });
+}
+/** The display unit for a lift/machine: its override, else the account default. */
+export function exerciseUnit(name: string): DisplayUnit {
+  return state.exerciseUnits[name.trim().toLowerCase()] ?? state.weightUnit;
+}
+/** Set (or clear, when it matches the account default) the unit for a machine. */
 export function setExerciseUnit(name: string, unit: DisplayUnit): void {
   const key = name.trim().toLowerCase();
   const next = { ...state.exerciseUnits };
-  if (unit === 'kg') delete next[key];
+  if (unit === state.weightUnit) delete next[key];
   else next[key] = unit;
   setState({ exerciseUnits: next });
+}
+
+// --- Per-exercise load type (Load-entry C) ---------------------------------
+/** How a lift is loaded: plain weight, an assisted machine (negative kg help),
+ *  or a resistance band (colour → estimated kg). Derived from the exercise
+ *  unless the user has pinned an override. */
+export function loadTypeFor(ex: Pick<Exercise, 'name' | 'equipment'>): LoadType {
+  const override = state.exerciseLoadTypes[ex.name.trim().toLowerCase()];
+  if (override) return override;
+  return deriveLoadType(ex.name, equipmentFor(ex));
+}
+/** Pin a load type for a lift; null restores the derived default. */
+export function setExerciseLoadType(name: string, type: LoadType | null): void {
+  const key = name.trim().toLowerCase();
+  const next = { ...state.exerciseLoadTypes };
+  if (type === null) delete next[key];
+  else next[key] = type;
+  setState({ exerciseLoadTypes: next });
+}
+/** The band library for a gym, falling back to sensible defaults. */
+export function bandLibraryFor(gym: Gym | null | undefined): readonly BandRung[] {
+  return gym?.bandLibrary && gym.bandLibrary.length > 0 ? gym.bandLibrary : BAND_DEFAULTS;
+}
+/** Persist a gym's band library (colour → estimated kg). */
+export function setGymBandLibrary(gymId: string, rungs: BandRung[]): void {
+  const g = state.gyms.find((x) => x.id === gymId);
+  if (!g) return;
+  upsertGym({ ...g, bandLibrary: rungs });
 }
 
 /** Activities whose start falls on the given local day key. */
@@ -1865,7 +1920,9 @@ export function resetLocalData(): void {
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
+  localStorage.removeItem(WEIGHT_UNIT_KEY);
   localStorage.removeItem(EX_UNIT_KEY);
+  localStorage.removeItem(EX_LOAD_KEY);
   pings = [];
   dismissals = [];
   state = {
@@ -1874,7 +1931,9 @@ export function resetLocalData(): void {
     reminders: [],
     restPeriods: [],
     activities: [],
+    weightUnit: 'kg',
     exerciseUnits: {},
+    exerciseLoadTypes: {},
     bodyMetrics: EMPTY_BODY,
     queue: [],
     syncStatus: 'pending',

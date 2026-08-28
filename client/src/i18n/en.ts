@@ -601,6 +601,23 @@ export const en = {
   weightLb: 'Weight, lb',
   unitLabel: 'Unit',
   unitStoredKg: (v: string) => `Stored as ${v} kg`,
+  assistCol: 'Assist',
+  bandCol: 'Band',
+  assistLabel: 'Assistance',
+  assistNote: 'Counter-weight that helps you — not weight lifted.',
+  bandLabel: 'Band',
+  bandNote: 'Band load is an estimate — for effort and reps, not counted as tonnage.',
+  bandColor: (c: string) =>
+    (
+      ({
+        yellow: 'Yellow',
+        green: 'Green',
+        red: 'Red',
+        blue: 'Blue',
+        black: 'Black',
+        purple: 'Purple',
+      }) as Record<string, string>
+    )[c] ?? c,
   kcalShort: 'kcal',
   logActivity: 'Log activity',
   actPickCap: 'Cardio & recovery count too — so Spotter sees your whole load.',

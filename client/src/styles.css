@@ -3483,6 +3483,74 @@ i > svg {
   font-size: 12px;
   color: var(--color-neutral-500);
 }
+.profile-unit-seg {
+  flex: none;
+  width: 84px;
+  margin-left: auto;
+}
+
+/* Load types (Load-entry C): assist + band pickers */
+.load-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.load-chip,
+.band-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border: 1px solid transparent;
+  color: var(--color-text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.load-chip.on {
+  background: var(--color-kcal-tint, var(--color-accent-900));
+  border-color: var(--color-kcal, var(--color-accent));
+  color: var(--color-kcal-text, var(--color-accent));
+}
+.band-chip.on {
+  border-color: var(--color-neutral-500);
+  background: var(--color-neutral-900);
+}
+.band-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  flex: none;
+}
+.load-note {
+  margin: 10px 2px 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+}
+.band-readout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+.band-readout-lab {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.band-readout-val {
+  font-size: 18px;
+  font-weight: 600;
+}
+/* Assist load reads in the lazurite energy colour (help, not lifted weight). */
+.assist-val {
+  color: var(--color-kcal, var(--color-accent));
+}
 
 .switch {
   width: 40px;

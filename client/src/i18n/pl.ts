@@ -557,6 +557,23 @@ export const pl: Strings = {
   weightLb: 'Ciężar, lb',
   unitLabel: 'Jednostka',
   unitStoredKg: (v: string) => `Zapis jako ${v} kg`,
+  assistCol: 'Asysta',
+  bandCol: 'Guma',
+  assistLabel: 'Asysta',
+  assistNote: 'Przeciwwaga, która ci pomaga — nie podniesiony ciężar.',
+  bandLabel: 'Guma',
+  bandNote: 'Obciążenie gumy to szacunek — do wysiłku i powtórzeń, nie liczone do tonażu.',
+  bandColor: (c: string) =>
+    (
+      ({
+        yellow: 'Żółta',
+        green: 'Zielona',
+        red: 'Czerwona',
+        blue: 'Niebieska',
+        black: 'Czarna',
+        purple: 'Fioletowa',
+      }) as Record<string, string>
+    )[c] ?? c,
   kcalShort: 'kal.',
   logActivity: 'Aktywność',
   actPickCap: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',

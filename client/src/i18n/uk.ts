@@ -558,6 +558,23 @@ export const uk: Strings = {
   weightLb: 'Вага, lb',
   unitLabel: 'Одиниці',
   unitStoredKg: (v: string) => `Збережеться як ${v} кг`,
+  assistCol: 'Допом.',
+  bandCol: 'Резинка',
+  assistLabel: 'Допомога',
+  assistNote: 'Противага, що допомагає тобі — не піднята вага.',
+  bandLabel: 'Резинка',
+  bandNote: 'Навантаження резинки — оцінка: для зусилля й повторень, не рахується в тоннаж.',
+  bandColor: (c: string) =>
+    (
+      ({
+        yellow: 'Жовта',
+        green: 'Зелена',
+        red: 'Червона',
+        blue: 'Синя',
+        black: 'Чорна',
+        purple: 'Фіолетова',
+      }) as Record<string, string>
+    )[c] ?? c,
   kcalShort: 'ккал',
   logActivity: 'Активність',
   actPickCap: 'Кардіо й відновлення теж рахуються — щоб Spotter бачив усе навантаження.',

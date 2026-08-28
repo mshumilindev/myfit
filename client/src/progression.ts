@@ -11,6 +11,7 @@
 import { topSet, isStrengthExercise } from './store';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
+import type { LoadType } from './loads';
 
 export interface TopPoint {
   ts: number;
@@ -54,7 +55,13 @@ export interface ProgOpts {
   equipment?: string[];
   primary?: MuscleGroup | null;
   bodyweight?: boolean;
+  /** Load type (Load-entry C): steers the direction of progress. Defaults to
+   *  plain weight. */
+  loadType?: LoadType;
 }
+
+/** Stack step for an assisted machine's counter-weight (a typical plate). */
+const ASSIST_STEP = 5;
 
 // Loaded compound barbell work on these gets a 5 kg jump; everything else 2.5.
 const BIG: MuscleGroup[] = ['quads', 'hamstrings', 'glutes', 'back', 'lats', 'chest'];
@@ -102,6 +109,46 @@ export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
   const last = history[0];
   const prevWeight = last.weight;
   const prevReps = last.reps;
+
+  // Resistance band: the kg is an estimate off a discrete colour ladder, so we
+  // never nudge it — chase reps, and the UI suggests the next band at the top.
+  if (opts.loadType === 'band') {
+    return {
+      state: 'progress',
+      weight: prevWeight,
+      reps: prevReps < high ? prevReps + 1 : high,
+      deltaKg: 0,
+      ...base,
+      prevWeight,
+      prevReps,
+    };
+  }
+
+  // Assisted machine: help is stored as negative kg. "Stronger" means LESS help,
+  // so double-progression walks the counter-weight toward zero (never past it).
+  if (opts.loadType === 'assist' && prevWeight !== null) {
+    if (prevReps >= high) {
+      const next = Math.min(prevWeight + ASSIST_STEP, 0);
+      return {
+        state: next >= 0 ? 'hold' : 'progress',
+        weight: next,
+        reps: next >= 0 ? Math.min(prevReps + 1, high) : low,
+        deltaKg: next - prevWeight,
+        ...base,
+        prevWeight,
+        prevReps,
+      };
+    }
+    return {
+      state: 'hold',
+      weight: prevWeight,
+      reps: Math.min(prevReps + 1, high),
+      deltaKg: 0,
+      ...base,
+      prevWeight,
+      prevReps,
+    };
+  }
 
   // Bodyweight / unloaded: progress by reps.
   if (opts.bodyweight || prevWeight === null || prevWeight === 0) {

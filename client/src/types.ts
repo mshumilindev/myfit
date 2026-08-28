@@ -3,6 +3,8 @@
  * static-dynamic (a TUT-driven timed hold, logged as weight + hold seconds).
  * A drop/reverse-drop is still ONE set; its parts live in `drops`.
  */
+import type { BandRung } from './loads';
+
 export type SetType = 'working' | 'warmup' | 'drop' | 'reverse-drop' | 'static-dynamic';
 
 /** One drop inside a drop/reverse-drop set (after the start weight). */
@@ -113,6 +115,9 @@ export interface Gym {
   /** Equipment inventory (design EQ-3): what you ticked on this gym.
    *  Absent/empty = never audited → never warn. */
   inventory?: string[];
+  /** Band library (Load-entry C-5): colour → estimated resistance in kg, set
+   *  once per gym. Absent = use BAND_DEFAULTS. */
+  bandLibrary?: BandRung[];
 }
 
 /** Default geofence for a newly saved gym (AC-GYM-05). */

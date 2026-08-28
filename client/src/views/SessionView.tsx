@@ -57,11 +57,14 @@ import {
   latestWeight,
   exerciseUnit,
   setExerciseUnit,
+  loadTypeFor,
+  bandLibraryFor,
   type DisplayUnit,
   type SupersetGroup,
 } from '../store';
 import { liftingCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
+import { bandForKg, assistStack, BAND_HEX, type BandRung } from '../loads';
 import { LiveHero } from '../components/LiveHero';
 import { PlateSheet } from '../components/PlateSheet';
 import { GymPicker } from '../components/GymPicker';
@@ -425,6 +428,8 @@ export function SessionView(props: {
 
   function isRecordSet(ex: Exercise, s: SetEntry): boolean {
     if (!isStrengthExercise(ex)) return false;
+    // Assist (negative kg) and band (estimate) don't carry weight records.
+    if (loadTypeFor(ex) !== 'weight') return false;
     // Only plain working sets carry the record tint — a drop row already says
     // “drop”, and its record still counts in history (SS-3 note).
     if (setTypeOf(s) !== 'working' || (s.weight ?? 0) <= 0) return false;
@@ -448,7 +453,13 @@ export function SessionView(props: {
     upsertSet(workout!.id, ex.id, { ...vals, id });
     setRecentSetId(id);
     const type: SetType = vals.type ?? (vals.isWarmup ? 'warmup' : 'working');
-    if (type === 'working' && vals.weight !== null && vals.weight > base && base > 0) {
+    if (
+      type === 'working' &&
+      loadTypeFor(ex) === 'weight' &&
+      vals.weight !== null &&
+      vals.weight > base &&
+      base > 0
+    ) {
       props.shell.toast({
         kind: 'ok',
         icon: 'trophy',
@@ -580,6 +591,20 @@ export function SessionView(props: {
     const directLogBlocked = !timed && !marker && planned > 0 && ghost.weight === null;
     const muscles = resolveMuscles(ex);
     const equipment = equipmentFor(ex);
+    const loadType = loadTypeFor(ex);
+    const bandLib = bandLibraryFor(gym);
+    // Weight-cell text adapts to the load type (Load-entry C-3).
+    const loadCell = (kg: number | null): string => {
+      if (kg === null) return t.bodyweightShort;
+      if (loadType === 'assist') return `${fmtWeightValue(kg)} ${t.kgCol.toLowerCase()}`;
+      if (loadType === 'band') {
+        const b = bandForKg(kg, bandLib);
+        return b ? `${t.bandColor(b.color)} ~${fmtWeightValue(b.kg)}` : fmtWeightValue(kg);
+      }
+      return isDesktop ? fmtWeightKg(kg) : fmtWeightValue(kg);
+    };
+    const loadColHead =
+      loadType === 'assist' ? t.assistCol : loadType === 'band' ? t.bandCol : null;
     const showChips = !timed && !marker && (muscles.primary !== null || equipment.length > 0);
     // Progression target from this lift's own history (design PROG-1).
     const target =
@@ -595,6 +620,7 @@ export function SessionView(props: {
               equipment,
               primary: muscles.primary,
               bodyweight: ghost.weight === null,
+              loadType,
             },
           )
         : null;
@@ -864,7 +890,7 @@ export function SessionView(props: {
               <div className="set-grid header">
                 <span>#</span>
                 <span>{t.repsCol}</span>
-                <span>{isDesktop ? t.weightCol : t.kgCol}</span>
+                <span>{loadColHead ?? (isDesktop ? t.weightCol : t.kgCol)}</span>
                 <span>{isDesktop ? t.typeCol : ''}</span>
                 {isDesktop && <span />}
               </div>
@@ -910,12 +936,8 @@ export function SessionView(props: {
                     <span className="val">
                       {type === 'static-dynamic' ? fmtHold(s.durationMin) : s.reps}
                     </span>
-                    <span className="val">
-                      {s.weight === null
-                        ? t.bodyweightShort
-                        : isDesktop
-                          ? fmtWeightKg(s.weight)
-                          : fmtWeightValue(s.weight)}
+                    <span className={`val${loadType === 'assist' ? ' assist-val' : ''}`}>
+                      {loadCell(s.weight)}
                     </span>
                     {setKindLabel(ex, s, grp)}
                     {isDesktop && (
@@ -2044,6 +2066,7 @@ export function SessionView(props: {
           exercise={workout.exercises.find((e) => e.id === sheet.exId)!}
           set={sheet.set}
           ghost={sheet.ghost}
+          bandLibrary={bandLibraryFor(gym)}
           onSave={(vals) => {
             const ex = workout.exercises.find((e) => e.id === sheet.exId)!;
             if (sheet.set) {
@@ -3150,6 +3173,7 @@ function SetEditorSheet(props: {
   exercise: Exercise;
   set: SetEntry | null;
   ghost: GhostValues;
+  bandLibrary: readonly BandRung[];
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
   onClose: () => void;
@@ -3157,11 +3181,20 @@ function SetEditorSheet(props: {
   const { t } = useT();
   const timed = isTimedExercise(props.exercise);
   const kind = exerciseKind(props.exercise);
+  // Load type (Load-entry C): assist (negative kg help) / band (colour→kg
+  // estimate) / plain weight. The weight field morphs accordingly.
+  const loadType = loadTypeFor(props.exercise);
+  const isAssist = loadType === 'assist';
+  const isBand = loadType === 'band';
+  const bandLib = props.bandLibrary;
+  const defaultBandKg = bandLib[Math.min(1, bandLib.length - 1)]?.kg ?? 0;
   const [view, setView] = useState<'main' | 'type'>('main');
   const [type, setType] = useState<SetType>(props.set ? setTypeOf(props.set) : 'working');
   const [drops, setDropsState] = useState<DropEntry[]>(props.set?.drops ?? []);
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
-  const [weight, setWeight] = useState(props.set?.weight ?? props.ghost.weight ?? 0);
+  const [weight, setWeight] = useState(
+    props.set?.weight ?? props.ghost.weight ?? (isBand ? defaultBandKg : 0),
+  );
   const [durationMin, setDurationMin] = useState(
     props.set?.durationMin ??
       props.ghost.durationMin ??
@@ -3200,6 +3233,9 @@ function SetEditorSheet(props: {
   };
   const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
   const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
+  const currentBand: BandRung | null = isBand
+    ? (bandForKg(weight, bandLib) ?? bandLib[Math.min(1, bandLib.length - 1)] ?? null)
+    : null;
   const idx = props.set
     ? [...props.exercise.sets]
         .sort((a, b) => a.position - b.position)
@@ -3461,6 +3497,81 @@ function SetEditorSheet(props: {
                 </div>
               )}
             </div>
+          ) : isAssist ? (
+            <>
+              <div className="steppers">
+                <Stepper
+                  label={t.reps}
+                  value={reps}
+                  step={1}
+                  min={0}
+                  focused={focused === 'reps'}
+                  onFocus={() => setFocused('reps')}
+                  onChange={setReps}
+                />
+                <Stepper
+                  label={t.assistLabel}
+                  value={Math.abs(weight)}
+                  step={5}
+                  min={0}
+                  focused={focused === 'weight'}
+                  onFocus={() => setFocused('weight')}
+                  onChange={(v) => setWeight(-Math.abs(v))}
+                />
+              </div>
+              <div className="load-chips assist-chips">
+                {assistStack(weight).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    className={`load-chip${weight === v ? ' on' : ''}`}
+                    onClick={() => setWeight(v)}
+                  >
+                    {fmtWeightValue(v)}
+                  </button>
+                ))}
+              </div>
+              <div className="load-note">{t.assistNote}</div>
+            </>
+          ) : isBand ? (
+            <>
+              <div className="steppers">
+                <Stepper
+                  label={t.reps}
+                  value={reps}
+                  step={1}
+                  min={0}
+                  focused={focused === 'reps'}
+                  onFocus={() => setFocused('reps')}
+                  onChange={setReps}
+                />
+                <div className="band-readout">
+                  <span className="band-readout-lab">{t.bandLabel}</span>
+                  <span
+                    className="band-readout-val"
+                    style={{ color: currentBand ? BAND_HEX[currentBand.color] : undefined }}
+                  >
+                    {currentBand
+                      ? `${t.bandColor(currentBand.color)} · ~${fmtWeightValue(currentBand.kg)} ${t.kgCol.toLowerCase()}`
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+              <div className="load-chips band-chips">
+                {bandLib.map((r) => (
+                  <button
+                    key={r.color}
+                    type="button"
+                    className={`band-chip${currentBand?.color === r.color ? ' on' : ''}`}
+                    onClick={() => setWeight(r.kg)}
+                  >
+                    <span className="band-dot" style={{ background: BAND_HEX[r.color] }} />
+                    {t.bandColor(r.color)}
+                  </button>
+                ))}
+              </div>
+              <div className="load-note">{t.bandNote}</div>
+            </>
           ) : (
             strengthSteppers(
               reps,
@@ -3470,7 +3581,7 @@ function SetEditorSheet(props: {
               focused === 'reps' || focused === 'weight' ? focused : null,
             )
           )}
-          {unitEligible && !bw && (
+          {unitEligible && !isAssist && !isBand && !bw && (
             <div className="toggle-row unit-row">
               <Icon name="scales" />
               <span className="lab">{t.unitLabel}</span>
@@ -3483,10 +3594,10 @@ function SetEditorSheet(props: {
               </div>
             </div>
           )}
-          {unitEligible && unit === 'lb' && !bw && weight > 0 && (
+          {unitEligible && !isAssist && !isBand && unit === 'lb' && !bw && weight > 0 && (
             <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
           )}
-          {isBarbell && !bw && (
+          {isBarbell && !isAssist && !isBand && !bw && (
             <button className="toggle-row" onClick={() => setPlateOpen(true)}>
               <Icon name="barbell" />
               <span className="lab">{t.plateTitle}</span>
@@ -3495,11 +3606,13 @@ function SetEditorSheet(props: {
               </span>
             </button>
           )}
-          <button className="toggle-row" onClick={() => setBw((x) => !x)}>
-            <Icon name="barbell" />
-            <span className="lab">{t.bodyweightSet}</span>
-            <Switch on={bw} />
-          </button>
+          {!isAssist && !isBand && (
+            <button className="toggle-row" onClick={() => setBw((x) => !x)}>
+              <Icon name="barbell" />
+              <span className="lab">{t.bodyweightSet}</span>
+              <Switch on={bw} />
+            </button>
+          )}
           <button className="toggle-row" onClick={() => setView('type')}>
             <Icon
               name={

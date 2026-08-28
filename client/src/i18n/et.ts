@@ -553,6 +553,23 @@ export const et: Strings = {
   weightLb: 'Raskus, lb',
   unitLabel: 'Ühik',
   unitStoredKg: (v: string) => `Salvestatakse kui ${v} kg`,
+  assistCol: 'Abi',
+  bandCol: 'Kumm',
+  assistLabel: 'Abikaal',
+  assistNote: 'Vastukaal, mis aitab sind — mitte tõstetud raskus.',
+  bandLabel: 'Kumm',
+  bandNote: 'Kummi koormus on hinnang — pingutuse ja korduste jaoks, tonnaaži ei arvestata.',
+  bandColor: (c: string) =>
+    (
+      ({
+        yellow: 'Kollane',
+        green: 'Roheline',
+        red: 'Punane',
+        blue: 'Sinine',
+        black: 'Must',
+        purple: 'Lilla',
+      }) as Record<string, string>
+    )[c] ?? c,
   kcalShort: 'kal.',
   logActivity: 'Tegevus',
   actPickCap: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',

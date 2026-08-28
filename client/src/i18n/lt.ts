@@ -565,6 +565,23 @@ export const lt: Strings = {
   weightLb: 'Svoris, lb',
   unitLabel: 'Vienetai',
   unitStoredKg: (v: string) => `Įrašoma kaip ${v} kg`,
+  assistCol: 'Pagalba',
+  bandCol: 'Guma',
+  assistLabel: 'Pagalba',
+  assistNote: 'Atsvaras, kuris tau padeda — ne pakeltas svoris.',
+  bandLabel: 'Guma',
+  bandNote: 'Gumos apkrova yra įvertis — pastangoms ir kartojimams, į tonažą neįskaičiuojama.',
+  bandColor: (c: string) =>
+    (
+      ({
+        yellow: 'Geltona',
+        green: 'Žalia',
+        red: 'Raudona',
+        blue: 'Mėlyna',
+        black: 'Juoda',
+        purple: 'Violetinė',
+      }) as Record<string, string>
+    )[c] ?? c,
   kcalShort: 'kal.',
   logActivity: 'Veikla',
   actPickCap: 'Kardio ir atsigavimas taip pat skaičiuojami — Spotter mato visą krūvį.',

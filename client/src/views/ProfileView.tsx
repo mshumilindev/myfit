@@ -19,6 +19,7 @@ import { ConfirmDialog, Icon, LanguageSelector, Sheet, Switch, ProfileSkeleton }
 import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
+import { useStore, setGlobalWeightUnit } from '../store';
 import type { BodyMetrics } from '../types';
 import { GymThumb } from '../components/GymThumb';
 import type { Shell } from '../App';
@@ -123,6 +124,7 @@ export function ProfileView({
   embedded?: boolean;
 }) {
   const { t, locale } = useT();
+  const weightUnit = useStore().weightUnit;
   const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => {
     const cached = cachePeek<ProfileData>(`profile.${userId}`);
     return { userId, value: cached ? cached.data : 'loading' };
@@ -589,7 +591,18 @@ export function ProfileView({
                 <div className="profile-setting-row static">
                   <Icon name="scales" />
                   <span>{t.profileUnits}</span>
-                  <span>{t.profileUnitsKg}</span>
+                  <div className="seg2 unit-seg profile-unit-seg">
+                    {(['kg', 'lb'] as const).map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        className={weightUnit === u ? 'active' : ''}
+                        onClick={() => setGlobalWeightUnit(u)}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <button className="profile-setting-row" onClick={() => setPasswordEditing(true)}>
                   <Icon name="key" />
