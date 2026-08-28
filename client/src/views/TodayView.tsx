@@ -1207,19 +1207,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               )}
               <button
                 className="tp-btn"
-                onClick={() => setBackfill(true)}
-                aria-label={t.logPastSession}
-                title={t.logPastSession}
-              >
-                <Icon name="arrow-counter-clockwise" />
-              </button>
-              <button
-                className="tp-btn"
                 onClick={openActivitySheet}
                 aria-label={t.logActivity}
                 title={t.logActivity}
               >
                 <Icon name="heartbeat" />
+              </button>
+              <button
+                className="tp-btn"
+                onClick={() => setBackfill(true)}
+                aria-label={t.logPastSession}
+                title={t.logPastSession}
+              >
+                <Icon name="arrow-counter-clockwise" />
               </button>
               <button className="tp-start" onClick={startSession}>
                 <Icon name="play" weight="fill" />

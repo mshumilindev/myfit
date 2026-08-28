@@ -20349,9 +20349,13 @@ button.badge {
   display: none;
 }
 @media (max-width: 719.98px) {
-  /* Room so the last content clears the floating pill. */
-  .today-has-pill .pane-main {
+  /* Room so the last content (records live in .pane-side) clears the floating
+     pill — pad the scroll container itself, not one column. */
+  .today-has-pill.screen {
     padding-bottom: calc(84px + max(6px, var(--safe-bottom, 0px)));
+  }
+  .today-has-pill .pane-side {
+    padding-bottom: 4px;
   }
   .td-pill-wrap {
     position: fixed;
