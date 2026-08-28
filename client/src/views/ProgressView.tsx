@@ -450,7 +450,7 @@ export function ProgressView({
           </div>
         )}
 
-        {(seg === 'records' || (showDesktopDetail && seg !== 'muscle')) && (
+        {seg === 'records' && (
           <div>
             <div
               className="section-label"
@@ -514,7 +514,7 @@ export function ProgressView({
         )}
       </section>
 
-      {showDesktopDetail && selected && selectedRecord && (
+      {seg === 'records' && showDesktopDetail && selected && selectedRecord && (
         <section className="progress-detail-pane">
           <div>
             <div className="progress-detail-title">

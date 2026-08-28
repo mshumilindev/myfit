@@ -355,7 +355,7 @@ export const en = {
   progWhyHold: 'Beat your reps, then the weight goes up.',
   progWhyStall: 'Top set has stalled — deload and rebuild.',
   progWhyFirst: 'First time — find a solid working weight.',
-  volFine: 'Fine',
+  volFine: 'Muscles',
   volZones: 'Zones',
   volList: 'List',
   volMap: 'Map',

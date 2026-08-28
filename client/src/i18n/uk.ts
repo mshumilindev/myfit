@@ -351,7 +351,7 @@ export const uk: Strings = {
   progWhyHold: 'Побий свої повтори, тоді підніметься вага.',
   progWhyStall: 'Топ-сет застояв — розвантаж і відбудуйся.',
   progWhyFirst: 'Уперше — знайди робочу вагу.',
-  volFine: 'Детально',
+  volFine: 'Мʼязи',
   volZones: 'Зони',
   volList: 'Список',
   volMap: 'Мапа',

@@ -985,32 +985,26 @@ export function restDayKeys(periods: RestPeriod[] = state.restPeriods): Set<numb
   return set;
 }
 
-/** Toggle whether unlogged days count as rest (keeping the streak alive). */
-export function setRestCountsSkipped(on: boolean): void {
-  commitBody({ restCountsSkipped: on });
-}
-
 /**
  * Consistency streak in days: the unbroken run of days back from today where
- * each day was trained OR is a rest day (a rest period, or -- when the pref is
- * on -- any unlogged day). Today with nothing logged yet does not break it, and
- * rest days keep the chain alive, so a planned week off or a vacation never
- * resets the streak.
+ * each day was trained OR counts as rest. Unlogged past days always count as
+ * rest (an ordinary gap never resets the streak), as do explicit rest periods;
+ * today with nothing logged yet doesn't break the chain.
  */
 export function consistencyStreak(now: number = Date.now()): number {
   const finished = state.workouts.filter((w) => w.finishedAt !== null);
   if (finished.length === 0) return 0;
   const trained = new Set(finished.map((w) => dayKey(w.startedAt)));
   const rests = restDayKeys();
-  const countSkipped = !!state.bodyMetrics.restCountsSkipped;
   const today = dayKey(now);
   const firstDay = Math.min(...finished.map((w) => dayKey(w.startedAt)));
   let streak = 0;
   for (let d = today; d >= firstDay; d--) {
-    if (trained.has(d) || rests.has(d) || (countSkipped && d < today)) {
+    // A past day always counts (skipped days are rest); today counts only once
+    // something is logged or it falls within a rest period.
+    if (trained.has(d) || rests.has(d) || d < today) {
       streak += 1;
     } else if (d === today) {
-      // today, nothing logged yet -- don't break the chain, don't count it
       continue;
     } else {
       break;

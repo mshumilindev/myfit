@@ -351,7 +351,7 @@ export const pl: Strings = {
   progWhyHold: 'Pobij powtórzenia, potem wzrośnie ciężar.',
   progWhyStall: 'Seria szczytowa stanęła — deload i odbuduj.',
   progWhyFirst: 'Pierwszy raz — znajdź roboczy ciężar.',
-  volFine: 'Szczegółowo',
+  volFine: 'Mięśnie',
   volZones: 'Strefy',
   volList: 'Lista',
   volMap: 'Mapa',

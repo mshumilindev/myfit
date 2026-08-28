@@ -21,7 +21,6 @@ import {
   dismissReminder,
   dismissWeighInToday,
   endRestPeriod,
-  setRestCountsSkipped,
   startRestPeriod,
   logVisitAsWorkout,
   muscleWorkSorted,
@@ -45,7 +44,7 @@ import {
 } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
-import { Icon, Sheet, Switch } from '../ui';
+import { Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -1438,7 +1437,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       {addWeightOpen && (
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
-      {restSheetOpen && <RestSheet store={store} onClose={() => setRestSheetOpen(false)} />}
+      {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
       {progSheetOpen && (
         <Sheet onClose={() => setProgSheetOpen(false)} className="prog-suggest-sheet">
           <div className="ps-title">{t.progSuggestSheetTitle}</div>
@@ -1477,7 +1476,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 }
 
 /** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
-function RestSheet({ store, onClose }: { store: Store; onClose: () => void }) {
+function RestSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const [mode, setMode] = useState<'active' | 'off'>('active');
   const iso = (d: Date) => {
@@ -1524,17 +1523,6 @@ function RestSheet({ store, onClose }: { store: Store; onClose: () => void }) {
         </label>
       </div>
       <div className="rest-len">{t.restLength(days)}</div>
-      <button
-        type="button"
-        className="toggle-row rest-skip"
-        onClick={() => setRestCountsSkipped(!store.bodyMetrics.restCountsSkipped)}
-      >
-        <span className="trs-copy">
-          <span className="trs-title">{t.restCountSkipped}</span>
-          <span className="trs-sub">{t.restCountSkippedSub}</span>
-        </span>
-        <Switch on={!!store.bodyMetrics.restCountsSkipped} />
-      </button>
       <div className="rest-actions">
         <button className="btn btn-secondary" onClick={onClose}>
           {t.cancel}

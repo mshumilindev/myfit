@@ -347,7 +347,7 @@ export const et: Strings = {
   progWhyHold: 'Ületa oma kordused, siis tõuseb raskus.',
   progWhyStall: 'Tippseeria on seiskunud — tee deload ja taasta.',
   progWhyFirst: 'Esimest korda — leia tööraskus.',
-  volFine: 'Täpselt',
+  volFine: 'Lihased',
   volZones: 'Tsoonid',
   volList: 'Loend',
   volMap: 'Kaart',

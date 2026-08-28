@@ -360,7 +360,7 @@ export const lt: Strings = {
   progWhyHold: 'Pagerink pakartojimus, tada kils svoris.',
   progWhyStall: 'Viršutinė serija sustojo — sumažink ir atsistatyk.',
   progWhyFirst: 'Pirmą kartą — surask darbinį svorį.',
-  volFine: 'Detaliai',
+  volFine: 'Raumenys',
   volZones: 'Zonos',
   volList: 'Sąrašas',
   volMap: 'Žemėlapis',
