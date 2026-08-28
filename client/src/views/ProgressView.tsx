@@ -25,6 +25,7 @@ import {
   VOLUME_MUSCLES,
   VOLUME_ZONES,
   weeklyMuscleSets,
+  volumeHeatColors,
   zoneLandmark,
   zoneSets,
   ZONE_COLOR,
@@ -66,6 +67,7 @@ export function ProgressView({
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [seg, setSeg] = useState<'total' | 'muscle' | 'volume' | 'records'>('total');
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
+  const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
   const ptab = sub;
   const setPtab = onSub;
   const showDesktopDetail = useDesktopDetail();
@@ -233,6 +235,12 @@ export function ProgressView({
     .map((m) => ({ m, v: volThisWeek.get(m) ?? 0 }))
     .sort((a, b) => b.v - a.v);
   const maxMuscle = Math.max(1, ...muscleRows.map((r) => r.v));
+  // Brass heatmap: each muscle shaded by how much of this week's tonnage it got
+  // (faint -> full brass). Powers the desktop Total / By-muscle right column.
+  const brassColors: Partial<Record<MuscleGroup, string>> = {};
+  for (const { m, v } of muscleRows) if (v > 0) brassColors[m] = brassShade(v / maxMuscle);
+  // Zone-coloured volume heatmap for the desktop Volume right column.
+  const volHeat = volumeHeatColors(finished, nowTs, volGrain);
   const weekTotal = [...volThisWeek.values()].reduce((a, b) => a + b, 0);
   const emptyMuscles = muscleRows.filter((r) => r.v === 0).map((r) => t.muscleGroups[r.m]);
   const topMuscle = muscleRows.length > 0 && muscleRows[0].v > 0 ? muscleRows[0] : null;
@@ -406,7 +414,16 @@ export function ProgressView({
         {segControl}
         {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
         {seg === 'muscle' && muscleNote}
-        {seg === 'volume' && <VolumePanel finished={finished} nowTs={nowTs} t={t} />}
+        {seg === 'volume' && (
+          <VolumePanel
+            finished={finished}
+            nowTs={nowTs}
+            t={t}
+            grain={volGrain}
+            onGrain={setVolGrain}
+            desktop={showDesktopDetail}
+          />
+        )}
         {seg === 'total' && <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />}
 
         {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
@@ -513,6 +530,31 @@ export function ProgressView({
           </div>
         )}
       </section>
+
+      {showDesktopDetail && seg === 'volume' && (
+        <section className="progress-detail-pane vol-map-pane">
+          <div className="section-label">{t.volumeTab}</div>
+          <MuscleHeatmap colors={volHeat} />
+          <div className="vol-legend">
+            {(['under', 'productive', 'high', 'over'] as Zone[]).map((z) => (
+              <span key={z} className="vol-leg">
+                <span className="sw" style={{ background: ZONE_COLOR[z] }} />
+                {t.volZone[z]}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {showDesktopDetail && (seg === 'muscle' || seg === 'total') && (
+        <section className="progress-detail-pane vol-map-pane">
+          <div className="section-label">{t.volumeThisWeek}</div>
+          <MuscleHeatmap colors={brassColors} />
+          <div className="brass-legend">
+            <span className="brass-grad" aria-hidden />
+          </div>
+        </section>
+      )}
 
       {seg === 'records' && showDesktopDetail && selected && selectedRecord && (
         <section className="progress-detail-pane">
@@ -720,6 +762,12 @@ function fmtSets(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
+/** Brass shade for a 0..1 intensity: faint graphite-brass -> full brass. */
+function brassShade(frac: number): string {
+  const pct = Math.round(26 + 64 * Math.min(1, Math.max(0, frac)));
+  return `color-mix(in srgb, var(--color-accent) ${pct}%, var(--color-neutral-800))`;
+}
+
 interface VolRow {
   key: string;
   label: string;
@@ -734,8 +782,23 @@ interface VolRow {
  * against its MEV/MAV/MRV range, as a zoned bar list or an anatomical heatmap,
  * at fine (17-group) or coarse (6-zone) grain.
  */
-function VolumePanel({ finished, nowTs, t }: { finished: Workout[]; nowTs: number; t: T }) {
-  const [grain, setGrain] = useState<'fine' | 'zones'>('fine');
+function VolumePanel({
+  finished,
+  nowTs,
+  t,
+  grain,
+  onGrain,
+  desktop,
+}: {
+  finished: Workout[];
+  nowTs: number;
+  t: T;
+  grain: 'fine' | 'zones';
+  onGrain: (g: 'fine' | 'zones') => void;
+  desktop: boolean;
+}) {
+  // On desktop the anatomical map lives in the right column, so the panel shows
+  // only the list; on mobile it toggles list <-> map inline.
   const [mapView, setMapView] = useState(false);
   const [fixMuscle, setFixMuscle] = useState<MuscleGroup | null>(null);
 
@@ -794,26 +857,28 @@ function VolumePanel({ finished, nowTs, t }: { finished: Workout[]; nowTs: numbe
     <div className="vol-panel">
       <div className="vol-controls">
         <div className="seg2">
-          <button className={grain === 'fine' ? 'active' : ''} onClick={() => setGrain('fine')}>
+          <button className={grain === 'fine' ? 'active' : ''} onClick={() => onGrain('fine')}>
             {t.volFine}
           </button>
-          <button className={grain === 'zones' ? 'active' : ''} onClick={() => setGrain('zones')}>
+          <button className={grain === 'zones' ? 'active' : ''} onClick={() => onGrain('zones')}>
             {t.volZones}
           </button>
         </div>
-        <div className="seg2">
-          <button className={!mapView ? 'active' : ''} onClick={() => setMapView(false)}>
-            {t.volList}
-          </button>
-          <button className={mapView ? 'active' : ''} onClick={() => setMapView(true)}>
-            {t.volMap}
-          </button>
-        </div>
+        {!desktop && (
+          <div className="seg2">
+            <button className={!mapView ? 'active' : ''} onClick={() => setMapView(false)}>
+              {t.volList}
+            </button>
+            <button className={mapView ? 'active' : ''} onClick={() => setMapView(true)}>
+              {t.volMap}
+            </button>
+          </div>
+        )}
       </div>
 
       {cold && <div className="vol-cold">{t.volColdStart}</div>}
 
-      {mapView ? (
+      {mapView && !desktop ? (
         <div className="vol-map">
           <MuscleHeatmap colors={heatColors} />
           <div className="vol-legend">

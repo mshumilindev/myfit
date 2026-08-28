@@ -148,3 +148,32 @@ export const ZONE_COLOR: Record<Zone, string> = {
   high: 'var(--color-accent)',
   over: 'var(--color-danger)',
 };
+
+/**
+ * Per-muscle heatmap colours for the trailing week: each muscle painted by its
+ * zone (fine grain) or its zone's aggregate zone (coarse grain). Shared by the
+ * list's own mini-map and the desktop right-column figure.
+ */
+export function volumeHeatColors(
+  finished: Workout[],
+  now: number,
+  grain: 'fine' | 'zones',
+  days = 7,
+): Partial<Record<MuscleGroup, string>> {
+  const per = weeklyMuscleSets(finished, now, days);
+  const out: Partial<Record<MuscleGroup, string>> = {};
+  if (grain === 'fine') {
+    for (const m of VOLUME_MUSCLES) {
+      const s = per.get(m) ?? 0;
+      if (s > 0) out[m] = ZONE_COLOR[classifyZone(s, LANDMARKS[m] as Landmark)];
+    }
+  } else {
+    for (const z of VOLUME_ZONES) {
+      const s = zoneSets(per, z.members);
+      if (s <= 0) continue;
+      const c = ZONE_COLOR[classifyZone(s, zoneLandmark(z.members))];
+      for (const m of z.members) out[m] = c;
+    }
+  }
+  return out;
+}
