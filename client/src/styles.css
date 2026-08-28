@@ -1873,15 +1873,20 @@ i > svg {
   height: 100%;
   object-fit: cover;
 }
+/* Frosted graphite glass over the photo — the same look as our liquid-glass
+   pills: blur + a graphite tint darkened toward the bottom, so the photo reads
+   as ambient texture and the white text stays crisp. */
 .past-hero-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;
+  -webkit-backdrop-filter: blur(9px) saturate(1.05) brightness(0.78);
+  backdrop-filter: blur(9px) saturate(1.05) brightness(0.78);
   background: linear-gradient(
     to top,
-    rgba(15, 16, 19, 0.95) 6%,
-    rgba(15, 16, 19, 0.62) 48%,
-    rgba(15, 16, 19, 0.5)
+    rgba(16, 17, 20, 0.9) 0%,
+    rgba(16, 17, 20, 0.68) 55%,
+    rgba(16, 17, 20, 0.62)
   );
 }
 .session-top.past-hero .back {
@@ -1889,7 +1894,7 @@ i > svg {
   top: 8px;
   left: 8px;
   z-index: 3;
-  color: var(--color-neutral-100);
+  color: #fff;
 }
 .session-top.past-hero > .trash,
 .session-top.past-hero > .btn {
@@ -1903,6 +1908,18 @@ i > svg {
   z-index: 2;
   align-self: flex-end;
   width: 100%;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+/* All header text over the photo goes white for legibility. */
+.session-top.past-hero .kicker {
+  color: rgba(255, 255, 255, 0.82);
+}
+.session-top.past-hero .title {
+  color: #fff;
+}
+.session-top.past-hero .past-gym-row,
+.session-top.past-hero .past-gym-row .edit {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .session-top.live-toolbar::before {
