@@ -468,14 +468,16 @@ export function ExerciseDetailView({
   // --- desktop (RICH-2 / SPARSE) — media left, text right -------------------
   return (
     <div className="screen exd desktop">
-      <button className="back exd-back-top" onClick={onClose} aria-label={t.backAction}>
-        <Icon name="caret-left" />
-      </button>
+      <div className="exd-top-row">
+        <button className="back exd-back-top" onClick={onClose} aria-label={t.backAction}>
+          <Icon name="caret-left" />
+        </button>
+        <div className="exd-crumb">
+          {t.exercisesTabLabel} / {canonical}
+        </div>
+      </div>
       <div className="exd-panes">
         <div className="exd-left">
-          <div className="exd-crumb">
-            {t.exercisesTabLabel} / {canonical}
-          </div>
           {renderMedia('16-9')}
           {formPhotos}
         </div>

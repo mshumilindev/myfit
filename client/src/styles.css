@@ -12918,6 +12918,12 @@ button.exd-media {
   padding: var(--space-5) var(--gutter) var(--space-8);
   gap: var(--space-4);
 }
+.exd-top-row {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .exd-back-top {
   flex: none;
   align-self: flex-start;
@@ -12932,6 +12938,9 @@ button.exd-media {
   padding: 4px;
   margin-left: -6px;
 }
+.exd-top-row .exd-crumb {
+  margin: 0;
+}
 .exd-panes {
   flex: 1;
   min-height: 0;
@@ -12943,11 +12952,15 @@ button.exd-media {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  /* The panes fill the viewport (flex:1) and their content overflows into the
+     scroll; put the bottom breathing room on the columns so it isn't eaten. */
+  padding-bottom: var(--space-6);
 }
 .exd-right {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  padding-bottom: var(--space-6);
 }
 .exd-crumb {
   font-size: 13px;
@@ -20509,4 +20522,15 @@ button.badge {
   .td-pill .tp-start i {
     font-size: 15px;
   }
+}
+
+/* Off-screen SVG filter defs (liquid-glass) — must stay in the render tree so
+   url(#liquid-glass) resolves, but take up no layout space (a bare <svg> with
+   width/height 0 still reserved room and pushed desktop content down). */
+.glass-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
