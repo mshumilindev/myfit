@@ -638,7 +638,7 @@ export function ProgressView({
             </div>
           </div>
           {lens === 'readiness' ? (
-            <ReadinessLens finished={finished} now={nowTs} />
+            <ReadinessLens finished={finished} now={nowTs} view="map" />
           ) : (
             <>
               <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
@@ -814,7 +814,15 @@ export function ProgressView({
       <div className="progress-pill-wrap">
         <div className="progress-pill">
           <Icon name="chart-line-up" weight="fill" />
-          <span className="pp-label">{segLabel(seg, t)}</span>
+          <span className="pp-label">
+            {seg === 'volume'
+              ? lens === 'fatigue'
+                ? t.fatigueTab
+                : lens === 'readiness'
+                  ? t.readinessKicker
+                  : t.volumeTab
+              : segLabel(seg, t)}
+          </span>
           {seg === 'volume' && (
             <>
               <span className="pp-sep" aria-hidden />
@@ -1185,20 +1193,11 @@ function VolumePanel({
       {cold && <div className="vol-cold">{t.volColdStart}</div>}
 
       {lens === 'readiness' ? (
-        <div className="vol-map">
-          <div className="seg2 seg3 lens-seg-m">
-            <button className="" onClick={() => onLens('volume')}>
-              {t.volumeTab}
-            </button>
-            <button className="" onClick={() => onLens('fatigue')}>
-              {t.fatigueTab}
-            </button>
-            <button className="active" onClick={() => onLens('readiness')}>
-              {t.readinessKicker}
-            </button>
-          </div>
-          <ReadinessLens finished={finished} now={nowTs} />
-        </div>
+        <ReadinessLens
+          finished={finished}
+          now={nowTs}
+          view={!desktop && mapView ? 'map' : 'list'}
+        />
       ) : mapView && !desktop ? (
         <div className="vol-map">
           <div className="seg2 seg3 lens-seg-m">

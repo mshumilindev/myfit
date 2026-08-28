@@ -5,10 +5,10 @@
  * of the most relevant muscles) whose "Full read" opens the Progress readiness
  * lens; `ReadinessLens` is that full body-map read.
  */
-import { useLayoutEffect, useRef } from 'react';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
 import { MuscleHeatmap, MuscleIcon } from './Muscle';
+import type { Nudge } from './NudgeStack';
 import {
   muscleReadiness,
   readinessColors,
@@ -68,50 +68,6 @@ function orderedRows(map: Map<MuscleGroup, MuscleReadiness>): MuscleReadiness[] 
     .sort((a, b) => rank[a.state] - rank[b.state] || a.readiness - b.readiness);
 }
 
-/** Chips + a trailing "Full read"; chips that don't fit drop from the end so the
- *  row never ends on a half-clipped chip and never scrolls. */
-function ReadinessStrip({ rows }: { rows: MuscleReadiness[] }) {
-  const { t } = useT();
-  const ref = useRef<HTMLDivElement>(null);
-  const key = rows.map((r) => r.muscle).join(',');
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const fit = () => {
-      const chips = Array.from(el.querySelectorAll<HTMLElement>('[data-chip]'));
-      chips.forEach((c) => (c.style.display = ''));
-      for (let i = chips.length - 1; i >= 0 && el.scrollWidth > el.clientWidth; i--) {
-        chips[i].style.display = 'none';
-      }
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [key]);
-  return (
-    <div className="rd-strip" ref={ref}>
-      {rows.map((r) => (
-        <span key={r.muscle} className="rd-chip" data-chip>
-          <MuscleIcon
-            muscle={r.muscle}
-            variant="row"
-            tone={r.daysSince === null ? 'muted' : 'primary'}
-          />
-          <span className="rd-chip-name">{t.muscleGroups[r.muscle]}</span>
-          <span className="rd-chip-pct tnum" style={{ color: READINESS_COLOR[r.state] }}>
-            {round(r.readiness * 100)}%
-          </span>
-        </span>
-      ))}
-      <span className="rd-chip rd-more">
-        {t.rdDetails}
-        <Icon name="caret-right" />
-      </span>
-    </div>
-  );
-}
-
 function ReadinessRow({ r }: { r: MuscleReadiness }) {
   const { t } = useT();
   return (
@@ -138,40 +94,77 @@ function ReadinessRow({ r }: { r: MuscleReadiness }) {
   );
 }
 
-/** Today's readiness card. Its own banner (lazurite left border + tint), the
- *  daily verdict, a strip of the most relevant muscles; opens the Progress
- *  readiness lens. Null on a cold start (too little history). */
-export function ReadinessCard({ finished, now }: { finished: Workout[]; now: number }) {
+/** Body of the readiness nudge in the stack: the per-muscle list + one
+ *  recommendation. The verdict lead is the nudge's title, so it isn't repeated. */
+function ReadinessNudgeBody({ finished, now }: { finished: Workout[]; now: number }) {
   const { t } = useT();
   const map = muscleReadiness(finished, now);
-  const trained = [...map.values()].filter((r) => r.daysSince !== null);
-  if (trained.length < 3) return null;
-
-  const v = verdict(map, t);
-  const cooling = recoveringMuscles(map).length;
-  const readyN = readyMuscles(map).filter((m) => map.get(m)?.state === 'ready').length;
-  const strip = orderedRows(map).slice(0, 8);
-
+  const rows = orderedRows(map);
+  const stale = staleMuscles(map)
+    .slice(0, 3)
+    .map((r) => t.muscleGroups[r.muscle]);
+  const ready = readyMuscles(map)
+    .filter((m) => map.get(m)?.state === 'ready')
+    .slice(0, 3)
+    .map((m) => t.muscleGroups[m]);
+  const reco = ready.length ? ready : stale;
   return (
-    <button className="rd-card" onClick={() => (window.location.hash = READINESS_LENS_HASH)}>
-      <div className="rd-card-head">
-        <span className="rd-kicker">
-          <Icon name="heartbeat" weight="fill" />
-          {t.readinessKicker}
-        </span>
-        <span className="rd-counts tnum">
-          {t.rdReadyN(readyN)} · {t.rdCoolingN(cooling)}
-        </span>
+    <div className="rd-lens">
+      <div className="rd-list">
+        {rows.map((r) => (
+          <ReadinessRow key={r.muscle} r={r} />
+        ))}
       </div>
-      <div className="rd-card-lead">{v.lead}</div>
-      <ReadinessStrip rows={strip} />
-    </button>
+      {reco.length > 0 && (
+        <div className="rd-reco">
+          <Icon name="check-circle" weight="fill" />
+          <span>{t.rdReco(reco.join(' · '))}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
-/** The full readiness read for the Progress volume lens: body map tinted by
- *  readiness, a per-muscle list, one recommendation. */
-export function ReadinessLens({ finished, now }: { finished: Workout[]; now: number }) {
+/** Build the readiness nudge for the Today stack, or null on a cold start.
+ *  Expands to the per-muscle read; "Full read" opens the Progress readiness lens. */
+export function buildReadinessNudge(finished: Workout[], now: number, t: T): Nudge | null {
+  const map = muscleReadiness(finished, now);
+  const trained = [...map.values()].filter((r) => r.daysSince !== null);
+  if (trained.length < 3) return null;
+  return {
+    id: 'readiness',
+    tone: 'readiness',
+    icon: 'heartbeat',
+    kicker: t.readinessKicker,
+    title: verdict(map, t).lead,
+    body: <ReadinessNudgeBody finished={finished} now={now} />,
+    actions: (close) => (
+      <button
+        className="prog-banner-cta"
+        onClick={() => {
+          window.location.hash = READINESS_LENS_HASH;
+          close();
+        }}
+      >
+        {t.rdDetails}
+        <Icon name="caret-right" weight="bold" />
+      </button>
+    ),
+  };
+}
+
+/** The readiness read for the Progress volume lens. `view` mirrors the panel's
+ *  List/Map switch: 'map' shows the tinted body map + legend, 'list' the
+ *  per-muscle list, 'full' both. Verdict + recommendation show in every view. */
+export function ReadinessLens({
+  finished,
+  now,
+  view = 'full',
+}: {
+  finished: Workout[];
+  now: number;
+  view?: 'full' | 'map' | 'list';
+}) {
   const { t } = useT();
   const map = muscleReadiness(finished, now);
   const rows = orderedRows(map);
@@ -185,26 +178,34 @@ export function ReadinessLens({ finished, now }: { finished: Workout[]; now: num
     .map((m) => t.muscleGroups[m]);
   const reco = ready.length ? ready : stale;
   if (rows.length === 0) return <div className="rd-lens-empty">{t.rdColdStart}</div>;
+  const showMap = view !== 'list';
+  const showList = view !== 'map';
   return (
     <div className="rd-lens">
       <div className="rd-verdict">
         <div className="rd-lead">{v.lead}</div>
         {v.why && <div className="rd-why">{v.why}</div>}
       </div>
-      <MuscleHeatmap colors={readinessColors(map)} className="rd-map" />
-      <div className="rd-legend">
-        {(['recovering', 'nearly', 'ready', 'stale'] as const).map((s) => (
-          <span key={s} className="rd-leg">
-            <span className="sw" style={{ background: READINESS_COLOR[s] }} />
-            {t.rdState[s]}
-          </span>
-        ))}
-      </div>
-      <div className="rd-list">
-        {rows.map((r) => (
-          <ReadinessRow key={r.muscle} r={r} />
-        ))}
-      </div>
+      {showMap && (
+        <>
+          <MuscleHeatmap colors={readinessColors(map)} className="rd-map" />
+          <div className="rd-legend">
+            {(['recovering', 'nearly', 'ready', 'stale'] as const).map((s) => (
+              <span key={s} className="rd-leg">
+                <span className="sw" style={{ background: READINESS_COLOR[s] }} />
+                {t.rdState[s]}
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+      {showList && (
+        <div className="rd-list">
+          {rows.map((r) => (
+            <ReadinessRow key={r.muscle} r={r} />
+          ))}
+        </div>
+      )}
       {reco.length > 0 && (
         <div className="rd-reco">
           <Icon name="check-circle" weight="fill" />
