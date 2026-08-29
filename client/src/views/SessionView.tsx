@@ -349,7 +349,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
