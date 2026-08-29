@@ -353,7 +353,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // this weekday, from history. Hidden mid-session, without weekday history, or
   // once today's session is already logged.
   const prediction = (() => {
-    if (open || trainedToday) return null;
+    if (trainedToday) return null;
     const dow = new Date(now).getDay();
     const sameDow = finished
       .filter((w) => new Date(w.startedAt).getDay() === dow)
@@ -392,7 +392,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
   };
   const weighReminder = (() => {
-    if (open) return null;
     const ws = store.bodyMetrics.weights;
     if (ws.length < 2) return null;
     const dowCount = new Array(7).fill(0);
@@ -469,25 +468,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const deltaPct = weeks[8] > 0 ? Math.round(((weeks[9] - weeks[8]) / weeks[8]) * 100) : null;
 
   const streakDays = consistencyStreak(pbNow);
-
-  const livePlannedSets = open
-    ? open.exercises.reduce((sum, ex) => {
-        if ((ex.plannedSets ?? 0) > 0) return sum + (ex.plannedSets ?? 0);
-        return sum + Math.max(ex.sets.length, ex.kind === 'strength' ? 1 : 1);
-      }, 0)
-    : 0;
-  const liveDoneSets = open ? workoutSets(open) : 0;
-  const liveProgressPct =
-    livePlannedSets > 0 ? Math.min(100, Math.round((liveDoneSets / livePlannedSets) * 100)) : 0;
-  const livePrimaryName =
-    open?.exercises.find((ex) => ex.sets.length < (ex.plannedSets ?? ex.sets.length + 1))?.name ??
-    open?.exercises[0]?.name ??
-    t.today;
-  const liveExerciseSummary = open?.exercises
-    .map((ex) => ex.name.trim())
-    .filter(Boolean)
-    .slice(0, 4)
-    .join(' · ');
 
   useEffect(() => {
     callFn<{ assignment: ProgramAssignment | null }>('programMine')
@@ -570,7 +550,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const suggest = ((): { variant: 'new' | 'drifted' } | null => {
     // Anyone who trains on their own Today (members + a solo admin/owner); never
     // a trainer viewing clients, and never mid-session.
-    if (getRole() === 'trainer' || open) return null;
+    if (getRole() === 'trainer') return null;
     if (!programReadiness.ready) return null;
     let dismissedAt = 0;
     try {
@@ -607,7 +587,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // Analysis nudge (Today → Trends): surfaces when Spotter has flagged actual
   // issues (risk/warn insights) — joins the deck, no separate dismiss.
   const analysisNudge = ((): { count: number; level: string; labels: string[] } | null => {
-    if (getRole() === 'trainer' || open) return null;
+    if (getRole() === 'trainer') return null;
     const res = computeTrends(finished, store.bodyMetrics, now);
     // A "quick win" is something to FIX — risks and warnings. FYI stats and
     // on-track wins are not counted.
@@ -630,7 +610,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // "likely today" plaque. Each carries a `priority` (higher = more urgent) that
   // fixes its order in the deck and the expanded overlay.
   const nudges: Nudge[] = [];
-  const readinessNudge = !open ? buildReadinessNudge(finished, now, t) : null;
+  const readinessNudge = buildReadinessNudge(finished, now, t);
   if (readinessNudge) nudges.push(readinessNudge);
   if (analysisNudge) {
     nudges.push({
@@ -686,7 +666,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // history). This plaque sits above the program card and is reworded away from
   // "likely" / "from your history".
   const programTodayPlan = (() => {
-    if (open || !assignment || !assignedActive || trainedToday) return null;
+    if (!assignment || !assignedActive || trainedToday) return null;
     const day = todayWeekday;
     const items = assignment.program.items.filter((i) => i.day === day);
     const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
@@ -714,7 +694,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // A program rest day: an active plan is assigned but this weekday prescribes
   // no work — and nothing's been logged yet, nor is a rest period already running.
   const programRestDay =
-    !open &&
     !activeRest &&
     !!assignment &&
     assignedActive &&
@@ -799,7 +778,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       ),
     });
   }
-  if (reminder && !open) {
+  if (reminder) {
     nudges.push({
       id: 'visit',
       tone: 'body',
@@ -859,7 +838,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       ),
     });
   }
-  if (!open && hasHistory && playbook.plays.length > 0) {
+  if (hasHistory && playbook.plays.length > 0) {
     nudges.push({
       id: 'playbook',
       tone: 'suggest',
@@ -909,7 +888,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     };
   })();
 
-  const programCard = !open && assignment && assignedActive && (
+  const programCard = assignment && assignedActive && (
     <section className="today-program-card">
       <div className="program-card-head">
         <Icon name="copy" />
@@ -1068,59 +1047,53 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   })();
 
   return (
-    <div
-      className={`screen paned${open ? ' today-live-mode' : ''}${
-        !open && !liveAct && hasHistory ? ' today-has-pill' : ''
-      }`}
-    >
+    <div className={`screen paned${!liveAct && hasHistory ? ' today-has-pill' : ''}`}>
       <div className="pane-main">
-        {open && <h2 className="visually-hidden">{t.today}</h2>}
-        {!open &&
-          (hasHistory ? (
-            <div className="td-topbar">
-              <div>
-                <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
-                <h2>{todayHeading}</h2>
-              </div>
-              <div className="td-topbar-actions">
-                <SyncChip store={store} />
-                <div className="td-header-ctas">
-                  {!activeRest && (
-                    <button className="btn btn-secondary" onClick={() => setRestSheetOpen(true)}>
-                      <Icon name="clock-countdown" />
-                      {t.restStartCta}
-                    </button>
-                  )}
-                  {!liveAct && (
-                    <button className="btn btn-secondary" onClick={openActivitySheet}>
-                      <Icon name="heartbeat" />
-                      {t.logActivity}
-                    </button>
-                  )}
-                  <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
-                    <Icon name="arrow-counter-clockwise" />
-                    {t.logPastSession}
-                  </button>
-                  {!liveAct && (
-                    <button className="btn btn-primary" onClick={startSession}>
-                      <Icon name="play" />
-                      {t.startSessionLabel}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="td-topbar">
+        {hasHistory ? (
+          <div className="td-topbar">
+            <div>
               <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
-              <div className="td-topbar-actions">
-                <SyncChip store={store} />
+              <h2>{todayHeading}</h2>
+            </div>
+            <div className="td-topbar-actions">
+              <SyncChip store={store} />
+              <div className="td-header-ctas">
+                {!activeRest && (
+                  <button className="btn btn-secondary" onClick={() => setRestSheetOpen(true)}>
+                    <Icon name="clock-countdown" />
+                    {t.restStartCta}
+                  </button>
+                )}
+                {!liveAct && (
+                  <button className="btn btn-secondary" onClick={openActivitySheet}>
+                    <Icon name="heartbeat" />
+                    {t.logActivity}
+                  </button>
+                )}
+                <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
+                  <Icon name="arrow-counter-clockwise" />
+                  {t.logPastSession}
+                </button>
+                {!liveAct && (
+                  <button className="btn btn-primary" onClick={startSession}>
+                    <Icon name="play" />
+                    {t.startSessionLabel}
+                  </button>
+                )}
               </div>
             </div>
-          ))}
+          </div>
+        ) : (
+          <div className="td-topbar">
+            <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
+            <div className="td-topbar-actions">
+              <SyncChip store={store} />
+            </div>
+          </div>
+        )}
 
         {banners}
-        {!open && liveAct && (
+        {liveAct && (
           <button
             className={`td-resume-activity cat-${activityCategory(liveAct)}`}
             onClick={() => shell.openOverlay({ screen: 'activity' })}
@@ -1138,7 +1111,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </span>
           </button>
         )}
-        {!open && activeRest && (
+        {activeRest && (
           <div
             className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
           >
@@ -1205,13 +1178,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         )}
         <NudgeStack nudges={nudges} />
         {programCard}
-        {!open && !(assignment && assignedActive) && hasHistory && (
+        {!(assignment && assignedActive) && hasHistory && (
           <div className="today-weekstrip-card">
             <WeekStrip />
           </div>
         )}
 
-        {!open && !liveAct && hasHistory && (
+        {!liveAct && hasHistory && (
           <div className="td-pill-wrap">
             <svg className="glass-defs" aria-hidden width="0" height="0">
               <filter
@@ -1274,7 +1247,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
-        {!open && hasHistory && playbook.plays.length === 0 && (
+        {hasHistory && playbook.plays.length === 0 && (
           <button className="td-templates-link" onClick={() => shell.goPlaybook()}>
             <Icon name="cards" />
             <span className="tl-body">
@@ -1285,112 +1258,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </button>
         )}
 
-        {open ? (
-          <>
-            <section className="today-live-summary">
-              <div className="today-live-summary-head">
-                <Icon name="list-checks" />
-                <span>{liveExerciseSummary || livePrimaryName}</span>
-                <strong>
-                  {liveProgressPct}% ·{' '}
-                  {t.progSetsDone(liveDoneSets, livePlannedSets || liveDoneSets)}
-                </strong>
-              </div>
-              <div className="today-live-segments">
-                {Array.from({ length: Math.max(livePlannedSets, liveDoneSets, 1) }, (_, i) => (
-                  <span key={i} className={i < liveDoneSets ? 'done' : ''} />
-                ))}
-              </div>
-              <p>{t.progGhostDivision}</p>
-            </section>
-
-            <div className="td-history">
-              <div className="section-label" style={{ marginBottom: 8 }}>
-                {t.recent}
-              </div>
-              <span className="visually-hidden">{t.tdHistory}</span>
-              <div className="desktop-only">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>{t.colDate}</th>
-                      <th>{t.colSession}</th>
-                      <th>{t.colSets}</th>
-                      <th>{t.volumeCol}</th>
-                      <th>{t.duration}</th>
-                      {suggestOn && <th>{t.musclesCol}</th>}
-                      <th className="td-history-dots"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {finished.slice(0, 5).map((w) => (
-                      <tr
-                        key={w.id}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() =>
-                          shell.openOverlay({ screen: 'past-workout', workoutId: w.id })
-                        }
-                      >
-                        <td>{fmtShortDate(w.startedAt, locale)}</td>
-                        <td>{sessionTitle(w)}</td>
-                        <td>{workoutSets(w)}</td>
-                        <td>{fmtKg(workoutVolumeKg(w))}</td>
-                        <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
-                        {suggestOn && (
-                          <td className="td-muscles">
-                            <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
-                          </td>
-                        )}
-                        <td className="td-history-dots">
-                          <Icon name="dots-three" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="mobile-only">
-                {finished.slice(0, 4).map((w) => (
-                  <button
-                    key={w.id}
-                    className="recent-row"
-                    onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: w.id })}
-                  >
-                    <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
-                    <span style={{ flex: 1 }}>
-                      <span className="name">{sessionTitle(w)}</span>
-                      <div className="stats">
-                        {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
-                        {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
-                      </div>
-                      {suggestOn && sessionMuscles(w).length > 0 && (
-                        <div className="recent-muscles">
-                          <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
-                        </div>
-                      )}
-                    </span>
-                    <Icon name="arrow-up-right" className="go" />
-                  </button>
-                ))}
-              </div>
-              {finished.length > 5 && (
-                <button
-                  className="td-history-all"
-                  onClick={() => shell.openOverlay({ screen: 'history' })}
-                >
-                  {t.seeAllHistory}
-                  <Icon name="arrow-up-right" />
-                </button>
-              )}
-              <RecentActivityList
-                activities={store.activities}
-                bodyKg={bodyKg}
-                t={t}
-                locale={locale}
-              />
-            </div>
-          </>
-        ) : hasHistory ? (
+        {hasHistory ? (
           <>
             <div className="td-stats">
               <div className="td-stat">
@@ -1564,17 +1432,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <div className="td-empty-title">{t.tdEmptyTitle}</div>
             <div className="td-empty-body">{t.tdEmptyBody}</div>
             <div className="td-empty-actions">
-              {!open && (
-                <button className="btn btn-primary" onClick={startSession}>
-                  <Icon name="play" />
-                  {t.startFirstSession}
-                </button>
-              )}
+              <button className="btn btn-primary" onClick={startSession}>
+                <Icon name="play" />
+                {t.startFirstSession}
+              </button>
               <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
                 {t.logPastSession}
               </button>
             </div>
-            {!open && store.gyms.length === 0 && (
+            {store.gyms.length === 0 && (
               <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
                 <span className="gym-hint-icon">
                   <Icon name="map-pin" />

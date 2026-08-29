@@ -677,7 +677,7 @@ export function App() {
       <div className="main-col">
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
-            <SpotterMark size={22} variant="tight" plate={false} className="app-brand-logo" />
+            <SpotterMark size={22} variant="glyph" plate={false} className="app-brand-logo" />
             <span className="app-brand-word">
               spotter
               <span className="app-brand-dot" aria-hidden />
@@ -700,7 +700,7 @@ export function App() {
             offline={store.syncStatus === 'offline'}
             queued={store.queue.length}
             onResume={() => setOverlay({ screen: 'session', workoutId: open.id })}
-            mode={effectiveTab === 'today' ? 'today' : 'compact'}
+            mode="compact"
           />
         )}
         <Suspense fallback={<ScreenFallback />}>
