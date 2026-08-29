@@ -5802,7 +5802,8 @@ i > svg {
   height: 148px;
 }
 .live-hero.session-live-hero {
-  height: 126px;
+  /* Same slim bar as the compact hero on every other screen. */
+  height: 52px;
 }
 .live-hero.offline {
   box-shadow: inset 0 -1px 0 var(--color-danger);
@@ -5917,7 +5918,10 @@ i > svg {
   color: var(--color-accent-300);
 }
 .session-live-hero .live-timer {
-  font-size: 34px;
+  font-size: 20px;
+}
+.session-live-hero .live-meta {
+  color: var(--color-neutral-400);
 }
 .live-hero-actions {
   position: absolute;
@@ -9841,13 +9845,13 @@ i > svg {
 }
 
 .session-live .session-top.live-toolbar > .live-hero {
-  height: 126px;
+  height: 52px;
 }
 
 .session-live .session-top.live-toolbar > .back {
   position: absolute;
   z-index: 5;
-  top: 12px;
+  top: 8px;
   left: 14px;
   width: 36px;
   height: 36px;
@@ -9861,9 +9865,9 @@ i > svg {
    hero, so they can never stack on each other. Mobile keeps them top-right
    (design G-10); desktop drops them into the bottom stat row (design GW-04). */
 .session-live .session-live-hero .live-hero-actions {
-  top: 12px;
+  top: 0;
   right: 14px;
-  bottom: auto;
+  bottom: 0;
   align-items: center;
   gap: 8px;
 }
@@ -9888,8 +9892,8 @@ i > svg {
 
 .session-live .live-hero-body {
   right: 0;
-  justify-content: flex-end;
-  padding: 0 18px 15px 62px;
+  justify-content: center;
+  padding: 0 60px;
 }
 
 .session-live .session-body {
