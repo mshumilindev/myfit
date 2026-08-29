@@ -349,7 +349,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -369,6 +369,9 @@ export function SessionView(props: {
   useEffect(() => {
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
     if (cards.length === 0) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      return;
+    }
     const ratios = new Map<string, number>();
     const io = new IntersectionObserver(
       (entries) => {
