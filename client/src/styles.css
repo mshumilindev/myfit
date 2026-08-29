@@ -13592,6 +13592,24 @@ button.exd-media {
   padding: 4px 20px 20px;
 }
 
+/* Phone: the desktop author layout zeroes the screen gutter and pads its own
+   panes (28px top bar, 20px panes). On phones the screen keeps its standard
+   12px/20px gutter, so those pane paddings would STACK on top of it and push
+   the content 48/40px in — far deeper than every other screen. Drop the extra
+   horizontal/top gutter here so the top bar, the editor and the exercises pane
+   all sit at the screen's own 12px top / 20px sides. The top bar bleeds its
+   divider back to the screen edges so it still spans full-width. */
+@media (max-width: 719.98px) {
+  .programs-author-page.programs-has-tabs > .programs-top {
+    margin: 0 -20px;
+    padding: 0 20px 16px;
+  }
+  .programs-author-page .exg-tabwrap {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 /* ==========================================================================
    App settings (admin, web) — feature flags
    ========================================================================== */
