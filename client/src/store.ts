@@ -585,14 +585,29 @@ function writeWorkoutDoc(w: Workout): void {
     onWriteError,
   );
 }
+
+/**
+ * Workouts that are being built on this device and must NOT hit the backend yet
+ * — a backfilled past session while its editor is open. (A live session doesn't
+ * need to be listed here: it's kept local by its `finishedAt === null`.) The set
+ * is in-memory, so after a reload a draft that was mid-edit falls back to normal
+ * syncing — an acceptable edge for an interrupted backfill.
+ */
+const draftWorkouts = new Set<string>();
+
+/** True while a workout is deliberately kept on this device only. */
+function isLocalOnlyWorkout(w: Workout): boolean {
+  return w.finishedAt === null || draftWorkouts.has(w.id);
+}
+
 function saveWorkout(id: string): void {
   const w = state.workouts.find((x) => x.id === id);
   if (!w) return;
-  // A session in progress is kept on this device only — every set is saved to
-  // localStorage (via setState → persist), but nothing is pushed to the backend
-  // until the workout is finished. Editing an already-finished workout still
-  // syncs immediately.
-  if (w.finishedAt === null) return;
+  // A session in progress (or an open backfill draft) is kept on this device
+  // only — every change is saved to localStorage (via setState → persist), but
+  // nothing is pushed to the backend until the workout is finished/committed.
+  // Editing an already-finished, already-synced workout still syncs immediately.
+  if (isLocalOnlyWorkout(w)) return;
   writeWorkoutDoc(w);
 }
 function deleteWorkoutDoc(id: string): void {
@@ -685,20 +700,34 @@ export function startWorkout(
     targetMuscles: meta.targetMuscles ?? [],
     exercises: [],
   };
-  setState({ workouts: sortWorkouts([workout, ...workouts]), syncStatus: bumpPending() });
+  // The new session is local-only until it's finished (see saveWorkout); only
+  // the sessions it just auto-closed (now finished) need syncing, so the chip
+  // only goes "pending" when there actually are some.
+  setState({
+    workouts: sortWorkouts([workout, ...workouts]),
+    syncStatus: closed.length > 0 ? bumpPending() : state.syncStatus,
+  });
   for (const id of closed) saveWorkout(id);
-  // The new session is local-only until it's finished (see saveWorkout); any
-  // sessions it just auto-closed above are finished, so those do sync.
   return workout;
 }
 
 function patchWorkout(id: string, patch: Partial<Workout>): void {
   const workouts = state.workouts.map((w) => (w.id === id ? { ...w, ...patch } : w));
-  setState({ workouts: sortWorkouts(workouts), syncStatus: bumpPending() });
+  const w = workouts.find((x) => x.id === id);
+  // Local-only edits (a live session or an open backfill draft) never touch the
+  // backend, so they must not flip the sync chip to "pending".
+  const local = !w || isLocalOnlyWorkout(w);
+  setState({
+    workouts: sortWorkouts(workouts),
+    syncStatus: local ? state.syncStatus : bumpPending(),
+  });
 }
 
 export function finishWorkout(id: string, at = Date.now()): void {
   if (!state.workouts.find((x) => x.id === id)) return;
+  // Finishing settles the session: it's no longer a local-only draft and now
+  // syncs (patchWorkout will mark pending, saveWorkout writes it).
+  draftWorkouts.delete(id);
   patchWorkout(id, { finishedAt: at, autoFinished: false });
   saveWorkout(id);
 }
@@ -735,8 +764,32 @@ export function reorderExercises(workoutId: string, orderedIds: string[]): void 
 }
 
 export function deleteWorkout(id: string): void {
-  setState({ workouts: state.workouts.filter((w) => w.id !== id), syncStatus: bumpPending() });
-  deleteWorkoutDoc(id);
+  const w = state.workouts.find((x) => x.id === id);
+  // A never-synced workout (a live session in progress, or an uncommitted
+  // backfill draft) lives only on this device — drop it locally; there's nothing
+  // on the backend to delete and no pending sync to raise.
+  const neverSynced = !w || isLocalOnlyWorkout(w);
+  draftWorkouts.delete(id);
+  setState({
+    workouts: state.workouts.filter((x) => x.id !== id),
+    syncStatus: neverSynced ? state.syncStatus : bumpPending(),
+  });
+  if (!neverSynced) deleteWorkoutDoc(id);
+}
+
+/**
+ * Flush a backfilled draft to the backend — called when its editor closes, so a
+ * past session logged in one sitting syncs once, at the end, instead of on every
+ * set. A no-op for a live (still-unfinished) session and for a normally-synced
+ * workout.
+ */
+export function commitWorkout(id: string): void {
+  if (!draftWorkouts.has(id)) return;
+  draftWorkouts.delete(id);
+  const w = state.workouts.find((x) => x.id === id);
+  if (!w || w.finishedAt === null) return;
+  setState({ syncStatus: bumpPending() });
+  writeWorkoutDoc(w);
 }
 
 export function addExercise(
@@ -1157,19 +1210,23 @@ export function startActivity(type: string, category: ActivityCategory): Activit
     runningSince: now,
     accumulatedMs: 0,
   };
+  // A live activity is kept on this device only until it's finished (mirrors an
+  // open workout); nothing is pushed to the backend here.
   setState({
     activities: [activity, ...state.activities].sort((a, b) => b.startedAt - a.startedAt),
-    syncStatus: bumpPending(),
+    syncStatus: state.syncStatus,
   });
-  writeActivityDoc(activity);
   return activity;
 }
 
 function patchActivity(id: string, patch: Partial<Activity>): void {
   const list = state.activities.map((a) => (a.id === id ? { ...a, ...patch } : a));
-  setState({ activities: list, syncStatus: bumpPending() });
   const updated = list.find((a) => a.id === id);
-  if (updated) writeActivityDoc(updated);
+  // In-progress activity edits stay local; only a finished activity syncs (so
+  // the sync chip also stays settled while the timer runs).
+  const local = !updated || updated.finishedAt === null;
+  setState({ activities: list, syncStatus: local ? state.syncStatus : bumpPending() });
+  if (updated && updated.finishedAt !== null) writeActivityDoc(updated);
 }
 
 /** Pause the live timer, banking the current running segment. */
@@ -1251,11 +1308,15 @@ export function logActivity(input: {
 }
 
 export function deleteActivity(id: string): void {
+  const a = state.activities.find((x) => x.id === id);
+  // A live (never-synced) activity is local-only — drop it without a backend
+  // delete or a pending sync. A finished one deletes remotely as before.
+  const neverSynced = !a || a.finishedAt === null;
   setState({
-    activities: state.activities.filter((a) => a.id !== id),
-    syncStatus: bumpPending(),
+    activities: state.activities.filter((x) => x.id !== id),
+    syncStatus: neverSynced ? state.syncStatus : bumpPending(),
   });
-  deleteActivityDoc(id);
+  if (!neverSynced) deleteActivityDoc(id);
 }
 
 /** Discard a live activity (semantic alias of delete, used by the timer page). */
@@ -2002,8 +2063,11 @@ export function backfillWorkout(
     gymId,
     exercises: [],
   };
-  setState({ workouts: sortWorkouts([workout, ...state.workouts]), syncStatus: bumpPending() });
-  writeWorkoutDoc(workout);
+  // A backfilled session is a draft while its editor is open: it stays on this
+  // device (saved to localStorage) and syncs once, via commitWorkout, when the
+  // editor closes — so building it doesn't spray writes on every added set.
+  draftWorkouts.add(workout.id);
+  setState({ workouts: sortWorkouts([workout, ...state.workouts]), syncStatus: state.syncStatus });
   return workout;
 }
 

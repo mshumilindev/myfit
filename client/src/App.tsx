@@ -24,6 +24,7 @@ import {
   retrySync,
   discardBlockingChange,
   bodyMetricsComplete,
+  commitWorkout,
 } from './store';
 import { SpotterMark } from './brand/SpotterMark';
 import { useT } from './i18n';
@@ -712,7 +713,12 @@ export function App() {
               past
               startAdd={activeOverlay.startAdd}
               shell={shell}
-              onClose={closeOverlay}
+              onClose={() => {
+                // A backfilled draft syncs once here, when its editor closes;
+                // a no-op for an already-synced past workout.
+                commitWorkout(activeOverlay.workoutId);
+                closeOverlay();
+              }}
             />
           )}
           {activeOverlay?.screen === 'exercise-history' && (
