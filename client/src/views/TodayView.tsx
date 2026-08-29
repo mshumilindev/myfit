@@ -1000,7 +1000,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   ) : hasPlan ? (
                     <span className="program-start-dot" aria-hidden />
                   ) : (
-                    <span className="program-start-plus">+</span>
+                    <Icon name="yoga" className="program-start-rest" />
                   )}
                 </span>
               </span>

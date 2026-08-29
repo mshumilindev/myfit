@@ -18329,8 +18329,13 @@ button.badge {
 .program-start-day.state-rest .program-start-dow,
 .program-start-day.state-rest strong,
 .program-start-day.state-rest .program-start-summary,
-.program-start-day.state-rest .program-start-plus {
+.program-start-day.state-rest .program-start-plus,
+.program-start-day.state-rest .program-start-rest {
   color: var(--color-rest-400);
+}
+/* The rest-day mark is a lotus, sized to sit with the other day marks. */
+.program-start-rest {
+  font-size: 15px;
 }
 .program-start-day.state-rest .program-start-bar {
   background: color-mix(in srgb, var(--color-rest-400) 50%, var(--color-neutral-800));
@@ -18346,7 +18351,8 @@ button.badge {
 .program-start-day.state-rest.is-today .program-start-dow,
 .program-start-day.state-rest.is-today strong,
 .program-start-day.state-rest.is-today .program-start-summary,
-.program-start-day.state-rest.is-today .program-start-plus {
+.program-start-day.state-rest.is-today .program-start-plus,
+.program-start-day.state-rest.is-today .program-start-rest {
   color: var(--color-rest-300);
 }
 .program-start-day.state-rest.is-today .program-start-dot {
