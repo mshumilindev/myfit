@@ -650,6 +650,24 @@ function sortWorkouts(ws: Workout[]): Workout[] {
   return [...ws].sort((a, b) => b.startedAt - a.startedAt);
 }
 
+export function mergeServerWorkoutsWithLocalDrafts(
+  serverWorkouts: Workout[],
+  localWorkouts: Workout[],
+): Workout[] {
+  const byId = new Set(serverWorkouts.map((w) => w.id));
+  const localOnly = localWorkouts.filter((w) => isLocalOnlyWorkout(w) && !byId.has(w.id));
+  return sortWorkouts([...serverWorkouts, ...localOnly]);
+}
+
+export function mergeServerActivitiesWithLocalLive(
+  serverActivities: Activity[],
+  localActivities: Activity[],
+): Activity[] {
+  const byId = new Set(serverActivities.map((a) => a.id));
+  const localLive = localActivities.filter((a) => a.finishedAt === null && !byId.has(a.id));
+  return [...serverActivities, ...localLive].sort((a, b) => b.startedAt - a.startedAt);
+}
+
 function bumpPending(): SyncStatus {
   if (state.syncStatus === 'failed') return 'failed';
   return navigator.onLine ? 'pending' : 'offline';
@@ -1607,9 +1625,10 @@ export function startSyncLoop(): () => void {
     onSnapshot(
       collection(db, 'users', uid, 'workouts'),
       (snap) => {
+        const serverWorkouts = snap.docs.map((d) => d.data() as Workout);
         state = {
           ...state,
-          workouts: sortWorkouts(snap.docs.map((d) => d.data() as Workout)),
+          workouts: mergeServerWorkoutsWithLocalDrafts(serverWorkouts, state.workouts),
         };
         recomputeReminders();
         markSynced(snap.metadata.fromCache, snap.metadata.hasPendingWrites);
@@ -1646,11 +1665,10 @@ export function startSyncLoop(): () => void {
     onSnapshot(
       collection(db, 'users', uid, 'activities'),
       (snap) => {
+        const serverActivities = snap.docs.map((d) => d.data() as Activity);
         state = {
           ...state,
-          activities: snap.docs
-            .map((d) => d.data() as Activity)
-            .sort((a, b) => b.startedAt - a.startedAt),
+          activities: mergeServerActivitiesWithLocalLive(serverActivities, state.activities),
         };
         persist();
         emit();

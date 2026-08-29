@@ -21,6 +21,8 @@ import {
   getOpenWorkout,
   knownExercises,
   logVisitAsWorkout,
+  mergeServerActivitiesWithLocalLive,
+  mergeServerWorkoutsWithLocalDrafts,
   prevLift,
   recordPresence,
   repeatWorkout,
@@ -31,6 +33,7 @@ import {
   reopenWorkout,
   restoreExercise,
   restoreSet,
+  startActivity,
   startWorkout,
   toggleFavorite,
   topSet,
@@ -274,6 +277,33 @@ describe('F-05 Gyms and reminders store', () => {
     expect(__getStateForTests().workouts[0]).toMatchObject({ id: retro.id });
   });
 
+  it('keeps local live and backfilled drafts across server snapshots', () => {
+    const server = workout({ id: 'server', startedAt: Date.now() - 5000 });
+    const live = startWorkout();
+    const retro = backfillWorkout(Date.now() - 3600_000, 45 * 60_000, 'gym-1');
+    const merged = mergeServerWorkoutsWithLocalDrafts([server], __getStateForTests().workouts);
+
+    expect(merged.map((w) => w.id)).toContain(server.id);
+    expect(merged.map((w) => w.id)).toContain(live.id);
+    expect(merged.map((w) => w.id)).toContain(retro.id);
+  });
+
+  it('keeps local live activities across server snapshots', () => {
+    const server = {
+      id: 'server-activity',
+      type: 'walk',
+      category: 'conditioning' as const,
+      startedAt: Date.now() - 5000,
+      finishedAt: Date.now() - 1000,
+      durationMin: 3,
+    };
+    const live = startActivity('run', 'conditioning');
+    const merged = mergeServerActivitiesWithLocalLive([server], __getStateForTests().activities);
+
+    expect(merged.map((a) => a.id)).toContain(server.id);
+    expect(merged.map((a) => a.id)).toContain(live.id);
+  });
+
   it('updates and deletes gyms', () => {
     const gym = upsertGym({ id: 'g1', name: 'Old', lat: 1, lng: 2, radiusM: 150 });
     upsertGym({ ...gym, name: 'New', radiusM: 250 });
@@ -495,6 +525,12 @@ describe('EQ per-hand loading (perHandFactor)', () => {
       ...JSON.parse(read('../client/src/data/per-side.json')),
       _comment: expect.any(String),
     });
+  });
+
+  it('allows own rest periods and activities in Firestore rules', () => {
+    const rules = readFileSync('firestore.rules', 'utf8');
+    expect(rules).toContain('match /restPeriods/{periodId}');
+    expect(rules).toContain('match /activities/{activityId}');
   });
 
   it('leaves barbell and machine moves at ×1', () => {

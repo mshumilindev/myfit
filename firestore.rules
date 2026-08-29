@@ -60,6 +60,11 @@ service cloud.firestore {
       match /restPeriods/{periodId} {
         allow read, write: if isSelf(userId);
       }
+      // Cardio / recovery activities — live timers stay local until finish, then
+      // the finished activity is written here by the owner.
+      match /activities/{activityId} {
+        allow read, write: if isSelf(userId);
+      }
       // Body metrics (weigh-ins, height, composition). Own read/write only;
       // admin/trainer cross-user reads go through functions (Admin SDK).
       match /meta/{docId} {
