@@ -20931,8 +20931,13 @@ button.badge {
     position: fixed;
     left: 0;
     right: 0;
-    /* Sit lower, closer to the nav hub — the 7px gap tightened 2× to 3.5px. */
-    bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 3.5px);
+    /* Sit lower, closer to the nav hub. The visible gap on an installed PWA is
+       driven by the home-indicator safe band, not this constant: the tabbar
+       trims 16px off its own safe padding while the pill reserved the full
+       --safe-bottom. Measured on a 34px inset the gap was 27px; reserving 14px
+       less drops the pill so the device gap roughly halves (~13px). The browser
+       (safe-bottom 0) is unchanged, still the 7px constant below. */
+    bottom: calc(60px + max(6px, calc(var(--safe-bottom, 0px) - 14px)) + 7px);
     display: flex;
     justify-content: center;
     padding: 0 20px;
