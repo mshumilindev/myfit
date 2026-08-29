@@ -249,7 +249,9 @@ i > svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px 12px;
+  /* Split so the icon (nudged down 4px to sit on the wordmark) has equal top and
+     bottom breathing room without moving the icon itself. */
+  padding: 7px 20px 15px;
 }
 /* Dumbbell mark before the wordmark. Nudged down so it sits on the optical
    centre of the script letters (Kaushan's tall ascenders + long descenders push
