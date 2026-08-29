@@ -20931,8 +20931,8 @@ button.badge {
     position: fixed;
     left: 0;
     right: 0;
-    /* Sit lower, closer to the nav hub — half the previous 14px gap. */
-    bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 7px);
+    /* Sit lower, closer to the nav hub — the 7px gap tightened 2× to 3.5px. */
+    bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 3.5px);
     display: flex;
     justify-content: center;
     padding: 0 20px;
