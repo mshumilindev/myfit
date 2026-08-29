@@ -94,9 +94,18 @@ describe('workoutCalories', () => {
   });
   it('counts a timed hold by its own duration', () => {
     const held = workout(20, [set(0, { durationMin: 5 })]);
-    // 5 min work @ 7.5 MET + 15 min rest @ 2.5 MET, 80 kg
-    // = 80 * (7.5 * 5/60 + 2.5 * 15/60) = 80 * (0.625 + 0.625) = 100
-    expect(workoutCalories(held, 80)).toBe(100);
+    // 5 min work @ 7.5 MET + 15 min gym-floor recovery @ 3.5 MET, 80 kg
+    // = 80 * (7.5 * 5/60 + 3.5 * 15/60) = 80 * (0.625 + 0.875) = 120
+    expect(workoutCalories(held, 80)).toBe(120);
+  });
+  it('lands a heavy 90-minute lifting session in a realistic range', () => {
+    const heavy = workout(
+      90,
+      Array.from({ length: 30 }, () => set(8)),
+    );
+    const kcal = workoutCalories(heavy, 100)!;
+    expect(kcal).toBeGreaterThanOrEqual(560);
+    expect(kcal).toBeLessThanOrEqual(650);
   });
   it('never lets work seconds exceed the wall-clock', () => {
     // 100 sets but only 1 min elapsed — capped at the minute of rest+work.

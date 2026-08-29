@@ -142,16 +142,17 @@ export function liftingCalories(minutes: number, bodyKg: number | null | undefin
  *     its own duration; a normal set is reps × ~3 s (a rep is ~1.5 s up +
  *     1.5 s down) with a floor so heavy low-rep sets still register.
  *   • Rest — everything else is time on the gym floor (racking plates, walking,
- *     waiting) at a light standing MET.
+ *     bracing, recovering with heart rate elevated) at a moderate resistance
+ *     training MET.
  *
  * kcal = bodyKg · (workMET · workHours + restMET · restHours). Work seconds are
  * capped at the wall-clock, so an implausibly short logged session can't invent
  * more effort than time elapsed. Null without a body weight or a duration.
  */
 const LIFT_WORK_MET = 7.5; // vigorous effort during a working set
-const LIFT_REST_MET = 2.5; // standing / moving on the gym floor between sets
+const LIFT_REST_MET = 3.5; // moderate resistance-session baseline between sets
 const SEC_PER_REP = 3; // ~1.5 s concentric + 1.5 s eccentric
-const MIN_SET_SEC = 22; // floor so a heavy single/double still counts as work
+const MIN_SET_SEC = 30; // floor so heavy / slow sets still count as real work
 
 /** Estimated active seconds for one logged set. */
 function setWorkSeconds(reps: number, durationMin: number | null | undefined): number {
