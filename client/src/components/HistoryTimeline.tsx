@@ -111,8 +111,13 @@ export function HistoryTimeline({
         <div className="hist-day" key={day.key}>
           <span className="hist-day-date">{fmtShortDate(day.items[0].ts, locale)}</span>
           <div className="hist-day-items">
-            {day.items.map((it) =>
-              it.kind === 'w' ? (
+            {day.items.map((it) => {
+              if (it.kind !== 'w') return <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} />;
+              // Calories read the same everywhere: a right-aligned flame chip
+              // (never inline in the stats), matching the activity rows — so the
+              // stats text can never collide with the number.
+              const kc = it.w.finishedAt ? workoutCalories(it.w, bodyKg) : null;
+              return (
                 <button
                   key={it.w.id}
                   className="hist-item hist-workout"
@@ -125,26 +130,20 @@ export function HistoryTimeline({
                       {it.w.finishedAt
                         ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
                         : ''}
-                      {(() => {
-                        const kc = it.w.finishedAt ? workoutCalories(it.w, bodyKg) : null;
-                        return kc != null ? (
-                          <span className="stat-kcal">
-                            {' '}
-                            · ~{kc} {t.kcalShort}
-                          </span>
-                        ) : null;
-                      })()}
                     </div>
                     {showMuscles && muscleWorkSorted(it.w).length > 0 && (
                       <MuscleRow entries={muscleWorkSorted(it.w)} onOpen={openMuscleHistory} />
                     )}
                   </span>
+                  {kc != null && (
+                    <span className="ta-kcal tnum">
+                      <Icon name="flame" weight="fill" />~{kc}
+                    </span>
+                  )}
                   <Icon name="arrow-up-right" className="go" />
                 </button>
-              ) : (
-                <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} />
-              ),
-            )}
+              );
+            })}
           </div>
         </div>
       ))}

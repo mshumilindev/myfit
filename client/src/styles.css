@@ -21933,12 +21933,6 @@ button.badge {
   font-variant-numeric: tabular-nums;
 }
 
-/* Session calories in stat lines (feature 6) */
-.stat-kcal {
-  color: var(--color-kcal-text);
-  font-variant-numeric: tabular-nums;
-}
-
 /* kcal-tinted value in session summary stat grid */
 .stat-grid .cell .v.kcal {
   color: var(--color-kcal-text);
