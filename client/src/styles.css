@@ -21569,6 +21569,12 @@ button.badge {
 .hist-workout .go {
   flex: none;
   align-self: center;
+  /* Same 30px box as the activity trash button, so the trailing icon — and
+     therefore the flame/kcal chip in front of it — lines up across every row. */
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
   font-size: 15px;
   color: var(--color-neutral-500);
 }
