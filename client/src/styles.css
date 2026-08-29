@@ -2171,12 +2171,15 @@ i > svg {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
+    /* Span exactly the content's left inset so the dots centre in that band —
+       equal gap to the screen edge and to the cards. */
+    width: 38px;
     z-index: 39;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 24px;
-    padding: 16px 9px;
+    padding: 16px 0;
     /* Only the dots are interactive; the column itself never blocks the cards. */
     pointer-events: none;
   }
@@ -2216,6 +2219,15 @@ i > svg {
      over the silver viewport tint when it's also the one on screen. */
   .srail-dot.active {
     background: var(--color-accent);
+  }
+  /* Inset the scrolling session content so cards (and the rest of the column)
+     clear the fixed rail instead of butting against the dots. Raised
+     specificity so it beats the per-mode body paddings. */
+  .session-screen.session-has-rail .session-body,
+  .session-screen.session-has-rail .muscles-worked,
+  .session-screen.session-has-rail .past-datebar,
+  .session-screen.session-has-rail .stats-strip {
+    padding-left: 38px;
   }
 }
 

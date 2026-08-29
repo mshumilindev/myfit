@@ -452,6 +452,9 @@ export function SessionView(props: {
     })?.id ??
     sortedExercises[0]?.id ??
     null;
+  // The left milestone rail shows on the phone once there's more than one
+  // exercise; the screen gets a class so the content can inset to clear it.
+  const showRail = !isDesktop && workout.exercises.length > 0 && sortedExercises.length > 1;
   // A rail dot reads as "done" once its planned sets are logged (or, unplanned,
   // once it has any set); markers count as done.
   const exerciseDone = (ex: Exercise): boolean => {
@@ -1448,7 +1451,7 @@ export function SessionView(props: {
 
   return (
     <div
-      className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}`}
+      className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}${showRail ? ' session-has-rail' : ''}`}
     >
       {live && !workout.autoFinished && !isDesktop && (
         <svg className="glass-defs" aria-hidden width="0" height="0">
@@ -1479,7 +1482,7 @@ export function SessionView(props: {
         </svg>
       )}
       <div className="pane-main">
-        {!isDesktop && workout.exercises.length > 0 && sortedExercises.length > 1 && (
+        {showRail && (
           <nav className="session-rail" aria-label={t.exerciseRailLabel}>
             {sortedExercises.map((ex) => {
               const inView = ex.id === viewportExId;
