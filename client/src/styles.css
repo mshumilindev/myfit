@@ -247,28 +247,24 @@ i > svg {
 .app-brand {
   flex: none;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px 6px;
-}
-.app-brand-word {
-  display: flex;
   align-items: baseline;
-  gap: 8px;
+  justify-content: space-between;
+  padding: 10px 20px 12px;
+}
+/* "spotter" — script wordmark on the left. */
+.app-brand-word {
   font-family: 'Kaushan Script', cursive;
-  font-size: 19px;
+  font-size: 22px;
   font-weight: 400;
   line-height: 1;
   color: var(--color-text);
 }
-.app-brand-dot {
-  align-self: center;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--color-accent);
-}
+/* "gym" — plain type, muted, pinned to the right. */
 .app-brand-sub {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   color: var(--color-neutral-500);
 }
 
@@ -1903,9 +1899,11 @@ i > svg {
 .session-top.live-toolbar {
   position: relative;
   overflow: hidden;
-  min-height: 58px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  min-height: 0;
+  /* No vertical padding: the toolbar box == the hero, so the floating back
+     button and the hero's controls share one vertical centre. */
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* Past workout: the header becomes a gym-photo hero, with the date and gym over
@@ -9844,8 +9842,9 @@ i > svg {
 .session-live .session-top.live-toolbar > .back {
   position: absolute;
   z-index: 5;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
   left: 14px;
   width: 36px;
   height: 36px;
@@ -9899,7 +9898,10 @@ i > svg {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 252px);
+  /* flex:1 already fills the scroll area; a viewport-based min-height double-
+     counted the chrome (brand row + taller hero + safe insets) and forced an
+     overflow scroll on an empty session. */
+  min-height: 0;
   margin: 0;
 }
 
