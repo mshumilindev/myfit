@@ -57,7 +57,7 @@ import {
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import type { Activity } from '../types';
-import { Icon, Sheet } from '../ui';
+import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -188,6 +188,7 @@ function RecentActivityList({
   t: ReturnType<typeof useT>['t'];
   locale: ReturnType<typeof useT>['locale'];
 }) {
+  const [confirmDelId, setConfirmDelId] = useState<string | null>(null);
   const recent = [...activities].sort((a, b) => b.startedAt - a.startedAt).slice(0, 5);
   if (recent.length === 0) return null;
   return (
@@ -218,7 +219,7 @@ function RecentActivityList({
             )}
             <button
               className="ta-del"
-              onClick={() => deleteActivity(a.id)}
+              onClick={() => setConfirmDelId(a.id)}
               aria-label={t.delete}
               title={t.delete}
             >
@@ -227,6 +228,20 @@ function RecentActivityList({
           </div>
         );
       })}
+      {confirmDelId && (
+        <ConfirmDialog
+          title={t.actDeleteTitle}
+          body={t.actDeleteBody}
+          confirmLabel={t.delete}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            deleteActivity(confirmDelId);
+            setConfirmDelId(null);
+          }}
+          onCancel={() => setConfirmDelId(null)}
+        />
+      )}
     </div>
   );
 }
@@ -243,6 +258,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [progSheetOpen, setProgSheetOpen] = useState(false);
   const [restSheetOpen, setRestSheetOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
+  const [confirmEndRest, setConfirmEndRest] = useState<string | null>(null);
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
   const openMuscleHistory = (muscle: MuscleGroup) =>
     shell.openOverlay({ screen: 'muscle-history', muscle });
@@ -1158,7 +1174,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                       </button>
                       <button
                         className="prog-banner-skip"
-                        onClick={() => endRestPeriod(activeRest.id)}
+                        onClick={() => setConfirmEndRest(activeRest.id)}
                       >
                         {t.restEndNow}
                       </button>
@@ -1166,7 +1182,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   ) : (
                     <button
                       className="prog-banner-cta"
-                      onClick={() => endRestPeriod(activeRest.id)}
+                      onClick={() => setConfirmEndRest(activeRest.id)}
                     >
                       {t.restEndNow}
                     </button>
@@ -1505,6 +1521,20 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       )}
       {activityOpen && <ActivitySheet shell={shell} onClose={() => setActivityOpen(false)} />}
       {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
+      {confirmEndRest && (
+        <ConfirmDialog
+          title={t.restEndTitle}
+          body={t.restEndBody}
+          confirmLabel={t.restEndNow}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            endRestPeriod(confirmEndRest);
+            setConfirmEndRest(null);
+          }}
+          onCancel={() => setConfirmEndRest(null)}
+        />
+      )}
       {progSheetOpen && (
         <Sheet onClose={() => setProgSheetOpen(false)} className="prog-suggest-sheet">
           <div className="ps-title">{t.progSuggestSheetTitle}</div>

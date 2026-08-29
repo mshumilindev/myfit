@@ -21373,6 +21373,20 @@ button.badge {
 .ta-row.cat-recovery > i {
   color: var(--color-rest-300);
 }
+/* Phone: line the activity rows up with the workout-history rows — the leading
+   icon sits in a column the same width as the date column (.recent-row .d =
+   44px), with the same 12px gap, so the names/text share one left edge. */
+@media (max-width: 719.98px) {
+  .ta-row {
+    padding-inline: 0;
+    gap: 12px;
+  }
+  .ta-row > i {
+    width: 44px;
+    display: inline-flex;
+    justify-content: center;
+  }
+}
 .ta-main {
   flex: 1;
   min-width: 0;

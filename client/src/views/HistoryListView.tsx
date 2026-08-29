@@ -3,7 +3,7 @@
  * month. Reached from the "See all" link under the Today history preview
  * (which shows only the last few). Each row opens the past workout.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import {
   deleteActivity,
@@ -18,7 +18,7 @@ import {
 import { fmtDurationHM, fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { MuscleRow } from '../components/Muscle';
-import { Icon } from '../ui';
+import { ConfirmDialog, Icon } from '../ui';
 import {
   activityType,
   activityCategory,
@@ -161,6 +161,7 @@ function ActivityHistRow({
   t: ReturnType<typeof useT>['t'];
   locale: ReturnType<typeof useT>['locale'];
 }) {
+  const [confirmDel, setConfirmDel] = useState(false);
   const cat = activityCategory(a);
   const kcal = a.calories ?? activityCalories(a, bodyKg);
   const min = Math.round(activityDurationMin(a));
@@ -182,12 +183,26 @@ function ActivityHistRow({
       )}
       <button
         className="ta-del"
-        onClick={() => deleteActivity(a.id)}
+        onClick={() => setConfirmDel(true)}
         aria-label={t.delete}
         title={t.delete}
       >
         <Icon name="trash" />
       </button>
+      {confirmDel && (
+        <ConfirmDialog
+          title={t.actDeleteTitle}
+          body={t.actDeleteBody}
+          confirmLabel={t.delete}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            deleteActivity(a.id);
+            setConfirmDel(false);
+          }}
+          onCancel={() => setConfirmDel(false)}
+        />
+      )}
     </div>
   );
 }
