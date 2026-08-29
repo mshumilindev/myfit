@@ -431,6 +431,13 @@ function programDay(ts: number): number {
   return ((new Date(ts).getDay() + 6) % 7) + 1;
 }
 
+/** Collapse the fine back sub-muscles to the coarse `back` family, so a program
+ *  day that targets one back region still matches a session that trained
+ *  another (they are the same "back" day). Everything else maps to itself. */
+function muscleFamily(m: MuscleGroup): MuscleGroup {
+  return m === 'lats' || m === 'traps' || m === 'lower_back' ? 'back' : m;
+}
+
 /** The set of primary muscle groups a session actually trained. */
 function primaryMusclesOf(w: Workout): Set<MuscleGroup> {
   const s = new Set<MuscleGroup>();
@@ -489,9 +496,15 @@ export function programDayNameFor(w: Workout, workouts: Workout[]): string | nul
   if (w.startedAt < programStart) return null;
   // When the day names its target muscles, require the session to have trained
   // at least one of them; a pure exercise day (no targets) is taken on trust.
+  // Match on the coarse muscle family: a program day may list `back` (or a
+  // specific sub-muscle like `lats`) while the logged session's primaries are
+  // other back sub-muscles (`traps`, `lower_back`) — the same back day, so a
+  // strict sub-muscle match would wrongly reject it (e.g. a "Back 2" day shown
+  // as the raw "Pull" readout).
   if (targets.length > 0) {
     const trained = primaryMusclesOf(w);
-    if (!targets.some((m) => trained.has(m))) return null;
+    const trainedFam = new Set([...trained].map(muscleFamily));
+    if (!targets.some((m) => trainedFam.has(muscleFamily(m)))) return null;
   }
   return name;
 }

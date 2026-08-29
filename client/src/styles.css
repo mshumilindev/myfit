@@ -247,25 +247,22 @@ i > svg {
 .app-brand {
   flex: none;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
+  gap: 9px;
   padding: 10px 20px 12px;
 }
-/* "spotter" — script wordmark on the left. */
+/* Dumbbell mark before the wordmark. */
+.app-brand-icon {
+  font-size: 20px;
+  color: var(--color-accent);
+}
+/* "spotter" — script wordmark. */
 .app-brand-word {
   font-family: 'Kaushan Script', cursive;
   font-size: 22px;
   font-weight: 400;
   line-height: 1;
   color: var(--color-text);
-}
-/* "gym" — plain type, muted, pinned to the right. */
-.app-brand-sub {
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: var(--color-neutral-500);
 }
 
 .screen {
@@ -9816,7 +9813,10 @@ i > svg {
 .session-live .session-top.live-toolbar {
   display: block;
   position: relative;
-  min-height: 126px;
+  /* Matches the slim hero height so the toolbar box == the hero: the back
+     button centres on it and the current-exercise plaque sits flush below,
+     with no dead band. */
+  min-height: 72px;
   padding: 0;
   overflow: hidden;
 }

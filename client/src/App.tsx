@@ -677,8 +677,8 @@ export function App() {
       <div className="main-col">
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
+            <Icon name="barbell" weight="fill" className="app-brand-icon" />
             <span className="app-brand-word">spotter</span>
-            <span className="app-brand-sub">gym</span>
           </div>
         )}
         {store.syncStatus === 'failed' && (
