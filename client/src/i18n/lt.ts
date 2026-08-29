@@ -326,6 +326,7 @@ export const lt: Strings = {
   dropBadge: 'dropas',
   reverseBadge: 'atvirkštinis dropas',
   workedSoFar: 'Šiandien padirbėjo',
+  exerciseRailLabel: 'Pratimų eiga',
   workedNote:
     'Serijos raumeniui šioje sesijoje, dropas skaičiuojamas kaip viena. Tai rodmuo, ne tikslas — nėra žiedo, kurį reikia uždaryti.',
   equipmentInUse: 'Naudojama įranga',

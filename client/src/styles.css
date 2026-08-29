@@ -2159,6 +2159,66 @@ i > svg {
   gap: var(--space-4);
 }
 
+/* Left milestone rail (mobile): one dot per exercise, joined by a vertical
+   line — a scroll-spy for the session. Desktop has the side pane, so it's
+   hidden there. */
+.session-rail {
+  display: none;
+}
+@media (max-width: 719.98px) {
+  .session-rail {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 39;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 9px;
+    /* Only the dots are interactive; the column itself never blocks the cards. */
+    pointer-events: none;
+  }
+  /* The connecting line runs behind the dots, first-centre to last-centre. */
+  .session-rail::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    transform: translateX(-50%);
+    background: var(--color-divider);
+    border-radius: 1px;
+  }
+  .srail-dot {
+    pointer-events: auto;
+    position: relative;
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: var(--color-neutral-700);
+    cursor: pointer;
+    transition: background 0.18s ease;
+  }
+  /* An exercise whose sets are all logged. */
+  .srail-dot.done {
+    background: var(--color-accent-700);
+  }
+  /* The exercise currently in the viewport — silver, told apart by colour only. */
+  .srail-dot.inview {
+    background: var(--color-neutral-300);
+  }
+  /* The exercise you're working on now (live) — accent, colour only; it wins
+     over the silver viewport tint when it's also the one on screen. */
+  .srail-dot.active {
+    background: var(--color-accent);
+  }
+}
+
 .session-empty {
   margin: clamp(18px, 4vh, 36px) 8px 0;
 }

@@ -313,6 +313,7 @@ export const et: Strings = {
   dropBadge: 'dropp',
   reverseBadge: 'pöörddropp',
   workedSoFar: 'Täna töötanud',
+  exerciseRailLabel: 'Harjutuste edenemine',
   workedNote:
     'Seeriad lihase kohta selles sessioonis, dropp loetakse üheks. See on näit, mitte siht — sulgemist vajavat rõngast pole.',
   equipmentInUse: 'Kasutuses olev varustus',

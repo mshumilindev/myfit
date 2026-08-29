@@ -317,6 +317,7 @@ export const pl: Strings = {
   dropBadge: 'dropset',
   reverseBadge: 'odwrotny drop',
   workedSoFar: 'Dziś zapracowało',
+  exerciseRailLabel: 'Postęp ćwiczeń',
   workedNote:
     'Serie na mięsień w tej sesji, drop liczony jako jedna. To odczyt, nie cel — nie ma pierścienia do domknięcia.',
   equipmentInUse: 'Sprzęt w użyciu',

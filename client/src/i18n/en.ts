@@ -321,6 +321,7 @@ export const en = {
   dropBadge: 'drop',
   reverseBadge: 'reverse drop',
   workedSoFar: 'Worked so far today',
+  exerciseRailLabel: 'Exercise progress',
   workedNote:
     'Sets per muscle in this session, drops counted as one. It is a reading, not a target — no ring to close.',
   equipmentInUse: 'Equipment in use',

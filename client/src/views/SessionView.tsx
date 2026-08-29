@@ -349,7 +349,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -359,6 +359,44 @@ export function SessionView(props: {
     startAddConsumed.current = true;
     setSheet({ kind: 'add' });
   }, [props.startAdd, workout]);
+
+  // Left milestone rail: which exercise card is currently the most-visible in
+  // the viewport (scroll-spy). The observer callback fires asynchronously on
+  // scroll, so the only setState here happens there — never synchronously in
+  // the effect body.
+  const [viewportExId, setViewportExId] = useState<string | null>(null);
+  const railExKey = (workout?.exercises ?? []).map((e) => e.id).join(',');
+  useEffect(() => {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
+    if (cards.length === 0) return;
+    const ratios = new Map<string, number>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const id = (e.target as HTMLElement).dataset.exid;
+          if (!id) continue;
+          if (e.isIntersecting) ratios.set(id, e.intersectionRatio);
+          else ratios.delete(id);
+        }
+        // Most-visible card wins; DOM order breaks ties toward the topmost.
+        let best: string | null = null;
+        let bestRatio = 0;
+        for (const c of cards) {
+          const id = c.dataset.exid;
+          if (!id) continue;
+          const r = ratios.get(id) ?? 0;
+          if (r > bestRatio) {
+            bestRatio = r;
+            best = id;
+          }
+        }
+        setViewportExId(best);
+      },
+      { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1], rootMargin: '-96px 0px -40% 0px' },
+    );
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, [railExKey, expandedPast, wokenIds, live]);
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -414,6 +452,13 @@ export function SessionView(props: {
     })?.id ??
     sortedExercises[0]?.id ??
     null;
+  // A rail dot reads as "done" once its planned sets are logged (or, unplanned,
+  // once it has any set); markers count as done.
+  const exerciseDone = (ex: Exercise): boolean => {
+    if (isMarkerExercise(ex)) return true;
+    const planned = Math.max(0, ex.plannedSets ?? 0);
+    return planned > 0 ? ex.sets.length >= planned : ex.sets.length > 0;
+  };
   const lastTimeRows = sortedExercises
     .filter((e) => isStrengthExercise(e))
     .map((e) => ({ name: e.name, prev: prevLift(e.name, workout.id) }))
@@ -649,6 +694,7 @@ export function SessionView(props: {
     return (
       <div
         key={ex.id}
+        data-exid={ex.id}
         className={`exercise-card${completed ? ' completed' : ''}${
           !grp && activeExerciseId === ex.id ? ' active' : ''
         }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
@@ -1433,6 +1479,29 @@ export function SessionView(props: {
         </svg>
       )}
       <div className="pane-main">
+        {!isDesktop && workout.exercises.length > 0 && sortedExercises.length > 1 && (
+          <nav className="session-rail" aria-label={t.exerciseRailLabel}>
+            {sortedExercises.map((ex) => {
+              const inView = ex.id === viewportExId;
+              return (
+                <button
+                  key={ex.id}
+                  type="button"
+                  className={`srail-dot${exerciseDone(ex) ? ' done' : ''}${
+                    live && ex.id === activeExerciseId ? ' active' : ''
+                  }${inView ? ' inview' : ''}`}
+                  aria-label={ex.name}
+                  aria-current={inView ? 'true' : undefined}
+                  onClick={() => {
+                    document
+                      .querySelector(`.session-screen [data-exid="${CSS.escape(ex.id)}"]`)
+                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                />
+              );
+            })}
+          </nav>
+        )}
         <div className="session-head-wrap">
           <div className={`session-top${live ? ' live-toolbar' : ' past-hero'}`}>
             {live && (
@@ -1846,6 +1915,7 @@ export function SessionView(props: {
                   return (
                     <button
                       key={single.id}
+                      data-exid={single.id}
                       className="past-ex-card queued-ex-card"
                       onClick={() => setWokenIds((x) => [...x, single.id])}
                     >
@@ -1862,6 +1932,7 @@ export function SessionView(props: {
                   return (
                     <button
                       key={single.id}
+                      data-exid={single.id}
                       className="past-ex-card"
                       onClick={() => setExpandedPast((x) => [...x, single.id])}
                     >

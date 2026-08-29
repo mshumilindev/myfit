@@ -317,6 +317,7 @@ export const uk: Strings = {
   dropBadge: 'дроп',
   reverseBadge: 'зворотний дроп',
   workedSoFar: 'Сьогодні попрацювало',
+  exerciseRailLabel: 'Прогрес по вправах',
   workedNote:
     'Підходи на м’яз у цій сесії, дроп рахується як один. Це показник, а не ціль — жодного кільця, яке треба закрити.',
   equipmentInUse: 'Обладнання в роботі',
