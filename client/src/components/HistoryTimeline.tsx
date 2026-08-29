@@ -22,7 +22,7 @@ import {
   activityType,
   activityCategory,
   activityCalories,
-  liftingCalories,
+  workoutCalories,
   durationMin as activityDurationMin,
 } from '../activities';
 import type { MuscleGroup } from '../data/exercises';
@@ -126,9 +126,7 @@ export function HistoryTimeline({
                         ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
                         : ''}
                       {(() => {
-                        const kc = it.w.finishedAt
-                          ? liftingCalories((it.w.finishedAt - it.w.startedAt) / 60000, bodyKg)
-                          : null;
+                        const kc = it.w.finishedAt ? workoutCalories(it.w, bodyKg) : null;
                         return kc != null ? (
                           <span className="stat-kcal">
                             {' '}

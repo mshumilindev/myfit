@@ -5,7 +5,7 @@
  * calorie estimate, and the conditioning/recovery balance that feeds the
  * fatigue model. No store or React imports, so it unit-tests as plain data.
  */
-import type { Activity, ActivityCategory, ActivityEffort } from './types';
+import type { Activity, ActivityCategory, ActivityEffort, Workout } from './types';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -119,14 +119,66 @@ export function activityCalories(a: Activity, bodyKg: number | null | undefined)
 }
 
 /**
- * Rough calories for a lifting session over its wall-clock duration. A blended
- * MET (~4.0) accounts for the long rests between sets, so the number reads as
- * an honest "energy out", not a peak-effort figure. Null without a body weight.
+ * Rough calories for a lifting session over its wall-clock duration, with a
+ * single blended MET (~4.0) that averages the hard sets and the long rests
+ * between them. This ignores how much work was actually done — two sessions of
+ * equal length read the same whether they held 5 sets or 30 — so it's the
+ * fallback for when only a duration is known. Prefer `workoutCalories`, which
+ * splits work from rest. Null without a body weight.
  */
 const LIFT_MET = 4.0;
 export function liftingCalories(minutes: number, bodyKg: number | null | undefined): number | null {
   if (!bodyKg || bodyKg <= 0 || minutes <= 0) return null;
   return Math.round(LIFT_MET * bodyKg * (minutes / 60));
+}
+
+/**
+ * Work-aware calories for a lifting session. The wall-clock is split into two
+ * compartments so that harder, set-dense sessions read higher than the same
+ * time spent mostly resting — the thing a single blended MET can't capture:
+ *
+ *   • Work — each logged set counts a short burst of active effort at a
+ *     vigorous resistance MET. A timed hold (static-dynamic / cardio set) uses
+ *     its own duration; a normal set is reps × ~3 s (a rep is ~1.5 s up +
+ *     1.5 s down) with a floor so heavy low-rep sets still register.
+ *   • Rest — everything else is time on the gym floor (racking plates, walking,
+ *     waiting) at a light standing MET.
+ *
+ * kcal = bodyKg · (workMET · workHours + restMET · restHours). Work seconds are
+ * capped at the wall-clock, so an implausibly short logged session can't invent
+ * more effort than time elapsed. Null without a body weight or a duration.
+ */
+const LIFT_WORK_MET = 7.5; // vigorous effort during a working set
+const LIFT_REST_MET = 2.5; // standing / moving on the gym floor between sets
+const SEC_PER_REP = 3; // ~1.5 s concentric + 1.5 s eccentric
+const MIN_SET_SEC = 22; // floor so a heavy single/double still counts as work
+
+/** Estimated active seconds for one logged set. */
+function setWorkSeconds(reps: number, durationMin: number | null | undefined): number {
+  if (durationMin && durationMin > 0) return durationMin * 60;
+  return Math.max(MIN_SET_SEC, Math.max(0, reps) * SEC_PER_REP);
+}
+
+export function workoutCalories(
+  w: Workout,
+  bodyKg: number | null | undefined,
+  endMs?: number,
+): number | null {
+  if (!bodyKg || bodyKg <= 0) return null;
+  const end = endMs ?? w.finishedAt;
+  if (end == null) return null;
+  const totalSec = Math.max(0, (end - w.startedAt) / 1000);
+  if (totalSec <= 0) return null;
+  let workSec = 0;
+  for (const ex of w.exercises) {
+    for (const s of ex.sets) {
+      workSec += setWorkSeconds(s.reps, s.durationMin);
+    }
+  }
+  workSec = Math.min(workSec, totalSec);
+  const restSec = totalSec - workSec;
+  const kcal = (bodyKg / 3600) * (LIFT_WORK_MET * workSec + LIFT_REST_MET * restSec);
+  return Math.round(kcal);
 }
 
 export interface ActivityWeek {
@@ -138,7 +190,7 @@ export interface ActivityWeek {
 
 /** Trailing-window rollup of conditioning vs recovery minutes and kcal. */
 export function activityWeek(
-  activities: Activity[] | null | undefined,
+  activities: Activity[],
   now: number,
   bodyKg: number | null | undefined,
   days = 7,
@@ -150,7 +202,7 @@ export function activityWeek(
     conditioningKcal: 0,
     count: 0,
   };
-  for (const a of activities ?? []) {
+  for (const a of activities) {
     if (a.startedAt < since) continue;
     out.count++;
     const min = durationMin(a);
@@ -170,11 +222,7 @@ export function activityWeek(
  * negative = conditioning-heavy on top of lifting, so trigger a touch sooner.
  * Bounded to [-1, 1]; ~1 recovery-point per 3h of recovery work.
  */
-export function activityRecoveryBias(
-  activities: Activity[] | null | undefined,
-  now: number,
-  days = 7,
-): number {
+export function activityRecoveryBias(activities: Activity[], now: number, days = 7): number {
   const w = activityWeek(activities, now, null, days);
   const raw = (w.recoveryMin * 1.2 - w.conditioningMin) / 180;
   return Math.max(-1, Math.min(1, raw));

@@ -64,7 +64,7 @@ import {
   type DisplayUnit,
   type SupersetGroup,
 } from '../store';
-import { liftingCalories } from '../activities';
+import { workoutCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
 import { bandForKg, assistStack, BAND_HEX, type BandRung, type LoadType } from '../loads';
 import { LiveHero } from '../components/LiveHero';
@@ -348,9 +348,8 @@ export function SessionView(props: {
   const prevExCount = useRef(workout?.exercises.length ?? 0);
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
-    const scrollIntoView = contentBottomRef.current?.scrollIntoView;
-    if (exCount > prevExCount.current && typeof scrollIntoView === 'function') {
-      scrollIntoView.call(contentBottomRef.current, { behavior: 'smooth', block: 'end' });
+    if (exCount > prevExCount.current) {
+      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -380,9 +379,10 @@ export function SessionView(props: {
   const cardioMinutes = workoutCardioMinutes(workout);
   const cardioDistance = workoutCardioDistanceKm(workout);
   // Session energy estimate (feature 6) — shown on the finished-session summary.
-  const sessionKcal = liftingCalories(
-    ((workout.finishedAt ?? now) - workout.startedAt) / 60000,
+  const sessionKcal = workoutCalories(
+    workout,
     latestWeight(store.bodyMetrics)?.weight ?? null,
+    workout.finishedAt ?? now,
   );
   const gym = store.gyms.find((g) => g.id === workout.gymId) ?? null;
   const gymName = gym?.name;
@@ -1461,7 +1461,6 @@ export function SessionView(props: {
             </button>
             {!live && (
               <div className="mid">
-                <div className="kicker">{kicker}</div>
                 {workout.finishedAt === null ? (
                   <div className="clock">
                     {fmtSessionClock((workout.finishedAt ?? now) - workout.startedAt)}
@@ -1496,6 +1495,8 @@ export function SessionView(props: {
               </button>
             )}
           </div>
+
+          {!live && <div className="past-datebar">{kicker}</div>}
 
           {live && (
             <div className="stats-strip">

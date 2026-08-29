@@ -5,12 +5,33 @@ import {
   activityCategory,
   durationMin,
   estimateCalories,
+  workoutCalories,
   activityWeek,
   activityRecoveryBias,
 } from './activities';
-import type { Activity } from './types';
+import type { Activity, Exercise, SetEntry, Workout } from './types';
 
 const DAY = 24 * 3600 * 1000;
+
+const set = (reps: number, over: Partial<SetEntry> = {}): SetEntry => ({
+  id: Math.random().toString(36).slice(2),
+  reps,
+  weight: 60,
+  isWarmup: false,
+  position: 0,
+  ...over,
+});
+
+const workout = (mins: number, sets: SetEntry[]): Workout => {
+  const ex: Exercise = { id: 'e1', name: 'Squat', position: 0, sets };
+  return {
+    id: 'w1',
+    startedAt: 0,
+    finishedAt: mins * 60000,
+    autoFinished: false,
+    exercises: [ex],
+  };
+};
 
 const act = (over: Partial<Activity>): Activity => ({
   id: Math.random().toString(36).slice(2),
@@ -57,6 +78,41 @@ describe('estimateCalories', () => {
     expect(estimateCalories(run, 30, null)).toBeNull();
     expect(estimateCalories(run, 30, 0)).toBeNull();
     expect(estimateCalories(run, 0, 80)).toBeNull();
+  });
+});
+
+describe('workoutCalories', () => {
+  it('splits work from rest, so a set-dense session outburns a lazy one of equal length', () => {
+    const busy = workout(
+      45,
+      Array.from({ length: 24 }, () => set(10)),
+    );
+    const lazy = workout(45, [set(10), set(10), set(10), set(10), set(10)]);
+    const busyKcal = workoutCalories(busy, 80)!;
+    const lazyKcal = workoutCalories(lazy, 80)!;
+    expect(busyKcal).toBeGreaterThan(lazyKcal);
+  });
+  it('counts a timed hold by its own duration', () => {
+    const held = workout(20, [set(0, { durationMin: 5 })]);
+    // 5 min work @ 7.5 MET + 15 min rest @ 2.5 MET, 80 kg
+    // = 80 * (7.5 * 5/60 + 2.5 * 15/60) = 80 * (0.625 + 0.625) = 100
+    expect(workoutCalories(held, 80)).toBe(100);
+  });
+  it('never lets work seconds exceed the wall-clock', () => {
+    // 100 sets but only 1 min elapsed — capped at the minute of rest+work.
+    const impossible = workout(
+      1,
+      Array.from({ length: 100 }, () => set(12)),
+    );
+    const kcal = workoutCalories(impossible, 80)!;
+    // Whole minute counts as work @ 7.5 MET: 80 * 7.5 * (1/60) = 10
+    expect(kcal).toBe(10);
+  });
+  it('degrades to null without a body weight or an end time', () => {
+    expect(workoutCalories(workout(45, [set(10)]), null)).toBeNull();
+    const live: Workout = { ...workout(45, [set(10)]), finishedAt: null };
+    expect(workoutCalories(live, 80)).toBeNull();
+    expect(workoutCalories(live, 80, 45 * 60000)).not.toBeNull();
   });
 });
 

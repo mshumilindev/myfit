@@ -33,7 +33,7 @@ import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet } from '../components/ActivitySheet';
-import { activityType, activityCategory, activityWeek, liftingCalories } from '../activities';
+import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
@@ -338,7 +338,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const weekAgoTs = now - WEEK_MS;
   const liftKcalWeek = finished
     .filter((w) => w.finishedAt !== null && w.startedAt >= weekAgoTs)
-    .reduce((s, w) => s + (liftingCalories((w.finishedAt! - w.startedAt) / 60000, bodyKg) ?? 0), 0);
+    .reduce((s, w) => s + (workoutCalories(w, bodyKg) ?? 0), 0);
   const cardioKcalWeek = activityWeek(store.activities, now, bodyKg).conditioningKcal;
   const energyOut = {
     lift: Math.round(liftKcalWeek),
