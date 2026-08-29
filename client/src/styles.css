@@ -18333,8 +18333,10 @@ button.badge {
 .program-start-day.state-rest .program-start-rest {
   color: var(--color-rest-400);
 }
-/* The rest-day mark is a lotus, sized to sit with the other day marks. */
-.program-start-rest {
+/* Every day mark is a plain glyph at one size (no filled circles). Each inherits
+   its cell's colour: green check (done), red x (missed), amber barbell (upcoming
+   training day — matches the cell's accent), topaz lotus (rest, via .state-rest). */
+.program-start-glyph {
   font-size: 15px;
 }
 .program-start-day.state-rest .program-start-bar {

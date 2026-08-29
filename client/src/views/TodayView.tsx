@@ -992,15 +992,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <span className="program-start-dow">{t.weekDayLetters[day - 1]}</span>
                 <span className="program-start-mark">
                   {done ? (
-                    <Icon name="check-circle" weight="fill" />
+                    <Icon name="check" className="program-start-glyph" />
                   ) : canStart ? (
-                    <Icon name="play" />
+                    <Icon name="play" weight="fill" className="program-start-glyph" />
                   ) : missed ? (
-                    <Icon name="warning-circle" weight="fill" />
+                    <Icon name="x" className="program-start-glyph" />
                   ) : hasPlan ? (
-                    <span className="program-start-dot" aria-hidden />
+                    <Icon name="barbell" className="program-start-glyph program-start-plan" />
                   ) : (
-                    <Icon name="yoga" className="program-start-rest" />
+                    <Icon name="yoga" className="program-start-glyph program-start-rest" />
                   )}
                 </span>
               </span>
