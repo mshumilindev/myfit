@@ -481,6 +481,7 @@ export const pl: Strings = {
   flagSuggestionsDesc:
     'Sugeruje ćwiczenia na dzień sesji i pokazuje przepracowane mięśnie — na żywo i w minionych sesjach.',
   seeAllHistory: 'Cała historia',
+  showMore: 'Pokaż więcej',
   historyCount: (n: number) => `${n} sesji`,
   flagGymPresence: 'Przypomnienia wg obecności na siłowni',
   flagGymPresenceDesc:

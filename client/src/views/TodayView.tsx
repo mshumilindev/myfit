@@ -5,11 +5,11 @@ import type { Shell } from '../App';
 import { db } from '../firebase';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
-import type { ExerciseKind, Gym, Workout } from '../types';
+import type { ExerciseKind, Gym } from '../types';
 import { callFn, getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
-import { MuscleRow } from '../components/Muscle';
+import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
 import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
@@ -21,42 +21,21 @@ import {
   endRestPeriod,
   startRestPeriod,
   latestWeight,
-  deleteActivity,
   logVisitAsWorkout,
-  muscleWorkSorted,
-  programDayNameFor,
   resolveMuscles,
   startWorkout,
   topSet,
   workoutDayReadout,
-  workoutSets,
   workoutVolumeKg,
   type useStore,
 } from '../store';
-import {
-  fmtDayMonth,
-  fmtDurationHM,
-  fmtDurationHuman,
-  fmtKg,
-  fmtShortDate,
-  fmtWeekday,
-  fmtWeekdayDayMonth,
-  useT,
-} from '../i18n';
+import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet } from '../components/ActivitySheet';
-import {
-  activityType,
-  activityCalories,
-  activityCategory,
-  activityWeek,
-  liftingCalories,
-  durationMin as activityDurationMin,
-} from '../activities';
+import { activityType, activityCategory, activityWeek, liftingCalories } from '../activities';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
-import type { Activity } from '../types';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
@@ -175,82 +154,10 @@ function writeProgramCache(a: ProgramAssignment | null): void {
   }
 }
 
-/** Recent logged activities (design feature 6, KCAL feed): cardio & recovery
- *  as secondary rows to strength, each with its calorie estimate. */
-function RecentActivityList({
-  activities,
-  bodyKg,
-  t,
-  locale,
-}: {
-  activities: Activity[];
-  bodyKg: number | null;
-  t: ReturnType<typeof useT>['t'];
-  locale: ReturnType<typeof useT>['locale'];
-}) {
-  const [confirmDelId, setConfirmDelId] = useState<string | null>(null);
-  const recent = [...activities].sort((a, b) => b.startedAt - a.startedAt).slice(0, 5);
-  if (recent.length === 0) return null;
-  return (
-    <div className="td-activity-list">
-      <div className="section-label" style={{ marginBottom: 8 }}>
-        {t.recentActivity}
-      </div>
-      {recent.map((a) => {
-        const type = activityType(a.type);
-        const cat = activityCategory(a);
-        const kcal = activityCalories(a, bodyKg);
-        const min = Math.round(activityDurationMin(a));
-        return (
-          <div key={a.id} className={`ta-row cat-${cat}`}>
-            <Icon name={type?.icon ?? 'heartbeat'} />
-            <span className="ta-main">
-              <span className="ta-name">{t.actType[a.type] ?? a.type}</span>
-              <span className="ta-sub">
-                {fmtShortDate(a.startedAt, locale)} · {min} {t.minShort}
-                {a.distanceKm ? ` · ${a.distanceKm} ${t.kmShort}` : ''} ·{' '}
-                {cat === 'recovery' ? t.actRecovery : t.actConditioning}
-              </span>
-            </span>
-            {kcal != null && (
-              <span className="ta-kcal tnum">
-                <Icon name="flame" weight="fill" />~{kcal}
-              </span>
-            )}
-            <button
-              className="ta-del"
-              onClick={() => setConfirmDelId(a.id)}
-              aria-label={t.delete}
-              title={t.delete}
-            >
-              <Icon name="trash" />
-            </button>
-          </div>
-        );
-      })}
-      {confirmDelId && (
-        <ConfirmDialog
-          title={t.actDeleteTitle}
-          body={t.actDeleteBody}
-          confirmLabel={t.delete}
-          cancelLabel={t.cancel}
-          danger
-          onConfirm={() => {
-            deleteActivity(confirmDelId);
-            setConfirmDelId(null);
-          }}
-          onCancel={() => setConfirmDelId(null)}
-        />
-      )}
-    </div>
-  );
-}
-
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
-  const sessionMuscles = (w: Workout) => muscleWorkSorted(w);
   const [startPicker, setStartPicker] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
@@ -269,17 +176,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // activated. When we can read the program doc (author/self) we honour its
   // status; when we can't (member of a trainer's plan) we default to showing.
   const [assignedActive, setAssignedActive] = useState(true);
-
-  /** Session heading: the program day name if it has one, else the weekday. */
-  // Program sessions keep their own day name; logged sessions are named by the
-  // muscle groups trained ("Back + Shoulders", "Legs", "Chest"), weekday only
-  // as a last resort (Ex suggestions).
-  const sessionTitle = (w: Workout) => {
-    const dn = programDayNameFor(w, store.workouts);
-    if (dn) return dn;
-    const r = workoutDayReadout(w);
-    return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
-  };
 
   // A live activity is mutually exclusive with a live workout: while one runs,
   // the other can't be started (design feature 6).
@@ -320,6 +216,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
+  const historyDayCount = buildHistoryDays(finished, store.activities).length;
   const [pbNow] = useState(() => Date.now());
   const playbook = useMemo(
     () =>
@@ -432,9 +329,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const showSkeleton = firstLoad && store.syncStatus === 'syncing';
 
   const reminder = presenceOn ? store.reminders[0] : undefined;
-  const queuedIds = new Set(
-    store.queue.map((q) => q.url.match(/workouts\/([0-9a-f-]+)/)?.[1]).filter(Boolean),
-  );
 
   // --- Aggregates for the stat grid, weekly bars and records (W-04) --------
   const totalVolKg = finished.reduce((v, w) => v + workoutVolumeKg(w), 0);
@@ -1340,92 +1234,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               <div className="section-label section-divide" style={{ marginBottom: 8 }}>
                 {t.tdHistory}
               </div>
-              {/* Desktop: full table (W-04). */}
-              <div className="desktop-only">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>{t.colDate}</th>
-                      <th>{t.colSession}</th>
-                      <th>{t.colSets}</th>
-                      <th>{t.volumeCol}</th>
-                      <th>{t.duration}</th>
-                      {suggestOn && <th>{t.musclesCol}</th>}
-                      <th className="td-history-dots"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {finished.slice(0, 8).map((w) => (
-                      <tr
-                        key={w.id}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() =>
-                          shell.openOverlay({ screen: 'past-workout', workoutId: w.id })
-                        }
-                      >
-                        <td>{fmtShortDate(w.startedAt, locale)}</td>
-                        <td>
-                          {fmtDayMonth(w.startedAt, locale)}
-                          {w.autoFinished && (
-                            <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
-                              {t.autoClosed}
-                            </span>
-                          )}
-                          {queuedIds.has(w.id) && (
-                            <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
-                              {t.queued}
-                            </span>
-                          )}
-                        </td>
-                        <td>{workoutSets(w)}</td>
-                        <td>{fmtKg(workoutVolumeKg(w))}</td>
-                        <td>{w.finishedAt ? fmtDurationHM(w.finishedAt - w.startedAt) : '—'}</td>
-                        {suggestOn && (
-                          <td className="td-muscles">
-                            <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
-                          </td>
-                        )}
-                        <td className="td-history-dots">
-                          <Icon name="dots-three" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {/* Mobile: stacked rows (S-13). */}
-              <div className="mobile-only">
-                {finished.slice(0, 3).map((w) => (
-                  <button
-                    key={w.id}
-                    className="recent-row"
-                    onClick={() => shell.openOverlay({ screen: 'past-workout', workoutId: w.id })}
-                  >
-                    <span className="d">{fmtShortDate(w.startedAt, locale)}</span>
-                    <span style={{ flex: 1 }}>
-                      <span className="name">{sessionTitle(w)}</span>
-                      {w.autoFinished && (
-                        <span className="tag tag-neutral" style={{ marginLeft: 6 }}>
-                          {t.autoClosed}
-                        </span>
-                      )}
-                      <div className="stats">
-                        {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
-                        {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
-                      </div>
-                      {suggestOn && sessionMuscles(w).length > 0 && (
-                        <div className="recent-muscles">
-                          <MuscleRow entries={sessionMuscles(w)} onOpen={openMuscleHistory} />
-                        </div>
-                      )}
-                    </span>
-                    <Icon name="arrow-up-right" className="go" />
-                  </button>
-                ))}
-              </div>
-              {/* Mobile lists 3, desktop up to 8 — offer the full history
-                  whenever there's more than the mobile count. */}
-              {finished.length > 3 && (
+              <HistoryTimeline
+                workouts={finished}
+                activities={store.activities}
+                allWorkouts={store.workouts}
+                bodyKg={bodyKg}
+                maxDays={5}
+                onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
+                openMuscleHistory={openMuscleHistory}
+                showMuscles={suggestOn}
+              />
+              {historyDayCount > 5 && (
                 <button
                   className="td-history-all"
                   onClick={() => shell.openOverlay({ screen: 'history' })}
@@ -1434,12 +1253,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <Icon name="arrow-up-right" />
                 </button>
               )}
-              <RecentActivityList
-                activities={store.activities}
-                bodyKg={bodyKg}
-                t={t}
-                locale={locale}
-              />
             </div>
           </>
         ) : (

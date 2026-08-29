@@ -482,6 +482,7 @@ export const uk: Strings = {
   flagSuggestionsDesc:
     "Пропонує вправи під день сесії і показує пропрацьовані м'язи — наживо і в минулих тренуваннях.",
   seeAllHistory: 'Уся історія',
+  showMore: 'Показати більше',
   historyCount: (n: number) => `${n} тренувань`,
   flagGymPresence: 'Нагадування за присутністю в залі',
   flagGymPresenceDesc:

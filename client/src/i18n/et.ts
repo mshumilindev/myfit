@@ -477,6 +477,7 @@ export const et: Strings = {
   flagSuggestionsDesc:
     'Soovitab harjutusi sessiooni päeva järgi ja näitab töötatud lihaseid — reaalajas ja varasemates sessioonides.',
   seeAllHistory: 'Kogu ajalugu',
+  showMore: 'Näita rohkem',
   historyCount: (n: number) => `${n} seanssi`,
   flagGymPresence: 'Jõusaali kohaloleku meeldetuletused',
   flagGymPresenceDesc:

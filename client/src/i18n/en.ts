@@ -485,6 +485,7 @@ export const en = {
   flagSuggestionsDesc:
     "Suggests exercises for the session's day and shows muscle groups worked, live and in past sessions.",
   seeAllHistory: 'See all history',
+  showMore: 'Show more',
   historyCount: (n: number) => `${n} sessions`,
   flagGymPresence: 'Gym-presence reminders',
   flagGymPresenceDesc:

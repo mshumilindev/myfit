@@ -489,6 +489,7 @@ export const lt: Strings = {
   flagSuggestionsDesc:
     'Siūlo pratimus pagal sesijos dieną ir rodo apkrautus raumenis — tiesiogiai ir praėjusiose sesijose.',
   seeAllHistory: 'Visa istorija',
+  showMore: 'Rodyti daugiau',
   historyCount: (n: number) => `${n} treniruočių`,
   flagGymPresence: 'Priminimai pagal buvimą salėje',
   flagGymPresenceDesc:
