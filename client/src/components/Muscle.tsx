@@ -260,9 +260,11 @@ const GROUP_VIEW: Record<Exclude<MuscleGroup, 'cardio'>, BView> = {
   fullbody: 'front',
 };
 const GROUP_REGION: Record<Exclude<MuscleGroup, 'cardio'>, Region> = {
-  biceps: 'arms',
-  triceps: 'arms',
-  forearms: 'arms',
+  // Arms are shown on the upper-body crop (not a bare 'arms' crop) so the limbs
+  // stay attached to a torso instead of floating in mid-air.
+  biceps: 'upper',
+  triceps: 'upper',
+  forearms: 'upper',
   chest: 'upper',
   shoulders: 'upper',
   core: 'upper',
@@ -270,7 +272,7 @@ const GROUP_REGION: Record<Exclude<MuscleGroup, 'cardio'>, Region> = {
   lats: 'upper',
   traps: 'upper',
   lower_back: 'upper',
-  neck: 'full',
+  neck: 'upper',
   quads: 'lower',
   adductors: 'lower',
   hamstrings: 'lower',
