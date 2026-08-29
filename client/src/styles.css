@@ -248,7 +248,7 @@ i > svg {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 9px;
+  justify-content: space-between;
   padding: 10px 20px 12px;
 }
 /* Dumbbell mark before the wordmark. Nudged down so it sits on the optical
