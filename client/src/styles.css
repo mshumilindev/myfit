@@ -258,7 +258,7 @@ i > svg {
   display: flex;
   align-items: center;
   position: relative;
-  top: 8px;
+  top: 4px;
   font-size: 20px;
   color: var(--color-text);
 }

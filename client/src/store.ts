@@ -587,7 +587,13 @@ function writeWorkoutDoc(w: Workout): void {
 }
 function saveWorkout(id: string): void {
   const w = state.workouts.find((x) => x.id === id);
-  if (w) writeWorkoutDoc(w);
+  if (!w) return;
+  // A session in progress is kept on this device only — every set is saved to
+  // localStorage (via setState → persist), but nothing is pushed to the backend
+  // until the workout is finished. Editing an already-finished workout still
+  // syncs immediately.
+  if (w.finishedAt === null) return;
+  writeWorkoutDoc(w);
 }
 function deleteWorkoutDoc(id: string): void {
   const uid = currentUid();
@@ -681,7 +687,8 @@ export function startWorkout(
   };
   setState({ workouts: sortWorkouts([workout, ...workouts]), syncStatus: bumpPending() });
   for (const id of closed) saveWorkout(id);
-  writeWorkoutDoc(workout);
+  // The new session is local-only until it's finished (see saveWorkout); any
+  // sessions it just auto-closed above are finished, so those do sync.
   return workout;
 }
 
