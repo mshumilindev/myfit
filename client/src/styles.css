@@ -251,10 +251,14 @@ i > svg {
   gap: 9px;
   padding: 10px 20px 12px;
 }
-/* Dumbbell mark before the wordmark. */
+/* Dumbbell mark before the wordmark. Nudged down so it sits on the optical
+   centre of the script letters (Kaushan's tall ascenders + long descenders push
+   the line-box centre well above the lowercase body). */
 .app-brand-icon {
   display: flex;
   align-items: center;
+  position: relative;
+  top: 8px;
   font-size: 20px;
   color: var(--color-text);
 }
