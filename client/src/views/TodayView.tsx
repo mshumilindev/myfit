@@ -334,16 +334,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const totalVolKg = finished.reduce((v, w) => v + workoutVolumeKg(w), 0);
 
   // Weekly energy out (design feature 6, KCAL): lifting (session wall-clock) +
-  // conditioning activities, split so cardio reads as a peer to strength.
+  // logged activities, split so non-lifting work reads as a peer to strength.
   const weekAgoTs = now - WEEK_MS;
   const liftKcalWeek = finished
     .filter((w) => w.finishedAt !== null && w.startedAt >= weekAgoTs)
     .reduce((s, w) => s + (workoutCalories(w, bodyKg) ?? 0), 0);
-  const cardioKcalWeek = activityWeek(store.activities, now, bodyKg).conditioningKcal;
+  const activityKcalWeek = activityWeek(store.activities, now, bodyKg).totalKcal;
   const energyOut = {
     lift: Math.round(liftKcalWeek),
-    cardio: Math.round(cardioKcalWeek),
-    total: Math.round(liftKcalWeek + cardioKcalWeek),
+    activities: Math.round(activityKcalWeek),
+    total: Math.round(liftKcalWeek + activityKcalWeek),
   };
   const byName = new Map<string, { recW: number; recReps: number; recTs: number }>();
   for (const w of finished) {
@@ -1200,7 +1200,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                     <span className="te-unit">{t.kcalOut}</span>
                   </div>
                   <div className="te-split">
-                    {t.energyLifting(energyOut.lift)} · {t.energyCardio(energyOut.cardio)}
+                    {t.energyLifting(energyOut.lift)} · {t.energyCardio(energyOut.activities)}
                   </div>
                 </div>
               </div>

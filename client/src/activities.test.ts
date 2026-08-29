@@ -148,6 +148,8 @@ describe('weekly rollup & recovery bias', () => {
     expect(w.recoveryMin).toBe(20);
     expect(w.count).toBe(2); // the 30-day-old one is outside the window
     expect(w.conditioningKcal).toBeGreaterThan(0);
+    expect(w.recoveryKcal).toBeGreaterThan(0);
+    expect(w.totalKcal).toBe(w.conditioningKcal + w.recoveryKcal);
   });
   it('tilts positive for recovery-dominant weeks, negative for conditioning-heavy', () => {
     const recovery = [

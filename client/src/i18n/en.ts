@@ -698,7 +698,7 @@ export const en = {
   actDeleteBody: 'It will be removed from your history.',
   kcalOut: 'kcal · last 7 days',
   energyLifting: (n: number) => `${n} lifting`,
-  energyCardio: (n: number) => `${n} cardio`,
+  energyCardio: (n: number) => `${n} activities`,
   actStart: 'Start',
   actReadyCap: 'The timer starts when you press Start.',
   actFinishTitle: 'Finish activity?',

@@ -654,7 +654,7 @@ export const pl: Strings = {
   actDeleteBody: 'Zostanie usunięta z historii.',
   kcalOut: 'kcal · ostatnie 7 dni',
   energyLifting: (n: number) => `${n} siłowo`,
-  energyCardio: (n: number) => `${n} cardio`,
+  energyCardio: (n: number) => `${n} aktywności`,
   actStart: 'Start',
   actReadyCap: 'Stoper ruszy po naciśnięciu Start.',
   actFinishTitle: 'Zakończyć aktywność?',

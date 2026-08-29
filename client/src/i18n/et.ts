@@ -651,7 +651,7 @@ export const et: Strings = {
   actDeleteBody: 'See eemaldatakse ajaloost.',
   kcalOut: 'kcal · viimased 7 päeva',
   energyLifting: (n: number) => `${n} jõusaal`,
-  energyCardio: (n: number) => `${n} kardio`,
+  energyCardio: (n: number) => `${n} tegevused`,
   actStart: 'Alusta',
   actReadyCap: 'Taimer käivitub, kui vajutad Alusta.',
   actFinishTitle: 'Lõpeta tegevus?',

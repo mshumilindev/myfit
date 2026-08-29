@@ -663,7 +663,7 @@ export const lt: Strings = {
   actDeleteBody: 'Ji bus pašalinta iš istorijos.',
   kcalOut: 'kcal · pastarosios 7 d.',
   energyLifting: (n: number) => `${n} jėga`,
-  energyCardio: (n: number) => `${n} kardio`,
+  energyCardio: (n: number) => `${n} veiklos`,
   actStart: 'Pradėti',
   actReadyCap: 'Laikmatis pradės, kai paspausi Pradėti.',
   actFinishTitle: 'Baigti veiklą?',

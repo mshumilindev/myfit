@@ -186,6 +186,8 @@ export interface ActivityWeek {
   conditioningMin: number;
   recoveryMin: number;
   conditioningKcal: number;
+  recoveryKcal: number;
+  totalKcal: number;
   count: number;
 }
 
@@ -201,18 +203,23 @@ export function activityWeek(
     conditioningMin: 0,
     recoveryMin: 0,
     conditioningKcal: 0,
+    recoveryKcal: 0,
+    totalKcal: 0,
     count: 0,
   };
   for (const a of activities ?? []) {
     if (a.startedAt < since) continue;
     out.count++;
     const min = durationMin(a);
+    const kcal = activityCalories(a, bodyKg) ?? 0;
     if (activityCategory(a) === 'recovery') {
       out.recoveryMin += min;
+      out.recoveryKcal += kcal;
     } else {
       out.conditioningMin += min;
-      out.conditioningKcal += activityCalories(a, bodyKg) ?? 0;
+      out.conditioningKcal += kcal;
     }
+    out.totalKcal += kcal;
   }
   return out;
 }
