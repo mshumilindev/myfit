@@ -675,6 +675,16 @@ export function App() {
         />
       )}
       <div className="main-col">
+        {!desktopRail && (
+          <div className="app-brand" aria-label="Spotter">
+            <SpotterMark size={22} variant="tight" plate={false} className="app-brand-logo" />
+            <span className="app-brand-word">
+              spotter
+              <span className="app-brand-dot" aria-hidden />
+              <span className="app-brand-sub">gym</span>
+            </span>
+          </div>
+        )}
         {store.syncStatus === 'failed' && (
           <SyncBlockedCard
             error={store.syncError}

@@ -218,6 +218,66 @@ i > svg {
   padding-bottom: 0;
 }
 
+/* Ambient brass top-glow behind every screen (design "Spotter · Final BG"):
+   a soft accent bloom from the upper-right that fades out by mid-screen, over
+   the base surface. Sits behind all content; the transparent main column and
+   screens let it show through. */
+.app::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 340px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(135% 105% at 78% -22%, rgba(217, 162, 79, 0.13), rgba(217, 162, 79, 0) 56%),
+    linear-gradient(rgba(217, 162, 79, 0.03), rgba(217, 162, 79, 0) 50%);
+}
+.app > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Brand row — logo + "spotter · gym" — pinned at the top of every screen on
+   phones (the desktop rail carries its own brand). It's a flex sibling above
+   the scroll area, so content never slides behind it and the glow shows
+   through. */
+.app-brand {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 6px;
+}
+.app-brand-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: inset 0 0 0 1px #2e3238;
+}
+.app-brand-word {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+.app-brand-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.app-brand-sub {
+  font-weight: 500;
+  color: var(--color-neutral-500);
+}
+
 .screen {
   flex: 1;
   min-height: 0; /* flex child must shrink or overflow-y never scrolls */
@@ -20834,7 +20894,8 @@ button.badge {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 14px);
+    /* Sit lower, closer to the nav hub — half the previous 14px gap. */
+    bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 7px);
     display: flex;
     justify-content: center;
     padding: 0 20px;
