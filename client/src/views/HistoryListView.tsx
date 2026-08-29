@@ -1,6 +1,6 @@
 /**
  * Full history — finished workouts and activities merged into one day-grouped
- * timeline, newest day first, two weeks (14 days) per page with numbered
+ * timeline, newest day first, one week (7 days) per page with numbered
  * pagination. Reached from the "See all history" link under the Today preview.
  */
 import { useState } from 'react';
@@ -10,7 +10,7 @@ import { useT } from '../i18n';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
 import { Icon } from '../ui';
 
-const PAGE_DAYS = 14; // two weeks per page
+const PAGE_DAYS = 7; // one week per page
 
 const ELLIPSIS = -1;
 /** Page numbers to show (0-based) with ELLIPSIS gaps — always first + last, the
