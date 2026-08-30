@@ -14506,8 +14506,8 @@ button.exd-media {
 }
 
 /* Floating session controls (mobile): a graphite liquid-glass pill —
-   Discard · Add exercise (the only labelled button, centred) · Finish.
-   Same refracted-glass technique as the Progress pill. */
+   Discard · Add exercise · Finish as three icon buttons. Same refracted-glass
+   technique as the Progress pill. */
 @media (max-width: 719.98px) {
   /* Room so the last card clears the floating pill, with breathing space. */
   .session-live .session-body {
@@ -14570,6 +14570,7 @@ button.exd-media {
     justify-content: center;
   }
   .session-pill .sp-discard,
+  .session-pill .sp-add,
   .session-pill .sp-finish {
     flex: none;
     width: 46px;
@@ -14595,20 +14596,11 @@ button.exd-media {
     cursor: default;
   }
   .session-pill .sp-add {
-    flex: none;
-    gap: 7px;
-    height: 46px;
-    padding: 0 20px;
-    border-radius: 999px;
     background: rgba(10, 11, 13, 0.5);
-    color: var(--color-text);
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
+    color: var(--color-accent);
   }
   .session-pill .sp-add i {
-    font-size: 16px;
-    color: var(--color-accent);
+    font-size: 20px;
   }
 }
 
