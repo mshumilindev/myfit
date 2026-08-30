@@ -466,6 +466,8 @@ export const pl: Strings = {
   muscleMapPlanned: 'zaplanowane',
   muscleMapOver: 'ponad limit tygodnia',
   muscleMapNearLimit: 'blisko limitu',
+  sessionCoachButton: 'Dzisiejsza gotowość',
+  sessionCoachTitle: 'Spojrzenie na dziś',
   moreLabel: 'więcej',
   programTargetsLabel: 'Cele programu',
   targetWorked: 'Przepracowano',

@@ -20040,6 +20040,11 @@ button.badge {
   margin-bottom: 18px;
   text-align: left;
 }
+/* In the coach sheet the session-start coach is the whole content — drop its
+   inline bottom margin so it sits flush in the drawer. */
+.coach-sheet .ssc {
+  margin-bottom: 4px;
+}
 .ssc-read {
   border-radius: var(--radius-md);
   border: 1px solid var(--color-divider);

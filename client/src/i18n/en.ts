@@ -470,6 +470,8 @@ export const en = {
   muscleMapPlanned: 'planned today',
   muscleMapOver: 'over weekly limit',
   muscleMapNearLimit: 'near weekly limit',
+  sessionCoachButton: 'Today’s readiness',
+  sessionCoachTitle: 'Today’s read',
   moreLabel: 'more',
   programTargetsLabel: 'Program targets',
   targetWorked: 'Worked',

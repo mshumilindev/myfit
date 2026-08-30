@@ -462,6 +462,8 @@ export const et: Strings = {
   muscleMapPlanned: 'planeeritud',
   muscleMapOver: 'üle nädala piiri',
   muscleMapNearLimit: 'piiri lähedal',
+  sessionCoachButton: 'Tänane valmisolek',
+  sessionCoachTitle: 'Tänane ülevaade',
   moreLabel: 'veel',
   programTargetsLabel: 'Programmi sihtmärgid',
   targetWorked: 'Tehtud',

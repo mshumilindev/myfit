@@ -68,7 +68,7 @@ import { workoutCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
 import { bandForKg, assistStack, BAND_HEX, type BandRung, type LoadType } from '../loads';
 import { LiveHero } from '../components/LiveHero';
-import { SessionStartCoach } from '../components/SessionStartCoach';
+import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionStartCoach';
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
 import { SessionMuscleMap } from '../components/SessionMuscleMap';
@@ -159,6 +159,7 @@ type SheetState =
   | { kind: 'superset'; exId: string }
   | { kind: 'gym' }
   | { kind: 'musclemap' }
+  | { kind: 'coach' }
   | null;
 
 type DialogState =
@@ -1727,13 +1728,21 @@ export function SessionView(props: {
 
           {workout.exercises.length === 0 ? (
             <div className="session-empty">
-              {live && (
-                <SessionStartCoach
-                  finished={store.workouts.filter((w) => w.finishedAt !== null)}
-                  now={now}
-                />
-              )}
               <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
+                {live &&
+                  hasSessionStartCoach(
+                    store.workouts.filter((w) => w.finishedAt !== null),
+                    now,
+                  ) && (
+                    <button
+                      className="btn btn-secondary session-coach-btn"
+                      style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                      onClick={() => setSheet({ kind: 'coach' })}
+                    >
+                      <Icon name="heartbeat" weight="fill" />
+                      {t.sessionCoachButton}
+                    </button>
+                  )}
                 <button
                   className="btn btn-primary"
                   style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
@@ -2363,6 +2372,16 @@ export function SessionView(props: {
           onOpenMuscle={openMuscleHistory}
           onClose={() => setSheet(null)}
         />
+      )}
+
+      {sheet?.kind === 'coach' && (
+        <Sheet className="coach-sheet" onClose={() => setSheet(null)}>
+          <div className="sheet-label">{t.sessionCoachTitle}</div>
+          <SessionStartCoach
+            finished={store.workouts.filter((w) => w.finishedAt !== null)}
+            now={now}
+          />
+        </Sheet>
       )}
 
       {sheet?.kind === 'superset' &&

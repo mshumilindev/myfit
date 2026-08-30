@@ -474,6 +474,8 @@ export const lt: Strings = {
   muscleMapPlanned: 'suplanuota',
   muscleMapOver: 'viršija savaitės ribą',
   muscleMapNearLimit: 'prie ribos',
+  sessionCoachButton: 'Šiandienos pasirengimas',
+  sessionCoachTitle: 'Šiandienos apžvalga',
   moreLabel: 'daugiau',
   programTargetsLabel: 'Programos tikslai',
   targetWorked: 'Apkrauta',

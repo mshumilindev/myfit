@@ -466,6 +466,8 @@ export const uk: Strings = {
   muscleMapPlanned: 'заплановано',
   muscleMapOver: 'забагато на тиждень',
   muscleMapNearLimit: 'на межі тижня',
+  sessionCoachButton: 'Готовність на сьогодні',
+  sessionCoachTitle: 'Погляд на сьогодні',
   moreLabel: 'ще',
   programTargetsLabel: 'Цілі програми',
   targetWorked: 'Пропрацьовано',

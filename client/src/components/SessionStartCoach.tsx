@@ -117,6 +117,20 @@ function ExerciseTargetRow({
   );
 }
 
+/** Whether the coach has anything to say — mirrors the null checks below, so the
+ *  session screen can show an "open" button only when the sheet won't be empty. */
+export function hasSessionStartCoach(finished: Workout[], now: number): boolean {
+  if (finished.length < 2) return false;
+  const dow = new Date(now).getDay();
+  const sameDow = finished
+    .filter((w) => new Date(w.startedAt).getDay() === dow)
+    .sort((a, b) => b.startedAt - a.startedAt);
+  if (sameDow.length === 0) return false;
+  // The coach renders when the most-recent same-weekday session had any logged
+  // exercises (its muscles are derived from those, so no exercises = nothing).
+  return sameDow[0].exercises.some((e) => e.sets.length > 0);
+}
+
 export function SessionStartCoach({ finished, now }: { finished: Workout[]; now: number }) {
   const { t } = useT();
   if (finished.length < 2) return null;
