@@ -14506,8 +14506,8 @@ button.exd-media {
 }
 
 /* Floating session controls (mobile): a graphite liquid-glass pill —
-   Discard · Add exercise · Finish as three icon buttons. Same refracted-glass
-   technique as the Progress pill. */
+   Discard · Muscle map · Add exercise (the only labelled button) · Finish.
+   Same refracted-glass technique as the Progress pill. */
 @media (max-width: 719.98px) {
   /* Room so the last card clears the floating pill, with breathing space. */
   .session-live .session-body {
@@ -14570,7 +14570,7 @@ button.exd-media {
     justify-content: center;
   }
   .session-pill .sp-discard,
-  .session-pill .sp-add,
+  .session-pill .sp-map,
   .session-pill .sp-finish {
     flex: none;
     width: 46px;
@@ -14582,6 +14582,13 @@ button.exd-media {
     color: var(--color-danger);
   }
   .session-pill .sp-discard i {
+    font-size: 19px;
+  }
+  .session-pill .sp-map {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-accent);
+  }
+  .session-pill .sp-map i {
     font-size: 19px;
   }
   .session-pill .sp-finish {
@@ -14596,11 +14603,20 @@ button.exd-media {
     cursor: default;
   }
   .session-pill .sp-add {
+    flex: none;
+    gap: 7px;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 999px;
     background: rgba(10, 11, 13, 0.5);
-    color: var(--color-accent);
+    color: var(--color-text);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
   }
   .session-pill .sp-add i {
-    font-size: 20px;
+    color: var(--color-accent);
+    font-size: 16px;
   }
 }
 
@@ -19559,29 +19575,11 @@ button.badge {
 }
 
 /* --- Session muscle map ---------------------------------------------------- */
-/* Open button in the "muscles worked" header (accent-tinted pill, like +N more). */
 .mworked-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-}
-.mm-open {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-divider));
-  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
-  color: var(--color-accent);
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.mm-open i {
-  font-size: 13px;
 }
 /* The sheet: front+back body map, legend, then day-relative hints. */
 .muscle-map-sheet .mm-map {

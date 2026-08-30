@@ -1642,10 +1642,6 @@ export function SessionView(props: {
               <div className="muscles-worked">
                 <div className="section-label mworked-head">
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
-                  <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
-                    <Icon name="person-simple" />
-                    {t.muscleMapButton}
-                  </button>
                 </div>
                 <div className="mworked-row">
                   {withMuscleBreak(entries, (x) => (
@@ -2025,6 +2021,16 @@ export function SessionView(props: {
             >
               <Icon name="trash" />
             </button>
+            {suggestOn && muscleWorkSorted(workout).length > 0 && (
+              <button
+                className="sp-btn sp-map"
+                onClick={() => setSheet({ kind: 'musclemap' })}
+                aria-label={t.muscleMapButton}
+                title={t.muscleMapButton}
+              >
+                <Icon name="user-focus" />
+              </button>
+            )}
             <button
               className="sp-btn sp-add"
               onClick={() => setSheet({ kind: 'add' })}
@@ -2032,6 +2038,7 @@ export function SessionView(props: {
               title={t.addExercise}
             >
               <Icon name="plus" weight="bold" />
+              <span>{t.addExercise}</span>
             </button>
             <button
               className="sp-btn sp-finish"
