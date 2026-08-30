@@ -19566,6 +19566,121 @@ button.badge {
   border-radius: 3px;
 }
 
+/* --- Session muscle map ---------------------------------------------------- */
+/* Open button in the "muscles worked" header (accent-tinted pill, like +N more). */
+.mworked-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mm-open {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-divider));
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.mm-open i {
+  font-size: 13px;
+}
+/* The sheet: front+back body map, legend, then day-relative hints. */
+.muscle-map-sheet .mm-map {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0 12px;
+}
+.muscle-map-sheet .mm-map .bodymap {
+  max-width: 300px;
+  margin: 0 auto;
+}
+.mm-legend {
+  margin-top: 2px;
+}
+.mm-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin: 10px 0 2px;
+}
+.mm-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+.mm-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.mm-group-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  margin-bottom: 1px;
+}
+.mm-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.mm-hint:disabled {
+  cursor: default;
+}
+.mm-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+.mm-hint-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.mm-hint-detail {
+  flex: none;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  font-variant-numeric: tabular-nums;
+}
+.mm-done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.mm-done i {
+  flex: none;
+  color: var(--color-ok);
+  font-size: 14px;
+}
+.mm-covered {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-ok-text);
+  margin-top: 10px;
+}
+
 /* Desktop right-column body map (Volume / By-muscle / Total). Shares the
    Records detail-pane chrome (same 28px title + 30/36 padding); only the figure
    and legend are centred. */

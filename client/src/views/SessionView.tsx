@@ -71,6 +71,7 @@ import { LiveHero } from '../components/LiveHero';
 import { SessionStartCoach } from '../components/SessionStartCoach';
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
+import { SessionMuscleMap } from '../components/SessionMuscleMap';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
 import {
@@ -157,6 +158,7 @@ type SheetState =
   | { kind: 'group-menu'; groupId: string }
   | { kind: 'superset'; exId: string }
   | { kind: 'gym' }
+  | { kind: 'musclemap' }
   | null;
 
 type DialogState =
@@ -349,7 +351,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -369,9 +371,6 @@ export function SessionView(props: {
   useEffect(() => {
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
     if (cards.length === 0) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      return;
-    }
     const ratios = new Map<string, number>();
     const io = new IntersectionObserver(
       (entries) => {
@@ -1639,8 +1638,12 @@ export function SessionView(props: {
             if (entries.length === 0) return null;
             return (
               <div className="muscles-worked">
-                <div className="section-label">
-                  {props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}
+                <div className="section-label mworked-head">
+                  <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
+                  <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
+                    <Icon name="person-simple" />
+                    {t.muscleMapButton}
+                  </button>
                 </div>
                 <div className="mworked-row">
                   {withMuscleBreak(entries, (x) => (
@@ -2350,6 +2353,15 @@ export function SessionView(props: {
             attachGymToWorkout(workout.id, id);
             setSheet(null);
           }}
+        />
+      )}
+
+      {sheet?.kind === 'musclemap' && (
+        <SessionMuscleMap
+          workout={workout}
+          now={now}
+          onOpenMuscle={openMuscleHistory}
+          onClose={() => setSheet(null)}
         />
       )}
 
