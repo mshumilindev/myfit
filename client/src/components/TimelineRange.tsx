@@ -13,6 +13,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 const MAX_DUR = 720; // longest activity: 12h
 const DAY = 1440; // 00:00 → 00:00 next day
 const MAX_END = DAY + MAX_DUR; // late start + 12h can spill past midnight
+const MAX_START = DAY - 15; // start no later than 23:45
 const SNAP = 5; // minute granularity
 
 function fmtTime(min: number): string {
@@ -82,8 +83,11 @@ export function TimelineRange({
       const ne = clamp(m, start, start + MAX_DUR);
       onChange(start, ne - start);
     } else {
-      const ns = clamp(m, Math.max(0, end - MAX_DUR), end);
-      onChange(ns, end - ns);
+      // Dragging the start: it can't pass the end or go past 23:45. Once the 12h
+      // cap is hit, the end travels back with the start so it never gets stuck.
+      const ns = Math.min(clamp(m, 0, MAX_START), end);
+      const ne = end - ns > MAX_DUR ? ns + MAX_DUR : end;
+      onChange(ns, ne - ns);
     }
   };
   const onUp = () => {
