@@ -34,6 +34,7 @@ import {
 } from '../volume';
 import { FeatsView } from '../components/FeatsView';
 import { TrendsView } from '../components/TrendsView';
+import { ChallengesView } from './ChallengesView';
 import { FixSheet } from '../components/FixSheet';
 import { ReadinessLens } from '../components/Readiness';
 import {
@@ -77,8 +78,8 @@ export function ProgressView({
 }: {
   store: Store;
   shell: Shell;
-  sub: 'progress' | 'trends' | 'feats';
-  onSub: (s: 'progress' | 'trends' | 'feats') => void;
+  sub: 'progress' | 'trends' | 'feats' | 'challenges';
+  onSub: (s: 'progress' | 'trends' | 'feats' | 'challenges') => void;
   featSub: 'achievements' | 'standards';
   onFeatSub: (s: 'achievements' | 'standards') => void;
   seg: 'total' | 'muscle' | 'volume' | 'records';
@@ -396,10 +397,18 @@ export function ProgressView({
       >
         {t.featsTab}
       </button>
+      <button
+        role="tab"
+        aria-selected={ptab === 'challenges'}
+        className={ptab === 'challenges' ? 'active' : ''}
+        onClick={() => setPtab('challenges')}
+      >
+        {t.challengesTab}
+      </button>
     </div>
   );
 
-  if (ptab === 'feats' || ptab === 'trends') {
+  if (ptab === 'feats' || ptab === 'trends' || ptab === 'challenges') {
     return (
       <div className="screen progress-page progress-alt">
         <div className="progress-tabbar">{pTabs}</div>
@@ -411,6 +420,8 @@ export function ProgressView({
               sub={featSub}
               onSub={onFeatSub}
             />
+          ) : ptab === 'challenges' ? (
+            <ChallengesView store={store} />
           ) : (
             <TrendsView finished={finished} body={store.bodyMetrics} />
           )}

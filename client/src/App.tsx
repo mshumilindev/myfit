@@ -41,6 +41,7 @@ import {
 } from './ui';
 import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
 import { computeNotifs, initSeenIds, saveSeenIds, unreadCount } from './notifications';
+import { useChallenges } from './challenges';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -214,7 +215,7 @@ function toHash(
   overlay: Overlay,
   programsPeer: ProgramsPeer,
   libMine: boolean,
-  progressSub: 'progress' | 'trends' | 'feats',
+  progressSub: 'progress' | 'trends' | 'feats' | 'challenges',
   featSub: 'achievements' | 'standards',
   progressSeg: ProgSeg,
   volumeLens: VolLens,
@@ -225,6 +226,7 @@ function toHash(
   }
   if (!overlay && tab === 'progress') {
     if (progressSub === 'trends') return '#/trends';
+    if (progressSub === 'challenges') return '#/challenges';
     if (progressSub === 'feats') return featSub === 'standards' ? '#/feats/standards' : '#/feats';
     if (progressSeg === 'muscle') return '#/progress/muscle';
     if (progressSeg === 'records') return '#/progress/records';
@@ -283,7 +285,8 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'exercises' || head === 'playbook' || head === 'templates')
     return { tab: 'programs', overlay: null };
   // Progress sub-tabs are peer URLs of #/progress (read separately below).
-  if (head === 'trends' || head === 'feats') return { tab: 'progress', overlay: null };
+  if (head === 'trends' || head === 'feats' || head === 'challenges')
+    return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
@@ -310,7 +313,7 @@ export type VolLens = 'volume' | 'fatigue' | 'readiness';
 /** Read the Progress sub-tab + volume seg/lens from the hash:
  *  #/trends, #/feats[/standards], #/progress[/muscle|/volume[/fatigue|/readiness]|/records]. */
 function progressFromHash(hash: string): {
-  sub: 'progress' | 'trends' | 'feats';
+  sub: 'progress' | 'trends' | 'feats' | 'challenges';
   featSub: 'achievements' | 'standards';
   seg: ProgSeg;
   lens: VolLens;
@@ -318,6 +321,7 @@ function progressFromHash(hash: string): {
   const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const base = { seg: 'total' as ProgSeg, lens: 'volume' as VolLens };
   if (parts[0] === 'trends') return { sub: 'trends', featSub: 'achievements', ...base };
+  if (parts[0] === 'challenges') return { sub: 'challenges', featSub: 'achievements', ...base };
   if (parts[0] === 'feats')
     return {
       sub: 'feats',
@@ -405,10 +409,11 @@ export function App() {
 
   // Milestone notifications — derived from training history (see notifications.ts).
   const [notifNow] = useState(() => Date.now());
+  const challenges = useChallenges();
   const notifs = useMemo(
-    () => computeNotifs(store, notifNow, t),
+    () => computeNotifs(store, notifNow, t, challenges),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, notifNow, t],
+    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t],
   );
   // On the first-ever load this silently baselines the whole history as read
   // (in the initializer, so nothing flashes unread); afterwards it just loads
@@ -471,9 +476,10 @@ export function App() {
     () => peerFromHash(window.location.hash).peer,
   );
   const [libMine, setLibMine] = useState<boolean>(() => peerFromHash(window.location.hash).mine);
-  // Progress sub-tabs (Progress · Trends · Feats) + the Feats sub-tab, kept in
-  // App so each has its own URL (#/trends, #/feats, #/feats/standards).
-  const [progressSub, setProgressSub] = useState<'progress' | 'trends' | 'feats'>(
+  // Progress sub-tabs (Progress · Trends · Feats · Challenges) + the Feats
+  // sub-tab, kept in App so each has its own URL (#/trends, #/feats,
+  // #/feats/standards, #/challenges).
+  const [progressSub, setProgressSub] = useState<'progress' | 'trends' | 'feats' | 'challenges'>(
     () => progressFromHash(window.location.hash).sub,
   );
   const [featSub, setFeatSub] = useState<'achievements' | 'standards'>(

@@ -967,10 +967,14 @@ export function MuscleBreakdownList({
     const m = new Map<MuscleGroup, number>();
     for (const w of store.workouts) {
       if (w.finishedAt === null || w.startedAt < wkStart || w.startedAt >= wkEnd) continue;
+      // Weekly context is "as of" the viewed session: for a past workout, count
+      // only what had been logged up to and including it, not sessions done
+      // later the same week (which it couldn't have known about).
+      if (w.startedAt > refTs) continue;
       for (const [mg, n] of muscleSetsInWorkout(w)) m.set(mg, (m.get(mg) ?? 0) + n);
     }
     return m;
-  }, [store.workouts, wkStart, wkEnd]);
+  }, [store.workouts, wkStart, wkEnd, refTs]);
 
   return (
     <div className="md-list">

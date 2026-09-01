@@ -20,6 +20,7 @@ const KIND_ICON: Record<NotifKind, string> = {
   trend: 'chart-line-up',
   streak: 'fire',
   volume: 'check-circle',
+  challenge: 'flag-banner',
 };
 
 const PAGE = 24;

@@ -116,6 +116,10 @@ import { HandHeart } from '@phosphor-icons/react/HandHeart';
 import { Snowflake } from '@phosphor-icons/react/Snowflake';
 import { ClockCounterClockwise } from '@phosphor-icons/react/ClockCounterClockwise';
 import { FlowerLotus } from '@phosphor-icons/react/FlowerLotus';
+import { Minus } from '@phosphor-icons/react/Minus';
+import { Stack } from '@phosphor-icons/react/Stack';
+import { Medal } from '@phosphor-icons/react/Medal';
+import { FlagBanner } from '@phosphor-icons/react/FlagBanner';
 import { X } from '@phosphor-icons/react/X';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
@@ -226,6 +230,10 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   snowflake: Snowflake,
   'clock-counter-clockwise': ClockCounterClockwise,
   yoga: FlowerLotus,
+  minus: Minus,
+  stack: Stack,
+  medal: Medal,
+  'flag-banner': FlagBanner,
   x: X,
   'x-circle': XCircle,
 };

@@ -22,10 +22,11 @@ import { computeTrends } from './trends';
 import { LANDMARKS, VOLUME_MUSCLES, classifyZone, weeklyMuscleSets } from './volume';
 import { fmtKg, fmtShortDate, fmtWeekday, type LocaleId } from './i18n';
 import type { useT } from './i18n';
+import { templateById, type ActiveChallenge } from './challenges';
 
 type T = ReturnType<typeof useT>['t'];
 
-export type NotifKind = 'standard' | 'pr' | 'feat' | 'trend' | 'streak' | 'volume';
+export type NotifKind = 'standard' | 'pr' | 'feat' | 'trend' | 'streak' | 'volume' | 'challenge';
 
 export interface Notif {
   id: string;
@@ -51,10 +52,34 @@ function weekKey(ts: number): number {
 type Store = ReturnType<typeof useStore>;
 
 /** Compute the current milestone feed, newest first (capped). */
-export function computeNotifs(store: Store, now: number, t: T): Notif[] {
+export function computeNotifs(
+  store: Store,
+  now: number,
+  t: T,
+  challenges: ActiveChallenge[] = [],
+): Notif[] {
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const out: Notif[] = [];
-  if (finished.length === 0) return out;
+
+  // --- Completed challenges (posted when a challenge is finished).
+  for (const ac of challenges) {
+    if (ac.status !== 'done') continue;
+    const tmpl = templateById(ac.templateId);
+    if (!tmpl) continue;
+    out.push({
+      id: `challenge:${ac.id}`,
+      kind: 'challenge',
+      ts: ac.completedAt ?? now,
+      title: t.notifChallengeTitle(tmpl.title(t, ac.target)),
+      subtitle: t.notifChallengeSub,
+      nav: '#/challenges',
+    });
+  }
+
+  if (finished.length === 0) {
+    out.sort((a, b) => b.ts - a.ts);
+    return out.slice(0, 150);
+  }
 
   const lastWorkoutTs = finished.reduce((m, w) => Math.max(m, w.finishedAt ?? w.startedAt), 0);
 
