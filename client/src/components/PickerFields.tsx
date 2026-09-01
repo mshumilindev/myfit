@@ -414,7 +414,8 @@ export function TimeField({
 /* --- duration ------------------------------------------------------------ */
 
 /** Duration entered as hours + minutes; the value stays in whole minutes.
- *  Handles anything from a few minutes to an all-day (up to 24h) activity. */
+ *  Each part is free text so you can clear it (empty counts as zero), and the
+ *  field handles anything from a few minutes to an all-day (24h) activity. */
 export function DurationField({
   value, // minutes
   onChange,
@@ -425,45 +426,51 @@ export function DurationField({
   max?: number;
 }) {
   const { t } = useT();
-  const valid = !Number.isNaN(value);
-  const hours = valid ? Math.floor(value / 60) : 0;
-  const mins = valid ? value % 60 : 0;
   const maxH = Math.floor(max / 60);
+  const valid = !Number.isNaN(value);
+  const [hStr, setHStr] = useState(valid ? String(Math.floor(value / 60)) : '');
+  const [mStr, setMStr] = useState(valid ? String(value % 60) : '');
+  const [prev, setPrev] = useState(value);
+  // Resync the visible text if the value is changed from outside the field.
+  if (value !== prev) {
+    setPrev(value);
+    setHStr(valid ? String(Math.floor(value / 60)) : '');
+    setMStr(valid ? String(value % 60) : '');
+  }
 
-  const set = (h: number, m: number) => {
-    const hh = Math.max(0, Math.min(maxH, Math.floor(h) || 0));
-    const mm = Math.max(0, Math.min(59, Math.floor(m) || 0));
+  function commit(h: string, m: string) {
+    const hh = Math.max(0, Math.min(maxH, parseInt(h, 10) || 0));
+    const mm = Math.max(0, Math.min(59, parseInt(m, 10) || 0));
+    setPrev(hh * 60 + mm);
     onChange(Math.min(max, hh * 60 + mm));
-  };
+  }
 
   return (
     <div className="dur-hm">
-      <label className="dur-part">
-        <input
-          className="input"
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={maxH}
-          value={valid ? hours : ''}
-          onChange={(e) => set(Number(e.target.value), mins)}
-          aria-label={t.hrShort}
-        />
-        <span className="dur-unit">{t.hrShort}</span>
-      </label>
-      <label className="dur-part">
-        <input
-          className="input"
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={59}
-          value={valid ? mins : ''}
-          onChange={(e) => set(hours, Number(e.target.value))}
-          aria-label={t.minShort}
-        />
-        <span className="dur-unit">{t.minShort}</span>
-      </label>
+      <input
+        className="dur-in"
+        inputMode="numeric"
+        aria-label={t.hrShort}
+        value={hStr}
+        onChange={(e) => {
+          const v = e.target.value.replace(/\D/g, '');
+          setHStr(v);
+          commit(v, mStr);
+        }}
+      />
+      <span className="dur-unit">{t.hrShort}</span>
+      <input
+        className="dur-in"
+        inputMode="numeric"
+        aria-label={t.minShort}
+        value={mStr}
+        onChange={(e) => {
+          const v = e.target.value.replace(/\D/g, '');
+          setMStr(v);
+          commit(hStr, v);
+        }}
+      />
+      <span className="dur-unit">{t.minShort}</span>
     </div>
   );
 }

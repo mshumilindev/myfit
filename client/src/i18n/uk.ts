@@ -121,7 +121,7 @@ export const uk: Strings = {
   logPastSession: 'Записати минуле тренування',
   backfillDate: 'Дата',
   backfillStart: 'Початок',
-  backfillDuration: 'Тривалість, хв',
+  backfillDuration: 'Тривалість',
   backfillContinue: 'Далі до вправ',
   backfillFuture: 'Цей час у майбутньому',
   dismiss: 'Прибрати',

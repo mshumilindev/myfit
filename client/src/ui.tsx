@@ -52,7 +52,9 @@ import { DownloadSimple } from '@phosphor-icons/react/DownloadSimple';
 import { Eraser } from '@phosphor-icons/react/Eraser';
 import { Envelope } from '@phosphor-icons/react/Envelope';
 import { Eye } from '@phosphor-icons/react/Eye';
+import { Feather } from '@phosphor-icons/react/Feather';
 import { Flame } from '@phosphor-icons/react/Flame';
+import { Gauge } from '@phosphor-icons/react/Gauge';
 import { Globe } from '@phosphor-icons/react/Globe';
 import { FloppyDisk } from '@phosphor-icons/react/FloppyDisk';
 import { Gear } from '@phosphor-icons/react/Gear';
@@ -165,7 +167,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   eraser: Eraser,
   envelope: Envelope,
   eye: Eye,
+  feather: Feather,
   flame: Flame,
+  gauge: Gauge,
   globe: Globe,
   gear: Gear,
   house: House,

@@ -113,7 +113,7 @@ export const en = {
   logPastSession: 'Log a past session',
   backfillDate: 'Date',
   backfillStart: 'Start',
-  backfillDuration: 'Duration, min',
+  backfillDuration: 'Duration',
   backfillContinue: 'Continue to exercises',
   backfillFuture: 'That time is in the future',
   dismiss: 'Dismiss',

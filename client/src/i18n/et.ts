@@ -109,7 +109,7 @@ export const et: Strings = {
   logPastSession: 'Logi möödunud treening',
   backfillDate: 'Kuupäev',
   backfillStart: 'Algus',
-  backfillDuration: 'Kestus, min',
+  backfillDuration: 'Kestus',
   backfillContinue: 'Edasi harjutustesse',
   backfillFuture: 'See aeg on tulevikus',
   dismiss: 'Peida',

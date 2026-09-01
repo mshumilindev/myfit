@@ -5823,25 +5823,33 @@ i > svg {
   font-weight: 600;
 }
 
-/* Duration entered as hours + minutes. */
+/* Duration entered as hours + minutes — one box, like the other fields. */
 .dur-hm {
   display: flex;
-  gap: 12px;
-}
-.dur-part {
-  flex: 1;
-  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  min-height: 50px;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
 }
-.dur-part .input {
-  width: 100%;
+.dur-in {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  font-size: 15px;
   text-align: center;
 }
 .dur-unit {
   flex: none;
   font-size: 13px;
   color: var(--color-neutral-500);
+  padding: 0 10px 0 2px;
 }
 
 /* --- Gym picker (start + backfill) --------------------------------------- */
@@ -19782,6 +19790,17 @@ button.badge {
 .seg2 button.active {
   background: var(--color-accent-900);
   color: var(--color-accent);
+}
+/* Effort as an icon switch: icon over label in each of the three segments. */
+.effort-switch button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 0;
+}
+.effort-switch button i {
+  font-size: 20px;
 }
 /* Four-way segment: tighter so translated labels still fit one line. */
 .seg3.seg4 button {

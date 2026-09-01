@@ -332,16 +332,24 @@ function EffortRow({
   return (
     <div className={className ?? 'act-effort'}>
       <span className="act-field-label">{t.actEffort}</span>
-      <div className="seg2 act-effort-seg">
+      <div className="seg2 act-effort-seg effort-switch">
         {EFFORTS.map((e) => (
           <button key={e} className={effort === e ? 'active' : ''} onClick={() => onEffort(e)}>
-            {t.actEffortLevel[e]}
+            <Icon name={EFFORT_ICON[e]} weight={effort === e ? 'fill' : undefined} />
+            <span>{t.actEffortLevel[e]}</span>
           </button>
         ))}
       </div>
     </div>
   );
 }
+
+/** Playful, escalating effort icons: a feather, an effort dial, a blaze. */
+const EFFORT_ICON: Record<ActivityEffort, string> = {
+  light: 'feather',
+  moderate: 'gauge',
+  hard: 'flame',
+};
 
 function DistanceField({
   value,

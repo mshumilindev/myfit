@@ -121,7 +121,7 @@ export const pl: Strings = {
   logPastSession: 'Zapisz przeszły trening',
   backfillDate: 'Data',
   backfillStart: 'Początek',
-  backfillDuration: 'Czas trwania, min',
+  backfillDuration: 'Czas trwania',
   backfillContinue: 'Dalej do ćwiczeń',
   backfillFuture: 'Ten czas jest w przyszłości',
   dismiss: 'Odrzuć',

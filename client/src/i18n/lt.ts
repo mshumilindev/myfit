@@ -121,7 +121,7 @@ export const lt: Strings = {
   logPastSession: 'Įrašyti praėjusią treniruotę',
   backfillDate: 'Data',
   backfillStart: 'Pradžia',
-  backfillDuration: 'Trukmė, min',
+  backfillDuration: 'Trukmė',
   backfillContinue: 'Toliau prie pratimų',
   backfillFuture: 'Šis laikas ateityje',
   dismiss: 'Atmesti',
