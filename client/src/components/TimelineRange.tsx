@@ -11,6 +11,7 @@ import { useState } from 'react';
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 
 const MAX_DUR = 720; // longest activity: 12h
+const MIN_DUR = 60; // shortest activity: 1h
 const DAY = 1440; // 00:00 → 00:00 next day
 const MAX_END = DAY + MAX_DUR; // late start + 12h can spill past midnight
 const MAX_START = DAY - 15; // start no later than 23:45
@@ -71,8 +72,6 @@ export function TimelineRange({
     if (!el) return;
     el.setPointerCapture(e.pointerId);
     setMode('end');
-    const m = clamp(posMin(e, el), start, start + MAX_DUR);
-    onChange(start, m - start);
   };
   const onMove = (e: ReactPointerEvent) => {
     if (!mode) return;
@@ -80,13 +79,21 @@ export function TimelineRange({
     if (!el) return;
     const m = posMin(e, el);
     if (mode === 'end') {
-      const ne = clamp(m, start, start + MAX_DUR);
-      onChange(start, ne - start);
+      // Dragging the end. Below the 1h minimum, the start travels left with it.
+      let ne = clamp(m, 0, start + MAX_DUR);
+      let ns = start;
+      if (ne - ns < MIN_DUR) ns = ne - MIN_DUR;
+      if (ns < 0) {
+        ns = 0;
+        ne = MIN_DUR;
+      }
+      onChange(ns, ne - ns);
     } else {
-      // Dragging the start: it can't pass the end or go past 23:45. Once the 12h
-      // cap is hit, the end travels back with the start so it never gets stuck.
-      const ns = Math.min(clamp(m, 0, MAX_START), end);
-      const ne = end - ns > MAX_DUR ? ns + MAX_DUR : end;
+      // Dragging the start (never past 23:45). The end follows so the gap stays
+      // between 1h and 12h — pushed right when squeezed, dragged left at the cap.
+      const ns = clamp(m, 0, MAX_START);
+      const gap = end - ns;
+      const ne = gap > MAX_DUR ? ns + MAX_DUR : gap < MIN_DUR ? ns + MIN_DUR : end;
       onChange(ns, ne - ns);
     }
   };
@@ -95,7 +102,12 @@ export function TimelineRange({
     setWinEnd(winEndFor(start)); // day scale, extended past midnight only if needed
   };
 
-  const marks = [0, 0.25, 0.5, 0.75, 1].map((f) => fmtTime(f * winEnd));
+  // Round interior ticks to :15 so the scale never shows fractional minutes;
+  // the two ends stay exact.
+  const marks = [0, 0.25, 0.5, 0.75, 1].map((f, i) => {
+    const raw = f * winEnd;
+    return fmtTime(i === 0 || i === 4 ? raw : Math.round(raw / 15) * 15);
+  });
   const rangeStyle = { left: `${startPct}%`, width: `${endPct - startPct}%` } as CSSProperties;
   const startStyle = { left: `${startPct}%` } as CSSProperties;
   const endStyle = { left: `${endPct}%` } as CSSProperties;

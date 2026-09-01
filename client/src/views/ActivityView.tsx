@@ -79,8 +79,8 @@ function NewActivity({ typeKey, onClose }: { typeKey: string; onClose: () => voi
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   });
   const [date, setDate] = useState(todayIso);
-  const [time, setTime] = useState('18:00');
-  const [duration, setDuration] = useState(30);
+  const [time, setTime] = useState('00:00');
+  const [duration, setDuration] = useState(720); // default range 00:00 → 12:00
 
   function start(): void {
     startActivity(type.key, type.category);
