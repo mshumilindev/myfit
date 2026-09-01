@@ -1006,6 +1006,48 @@ export function restMs(prevLoggedAt?: number | null, loggedAt?: number | null): 
   return Math.max(0, loggedAt - prevLoggedAt);
 }
 
+// Estimated active seconds spent performing one set: a timed hold uses its own
+// duration; a normal set is reps × ~3 s (≈1.5 s up + 1.5 s down) with a ~30 s
+// floor so heavy low-rep sets still register. Mirrors the calorie work split.
+const SET_SEC_PER_REP = 3;
+const SET_MIN_WORK_SEC = 30;
+export function setWorkSeconds(s: Pick<SetEntry, 'reps' | 'durationMin'>): number {
+  if (s.durationMin && s.durationMin > 0) return s.durationMin * 60;
+  return Math.max(SET_MIN_WORK_SEC, Math.max(0, s.reps) * SET_SEC_PER_REP);
+}
+
+/**
+ * Rest BEFORE a set, in seconds: the gap since the previously logged set minus
+ * the time spent performing THIS set. A set is logged once it's finished, so the
+ * raw gap between two set logs is "rest after the previous set + this set's own
+ * working time" — netting out the working time leaves the real rest. Derived
+ * live from the saved `loggedAt` stamps, so it recomputes correctly for every
+ * past session with no stored value and no data migration. Null when a stamp is
+ * missing or the gap is implausible (backfilled / resumed next day).
+ */
+export function restBeforeSet(
+  prevLoggedAt: number | null | undefined,
+  set: SetEntry,
+): number | null {
+  if (!prevLoggedAt || !set.loggedAt) return null;
+  const gap = Math.round((set.loggedAt - prevLoggedAt) / 1000);
+  if (gap <= 0 || gap >= 3 * 3600) return null;
+  return Math.max(0, gap - setWorkSeconds(set));
+}
+
+/** As restBeforeSet, but finds the previous logged set anywhere in the workout,
+ *  so rest carried across exercise cards is captured too. */
+export function restBeforeSetInWorkout(w: Workout, set: SetEntry): number | null {
+  if (!set.loggedAt) return null;
+  let prev = 0;
+  for (const e of w.exercises)
+    for (const s of e.sets) {
+      const ts = s.loggedAt ?? 0;
+      if (ts > prev && ts < set.loggedAt) prev = ts;
+    }
+  return prev > 0 ? restBeforeSet(prev, set) : null;
+}
+
 /**
  * One-time cleanup: the per-set `restSec` values stored by older builds were
  * computed incorrectly. Rest is now derived from real set timestamps at display

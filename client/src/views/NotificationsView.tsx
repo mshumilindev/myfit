@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
-import { isUnread, notifTime, type Notif, type NotifKind } from '../notifications';
+import { isSeen, notifTime, type Notif, type NotifKind, type NotifState } from '../notifications';
 
 const KIND_ICON: Record<NotifKind, string> = {
   standard: 'trophy',
@@ -51,14 +51,14 @@ function group(
 export function NotificationsView({
   notifs,
   now,
-  seenIds,
+  state,
   onSeen,
   onMarkAll,
   onClose,
 }: {
   notifs: Notif[];
   now: number;
-  seenIds: Set<string>;
+  state: NotifState;
   onSeen: (ids: string[]) => void;
   onMarkAll: () => void;
   onClose: () => void;
@@ -67,7 +67,7 @@ export function NotificationsView({
   const [limit, setLimit] = useState(PAGE);
   // Freeze the read state at open time so a row keeps its highlight while you
   // look at it, even as it's being marked read in the background.
-  const [snapshot] = useState(() => seenIds);
+  const [snapshot] = useState(() => state);
   const feedRef = useRef<HTMLDivElement>(null);
   const sentinel = useRef<HTMLDivElement>(null);
   const reported = useRef<Set<string>>(new Set());
@@ -99,7 +99,7 @@ export function NotificationsView({
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           const id = (e.target as HTMLElement).dataset.nid;
-          if (!id || reported.current.has(id) || snapshot.has(id)) continue;
+          if (!id || reported.current.has(id) || isSeen(snapshot, id)) continue;
           reported.current.add(id);
           fresh.push(id);
         }
@@ -112,7 +112,7 @@ export function NotificationsView({
   }, [shown.length, snapshot, onSeen]);
 
   const groups = group(shown, now);
-  const hasUnread = notifs.some((n) => isUnread(n, seenIds));
+  const hasUnread = notifs.some((n) => !isSeen(state, n.id));
 
   const sectionLabel = (k: 'today' | 'week' | 'earlier') =>
     k === 'today' ? t.notifToday : k === 'week' ? t.notifThisWeek : t.notifEarlier;
@@ -146,7 +146,7 @@ export function NotificationsView({
               <div className="notif-group-label">{sectionLabel(g.label)}</div>
               <div className="notif-rows">
                 {g.items.map((n) => {
-                  const unread = !snapshot.has(n.id);
+                  const unread = !isSeen(snapshot, n.id);
                   const cls = `notif-row nkind-${n.kind}${unread ? ' unread' : ''}${
                     n.nav ? ' linked' : ''
                   }`;

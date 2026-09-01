@@ -5,13 +5,60 @@
  * the vague "try a deload" into a per-muscle read and a targeted suggestion.
  * Pure over the finished-workout history.
  */
-import { weeklyMuscleSets, LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
+import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { topHistory } from './progression';
 import { resolveMuscles, isStrengthExercise } from './store';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 
 const DAY = 24 * 3600 * 1000;
+
+/**
+ * Fatigue weights stabilizer (secondary) work LESS than the volume read does.
+ * The MRV landmarks are calibrated for DIRECT training volume, but a muscle
+ * like the lower back is loaded as a synergist on nearly every squat, hinge and
+ * row. Counting that stabilizer work at the volume model's 0.5/set (against a
+ * low MRV) makes it read "fried" after a normal leg day, which isn't real
+ * systemic fatigue. So for the fatigue read a secondary set counts at a third,
+ * and — the firm rule — a muscle worked ONLY as a stabilizer this week (no
+ * direct sets) can never read "fried".
+ */
+const FATIGUE_SECONDARY_WEIGHT = 1 / 3;
+/** Ceiling on fatigue score for a muscle with no direct (primary) sets. */
+const NO_DIRECT_CEILING = 0.5;
+
+interface WeekSplit {
+  primary: number;
+  secondary: number;
+}
+
+/** Trailing-week sets per muscle, split into direct (primary) vs stabilizer
+ *  (secondary) so the fatigue read can weight them differently. */
+function weeklyFatigueSplit(
+  finished: Workout[],
+  now: number,
+  days = 7,
+): Map<MuscleGroup, WeekSplit> {
+  const since = now - days * DAY;
+  const out = new Map<MuscleGroup, WeekSplit>();
+  const add = (m: MuscleGroup, key: keyof WeekSplit, v: number): void => {
+    const cur = out.get(m) ?? { primary: 0, secondary: 0 };
+    cur[key] += v;
+    out.set(m, cur);
+  };
+  for (const w of finished) {
+    if (w.startedAt < since) continue;
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e)) continue;
+      const n = e.sets.length;
+      if (n === 0) continue;
+      const { primary, secondary } = resolveMuscles(e);
+      if (primary) add(primary, 'primary', n);
+      for (const s of secondary) if (s !== primary) add(s, 'secondary', n);
+    }
+  }
+  return out;
+}
 
 export type FatigueLevel = 'fresh' | 'moderate' | 'high' | 'fried';
 
@@ -69,17 +116,24 @@ export function muscleFatigue(
   now: number,
   landmarks?: ReadonlyMap<MuscleGroup, Landmark>,
 ): Map<MuscleGroup, MuscleFatigue> {
-  const per = weeklyMuscleSets(finished, now);
+  const split = weeklyFatigueSplit(finished, now);
   const stalled = stalledMuscles(finished, now);
   const out = new Map<MuscleGroup, MuscleFatigue>();
   for (const m of VOLUME_MUSCLES) {
     // Personalised ceiling when available (so a tolerant athlete reads less
     // fatigued at the same volume, and a deload holds off) — else the default.
     const lm = landmarks?.get(m) ?? (LANDMARKS[m] as Landmark);
-    const sets = per.get(m) ?? 0;
-    const volComp = clamp((sets / lm.mrv - 0.7) / 0.45, 0, 1);
+    const wk = split.get(m) ?? { primary: 0, secondary: 0 };
+    // Display set count stays consistent with the volume read (secondary 0.5);
+    // the fatigue SCORE weights stabilizer work less (secondary 1/3).
+    const sets = wk.primary + wk.secondary * 0.5;
+    const fatSets = wk.primary + wk.secondary * FATIGUE_SECONDARY_WEIGHT;
+    const volComp = clamp((fatSets / lm.mrv - 0.7) / 0.45, 0, 1);
     const isSt = stalled.has(m);
-    const score = clamp(volComp * 0.75 + (isSt ? 0.4 : 0), 0, 1);
+    let score = clamp(volComp * 0.75 + (isSt ? 0.4 : 0), 0, 1);
+    // A muscle only stabilized this week (no direct sets) can't read "fried" —
+    // stabilizer load and a stale lift alone don't warrant a deload here.
+    if (wk.primary <= 0) score = Math.min(score, NO_DIRECT_CEILING);
     out.set(m, { muscle: m, score, level: levelOf(score), sets, mrv: lm.mrv, stalled: isSt });
   }
   return out;

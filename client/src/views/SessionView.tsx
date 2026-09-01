@@ -23,6 +23,7 @@ import {
   isStrengthExercise,
   isTimedExercise,
   isMarkerExercise,
+  restBeforeSetInWorkout,
   knownExercises,
   perHandFactor,
   muscleSetsInWorkout,
@@ -353,7 +354,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -371,7 +372,6 @@ export function SessionView(props: {
   const [viewportExId, setViewportExId] = useState<string | null>(null);
   const railExKey = (workout?.exercises ?? []).map((e) => e.id).join(',');
   useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return;
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
     if (cards.length === 0) return;
     const ratios = new Map<string, number>();
@@ -457,9 +457,13 @@ export function SessionView(props: {
     })?.id ??
     sortedExercises[0]?.id ??
     null;
-  // The left milestone rail shows on the phone once there's more than one
-  // exercise; the screen gets a class so the content can inset to clear it.
-  const showRail = !isDesktop && workout.exercises.length > 0 && sortedExercises.length > 1;
+  // The left milestone rail shows on the phone during a LIVE session once
+  // there's more than one exercise (not in history); the screen gets a class so
+  // the content can inset to clear it.
+  const showRail = live && !isDesktop && workout.exercises.length > 0 && sortedExercises.length > 1;
+  // On a live phone session the muscle-map opener lives in the floating pill
+  // (same condition as the pill), not inline in the "muscles worked" header.
+  const muscleMapInPill = live && !workout.autoFinished && !isDesktop;
   // A rail dot reads as "done" once its planned sets are logged (or, unplanned,
   // once it has any set); markers count as done.
   const exerciseDone = (ex: Exercise): boolean => {
@@ -973,12 +977,14 @@ export function SessionView(props: {
                 const type = setTypeOf(s);
                 const drops = setDrops(s);
                 const idx = grp ? `R${i + 1}` : `${i + 1}`;
-                // Rest before this set, captured at log time (gap to the
-                // previously logged set anywhere in the session). Cleared for
-                // old workouts whose values were computed incorrectly. For a
-                // card's first set the gap is the rest since the previous
-                // exercise, so it renders as a "between cards" marker on top.
-                const restBefore = s.restSec != null ? s.restSec * 1000 : null;
+                // Rest before this set — derived live from the set timestamps
+                // (gap to the previously logged set anywhere in the session,
+                // minus this set's own working time), so it stays correct for
+                // every past session. For a card's first set the gap is the rest
+                // since the previous exercise, so it renders as a "between cards"
+                // marker on top.
+                const restSecBefore = restBeforeSetInWorkout(workout!, s);
+                const restBefore = restSecBefore != null ? restSecBefore * 1000 : null;
                 const interCard = i === 0;
                 const restLine =
                   restBefore !== null && restBefore > 0 ? (
@@ -1489,9 +1495,7 @@ export function SessionView(props: {
                 <button
                   key={ex.id}
                   type="button"
-                  className={`srail-dot${exerciseDone(ex) ? ' done' : ''}${
-                    live && ex.id === activeExerciseId ? ' active' : ''
-                  }${inView ? ' inview' : ''}`}
+                  className={`srail-dot${exerciseDone(ex) ? ' done' : ''}`}
                   aria-label={ex.name}
                   aria-current={inView ? 'true' : undefined}
                   onClick={() => {
@@ -1637,10 +1641,12 @@ export function SessionView(props: {
               <div className="muscles-worked">
                 <div className="section-label mworked-head">
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
-                  <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
-                    <Icon name="person-simple" />
-                    {t.muscleMapButton}
-                  </button>
+                  {!muscleMapInPill && (
+                    <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
+                      <Icon name="person-simple" />
+                      {t.muscleMapButton}
+                    </button>
+                  )}
                 </div>
                 <div className="mworked-row">
                   {withMuscleBreak(entries, (x) => (
@@ -2020,6 +2026,16 @@ export function SessionView(props: {
             >
               <Icon name="trash" />
             </button>
+            {muscleWorkSorted(workout).length > 0 && (
+              <button
+                className="sp-btn sp-map"
+                onClick={() => setSheet({ kind: 'musclemap' })}
+                aria-label={t.muscleMapButton}
+                title={t.muscleMapButton}
+              >
+                <Icon name="person-simple" />
+              </button>
+            )}
             <button className="sp-btn sp-add" onClick={() => setSheet({ kind: 'add' })}>
               <Icon name="plus" weight="bold" />
               <span>{t.addExercise}</span>

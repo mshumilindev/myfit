@@ -16,6 +16,7 @@ import {
   isStrengthExercise,
   muscleSetsInWorkout,
   resolveMuscles,
+  restBeforeSetInWorkout,
   setTopWeight,
   setTypeOf,
   workoutVolumeKg,
@@ -661,9 +662,11 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
       for (const ex of w.exercises) {
         if (!isStrengthExercise(ex)) continue;
         for (const s of ex.sets) {
-          if (setTypeOf(s) === 'warmup' || s.restSec == null || s.restSec <= 0) continue;
+          if (setTypeOf(s) === 'warmup') continue;
+          const rs = restBeforeSetInWorkout(w, s);
+          if (rs == null || rs <= 0) continue;
           const r = rest.get(ex.name) ?? { sum: 0, n: 0 };
-          r.sum += s.restSec;
+          r.sum += rs;
           r.n += 1;
           rest.set(ex.name, r);
         }

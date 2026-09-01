@@ -40,7 +40,14 @@ import {
   type ToastState,
 } from './ui';
 import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
-import { computeNotifs, initSeenIds, saveSeenIds, unreadCount } from './notifications';
+import {
+  computeNotifs,
+  syncNotifs,
+  useNotifs,
+  markNotifsSeen,
+  markAllNotifsSeen,
+  unreadCount,
+} from './notifications';
 import { useChallenges } from './challenges';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
@@ -408,33 +415,21 @@ export function App() {
   }
 
   // Milestone notifications — derived from training history (see notifications.ts).
+  // The reconciled feed + read state live in a small reactive store: the app
+  // computes the raw events, feeds them in from an effect, and subscribes for
+  // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
   const challenges = useChallenges();
-  const notifs = useMemo(
+  const rawNotifs = useMemo(
     () => computeNotifs(store, notifNow, t, challenges),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t],
   );
-  // On the first-ever load this silently baselines the whole history as read
-  // (in the initializer, so nothing flashes unread); afterwards it just loads
-  // what's been acknowledged.
-  const [seenIds, setSeenIds] = useState<Set<string>>(() => initSeenIds(notifs));
-  const notifUnread = unreadCount(notifs, seenIds);
-  const markNotifsSeen = (ids: string[]) => {
-    setSeenIds((prev) => {
-      let changed = false;
-      const next = new Set(prev);
-      for (const id of ids)
-        if (!next.has(id)) {
-          next.add(id);
-          changed = true;
-        }
-      if (!changed) return prev;
-      saveSeenIds(next);
-      return next;
-    });
-  };
-  const markAllNotifsSeen = () => markNotifsSeen(notifs.map((n) => n.id));
+  useEffect(() => {
+    syncNotifs(rawNotifs);
+  }, [rawNotifs]);
+  const { notifs, state: notifState } = useNotifs();
+  const notifUnread = unreadCount(notifState, notifs);
 
   // Deep-link focus: a notification can ask a screen to scroll to a specific
   // card (id) and, when it's interactive (a feat cell), open its existing
@@ -837,7 +832,7 @@ export function App() {
             <NotificationsView
               notifs={notifs}
               now={notifNow}
-              seenIds={seenIds}
+              state={notifState}
               onSeen={markNotifsSeen}
               onMarkAll={markAllNotifsSeen}
               onClose={closeOverlay}

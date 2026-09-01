@@ -8,6 +8,7 @@
  * This is separate from the server-pushed org/role `Notice` strip — those are
  * account notices; these are personal milestones.
  */
+import { useSyncExternalStore } from 'react';
 import {
   useStore,
   isStrengthExercise,
@@ -78,7 +79,7 @@ export function computeNotifs(
 
   if (finished.length === 0) {
     out.sort((a, b) => b.ts - a.ts);
-    return out.slice(0, 150);
+    return out.slice(0, 400);
   }
 
   const lastWorkoutTs = finished.reduce((m, w) => Math.max(m, w.finishedAt ?? w.startedAt), 0);
@@ -194,61 +195,200 @@ export function computeNotifs(
   }
 
   out.sort((a, b) => b.ts - a.ts);
-  return out.slice(0, 150);
+  return out.slice(0, 400);
 }
 
-// --- Seen-state (per-event ids) — per device, in localStorage. ---------------
-// Per-item read tracking (best practice): a set of acknowledged event ids. Rows
-// are marked read as they scroll into view; the badge counts what's left.
-const SEEN_KEY = 'spotter.notif.seen';
-export const NOTIF_INIT_KEY = 'spotter.notif.init';
+// --- Seen-state (per-event record) — per device, in localStorage. ------------
+/**
+ * Read tracking, redesigned to stop the feed re-flooding. The earlier model was
+ * a capped set of "seen" ids: with a long history it overflowed the cap and
+ * evicted the ids of the always-present summary events (current standard tier,
+ * streak, weekly-volume goal), which sit at the top of the feed because their
+ * timestamp is the last workout — so they resurfaced as "new" on every open.
+ *
+ * Instead we keep a small record per event id: a timestamp FROZEN at first
+ * sight (so a milestone keeps the date it actually happened and never jumps to
+ * "now" when you train again) and a seen flag. The map is reconciled against the
+ * live feed each compute — new ids are added (unread, or silently seen on the
+ * very first run), the timestamp of a known id is reused, and the whole thing is
+ * capped by recency so a feed member is never the one evicted.
+ */
+export interface NotifMeta {
+  /** Event timestamp, frozen the first time we saw this id. */
+  ts: number;
+  seen: boolean;
+}
+export type NotifState = Record<string, NotifMeta>;
 
-export function loadSeenIds(): Set<string> {
+const STATE_KEY = 'spotter.notif.state';
+export const NOTIF_INIT_KEY = 'spotter.notif.init';
+/** How many event records to retain (far past the visible feed, so nothing on
+ *  screen is ever evicted). */
+const MAX_STATE = 1000;
+/** How many events the feed shows. */
+const FEED_CAP = 120;
+
+export function loadNotifState(): NotifState {
   try {
-    const raw = localStorage.getItem(SEEN_KEY);
-    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    const raw = localStorage.getItem(STATE_KEY);
+    return raw ? (JSON.parse(raw) as NotifState) : {};
   } catch {
-    return new Set();
+    return {};
   }
 }
 
-export function saveSeenIds(seen: Set<string>): void {
+export function saveNotifState(state: NotifState): void {
   try {
-    // Cap so the store can't grow without bound (keeps the most recent 400).
-    const arr = [...seen].slice(-400);
-    localStorage.setItem(SEEN_KEY, JSON.stringify(arr));
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
   } catch {
     /* private mode / quota — ignore */
   }
 }
 
 /**
- * Seed the seen-set for this device. On the very first run we baseline the
- * whole existing history as already-read — so opening the app for the first
- * time doesn't dump years of milestones as "unread" — and remember that we
- * did. Afterwards we just load whatever's been acknowledged. Runs in a
- * `useState` initializer (not an effect), so nothing ever flashes unread.
+ * Reconcile the freshly computed events against the stored state: freeze each
+ * id's timestamp at first sight, carry its seen flag (a brand-new id is unread,
+ * unless this is the very first run, when the whole existing history is
+ * baselined as read), then cap by recency. Returns the display feed (stamped
+ * with the stable timestamps, newest first) and the next state to persist.
  */
-export function initSeenIds(notifs: Notif[]): Set<string> {
-  try {
-    if (!localStorage.getItem(NOTIF_INIT_KEY) && notifs.length > 0) {
-      const all = new Set(notifs.map((n) => n.id));
-      saveSeenIds(all);
-      localStorage.setItem(NOTIF_INIT_KEY, '1');
-      return all;
-    }
-  } catch {
-    /* private mode / quota — fall through to a plain load */
+export function reconcileNotifs(
+  raw: Notif[],
+  prev: NotifState,
+  firstRun: boolean,
+): { notifs: Notif[]; state: NotifState } {
+  const next: NotifState = {};
+  for (const n of raw) {
+    const ex = prev[n.id];
+    next[n.id] = { ts: ex?.ts ?? n.ts, seen: ex?.seen ?? firstRun };
   }
-  return loadSeenIds();
+  let entries = Object.entries(next);
+  if (entries.length > MAX_STATE) {
+    entries = entries.sort((a, b) => b[1].ts - a[1].ts).slice(0, MAX_STATE);
+  }
+  const state: NotifState = Object.fromEntries(entries);
+  const notifs = raw
+    .filter((n) => state[n.id])
+    .map((n) => ({ ...n, ts: state[n.id].ts }))
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, FEED_CAP);
+  return { notifs, state };
 }
 
-export function unreadCount(notifs: Notif[], seen: Set<string>): number {
-  return notifs.reduce((n, x) => n + (seen.has(x.id) ? 0 : 1), 0);
+/** Mark specific ids read (viewport entry). Returns the same object when nothing
+ *  changed so callers can skip a needless persist/render. */
+export function markSeen(state: NotifState, ids: string[]): NotifState {
+  let changed = false;
+  const next: NotifState = { ...state };
+  for (const id of ids) {
+    const m = next[id];
+    if (m && !m.seen) {
+      next[id] = { ts: m.ts, seen: true };
+      changed = true;
+    }
+  }
+  return changed ? next : state;
 }
 
-export function isUnread(n: Notif, seen: Set<string>): boolean {
-  return !seen.has(n.id);
+/** Mark everything currently known read ("mark all read"). */
+export function markAllSeen(state: NotifState): NotifState {
+  let changed = false;
+  const next: NotifState = { ...state };
+  for (const id in next) {
+    if (!next[id].seen) {
+      next[id] = { ts: next[id].ts, seen: true };
+      changed = true;
+    }
+  }
+  return changed ? next : state;
+}
+
+export function unreadCount(state: NotifState, notifs: Notif[]): number {
+  return notifs.reduce((n, x) => n + (state[x.id]?.seen ? 0 : 1), 0);
+}
+
+export function isSeen(state: NotifState, id: string): boolean {
+  return !!state[id]?.seen;
+}
+
+// --- Reactive store: the reconciled feed + read state ------------------------
+// A tiny external store (mirrors store.ts) so the read state can be a fold over
+// renders — new events added, seen flags carried — without reading refs during
+// render or setting state in an effect. The app feeds it the freshly computed
+// events from an effect (`syncNotifs`); views subscribe with `useNotifs`.
+let storeState: NotifState = loadNotifState();
+let storeFeed: Notif[] = [];
+let firstRun: boolean = (() => {
+  try {
+    return !localStorage.getItem(NOTIF_INIT_KEY);
+  } catch {
+    return true;
+  }
+})();
+let snapshot: { notifs: Notif[]; state: NotifState } = { notifs: storeFeed, state: storeState };
+const notifListeners = new Set<() => void>();
+
+function emitNotifs(): void {
+  snapshot = { notifs: storeFeed, state: storeState };
+  notifListeners.forEach((l) => l());
+}
+
+/** Reconcile freshly computed events into the store (call from an effect). */
+export function syncNotifs(raw: Notif[]): void {
+  const { notifs, state } = reconcileNotifs(raw, storeState, firstRun);
+  if (firstRun) {
+    try {
+      localStorage.setItem(NOTIF_INIT_KEY, '1');
+    } catch {
+      /* private mode — ignore */
+    }
+    firstRun = false;
+  }
+  const feedSame =
+    notifs.length === storeFeed.length &&
+    notifs.every((n, i) => storeFeed[i]?.id === n.id && storeFeed[i]?.ts === n.ts);
+  const stateSame = sameSeen(state, storeState);
+  storeState = state;
+  storeFeed = notifs;
+  saveNotifState(state);
+  if (!feedSame || !stateSame) emitNotifs();
+}
+
+/** Shallow equality on the seen flags + key set (ts is frozen, so ignore it). */
+function sameSeen(a: NotifState, b: NotifState): boolean {
+  const ak = Object.keys(a);
+  if (ak.length !== Object.keys(b).length) return false;
+  for (const k of ak) if (!b[k] || b[k].seen !== a[k].seen) return false;
+  return true;
+}
+
+export function markNotifsSeen(ids: string[]): void {
+  const next = markSeen(storeState, ids);
+  if (next !== storeState) {
+    storeState = next;
+    saveNotifState(next);
+    emitNotifs();
+  }
+}
+
+export function markAllNotifsSeen(): void {
+  const next = markAllSeen(storeState);
+  if (next !== storeState) {
+    storeState = next;
+    saveNotifState(next);
+    emitNotifs();
+  }
+}
+
+/** Reactive: the current feed + read state. */
+export function useNotifs(): { notifs: Notif[]; state: NotifState } {
+  return useSyncExternalStore(
+    (cb) => {
+      notifListeners.add(cb);
+      return () => notifListeners.delete(cb);
+    },
+    () => snapshot,
+  );
 }
 
 /** Relative label for the feed: "just now" / "3h" / weekday / short date. */

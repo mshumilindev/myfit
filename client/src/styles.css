@@ -2252,14 +2252,11 @@ i > svg {
   .srail-dot.done {
     background: var(--color-accent-700);
   }
-  /* The exercise currently in the viewport — silver, told apart by colour only. */
-  .srail-dot.inview {
+  /* No persistent position highlight — the rail stays quiet and only responds
+     to touch/hover (the dot you're pressing lights up silver). */
+  .srail-dot:hover,
+  .srail-dot:active {
     background: var(--color-neutral-300);
-  }
-  /* The exercise you're working on now (live) — accent, colour only; it wins
-     over the silver viewport tint when it's also the one on screen. */
-  .srail-dot.active {
-    background: var(--color-accent);
   }
   /* Inset the scrolling session content so cards (and the rest of the column)
      clear the fixed rail instead of butting against the dots. Raised
@@ -14900,6 +14897,17 @@ button.exd-media {
   }
   .session-pill .sp-discard i {
     font-size: 19px;
+  }
+  .session-pill .sp-map {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-accent-200);
+  }
+  .session-pill .sp-map i {
+    font-size: 20px;
   }
   .session-pill .sp-finish {
     background: var(--color-accent);
