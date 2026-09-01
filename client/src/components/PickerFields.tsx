@@ -413,67 +413,57 @@ export function TimeField({
 
 /* --- duration ------------------------------------------------------------ */
 
-const DURATIONS = [30, 45, 60, 75, 90, 105, 120, 180, 240, 360, 480, 720];
-
+/** Duration entered as hours + minutes; the value stays in whole minutes.
+ *  Handles anything from a few minutes to an all-day (up to 24h) activity. */
 export function DurationField({
   value, // minutes
   onChange,
-  min = 1,
   max = 1440, // up to 24h — long walks, all-day activities
 }: {
   value: number;
   onChange: (min: number) => void;
-  min?: number;
   max?: number;
 }) {
   const { t } = useT();
-  const [open, setOpen] = useState(false);
-  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const valid = !Number.isNaN(value);
+  const hours = valid ? Math.floor(value / 60) : 0;
+  const mins = valid ? value % 60 : 0;
+  const maxH = Math.floor(max / 60);
+
+  const set = (h: number, m: number) => {
+    const hh = Math.max(0, Math.min(maxH, Math.floor(h) || 0));
+    const mm = Math.max(0, Math.min(59, Math.floor(m) || 0));
+    onChange(Math.min(max, hh * 60 + mm));
+  };
 
   return (
-    <div className="picker up">
-      <div className="input-field" ref={anchorRef}>
+    <div className="dur-hm">
+      <label className="dur-part">
         <input
           className="input"
           type="number"
-          min={min}
-          max={max}
-          value={Number.isNaN(value) ? '' : value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          inputMode="numeric"
+          min={0}
+          max={maxH}
+          value={valid ? hours : ''}
+          onChange={(e) => set(Number(e.target.value), mins)}
+          aria-label={t.hrShort}
         />
-        <button
-          type="button"
-          className="field-btn"
-          aria-label={t.backfillDuration}
-          aria-expanded={open}
-          onClick={() => setOpen((x) => !x)}
-        >
-          <Icon name="timer" />
-        </button>
-      </div>
-      <Popover
-        open={open}
-        onClose={() => setOpen(false)}
-        className="dur"
-        anchorRef={anchorRef}
-        placement="up"
-      >
-        <div className="dur-list" role="listbox" aria-label={t.backfillDuration}>
-          {DURATIONS.map((d) => (
-            <button
-              type="button"
-              key={d}
-              className={`dur-opt${d === value ? ' sel' : ''}`}
-              onClick={() => {
-                onChange(d);
-                setOpen(false);
-              }}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      </Popover>
+        <span className="dur-unit">{t.hrShort}</span>
+      </label>
+      <label className="dur-part">
+        <input
+          className="input"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={59}
+          value={valid ? mins : ''}
+          onChange={(e) => set(hours, Number(e.target.value))}
+          aria-label={t.minShort}
+        />
+        <span className="dur-unit">{t.minShort}</span>
+      </label>
     </div>
   );
 }

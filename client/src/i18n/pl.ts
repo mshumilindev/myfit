@@ -590,6 +590,7 @@ export const pl: Strings = {
   rpe: 'Odczuwany wysiłek',
   rpeShort: 'Wys.',
   minShort: 'min.',
+  hrShort: 'godz.',
   kmShort: 'km',
   plateTitle: 'Kalkulator talerzy',
   plateSolve: 'Oblicz',

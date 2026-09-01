@@ -591,6 +591,7 @@ export const uk: Strings = {
   rpe: 'Субʼєктивне зусилля',
   rpeShort: 'Зус.',
   minShort: 'хв',
+  hrShort: 'год',
   kmShort: 'км',
   plateTitle: 'Калькулятор млинців',
   plateSolve: 'Порахувати',

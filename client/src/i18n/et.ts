@@ -586,6 +586,7 @@ export const et: Strings = {
   rpe: 'Tajutud pingutus',
   rpeShort: 'Ping.',
   minShort: 'min.',
+  hrShort: 't',
   kmShort: 'km',
   plateTitle: 'Ketaste kalkulaator',
   plateSolve: 'Arvuta',

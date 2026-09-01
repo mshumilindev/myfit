@@ -634,6 +634,7 @@ export const en = {
   rpe: 'RPE',
   rpeShort: 'RPE',
   minShort: 'min',
+  hrShort: 'h',
   kmShort: 'km',
   plateTitle: 'Plate calculator',
   plateSolve: 'Solve',

@@ -598,6 +598,7 @@ export const lt: Strings = {
   rpe: 'Juntamos pastangos',
   rpeShort: 'Past.',
   minShort: 'min.',
+  hrShort: 'val.',
   kmShort: 'km',
   plateTitle: 'Svarmenų skaičiuoklė',
   plateSolve: 'Apskaičiuoti',
