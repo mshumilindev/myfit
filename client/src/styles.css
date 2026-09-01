@@ -264,13 +264,14 @@ i > svg {
   font-size: 20px;
   color: var(--color-text);
 }
-/* "spotter" — script wordmark. */
+/* "spotter" — script wordmark. Neutral/white so it stays a constant brand
+   anchor across apps; the accent lives on the current-app name beside it. */
 .app-brand-word {
   font-family: 'Kaushan Script', cursive;
   font-size: 22px;
   font-weight: 400;
   line-height: 1;
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 /* Wordmark + current-app name sit together at the header's left. */
 .app-brand-lead {
