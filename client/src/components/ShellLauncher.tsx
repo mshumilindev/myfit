@@ -22,12 +22,13 @@ export function ShellLauncher({
   onGym,
   onApex,
   onRoster,
+  onNutrition,
   onSignOut,
   onClose,
 }: {
   store: StoreState;
   now: number;
-  current: 'gym' | 'apex' | 'roster';
+  current: 'gym' | 'apex' | 'roster' | 'nutrition';
   peopleLabel: string;
   peopleDesc: string;
   activeChallenges: number;
@@ -35,6 +36,7 @@ export function ShellLauncher({
   onGym: () => void;
   onApex: () => void;
   onRoster: () => void;
+  onNutrition: () => void;
   onSignOut: () => void;
   onClose: () => void;
 }) {
@@ -113,18 +115,24 @@ export function ShellLauncher({
           )}
         </button>
 
-        <div className="shell-tile locked" aria-disabled="true">
+        <button
+          className={`shell-tile${current === 'nutrition' ? ' current' : ''}`}
+          onClick={onNutrition}
+          disabled={current === 'nutrition'}
+        >
           <span className="shell-ic shell-ic-nut">
-            <Icon name="fork-knife" />
+            <Icon name="fork-knife" weight="fill" />
           </span>
           <div className="shell-tile-main">
             <div className="shell-tile-name">{t.shellNutrition}</div>
-            <div className="shell-tile-sub soon">
-              <Icon name="lock-simple" />
-              {t.shellComingSoon}
-            </div>
+            <div className="shell-tile-sub">{t.shellNutritionDesc}</div>
           </div>
-        </div>
+          {current === 'nutrition' ? (
+            <span className="shell-current">{t.shellCurrent}</span>
+          ) : (
+            <Icon name="caret-right" className="shell-go" />
+          )}
+        </button>
       </div>
       <button className="shell-signout" onClick={() => setConfirmSignOut(true)}>
         <Icon name="sign-out" />

@@ -65,17 +65,12 @@ service cloud.firestore {
       match /activities/{activityId} {
         allow read, write: if isSelf(userId);
       }
-      // Body metrics (weigh-ins, height, composition). Own read/write only;
-      // admin/trainer cross-user reads go through functions (Admin SDK).
+      // Body metrics (weigh-ins, height, composition) AND Spotter Nutrition,
+      // which stores its data in singleton meta/* docs (nutritionLog,
+      // nutritionFoods, nutritionGoal, nutritionProfile) under the same account
+      // — all covered here. Own read/write only; admin/trainer cross-user reads
+      // go through functions (Admin SDK).
       match /meta/{docId} {
-        allow read, write: if isSelf(userId);
-      }
-
-      // Spotter Nutrition — user's own nutrition data (separate service, shared account).
-      match /nutritionEntries/{entryId} {
-        allow read, write: if isSelf(userId);
-      }
-      match /nutritionFoods/{foodId} {
         allow read, write: if isSelf(userId);
       }
       match /pings/{pingId} {

@@ -129,6 +129,9 @@ const ApexApp = lazy(() =>
 const RosterApp = lazy(() =>
   import('./views/RosterApp').then((module) => ({ default: module.RosterApp })),
 );
+const NutritionApp = lazy(() =>
+  import('./NutritionApp').then((module) => ({ default: module.NutritionApp })),
+);
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
 );
@@ -379,6 +382,11 @@ function rosterHash(tab: RosterTab): string {
   return `#/people/${tab}`;
 }
 
+// --- Nutrition (food & macros sub-app) is a full-screen mode at #/nutrition.
+function isNutritionHash(hash: string): boolean {
+  return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'nutrition';
+}
+
 export function App() {
   const { t } = useT();
   const store = useStore();
@@ -461,6 +469,9 @@ export function App() {
   const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(window.location.hash));
   const [rosterTab, setRosterTab] = useState<RosterTab>(() =>
     rosterTabFromHash(window.location.hash),
+  );
+  const [nutritionOpen, setNutritionOpen] = useState<boolean>(() =>
+    isNutritionHash(window.location.hash),
   );
   const [shellOpen, setShellOpen] = useState(false);
 
@@ -654,19 +665,21 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = rosterOpen
-      ? rosterHash(rosterTab)
-      : apexOpen
-        ? apexHash(apexTab)
-        : toHash(
-            effectiveTab,
-            activeOverlay,
-            programsPeer,
-            libMine,
-            progressSub,
-            progressSeg,
-            volumeLens,
-          );
+    const next = nutritionOpen
+      ? '#/nutrition'
+      : rosterOpen
+        ? rosterHash(rosterTab)
+        : apexOpen
+          ? apexHash(apexTab)
+          : toHash(
+              effectiveTab,
+              activeOverlay,
+              programsPeer,
+              libMine,
+              progressSub,
+              progressSeg,
+              volumeLens,
+            );
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
   }, [
     authed,
@@ -675,6 +688,7 @@ export function App() {
     apexTab,
     rosterOpen,
     rosterTab,
+    nutritionOpen,
     effectiveTab,
     activeOverlay,
     programsPeer,
@@ -692,6 +706,7 @@ export function App() {
       setApexTab(apexTabFromHash(window.location.hash));
       setRosterOpen(isRosterHash(window.location.hash));
       setRosterTab(rosterTabFromHash(window.location.hash));
+      setNutritionOpen(isNutritionHash(window.location.hash));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
@@ -733,6 +748,15 @@ export function App() {
     else el.classList.remove('theme-roster');
     return () => el.classList.remove('theme-roster');
   }, [rosterOpen]);
+
+  // Same for Nutrition — lazurite accent on the root while its app is open (so
+  // portaled sheets/menus pick up the blue accent too).
+  useEffect(() => {
+    const el = document.documentElement;
+    if (nutritionOpen) el.classList.add('theme-nutrition');
+    else el.classList.remove('theme-nutrition');
+    return () => el.classList.remove('theme-nutrition');
+  }, [nutritionOpen]);
 
   if (joinToken) {
     return (
@@ -805,18 +829,64 @@ export function App() {
     setShellOpen(false);
     setApexOpen(false);
     setRosterOpen(false);
+    setNutritionOpen(false);
   };
   const openApex = () => {
     setShellOpen(false);
     setRosterOpen(false);
+    setNutritionOpen(false);
     setApexOpen(true);
   };
   const openRoster = (rtab: RosterTab) => {
     setShellOpen(false);
     setApexOpen(false);
+    setNutritionOpen(false);
     setRosterTab(rtab);
     setRosterOpen(true);
   };
+  const openNutrition = () => {
+    setShellOpen(false);
+    setApexOpen(false);
+    setRosterOpen(false);
+    setNutritionOpen(true);
+  };
+
+  // Nutrition takes over the whole screen — its own lazurite skin & store.
+  if (nutritionOpen) {
+    return (
+      <div className="app app-apex-root">
+        <Suspense fallback={<ScreenFallback />}>
+          <NutritionApp
+            now={notifNow}
+            onOpenShell={() => setShellOpen(true)}
+            onOpenProfile={() => openRoster('me')}
+            notifs={notifs}
+            notifState={notifState}
+            notifUnread={notifUnread}
+            onNotifSeen={markNotifsSeen}
+            onNotifMarkAll={markAllNotifsSeen}
+          />
+        </Suspense>
+        {shellOpen && (
+          <ShellLauncher
+            store={store}
+            now={notifNow}
+            current="nutrition"
+            peopleLabel={peopleLabel}
+            peopleDesc={peopleDesc}
+            activeChallenges={activeChallengeCount}
+            notifUnread={notifUnread}
+            onGym={openGym}
+            onApex={openApex}
+            onRoster={() => openRoster(rosterHomeFor(role))}
+            onNutrition={() => setShellOpen(false)}
+            onSignOut={() => shell.signOut()}
+            onClose={() => setShellOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
 
   // People (accounts & profiles) takes over the whole screen — its own silver skin.
   if (rosterOpen) {
@@ -849,6 +919,7 @@ export function App() {
             onGym={openGym}
             onApex={openApex}
             onRoster={() => setShellOpen(false)}
+            onNutrition={openNutrition}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -888,6 +959,7 @@ export function App() {
             onGym={openGym}
             onApex={() => setShellOpen(false)}
             onRoster={() => openRoster(rosterHomeFor(role))}
+            onNutrition={openNutrition}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -1096,6 +1168,7 @@ export function App() {
             openApex();
           }}
           onRoster={() => openRoster(rosterHomeFor(role))}
+          onNutrition={openNutrition}
           onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />

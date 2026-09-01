@@ -23931,6 +23931,34 @@ button.badge {
   background: radial-gradient(120% 44% at 78% -14%, rgba(200, 204, 212, 0.1), transparent 56%);
 }
 
+/* Nutrition — graphite + lazurite. Same re-skin trick: override the accent ramp
+   on the wrapper (and document root, for portaled sheets) so the shared sub-app
+   chrome (rail, header, nav) turns blue while every screen keeps graphite. */
+.app-nutrition,
+.theme-nutrition {
+  --color-accent: #4f93d6;
+  --color-accent-100: #e6f0fa;
+  --color-accent-200: #bcd8f2;
+  --color-accent-300: #93bfe8;
+  --color-accent-400: #6ba6de;
+  --color-accent-500: #4f93d6;
+  --color-accent-600: #3d84c9;
+  --color-accent-700: #336ea8;
+  --color-accent-800: #24486b;
+  --color-accent-900: #14222f;
+}
+.app-nutrition.apex-app::before {
+  background: radial-gradient(120% 44% at 78% -14%, rgba(79, 147, 214, 0.14), transparent 56%);
+}
+/* The app's own identity glyph in the brand header (nutrition shows a fork-knife
+   mark beside the wordmark). */
+.app-brand-mark {
+  font-size: 20px;
+  color: var(--color-accent);
+  display: inline-flex;
+  margin-right: 9px;
+}
+
 .app-apex-root {
   display: flex;
   flex-direction: column;
@@ -24367,9 +24395,9 @@ button.badge {
   color: #d7dae0;
 }
 .shell-ic-nut {
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
-  color: var(--color-neutral-600);
+  background: rgba(61, 132, 201, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(61, 132, 201, 0.3);
+  color: #7fb4e6;
 }
 .shell-tile-main {
   flex: 1;
