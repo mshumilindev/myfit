@@ -32,9 +32,7 @@ import {
   type Landmark,
   type Zone,
 } from '../volume';
-import { FeatsView } from '../components/FeatsView';
 import { TrendsView } from '../components/TrendsView';
-import { ChallengesView } from './ChallengesView';
 import { FixSheet } from '../components/FixSheet';
 import { ReadinessLens } from '../components/Readiness';
 import {
@@ -69,8 +67,6 @@ export function ProgressView({
   shell,
   sub,
   onSub,
-  featSub,
-  onFeatSub,
   seg,
   onSeg,
   lens,
@@ -78,10 +74,8 @@ export function ProgressView({
 }: {
   store: Store;
   shell: Shell;
-  sub: 'progress' | 'trends' | 'feats' | 'challenges';
-  onSub: (s: 'progress' | 'trends' | 'feats' | 'challenges') => void;
-  featSub: 'achievements' | 'standards';
-  onFeatSub: (s: 'achievements' | 'standards') => void;
+  sub: 'progress' | 'trends';
+  onSub: (s: 'progress' | 'trends') => void;
   seg: 'total' | 'muscle' | 'volume' | 'records';
   onSeg: (s: 'total' | 'muscle' | 'volume' | 'records') => void;
   lens: 'volume' | 'fatigue' | 'readiness';
@@ -389,42 +383,15 @@ export function ProgressView({
       >
         {t.trendsTab}
       </button>
-      <button
-        role="tab"
-        aria-selected={ptab === 'feats'}
-        className={ptab === 'feats' ? 'active' : ''}
-        onClick={() => setPtab('feats')}
-      >
-        {t.featsTab}
-      </button>
-      <button
-        role="tab"
-        aria-selected={ptab === 'challenges'}
-        className={ptab === 'challenges' ? 'active' : ''}
-        onClick={() => setPtab('challenges')}
-      >
-        {t.challengesTab}
-      </button>
     </div>
   );
 
-  if (ptab === 'feats' || ptab === 'trends' || ptab === 'challenges') {
+  if (ptab === 'trends') {
     return (
       <div className="screen progress-page progress-alt">
         <div className="progress-tabbar">{pTabs}</div>
         <div className="progress-alt-body">
-          {ptab === 'feats' ? (
-            <FeatsView
-              finished={finished}
-              body={store.bodyMetrics}
-              sub={featSub}
-              onSub={onFeatSub}
-            />
-          ) : ptab === 'challenges' ? (
-            <ChallengesView store={store} />
-          ) : (
-            <TrendsView finished={finished} body={store.bodyMetrics} />
-          )}
+          <TrendsView finished={finished} body={store.bodyMetrics} />
         </div>
       </div>
     );

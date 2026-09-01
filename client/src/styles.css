@@ -23481,14 +23481,10 @@ button.badge {
 }
 
 /* ---- Challenges: consistency revisions (one-row tabs, funnel filter, pager) */
-/* Keep all four Progress sub-tabs on a single row. */
+/* Progress sub-tabs (Progress · Trends) sit on one row. */
 @media (max-width: 719.98px) {
   .prog-tabs.progress-subtabs {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  .prog-tabs.progress-subtabs button {
-    font-size: 12px;
-    padding: 8px 2px;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 /* Search row with a funnel button, mirroring the exercise library. */
@@ -23570,4 +23566,605 @@ button.badge {
 /* Pager spacing inside the catalog section. */
 .ch-catalog + .exl-pager {
   margin-top: 16px;
+}
+
+/* ============================================================================
+   Suite Shell + Apex (gamification app).
+   The reused views (Challenges, Ranks, Awards, Feed) re-skin to amethyst for
+   free: `.app-apex` just overrides the accent ramp they already read from.
+   ========================================================================== */
+.app-apex,
+.theme-apex {
+  --color-accent: #9d6ff0;
+  --color-accent-100: #efe7fd;
+  --color-accent-200: #c4a4f7;
+  --color-accent-300: #b98ee6;
+  --color-accent-400: #a97ef2;
+  --color-accent-500: #9d6ff0;
+  --color-accent-600: #7d59c8;
+  --color-accent-700: #6b4bb0;
+  --color-accent-800: #4a3480;
+  --color-accent-900: #241a3a;
+  --amethyst-glow: rgba(157, 111, 240, 0.5);
+}
+
+.app-apex-root {
+  display: flex;
+  flex-direction: column;
+}
+.apex-app {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+.apex-app::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 44% at 78% -14%, rgba(157, 111, 240, 0.14), transparent 56%);
+  pointer-events: none;
+  z-index: 0;
+}
+.apex-head,
+.apex-body,
+.apex-nav {
+  position: relative;
+  z-index: 1;
+}
+.apex-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 8px;
+}
+.apex-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--color-neutral-500, var(--color-neutral-600));
+}
+.apex-bell,
+.apex-appicon {
+  position: relative;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  color: inherit;
+  font-size: 22px;
+}
+.apex-appicon {
+  color: var(--color-accent-200);
+}
+.apex-bell-badge {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #160f24;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+
+.apex-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.apex-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4px 16px calc(72px + env(safe-area-inset-bottom, 0px));
+}
+.apex-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.apex-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 4px 6px;
+}
+.apex-title-sub {
+  font-size: 13px;
+  color: var(--color-neutral-600);
+  flex: none;
+}
+/* Feed tab: NotificationsView keeps its own scroll; drop its back button gap. */
+.apex-body .notif-screen {
+  padding-top: 0;
+}
+.apex-body .notif-head.embedded {
+  padding-left: 6px;
+}
+
+/* Bottom nav */
+.apex-nav {
+  flex: none;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  background: rgba(20, 21, 24, 0.92);
+  box-shadow: inset 0 1px 0 #26282c;
+}
+.apex-nav button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-neutral-600);
+  font: inherit;
+  font-size: 10px;
+  padding: 4px 0;
+}
+.apex-nav button i {
+  font-size: 19px;
+}
+.apex-nav button.active {
+  color: var(--color-accent-200);
+  font-weight: 600;
+}
+
+/* --- Apex Home / Overview -------------------------------------------------- */
+.apx-home {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.apx-sec-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--color-neutral-600);
+  text-transform: uppercase;
+  padding: 10px 4px 2px;
+}
+.apx-sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.apx-seeall {
+  border: none;
+  background: none;
+  color: var(--color-accent-200);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 4px 2px;
+}
+.apx-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  padding: 15px;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.apx-active {
+  box-shadow:
+    inset 0 0 0 1px var(--color-neutral-800),
+    0 0 26px -12px var(--amethyst-glow);
+}
+.apx-ring {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  flex: none;
+}
+.apx-ring svg {
+  display: block;
+}
+.apx-ring-ic {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent-200);
+  font-size: 18px;
+}
+.apx-active-main {
+  flex: 1;
+  min-width: 0;
+}
+.apx-active-title {
+  font-size: 16px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.apx-active-sub {
+  font-size: 13px;
+  color: var(--color-neutral-600);
+  margin-top: 3px;
+}
+.apx-accent {
+  color: var(--color-accent-200);
+  font-weight: 600;
+}
+.apx-go {
+  flex: none;
+  color: var(--color-neutral-600);
+  font-size: 16px;
+}
+.apx-streak {
+  gap: 13px;
+}
+.apx-streak-ic {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+  color: var(--color-accent-200);
+  font-size: 20px;
+}
+.apx-streak-txt {
+  flex: none;
+}
+.apx-streak-n {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.apx-streak-lab {
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  margin-top: 2px;
+}
+.apx-week {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.apx-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.apx-dot.st-on {
+  background: var(--color-accent);
+}
+.apx-dot.st-off {
+  background: var(--color-accent-900);
+}
+.apx-dot.st-future {
+  box-shadow: inset 0 0 0 1.5px var(--color-neutral-700);
+}
+.apx-rank-ic,
+.apx-award-ic {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+  color: var(--color-accent-200);
+  font-size: 20px;
+}
+.apx-award-ic {
+  font-size: 22px;
+}
+.apx-rank-main {
+  flex: 1;
+  min-width: 0;
+}
+.apx-rank-title,
+.apx-award-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+.apx-rank-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--color-neutral-800);
+  margin-top: 9px;
+  overflow: hidden;
+}
+.apx-rank-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--color-accent-700), var(--color-accent-200));
+}
+.apx-rank-togo {
+  flex: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+.apx-award {
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--color-accent) 12%, transparent),
+    color-mix(in srgb, var(--color-surface) 60%, transparent)
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 24%, transparent),
+    0 0 26px -12px var(--amethyst-glow);
+}
+.apx-award-sub {
+  font-size: 12.5px;
+  color: var(--color-neutral-600);
+  margin-top: 2px;
+}
+.apx-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.apx-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 9px 4px;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  border-radius: 10px;
+}
+.apx-recent-row:hover {
+  background: var(--color-neutral-900);
+}
+.apx-recent-ic {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent-200);
+  font-size: 16px;
+}
+.apx-recent-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.apx-recent-time {
+  flex: none;
+  font-size: 12px;
+  color: var(--color-neutral-600);
+}
+.apx-empty-card {
+  color: var(--color-neutral-500, var(--color-neutral-600));
+}
+
+/* --- The Shell launcher (silver) ------------------------------------------ */
+.shell-sheet {
+  --silver: #c3c9d2;
+  --silver-bright: #e8ebf0;
+  --silver-dim: #8b929c;
+}
+.shell-head {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  color: var(--silver-dim);
+  text-transform: uppercase;
+  padding: 2px 2px 4px;
+}
+.shell-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 14px;
+}
+.shell-tile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 16px;
+  background: var(--color-bg);
+  box-shadow:
+    inset 0 0 0 1px var(--color-neutral-800),
+    inset 0 1px 0 rgba(232, 235, 240, 0.08);
+  padding: 15px 16px;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.shell-tile:disabled {
+  cursor: default;
+}
+.shell-tile.locked {
+  background: rgba(22, 23, 26, 0.5);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-900);
+  opacity: 0.6;
+}
+.shell-ic {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+}
+.shell-ic-gym {
+  background: rgba(217, 162, 79, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.28);
+  color: #e4bb76;
+}
+.shell-ic-apex {
+  background: rgba(157, 111, 240, 0.15);
+  box-shadow:
+    inset 0 0 0 1px rgba(157, 111, 240, 0.34),
+    0 0 20px -6px rgba(157, 111, 240, 0.5);
+  color: #c4a4f7;
+}
+.shell-ic-nut {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-600);
+}
+.shell-tile-main {
+  flex: 1;
+  min-width: 0;
+}
+.shell-tile-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.shell-tile.locked .shell-tile-name {
+  color: var(--color-neutral-500, var(--color-neutral-600));
+}
+.shell-badge {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: #9d6ff0;
+  color: #160f24;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.shell-tile-sub {
+  font-size: 12.5px;
+  color: var(--color-neutral-500, var(--color-neutral-600));
+  margin-top: 2px;
+}
+.shell-tile-sub.soon {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-neutral-600);
+}
+.shell-current {
+  flex: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--silver);
+  padding: 6px 12px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.shell-go {
+  flex: none;
+  color: var(--color-neutral-600);
+  font-size: 16px;
+}
+.shell-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  padding: 20px 0 4px;
+  letter-spacing: 0.02em;
+}
+
+/* --- Header / rail app-switch entry --------------------------------------- */
+.app-appswitch {
+  position: relative;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.app-appswitch-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: #9d6ff0;
+  color: #160f24;
+  font-size: 9px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+.rail-apps {
+  position: relative;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+.rail-apps-badge {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: #9d6ff0;
+  color: #160f24;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+/* Desktop: Apex centres like the app content column. */
+@media (min-width: 720px) {
+  .apex-app {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
 }

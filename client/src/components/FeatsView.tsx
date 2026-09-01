@@ -22,11 +22,15 @@ export function FeatsView({
   body,
   sub,
   onSub,
+  hideSubtabs,
 }: {
   finished: Workout[];
   body: BodyMetrics;
   sub: 'achievements' | 'standards';
   onSub: (s: 'achievements' | 'standards') => void;
+  /** In Apex, Achievements is its own tab (Ranks holds Standards), so the
+   *  achievements/standards toggle is hidden and only achievements show. */
+  hideSubtabs?: boolean;
 }) {
   const { t, locale } = useT();
   const [openKey, setOpenKey] = useState<string | null>(null);
@@ -104,7 +108,7 @@ export function FeatsView({
     </div>
   );
 
-  if (sub === 'standards') {
+  if (sub === 'standards' && !hideSubtabs) {
     return (
       <div className="feats-wrap">
         {subTabs}
@@ -115,7 +119,7 @@ export function FeatsView({
 
   return (
     <div className="feats-wrap">
-      {subTabs}
+      {!hideSubtabs && subTabs}
       <div className="feats" ref={wrapRef}>
         <div className="feats-head">
           <span className="feats-count num">{t.featsOf(r.unlockedCount, r.total)}</span>

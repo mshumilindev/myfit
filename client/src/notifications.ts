@@ -73,7 +73,7 @@ export function computeNotifs(
       ts: ac.completedAt ?? now,
       title: t.notifChallengeTitle(tmpl.title(t, ac.target)),
       subtitle: t.notifChallengeSub,
-      nav: '#/challenges',
+      nav: '#/apex/challenges',
     });
   }
 
@@ -127,7 +127,7 @@ export function computeNotifs(
       ts: lastWorkoutTs,
       title: `${r.name} → ${tierLabel}`,
       subtitle: `${fmtKg(r.best)} · ${t.notifStandardSub}`,
-      nav: `#/feats/standards?f=std-${encodeURIComponent(r.key)}`,
+      nav: `#/apex/ranks?f=std-${encodeURIComponent(r.key)}`,
     });
   }
 
@@ -141,7 +141,7 @@ export function computeNotifs(
       ts: ach.unlockAt ?? lastWorkoutTs,
       title: ach.title,
       subtitle: t.notifFeatSub,
-      nav: `#/feats?f=feat-${encodeURIComponent(ach.key)}`,
+      nav: `#/apex/awards?f=feat-${encodeURIComponent(ach.key)}`,
     });
   }
 

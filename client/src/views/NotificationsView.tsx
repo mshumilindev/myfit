@@ -55,6 +55,8 @@ export function NotificationsView({
   onSeen,
   onMarkAll,
   onClose,
+  embedded,
+  title,
 }: {
   notifs: Notif[];
   now: number;
@@ -62,6 +64,9 @@ export function NotificationsView({
   onSeen: (ids: string[]) => void;
   onMarkAll: () => void;
   onClose: () => void;
+  /** In Apex the feed is a tab, not an overlay — no back button. */
+  embedded?: boolean;
+  title?: string;
 }) {
   const { t, locale } = useT();
   const [limit, setLimit] = useState(PAGE);
@@ -119,11 +124,13 @@ export function NotificationsView({
 
   return (
     <div className="screen notif-screen" style={{ gap: 'var(--space-4)' }}>
-      <div className="notif-head">
-        <button className="back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
-        <h2 className="title-26">{t.notifTitle}</h2>
+      <div className={`notif-head${embedded ? ' embedded' : ''}`}>
+        {!embedded && (
+          <button className="back" onClick={onClose} aria-label={t.backAction}>
+            <Icon name="caret-left" />
+          </button>
+        )}
+        <h2 className="title-26">{title ?? t.notifTitle}</h2>
         {hasUnread && (
           <button className="notif-markall" onClick={onMarkAll}>
             {t.notifMarkAll}

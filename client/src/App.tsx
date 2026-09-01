@@ -49,6 +49,8 @@ import {
   unreadCount,
 } from './notifications';
 import { useChallenges } from './challenges';
+import { ShellLauncher } from './components/ShellLauncher';
+import type { ApexTab } from './views/ApexApp';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -125,6 +127,9 @@ const HistoryListView = lazy(() =>
 );
 const GymDetailView = lazy(() =>
   import('./views/GymDetailView').then((module) => ({ default: module.GymDetailView })),
+);
+const ApexApp = lazy(() =>
+  import('./views/ApexApp').then((module) => ({ default: module.ApexApp })),
 );
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
@@ -222,8 +227,7 @@ function toHash(
   overlay: Overlay,
   programsPeer: ProgramsPeer,
   libMine: boolean,
-  progressSub: 'progress' | 'trends' | 'feats' | 'challenges',
-  featSub: 'achievements' | 'standards',
+  progressSub: 'progress' | 'trends',
   progressSeg: ProgSeg,
   volumeLens: VolLens,
 ): string {
@@ -233,8 +237,6 @@ function toHash(
   }
   if (!overlay && tab === 'progress') {
     if (progressSub === 'trends') return '#/trends';
-    if (progressSub === 'challenges') return '#/challenges';
-    if (progressSub === 'feats') return featSub === 'standards' ? '#/feats/standards' : '#/feats';
     if (progressSeg === 'muscle') return '#/progress/muscle';
     if (progressSeg === 'records') return '#/progress/records';
     if (progressSeg === 'volume')
@@ -320,21 +322,13 @@ export type VolLens = 'volume' | 'fatigue' | 'readiness';
 /** Read the Progress sub-tab + volume seg/lens from the hash:
  *  #/trends, #/feats[/standards], #/progress[/muscle|/volume[/fatigue|/readiness]|/records]. */
 function progressFromHash(hash: string): {
-  sub: 'progress' | 'trends' | 'feats' | 'challenges';
-  featSub: 'achievements' | 'standards';
+  sub: 'progress' | 'trends';
   seg: ProgSeg;
   lens: VolLens;
 } {
   const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const base = { seg: 'total' as ProgSeg, lens: 'volume' as VolLens };
-  if (parts[0] === 'trends') return { sub: 'trends', featSub: 'achievements', ...base };
-  if (parts[0] === 'challenges') return { sub: 'challenges', featSub: 'achievements', ...base };
-  if (parts[0] === 'feats')
-    return {
-      sub: 'feats',
-      featSub: parts[1] === 'standards' ? 'standards' : 'achievements',
-      ...base,
-    };
+  if (parts[0] === 'trends') return { sub: 'trends', ...base };
   if (parts[0] === 'progress') {
     const seg: ProgSeg = (['muscle', 'volume', 'records'] as string[]).includes(parts[1])
       ? (parts[1] as ProgSeg)
@@ -343,9 +337,9 @@ function progressFromHash(hash: string): {
       seg === 'volume' && (parts[2] === 'fatigue' || parts[2] === 'readiness')
         ? (parts[2] as VolLens)
         : 'volume';
-    return { sub: 'progress', featSub: 'achievements', seg, lens };
+    return { sub: 'progress', seg, lens };
   }
-  return { sub: 'progress', featSub: 'achievements', ...base };
+  return { sub: 'progress', ...base };
 }
 
 /** The `?f=<element-id>` deep-link target a notification asks to focus. */
@@ -354,6 +348,19 @@ function focusFromHash(hash: string): string | null {
   if (!q) return null;
   const m = /(?:^|&)f=([^&]+)/.exec(q);
   return m ? decodeURIComponent(m[1]) : null;
+}
+
+// --- Apex (the gamification sub-app) is a full-screen mode at #/apex[/<tab>].
+const APEX_TAB_IDS: readonly string[] = ['home', 'challenges', 'ranks', 'awards', 'feed'];
+function isApexHash(hash: string): boolean {
+  return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'apex';
+}
+function apexTabFromHash(hash: string): ApexTab {
+  const seg = hash.split('?')[0].replace(/^#\/?/, '').split('/')[1] ?? '';
+  return (APEX_TAB_IDS.includes(seg) ? seg : 'home') as ApexTab;
+}
+function apexHash(tab: ApexTab): string {
+  return tab === 'home' ? '#/apex' : `#/apex/${tab}`;
 }
 
 export function App() {
@@ -431,6 +438,12 @@ export function App() {
   const { notifs, state: notifState } = useNotifs();
   const notifUnread = unreadCount(notifState, notifs);
 
+  // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
+  const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
+  const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(window.location.hash));
+  const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(window.location.hash));
+  const [shellOpen, setShellOpen] = useState(false);
+
   // Deep-link focus: a notification can ask a screen to scroll to a specific
   // card (id) and, when it's interactive (a feat cell), open its existing
   // detail. Poll for the element until the target screen has mounted.
@@ -474,11 +487,8 @@ export function App() {
   // Progress sub-tabs (Progress · Trends · Feats · Challenges) + the Feats
   // sub-tab, kept in App so each has its own URL (#/trends, #/feats,
   // #/feats/standards, #/challenges).
-  const [progressSub, setProgressSub] = useState<'progress' | 'trends' | 'feats' | 'challenges'>(
+  const [progressSub, setProgressSub] = useState<'progress' | 'trends'>(
     () => progressFromHash(window.location.hash).sub,
-  );
-  const [featSub, setFeatSub] = useState<'achievements' | 'standards'>(
-    () => progressFromHash(window.location.hash).featSub,
   );
   // Progress volume seg + lens live here too, so #/progress/volume/readiness
   // survives a refresh and deep links land on the right lens.
@@ -624,26 +634,28 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = toHash(
-      effectiveTab,
-      activeOverlay,
-      programsPeer,
-      libMine,
-      progressSub,
-      featSub,
-      progressSeg,
-      volumeLens,
-    );
+    const next = apexOpen
+      ? apexHash(apexTab)
+      : toHash(
+          effectiveTab,
+          activeOverlay,
+          programsPeer,
+          libMine,
+          progressSub,
+          progressSeg,
+          volumeLens,
+        );
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
   }, [
     authed,
     joinToken,
+    apexOpen,
+    apexTab,
     effectiveTab,
     activeOverlay,
     programsPeer,
     libMine,
     progressSub,
-    featSub,
     progressSeg,
     volumeLens,
   ]);
@@ -652,6 +664,8 @@ export function App() {
   useEffect(() => {
     if (!authed || joinToken) return;
     const onPop = () => {
+      setApexOpen(isApexHash(window.location.hash));
+      setApexTab(apexTabFromHash(window.location.hash));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
@@ -659,7 +673,6 @@ export function App() {
       setProgramsPeer(pk.peer);
       setLibMine(pk.mine);
       setProgressSub(ps.sub);
-      setFeatSub(ps.featSub);
       setProgressSeg(ps.seg);
       setVolumeLens(ps.lens);
       setFocusTarget(focusFromHash(window.location.hash));
@@ -676,6 +689,16 @@ export function App() {
     window.addEventListener('hashchange', onPop);
     return () => window.removeEventListener('hashchange', onPop);
   }, [authed, open, joinToken]);
+
+  // While Apex is open, put the amethyst accent on the document root too, so
+  // sheets that portal to <body> (the challenge start/filter sheets) re-skin
+  // along with the rest of the app.
+  useEffect(() => {
+    const el = document.documentElement;
+    if (apexOpen) el.classList.add('theme-apex');
+    else el.classList.remove('theme-apex');
+    return () => el.classList.remove('theme-apex');
+  }, [apexOpen]);
 
   if (joinToken) {
     return (
@@ -739,6 +762,43 @@ export function App() {
     setTab('programs');
   };
 
+  // Apex takes over the whole screen (its own header, nav and amethyst skin).
+  if (apexOpen) {
+    return (
+      <div className="app app-apex-root">
+        <Suspense fallback={<ScreenFallback />}>
+          <ApexApp
+            store={store}
+            now={notifNow}
+            tab={apexTab}
+            onTab={setApexTab}
+            onOpenShell={() => setShellOpen(true)}
+            notifs={notifs}
+            notifState={notifState}
+            notifUnread={notifUnread}
+            onNotifSeen={markNotifsSeen}
+            onNotifMarkAll={markAllNotifsSeen}
+          />
+        </Suspense>
+        {shellOpen && (
+          <ShellLauncher
+            store={store}
+            now={notifNow}
+            current="apex"
+            activeChallenges={activeChallengeCount}
+            notifUnread={notifUnread}
+            onGym={() => {
+              setApexOpen(false);
+              setShellOpen(false);
+            }}
+            onApex={() => setShellOpen(false)}
+            onClose={() => setShellOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="app">
       {desktopRail && (
@@ -749,8 +809,7 @@ export function App() {
           openWorkoutStartedAt={open?.startedAt}
           syncStatus={store.syncStatus}
           notifUnread={notifUnread}
-          notifActive={activeOverlay?.screen === 'notifications'}
-          onOpenNotifications={() => setOverlay({ screen: 'notifications' })}
+          onOpenShell={() => setShellOpen(true)}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
         />
@@ -761,16 +820,17 @@ export function App() {
             <span className="app-brand-word">spotter</span>
             <div className="app-brand-actions">
               <button
-                className="app-bell"
-                onClick={() => setOverlay({ screen: 'notifications' })}
-                aria-label={t.notifTitle}
+                className="app-appswitch"
+                onClick={() => setShellOpen(true)}
+                aria-label={t.shellSwitch}
               >
-                <Icon name="bell" />
+                <Icon name="barbell" weight="fill" className="app-brand-icon" />
                 {notifUnread > 0 && (
-                  <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
+                  <span className="app-appswitch-badge">
+                    {notifUnread > 9 ? '9+' : notifUnread}
+                  </span>
                 )}
               </button>
-              <Icon name="barbell" weight="fill" className="app-brand-icon" />
             </div>
           </div>
         )}
@@ -863,8 +923,6 @@ export function App() {
                   shell={shell}
                   sub={progressSub}
                   onSub={setProgressSub}
-                  featSub={featSub}
-                  onFeatSub={setFeatSub}
                   seg={progressSeg}
                   onSeg={setProgressSeg}
                   lens={volumeLens}
@@ -932,6 +990,22 @@ export function App() {
           ))}
         </div>
       </div>
+      {shellOpen && (
+        <ShellLauncher
+          store={store}
+          now={notifNow}
+          current="gym"
+          activeChallenges={activeChallengeCount}
+          notifUnread={notifUnread}
+          onGym={() => setShellOpen(false)}
+          onApex={() => {
+            setApexTab('home');
+            setApexOpen(true);
+            setShellOpen(false);
+          }}
+          onClose={() => setShellOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -1079,8 +1153,7 @@ function Rail(props: {
   openWorkoutStartedAt?: number;
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
   notifUnread: number;
-  notifActive: boolean;
-  onOpenNotifications: () => void;
+  onOpenShell: () => void;
   onOpenProfile: () => void;
   onOpenSettings: () => void;
 }) {
@@ -1100,10 +1173,20 @@ function Rail(props: {
 
   return (
     <aside className="rail">
-      <div className="rail-brand">
+      <button
+        className="rail-brand rail-apps"
+        onClick={props.onOpenShell}
+        aria-label={t.shellSwitch}
+        title={t.shellSwitch}
+      >
         <SpotterMark size={40} variant="sidebar" />
         <span>{t.appName}</span>
-      </div>
+        {props.notifUnread > 0 && (
+          <span className="rail-apps-badge">
+            {props.notifUnread > 9 ? '9+' : props.notifUnread}
+          </span>
+        )}
+      </button>
       {nav.map((x) => (
         <button
           key={x.id}
@@ -1117,20 +1200,6 @@ function Rail(props: {
           {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
-      <button
-        className={`rail-item${props.notifActive ? ' active' : ''}`}
-        aria-label={t.notifTitle}
-        title={t.notifTitle}
-        onClick={props.onOpenNotifications}
-      >
-        <Icon name="bell" />
-        <span className="rail-label">{t.notifTitle}</span>
-        {props.notifUnread > 0 && (
-          <span className="rail-notif-badge">
-            {props.notifUnread > 9 ? '9+' : props.notifUnread}
-          </span>
-        )}
-      </button>
       {role === 'admin' && (
         <button
           className="rail-item"
