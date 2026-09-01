@@ -332,9 +332,8 @@ function EffortRow({
 }) {
   return (
     <div className={className ?? 'act-effort'}>
-      <span className="act-field-label">{t.actEffort}</span>
       <EffortGauge
-        ariaLabel={t.actEffort}
+        title={t.actEffort}
         value={effort}
         onChange={onEffort}
         options={EFFORTS.map((e) => ({ value: e, label: t.actEffortLevel[e] }))}

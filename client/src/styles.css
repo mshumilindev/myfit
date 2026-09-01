@@ -19852,12 +19852,29 @@ button.badge {
   }
 }
 
-/* Effort gauge (design 03): needle + filling arc, labels below select. */
-.eg {
+/* Effort gauge (design 03): a card with a colour-graded semicircular dial —
+   green (Light) → brass (Moderate) → red (Hard) — and a label row that selects.
+   --eff carries the current level's colour to the needle, hub, label and tick. */
+.eg-card {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 17px;
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.eg-kicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  padding-bottom: 6px;
+}
+.eg-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 0 2px;
 }
 .eg-svg {
   width: 200px;
@@ -19866,48 +19883,45 @@ button.badge {
 }
 .eg-track {
   fill: none;
-  stroke: var(--color-neutral-700);
+  stroke: var(--color-neutral-800);
   stroke-width: 9;
   stroke-linecap: round;
 }
 .eg-arc {
   fill: none;
-  stroke: url(#effGrad);
+  stroke: url(#egGrad);
   stroke-width: 9;
   stroke-linecap: round;
   stroke-dasharray: 100;
-  transition: stroke-dashoffset 0.32s cubic-bezier(0.34, 1.2, 0.44, 1);
-}
-.eg-g0 {
-  stop-color: var(--color-accent-700);
-}
-.eg-g1 {
-  stop-color: var(--color-accent);
+  transition: stroke-dashoffset 0.34s cubic-bezier(0.34, 1.2, 0.44, 1);
 }
 .eg-ticks line {
-  stroke: var(--color-neutral-600);
+  stroke: var(--color-neutral-700);
   stroke-width: 2;
 }
 .eg-needle {
   transform-origin: 100px 100px;
-  transition: transform 0.34s cubic-bezier(0.34, 1.28, 0.44, 1);
+  transition: transform 0.36s cubic-bezier(0.34, 1.3, 0.44, 1);
 }
 .eg-needle line {
-  stroke: var(--color-accent);
+  stroke: var(--eff);
   stroke-width: 3.5;
   stroke-linecap: round;
+  transition: stroke 0.34s ease;
 }
 .eg-hub {
   fill: var(--color-surface);
-  stroke: var(--color-accent);
+  stroke: var(--eff);
   stroke-width: 2.5;
+  transition: stroke 0.34s ease;
 }
 .eg-current {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 2px;
-  color: var(--color-accent);
+  color: var(--eff);
+  transition: color 0.34s ease;
 }
 .eg-current i {
   font-size: 18px;
@@ -19918,26 +19932,27 @@ button.badge {
 }
 .eg-legend {
   display: flex;
-  width: 100%;
-  margin-top: 10px;
+  justify-content: space-between;
+  width: 210px;
+  max-width: 100%;
+  margin-top: 8px;
 }
 .eg-opt {
-  flex: 1;
-  padding: 8px 0;
+  padding: 6px 8px;
   border: none;
   background: none;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
-  color: var(--color-neutral-500);
+  font-size: 11px;
+  color: var(--color-neutral-600);
 }
 .eg-opt.on {
-  color: var(--color-accent);
+  color: var(--eff);
   font-weight: 600;
 }
 @media (hover: hover) {
   .eg-opt:not(.on):hover {
-    color: var(--color-neutral-300);
+    color: var(--color-neutral-400);
   }
 }
 /* Four-way segment: tighter so translated labels still fit one line. */
