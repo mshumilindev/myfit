@@ -23927,9 +23927,6 @@ button.badge {
   --color-accent-800: #4a4d53;
   --color-accent-900: #26282c;
 }
-.app-roster.apex-app::before {
-  background: radial-gradient(120% 44% at 78% -14%, rgba(200, 204, 212, 0.1), transparent 56%);
-}
 
 /* Nutrition — graphite + lazurite. Same re-skin trick: override the accent ramp
    on the wrapper (and document root, for portaled sheets) so the shared sub-app
@@ -23946,9 +23943,6 @@ button.badge {
   --color-accent-700: #336ea8;
   --color-accent-800: #24486b;
   --color-accent-900: #14222f;
-}
-.app-nutrition.apex-app::before {
-  background: radial-gradient(120% 44% at 78% -14%, rgba(79, 147, 214, 0.14), transparent 56%);
 }
 /* The app's own identity glyph in the brand header (nutrition shows a fork-knife
    mark beside the wordmark). */
@@ -23974,10 +23968,22 @@ button.badge {
 .apex-app::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 44% at 78% -14%, rgba(157, 111, 240, 0.14), transparent 56%);
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 340px;
   pointer-events: none;
   z-index: 0;
+  /* Ambient accent top-glow (matches the Gym "Final BG"): a soft bloom from the
+     upper-right that fades by mid-screen, so the header colour flows into the
+     page. Accent-driven, so it re-tints per app (amethyst / silver / lazurite). */
+  background:
+    radial-gradient(
+      135% 105% at 78% -22%,
+      color-mix(in srgb, var(--color-accent) 13%, transparent),
+      transparent 56%
+    ),
+    linear-gradient(color-mix(in srgb, var(--color-accent) 3%, transparent), transparent 50%);
 }
 /* The header/body/nav column beside the (desktop-only) rail. */
 .apex-col {

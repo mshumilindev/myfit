@@ -2,10 +2,11 @@
    so it never collides with the gym-tracker design system. Generated from the
    nutrition project's tokens.css + theme-lazurite.css + kit.css + styles.css. */
 .app-nutrition{
-  
-  --bg: #0d0e10;
-  --surface: #16181c;
-  --surface-2: #1d2024;
+  /* Neutrals aligned to the suite (gym) so the graphite base, cards and the
+     ambient header→page glow read identically across apps. */
+  --bg: #16171a;
+  --surface: #1f2125;
+  --surface-2: #26282c;
   --hairline: #2a2e34;
   --text: #eef1f4;
   --muted: #a2a9b2;
@@ -14,7 +15,7 @@
   
   --ok: #3ecf8e; 
   --danger: #e5564b; 
-  --skeleton: #21252b;
+  --skeleton: #26282c;
 
   
   --acc: #6b7280;
