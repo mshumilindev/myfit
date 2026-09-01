@@ -11,11 +11,9 @@ import { useState } from 'react';
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 
 const MAX_DUR = 720; // longest activity: 12h
-const MIN_END = 720; // scale shows at least 00:00–12:00
-const MAX_END = 2160; // hard ceiling (late night + 12h)
-const STEP = 120; // the scale grows in 2h increments
+const DAY = 1440; // 00:00 → 00:00 next day
+const MAX_END = DAY + MAX_DUR; // late start + 12h can spill past midnight
 const SNAP = 5; // minute granularity
-const DAY = 1440;
 
 function fmtTime(min: number): string {
   const m = ((min % DAY) + DAY) % DAY;
@@ -30,9 +28,9 @@ function fmtDur(min: number, t: { hrShort: string; minShort: string }): string {
 }
 const snap = (v: number) => Math.round(v / SNAP) * SNAP;
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
-/** Smallest scale end that fits `end`, on the 2h grid, never below 12h. */
-const winEndFor = (end: number) =>
-  clamp(Math.ceil(Math.max(end, MIN_END) / STEP) * STEP, MIN_END, MAX_END);
+/** Scale runs 00:00 → 00:00 next day (the whole calendar day), and only
+ *  stretches past midnight when the start is late enough that +12h spills over. */
+const winEndFor = (start: number) => clamp(Math.max(DAY, start + MAX_DUR), DAY, MAX_END);
 
 export function TimelineRange({
   start,
@@ -48,7 +46,7 @@ export function TimelineRange({
   const dur = clamp(duration, 0, MAX_DUR);
   const end = start + dur;
   // The visible scale end — frozen while dragging, recomputed on release.
-  const [winEnd, setWinEnd] = useState(() => winEndFor(end));
+  const [winEnd, setWinEnd] = useState(() => winEndFor(start));
 
   const startPct = clamp((start / winEnd) * 100, 0, 100);
   const endPct = clamp((end / winEnd) * 100, 0, 100);
@@ -90,7 +88,7 @@ export function TimelineRange({
   };
   const onUp = () => {
     setMode(null);
-    setWinEnd(winEndFor(end)); // add hours at the end; morning never trims
+    setWinEnd(winEndFor(start)); // day scale, extended past midnight only if needed
   };
 
   const marks = [0, 0.25, 0.5, 0.75, 1].map((f) => fmtTime(f * winEnd));
