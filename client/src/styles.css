@@ -276,22 +276,22 @@ i > svg {
 .app-brand-lead {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 11px;
 }
-/* Current app name (Gym / Apex / Users…) — the design's tight bold Inter, a
-   plain label that also opens the app switcher. Colour stays neutral so the
-   accent script wordmark keeps the spotlight. */
+/* Current app name (Gym / Apex / Users…) — small accent caps beside the script
+   wordmark, per the hybrid-header design. Also opens the app switcher. */
 .app-brand-app {
   border: none;
   background: none;
   padding: 0;
   cursor: pointer;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   line-height: 1;
-  color: var(--color-neutral-400);
+  color: var(--color-accent);
 }
 /* Right-side header actions: the notifications bell + the dumbbell mark. The
    group carries the optical nudge onto the script wordmark; the barbell must not
