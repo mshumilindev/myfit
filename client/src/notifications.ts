@@ -33,6 +33,8 @@ export interface Notif {
   ts: number;
   title: string;
   subtitle: string;
+  /** Hash route to open on tap (routed by App's hashchange handler). */
+  nav?: string;
 }
 
 const DAY = 24 * 3600 * 1000;
@@ -78,6 +80,7 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
             ts: top.loggedAt ?? w.finishedAt ?? w.startedAt,
             title: t.notifPrTitle(ex.name),
             subtitle: `${fmtKg(wgt)} · ${t.notifPrUp(fmtKg(wgt - prev))}`,
+            nav: `#/exercise/${encodeURIComponent(ex.name)}`,
           });
         }
         bestByName.set(key, wgt);
@@ -98,6 +101,7 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
       ts: lastWorkoutTs,
       title: `${r.name} → ${tierLabel}`,
       subtitle: `${fmtKg(r.best)} · ${t.notifStandardSub}`,
+      nav: '#/feats/standards',
     });
   }
 
@@ -111,6 +115,7 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
       ts: ach.unlockAt ?? lastWorkoutTs,
       title: ach.title,
       subtitle: t.notifFeatSub,
+      nav: '#/feats',
     });
   }
 
@@ -126,6 +131,7 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
         ts: lastWorkoutTs,
         title: ins.headline ?? ins.kicker ?? ins.detail,
         subtitle: ins.detail,
+        nav: '#/trends',
       });
     }
   }
@@ -158,11 +164,12 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
       ts: lastWorkoutTs,
       title: t.notifVolumeTitle,
       subtitle: t.notifVolumeSub,
+      nav: '#/progress/volume',
     });
   }
 
   out.sort((a, b) => b.ts - a.ts);
-  return out.slice(0, 50);
+  return out.slice(0, 150);
 }
 
 // --- Seen-state (last-seen timestamp) — per device, in localStorage. ---------

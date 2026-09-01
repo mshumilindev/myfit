@@ -272,13 +272,18 @@ i > svg {
   line-height: 1;
   color: var(--color-accent);
 }
-/* Right-side header actions: the notifications bell + the dumbbell mark. */
+/* Right-side header actions: the notifications bell + the dumbbell mark. The
+   group carries the optical nudge onto the script wordmark; the barbell must not
+   also apply its own, or the two icons drift apart vertically. */
 .app-brand-actions {
   display: flex;
   align-items: center;
   gap: 16px;
   position: relative;
   top: 4px;
+}
+.app-brand-actions .app-brand-icon {
+  top: 0;
 }
 .app-bell {
   position: relative;
@@ -288,7 +293,7 @@ i > svg {
   border: none;
   background: none;
   color: var(--color-text);
-  font-size: 21px;
+  font-size: 20px;
   cursor: pointer;
 }
 .app-bell-badge {
@@ -4621,12 +4626,33 @@ i > svg {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 12px 14px;
+  border: none;
   border-radius: 14px;
+  background: none;
+  color: var(--color-text);
+  text-align: left;
+  font: inherit;
 }
 .notif-row.unread {
   background: color-mix(in srgb, var(--color-accent) 5%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+.notif-row.linked {
+  cursor: pointer;
+}
+.notif-row.linked:hover {
+  background: var(--color-neutral-900);
+}
+.notif-row.linked.unread:hover {
+  background: color-mix(in srgb, var(--color-accent) 9%, transparent);
+}
+.notif-go {
+  flex: none;
+  align-self: center;
+  font-size: 15px;
+  color: var(--color-neutral-600);
 }
 .notif-dot {
   position: absolute;

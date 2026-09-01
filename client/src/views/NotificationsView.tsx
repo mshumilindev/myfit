@@ -2,8 +2,12 @@
  * Notifications inbox — the milestone feed (standards, PRs, achievements,
  * trends, streaks, weekly volume goal), grouped by recency, with unread rows
  * highlighted. Opened from the header bell; "Mark all read" clears the badge.
- * Works as a full screen on mobile and inside the desktop content column.
+ * Rows with a target are tappable (they route via the URL hash). The list is
+ * rendered incrementally — more rows load as a bottom sentinel scrolls into
+ * view — so a long history never mounts all at once. Works full-screen on
+ * mobile and inside the desktop content column.
  */
+import { useEffect, useRef, useState } from 'react';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
 import { isUnread, notifTime, type Notif, type NotifKind } from '../notifications';
@@ -16,6 +20,8 @@ const KIND_ICON: Record<NotifKind, string> = {
   streak: 'fire',
   volume: 'check-circle',
 };
+
+const PAGE = 24;
 
 function group(
   notifs: Notif[],
@@ -54,7 +60,25 @@ export function NotificationsView({
   onClose: () => void;
 }) {
   const { t, locale } = useT();
-  const groups = group(notifs, now);
+  const [limit, setLimit] = useState(PAGE);
+  const sentinel = useRef<HTMLDivElement>(null);
+
+  // Load more as the bottom sentinel scrolls near the viewport.
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setLimit((l) => l + PAGE);
+      },
+      { rootMargin: '400px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const shown = notifs.slice(0, limit);
+  const groups = group(shown, now);
   const hasUnread = notifs.some((n) => isUnread(n, seenTs));
 
   const sectionLabel = (k: 'today' | 'week' | 'earlier') =>
@@ -90,11 +114,11 @@ export function NotificationsView({
               <div className="notif-rows">
                 {g.items.map((n) => {
                   const unread = isUnread(n, seenTs);
-                  return (
-                    <div
-                      key={n.id}
-                      className={`notif-row nkind-${n.kind}${unread ? ' unread' : ''}`}
-                    >
+                  const cls = `notif-row nkind-${n.kind}${unread ? ' unread' : ''}${
+                    n.nav ? ' linked' : ''
+                  }`;
+                  const inner = (
+                    <>
                       {unread && <span className="notif-dot" />}
                       <span className="notif-ic">
                         <Icon name={KIND_ICON[n.kind]} weight="fill" />
@@ -104,12 +128,29 @@ export function NotificationsView({
                         <div className="notif-sub">{n.subtitle}</div>
                       </div>
                       <span className="notif-time">{notifTime(n.ts, now, t, locale)}</span>
+                      {n.nav && <Icon name="caret-right" className="notif-go" />}
+                    </>
+                  );
+                  return n.nav ? (
+                    <button
+                      key={n.id}
+                      className={cls}
+                      onClick={() => {
+                        window.location.hash = n.nav as string;
+                      }}
+                    >
+                      {inner}
+                    </button>
+                  ) : (
+                    <div key={n.id} className={cls}>
+                      {inner}
                     </div>
                   );
                 })}
               </div>
             </div>
           ))}
+          <div ref={sentinel} aria-hidden />
         </div>
       )}
     </div>
