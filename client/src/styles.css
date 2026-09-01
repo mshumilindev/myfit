@@ -19880,6 +19880,8 @@ button.badge {
   width: 200px;
   max-width: 100%;
   height: auto;
+  touch-action: none;
+  cursor: pointer;
 }
 .eg-track {
   fill: none;
@@ -19893,11 +19895,23 @@ button.badge {
   stroke-width: 9;
   stroke-linecap: round;
   stroke-dasharray: 100;
-  transition: stroke-dashoffset 0.34s cubic-bezier(0.34, 1.2, 0.44, 1);
+  transition:
+    stroke-dashoffset 0.34s cubic-bezier(0.34, 1.2, 0.44, 1),
+    opacity 0.2s ease;
+}
+.eg-g0 {
+  stop-color: var(--color-ok);
+}
+.eg-g1 {
+  stop-color: var(--color-accent);
+}
+.eg-g2 {
+  stop-color: var(--color-danger);
 }
 .eg-ticks line {
   stroke: var(--color-neutral-700);
-  stroke-width: 2;
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 .eg-needle {
   transform-origin: 100px 100px;
