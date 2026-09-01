@@ -653,6 +653,7 @@ export const uk: Strings = {
     row: 'Веслування',
     walk: 'Ходьба',
     hiit: 'HIIT',
+    dance: 'Танці',
     cardio: 'Кардіо',
     yoga: 'Йога',
     mobility: 'Мобільність',

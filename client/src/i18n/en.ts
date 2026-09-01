@@ -696,6 +696,7 @@ export const en = {
     row: 'Rowing',
     walk: 'Walk',
     hiit: 'HIIT',
+    dance: 'Dance',
     cardio: 'Cardio',
     yoga: 'Yoga',
     mobility: 'Mobility',

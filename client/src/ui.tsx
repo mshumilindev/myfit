@@ -98,6 +98,7 @@ import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
 import { Sparkle } from '@phosphor-icons/react/Sparkle';
 import { SignOut } from '@phosphor-icons/react/SignOut';
 import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
+import { DiscoBall } from '@phosphor-icons/react/DiscoBall';
 import { Star } from '@phosphor-icons/react/Star';
 import { Timer } from '@phosphor-icons/react/Timer';
 import { Trash } from '@phosphor-icons/react/Trash';
@@ -212,6 +213,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'sign-out': SignOut,
   star: Star,
   'squares-four': SquaresFour,
+  'disco-ball': DiscoBall,
   timer: Timer,
   trash: Trash,
   trophy: Trophy,

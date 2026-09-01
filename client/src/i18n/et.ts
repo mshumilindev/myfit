@@ -649,6 +649,7 @@ export const et: Strings = {
     row: 'Sõudmine',
     walk: 'Kõnd',
     hiit: 'HIIT',
+    dance: 'Tants',
     cardio: 'Kardio',
     yoga: 'Jooga',
     mobility: 'Liikuvus',

@@ -652,6 +652,7 @@ export const pl: Strings = {
     row: 'Wioślarz',
     walk: 'Marsz',
     hiit: 'HIIT',
+    dance: 'Taniec',
     cardio: 'Cardio',
     yoga: 'Joga',
     mobility: 'Mobilność',

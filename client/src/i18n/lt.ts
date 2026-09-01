@@ -661,6 +661,7 @@ export const lt: Strings = {
     row: 'Irklavimas',
     walk: 'Ėjimas',
     hiit: 'HIIT',
+    dance: 'Šokiai',
     cardio: 'Kardio',
     yoga: 'Joga',
     mobility: 'Mobilumas',

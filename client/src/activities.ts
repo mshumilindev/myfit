@@ -50,6 +50,7 @@ export const ACTIVITY_TYPES: ActivityType[] = [
     tracksDistance: true,
   },
   { key: 'hiit', category: 'conditioning', icon: 'lightning', met: 8.0 },
+  { key: 'dance', category: 'conditioning', icon: 'disco-ball', met: 5.5 },
   { key: 'cardio', category: 'conditioning', icon: 'heartbeat', met: 6.0 },
   { key: 'yoga', category: 'recovery', icon: 'yoga', met: 2.5 },
   { key: 'mobility', category: 'recovery', icon: 'person-simple-tai-chi', met: 2.3 },
