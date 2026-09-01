@@ -849,6 +849,7 @@ export function App() {
             onGym={openGym}
             onApex={openApex}
             onRoster={() => setShellOpen(false)}
+            onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -887,6 +888,7 @@ export function App() {
             onGym={openGym}
             onApex={() => setShellOpen(false)}
             onRoster={() => openRoster(rosterHomeFor(role))}
+            onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -1094,6 +1096,7 @@ export function App() {
             openApex();
           }}
           onRoster={() => openRoster(rosterHomeFor(role))}
+          onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />
       )}

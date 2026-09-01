@@ -24125,6 +24125,27 @@ button.badge {
   color: var(--color-neutral-600);
   font-size: 16px;
 }
+/* Sign out — a distinct danger action in the suite hub. */
+.shell-signout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.shell-signout i {
+  font-size: 19px;
+}
 .shell-note {
   text-align: center;
   font-size: 12px;

@@ -4,8 +4,9 @@
  * and Nutrition (coming soon). Silver, neutral chrome — the apps supply the
  * colour. One account, one training history.
  */
+import { useState } from 'react';
 import { useT } from '../i18n';
-import { Icon, Sheet } from '../ui';
+import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
 
 const DAY = 24 * 3600 * 1000;
@@ -21,6 +22,7 @@ export function ShellLauncher({
   onGym,
   onApex,
   onRoster,
+  onSignOut,
   onClose,
 }: {
   store: StoreState;
@@ -33,9 +35,11 @@ export function ShellLauncher({
   onGym: () => void;
   onApex: () => void;
   onRoster: () => void;
+  onSignOut: () => void;
   onClose: () => void;
 }) {
   const { t } = useT();
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
   const sessionsWeek = store.workouts.filter(
     (w) => w.finishedAt !== null && w.startedAt >= now - 7 * DAY,
   ).length;
@@ -122,7 +126,27 @@ export function ShellLauncher({
           </div>
         </div>
       </div>
+      <button className="shell-signout" onClick={() => setConfirmSignOut(true)}>
+        <Icon name="sign-out" />
+        <span>{t.signOut}</span>
+      </button>
       <div className="shell-note">{t.shellNote}</div>
+      {confirmSignOut && (
+        <ConfirmDialog
+          title={t.signOutTitle}
+          body={
+            store.queue.length > 0 ? t.signOutQueueBody(store.queue.length) : t.signOutCleanBody
+          }
+          confirmLabel={t.signOut}
+          cancelLabel={t.cancel}
+          danger
+          onCancel={() => setConfirmSignOut(false)}
+          onConfirm={() => {
+            setConfirmSignOut(false);
+            onSignOut();
+          }}
+        />
+      )}
     </Sheet>
   );
 }
