@@ -781,13 +781,13 @@
   background: var(--acc);
 }.app-nutrition .legend .sw.dg{
   background: var(--danger);
-}.app-nutrition .account-chip{
+}.app-nutrition .n-acct{
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--hairline);
-}.app-nutrition .account-chip .ava{
+}.app-nutrition .n-acct .ava{
   width: 40px;
   height: 40px;
   flex: none;
@@ -799,10 +799,10 @@
   justify-content: center;
   font-weight: 600;
   font-size: 14px;
-}.app-nutrition .account-chip .nm{
+}.app-nutrition .n-acct .nm{
   display: block;
   font-weight: 600;
-}.app-nutrition .account-chip .sub{
+}.app-nutrition .n-acct .sub{
   display: block;
   color: var(--muted);
   font-size: 12px;
@@ -1589,4 +1589,91 @@
   object-fit: cover;
   background: var(--surface-2);
   flex: none;
+}
+
+/* ============================================================================
+   Gym design-system leak guard. Several nutrition class names (.bars, .seg,
+   .screen, .input, .empty, .dialog, .field-error, .auth-card) also exist as
+   gym GLOBAL classes. Gym's unscoped rules (specificity 0,1,0) leak every
+   property nutrition's scoped rule (0,2,0) does not itself set. `revert` on
+   exactly those leaked properties removes gym's contribution and restores
+   nutrition's intended block/flow layout — without touching properties
+   nutrition does set.
+   ========================================================================== */
+.app-nutrition .bars {
+  align-items: stretch;
+  height: auto;
+}
+.app-nutrition .seg {
+  background: revert;
+  border: revert;
+  border-radius: revert;
+  flex: revert;
+  overflow: revert;
+  padding: revert;
+}
+.app-nutrition .screen {
+  display: revert;
+  flex-direction: revert;
+  align-items: revert;
+  gap: revert;
+  min-height: revert;
+  overflow-x: revert;
+  overscroll-behavior: revert;
+  -webkit-overflow-scrolling: revert;
+}
+.app-nutrition .input {
+  opacity: revert;
+  outline-offset: revert;
+}
+.app-nutrition .empty {
+  display: revert;
+  flex-direction: revert;
+  align-items: revert;
+  gap: revert;
+}
+.app-nutrition .dialog {
+  display: revert;
+  flex-direction: revert;
+  gap: revert;
+  box-shadow: revert;
+}
+.app-nutrition .field-error {
+  display: revert;
+  align-items: revert;
+  gap: revert;
+}
+.app-nutrition .auth-card {
+  display: revert;
+  flex-direction: revert;
+  gap: revert;
+  justify-content: revert;
+  position: revert;
+}
+
+/* Bottom nav: nutrition has exactly 4 items (Today/History/Goal/Apps), so use
+   4 even columns like gym's tabbar — no empty gap before Apps. */
+.app-nutrition .apex-nav {
+  grid-template-columns: repeat(4, 1fr);
+}
+.app-nutrition .apex-nav-apps {
+  grid-column: auto;
+}
+
+/* Plaque/banner: gym-surface card (not a heavy accent block); accent stays on
+   the overline + CTA only. */
+.app-nutrition .plaque {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+}
+
+/* Search-result rows: stack name over meta (the .row .body variants didn't set
+   block display, so they ran together on one line). */
+.app-nutrition .row .body .name {
+  display: block;
+}
+.app-nutrition .row .body .meta {
+  display: block;
+  margin-top: 1px;
 }

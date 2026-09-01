@@ -172,7 +172,6 @@ export function NutritionRoot({
       <div className="apex-col">
         <header className="app-brand apex-head">
           <div className="app-brand-lead">
-            <Icon name="fork-knife" weight="fill" className="app-brand-icon" />
             <span className="app-brand-word">spotter</span>
             <button className="app-brand-app" onClick={onOpenShell} aria-label={t('apps')}>
               {t('appName')}

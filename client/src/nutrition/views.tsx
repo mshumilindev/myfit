@@ -549,7 +549,7 @@ export function ProfileView() {
     return (
       <div className="screen">
         <Header overline="PROFILE" title={name} />
-        <div className="account-chip">
+        <div className="n-acct">
           <Sk w={40} h={40} r={20} />
           <div style={{ flex: 1 }}>
             <Sk w={140} h={16} />
@@ -572,7 +572,7 @@ export function ProfileView() {
     <div className="screen">
       <Header overline="PROFILE" title={name} />
 
-      <div className="account-chip">
+      <div className="n-acct">
         <Avatar uid={s.uid ?? undefined} name={name} size={40} />
         <span>
           <span className="nm">{name}</span>
