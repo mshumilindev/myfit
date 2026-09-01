@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, Sheet } from '../ui';
 import type { StoreState } from '../store';
 import {
   challengeCatalog,
@@ -139,10 +139,26 @@ export function ChallengesView({ store }: { store: StoreState }) {
   const [detailId, setDetailId] = useState<string | null>(null);
   const detail = detailId ? (live.find((l) => l.ac.id === detailId) ?? null) : null;
 
+  // Catalog paging (20 per page) + a filter sheet, like the exercise library.
+  const [page, setPage] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
+  const applyCat = (c: ChallengeCategory | 'all') => {
+    setCat(c);
+    setPage(0);
+  };
+  const applyQuery = (v: string) => {
+    setQ(v);
+    setPage(0);
+  };
+  const PAGE = 20;
+  const maxPage = Math.max(0, Math.ceil(filtered.length / PAGE) - 1);
+  const curPage = Math.min(page, maxPage);
+  const shown = filtered.slice(curPage * PAGE, curPage * PAGE + PAGE);
+
   const activeCount = activeList.length;
 
   return (
-    <div className="screen ch-screen">
+    <div className="ch-screen">
       <div className="ch-head">
         <h2 className="title-26">{t.challengesTitle}</h2>
         {activeCount > 0 && <span className="ch-count">{t.chNActive(activeCount)}</span>}
@@ -163,63 +179,129 @@ export function ChallengesView({ store }: { store: StoreState }) {
         <section className="ch-sect">
           <div className="ch-sect-label">{t.chStartSection}</div>
 
-          <div className="ch-search">
-            <Icon name="magnifying-glass" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={t.chSearchPlaceholder}
-              aria-label={t.chSearchPlaceholder}
-            />
-            {q && (
-              <button
-                className="ch-search-clear"
-                onClick={() => setQ('')}
-                aria-label={t.clearLabel}
-              >
-                <Icon name="x" />
-              </button>
-            )}
+          <div className="ch-searchrow">
+            <div className="ch-search">
+              <Icon name="magnifying-glass" />
+              <input
+                value={q}
+                onChange={(e) => applyQuery(e.target.value)}
+                placeholder={t.chSearchPlaceholder}
+                aria-label={t.chSearchPlaceholder}
+              />
+              {q && (
+                <button
+                  className="ch-search-clear"
+                  onClick={() => applyQuery('')}
+                  aria-label={t.clearLabel}
+                >
+                  <Icon name="x" />
+                </button>
+              )}
+            </div>
+            <button
+              className={`ch-funnel${cat !== 'all' ? ' on' : ''}`}
+              onClick={() => setShowFilters(true)}
+              aria-label={t.libFiltersLabel}
+            >
+              <Icon name="funnel-simple" />
+            </button>
           </div>
 
-          <div className="ch-filters" role="tablist">
+          {cat !== 'all' && (
+            <div className="ch-active-filter">
+              <button className="ch-fchip" onClick={() => applyCat('all')}>
+                {t.chCat[cat]}
+                <Icon name="x" />
+              </button>
+            </div>
+          )}
+
+          {filtered.length === 0 ? (
+            <div className="ch-empty">{t.chSearchEmpty}</div>
+          ) : (
+            <>
+              <div className="ch-catalog">
+                {shown.map((c) => (
+                  <CatalogRow
+                    key={c.id}
+                    c={c}
+                    started={startedIds.has(c.id)}
+                    onStart={() => setStartTmpl(c)}
+                  />
+                ))}
+              </div>
+              {maxPage > 0 && (
+                <nav className="exl-pager" aria-label={t.pagination}>
+                  <button
+                    className="exl-pagebtn"
+                    disabled={curPage === 0}
+                    onClick={() => setPage(curPage - 1)}
+                    aria-label={t.pagePrev}
+                  >
+                    <Icon name="caret-left" />
+                  </button>
+                  {Array.from({ length: maxPage + 1 }, (_, p) => (
+                    <button
+                      key={p}
+                      className={`exl-pagenum${p === curPage ? ' active' : ''}`}
+                      aria-current={p === curPage ? 'page' : undefined}
+                      onClick={() => setPage(p)}
+                    >
+                      {p + 1}
+                    </button>
+                  ))}
+                  <button
+                    className="exl-pagebtn"
+                    disabled={curPage >= maxPage}
+                    onClick={() => setPage(curPage + 1)}
+                    aria-label={t.pageNext}
+                  >
+                    <Icon name="caret-left" className="flip" />
+                  </button>
+                </nav>
+              )}
+            </>
+          )}
+        </section>
+      </div>
+
+      {showFilters && (
+        <Sheet onClose={() => setShowFilters(false)} className="ch-filter-sheet">
+          <div className="sheet-head with-back">
             <button
-              role="tab"
-              aria-selected={cat === 'all'}
+              className="sheet-back"
+              onClick={() => setShowFilters(false)}
+              aria-label={t.backAction}
+            >
+              <Icon name="caret-left" />
+            </button>
+            <span className="t">{t.libFiltersLabel}</span>
+          </div>
+          <div className="ch-filter-chips">
+            <button
               className={cat === 'all' ? 'active' : ''}
-              onClick={() => setCat('all')}
+              onClick={() => {
+                applyCat('all');
+                setShowFilters(false);
+              }}
             >
               {t.chFilterAll}
             </button>
             {CHALLENGE_CATEGORIES.map((c) => (
               <button
                 key={c}
-                role="tab"
-                aria-selected={cat === c}
                 className={cat === c ? 'active' : ''}
-                onClick={() => setCat(c)}
+                onClick={() => {
+                  applyCat(c);
+                  setShowFilters(false);
+                }}
               >
                 {t.chCat[c]}
               </button>
             ))}
           </div>
-
-          {filtered.length === 0 ? (
-            <div className="ch-empty">{t.chSearchEmpty}</div>
-          ) : (
-            <div className="ch-catalog">
-              {filtered.map((c) => (
-                <CatalogRow
-                  key={c.id}
-                  c={c}
-                  started={startedIds.has(c.id)}
-                  onStart={() => setStartTmpl(c)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
+        </Sheet>
+      )}
 
       {startTmpl && (
         <StartSheet
@@ -334,67 +416,58 @@ function StartSheet({
   const inc = () => setTarget((v) => Math.min(tmpl.max, Math.round((v + tmpl.step) * 100) / 100));
 
   return (
-    <div className="ch-scrim" onClick={onClose}>
-      <div className="ch-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="ch-grip" />
-        <div className="ch-sheet-head">
-          <div className={`ch-sheet-ic ${ACCENT_CLASS[tmpl.accent]}`}>
-            <Icon name={tmpl.icon} weight="fill" />
-          </div>
-          <div>
-            <div className="ch-sheet-title">{tmpl.title(t, target)}</div>
-            <div className="ch-sheet-cat">{t.chCat[tmpl.category]}</div>
-          </div>
+    <Sheet onClose={onClose} className="ch-start-sheet">
+      <div className="ch-sheet-head">
+        <div className={`ch-sheet-ic ${ACCENT_CLASS[tmpl.accent]}`}>
+          <Icon name={tmpl.icon} weight="fill" />
         </div>
-
-        <p className="ch-sheet-blurb">{tmpl.blurb(t)}</p>
-
-        {adjustable && (
-          <>
-            <div className="ch-field-label">
-              {t.chTarget} — {unit}
-            </div>
-            <div className="ch-stepper">
-              <button
-                className="ch-step"
-                onClick={dec}
-                disabled={target <= tmpl.min}
-                aria-label="−"
-              >
-                <Icon name="minus" />
-              </button>
-              <div className="ch-step-val num">{fmtChallengeValue(tmpl.unit, target, t)}</div>
-              <button
-                className="ch-step plus"
-                onClick={inc}
-                disabled={target >= tmpl.max}
-                aria-label="+"
-              >
-                <Icon name="plus" />
-              </button>
-            </div>
-          </>
-        )}
-
-        {tmpl.durations.length > 1 && (
-          <>
-            <div className="ch-field-label">{t.chDuration}</div>
-            <div className="ch-segmented">
-              {tmpl.durations.map((d) => (
-                <button key={d} className={d === days ? 'active' : ''} onClick={() => setDays(d)}>
-                  {fmtChallengeDuration(d, t)}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        <button className="ch-cta" onClick={() => onStart(target, days)}>
-          <Icon name="flag-banner" weight="fill" />
-          {t.chStartCta}
-        </button>
+        <div>
+          <div className="ch-sheet-title">{tmpl.title(t, target)}</div>
+          <div className="ch-sheet-cat">{t.chCat[tmpl.category]}</div>
+        </div>
       </div>
-    </div>
+
+      <p className="ch-sheet-blurb">{tmpl.blurb(t)}</p>
+
+      {adjustable && (
+        <>
+          <div className="ch-field-label">
+            {t.chTarget} — {unit}
+          </div>
+          <div className="ch-stepper">
+            <button className="ch-step" onClick={dec} disabled={target <= tmpl.min} aria-label="−">
+              <Icon name="minus" />
+            </button>
+            <div className="ch-step-val num">{fmtChallengeValue(tmpl.unit, target, t)}</div>
+            <button
+              className="ch-step plus"
+              onClick={inc}
+              disabled={target >= tmpl.max}
+              aria-label="+"
+            >
+              <Icon name="plus" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {tmpl.durations.length > 1 && (
+        <>
+          <div className="ch-field-label">{t.chDuration}</div>
+          <div className="ch-segmented">
+            {tmpl.durations.map((d) => (
+              <button key={d} className={d === days ? 'active' : ''} onClick={() => setDays(d)}>
+                {fmtChallengeDuration(d, t)}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      <button className="btn btn-primary ch-start-cta" onClick={() => onStart(target, days)}>
+        {t.chStartCta}
+      </button>
+    </Sheet>
   );
 }
 
@@ -533,7 +606,7 @@ function CompleteSheet({ l, onDone }: { l: LiveChallenge; onDone: () => void }) 
         <div className="ch-complete-title">{tmpl.title(t, prog.target)}</div>
         <div className="ch-complete-body">{t.chCompleteBody(valueLabel, days)}</div>
         <div className="ch-complete-actions">
-          <button className="ch-cta" onClick={onDone}>
+          <button className="btn btn-primary" onClick={onDone}>
             {t.chDone}
           </button>
         </div>
