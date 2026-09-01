@@ -24134,30 +24134,39 @@ button.badge {
   place-items: center;
   box-shadow: 0 0 0 2px var(--color-bg);
 }
-.rail-apps {
-  position: relative;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  width: 100%;
-}
-.rail-apps-badge {
-  position: absolute;
-  top: 4px;
-  right: 8px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  box-sizing: border-box;
-  border-radius: 999px;
-  background: #9d6ff0;
-  color: #160f24;
-  font-size: 10px;
-  font-weight: 700;
+/* Rail: Gym app-icon (top) — brass-tinted identity tile that opens the Shell. */
+.rail-appicon {
   display: grid;
   place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+  color: var(--color-accent);
+  cursor: pointer;
+  margin-bottom: var(--space-1);
+}
+.rail-appicon i {
+  font-size: 22px;
+}
+@media (hover: hover) {
+  .rail-appicon:hover {
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+}
+
+/* Rail: apps switcher (foot) — neutral/silver plate, distinct from accent nav. */
+.rail-switch {
+  background: rgba(233, 234, 236, 0.05);
+  color: var(--color-neutral-300);
+}
+@media (hover: hover) {
+  .rail-switch:hover {
+    background: rgba(233, 234, 236, 0.09);
+    color: var(--color-neutral-200);
+  }
 }
 
 /* Desktop: Apex centres like the app content column. */

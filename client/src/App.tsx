@@ -27,7 +27,6 @@ import {
   bodyMetricsComplete,
   commitWorkout,
 } from './store';
-import { SpotterMark } from './brand/SpotterMark';
 import { useT } from './i18n';
 import {
   Icon,
@@ -810,6 +809,7 @@ export function App() {
           syncStatus={store.syncStatus}
           notifUnread={notifUnread}
           onOpenShell={() => setShellOpen(true)}
+          onOpenNotifications={() => setOverlay({ screen: 'notifications' })}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
         />
@@ -820,16 +820,21 @@ export function App() {
             <span className="app-brand-word">spotter</span>
             <div className="app-brand-actions">
               <button
+                className="app-bell"
+                onClick={() => setOverlay({ screen: 'notifications' })}
+                aria-label={t.notifTitle}
+              >
+                <Icon name="bell" weight="fill" className="app-brand-icon" />
+                {notifUnread > 0 && (
+                  <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
+                )}
+              </button>
+              <button
                 className="app-appswitch"
                 onClick={() => setShellOpen(true)}
                 aria-label={t.shellSwitch}
               >
                 <Icon name="barbell" weight="fill" className="app-brand-icon" />
-                {notifUnread > 0 && (
-                  <span className="app-appswitch-badge">
-                    {notifUnread > 9 ? '9+' : notifUnread}
-                  </span>
-                )}
               </button>
             </div>
           </div>
@@ -1154,6 +1159,7 @@ function Rail(props: {
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
   notifUnread: number;
   onOpenShell: () => void;
+  onOpenNotifications: () => void;
   onOpenProfile: () => void;
   onOpenSettings: () => void;
 }) {
@@ -1173,19 +1179,14 @@ function Rail(props: {
 
   return (
     <aside className="rail">
+      {/* Gym app-icon (identity + opens the suite Shell). */}
       <button
-        className="rail-brand rail-apps"
+        className="rail-appicon"
         onClick={props.onOpenShell}
-        aria-label={t.shellSwitch}
-        title={t.shellSwitch}
+        aria-label={t.shellGym}
+        title={t.shellGym}
       >
-        <SpotterMark size={40} variant="sidebar" />
-        <span>{t.appName}</span>
-        {props.notifUnread > 0 && (
-          <span className="rail-apps-badge">
-            {props.notifUnread > 9 ? '9+' : props.notifUnread}
-          </span>
-        )}
+        <Icon name="barbell" weight="fill" />
       </button>
       {nav.map((x) => (
         <button
@@ -1200,18 +1201,41 @@ function Rail(props: {
           {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
-      {role === 'admin' && (
+      <div className="rail-foot">
+        {/* Notifications — the milestone feed, reachable from every app. */}
         <button
           className="rail-item"
-          aria-label={t.settingsTitle}
-          title={t.settingsTitle}
-          onClick={props.onOpenSettings}
+          onClick={props.onOpenNotifications}
+          aria-label={t.notifTitle}
+          title={t.notifTitle}
         >
-          <Icon name="gear" />
-          <span className="rail-label">{t.settingsTitle}</span>
+          <Icon name="bell" weight="fill" />
+          {props.notifUnread > 0 && (
+            <span className="rail-notif-badge">
+              {props.notifUnread > 9 ? '9+' : props.notifUnread}
+            </span>
+          )}
         </button>
-      )}
-      <div className="rail-foot">
+        {/* Apps — switch between Gym / Apex / Nutrition. */}
+        <button
+          className="rail-item rail-switch"
+          onClick={props.onOpenShell}
+          aria-label={t.shellSwitch}
+          title={t.shellSwitch}
+        >
+          <Icon name="squares-four" />
+        </button>
+        {role === 'admin' && (
+          <button
+            className="rail-item"
+            aria-label={t.settingsTitle}
+            title={t.settingsTitle}
+            onClick={props.onOpenSettings}
+          >
+            <Icon name="gear" />
+            <span className="rail-label">{t.settingsTitle}</span>
+          </button>
+        )}
         <div className="rail-lang">
           <LanguageSelector />
         </div>
