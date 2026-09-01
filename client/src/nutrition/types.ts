@@ -13,6 +13,8 @@ export interface Food {
   id: string;
   name: string;
   emoji?: string;
+  /** Product photo (Open Food Facts thumbnail), when available. */
+  photo?: string;
   basis: Basis;
   per: Macros;
   kind: FoodKind;

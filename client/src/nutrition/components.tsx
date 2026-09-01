@@ -13,6 +13,7 @@ import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
 import { Barbell } from '@phosphor-icons/react/Barbell';
 import { Drop } from '@phosphor-icons/react/Drop';
 import { Bread } from '@phosphor-icons/react/Bread';
+import { X } from '@phosphor-icons/react/X';
 import type { IconProps } from '@phosphor-icons/react';
 import { pct, round } from './calc';
 import { LANGS, useT } from './i18n';
@@ -26,6 +27,7 @@ type IconName =
   | 'goal'
   | 'profile'
   | 'plus'
+  | 'close'
   | 'protein'
   | 'fat'
   | 'carbs'
@@ -45,6 +47,7 @@ const MAP: Record<IconName, ComponentType<IconProps>> = {
   cloudOff: CloudSlash,
   chevron: CaretRight,
   apps: SquaresFour,
+  close: X,
 };
 
 export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
@@ -265,14 +268,14 @@ export function Sheet({
   const { t } = useT();
   return (
     <div className="scrim" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="grab" />
-        <div className="sheet-hdr">
-          <h2>{title}</h2>
-          <button className="btn ghost sm" onClick={onClose}>
-            {t('close')}
+      <div className="sheet" role="dialog" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-chrome">
+          <span className="grabber" />
+          <button className="sheet-close" onClick={onClose} aria-label={t('close')}>
+            <Icon name="close" size={16} />
           </button>
         </div>
+        {title && <h2 className="sheet-title">{title}</h2>}
         {children}
       </div>
     </div>

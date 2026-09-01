@@ -19,6 +19,14 @@ function defaultAmount(basis: Basis): number {
   return basis === 'portion' ? 1 : 100;
 }
 
+/** Product thumbnail (Open Food Facts photo) with an emoji fallback. */
+function FoodIc({ food }: { food: Food }) {
+  if (food.photo) {
+    return <img className="food-ic" src={food.photo} alt="" loading="lazy" />;
+  }
+  return <span className="ic">{food.emoji ?? '🍽️'}</span>;
+}
+
 function MacroPreview({ items }: { items: { macros: import('./types').Macros }[] }) {
   const { t } = useT();
   const m = roundMacros(sumMacros(items));
@@ -60,7 +68,7 @@ function QuantityStep({
   return (
     <div>
       <div className="row" style={{ borderBottom: 'none' }}>
-        <span className="ic">{food.emoji ?? '🍽️'}</span>
+        <FoodIc food={food} />
         <span className="body">
           <span className="name">{food.name}</span>
           <span className="meta">
@@ -231,7 +239,7 @@ function SearchStep({ onPick }: { onPick: (food: Food) => void }) {
                 }}
                 onClick={() => onPick(f)}
               >
-                <span className="ic">{f.emoji ?? '🍽️'}</span>
+                <FoodIc food={f} />
                 <span className="body">
                   <span className="name">
                     {f.name} {f.approx && <span className="tag approx">{t('approx')}</span>}{' '}

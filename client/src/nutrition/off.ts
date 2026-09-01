@@ -10,7 +10,10 @@ const BASE = 'https://world.openfoodfacts.org';
 interface OffProduct {
   code?: string;
   product_name?: string;
+  generic_name?: string;
   brands?: string;
+  image_front_small_url?: string;
+  image_small_url?: string;
   nutriments?: Record<string, number | string | undefined>;
 }
 
@@ -25,10 +28,12 @@ function toFood(p: OffProduct): Food | null {
   const name = (p.product_name ?? '').trim();
   if (!name || kcal <= 0) return null; // skip empty / macro-less entries
   const brand = (p.brands ?? '').split(',')[0]?.trim();
+  const photo = (p.image_front_small_url ?? p.image_small_url ?? '').trim() || undefined;
   return {
     id: `off-${p.code ?? name}`,
     name: brand && !name.toLowerCase().includes(brand.toLowerCase()) ? `${name} · ${brand}` : name,
     emoji: '🛒',
+    photo,
     basis: '100g',
     kind: 'product',
     per: {
@@ -53,6 +58,26 @@ async function getJSON(url: string, ms = 7000): Promise<unknown> {
   }
 }
 
+/** Rank so the most obvious matches surface first: exact name, then
+ *  starts-with, then whole-word, then substring; shorter (more generic) names
+ *  win ties, so "apple" beats "Apple & raisin oat bars". */
+function rankByRelevance(foods: Food[], query: string): Food[] {
+  const q = query.trim().toLowerCase();
+  const score = (f: Food): number => {
+    const name = f.name.toLowerCase();
+    const bare = name.split(' · ')[0]; // drop the "· Brand" suffix
+    if (bare === q || name === q) return 0;
+    if (bare.startsWith(q)) return 1;
+    if (new RegExp(`\\b${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(bare)) return 2;
+    if (bare.includes(q)) return 3;
+    return 4;
+  };
+  return foods
+    .map((f, i) => ({ f, i, s: score(f), len: f.name.length }))
+    .sort((a, b) => a.s - b.s || a.len - b.len || a.i - b.i)
+    .map((x) => x.f);
+}
+
 /** Search products by name in Open Food Facts. Throws on network/timeout. */
 export async function searchProductsOFF(query: string): Promise<Food[]> {
   const q = query.trim();
@@ -60,19 +85,19 @@ export async function searchProductsOFF(query: string): Promise<Food[]> {
   const url =
     `${BASE}/cgi/search.pl?search_terms=${encodeURIComponent(q)}` +
     `&search_simple=1&action=process&json=1&page_size=24` +
-    `&fields=code,product_name,brands,nutriments`;
+    `&fields=code,product_name,generic_name,brands,image_front_small_url,image_small_url,nutriments`;
   const data = (await getJSON(url)) as { products?: OffProduct[] };
-  return (data.products ?? [])
+  const foods = (data.products ?? [])
     .map(toFood)
-    .filter((f): f is Food => f !== null)
-    .slice(0, 20);
+    .filter((f): f is Food => f !== null);
+  return rankByRelevance(foods, q).slice(0, 20);
 }
 
 /** Look a product up by barcode in Open Food Facts. Returns null if not found. */
 export async function lookupBarcodeOFF(code: string): Promise<Food | null> {
   const c = code.trim();
   if (!c) return null;
-  const url = `${BASE}/api/v2/product/${encodeURIComponent(c)}?fields=code,product_name,brands,nutriments`;
+  const url = `${BASE}/api/v2/product/${encodeURIComponent(c)}?fields=code,product_name,generic_name,brands,image_front_small_url,image_small_url,nutriments`;
   const data = (await getJSON(url)) as { status?: number; product?: OffProduct };
   if (!data.product) return null;
   return toFood({ ...data.product, code: c });
