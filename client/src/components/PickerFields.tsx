@@ -413,13 +413,13 @@ export function TimeField({
 
 /* --- duration ------------------------------------------------------------ */
 
-const DURATIONS = [30, 45, 60, 75, 90, 105, 120];
+const DURATIONS = [30, 45, 60, 75, 90, 105, 120, 180, 240, 360, 480, 720];
 
 export function DurationField({
   value, // minutes
   onChange,
   min = 1,
-  max = 480,
+  max = 1440, // up to 24h — long walks, all-day activities
 }: {
   value: number;
   onChange: (min: number) => void;
