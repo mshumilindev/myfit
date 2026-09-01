@@ -26,6 +26,7 @@ import { ArrowsClockwise } from '@phosphor-icons/react/ArrowsClockwise';
 import { ArrowsLeftRight } from '@phosphor-icons/react/ArrowsLeftRight';
 import { Archive } from '@phosphor-icons/react/Archive';
 import { Barbell } from '@phosphor-icons/react/Barbell';
+import { Bell } from '@phosphor-icons/react/Bell';
 import { Export } from '@phosphor-icons/react/Export';
 import { CalendarBlank } from '@phosphor-icons/react/CalendarBlank';
 import { CalendarCheck } from '@phosphor-icons/react/CalendarCheck';
@@ -136,6 +137,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   swap: ArrowsLeftRight,
   archive: Archive,
   barbell: Barbell,
+  bell: Bell,
   export: Export,
   'calendar-blank': CalendarBlank,
   'calendar-check': CalendarCheck,

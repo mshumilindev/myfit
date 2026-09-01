@@ -3,6 +3,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -39,6 +40,7 @@ import {
   type ToastState,
 } from './ui';
 import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
+import { computeNotifs, loadSeenTs, saveSeenTs, unreadCount } from './notifications';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -103,6 +105,11 @@ const PlaybookView = lazy(() =>
     default: module.PlaybookView,
   })),
 );
+const NotificationsView = lazy(() =>
+  import('./views/NotificationsView').then((module) => ({
+    default: module.NotificationsView,
+  })),
+);
 const HistoryListView = lazy(() =>
   import('./views/HistoryListView').then((module) => ({
     default: module.HistoryListView,
@@ -129,6 +136,7 @@ export type Overlay =
   | { screen: 'muscle-history'; muscle: MuscleGroup }
   | { screen: 'settings' }
   | { screen: 'history' }
+  | { screen: 'notifications' }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
   | { screen: 'library'; libTab?: 'mine' }
@@ -238,6 +246,7 @@ function toHash(
     return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
+  if (overlay?.screen === 'notifications') return '#/notifications';
   if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
@@ -277,6 +286,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'trends' || head === 'feats') return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
+  if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -384,6 +394,30 @@ export function App() {
     if (uid)
       updateDoc(doc(db, 'users', uid, 'notices', id), { readAt: Date.now() }).catch(() => {});
   }
+
+  // Milestone notifications — derived from training history (see notifications.ts).
+  const [notifNow] = useState(() => Date.now());
+  const [notifSeenBump, setNotifSeenBump] = useState(0);
+  const notifs = useMemo(
+    () => computeNotifs(store, notifNow, t),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, notifNow, t],
+  );
+  // Re-read the persisted mark whenever it changes or new events arrive.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const seenTs = useMemo(() => loadSeenTs(), [notifSeenBump, notifs]);
+  const notifUnread = unreadCount(notifs, seenTs);
+  // First ever load baselines silently — history isn't dumped as "unread".
+  useEffect(() => {
+    if (loadSeenTs() == null && notifs.length > 0) {
+      saveSeenTs(notifs.reduce((m, n) => Math.max(m, n.ts), 0));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notifs.length]);
+  const markNotifsSeen = () => {
+    saveSeenTs(notifs.reduce((m, n) => Math.max(m, n.ts), Date.now()));
+    setNotifSeenBump((b) => b + 1);
+  };
   // Invite links (#/join/<token>) open onboarding before any auth gate.
   const [joinToken, setJoinToken] = useState<string | null>(() => {
     const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(window.location.hash);
@@ -671,6 +705,9 @@ export function App() {
           goTab={goTab}
           openWorkoutStartedAt={open?.startedAt}
           syncStatus={store.syncStatus}
+          notifUnread={notifUnread}
+          notifActive={activeOverlay?.screen === 'notifications'}
+          onOpenNotifications={() => setOverlay({ screen: 'notifications' })}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
         />
@@ -679,7 +716,19 @@ export function App() {
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
             <span className="app-brand-word">spotter</span>
-            <Icon name="barbell" weight="fill" className="app-brand-icon" />
+            <div className="app-brand-actions">
+              <button
+                className="app-bell"
+                onClick={() => setOverlay({ screen: 'notifications' })}
+                aria-label={t.notifTitle}
+              >
+                <Icon name="bell" />
+                {notifUnread > 0 && (
+                  <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
+                )}
+              </button>
+              <Icon name="barbell" weight="fill" className="app-brand-icon" />
+            </div>
           </div>
         )}
         {store.syncStatus === 'failed' && (
@@ -735,6 +784,15 @@ export function App() {
           )}
           {activeOverlay?.screen === 'history' && (
             <HistoryListView shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'notifications' && (
+            <NotificationsView
+              notifs={notifs}
+              now={notifNow}
+              seenTs={seenTs}
+              onMarkAll={markNotifsSeen}
+              onClose={closeOverlay}
+            />
           )}
           {activeOverlay?.screen === 'gym' && (
             <GymDetailView
@@ -976,6 +1034,9 @@ function Rail(props: {
   goTab: (t: Tab) => void;
   openWorkoutStartedAt?: number;
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
+  notifUnread: number;
+  notifActive: boolean;
+  onOpenNotifications: () => void;
   onOpenProfile: () => void;
   onOpenSettings: () => void;
 }) {
@@ -1012,6 +1073,20 @@ function Rail(props: {
           {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
+      <button
+        className={`rail-item${props.notifActive ? ' active' : ''}`}
+        aria-label={t.notifTitle}
+        title={t.notifTitle}
+        onClick={props.onOpenNotifications}
+      >
+        <Icon name="bell" />
+        <span className="rail-label">{t.notifTitle}</span>
+        {props.notifUnread > 0 && (
+          <span className="rail-notif-badge">
+            {props.notifUnread > 9 ? '9+' : props.notifUnread}
+          </span>
+        )}
+      </button>
       {role === 'admin' && (
         <button
           className="rail-item"
