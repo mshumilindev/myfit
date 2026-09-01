@@ -21,7 +21,8 @@ import {
 import { useT } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
 import { EffortGauge } from '../components/EffortGauge';
-import { DateField, TimeField, DurationField } from '../components/PickerFields';
+import { DateField } from '../components/PickerFields';
+import { TimelineRange } from '../components/TimelineRange';
 import { activityType, activityElapsedMs, isActivityPaused, estimateCalories } from '../activities';
 import type { ActivityEffort } from '../types';
 
@@ -48,6 +49,13 @@ export function ActivityView({ newType, onClose }: { newType?: string; onClose: 
   if (!type) return <CloseOnMount onClose={onClose} />;
   return <NewActivity typeKey={type.key} onClose={onClose} />;
 }
+
+const hhmmToMin = (s: string): number => {
+  const [h, m] = s.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+};
+const minToHhmm = (n: number): string =>
+  `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
 
 function CloseOnMount({ onClose }: { onClose: () => void }) {
   useEffect(() => onClose(), [onClose]);
@@ -124,16 +132,15 @@ function NewActivity({ typeKey, onClose }: { typeKey: string; onClose: () => voi
             <span className="field-label">{t.backfillDate}</span>
             <DateField value={date} onChange={setDate} max={todayIso} />
           </label>
-          <div className="backfill-grid">
-            <label className="field-block">
-              <span className="field-label">{t.backfillStart}</span>
-              <TimeField value={time} onChange={setTime} />
-            </label>
-            <label className="field-block">
-              <span className="field-label">{t.backfillDuration}</span>
-              <DurationField value={duration} onChange={setDuration} />
-            </label>
-          </div>
+          <TimelineRange
+            start={hhmmToMin(time)}
+            duration={duration}
+            onChange={(s, d) => {
+              setTime(minToHhmm(s));
+              setDuration(d);
+            }}
+            units={{ hrShort: t.hrShort, minShort: t.minShort }}
+          />
           <EffortRow effort={effort} onEffort={setEffort} t={t} />
           {type.tracksDistance && <DistanceField value={distance} onChange={setDistance} t={t} />}
           <div className="act-summary-row">

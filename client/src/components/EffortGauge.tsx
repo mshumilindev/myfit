@@ -63,9 +63,9 @@ export function EffortGauge<T extends string>({
   };
 
   return (
-    <div className="eg-card">
+    <div className="eg-card" style={bodyStyle}>
       <div className="eg-kicker">{title}</div>
-      <div className="eg-body" style={bodyStyle}>
+      <div className="eg-body">
         <svg
           ref={svgRef}
           className="eg-svg"
