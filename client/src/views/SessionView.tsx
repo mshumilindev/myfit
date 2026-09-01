@@ -353,7 +353,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -371,6 +371,7 @@ export function SessionView(props: {
   const [viewportExId, setViewportExId] = useState<string | null>(null);
   const railExKey = (workout?.exercises ?? []).map((e) => e.id).join(',');
   useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
     if (cards.length === 0) return;
     const ratios = new Map<string, number>();
