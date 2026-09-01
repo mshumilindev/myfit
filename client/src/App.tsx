@@ -40,7 +40,7 @@ import {
   type ToastState,
 } from './ui';
 import { isUpdateReady, subscribeUpdateReady } from './pwaUpdate';
-import { computeNotifs, loadSeenTs, saveSeenTs, unreadCount } from './notifications';
+import { computeNotifs, initSeenIds, saveSeenIds, unreadCount } from './notifications';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -253,7 +253,7 @@ function toHash(
 
 /** Parse a URL hash back into {tab, overlay}. Unknown → Today. */
 function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
-  const parts = hash.replace(/^#\/?/, '').split('/');
+  const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const head = parts[0] ?? '';
   if (head === 'session') return { tab: 'today', overlay: { screen: 'session', workoutId: '' } };
   if (head === 'activity') return { tab: 'today', overlay: { screen: 'activity' } };
@@ -298,7 +298,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
  *  separate from fromHash so it can be applied without threading it through the
  *  overlay stack. */
 function peerFromHash(hash: string): { peer: ProgramsPeer; mine: boolean } {
-  const parts = hash.replace(/^#\/?/, '').split('/');
+  const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   if (parts[0] === 'exercises') return { peer: 'exercises', mine: parts[1] === 'mine' };
   if (parts[0] === 'playbook' || parts[0] === 'templates') return { peer: 'playbook', mine: false };
   return { peer: 'programs', mine: false };
@@ -315,7 +315,7 @@ function progressFromHash(hash: string): {
   seg: ProgSeg;
   lens: VolLens;
 } {
-  const parts = hash.replace(/^#\/?/, '').split('/');
+  const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const base = { seg: 'total' as ProgSeg, lens: 'volume' as VolLens };
   if (parts[0] === 'trends') return { sub: 'trends', featSub: 'achievements', ...base };
   if (parts[0] === 'feats')
@@ -335,6 +335,14 @@ function progressFromHash(hash: string): {
     return { sub: 'progress', featSub: 'achievements', seg, lens };
   }
   return { sub: 'progress', featSub: 'achievements', ...base };
+}
+
+/** The `?f=<element-id>` deep-link target a notification asks to focus. */
+function focusFromHash(hash: string): string | null {
+  const q = hash.split('?')[1];
+  if (!q) return null;
+  const m = /(?:^|&)f=([^&]+)/.exec(q);
+  return m ? decodeURIComponent(m[1]) : null;
 }
 
 export function App() {
@@ -397,27 +405,60 @@ export function App() {
 
   // Milestone notifications — derived from training history (see notifications.ts).
   const [notifNow] = useState(() => Date.now());
-  const [notifSeenBump, setNotifSeenBump] = useState(0);
   const notifs = useMemo(
     () => computeNotifs(store, notifNow, t),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, notifNow, t],
   );
-  // Re-read the persisted mark whenever it changes or new events arrive.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const seenTs = useMemo(() => loadSeenTs(), [notifSeenBump, notifs]);
-  const notifUnread = unreadCount(notifs, seenTs);
-  // First ever load baselines silently — history isn't dumped as "unread".
-  useEffect(() => {
-    if (loadSeenTs() == null && notifs.length > 0) {
-      saveSeenTs(notifs.reduce((m, n) => Math.max(m, n.ts), 0));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notifs.length]);
-  const markNotifsSeen = () => {
-    saveSeenTs(notifs.reduce((m, n) => Math.max(m, n.ts), Date.now()));
-    setNotifSeenBump((b) => b + 1);
+  // On the first-ever load this silently baselines the whole history as read
+  // (in the initializer, so nothing flashes unread); afterwards it just loads
+  // what's been acknowledged.
+  const [seenIds, setSeenIds] = useState<Set<string>>(() => initSeenIds(notifs));
+  const notifUnread = unreadCount(notifs, seenIds);
+  const markNotifsSeen = (ids: string[]) => {
+    setSeenIds((prev) => {
+      let changed = false;
+      const next = new Set(prev);
+      for (const id of ids)
+        if (!next.has(id)) {
+          next.add(id);
+          changed = true;
+        }
+      if (!changed) return prev;
+      saveSeenIds(next);
+      return next;
+    });
   };
+  const markAllNotifsSeen = () => markNotifsSeen(notifs.map((n) => n.id));
+
+  // Deep-link focus: a notification can ask a screen to scroll to a specific
+  // card (id) and, when it's interactive (a feat cell), open its existing
+  // detail. Poll for the element until the target screen has mounted.
+  const [focusTarget, setFocusTarget] = useState<string | null>(() =>
+    focusFromHash(window.location.hash),
+  );
+  useEffect(() => {
+    if (!focusTarget) return;
+    let raf = 0;
+    let tries = 0;
+    const run = () => {
+      const el = document.getElementById(focusTarget);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('notif-focus');
+        window.setTimeout(() => el.classList.remove('notif-focus'), 2200);
+        if (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button') {
+          window.setTimeout(() => el.click(), 280);
+        }
+        setFocusTarget(null);
+        return;
+      }
+      if (tries++ < 45) raf = requestAnimationFrame(run);
+      else setFocusTarget(null);
+    };
+    raf = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(raf);
+  }, [focusTarget]);
   // Invite links (#/join/<token>) open onboarding before any auth gate.
   const [joinToken, setJoinToken] = useState<string | null>(() => {
     const m = /^#\/join\/([A-Za-z0-9-]+)/.exec(window.location.hash);
@@ -620,6 +661,7 @@ export function App() {
       setFeatSub(ps.featSub);
       setProgressSeg(ps.seg);
       setVolumeLens(ps.lens);
+      setFocusTarget(focusFromHash(window.location.hash));
       setOverlayNav({
         cur:
           ho?.screen === 'session' && !ho.workoutId
@@ -789,8 +831,9 @@ export function App() {
             <NotificationsView
               notifs={notifs}
               now={notifNow}
-              seenTs={seenTs}
-              onMarkAll={markNotifsSeen}
+              seenIds={seenIds}
+              onSeen={markNotifsSeen}
+              onMarkAll={markAllNotifsSeen}
               onClose={closeOverlay}
             />
           )}

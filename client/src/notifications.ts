@@ -101,7 +101,7 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
       ts: lastWorkoutTs,
       title: `${r.name} → ${tierLabel}`,
       subtitle: `${fmtKg(r.best)} · ${t.notifStandardSub}`,
-      nav: '#/feats/standards',
+      nav: `#/feats/standards?f=std-${encodeURIComponent(r.key)}`,
     });
   }
 
@@ -115,7 +115,7 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
       ts: ach.unlockAt ?? lastWorkoutTs,
       title: ach.title,
       subtitle: t.notifFeatSub,
-      nav: '#/feats',
+      nav: `#/feats?f=feat-${encodeURIComponent(ach.key)}`,
     });
   }
 
@@ -172,35 +172,58 @@ export function computeNotifs(store: Store, now: number, t: T): Notif[] {
   return out.slice(0, 150);
 }
 
-// --- Seen-state (last-seen timestamp) — per device, in localStorage. ---------
-const SEEN_KEY = 'spotter.notif.seenTs';
+// --- Seen-state (per-event ids) — per device, in localStorage. ---------------
+// Per-item read tracking (best practice): a set of acknowledged event ids. Rows
+// are marked read as they scroll into view; the badge counts what's left.
+const SEEN_KEY = 'spotter.notif.seen';
+export const NOTIF_INIT_KEY = 'spotter.notif.init';
 
-export function loadSeenTs(): number | null {
+export function loadSeenIds(): Set<string> {
   try {
     const raw = localStorage.getItem(SEEN_KEY);
-    return raw != null ? Number(raw) : null;
+    return new Set(raw ? (JSON.parse(raw) as string[]) : []);
   } catch {
-    return null;
+    return new Set();
   }
 }
 
-export function saveSeenTs(ts: number): void {
+export function saveSeenIds(seen: Set<string>): void {
   try {
-    localStorage.setItem(SEEN_KEY, String(ts));
+    // Cap so the store can't grow without bound (keeps the most recent 400).
+    const arr = [...seen].slice(-400);
+    localStorage.setItem(SEEN_KEY, JSON.stringify(arr));
   } catch {
     /* private mode / quota — ignore */
   }
 }
 
-/** Unread = events newer than the last-seen mark. Null (never opened) reads as
- *  zero — the first load baselines silently rather than dumping all of history. */
-export function unreadCount(notifs: Notif[], seenTs: number | null): number {
-  if (seenTs == null) return 0;
-  return notifs.reduce((n, x) => n + (x.ts > seenTs ? 1 : 0), 0);
+/**
+ * Seed the seen-set for this device. On the very first run we baseline the
+ * whole existing history as already-read — so opening the app for the first
+ * time doesn't dump years of milestones as "unread" — and remember that we
+ * did. Afterwards we just load whatever's been acknowledged. Runs in a
+ * `useState` initializer (not an effect), so nothing ever flashes unread.
+ */
+export function initSeenIds(notifs: Notif[]): Set<string> {
+  try {
+    if (!localStorage.getItem(NOTIF_INIT_KEY) && notifs.length > 0) {
+      const all = new Set(notifs.map((n) => n.id));
+      saveSeenIds(all);
+      localStorage.setItem(NOTIF_INIT_KEY, '1');
+      return all;
+    }
+  } catch {
+    /* private mode / quota — fall through to a plain load */
+  }
+  return loadSeenIds();
 }
 
-export function isUnread(n: Notif, seenTs: number | null): boolean {
-  return seenTs != null && n.ts > seenTs;
+export function unreadCount(notifs: Notif[], seen: Set<string>): number {
+  return notifs.reduce((n, x) => n + (seen.has(x.id) ? 0 : 1), 0);
+}
+
+export function isUnread(n: Notif, seen: Set<string>): boolean {
+  return !seen.has(n.id);
 }
 
 /** Relative label for the feed: "just now" / "3h" / weekday / short date. */

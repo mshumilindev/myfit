@@ -69,6 +69,7 @@ export function FeatsView({
 
   const Tile = ({ a, current }: { a: Ach; current?: boolean }) => (
     <button
+      id={`feat-${a.key}`}
       className={`feat-cell${a.unlocked ? ' on' : ' ghost'}${current ? ' current' : ''}`}
       onClick={() => openTile(a)}
     >

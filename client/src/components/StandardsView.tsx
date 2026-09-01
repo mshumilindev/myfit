@@ -40,7 +40,7 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
     system === 'rank' ? t.rankShort[id] : t.lvlShort[id];
 
   const Card = ({ r }: { r: DiscResult }) => (
-    <section className="std-card">
+    <section id={`std-${r.key}`} className="std-card">
       <div className="std-card-head">
         <div className="std-titles">
           <span className="std-name">{r.name}</span>

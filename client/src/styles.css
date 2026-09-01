@@ -4654,6 +4654,32 @@ i > svg {
   font-size: 15px;
   color: var(--color-neutral-600);
 }
+/* Deep-link arrival flash — briefly rings the feat tile / standard card the
+   feed scrolled you to, then fades on its own (~2.2s, matches App's timeout).
+   Follows the target's own border-radius; lifted so the glow isn't clipped. */
+@keyframes notif-focus-pulse {
+  0%,
+  55% {
+    box-shadow:
+      0 0 0 2px var(--color-accent),
+      0 0 20px color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px transparent,
+      0 0 0 transparent;
+  }
+}
+.notif-focus {
+  position: relative;
+  z-index: 2;
+  animation: notif-focus-pulse 2.2s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .notif-focus {
+    animation-duration: 0.01ms;
+  }
+}
 .notif-dot {
   position: absolute;
   left: 6px;

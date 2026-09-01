@@ -1,11 +1,12 @@
 /**
  * Notifications inbox — the milestone feed (standards, PRs, achievements,
- * trends, streaks, weekly volume goal), grouped by recency, with unread rows
- * highlighted. Opened from the header bell; "Mark all read" clears the badge.
- * Rows with a target are tappable (they route via the URL hash). The list is
- * rendered incrementally — more rows load as a bottom sentinel scrolls into
- * view — so a long history never mounts all at once. Works full-screen on
- * mobile and inside the desktop content column.
+ * trends, streaks, weekly volume goal), grouped by recency. Best-practice read
+ * handling: a row is marked read as it scrolls into view (the badge counts down
+ * live), while its highlight stays for the session so you can still see what was
+ * new. "Mark all read" clears the rest. Rows with a target are tappable (they
+ * deep-link via the URL hash). The list renders incrementally as a bottom
+ * sentinel scrolls into view. Works full-screen on mobile and in the desktop
+ * content column.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '../i18n';
@@ -49,21 +50,30 @@ function group(
 export function NotificationsView({
   notifs,
   now,
-  seenTs,
+  seenIds,
+  onSeen,
   onMarkAll,
   onClose,
 }: {
   notifs: Notif[];
   now: number;
-  seenTs: number | null;
+  seenIds: Set<string>;
+  onSeen: (ids: string[]) => void;
   onMarkAll: () => void;
   onClose: () => void;
 }) {
   const { t, locale } = useT();
   const [limit, setLimit] = useState(PAGE);
+  // Freeze the read state at open time so a row keeps its highlight while you
+  // look at it, even as it's being marked read in the background.
+  const [snapshot] = useState(() => seenIds);
+  const feedRef = useRef<HTMLDivElement>(null);
   const sentinel = useRef<HTMLDivElement>(null);
+  const reported = useRef<Set<string>>(new Set());
 
-  // Load more as the bottom sentinel scrolls near the viewport.
+  const shown = notifs.slice(0, limit);
+
+  // Load more as the bottom sentinel nears the viewport.
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
@@ -77,9 +87,31 @@ export function NotificationsView({
     return () => io.disconnect();
   }, []);
 
-  const shown = notifs.slice(0, limit);
+  // Mark rows read as they come into view (once each). Uses the open-time
+  // snapshot so only rows that were actually unread get reported.
+  useEffect(() => {
+    const root = feedRef.current;
+    if (!root) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const fresh: string[] = [];
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const id = (e.target as HTMLElement).dataset.nid;
+          if (!id || reported.current.has(id) || snapshot.has(id)) continue;
+          reported.current.add(id);
+          fresh.push(id);
+        }
+        if (fresh.length) onSeen(fresh);
+      },
+      { threshold: 0.6 },
+    );
+    root.querySelectorAll<HTMLElement>('[data-nid]').forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [shown.length, snapshot, onSeen]);
+
   const groups = group(shown, now);
-  const hasUnread = notifs.some((n) => isUnread(n, seenTs));
+  const hasUnread = notifs.some((n) => isUnread(n, seenIds));
 
   const sectionLabel = (k: 'today' | 'week' | 'earlier') =>
     k === 'today' ? t.notifToday : k === 'week' ? t.notifThisWeek : t.notifEarlier;
@@ -107,13 +139,13 @@ export function NotificationsView({
           <div className="notif-empty-body">{t.notifEmptyBody}</div>
         </div>
       ) : (
-        <div className="notif-feed">
+        <div className="notif-feed" ref={feedRef}>
           {groups.map((g) => (
             <div className="notif-group" key={g.label}>
               <div className="notif-group-label">{sectionLabel(g.label)}</div>
               <div className="notif-rows">
                 {g.items.map((n) => {
-                  const unread = isUnread(n, seenTs);
+                  const unread = !snapshot.has(n.id);
                   const cls = `notif-row nkind-${n.kind}${unread ? ' unread' : ''}${
                     n.nav ? ' linked' : ''
                   }`;
@@ -134,6 +166,7 @@ export function NotificationsView({
                   return n.nav ? (
                     <button
                       key={n.id}
+                      data-nid={n.id}
                       className={cls}
                       onClick={() => {
                         window.location.hash = n.nav as string;
@@ -142,7 +175,7 @@ export function NotificationsView({
                       {inner}
                     </button>
                   ) : (
-                    <div key={n.id} className={cls}>
+                    <div key={n.id} data-nid={n.id} className={cls}>
                       {inner}
                     </div>
                   );
