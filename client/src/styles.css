@@ -19851,6 +19851,95 @@ button.badge {
     color: var(--color-neutral-300);
   }
 }
+
+/* Effort gauge (design 03): needle + filling arc, labels below select. */
+.eg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0 2px;
+}
+.eg-svg {
+  width: 200px;
+  max-width: 100%;
+  height: auto;
+}
+.eg-track {
+  fill: none;
+  stroke: var(--color-neutral-700);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+.eg-arc {
+  fill: none;
+  stroke: url(#effGrad);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  transition: stroke-dashoffset 0.32s cubic-bezier(0.34, 1.2, 0.44, 1);
+}
+.eg-g0 {
+  stop-color: var(--color-accent-700);
+}
+.eg-g1 {
+  stop-color: var(--color-accent);
+}
+.eg-ticks line {
+  stroke: var(--color-neutral-600);
+  stroke-width: 2;
+}
+.eg-needle {
+  transform-origin: 100px 100px;
+  transition: transform 0.34s cubic-bezier(0.34, 1.28, 0.44, 1);
+}
+.eg-needle line {
+  stroke: var(--color-accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.eg-hub {
+  fill: var(--color-surface);
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+}
+.eg-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  color: var(--color-accent);
+}
+.eg-current i {
+  font-size: 18px;
+}
+.eg-current span {
+  font-size: 16px;
+  font-weight: 600;
+}
+.eg-legend {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+}
+.eg-opt {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.eg-opt.on {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+@media (hover: hover) {
+  .eg-opt:not(.on):hover {
+    color: var(--color-neutral-300);
+  }
+}
 /* Four-way segment: tighter so translated labels still fit one line. */
 .seg3.seg4 button {
   font-size: 11px;

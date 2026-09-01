@@ -20,7 +20,7 @@ import {
 } from '../store';
 import { useT } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
-import { Switcher } from '../components/Switcher';
+import { EffortGauge } from '../components/EffortGauge';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { activityType, activityElapsedMs, isActivityPaused, estimateCalories } from '../activities';
 import type { ActivityEffort } from '../types';
@@ -333,26 +333,15 @@ function EffortRow({
   return (
     <div className={className ?? 'act-effort'}>
       <span className="act-field-label">{t.actEffort}</span>
-      <Switcher
+      <EffortGauge
         ariaLabel={t.actEffort}
         value={effort}
         onChange={onEffort}
-        options={EFFORTS.map((e) => ({
-          value: e,
-          label: t.actEffortLevel[e],
-          icon: EFFORT_ICON[e],
-        }))}
+        options={EFFORTS.map((e) => ({ value: e, label: t.actEffortLevel[e] }))}
       />
     </div>
   );
 }
-
-/** Playful, escalating effort icons: a feather, an effort dial, a blaze. */
-const EFFORT_ICON: Record<ActivityEffort, string> = {
-  light: 'feather',
-  moderate: 'gauge',
-  hard: 'flame',
-};
 
 function DistanceField({
   value,
