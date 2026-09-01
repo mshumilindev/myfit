@@ -272,6 +272,27 @@ i > svg {
   line-height: 1;
   color: var(--color-accent);
 }
+/* Wordmark + current-app name sit together at the header's left. */
+.app-brand-lead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+/* Current app name (Gym / Apex / Users…) — the design's tight bold Inter, a
+   plain label that also opens the app switcher. Colour stays neutral so the
+   accent script wordmark keeps the spotlight. */
+.app-brand-app {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text);
+}
 /* Right-side header actions: the notifications bell + the dumbbell mark. The
    group carries the optical nudge onto the script wordmark; the barbell must not
    also apply its own, or the two icons drift apart vertically. */
@@ -1913,9 +1934,9 @@ i > svg {
 
 .seg button.active {
   color: var(--color-accent);
-  border-color: rgba(217, 162, 79, 0.55);
-  background: rgba(217, 162, 79, 0.13);
-  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.08);
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent);
 }
 
 /* On the phone the admin filter tabs span the full width, sharing it evenly. */
@@ -5291,6 +5312,10 @@ i > svg {
   border: none;
   cursor: pointer;
   width: 46px;
+}
+/* A little breathing room above the avatar in the desktop rail foot. */
+.rail-foot .account-chip {
+  margin-top: var(--space-2);
 }
 
 .account-chip .avatar {
@@ -8804,9 +8829,9 @@ i > svg {
   cursor: pointer;
 }
 .seg-opt.active {
-  border-color: rgba(217, 162, 79, 0.55);
-  background: rgba(217, 162, 79, 0.13);
-  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.08);
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent);
   color: var(--color-accent);
 }
 .admin-table {
@@ -23588,6 +23613,26 @@ button.badge {
   --amethyst-glow: rgba(157, 111, 240, 0.5);
 }
 
+/* People — graphite + silver. Same re-skin trick: override the accent ramp on
+   the wrapper (and on the document root, for portaled sheets) so the reused
+   Trainer/Admin/Profile views turn silver for free. */
+.app-roster,
+.theme-roster {
+  --color-accent: #c3c7cf;
+  --color-accent-100: #eceef1;
+  --color-accent-200: #d7dae0;
+  --color-accent-300: #c3c7cf;
+  --color-accent-400: #b0b4bd;
+  --color-accent-500: #c3c7cf;
+  --color-accent-600: #8b8f98;
+  --color-accent-700: #6f727a;
+  --color-accent-800: #4a4d53;
+  --color-accent-900: #26282c;
+}
+.app-roster.apex-app::before {
+  background: radial-gradient(120% 44% at 78% -14%, rgba(200, 204, 212, 0.1), transparent 56%);
+}
+
 .app-apex-root {
   display: flex;
   flex-direction: column;
@@ -23597,7 +23642,7 @@ button.badge {
   flex: 1;
   min-height: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background: var(--color-bg);
 }
 .apex-app::before {
@@ -23608,55 +23653,20 @@ button.badge {
   pointer-events: none;
   z-index: 0;
 }
-.apex-head,
-.apex-body,
-.apex-nav {
+/* The header/body/nav column beside the (desktop-only) rail. */
+.apex-col {
   position: relative;
   z-index: 1;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
+/* Header reuses .app-brand for identical padding/height to the Gym header;
+   .apex-head only carries the stacking context over the amethyst glow. */
 .apex-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 18px 8px;
-}
-.apex-head-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  color: var(--color-neutral-500, var(--color-neutral-600));
-}
-.apex-bell,
-.apex-appicon {
   position: relative;
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 2px;
-  display: grid;
-  place-items: center;
-  color: inherit;
-  font-size: 22px;
-}
-.apex-appicon {
-  color: var(--color-accent-200);
-}
-.apex-bell-badge {
-  position: absolute;
-  top: -6px;
-  right: -7px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  box-sizing: border-box;
-  border-radius: 999px;
-  background: var(--color-accent);
-  color: #160f24;
-  font-size: 10px;
-  font-weight: 700;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 0 0 2px var(--color-bg);
+  z-index: 1;
 }
 
 .apex-body {
@@ -23690,9 +23700,13 @@ button.badge {
   color: var(--color-neutral-600);
   flex: none;
 }
-/* Feed tab: NotificationsView keeps its own scroll; drop its back button gap. */
-.apex-body .notif-screen {
-  padding-top: 0;
+/* Feed tab: NotificationsView keeps its own scroll. On phones the brand header
+   sits above it, so drop the screen's top gap; on desktop there's no header, so
+   the screen keeps its normal top padding. */
+@media (max-width: 719px) {
+  .apex-body .notif-screen {
+    padding-top: 0;
+  }
 }
 .apex-body .notif-head.embedded {
   padding-left: 6px;
@@ -24042,6 +24056,11 @@ button.badge {
     0 0 20px -6px rgba(157, 111, 240, 0.5);
   color: #c4a4f7;
 }
+.shell-ic-people {
+  background: rgba(200, 204, 212, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(200, 204, 212, 0.28);
+  color: #d7dae0;
+}
 .shell-ic-nut {
   background: rgba(255, 255, 255, 0.03);
   box-shadow: inset 0 0 0 1px var(--color-neutral-800);
@@ -24134,29 +24153,6 @@ button.badge {
   place-items: center;
   box-shadow: 0 0 0 2px var(--color-bg);
 }
-/* Rail: Gym app-icon (top) — brass-tinted identity tile that opens the Shell. */
-.rail-appicon {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
-  color: var(--color-accent);
-  cursor: pointer;
-  margin-bottom: var(--space-1);
-}
-.rail-appicon i {
-  font-size: 22px;
-}
-@media (hover: hover) {
-  .rail-appicon:hover {
-    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
-  }
-}
-
 /* Rail: apps switcher (foot) — neutral/silver plate, distinct from accent nav. */
 .rail-switch {
   background: rgba(233, 234, 236, 0.05);
@@ -24169,11 +24165,41 @@ button.badge {
   }
 }
 
-/* Desktop: Apex centres like the app content column. */
+/* Bottom-nav Apps button shares the nav-item look (it's a plain <button>). */
+.apex-nav-apps {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-neutral-600);
+  font: inherit;
+  font-size: 10px;
+  padding: 4px 0;
+}
+.apex-nav-apps i {
+  font-size: 19px;
+}
+
+/* Desktop: sub-apps switch to the icon rail; the mobile brand header + bottom
+   nav collapse and the content column fills the space beside the rail. The
+   content itself is capped and centred horizontally for readability. */
 @media (min-width: 720px) {
-  .apex-app {
-    max-width: 720px;
-    margin: 0 auto;
+  .apex-head,
+  .apex-nav {
+    display: none;
+  }
+  .apex-scroll {
+    padding: 24px 30px calc(24px + env(safe-area-inset-bottom, 0px));
+    max-width: 900px;
+    margin-inline: auto;
+    width: 100%;
+  }
+  .apex-body .screen {
+    max-width: 900px;
+    margin-inline: auto;
     width: 100%;
   }
 }

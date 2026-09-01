@@ -14,19 +14,25 @@ export function ShellLauncher({
   store,
   now,
   current,
+  peopleLabel,
+  peopleDesc,
   activeChallenges,
   notifUnread,
   onGym,
   onApex,
+  onRoster,
   onClose,
 }: {
   store: StoreState;
   now: number;
-  current: 'gym' | 'apex';
+  current: 'gym' | 'apex' | 'roster';
+  peopleLabel: string;
+  peopleDesc: string;
   activeChallenges: number;
   notifUnread: number;
   onGym: () => void;
   onApex: () => void;
+  onRoster: () => void;
   onClose: () => void;
 }) {
   const { t } = useT();
@@ -78,6 +84,25 @@ export function ShellLauncher({
             <div className="shell-tile-sub">{t.shellActiveNew(activeChallenges, notifUnread)}</div>
           </div>
           {current === 'apex' ? (
+            <span className="shell-current">{t.shellCurrent}</span>
+          ) : (
+            <Icon name="caret-right" className="shell-go" />
+          )}
+        </button>
+
+        <button
+          className={`shell-tile${current === 'roster' ? ' current' : ''}`}
+          onClick={onRoster}
+          disabled={current === 'roster'}
+        >
+          <span className="shell-ic shell-ic-people">
+            <Icon name="user-focus" weight="fill" />
+          </span>
+          <div className="shell-tile-main">
+            <div className="shell-tile-name">{peopleLabel}</div>
+            <div className="shell-tile-sub">{peopleDesc}</div>
+          </div>
+          {current === 'roster' ? (
             <span className="shell-current">{t.shellCurrent}</span>
           ) : (
             <Icon name="caret-right" className="shell-go" />

@@ -49,7 +49,9 @@ import {
 } from './notifications';
 import { useChallenges } from './challenges';
 import { ShellLauncher } from './components/ShellLauncher';
+import { SpotterMark } from './brand/SpotterMark';
 import type { ApexTab } from './views/ApexApp';
+import type { RosterTab } from './views/RosterApp';
 import { AuthView } from './views/AuthView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
@@ -62,12 +64,6 @@ const OnboardingView = lazy(() =>
 );
 const ProfileCompletionGate = lazy(() =>
   import('./components/BodyMetrics').then((module) => ({ default: module.ProfileCompletionGate })),
-);
-const AdminView = lazy(() =>
-  import('./views/AdminView').then((module) => ({ default: module.AdminView })),
-);
-const TrainerView = lazy(() =>
-  import('./views/TrainerView').then((module) => ({ default: module.TrainerView })),
 );
 const TodayView = lazy(() =>
   import('./views/TodayView').then((module) => ({ default: module.TodayView })),
@@ -130,6 +126,9 @@ const GymDetailView = lazy(() =>
 const ApexApp = lazy(() =>
   import('./views/ApexApp').then((module) => ({ default: module.ApexApp })),
 );
+const RosterApp = lazy(() =>
+  import('./views/RosterApp').then((module) => ({ default: module.RosterApp })),
+);
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
 );
@@ -164,13 +163,29 @@ export interface Shell {
   queueLength: number;
 }
 
-const TABS: Tab[] = ['today', 'progress', 'gyms', 'programs', 'people', 'me'];
+const TABS: Tab[] = ['today', 'progress', 'gyms', 'programs'];
 type NavRole = ReturnType<typeof getRole>;
-type NavLabels = Pick<
-  ReturnType<typeof useT>['t'],
-  'today' | 'progress' | 'gyms' | 'progTitle' | 'adminPeople' | 'trClientsTab' | 'navMe'
->;
+type NavLabels = Pick<ReturnType<typeof useT>['t'], 'today' | 'progress' | 'gyms' | 'progTitle'>;
 type NavItem = { id: Tab; icon: string; label: string };
+
+/** The People sub-app's label follows the role, matching the old in-Gym menu. */
+function peopleLabelFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
+  if (role === 'trainer') return t.trClientsTab;
+  if (role === 'admin') return t.adminPeople;
+  return t.navMe;
+}
+/** …and its Shell tile description, so each role sees what the app holds. */
+function peopleDescFor(role: NavRole, t: ReturnType<typeof useT>['t']): string {
+  if (role === 'trainer') return t.shellPeopleDescCoach;
+  if (role === 'admin') return t.shellPeopleDescAdmin;
+  return t.shellPeopleDesc;
+}
+/** The tab the People app opens on for a given role. */
+function rosterHomeFor(role: NavRole): RosterTab {
+  if (role === 'trainer') return 'clients';
+  if (role === 'admin') return 'users';
+  return 'me';
+}
 const EDGE_BACK_START_PX = 28;
 const EDGE_BACK_LOCK_PX = 18;
 const EDGE_BACK_TRIGGER_PX = 72;
@@ -198,25 +213,14 @@ function defaultTab(): Tab {
   return 'today';
 }
 
-function tabsForRole(role: NavRole, t: NavLabels): NavItem[] {
-  if (role === 'trainer') {
-    return [
-      { id: 'today', icon: 'house', label: t.today },
-      { id: 'progress', icon: 'chart-line-up', label: t.progress },
-      { id: 'programs', icon: 'list-checks', label: t.progTitle },
-      { id: 'gyms', icon: 'map-pin', label: t.gyms },
-      { id: 'people', icon: 'user-focus', label: t.trClientsTab },
-    ];
-  }
-
+function tabsForRole(_role: NavRole, t: NavLabels): NavItem[] {
+  // Clients / users / profile moved into the People sub-app, so the Gym menu is
+  // the same four core tabs for everyone; People is reached via the app switcher.
   return [
     { id: 'today', icon: 'house', label: t.today },
     { id: 'progress', icon: 'chart-line-up', label: t.progress },
     { id: 'programs', icon: 'list-checks', label: t.progTitle },
     { id: 'gyms', icon: 'map-pin', label: t.gyms },
-    role === 'admin'
-      ? { id: 'people', icon: 'shield-check', label: t.adminPeople }
-      : { id: 'me', icon: 'user', label: t.navMe },
   ];
 }
 
@@ -362,6 +366,19 @@ function apexHash(tab: ApexTab): string {
   return tab === 'home' ? '#/apex' : `#/apex/${tab}`;
 }
 
+// --- People (accounts & profiles sub-app) is a full-screen mode at #/people[/<tab>].
+const ROSTER_TAB_IDS: readonly string[] = ['clients', 'users', 'me', 'feed'];
+function isRosterHash(hash: string): boolean {
+  return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'people';
+}
+function rosterTabFromHash(hash: string): RosterTab {
+  const seg = hash.split('?')[0].replace(/^#\/?/, '').split('/')[1] ?? '';
+  return (ROSTER_TAB_IDS.includes(seg) ? seg : 'me') as RosterTab;
+}
+function rosterHash(tab: RosterTab): string {
+  return `#/people/${tab}`;
+}
+
 export function App() {
   const { t } = useT();
   const store = useStore();
@@ -441,6 +458,10 @@ export function App() {
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;
   const [apexOpen, setApexOpen] = useState<boolean>(() => isApexHash(window.location.hash));
   const [apexTab, setApexTab] = useState<ApexTab>(() => apexTabFromHash(window.location.hash));
+  const [rosterOpen, setRosterOpen] = useState<boolean>(() => isRosterHash(window.location.hash));
+  const [rosterTab, setRosterTab] = useState<RosterTab>(() =>
+    rosterTabFromHash(window.location.hash),
+  );
   const [shellOpen, setShellOpen] = useState(false);
 
   // Deep-link focus: a notification can ask a screen to scroll to a specific
@@ -633,23 +654,27 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = apexOpen
-      ? apexHash(apexTab)
-      : toHash(
-          effectiveTab,
-          activeOverlay,
-          programsPeer,
-          libMine,
-          progressSub,
-          progressSeg,
-          volumeLens,
-        );
+    const next = rosterOpen
+      ? rosterHash(rosterTab)
+      : apexOpen
+        ? apexHash(apexTab)
+        : toHash(
+            effectiveTab,
+            activeOverlay,
+            programsPeer,
+            libMine,
+            progressSub,
+            progressSeg,
+            volumeLens,
+          );
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
   }, [
     authed,
     joinToken,
     apexOpen,
     apexTab,
+    rosterOpen,
+    rosterTab,
     effectiveTab,
     activeOverlay,
     programsPeer,
@@ -665,6 +690,8 @@ export function App() {
     const onPop = () => {
       setApexOpen(isApexHash(window.location.hash));
       setApexTab(apexTabFromHash(window.location.hash));
+      setRosterOpen(isRosterHash(window.location.hash));
+      setRosterTab(rosterTabFromHash(window.location.hash));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
@@ -698,6 +725,14 @@ export function App() {
     else el.classList.remove('theme-apex');
     return () => el.classList.remove('theme-apex');
   }, [apexOpen]);
+
+  // Same for People — silver accent on the root while its app is open.
+  useEffect(() => {
+    const el = document.documentElement;
+    if (rosterOpen) el.classList.add('theme-roster');
+    else el.classList.remove('theme-roster');
+    return () => el.classList.remove('theme-roster');
+  }, [rosterOpen]);
 
   if (joinToken) {
     return (
@@ -761,16 +796,39 @@ export function App() {
     setTab('programs');
   };
 
-  // Apex takes over the whole screen (its own header, nav and amethyst skin).
-  if (apexOpen) {
+  // Suite switching: only one app owns the screen at a time.
+  const rosterRole: 'trainer' | 'admin' | 'member' =
+    role === 'trainer' ? 'trainer' : role === 'admin' ? 'admin' : 'member';
+  const peopleLabel = peopleLabelFor(role, t);
+  const peopleDesc = peopleDescFor(role, t);
+  const openGym = () => {
+    setShellOpen(false);
+    setApexOpen(false);
+    setRosterOpen(false);
+  };
+  const openApex = () => {
+    setShellOpen(false);
+    setRosterOpen(false);
+    setApexOpen(true);
+  };
+  const openRoster = (rtab: RosterTab) => {
+    setShellOpen(false);
+    setApexOpen(false);
+    setRosterTab(rtab);
+    setRosterOpen(true);
+  };
+
+  // People (accounts & profiles) takes over the whole screen — its own silver skin.
+  if (rosterOpen) {
     return (
       <div className="app app-apex-root">
         <Suspense fallback={<ScreenFallback />}>
-          <ApexApp
-            store={store}
+          <RosterApp
+            role={rosterRole}
             now={notifNow}
-            tab={apexTab}
-            onTab={setApexTab}
+            tab={rosterTab}
+            onTab={setRosterTab}
+            shell={shell}
             onOpenShell={() => setShellOpen(true)}
             notifs={notifs}
             notifState={notifState}
@@ -783,14 +841,52 @@ export function App() {
           <ShellLauncher
             store={store}
             now={notifNow}
-            current="apex"
+            current="roster"
+            peopleLabel={peopleLabel}
+            peopleDesc={peopleDesc}
             activeChallenges={activeChallengeCount}
             notifUnread={notifUnread}
-            onGym={() => {
-              setApexOpen(false);
-              setShellOpen(false);
-            }}
+            onGym={openGym}
+            onApex={openApex}
+            onRoster={() => setShellOpen(false)}
+            onClose={() => setShellOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Apex takes over the whole screen (its own header, nav and amethyst skin).
+  if (apexOpen) {
+    return (
+      <div className="app app-apex-root">
+        <Suspense fallback={<ScreenFallback />}>
+          <ApexApp
+            store={store}
+            now={notifNow}
+            tab={apexTab}
+            onTab={setApexTab}
+            onOpenShell={() => setShellOpen(true)}
+            onOpenProfile={() => openRoster('me')}
+            notifs={notifs}
+            notifState={notifState}
+            notifUnread={notifUnread}
+            onNotifSeen={markNotifsSeen}
+            onNotifMarkAll={markAllNotifsSeen}
+          />
+        </Suspense>
+        {shellOpen && (
+          <ShellLauncher
+            store={store}
+            now={notifNow}
+            current="apex"
+            peopleLabel={peopleLabel}
+            peopleDesc={peopleDesc}
+            activeChallenges={activeChallengeCount}
+            notifUnread={notifUnread}
+            onGym={openGym}
             onApex={() => setShellOpen(false)}
+            onRoster={() => openRoster(rosterHomeFor(role))}
             onClose={() => setShellOpen(false)}
           />
         )}
@@ -817,7 +913,16 @@ export function App() {
       <div className="main-col">
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
-            <span className="app-brand-word">spotter</span>
+            <div className="app-brand-lead">
+              <span className="app-brand-word">spotter</span>
+              <button
+                className="app-brand-app"
+                onClick={() => setShellOpen(true)}
+                aria-label={t.shellSwitch}
+              >
+                {t.shellGym}
+              </button>
+            </div>
             <div className="app-brand-actions">
               <button
                 className="app-bell"
@@ -828,13 +933,6 @@ export function App() {
                 {notifUnread > 0 && (
                   <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
                 )}
-              </button>
-              <button
-                className="app-appswitch"
-                onClick={() => setShellOpen(true)}
-                aria-label={t.shellSwitch}
-              >
-                <Icon name="barbell" weight="fill" className="app-brand-icon" />
               </button>
             </div>
           </div>
@@ -935,17 +1033,6 @@ export function App() {
                 />
               )}
               {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}
-              {effectiveTab === 'people' &&
-                (role === 'trainer' ? (
-                  <TrainerView
-                    onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
-                    onOpenMe={() => setOverlay({ screen: 'profile', userId: 'me' })}
-                  />
-                ) : (
-                  <AdminView
-                    onOpenProfile={(id) => setOverlay({ screen: 'profile', userId: id })}
-                  />
-                ))}
               {effectiveTab === 'programs' &&
                 (programsPeer === 'exercises' ? (
                   <ExerciseLibraryView
@@ -959,14 +1046,6 @@ export function App() {
                 ) : (
                   <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
                 ))}
-              {effectiveTab === 'me' && (
-                <ProfileView
-                  userId="me"
-                  shell={shell}
-                  embedded
-                  onClose={() => setTab(defaultTab())}
-                />
-              )}
             </Suspense>
           </>
         )}
@@ -982,6 +1061,11 @@ export function App() {
                 <span>{x.label}</span>
               </button>
             ))}
+            {/* Apps — open the suite switcher (People / Apex / Nutrition). */}
+            <button onClick={() => setShellOpen(true)} aria-label={t.shellSwitch}>
+              <Icon name="squares-four" />
+              <span>{t.appsTab}</span>
+            </button>
           </nav>
         )}
         <div className="toast-holder">
@@ -1000,14 +1084,16 @@ export function App() {
           store={store}
           now={notifNow}
           current="gym"
+          peopleLabel={peopleLabel}
+          peopleDesc={peopleDesc}
           activeChallenges={activeChallengeCount}
           notifUnread={notifUnread}
           onGym={() => setShellOpen(false)}
           onApex={() => {
             setApexTab('home');
-            setApexOpen(true);
-            setShellOpen(false);
+            openApex();
           }}
+          onRoster={() => openRoster(rosterHomeFor(role))}
           onClose={() => setShellOpen(false)}
         />
       )}
@@ -1179,15 +1265,10 @@ function Rail(props: {
 
   return (
     <aside className="rail">
-      {/* Gym app-icon (identity + opens the suite Shell). */}
-      <button
-        className="rail-appicon"
-        onClick={props.onOpenShell}
-        aria-label={t.shellGym}
-        title={t.shellGym}
-      >
-        <Icon name="barbell" weight="fill" />
-      </button>
+      {/* Brand mark — the same across every app's rail. */}
+      <div className="rail-brand">
+        <SpotterMark size={40} variant="sidebar" />
+      </div>
       {nav.map((x) => (
         <button
           key={x.id}
