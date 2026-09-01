@@ -1,23 +1,25 @@
 /**
  * TimelineRange (design 06) — pick an activity's start and end on a day
- * timeline instead of separate Start + Duration fields. The scale is dynamic:
- * it always spans 12 hours from the start, so the range uses the full width and
- * you can log up to +12h. Drag the left handle (or the bar) to slide the start
- * in time; drag the right handle to set how long it ran. Value is start-minutes
- * into the day + duration in minutes.
+ * timeline instead of separate Start + Duration fields. The scale always begins
+ * at the start of the calendar day (00:00) and only extends to the right as the
+ * activity runs later — we add hours at the end, never trim the morning. Both
+ * handles drag along the fixed scale; duration is capped at 12h. The scale's
+ * right extent is recomputed when you release a handle, not while dragging.
+ * Value is start-minutes into the day + duration in minutes.
  */
-import { useRef } from 'react';
+import { useState } from 'react';
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 
-const WINDOW = 720; // minutes shown across the track (12h)
+const MAX_DUR = 720; // longest activity: 12h
+const MIN_END = 720; // scale shows at least 00:00–12:00
+const MAX_END = 2160; // hard ceiling (late night + 12h)
+const STEP = 120; // the scale grows in 2h increments
 const SNAP = 5; // minute granularity
 const DAY = 1440;
 
 function fmtTime(min: number): string {
   const m = ((min % DAY) + DAY) % DAY;
-  const h = Math.floor(m / 60);
-  const mm = m % 60;
-  return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 }
 function fmtDur(min: number, t: { hrShort: string; minShort: string }): string {
   const h = Math.floor(min / 60);
@@ -28,6 +30,9 @@ function fmtDur(min: number, t: { hrShort: string; minShort: string }): string {
 }
 const snap = (v: number) => Math.round(v / SNAP) * SNAP;
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+/** Smallest scale end that fits `end`, on the 2h grid, never below 12h. */
+const winEndFor = (end: number) =>
+  clamp(Math.ceil(Math.max(end, MIN_END) / STEP) * STEP, MIN_END, MAX_END);
 
 export function TimelineRange({
   start,
@@ -40,50 +45,57 @@ export function TimelineRange({
   onChange: (start: number, duration: number) => void;
   units: { hrShort: string; minShort: string };
 }) {
-  const drag = useRef<{ mode: 'start' | 'end'; downX: number; start0: number } | null>(null);
-
-  const dur = clamp(duration, 0, WINDOW);
-  const endPct = (dur / WINDOW) * 100;
+  const dur = clamp(duration, 0, MAX_DUR);
   const end = start + dur;
+  // The visible scale end — frozen while dragging, recomputed on release.
+  const [winEnd, setWinEnd] = useState(() => winEndFor(end));
 
-  const trackEl = (e: ReactPointerEvent) =>
+  const startPct = clamp((start / winEnd) * 100, 0, 100);
+  const endPct = clamp((end / winEnd) * 100, 0, 100);
+
+  const posMin = (e: ReactPointerEvent, el: Element) => {
+    const r = el.getBoundingClientRect();
+    return snap(clamp((e.clientX - r.left) / r.width, 0, 1) * winEnd);
+  };
+  const trackOf = (e: ReactPointerEvent) =>
     (e.currentTarget as Element).closest('.tlr-track') as Element | null;
 
-  const onMove = (e: ReactPointerEvent) => {
-    const d = drag.current;
-    if (!d) return;
-    const el = trackEl(e);
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    if (d.mode === 'end') {
-      const pct = clamp((e.clientX - r.left) / r.width, 0, 1);
-      onChange(start, snap(pct * WINDOW));
-    } else {
-      const deltaMin = ((e.clientX - d.downX) / r.width) * WINDOW;
-      onChange(clamp(snap(d.start0 + deltaMin), 0, DAY - 1), dur);
-    }
-  };
+  const [mode, setMode] = useState<'start' | 'end' | null>(null);
+
   const onStartDown = (e: ReactPointerEvent) => {
-    const el = trackEl(e);
+    const el = trackOf(e);
     if (el) el.setPointerCapture(e.pointerId);
-    drag.current = { mode: 'start', downX: e.clientX, start0: start };
+    setMode('start');
   };
   const onEndDown = (e: ReactPointerEvent) => {
-    const el = trackEl(e);
+    const el = trackOf(e);
     if (!el) return;
     el.setPointerCapture(e.pointerId);
-    drag.current = { mode: 'end', downX: e.clientX, start0: start };
-    const r = el.getBoundingClientRect();
-    const pct = clamp((e.clientX - r.left) / r.width, 0, 1);
-    onChange(start, snap(pct * WINDOW));
+    setMode('end');
+    const m = clamp(posMin(e, el), start, start + MAX_DUR);
+    onChange(start, m - start);
   };
-  const up = () => {
-    drag.current = null;
+  const onMove = (e: ReactPointerEvent) => {
+    if (!mode) return;
+    const el = trackOf(e);
+    if (!el) return;
+    const m = posMin(e, el);
+    if (mode === 'end') {
+      const ne = clamp(m, start, start + MAX_DUR);
+      onChange(start, ne - start);
+    } else {
+      const ns = clamp(m, Math.max(0, end - MAX_DUR), end);
+      onChange(ns, end - ns);
+    }
+  };
+  const onUp = () => {
+    setMode(null);
+    setWinEnd(winEndFor(end)); // add hours at the end; morning never trims
   };
 
-  // Scale ticks: start, +3h, +6h, +9h, +12h.
-  const marks = [0, 0.25, 0.5, 0.75, 1].map((f) => fmtTime(start + f * WINDOW));
-  const rangeStyle = { width: `${endPct}%` } as CSSProperties;
+  const marks = [0, 0.25, 0.5, 0.75, 1].map((f) => fmtTime(f * winEnd));
+  const rangeStyle = { left: `${startPct}%`, width: `${endPct - startPct}%` } as CSSProperties;
+  const startStyle = { left: `${startPct}%` } as CSSProperties;
   const endStyle = { left: `${endPct}%` } as CSSProperties;
 
   return (
@@ -97,13 +109,14 @@ export function TimelineRange({
         <span className="tlr-dur num">{fmtDur(dur, units)}</span>
       </div>
 
-      <div className="tlr-track" onPointerMove={onMove} onPointerUp={up}>
+      <div className="tlr-track" onPointerMove={onMove} onPointerUp={onUp}>
         <div className="tlr-bg" />
         <div className="tlr-range" style={rangeStyle} onPointerDown={onStartDown} />
         <span
           className="tlr-handle tlr-h-start"
           role="slider"
           aria-label="start"
+          style={startStyle}
           onPointerDown={onStartDown}
         />
         <span
