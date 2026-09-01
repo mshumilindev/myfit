@@ -20,6 +20,7 @@ import {
 } from '../store';
 import { useT } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
+import { Switcher } from '../components/Switcher';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { activityType, activityElapsedMs, isActivityPaused, estimateCalories } from '../activities';
 import type { ActivityEffort } from '../types';
@@ -332,14 +333,16 @@ function EffortRow({
   return (
     <div className={className ?? 'act-effort'}>
       <span className="act-field-label">{t.actEffort}</span>
-      <div className="seg2 act-effort-seg effort-switch">
-        {EFFORTS.map((e) => (
-          <button key={e} className={effort === e ? 'active' : ''} onClick={() => onEffort(e)}>
-            <Icon name={EFFORT_ICON[e]} weight={effort === e ? 'fill' : undefined} />
-            <span>{t.actEffortLevel[e]}</span>
-          </button>
-        ))}
-      </div>
+      <Switcher
+        ariaLabel={t.actEffort}
+        value={effort}
+        onChange={onEffort}
+        options={EFFORTS.map((e) => ({
+          value: e,
+          label: t.actEffortLevel[e],
+          icon: EFFORT_ICON[e],
+        }))}
+      />
     </div>
   );
 }

@@ -3964,7 +3964,7 @@ i > svg {
 
 .backfill-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
 
@@ -5825,17 +5825,22 @@ i > svg {
 
 /* Duration entered as hours + minutes — one box, like the other fields. */
 .dur-hm {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 2px;
   min-height: 50px;
-  padding: 6px 12px;
+  padding: 6px 10px;
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-md);
+  overflow: hidden;
 }
 .dur-in {
   flex: 1;
+  width: 100%;
   min-width: 0;
   border: none;
   background: none;
@@ -19791,16 +19796,60 @@ button.badge {
   background: var(--color-accent-900);
   color: var(--color-accent);
 }
-/* Effort as an icon switch: icon over label in each of the three segments. */
-.effort-switch button {
+/* Switcher — segmented control with a sliding pill thumb (see Switcher.tsx). */
+.switcher {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--sw-n, 3), 1fr);
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.switcher-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--sw-n, 3));
+  border-radius: calc(var(--radius-md) - 4px);
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  transform: translateX(calc(var(--sw-i, 0) * 100%));
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.switcher-opt {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 9px 0;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-neutral-500);
+  font: inherit;
+  font-size: 12px;
 }
-.effort-switch button i {
+.switcher-opt i {
   font-size: 20px;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.switcher-opt.on {
+  color: var(--color-accent);
+}
+.switcher-opt.on i {
+  transform: scale(1.08);
+}
+@media (hover: hover) {
+  .switcher-opt:not(.on):hover {
+    color: var(--color-neutral-300);
+  }
 }
 /* Four-way segment: tighter so translated labels still fit one line. */
 .seg3.seg4 button {
