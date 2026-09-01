@@ -459,6 +459,7 @@ export const en = {
   newExercise: 'New exercise',
   muscleGroupsWorked: 'Muscle groups worked',
   musclesWorkedLabel: 'Muscles worked',
+  mdWeekTag: 'this week',
   muscleMapButton: 'Muscle map',
   muscleMapTitle: 'Today’s muscle map',
   muscleMapWeekNote: 'Colours show this week’s volume, today included',

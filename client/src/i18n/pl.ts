@@ -455,6 +455,7 @@ export const pl: Strings = {
   newExercise: 'Nowe ćwiczenie',
   muscleGroupsWorked: 'Przepracowane mięśnie',
   musclesWorkedLabel: 'Mięśnie w pracy',
+  mdWeekTag: 'w tym tyg.',
   muscleMapButton: 'Mapa mięśni',
   muscleMapTitle: 'Dzisiejsza mapa mięśni',
   muscleMapWeekNote: 'Kolory — objętość w tym tygodniu, z dzisiejszym',

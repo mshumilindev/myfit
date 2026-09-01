@@ -270,7 +270,7 @@ i > svg {
   font-size: 22px;
   font-weight: 400;
   line-height: 1;
-  color: var(--color-text);
+  color: var(--color-accent);
 }
 
 .screen {
@@ -14099,8 +14099,10 @@ button.exd-media {
 .md-list {
   display: flex;
   flex-direction: column;
-  /* When the full list is long (up to ~18 groups) it must scroll inside the
-     sheet — otherwise the tail falls past the bottom edge and can't be seen. */
+}
+/* In the drawer the full list (up to ~18 groups) must scroll inside the sheet —
+   otherwise the tail falls past the bottom edge. Inline (summary) it grows. */
+.muscle-drawer .md-list {
   overflow-y: auto;
   max-height: calc(100dvh - 172px);
   overscroll-behavior: contain;
@@ -14126,9 +14128,14 @@ button.exd-media {
   height: 46px !important;
   flex: none;
 }
-.md-name {
+.md-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.md-name {
   font-size: 15px;
   font-weight: 500;
   color: var(--color-neutral-700);
@@ -14136,11 +14143,43 @@ button.exd-media {
 .md-row.primary .md-name {
   font-weight: 600;
 }
+/* Weekly-volume meter under the name: bar toward the desired weekly sets (MAV),
+   split into this session (bright) + the rest of the week (faded), plus the
+   week total / target, tinted by the volume zone. */
+.md-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.md-bar {
+  flex: none;
+  width: 92px;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--color-neutral-800);
+  overflow: hidden;
+}
+.md-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  min-width: 4px;
+}
+.md-meter-lab {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.md-week-tag {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
 .md-count {
   flex: none;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-neutral-400);
+  align-self: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -14506,7 +14545,7 @@ button.exd-media {
 }
 
 /* Floating session controls (mobile): a graphite liquid-glass pill —
-   Discard · Muscle map · Add exercise (the only labelled button) · Finish.
+   Discard · Add exercise (the only labelled button, centred) · Finish.
    Same refracted-glass technique as the Progress pill. */
 @media (max-width: 719.98px) {
   /* Room so the last card clears the floating pill, with breathing space. */
@@ -14570,7 +14609,6 @@ button.exd-media {
     justify-content: center;
   }
   .session-pill .sp-discard,
-  .session-pill .sp-map,
   .session-pill .sp-finish {
     flex: none;
     width: 46px;
@@ -14582,13 +14620,6 @@ button.exd-media {
     color: var(--color-danger);
   }
   .session-pill .sp-discard i {
-    font-size: 19px;
-  }
-  .session-pill .sp-map {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--color-accent);
-  }
-  .session-pill .sp-map i {
     font-size: 19px;
   }
   .session-pill .sp-finish {
@@ -14615,8 +14646,8 @@ button.exd-media {
     white-space: nowrap;
   }
   .session-pill .sp-add i {
-    color: var(--color-accent);
     font-size: 16px;
+    color: var(--color-accent);
   }
 }
 
@@ -19575,11 +19606,29 @@ button.badge {
 }
 
 /* --- Session muscle map ---------------------------------------------------- */
+/* Open button in the "muscles worked" header (accent-tinted pill, like +N more). */
 .mworked-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+.mm-open {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-divider));
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.mm-open i {
+  font-size: 13px;
 }
 /* The sheet: front+back body map, legend, then day-relative hints. */
 .muscle-map-sheet .mm-map {

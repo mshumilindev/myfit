@@ -79,6 +79,7 @@ import {
   MuscleChip,
   MuscleIcon,
   MuscleSetChip,
+  MuscleBreakdownList,
   MUSCLE_IDS,
   equipmentIconName,
   withMuscleBreak,
@@ -352,7 +353,7 @@ export function SessionView(props: {
   const exCount = workout?.exercises.length ?? 0;
   useEffect(() => {
     if (exCount > prevExCount.current) {
-      contentBottomRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' });
+      contentBottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
     prevExCount.current = exCount;
   }, [exCount]);
@@ -372,7 +373,6 @@ export function SessionView(props: {
   useEffect(() => {
     const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
     if (cards.length === 0) return;
-    if (typeof IntersectionObserver === 'undefined') return;
     const ratios = new Map<string, number>();
     const io = new IntersectionObserver(
       (entries) => {
@@ -1362,17 +1362,11 @@ export function SessionView(props: {
             return (
               <div className="muscles-worked">
                 <div className="section-label">{t.muscleGroupsWorked}</div>
-                <div className="mworked-row">
-                  {withMuscleBreak(entries, (x) => (
-                    <MuscleSetChip
-                      key={x.muscle}
-                      muscle={x.muscle}
-                      count={x.sets}
-                      tone={x.primary ? 'primary' : 'secondary'}
-                      onClick={openMuscleHistory}
-                    />
-                  ))}
-                </div>
+                <MuscleBreakdownList
+                  entries={entries}
+                  refTs={workout.startedAt}
+                  onOpen={openMuscleHistory}
+                />
               </div>
             );
           })()}
@@ -1642,6 +1636,10 @@ export function SessionView(props: {
               <div className="muscles-worked">
                 <div className="section-label mworked-head">
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
+                  <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
+                    <Icon name="person-simple" />
+                    {t.muscleMapButton}
+                  </button>
                 </div>
                 <div className="mworked-row">
                   {withMuscleBreak(entries, (x) => (
@@ -2021,22 +2019,7 @@ export function SessionView(props: {
             >
               <Icon name="trash" />
             </button>
-            {suggestOn && muscleWorkSorted(workout).length > 0 && (
-              <button
-                className="sp-btn sp-map"
-                onClick={() => setSheet({ kind: 'musclemap' })}
-                aria-label={t.muscleMapButton}
-                title={t.muscleMapButton}
-              >
-                <Icon name="user-focus" />
-              </button>
-            )}
-            <button
-              className="sp-btn sp-add"
-              onClick={() => setSheet({ kind: 'add' })}
-              aria-label={t.addExercise}
-              title={t.addExercise}
-            >
+            <button className="sp-btn sp-add" onClick={() => setSheet({ kind: 'add' })}>
               <Icon name="plus" weight="bold" />
               <span>{t.addExercise}</span>
             </button>

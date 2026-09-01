@@ -451,6 +451,7 @@ export const et: Strings = {
   newExercise: 'Uus harjutus',
   muscleGroupsWorked: 'Töötatud lihased',
   musclesWorkedLabel: 'Lihased töös',
+  mdWeekTag: 'sel nädalal',
   muscleMapButton: 'Lihaste kaart',
   muscleMapTitle: 'Tänane lihaste kaart',
   muscleMapWeekNote: 'Värvid — selle nädala maht, tänane kaasas',

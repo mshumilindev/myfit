@@ -14,13 +14,22 @@
  * precision. `MuscleIcon` therefore renders a library figure at figure/row/full
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
-import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { t as strings } from '../i18n';
 import { Icon, Sheet } from '../ui';
+import { useStore, muscleSetsInWorkout } from '../store';
+import { LANDMARKS, classifyZone, ZONE_COLOR } from '../volume';
 
 /** Muscles in the vocabulary order of the filter bar (MG-5). */
 export const MUSCLE_IDS: Exclude<MuscleGroup, 'cardio'>[] = [
@@ -923,41 +932,119 @@ export function MuscleChip({
 
 type MuscleEntry = { muscle: MuscleGroup; sets: number; primary: boolean };
 
-/** The full worked-muscle list (primary then secondary, with set counts) in a
- *  bottom drawer — opened from the "+N more" chip on a clipped session row. */
+const WEEK_DAY_MS = 24 * 3600 * 1000;
+/** Mon–Sun calendar week [start, end) containing `ts`. */
+function weekBounds(ts: number): [number, number] {
+  const d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  const dow = (d.getDay() + 6) % 7; // Monday = 0
+  const start = d.getTime() - dow * WEEK_DAY_MS;
+  return [start, start + 7 * WEEK_DAY_MS];
+}
+
+/**
+ * The worked-muscle list with weekly context: for each muscle, this session's
+ * sets (the right-hand count) plus a bar toward its desired weekly volume (MAV),
+ * split into this session (bright) and the rest of the same calendar week
+ * (faded), so a muscle trained across several days reads as its week total. The
+ * bar and the "N / target" label are tinted by the volume zone
+ * (under / productive / high / over). `refTs` anchors which week to sum.
+ */
+export function MuscleBreakdownList({
+  entries,
+  refTs,
+  onOpen,
+}: {
+  entries: MuscleEntry[];
+  refTs: number;
+  onOpen?: (m: MuscleGroup) => void;
+}) {
+  const store = useStore();
+  const interactive = !!onOpen;
+  const s = strings();
+  const [wkStart, wkEnd] = weekBounds(refTs);
+  const week = useMemo(() => {
+    const m = new Map<MuscleGroup, number>();
+    for (const w of store.workouts) {
+      if (w.finishedAt === null || w.startedAt < wkStart || w.startedAt >= wkEnd) continue;
+      for (const [mg, n] of muscleSetsInWorkout(w)) m.set(mg, (m.get(mg) ?? 0) + n);
+    }
+    return m;
+  }, [store.workouts, wkStart, wkEnd]);
+
+  return (
+    <div className="md-list">
+      {entries.map((e) => {
+        const lm = LANDMARKS[e.muscle];
+        const wk = Math.max(week.get(e.muscle) ?? e.sets, e.sets);
+        const target = lm ? lm.mav : 0;
+        const multi = wk > e.sets + 0.01;
+        const color = lm ? ZONE_COLOR[classifyZone(wk, lm)] : undefined;
+        const fillW = target > 0 ? Math.min(100, (wk / target) * 100) : 0;
+        return (
+          <div
+            key={e.muscle}
+            className={`md-row${e.primary ? ' primary' : ''}`}
+            role={interactive ? 'button' : undefined}
+            tabIndex={interactive ? 0 : undefined}
+            onClick={interactive ? () => onOpen(e.muscle) : undefined}
+          >
+            <MuscleIcon
+              muscle={e.muscle}
+              variant="chipFig"
+              tone={e.primary ? 'primary' : 'secondary'}
+            />
+            <div className="md-main">
+              <span className="md-name">{s.muscleGroups[e.muscle]}</span>
+              {lm ? (
+                <div className="md-meter">
+                  <span className="md-bar">
+                    <span
+                      className="md-bar-fill"
+                      style={{ width: `${fillW}%`, background: color }}
+                    />
+                  </span>
+                  <span className="md-meter-lab" style={{ color }}>
+                    {fmtSetCount(wk)} / {target}
+                  </span>
+                  <span className="md-week-tag">{s.mdWeekTag}</span>
+                </div>
+              ) : (
+                multi && (
+                  <div className="md-meter">
+                    <span className="md-week-tag">
+                      {s.mdWeekTag}: {fmtSetCount(wk)}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+            <span className="md-count tnum">{fmtSetCount(e.sets)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** The full worked-muscle list in a bottom drawer — opened from the "+N more"
+ *  chip on a clipped session row. */
 function MuscleDrawer({
   entries,
+  refTs,
   onOpen,
   onClose,
 }: {
   entries: MuscleEntry[];
+  refTs: number;
   onOpen?: (m: MuscleGroup) => void;
   onClose: () => void;
 }) {
-  const interactive = !!onOpen;
   return (
     <Sheet onClose={onClose}>
       <div className="muscle-drawer">
         <div className="section-label">{strings().musclesWorkedLabel}</div>
-        <div className="md-list">
-          {entries.map((e) => (
-            <div
-              key={e.muscle}
-              className={`md-row${e.primary ? ' primary' : ''}`}
-              role={interactive ? 'button' : undefined}
-              tabIndex={interactive ? 0 : undefined}
-              onClick={interactive ? () => onOpen(e.muscle) : undefined}
-            >
-              <MuscleIcon
-                muscle={e.muscle}
-                variant="chipFig"
-                tone={e.primary ? 'primary' : 'secondary'}
-              />
-              <span className="md-name">{strings().muscleGroups[e.muscle]}</span>
-              <span className="md-count tnum">{fmtSetCount(e.sets)}</span>
-            </div>
-          ))}
-        </div>
+        <MuscleBreakdownList entries={entries} refTs={refTs} onOpen={onOpen} />
       </div>
     </Sheet>
   );
@@ -970,9 +1057,12 @@ function MuscleDrawer({
  */
 export function MuscleRow({
   entries,
+  refTs,
   onOpen,
 }: {
   entries: MuscleEntry[];
+  /** Timestamp of the workout these entries belong to — anchors the week sum. */
+  refTs: number;
   onOpen?: (m: MuscleGroup) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -1046,7 +1136,12 @@ export function MuscleRow({
           // Sheet's scrim click would otherwise bubble to the row button and
           // open the workout. Stop it at the portal boundary.
           <div onClick={(e) => e.stopPropagation()}>
-            <MuscleDrawer entries={entries} onOpen={onOpen} onClose={() => setOpen(false)} />
+            <MuscleDrawer
+              entries={entries}
+              refTs={refTs}
+              onOpen={onOpen}
+              onClose={() => setOpen(false)}
+            />
           </div>,
           document.body,
         )}

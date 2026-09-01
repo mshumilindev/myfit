@@ -463,6 +463,7 @@ export const lt: Strings = {
   newExercise: 'Naujas pratimas',
   muscleGroupsWorked: 'Apkrauti raumenys',
   musclesWorkedLabel: 'Raumenys darbe',
+  mdWeekTag: 'šią sav.',
   muscleMapButton: 'Raumenų žemėlapis',
   muscleMapTitle: 'Šiandienos raumenų žemėlapis',
   muscleMapWeekNote: 'Spalvos — savaitės apimtis, įskaitant šiandien',

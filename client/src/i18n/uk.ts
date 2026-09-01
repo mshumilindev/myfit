@@ -455,6 +455,7 @@ export const uk: Strings = {
   newExercise: 'Нова вправа',
   muscleGroupsWorked: "Пропрацьовані м'язи",
   musclesWorkedLabel: "М'язи в роботі",
+  mdWeekTag: 'за тиждень',
   muscleMapButton: 'Мапа мʼязів',
   muscleMapTitle: 'Мапа мʼязів на сьогодні',
   muscleMapWeekNote: 'Кольори — обсяг за тиждень, з урахуванням сьогодні',

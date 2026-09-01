@@ -132,7 +132,11 @@ export function HistoryTimeline({
                         : ''}
                     </div>
                     {showMuscles && muscleWorkSorted(it.w).length > 0 && (
-                      <MuscleRow entries={muscleWorkSorted(it.w)} onOpen={openMuscleHistory} />
+                      <MuscleRow
+                        entries={muscleWorkSorted(it.w)}
+                        refTs={it.w.startedAt}
+                        onOpen={openMuscleHistory}
+                      />
                     )}
                   </span>
                   {kc != null && (
