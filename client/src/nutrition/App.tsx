@@ -125,7 +125,12 @@ export function NutritionRoot({
   const [undo, setUndo] = useState<Entry | null>(null);
   const undoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => { if (undoTimer.current) clearTimeout(undoTimer.current); }, []);
+  useEffect(
+    () => () => {
+      if (undoTimer.current) clearTimeout(undoTimer.current);
+    },
+    [],
+  );
 
   function del(entry: Entry) {
     setDetail(null);

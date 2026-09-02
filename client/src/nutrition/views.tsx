@@ -313,11 +313,7 @@ export function HistoryView({ onOpenEntry }: { onOpenEntry: (e: Entry) => void }
               .map((d) => {
                 const dd = goalKcal ? round(d.macros.kcal - goalKcal) : null;
                 return (
-                  <button
-                    key={d.day}
-                    className="entry"
-                    onClick={() => setOpenDay(d.day)}
-                  >
+                  <button key={d.day} className="entry" onClick={() => setOpenDay(d.day)}>
                     <span className="body">
                       <span className="name">
                         {dateLabel(d.day, lang, {

@@ -87,9 +87,7 @@ export async function searchProductsOFF(query: string): Promise<Food[]> {
     `&search_simple=1&action=process&json=1&page_size=24` +
     `&fields=code,product_name,generic_name,brands,image_front_small_url,image_small_url,nutriments`;
   const data = (await getJSON(url)) as { products?: OffProduct[] };
-  const foods = (data.products ?? [])
-    .map(toFood)
-    .filter((f): f is Food => f !== null);
+  const foods = (data.products ?? []).map(toFood).filter((f): f is Food => f !== null);
   return rankByRelevance(foods, q).slice(0, 20);
 }
 

@@ -18,7 +18,11 @@ export const LANGS: { id: Lang; flag: string; label: string }[] = [
 
 export type TFn = (key: keyof Strings, vars?: Record<string, string | number>) => string;
 
-export function translate(lang: Lang, key: keyof Strings, vars?: Record<string, string | number>): string {
+export function translate(
+  lang: Lang,
+  key: keyof Strings,
+  vars?: Record<string, string | number>,
+): string {
   let s: string = DICTS[lang][key] ?? en[key];
   if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
   return s;
