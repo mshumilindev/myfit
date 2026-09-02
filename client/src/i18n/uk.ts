@@ -517,6 +517,8 @@ export const uk: Strings = {
   flagGymPresence: 'Нагадування за присутністю в залі',
   flagGymPresenceDesc:
     'Визначати відвідування залу за геолокацією і пропонувати залогувати тренування. Вимкнено за замовчуванням.',
+  flagNutrition: 'Додаток Nutrition',
+  flagNutritionDesc: 'Розблокувати додаток Nutrition (трекер КБЖУ) у перемикачі додатків.',
   settingsTitle: 'Налаштування',
   settingsSub: 'Прапорці функцій для цього пристрою',
   settingsFeaturesLabel: 'Функції',

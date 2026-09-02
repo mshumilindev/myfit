@@ -516,6 +516,8 @@ export const pl: Strings = {
   flagGymPresence: 'Przypomnienia wg obecności na siłowni',
   flagGymPresenceDesc:
     'Wykrywaj wizyty na siłowni po lokalizacji i proponuj zapis sesji. Domyślnie wyłączone.',
+  flagNutrition: 'Aplikacja Nutrition',
+  flagNutritionDesc: 'Odblokuj aplikację Nutrition (licznik KBŻU) w przełączniku aplikacji.',
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
   settingsFeaturesLabel: 'Funkcje',

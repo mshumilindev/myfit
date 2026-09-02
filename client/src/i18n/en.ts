@@ -520,6 +520,8 @@ export const en = {
   flagGymPresence: 'Gym-presence reminders',
   flagGymPresenceDesc:
     'Use location to detect gym visits and suggest logging a session. Off by default.',
+  flagNutrition: 'Nutrition app',
+  flagNutritionDesc: 'Unlock the Nutrition app (КБЖУ tracker) in the app switcher.',
   settingsTitle: 'Settings',
   settingsSub: 'Feature flags for this device',
   settingsFeaturesLabel: 'Features',

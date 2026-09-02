@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from 'react';
 
-export const FEATURE_FLAGS = [{ id: 'gymPresence' }] as const;
+export const FEATURE_FLAGS = [{ id: 'gymPresence' }, { id: 'nutrition' }] as const;
 export type FlagId = (typeof FEATURE_FLAGS)[number]['id'];
 
 const KEY = 'gym.flags';

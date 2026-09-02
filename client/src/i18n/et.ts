@@ -512,6 +512,8 @@ export const et: Strings = {
   flagGymPresence: 'Jõusaali kohaloleku meeldetuletused',
   flagGymPresenceDesc:
     'Tuvasta jõusaali külastusi asukoha järgi ja paku seansi salvestamist. Vaikimisi väljas.',
+  flagNutrition: 'Nutrition rakendus',
+  flagNutritionDesc: 'Ava Nutrition rakendus (KBRÜ jälgija) rakenduste vahetajas.',
   settingsTitle: 'Seaded',
   settingsSub: 'Selle seadme funktsioonilipud',
   settingsFeaturesLabel: 'Funktsioonid',

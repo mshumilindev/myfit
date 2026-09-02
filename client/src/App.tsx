@@ -57,6 +57,7 @@ import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
 import type { SyncError, Notice } from './types';
 import type { MuscleGroup } from './data/exercises';
+import { useFlag, isFlagOn } from './data/flags';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 
 const OnboardingView = lazy(() =>
@@ -470,9 +471,12 @@ export function App() {
   const [rosterTab, setRosterTab] = useState<RosterTab>(() =>
     rosterTabFromHash(window.location.hash),
   );
-  const [nutritionOpen, setNutritionOpen] = useState<boolean>(() =>
-    isNutritionHash(window.location.hash),
+  const [nutritionOpen, setNutritionOpen] = useState<boolean>(
+    () => isNutritionHash(window.location.hash) && isFlagOn('nutrition'),
   );
+  // Nutrition is behind a feature flag (admin-only toggle in Settings); default
+  // OFF → the Shell shows it as "coming soon" and it cannot be opened.
+  const nutritionEnabled = useFlag('nutrition');
   const [shellOpen, setShellOpen] = useState(false);
 
   // Deep-link focus: a notification can ask a screen to scroll to a specific
@@ -706,7 +710,7 @@ export function App() {
       setApexTab(apexTabFromHash(window.location.hash));
       setRosterOpen(isRosterHash(window.location.hash));
       setRosterTab(rosterTabFromHash(window.location.hash));
-      setNutritionOpen(isNutritionHash(window.location.hash));
+      setNutritionOpen(isNutritionHash(window.location.hash) && isFlagOn('nutrition'));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
@@ -845,6 +849,7 @@ export function App() {
     setRosterOpen(true);
   };
   const openNutrition = () => {
+    if (!nutritionEnabled) return;
     setShellOpen(false);
     setApexOpen(false);
     setRosterOpen(false);
@@ -852,7 +857,7 @@ export function App() {
   };
 
   // Nutrition takes over the whole screen — its own lazurite skin & store.
-  if (nutritionOpen) {
+  if (nutritionOpen && nutritionEnabled) {
     return (
       <div className="app app-apex-root">
         <Suspense fallback={<ScreenFallback />}>
@@ -880,6 +885,7 @@ export function App() {
             onApex={openApex}
             onRoster={() => openRoster(rosterHomeFor(role))}
             onNutrition={() => setShellOpen(false)}
+            nutritionEnabled={nutritionEnabled}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -920,6 +926,7 @@ export function App() {
             onApex={openApex}
             onRoster={() => setShellOpen(false)}
             onNutrition={openNutrition}
+            nutritionEnabled={nutritionEnabled}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -960,6 +967,7 @@ export function App() {
             onApex={() => setShellOpen(false)}
             onRoster={() => openRoster(rosterHomeFor(role))}
             onNutrition={openNutrition}
+            nutritionEnabled={nutritionEnabled}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -1169,6 +1177,7 @@ export function App() {
           }}
           onRoster={() => openRoster(rosterHomeFor(role))}
           onNutrition={openNutrition}
+          nutritionEnabled={nutritionEnabled}
           onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />
