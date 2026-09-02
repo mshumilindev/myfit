@@ -262,7 +262,7 @@
       "chest-upper"
     ],
     "secondary": [
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Bottoms-Up_Clean_From_The_Hang_Position": {
@@ -512,7 +512,7 @@
   },
   "Crucifix": {
     "primary": [
-      "delt-rear"
+      "delt-side"
     ]
   },
   "Cuban_Press": {
@@ -902,7 +902,7 @@
       "chest-upper"
     ],
     "secondary": [
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Incline_Dumbbell_Bench_With_Palms_Facing_In": {
@@ -918,7 +918,7 @@
       "chest-upper"
     ],
     "secondary": [
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Incline_Dumbbell_Flyes_-_With_A_Twist": {
@@ -926,7 +926,7 @@
       "chest-upper"
     ],
     "secondary": [
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Incline_Dumbbell_Press": {
@@ -973,7 +973,7 @@
       "chest-upper"
     ],
     "secondary": [
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Incline_Push-Up_Wide": {
@@ -991,7 +991,7 @@
   },
   "Iron_Cross": {
     "primary": [
-      "delt-rear"
+      "delt-side"
     ],
     "secondary": [
       "chest-lower",
@@ -1635,7 +1635,7 @@
     "secondary": [
       "chest-lower",
       "chest-upper",
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Reverse_Flyes": {
@@ -1664,7 +1664,7 @@
     "secondary": [
       "chest-lower",
       "chest-upper",
-      "delt-rear"
+      "delt-front"
     ]
   },
   "Ring_Dips": {
