@@ -17415,6 +17415,10 @@ button.badge {
 .prog-banner-cta i {
   font-size: 14px;
 }
+.prog-banner-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 .prog-banner-skip {
   min-height: 38px;
   padding: 0 10px;
@@ -23055,11 +23059,12 @@ button.badge {
 .hist-activity.cat-recovery .hist-act-icon {
   color: var(--color-rest-300);
 }
-.hist-workout .go {
+.hist-item .go {
   flex: none;
   align-self: center;
-  /* Same 30px box as the activity trash button, so the trailing icon — and
-     therefore the flame/kcal chip in front of it — lines up across every row. */
+  /* Same 30px box for workout AND activity rows, so the trailing link icon —
+     and therefore the flame/kcal chip in front of it — sits on the same grid
+     column across every row, and stays vertically centred. */
   width: 30px;
   height: 30px;
   display: grid;
@@ -23094,6 +23099,7 @@ button.badge {
   gap: 3px;
   font-size: 13px;
   color: var(--color-kcal-text);
+  font-variant-numeric: tabular-nums;
 }
 .ta-kcal i {
   font-size: 13px;
@@ -23532,6 +23538,11 @@ button.badge {
   }
   .td-pill .tp-start i {
     font-size: 15px;
+  }
+  .td-pill .tp-start:disabled,
+  .td-pill .tp-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 }
 

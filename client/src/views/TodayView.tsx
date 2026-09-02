@@ -182,8 +182,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // the other can't be started (design feature 6).
   const open = store.workouts.find((w) => w.finishedAt === null);
   const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
+  // Feature 6 mutual exclusion: while a session OR an activity is live, neither
+  // a new session nor a new activity can be started. Start controls go disabled;
+  // the live one is resumed via its own hero/banner.
+  const busy = !!open || !!liveAct;
 
   function beginSession(gymId: string | null) {
+    if (open) {
+      shell.openOverlay({ screen: 'session', workoutId: open.id });
+      return;
+    }
     if (liveAct) {
       shell.openOverlay({ screen: 'activity' });
       return;
@@ -193,6 +201,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
   function startSession() {
+    if (open) {
+      shell.openOverlay({ screen: 'session', workoutId: open.id });
+      return;
+    }
     if (liveAct) {
       shell.openOverlay({ screen: 'activity' });
       return;
@@ -1053,7 +1065,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   </button>
                 )}
                 {!liveAct && (
-                  <button className="btn btn-secondary" onClick={openActivitySheet}>
+                  <button className="btn btn-secondary" onClick={openActivitySheet} disabled={busy}>
                     <Icon name="heartbeat" />
                     {t.logActivity}
                   </button>
@@ -1063,7 +1075,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   {t.logPastSession}
                 </button>
                 {!liveAct && (
-                  <button className="btn btn-primary" onClick={startSession}>
+                  <button className="btn btn-primary" onClick={startSession} disabled={busy}>
                     <Icon name="play" />
                     {t.startSessionLabel}
                   </button>
@@ -1140,7 +1152,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div className="prog-banner-acts">
                   {activeRest.mode === 'active' ? (
                     <>
-                      <button className="prog-banner-cta" onClick={startSession}>
+                      <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
                         <Icon name="play" weight="bold" />
                         {t.restStartLight}
                       </button>
@@ -1215,6 +1227,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               <button
                 className="tp-btn"
                 onClick={openActivitySheet}
+                disabled={busy}
                 aria-label={t.logActivity}
                 title={t.logActivity}
               >
@@ -1228,7 +1241,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               >
                 <Icon name="arrow-counter-clockwise" />
               </button>
-              <button className="tp-start" onClick={startSession}>
+              <button className="tp-start" onClick={startSession} disabled={busy}>
                 <Icon name="play" weight="fill" />
                 <span>{t.startSessionLabel}</span>
               </button>
@@ -1341,7 +1354,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <div className="td-empty-title">{t.tdEmptyTitle}</div>
             <div className="td-empty-body">{t.tdEmptyBody}</div>
             <div className="td-empty-actions">
-              <button className="btn btn-primary" onClick={startSession}>
+              <button className="btn btn-primary" onClick={startSession} disabled={busy}>
                 <Icon name="play" />
                 {t.startFirstSession}
               </button>

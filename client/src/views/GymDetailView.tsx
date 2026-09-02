@@ -109,6 +109,10 @@ export function GymDetailView({
 }) {
   const { t, locale } = useT();
   const store = useStore();
+  // Feature 6: block starting a second session/activity while one is live.
+  const openW = store.workouts.find((w) => w.finishedAt === null) ?? null;
+  const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
+  const sessionBusy = !!openW || !!liveAct;
 
   // Resolve the underlying gym: by id, or by matching a candidate's coords to a
   // saved gym (so opening a search result that's already saved shows it saved).
@@ -250,7 +254,16 @@ export function GymDetailView({
         )}
         <button
           className={isSaved ? 'btn btn-primary btn-big' : 'btn btn-secondary btn-big'}
+          disabled={sessionBusy}
           onClick={() => {
+            if (openW) {
+              shell.openOverlay({ screen: 'session', workoutId: openW.id });
+              return;
+            }
+            if (liveAct) {
+              shell.openOverlay({ screen: 'activity' });
+              return;
+            }
             const g = ensureSaved();
             const w = startWorkout(g.id);
             shell.openOverlay({ screen: 'session', workoutId: w.id });

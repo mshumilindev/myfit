@@ -450,12 +450,29 @@ export function SessionView(props: {
   const lastLoggedAt = lastChrono ? (lastChrono.s.loggedAt as number) : 0;
   const lastLoggedExId = lastChrono ? lastChrono.exId : null;
 
+  // "Current" follows where you are actually working. If your most-recently
+  // logged set is on an exercise that still has sets to go (planned remaining,
+  // or any unplanned exercise you're mid-way through), that's the current one —
+  // even if an earlier exercise is still unfinished (you skipped ahead). Only
+  // when nothing is in progress do we fall back to the first incomplete
+  // exercise by position.
+  const incompleteById = (ex: Exercise): boolean => {
+    if (isMarkerExercise(ex)) return false;
+    const planned = Math.max(0, ex.plannedSets ?? 0);
+    return planned > 0 ? ex.sets.length < planned : ex.sets.length === 0;
+  };
+  const lastLoggedEx = lastLoggedExId
+    ? sortedExercises.find((e) => e.id === lastLoggedExId)
+    : null;
+  const lastLoggedStillGoing =
+    lastLoggedEx && !isMarkerExercise(lastLoggedEx)
+      ? (Math.max(0, lastLoggedEx.plannedSets ?? 0) > 0
+          ? lastLoggedEx.sets.length < (lastLoggedEx.plannedSets as number)
+          : true)
+      : false;
   const activeExerciseId =
-    sortedExercises.find((ex) => {
-      if (isMarkerExercise(ex)) return false;
-      const planned = Math.max(0, ex.plannedSets ?? 0);
-      return planned > 0 ? ex.sets.length < planned : ex.sets.length === 0;
-    })?.id ??
+    (lastLoggedStillGoing ? lastLoggedEx!.id : null) ??
+    sortedExercises.find(incompleteById)?.id ??
     sortedExercises[0]?.id ??
     null;
   // The left milestone rail shows on the phone during a LIVE session once

@@ -141,8 +141,21 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
       address: savedAddrs[g.id],
     });
 
+  // Feature 6: only one live session/activity at a time. If one is already
+  // running, resume it instead of starting a second, and the CTA is disabled.
+  const openW = store.workouts.find((w) => w.finishedAt === null) ?? null;
+  const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
+  const sessionBusy = !!openW || !!liveAct;
   const startAtSelectedGym = () => {
     if (!selectedGym) return;
+    if (openW) {
+      shell.openOverlay({ screen: 'session', workoutId: openW.id });
+      return;
+    }
+    if (liveAct) {
+      shell.openOverlay({ screen: 'activity' });
+      return;
+    }
     const workout = startWorkout(selectedGym.id);
     shell.openOverlay({ screen: 'session', workoutId: workout.id });
   };
@@ -328,7 +341,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
 
             <div className="gyms-detail-body">
               <div className="gyms-actions">
-                <button className="btn btn-primary" onClick={startAtSelectedGym}>
+                <button className="btn btn-primary" onClick={startAtSelectedGym} disabled={sessionBusy}>
                   <Icon name="play" />
                   {t.startSessionHere}
                 </button>
