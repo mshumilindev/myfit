@@ -2,12 +2,17 @@
  * Goals ("My Fit") — the fourth peer tab of Programs/Playbook/Exercises.
  * Programs say WHAT you train; Goals say WHY: the physique you're building
  * toward, this block's per-muscle focus (grow/hold/ease), and long-term
- * measured goals. This is the overview (design GL-01). The physique picker,
- * focus editor and long-term detail land as follow-up screens; for now each
- * section shows its empty state so the tab is coherent and navigable.
+ * measured goals (design GL-01). Focus is live; the physique picker (needs the
+ * archetype silhouettes) and long-term goals land next.
  */
+import { useState } from 'react';
 import { useT } from '../i18n';
+import { useStore } from '../store';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
+import { FocusBodyMap } from '../components/Muscle';
+import { FocusEditor } from './FocusEditor';
+import { focusLists } from '../goals';
+import { focusToGroup, type FocusMuscle } from '../data/subregions';
 import type { Shell } from '../App';
 import { Icon } from '../ui';
 
@@ -18,6 +23,12 @@ export function GoalsView({
   onProgramsTab?: (peer: ProgramsPeer) => void;
 }) {
   const { t } = useT();
+  const store = useStore();
+  const [editingFocus, setEditingFocus] = useState(false);
+
+  const { grow, ease } = focusLists(store.goals);
+  const hasFocus = grow.length > 0 || ease.length > 0;
+  const label = (f: FocusMuscle) => t.subMuscleNames[f] ?? t.muscleGroups[focusToGroup(f)];
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs goals-tab">
@@ -32,6 +43,7 @@ export function GoalsView({
       <div className="goals-body">
         <p className="goals-intro">{t.goalsIntro}</p>
 
+        {/* Physique target — awaits the archetype silhouettes */}
         <section className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsPhysiqueTitle}</span>
@@ -43,17 +55,57 @@ export function GoalsView({
           </div>
         </section>
 
+        {/* Focus this block — live */}
         <section className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsFocusTitle}</span>
-            <span className="tag tag-neutral goals-soon">{t.goalsSoon}</span>
+            <button
+              className="goals-edit"
+              onClick={() => setEditingFocus(true)}
+              aria-label={t.focusTitle}
+            >
+              <Icon name="pencil-simple" />
+            </button>
           </div>
-          <div className="goals-empty">
-            <Icon name="crosshair" />
-            <p>{t.goalsFocusEmpty}</p>
-          </div>
+          {hasFocus ? (
+            <div className="goals-focus">
+              <FocusBodyMap grow={grow} ease={ease} view="both" width={104} className="goals-focus-map" />
+              <div className="goals-focus-cols">
+                {grow.length > 0 && (
+                  <div>
+                    <div className="goals-focus-lbl grow">{t.emphGrow}</div>
+                    <div className="goals-chips">
+                      {grow.map((f) => (
+                        <span key={f} className="goals-chip grow">
+                          {label(f)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {ease.length > 0 && (
+                  <div>
+                    <div className="goals-focus-lbl ease">{t.emphEase}</div>
+                    <div className="goals-chips">
+                      {ease.map((f) => (
+                        <span key={f} className="goals-chip ease">
+                          {label(f)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <button className="goals-empty goals-empty-btn" onClick={() => setEditingFocus(true)}>
+              <Icon name="crosshair" />
+              <p>{t.goalsFocusEmpty}</p>
+            </button>
+          )}
         </section>
 
+        {/* Long-term goals — next */}
         <section className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsLongTermTitle}</span>
@@ -65,6 +117,8 @@ export function GoalsView({
           </div>
         </section>
       </div>
+
+      {editingFocus && <FocusEditor onClose={() => setEditingFocus(false)} />}
     </div>
   );
 }

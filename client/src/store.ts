@@ -53,6 +53,13 @@ import {
   type MuscleGroup,
 } from './data/exercises';
 import type { ExerciseSubRegions } from './data/subregions';
+import {
+  EMPTY_GOALS,
+  type FitGoals,
+  type PhysiqueTarget,
+  type BlockFocus,
+  type LongTermGoal,
+} from './goals';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
@@ -63,6 +70,7 @@ const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
 const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
+const GOALS_KEY = 'spotter.goals';
 const REST_KEY = 'spotter.restPeriods';
 const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
@@ -93,6 +101,8 @@ export interface StoreState {
   exerciseLoadTypes: Record<string, LoadType>;
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
+  /** Goals: physique target, block focus, long-term goals (My Fit). */
+  goals: FitGoals;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
   queue: QueuedMutation[];
   syncStatus: SyncStatus;
@@ -119,6 +129,7 @@ let state: StoreState = {
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
+  goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   queue: [],
   syncStatus: 'pending',
   syncError: null,
@@ -146,6 +157,7 @@ function persist(): void {
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
     localStorage.setItem(EX_LOAD_KEY, JSON.stringify(state.exerciseLoadTypes));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
+    localStorage.setItem(GOALS_KEY, JSON.stringify(state.goals));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
   }
@@ -627,6 +639,13 @@ function writeBodyDoc(): void {
   // JSON round-trip drops `undefined` (Firestore rejects it).
   const clean = JSON.parse(JSON.stringify({ ...state.bodyMetrics, updatedAt: Date.now() }));
   setDoc(doc(db, 'users', uid, 'meta', 'body'), clean).catch(onWriteError);
+}
+
+function writeGoalsDoc(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const clean = JSON.parse(JSON.stringify({ ...state.goals, updatedAt: Date.now() }));
+  setDoc(doc(db, 'users', uid, 'meta', 'goals'), clean).catch(onWriteError);
 }
 function deleteGymDoc(id: string): void {
   const uid = currentUid();
@@ -1122,6 +1141,35 @@ export function deleteGym(id: string): void {
 function commitBody(patch: Partial<BodyMetrics>): void {
   setState({ bodyMetrics: { ...state.bodyMetrics, ...patch }, syncStatus: bumpPending() });
   writeBodyDoc();
+}
+
+// --- Goals (My Fit) --------------------------------------------------------
+
+function commitGoals(patch: Partial<FitGoals>): void {
+  setState({ goals: { ...state.goals, ...patch }, syncStatus: bumpPending() });
+  writeGoalsDoc();
+}
+
+export function setPhysiqueTarget(physique: PhysiqueTarget | undefined): void {
+  commitGoals({ physique });
+}
+
+export function setBlockFocus(focus: BlockFocus | undefined): void {
+  commitGoals({ focus });
+}
+
+export function addLongTermGoal(goal: LongTermGoal): void {
+  commitGoals({ longTerm: [...state.goals.longTerm, goal] });
+}
+
+export function updateLongTermGoal(id: string, patch: Partial<LongTermGoal>): void {
+  commitGoals({
+    longTerm: state.goals.longTerm.map((g) => (g.id === id ? { ...g, ...patch } : g)),
+  });
+}
+
+export function removeLongTermGoal(id: string): void {
+  commitGoals({ longTerm: state.goals.longTerm.filter((g) => g.id !== id) });
 }
 
 export function addWeight(weight: number, at: number): void {
@@ -1758,6 +1806,19 @@ export function startSyncLoop(): () => void {
       onWriteError,
     ),
   );
+
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'goals'),
+      (snap) => {
+        const data = snap.exists() ? (snap.data() as FitGoals) : EMPTY_GOALS;
+        state = { ...state, goals: { ...EMPTY_GOALS, ...data, longTerm: data.longTerm ?? [] } };
+        persist();
+        emit();
+      },
+      onWriteError,
+    ),
+  );
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'pings'),
@@ -2196,6 +2257,7 @@ export function resetLocalData(): void {
     exerciseUnits: {},
     exerciseLoadTypes: {},
     bodyMetrics: EMPTY_BODY,
+    goals: EMPTY_GOALS,
     queue: [],
     syncStatus: 'pending',
     syncError: null,

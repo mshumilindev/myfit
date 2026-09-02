@@ -25,6 +25,7 @@ import {
 import { createPortal } from 'react-dom';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
 import type { MuscleGroup } from '../data/exercises';
+import { FOCUS_LIB_IDS, focusToGroup, type FocusMuscle } from '../data/subregions';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { t as strings } from '../i18n';
 import { Icon, Sheet } from '../ui';
@@ -630,6 +631,75 @@ export function MuscleHeatmap({
                 fill={c ?? DIM}
                 stroke={active ? 'var(--color-bg)' : DIM_STROKE}
                 strokeWidth={active ? 0.25 : 0.12}
+              />
+            );
+          })}
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Focus map (Goals): the shared body figure with GROW muscles tinted accent and
+ * EASE-off muscles tinted danger, everything else dimmed. Fine sub-regions (the
+ * three delt heads, upper/lower chest) light their exact library paths; other
+ * fine ids fall back to their coarse group's paths. Grow wins any overlap.
+ */
+const FOCUS_GROW_COLOR = 'var(--color-accent)';
+const FOCUS_EASE_COLOR = 'var(--color-danger)';
+
+export function FocusBodyMap({
+  grow,
+  ease,
+  view = 'both',
+  width,
+  className,
+}: {
+  grow: FocusMuscle[];
+  ease: FocusMuscle[];
+  view?: BView | 'both';
+  width?: number | string;
+  className?: string;
+}) {
+  const idColor = new Map<string, string>();
+  const paint = (list: FocusMuscle[], color: string) => {
+    for (const f of list) {
+      const split = FOCUS_LIB_IDS[f];
+      if (split) {
+        for (const id of split.front) idColor.set(id, color);
+        for (const id of split.back) idColor.set(id, color);
+      } else {
+        const g = focusToGroup(f);
+        if (g !== 'cardio') {
+          for (const id of LIB[g].front) idColor.set(id, color);
+          for (const id of LIB[g].back) idColor.set(id, color);
+        }
+      }
+    }
+  };
+  paint(ease, FOCUS_EASE_COLOR);
+  paint(grow, FOCUS_GROW_COLOR);
+
+  const views: BView[] = view === 'both' ? ['front', 'back'] : [view];
+  return (
+    <div className={className ? `bodymap ${className}` : 'bodymap'} style={{ width }}>
+      {views.map((v) => (
+        <svg
+          key={v}
+          viewBox={VIEWBOX[v].full}
+          style={{ display: 'block', flex: 1, minWidth: 0, width: '100%', height: 'auto' }}
+          aria-hidden
+        >
+          {VIEW_PATHS[v].map(({ id, path }) => {
+            const c = idColor.get(id);
+            return (
+              <path
+                key={id}
+                d={path}
+                fill={c ?? DIM}
+                stroke={c ? 'var(--color-bg)' : DIM_STROKE}
+                strokeWidth={c ? 0.25 : 0.12}
               />
             );
           })}
