@@ -16218,6 +16218,29 @@ button.badge {
   font-size: 10px;
   color: var(--color-neutral-600);
 }
+
+/* Fine sub-region emphasis chips under the primary muscle badges (chest/shoulder
+   exercises). Small, quiet — a refinement of the coarse badge above, not a peer. */
+.exd-subregions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: -1px;
+}
+.exd-subchip {
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--color-accent-200);
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.exd-subchip.minor {
+  color: var(--color-neutral-400);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
 .exd-formphotos {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

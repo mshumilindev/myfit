@@ -16,6 +16,7 @@ import {
   customExercises,
   muscleInfoByName,
   richExerciseByName,
+  subRegionsByName,
   type MuscleGroup,
 } from '../data/exercises';
 import {
@@ -66,6 +67,7 @@ export function ExerciseDetailView({
   const canonical = canonicalExerciseName(name);
   const info = muscleInfoByName(canonical);
   const rich = richExerciseByName(canonical);
+  const subR = subRegionsByName(canonical);
   const hasBaseRecord = !!rich;
 
   // Custom ("My exercises") entry, if any — editable in place. Recomputed each
@@ -180,6 +182,20 @@ export function ExerciseDetailView({
                 >
                   {t.muscleGroups[m]}
                 </button>
+              ))}
+            </div>
+          )}
+          {subR && (subR.primary.length > 0 || (subR.secondary?.length ?? 0) > 0) && (
+            <div className="exd-subregions">
+              {subR.primary.map((f) => (
+                <span key={f} className="exd-subchip">
+                  {t.subMuscleNames[f]}
+                </span>
+              ))}
+              {(subR.secondary ?? []).map((f) => (
+                <span key={f} className="exd-subchip minor">
+                  {t.subMuscleNames[f]}
+                </span>
               ))}
             </div>
           )}
