@@ -133,9 +133,7 @@ const RosterApp = lazy(() =>
 const NutritionApp = lazy(() =>
   import('./NutritionApp').then((module) => ({ default: module.NutritionApp })),
 );
-const LearnApp = lazy(() =>
-  import('./LearnApp').then((module) => ({ default: module.LearnApp })),
-);
+const LearnApp = lazy(() => import('./LearnApp').then((module) => ({ default: module.LearnApp })));
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
 );
@@ -147,7 +145,7 @@ export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 
 export type Overlay =
   | { screen: 'session'; workoutId: string }
-  | { screen: 'activity'; newType?: string }
+  | { screen: 'activity'; newType?: string; editId?: string }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
   | { screen: 'exercise-detail'; name: string }
@@ -681,20 +679,20 @@ export function App() {
     const next = learnOpen
       ? '#/learn'
       : nutritionOpen
-      ? '#/nutrition'
-      : rosterOpen
-        ? rosterHash(rosterTab)
-        : apexOpen
-          ? apexHash(apexTab)
-          : toHash(
-              effectiveTab,
-              activeOverlay,
-              programsPeer,
-              libMine,
-              progressSub,
-              progressSeg,
-              volumeLens,
-            );
+        ? '#/nutrition'
+        : rosterOpen
+          ? rosterHash(rosterTab)
+          : apexOpen
+            ? apexHash(apexTab)
+            : toHash(
+                effectiveTab,
+                activeOverlay,
+                programsPeer,
+                libMine,
+                progressSub,
+                progressSeg,
+                volumeLens,
+              );
     if (window.location.hash !== next) window.history.replaceState(null, '', next);
   }, [
     authed,
@@ -850,18 +848,23 @@ export function App() {
     role === 'trainer' ? 'trainer' : role === 'admin' ? 'admin' : 'member';
   const peopleLabel = peopleLabelFor(role, t);
   const peopleDesc = peopleDescFor(role, t);
+  // Switching apps always lands on that app's home screen — never the tab or
+  // overlay you left behind. (Apex/Learn/Nutrition also reset their entry tab.)
   const openGym = () => {
     setShellOpen(false);
     setApexOpen(false);
     setRosterOpen(false);
     setNutritionOpen(false);
     setLearnOpen(false);
+    setOverlay(null);
+    setTab('today');
   };
   const openApex = () => {
     setShellOpen(false);
     setRosterOpen(false);
     setNutritionOpen(false);
     setLearnOpen(false);
+    setApexTab('home');
     setApexOpen(true);
   };
   const openRoster = (rtab: RosterTab) => {
@@ -1118,7 +1121,11 @@ export function App() {
             <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
           )}
           {activeOverlay?.screen === 'activity' && (
-            <ActivityView newType={activeOverlay.newType} onClose={closeOverlay} />
+            <ActivityView
+              newType={activeOverlay.newType}
+              editId={activeOverlay.editId}
+              onClose={closeOverlay}
+            />
           )}
           {activeOverlay?.screen === 'past-workout' && (
             <SessionView

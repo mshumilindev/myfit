@@ -36,6 +36,7 @@ import { ActivitySheet } from '../components/ActivitySheet';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
+import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
@@ -956,6 +957,83 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return t.today;
   })();
 
+  // Learn-progress banner — nudges the user toward the how-to library, in
+  // Learn's rubellite/gem colours. When nothing is completed yet it shows as a
+  // full standalone banner ABOVE the nudge stack; once lessons are done it folds
+  // into the stack as one more advisory card. Only shown once at least one
+  // lesson actually has a recorded video — no point pointing at an empty library.
+  const learnHasVideo = ALL_LESSONS.some(isReady);
+  const learnProgress = (() => {
+    let done = 0;
+    try {
+      const raw = localStorage.getItem('spotter.learn.completed');
+      if (raw) {
+        const arr = JSON.parse(raw) as string[];
+        if (Array.isArray(arr)) done = Math.min(arr.length, LESSON_COUNT);
+      }
+    } catch {
+      /* ignore */
+    }
+    const total = LESSON_COUNT;
+    return { done, total, pct: total ? Math.round((done / total) * 100) : 0 };
+  })();
+  const openLearn = () => {
+    window.location.hash = '#/learn';
+  };
+  const learnBanner = (
+    <button type="button" className="learn-banner" onClick={openLearn}>
+      <span className="learn-banner-ic">
+        <Icon name="graduation-cap" weight="fill" />
+      </span>
+      <span className="learn-banner-main">
+        <span className="learn-banner-kicker">{t.learnBannerKicker}</span>
+        <span className="learn-banner-title">
+          {learnProgress.done > 0 ? t.learnBannerTitleGoing : t.learnBannerTitleStart}
+        </span>
+        <span className="learn-banner-bar">
+          <span style={{ width: `${learnProgress.pct}%` }} />
+        </span>
+        <span className="learn-banner-sub">
+          {t.learnBannerProgress(learnProgress.done, learnProgress.total)}
+        </span>
+      </span>
+      <Icon name="caret-right" className="learn-banner-go" />
+    </button>
+  );
+  // Zero completed → full banner above the stack; otherwise a card in the stack.
+  if (learnHasVideo && learnProgress.done > 0) {
+    nudges.push({
+      id: 'learn',
+      tone: 'learn',
+      priority: 20,
+      icon: 'graduation-cap',
+      kicker: t.learnBannerKicker,
+      title: t.learnBannerTitleGoing,
+      body: (
+        <div className="learn-nudge-prog">
+          <span className="learn-banner-bar">
+            <span style={{ width: `${learnProgress.pct}%` }} />
+          </span>
+          <span className="learn-banner-sub">
+            {t.learnBannerProgress(learnProgress.done, learnProgress.total)}
+          </span>
+        </div>
+      ),
+      actions: (close) => (
+        <button
+          className="prog-banner-cta"
+          onClick={() => {
+            openLearn();
+            close();
+          }}
+        >
+          {t.learnBannerCta}
+          <Icon name="arrow-right" weight="bold" />
+        </button>
+      ),
+    });
+  }
+
   return (
     <div className={`screen paned${!liveAct && hasHistory ? ' today-has-pill' : ''}`}>
       <div className="pane-main">
@@ -1086,6 +1164,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </div>
           </div>
         )}
+        {learnHasVideo && learnProgress.done === 0 && learnBanner}
         <NudgeStack nudges={nudges} />
         {programCard}
         {!(assignment && assignedActive) && hasHistory && (
@@ -1241,6 +1320,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 bodyKg={bodyKg}
                 maxDays={5}
                 onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
+                onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
                 openMuscleHistory={openMuscleHistory}
                 showMuscles={suggestOn}
               />

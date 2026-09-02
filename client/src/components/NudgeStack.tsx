@@ -17,7 +17,7 @@ import { Icon } from '../ui';
 
 export interface Nudge {
   id: string;
-  tone: 'readiness' | 'recovery' | 'analysis' | 'suggest' | 'plan' | 'body' | 'rest';
+  tone: 'readiness' | 'recovery' | 'analysis' | 'suggest' | 'plan' | 'body' | 'rest' | 'learn';
   /** Higher = more urgent. Orders the overlay (fixed) and the deck. */
   priority: number;
   icon: string;
@@ -193,7 +193,12 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
             <div className="nudge-scrim" onClick={close} />
             <div className="nudge-sheet" role="dialog">
               <div className="nudge-sheet-head">
-                <button type="button" className="nudge-close" onClick={close} aria-label={t.srClose}>
+                <button
+                  type="button"
+                  className="nudge-close"
+                  onClick={close}
+                  aria-label={t.srClose}
+                >
                   <Icon name="x-circle" weight="fill" />
                 </button>
               </div>

@@ -65,6 +65,7 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
             maxDays={PAGE_DAYS}
             dayOffset={curPage * PAGE_DAYS}
             onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
+            onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
           />
           {maxPage > 0 && (
             <nav className="exl-pager" aria-label={t.pagination}>

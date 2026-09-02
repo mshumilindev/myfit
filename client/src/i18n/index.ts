@@ -131,9 +131,11 @@ export function fmtWeekday(ts: number, locale: LocaleId = current): string {
 
 /** "31 July" */
 export function fmtDayMonth(ts: number, locale: LocaleId = current): string {
+  // Abbreviated month (e.g. "1 Sep") in every locale — keeps narrow date
+  // columns (recent-session rows) on one line instead of wrapping.
   return new Intl.DateTimeFormat(dateLocale[locale], {
     day: 'numeric',
-    month: 'long',
+    month: 'short',
   }).format(new Date(ts));
 }
 

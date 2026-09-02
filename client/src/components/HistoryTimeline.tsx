@@ -5,9 +5,7 @@
  * chronological order, earliest on top. Used by the Today preview and the full
  * history, capped to `maxDays` days.
  */
-import { useState } from 'react';
 import {
-  deleteActivity,
   muscleWorkSorted,
   programDayNameFor,
   workoutDayReadout,
@@ -17,7 +15,7 @@ import {
 import { fmtDurationHM, fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { MuscleRow } from './Muscle';
-import { ConfirmDialog, Icon } from '../ui';
+import { Icon } from '../ui';
 import {
   activityType,
   activityCategory,
@@ -73,6 +71,7 @@ export function HistoryTimeline({
   maxDays,
   dayOffset = 0,
   onOpenWorkout,
+  onOpenActivity,
   openMuscleHistory,
   showMuscles = true,
 }: {
@@ -88,6 +87,8 @@ export function HistoryTimeline({
   /** Skip this many of the most-recent days first (for paging). */
   dayOffset?: number;
   onOpenWorkout: (id: string) => void;
+  /** Open a logged activity's detail/edit view. Omit to keep rows non-interactive. */
+  onOpenActivity?: (id: string) => void;
   openMuscleHistory?: (m: MuscleGroup) => void;
   showMuscles?: boolean;
 }) {
@@ -112,7 +113,10 @@ export function HistoryTimeline({
           <span className="hist-day-date">{fmtShortDate(day.items[0].ts, locale)}</span>
           <div className="hist-day-items">
             {day.items.map((it) => {
-              if (it.kind !== 'w') return <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} />;
+              if (it.kind !== 'w')
+                return (
+                  <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
+                );
               // Calories read the same everywhere: a right-aligned flame chip
               // (never inline in the stats), matching the activity rows — so the
               // stats text can never collide with the number.
@@ -157,14 +161,21 @@ export function HistoryTimeline({
 
 /** One finished activity in the timeline — the type icon sits inline with the
  *  name; the date lives in the shared day column. */
-function ActivityRow({ a, bodyKg }: { a: Activity; bodyKg: number | null }) {
+function ActivityRow({
+  a,
+  bodyKg,
+  onOpen,
+}: {
+  a: Activity;
+  bodyKg: number | null;
+  onOpen?: (id: string) => void;
+}) {
   const { t } = useT();
-  const [confirmDel, setConfirmDel] = useState(false);
   const cat = activityCategory(a);
   const kcal = a.calories ?? activityCalories(a, bodyKg);
   const min = Math.round(activityDurationMin(a));
-  return (
-    <div className={`hist-item hist-activity cat-${cat}`}>
+  const inner = (
+    <>
       <span className="hist-item-body">
         <span className="hist-item-name">
           <Icon name={activityType(a.type)?.icon ?? 'heartbeat'} className="hist-act-icon" />
@@ -181,28 +192,20 @@ function ActivityRow({ a, bodyKg }: { a: Activity; bodyKg: number | null }) {
           <Icon name="flame" weight="fill" />~{kcal}
         </span>
       )}
-      <button
-        className="ta-del"
-        onClick={() => setConfirmDel(true)}
-        aria-label={t.delete}
-        title={t.delete}
-      >
-        <Icon name="trash" />
-      </button>
-      {confirmDel && (
-        <ConfirmDialog
-          title={t.actDeleteTitle}
-          body={t.actDeleteBody}
-          confirmLabel={t.delete}
-          cancelLabel={t.cancel}
-          danger
-          onConfirm={() => {
-            deleteActivity(a.id);
-            setConfirmDel(false);
-          }}
-          onCancel={() => setConfirmDel(false)}
-        />
-      )}
-    </div>
+      {onOpen && <Icon name="arrow-up-right" className="go" />}
+    </>
+  );
+  // Opens the activity's detail/edit view (like workouts). Non-interactive when
+  // no opener is provided.
+  return onOpen ? (
+    <button
+      className={`hist-item hist-activity cat-${cat}`}
+      onClick={() => onOpen(a.id)}
+      aria-label={t.actType[a.type] ?? a.type}
+    >
+      {inner}
+    </button>
+  ) : (
+    <div className={`hist-item hist-activity cat-${cat}`}>{inner}</div>
   );
 }

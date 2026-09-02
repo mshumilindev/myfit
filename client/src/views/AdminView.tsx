@@ -103,6 +103,13 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
     () => people.filter((p) => p.role === 'trainer' && p.status === 'active'),
     [people],
   );
+  // Trainer pickers accept admins too — an admin can be assigned as a trainer.
+  // (Kept separate from `trainers` so the count/filter still mean the role.)
+  const assignableTrainers = useMemo(
+    () =>
+      people.filter((p) => (p.role === 'trainer' || p.role === 'admin') && p.status === 'active'),
+    [people],
+  );
   const needle = q.trim().toLowerCase();
   const filtered = useMemo(
     () =>
@@ -387,7 +394,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
       {creating && (
         <NewPersonDialog
           kind={creating}
-          trainers={trainers}
+          trainers={assignableTrainers}
           onClose={() => setCreating(null)}
           onCreated={(p, token, expiresAt) => {
             setCreating(null);
@@ -542,7 +549,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
       {assignFor && (
         <AssignTrainerDialog
           person={assignFor}
-          trainers={trainers}
+          trainers={assignableTrainers}
           onClose={() => setAssignFor(null)}
           onDone={() => {
             setAssignFor(null);

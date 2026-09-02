@@ -344,9 +344,19 @@ export function syncNotifs(raw: Notif[]): void {
     }
     firstRun = false;
   }
+  // Compare the rendered strings too, not just id + ts: changing the app
+  // language recomputes every title/subtitle with the new dictionary while ids
+  // and timestamps stay put, so an id/ts-only check would keep showing the old
+  // language until some unrelated change forced an emit.
   const feedSame =
     notifs.length === storeFeed.length &&
-    notifs.every((n, i) => storeFeed[i]?.id === n.id && storeFeed[i]?.ts === n.ts);
+    notifs.every(
+      (n, i) =>
+        storeFeed[i]?.id === n.id &&
+        storeFeed[i]?.ts === n.ts &&
+        storeFeed[i]?.title === n.title &&
+        storeFeed[i]?.subtitle === n.subtitle,
+    );
   const stateSame = sameSeen(state, storeState);
   storeState = state;
   storeFeed = notifs;

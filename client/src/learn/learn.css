@@ -15,8 +15,12 @@
   padding: 12px 16px calc(96px + env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 720px) {
+  /* Learn fills the full width beside the rail — override the shared 900px cap
+     so the lesson grid can breathe and previews get bigger. The player keeps a
+     readable, centred max-width of its own (see .ln-player below). */
   .app-learn .apex-scroll {
-    padding: 22px 32px 40px;
+    padding: 22px 40px 40px;
+    max-width: none;
   }
 }
 
@@ -225,12 +229,22 @@
   width: 100%;
 }
 .app-learn .ln-thumb.row {
-  height: 88px;
+  height: 92px;
   width: auto;
 }
 .app-learn .ln-thumb.lead {
-  height: 104px;
+  height: 112px;
   width: auto;
+}
+/* Portrait previews (mobile view): a 9:16 still sized by height alone becomes a
+   sliver, so size portrait rows/leads by width instead — much bigger stills. */
+.app-learn .ln-thumb.cut-p.row {
+  height: auto;
+  width: 68px;
+}
+.app-learn .ln-thumb.cut-p.lead {
+  height: auto;
+  width: 96px;
 }
 .app-learn .ln-thumb-ph {
   position: absolute;
@@ -330,9 +344,21 @@
   gap: 20px 12px;
 }
 @media (min-width: 720px) {
+  /* Fill the (now full) width with bigger tiles — as wide as the space allows,
+     never squeezed to a fixed column count. */
   .app-learn .ln-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+    gap: 24px 20px;
+  }
+  .app-learn .ln-card-title {
+    font-size: 15px;
+  }
+  /* Bigger stills for the wide layout. */
+  .app-learn .ln-thumb.cut-w.row {
+    height: 100px;
+  }
+  .app-learn .ln-thumb.cut-w.lead {
+    height: 132px;
   }
 }
 .app-learn .ln-card {
@@ -555,6 +581,12 @@
     aspect-ratio: 9 / 16;
     width: auto;
     justify-self: center;
+  }
+  /* The player stays readable and centred even though the scroll is full-width. */
+  .app-learn .ln-player {
+    max-width: 940px;
+    margin-inline: auto;
+    width: 100%;
   }
   .app-learn .ln-stage,
   .app-learn .ln-meta {

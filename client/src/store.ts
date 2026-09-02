@@ -1367,6 +1367,32 @@ export function logActivity(input: {
   return activity;
 }
 
+/** Edit a finished (logged) activity — time, duration, effort, distance and the
+ *  recomputed calories in one patch. Calories are computed by the caller (which
+ *  has the body weight + estimator) just like a backfill. */
+export function editActivity(
+  id: string,
+  patch: {
+    startedAt: number;
+    finishedAt: number | null;
+    durationMin: number;
+    calories?: number | null;
+    distanceKm?: number | null;
+    effort?: ActivityEffort;
+    note?: string | null;
+  },
+): void {
+  patchActivity(id, {
+    startedAt: patch.startedAt,
+    finishedAt: patch.finishedAt,
+    durationMin: Math.round(patch.durationMin * 10) / 10,
+    calories: patch.calories ?? null,
+    distanceKm: patch.distanceKm ?? null,
+    ...(patch.effort ? { effort: patch.effort } : {}),
+    ...(patch.note !== undefined ? { note: patch.note } : {}),
+  });
+}
+
 export function deleteActivity(id: string): void {
   const a = state.activities.find((x) => x.id === id);
   // A live (never-synced) activity is local-only — drop it without a backend

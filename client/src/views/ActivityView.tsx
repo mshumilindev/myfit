@@ -17,6 +17,8 @@ import {
   updateActivity,
   finishActivity,
   discardActivity,
+  editActivity,
+  deleteActivity,
 } from '../store';
 import { useT } from '../i18n';
 import { ConfirmDialog, Icon } from '../ui';
@@ -24,7 +26,7 @@ import { EffortGauge } from '../components/EffortGauge';
 import { DateField } from '../components/PickerFields';
 import { TimelineRange } from '../components/TimelineRange';
 import { activityType, activityElapsedMs, isActivityPaused, estimateCalories } from '../activities';
-import type { ActivityEffort } from '../types';
+import type { Activity, ActivityEffort } from '../types';
 
 const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
 
@@ -38,11 +40,25 @@ function clock(ms: number): string {
   return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
 }
 
-export function ActivityView({ newType, onClose }: { newType?: string; onClose: () => void }) {
+export function ActivityView({
+  newType,
+  editId,
+  onClose,
+}: {
+  newType?: string;
+  editId?: string;
+  onClose: () => void;
+}) {
   // Subscribe so pressing Start (which creates the live activity) flips this
   // view from the idle state into the running timer.
-  useStore();
+  const store = useStore();
   const live = liveActivity();
+  // Editing an existing logged activity takes priority (opened from History).
+  if (editId) {
+    const existing = store.activities.find((a) => a.id === editId && a.finishedAt !== null);
+    if (!existing) return <CloseOnMount onClose={onClose} />;
+    return <EditActivity activity={existing} onClose={onClose} />;
+  }
   // A live activity always wins; otherwise this is a fresh, not-yet-started one.
   if (live) return <RunningActivity onClose={onClose} />;
   const type = newType ? activityType(newType) : null;
@@ -159,6 +175,115 @@ function NewActivity({ typeKey, onClose }: { typeKey: string; onClose: () => voi
             </button>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+/** Edit a finished (logged) activity — same form as a backfill, prefilled, plus
+ *  a Delete. Opened from the History timeline. */
+function EditActivity({ activity, onClose }: { activity: Activity; onClose: () => void }) {
+  const { t } = useT();
+  const store = useStore();
+  const type = activityType(activity.type);
+  const isRecovery = activity.category === 'recovery';
+  const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
+
+  const start = new Date(activity.startedAt);
+  const p = (n: number) => String(n).padStart(2, '0');
+  const [date, setDate] = useState(
+    `${start.getFullYear()}-${p(start.getMonth() + 1)}-${p(start.getDate())}`,
+  );
+  const [time, setTime] = useState(`${p(start.getHours())}:${p(start.getMinutes())}`);
+  const [duration, setDuration] = useState(Math.max(1, Math.round(activity.durationMin)));
+  const [effort, setEffort] = useState<ActivityEffort>(activity.effort ?? 'moderate');
+  const [distance, setDistance] = useState(
+    activity.distanceKm != null ? String(activity.distanceKm) : '',
+  );
+  const [confirmDel, setConfirmDel] = useState(false);
+  const todayIso = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  })();
+
+  if (!type) return <CloseOnMount onClose={onClose} />;
+  const kcal = estimateCalories(type, duration, bodyKg, effort);
+
+  function save(): void {
+    const startedAt = new Date(`${date}T${time}`).getTime();
+    if (Number.isNaN(startedAt)) return;
+    editActivity(activity.id, {
+      startedAt,
+      finishedAt: startedAt + duration * 60000,
+      durationMin: duration,
+      calories: type ? estimateCalories(type, duration, bodyKg, effort) : null,
+      distanceKm: type?.tracksDistance && distance ? Number(distance) || null : null,
+      effort,
+    });
+    onClose();
+  }
+
+  return (
+    <div className={`screen activity-screen cat-${activity.category}`}>
+      <ActivityHead
+        type={type}
+        isRecovery={isRecovery}
+        onClose={onClose}
+        t={t}
+        fallbackName={activity.type}
+      />
+
+      <div className="av-past">
+        <label className="field-block">
+          <span className="field-label">{t.backfillDate}</span>
+          <DateField value={date} onChange={setDate} max={todayIso} />
+        </label>
+        <TimelineRange
+          start={hhmmToMin(time)}
+          duration={duration}
+          onChange={(s, d) => {
+            setTime(minToHhmm(s));
+            setDuration(d);
+          }}
+          units={{ hrShort: t.hrShort, minShort: t.minShort }}
+        />
+        <EffortRow effort={effort} onEffort={setEffort} t={t} />
+        {type.tracksDistance && <DistanceField value={distance} onChange={setDistance} t={t} />}
+        <div className="act-summary-row">
+          {kcal != null ? (
+            <span className="act-kcal sm">
+              <Icon name="flame" weight="fill" />
+              <span className="tnum">~{kcal}</span>
+              <em>{t.kcalShort}</em>
+            </span>
+          ) : (
+            <span className="act-noweight-inline">{t.actNoWeight}</span>
+          )}
+          <button className="btn btn-primary" onClick={save}>
+            <Icon name="check" weight="bold" />
+            {t.actSave}
+          </button>
+        </div>
+        <button className="btn danger-outline av-discard-btn" onClick={() => setConfirmDel(true)}>
+          <Icon name="trash" />
+          {t.delete}
+        </button>
+      </div>
+
+      {confirmDel && (
+        <ConfirmDialog
+          title={t.actDeleteTitle}
+          body={t.actDeleteBody}
+          confirmLabel={t.delete}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            deleteActivity(activity.id);
+            setConfirmDel(false);
+            onClose();
+          }}
+          onCancel={() => setConfirmDel(false)}
+        />
       )}
     </div>
   );

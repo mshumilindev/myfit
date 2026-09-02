@@ -18,16 +18,8 @@ import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
 import { useLearnT } from './i18n';
-import {
-  catalogForRole,
-  lessonsForRole,
-  lessonById,
-  topicById,
-  topicTitle,
-  type Lesson,
-  type Topic,
-  type ViewerRole,
-} from './catalog';
+import { catalogForRole, type Lesson, type Topic, type ViewerRole } from './catalog';
+import { localizeTopics, localTopicTitle } from './catalog.i18n';
 
 type Tab = 'home' | 'topics' | 'saved' | 'feed';
 type Cut = 'phone' | 'web';
@@ -203,7 +195,7 @@ function HomeScreen({
   cut: Cut;
   onPlay: (l: Lesson) => void;
 }) {
-  const { L } = useLearnT();
+  const { L, locale } = useLearnT();
   const [q, setQ] = useState('');
   const [active, setActive] = useState<Set<string>>(new Set());
   const first = lessons[0];
@@ -267,7 +259,7 @@ function HomeScreen({
               <button className="ln-continue" onClick={() => onPlay(first)}>
                 <Thumb cut={cut} variant="lead" />
                 <div className="ln-continue-main">
-                  <div className="ln-lesson-tag">{topicTitle(first.topic)}</div>
+                  <div className="ln-lesson-tag">{localTopicTitle(first.topic, locale)}</div>
                   <div className="ln-continue-title">{first.title}</div>
                   <div className="ln-continue-sub">
                     <Icon name="clock" /> {L.videoComingSoon}
@@ -363,9 +355,9 @@ function SavedScreen({
   onPlay: (l: Lesson) => void;
   onBrowse: () => void;
 }) {
-  const { L } = useLearnT();
-  const visibleIds = new Set(lessons.map((l) => l.id));
-  const items = saved.map(lessonById).filter((l): l is Lesson => !!l && visibleIds.has(l.id));
+  const { L, locale } = useLearnT();
+  const byId = new Map(lessons.map((l) => [l.id, l] as const));
+  const items = saved.map((id) => byId.get(id)).filter((l): l is Lesson => !!l);
   return (
     <div className="ln-screen">
       <div className="ln-head">
@@ -391,7 +383,7 @@ function SavedScreen({
               <span className="ln-saved-text">
                 <span className="ln-saved-title">{l.title}</span>
                 <span className="ln-saved-meta">
-                  {topicTitle(l.topic)} · {L.videoComingSoon.toLowerCase()}
+                  {localTopicTitle(l.topic, locale)} · {L.videoComingSoon.toLowerCase()}
                 </span>
               </span>
               <Icon name="bookmark-simple" weight="fill" className="ln-saved-mark" />
@@ -420,20 +412,22 @@ function Player({
   onBack: () => void;
   onPlay: (l: Lesson) => void;
 }) {
-  const { L } = useLearnT();
-  // The switch selects which recorded cut to watch (defaults to the view);
-  // orientation of the app itself always follows the view (`cut`).
+  const { L, locale } = useLearnT();
+  // The Phone/Web switch chooses which recorded cut you're watching, and the
+  // stage + up-next stills take that cut's orientation (Web → landscape 16:9,
+  // Phone → portrait 9:16). It defaults to the current view but can be flipped
+  // either way: mobile + Web → landscape, web + Phone → portrait.
   const [watch, setWatch] = useState<Cut>(cut);
-  const topic = topicById(lesson.topic)!;
+  const topicName = localTopicTitle(lesson.topic, locale);
   const upNext = lessons.filter((l) => l.topic === lesson.topic && l.id !== lesson.id).slice(0, 3);
 
   return (
     <div className="ln-player">
       <button className="ln-back" onClick={onBack}>
-        <Icon name="caret-left" /> {topic.title}
+        <Icon name="caret-left" /> {topicName}
       </button>
 
-      <div className={`ln-stage cut-${cut === 'phone' ? 'p' : 'w'}`}>
+      <div className={`ln-stage cut-${watch === 'phone' ? 'p' : 'w'}`}>
         <div className="ln-stage-inner">
           <span className="ln-stage-ic">
             <Icon name="graduation-cap" weight="fill" />
@@ -444,7 +438,7 @@ function Player({
       </div>
 
       <div className="ln-meta">
-        <div className="ln-lesson-tag">{topic.title}</div>
+        <div className="ln-lesson-tag">{topicName}</div>
         <div className="ln-meta-title">{lesson.title}</div>
         <div className="ln-meta-desc">{lesson.blurb}</div>
 
@@ -454,7 +448,8 @@ function Player({
               className={`ln-switch-opt${watch === 'phone' ? ' on' : ''}`}
               onClick={() => setWatch('phone')}
             >
-              <Icon name="device-mobile" weight={watch === 'phone' ? 'fill' : undefined} /> {L.phone}
+              <Icon name="device-mobile" weight={watch === 'phone' ? 'fill' : undefined} />{' '}
+              {L.phone}
             </button>
             <button
               className={`ln-switch-opt${watch === 'web' ? ' on' : ''}`}
@@ -475,7 +470,7 @@ function Player({
             <div className="ln-saved-list">
               {upNext.map((l) => (
                 <button key={l.id} className="ln-saved-row" onClick={() => onPlay(l)}>
-                  <Thumb cut={cut} variant="row" />
+                  <Thumb cut={watch} variant="row" />
                   <span className="ln-saved-text">
                     <span className="ln-saved-title">{l.title}</span>
                     <span className="ln-saved-meta">{L.videoComingSoon.toLowerCase()}</span>
@@ -511,7 +506,7 @@ export function LearnRoot({
   onNotifSeen: (ids: string[]) => void;
   onNotifMarkAll: () => void;
 }) {
-  const { L } = useLearnT();
+  const { L, locale } = useLearnT();
   const [tab, setTab] = useState<Tab>('home');
   const [topic, setTopic] = useState<Topic | null>(null);
   const [playing, setPlaying] = useState<Lesson | null>(null);
@@ -533,9 +528,14 @@ export function LearnRoot({
     }
   }, [saved]);
 
-  // Role-visible catalog — trainer/admin lessons never leak to members.
-  const topics = useMemo(() => catalogForRole(role), [role]);
-  const lessons = useMemo(() => lessonsForRole(role), [role]);
+  // Role-visible catalog — trainer/admin lessons never leak to members — then
+  // localised so lesson/topic titles and blurbs render in the active language.
+  const topics = useMemo(() => localizeTopics(catalogForRole(role), locale), [role, locale]);
+  const lessons = useMemo(() => topics.flatMap((t) => t.lessons), [topics]);
+
+  // Keep the open lesson/topic in sync with the active language.
+  const playingLive = playing ? (lessons.find((l) => l.id === playing.id) ?? playing) : null;
+  const topicLive = topic ? (topics.find((t) => t.id === topic.id) ?? topic) : null;
 
   const toggleSave = (id: string) =>
     setSaved((s) => (s.includes(id) ? s.filter((x) => x !== id) : [id, ...s]));
@@ -602,14 +602,14 @@ export function LearnRoot({
         </header>
 
         <div className="apex-body">
-          {playing ? (
+          {playingLive ? (
             <div className="apex-scroll" ref={scrollRef}>
               <Player
-                lesson={playing}
+                lesson={playingLive}
                 lessons={lessons}
                 cut={cut}
-                saved={saved.includes(playing.id)}
-                onToggleSave={() => toggleSave(playing.id)}
+                saved={saved.includes(playingLive.id)}
+                onToggleSave={() => toggleSave(playingLive.id)}
                 onBack={() => setPlaying(null)}
                 onPlay={openPlayer}
               />
@@ -631,9 +631,9 @@ export function LearnRoot({
                 <HomeScreen topics={topics} lessons={lessons} cut={cut} onPlay={openPlayer} />
               )}
               {tab === 'topics' &&
-                (topic ? (
+                (topicLive ? (
                   <TopicDetail
-                    topic={topic}
+                    topic={topicLive}
                     cut={cut}
                     onBack={() => setTopic(null)}
                     onPlay={openPlayer}

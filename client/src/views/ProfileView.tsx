@@ -1093,7 +1093,10 @@ function ProfileAssignTrainerSheet(props: {
 }) {
   const { t } = useT();
   const trainers = props.people.filter(
-    (p) => p.role === 'trainer' && p.status === 'active' && p.id !== props.person.id,
+    (p) =>
+      (p.role === 'trainer' || p.role === 'admin') &&
+      p.status === 'active' &&
+      p.id !== props.person.id,
   );
   const [sel, setSel] = useState<string | null>(props.person.trainerId);
   const [busy, setBusy] = useState(false);

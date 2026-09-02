@@ -56,7 +56,9 @@ async function validateTrainerAssignment(
   if (!isId(trainerId)) throw new HttpsError('invalid-argument', 'trainer required');
   if (trainerId === subjectId) throw new HttpsError('invalid-argument', 'cannot train yourself');
   const tr = await usersById(trainerId);
-  if (!tr || tr.role !== 'trainer') throw new HttpsError('invalid-argument', 'not a trainer');
+  // Admins can act as trainers too, not only users with the trainer role.
+  if (!tr || (tr.role !== 'trainer' && tr.role !== 'admin'))
+    throw new HttpsError('invalid-argument', 'not a trainer');
   if (tr.status !== 'active') throw new HttpsError('invalid-argument', 'trainer must be active');
   return trainerId;
 }

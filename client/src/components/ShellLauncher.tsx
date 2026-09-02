@@ -101,25 +101,6 @@ export function ShellLauncher({
         </button>
 
         <button
-          className={`shell-tile${current === 'roster' ? ' current' : ''}`}
-          onClick={onRoster}
-          disabled={current === 'roster'}
-        >
-          <span className="shell-ic shell-ic-people">
-            <Icon name="user-focus" weight="fill" />
-          </span>
-          <div className="shell-tile-main">
-            <div className="shell-tile-name">{peopleLabel}</div>
-            <div className="shell-tile-sub">{peopleDesc}</div>
-          </div>
-          {current === 'roster' ? (
-            <span className="shell-current">{t.shellCurrent}</span>
-          ) : (
-            <Icon name="caret-right" className="shell-go" />
-          )}
-        </button>
-
-        <button
           className={`shell-tile${current === 'nutrition' ? ' current' : ''}${
             nutritionEnabled ? '' : ' locked'
           }`}
@@ -147,7 +128,27 @@ export function ShellLauncher({
             )
           ) : null}
         </button>
-              <button
+
+        <button
+          className={`shell-tile${current === 'roster' ? ' current' : ''}`}
+          onClick={onRoster}
+          disabled={current === 'roster'}
+        >
+          <span className="shell-ic shell-ic-people">
+            <Icon name="user-focus" weight="fill" />
+          </span>
+          <div className="shell-tile-main">
+            <div className="shell-tile-name">{peopleLabel}</div>
+            <div className="shell-tile-sub">{peopleDesc}</div>
+          </div>
+          {current === 'roster' ? (
+            <span className="shell-current">{t.shellCurrent}</span>
+          ) : (
+            <Icon name="caret-right" className="shell-go" />
+          )}
+        </button>
+
+        <button
           className={`shell-tile${current === 'learn' ? ' current' : ''}`}
           onClick={onLearn}
           disabled={current === 'learn'}

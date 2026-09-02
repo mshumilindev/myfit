@@ -1723,6 +1723,7 @@ i > svg {
   font-size: 11px;
   color: var(--color-neutral-600);
   font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .recent-row .name {
@@ -20565,10 +20566,24 @@ button.badge {
 
 /* full sheet */
 .rd-verdict {
-  padding: 14px 15px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
   border-left: 3px solid var(--color-kcal, var(--color-accent));
   background: color-mix(in srgb, var(--color-kcal, var(--color-accent)) 8%, var(--color-surface));
+}
+.rd-verdict .rd-verdict-ic {
+  flex: none;
+  font-size: 18px;
+  margin-top: 1px;
+  color: var(--color-kcal, var(--color-accent));
+}
+.rd-verdict .rd-verdict-main {
+  flex: 1;
+  min-width: 0;
 }
 .rd-lead {
   font-size: 15px;
@@ -20856,6 +20871,101 @@ button.badge {
 }
 .tone-rest {
   --tone: var(--color-rest-400);
+}
+/* Learn's rubellite/gem accent (Learn app colour) — hardcoded since Learn's
+   token ramp only exists under .theme-learn, and this renders in the Gym theme. */
+.tone-learn {
+  --tone: #e5537e;
+}
+/* Progress row inside the in-stack Learn nudge (expanded card). */
+.learn-nudge-prog {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---- Learn-progress banner (full, above the nudge stack when 0 completed) ---- */
+.learn-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, #e5537e 34%, var(--color-divider));
+  border-left: 3px solid #e5537e;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  color: var(--color-text);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, #e5537e 15%, var(--color-surface)),
+    color-mix(in srgb, #e5537e 6%, var(--color-surface))
+  );
+  box-shadow: 0 8px 24px -16px rgba(229, 83, 126, 0.7);
+}
+.learn-banner-ic {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: #e5537e;
+  background: color-mix(in srgb, #e5537e 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #e5537e 40%, transparent);
+}
+.learn-banner-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.learn-banner-kicker {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: #e5537e;
+}
+.learn-banner-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+.learn-banner-bar {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  margin-top: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, #e5537e 20%, var(--color-neutral-800));
+}
+.learn-banner-bar > span {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #b23a63, #e5537e);
+}
+.learn-banner-sub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.learn-banner-go {
+  flex: none;
+  font-size: 18px;
+  color: #e5537e;
+}
+@media (hover: hover) {
+  .learn-banner:hover {
+    border-color: color-mix(in srgb, #e5537e 55%, var(--color-divider));
+    box-shadow: 0 10px 30px -14px rgba(229, 83, 126, 0.85);
+  }
 }
 .nudge-wrap {
   position: relative;
@@ -21178,8 +21288,8 @@ button.badge {
 .coach-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 12px;
+  margin-top: 12px;
 }
 .nudge-card-acts {
   display: flex;
