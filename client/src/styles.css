@@ -14541,9 +14541,9 @@ button.exd-media {
    the src — one element, fixed box, so the figure never moves on hover/active. */
 .phys-fig {
   display: block;
-  width: 92px;
+  width: 100px;
   margin: 0 auto;
-  aspect-ratio: 210 / 540;
+  aspect-ratio: 240 / 560;
   object-fit: contain;
 }
 .phys-name {
