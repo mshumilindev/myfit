@@ -14,6 +14,7 @@ import { FocusEditor } from './FocusEditor';
 import { focusLists, groupEmphasis, FOCUS_MAV_DELTA } from '../goals';
 import { focusToGroup, type FocusMuscle } from '../data/subregions';
 import { LANDMARKS } from '../volume';
+import { exercisesForSubRegions } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
 import { Icon } from '../ui';
@@ -41,6 +42,8 @@ export function GoalsView({
       return { m: m as MuscleGroup, from: base, to, grow: e === 'grow' };
     })
     .filter((x): x is { m: MuscleGroup; from: number; to: number; grow: boolean } => !!x && x.from !== x.to);
+
+  const suggestedMoves = exercisesForSubRegions(grow);
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs goals-tab">
@@ -133,6 +136,23 @@ export function GoalsView({
                   <span className={`goals-vol-delta ${d.grow ? 'grow' : 'ease'}`}>
                     {d.grow ? `+${d.to - d.from}` : `−${d.from - d.to}`}
                   </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {hasFocus && suggestedMoves.length > 0 && (
+          <section className="goals-card">
+            <div className="goals-card-head">
+              <span className="goals-card-kicker">{t.goalsSuggestedTitle}</span>
+            </div>
+            <div className="goals-moves">
+              {suggestedMoves.map((mv) => (
+                <div className="goals-move" key={mv.name}>
+                  <Icon name="chart-line-up" />
+                  <span className="goals-move-name">{mv.name}</span>
+                  <span className="goals-chip grow">{label(mv.region)}</span>
                 </div>
               ))}
             </div>

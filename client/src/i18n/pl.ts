@@ -581,6 +581,7 @@ export const pl: Strings = {
   focusSummary: (g: number, e: number, h: number) => `${g} wzrost · ${e} redukcja · ${h} utrzym.`,
   goalsShapeTitle: 'Jak fokus kształtuje trening',
   goalsVolumeTargets: 'Tygodniowe cele objętości',
+  goalsSuggestedTitle: 'Sugerowane ruchy',
   lastDoneCol: 'Ostatnio',
   never: 'Nigdy',
   clearLabel: 'Wyczyść',

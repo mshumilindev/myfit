@@ -625,6 +625,7 @@ export const en = {
   focusSummary: (g: number, e: number, h: number) => `${g} grow · ${e} ease · ${h} held`,
   goalsShapeTitle: 'How your focus shapes training',
   goalsVolumeTargets: 'Weekly volume targets',
+  goalsSuggestedTitle: 'Suggested moves',
   lastDoneCol: 'Last done',
   never: 'Never',
   clearLabel: 'Clear',

@@ -14322,6 +14322,31 @@ button.exd-media {
   text-align: right;
 }
 
+/* Goals: suggested moves for grow muscles */
+.goals-moves {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.goals-move {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+.goals-move > i {
+  font-size: 14px;
+  color: var(--color-accent);
+  flex: none;
+}
+.goals-move-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
 /* Focus editor sheet (GL-03) */
 .focus-sheet .focus-reset {
   border: 0;

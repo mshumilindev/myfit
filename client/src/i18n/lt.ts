@@ -589,6 +589,7 @@ export const lt: Strings = {
   focusSummary: (g: number, e: number, h: number) => `${g} auginti · ${e} mažinti · ${h} išlaikyti`,
   goalsShapeTitle: 'Kaip fokusas veikia treniruotes',
   goalsVolumeTargets: 'Savaitinės apimties tikslai',
+  goalsSuggestedTitle: 'Siūlomi pratimai',
   lastDoneCol: 'Paskutinį kartą',
   never: 'Niekada',
   clearLabel: 'Išvalyti',

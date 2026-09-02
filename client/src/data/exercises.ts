@@ -7,7 +7,7 @@ import DB_RAW from './exercises.db.json';
 import RICH_RAW from './exercises.rich.json';
 import SUBREGIONS_RAW from './subregionTags.json';
 import type { EquipmentId } from './equipment';
-import type { ExerciseSubRegions } from './subregions';
+import type { ExerciseSubRegions, FocusMuscle } from './subregions';
 
 export type MuscleGroup =
   | 'chest'
@@ -100,6 +100,34 @@ export function subRegionsByName(name: string): ExerciseSubRegions | null {
   if (custom?.subRegions) return custom.subRegions;
   const r = RICH_BY_NAME.get(key);
   return r ? (SUBREGIONS[r.id] ?? null) : null;
+}
+
+/**
+ * Catalog moves whose PRIMARY sub-region is one of the requested fine regions —
+ * for the Goals "suggested moves" strip. Round-robins across regions so a mixed
+ * focus gets a spread, deduped by name.
+ */
+export function exercisesForSubRegions(
+  regions: FocusMuscle[],
+  perRegion = 2,
+  cap = 6,
+): { name: string; region: FocusMuscle }[] {
+  const out: { name: string; region: FocusMuscle }[] = [];
+  const seen = new Set<string>();
+  for (const r of regions) {
+    let n = 0;
+    for (const ex of BUILT_IN_CATALOG) {
+      if (n >= perRegion) break;
+      const sr = SUBREGIONS[ex.id];
+      if (sr?.primary.includes(r) && !seen.has(ex.names[0])) {
+        seen.add(ex.names[0]);
+        out.push({ name: ex.names[0], region: r });
+        n++;
+        if (out.length >= cap) return out;
+      }
+    }
+  }
+  return out;
 }
 
 function richPrimary(rich: RichExercise): MuscleGroup {
