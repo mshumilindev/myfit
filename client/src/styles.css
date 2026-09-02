@@ -14458,6 +14458,20 @@ button.exd-media {
   font-size: 12px;
   cursor: pointer;
 }
+
+.goals-reset {
+  align-self: center;
+  margin-top: 4px;
+  border: 0;
+  background: none;
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+.goals-reset:hover {
+  color: var(--color-danger-text);
+}
 .goals-physique {
   display: flex;
   gap: 14px;
@@ -14513,23 +14527,35 @@ button.exd-media {
   color: var(--color-accent);
 }
 .phys-fig {
+  position: relative;
   width: 56px;
   margin: 0 auto;
   aspect-ratio: 192 / 512;
-  background-image: url(/physiques/figures.png);
-  background-repeat: no-repeat;
-  background-size: 872% 218%;
-  background-position: var(--fig-bx, 0%) var(--fig-y, 0%);
 }
-/* Highlighted silhouette on hover/active (web) and active (mobile has no hover). */
-.phys-card:hover .phys-fig,
-.phys-card.active .phys-fig,
-.phys-fig.lit {
-  background-position: var(--fig-hx, 0%) var(--fig-y, 0%);
+.phys-fig img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+/* Highlighted silhouette cross-fades in on hover/active (web) and active
+   (mobile has no hover). Both layers share the exact box + source dims, so the
+   figure never shifts. */
+.phys-lit {
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+.phys-card:hover .phys-lit,
+.phys-card.active .phys-lit,
+.phys-fig.lit .phys-lit {
+  opacity: 1;
 }
 .phys-name {
   font-size: 14px;
   margin-top: 8px;
+  color: var(--color-text);
 }
 .phys-card.active .phys-name {
   color: var(--color-accent-100);

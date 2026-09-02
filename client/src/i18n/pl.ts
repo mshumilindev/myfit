@@ -611,6 +611,8 @@ export const pl: Strings = {
   physIntro: 'Wybierz sylwetkę, do której dążysz — ustawia startowy fokus mięśni, który potem dostroisz.',
   physUseThis: 'Ustaw ten cel',
   physChange: 'Zmień',
+  goalsReset: 'Zresetuj cele',
+  goalsResetBody: 'To wyczyści cel sylwetki i fokus bloku.',
   lastDoneCol: 'Ostatnio',
   never: 'Nigdy',
   clearLabel: 'Wyczyść',

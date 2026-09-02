@@ -53,13 +53,7 @@ import {
   type MuscleGroup,
 } from './data/exercises';
 import type { ExerciseSubRegions } from './data/subregions';
-import {
-  EMPTY_GOALS,
-  type FitGoals,
-  type PhysiqueTarget,
-  type BlockFocus,
-  type LongTermGoal,
-} from './goals';
+import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from './goals';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
@@ -1158,19 +1152,11 @@ export function setBlockFocus(focus: BlockFocus | undefined): void {
   commitGoals({ focus });
 }
 
-export function addLongTermGoal(goal: LongTermGoal): void {
-  commitGoals({ longTerm: [...state.goals.longTerm, goal] });
+export function resetGoals(): void {
+  setState({ goals: EMPTY_GOALS, syncStatus: bumpPending() });
+  writeGoalsDoc();
 }
 
-export function updateLongTermGoal(id: string, patch: Partial<LongTermGoal>): void {
-  commitGoals({
-    longTerm: state.goals.longTerm.map((g) => (g.id === id ? { ...g, ...patch } : g)),
-  });
-}
-
-export function removeLongTermGoal(id: string): void {
-  commitGoals({ longTerm: state.goals.longTerm.filter((g) => g.id !== id) });
-}
 
 export function addWeight(weight: number, at: number): void {
   const entry: WeightEntry = { id: uuid(), at, weight };
@@ -1812,7 +1798,7 @@ export function startSyncLoop(): () => void {
       doc(db, 'users', uid, 'meta', 'goals'),
       (snap) => {
         const data = snap.exists() ? (snap.data() as FitGoals) : EMPTY_GOALS;
-        state = { ...state, goals: { ...EMPTY_GOALS, ...data, longTerm: data.longTerm ?? [] } };
+        state = { ...state, goals: { ...EMPTY_GOALS, ...data } };
         persist();
         emit();
       },

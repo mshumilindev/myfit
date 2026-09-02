@@ -5,24 +5,21 @@
  * existing emphasis is kept). Cards render the body-muscles map for now; the
  * stylised silhouettes swap in here once available.
  */
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { useT } from '../i18n';
 import { useStore, setPhysiqueTarget, setBlockFocus } from '../store';
 import { Sheet, Icon } from '../ui';
-import {
-  ARCHETYPES,
-  ARCHETYPES_BY_SEX,
-  physiqueFigureVars,
-  type ArchetypeId,
-  type Emphasis,
-} from '../goals';
+import { ARCHETYPES, ARCHETYPES_BY_SEX, type ArchetypeId, type Emphasis } from '../goals';
 import type { FocusMuscle } from '../data/subregions';
 
 export function PhysiquePicker({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const store = useStore();
   const cur = store.goals.physique;
-  const [sex, setSex] = useState<'male' | 'female'>(cur?.sex ?? store.bodyMetrics.sex ?? 'male');
+  // If the account states a sex, lock to it (no toggle); otherwise let the user pick.
+  const accountSex = store.bodyMetrics.sex;
+  const [sexState, setSexState] = useState<'male' | 'female'>(cur?.sex ?? 'male');
+  const sex = accountSex ?? sexState;
   const [picked, setPicked] = useState<ArchetypeId | null>(cur?.archetype ?? null);
 
   const ids = ARCHETYPES_BY_SEX(sex);
@@ -55,14 +52,16 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
 
       <p className="phys-intro">{t.physIntro}</p>
 
-      <div className="phys-sex seg3">
-        <button className={sex === 'male' ? 'active' : ''} onClick={() => setSex('male')}>
-          {t.sexMale}
-        </button>
-        <button className={sex === 'female' ? 'active' : ''} onClick={() => setSex('female')}>
-          {t.sexFemale}
-        </button>
-      </div>
+      {!accountSex && (
+        <div className="phys-sex seg3">
+          <button className={sex === 'male' ? 'active' : ''} onClick={() => setSexState('male')}>
+            {t.sexMale}
+          </button>
+          <button className={sex === 'female' ? 'active' : ''} onClick={() => setSexState('female')}>
+            {t.sexFemale}
+          </button>
+        </div>
+      )}
 
       <div className="phys-grid">
         {ids.map((id) => (
@@ -72,7 +71,10 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
             onClick={() => setPicked(id)}
           >
             {picked === id && <Icon name="check-circle" weight="fill" className="phys-check" />}
-            <div className="phys-fig" style={physiqueFigureVars(id) as CSSProperties} />
+            <div className="phys-fig">
+              <img className="phys-base" src={`/physiques/${id}.png`} alt="" />
+              <img className="phys-lit" src={`/physiques/${id}-lit.png`} alt="" />
+            </div>
             <div className="phys-name">{t.archetypes[id].name}</div>
             <div className="phys-blurb">{t.archetypes[id].blurb}</div>
           </button>

@@ -655,6 +655,8 @@ export const en = {
   physIntro: 'Pick the shape you\'re building toward — it seeds your muscle focus, which you can tune afterwards.',
   physUseThis: 'Use this target',
   physChange: 'Change',
+  goalsReset: 'Reset goals',
+  goalsResetBody: 'This clears your physique target and block focus.',
   lastDoneCol: 'Last done',
   never: 'Never',
   clearLabel: 'Clear',

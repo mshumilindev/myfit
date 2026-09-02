@@ -37,32 +37,12 @@ export interface BlockFocus {
   emphasis: Partial<Record<FocusMuscle, Emphasis>>;
 }
 
-export interface GoalMeasure {
-  kind: 'ratio' | 'bodyfat' | 'volume-balance' | 'custom';
-  label: string;
-  from: number;
-  to: number;
-  current?: number;
-}
-
-export interface LongTermGoal {
-  id: string;
-  title: string;
-  horizonMonths: number;
-  startedAt: number;
-  measure: GoalMeasure;
-  /** Fine muscles this goal drives to grow. */
-  drivesMuscles: FocusMuscle[];
-  milestones: { label: string; at: number; done: boolean }[];
-}
-
 export interface FitGoals {
   physique?: PhysiqueTarget;
   focus?: BlockFocus;
-  longTerm: LongTermGoal[];
 }
 
-export const EMPTY_GOALS: FitGoals = { longTerm: [] };
+export const EMPTY_GOALS: FitGoals = {};
 
 /** Archetype presets: sex + the fine muscles each seeds to GROW. */
 export const ARCHETYPES: Record<ArchetypeId, { sex: 'male' | 'female'; grow: FocusMuscle[] }> = {
@@ -101,12 +81,6 @@ export function focusCounts(g: FitGoals): { grow: number; ease: number; hold: nu
   return { grow: grow.length, ease: ease.length, hold: FOCUS_MUSCLES.length - grow.length - ease.length };
 }
 
-/** 0..1 progress toward a long-term goal's measure. */
-export function goalProgress(goal: LongTermGoal): number {
-  const { from, to, current } = goal.measure;
-  if (current == null || to === from) return 0;
-  return Math.max(0, Math.min(1, (current - from) / (to - from)));
-}
 
 
 /**
@@ -158,27 +132,4 @@ export function focusAdjustLandmarks<T extends Landmark>(
     }
   }
   return out;
-}
-
-
-/**
- * CSS variables to crop the physique sprite (public/physiques/figures.png,
- * 8 cols x 2 rows: male row 0 / female row 1, each archetype a base+highlighted
- * pair). --fig-bx is the base column, --fig-hx the highlighted one; the figure
- * element swaps to --fig-hx on hover/active (web) and active (mobile).
- */
-const FIG_ZOOM = 1.09; // crop ~4% each side to hide the glow bleed between cells
-export const PHYS_BG_SIZE = `${(800 * FIG_ZOOM).toFixed(2)}% ${(200 * FIG_ZOOM).toFixed(2)}%`;
-const figPos = (i: number, n: number) =>
-  `${((100 * ((i + 0.5) * FIG_ZOOM - 0.5)) / (n * FIG_ZOOM - 1)).toFixed(3)}%`;
-
-export function physiqueFigureVars(id: ArchetypeId): Record<string, string> {
-  const sex = ARCHETYPES[id].sex;
-  const idx = Math.max(0, ARCHETYPES_BY_SEX(sex).indexOf(id));
-  const baseCol = idx * 2;
-  return {
-    '--fig-bx': figPos(baseCol, 8),
-    '--fig-hx': figPos(baseCol + 1, 8),
-    '--fig-y': figPos(sex === 'male' ? 0 : 1, 2),
-  };
 }
