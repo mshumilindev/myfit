@@ -107,6 +107,24 @@ export function subRegionsByName(name: string): ExerciseSubRegions | null {
  * for the Goals "suggested moves" strip. Round-robins across regions so a mixed
  * focus gets a spread, deduped by name.
  */
+const SUGGEST_SKIP = /stretch|circle|warm|mobility|around the world|arm drill|wrist|pass between|figure 8|windmill|get-?up|drill/i;
+// Prefer real, loadable moves for suggestions.
+const EQUIP_RANK: Record<string, number> = {
+  dumbbell: 0,
+  barbell: 0,
+  cable: 0,
+  machine: 1,
+  'e-z-curl-bar': 1,
+  kettlebell: 2,
+  body: 3,
+};
+function suggestScore(ex: CatalogExercise): number {
+  const rich = RICH_BY_ID.get(ex.id);
+  if (!rich || rich.category !== 'strength') return 99;
+  if (SUGGEST_SKIP.test(ex.names[0])) return 99;
+  return EQUIP_RANK[(ex.equipment as string) ?? ''] ?? 4;
+}
+
 export function exercisesForSubRegions(
   regions: FocusMuscle[],
   perRegion = 2,
@@ -115,16 +133,27 @@ export function exercisesForSubRegions(
   const out: { name: string; region: FocusMuscle }[] = [];
   const seen = new Set<string>();
   for (const r of regions) {
+    // Candidates whose PRIMARY sub-region is r, ranked by how "real" the move is.
+    const ranked = BUILT_IN_CATALOG.filter((ex) => SUBREGIONS[ex.id]?.primary.includes(r))
+      .map((ex) => ({
+        ex,
+        score: suggestScore(ex),
+        // Prefer moves that target THIS region specifically (e.g. incline → upper
+        // chest) over ones that hit several (flat bench → both).
+        spec: SUBREGIONS[ex.id]!.primary.length === 1 ? 0 : 1,
+      }))
+      .filter((c) => c.score < 99)
+      .sort(
+        (a, b) => a.spec - b.spec || a.score - b.score || a.ex.names[0].localeCompare(b.ex.names[0]),
+      );
     let n = 0;
-    for (const ex of BUILT_IN_CATALOG) {
+    for (const { ex } of ranked) {
       if (n >= perRegion) break;
-      const sr = SUBREGIONS[ex.id];
-      if (sr?.primary.includes(r) && !seen.has(ex.names[0])) {
-        seen.add(ex.names[0]);
-        out.push({ name: ex.names[0], region: r });
-        n++;
-        if (out.length >= cap) return out;
-      }
+      if (seen.has(ex.names[0])) continue;
+      seen.add(ex.names[0]);
+      out.push({ name: ex.names[0], region: r });
+      n++;
+      if (out.length >= cap) return out;
     }
   }
   return out;
