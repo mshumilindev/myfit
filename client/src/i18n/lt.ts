@@ -21,6 +21,9 @@ export const lt: Strings = {
 
   appName: 'Spotter',
   backAction: 'Atgal',
+  srClose: 'Uždaryti',
+  srRangeStart: 'Pradžia',
+  srRangeEnd: 'Pabaiga',
   menuAction: 'Meniu',
   reorder: 'Keisti tvarką',
   previousAction: 'Ankstesnis',

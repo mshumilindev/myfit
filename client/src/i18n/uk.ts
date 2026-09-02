@@ -21,6 +21,9 @@ export const uk: Strings = {
 
   appName: 'Spotter',
   backAction: 'Назад',
+  srClose: 'Закрити',
+  srRangeStart: 'Початок',
+  srRangeEnd: 'Кінець',
   menuAction: 'Меню',
   reorder: 'Переставити',
   previousAction: 'Попередній',

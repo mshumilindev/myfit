@@ -9,6 +9,9 @@ export const en = {
   // Auth (S-01…S-06)
   appName: 'Spotter',
   backAction: 'Back',
+  srClose: 'Close',
+  srRangeStart: 'Start',
+  srRangeEnd: 'End',
   menuAction: 'Menu',
   reorder: 'Reorder',
   previousAction: 'Previous',

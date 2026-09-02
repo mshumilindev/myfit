@@ -9,6 +9,9 @@ export const et: Strings = {
 
   appName: 'Spotter',
   backAction: 'Tagasi',
+  srClose: 'Sulge',
+  srRangeStart: 'Algus',
+  srRangeEnd: 'Lõpp',
   menuAction: 'Menüü',
   reorder: 'Muuda järjekorda',
   previousAction: 'Eelmine',

@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useT } from '../i18n';
 import { Icon } from '../ui';
 
 export interface Nudge {
@@ -38,6 +39,7 @@ const rotate = <T,>(arr: T[], n: number): T[] => {
 };
 
 export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
+  const { t } = useT();
   const [rotation, setRotation] = useState(0);
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -191,7 +193,7 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
             <div className="nudge-scrim" onClick={close} />
             <div className="nudge-sheet" role="dialog">
               <div className="nudge-sheet-head">
-                <button type="button" className="nudge-close" onClick={close} aria-label="Close">
+                <button type="button" className="nudge-close" onClick={close} aria-label={t.srClose}>
                   <Icon name="x-circle" weight="fill" />
                 </button>
               </div>

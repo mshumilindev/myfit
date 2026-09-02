@@ -21,6 +21,9 @@ export const pl: Strings = {
 
   appName: 'Spotter',
   backAction: 'Wstecz',
+  srClose: 'Zamknij',
+  srRangeStart: 'Początek',
+  srRangeEnd: 'Koniec',
   menuAction: 'Menu',
   reorder: 'Zmień kolejność',
   previousAction: 'Poprzedni',

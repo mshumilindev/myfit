@@ -8,6 +8,7 @@
  * Value is start-minutes into the day + duration in minutes.
  */
 import { useState } from 'react';
+import { useT } from '../i18n';
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 
 const MAX_DUR = 720; // longest activity: 12h
@@ -45,6 +46,7 @@ export function TimelineRange({
   onChange: (start: number, duration: number) => void;
   units: { hrShort: string; minShort: string };
 }) {
+  const { t } = useT();
   const dur = clamp(duration, 0, MAX_DUR);
   const end = start + dur;
   // The visible scale end — frozen while dragging, recomputed on release.
@@ -129,14 +131,14 @@ export function TimelineRange({
         <span
           className="tlr-handle tlr-h-start"
           role="slider"
-          aria-label="start"
+          aria-label={t.srRangeStart}
           style={startStyle}
           onPointerDown={onStartDown}
         />
         <span
           className="tlr-handle tlr-h-end"
           role="slider"
-          aria-label="end"
+          aria-label={t.srRangeEnd}
           style={endStyle}
           onPointerDown={onEndDown}
         />
