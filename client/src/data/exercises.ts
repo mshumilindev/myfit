@@ -5,7 +5,9 @@
  */
 import DB_RAW from './exercises.db.json';
 import RICH_RAW from './exercises.rich.json';
+import SUBREGIONS_RAW from './subregionTags.json';
 import type { EquipmentId } from './equipment';
+import type { ExerciseSubRegions } from './subregions';
 
 export type MuscleGroup =
   | 'chest'
@@ -79,6 +81,21 @@ const RICH_BY_NAME = new Map<string, RichExercise>(
 );
 
 const RICH_EN = new Set(RICH_EXERCISES.map((e) => e.name.trim().toLowerCase()));
+/**
+ * Fine muscle sub-region overlay (curated; see data/subregionTags.json + the
+ * subregion-review sheet). Kept separate from the generated rich data so a DB
+ * rebuild never wipes it. Only exercises touching the split groups
+ * (shoulders / chest) have an entry.
+ */
+const SUBREGIONS = SUBREGIONS_RAW as Record<string, ExerciseSubRegions>;
+
+export function subRegionsById(id: string): ExerciseSubRegions | null {
+  return SUBREGIONS[id] ?? null;
+}
+export function subRegionsByName(name: string): ExerciseSubRegions | null {
+  const r = RICH_BY_NAME.get(name.trim().toLowerCase());
+  return r ? (SUBREGIONS[r.id] ?? null) : null;
+}
 
 function richPrimary(rich: RichExercise): MuscleGroup {
   return rich.primaryMuscles[0] ?? (rich.category === 'cardio' ? 'cardio' : 'fullbody');
