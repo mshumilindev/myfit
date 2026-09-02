@@ -12,7 +12,10 @@ import { FocusBodyMap } from '../components/Muscle';
 import { FOCUS_MUSCLES, focusToGroup, type FocusMuscle } from '../data/subregions';
 import type { Emphasis } from '../goals';
 
-type Grp = { key: 'grpShoulders' | 'grpChest' | 'grpBack' | 'grpLegs' | 'grpArms' | 'grpCore'; muscles: FocusMuscle[] };
+type Grp = {
+  key: 'grpShoulders' | 'grpChest' | 'grpBack' | 'grpLegs' | 'grpArms' | 'grpCore';
+  muscles: FocusMuscle[];
+};
 const GROUPS: Grp[] = [
   { key: 'grpShoulders', muscles: ['delt-front', 'delt-side', 'delt-rear'] },
   { key: 'grpChest', muscles: ['chest-upper', 'chest-lower'] },
@@ -55,7 +58,8 @@ export function FocusEditor({ onClose }: { onClose: () => void }) {
   };
 
   const segs: Emphasis[] = ['ease', 'hold', 'grow'];
-  const segLabel = (e: Emphasis) => (e === 'ease' ? t.emphEase : e === 'hold' ? t.emphHold : t.emphGrow);
+  const segLabel = (e: Emphasis) =>
+    e === 'ease' ? t.emphEase : e === 'hold' ? t.emphHold : t.emphGrow;
 
   return (
     <Sheet onClose={onClose} className="focus-sheet">

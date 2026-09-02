@@ -754,10 +754,8 @@ export function CustomEditor(props: {
   const [subSecondary, setSubSecondary] = useState<FocusMuscle[]>(initSR?.secondary ?? []);
   const primarySplit: FocusMuscle[] = primary ? (SPLIT_GROUPS[primary] ?? []) : [];
   const secondarySplit: FocusMuscle[] = secondary.flatMap((m) => SPLIT_GROUPS[m] ?? []);
-  const toggle = (
-    set: React.Dispatch<React.SetStateAction<FocusMuscle[]>>,
-    f: FocusMuscle,
-  ) => set((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
+  const toggle = (set: React.Dispatch<React.SetStateAction<FocusMuscle[]>>, f: FocusMuscle) =>
+    set((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
   const ready = name.trim().length > 0;
 
   return (
@@ -876,7 +874,9 @@ export function CustomEditor(props: {
           const sp = subPrimary.filter((f) => primarySplit.includes(f));
           const ss = subSecondary.filter((f) => secondarySplit.includes(f));
           const subRegions: ExerciseSubRegions | undefined =
-            sp.length || ss.length ? { primary: sp, ...(ss.length ? { secondary: ss } : {}) } : undefined;
+            sp.length || ss.length
+              ? { primary: sp, ...(ss.length ? { secondary: ss } : {}) }
+              : undefined;
           props.onSave({ id: props.init.id, name, primary, secondary, equipment, subRegions });
         }}
       >

@@ -45,7 +45,10 @@ export function GoalsView({
       const to = e === 'grow' ? base + FOCUS_MAV_DELTA : Math.max(0, base - FOCUS_MAV_DELTA);
       return { m: m as MuscleGroup, from: base, to, grow: e === 'grow' };
     })
-    .filter((x): x is { m: MuscleGroup; from: number; to: number; grow: boolean } => !!x && x.from !== x.to);
+    .filter(
+      (x): x is { m: MuscleGroup; from: number; to: number; grow: boolean } =>
+        !!x && x.from !== x.to,
+    );
 
   const suggestedMoves = exercisesForSubRegions(grow);
 
@@ -93,7 +96,10 @@ export function GoalsView({
               </div>
             </div>
           ) : (
-            <button className="goals-empty goals-empty-btn" onClick={() => setEditingPhysique(true)}>
+            <button
+              className="goals-empty goals-empty-btn"
+              onClick={() => setEditingPhysique(true)}
+            >
               <Icon name="user" />
               <p>{t.goalsPhysiqueEmpty}</p>
             </button>
@@ -114,7 +120,13 @@ export function GoalsView({
           </div>
           {hasFocus ? (
             <div className="goals-focus">
-              <FocusBodyMap grow={grow} ease={ease} view="both" width={104} className="goals-focus-map" />
+              <FocusBodyMap
+                grow={grow}
+                ease={ease}
+                view="both"
+                width={104}
+                className="goals-focus-map"
+              />
               <div className="goals-focus-cols">
                 {grow.length > 0 && (
                   <div>

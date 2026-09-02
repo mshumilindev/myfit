@@ -79,7 +79,10 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
           <button className={sex === 'male' ? 'active' : ''} onClick={() => setSexState('male')}>
             {t.sexMale}
           </button>
-          <button className={sex === 'female' ? 'active' : ''} onClick={() => setSexState('female')}>
+          <button
+            className={sex === 'female' ? 'active' : ''}
+            onClick={() => setSexState('female')}
+          >
             {t.sexFemale}
           </button>
         </div>

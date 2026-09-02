@@ -1,2342 +1,1275 @@
 {
   "Ab_Roller": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Advanced_Kettlebell_Windmill": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Alternating_Cable_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Alternating_Deltoid_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Alternating_Floor_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Alternating_Kettlebell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Alternating_Renegade_Row": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Anti-Gravity_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Arm_Circles": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Arnold_Dumbbell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Around_The_Worlds": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Back_Flyes_-_With_Bands": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Backward_Medicine_Ball_Throw": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Band_Pull_Apart": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Barbell_Ab_Rollout": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Barbell_Ab_Rollout_-_On_Knees": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Barbell_Bench_Press_-_Medium_Grip": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Barbell_Guillotine_Bench_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Barbell_Incline_Bench_Press_-_Medium_Grip": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Barbell_Incline_Shoulder_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-upper"]
   },
   "Barbell_Rear_Delt_Row": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Barbell_Rollout_from_Bench": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Barbell_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Battling_Ropes": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Behind_Head_Chest_Stretch": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Bench_Dips": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Bench_Press_-_Powerlifting": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Bench_Press_-_With_Bands": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Bench_Press_with_Chains": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Bent_Over_Barbell_Row": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Bent_Over_Low-Pulley_Side_Lateral": {
-    "primary": [
-      "delt-rear",
-      "delt-side"
-    ]
+    "primary": ["delt-rear", "delt-side"]
   },
   "Bent_Over_Two-Dumbbell_Row": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Bent_Press": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Bent-Arm_Barbell_Pullover": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Bent-Arm_Dumbbell_Pullover": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Board_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Bodyweight_Flyes": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Bottoms-Up_Clean_From_The_Hang_Position": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Bradford_Rocky_Presses": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Butterfly": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Cable_Chest_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Cable_Crossover": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Cable_Internal_Rotation": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Cable_Iron_Cross": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Cable_Rear_Delt_Fly": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Cable_Rope_Rear-Delt_Rows": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Cable_Seated_Lateral_Raise": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Cable_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Car_Drivers": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Catch_and_Overhead_Throw": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Chain_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Chair_Upper_Body_Stretch": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Chest_And_Front_Of_Shoulder_Stretch": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Chest_Push_multiple_response": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Chest_Push_single_response": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Chest_Push_from_3_point_stance": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Chest_Push_with_Run_Release": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Chest_Stretch_on_Stability_Ball": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Circus_Bell": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Clean_and_Jerk": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Clean_and_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Clean_from_Blocks": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Clean_Shrug": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Clock_Push-Up": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Close-Grip_Barbell_Bench_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Close-Grip_Dumbbell_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Close-Grip_EZ-Bar_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Close-Grip_Front_Lat_Pulldown": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Close-Grip_Push-Up_off_of_a_Dumbbell": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Conans_Wheel": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Cross_Over_-_With_Bands": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Crucifix": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Cuban_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Decline_Barbell_Bench_Press": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Decline_Close-Grip_Bench_To_Skull_Crusher": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Decline_Dumbbell_Bench_Press": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Decline_Dumbbell_Flyes": {
-    "primary": [
-      "chest-lower"
-    ]
+    "primary": ["chest-lower"]
   },
   "Decline_Push-Up": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Decline_Smith_Press": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Dip_Machine": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Dips_-_Chest_Version": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Dips_-_Triceps_Version": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Double_Kettlebell_Jerk": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Double_Kettlebell_Push_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Double_Kettlebell_Snatch": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Double_Kettlebell_Windmill": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Drop_Push": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Dumbbell_Bench_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Dumbbell_Bench_Press_with_Neutral_Grip": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Dumbbell_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Dumbbell_Floor_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Dumbbell_Flyes": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Dumbbell_Incline_Row": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Dumbbell_Incline_Shoulder_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Dumbbell_Lying_One-Arm_Rear_Lateral_Raise": {
-    "primary": [
-      "delt-rear",
-      "delt-side"
-    ]
+    "primary": ["delt-rear", "delt-side"]
   },
   "Dumbbell_Lying_Rear_Lateral_Raise": {
-    "primary": [
-      "delt-rear",
-      "delt-side"
-    ]
+    "primary": ["delt-rear", "delt-side"]
   },
   "Dumbbell_One-Arm_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Dumbbell_One-Arm_Upright_Row": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Dumbbell_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Dumbbell_Scaption": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Dumbbell_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Dynamic_Chest_Stretch": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Elbow_Circles": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Elbows_Back": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Extended_Range_One-Arm_Kettlebell_Floor_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "External_Rotation": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "External_Rotation_with_Band": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "External_Rotation_with_Cable": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Face_Pull": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Flat_Bench_Cable_Flyes": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Floor_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Floor_Press_with_Chains": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Forward_Drag_with_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Front_Cable_Raise": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Front_Dumbbell_Raise": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Front_Incline_Dumbbell_Raise": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Front_Plate_Raise": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Front_Raise_And_Pullover": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Front_Two-Dumbbell_Raise": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Full_Range-Of-Motion_Lat_Pulldown": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Goblet_Squat": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Hammer_Grip_Incline_DB_Bench_Press": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Handstand_Push-Ups": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Hang_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Hang_Clean_-_Below_the_Knees": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Hang_Snatch": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Hang_Snatch_-_Below_Knees": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Heaving_Snatch_Balance": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Heavy_Bag_Thrust": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Bench_Pull": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Incline_Cable_Chest_Press": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Cable_Flye": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Dumbbell_Bench_With_Palms_Facing_In": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Dumbbell_Flyes": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Dumbbell_Flyes_-_With_A_Twist": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Dumbbell_Press": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Push-Up": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Push-Up_Close-Grip": {
     "primary": [],
-    "secondary": [
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-upper", "delt-front"]
   },
   "Incline_Push-Up_Depth_Jump": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Push-Up_Medium": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Push-Up_Reverse_Grip": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Incline_Push-Up_Wide": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Internal_Rotation_with_Band": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Iron_Cross": {
-    "primary": [
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Isometric_Chest_Squeezes": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Isometric_Wipers": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Jerk_Balance": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "JM_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Keg_Load": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kettlebell_Arnold_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Kettlebell_Figure_8": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kettlebell_Hang_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kettlebell_Pass_Between_The_Legs": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kettlebell_Pirate_Ships": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Kettlebell_Pistol_Squat": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kettlebell_Seated_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Kettlebell_Seesaw_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Kettlebell_Sumo_High_Pull": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kettlebell_Thruster": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Kettlebell_Turkish_Get-Up_Lunge_style": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Kettlebell_Turkish_Get-Up_Squat_style": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Kettlebell_Windmill": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kipping_Muscle_Up": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Kneeling_Arm_Drill": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Landmine_180s": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Landmine_Linear_Jammer": {
-    "primary": [
-      "delt-front"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Lateral_Raise_-_With_Bands": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Leg-Over_Floor_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Leverage_Chest_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Leverage_Decline_Chest_Press": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Leverage_Incline_Chest_Press": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Leverage_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Log_Lift": {
-    "primary": [
-      "delt-front"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Low_Cable_Crossover": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Low_Pulley_Row_To_Neck": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Lying_Dumbbell_Tricep_Extension": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Lying_One-Arm_Lateral_Raise": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Lying_Rear_Delt_Raise": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Machine_Bench_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Machine_Shoulder_Military_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Medicine_Ball_Chest_Pass": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Medicine_Ball_Full_Twist": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Medicine_Ball_Scoop_Throw": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Mountain_Climbers": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Muscle_Snatch": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Muscle_Up": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Neck_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "One_Arm_Dumbbell_Bench_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "One_Arm_Floor_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "One_Half_Locust": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "One-Arm_Dumbbell_Row": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "One-Arm_Flat_Bench_Dumbbell_Flye": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "One-Arm_Incline_Lateral_Raise": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "One-Arm_Kettlebell_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Clean_and_Jerk": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Floor_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "One-Arm_Kettlebell_Jerk": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Military_Press_To_The_Side": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Para_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Push_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Snatch": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Split_Jerk": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Split_Snatch": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "One-Arm_Kettlebell_Swings": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "One-Arm_Medicine_Ball_Slam": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "One-Arm_Open_Palm_Kettlebell_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "One-Arm_Overhead_Kettlebell_Squats": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "One-Arm_Side_Laterals": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Open_Palm_Kettlebell_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Otis-Up": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Overhead_Squat": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Overhead_Stretch": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Pallof_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Pallof_Press_With_Rotation": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Parallel_Bar_Dip": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Pin_Presses": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Plyo_Kettlebell_Pushups": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Plyo_Push-up": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Power_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Power_Jerk": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Power_Partials": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Power_Snatch": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Power_Snatch_from_Blocks": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Power_Stairs": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Press_Sit-Up": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Prowler_Sprint": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Push_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Push_Press_-_Behind_the_Neck": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Push_Up_to_Side_Plank": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-side"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-side"]
   },
   "Push-Up_Wide": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Push-Ups_-_Close_Triceps_Position": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Push-Ups_With_Feet_Elevated": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Push-Ups_With_Feet_On_An_Exercise_Ball": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Pushups": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Pushups_Close_and_Wide_Hand_Positions": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Pyramid": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Rack_Delivery": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Return_Push_from_Stance": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Reverse_Band_Bench_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Reverse_Flyes": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Reverse_Flyes_With_External_Rotation": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Reverse_Grip_Bent-Over_Rows": {
     "primary": [],
-    "secondary": [
-      "delt-rear"
-    ]
+    "secondary": ["delt-rear"]
   },
   "Reverse_Machine_Flyes": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Reverse_Triceps_Bench_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Ring_Dips": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Rocky_Pull-Ups_Pulldowns": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Rope_Climb": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Round_The_World_Shoulder_Stretch": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Sandbag_Load": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Seated_Barbell_Military_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Seated_Bent-Over_Rear_Delt_Raise": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Seated_Biceps": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Seated_Cable_Rows": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Seated_Cable_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Seated_Dumbbell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Seated_Front_Deltoid": {
-    "primary": [
-      "delt-front"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Seated_Side_Lateral_Raise": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "See-Saw_Press_Alternating_Side_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Shoulder_Circles": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Shoulder_Press_-_With_Bands": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Shoulder_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Shoulder_Stretch": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Side_Bridge": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Side_Lateral_Raise": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Side_Laterals_to_Front_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Side_To_Side_Chins": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Side_Wrist_Pull": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Single_Dumbbell_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Single-Arm_Cable_Crossover": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["chest-lower", "chest-upper"]
   },
   "Single-Arm_Linear_Jammer": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Single-Arm_Push-Up": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Sled_Overhead_Backward_Walk": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Sled_Push": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Sled_Reverse_Flye": {
-    "primary": [
-      "delt-rear"
-    ]
+    "primary": ["delt-rear"]
   },
   "Sledgehammer_Swings": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Smith_Incline_Shoulder_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-upper"]
   },
   "Smith_Machine_Behind_the_Back_Shrug": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Smith_Machine_Bench_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Smith_Machine_Bent_Over_Row": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Smith_Machine_Close-Grip_Bench_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Smith_Machine_Decline_Press": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Smith_Machine_Hang_Power_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Smith_Machine_Incline_Bench_Press": {
-    "primary": [
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Smith_Machine_One-Arm_Upright_Row": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Smith_Machine_Overhead_Shoulder_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Smith_Machine_Upright_Row": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Snatch": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Snatch_Balance": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Snatch_from_Blocks": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Snatch_Shrug": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Spell_Caster": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Spider_Crawl": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Split_Clean": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Split_Jerk": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Split_Snatch": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Squat_Jerk": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Standing_Alternating_Dumbbell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Barbell_Press_Behind_Neck": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Bent-Over_One-Arm_Dumbbell_Triceps_Extension": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Standing_Biceps_Stretch": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Standing_Bradford_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Cable_Chest_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Standing_Cable_Lift": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Standing_Cable_Wood_Chop": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Standing_Dumbbell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Dumbbell_Upright_Row": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Standing_Front_Barbell_Raise_Over_Head": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Low-Pulley_Deltoid_Raise": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Standing_Low-Pulley_One-Arm_Triceps_Extension": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Standing_Military_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_One-Arm_Dumbbell_Triceps_Extension": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Standing_Overhead_Barbell_Triceps_Extension": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Standing_Palm-In_One-Arm_Dumbbell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Palms-In_Dumbbell_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Standing_Two-Arm_Overhead_Throw": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "Star_Jump": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Straight_Raises_on_Incline_Bench": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ]
+    "primary": ["delt-front", "delt-side"]
   },
   "Straight-Arm_Dumbbell_Pullover": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Supine_Chest_Throw": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Supine_One-Arm_Overhead_Throw": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Supine_Two-Arm_Overhead_Throw": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Suspended_Fallout": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Suspended_Push-Up": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Svend_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Tate_Press": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Tire_Flip": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "chest-upper",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "chest-upper", "delt-front"]
   },
   "Tricep_Side_Stretch": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Two-Arm_Kettlebell_Clean": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Two-Arm_Kettlebell_Jerk": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Two-Arm_Kettlebell_Military_Press": {
-    "primary": [
-      "delt-front"
-    ]
+    "primary": ["delt-front"]
   },
   "Underhand_Cable_Pulldowns": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Upright_Barbell_Row": {
-    "primary": [
-      "delt-side"
-    ]
+    "primary": ["delt-side"]
   },
   "Upright_Cable_Row": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Upright_Row_-_With_Bands": {
     "primary": [],
-    "secondary": [
-      "delt-side"
-    ]
+    "secondary": ["delt-side"]
   },
   "Upward_Stretch": {
-    "primary": [
-      "delt-front",
-      "delt-side"
-    ],
-    "secondary": [
-      "chest-lower",
-      "chest-upper"
-    ]
+    "primary": ["delt-front", "delt-side"],
+    "secondary": ["chest-lower", "chest-upper"]
   },
   "V-Bar_Pulldown": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "V-Bar_Pullup": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Vertical_Swing": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Weighted_Bench_Dip": {
     "primary": [],
-    "secondary": [
-      "chest-lower",
-      "delt-front"
-    ]
+    "secondary": ["chest-lower", "delt-front"]
   },
   "Wide-Grip_Barbell_Bench_Press": {
-    "primary": [
-      "chest-lower",
-      "chest-upper"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower", "chest-upper"],
+    "secondary": ["delt-front"]
   },
   "Wide-Grip_Decline_Barbell_Bench_Press": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Wide-Grip_Decline_Barbell_Pullover": {
-    "primary": [
-      "chest-lower"
-    ],
-    "secondary": [
-      "delt-front"
-    ]
+    "primary": ["chest-lower"],
+    "secondary": ["delt-front"]
   },
   "Wide-Grip_Lat_Pulldown": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Wide-Grip_Pulldown_Behind_The_Neck": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   },
   "Wide-Grip_Rear_Pull-Up": {
     "primary": [],
-    "secondary": [
-      "delt-rear"
-    ]
+    "secondary": ["delt-rear"]
   },
   "Wrist_Roller": {
     "primary": [],
-    "secondary": [
-      "delt-front"
-    ]
+    "secondary": ["delt-front"]
   }
 }

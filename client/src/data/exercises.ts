@@ -107,7 +107,8 @@ export function subRegionsByName(name: string): ExerciseSubRegions | null {
  * for the Goals "suggested moves" strip. Round-robins across regions so a mixed
  * focus gets a spread, deduped by name.
  */
-const SUGGEST_SKIP = /stretch|circle|warm|mobility|around the world|arm drill|wrist|pass between|figure 8|windmill|get-?up|drill/i;
+const SUGGEST_SKIP =
+  /stretch|circle|warm|mobility|around the world|arm drill|wrist|pass between|figure 8|windmill|get-?up|drill/i;
 // Prefer real, loadable moves for suggestions.
 const EQUIP_RANK: Record<string, number> = {
   dumbbell: 0,
@@ -144,7 +145,8 @@ export function exercisesForSubRegions(
       }))
       .filter((c) => c.score < 99)
       .sort(
-        (a, b) => a.spec - b.spec || a.score - b.score || a.ex.names[0].localeCompare(b.ex.names[0]),
+        (a, b) =>
+          a.spec - b.spec || a.score - b.score || a.ex.names[0].localeCompare(b.ex.names[0]),
       );
     let n = 0;
     for (const { ex } of ranked) {

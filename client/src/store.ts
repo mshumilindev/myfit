@@ -1157,7 +1157,6 @@ export function resetGoals(): void {
   writeGoalsDoc();
 }
 
-
 export function addWeight(weight: number, at: number): void {
   const entry: WeightEntry = { id: uuid(), at, weight };
   commitBody({ weights: [...state.bodyMetrics.weights, entry].sort((a, b) => a.at - b.at) });
