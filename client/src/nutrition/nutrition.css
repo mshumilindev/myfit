@@ -39,10 +39,18 @@
   --space-6: 16.8px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }.app-nutrition *{
+  box-sizing: border-box;
+}
+/* margin/padding reset applies only to nutrition's own content (screens, sheets,
+   dialogs) — NOT the shared suite chrome (app-brand header, apex-nav, AppRail,
+   sheet grabber/close), which must keep gym's padding. */
+.app-nutrition .apex-scroll *,
+.app-nutrition .scrim *,
+.app-nutrition .snack * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}.app-nutrition, .app-nutrition, .app-nutrition #root{
+}
+.app-nutrition, .app-nutrition, .app-nutrition #root{
   height: 100%;
 }.app-nutrition{
   background: var(--bg);
@@ -53,9 +61,13 @@
   -webkit-font-smoothing: antialiased;
 }.app-nutrition .tnum{
   font-variant-numeric: tabular-nums;
-}.app-nutrition button{
+}.app-nutrition .apex-scroll button,
+.app-nutrition .scrim button {
   font: inherit;
   color: inherit;
+  cursor: pointer;
+}
+.app-nutrition button {
   cursor: pointer;
 }.app-nutrition svg{
   display: block;
@@ -860,44 +872,41 @@
   font-size: 13px;
   margin-bottom: var(--space-3);
 }.app-nutrition{
-  
-  --bg: #0d0e10;
-  --surface: #16181c;
-  --surface-2: #1d2024;
-  --hairline: #2a2e34;
-  --text: #eef1f4;
-  --muted: #a2a9b2;
-  --dim: #6b727c;
+  /* DUPLICATE token block from the CSS merge — kept in sync with the primary
+     block: all tokens map onto the gym design system. */
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-neutral-900);
+  --hairline: var(--color-divider);
+  --text: var(--color-text);
+  --muted: var(--color-neutral-500);
+  --dim: var(--color-neutral-600);
 
-  
-  --acc: #3d84c9;
-  --acc-100: #e9f1fb;
-  --acc-200: #cbe0f6;
-  --acc-300: #a6c9ec;
-  --acc-600: #336aa3;
-  --acc-700: #274f79;
-  --acc-800: #1c3a5a;
-  --acc-900: #132738;
+  --acc: var(--color-accent);
+  --acc-100: var(--color-accent-100);
+  --acc-200: var(--color-accent-200);
+  --acc-300: var(--color-accent-300);
+  --acc-600: var(--color-accent-600);
+  --acc-700: var(--color-accent-700);
+  --acc-800: var(--color-accent-800);
+  --acc-900: var(--color-accent-900);
 
-  
-  --ok: #3ecf8e; 
-  --danger: #e5564b; 
-  --skeleton: #21252b;
+  --ok: var(--color-ok);
+  --danger: var(--color-danger);
+  --skeleton: var(--color-neutral-900);
 
-  --radius-s: 8px;
-  --radius-m: 12px;
-  --radius-l: 16px;
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
+  --radius-s: var(--radius-sm);
+  --radius-m: var(--radius-md);
+  --radius-l: var(--radius-lg);
+  --space-1: 2.8px;
+  --space-2: 5.6px;
+  --space-3: 8.4px;
+  --space-4: 11.2px;
+  --space-5: 14px;
+  --space-6: 16.8px;
 
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }.app-nutrition *{
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }.app-nutrition, .app-nutrition, .app-nutrition #root{
   height: 100%;
@@ -910,7 +919,8 @@
   -webkit-font-smoothing: antialiased;
 }.app-nutrition .tnum{
   font-variant-numeric: tabular-nums;
-}.app-nutrition button{
+}.app-nutrition .apex-scroll button,
+.app-nutrition .scrim button {
   font: inherit;
   color: inherit;
   cursor: pointer;
@@ -1677,3 +1687,30 @@
   display: block;
   margin-top: 1px;
 }
+
+/* Comprehensive gym leak-guard (descendant selectors too). Gym has many generic
+   classes (.bar, .val, .name, .meta, .row, .big, .t, .tile, .on, .active …)
+   that collide with nutrition's; gym's rules leaked visual props nutrition did
+   not set (e.g. the grey .bars .bar background behind the macro rows). Revert
+   exactly those leaked props on content classes — chrome classes (rail, nav,
+   sheet, avatar…) are intentionally left to gym. */
+.app-nutrition .bar { background: revert; border-radius: revert; flex: revert; height: revert; overflow: revert; width: revert; }
+.app-nutrition .body { display: revert; flex-direction: revert; gap: revert; min-height: revert; padding: revert; position: revert; }
+.app-nutrition .btn { border-color: revert; flex: revert; margin: revert; position: revert; width: revert; }
+.app-nutrition .center { justify-content: revert; }
+.app-nutrition .d { flex: revert; width: revert; }
+.app-nutrition .danger { background: revert; }
+.app-nutrition .dot { flex: revert; margin: revert; }
+.app-nutrition .grow { align-items: revert; display: revert; gap: revert; justify-content: revert; }
+.app-nutrition .meta { align-items: revert; background: revert; flex: revert; flex-direction: revert; gap: revert; justify-content: revert; overflow: revert; }
+.app-nutrition .muted { background: revert; }
+.app-nutrition .name { background: revert; border: revert; flex: revert; padding: revert; text-align: revert; }
+.app-nutrition .nm { overflow: revert; }
+.app-nutrition .ok { background: revert; }
+.app-nutrition .row { background: revert; border: revert; border-radius: revert; box-shadow: revert; grid-template-columns: revert; justify-content: revert; text-align: revert; width: revert; }
+.app-nutrition .sk { height: revert; width: revert; }
+.app-nutrition .sm { padding: revert; }
+.app-nutrition .t { flex: revert; margin: revert; }
+.app-nutrition .tag { flex: revert; }
+.app-nutrition .tile { box-shadow: revert; flex: revert; text-align: revert; }
+.app-nutrition .val { background: revert; border: revert; margin: revert; padding: revert; text-align: revert; width: revert; }
