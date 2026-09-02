@@ -110,6 +110,8 @@ export const uk: Strings = {
   primaryMuscleLabel: 'Основний мʼяз',
   muscleGroupsLabel: 'Групи мʼязів',
   secondaryMuscleLabel: 'Додаткові мʼязи',
+  subRegionsLabel: 'Підрегіони',
+  subRegionsSecondaryLabel: 'Підрегіони (допоміжні)',
   equipmentLabelField: 'Обладнання',
   newExerciseNote: 'Познач, які мʼязи працюють і яке потрібне обладнання.',
   newExerciseAuthorNote:
@@ -270,6 +272,14 @@ export const uk: Strings = {
     neck: 'Шия',
     fullbody: 'Все тіло',
     cardio: 'Кардіо',
+  } as Record<string, string>,
+
+  subMuscleNames: {
+    'delt-front': 'Передня дельта',
+    'delt-side': 'Середня дельта',
+    'delt-rear': 'Задня дельта',
+    'chest-upper': 'Верх грудей',
+    'chest-lower': 'Низ грудей',
   } as Record<string, string>,
 
   // --- Типи підходів та мускулатура (додаток SS/DS/MG/EQ) ------------------

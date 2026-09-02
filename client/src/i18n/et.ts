@@ -98,6 +98,8 @@ export const et: Strings = {
   primaryMuscleLabel: 'Peamine lihas',
   muscleGroupsLabel: 'Lihasgrupid',
   secondaryMuscleLabel: 'Teisesed lihased',
+  subRegionsLabel: 'Alapiirkonnad',
+  subRegionsSecondaryLabel: 'Alapiirkonnad (teisesed)',
   equipmentLabelField: 'Varustus',
   newExerciseNote: 'Märgi treenitavad lihased ja vajalik varustus.',
   newExerciseAuthorNote:
@@ -266,6 +268,14 @@ export const et: Strings = {
     neck: 'Kael',
     fullbody: 'Kogu keha',
     cardio: 'Kardio',
+  } as Record<string, string>,
+
+  subMuscleNames: {
+    'delt-front': 'Eesmine delta',
+    'delt-side': 'Külgmine delta',
+    'delt-rear': 'Tagumine delta',
+    'chest-upper': 'Ülarind',
+    'chest-lower': 'Alarind',
   } as Record<string, string>,
 
   // --- Seeriatüübid, lihased, varustus (lisa SS/DS/MG/EQ) ------------------

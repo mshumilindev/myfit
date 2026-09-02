@@ -110,6 +110,8 @@ export const lt: Strings = {
   primaryMuscleLabel: 'Pagrindinis raumuo',
   muscleGroupsLabel: 'Raumenų grupės',
   secondaryMuscleLabel: 'Papildomi raumenys',
+  subRegionsLabel: 'Poregioniai',
+  subRegionsSecondaryLabel: 'Poregioniai (antriniai)',
   equipmentLabelField: 'Įranga',
   newExerciseNote: 'Pažymėk treniruojamus raumenis ir reikalingą įrangą.',
   newExerciseAuthorNote:
@@ -279,6 +281,14 @@ export const lt: Strings = {
     neck: 'Kaklas',
     fullbody: 'Visas kūnas',
     cardio: 'Kardio',
+  } as Record<string, string>,
+
+  subMuscleNames: {
+    'delt-front': 'Priekinis deltas',
+    'delt-side': 'Šoninis deltas',
+    'delt-rear': 'Užpakalinis deltas',
+    'chest-upper': 'Viršutinė krūtinė',
+    'chest-lower': 'Apatinė krūtinė',
   } as Record<string, string>,
 
   // --- Serijų tipai, raumenys, įranga (priedas SS/DS/MG/EQ) ----------------

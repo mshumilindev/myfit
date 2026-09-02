@@ -52,6 +52,7 @@ import {
   type CustomExercise,
   type MuscleGroup,
 } from './data/exercises';
+import type { ExerciseSubRegions } from './data/subregions';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
@@ -1830,6 +1831,7 @@ export function saveCatalogExercise(meta: {
   primaryMuscle: MuscleGroup | null;
   secondaryMuscles: MuscleGroup[];
   equipment: string[];
+  subRegions?: ExerciseSubRegions;
 }): void {
   const role = getRole();
   if (role !== 'admin' && role !== 'trainer') return;
@@ -1851,6 +1853,7 @@ export function saveCatalogExercise(meta: {
     primaryMuscle: meta.primaryMuscle,
     secondaryMuscles: meta.secondaryMuscles,
     equipment: meta.equipment,
+    ...(meta.subRegions ? { subRegions: meta.subRegions } : {}),
     createdBy: uid,
     updatedAt: Date.now(),
   }).catch(onWriteError);
@@ -1866,6 +1869,7 @@ export function updateCatalogExercise(
     primaryMuscle: MuscleGroup | null;
     secondaryMuscles: MuscleGroup[];
     equipment: string[];
+    subRegions?: ExerciseSubRegions;
   },
 ): void {
   const role = getRole();
@@ -1981,6 +1985,7 @@ export interface MyExercise {
   primaryMuscle: MuscleGroup | null;
   secondaryMuscles: MuscleGroup[];
   equipment: string[];
+  subRegions?: ExerciseSubRegions;
   /** 'catalog' = saved to exerciseCatalog (editable + deletable);
    *  'logged'  = created ad-hoc in a session, not yet in the catalogue. */
   source: 'catalog' | 'logged';
@@ -1999,6 +2004,7 @@ export function myExercises(): MyExercise[] {
     primaryMuscle: e.primaryMuscle,
     secondaryMuscles: e.secondaryMuscles,
     equipment: e.equipment,
+    subRegions: e.subRegions,
     source: 'catalog' as const,
   }));
   const seen = new Set(out.map((e) => e.name.trim().toLowerCase()));

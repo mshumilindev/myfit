@@ -110,6 +110,8 @@ export const pl: Strings = {
   primaryMuscleLabel: 'Główny mięsień',
   muscleGroupsLabel: 'Grupy mięśni',
   secondaryMuscleLabel: 'Mięśnie pomocnicze',
+  subRegionsLabel: 'Podregiony',
+  subRegionsSecondaryLabel: 'Podregiony (pomocnicze)',
   equipmentLabelField: 'Sprzęt',
   newExerciseNote: 'Oznacz trenowane mięśnie i potrzebny sprzęt.',
   newExerciseAuthorNote:
@@ -270,6 +272,14 @@ export const pl: Strings = {
     neck: 'Kark',
     fullbody: 'Całe ciało',
     cardio: 'Cardio',
+  } as Record<string, string>,
+
+  subMuscleNames: {
+    'delt-front': 'Przedni akton',
+    'delt-side': 'Boczny akton',
+    'delt-rear': 'Tylny akton',
+    'chest-upper': 'Górna klatka',
+    'chest-lower': 'Dolna klatka',
   } as Record<string, string>,
 
   // --- Typy serii, mięśnie, sprzęt (dodatek SS/DS/MG/EQ) -------------------

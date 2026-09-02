@@ -90,10 +90,15 @@ const RICH_EN = new Set(RICH_EXERCISES.map((e) => e.name.trim().toLowerCase()));
 const SUBREGIONS = SUBREGIONS_RAW as Record<string, ExerciseSubRegions>;
 
 export function subRegionsById(id: string): ExerciseSubRegions | null {
+  const custom = customList.find((e) => e.id === id);
+  if (custom?.subRegions) return custom.subRegions;
   return SUBREGIONS[id] ?? null;
 }
 export function subRegionsByName(name: string): ExerciseSubRegions | null {
-  const r = RICH_BY_NAME.get(name.trim().toLowerCase());
+  const key = name.trim().toLowerCase();
+  const custom = customByName.get(key);
+  if (custom?.subRegions) return custom.subRegions;
+  const r = RICH_BY_NAME.get(key);
   return r ? (SUBREGIONS[r.id] ?? null) : null;
 }
 
@@ -219,6 +224,8 @@ export interface CustomExercise {
   primaryMuscle: MuscleGroup | null;
   secondaryMuscles: MuscleGroup[];
   equipment: string[];
+  /** Optional fine sub-region attribution for chest/shoulder custom lifts. */
+  subRegions?: ExerciseSubRegions;
 }
 
 const CUSTOM_CACHE_KEY = 'gym.catalog';

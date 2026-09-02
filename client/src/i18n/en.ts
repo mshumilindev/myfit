@@ -102,6 +102,8 @@ export const en = {
   primaryMuscleLabel: 'Primary muscle',
   muscleGroupsLabel: 'Muscle groups',
   secondaryMuscleLabel: 'Secondary muscles',
+  subRegionsLabel: 'Sub-regions',
+  subRegionsSecondaryLabel: 'Sub-regions (secondary)',
   equipmentLabelField: 'Equipment',
   newExerciseNote: 'Tag the muscles it trains and the equipment it needs.',
   newExerciseAuthorNote:
@@ -274,6 +276,14 @@ export const en = {
     neck: 'Neck',
     fullbody: 'Full body',
     cardio: 'Cardio',
+  } as Record<string, string>,
+
+  subMuscleNames: {
+    'delt-front': 'Front delt',
+    'delt-side': 'Side delt',
+    'delt-rear': 'Rear delt',
+    'chest-upper': 'Upper chest',
+    'chest-lower': 'Lower chest',
   } as Record<string, string>,
 
   // --- Set types, muscles, equipment (design addendum SS/DS/MG/EQ) ---------

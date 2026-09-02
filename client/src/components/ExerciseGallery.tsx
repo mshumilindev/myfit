@@ -19,6 +19,7 @@ import {
   canonicalExerciseName,
   muscleInfoByName,
   richExerciseByName,
+  subRegionsByName,
   secondaryMusclesOf,
   type ExerciseCategory,
   type ExerciseForce,
@@ -26,6 +27,7 @@ import {
   type ExerciseMechanic,
   type MuscleGroup,
 } from '../data/exercises';
+import { SPLIT_GROUPS, type FocusMuscle, type ExerciseSubRegions } from '../data/subregions';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import {
   deleteCatalogExercise,
@@ -698,6 +700,7 @@ export function ExerciseGallery({
               primaryMuscle: v.primary,
               secondaryMuscles: v.secondary,
               equipment: v.equipment,
+              subRegions: v.subRegions,
             };
             if (editing.id) updateCatalogExercise(editing.id, meta);
             else saveCatalogExercise(meta);
@@ -729,6 +732,7 @@ export interface CustomEditState {
   primary: MuscleGroup | null;
   secondary: MuscleGroup[];
   equipment: string[];
+  subRegions?: ExerciseSubRegions;
 }
 
 /** Create / edit a custom exercise: name + primary + secondary + equipment.
@@ -743,6 +747,17 @@ export function CustomEditor(props: {
   const [primary, setPrimary] = useState<MuscleGroup | null>(props.init.primary);
   const [secondary, setSecondary] = useState<MuscleGroup[]>(props.init.secondary);
   const [equipment, setEquipment] = useState<string[]>(props.init.equipment);
+  // Fine sub-regions (chest/shoulder only). Prefill from the edited exercise or,
+  // failing that, the built-in overlay for a library lift being cloned.
+  const initSR = props.init.subRegions ?? subRegionsByName(props.init.name) ?? undefined;
+  const [subPrimary, setSubPrimary] = useState<FocusMuscle[]>(initSR?.primary ?? []);
+  const [subSecondary, setSubSecondary] = useState<FocusMuscle[]>(initSR?.secondary ?? []);
+  const primarySplit: FocusMuscle[] = primary ? (SPLIT_GROUPS[primary] ?? []) : [];
+  const secondarySplit: FocusMuscle[] = secondary.flatMap((m) => SPLIT_GROUPS[m] ?? []);
+  const toggle = (
+    set: React.Dispatch<React.SetStateAction<FocusMuscle[]>>,
+    f: FocusMuscle,
+  ) => set((xs) => (xs.includes(f) ? xs.filter((x) => x !== f) : [...xs, f]));
   const ready = name.trim().length > 0;
 
   return (
@@ -802,6 +817,41 @@ export function CustomEditor(props: {
         ))}
       </div>
 
+      {(primarySplit.length > 0 || secondarySplit.length > 0) && (
+        <>
+          <div className="field-label">{t.subRegionsLabel}</div>
+          {primarySplit.length > 0 && (
+            <div className="filter-chips">
+              {primarySplit.map((f) => (
+                <button
+                  key={f}
+                  className={`fchip${subPrimary.includes(f) ? ' active' : ''}`}
+                  onClick={() => toggle(setSubPrimary, f)}
+                >
+                  {t.subMuscleNames[f]}
+                </button>
+              ))}
+            </div>
+          )}
+          {secondarySplit.length > 0 && (
+            <>
+              <div className="field-label">{t.subRegionsSecondaryLabel}</div>
+              <div className="filter-chips">
+                {secondarySplit.map((f) => (
+                  <button
+                    key={f}
+                    className={`fchip${subSecondary.includes(f) ? ' active' : ''}`}
+                    onClick={() => toggle(setSubSecondary, f)}
+                  >
+                    {t.subMuscleNames[f]}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
+
       <div className="field-label">{t.equipmentLabelField}</div>
       <div className="filter-chips">
         {EQUIPMENT_IDS.map((id) => (
@@ -822,7 +872,13 @@ export function CustomEditor(props: {
         className="btn btn-primary"
         style={{ minHeight: 48, fontSize: 15, marginTop: 'var(--space-3)' }}
         disabled={!ready}
-        onClick={() => props.onSave({ id: props.init.id, name, primary, secondary, equipment })}
+        onClick={() => {
+          const sp = subPrimary.filter((f) => primarySplit.includes(f));
+          const ss = subSecondary.filter((f) => secondarySplit.includes(f));
+          const subRegions: ExerciseSubRegions | undefined =
+            sp.length || ss.length ? { primary: sp, ...(ss.length ? { secondary: ss } : {}) } : undefined;
+          props.onSave({ id: props.init.id, name, primary, secondary, equipment, subRegions });
+        }}
       >
         {props.init.id ? t.save : t.libCreateExercise}
       </button>
