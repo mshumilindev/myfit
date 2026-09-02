@@ -14071,6 +14071,15 @@ button.exd-media {
 @media (max-width: 719.98px) {
   .programs-top .prog-tabs {
     margin-left: 0;
+    /* Four peer tabs (Programs · Goals · Playbook · Exercises) in ONE row —
+       a 4-segment pill instead of the 2-col grid that would wrap. */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .programs-top .prog-tabs button {
+    font-size: 12px;
+    padding: 8px 2px;
+    white-space: nowrap;
+    min-width: 0;
   }
 }
 
