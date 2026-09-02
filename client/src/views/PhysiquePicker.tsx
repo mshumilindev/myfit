@@ -26,12 +26,14 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
   const ids = ARCHETYPES_BY_SEX(sex);
 
   // Preload the highlighted variants so the hover/active swap is instant.
+  // Depend on the primitive `sex` (not `ids`) so the React Compiler can't
+  // create a temporal-dead-zone reference to `ids` in the effect.
   useEffect(() => {
-    for (const id of ids) {
+    for (const id of ARCHETYPES_BY_SEX(sex)) {
       const img = new Image();
       img.src = `/physiques/${id}-lit.png`;
     }
-  }, [ids]);
+  }, [sex]);
 
   const use = () => {
     if (!picked) return;
