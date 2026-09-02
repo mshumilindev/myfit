@@ -619,6 +619,7 @@ export const lt: Strings = {
   physIntro: 'Pasirink formą, kurios sieki — ji nustato pradinį raumenų fokusą, kurį vėliau pakoreguosi.',
   physUseThis: 'Nustatyti šį tikslą',
   physChange: 'Keisti',
+  physRemove: 'Pašalinti',
   goalsReset: 'Atstatyti tikslus',
   goalsResetBody: 'Tai išvalys kūno tikslą ir bloko fokusą.',
   lastDoneCol: 'Paskutinį kartą',

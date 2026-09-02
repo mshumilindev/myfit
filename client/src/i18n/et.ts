@@ -607,6 +607,7 @@ export const et: Strings = {
   physIntro: 'Vali kuju, mille poole ehitad — see seab lihasfookuse lähte, mida saad hiljem häälestada.',
   physUseThis: 'Vali see siht',
   physChange: 'Muuda',
+  physRemove: 'Eemalda',
   goalsReset: 'Lähtesta eesmärgid',
   goalsResetBody: 'See tühjendab kehaeesmärgi ja bloki fookuse.',
   lastDoneCol: 'Viimati',

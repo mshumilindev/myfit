@@ -14479,7 +14479,7 @@ button.exd-media {
 }
 .goals-physique-fig {
   flex: none;
-  width: 48px;
+  width: 64px;
 }
 .goals-physique-name {
   font-size: 20px;
@@ -14490,6 +14490,17 @@ button.exd-media {
   color: var(--color-neutral-500);
   margin-top: 3px;
   line-height: 1.45;
+}
+.phys-remove {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  cursor: pointer;
+}
+.phys-remove:hover {
+  color: var(--color-danger-text);
 }
 .phys-intro {
   margin: 0 0 4px;
@@ -14528,9 +14539,14 @@ button.exd-media {
 }
 .phys-fig {
   position: relative;
-  width: 56px;
+  width: 82px;
   margin: 0 auto;
   aspect-ratio: 192 / 512;
+  /* Studio renders can't be matted (figure tone == bg tone), so present each as
+     a neat rounded portrait rather than an accidental rectangular tile. */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 .phys-fig img {
   position: absolute;

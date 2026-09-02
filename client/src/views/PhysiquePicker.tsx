@@ -48,6 +48,17 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
           <Icon name="caret-left" />
         </button>
         <span className="t">{t.goalsPhysiqueTitle}</span>
+        {cur && (
+          <button
+            className="phys-remove"
+            onClick={() => {
+              setPhysiqueTarget(undefined);
+              onClose();
+            }}
+          >
+            {t.physRemove}
+          </button>
+        )}
       </div>
 
       <p className="phys-intro">{t.physIntro}</p>

@@ -612,6 +612,7 @@ export const uk: Strings = {
   physIntro: 'Обери форму, до якої будуєшся — вона задає стартовий фокус мʼязів, який далі можна підлаштувати.',
   physUseThis: 'Обрати цю ціль',
   physChange: 'Змінити',
+  physRemove: 'Прибрати',
   goalsReset: 'Скинути цілі',
   goalsResetBody: 'Це очистить ціль фігури та фокус блоку.',
   lastDoneCol: 'Востаннє',
