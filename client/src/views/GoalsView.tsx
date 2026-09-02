@@ -5,14 +5,21 @@
  * measured goals (design GL-01). Focus is live; the physique picker (needs the
  * archetype silhouettes) and long-term goals land next.
  */
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useT } from '../i18n';
 import { useStore } from '../store';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { FocusBodyMap } from '../components/Muscle';
 import { FocusEditor } from './FocusEditor';
 import { LongTermEditor } from './LongTermEditor';
-import { focusLists, groupEmphasis, goalProgress, FOCUS_MAV_DELTA } from '../goals';
+import { PhysiquePicker } from './PhysiquePicker';
+import {
+  focusLists,
+  groupEmphasis,
+  goalProgress,
+  physiqueFigureVars,
+  FOCUS_MAV_DELTA,
+} from '../goals';
 import { focusToGroup, type FocusMuscle } from '../data/subregions';
 import { LANDMARKS } from '../volume';
 import { exercisesForSubRegions } from '../data/exercises';
@@ -30,6 +37,8 @@ export function GoalsView({
   const store = useStore();
   const [editingFocus, setEditingFocus] = useState(false);
   const [editingGoal, setEditingGoal] = useState<{ id: string | null } | null>(null);
+  const [editingPhysique, setEditingPhysique] = useState(false);
+  const physique = store.goals.physique;
 
   const { grow, ease } = focusLists(store.goals);
   const hasFocus = grow.length > 0 || ease.length > 0;
@@ -60,16 +69,33 @@ export function GoalsView({
       <div className="goals-body">
         <p className="goals-intro">{t.goalsIntro}</p>
 
-        {/* Physique target — awaits the archetype silhouettes */}
+        {/* Physique target */}
         <section className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsPhysiqueTitle}</span>
-            <span className="tag tag-neutral goals-soon">{t.goalsSoon}</span>
+            {physique && (
+              <button className="goals-change" onClick={() => setEditingPhysique(true)}>
+                {t.physChange}
+              </button>
+            )}
           </div>
-          <div className="goals-empty">
-            <Icon name="user" />
-            <p>{t.goalsPhysiqueEmpty}</p>
-          </div>
+          {physique ? (
+            <div className="goals-physique">
+              <div
+                className="phys-fig lit goals-physique-fig"
+                style={physiqueFigureVars(physique.archetype) as CSSProperties}
+              />
+              <div>
+                <div className="goals-physique-name">{t.archetypes[physique.archetype].name}</div>
+                <div className="goals-physique-blurb">{t.archetypes[physique.archetype].blurb}</div>
+              </div>
+            </div>
+          ) : (
+            <button className="goals-empty goals-empty-btn" onClick={() => setEditingPhysique(true)}>
+              <Icon name="user" />
+              <p>{t.goalsPhysiqueEmpty}</p>
+            </button>
+          )}
         </section>
 
         {/* Focus this block — live */}
@@ -211,6 +237,7 @@ export function GoalsView({
       {editingGoal && (
         <LongTermEditor id={editingGoal.id} onClose={() => setEditingGoal(null)} />
       )}
+      {editingPhysique && <PhysiquePicker onClose={() => setEditingPhysique(false)} />}
     </div>
   );
 }

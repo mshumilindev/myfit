@@ -14450,6 +14450,106 @@ button.exd-media {
   margin-top: 10px;
 }
 
+/* Goals: physique target card + picker */
+.goals-change {
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: 12px;
+  cursor: pointer;
+}
+.goals-physique {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.goals-physique-fig {
+  flex: none;
+  width: 48px;
+}
+.goals-physique-name {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+.goals-physique-blurb {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+.phys-intro {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-neutral-500);
+}
+.phys-sex {
+  margin-bottom: 4px;
+}
+.phys-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+}
+.phys-card {
+  position: relative;
+  border: 0;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 12px 12px 14px;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+.phys-card.active {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+.phys-check {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  font-size: 17px;
+  color: var(--color-accent);
+}
+.phys-fig {
+  width: 56px;
+  margin: 0 auto;
+  aspect-ratio: 192 / 512;
+  background-image: url(/physiques/figures.png);
+  background-repeat: no-repeat;
+  background-size: 872% 218%;
+  background-position: var(--fig-bx, 0%) var(--fig-y, 0%);
+}
+/* Highlighted silhouette on hover/active (web) and active (mobile has no hover). */
+.phys-card:hover .phys-fig,
+.phys-card.active .phys-fig,
+.phys-fig.lit {
+  background-position: var(--fig-hx, 0%) var(--fig-y, 0%);
+}
+.phys-name {
+  font-size: 14px;
+  margin-top: 8px;
+}
+.phys-card.active .phys-name {
+  color: var(--color-accent-100);
+}
+.phys-blurb {
+  font-size: 10px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+  line-height: 1.35;
+}
+.phys-card.active .phys-blurb {
+  color: var(--color-accent-300);
+}
+.phys-use {
+  width: 100%;
+  min-height: 48px;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
 /* Focus editor sheet (GL-03) */
 .focus-sheet .focus-reset {
   border: 0;

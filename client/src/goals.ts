@@ -159,3 +159,26 @@ export function focusAdjustLandmarks<T extends Landmark>(
   }
   return out;
 }
+
+
+/**
+ * CSS variables to crop the physique sprite (public/physiques/figures.png,
+ * 8 cols x 2 rows: male row 0 / female row 1, each archetype a base+highlighted
+ * pair). --fig-bx is the base column, --fig-hx the highlighted one; the figure
+ * element swaps to --fig-hx on hover/active (web) and active (mobile).
+ */
+const FIG_ZOOM = 1.09; // crop ~4% each side to hide the glow bleed between cells
+export const PHYS_BG_SIZE = `${(800 * FIG_ZOOM).toFixed(2)}% ${(200 * FIG_ZOOM).toFixed(2)}%`;
+const figPos = (i: number, n: number) =>
+  `${((100 * ((i + 0.5) * FIG_ZOOM - 0.5)) / (n * FIG_ZOOM - 1)).toFixed(3)}%`;
+
+export function physiqueFigureVars(id: ArchetypeId): Record<string, string> {
+  const sex = ARCHETYPES[id].sex;
+  const idx = Math.max(0, ARCHETYPES_BY_SEX(sex).indexOf(id));
+  const baseCol = idx * 2;
+  return {
+    '--fig-bx': figPos(baseCol, 8),
+    '--fig-hx': figPos(baseCol + 1, 8),
+    '--fig-y': figPos(sex === 'male' ? 0 : 1, 2),
+  };
+}
