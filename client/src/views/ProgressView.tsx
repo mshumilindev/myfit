@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import {
   estimatedOneRepMaxSet,
-  est1rm,
+  setBestE1rm,
   exerciseNeeds,
   exerciseVolumeKg,
   missingAtGym,
@@ -167,7 +167,7 @@ export function ProgressView({
         cur.recTs = w.startedAt;
       }
       const e1rmTop = estimatedOneRepMaxSet(e.sets);
-      if (e1rmTop) cur.recE1rm = Math.max(cur.recE1rm, est1rm(e1rmTop.weight ?? 0, e1rmTop.reps));
+      if (e1rmTop) cur.recE1rm = Math.max(cur.recE1rm, setBestE1rm(e1rmTop));
       byName.set(key, cur);
     }
   }
@@ -178,7 +178,7 @@ export function ProgressView({
       const e = w.exercises.find((x) => x.name.trim() === name);
       const top = e && estimatedOneRepMaxSet(e.sets);
       if (top) {
-        pts.push({ ts: w.startedAt, rm: est1rm(top.weight ?? 0, top.reps) });
+        pts.push({ ts: w.startedAt, rm: setBestE1rm(top) });
       }
     }
     return { name, pts };
@@ -230,7 +230,7 @@ export function ProgressView({
   const selectedE1rmPoints = selectedSessions
     .map((item) => {
       const top = estimatedOneRepMaxSet(item.exercise.sets);
-      return top ? { rm: est1rm(top.weight ?? 0, top.reps) } : null;
+      return top ? { rm: setBestE1rm(top) } : null;
     })
     .filter((item): item is { rm: number } => item !== null)
     .reverse();

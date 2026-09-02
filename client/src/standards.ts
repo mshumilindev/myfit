@@ -9,7 +9,7 @@
  *      men 90 kg / women 60 kg). Lifts: presses, rows, hinges, machines, etc.
  */
 import { canonicalExerciseName } from './data/exercises';
-import { est1rm, isStrengthExercise, setTypeOf } from './store';
+import { isStrengthExercise, setBestE1rm, setTypeOf } from './store';
 import type { Workout } from './types';
 
 export type Sex = 'M' | 'F';
@@ -492,7 +492,7 @@ function bestFor(workouts: Workout[], match: (n: string) => boolean): number {
       if (!isStrengthExercise(ex) || !match(ex.name)) continue;
       for (const s of ex.sets) {
         if (setTypeOf(s) === 'warmup') continue;
-        best = Math.max(best, est1rm(s.weight ?? 0, s.reps));
+        best = Math.max(best, setBestE1rm(s));
       }
     }
   }

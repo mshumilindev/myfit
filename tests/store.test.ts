@@ -48,6 +48,7 @@ import {
   perHandFactor,
   setVolumeKg,
   setRepsTotal,
+  setBestE1rm,
   exerciseVolumeKg,
   muscleVolumeKg,
   muscleSetsInWorkout,
@@ -555,6 +556,25 @@ describe('EQ set and exercise volume', () => {
     });
     expect(setVolumeKg(dropSet)).toBe(1200);
     expect(setRepsTotal(dropSet)).toBe(15);
+  });
+
+  it('best e1RM counts drop parts, so a reverse-drop\'s heavier drop still scores', () => {
+    // Plain working set: best e1RM is the set itself.
+    expect(setBestE1rm(set({ reps: 6, weight: 100 }))).toBe(est1rm(100, 6));
+    // Reverse-drop: light top (60x8 -> 76) but the ascending drop 100x3 -> 110
+    // is the strongest effort, so it must win.
+    const revDrop = set({
+      reps: 8,
+      weight: 60,
+      type: 'reverse-drop',
+      drops: [
+        { reps: 5, weight: 80 },
+        { reps: 3, weight: 100 },
+      ],
+    });
+    expect(setBestE1rm(revDrop)).toBe(est1rm(100, 3));
+    // Warm-ups never score.
+    expect(setBestE1rm(set({ isWarmup: true, reps: 3, weight: 120 }))).toBe(0);
   });
 
   it('counts bodyweight sets as zero external load in total volume', () => {

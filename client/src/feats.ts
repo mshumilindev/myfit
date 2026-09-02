@@ -5,7 +5,14 @@
  * dates are recovered by replaying sessions in chronological order and noting
  * where a metric first crosses each tier.
  */
-import { est1rm, isStrengthExercise, setRepsTotal, setTypeOf, workoutVolumeKg } from './store';
+import {
+  isStrengthExercise,
+  setBestE1rm,
+  setRepsTotal,
+  setTopWeight,
+  setTypeOf,
+  workoutVolumeKg,
+} from './store';
 import type { SetEntry, Workout } from './types';
 
 export type FeatGroup =
@@ -402,9 +409,9 @@ export function computeFeats(finished: Workout[]): FeatsResult {
         setsDone += 1;
         repsDone += setRepsTotal(s);
         distance += s.distanceKm ?? 0;
-        if (setTypeOf(s) !== 'warmup') heaviestSet = Math.max(heaviestSet, s.weight ?? 0);
+        if (setTypeOf(s) !== 'warmup') heaviestSet = Math.max(heaviestSet, setTopWeight(s));
         if (!strength) continue;
-        const e = est1rm(s.weight ?? 0, s.reps);
+        const e = setBestE1rm(s);
         if (e <= 0) continue;
         const prev = bestByEx.get(ex.name) ?? 0;
         if (e > prev) {

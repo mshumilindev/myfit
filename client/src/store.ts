@@ -2019,10 +2019,24 @@ export function est1rm(weight: number, reps: number): number {
   return Math.round(weight * (1 + reps / 30));
 }
 
+/**
+ * Best estimated 1RM across a set's performed segments — the top set AND any
+ * drop parts. A drop or reverse-drop set is one set whose parts live in
+ * `drops`; without looking at them, an ascending reverse-drop (or a heavy,
+ * high-rep drop) would never register an e1RM record even though it was the
+ * strongest effort. Warm-ups score 0.
+ */
+export function setBestE1rm(s: SetEntry): number {
+  if (setTypeOf(s) === 'warmup') return 0;
+  let best = est1rm(s.weight ?? 0, s.reps);
+  for (const d of setDrops(s)) best = Math.max(best, est1rm(d.weight ?? 0, d.reps));
+  return best;
+}
+
 export function estimatedOneRepMaxSet(sets: SetEntry[]): SetEntry | undefined {
   return [...sets]
-    .filter((s) => setTypeOf(s) !== 'warmup' && est1rm(s.weight ?? 0, s.reps) > 0)
-    .sort((a, b) => est1rm(b.weight ?? 0, b.reps) - est1rm(a.weight ?? 0, a.reps))[0];
+    .filter((s) => setBestE1rm(s) > 0)
+    .sort((a, b) => setBestE1rm(b) - setBestE1rm(a))[0];
 }
 export interface MyExercise {
   /** Catalogue id, or `logged-<name>` for a history-only user exercise. */
