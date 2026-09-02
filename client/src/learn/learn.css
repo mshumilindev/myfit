@@ -1,9 +1,8 @@
 /* ============================================================================
-   Learn — how-to videos. Scoped under .app-learn. Layout/chrome come from the
-   shared suite CSS (.apex-app, AppRail, .app-brand, .apex-nav); the gem accent
-   ramp is set on .app-learn / .theme-learn in styles.css, so the chrome turns
-   rubellite. These rules style Learn's own content (home, topics, saved,
-   player) using the gym design tokens.
+   Learn — how-to videos. Scoped under .app-learn. Chrome comes from the shared
+   suite CSS (.apex-app, AppRail, .app-brand, .apex-nav); the gem accent ramp is
+   set on .app-learn / .theme-learn in styles.css. Thumbnail orientation follows
+   the global "cut" (cut-p = 9:16 phone, cut-w = 16:9 web).
    ========================================================================== */
 
 .app-learn {
@@ -21,28 +20,33 @@
   }
 }
 
-.app-learn .ln-screen {
+/* Section rhythm: consistent gaps between head / toolbar / continue / blocks. */
+.app-learn .ln-screen,
+.app-learn .ln-player {
   display: flex;
   flex-direction: column;
+  gap: 18px;
 }
 
-/* head */
 .app-learn .ln-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin: 0;
 }
 .app-learn .ln-head h1 {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
+  color: var(--color-text);
 }
 .app-learn .ln-count {
   font-size: 13px;
   color: var(--color-neutral-500);
   font-variant-numeric: tabular-nums;
+  flex: none;
 }
 .app-learn .ln-count .acc {
   color: var(--color-accent);
@@ -55,13 +59,11 @@
   font-weight: 600;
   color: var(--color-neutral-500);
   text-transform: uppercase;
-  padding: 4px 2px 10px;
-}
-.app-learn .ln-kicker.up {
-  padding-top: 18px;
+  margin: 0 2px -8px;
 }
 
 .app-learn .ln-back {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -69,14 +71,142 @@
   border: none;
   color: var(--color-neutral-500);
   font-size: 13px;
-  padding: 0 0 12px;
+  padding: 0;
+  margin-bottom: -6px;
   cursor: pointer;
 }
 .app-learn .ln-back i {
   font-size: 18px;
 }
 
-/* thumbnails */
+/* ---- search + filter (gym-style) ---- */
+.app-learn .ln-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.app-learn .ln-toolrow {
+  display: flex;
+  gap: 10px;
+}
+.app-learn .ln-search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  padding: 0 13px;
+  height: 42px;
+  color: var(--color-neutral-600);
+}
+.app-learn .ln-search i {
+  font-size: 16px;
+  flex: none;
+}
+.app-learn .ln-search input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+}
+.app-learn .ln-search input::placeholder {
+  color: var(--color-neutral-600);
+}
+.app-learn .ln-filter-btn {
+  position: relative;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-400);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+.app-learn .ln-filter-btn.on {
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+.app-learn .ln-filter-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #16171a;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.app-learn .ln-filters {
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.app-learn .ln-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+}
+.app-learn .ln-filter-clear {
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+/* wrapped chips — never a single scroll row */
+.app-learn .ln-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.app-learn .ln-chip {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: none;
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  cursor: pointer;
+}
+.app-learn .ln-chip.on {
+  color: var(--color-accent);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+/* ---- thumbnails (orientation follows the cut) ---- */
 .app-learn .ln-thumb {
   position: relative;
   overflow: hidden;
@@ -85,17 +215,22 @@
   background: var(--color-neutral-900);
   flex: none;
 }
-.app-learn .ln-thumb.r-p {
+.app-learn .ln-thumb.cut-p {
   aspect-ratio: 9 / 16;
 }
-.app-learn .ln-thumb.r-w {
+.app-learn .ln-thumb.cut-w {
   aspect-ratio: 16 / 9;
 }
-.app-learn .ln-thumb img {
+.app-learn .ln-thumb.tile {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+}
+.app-learn .ln-thumb.row {
+  height: 62px;
+  width: auto;
+}
+.app-learn .ln-thumb.lead {
+  height: 104px;
+  width: auto;
 }
 .app-learn .ln-thumb-ph {
   position: absolute;
@@ -103,7 +238,7 @@
   display: grid;
   place-items: center;
   color: var(--color-neutral-700);
-  font-size: 26px;
+  font-size: 24px;
   background: radial-gradient(120% 90% at 30% 0%, rgba(229, 83, 126, 0.08), transparent 60%);
 }
 .app-learn .ln-thumb-scrim {
@@ -130,8 +265,14 @@
 .app-learn .ln-soon-chip i {
   font-size: 11px;
 }
+.app-learn .ln-thumb.row .ln-soon-chip {
+  top: 5px;
+  right: 5px;
+  padding: 2px 6px;
+  font-size: 9px;
+}
 
-/* continue card */
+/* ---- continue card ---- */
 .app-learn .ln-continue {
   display: flex;
   gap: 14px;
@@ -144,10 +285,6 @@
   background: var(--color-surface);
   box-shadow: inset 0 0 0 1px var(--color-neutral-800), 0 0 26px -14px var(--gem-glow);
   padding: 12px;
-}
-.app-learn .ln-continue .ln-thumb {
-  width: 74px;
-  aspect-ratio: 9 / 16;
 }
 .app-learn .ln-continue-main {
   flex: 1;
@@ -165,6 +302,7 @@
   font-weight: 600;
   margin-top: 4px;
   line-height: 1.25;
+  color: var(--color-text);
 }
 .app-learn .ln-continue-sub {
   display: inline-flex;
@@ -178,39 +316,11 @@
   font-size: 13px;
 }
 
-/* chips */
-.app-learn .ln-chips {
-  display: flex;
-  gap: 8px;
-  margin-top: 18px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.app-learn .ln-chips::-webkit-scrollbar {
-  display: none;
-}
-.app-learn .ln-chip {
-  flex: none;
-  font-size: 12.5px;
-  color: var(--color-neutral-500);
-  padding: 8px 15px;
-  border-radius: 999px;
-  background: none;
-  border: none;
-  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
-  cursor: pointer;
-}
-.app-learn .ln-chip.on {
-  color: var(--color-accent);
-  font-weight: 600;
-  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
-}
-
-/* per-topic grid */
+/* ---- per-topic grid ---- */
 .app-learn .ln-topic-block {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 .app-learn .ln-grid {
   display: grid;
@@ -237,8 +347,17 @@
   margin-top: 8px;
   color: var(--color-text);
 }
+.app-learn .ln-sentinel {
+  height: 1px;
+}
+.app-learn .ln-noresults {
+  color: var(--color-neutral-500);
+  font-size: 14px;
+  padding: 24px 2px;
+  text-align: center;
+}
 
-/* topics list */
+/* ---- topics list ---- */
 .app-learn .ln-topics {
   display: flex;
   flex-direction: column;
@@ -276,6 +395,7 @@
   display: block;
   font-size: 16px;
   font-weight: 600;
+  color: var(--color-text);
 }
 .app-learn .ln-topic-desc {
   display: block;
@@ -304,7 +424,7 @@
   flex: none;
 }
 
-/* saved list */
+/* ---- saved / up-next rows ---- */
 .app-learn .ln-saved-list {
   display: flex;
   flex-direction: column;
@@ -320,10 +440,6 @@
   border: none;
   cursor: pointer;
 }
-.app-learn .ln-saved-row .ln-thumb {
-  width: 104px;
-  aspect-ratio: 16 / 9;
-}
 .app-learn .ln-saved-text {
   flex: 1;
   min-width: 0;
@@ -332,6 +448,7 @@
   display: block;
   font-size: 14.5px;
   font-weight: 600;
+  color: var(--color-text);
 }
 .app-learn .ln-saved-meta {
   display: block;
@@ -345,7 +462,7 @@
   flex: none;
 }
 
-/* empty state */
+/* ---- empty state ---- */
 .app-learn .ln-empty {
   flex: 1;
   display: flex;
@@ -370,6 +487,7 @@
   font-size: 18px;
   font-weight: 600;
   margin-top: 20px;
+  color: var(--color-text);
 }
 .app-learn .ln-empty-sub {
   font-size: 13.5px;
@@ -379,7 +497,7 @@
   max-width: 300px;
 }
 
-/* pill button */
+/* ---- pill button ---- */
 .app-learn .ln-pill {
   display: inline-flex;
   align-items: center;
@@ -398,21 +516,21 @@
 .app-learn .ln-pill i {
   font-size: 15px;
 }
+.app-learn .ln-pill.sm {
+  margin-top: 0;
+  padding: 9px 15px;
+  font-size: 12.5px;
+}
 .app-learn .ln-pill.on {
   color: #16171a;
   background: var(--color-accent);
   box-shadow: none;
 }
 
-/* player */
-.app-learn .ln-player {
-  display: flex;
-  flex-direction: column;
-}
+/* ---- player ---- */
 .app-learn .ln-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
   border-radius: 16px;
   overflow: hidden;
   background: #0a090b;
@@ -420,6 +538,26 @@
   display: grid;
   place-items: center;
   text-align: center;
+}
+.app-learn .ln-stage.cut-w {
+  aspect-ratio: 16 / 9;
+  max-height: 508px;
+}
+.app-learn .ln-stage.cut-p {
+  aspect-ratio: 9 / 16;
+  max-height: 60vh;
+}
+@media (min-width: 720px) {
+  .app-learn .ln-stage.cut-p {
+    max-height: 508px;
+    aspect-ratio: 9 / 16;
+    width: auto;
+    justify-self: center;
+  }
+  .app-learn .ln-stage,
+  .app-learn .ln-meta {
+    max-width: 904px;
+  }
 }
 .app-learn .ln-stage-inner {
   display: flex;
@@ -442,6 +580,7 @@
 .app-learn .ln-stage-title {
   font-size: 16px;
   font-weight: 600;
+  color: var(--color-text);
 }
 .app-learn .ln-stage-sub {
   font-size: 12.5px;
@@ -451,13 +590,16 @@
 }
 
 .app-learn .ln-meta {
-  padding: 16px 2px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 .app-learn .ln-meta-title {
   font-size: 21px;
   font-weight: 700;
   letter-spacing: -0.02em;
   margin-top: 7px;
+  color: var(--color-text);
 }
 .app-learn .ln-meta-desc {
   font-size: 14px;
@@ -470,15 +612,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 18px;
   flex-wrap: wrap;
-}
-.app-learn .ln-cutlabel {
-  font-size: 11.5px;
-  color: var(--color-neutral-500);
-}
-.app-learn .ln-cutlabel b {
-  color: var(--color-accent);
 }
 .app-learn .ln-switch {
   display: inline-flex;
@@ -492,7 +627,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 12px;
+  padding: 8px 13px;
   border-radius: 9px;
   border: none;
   background: none;
@@ -508,60 +643,4 @@
   font-weight: 600;
   background: color-mix(in srgb, var(--color-accent) 16%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
-}
-.app-learn .ln-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
-.app-learn .ln-actions .ln-pill {
-  margin-top: 16px;
-}
-
-/* up next */
-.app-learn .ln-upnext {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-.app-learn .ln-up-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.app-learn .ln-up-row .ln-thumb {
-  width: 104px;
-  aspect-ratio: 16 / 9;
-}
-.app-learn .ln-up-text {
-  flex: 1;
-  min-width: 0;
-}
-.app-learn .ln-up-title {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-.app-learn .ln-up-meta {
-  display: block;
-  font-size: 12px;
-  color: var(--color-neutral-600);
-  margin-top: 3px;
-}
-
-/* desktop: constrain the player width like the design */
-@media (min-width: 720px) {
-  .app-learn .ln-stage {
-    max-width: 904px;
-    max-height: 508px;
-  }
-  .app-learn .ln-meta {
-    max-width: 904px;
-  }
 }

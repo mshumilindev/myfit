@@ -1,32 +1,39 @@
 /**
- * Learn — the how-to video app inside the Spotter suite. Graphite + rubellite
- * ("gem") accent. Reuses the shared sub-app chrome (AppRail desktop rail,
- * .app-brand header, .apex-nav bottom nav) exactly like Apex / People /
- * Nutrition, so it stays consistent; only the accent ramp differs.
+ * Learn — how-to videos inside the Spotter suite. Graphite + rubellite (gem).
+ * Reuses the shared sub-app chrome (AppRail, .app-brand header, .apex-nav) like
+ * the other apps; only the accent differs.
  *
- * Videos are not shot yet, so every lesson shows a "video coming soon" state:
- * thumbnails carry a Soon badge, the player shows a coming-soon panel, and the
- * Phone/Web switch is inert. The catalog (learn/catalog.ts) drives everything.
+ * - Role-gated: trainers/admins see their extra lessons; members never do.
+ * - One global "cut" (phone/web) drives BOTH the player and every thumbnail's
+ *   orientation. It defaults to the current view (mobile → portrait 9:16,
+ *   desktop → landscape 16:9) and the Phone/Web switch flips it everywhere.
+ * - Videos aren't shot yet → every lesson shows a "coming soon" state.
+ * - Gym-style search + filter (wrapped, not a scroll strip); long lists are
+ *   revealed progressively (lightweight virtualization).
+ * - Localised UI via useLearnT.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
+import { useLearnT } from './i18n';
 import {
-  CATALOG,
-  ALL_LESSONS,
-  LESSON_COUNT,
+  catalogForRole,
+  lessonsForRole,
   lessonById,
   topicById,
   topicTitle,
   type Lesson,
   type Topic,
+  type ViewerRole,
 } from './catalog';
 
 type Tab = 'home' | 'topics' | 'saved' | 'feed';
+type Cut = 'phone' | 'web';
 
 const SAVED_KEY = 'spotter.learn.saved';
+const CUT_KEY = 'spotter.learn.cut';
 
 function readSaved(): string[] {
   try {
@@ -36,107 +43,270 @@ function readSaved(): string[] {
     return [];
   }
 }
-function writeSaved(ids: string[]): void {
-  try {
-    localStorage.setItem(SAVED_KEY, JSON.stringify(ids));
-  } catch {
-    /* storage unavailable */
-  }
+
+/** Global cut: defaults to the current view (desktop → web, phone → web-off). */
+function useCut(): [Cut, (c: Cut) => void] {
+  const [cut, setCut] = useState<Cut>(() => {
+    try {
+      const s = localStorage.getItem(CUT_KEY);
+      if (s === 'phone' || s === 'web') return s;
+    } catch {
+      /* ignore */
+    }
+    const desktop =
+      typeof window !== 'undefined' &&
+      !!window.matchMedia &&
+      window.matchMedia('(min-width: 720px)').matches;
+    return desktop ? 'web' : 'phone';
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(CUT_KEY, cut);
+    } catch {
+      /* ignore */
+    }
+  }, [cut]);
+  return [cut, setCut];
 }
 
-/** A thumbnail tile — real still when shot, otherwise a graphite placeholder.
- *  Always carries the "Soon" marker until the lesson is recorded. */
-function Thumb({ lesson, ratio }: { lesson: Lesson; ratio: '9/16' | '16/9' }) {
+/** Reveal items progressively as a sentinel scrolls into view (virtualization). */
+function useReveal(total: number, step = 12): [number, (el: HTMLDivElement | null) => void] {
+  const [n, setN] = useState(Math.min(step, total));
+  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!node || n >= total) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) setN((x) => Math.min(total, x + step));
+    });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [node, n, total, step]);
+  return [n, setNode];
+}
+
+/** Thumbnail — real still when shot, else a placeholder; orientation = cut. */
+function Thumb({ cut, variant }: { cut: Cut; variant: 'tile' | 'row' | 'lead' }) {
+  const { L } = useLearnT();
   return (
-    <div className={`ln-thumb r-${ratio === '9/16' ? 'p' : 'w'}`}>
-      {lesson.thumb ? (
-        <img src={lesson.thumb} alt="" loading="lazy" />
-      ) : (
-        <div className="ln-thumb-ph">
-          <Icon name="graduation-cap" weight="fill" />
-        </div>
-      )}
+    <div className={`ln-thumb ${variant} cut-${cut === 'phone' ? 'p' : 'w'}`}>
+      <div className="ln-thumb-ph">
+        <Icon name="graduation-cap" weight="fill" />
+      </div>
       <div className="ln-thumb-scrim" />
       <span className="ln-soon-chip">
-        <Icon name="clock" /> Soon
+        <Icon name="clock" /> {L.soon}
       </span>
     </div>
   );
 }
 
-/** Home — "How to Spotter": continue card, topic chips, per-topic grids. */
-function HomeScreen({ onPlay }: { onPlay: (l: Lesson) => void }) {
-  const first = ALL_LESSONS[0];
-  const [chip, setChip] = useState<'all' | Topic['id']>('all');
-  const shownTopics = chip === 'all' ? CATALOG : CATALOG.filter((t) => t.id === chip);
-
+function Tile({ lesson, cut, onPlay }: { lesson: Lesson; cut: Cut; onPlay: (l: Lesson) => void }) {
   return (
-    <div className="ln-screen">
-      <div className="ln-head">
-        <h1>How to Spotter</h1>
-        <span className="ln-count">
-          <span className="acc">0</span> / {LESSON_COUNT}
-        </span>
-      </div>
+    <button className="ln-card" onClick={() => onPlay(lesson)}>
+      <Thumb cut={cut} variant="tile" />
+      <div className="ln-card-title">{lesson.title}</div>
+    </button>
+  );
+}
 
-      <div className="ln-kicker">Continue</div>
-      <button className="ln-continue" onClick={() => onPlay(first)}>
-        <Thumb lesson={first} ratio="9/16" />
-        <div className="ln-continue-main">
-          <div className="ln-lesson-tag">{topicTitle(first.topic)}</div>
-          <div className="ln-continue-title">{first.title}</div>
-          <div className="ln-continue-sub">
-            <Icon name="clock" /> Video coming soon
-          </div>
-        </div>
-      </button>
-
-      <div className="ln-chips">
-        <button
-          className={`ln-chip${chip === 'all' ? ' on' : ''}`}
-          onClick={() => setChip('all')}
-        >
-          All
-        </button>
-        {CATALOG.map((t) => (
-          <button
-            key={t.id}
-            className={`ln-chip${chip === t.id ? ' on' : ''}`}
-            onClick={() => setChip(t.id)}
-          >
-            {t.title}
-          </button>
+/** A virtualized grid of lesson tiles. */
+function LessonGrid({
+  lessons,
+  cut,
+  onPlay,
+}: {
+  lessons: Lesson[];
+  cut: Cut;
+  onPlay: (l: Lesson) => void;
+}) {
+  const [n, sentinel] = useReveal(lessons.length, 12);
+  return (
+    <>
+      <div className="ln-grid">
+        {lessons.slice(0, n).map((l) => (
+          <Tile key={l.id} lesson={l} cut={cut} onPlay={onPlay} />
         ))}
       </div>
+      {n < lessons.length && <div ref={sentinel} className="ln-sentinel" aria-hidden />}
+    </>
+  );
+}
 
-      {shownTopics.map((t) => (
-        <div key={t.id} className="ln-topic-block">
-          <div className="ln-kicker">
-            {t.title} · {t.lessons.length} lessons
+/** Search + filter toolbar (gym-style: search field + filter button + wrapped chips). */
+function Toolbar({
+  q,
+  onQ,
+  topics,
+  active,
+  onToggle,
+  onClear,
+}: {
+  q: string;
+  onQ: (v: string) => void;
+  topics: Topic[];
+  active: Set<string>;
+  onToggle: (id: string) => void;
+  onClear: () => void;
+}) {
+  const { L } = useLearnT();
+  const [open, setOpen] = useState(false);
+  const count = active.size;
+  return (
+    <div className="ln-toolbar">
+      <div className="ln-toolrow">
+        <label className="ln-search">
+          <Icon name="magnifying-glass" />
+          <input value={q} placeholder={L.search} onChange={(e) => onQ(e.target.value)} />
+        </label>
+        <button
+          className={`ln-filter-btn${open || count ? ' on' : ''}`}
+          onClick={() => setOpen((o) => !o)}
+          aria-label={L.filters}
+        >
+          <Icon name="funnel-simple" weight={count ? 'fill' : undefined} />
+          {count > 0 && <span className="ln-filter-count">{count}</span>}
+        </button>
+      </div>
+      {open && (
+        <div className="ln-filters">
+          <div className="ln-filter-head">
+            <span>{L.filters}</span>
+            {count > 0 && (
+              <button className="ln-filter-clear" onClick={onClear}>
+                {L.clear}
+              </button>
+            )}
           </div>
-          <div className="ln-grid">
-            {t.lessons.map((l) => (
-              <button key={l.id} className="ln-card" onClick={() => onPlay(l)}>
-                <Thumb lesson={l} ratio="9/16" />
-                <div className="ln-card-title">{l.title}</div>
+          <div className="ln-filter-chips">
+            {topics.map((t) => (
+              <button
+                key={t.id}
+                className={`ln-chip${active.has(t.id) ? ' on' : ''}`}
+                onClick={() => onToggle(t.id)}
+              >
+                {t.title}
               </button>
             ))}
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
-/** Topics — one row per topic with lesson count. */
-function TopicsScreen({ onOpenTopic }: { onOpenTopic: (t: Topic) => void }) {
+function HomeScreen({
+  topics,
+  lessons,
+  cut,
+  onPlay,
+}: {
+  topics: Topic[];
+  lessons: Lesson[];
+  cut: Cut;
+  onPlay: (l: Lesson) => void;
+}) {
+  const { L } = useLearnT();
+  const [q, setQ] = useState('');
+  const [active, setActive] = useState<Set<string>>(new Set());
+  const first = lessons[0];
+
+  const query = q.trim().toLowerCase();
+  const filtering = query.length > 0 || active.size > 0;
+  const results = useMemo(
+    () =>
+      lessons.filter(
+        (l) =>
+          (active.size === 0 || active.has(l.topic)) &&
+          (query.length === 0 ||
+            l.title.toLowerCase().includes(query) ||
+            l.blurb.toLowerCase().includes(query)),
+      ),
+    [lessons, active, query],
+  );
+
+  const toggle = (id: string) =>
+    setActive((s) => {
+      const next = new Set(s);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
   return (
     <div className="ln-screen">
       <div className="ln-head">
-        <h1>Topics</h1>
+        <h1>{L.howTo}</h1>
+        <span className="ln-count">
+          <span className="acc">0</span> / {lessons.length}
+        </span>
+      </div>
+
+      <Toolbar
+        q={q}
+        onQ={setQ}
+        topics={topics}
+        active={active}
+        onToggle={toggle}
+        onClear={() => setActive(new Set())}
+      />
+
+      {filtering ? (
+        <div className="ln-topic-block">
+          <div className="ln-kicker">
+            {L.results} · {results.length}
+          </div>
+          {results.length === 0 ? (
+            <div className="ln-noresults">{L.noResults}</div>
+          ) : (
+            <LessonGrid lessons={results} cut={cut} onPlay={onPlay} />
+          )}
+        </div>
+      ) : (
+        <>
+          {first && (
+            <>
+              <div className="ln-kicker">{L.continueLabel}</div>
+              <button className="ln-continue" onClick={() => onPlay(first)}>
+                <Thumb cut={cut} variant="lead" />
+                <div className="ln-continue-main">
+                  <div className="ln-lesson-tag">{topicTitle(first.topic)}</div>
+                  <div className="ln-continue-title">{first.title}</div>
+                  <div className="ln-continue-sub">
+                    <Icon name="clock" /> {L.videoComingSoon}
+                  </div>
+                </div>
+              </button>
+            </>
+          )}
+          {topics.map((t) => (
+            <div key={t.id} className="ln-topic-block">
+              <div className="ln-kicker">
+                {t.title} · {L.lessons(t.lessons.length)}
+              </div>
+              <LessonGrid lessons={t.lessons} cut={cut} onPlay={onPlay} />
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+function TopicsScreen({
+  topics,
+  onOpenTopic,
+}: {
+  topics: Topic[];
+  onOpenTopic: (t: Topic) => void;
+}) {
+  const { L } = useLearnT();
+  return (
+    <div className="ln-screen">
+      <div className="ln-head">
+        <h1>{L.topics}</h1>
       </div>
       <div className="ln-topics">
-        {CATALOG.map((t) => (
+        {topics.map((t) => (
           <button key={t.id} className="ln-topic-row" onClick={() => onOpenTopic(t)}>
             <span className="ln-topic-ic">
               <Icon name={t.icon} weight="fill" />
@@ -156,75 +326,75 @@ function TopicsScreen({ onOpenTopic }: { onOpenTopic: (t: Topic) => void }) {
   );
 }
 
-/** A topic's lessons (opened from Topics). */
 function TopicDetail({
   topic,
+  cut,
   onBack,
   onPlay,
 }: {
   topic: Topic;
+  cut: Cut;
   onBack: () => void;
   onPlay: (l: Lesson) => void;
 }) {
+  const { L } = useLearnT();
   return (
     <div className="ln-screen">
       <button className="ln-back" onClick={onBack}>
-        <Icon name="caret-left" /> Topics
+        <Icon name="caret-left" /> {L.topics}
       </button>
       <div className="ln-head">
         <h1>{topic.title}</h1>
-        <span className="ln-count">{topic.lessons.length} lessons</span>
+        <span className="ln-count">{L.lessons(topic.lessons.length)}</span>
       </div>
-      <div className="ln-grid">
-        {topic.lessons.map((l) => (
-          <button key={l.id} className="ln-card" onClick={() => onPlay(l)}>
-            <Thumb lesson={l} ratio="9/16" />
-            <div className="ln-card-title">{l.title}</div>
-          </button>
-        ))}
-      </div>
+      <LessonGrid lessons={topic.lessons} cut={cut} onPlay={onPlay} />
     </div>
   );
 }
 
-/** Saved — bookmarked lessons, or the empty state. */
 function SavedScreen({
   saved,
+  lessons,
+  cut,
   onPlay,
   onBrowse,
 }: {
   saved: string[];
+  lessons: Lesson[];
+  cut: Cut;
   onPlay: (l: Lesson) => void;
   onBrowse: () => void;
 }) {
-  const lessons = saved.map(lessonById).filter((l): l is Lesson => !!l);
+  const { L } = useLearnT();
+  const visibleIds = new Set(lessons.map((l) => l.id));
+  const items = saved.map(lessonById).filter((l): l is Lesson => !!l && visibleIds.has(l.id));
   return (
     <div className="ln-screen">
       <div className="ln-head">
-        <h1>Saved</h1>
-        {lessons.length > 0 && <span className="ln-count">{lessons.length} videos</span>}
+        <h1>{L.saved}</h1>
+        {items.length > 0 && <span className="ln-count">{L.videos(items.length)}</span>}
       </div>
-      {lessons.length === 0 ? (
+      {items.length === 0 ? (
         <div className="ln-empty">
           <span className="ln-empty-ic">
             <Icon name="bookmark-simple" />
           </span>
-          <div className="ln-empty-title">Nothing saved yet</div>
-          <div className="ln-empty-sub">
-            Tap the bookmark on any lesson to keep it here for later.
-          </div>
+          <div className="ln-empty-title">{L.nothingSaved}</div>
+          <div className="ln-empty-sub">{L.savedHint}</div>
           <button className="ln-pill" onClick={onBrowse}>
-            <Icon name="compass" /> Browse lessons
+            <Icon name="compass" /> {L.browse}
           </button>
         </div>
       ) : (
         <div className="ln-saved-list">
-          {lessons.map((l) => (
+          {items.map((l) => (
             <button key={l.id} className="ln-saved-row" onClick={() => onPlay(l)}>
-              <Thumb lesson={l} ratio="16/9" />
+              <Thumb cut={cut} variant="row" />
               <span className="ln-saved-text">
                 <span className="ln-saved-title">{l.title}</span>
-                <span className="ln-saved-meta">{topicTitle(l.topic)} · coming soon</span>
+                <span className="ln-saved-meta">
+                  {topicTitle(l.topic)} · {L.videoComingSoon.toLowerCase()}
+                </span>
               </span>
               <Icon name="bookmark-simple" weight="fill" className="ln-saved-mark" />
             </button>
@@ -235,24 +405,28 @@ function SavedScreen({
   );
 }
 
-/** Player — video coming soon panel + lesson meta + inert Phone/Web switch. */
 function Player({
   lesson,
+  lessons,
+  cut,
+  setCut,
   saved,
   onToggleSave,
   onBack,
   onPlay,
 }: {
   lesson: Lesson;
+  lessons: Lesson[];
+  cut: Cut;
+  setCut: (c: Cut) => void;
   saved: boolean;
   onToggleSave: () => void;
   onBack: () => void;
   onPlay: (l: Lesson) => void;
 }) {
-  const [cut, setCut] = useState<'phone' | 'web'>('web');
+  const { L } = useLearnT();
   const topic = topicById(lesson.topic)!;
-  const idx = topic.lessons.findIndex((l) => l.id === lesson.id);
-  const upNext = topic.lessons.filter((l) => l.id !== lesson.id).slice(0, 3);
+  const upNext = lessons.filter((l) => l.topic === lesson.topic && l.id !== lesson.id).slice(0, 3);
 
   return (
     <div className="ln-player">
@@ -260,62 +434,52 @@ function Player({
         <Icon name="caret-left" /> {topic.title}
       </button>
 
-      <div className="ln-stage">
+      <div className={`ln-stage cut-${cut === 'phone' ? 'p' : 'w'}`}>
         <div className="ln-stage-inner">
           <span className="ln-stage-ic">
             <Icon name="graduation-cap" weight="fill" />
           </span>
-          <div className="ln-stage-title">This lesson is coming soon</div>
-          <div className="ln-stage-sub">
-            We’re recording it in two cuts — phone and web. Save it and we’ll notify you.
-          </div>
+          <div className="ln-stage-title">{L.comingSoonTitle}</div>
+          <div className="ln-stage-sub">{L.comingSoonBody}</div>
         </div>
       </div>
 
       <div className="ln-meta">
-        <div className="ln-lesson-tag">
-          {topic.title} · {idx + 1} of {LESSON_COUNT}
-        </div>
+        <div className="ln-lesson-tag">{topic.title}</div>
         <div className="ln-meta-title">{lesson.title}</div>
         <div className="ln-meta-desc">{lesson.blurb}</div>
 
         <div className="ln-cutrow">
-          <span className="ln-cutlabel">
-            Two cuts planned — <b>phone</b> &amp; <b>web</b>
-          </span>
-          <div className="ln-switch" aria-disabled>
+          <div className="ln-switch">
             <button
               className={`ln-switch-opt${cut === 'phone' ? ' on' : ''}`}
               onClick={() => setCut('phone')}
             >
-              <Icon name="device-mobile" weight={cut === 'phone' ? 'fill' : undefined} /> Phone
+              <Icon name="device-mobile" weight={cut === 'phone' ? 'fill' : undefined} /> {L.phone}
             </button>
             <button
               className={`ln-switch-opt${cut === 'web' ? ' on' : ''}`}
               onClick={() => setCut('web')}
             >
-              <Icon name="monitor" weight={cut === 'web' ? 'fill' : undefined} /> Web
+              <Icon name="monitor" weight={cut === 'web' ? 'fill' : undefined} /> {L.web}
             </button>
           </div>
-        </div>
-
-        <div className="ln-actions">
-          <button className={`ln-pill${saved ? ' on' : ''}`} onClick={onToggleSave}>
+          <button className={`ln-pill sm${saved ? ' on' : ''}`} onClick={onToggleSave}>
             <Icon name="bookmark-simple" weight={saved ? 'fill' : undefined} />
-            {saved ? 'Saved' : 'Save'}
+            {saved ? L.savedDone : L.save}
           </button>
         </div>
 
         {upNext.length > 0 && (
           <>
-            <div className="ln-kicker up">Up next</div>
-            <div className="ln-upnext">
+            <div className="ln-kicker up">{L.upNext}</div>
+            <div className="ln-saved-list">
               {upNext.map((l) => (
-                <button key={l.id} className="ln-up-row" onClick={() => onPlay(l)}>
-                  <Thumb lesson={l} ratio="16/9" />
-                  <span className="ln-up-text">
-                    <span className="ln-up-title">{l.title}</span>
-                    <span className="ln-up-meta">coming soon</span>
+                <button key={l.id} className="ln-saved-row" onClick={() => onPlay(l)}>
+                  <Thumb cut={cut} variant="row" />
+                  <span className="ln-saved-text">
+                    <span className="ln-saved-title">{l.title}</span>
+                    <span className="ln-saved-meta">{L.videoComingSoon.toLowerCase()}</span>
                   </span>
                 </button>
               ))}
@@ -329,6 +493,7 @@ function Player({
 
 export function LearnRoot({
   now,
+  role,
   onOpenShell,
   onOpenProfile,
   notifs,
@@ -338,6 +503,7 @@ export function LearnRoot({
   onNotifMarkAll,
 }: {
   now: number;
+  role: ViewerRole;
   onOpenShell: () => void;
   onOpenProfile: () => void;
   notifs: Notif[];
@@ -346,30 +512,37 @@ export function LearnRoot({
   onNotifSeen: (ids: string[]) => void;
   onNotifMarkAll: () => void;
 }) {
+  const { L } = useLearnT();
   const [tab, setTab] = useState<Tab>('home');
   const [topic, setTopic] = useState<Topic | null>(null);
   const [playing, setPlaying] = useState<Lesson | null>(null);
   const [saved, setSaved] = useState<string[]>(() => readSaved());
+  const [cut, setCut] = useCut();
 
   useEffect(() => {
-    writeSaved(saved);
+    try {
+      localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+    } catch {
+      /* ignore */
+    }
   }, [saved]);
+
+  // Role-visible catalog — trainer/admin lessons never leak to members.
+  const topics = useMemo(() => catalogForRole(role), [role]);
+  const lessons = useMemo(() => lessonsForRole(role), [role]);
 
   const toggleSave = (id: string) =>
     setSaved((s) => (s.includes(id) ? s.filter((x) => x !== id) : [id, ...s]));
 
-  const openPlayer = (l: Lesson) => {
-    setPlaying(l);
-    window.scrollTo?.(0, 0);
-  };
+  const openPlayer = (l: Lesson) => setPlaying(l);
 
   const nav = useMemo(
     () => [
-      { id: 'home', icon: 'play-circle', label: 'Home' },
-      { id: 'topics', icon: 'stack', label: 'Topics' },
-      { id: 'saved', icon: 'bookmark-simple', label: 'Saved' },
+      { id: 'home', icon: 'play-circle', label: L.home },
+      { id: 'topics', icon: 'stack', label: L.topics },
+      { id: 'saved', icon: 'bookmark-simple', label: L.saved },
     ],
-    [],
+    [L],
   );
 
   function goTab(id: Tab) {
@@ -382,7 +555,7 @@ export function LearnRoot({
     <div className="app-learn apex-app">
       <AppRail
         nav={nav}
-        activeId={playing ? null : tab === 'feed' ? null : tab}
+        activeId={playing || tab === 'feed' ? null : tab}
         onNav={(id) => goTab(id as Tab)}
         onOpenShell={onOpenShell}
         onOpenNotifications={() => {
@@ -396,21 +569,18 @@ export function LearnRoot({
         <header className="app-brand apex-head">
           <div className="app-brand-lead">
             <span className="app-brand-word">spotter</span>
-            <button className="app-brand-app" onClick={onOpenShell} aria-label="Apps">
-              Learn
+            <button className="app-brand-app" onClick={onOpenShell} aria-label={L.apps}>
+              {L.app}
             </button>
           </div>
           <div className="app-brand-actions">
-            <button className="app-bell" aria-label="Search">
-              <Icon name="magnifying-glass" className="app-brand-icon" />
-            </button>
             <button
               className="app-bell"
               onClick={() => {
                 setPlaying(null);
                 setTab('feed');
               }}
-              aria-label="Notifications"
+              aria-label={L.notifications}
             >
               <Icon
                 name="bell"
@@ -429,6 +599,9 @@ export function LearnRoot({
             <div className="apex-scroll">
               <Player
                 lesson={playing}
+                lessons={lessons}
+                cut={cut}
+                setCut={setCut}
                 saved={saved.includes(playing.id)}
                 onToggleSave={() => toggleSave(playing.id)}
                 onBack={() => setPlaying(null)}
@@ -438,7 +611,7 @@ export function LearnRoot({
           ) : tab === 'feed' ? (
             <NotificationsView
               embedded
-              title="Notifications"
+              title={L.notifications}
               notifs={notifs}
               now={now}
               state={notifState}
@@ -448,19 +621,28 @@ export function LearnRoot({
             />
           ) : (
             <div className="apex-scroll">
-              {tab === 'home' && <HomeScreen onPlay={openPlayer} />}
+              {tab === 'home' && (
+                <HomeScreen topics={topics} lessons={lessons} cut={cut} onPlay={openPlayer} />
+              )}
               {tab === 'topics' &&
                 (topic ? (
                   <TopicDetail
                     topic={topic}
+                    cut={cut}
                     onBack={() => setTopic(null)}
                     onPlay={openPlayer}
                   />
                 ) : (
-                  <TopicsScreen onOpenTopic={setTopic} />
+                  <TopicsScreen topics={topics} onOpenTopic={setTopic} />
                 ))}
               {tab === 'saved' && (
-                <SavedScreen saved={saved} onPlay={openPlayer} onBrowse={() => goTab('home')} />
+                <SavedScreen
+                  saved={saved}
+                  lessons={lessons}
+                  cut={cut}
+                  onPlay={openPlayer}
+                  onBrowse={() => goTab('home')}
+                />
               )}
             </div>
           )}
@@ -479,9 +661,9 @@ export function LearnRoot({
               <span>{x.label}</span>
             </button>
           ))}
-          <button className="apex-nav-apps" onClick={onOpenShell} aria-label="Apps">
+          <button className="apex-nav-apps" onClick={onOpenShell} aria-label={L.apps}>
             <Icon name="squares-four" />
-            <span>Apps</span>
+            <span>{L.apps}</span>
           </button>
         </nav>
       </div>

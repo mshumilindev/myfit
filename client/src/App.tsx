@@ -934,6 +934,7 @@ export function App() {
         <Suspense fallback={<ScreenFallback />}>
           <LearnApp
             now={notifNow}
+            role={role}
             onOpenShell={() => setShellOpen(true)}
             onOpenProfile={() => openRoster('me')}
             notifs={notifs}
