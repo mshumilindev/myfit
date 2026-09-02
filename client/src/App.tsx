@@ -111,6 +111,11 @@ const PlaybookView = lazy(() =>
     default: module.PlaybookView,
   })),
 );
+const GoalsView = lazy(() =>
+  import('./views/GoalsView').then((module) => ({
+    default: module.GoalsView,
+  })),
+);
 const NotificationsView = lazy(() =>
   import('./views/NotificationsView').then((module) => ({
     default: module.NotificationsView,
@@ -242,6 +247,7 @@ function toHash(
   if (!overlay && tab === 'programs') {
     if (programsPeer === 'exercises') return libMine ? '#/exercises/mine' : '#/exercises';
     if (programsPeer === 'playbook') return '#/playbook';
+    if (programsPeer === 'goals') return '#/goals';
   }
   if (!overlay && tab === 'progress') {
     if (progressSub === 'trends') return '#/trends';
@@ -299,7 +305,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   // Playbook and Exercises are peer tabs of Programs, not overlays (AC-LIBTAB):
   // route them to the programs tab; which peer is active is read separately via
   // `peerFromHash` so a refresh on #/playbook or #/exercises lands there.
-  if (head === 'exercises' || head === 'playbook' || head === 'templates')
+  if (head === 'exercises' || head === 'playbook' || head === 'templates' || head === 'goals')
     return { tab: 'programs', overlay: null };
   // Progress sub-tabs are peer URLs of #/progress (read separately below).
   if (head === 'trends' || head === 'feats' || head === 'challenges')
@@ -321,6 +327,7 @@ function peerFromHash(hash: string): { peer: ProgramsPeer; mine: boolean } {
   const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   if (parts[0] === 'exercises') return { peer: 'exercises', mine: parts[1] === 'mine' };
   if (parts[0] === 'playbook' || parts[0] === 'templates') return { peer: 'playbook', mine: false };
+  if (parts[0] === 'goals') return { peer: 'goals', mine: false };
   return { peer: 'programs', mine: false };
 }
 
@@ -1208,6 +1215,8 @@ export function App() {
                   />
                 ) : programsPeer === 'playbook' ? (
                   <PlaybookView shell={shell} onProgramsTab={goProgramsPeer} />
+                ) : programsPeer === 'goals' ? (
+                  <GoalsView shell={shell} onProgramsTab={goProgramsPeer} />
                 ) : (
                   <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
                 ))}

@@ -8,7 +8,7 @@
  */
 import { useT } from '../i18n';
 
-export type ProgramsPeer = 'programs' | 'playbook' | 'exercises';
+export type ProgramsPeer = 'programs' | 'goals' | 'playbook' | 'exercises';
 
 export function ProgramsTabs({
   active,
@@ -20,6 +20,7 @@ export function ProgramsTabs({
   const { t } = useT();
   const tabs: { id: ProgramsPeer; label: string }[] = [
     { id: 'programs', label: t.programsTabLabel },
+    { id: 'goals', label: t.goalsTab },
     { id: 'playbook', label: t.playbook },
     { id: 'exercises', label: t.exercisesTabLabel },
   ];
