@@ -400,23 +400,35 @@ export function ProgressView({
   if (finished.length < 3) {
     return (
       <div className="screen progress-page progress-locked">
-        <div className="progress-head">
-          <h2 className="headline">{t.progress}</h2>
-        </div>
         <div className="progress-tabbar">{pTabs}</div>
-        <div className="progress-locked-layout">
-          <section className="progress-weekly-panel">
-            <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
-            <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />
-          </section>
-          <div className="progress-locked-empty">
-            <EmptyState
-              icon="chart-line-up"
-              title={t.moreSessionsTitle(Math.max(1, 3 - finished.length))}
-              body={t.progressLocked(finished.length)}
-            />
-            <UnlockDots finishedCount={finished.length} label={t.progressUnlocksAt} />
-          </div>
+        <div className="progress-locked-body">
+          {weeks.some((v) => v > 0) ? (
+            <div className="progress-locked-layout">
+              <section className="progress-weekly-panel">
+                <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
+                <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />
+              </section>
+              <div className="progress-locked-empty">
+                <EmptyState
+                  icon="chart-line-up"
+                  title={t.moreSessionsTitle(Math.max(1, 3 - finished.length))}
+                  body={t.progressLocked(finished.length)}
+                />
+                <UnlockDots finishedCount={finished.length} label={t.progressUnlocksAt} />
+              </div>
+            </div>
+          ) : (
+            // Empty account: the weekly chart has no data, so a bare min-height bar
+            // row just reads as broken — show a clean standalone empty card instead.
+            <div className="progress-locked-empty solo">
+              <EmptyState
+                icon="chart-line-up"
+                title={t.moreSessionsTitle(Math.max(1, 3 - finished.length))}
+                body={t.progressLocked(finished.length)}
+              />
+              <UnlockDots finishedCount={finished.length} label={t.progressUnlocksAt} />
+            </div>
+          )}
         </div>
       </div>
     );

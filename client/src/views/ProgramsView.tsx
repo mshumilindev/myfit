@@ -679,7 +679,7 @@ export function ProgramsView({
         ? Math.round(assignment.adherence * 100)
         : null;
     return (
-      <div className="screen programs-page">
+      <div className="screen programs-page programs-flush">
         <div className="programs-top">
           <div>
             <div className="kicker">{t.training}</div>
@@ -687,492 +687,496 @@ export function ProgramsView({
           </div>
           {progTabsEl}
         </div>
-
-        {!memberLoaded && !failed && (
-          <div className="program-skeleton" aria-hidden="true">
-            {/* S-50 kit: avatar row + CTA block + three tiles */}
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div
-                className="sk"
-                style={{ width: 44, height: 44, borderRadius: 12, flex: 'none' }}
-              />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
-                <div className="sk" style={{ width: '40%', height: 13 }} />
-                <div className="sk" style={{ width: '65%', height: 9 }} />
-              </div>
-            </div>
-            <div className="sk" style={{ height: 62, borderRadius: 14 }} />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <div className="sk" style={{ flex: 1, height: 70 }} />
-              <div className="sk" style={{ flex: 1, height: 70 }} />
-              <div className="sk" style={{ flex: 1, height: 70 }} />
-            </div>
-          </div>
-        )}
-
-        {failed && (
-          <button className="program-card" onClick={load}>
-            <Icon name="warning-circle" />
-            <span>{t.retry}</span>
-          </button>
-        )}
-
-        {memberLoaded && !failed && !active && (
-          <div className="program-routes">
-            <div className="program-route-intro">
-              <div className="field-label">{t.progTitle}</div>
-              <div className="n">{t.progNone}</div>
-              <div className="s">{t.progMemberEmpty}</div>
-            </div>
-            {/* One entry into the builder — weeks are editable inside (1…N or
-                open-ended), so a separate "plan one week" route was redundant. */}
-            <button className="program-route" onClick={() => startMemberDraft(8)}>
-              <Icon name="squares-four" />
-              <div className="body">
-                <div className="n">{t.progRouteBuild}</div>
-                <div className="s">{t.progRouteBuildBody}</div>
-              </div>
-              <Icon name="arrow-right" className="go" />
-            </button>
-            <div className="program-route passive">
-              <Icon name="clock-countdown" />
-              <div className="body">
-                <div className="n">{t.progRouteWait}</div>
-                <div className="s">{t.progRouteWaitBody}</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {active &&
-          !memberDetailOpen &&
-          (liveOpen ? (
-            <section className="program-member-list compact">
-              <button
-                className="program-member-list-card active"
-                onClick={() => setMemberDetailOpen(true)}
-              >
-                <span className="program-card-title">
-                  <span className="n">{active.name}</span>
-                  <span className="tag tag-accent">{t.progStatusActive}</span>
-                  <Icon name="dots-three-vertical" />
-                </span>
-                <span className="s">
-                  {t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}
-                  {assignment?.assignedBy && !isMine
-                    ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
-                    : ''}
-                </span>
-                <span className="program-card-progress" aria-hidden>
-                  {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
-                    const cur = assignment?.week ?? 1;
-                    return (
-                      <span key={wk} className={wk === cur ? 'current' : wk < cur ? 'past' : ''} />
-                    );
-                  })}
-                </span>
-              </button>
-              <div
-                className="program-week-strip program-week-strip-compact"
-                aria-label={t.progWeekStrip}
-              >
-                {days.map((day) => {
-                  const count = active.items.filter((item) => item.day === day).length;
-                  const st = dayStatus.get(day)?.status;
-                  return (
-                    <button
-                      key={day}
-                      className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
-                      onClick={() => setMemberDetailOpen(true)}
-                    >
-                      <span>{dayAbbr(day)}</span>
-                      <strong>{count > 0 ? count : '+'}</strong>
-                    </button>
-                  );
-                })}
-              </div>
-              {outlook?.missedCount ? (
-                <div className="program-notice miss">
-                  <Icon name="warning-circle" />
-                  {t.progNoticeMissed(outlook.missedCount)}
+        <div className="programs-member-body">
+          {!memberLoaded && !failed && (
+            <div className="program-skeleton" aria-hidden="true">
+              {/* S-50 kit: avatar row + CTA block + three tiles */}
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div
+                  className="sk"
+                  style={{ width: 44, height: 44, borderRadius: 12, flex: 'none' }}
+                />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <div className="sk" style={{ width: '40%', height: 13 }} />
+                  <div className="sk" style={{ width: '65%', height: 9 }} />
                 </div>
-              ) : null}
-            </section>
-          ) : (
-            <section className="program-member-list">
-              <button className="program-member-cover" onClick={() => setMemberDetailOpen(true)}>
-                <span className="field-label">{t.progStatusActive}</span>
-                <span className="program-cover-title">{active.name}</span>
-                <span className="program-cover-meta">
-                  {t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}
-                  {assignment?.assignedBy && !isMine
-                    ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
-                    : ''}
-                </span>
-                <span className="program-cover-progress">
-                  <span>
+              </div>
+              <div className="sk" style={{ height: 62, borderRadius: 14 }} />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div className="sk" style={{ flex: 1, height: 70 }} />
+                <div className="sk" style={{ flex: 1, height: 70 }} />
+                <div className="sk" style={{ flex: 1, height: 70 }} />
+              </div>
+            </div>
+          )}
+
+          {failed && (
+            <button className="program-card" onClick={load}>
+              <Icon name="warning-circle" />
+              <span>{t.retry}</span>
+            </button>
+          )}
+
+          {memberLoaded && !failed && !active && (
+            <div className="program-routes">
+              <div className="program-route-intro">
+                <div className="field-label">{t.progTitle}</div>
+                <div className="n">{t.progNone}</div>
+                <div className="s">{t.progMemberEmpty}</div>
+              </div>
+              {/* One entry into the builder — weeks are editable inside (1…N or
+                open-ended), so a separate "plan one week" route was redundant. */}
+              <button className="program-route" onClick={() => startMemberDraft(8)}>
+                <Icon name="squares-four" />
+                <div className="body">
+                  <div className="n">{t.progRouteBuild}</div>
+                  <div className="s">{t.progRouteBuildBody}</div>
+                </div>
+                <Icon name="arrow-right" className="go" />
+              </button>
+              <div className="program-route passive">
+                <Icon name="clock-countdown" />
+                <div className="body">
+                  <div className="n">{t.progRouteWait}</div>
+                  <div className="s">{t.progRouteWaitBody}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {active &&
+            !memberDetailOpen &&
+            (liveOpen ? (
+              <section className="program-member-list compact">
+                <button
+                  className="program-member-list-card active"
+                  onClick={() => setMemberDetailOpen(true)}
+                >
+                  <span className="program-card-title">
+                    <span className="n">{active.name}</span>
+                    <span className="tag tag-accent">{t.progStatusActive}</span>
+                    <Icon name="dots-three-vertical" />
+                  </span>
+                  <span className="s">
+                    {t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}
+                    {assignment?.assignedBy && !isMine
+                      ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
+                      : ''}
+                  </span>
+                  <span className="program-card-progress" aria-hidden>
                     {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
                       const cur = assignment?.week ?? 1;
                       return (
-                        <i key={wk} className={wk === cur ? 'current' : wk < cur ? 'past' : ''} />
+                        <span
+                          key={wk}
+                          className={wk === cur ? 'current' : wk < cur ? 'past' : ''}
+                        />
                       );
                     })}
                   </span>
-                  <em>
-                    {active.weeks === 0
-                      ? t.progOpenEnded
-                      : `${t.progWeekShort(assignment?.week ?? 1)} / ${active.weeks}`}
-                  </em>
-                </span>
-                {adherence !== null && <span className="tag tag-ok">{adherence}%</span>}
-              </button>
-
-              <div
-                className="program-week-strip program-week-strip-compact"
-                aria-label={t.progWeekStrip}
-              >
-                {days.map((day) => {
-                  const count = active.items.filter((item) => item.day === day).length;
-                  const st = dayStatus.get(day)?.status;
-                  return (
-                    <button
-                      key={day}
-                      className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
-                      onClick={() => setMemberDetailOpen(true)}
-                    >
-                      <span>{dayAbbr(day)}</span>
-                      <strong>{count > 0 ? count : '+'}</strong>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                className="program-member-list-card active"
-                onClick={() => setMemberDetailOpen(true)}
-              >
-                <span className="program-card-title">
-                  <span className="n">{active.name}</span>
-                  <span className="tag tag-accent">{t.progStatusActive}</span>
-                  <Icon name="dots-three-vertical" />
-                </span>
-                <span className="s">
-                  {t.progDaysCount(active.daysPerWeek)} ·{' '}
-                  {active.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(active.weeks)}
-                </span>
-                <span className="program-member-list-meta">
-                  <span>{t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}</span>
-                  {adherence !== null && <span className="ok">{adherence}%</span>}
-                </span>
-              </button>
-
-              <button className="program-member-list-card" onClick={() => startMemberDraft(8)}>
-                <span className="program-card-title">
-                  <span className="n">{t.progRouteBuild}</span>
-                  <span className="tag tag-neutral">{t.progStatusDraft}</span>
-                </span>
-                <span className="s">{t.progRouteBuildBody}</span>
-              </button>
-
-              {activeEquipment.length > 0 && (
-                <div className="program-member-equipment">
-                  {activeEquipment.slice(0, 4).map((id) => (
-                    <span key={id} className="tag tag-neutral">
-                      <EquipmentIcon equipment={id} />
-                      {t.equipmentNames[id]}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </section>
-          ))}
-
-        {active && memberDetailOpen && (
-          <section className="program-member-detail">
-            <div className="program-member-detail-top">
-              <button
-                className="round-icon"
-                aria-label={t.backAction}
-                onClick={() => setMemberDetailOpen(false)}
-              >
-                <Icon name="caret-left" />
-              </button>
-            </div>
-            <div className="program-card-head">
-              <Icon name="copy" />
-              <div>
-                <div className="field-label">
-                  {t.progWeekN(assignment?.week ?? 1)}
-                  {isMine && (
-                    <span className="tag tag-accent program-mine-tag">{t.progStatusMine}</span>
-                  )}
-                </div>
-                <div className="n">{active.name}</div>
-                <div className="s">
-                  {assignment
-                    ? `${t.progSessions(assignment.done, assignment.total)}${
-                        assignment.assignedBy && !isMine
-                          ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
-                          : ''
-                      }`
-                    : ''}
-                </div>
-              </div>
-              {assignment?.adherence !== null && assignment?.adherence !== undefined && (
-                <span className="tag tag-ok">{Math.round(assignment.adherence * 100)}%</span>
-              )}
-              {isMine && (
-                <button className="btn btn-secondary btn-sm" onClick={editMemberProgram}>
-                  <Icon name="pencil-simple" />
-                  {t.progEditPlan}
                 </button>
-              )}
-            </div>
-
-            <div className="program-weeks" aria-label={t.progTitle}>
-              {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
-                const cur = assignment?.week ?? 1;
-                return (
-                  <span
-                    key={wk}
-                    className={`program-week-bar${wk === cur ? ' current' : wk < cur ? ' past' : ''}`}
-                  />
-                );
-              })}
-            </div>
-
-            {outlook && (
-              <div className="program-notices">
-                {outlook.finished ? (
-                  <div className="program-notice ok">
-                    <Icon name="check-circle" />
-                    {t.progNoticeFinished}
-                  </div>
-                ) : outlook.weekComplete ? (
-                  <div className="program-notice ok">
-                    <Icon name="check-circle" />
-                    {t.progNoticeWeekComplete(outlook.currentWeek)}
-                  </div>
-                ) : null}
-                {outlook.missedCount > 0 && (
+                <div
+                  className="program-week-strip program-week-strip-compact"
+                  aria-label={t.progWeekStrip}
+                >
+                  {days.map((day) => {
+                    const count = active.items.filter((item) => item.day === day).length;
+                    const st = dayStatus.get(day)?.status;
+                    return (
+                      <button
+                        key={day}
+                        className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
+                        onClick={() => setMemberDetailOpen(true)}
+                      >
+                        <span>{dayAbbr(day)}</span>
+                        <strong>{count > 0 ? count : '+'}</strong>
+                      </button>
+                    );
+                  })}
+                </div>
+                {outlook?.missedCount ? (
                   <div className="program-notice miss">
                     <Icon name="warning-circle" />
                     {t.progNoticeMissed(outlook.missedCount)}
                   </div>
+                ) : null}
+              </section>
+            ) : (
+              <section className="program-member-list">
+                <button className="program-member-cover" onClick={() => setMemberDetailOpen(true)}>
+                  <span className="field-label">{t.progStatusActive}</span>
+                  <span className="program-cover-title">{active.name}</span>
+                  <span className="program-cover-meta">
+                    {t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}
+                    {assignment?.assignedBy && !isMine
+                      ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
+                      : ''}
+                  </span>
+                  <span className="program-cover-progress">
+                    <span>
+                      {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
+                        const cur = assignment?.week ?? 1;
+                        return (
+                          <i key={wk} className={wk === cur ? 'current' : wk < cur ? 'past' : ''} />
+                        );
+                      })}
+                    </span>
+                    <em>
+                      {active.weeks === 0
+                        ? t.progOpenEnded
+                        : `${t.progWeekShort(assignment?.week ?? 1)} / ${active.weeks}`}
+                    </em>
+                  </span>
+                  {adherence !== null && <span className="tag tag-ok">{adherence}%</span>}
+                </button>
+
+                <div
+                  className="program-week-strip program-week-strip-compact"
+                  aria-label={t.progWeekStrip}
+                >
+                  {days.map((day) => {
+                    const count = active.items.filter((item) => item.day === day).length;
+                    const st = dayStatus.get(day)?.status;
+                    return (
+                      <button
+                        key={day}
+                        className={`program-week-slot${count > 0 ? ' filled' : ''}${st ? ` ${st}` : ''}`}
+                        onClick={() => setMemberDetailOpen(true)}
+                      >
+                        <span>{dayAbbr(day)}</span>
+                        <strong>{count > 0 ? count : '+'}</strong>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  className="program-member-list-card active"
+                  onClick={() => setMemberDetailOpen(true)}
+                >
+                  <span className="program-card-title">
+                    <span className="n">{active.name}</span>
+                    <span className="tag tag-accent">{t.progStatusActive}</span>
+                    <Icon name="dots-three-vertical" />
+                  </span>
+                  <span className="s">
+                    {t.progDaysCount(active.daysPerWeek)} ·{' '}
+                    {active.weeks === 0 ? t.progOpenEnded : t.progWeeksCount(active.weeks)}
+                  </span>
+                  <span className="program-member-list-meta">
+                    <span>{t.progSessions(assignment?.done ?? 0, assignment?.total ?? 0)}</span>
+                    {adherence !== null && <span className="ok">{adherence}%</span>}
+                  </span>
+                </button>
+
+                <button className="program-member-list-card" onClick={() => startMemberDraft(8)}>
+                  <span className="program-card-title">
+                    <span className="n">{t.progRouteBuild}</span>
+                    <span className="tag tag-neutral">{t.progStatusDraft}</span>
+                  </span>
+                  <span className="s">{t.progRouteBuildBody}</span>
+                </button>
+
+                {activeEquipment.length > 0 && (
+                  <div className="program-member-equipment">
+                    {activeEquipment.slice(0, 4).map((id) => (
+                      <span key={id} className="tag tag-neutral">
+                        <EquipmentIcon equipment={id} />
+                        {t.equipmentNames[id]}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+
+          {active && memberDetailOpen && (
+            <section className="program-member-detail">
+              <div className="program-member-detail-top">
+                <button
+                  className="round-icon"
+                  aria-label={t.backAction}
+                  onClick={() => setMemberDetailOpen(false)}
+                >
+                  <Icon name="caret-left" />
+                </button>
+              </div>
+              <div className="program-card-head">
+                <Icon name="copy" />
+                <div>
+                  <div className="field-label">
+                    {t.progWeekN(assignment?.week ?? 1)}
+                    {isMine && (
+                      <span className="tag tag-accent program-mine-tag">{t.progStatusMine}</span>
+                    )}
+                  </div>
+                  <div className="n">{active.name}</div>
+                  <div className="s">
+                    {assignment
+                      ? `${t.progSessions(assignment.done, assignment.total)}${
+                          assignment.assignedBy && !isMine
+                            ? ` · ${t.progAssignedBy(assignment.assignedBy)}`
+                            : ''
+                        }`
+                      : ''}
+                  </div>
+                </div>
+                {assignment?.adherence !== null && assignment?.adherence !== undefined && (
+                  <span className="tag tag-ok">{Math.round(assignment.adherence * 100)}%</span>
+                )}
+                {isMine && (
+                  <button className="btn btn-secondary btn-sm" onClick={editMemberProgram}>
+                    <Icon name="pencil-simple" />
+                    {t.progEditPlan}
+                  </button>
                 )}
               </div>
-            )}
 
-            <div className="program-week-strip" aria-label={t.progWeekStrip}>
-              {days.map((day) => {
-                const count = active.items.filter((item) => item.day === day).length;
-                return (
-                  <div
-                    key={day}
-                    className={`program-week-slot${count > 0 ? ' filled' : ''}${day === todayWeekday ? ' is-today' : ''}`}
-                  >
-                    <span>{dayAbbr(day)}</span>
-                    <strong>{count > 0 ? count : '+'}</strong>
-                  </div>
-                );
-              })}
-            </div>
+              <div className="program-weeks" aria-label={t.progTitle}>
+                {Array.from({ length: active.weeks }, (_, i) => i + 1).map((wk) => {
+                  const cur = assignment?.week ?? 1;
+                  return (
+                    <span
+                      key={wk}
+                      className={`program-week-bar${wk === cur ? ' current' : wk < cur ? ' past' : ''}`}
+                    />
+                  );
+                })}
+              </div>
 
-            <div className="program-member-days">
-              {days.map((day) => {
-                const items = active.items
-                  .filter((item) => item.day === day)
-                  .sort((a, b) => a.position - b.position);
-                const equipment = [
-                  ...new Set(items.flatMap((item) => item.equipment ?? [])),
-                ] as EquipmentId[];
-                const st = dayStatus.get(day)?.status;
-                const cell = dayStatus.get(day);
-                const isToday =
-                  !!cell &&
-                  Math.floor(cell.date / 86_400_000) === Math.floor(outlookNow / 86_400_000);
-                // EQ-2 · the day sums its muscles; the gym inventory is
-                // checked against the gym this member trains the most.
-                const dayMuscles: MuscleGroup[] = [];
-                for (const item of items) {
-                  const m = resolveMuscles({ name: item.name, kind: item.kind });
-                  if (m.primary && !dayMuscles.includes(m.primary)) dayMuscles.push(m.primary);
-                  for (const sec of m.secondary) {
-                    if (!dayMuscles.includes(sec)) dayMuscles.push(sec);
-                  }
-                }
-                const gymCounts = new Map<string, number>();
-                for (const w of store.workouts) {
-                  if (w.gymId) gymCounts.set(w.gymId, (gymCounts.get(w.gymId) ?? 0) + 1);
-                }
-                const homeGym =
-                  [...gymCounts.entries()]
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([id]) => store.gyms.find((g) => g.id === id))[0] ?? null;
-                const missing =
-                  homeGym?.inventory && homeGym.inventory.length > 0
-                    ? equipment.filter((id) => !homeGym.inventory!.includes(id))
-                    : [];
-                const equipLabel = (id: string) => {
-                  const names = t.equipmentNames as Record<string, string>;
-                  return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
-                };
-                const warnKey = `${day}:${missing.join(',')}`;
-                const letters = new Map<string, number>();
-                for (const item of items) {
-                  const gid = item.groupId ?? null;
-                  if (gid && !letters.has(gid)) letters.set(gid, letters.size);
-                }
-                return (
-                  <div
-                    key={day}
-                    className={`program-member-day${st === 'missed' ? ' missed' : st === 'logged' ? ' logged' : ''}`}
-                  >
-                    <div className="program-day-head">
-                      <div>
-                        <div className="pd-title-row">
-                          <span className="pd-title">
-                            {t.progDayLine(
-                              t.weekDayNames[day - 1],
-                              active.dayNames?.[day] || t.progDay(day),
-                            )}
-                          </span>
-                          {isToday && st !== 'logged' && (
-                            <span className="tag tag-accent">{t.today}</span>
-                          )}
-                        </div>
-                      </div>
-                      {st === 'logged' && (
-                        <Icon name="check-circle" className="program-day-check" />
-                      )}
-                      {st === 'missed' && cell && (
-                        <button
-                          className="btn btn-secondary btn-sm program-day-backfill"
-                          onClick={() => backfillDay(cell)}
-                        >
-                          <Icon name="arrow-counter-clockwise" />
-                          {t.progBackfill}
-                        </button>
-                      )}
+              {outlook && (
+                <div className="program-notices">
+                  {outlook.finished ? (
+                    <div className="program-notice ok">
+                      <Icon name="check-circle" />
+                      {t.progNoticeFinished}
                     </div>
-                    {items.length === 0 ? (
-                      <div className="detail-muted">{t.progRestDay}</div>
-                    ) : (
-                      <>
-                        {dayMuscles.length > 0 && (
-                          <div className="pd-chips">
-                            {dayMuscles.map((m) => (
-                              <MuscleChip key={m} muscle={m} />
-                            ))}
+                  ) : outlook.weekComplete ? (
+                    <div className="program-notice ok">
+                      <Icon name="check-circle" />
+                      {t.progNoticeWeekComplete(outlook.currentWeek)}
+                    </div>
+                  ) : null}
+                  {outlook.missedCount > 0 && (
+                    <div className="program-notice miss">
+                      <Icon name="warning-circle" />
+                      {t.progNoticeMissed(outlook.missedCount)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="program-week-strip" aria-label={t.progWeekStrip}>
+                {days.map((day) => {
+                  const count = active.items.filter((item) => item.day === day).length;
+                  return (
+                    <div
+                      key={day}
+                      className={`program-week-slot${count > 0 ? ' filled' : ''}${day === todayWeekday ? ' is-today' : ''}`}
+                    >
+                      <span>{dayAbbr(day)}</span>
+                      <strong>{count > 0 ? count : '+'}</strong>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="program-member-days">
+                {days.map((day) => {
+                  const items = active.items
+                    .filter((item) => item.day === day)
+                    .sort((a, b) => a.position - b.position);
+                  const equipment = [
+                    ...new Set(items.flatMap((item) => item.equipment ?? [])),
+                  ] as EquipmentId[];
+                  const st = dayStatus.get(day)?.status;
+                  const cell = dayStatus.get(day);
+                  const isToday =
+                    !!cell &&
+                    Math.floor(cell.date / 86_400_000) === Math.floor(outlookNow / 86_400_000);
+                  // EQ-2 · the day sums its muscles; the gym inventory is
+                  // checked against the gym this member trains the most.
+                  const dayMuscles: MuscleGroup[] = [];
+                  for (const item of items) {
+                    const m = resolveMuscles({ name: item.name, kind: item.kind });
+                    if (m.primary && !dayMuscles.includes(m.primary)) dayMuscles.push(m.primary);
+                    for (const sec of m.secondary) {
+                      if (!dayMuscles.includes(sec)) dayMuscles.push(sec);
+                    }
+                  }
+                  const gymCounts = new Map<string, number>();
+                  for (const w of store.workouts) {
+                    if (w.gymId) gymCounts.set(w.gymId, (gymCounts.get(w.gymId) ?? 0) + 1);
+                  }
+                  const homeGym =
+                    [...gymCounts.entries()]
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([id]) => store.gyms.find((g) => g.id === id))[0] ?? null;
+                  const missing =
+                    homeGym?.inventory && homeGym.inventory.length > 0
+                      ? equipment.filter((id) => !homeGym.inventory!.includes(id))
+                      : [];
+                  const equipLabel = (id: string) => {
+                    const names = t.equipmentNames as Record<string, string>;
+                    return names[id] ?? id.charAt(0).toUpperCase() + id.slice(1);
+                  };
+                  const warnKey = `${day}:${missing.join(',')}`;
+                  const letters = new Map<string, number>();
+                  for (const item of items) {
+                    const gid = item.groupId ?? null;
+                    if (gid && !letters.has(gid)) letters.set(gid, letters.size);
+                  }
+                  return (
+                    <div
+                      key={day}
+                      className={`program-member-day${st === 'missed' ? ' missed' : st === 'logged' ? ' logged' : ''}`}
+                    >
+                      <div className="program-day-head">
+                        <div>
+                          <div className="pd-title-row">
+                            <span className="pd-title">
+                              {t.progDayLine(
+                                t.weekDayNames[day - 1],
+                                active.dayNames?.[day] || t.progDay(day),
+                              )}
+                            </span>
+                            {isToday && st !== 'logged' && (
+                              <span className="tag tag-accent">{t.today}</span>
+                            )}
                           </div>
+                        </div>
+                        {st === 'logged' && (
+                          <Icon name="check-circle" className="program-day-check" />
                         )}
-                        <div className="program-prescriptions">
-                          {items.map((item) => {
-                            const gid = item.groupId ?? null;
-                            const letter = gid
-                              ? String.fromCharCode(65 + (letters.get(gid) ?? 0))
-                              : null;
-                            return (
-                              <div key={item.id} className="program-prescription-row pdr">
-                                <span className={`pdr-bar${gid ? ' on' : ''}`} />
-                                <span className="n">
-                                  {item.name}
-                                  {letter && (
-                                    <span className="pdr-index">
-                                      {letter}
-                                      {(item.groupOrder ?? 0) + 1}
+                        {st === 'missed' && cell && (
+                          <button
+                            className="btn btn-secondary btn-sm program-day-backfill"
+                            onClick={() => backfillDay(cell)}
+                          >
+                            <Icon name="arrow-counter-clockwise" />
+                            {t.progBackfill}
+                          </button>
+                        )}
+                      </div>
+                      {items.length === 0 ? (
+                        <div className="detail-muted">{t.progRestDay}</div>
+                      ) : (
+                        <>
+                          {dayMuscles.length > 0 && (
+                            <div className="pd-chips">
+                              {dayMuscles.map((m) => (
+                                <MuscleChip key={m} muscle={m} />
+                              ))}
+                            </div>
+                          )}
+                          <div className="program-prescriptions">
+                            {items.map((item) => {
+                              const gid = item.groupId ?? null;
+                              const letter = gid
+                                ? String.fromCharCode(65 + (letters.get(gid) ?? 0))
+                                : null;
+                              return (
+                                <div key={item.id} className="program-prescription-row pdr">
+                                  <span className={`pdr-bar${gid ? ' on' : ''}`} />
+                                  <span className="n">
+                                    {item.name}
+                                    {letter && (
+                                      <span className="pdr-index">
+                                        {letter}
+                                        {(item.groupOrder ?? 0) + 1}
+                                      </span>
+                                    )}
+                                  </span>
+                                  {item.dropLast && (
+                                    <span className="pdr-drop">
+                                      <Icon name="caret-line-down" />
+                                      {t.dropOnLast}
                                     </span>
                                   )}
-                                </span>
-                                {item.dropLast && (
-                                  <span className="pdr-drop">
-                                    <Icon name="caret-line-down" />
-                                    {t.dropOnLast}
+                                  <span className="s">
+                                    {item.kind === 'strength'
+                                      ? `${item.sets} × ${item.reps}`
+                                      : `${item.durationMin ?? 10} ${t.minShort}`}
                                   </span>
-                                )}
-                                <span className="s">
-                                  {item.kind === 'strength'
-                                    ? `${item.sets} × ${item.reps}`
-                                    : `${item.durationMin ?? 10} ${t.minShort}`}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        {equipment.length > 0 && (
-                          <div className="pd-equip">
-                            {equipment
-                              .filter((id) => !missing.includes(id))
-                              .map((id) => (
-                                <span key={id} className="mchip">
-                                  <Icon name={equipmentIconName(id)} />
+                                </div>
+                              );
+                            })}
+                          </div>
+                          {equipment.length > 0 && (
+                            <div className="pd-equip">
+                              {equipment
+                                .filter((id) => !missing.includes(id))
+                                .map((id) => (
+                                  <span key={id} className="mchip">
+                                    <Icon name={equipmentIconName(id)} />
+                                    {equipLabel(id)}
+                                  </span>
+                                ))}
+                              {missing.map((id) => (
+                                <span key={id} className="mchip ruby">
+                                  <Icon name="warning-circle" />
                                   {equipLabel(id)}
                                 </span>
                               ))}
-                            {missing.map((id) => (
-                              <span key={id} className="mchip ruby">
-                                <Icon name="warning-circle" />
-                                {equipLabel(id)}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                    {missing.length > 0 && homeGym && !ignoredEquipWarn.includes(warnKey) && (
-                      <div className="pd-warn">
-                        <Icon name="warning-circle" />
-                        <div className="pd-warn-body">
-                          <p>{t.gymMissingSwap(homeGym.name, equipLabel(missing[0]))}</p>
-                          <div className="pd-warn-actions">
-                            <button
-                              className="pd-warn-swap"
-                              onClick={() => {
-                                if (isMine) editMemberProgram();
-                                else setIgnoredEquipWarn((x) => [...x, warnKey]);
-                              }}
-                            >
-                              {t.suggestSwap}
-                            </button>
-                            <button
-                              className="pd-warn-ignore"
-                              onClick={() => setIgnoredEquipWarn((x) => [...x, warnKey])}
-                            >
-                              {t.ignoreLabel}
-                            </button>
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {missing.length > 0 && homeGym && !ignoredEquipWarn.includes(warnKey) && (
+                        <div className="pd-warn">
+                          <Icon name="warning-circle" />
+                          <div className="pd-warn-body">
+                            <p>{t.gymMissingSwap(homeGym.name, equipLabel(missing[0]))}</p>
+                            <div className="pd-warn-actions">
+                              <button
+                                className="pd-warn-swap"
+                                onClick={() => {
+                                  if (isMine) editMemberProgram();
+                                  else setIgnoredEquipWarn((x) => [...x, warnKey]);
+                                }}
+                              >
+                                {t.suggestSwap}
+                              </button>
+                              <button
+                                className="pd-warn-ignore"
+                                onClick={() => setIgnoredEquipWarn((x) => [...x, warnKey])}
+                              >
+                                {t.ignoreLabel}
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                    {isToday && st !== 'logged' && items.length > 0 && !liveOpen && (
-                      <button
-                        className="btn btn-primary pd-start"
-                        onClick={() => {
-                          const w = startWorkout(null);
-                          for (const item of items) {
-                            addExercise(w.id, item.name, item.kind, {
-                              plannedSets: item.kind === 'strength' ? item.sets : 1,
-                              plannedReps: item.kind === 'strength' ? item.reps : null,
-                              plannedDurationMin:
-                                item.kind === 'strength' ? null : (item.durationMin ?? 10),
-                              equipment: item.equipment,
-                              groupId: item.groupId ?? null,
-                              groupOrder: item.groupOrder ?? null,
-                            });
-                          }
-                          shell.openOverlay({ screen: 'session', workoutId: w.id });
-                        }}
-                      >
-                        <Icon name="play" />
-                        {t.startDay(active.dayNames?.[day] || t.progDay(day))}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+                      )}
+                      {isToday && st !== 'logged' && items.length > 0 && !liveOpen && (
+                        <button
+                          className="btn btn-primary pd-start"
+                          onClick={() => {
+                            const w = startWorkout(null);
+                            for (const item of items) {
+                              addExercise(w.id, item.name, item.kind, {
+                                plannedSets: item.kind === 'strength' ? item.sets : 1,
+                                plannedReps: item.kind === 'strength' ? item.reps : null,
+                                plannedDurationMin:
+                                  item.kind === 'strength' ? null : (item.durationMin ?? 10),
+                                equipment: item.equipment,
+                                groupId: item.groupId ?? null,
+                                groupOrder: item.groupOrder ?? null,
+                              });
+                            }
+                            shell.openOverlay({ screen: 'session', workoutId: w.id });
+                          }}
+                        >
+                          <Icon name="play" />
+                          {t.startDay(active.dayNames?.[day] || t.progDay(day))}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </div>
       </div>
     );
   }

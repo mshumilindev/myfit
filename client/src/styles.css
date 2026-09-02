@@ -4464,6 +4464,12 @@ i > svg {
   }
 
   .progress-page.progress-locked {
+    padding: 0;
+  }
+  .progress-locked-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding: 30px 36px;
   }
 
@@ -4478,6 +4484,10 @@ i > svg {
     align-items: stretch;
   }
 
+  /* Empty account (no weekly data): a standalone, non-stretched card. */
+  .progress-locked-empty.solo {
+    max-width: 460px;
+  }
   .progress-locked-empty {
     justify-content: center;
     gap: 14px;
@@ -14088,6 +14098,47 @@ button.exd-media {
   min-height: 0;
   overflow-y: auto;
   padding: 4px 20px 20px;
+}
+
+/* Member Programs flush tab bar (design PG-01b, matching Playbook/Exercises)
+   WITHOUT the author-editor two-pane rules — a standalone modifier so the
+   member view's week strip etc. keep their own styling. Flush top bar, hidden
+   duplicate title, full-width faint divider, padded scrollable body. */
+.screen.programs-page.programs-flush {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+.programs-page.programs-flush > .programs-top {
+  flex: none;
+  align-items: center;
+  padding: 12px 20px;
+  box-shadow: 0 1px 0 var(--color-divider);
+}
+.programs-page.programs-flush > .programs-top > div:first-child {
+  display: none;
+}
+.programs-page.programs-flush > .programs-top .prog-tabs {
+  margin-left: 0;
+}
+.programs-page.programs-flush > .programs-member-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: 16px 20px calc(20px + env(safe-area-inset-bottom));
+}
+@media (min-width: 720px) {
+  .programs-page.programs-flush > .programs-top {
+    padding: 16px 28px;
+  }
+  .programs-page.programs-flush > .programs-member-body {
+    padding: 24px 28px 40px;
+    scrollbar-gutter: stable;
+  }
 }
 
 /* ==========================================================================
