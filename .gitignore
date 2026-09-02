@@ -33,6 +33,10 @@ playwright-report/
 *.log
 .DS_Store
 
+# Tutorial recorder local artifacts
+.tutorial-profile/
+tutorials/out/
+
 # FUSE mount temp files (deleted-but-open)
 .fuse_hidden*
 **/.fuse_hidden*
