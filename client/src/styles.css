@@ -14356,6 +14356,100 @@ button.exd-media {
   font-size: 13px;
 }
 
+/* Goals: long-term goal list + editor */
+.goals-lt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.goals-lt {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: 13px 14px;
+}
+.goals-lt-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.goals-lt-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  color: var(--color-text);
+}
+.goals-lt-meas {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 5px;
+}
+.goals-lt-bar,
+.lt-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--color-neutral-900);
+  margin-top: 9px;
+  overflow: hidden;
+}
+.goals-lt-bar > div,
+.lt-bar > div {
+  height: 100%;
+  background: var(--color-accent);
+}
+.lt-nums {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.lt-progress {
+  margin: 4px 0 2px;
+}
+.lt-progress-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.lt-pct {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.lt-to-target {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+.lt-bar {
+  margin-top: 8px;
+}
+.lt-how {
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 12px 13px;
+  margin-top: 4px;
+}
+.lt-how-title {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  margin-bottom: 6px;
+}
+.lt-how p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-neutral-400);
+}
+.lt-delete {
+  width: 100%;
+  margin-top: 10px;
+}
+
 /* Focus editor sheet (GL-03) */
 .focus-sheet .focus-reset {
   border: 0;

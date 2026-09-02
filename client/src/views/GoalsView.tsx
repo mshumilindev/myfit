@@ -11,7 +11,8 @@ import { useStore } from '../store';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { FocusBodyMap } from '../components/Muscle';
 import { FocusEditor } from './FocusEditor';
-import { focusLists, groupEmphasis, FOCUS_MAV_DELTA } from '../goals';
+import { LongTermEditor } from './LongTermEditor';
+import { focusLists, groupEmphasis, goalProgress, FOCUS_MAV_DELTA } from '../goals';
 import { focusToGroup, type FocusMuscle } from '../data/subregions';
 import { LANDMARKS } from '../volume';
 import { exercisesForSubRegions } from '../data/exercises';
@@ -28,6 +29,7 @@ export function GoalsView({
   const { t } = useT();
   const store = useStore();
   const [editingFocus, setEditingFocus] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<{ id: string | null } | null>(null);
 
   const { grow, ease } = focusLists(store.goals);
   const hasFocus = grow.length > 0 || ease.length > 0;
@@ -159,20 +161,56 @@ export function GoalsView({
           </section>
         )}
 
-        {/* Long-term goals — next */}
+        {/* Long-term goals */}
         <section className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsLongTermTitle}</span>
-            <span className="tag tag-neutral goals-soon">{t.goalsSoon}</span>
+            <button
+              className="goals-edit"
+              onClick={() => setEditingGoal({ id: null })}
+              aria-label={t.goalsNewGoal}
+            >
+              <Icon name="plus" />
+            </button>
           </div>
-          <div className="goals-empty">
-            <Icon name="flag-banner" />
-            <p>{t.goalsLongTermEmpty}</p>
-          </div>
+          {store.goals.longTerm.length === 0 ? (
+            <button className="goals-empty goals-empty-btn" onClick={() => setEditingGoal({ id: null })}>
+              <Icon name="flag-banner" />
+              <p>{t.goalsLongTermEmpty}</p>
+            </button>
+          ) : (
+            <div className="goals-lt-list">
+              {store.goals.longTerm.map((g) => {
+                const pct = Math.round(goalProgress(g) * 100);
+                return (
+                  <button className="goals-lt" key={g.id} onClick={() => setEditingGoal({ id: g.id })}>
+                    <div className="goals-lt-top">
+                      <span className="goals-lt-name">{g.title}</span>
+                      {g.horizonMonths > 0 && (
+                        <span className="tag tag-neutral">{t.ltMonths(g.horizonMonths)}</span>
+                      )}
+                    </div>
+                    {g.measure.label && (
+                      <div className="goals-lt-meas">
+                        {g.measure.label}
+                        {g.measure.current != null ? ` · ${g.measure.from} → ${g.measure.to}` : ''}
+                      </div>
+                    )}
+                    <div className="goals-lt-bar">
+                      <div style={{ width: `${Math.max(0, Math.min(100, pct))}%` }} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </section>
       </div>
 
       {editingFocus && <FocusEditor onClose={() => setEditingFocus(false)} />}
+      {editingGoal && (
+        <LongTermEditor id={editingGoal.id} onClose={() => setEditingGoal(null)} />
+      )}
     </div>
   );
 }
