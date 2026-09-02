@@ -5,7 +5,7 @@
  * existing emphasis is kept). Cards render the body-muscles map for now; the
  * stylised silhouettes swap in here once available.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useT } from '../i18n';
 import { useStore, setPhysiqueTarget, setBlockFocus } from '../store';
 import { Sheet, Icon } from '../ui';
@@ -21,8 +21,17 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
   const [sexState, setSexState] = useState<'male' | 'female'>(cur?.sex ?? 'male');
   const sex = accountSex ?? sexState;
   const [picked, setPicked] = useState<ArchetypeId | null>(cur?.archetype ?? null);
+  const [hoverId, setHoverId] = useState<ArchetypeId | null>(null);
 
   const ids = ARCHETYPES_BY_SEX(sex);
+
+  // Preload the highlighted variants so the hover/active swap is instant.
+  useEffect(() => {
+    for (const id of ids) {
+      const img = new Image();
+      img.src = `/physiques/${id}-lit.png`;
+    }
+  }, [ids]);
 
   const use = () => {
     if (!picked) return;
@@ -80,12 +89,15 @@ export function PhysiquePicker({ onClose }: { onClose: () => void }) {
             key={id}
             className={`phys-card${picked === id ? ' active' : ''}`}
             onClick={() => setPicked(id)}
+            onMouseEnter={() => setHoverId(id)}
+            onMouseLeave={() => setHoverId((h) => (h === id ? null : h))}
           >
             {picked === id && <Icon name="check-circle" weight="fill" className="phys-check" />}
-            <div className="phys-fig">
-              <img className="phys-base" src={`/physiques/${id}.png`} alt="" />
-              <img className="phys-lit" src={`/physiques/${id}-lit.png`} alt="" />
-            </div>
+            <img
+              className="phys-fig"
+              src={`/physiques/${id}${picked === id || hoverId === id ? '-lit' : ''}.png`}
+              alt=""
+            />
             <div className="phys-name">{t.archetypes[id].name}</div>
             <div className="phys-blurb">{t.archetypes[id].blurb}</div>
           </button>

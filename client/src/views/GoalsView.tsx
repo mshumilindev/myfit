@@ -66,18 +66,27 @@ export function GoalsView({
         <section className="goals-card">
           <div className="goals-card-head">
             <span className="goals-card-kicker">{t.goalsPhysiqueTitle}</span>
-            {physique && (
+            {physique ? (
               <button className="goals-change" onClick={() => setEditingPhysique(true)}>
                 {t.physChange}
+              </button>
+            ) : (
+              <button
+                className="goals-edit"
+                onClick={() => setEditingPhysique(true)}
+                aria-label={t.goalsPhysiqueTitle}
+              >
+                <Icon name="plus" />
               </button>
             )}
           </div>
           {physique ? (
             <div className="goals-physique">
-              <div className="phys-fig lit goals-physique-fig">
-                <img className="phys-base" src={`/physiques/${physique.archetype}.png`} alt="" />
-                <img className="phys-lit" src={`/physiques/${physique.archetype}-lit.png`} alt="" />
-              </div>
+              <img
+                className="phys-fig goals-physique-fig"
+                src={`/physiques/${physique.archetype}-lit.png`}
+                alt=""
+              />
               <div>
                 <div className="goals-physique-name">{t.archetypes[physique.archetype].name}</div>
                 <div className="goals-physique-blurb">{t.archetypes[physique.archetype].blurb}</div>

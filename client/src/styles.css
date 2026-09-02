@@ -14537,36 +14537,14 @@ button.exd-media {
   font-size: 17px;
   color: var(--color-accent);
 }
+/* Single transparent (matted) figure. The highlighted variant is swapped in via
+   the src — one element, fixed box, so the figure never moves on hover/active. */
 .phys-fig {
-  position: relative;
+  display: block;
   width: 82px;
   margin: 0 auto;
   aspect-ratio: 192 / 512;
-  /* Studio renders can't be matted (figure tone == bg tone), so present each as
-     a neat rounded portrait rather than an accidental rectangular tile. */
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-}
-.phys-fig img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
   object-fit: contain;
-  display: block;
-}
-/* Highlighted silhouette cross-fades in on hover/active (web) and active
-   (mobile has no hover). Both layers share the exact box + source dims, so the
-   figure never shifts. */
-.phys-lit {
-  opacity: 0;
-  transition: opacity 0.14s ease;
-}
-.phys-card:hover .phys-lit,
-.phys-card.active .phys-lit,
-.phys-fig.lit .phys-lit {
-  opacity: 1;
 }
 .phys-name {
   font-size: 14px;
