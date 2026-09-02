@@ -882,7 +882,7 @@ export function Switch({ on }: { on: boolean }) {
  * Compact language selector — flag chip on every screen (documented addition
  * on top of the boards; see docs/DESIGN.md). Opens a popover with all locales.
  */
-export function LanguageSelector() {
+export function LanguageSelector({ compact }: { compact?: boolean } = {}) {
   const { locale } = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -901,7 +901,7 @@ export function LanguageSelector() {
   }, [open]);
 
   return (
-    <div className="lang" ref={ref}>
+    <div className={`lang${compact ? ' compact' : ''}`} ref={ref}>
       <button
         className="lang-chip"
         type="button"
@@ -911,8 +911,8 @@ export function LanguageSelector() {
         onClick={() => setOpen((x) => !x)}
       >
         <span aria-hidden>{FLAGS[locale]}</span>
-        <span className="lang-chip-label">{LOCALES[locale].locale}</span>
-        <Icon name="caret-line-down" className="lang-chip-caret" />
+        {!compact && <span className="lang-chip-label">{LOCALES[locale].locale}</span>}
+        {!compact && <Icon name="caret-line-down" className="lang-chip-caret" />}
       </button>
       {open && (
         <Portal>

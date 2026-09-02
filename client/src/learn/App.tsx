@@ -12,8 +12,8 @@
  *   revealed progressively (lightweight virtualization).
  * - Localised UI via useLearnT.
  */
-import { useEffect, useMemo, useState } from 'react';
-import { Icon } from '../ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Icon, LanguageSelector } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
@@ -33,7 +33,6 @@ type Tab = 'home' | 'topics' | 'saved' | 'feed';
 type Cut = 'phone' | 'web';
 
 const SAVED_KEY = 'spotter.learn.saved';
-const CUT_KEY = 'spotter.learn.cut';
 
 function readSaved(): string[] {
   try {
@@ -44,29 +43,25 @@ function readSaved(): string[] {
   }
 }
 
-/** Global cut: defaults to the current view (desktop → web, phone → web-off). */
-function useCut(): [Cut, (c: Cut) => void] {
-  const [cut, setCut] = useState<Cut>(() => {
-    try {
-      const s = localStorage.getItem(CUT_KEY);
-      if (s === 'phone' || s === 'web') return s;
-    } catch {
-      /* ignore */
-    }
-    const desktop =
-      typeof window !== 'undefined' &&
-      !!window.matchMedia &&
-      window.matchMedia('(min-width: 720px)').matches;
-    return desktop ? 'web' : 'phone';
-  });
+/** Orientation is driven purely by the view: mobile → portrait (phone / 9:16),
+ *  web → landscape (16:9). It is NOT a manual toggle — every thumbnail and the
+ *  player follow the current viewport. */
+function useViewCut(): Cut {
+  const query = '(min-width: 720px)';
+  const [cut, setCut] = useState<Cut>(() =>
+    typeof window !== 'undefined' && window.matchMedia && window.matchMedia(query).matches
+      ? 'web'
+      : 'phone',
+  );
   useEffect(() => {
-    try {
-      localStorage.setItem(CUT_KEY, cut);
-    } catch {
-      /* ignore */
-    }
-  }, [cut]);
-  return [cut, setCut];
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia(query);
+    const on = () => setCut(mq.matches ? 'web' : 'phone');
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return cut;
 }
 
 /** Reveal items progressively as a sentinel scrolls into view (virtualization). */
@@ -87,15 +82,18 @@ function useReveal(total: number, step = 12): [number, (el: HTMLDivElement | nul
 /** Thumbnail — real still when shot, else a placeholder; orientation = cut. */
 function Thumb({ cut, variant }: { cut: Cut; variant: 'tile' | 'row' | 'lead' }) {
   const { L } = useLearnT();
+  // Orientation follows the view everywhere: mobile → portrait, web → landscape.
   return (
     <div className={`ln-thumb ${variant} cut-${cut === 'phone' ? 'p' : 'w'}`}>
       <div className="ln-thumb-ph">
         <Icon name="graduation-cap" weight="fill" />
       </div>
       <div className="ln-thumb-scrim" />
-      <span className="ln-soon-chip">
-        <Icon name="clock" /> {L.soon}
-      </span>
+      {variant === 'tile' && (
+        <span className="ln-soon-chip">
+          <Icon name="clock" /> {L.soon}
+        </span>
+      )}
     </div>
   );
 }
@@ -409,7 +407,6 @@ function Player({
   lesson,
   lessons,
   cut,
-  setCut,
   saved,
   onToggleSave,
   onBack,
@@ -418,13 +415,15 @@ function Player({
   lesson: Lesson;
   lessons: Lesson[];
   cut: Cut;
-  setCut: (c: Cut) => void;
   saved: boolean;
   onToggleSave: () => void;
   onBack: () => void;
   onPlay: (l: Lesson) => void;
 }) {
   const { L } = useLearnT();
+  // The switch selects which recorded cut to watch (defaults to the view);
+  // orientation of the app itself always follows the view (`cut`).
+  const [watch, setWatch] = useState<Cut>(cut);
   const topic = topicById(lesson.topic)!;
   const upNext = lessons.filter((l) => l.topic === lesson.topic && l.id !== lesson.id).slice(0, 3);
 
@@ -452,16 +451,16 @@ function Player({
         <div className="ln-cutrow">
           <div className="ln-switch">
             <button
-              className={`ln-switch-opt${cut === 'phone' ? ' on' : ''}`}
-              onClick={() => setCut('phone')}
+              className={`ln-switch-opt${watch === 'phone' ? ' on' : ''}`}
+              onClick={() => setWatch('phone')}
             >
-              <Icon name="device-mobile" weight={cut === 'phone' ? 'fill' : undefined} /> {L.phone}
+              <Icon name="device-mobile" weight={watch === 'phone' ? 'fill' : undefined} /> {L.phone}
             </button>
             <button
-              className={`ln-switch-opt${cut === 'web' ? ' on' : ''}`}
-              onClick={() => setCut('web')}
+              className={`ln-switch-opt${watch === 'web' ? ' on' : ''}`}
+              onClick={() => setWatch('web')}
             >
-              <Icon name="monitor" weight={cut === 'web' ? 'fill' : undefined} /> {L.web}
+              <Icon name="monitor" weight={watch === 'web' ? 'fill' : undefined} /> {L.web}
             </button>
           </div>
           <button className={`ln-pill sm${saved ? ' on' : ''}`} onClick={onToggleSave}>
@@ -471,8 +470,8 @@ function Player({
         </div>
 
         {upNext.length > 0 && (
-          <>
-            <div className="ln-kicker up">{L.upNext}</div>
+          <div className="ln-upnext-sec">
+            <div className="ln-kicker">{L.upNext}</div>
             <div className="ln-saved-list">
               {upNext.map((l) => (
                 <button key={l.id} className="ln-saved-row" onClick={() => onPlay(l)}>
@@ -484,7 +483,7 @@ function Player({
                 </button>
               ))}
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -517,7 +516,14 @@ export function LearnRoot({
   const [topic, setTopic] = useState<Topic | null>(null);
   const [playing, setPlaying] = useState<Lesson | null>(null);
   const [saved, setSaved] = useState<string[]>(() => readSaved());
-  const [cut, setCut] = useCut();
+  const cut = useViewCut();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Always land at the top when opening a lesson or switching tab/topic —
+  // the .apex-scroll node is reused across branches so its scrollTop persists.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [playing, tab, topic]);
 
   useEffect(() => {
     try {
@@ -591,17 +597,17 @@ export function LearnRoot({
                 <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
               )}
             </button>
+            <LanguageSelector />
           </div>
         </header>
 
         <div className="apex-body">
           {playing ? (
-            <div className="apex-scroll">
+            <div className="apex-scroll" ref={scrollRef}>
               <Player
                 lesson={playing}
                 lessons={lessons}
                 cut={cut}
-                setCut={setCut}
                 saved={saved.includes(playing.id)}
                 onToggleSave={() => toggleSave(playing.id)}
                 onBack={() => setPlaying(null)}
@@ -620,7 +626,7 @@ export function LearnRoot({
               onClose={() => setTab('home')}
             />
           ) : (
-            <div className="apex-scroll">
+            <div className="apex-scroll" ref={scrollRef}>
               {tab === 'home' && (
                 <HomeScreen topics={topics} lessons={lessons} cut={cut} onPlay={openPlayer} />
               )}

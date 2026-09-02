@@ -8,7 +8,7 @@
  */
 import { currentUid, getUsername } from '../api';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 import { SpotterMark } from '../brand/SpotterMark';
 import { Avatar } from './Avatar';
 
@@ -73,6 +73,9 @@ export function AppRail({
         >
           <Icon name="squares-four" />
         </button>
+        <div className="rail-lang">
+          <LanguageSelector compact />
+        </div>
         <button
           className="account-chip"
           onClick={onOpenProfile}

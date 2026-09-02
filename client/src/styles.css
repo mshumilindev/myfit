@@ -24587,3 +24587,22 @@ button.badge {
     width: 100%;
   }
 }
+
+
+/* Compact language selector for the icon rails (sub-app AppRail foot): flag-only
+   button sized like a rail item; the popover is unchanged. */
+.rail-lang .lang.compact .lang-chip {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 13px;
+  font-size: 20px;
+  box-shadow: none;
+  background: none;
+  border: none;
+  color: var(--color-neutral-500);
+}
+.rail-lang .lang.compact .lang-chip:hover {
+  background: rgba(233, 234, 236, 0.05);
+}

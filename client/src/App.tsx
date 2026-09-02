@@ -1091,6 +1091,7 @@ export function App() {
                   <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
                 )}
               </button>
+              <LanguageSelector />
             </div>
           </div>
         )}

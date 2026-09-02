@@ -6,7 +6,7 @@ import { useT } from './i18n';
 import { store, useStore } from './store';
 import { GoalView, HistoryView, TodayView } from './views';
 import type { Entry } from './types';
-import { Icon } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
 import type { Notif, NotifState } from '../notifications';
@@ -192,6 +192,7 @@ export function NutritionRoot({
                 <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
               )}
             </button>
+            <LanguageSelector />
           </div>
         </header>
 

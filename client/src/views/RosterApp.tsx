@@ -11,7 +11,7 @@
  */
 import { useState } from 'react';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 import type { Shell } from '../App';
 import { AppRail } from '../components/AppRail';
 import { TrainerView } from './TrainerView';
@@ -101,6 +101,7 @@ export function RosterApp({
                 <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
               )}
             </button>
+            <LanguageSelector />
           </div>
         </header>
 

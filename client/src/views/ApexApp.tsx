@@ -11,7 +11,7 @@
  */
 import { useMemo } from 'react';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, LanguageSelector } from '../ui';
 import type { StoreState } from '../store';
 import { AppRail } from '../components/AppRail';
 import { ChallengesView } from './ChallengesView';
@@ -94,6 +94,7 @@ export function ApexApp({
                 <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
               )}
             </button>
+            <LanguageSelector />
           </div>
         </header>
 
