@@ -133,6 +133,9 @@ const RosterApp = lazy(() =>
 const NutritionApp = lazy(() =>
   import('./NutritionApp').then((module) => ({ default: module.NutritionApp })),
 );
+const LearnApp = lazy(() =>
+  import('./LearnApp').then((module) => ({ default: module.LearnApp })),
+);
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
 );
@@ -388,6 +391,11 @@ function isNutritionHash(hash: string): boolean {
   return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'nutrition';
 }
 
+// --- Learn (how-to videos sub-app) is a full-screen mode at #/learn.
+function isLearnHash(hash: string): boolean {
+  return hash.split('?')[0].replace(/^#\/?/, '').split('/')[0] === 'learn';
+}
+
 export function App() {
   const { t } = useT();
   const store = useStore();
@@ -474,6 +482,7 @@ export function App() {
   const [nutritionOpen, setNutritionOpen] = useState<boolean>(
     () => isNutritionHash(window.location.hash) && isFlagOn('nutrition'),
   );
+  const [learnOpen, setLearnOpen] = useState<boolean>(() => isLearnHash(window.location.hash));
   // Nutrition is behind a feature flag (admin-only toggle in Settings); default
   // OFF → the Shell shows it as "coming soon" and it cannot be opened.
   const nutritionEnabled = useFlag('nutrition');
@@ -669,7 +678,9 @@ export function App() {
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
     if (!authed || joinToken) return;
-    const next = nutritionOpen
+    const next = learnOpen
+      ? '#/learn'
+      : nutritionOpen
       ? '#/nutrition'
       : rosterOpen
         ? rosterHash(rosterTab)
@@ -693,6 +704,7 @@ export function App() {
     rosterOpen,
     rosterTab,
     nutritionOpen,
+    learnOpen,
     effectiveTab,
     activeOverlay,
     programsPeer,
@@ -711,6 +723,7 @@ export function App() {
       setRosterOpen(isRosterHash(window.location.hash));
       setRosterTab(rosterTabFromHash(window.location.hash));
       setNutritionOpen(isNutritionHash(window.location.hash) && isFlagOn('nutrition'));
+      setLearnOpen(isLearnHash(window.location.hash));
       const { tab: ht, overlay: ho } = fromHash(window.location.hash);
       const pk = peerFromHash(window.location.hash);
       const ps = progressFromHash(window.location.hash);
@@ -761,6 +774,14 @@ export function App() {
     else el.classList.remove('theme-nutrition');
     return () => el.classList.remove('theme-nutrition');
   }, [nutritionOpen]);
+
+  // Same for Learn — rubellite accent on the root while its app is open.
+  useEffect(() => {
+    const el = document.documentElement;
+    if (learnOpen) el.classList.add('theme-learn');
+    else el.classList.remove('theme-learn');
+    return () => el.classList.remove('theme-learn');
+  }, [learnOpen]);
 
   if (joinToken) {
     return (
@@ -834,17 +855,20 @@ export function App() {
     setApexOpen(false);
     setRosterOpen(false);
     setNutritionOpen(false);
+    setLearnOpen(false);
   };
   const openApex = () => {
     setShellOpen(false);
     setRosterOpen(false);
     setNutritionOpen(false);
+    setLearnOpen(false);
     setApexOpen(true);
   };
   const openRoster = (rtab: RosterTab) => {
     setShellOpen(false);
     setApexOpen(false);
     setNutritionOpen(false);
+    setLearnOpen(false);
     setRosterTab(rtab);
     setRosterOpen(true);
   };
@@ -853,7 +877,15 @@ export function App() {
     setShellOpen(false);
     setApexOpen(false);
     setRosterOpen(false);
+    setLearnOpen(false);
     setNutritionOpen(true);
+  };
+  const openLearn = () => {
+    setShellOpen(false);
+    setApexOpen(false);
+    setRosterOpen(false);
+    setNutritionOpen(false);
+    setLearnOpen(true);
   };
 
   // Nutrition takes over the whole screen — its own lazurite skin & store.
@@ -886,6 +918,46 @@ export function App() {
             onRoster={() => openRoster(rosterHomeFor(role))}
             onNutrition={() => setShellOpen(false)}
             nutritionEnabled={nutritionEnabled}
+            onLearn={openLearn}
+            onSignOut={() => shell.signOut()}
+            onClose={() => setShellOpen(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Learn (how-to videos) takes over the whole screen — its own rubellite skin.
+  if (learnOpen) {
+    return (
+      <div className="app app-apex-root">
+        <Suspense fallback={<ScreenFallback />}>
+          <LearnApp
+            now={notifNow}
+            onOpenShell={() => setShellOpen(true)}
+            onOpenProfile={() => openRoster('me')}
+            notifs={notifs}
+            notifState={notifState}
+            notifUnread={notifUnread}
+            onNotifSeen={markNotifsSeen}
+            onNotifMarkAll={markAllNotifsSeen}
+          />
+        </Suspense>
+        {shellOpen && (
+          <ShellLauncher
+            store={store}
+            now={notifNow}
+            current="learn"
+            peopleLabel={peopleLabel}
+            peopleDesc={peopleDesc}
+            activeChallenges={activeChallengeCount}
+            notifUnread={notifUnread}
+            onGym={openGym}
+            onApex={openApex}
+            onRoster={() => openRoster(rosterHomeFor(role))}
+            onNutrition={openNutrition}
+            nutritionEnabled={nutritionEnabled}
+            onLearn={() => setShellOpen(false)}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -927,6 +999,7 @@ export function App() {
             onRoster={() => setShellOpen(false)}
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
+            onLearn={openLearn}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -968,6 +1041,7 @@ export function App() {
             onRoster={() => openRoster(rosterHomeFor(role))}
             onNutrition={openNutrition}
             nutritionEnabled={nutritionEnabled}
+            onLearn={openLearn}
             onSignOut={() => shell.signOut()}
             onClose={() => setShellOpen(false)}
           />
@@ -1178,6 +1252,7 @@ export function App() {
           onRoster={() => openRoster(rosterHomeFor(role))}
           onNutrition={openNutrition}
           nutritionEnabled={nutritionEnabled}
+          onLearn={openLearn}
           onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />

@@ -1622,6 +1622,8 @@ export const lt: Strings = {
   shellApexDesc: 'Iššūkiai, rangai ir etapai.',
   shellNutrition: 'Nutrition',
   shellNutritionDesc: 'Pamaitink treniruotes.',
+  shellLearn: 'Learn',
+  shellLearnDesc: 'Vaizdo pamokos.',
   shellPeopleDesc: 'Tavo profilis ir paskyra.',
   shellPeopleDescCoach: 'Tavo klientai ir profilis.',
   shellPeopleDescAdmin: 'Nariai, treneriai ir paskyra.',

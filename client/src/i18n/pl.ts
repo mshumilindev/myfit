@@ -1615,6 +1615,8 @@ export const pl: Strings = {
   shellApexDesc: 'Wyzwania, rangi i kamienie milowe.',
   shellNutrition: 'Nutrition',
   shellNutritionDesc: 'Zasil swój trening.',
+  shellLearn: 'Learn',
+  shellLearnDesc: 'Filmy instruktażowe.',
   shellPeopleDesc: 'Twój profil i konto.',
   shellPeopleDescCoach: 'Twoi klienci i profil.',
   shellPeopleDescAdmin: 'Członkowie, trenerzy i konto.',

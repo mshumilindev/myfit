@@ -1609,6 +1609,8 @@ export const et: Strings = {
   shellApexDesc: 'Väljakutsed, järgud ja verstapostid.',
   shellNutrition: 'Nutrition',
   shellNutritionDesc: 'Toida oma treeningut.',
+  shellLearn: 'Learn',
+  shellLearnDesc: 'Õppevideod.',
   shellPeopleDesc: 'Sinu profiil ja konto.',
   shellPeopleDescCoach: 'Sinu kliendid ja profiil.',
   shellPeopleDescAdmin: 'Liikmed, treenerid ja konto.',

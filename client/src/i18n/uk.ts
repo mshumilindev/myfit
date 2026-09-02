@@ -1614,6 +1614,8 @@ export const uk: Strings = {
   shellApexDesc: 'Челенджі, розряди й віхи.',
   shellNutrition: 'Nutrition',
   shellNutritionDesc: 'Заправ свої тренування.',
+  shellLearn: 'Learn',
+  shellLearnDesc: 'Відео-інструкції.',
   shellPeopleDesc: 'Твій профіль та акаунт.',
   shellPeopleDescCoach: 'Твої клієнти та профіль.',
   shellPeopleDescAdmin: 'Учасники, тренери та акаунт.',

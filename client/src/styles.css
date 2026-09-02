@@ -23931,6 +23931,25 @@ button.badge {
 /* Nutrition — graphite + lazurite. Same re-skin trick: override the accent ramp
    on the wrapper (and document root, for portaled sheets) so the shared sub-app
    chrome (rail, header, nav) turns blue while every screen keeps graphite. */
+/* Learn — graphite + rubellite ("gem"). Same re-skin trick: override the accent
+   ramp (and the gem helper vars learn.css reads) so the shared sub-app chrome
+   turns rose. */
+.app-learn,
+.theme-learn {
+  --color-accent: #e5537e;
+  --color-accent-100: #fdeaf0;
+  --color-accent-200: #f7c0d1;
+  --color-accent-300: #f58fac;
+  --color-accent-400: #ef6f94;
+  --color-accent-500: #e5537e;
+  --color-accent-600: #c9426a;
+  --color-accent-700: #a12f52;
+  --color-accent-800: #6e2039;
+  --color-accent-900: #3a1420;
+  --gem-glow: rgba(229, 83, 126, 0.5);
+  --gem-deep: #a12f52;
+}
+
 .app-nutrition,
 .theme-nutrition {
   --color-accent: #4f93d6;
@@ -24404,6 +24423,11 @@ button.badge {
   background: rgba(61, 132, 201, 0.14);
   box-shadow: inset 0 0 0 1px rgba(61, 132, 201, 0.3);
   color: #7fb4e6;
+}
+.shell-ic-learn {
+  background: rgba(229, 83, 126, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(229, 83, 126, 0.3);
+  color: #f58fac;
 }
 .shell-tile-main {
   flex: 1;

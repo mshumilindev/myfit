@@ -100,6 +100,13 @@ import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
 import { Sparkle } from '@phosphor-icons/react/Sparkle';
 import { SignOut } from '@phosphor-icons/react/SignOut';
 import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
+import { GraduationCap } from '@phosphor-icons/react/GraduationCap';
+import { BookmarkSimple } from '@phosphor-icons/react/BookmarkSimple';
+import { RocketLaunch } from '@phosphor-icons/react/RocketLaunch';
+import { PencilSimpleLine } from '@phosphor-icons/react/PencilSimpleLine';
+import { Compass } from '@phosphor-icons/react/Compass';
+import { DeviceMobile } from '@phosphor-icons/react/DeviceMobile';
+import { Monitor } from '@phosphor-icons/react/Monitor';
 import { DiscoBall } from '@phosphor-icons/react/DiscoBall';
 import { Star } from '@phosphor-icons/react/Star';
 import { Timer } from '@phosphor-icons/react/Timer';
@@ -217,6 +224,13 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'sign-out': SignOut,
   star: Star,
   'squares-four': SquaresFour,
+  'graduation-cap': GraduationCap,
+  'bookmark-simple': BookmarkSimple,
+  'rocket-launch': RocketLaunch,
+  'pencil-simple-line': PencilSimpleLine,
+  compass: Compass,
+  'device-mobile': DeviceMobile,
+  monitor: Monitor,
   'disco-ball': DiscoBall,
   timer: Timer,
   trash: Trash,

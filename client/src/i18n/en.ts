@@ -1637,6 +1637,8 @@ export const en = {
   shellApexDesc: 'Challenges, ranks & milestones.',
   shellNutrition: 'Nutrition',
   shellNutritionDesc: 'Fuel your training.',
+  shellLearn: 'Learn',
+  shellLearnDesc: 'How-to videos.',
   shellPeopleDesc: 'Your profile & account.',
   shellPeopleDescCoach: 'Your clients & profile.',
   shellPeopleDescAdmin: 'Members, trainers & account.',

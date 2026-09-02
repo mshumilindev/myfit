@@ -1,0 +1,567 @@
+/* ============================================================================
+   Learn — how-to videos. Scoped under .app-learn. Layout/chrome come from the
+   shared suite CSS (.apex-app, AppRail, .app-brand, .apex-nav); the gem accent
+   ramp is set on .app-learn / .theme-learn in styles.css, so the chrome turns
+   rubellite. These rules style Learn's own content (home, topics, saved,
+   player) using the gym design tokens.
+   ========================================================================== */
+
+.app-learn {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.app-learn .apex-scroll {
+  padding: 12px 16px calc(96px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 720px) {
+  .app-learn .apex-scroll {
+    padding: 22px 32px 40px;
+  }
+}
+
+.app-learn .ln-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+/* head */
+.app-learn .ln-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.app-learn .ln-head h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.app-learn .ln-count {
+  font-size: 13px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.app-learn .ln-count .acc {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.app-learn .ln-kicker {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  padding: 4px 2px 10px;
+}
+.app-learn .ln-kicker.up {
+  padding-top: 18px;
+}
+
+.app-learn .ln-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--color-neutral-500);
+  font-size: 13px;
+  padding: 0 0 12px;
+  cursor: pointer;
+}
+.app-learn .ln-back i {
+  font-size: 18px;
+}
+
+/* thumbnails */
+.app-learn .ln-thumb {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  background: var(--color-neutral-900);
+  flex: none;
+}
+.app-learn .ln-thumb.r-p {
+  aspect-ratio: 9 / 16;
+}
+.app-learn .ln-thumb.r-w {
+  aspect-ratio: 16 / 9;
+}
+.app-learn .ln-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.app-learn .ln-thumb-ph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-neutral-700);
+  font-size: 26px;
+  background: radial-gradient(120% 90% at 30% 0%, rgba(229, 83, 126, 0.08), transparent 60%);
+}
+.app-learn .ln-thumb-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(12, 10, 12, 0.05), rgba(12, 10, 12, 0.7));
+  pointer-events: none;
+}
+.app-learn .ln-soon-chip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-accent-200);
+  background: rgba(20, 14, 17, 0.66);
+  box-shadow: inset 0 0 0 1px rgba(229, 83, 126, 0.4);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.app-learn .ln-soon-chip i {
+  font-size: 11px;
+}
+
+/* continue card */
+.app-learn .ln-continue {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800), 0 0 26px -14px var(--gem-glow);
+  padding: 12px;
+}
+.app-learn .ln-continue .ln-thumb {
+  width: 74px;
+  aspect-ratio: 9 / 16;
+}
+.app-learn .ln-continue-main {
+  flex: 1;
+  min-width: 0;
+}
+.app-learn .ln-lesson-tag {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+.app-learn .ln-continue-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 4px;
+  line-height: 1.25;
+}
+.app-learn .ln-continue-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+  margin-top: 6px;
+}
+.app-learn .ln-continue-sub i {
+  font-size: 13px;
+}
+
+/* chips */
+.app-learn .ln-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.app-learn .ln-chips::-webkit-scrollbar {
+  display: none;
+}
+.app-learn .ln-chip {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+  padding: 8px 15px;
+  border-radius: 999px;
+  background: none;
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  cursor: pointer;
+}
+.app-learn .ln-chip.on {
+  color: var(--color-accent);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+/* per-topic grid */
+.app-learn .ln-topic-block {
+  display: flex;
+  flex-direction: column;
+}
+.app-learn .ln-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .app-learn .ln-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+.app-learn .ln-card {
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.app-learn .ln-card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 8px;
+  color: var(--color-text);
+}
+
+/* topics list */
+.app-learn .ln-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.app-learn .ln-topic-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  padding: 15px;
+}
+.app-learn .ln-topic-ic {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
+  color: var(--color-accent);
+  font-size: 22px;
+}
+.app-learn .ln-topic-text {
+  flex: 1;
+  min-width: 0;
+}
+.app-learn .ln-topic-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+.app-learn .ln-topic-desc {
+  display: block;
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+}
+.app-learn .ln-topic-bar {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--color-neutral-800);
+  margin-top: 9px;
+  overflow: hidden;
+}
+.app-learn .ln-topic-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gem-deep), var(--color-accent));
+}
+.app-learn .ln-topic-count {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+/* saved list */
+.app-learn .ln-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.app-learn .ln-saved-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.app-learn .ln-saved-row .ln-thumb {
+  width: 104px;
+  aspect-ratio: 16 / 9;
+}
+.app-learn .ln-saved-text {
+  flex: 1;
+  min-width: 0;
+}
+.app-learn .ln-saved-title {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.app-learn .ln-saved-meta {
+  display: block;
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  margin-top: 3px;
+}
+.app-learn .ln-saved-mark {
+  font-size: 19px;
+  color: var(--color-accent);
+  flex: none;
+}
+
+/* empty state */
+.app-learn .ln-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+}
+.app-learn .ln-empty-ic {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-600);
+  font-size: 32px;
+}
+.app-learn .ln-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 20px;
+}
+.app-learn .ln-empty-sub {
+  font-size: 13.5px;
+  color: var(--color-neutral-500);
+  line-height: 1.55;
+  margin-top: 8px;
+  max-width: 300px;
+}
+
+/* pill button */
+.app-learn .ln-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+  padding: 11px 18px;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 42%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 9%, transparent);
+}
+.app-learn .ln-pill i {
+  font-size: 15px;
+}
+.app-learn .ln-pill.on {
+  color: #16171a;
+  background: var(--color-accent);
+  box-shadow: none;
+}
+
+/* player */
+.app-learn .ln-player {
+  display: flex;
+  flex-direction: column;
+}
+.app-learn .ln-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0a090b;
+  box-shadow: inset 0 0 0 1px #1c1a1d;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+.app-learn .ln-stage-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 28px;
+}
+.app-learn .ln-stage-ic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent), 0 0 30px -8px var(--gem-glow);
+  color: var(--color-accent);
+  font-size: 26px;
+}
+.app-learn .ln-stage-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.app-learn .ln-stage-sub {
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+  line-height: 1.5;
+  max-width: 340px;
+}
+
+.app-learn .ln-meta {
+  padding: 16px 2px 0;
+}
+.app-learn .ln-meta-title {
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 7px;
+}
+.app-learn .ln-meta-desc {
+  font-size: 14px;
+  color: var(--color-neutral-500);
+  line-height: 1.6;
+  margin-top: 12px;
+}
+.app-learn .ln-cutrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.app-learn .ln-cutlabel {
+  font-size: 11.5px;
+  color: var(--color-neutral-500);
+}
+.app-learn .ln-cutlabel b {
+  color: var(--color-accent);
+}
+.app-learn .ln-switch {
+  display: inline-flex;
+  gap: 3px;
+  background: rgba(31, 33, 37, 0.85);
+  border-radius: 11px;
+  padding: 3px;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.app-learn .ln-switch-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  border: none;
+  background: none;
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  cursor: pointer;
+}
+.app-learn .ln-switch-opt i {
+  font-size: 14px;
+}
+.app-learn .ln-switch-opt.on {
+  color: var(--color-accent);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+.app-learn .ln-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.app-learn .ln-actions .ln-pill {
+  margin-top: 16px;
+}
+
+/* up next */
+.app-learn .ln-upnext {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.app-learn .ln-up-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.app-learn .ln-up-row .ln-thumb {
+  width: 104px;
+  aspect-ratio: 16 / 9;
+}
+.app-learn .ln-up-text {
+  flex: 1;
+  min-width: 0;
+}
+.app-learn .ln-up-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.app-learn .ln-up-meta {
+  display: block;
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  margin-top: 3px;
+}
+
+/* desktop: constrain the player width like the design */
+@media (min-width: 720px) {
+  .app-learn .ln-stage {
+    max-width: 904px;
+    max-height: 508px;
+  }
+  .app-learn .ln-meta {
+    max-width: 904px;
+  }
+}

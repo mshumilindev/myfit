@@ -24,12 +24,13 @@ export function ShellLauncher({
   onRoster,
   onNutrition,
   nutritionEnabled,
+  onLearn,
   onSignOut,
   onClose,
 }: {
   store: StoreState;
   now: number;
-  current: 'gym' | 'apex' | 'roster' | 'nutrition';
+  current: 'gym' | 'apex' | 'roster' | 'nutrition' | 'learn';
   peopleLabel: string;
   peopleDesc: string;
   activeChallenges: number;
@@ -39,6 +40,7 @@ export function ShellLauncher({
   onRoster: () => void;
   onNutrition: () => void;
   nutritionEnabled: boolean;
+  onLearn: () => void;
   onSignOut: () => void;
   onClose: () => void;
 }) {
@@ -144,6 +146,24 @@ export function ShellLauncher({
               <Icon name="caret-right" className="shell-go" />
             )
           ) : null}
+        </button>
+              <button
+          className={`shell-tile${current === 'learn' ? ' current' : ''}`}
+          onClick={onLearn}
+          disabled={current === 'learn'}
+        >
+          <span className="shell-ic shell-ic-learn">
+            <Icon name="graduation-cap" weight="fill" />
+          </span>
+          <div className="shell-tile-main">
+            <div className="shell-tile-name">{t.shellLearn}</div>
+            <div className="shell-tile-sub">{t.shellLearnDesc}</div>
+          </div>
+          {current === 'learn' ? (
+            <span className="shell-current">{t.shellCurrent}</span>
+          ) : (
+            <Icon name="caret-right" className="shell-go" />
+          )}
         </button>
       </div>
       <button className="shell-signout" onClick={() => setConfirmSignOut(true)}>
