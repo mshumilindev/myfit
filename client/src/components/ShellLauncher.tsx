@@ -118,7 +118,9 @@ export function ShellLauncher({
         </button>
 
         <button
-          className={`shell-tile${current === 'nutrition' ? ' current' : ''}`}
+          className={`shell-tile${current === 'nutrition' ? ' current' : ''}${
+            nutritionEnabled ? '' : ' locked'
+          }`}
           onClick={nutritionEnabled ? onNutrition : undefined}
           disabled={!nutritionEnabled || current === 'nutrition'}
         >
