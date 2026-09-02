@@ -126,6 +126,12 @@ const HistoryListView = lazy(() =>
     default: module.HistoryListView,
   })),
 );
+const RecapView = lazy(() =>
+  import('./views/RecapView').then((module) => ({ default: module.RecapView })),
+);
+const RecapStory = lazy(() =>
+  import('./views/RecapView').then((module) => ({ default: module.RecapStory })),
+);
 const GymDetailView = lazy(() =>
   import('./views/GymDetailView').then((module) => ({ default: module.GymDetailView })),
 );
@@ -158,6 +164,8 @@ export type Overlay =
   | { screen: 'settings' }
   | { screen: 'history' }
   | { screen: 'notifications' }
+  | { screen: 'recap'; period: string }
+  | { screen: 'recap-story'; period: string }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
   | { screen: 'library'; libTab?: 'mine' }
@@ -272,6 +280,9 @@ function toHash(
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'notifications') return '#/notifications';
+  if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
+  if (overlay?.screen === 'recap-story')
+    return `#/recap-story/${encodeURIComponent(overlay.period)}`;
   if (tab === 'me') return '#/me';
   return `#/${tab}`;
 }
@@ -313,6 +324,10 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
+  if (head === 'recap' && parts[1])
+    return { tab: 'today', overlay: { screen: 'recap', period: decodeURIComponent(parts[1]) } };
+  if (head === 'recap-story' && parts[1])
+    return { tab: 'today', overlay: { screen: 'recap-story', period: decodeURIComponent(parts[1]) } };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -1171,7 +1186,23 @@ export function App() {
               onSeen={markNotifsSeen}
               onMarkAll={markAllNotifsSeen}
               onClose={closeOverlay}
+              onOpenRecap={(period, story) =>
+                setOverlay({ screen: story ? 'recap-story' : 'recap', period })
+              }
             />
+          )}
+          {activeOverlay?.screen === 'recap' && (
+            <RecapView
+              period={activeOverlay.period}
+              desktop
+              onStory={() =>
+                setOverlay({ screen: 'recap-story', period: activeOverlay.period })
+              }
+              onClose={closeOverlay}
+            />
+          )}
+          {activeOverlay?.screen === 'recap-story' && (
+            <RecapStory period={activeOverlay.period} onClose={closeOverlay} />
           )}
           {activeOverlay?.screen === 'gym' && (
             <GymDetailView

@@ -131,6 +131,10 @@ import { Stack } from '@phosphor-icons/react/Stack';
 import { Medal } from '@phosphor-icons/react/Medal';
 import { FlagBanner } from '@phosphor-icons/react/FlagBanner';
 import { X } from '@phosphor-icons/react/X';
+import { CaretUp } from '@phosphor-icons/react/CaretUp';
+import { CaretDown } from '@phosphor-icons/react/CaretDown';
+import { Wind } from '@phosphor-icons/react/Wind';
+import { HourglassMedium } from '@phosphor-icons/react/HourglassMedium';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
 
@@ -256,21 +260,27 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'flag-banner': FlagBanner,
   x: X,
   'x-circle': XCircle,
+  'caret-up': CaretUp,
+  'caret-down': CaretDown,
+  wind: Wind,
+  'hourglass-medium': HourglassMedium,
 };
 
 export function Icon({
   name,
   className,
   weight = 'bold',
+  style,
 }: {
   name: string;
   className?: string;
   weight?: IconProps['weight'];
+  style?: CSSProperties;
 }) {
   const Glyph = ICONS[name];
   const classes = ['ui-icon', className].filter(Boolean).join(' ');
   return (
-    <i className={classes} aria-hidden>
+    <i className={classes} aria-hidden style={style}>
       {Glyph ? <Glyph size="1em" weight={weight} /> : null}
     </i>
   );

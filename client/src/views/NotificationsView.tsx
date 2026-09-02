@@ -11,6 +11,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
+import { RecapBlock } from '../components/RecapBlock';
 import { isSeen, notifTime, type Notif, type NotifKind, type NotifState } from '../notifications';
 
 const KIND_ICON: Record<NotifKind, string> = {
@@ -57,6 +58,7 @@ export function NotificationsView({
   onClose,
   embedded,
   title,
+  onOpenRecap,
 }: {
   notifs: Notif[];
   now: number;
@@ -67,6 +69,7 @@ export function NotificationsView({
   /** In Apex the feed is a tab, not an overlay — no back button. */
   embedded?: boolean;
   title?: string;
+  onOpenRecap?: (period: string, story: boolean) => void;
 }) {
   const { t, locale } = useT();
   const [limit, setLimit] = useState(PAGE);
@@ -137,6 +140,8 @@ export function NotificationsView({
           </button>
         )}
       </div>
+
+      {onOpenRecap && <RecapBlock onOpen={onOpenRecap} />}
 
       {notifs.length === 0 ? (
         <div className="notif-empty">
