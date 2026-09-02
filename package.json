@@ -24,8 +24,8 @@
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "npm run build && playwright test",
-    "tutorial:mobile": "node scripts/record-mobile-tutorial.mjs",
-    "tutorial:mobile:first-workout": "node scripts/record-mobile-tutorial.mjs --scenario first-workout",
+    "tutorial:mobile": "node scripts/record-mobile-video.mjs",
+    "tutorial:mobile:first-workout": "node scripts/record-mobile-video.mjs --scenario first-workout",
     "verify:pwa": "npm run build -w client && node scripts/verify-tabbar-safe-area.mjs && node scripts/verify-pwa-autoupdate.mjs",
     "verify:ui": "npm run build -w client && node scripts/verify-pinned-headers.mjs && node scripts/verify-empty-exercise-card.mjs",
     "prepare": "node ./scripts/install-git-hooks.mjs"

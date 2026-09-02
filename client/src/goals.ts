@@ -60,38 +60,40 @@ export const ARCHETYPES_BY_SEX = (sex: 'male' | 'female'): ArchetypeId[] =>
   (Object.keys(ARCHETYPES) as ArchetypeId[]).filter((id) => ARCHETYPES[id].sex === sex);
 
 /** Emphasis for one muscle (default hold). */
-export function emphasisOf(g: FitGoals, f: FocusMuscle): Emphasis {
-  return g.focus?.emphasis[f] ?? 'hold';
+export function emphasisOf(g: FitGoals | undefined, f: FocusMuscle): Emphasis {
+  return g?.focus?.emphasis[f] ?? 'hold';
 }
 
 /** grow / ease muscle lists from the current focus. */
-export function focusLists(g: FitGoals): { grow: FocusMuscle[]; ease: FocusMuscle[] } {
+export function focusLists(g: FitGoals | undefined): { grow: FocusMuscle[]; ease: FocusMuscle[] } {
   const grow: FocusMuscle[] = [];
   const ease: FocusMuscle[] = [];
   for (const f of FOCUS_MUSCLES) {
-    const e = g.focus?.emphasis[f];
+    const e = g?.focus?.emphasis[f];
     if (e === 'grow') grow.push(f);
     else if (e === 'ease') ease.push(f);
   }
   return { grow, ease };
 }
 
-export function focusCounts(g: FitGoals): { grow: number; ease: number; hold: number } {
+export function focusCounts(g: FitGoals | undefined): { grow: number; ease: number; hold: number } {
   const { grow, ease } = focusLists(g);
-  return { grow: grow.length, ease: ease.length, hold: FOCUS_MUSCLES.length - grow.length - ease.length };
+  return {
+    grow: grow.length,
+    ease: ease.length,
+    hold: FOCUS_MUSCLES.length - grow.length - ease.length,
+  };
 }
-
-
 
 /**
  * Coarse-group emphasis folded from the fine focus (grow beats ease beats hold).
  * The volume/radar engines key on MuscleGroup, so a group counts as "grow" if
  * ANY of its sub-regions is set to grow.
  */
-export function groupEmphasis(g: FitGoals): Map<MuscleGroup, Emphasis> {
+export function groupEmphasis(g: FitGoals | undefined): Map<MuscleGroup, Emphasis> {
   const out = new Map<MuscleGroup, Emphasis>();
   for (const f of FOCUS_MUSCLES) {
-    const e = g.focus?.emphasis[f];
+    const e = g?.focus?.emphasis[f];
     if (!e || e === 'hold') continue;
     const grp = focusToGroup(f);
     const prev = out.get(grp);
@@ -114,7 +116,7 @@ const GROW_MEV = 2;
  */
 export function focusAdjustLandmarks<T extends Landmark>(
   base: ReadonlyMap<MuscleGroup, T>,
-  g: FitGoals,
+  g: FitGoals | undefined,
 ): Map<MuscleGroup, T> {
   const emph = groupEmphasis(g);
   const out = new Map<MuscleGroup, T>();
@@ -125,7 +127,12 @@ export function focusAdjustLandmarks<T extends Landmark>(
       continue;
     }
     if (e === 'grow') {
-      out.set(m, { ...lm, mev: lm.mev + GROW_MEV, mav: lm.mav + FOCUS_MAV_DELTA, mrv: lm.mrv + FOCUS_MAV_DELTA });
+      out.set(m, {
+        ...lm,
+        mev: lm.mev + GROW_MEV,
+        mav: lm.mav + FOCUS_MAV_DELTA,
+        mrv: lm.mrv + FOCUS_MAV_DELTA,
+      });
     } else {
       const mev = Math.max(0, lm.mev - 3);
       out.set(m, { ...lm, mev, mav: Math.max(mev, lm.mav - FOCUS_MAV_DELTA) });
