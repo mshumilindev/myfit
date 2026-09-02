@@ -623,6 +623,8 @@ export const en = {
   grpArms: 'Arms',
   grpCore: 'Core',
   focusSummary: (g: number, e: number, h: number) => `${g} grow · ${e} ease · ${h} held`,
+  goalsShapeTitle: 'How your focus shapes training',
+  goalsVolumeTargets: 'Weekly volume targets',
   lastDoneCol: 'Last done',
   never: 'Never',
   clearLabel: 'Clear',

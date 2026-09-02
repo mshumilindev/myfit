@@ -50,6 +50,7 @@ import {
   type TuneSummary,
 } from '../personalize';
 import { volumeWeakPoints, type WeakPoint } from '../weakpoints';
+import { focusAdjustLandmarks } from '../goals';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -268,8 +269,11 @@ export function ProgressView({
   // generic ranges until there's enough data) — used everywhere the zones read.
   const pLandmarks = personalLandmarks(finished, nowTs);
   const tuned = tuneSummary(pLandmarks);
+  // Block focus (Goals) shifts the productive targets: grow raises them, ease
+  // trims them. Layered on top of personalisation; fatigue keeps the raw ranges.
+  const effLandmarks = focusAdjustLandmarks(pLandmarks, store.goals);
   // Zone-coloured volume heatmap for the desktop Volume right column.
-  const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays, pLandmarks);
+  const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays, effLandmarks);
   // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
   const fatMap = muscleFatigue(finished, nowTs, pLandmarks);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
@@ -478,7 +482,7 @@ export function ProgressView({
             grain={volGrain}
             onGrain={setVolGrain}
             rangeDays={rangeDays}
-            landmarks={pLandmarks}
+            landmarks={effLandmarks}
             tuned={tuned}
             desktop={showDesktopDetail}
             deload={deload}

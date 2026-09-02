@@ -587,6 +587,8 @@ export const lt: Strings = {
   grpArms: 'Rankos',
   grpCore: 'Presas',
   focusSummary: (g: number, e: number, h: number) => `${g} auginti · ${e} mažinti · ${h} išlaikyti`,
+  goalsShapeTitle: 'Kaip fokusas veikia treniruotes',
+  goalsVolumeTargets: 'Savaitinės apimties tikslai',
   lastDoneCol: 'Paskutinį kartą',
   never: 'Niekada',
   clearLabel: 'Išvalyti',

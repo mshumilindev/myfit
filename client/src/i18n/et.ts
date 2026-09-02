@@ -575,6 +575,8 @@ export const et: Strings = {
   grpArms: 'Käed',
   grpCore: 'Kõht',
   focusSummary: (g: number, e: number, h: number) => `${g} kasvata · ${e} vähenda · ${h} hoia`,
+  goalsShapeTitle: 'Kuidas fookus kujundab treeningut',
+  goalsVolumeTargets: 'Nädala mahu sihid',
   lastDoneCol: 'Viimati',
   never: 'Mitte kunagi',
   clearLabel: 'Puhasta',

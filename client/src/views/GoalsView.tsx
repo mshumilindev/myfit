@@ -11,8 +11,10 @@ import { useStore } from '../store';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { FocusBodyMap } from '../components/Muscle';
 import { FocusEditor } from './FocusEditor';
-import { focusLists } from '../goals';
+import { focusLists, groupEmphasis, FOCUS_MAV_DELTA } from '../goals';
 import { focusToGroup, type FocusMuscle } from '../data/subregions';
+import { LANDMARKS } from '../volume';
+import type { MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
 import { Icon } from '../ui';
 
@@ -29,6 +31,16 @@ export function GoalsView({
   const { grow, ease } = focusLists(store.goals);
   const hasFocus = grow.length > 0 || ease.length > 0;
   const label = (f: FocusMuscle) => t.subMuscleNames[f] ?? t.muscleGroups[focusToGroup(f)];
+
+  // Weekly volume-target deltas the focus produces (coarse groups; generic base).
+  const volDeltas = [...groupEmphasis(store.goals).entries()]
+    .map(([m, e]) => {
+      const base = LANDMARKS[m as MuscleGroup]?.mav;
+      if (base == null) return null;
+      const to = e === 'grow' ? base + FOCUS_MAV_DELTA : Math.max(0, base - FOCUS_MAV_DELTA);
+      return { m: m as MuscleGroup, from: base, to, grow: e === 'grow' };
+    })
+    .filter((x): x is { m: MuscleGroup; from: number; to: number; grow: boolean } => !!x && x.from !== x.to);
 
   return (
     <div className="screen programs-page programs-author-page programs-has-tabs goals-tab">
@@ -104,6 +116,28 @@ export function GoalsView({
             </button>
           )}
         </section>
+
+        {hasFocus && volDeltas.length > 0 && (
+          <section className="goals-card">
+            <div className="goals-card-head">
+              <span className="goals-card-kicker">{t.goalsShapeTitle}</span>
+            </div>
+            <div className="goals-shape-lbl">{t.goalsVolumeTargets}</div>
+            <div className="goals-vol">
+              {volDeltas.map((d) => (
+                <div className="goals-vol-row" key={d.m}>
+                  <span className="goals-vol-name">{t.muscleGroups[d.m]}</span>
+                  <span className="goals-vol-from">{d.from}</span>
+                  <Icon name="arrow-right" />
+                  <span className={`goals-vol-to ${d.grow ? 'grow' : 'ease'}`}>{d.to}</span>
+                  <span className={`goals-vol-delta ${d.grow ? 'grow' : 'ease'}`}>
+                    {d.grow ? `+${d.to - d.from}` : `−${d.from - d.to}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Long-term goals — next */}
         <section className="goals-card">

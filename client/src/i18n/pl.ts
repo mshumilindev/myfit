@@ -579,6 +579,8 @@ export const pl: Strings = {
   grpArms: 'Ramiona',
   grpCore: 'Brzuch',
   focusSummary: (g: number, e: number, h: number) => `${g} wzrost · ${e} redukcja · ${h} utrzym.`,
+  goalsShapeTitle: 'Jak fokus kształtuje trening',
+  goalsVolumeTargets: 'Tygodniowe cele objętości',
   lastDoneCol: 'Ostatnio',
   never: 'Nigdy',
   clearLabel: 'Wyczyść',

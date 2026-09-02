@@ -580,6 +580,8 @@ export const uk: Strings = {
   grpArms: 'Руки',
   grpCore: 'Кор',
   focusSummary: (g: number, e: number, h: number) => `${g} ріст · ${e} менше · ${h} тримати`,
+  goalsShapeTitle: 'Як фокус впливає на тренування',
+  goalsVolumeTargets: 'Тижневі цілі обʼєму',
   lastDoneCol: 'Востаннє',
   never: 'Ніколи',
   clearLabel: 'Скинути',

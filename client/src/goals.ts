@@ -6,7 +6,9 @@
  * is pure data and helpers only.
  */
 import type { FocusMuscle } from './data/subregions';
-import { FOCUS_MUSCLES } from './data/subregions';
+import { FOCUS_MUSCLES, focusToGroup } from './data/subregions';
+import type { MuscleGroup } from './data/exercises';
+import type { Landmark } from './volume';
 
 export type Emphasis = 'grow' | 'hold' | 'ease';
 
@@ -104,4 +106,56 @@ export function goalProgress(goal: LongTermGoal): number {
   const { from, to, current } = goal.measure;
   if (current == null || to === from) return 0;
   return Math.max(0, Math.min(1, (current - from) / (to - from)));
+}
+
+
+/**
+ * Coarse-group emphasis folded from the fine focus (grow beats ease beats hold).
+ * The volume/radar engines key on MuscleGroup, so a group counts as "grow" if
+ * ANY of its sub-regions is set to grow.
+ */
+export function groupEmphasis(g: FitGoals): Map<MuscleGroup, Emphasis> {
+  const out = new Map<MuscleGroup, Emphasis>();
+  for (const f of FOCUS_MUSCLES) {
+    const e = g.focus?.emphasis[f];
+    if (!e || e === 'hold') continue;
+    const grp = focusToGroup(f);
+    const prev = out.get(grp);
+    if (prev === 'grow') continue;
+    if (e === 'grow') out.set(grp, 'grow');
+    else if (!prev) out.set(grp, 'ease');
+  }
+  return out;
+}
+
+/** Per-grow/ease shift applied to a muscle's weekly set landmarks. */
+export const FOCUS_MAV_DELTA = 4;
+const GROW_MEV = 2;
+
+/**
+ * Apply the block focus to volume landmarks: GROW raises the productive target
+ * (and the floor, so it's flagged sooner); EASE trims it. Generic so it keeps
+ * any extra fields (e.g. personalisation source/confidence). Muscles with no
+ * emphasis pass through untouched.
+ */
+export function focusAdjustLandmarks<T extends Landmark>(
+  base: ReadonlyMap<MuscleGroup, T>,
+  g: FitGoals,
+): Map<MuscleGroup, T> {
+  const emph = groupEmphasis(g);
+  const out = new Map<MuscleGroup, T>();
+  for (const [m, lm] of base) {
+    const e = emph.get(m);
+    if (!e) {
+      out.set(m, lm);
+      continue;
+    }
+    if (e === 'grow') {
+      out.set(m, { ...lm, mev: lm.mev + GROW_MEV, mav: lm.mav + FOCUS_MAV_DELTA, mrv: lm.mrv + FOCUS_MAV_DELTA });
+    } else {
+      const mev = Math.max(0, lm.mev - 3);
+      out.set(m, { ...lm, mev, mav: Math.max(mev, lm.mav - FOCUS_MAV_DELTA) });
+    }
+  }
+  return out;
 }
