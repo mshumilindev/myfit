@@ -2070,4 +2070,61 @@ export const EQUIPMENT_ENRICH: Record<
       { brand: 'Lock-Jaw', name: 'Pro' },
     ],
   },
+
+  // ── Rack attachments / climbing / balance (tranche 6) ──
+  'rack-jhooks': {
+    models: [
+      { brand: 'Rogue', name: 'J-Cups' },
+      { brand: 'REP Fitness', name: 'J-Cups' },
+    ],
+  },
+  'rack-spotter-arms': {
+    models: [
+      { brand: 'Rogue', name: 'Safety Spotter Arms' },
+      { brand: 'REP Fitness', name: 'Spotter Arms' },
+    ],
+  },
+  'rack-safety-straps': {
+    models: [
+      { brand: 'Rogue', name: 'Strap Safety System' },
+      { brand: 'EliteFTS', name: 'Strap Safeties' },
+    ],
+  },
+  'rack-pullup-attach': {
+    models: [
+      { brand: 'Rogue', name: 'Pull-Up Bar Attachment' },
+      { brand: 'REP Fitness', name: 'Pull-Up Bar' },
+    ],
+  },
+  'rack-dip-attach': {
+    models: [
+      { brand: 'Rogue', name: 'Matador Dip' },
+      { brand: 'Titan Fitness', name: 'Dip Attachment' },
+    ],
+  },
+  'rack-plate-horns': {
+    models: [
+      { brand: 'Rogue', name: 'Plate Horns' },
+      { brand: 'REP Fitness', name: 'Plate Storage Posts' },
+    ],
+  },
+  'grip-hangboard': {
+    models: [
+      { brand: 'Beastmaker', name: '1000 / 2000 Series' },
+      { brand: 'Metolius', name: 'Wood Grips / Simulator' },
+      { brand: 'Tension', name: 'Grindstone' },
+    ],
+  },
+  'grip-campus-board': {
+    models: [
+      { brand: 'Metolius', name: 'Wood Rungs' },
+      { brand: 'Tension', name: 'Campus Rungs' },
+    ],
+  },
+  'rec-slackline': {
+    models: [
+      { brand: 'Gibbon', name: 'Classic Line' },
+      { brand: 'Slackline Industries', name: 'Play Line' },
+    ],
+  },
 };
