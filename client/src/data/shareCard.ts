@@ -620,3 +620,154 @@ export async function drawRecapCard(
   ctx.restore();
   ctx.textAlign = 'left';
 }
+
+// ═══ STAT / LIST SHARE CARD (awards · standards) ═════════════════════════════
+// A generic branded card for the Apex surfaces: a big hero number, a headline,
+// and a ranked list of rows (a lead glyph, a name, a right-aligned detail).
+// Rendered offline like the other cards.
+
+export type StatShareFormat = 'story' | 'square';
+
+export const STAT_DIMS: Record<StatShareFormat, { w: number; h: number }> = {
+  story: { w: 1080, h: 1920 },
+  square: { w: 1080, h: 1080 },
+};
+
+export interface StatShareRow {
+  lead: string; // emoji or short glyph (e.g. a rank numeral)
+  name: string;
+  detail: string;
+  accent?: boolean; // draw the detail in brass
+}
+
+export interface StatShareModel {
+  brand: string;
+  kicker: string;
+  headline: string;
+  hero: { value: string; label: string };
+  rows: StatShareRow[];
+  handle: string;
+}
+
+export async function drawStatCard(
+  canvas: HTMLCanvasElement,
+  m: StatShareModel,
+  format: StatShareFormat = 'story',
+): Promise<void> {
+  const { w, h } = STAT_DIMS[format];
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const story = format === 'story';
+  const padX = 96;
+  const innerW = w - padX * 2;
+
+  try {
+    await (document as Document).fonts?.load("400 100px 'Kaushan Script'");
+  } catch {
+    /* font optional */
+  }
+
+  // Ground — warm graphite wash, matching the recap card.
+  const g = ctx.createLinearGradient(0, 0, w * 0.4, h);
+  g.addColorStop(0, '#221d15');
+  g.addColorStop(0.5, C.bgTop);
+  g.addColorStop(1, C.bgBottom);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.strokeStyle = C.panelLine;
+  ctx.lineWidth = 2;
+  roundRect(ctx, 40, 40, w - 80, h - 80, 40);
+  ctx.stroke();
+
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
+
+  // Header: wordmark left · kicker right
+  let y = story ? 172 : 132;
+  ctx.fillStyle = C.text;
+  ctx.font = `400 ${story ? 60 : 52}px 'Kaushan Script', cursive`;
+  ctx.fillText(m.brand, padX, y);
+  ctx.fillStyle = C.brass;
+  ctx.font = `600 24px ${FONT}`;
+  ctx.textAlign = 'right';
+  ctx.save();
+  ctx.letterSpacing = '3px';
+  ctx.fillText(m.kicker.toUpperCase(), padX + innerW, y - (story ? 14 : 12));
+  ctx.restore();
+  ctx.textAlign = 'left';
+
+  // Hero number + label
+  y += story ? 200 : 150;
+  ctx.fillStyle = C.brass;
+  ctx.font = `800 ${story ? 180 : 132}px ${FONT}`;
+  ctx.fillText(m.hero.value, padX, y);
+  y += story ? 46 : 40;
+  ctx.fillStyle = C.muted;
+  ctx.font = `500 26px ${FONT}`;
+  ctx.save();
+  ctx.letterSpacing = '3px';
+  ctx.fillText(ellipsize(ctx, m.hero.label.toUpperCase(), innerW), padX, y);
+  ctx.restore();
+
+  // Headline
+  y += story ? 60 : 50;
+  ctx.fillStyle = C.text;
+  ctx.font = `700 ${story ? 40 : 34}px ${FONT}`;
+  ctx.fillText(ellipsize(ctx, m.headline, innerW), padX, y);
+
+  // Rows list
+  const footerBaseline = h - (story ? 96 : 60);
+  const rowH = story ? 104 : 88;
+  const maxRows = Math.min(
+    m.rows.length,
+    Math.floor((footerBaseline - (story ? 60 : 44) - (y + 48)) / rowH),
+  );
+  y += story ? 44 : 34;
+  for (const row of m.rows.slice(0, Math.max(0, maxRows))) {
+    roundRect(ctx, padX, y, innerW, rowH - (story ? 16 : 14), 22);
+    ctx.fillStyle = C.panel;
+    ctx.fill();
+    ctx.strokeStyle = C.panelLine;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    const midY = y + (rowH - (story ? 16 : 14)) / 2;
+    ctx.textBaseline = 'middle';
+    // lead glyph (emoji / numeral)
+    ctx.font = `400 ${story ? 44 : 38}px ${FONT}`;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = C.text;
+    ctx.fillText(row.lead, padX + 28, midY + 2);
+    // name
+    ctx.font = `600 ${story ? 34 : 30}px ${FONT}`;
+    ctx.fillStyle = C.text;
+    const detailW = (() => {
+      ctx.save();
+      ctx.font = `700 ${story ? 32 : 28}px ${FONT}`;
+      const wd = ctx.measureText(row.detail).width;
+      ctx.restore();
+      return wd;
+    })();
+    ctx.fillText(ellipsize(ctx, row.name, innerW - 110 - detailW - 60), padX + 100, midY + 2);
+    // detail (right)
+    ctx.font = `700 ${story ? 32 : 28}px ${FONT}`;
+    ctx.fillStyle = row.accent ? C.brass : C.muted;
+    ctx.textAlign = 'right';
+    ctx.fillText(row.detail, padX + innerW - 28, midY + 2);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    y += rowH;
+  }
+
+  // Footer handle
+  ctx.fillStyle = C.faint;
+  ctx.font = `600 24px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.save();
+  ctx.letterSpacing = '3px';
+  ctx.fillText(m.handle.toUpperCase(), w / 2, footerBaseline);
+  ctx.restore();
+  ctx.textAlign = 'left';
+}
