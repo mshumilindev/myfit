@@ -4468,18 +4468,6 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     info: 'Weighted step used on the pool floor for water aerobics.',
     aka: ['water step'],
   },
-  // extra cardio
-  {
-    id: 'cardio-jacobs-ladder',
-    name: "Jacob's ladder",
-    category: 'cardio',
-    cls: 'other',
-    muscles: ['cardio', 'fullbody', 'back'],
-    brands: ['Jacobs Ladder', 'Matrix'],
-    loadType: 'none',
-    info: 'Self-paced inclined climbing ladder — full-body low-impact cardio.',
-    aka: ['climbing ladder cardio', 'jacob ladder'],
-  },
   {
     id: 'cardio-treadclimber',
     name: 'Treadclimber / incline stepper-mill',
