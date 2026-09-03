@@ -1,5 +1,5 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   estimatedOneRepMaxSet,
   setBestE1rm,
@@ -98,6 +98,16 @@ export function ProgressView({
   const setPtab = onSub;
   const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
+  // The muscle you're training RIGHT NOW should already show on the fatigue /
+  // readiness maps — include the active (unfinished) session's logged sets so
+  // it doesn't vanish until the workout is finished.
+  const mapWorkouts = useMemo(() => {
+    const live = store.workouts.filter(
+      (w) => w.finishedAt === null && w.exercises.some((e) => e.sets.length > 0),
+    );
+    return live.length ? [...finished, ...live] : finished;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.workouts]);
   const openMuscleHistory = (muscle: MuscleGroup) =>
     shell.openOverlay({ screen: 'muscle-history', muscle });
 
@@ -275,7 +285,7 @@ export function ProgressView({
   // Zone-coloured volume heatmap for the desktop Volume right column.
   const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays, effLandmarks);
   // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
-  const fatMap = muscleFatigue(finished, nowTs, pLandmarks);
+  const fatMap = muscleFatigue(mapWorkouts, nowTs, pLandmarks);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
   for (const f of fatMap.values()) if (f.sets > 0) fatColors[f.muscle] = FATIGUE_COLOR[f.level];
   const deload = deloadSuggestion(fatMap, activityRecoveryBias(store.activities, nowTs));
@@ -477,6 +487,7 @@ export function ProgressView({
         {seg === 'volume' && (
           <VolumePanel
             finished={finished}
+            mapWorkouts={mapWorkouts}
             nowTs={nowTs}
             t={t}
             grain={volGrain}
@@ -632,7 +643,7 @@ export function ProgressView({
             </div>
           </div>
           {lens === 'readiness' ? (
-            <ReadinessLens finished={finished} now={nowTs} view="map" />
+            <ReadinessLens finished={mapWorkouts} now={nowTs} view="map" />
           ) : (
             <>
               <MuscleHeatmap colors={lens === 'fatigue' ? fatColors : volHeat} />
@@ -1052,8 +1063,10 @@ function VolumePanel({
   fatColors,
   mapView,
   onMapView,
+  mapWorkouts,
 }: {
   finished: Workout[];
+  mapWorkouts: Workout[];
   nowTs: number;
   t: T;
   grain: 'fine' | 'zones';
@@ -1188,7 +1201,7 @@ function VolumePanel({
 
       {lens === 'readiness' ? (
         <ReadinessLens
-          finished={finished}
+          finished={mapWorkouts}
           now={nowTs}
           view={!desktop && mapView ? 'map' : 'list'}
         />

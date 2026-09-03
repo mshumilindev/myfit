@@ -98,7 +98,10 @@ export function muscleReadiness(
   const since = now - LOOKBACK_DAYS * DAY;
   // Most-recent-first, so the first hit per muscle is its last session.
   const recent = finished
-    .filter((w) => w.finishedAt !== null && w.startedAt >= since)
+    // finishedAt not required, so an in-progress session's logged sets count
+    // for callers that pass them (e.g. the Progress maps); finished-only callers
+    // are unaffected since their input has no in-progress workouts.
+    .filter((w) => w.startedAt >= since)
     .sort((a, b) => b.startedAt - a.startedAt);
 
   const last = new Map<MuscleGroup, { daysSince: number; dose: number }>();
