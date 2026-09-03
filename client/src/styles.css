@@ -25513,7 +25513,7 @@ button.badge {
 .rc-topbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 4px 4px 10px;
 }
 .rc-hero-band {

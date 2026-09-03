@@ -316,9 +316,9 @@ export function RecapView({
         <button className="back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
-        <span style={{ flex: 1, fontSize: 14, color: 'var(--color-neutral-400)' }}>
+        <h2 className="title-26" style={{ flex: 1, minWidth: 0 }}>
           {t.rcRecap}
-        </span>
+        </h2>
         <button className="rc-icon-btn" onClick={onStory} aria-label={t.rcPlayStory}>
           <Icon name="cards" />
         </button>
