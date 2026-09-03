@@ -4574,7 +4574,7 @@ i > svg {
 .hist-head {
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .hist-head .back {
@@ -13260,16 +13260,20 @@ h6 {
 .exlib-top {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 10px;
 }
 
 .exlib-top .back {
+  width: 34px;
+  height: 34px;
   background: none;
   border: none;
+  border-radius: var(--radius-md);
   color: var(--color-neutral-300);
-  font-size: 20px;
+  font-size: 19px;
   cursor: pointer;
   padding: 4px;
+  margin-left: -6px;
 }
 
 .exlib-sub {
@@ -14682,8 +14686,8 @@ button.exd-media {
    ========================================================================== */
 .settings-view .hist-head {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
+  align-items: center;
+  gap: 10px;
 }
 .settings-sub {
   font-size: 12px;
@@ -14777,8 +14781,8 @@ button.exd-media {
 }
 .hist-list .hist-head {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
+  align-items: center;
+  gap: 10px;
 }
 .hist-list-sub {
   font-size: 12px;
@@ -23842,7 +23846,7 @@ button.badge {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 .ch-count {
   font-size: 13px;
@@ -24791,7 +24795,7 @@ button.badge {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 4px 16px calc(72px + env(safe-area-inset-bottom, 0px));
+  padding: 4px 20px calc(72px + env(safe-area-inset-bottom, 0px));
 }
 .apex-page {
   display: flex;
@@ -24803,7 +24807,7 @@ button.badge {
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  padding: 4px 4px 6px;
+  padding: 4px 0 6px;
 }
 .apex-title-sub {
   font-size: 13px;
