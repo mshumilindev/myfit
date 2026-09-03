@@ -2339,4 +2339,42 @@ export const EQUIPMENT_ENRICH: Record<
       { brand: '5.11', name: 'TacTec Plate' },
     ],
   },
+
+  // ── Hydrotherapy / testing / gymnastics (tranche 10) ──
+  'aqua-underwater-treadmill': {
+    models: [
+      { brand: 'HydroWorx', name: '300 / 500' },
+      { brand: 'SwimEx', name: 'Aquatic Treadmill' },
+    ],
+  },
+  'test-metabolic-cart': {
+    models: [
+      { brand: 'COSMED', name: 'K5 / Quark' },
+      { brand: 'PNOE', name: 'Metabolic Analyzer' },
+    ],
+  },
+  'test-goniometer': {
+    models: [
+      { brand: 'Baseline', name: 'Goniometer' },
+      { brand: 'Jamar', name: 'Goniometer' },
+    ],
+  },
+  'gym-balance-beam': {
+    models: [
+      { brand: 'AAI', name: 'Competition Beam' },
+      { brand: "Norbert's Athletic", name: 'Training Beam' },
+    ],
+  },
+  'box-slip-bag': {
+    models: [
+      { brand: 'Ringside', name: 'Maize Bag' },
+      { brand: 'Cleto Reyes', name: 'Slip Bag' },
+    ],
+  },
+  'cond-tornado-ball': {
+    models: [
+      { brand: 'Power Systems', name: 'Tornado Ball' },
+      { brand: 'Rogue', name: 'Rope Med Ball' },
+    ],
+  },
 };
