@@ -223,6 +223,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'EliteFTS'],
     loadType: 'plate',
     info: 'Gentle arc reduces shoulder strain under the bar.',
+    aka: ['buffalo bar', 'bow bar'],
   },
   {
     id: 'barbell-technique',
@@ -426,6 +427,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['PRx Performance', 'Rogue'],
     loadType: 'none',
     info: 'Folds flat to the wall — home-gym space saver.',
+    aka: ['fold back rack', 'wall mounted rack', 'folding rack'],
   },
 
   // ─── Benches & supports ─────────────────────────────────────────────────────
@@ -759,6 +761,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: B.sel,
     loadType: 'selectorized',
     info: 'Resisted trunk rotation for the obliques.',
+    aka: ['torso rotation', 'rotary torso', 'oblique machine'],
   },
   {
     id: 'm-back-extension',
@@ -791,6 +794,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Nautilus'],
     loadType: 'selectorized',
     info: 'Trains the neck through flexion, extension and lateral flexion.',
+    aka: ['neck machine', 'four way neck'],
   },
 
   // ─── Plate-loaded / iso-lateral ("Hammer") ─────────────────────────────────
@@ -913,6 +917,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: B.hs,
     loadType: 'plate',
     info: 'Heavy chest-supported rowing.',
+    aka: ['plate loaded row', 'seated row plate'],
   },
   {
     id: 'hs-deadlift-machine',
@@ -980,6 +985,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'REP Fitness'],
     loadType: 'plate',
     info: 'Cable pulleys built into a power rack.',
+    aka: ['crossover cage', 'rack cable'],
   },
 
   // ─── Cardio ─────────────────────────────────────────────────────────────────
@@ -1113,6 +1119,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Jacobs Ladder'],
     loadType: 'none',
     info: 'Self-paced climbing ladder at a forward angle.',
+    aka: ['jacobs ladder', 'climbing ladder'],
   },
   {
     id: 'cardio-vertical-climber',
@@ -1272,6 +1279,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Strikes for rotational power and conditioning.',
+    aka: ['sledgehammer', 'tire', 'tire flip'],
   },
   {
     id: 'cond-farmers-handles',
@@ -1405,6 +1413,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Versa Gripps', 'SBD'],
     loadType: 'none',
     info: 'Secures grip on heavy pulls.',
+    aka: ['lifting straps', 'wrist straps', 'olympic straps'],
   },
   {
     id: 'acc-chalk',
@@ -1426,6 +1435,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'PRIME Fitness'],
     loadType: 'none',
     info: 'Wide/neutral cable attachment for pulldowns.',
+    aka: ['lat bar', 'pulldown bar'],
   },
   {
     id: 'acc-row-handle',
@@ -1436,6 +1446,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'PRIME Fitness'],
     loadType: 'none',
     info: 'Close-grip cable attachment for rows and pulldowns.',
+    aka: ['v handle', 'v bar', 'row handle'],
   },
   {
     id: 'acc-rope',
@@ -1446,6 +1457,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Cable rope for pushdowns, face-pulls and curls.',
+    aka: ['tricep rope', 'rope attachment', 'pushdown rope'],
   },
   {
     id: 'acc-ez-cable-bar',
@@ -1456,6 +1468,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Angled cable attachment for curls and pushdowns.',
+    aka: ['ez cable bar', 'curl attachment'],
   },
   {
     id: 'acc-ankle-strap',
@@ -1466,6 +1479,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Spud Inc'],
     loadType: 'none',
     info: 'Kickbacks, abductions and cable leg work.',
+    aka: ['ankle cuff', 'cable ankle strap', 'kickback strap'],
   },
   {
     id: 'acc-fat-grips',
@@ -1498,6 +1512,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Hampton'],
     loadType: 'none',
     info: 'Cushions the bar across the hips for thrusts.',
+    aka: ['barbell pad', 'hip thrust pad', 'squat pad'],
   },
   {
     id: 'acc-landmine-attach',
@@ -1508,6 +1523,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'PRIME Fitness'],
     loadType: 'none',
     info: 'T-bar/row and press handles for the landmine.',
+    aka: ['landmine handle', 'landmine row handle'],
   },
 
   // ─── Recovery & mobility ────────────────────────────────────────────────────
@@ -1553,6 +1569,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Manduka', 'Rogue'],
     loadType: 'none',
     info: 'Floor mat for mobility, core and stretching.',
+    aka: ['exercise mat', 'yoga mat', 'stretching mat'],
   },
   {
     id: 'rec-mobility-bands',
@@ -1563,6 +1580,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['RockTape', 'Rogue'],
     loadType: 'none',
     info: 'Compression flossing and joint distraction.',
+    aka: ['voodoo bands', 'floss bands', 'compression bands'],
   },
   // ─── Barbells & specialty bars (more) ───────────────────────────────────────
   {
@@ -1585,6 +1603,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Ivanko'],
     loadType: 'plate',
     info: 'Deeper bend than an EZ bar for a longer biceps stretch.',
+    aka: ['cambered curl bar', 'ez curl cambered'],
   },
   {
     id: 'barbell-tsunami',
@@ -1606,6 +1625,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Eleiko'],
     loadType: 'plate',
     info: 'Shorter, lighter bar for youth and light technique work.',
+    aka: ['youth bar', 'junior bar', '10kg bar'],
   },
   {
     id: 'barbell-curl-fixed',
@@ -1616,6 +1636,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Ivanko', 'Body-Solid'],
     loadType: 'fixed',
     info: 'Pre-weighted EZ bars on a rack.',
+    aka: ['fixed curl bars', 'preloaded curl bar'],
   },
   {
     id: 'barbell-viking-press',
@@ -1626,6 +1647,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'plate',
     info: 'Neutral-grip landmine press unit for strongman overhead.',
+    aka: ['viking press', 'landmine viking'],
   },
 
   // ─── Free weights (more) ────────────────────────────────────────────────────
@@ -1638,6 +1660,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Technogym', 'Life Fitness'],
     loadType: 'fixed',
     info: 'Light coated dumbbells for classes and toning.',
+    aka: ['vinyl dumbbells', 'studio dumbbells', 'aerobic dumbbells'],
   },
   {
     id: 'dumbbell-urethane',
@@ -1648,6 +1671,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness', 'Escape', 'Eleiko'],
     loadType: 'fixed',
     info: 'Durable, quiet, floor-friendly commercial dumbbells.',
+    aka: ['urethane dumbbells', 'commercial dumbbells'],
   },
   {
     id: 'dumbbell-spinlock',
@@ -1658,6 +1682,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['York', 'Body-Solid'],
     loadType: 'plate',
     info: 'Threaded handles with collars for loadable dumbbells.',
+    aka: ['spinlock dumbbells', 'screw collar dumbbell'],
   },
   {
     id: 'kettlebell-urethane',
@@ -1668,6 +1693,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Life Fitness'],
     loadType: 'fixed',
     info: 'Coated bells that protect the floor.',
+    aka: ['urethane kettlebell', 'rubber kettlebell'],
   },
   {
     id: 'weight-fixed-bar',
@@ -1678,6 +1704,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Body-Solid', 'Technogym'],
     loadType: 'fixed',
     info: 'Padded fixed bars for group classes.',
+    aka: ['weighted bar', 'studio bar', 'aerobic bar'],
   },
   {
     id: 'plate-tri-grip',
@@ -1699,6 +1726,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness', 'Eleiko', 'Escape'],
     loadType: 'plate',
     info: 'Encased plates — commercial, quiet, durable.',
+    aka: ['urethane plates', 'commercial plates'],
   },
   {
     id: 'plate-micro',
@@ -1744,6 +1772,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Eleiko'],
     loadType: 'none',
     info: 'Stackable blocks to drop and press from height.',
+    aka: ['jerk blocks'],
   },
   {
     id: 'rack-pulling-blocks',
@@ -1754,6 +1783,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'none',
     info: 'Elevate the bar for partial/deficit pulls.',
+    aka: ['pulling blocks', 'pull blocks'],
   },
   {
     id: 'rack-lifting-platform',
@@ -1775,6 +1805,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'none',
     info: 'Lifts a loaded bar to slide plates on and off.',
+    aka: ['deadlift jack', 'bar jack'],
   },
   {
     id: 'rack-rig',
@@ -1798,6 +1829,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness', 'Hammer Strength'],
     loadType: 'none',
     info: 'Upright back pad for heavy seated overhead pressing.',
+    aka: ['shoulder press bench', 'vertical bench', 'military bench'],
   },
   {
     id: 'bench-olympic',
@@ -1808,6 +1840,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Body-Solid', 'Hammer Strength'],
     loadType: 'none',
     info: 'Self-contained bench + bar cradle.',
+    aka: ['olympic bench', 'bench with uprights', 'competition bench'],
   },
   {
     id: 'bench-seal-row',
@@ -1829,6 +1862,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'bodyweight',
     info: 'Anchors the ankles for Nordic curls.',
+    aka: ['nordic bench', 'nordic curl bench', 'hamstring bench'],
   },
   {
     id: 'bench-captains-chair',
@@ -1863,6 +1897,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness', 'Technogym', 'Cybex'],
     loadType: 'selectorized',
     info: 'Upper-chest biased guided press.',
+    aka: ['incline press machine', 'incline chest machine'],
   },
   {
     id: 'm-decline-press',
@@ -1873,6 +1908,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Cybex', 'Hammer Strength'],
     loadType: 'selectorized',
     info: 'Lower-chest biased guided press.',
+    aka: ['decline press machine', 'decline chest machine'],
   },
   {
     id: 'm-converging-press',
@@ -1883,6 +1919,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Cybex (Eagle)', 'Life Fitness'],
     loadType: 'selectorized',
     info: 'Arms converge as you press for a peak-contraction squeeze.',
+    aka: ['converging chest press', 'iso press'],
   },
   {
     id: 'm-seated-dip',
@@ -1893,6 +1930,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness', 'Cybex'],
     loadType: 'selectorized',
     info: 'Guided dip pattern, seated.',
+    aka: ['seated dip', 'dip machine'],
   },
   {
     id: 'm-front-raise',
@@ -1903,6 +1941,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Panatta'],
     loadType: 'selectorized',
     info: 'Isolates the front delts.',
+    aka: ['front raise machine', 'front delt machine'],
   },
   {
     id: 'm-shrug',
@@ -1913,6 +1952,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Loaded shrugs without holding a bar.',
+    aka: ['shrug machine', 'trap machine'],
   },
   {
     id: 'm-cable-crunch-station',
@@ -1923,6 +1963,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness', 'Technogym'],
     loadType: 'selectorized',
     info: 'Kneeling or seated loaded trunk flexion.',
+    aka: ['ab crunch machine', 'cable crunch'],
   },
   {
     id: 'm-oblique',
@@ -1933,6 +1974,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Panatta', 'Technogym'],
     loadType: 'selectorized',
     info: 'Resisted lateral flexion for the obliques.',
+    aka: ['oblique machine', 'side bend machine'],
   },
   {
     id: 'm-multi-hip',
@@ -1954,6 +1996,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Technogym', 'Panatta'],
     loadType: 'selectorized',
     info: 'Single-leg standing hamstring curl.',
+    aka: ['standing leg curl', 'standing hamstring curl'],
   },
   {
     id: 'm-single-leg-press',
@@ -1964,6 +2007,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Cybex', 'Hammer Strength'],
     loadType: 'plate',
     info: 'Unilateral leg pressing.',
+    aka: ['single leg press', 'unilateral leg press'],
   },
   {
     id: 'm-tibialis',
@@ -1974,6 +2018,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Tib Bar Guy', 'Panatta'],
     loadType: 'plate',
     info: 'Trains the shin (tibialis anterior) for knee health.',
+    aka: ['tibialis machine', 'tib bar', 'shin machine'],
   },
   {
     id: 'm-wrist-forearm',
@@ -1984,6 +2029,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Panatta', 'IronMind'],
     loadType: 'plate',
     info: 'Loaded wrist flexion/extension.',
+    aka: ['forearm machine', 'wrist curl machine'],
   },
   {
     id: 'm-hip-thrust',
@@ -2005,6 +2051,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Technogym', 'Keiser'],
     loadType: 'selectorized',
     info: 'Standing anti-rotation / rotation core station.',
+    aka: ['functional core trainer', 'rotary trainer', 'kinesis'],
   },
 
   // ─── Plate-loaded / iso-lateral (more) ──────────────────────────────────────
@@ -2017,6 +2064,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength'],
     loadType: 'plate',
     info: 'Lower-chest biased plate-loaded press.',
+    aka: ['iso decline', 'hammer decline'],
   },
   {
     id: 'hs-iso-lowrow',
@@ -2027,6 +2075,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength'],
     loadType: 'plate',
     info: 'Low-to-high pulling angle, independent arms.',
+    aka: ['iso low row', 'hammer low row'],
   },
   {
     id: 'hs-iso-frontlat',
@@ -2037,6 +2086,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength'],
     loadType: 'plate',
     info: 'Front-facing plate-loaded pulldown.',
+    aka: ['iso front lat', 'hammer front pulldown'],
   },
   {
     id: 'hs-iso-biceps',
@@ -2047,6 +2097,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Preacher-style plate-loaded curl.',
+    aka: ['plate loaded curl', 'iso biceps'],
   },
   {
     id: 'hs-iso-triceps',
@@ -2057,6 +2108,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Seated dip/extension, plate-loaded.',
+    aka: ['plate loaded triceps', 'iso triceps'],
   },
   {
     id: 'hs-ground-base',
@@ -2067,6 +2119,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength'],
     loadType: 'plate',
     info: 'Standing pivoting press/jammer for athletic power.',
+    aka: ['ground base', 'jammer', 'squat press'],
   },
   {
     id: 'hs-super-row',
@@ -2077,6 +2130,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Panatta', 'Watson'],
     loadType: 'plate',
     info: 'Wide chest-supported rowing.',
+    aka: ['super row', 'wide row plate'],
   },
   {
     id: 'hs-plate-pullover',
@@ -2087,6 +2141,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Panatta', 'Nautilus'],
     loadType: 'plate',
     info: 'Big-arc lat pullover, plate-loaded.',
+    aka: ['plate loaded pullover'],
   },
   {
     id: 'hs-plate-calf',
@@ -2097,6 +2152,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Standing or donkey calf raise.',
+    aka: ['plate loaded calf', 'calf raise plate'],
   },
   {
     id: 'hs-linear-leg-press',
@@ -2107,6 +2163,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Seated straight-line leg press.',
+    aka: ['linear leg press', 'horizontal leg press'],
   },
   {
     id: 'hs-seated-leg-press',
@@ -2117,6 +2174,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Cybex', 'Life Fitness'],
     loadType: 'selectorized',
     info: 'Upright seated press with a natural path.',
+    aka: ['seated leg press', 'cybex eagle leg press'],
   },
   {
     id: 'hs-plate-shrug',
@@ -2127,6 +2185,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Heavy loaded shrugs on a fixed path.',
+    aka: ['plate shrug', 'deadlift shrug'],
   },
 
   // ─── Cable attachments ──────────────────────────────────────────────────────
@@ -2139,6 +2198,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['MAG Grip', 'PRIME Fitness'],
     loadType: 'none',
     info: 'Ergonomic neutral pulldown/row grips.',
+    aka: ['mag grips', 'multi angle grip'],
   },
   {
     id: 'acc-d-handle',
@@ -2149,6 +2209,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'PRIME Fitness'],
     loadType: 'none',
     info: 'Single-arm cable handle for rows, curls, flyes.',
+    aka: ['single handle', 'stirrup handle', 'd handle'],
   },
   {
     id: 'acc-straight-bar',
@@ -2159,6 +2220,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Pushdowns and cable curls.',
+    aka: ['straight bar', 'cable straight bar'],
   },
   {
     id: 'acc-triangle',
@@ -2169,6 +2231,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Neutral close-grip rows and pulldowns.',
+    aka: ['close grip handle', 'triangle handle', 'v grip'],
   },
   {
     id: 'acc-multi-grip-row',
@@ -2179,6 +2242,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['PRIME Fitness'],
     loadType: 'none',
     info: 'Several grip widths/angles in one handle.',
+    aka: ['row handle', 'multi grip handle'],
   },
   {
     id: 'acc-stirrup',
@@ -2189,6 +2253,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Soft single handle for functional cable work.',
+    aka: ['stirrup handle', 'sports handle'],
   },
 
   // ─── Cardio (more) ──────────────────────────────────────────────────────────
@@ -2212,6 +2277,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Technogym', 'Matrix'],
     loadType: 'motorized',
     info: 'Quiet magnetic-resistance rowing.',
+    aka: ['magnetic rower', 'home rower'],
   },
   {
     id: 'cardio-assault-runner',
@@ -2222,6 +2288,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Woodway (Curve)', 'Assault (Runner)', 'TrueForm'],
     loadType: 'none',
     info: 'Push-driven curved runner for sprints and pushes.',
+    aka: ['sled treadmill', 'manual runner', 'assault runner'],
   },
   {
     id: 'cardio-ube',
@@ -2265,6 +2332,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Helix', 'Life Fitness'],
     loadType: 'motorized',
     info: 'Side-to-side motion targeting the glutes and hips.',
+    aka: ['lateral trainer', 'glute trainer', 'helix'],
   },
   {
     id: 'cardio-skillmill',
@@ -2288,6 +2356,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['EliteFTS', 'Rogue'],
     loadType: 'none',
     info: 'Anchor to the bar for accommodating resistance.',
+    aka: ['deadlift bands', 'bar tension bands', 'strength bands'],
   },
   {
     id: 'band-pegs',
@@ -2298,6 +2367,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'EliteFTS'],
     loadType: 'none',
     info: 'Rack pegs to anchor bands for squats and bench.',
+    aka: ['band pegs', 'band attachment'],
   },
   {
     id: 'aid-slingshot',
@@ -2330,6 +2400,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Inzer', 'SBD'],
     loadType: 'none',
     info: 'Stiff wraps for maximal geared squats.',
+    aka: ['knee wrap'],
   },
   {
     id: 'aid-wrist-wraps',
@@ -2351,6 +2422,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SBD', 'Rehband'],
     loadType: 'none',
     info: 'Compression and warmth for pressing.',
+    aka: ['elbow sleeve'],
   },
 
   // ─── Suspension / gymnastics / rig (more) ───────────────────────────────────
@@ -2363,6 +2435,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'bodyweight',
     info: 'Climb by moving pegs — grip and pulling strength.',
+    aka: ['peg board', 'pegboard'],
   },
   {
     id: 'gym-climbing-rope',
@@ -2373,6 +2446,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'bodyweight',
     info: 'Rope climbs for grip and pulling power.',
+    aka: ['climbing rope', 'rope climb'],
   },
   {
     id: 'gym-monkey-bars',
@@ -2383,6 +2457,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'bodyweight',
     info: 'Overhead traversing for grip and shoulders.',
+    aka: ['monkey bars', 'traverse bars'],
   },
   {
     id: 'gym-salmon-ladder',
@@ -2393,6 +2468,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'bodyweight',
     info: 'Explosive pull-up-to-rung ladder.',
+    aka: ['salmon ladder', 'ninja ladder'],
   },
   {
     id: 'gym-nordic-anchor',
@@ -2403,6 +2479,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Kboo'],
     loadType: 'bodyweight',
     info: 'Door/rack anchor for Nordic curls.',
+    aka: ['nordic anchor', 'nordic curl strap', 'ghr strap'],
   },
 
   // ─── Strongman / conditioning (more) ────────────────────────────────────────
@@ -2437,6 +2514,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Slater'],
     loadType: 'fixed',
     info: 'Awkward liquid/loaded keg for carries and press.',
+    aka: ['strongman keg', 'keg'],
   },
   {
     id: 'cond-circus-db',
@@ -2447,6 +2525,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Cerberus'],
     loadType: 'plate',
     info: 'Giant thick-handled dumbbell for one-arm overhead.',
+    aka: ['circus dumbbell', 'circus db'],
   },
   {
     id: 'cond-husafell',
@@ -2457,6 +2536,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'fixed',
     info: 'Front-loaded carry for the whole body.',
+    aka: ['husafell stone', 'husafell bag', 'carry plate'],
   },
   {
     id: 'cond-conans-wheel',
@@ -2467,6 +2547,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'plate',
     info: 'Rotational or dragged loaded strongman event.',
+    aka: ['conans wheel', 'arm over arm'],
   },
   {
     id: 'cond-mace',
@@ -2510,6 +2591,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Dynamax'],
     loadType: 'fixed',
     info: 'Soft heavy ball for lifts, carries and over-shoulder throws.',
+    aka: ['dead ball', 'soft atlas ball', 'slam ball soft'],
   },
   {
     id: 'cond-agility-ladder',
@@ -2520,6 +2602,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SKLZ', 'Perform Better'],
     loadType: 'none',
     info: 'Footwork and speed drills.',
+    aka: ['agility ladder', 'speed ladder', 'footwork ladder'],
   },
   {
     id: 'cond-hurdles',
@@ -2530,6 +2613,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SKLZ', 'Perform Better'],
     loadType: 'none',
     info: 'Jumps and drills for power and coordination.',
+    aka: ['hurdles', 'plyo hurdles', 'speed hurdles'],
   },
   {
     id: 'cond-aerobic-step',
@@ -2564,6 +2648,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['IronMind', 'Rogue'],
     loadType: 'plate',
     info: 'Pinch-hold training for thumb and grip.',
+    aka: ['pinch block', 'grip plate', 'pinch grip'],
   },
   {
     id: 'grip-wrist-roller',
@@ -2574,6 +2659,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'IronMind'],
     loadType: 'plate',
     info: 'Roll a hanging weight up and down for forearms.',
+    aka: ['wrist roller', 'forearm roller'],
   },
   {
     id: 'grip-thick-handle',
@@ -2584,6 +2670,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'IronMind'],
     loadType: 'plate',
     info: 'Fat-handled dumbbell/loading pin for grip.',
+    aka: ['fat bar handle', 'thick handle', 'loadable fat grip'],
   },
   {
     id: 'grip-hub',
@@ -2594,6 +2681,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['IronMind'],
     loadType: 'fixed',
     info: 'Pinch-lift blocks and hub-grip plates.',
+    aka: ['hub weight', 'block weight', 'plate hub'],
   },
 
   // ─── Recovery & mobility (more) ─────────────────────────────────────────────
@@ -2628,6 +2716,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['TriggerPoint', 'The Stick'],
     loadType: 'none',
     info: 'Handheld roller for rolling out limbs.',
+    aka: ['muscle roller stick', 'massage stick', 'the stick'],
   },
   {
     id: 'rec-inversion-table',
@@ -2649,6 +2738,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['HigherDOSE', 'Finnleo'],
     loadType: 'none',
     info: 'Heat exposure for recovery and relaxation.',
+    aka: ['sauna', 'infrared sauna', 'steam room'],
   },
   {
     id: 'rec-cold-plunge',
@@ -2704,6 +2794,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'PRIME Fitness'],
     loadType: 'none',
     info: 'Long cambered bar for wide-grip pulldowns.',
+    aka: ['wide lat bar', 'pulldown bar wide'],
   },
   {
     id: 'acc-lat-bar-short',
@@ -2714,6 +2805,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Close neutral-grip pulldown bar.',
+    aka: ['neutral grip lat bar', 'short lat bar'],
   },
   {
     id: 'acc-pushdown-bar',
@@ -2724,6 +2816,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Short angled bar for pushdowns.',
+    aka: ['pushdown bar', 'tricep bar'],
   },
   {
     id: 'acc-revolving-curl-bar',
@@ -2734,6 +2827,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Spinning EZ cable bar for curls.',
+    aka: ['revolving curl bar', 'cable curl bar'],
   },
   {
     id: 'acc-double-d',
@@ -2744,6 +2838,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Life Fitness'],
     loadType: 'none',
     info: 'Neutral close-grip rowing handle.',
+    aka: ['double d handle', 'seated row handle', 'low row handle'],
   },
   {
     id: 'acc-rotating-handle',
@@ -2754,6 +2849,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['PRIME Fitness'],
     loadType: 'none',
     info: 'Swiveling single handle for curls, flyes and rows.',
+    aka: ['rotating handle', 'swivel handle'],
   },
   {
     id: 'acc-globe-handle',
@@ -2764,6 +2860,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'IronMind'],
     loadType: 'none',
     info: 'Sphere grips that hammer the forearms on any cable move.',
+    aka: ['globe handle', 'ball handle', 'grip ball'],
   },
   {
     id: 'acc-pro-handle',
@@ -2774,6 +2871,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['PRIME Fitness'],
     loadType: 'none',
     info: 'Adjustable-angle handles for a custom line of pull.',
+    aka: ['pro handle', 'multi angle handle'],
   },
   {
     id: 'acc-tricep-v',
@@ -2784,6 +2882,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Angled V for pushdowns and close rows.',
+    aka: ['v bar', 'tricep v', 'v handle'],
   },
   {
     id: 'acc-row-footplate',
@@ -2794,6 +2893,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Life Fitness'],
     loadType: 'none',
     info: 'Brace plate for heavy seated cable rows.',
+    aka: ['foot plate', 'row platform'],
   },
   {
     id: 'acc-loading-pin',
@@ -2804,6 +2904,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Spud Inc'],
     loadType: 'plate',
     info: 'Hangs plates directly on a carabiner for cable work.',
+    aka: ['loading pin'],
   },
   {
     id: 'acc-carabiner',
@@ -2814,6 +2915,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Swaps attachments on and off the cable fast.',
+    aka: ['carabiner', 'cable clip'],
   },
   {
     id: 'acc-hip-belt-cable',
@@ -2824,6 +2926,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Spud Inc', 'Rogue'],
     loadType: 'none',
     info: 'Waist belt to run cable/belt squats and pull-throughs.',
+    aka: ['hip belt', 'belt squat strap', 'cable dip belt'],
   },
 
   // ─── Grip / thick-handle globes ─────────────────────────────────────────────
@@ -2836,6 +2939,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['IronMind'],
     loadType: 'plate',
     info: 'Free-rotating thick handle — a classic grip test.',
+    aka: ['rolling thunder', 'revolving grip handle'],
   },
   {
     id: 'grip-globe-db',
@@ -2846,6 +2950,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['IronMind', 'Rogue'],
     loadType: 'fixed',
     info: 'Sphere-headed dumbbells for grip and odd-object work.',
+    aka: ['globe dumbbell', 'ball dumbbell'],
   },
   {
     id: 'grip-blob',
@@ -2856,6 +2961,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['IronMind'],
     loadType: 'fixed',
     info: 'Cut plate half for advanced pinch grip.',
+    aka: ['blob', 'pinch weight', 'york blob'],
   },
 
   // ─── Balls (full set) ───────────────────────────────────────────────────────
@@ -2879,6 +2985,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Technogym', 'SKLZ'],
     loadType: 'fixed',
     info: 'Light coated ball for studio and rehab.',
+    aka: ['toning ball', 'soft weight ball'],
   },
   {
     id: 'ball-sandbell',
@@ -2889,6 +2996,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hyperwear'],
     loadType: 'fixed',
     info: 'Floppy sand-filled disc for slams and carries.',
+    aka: ['sandbell', 'sand disc'],
   },
   {
     id: 'ball-reaction',
@@ -2899,6 +3007,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SKLZ'],
     loadType: 'none',
     info: 'Erratic-bounce ball for reflex and agility drills.',
+    aka: ['reaction ball', 'agility ball'],
   },
   {
     id: 'ball-power-plyo',
@@ -2909,6 +3018,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Dynamax'],
     loadType: 'fixed',
     info: 'Heavy no-bounce ball for rotational throws.',
+    aka: ['plyo ball', 'power ball', 'medicine ball'],
   },
   {
     id: 'ball-mini-stability',
@@ -2919,6 +3029,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['TriggerPoint'],
     loadType: 'bodyweight',
     info: 'Small soft ball for Pilates and core.',
+    aka: ['mini stability ball', 'pilates ball', 'barre ball'],
   },
 
   // ─── Kettlebell / odd-object (more) ─────────────────────────────────────────
@@ -2931,6 +3042,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Kettlebell Kings', 'Rogue'],
     loadType: 'fixed',
     info: 'Textured matte finish that holds chalk.',
+    aka: ['powder coat kettlebell', 'powder coated kb'],
   },
   {
     id: 'kb-loadable',
@@ -2941,6 +3053,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Kettlebell Kings'],
     loadType: 'plate',
     info: 'Open-shell bell you fill with plates.',
+    aka: ['loadable kettlebell', 'adjustable shell kettlebell'],
   },
 
   // ─── Suspension / bodyweight (more) ─────────────────────────────────────────
@@ -2964,6 +3077,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Yoga4You'],
     loadType: 'bodyweight',
     info: 'Hanging fabric for inversions and stretch.',
+    aka: ['aerial silks', 'yoga hammock', 'aerial yoga'],
   },
   {
     id: 'sus-parallel-bars',
@@ -2974,6 +3088,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'bodyweight',
     info: 'Fixed parallettes/parallel bars for dips and holds.',
+    aka: ['parallel bars', 'gymnastic bars'],
   },
   {
     id: 'sus-ab-straps',
@@ -2984,6 +3099,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Spud Inc'],
     loadType: 'bodyweight',
     info: 'Elbow slings for hanging leg raises.',
+    aka: ['ab straps', 'hanging ab straps', 'captains chair straps'],
   },
 
   // ─── Boxing / combat conditioning ───────────────────────────────────────────
@@ -3007,6 +3123,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Century', 'Everlast'],
     loadType: 'fixed',
     info: 'Base-weighted striking bag, no rigging needed.',
+    aka: ['freestanding bag', 'standing punch bag', 'wavemaster'],
   },
   {
     id: 'box-speed-bag',
@@ -3072,6 +3189,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Suples', 'Century'],
     loadType: 'fixed',
     info: 'Throw/ground-drill dummy for combat sports.',
+    aka: ['grappling dummy', 'mma dummy', 'wrestling dummy'],
   },
 
   // ─── Speed / agility / athletic ─────────────────────────────────────────────
@@ -3084,6 +3202,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SKLZ', 'Perform Better'],
     loadType: 'none',
     info: 'Drag chute for sprint resistance.',
+    aka: ['speed chute', 'running parachute', 'resistance parachute'],
   },
   {
     id: 'spd-sled-harness',
@@ -3094,6 +3213,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'SKLZ'],
     loadType: 'plate',
     info: 'Shoulder harness to tow a sled for speed.',
+    aka: ['sled harness', 'pulling harness'],
   },
   {
     id: 'spd-reaction-lights',
@@ -3104,6 +3224,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['BlazePod', 'FITLIGHT'],
     loadType: 'motorized',
     info: 'Light pods for reaction, agility and cognitive drills.',
+    aka: ['reaction lights', 'blazepod', 'fitlight'],
   },
   {
     id: 'spd-cones-dots',
@@ -3114,6 +3235,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SKLZ', 'Perform Better'],
     loadType: 'none',
     info: 'Markers for footwork and agility patterns.',
+    aka: ['agility cones', 'speed cones', 'field markers'],
   },
   {
     id: 'spd-resistance-belt',
@@ -3124,6 +3246,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['SKLZ', 'Kbands'],
     loadType: 'none',
     info: 'Bungee belt for resisted and assisted sprints.',
+    aka: ['resistance belt', 'overspeed belt', 'partner belt'],
   },
 
   // ─── Collars, storage & rack accessories ────────────────────────────────────
@@ -3136,6 +3259,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'York'],
     loadType: 'none',
     info: 'Quick spring clips to hold plates on.',
+    aka: ['spring collars', 'spring clips', 'barbell clips'],
   },
   {
     id: 'acc-collars-comp',
@@ -3146,6 +3270,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Eleiko', 'Lock-Jaw'],
     loadType: 'none',
     info: 'Locking collars that grip the sleeve firmly.',
+    aka: ['lock jaw collars', 'competition collars', 'barbell clamps'],
   },
   {
     id: 'store-db-rack',
@@ -3156,6 +3281,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Life Fitness'],
     loadType: 'none',
     info: 'Tiered storage for the dumbbell set.',
+    aka: ['dumbbell rack', 'db storage', 'dumbbell stand'],
   },
   {
     id: 'store-plate-tree',
@@ -3166,6 +3292,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'none',
     info: 'Upright pegs to store weight plates.',
+    aka: ['plate tree', 'plate storage', 'weight tree'],
   },
   {
     id: 'store-kb-rack',
@@ -3176,6 +3303,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue'],
     loadType: 'none',
     info: 'Shelving for kettlebells and med balls.',
+    aka: ['kettlebell rack', 'ball rack', 'med ball storage'],
   },
   {
     id: 'acc-band-peg-storage',
@@ -3186,6 +3314,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'PRx Performance'],
     loadType: 'none',
     info: 'Wall/rack holders for bars, bands and attachments.',
+    aka: ['bar storage', 'accessory storage', 'attachment rack'],
   },
 
   // ─── Board press / powerlifting aids (more) ─────────────────────────────────
@@ -3198,6 +3327,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['EliteFTS', 'Rogue'],
     loadType: 'none',
     info: 'Boards on the chest for partial-range bench overload.',
+    aka: ['bench boards', 'board press'],
   },
   {
     id: 'pl-bench-blocks',
@@ -3208,6 +3338,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'none',
     info: 'Set the bar height for pin/rack presses and pulls.',
+    aka: ['bench blocks', 'bar blocks'],
   },
   {
     id: 'pl-deadlift-platform',
@@ -3218,6 +3349,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Titan'],
     loadType: 'none',
     info: 'Protects floor and bar for heavy pulls.',
+    aka: ['deadlift platform', 'drop pads', 'lifting platform'],
   },
 
   // ─── Yoga / mobility (more) ──────────────────────────────────────────────────
@@ -3241,6 +3373,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Chirp', 'Gaiam'],
     loadType: 'none',
     info: 'Backbend and chest-opening prop.',
+    aka: ['yoga wheel', 'back wheel'],
   },
   {
     id: 'mob-slant-board',
@@ -3251,6 +3384,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['StrongTek'],
     loadType: 'none',
     info: 'Angled board for calf/ankle stretch and squats.',
+    aka: ['slant board', 'incline board', 'calf stretch board'],
   },
   {
     id: 'mob-balance-pad',
@@ -3261,6 +3395,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Airex', 'TheraBand'],
     loadType: 'bodyweight',
     info: 'Foam pad for unstable balance work.',
+    aka: ['balance pad', 'foam balance pad'],
   },
   {
     id: 'mob-foot-roller',
@@ -3271,6 +3406,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['TriggerPoint'],
     loadType: 'none',
     info: 'Small roller for plantar fascia and feet.',
+    aka: ['foot roller', 'arch roller', 'plantar roller'],
   },
 
   // ─── Belts, straps & lifting gear (full set) ────────────────────────────────
@@ -3305,6 +3441,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Eleiko', 'Rogue', '2POOD'],
     loadType: 'none',
     info: 'Narrower in front, wider at the back — freedom for the clean & jerk.',
+    aka: ['weightlifting belt', 'tapered belt', 'oly belt'],
   },
   {
     id: 'belt-nylon',
@@ -3315,6 +3452,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Harbinger', 'Rogue', '2POOD'],
     loadType: 'none',
     info: 'Flexible everyday belt for general training and CrossFit.',
+    aka: ['nylon belt', 'velcro belt', 'training belt'],
   },
   {
     id: 'strap-lasso',
@@ -3336,6 +3474,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'SBD'],
     loadType: 'none',
     info: 'Locked-in figure-8 loops for maximal deadlifts and shrugs.',
+    aka: ['figure 8 straps', 'figure eight straps'],
   },
   {
     id: 'strap-hook',
@@ -3346,6 +3485,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Harbinger'],
     loadType: 'none',
     info: 'Metal hooks that take the grip out of pulls entirely.',
+    aka: ['lifting hooks', 'deadlift hooks'],
   },
   {
     id: 'strap-grips',
@@ -3356,6 +3496,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Versa Gripps'],
     loadType: 'none',
     info: 'Wrap-around grips with wrist support — no-tie alternative to straps.',
+    aka: ['versa gripps', 'lifting grips'],
   },
   {
     id: 'strap-oly',
@@ -3366,6 +3507,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Eleiko'],
     loadType: 'none',
     info: 'Shorter straps set for quick release in the snatch.',
+    aka: ['snatch straps', 'weightlifting straps'],
   },
 
   // ─── More bars / grifs ──────────────────────────────────────────────────────
@@ -3378,6 +3520,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Texas Power Bars', 'Rogue', 'Kabuki Strength'],
     loadType: 'plate',
     info: 'Thick, rigid, aggressive center knurl — no whip under a max squat.',
+    aka: ['squat bar', 'stiff squat bar'],
   },
   {
     id: 'barbell-bench-specialist',
@@ -3388,6 +3531,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Texas Power Bars', 'Rogue'],
     loadType: 'plate',
     info: 'Extra-stiff 29 mm bar so the load stays steady off the chest.',
+    aka: ['bench bar', 'stiff bench bar'],
   },
   {
     id: 'barbell-spider',
@@ -3409,6 +3553,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Kabuki Strength'],
     loadType: 'plate',
     info: 'Open-back hex bar you can walk out for carries and rack pulls.',
+    aka: ['open trap bar', 'rackable trap bar', 'open hex bar'],
   },
   {
     id: 'barbell-duffalo',
@@ -3419,6 +3564,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Kabuki Strength'],
     loadType: 'plate',
     info: 'Continuous bow eases the shoulders on squats and adds bench range.',
+    aka: ['duffalo bar', 'bowed bar'],
   },
   {
     id: 'barbell-multi-grip',
@@ -3440,6 +3586,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Bandbell'],
     loadType: 'plate',
     info: 'Flexible bar loaded with banded plates for reflexive stability.',
+    aka: ['earthquake bar', 'oscillating bar', 'bamboo bar'],
   },
   // ─── Gap-fill (tranche 4) ────────────────────────────────────────────────────
   // plates
@@ -3452,6 +3599,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Eleiko', 'Rogue', 'American Barbell'],
     loadType: 'plate',
     info: 'Light full-diameter plates (2.5–5 kg) to learn lifts at the right height.',
+    aka: ['technique plates', 'training plates'],
   },
   // machines
   {
@@ -3474,6 +3622,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Ab Coaster'],
     loadType: 'selectorized',
     info: 'Knees-to-chest carriage on a curved track for lower abs.',
+    aka: ['ab coaster', 'ab carriage'],
   },
   {
     id: 'm-reformer',
@@ -3495,6 +3644,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Balanced Body', 'Merrithew'],
     loadType: 'none',
     info: 'Spring towers and pedals for Pilates strength and mobility.',
+    aka: ['pilates chair', 'cadillac', 'wunda chair'],
   },
   {
     id: 'm-total-gym',
@@ -3505,6 +3655,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Total Gym'],
     loadType: 'bodyweight',
     info: 'Bodyweight glideboard on an incline — scalable full-body resistance.',
+    aka: ['total gym', 'glideboard'],
   },
   {
     id: 'm-pneumatic',
@@ -3515,6 +3666,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Keiser', 'HUR'],
     loadType: 'none',
     info: 'Air-cylinder resistance — smooth, fast, and easy to micro-load.',
+    aka: ['air resistance machine', 'keiser', 'pneumatic'],
   },
   {
     id: 'm-digital-trainer',
@@ -3525,6 +3677,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Tonal', 'Vitruvian', 'Speediance'],
     loadType: 'motorized',
     info: 'Motor/electromagnetic cables with app-driven weight and tracking.',
+    aka: ['smart trainer', 'tonal', 'digital weight', 'cable robot'],
   },
   {
     id: 'm-multi-gym',
@@ -3547,6 +3700,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta', 'Watson'],
     loadType: 'plate',
     info: 'Plate-loaded quad isolation.',
+    aka: ['plate loaded leg extension'],
   },
   {
     id: 'hs-plate-leg-curl',
@@ -3557,6 +3711,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta', 'Watson'],
     loadType: 'plate',
     info: 'Plate-loaded hamstring curl (seated/lying/kneeling).',
+    aka: ['plate loaded leg curl'],
   },
   {
     id: 'hs-plate-hip-thrust',
@@ -3567,6 +3722,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Booty Builder', 'Panatta', 'Rogue'],
     loadType: 'plate',
     info: 'Dedicated plate-loaded glute-bridge station.',
+    aka: ['plate loaded hip thrust', 'glute drive plate'],
   },
   {
     id: 'hs-viking-machine',
@@ -3577,6 +3733,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Panatta', 'Rogue'],
     loadType: 'plate',
     info: 'Fixed neutral-grip overhead press station.',
+    aka: ['viking press machine'],
   },
   {
     id: 'hs-plate-preacher',
@@ -3587,6 +3744,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hammer Strength', 'Panatta'],
     loadType: 'plate',
     info: 'Iso preacher curl with independent arms.',
+    aka: ['plate loaded preacher', 'plate curl machine'],
   },
   // cable
   {
@@ -3598,6 +3756,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Freemotion', 'Rogue'],
     loadType: 'plate',
     info: 'Single height-adjustable pulley fixed to a wall or rack.',
+    aka: ['wall pulley', 'wall mounted cable'],
   },
   {
     id: 'cable-crossover-half',
@@ -3608,6 +3767,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['REP Fitness', 'Force USA'],
     loadType: 'selectorized',
     info: 'Rack with a built-in weight stack, lat pull and low row.',
+    aka: ['half rack cable', 'lat combo'],
   },
   // cardio
   {
@@ -3630,6 +3790,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Sunny Health', 'Xiser'],
     loadType: 'none',
     info: 'Compact hydraulic stepper for low-impact cardio.',
+    aka: ['mini stepper', 'small step machine'],
   },
   // bands
   {
@@ -3641,6 +3802,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Bodylastics', 'Undersun'],
     loadType: 'none',
     info: 'Clip several tubes to a handle to dial the resistance.',
+    aka: ['clip band set', 'stackable bands'],
   },
   {
     id: 'band-pull-apart',
@@ -3663,6 +3825,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'IronMind'],
     loadType: 'plate',
     info: 'Head strap that hangs plates to train the neck.',
+    aka: ['neck harness', 'head harness'],
   },
   {
     id: 'acc-arm-blaster',
@@ -3673,6 +3836,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'Hyperlethal'],
     loadType: 'none',
     info: 'Braces the elbows for strict curls.',
+    aka: ['arm blaster', 'bicep isolator', 'bicep blaster'],
   },
   {
     id: 'acc-gym-grips',
@@ -3683,6 +3847,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Bear Komplex', 'Victory', 'WODies'],
     loadType: 'none',
     info: 'Palm protection for bar work and pull-ups.',
+    aka: ['hand grips', 'gymnastics grips', 'pull up grips'],
   },
   {
     id: 'acc-heel-wedge',
@@ -3693,6 +3858,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['StrongTek', 'Rogue'],
     loadType: 'none',
     info: 'Elevates the heels for a more upright, quad-biased squat.',
+    aka: ['squat wedge', 'heel wedge'],
   },
   {
     id: 'acc-ab-mat',
@@ -3703,6 +3869,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'GoFit'],
     loadType: 'bodyweight',
     info: 'Contoured pad supporting the lower back for sit-ups.',
+    aka: ['ab mat', 'sit up pad'],
   },
   {
     id: 'acc-pushup-bars',
@@ -3713,6 +3880,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Perfect Fitness', 'Rogue'],
     loadType: 'bodyweight',
     info: 'Raised handles for a deeper push-up and easier wrists.',
+    aka: ['push up bars', 'push up handles', 'push up stands'],
   },
   {
     id: 'acc-weight-releasers',
@@ -3723,6 +3891,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['EliteFTS', 'Rogue'],
     loadType: 'plate',
     info: 'Overload the eccentric, then shed weight at the bottom of squat/bench.',
+    aka: ['weight releasers'],
   },
   {
     id: 'acc-lifting-chains',
@@ -3733,6 +3902,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'EliteFTS'],
     loadType: 'plate',
     info: 'Chains add weight as the bar rises — accommodating resistance.',
+    aka: ['lifting chains', 'strongman chains'],
   },
   {
     id: 'acc-gym-timer',
@@ -3743,6 +3913,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'GymNext'],
     loadType: 'none',
     info: 'Big clock for EMOM/AMRAP, rest and intervals.',
+    aka: ['gym timer', 'interval timer', 'crossfit timer'],
   },
   {
     id: 'acc-lifting-shoes',
@@ -3775,6 +3946,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Rogue', 'SBD'],
     loadType: 'none',
     info: 'Protect the shins from bar scrape on pulls.',
+    aka: ['deadlift socks', 'shin sleeves'],
   },
   // recovery / mobility
   {
@@ -3786,6 +3958,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hyperice (Vyper)', 'TriggerPoint'],
     loadType: 'motorized',
     info: 'Foam roller with vibration for deeper release.',
+    aka: ['vibrating foam roller', 'vyper'],
   },
   {
     id: 'rec-yoga-bolster',
@@ -3796,6 +3969,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Manduka', 'Hugger Mugger'],
     loadType: 'none',
     info: 'Firm cushion to support restorative poses.',
+    aka: ['yoga bolster', 'meditation cushion'],
   },
   {
     id: 'rec-massage-table',
@@ -3806,6 +3980,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Earthlite', 'NRG'],
     loadType: 'none',
     info: 'Padded table for soft-tissue work and stretching.',
+    aka: ['massage table', 'treatment table'],
   },
   {
     id: 'rec-red-light',
@@ -3816,6 +3991,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Joovv', 'Mito Red'],
     loadType: 'none',
     info: 'Photobiomodulation panel used for recovery.',
+    aka: ['red light therapy', 'infrared panel', 'joovv'],
   },
   {
     id: 'rec-hanging-boots',
@@ -3826,6 +4002,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Teeter'],
     loadType: 'none',
     info: 'Ankle boots to hang inverted from a bar and decompress.',
+    aka: ['inversion boots', 'gravity boots'],
   },
   // ─── Gap-fill (tranche 5) — final sweep ─────────────────────────────────────
   // cardio
@@ -3860,6 +4037,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Hydrorider', 'SciFit'],
     loadType: 'none',
     info: 'Pool cycling — very low-impact rehab conditioning.',
+    aka: ['aqua bike', 'pool bike', 'hydro bike'],
   },
   // machine
   {
@@ -3882,6 +4060,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Biodex', 'HUMAC'],
     loadType: 'motorized',
     info: 'Speed-controlled resistance for testing and rehab.',
+    aka: ['isokinetic', 'biodex', 'dynamometer machine'],
   },
   // suspension / bodyweight station
   {
@@ -3904,6 +4083,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Iron Gym', 'Perfect Fitness'],
     loadType: 'bodyweight',
     info: 'Removable bar that wedges in a door frame.',
+    aka: ['doorway bar', 'door pull up bar'],
   },
   // conditioning / athletic
   {
@@ -3915,6 +4095,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Kamagon', 'Aqua Training Bag'],
     loadType: 'fixed',
     info: 'Shifting water load for carries, presses and slams.',
+    aka: ['aqua bag', 'water bag', 'kamagon'],
   },
   {
     id: 'cond-starting-blocks',
@@ -3925,6 +4106,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Gill Athletics', 'SKLZ'],
     loadType: 'none',
     info: 'Push-off blocks for sprint starts.',
+    aka: ['starting blocks', 'sprint blocks'],
   },
   {
     id: 'cond-weighted-hoop',
@@ -3935,6 +4117,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Dynamis', 'Sports Hoop'],
     loadType: 'fixed',
     info: 'Weighted hoop for core and cardio.',
+    aka: ['weighted hula hoop', 'fitness hoop', 'smart hoop'],
   },
   {
     id: 'cond-power-wheel',
@@ -3945,6 +4128,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Lifeline'],
     loadType: 'bodyweight',
     info: 'Ab-wheel with straps for feet — planks and pikes in motion.',
+    aka: ['power wheel', 'ab wheel straps'],
   },
   // accessories
   {
@@ -3956,6 +4140,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Bala', 'Nordic Lifting'],
     loadType: 'fixed',
     info: 'Strap-on cuff weights for kicks, raises and walks.',
+    aka: ['ankle weights', 'wrist weights', 'cuff weights'],
   },
   {
     id: 'acc-band-door-anchor',
@@ -3966,6 +4151,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Bodylastics', 'Undersun'],
     loadType: 'none',
     info: 'Anchors a band in a closed door for pressing and rows.',
+    aka: ['door anchor', 'band door anchor'],
   },
   {
     id: 'acc-ceiling-anchor',
@@ -3976,6 +4162,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['TRX', 'Rogue'],
     loadType: 'none',
     info: 'Fixed mount for suspension trainers and bands.',
+    aka: ['ceiling anchor', 'suspension anchor', 'trx anchor'],
   },
   {
     id: 'acc-hand-grips-pads',
@@ -3986,6 +4173,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Harbinger', 'Cobra Grips'],
     loadType: 'none',
     info: 'Palm pads for grip and callus protection.',
+    aka: ['grip pads', 'workout gloves', 'lifting pads'],
   },
   // recovery / rehab
   {
@@ -3997,6 +4185,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Compex', 'PowerDot', 'Marc Pro'],
     loadType: 'motorized',
     info: 'Electrical muscle stimulation for activation and recovery.',
+    aka: ['ems unit', 'tens unit', 'estim', 'compex'],
   },
   {
     id: 'rec-cupping',
@@ -4007,6 +4196,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['RockTape (RockPods)', 'Graston'],
     loadType: 'none',
     info: 'Suction cups and scraping tools for soft-tissue work.',
+    aka: ['cupping set', 'iastm', 'scraping tools'],
   },
   {
     id: 'rec-therapy-putty',
@@ -4017,6 +4207,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['TheraPutty', 'TheraBand'],
     loadType: 'none',
     info: 'Squeeze putty for hand, finger and forearm rehab.',
+    aka: ['therapy putty', 'hand putty', 'grip egg'],
   },
   {
     id: 'rec-shoulder-pulley',
@@ -4027,6 +4218,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['RANGEMASTER', 'Vive'],
     loadType: 'none',
     info: 'Rope-and-pulley for shoulder range-of-motion rehab.',
+    aka: ['shoulder pulley', 'over door pulley'],
   },
   {
     id: 'rec-stretch-table',
@@ -4037,6 +4229,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['StretchLab', 'Nimble'],
     loadType: 'none',
     info: 'Table/frame for practitioner- or self-assisted stretching.',
+    aka: ['stretch table', 'stretch cage', 'assisted stretch'],
   },
   {
     id: 'rec-cold-compression',
@@ -4047,6 +4240,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['Game Ready', 'Breg'],
     loadType: 'motorized',
     info: 'Circulating ice + compression wrap for injury recovery.',
+    aka: ['cold compression', 'game ready', 'ice compression'],
   },
   {
     id: 'rec-peanut-ball',
@@ -4057,6 +4251,7 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     brands: ['TriggerPoint', 'RAD'],
     loadType: 'none',
     info: 'Twin-ball tool for the spine and calves.',
+    aka: ['peanut ball', 'double lacrosse ball'],
   },
   // ─── Gap-fill (tranche 6) — rack attachments, climbing grip, balance ────────
   // rack attachments
