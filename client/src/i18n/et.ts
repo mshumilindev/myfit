@@ -98,6 +98,7 @@ export const et: Strings = {
   primaryMuscleLabel: 'Peamine lihas',
   muscleGroupsLabel: 'Lihasgrupid',
   secondaryMuscleLabel: 'Teisesed lihased',
+  exlSecondaryFor: (m: string) => `Teisesed · ${m}`,
   subRegionsLabel: 'Alapiirkonnad',
   subRegionsSecondaryLabel: 'Alapiirkonnad (teisesed)',
   equipmentLabelField: 'Varustus',

@@ -110,6 +110,7 @@ export const uk: Strings = {
   primaryMuscleLabel: 'Основний мʼяз',
   muscleGroupsLabel: 'Групи мʼязів',
   secondaryMuscleLabel: 'Додаткові мʼязи',
+  exlSecondaryFor: (m: string) => `Додаткові · ${m}`,
   subRegionsLabel: 'Підрегіони',
   subRegionsSecondaryLabel: 'Підрегіони (допоміжні)',
   equipmentLabelField: 'Обладнання',

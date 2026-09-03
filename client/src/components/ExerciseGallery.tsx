@@ -13,7 +13,7 @@
  * Two user additions layer on the design: Library/My-exercises tabs and custom
  * exercise CRUD (create / edit / delete), both URL-addressable.
  */
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   BUILT_IN_CATALOG,
   canonicalExerciseName,
@@ -210,7 +210,16 @@ export function ExerciseGallery({
             (s.force === undefined || r.force === s.force) &&
             (s.level === undefined || r.level === s.level),
         )
-        .sort((a, b) => a.name.localeCompare(b.name)),
+        .sort((a, b) => {
+          // With a muscle filter on, exercises where it's the PRIMARY mover come
+          // first; the ones where it's only secondary fall below (see divider).
+          if (s.muscle !== undefined) {
+            const ap = a.primary === s.muscle ? 0 : 1;
+            const bp = b.primary === s.muscle ? 0 : 1;
+            if (ap !== bp) return ap - bp;
+          }
+          return a.name.localeCompare(b.name);
+        }),
     [rows, needle, s.muscle, s.equip, s.category, s.mechanic, s.force, s.level],
   );
 
@@ -581,15 +590,34 @@ export function ExerciseGallery({
     );
   };
 
+  // Boundary between primary-muscle matches and secondary-muscle matches in the
+  // full sorted list (library only, when a muscle filter is active).
+  const secStart =
+    !isMine && s.muscle !== undefined ? list.findIndex((r) => r.primary !== s.muscle) : -1;
+  const renderPage = (renderFn: (r: Row, i: number) => ReactNode) =>
+    shown.flatMap((r, i) => {
+      const gIdx = curPage * PAGE + i;
+      const out: ReactNode[] = [];
+      if (secStart >= 0 && gIdx === secStart) {
+        out.push(
+          <div key="__secdiv" className="exl-sec-div">
+            {t.exlSecondaryFor(t.muscleGroups[s.muscle as MuscleGroup])}
+          </div>,
+        );
+      }
+      out.push(renderFn(r, i));
+      return out;
+    });
+
   const body =
     isMine && mine.length === 0 ? (
       <div className="exg-mine-empty">{t.libNoCustom}</div>
     ) : isMine ? (
       <div className="exl-mrows">{shown.map(mineRow)}</div>
     ) : isDesktop ? (
-      <div className="exl-grid">{shown.map(card)}</div>
+      <div className="exl-grid">{renderPage(card)}</div>
     ) : (
-      <div className="exl-mrows">{shown.map(listRow)}</div>
+      <div className="exl-mrows">{renderPage(listRow)}</div>
     );
 
   // Library / My-exercises subtabs. They live under the content heading (not in

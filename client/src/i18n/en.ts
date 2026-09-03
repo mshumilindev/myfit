@@ -102,6 +102,7 @@ export const en = {
   primaryMuscleLabel: 'Primary muscle',
   muscleGroupsLabel: 'Muscle groups',
   secondaryMuscleLabel: 'Secondary muscles',
+  exlSecondaryFor: (m: string) => `Secondary · ${m}`,
   subRegionsLabel: 'Sub-regions',
   subRegionsSecondaryLabel: 'Sub-regions (secondary)',
   equipmentLabelField: 'Equipment',

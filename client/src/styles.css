@@ -16469,6 +16469,19 @@ button.badge {
   flex-wrap: wrap;
 }
 
+/* Exercise library: "Secondary · <muscle>" section divider between the
+   primary-mover matches and the ones where the filtered muscle assists. */
+.exl-sec-div {
+  grid-column: 1 / -1;
+  margin: 6px 2px 2px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-divider);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
 .exl-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

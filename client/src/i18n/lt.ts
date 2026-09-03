@@ -110,6 +110,7 @@ export const lt: Strings = {
   primaryMuscleLabel: 'Pagrindinis raumuo',
   muscleGroupsLabel: 'Raumenų grupės',
   secondaryMuscleLabel: 'Papildomi raumenys',
+  exlSecondaryFor: (m: string) => `Papildomi · ${m}`,
   subRegionsLabel: 'Poregioniai',
   subRegionsSecondaryLabel: 'Poregioniai (antriniai)',
   equipmentLabelField: 'Įranga',
