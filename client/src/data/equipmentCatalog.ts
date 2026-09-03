@@ -10,6 +10,7 @@
  */
 import type { MuscleGroup } from './exercises';
 import type { EquipmentId } from './equipment';
+import { EQUIPMENT_ENRICH } from './equipmentEnrich';
 
 export type EquipCategory =
   | 'barbell'
@@ -46,6 +47,24 @@ export interface EquipmentItem {
   info?: string;
   /** Extra searchable keywords / aliases. */
   aka?: string[];
+  /** Notable named model lines per brand (curated; there is no SKU DB). */
+  models?: EquipmentModel[];
+  /** License-clean image (Wikimedia Commons / stock), attribution carried. */
+  image?: EquipmentImage;
+}
+
+export interface EquipmentModel {
+  brand: string;
+  name: string;
+}
+
+export interface EquipmentImage {
+  thumbUrl: string;
+  pageUrl: string;
+  /** e.g. 'CC BY-SA 4.0', 'CC0', 'Pexels', 'Pixabay'. */
+  license: string;
+  /** Author/credit for attribution (empty for no-attribution licenses). */
+  author: string;
 }
 
 // A shared pool of brands referenced across items, kept here for reuse.
@@ -3907,5 +3926,16 @@ export const EQUIPMENT_BY_CATEGORY = EQUIPMENT_CATALOG.reduce<Record<string, Equ
 );
 
 export function equipmentById(id: string): EquipmentItem | undefined {
-  return EQUIPMENT_CATALOG.find((e) => e.id === id);
+  const base = EQUIPMENT_CATALOG.find((e) => e.id === id);
+  if (!base) return undefined;
+  const extra = EQUIPMENT_ENRICH[id];
+  return extra ? { ...base, ...extra } : base;
+}
+
+/** The catalog with model lines + images merged in (for lists/search). */
+export function enrichedCatalog(): EquipmentItem[] {
+  return EQUIPMENT_CATALOG.map((e) => {
+    const extra = EQUIPMENT_ENRICH[e.id];
+    return extra ? { ...e, ...extra } : e;
+  });
 }
