@@ -29,7 +29,8 @@ export type EquipCategory =
   | 'conditioning' // strongman / functional / GPP
   | 'accessory' // bars attachments, belts, grips, boxes
   | 'recovery'
-  | 'aquatic'; // pool / swim fitness
+  | 'aquatic' // pool / swim fitness
+  | 'assessment'; // testing / measurement
 
 export type LoadType =
   'selectorized' | 'plate' | 'fixed' | 'adjustable' | 'bodyweight' | 'motorized' | 'none';
@@ -4468,6 +4469,108 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
     loadType: 'none',
     info: 'Swinging-leg glider for low-impact cardio.',
     aka: ['air glider', 'swing stepper'],
+  },
+  // ─── Gap-fill (tranche 9) — assessment, specialty training ──────────────────
+  // assessment / testing
+  {
+    id: 'test-force-plate',
+    name: 'Force plate',
+    category: 'assessment',
+    cls: 'other',
+    muscles: [],
+    brands: ['Hawkin Dynamics', 'VALD (ForceDecks)', 'Kistler'],
+    loadType: 'none',
+    info: 'Platform that measures ground-reaction force for jump and strength testing.',
+    aka: ['force platform', 'forcedecks', 'jump plate'],
+  },
+  {
+    id: 'test-hand-dynamometer',
+    name: 'Hand-grip dynamometer',
+    category: 'assessment',
+    cls: 'other',
+    muscles: ['forearms'],
+    brands: ['Jamar', 'Camry', 'CAMRY'],
+    loadType: 'none',
+    info: 'Squeeze gauge that measures grip strength.',
+    aka: ['grip dynamometer', 'grip tester'],
+  },
+  {
+    id: 'test-body-comp',
+    name: 'Body-composition analyzer',
+    category: 'assessment',
+    cls: 'other',
+    muscles: [],
+    brands: ['InBody', 'Tanita', 'Seca'],
+    loadType: 'none',
+    info: 'Bioimpedance scale that estimates muscle, fat and water.',
+    aka: ['inbody', 'bia scale', 'body fat scale'],
+  },
+  {
+    id: 'test-skinfold',
+    name: 'Skinfold calipers',
+    category: 'assessment',
+    cls: 'other',
+    muscles: [],
+    brands: ['Harpenden', 'Lange', 'Accu-Measure'],
+    loadType: 'none',
+    info: 'Pinch calipers for estimating body fat from skinfolds.',
+    aka: ['body fat calipers', 'fat calipers'],
+  },
+  {
+    id: 'test-jump-mat',
+    name: 'Jump / contact mat',
+    category: 'assessment',
+    cls: 'other',
+    muscles: [],
+    brands: ['Just Jump', 'Probotics', 'Chronojump'],
+    loadType: 'none',
+    info: 'Timing mat that measures vertical jump and contact time.',
+    aka: ['vertical jump mat', 'contact mat'],
+  },
+  // specialty training
+  {
+    id: 'cond-vertimax',
+    name: 'VertiMax jump/speed platform',
+    category: 'conditioning',
+    cls: 'other',
+    muscles: ['quads', 'glutes', 'calves', 'cardio'],
+    brands: ['VertiMax'],
+    loadType: 'none',
+    info: 'Platform with elastic cords for resisted jumps and sprint drills.',
+    aka: ['vertimax', 'jump trainer'],
+  },
+  {
+    id: 'm-flywheel',
+    name: 'Flywheel / isoinertial trainer',
+    category: 'machine',
+    cls: 'machine',
+    muscles: ['fullbody'],
+    brands: ['Exxentric (kBox)', 'Desmotec', 'nHANCE'],
+    loadType: 'none',
+    info: 'Spinning flywheel that loads the eccentric as hard as the concentric.',
+    aka: ['kbox', 'isoinertial', 'flywheel training'],
+  },
+  {
+    id: 'rec-leg-stretcher',
+    name: 'Leg stretcher / split machine',
+    category: 'recovery',
+    cls: 'other',
+    muscles: ['adductors', 'hamstrings'],
+    brands: ['Century', 'Valor Fitness'],
+    loadType: 'none',
+    info: 'Geared or manual device to widen the split for martial arts and dance.',
+    aka: ['split machine', 'leg stretch machine'],
+  },
+  {
+    id: 'acc-ruck-plate',
+    name: 'Ruck plate',
+    category: 'accessory',
+    cls: 'other',
+    muscles: [],
+    brands: ['GORUCK', '5.11'],
+    loadType: 'fixed',
+    info: 'Flat weighted plate that sits in a rucksack for loaded carries.',
+    aka: ['rucking plate'],
   },
 ];
 

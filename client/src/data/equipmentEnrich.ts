@@ -2288,4 +2288,55 @@ export const EQUIPMENT_ENRICH: Record<
       { brand: 'Body Rider', name: 'Air Walker' },
     ],
   },
+
+  // ── Assessment / specialty training (tranche 9) ──
+  'test-force-plate': {
+    models: [
+      { brand: 'Hawkin Dynamics', name: 'Force Plates' },
+      { brand: 'VALD', name: 'ForceDecks' },
+    ],
+  },
+  'test-hand-dynamometer': {
+    models: [
+      { brand: 'Jamar', name: 'Hydraulic Dynamometer' },
+      { brand: 'Camry', name: 'Digital Dynamometer' },
+    ],
+  },
+  'test-body-comp': {
+    models: [
+      { brand: 'InBody', name: '270 / 570 / 770' },
+      { brand: 'Tanita', name: 'MC-780' },
+    ],
+  },
+  'test-skinfold': {
+    models: [
+      { brand: 'Harpenden', name: 'Skinfold Caliper' },
+      { brand: 'Accu-Measure', name: 'Fitness 3000' },
+    ],
+  },
+  'test-jump-mat': {
+    models: [
+      { brand: 'Just Jump', name: 'Just Jump System' },
+      { brand: 'Chronojump', name: 'Contact Platform' },
+    ],
+  },
+  'cond-vertimax': { models: [{ brand: 'VertiMax', name: 'Raptor / V8' }] },
+  'm-flywheel': {
+    models: [
+      { brand: 'Exxentric', name: 'kBox4' },
+      { brand: 'Desmotec', name: 'D-Evo' },
+    ],
+  },
+  'rec-leg-stretcher': {
+    models: [
+      { brand: 'Century', name: 'Leg Stretcher' },
+      { brand: 'Valor Fitness', name: 'CA-37' },
+    ],
+  },
+  'acc-ruck-plate': {
+    models: [
+      { brand: 'GORUCK', name: 'Ruck Plate' },
+      { brand: '5.11', name: 'TacTec Plate' },
+    ],
+  },
 };
