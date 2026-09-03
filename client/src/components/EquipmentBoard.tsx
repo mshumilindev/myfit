@@ -82,13 +82,11 @@ export function EquipmentBoard({ gym }: { gym: Gym }) {
   );
 
   const toggle = (id: string) => {
-    setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      setGymEquipment(gym.id, [...next]);
-      return next;
-    });
+    const next = new Set(picked);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setPicked(next);
+    setGymEquipment(gym.id, [...next]);
   };
 
   const toggleCat = (c: EquipCategory) =>
@@ -148,20 +146,31 @@ export function EquipmentBoard({ gym }: { gym: Gym }) {
                   </span>
                 </button>
                 {expanded && (
-                  <div className="eq-chips">
+                  <div className="eq-grid">
                     {items.map((it) => {
                       const on = picked.has(it.id);
                       const info = localizedEquipInfo(it, locale);
                       return (
                         <button
                           key={it.id}
-                          className={`eq-chip${on ? ' on' : ''}`}
+                          className={`eq-tile${on ? ' on' : ''}`}
                           onClick={() => toggle(it.id)}
                           aria-pressed={on}
                           title={info}
                         >
-                          {on && <Icon name="check" />}
-                          {localizedEquipName(it, locale)}
+                          <span className="eq-thumb">
+                            {it.image ? (
+                              <img src={it.image.thumbUrl} alt="" loading="lazy" />
+                            ) : (
+                              <span className="eq-thumb-ph" aria-hidden />
+                            )}
+                            {on && (
+                              <span className="eq-tile-check">
+                                <Icon name="check" weight="bold" />
+                              </span>
+                            )}
+                          </span>
+                          <span className="eq-tile-name">{localizedEquipName(it, locale)}</span>
                         </button>
                       );
                     })}
