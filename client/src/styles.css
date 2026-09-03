@@ -24102,6 +24102,20 @@ button.badge {
   width: 34px;
   padding: 7px 0;
 }
+/* Catalog row for a challenge already running: an accent "Active" tag — reads
+   as in-progress, not the green check that used to look like it was completed. */
+.ch-cat-active {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  font-size: 17px;
+  color: var(--ch-warn, #e8933f);
+  background: color-mix(in srgb, var(--ch-warn, #e8933f) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ch-warn, #e8933f) 32%, transparent);
+}
 .ch-empty {
   text-align: center;
   color: var(--color-neutral-600);
@@ -24113,8 +24127,8 @@ button.badge {
 .ch-scrim {
   position: fixed;
   inset: 0;
-  z-index: 60;
-  background: rgba(10, 11, 14, 0.6);
+  z-index: 120;
+  background: rgba(10, 11, 14, 0.72);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -24295,6 +24309,26 @@ button.badge {
   justify-content: space-between;
   padding: 16px 18px 6px;
   color: var(--color-neutral-600);
+}
+.ch-detail-top .back {
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-neutral-300);
+  font-size: 19px;
+  padding: 4px;
+  margin-left: -6px;
+  cursor: pointer;
+}
+/* The big value stays at the ring's true centre; the unit label rides below it. */
+.ch-detail-body .ch-ring-mid .ch-big-lab {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 36px;
+  margin-top: 0;
 }
 .ch-detail-kick {
   font-size: 13px;
@@ -24966,7 +25000,7 @@ button.badge {
   background: var(--color-accent);
 }
 .apx-dot.st-off {
-  background: var(--color-accent-900);
+  background: var(--color-danger);
 }
 .apx-dot.st-future {
   box-shadow: inset 0 0 0 1.5px var(--color-neutral-700);

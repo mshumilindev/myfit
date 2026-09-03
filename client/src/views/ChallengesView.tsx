@@ -8,6 +8,7 @@
  * full-width on mobile and in the desktop content column.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { fmtDayMonth, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import type { StoreState } from '../store';
@@ -388,9 +389,15 @@ function CatalogRow({
         <div className="ch-cat-title">{c.title(t, c.target)}</div>
         <div className="ch-cat-sub">{t.chCat[c.category]}</div>
       </div>
-      <button className="ch-start" onClick={onStart} disabled={started}>
-        {started ? <Icon name="check" /> : t.chStart}
-      </button>
+      {started ? (
+        <span className="ch-cat-active" role="img" aria-label={t.chActive} title={t.chActive}>
+          <Icon name="clock" weight="bold" />
+        </span>
+      ) : (
+        <button className="ch-start" onClick={onStart}>
+          {t.chStart}
+        </button>
+      )}
     </div>
   );
 }
@@ -493,7 +500,7 @@ function DetailSheet({
     t,
   );
 
-  return (
+  return createPortal(
     <div className="ch-scrim ch-scrim-full" onClick={onClose}>
       <div className="ch-detail" onClick={(e) => e.stopPropagation()}>
         <div className="ch-detail-top">
@@ -556,7 +563,8 @@ function DetailSheet({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -591,7 +599,7 @@ function CompleteSheet({ l, onDone }: { l: LiveChallenge; onDone: () => void }) 
   );
   const valueLabel = `${fmtChallengeValue(tmpl.unit, prog.target, t)} ${t.chUnit[tmpl.unit] ?? tmpl.unit}`;
 
-  return (
+  return createPortal(
     <div className="ch-scrim ch-scrim-full">
       <div className="ch-complete">
         <div className="ch-confetti" aria-hidden>
@@ -615,7 +623,8 @@ function CompleteSheet({ l, onDone }: { l: LiveChallenge; onDone: () => void }) 
           {t.chPostedToNotifs}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
