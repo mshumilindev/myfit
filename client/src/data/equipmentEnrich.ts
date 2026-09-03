@@ -2214,4 +2214,78 @@ export const EQUIPMENT_ENRICH: Record<
       { brand: 'TheraBand', name: 'Hand Xtrainer' },
     ],
   },
+
+  // ── Combat gear / rehab / studio (tranche 8) ──
+  'box-reflex-bag': {
+    models: [
+      { brand: 'Everlast', name: 'Reflex Bag' },
+      { brand: 'Century', name: 'Reflex Bag' },
+    ],
+  },
+  'box-uppercut-bag': {
+    models: [
+      { brand: 'Title Boxing', name: 'Uppercut Bag' },
+      { brand: 'Everlast', name: 'Angle Bag' },
+    ],
+  },
+  'box-hand-wraps': {
+    models: [
+      { brand: 'Everlast', name: 'Hand Wraps' },
+      { brand: 'Fairtex', name: 'Hand Wraps' },
+    ],
+  },
+  'box-shin-guards': {
+    models: [
+      { brand: 'Fairtex', name: 'SP5 Shin Guards' },
+      { brand: 'Venum', name: 'Elite Shin Guards' },
+    ],
+  },
+  'box-headgear': {
+    models: [
+      { brand: 'Winning', name: 'Headgear' },
+      { brand: 'Cleto Reyes', name: 'Headgear' },
+    ],
+  },
+  'box-groin-guard': {
+    models: [
+      { brand: 'Fairtex', name: 'Groin Guard' },
+      { brand: 'Twins Special', name: 'Steel Cup' },
+    ],
+  },
+  'm-donkey-calf': {
+    models: [
+      { brand: 'Nautilus', name: 'Donkey Calf' },
+      { brand: 'Panatta', name: 'Donkey Calf' },
+    ],
+  },
+  'rec-acupressure-mat': {
+    models: [
+      { brand: 'Shakti', name: 'Mat' },
+      { brand: 'ProsourceFit', name: 'Acupressure Mat' },
+    ],
+  },
+  'rec-neck-traction': {
+    models: [
+      { brand: 'ComforTrac', name: 'Cervical Traction' },
+      { brand: 'Vive', name: 'Cervical Traction' },
+    ],
+  },
+  'rec-ballet-barre': {
+    models: [
+      { brand: 'Vita Vibe', name: 'Ballet Barre' },
+      { brand: 'Nimble Sports', name: 'Portable Barre' },
+    ],
+  },
+  'gym-mushroom': {
+    models: [
+      { brand: 'AAI', name: 'Pommel Trainer' },
+      { brand: "Norbert's Athletic", name: 'Mushroom' },
+    ],
+  },
+  'cardio-air-walker': {
+    models: [
+      { brand: 'Sunny Health', name: 'Air Walk Trainer' },
+      { brand: 'Body Rider', name: 'Air Walker' },
+    ],
+  },
 };
