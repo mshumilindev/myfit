@@ -709,6 +709,42 @@ export function FocusBodyMap({
   );
 }
 
+/**
+ * Focus body map as a self-contained SVG STRING (literal colours, no CSS vars),
+ * for rasterising onto a share-card canvas. `grow` muscles are gold; everything
+ * else is dimmed. One view per call ('front' | 'back').
+ */
+export function focusBodyMapSvg(grow: FocusMuscle[], view: BView): string {
+  const GROW = '#e9c07a';
+  const DIMF = '#33373d';
+  const idColor = new Map<string, string>();
+  for (const f of grow) {
+    const split = FOCUS_LIB_IDS[f];
+    if (split) {
+      for (const id of split.front) idColor.set(id, GROW);
+      for (const id of split.back) idColor.set(id, GROW);
+    } else {
+      const g = focusToGroup(f);
+      if (g !== 'cardio') {
+        for (const id of LIB[g].front) idColor.set(id, GROW);
+        for (const id of LIB[g].back) idColor.set(id, GROW);
+      }
+    }
+  }
+  const paths = VIEW_PATHS[view]
+    .map(({ id, path }) => {
+      const c = idColor.get(id);
+      return `<path d="${path}" fill="${c ?? DIMF}" stroke="${c ? '#141518' : 'rgba(0,0,0,0.3)'}" stroke-width="${c ? 0.25 : 0.12}"/>`;
+    })
+    .join('');
+  const vb = VIEWBOX[view].full;
+  const parts = vb.split(/\s+/).map(Number);
+  const vw = parts[2] || 200;
+  const vh = parts[3] || 400;
+  const scale = 6;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" width="${Math.round(vw * scale)}" height="${Math.round(vh * scale)}">${paths}</svg>`;
+}
+
 export type MuscleFigureView = 'front' | 'back' | 'both' | 'auto';
 
 /**

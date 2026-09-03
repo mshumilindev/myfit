@@ -74,5 +74,7 @@ describe('recaps', () => {
     expect(r.prevExists).toBe(false);
     expect(r.d.volume).toBeNull();
     expect(r.headline).toBe('firstPeriod');
+    // A debut period counts first-ever lifts as records (not zero).
+    expect(r.prCount).toBeGreaterThan(0);
   });
 });

@@ -284,183 +284,339 @@ export function cardBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'));
 }
 
-// ─── Recap share card (My Fit — Recaps · RC-04) ──────────────────────────────
+// ═══ RECAP SHARE CARD ════════════════════════════════════════════════════════
+// A period-recap card (Spotter Wrapped) rendered offline on a canvas, offered
+// in the same two formats as the workout card (portrait story · square). The
+// front+back muscle map is supplied as self-contained SVG strings and
+// rasterised here, so the whole card is drawn from local data with no network.
+
+export type RecapShareFormat = 'story' | 'square';
+
+export const RECAP_DIMS: Record<RecapShareFormat, { w: number; h: number }> = {
+  story: { w: 1080, h: 1920 },
+  square: { w: 1080, h: 1080 },
+};
+
 export interface RecapShareModel {
   brand: string;
-  kicker: string; // "Monthly recap"
-  period: string; // "August 2026"
+  kicker: string;
+  period: string;
   headline: string;
-  stats: ShareStat[]; // exactly 3
+  stats: ShareStat[];
   record?: { name: string; detail: string } | null;
-  kcal?: string | null; // "9,840 kcal"
-  muscles: Array<{ name: string; pct: number }>; // top 3
-  handle: string; // "@you · spotter.app"
+  kcal?: string | null;
+  muscles: Array<{ name: string; pct: number }>;
+  /** Self-contained front/back body-map SVG (from focusBodyMapSvg). */
+  bodyFrontSvg: string;
+  bodyBackSvg: string;
+  handle: string;
 }
 
-/** Portrait recap card (1080×1350) — the shareable summary of a period. */
-export function drawRecapCard(canvas: HTMLCanvasElement, m: RecapShareModel): void {
-  const w = 1080;
-  const h = 1350;
+/** Rasterise a self-contained SVG string into an <img> (no network, no taint). */
+function svgToImage(svg: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+}
+
+/** Wrap `text` to at most `maxLines`, ellipsising the last line if it overflows. */
+function wrapLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxW: number,
+  maxLines: number,
+): string[] {
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let cur = '';
+  for (const word of words) {
+    const test = cur ? `${cur} ${word}` : word;
+    if (ctx.measureText(test).width > maxW && cur) {
+      lines.push(cur);
+      cur = word;
+      if (lines.length === maxLines) break;
+    } else {
+      cur = test;
+    }
+  }
+  if (cur && lines.length < maxLines) lines.push(cur);
+  if (lines.length === maxLines) lines[maxLines - 1] = ellipsize(ctx, lines[maxLines - 1], maxW);
+  return lines;
+}
+
+/**
+ * Draw the recap share card. Async because it rasterises the muscle-map SVGs
+ * and awaits the wordmark font so the card is pixel-identical everywhere.
+ */
+export async function drawRecapCard(
+  canvas: HTMLCanvasElement,
+  m: RecapShareModel,
+  format: RecapShareFormat = 'story',
+): Promise<void> {
+  const { w, h } = RECAP_DIMS[format];
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  const gold = '#e9c07a';
-  const goldDim = '#eed3a5';
-  const gold900 = '#342713';
-  const text = '#e9eaec';
-  const muted = '#90959a';
-  const kcalBlue = '#3d84c9';
-  const padX = 80;
+  const story = format === 'story';
+  const padX = 96;
+  const innerW = w - padX * 2;
 
-  // ground: warm radial + dark gradient
-  const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, '#221d13');
-  g.addColorStop(0.55, '#17181b');
-  g.addColorStop(1, '#131417');
+  // Rasterise the body maps up front (parallel), and make sure the script
+  // wordmark font is ready so it renders as the header font, not a fallback.
+  const [front, back] = await Promise.all([
+    svgToImage(m.bodyFrontSvg).catch(() => null),
+    svgToImage(m.bodyBackSvg).catch(() => null),
+  ]);
+  try {
+    await (document as Document).fonts?.load("400 100px 'Kaushan Script'");
+  } catch {
+    /* font optional */
+  }
+
+  // Ground — a warm graphite wash (matches the app's recap "replay" feel).
+  const g = ctx.createLinearGradient(0, 0, w * 0.4, h);
+  g.addColorStop(0, '#221d15');
+  g.addColorStop(0.5, C.bgTop);
+  g.addColorStop(1, C.bgBottom);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
-  const rg = ctx.createRadialGradient(w * 0.22, 0, 0, w * 0.22, 0, w * 0.9);
-  rg.addColorStop(0, 'rgba(233,192,122,0.26)');
-  rg.addColorStop(0.55, 'rgba(233,192,122,0)');
-  ctx.fillStyle = rg;
-  ctx.fillRect(0, 0, w, h);
+
+  // Hairline frame
+  ctx.strokeStyle = C.panelLine;
+  ctx.lineWidth = 2;
+  roundRect(ctx, 40, 40, w - 80, h - 80, 40);
+  ctx.stroke();
 
   ctx.textBaseline = 'alphabetic';
-  // brand row
-  ctx.fillStyle = gold;
-  ctx.font = `700 30px ${FONT}`;
   ctx.textAlign = 'left';
-  ctx.fillText('◆', padX, 96);
-  ctx.fillStyle = text;
-  ctx.font = `600 34px ${FONT}`;
-  ctx.fillText(m.brand, padX + 46, 96);
-  ctx.fillStyle = goldDim;
-  ctx.font = `600 22px ${FONT}`;
+
+  // ── Header: wordmark (script) left · kicker right ──────────────────────────
+  let y = story ? 172 : 132;
+  ctx.fillStyle = C.text;
+  ctx.font = `400 ${story ? 60 : 52}px 'Kaushan Script', cursive`;
+  ctx.fillText(m.brand, padX, y);
+  ctx.fillStyle = C.brass;
+  ctx.font = `600 24px ${FONT}`;
   ctx.textAlign = 'right';
-  ctx.fillText(m.kicker.toUpperCase(), w - padX, 94);
+  ctx.save();
+  ctx.letterSpacing = '3px';
+  ctx.fillText(m.kicker.toUpperCase(), padX + innerW, y - (story ? 14 : 12));
+  ctx.restore();
   ctx.textAlign = 'left';
 
-  // period + headline
-  ctx.fillStyle = text;
-  ctx.font = `600 76px ${FONT}`;
-  ctx.fillText(ellipsize(ctx, m.period, w - padX * 2), padX, 240);
-  ctx.fillStyle = '#fbf3e6';
-  ctx.font = `500 34px ${FONT}`;
-  wrapText(ctx, m.headline, padX, 300, w - padX * 2, 44);
+  // ── Period + headline ──────────────────────────────────────────────────────
+  y += story ? 92 : 78;
+  ctx.fillStyle = C.text;
+  ctx.font = `800 ${story ? 84 : 66}px ${FONT}`;
+  ctx.fillText(ellipsize(ctx, m.period, innerW), padX, y);
+  y += story ? 20 : 16;
+  ctx.fillStyle = C.brass;
+  ctx.font = `400 ${story ? 34 : 30}px ${FONT}`;
+  const hlLines = wrapLines(ctx, m.headline, innerW, 2);
+  const hlLead = story ? 46 : 40;
+  for (const line of hlLines) {
+    y += hlLead;
+    ctx.fillText(line, padX, y);
+  }
 
-  // 3 hero stats
-  const sy = 470;
-  const colW = (w - padX * 2) / 3;
-  m.stats.slice(0, 3).forEach((st, i) => {
-    const x = padX + colW * i;
-    ctx.fillStyle = i === 0 ? gold : text;
-    ctx.font = `700 92px ${FONT}`;
-    ctx.fillText(st.value, x, sy);
-    ctx.fillStyle = goldDim;
-    ctx.font = `600 22px ${FONT}`;
-    ctx.fillText(st.label.toUpperCase(), x, sy + 44);
-    if (i > 0) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.14)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x - 24, sy - 66);
-      ctx.lineTo(x - 24, sy + 30);
-      ctx.stroke();
+  // ── Stats row (no dividers) ────────────────────────────────────────────────
+  y += story ? 58 : 42;
+  const statH = story ? 178 : 140;
+  roundRect(ctx, padX, y, innerW, statH, 30);
+  ctx.fillStyle = C.panel;
+  ctx.fill();
+  ctx.strokeStyle = C.panelLine;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  const cells = m.stats.slice(0, 3);
+  const cw = innerW / cells.length;
+  cells.forEach((c, i) => {
+    const cx = padX + cw * i + cw / 2;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = C.brass;
+    ctx.font = `800 ${story ? 66 : 56}px ${FONT}`;
+    ctx.fillText(ellipsize(ctx, c.value, cw - 20), cx, y + statH / 2 + 6);
+    ctx.fillStyle = C.muted;
+    ctx.font = `500 24px ${FONT}`;
+    ctx.save();
+    ctx.letterSpacing = '2px';
+    ctx.fillText(ellipsize(ctx, c.label.toUpperCase(), cw - 16), cx, y + statH - 36);
+    ctx.restore();
+  });
+  ctx.textAlign = 'left';
+  y += statH;
+
+  // ── Layout of the lower blocks (bars · record · kcal · footer) ─────────────
+  // Story is portrait, so it can show the anatomical map: the bottom cluster is
+  // anchored to the foot and the map fills the gap between stats and it. Square
+  // has no room for a legible map (the user chose portrait for that), so it just
+  // flows the blocks straight down from the stats — compact, no shrunken map.
+  const footerBaseline = h - (story ? 96 : 60);
+  const kcalH = story ? 96 : 84;
+  const recH = story ? 128 : 116;
+  const barRowH = story ? 40 : 36;
+  const barGap = story ? 24 : 18;
+  const nBars = Math.min(3, m.muscles.length);
+  const barsH = nBars > 0 ? nBars * barRowH + (nBars - 1) * barGap : 0;
+
+  let barsTop = 0;
+  let recTop = 0;
+  let kcalTop = 0;
+  let drawMap = false;
+  let mapTop = 0;
+  let mapMaxH = 0;
+
+  if (story) {
+    let bottom = footerBaseline - 54;
+    if (m.kcal) {
+      bottom -= kcalH;
+      kcalTop = bottom;
+      bottom -= 28;
     }
-  });
+    if (m.record) {
+      bottom -= recH;
+      recTop = bottom;
+      bottom -= 28;
+    }
+    if (nBars > 0) {
+      bottom -= barsH;
+      barsTop = bottom;
+      bottom -= 34;
+    }
+    mapTop = y + 34;
+    mapMaxH = Math.max(0, bottom - mapTop);
+    drawMap = (!!front || !!back) && mapMaxH > 60;
+  } else {
+    let cy = y + 44;
+    if (nBars > 0) {
+      barsTop = cy;
+      cy += barsH + 26;
+    }
+    if (m.record) {
+      recTop = cy;
+      cy += recH + 20;
+    }
+    if (m.kcal) {
+      kcalTop = cy;
+    }
+  }
 
-  // muscle distribution (top 3 bars) — the "where the work went" data
-  let y = 660;
-  ctx.fillStyle = goldDim;
-  ctx.font = `600 22px ${FONT}`;
-  ctx.fillText('WHERE THE WORK WENT'.length ? m.muscles.length ? 'MUSCLE FOCUS' : '' : '', padX, y);
-  y += 30;
-  const barX = padX + 220;
-  const barW = w - padX - barX - 90;
-  const maxPct = Math.max(...m.muscles.map((mm) => mm.pct), 1);
-  m.muscles.slice(0, 3).forEach((mm) => {
-    ctx.fillStyle = text;
-    ctx.font = `500 30px ${FONT}`;
-    ctx.textAlign = 'left';
-    ctx.fillText(ellipsize(ctx, mm.name, 200), padX, y + 26);
-    // track
-    ctx.fillStyle = '#262a2d';
-    roundRect(ctx, barX, y + 8, barW, 16, 8);
-    ctx.fill();
-    // fill
-    const gb = ctx.createLinearGradient(barX, 0, barX + barW, 0);
-    gb.addColorStop(0, '#8a642e');
-    gb.addColorStop(1, gold);
-    ctx.fillStyle = gb;
-    roundRect(ctx, barX, y + 8, Math.max(16, (barW * mm.pct) / maxPct), 16, 8);
-    ctx.fill();
-    ctx.fillStyle = muted;
-    ctx.font = `500 26px ${FONT}`;
-    ctx.textAlign = 'right';
-    ctx.fillText(`${mm.pct}%`, w - padX, y + 28);
-    ctx.textAlign = 'left';
-    y += 58;
-  });
+  // ── Muscle map (portrait only) fills the space between stats and bottom ─────
+  if (drawMap) {
+    const imgs = [front, back].filter((im): im is HTMLImageElement => !!im);
+    const gap = imgs.length > 1 ? 28 : 0;
+    const aspects = imgs.map((im) => im.width / im.height);
+    const aSum = aspects.reduce((s, a) => s + a, 0);
+    let mh = mapMaxH;
+    let totalW = mh * aSum + gap;
+    if (totalW > innerW) {
+      mh = (innerW - gap) / aSum;
+      totalW = innerW;
+    }
+    let dx = (w - totalW) / 2;
+    const dyTop = mapTop + (mapMaxH - mh) / 2;
+    for (let k = 0; k < imgs.length; k++) {
+      const iw = mh * aspects[k];
+      ctx.drawImage(imgs[k], dx, dyTop, iw, mh);
+      dx += iw + gap;
+    }
+  }
 
-  // record + kcal chips row
-  y += 24;
+  // ── Muscle bars (full width, no dividers) ──────────────────────────────────
+  if (nBars > 0) {
+    const labelW = story ? 250 : 210;
+    const pctW = 90;
+    const barX = padX + labelW + 20;
+    const barW = innerW - labelW - pctW - 40;
+    let by = barsTop;
+    for (const mu of m.muscles.slice(0, nBars)) {
+      const midY = by + barRowH / 2;
+      ctx.fillStyle = C.text;
+      ctx.font = `600 ${story ? 30 : 27}px ${FONT}`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ellipsize(ctx, mu.name, labelW), padX, midY);
+      const trackH = 14;
+      roundRect(ctx, barX, midY - trackH / 2, barW, trackH, trackH / 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fill();
+      const fillW = Math.max(trackH, (Math.min(100, mu.pct) / 100) * barW);
+      roundRect(ctx, barX, midY - trackH / 2, fillW, trackH, trackH / 2);
+      ctx.fillStyle = C.brass;
+      ctx.fill();
+      ctx.fillStyle = C.muted;
+      ctx.font = `600 ${story ? 28 : 25}px ${FONT}`;
+      ctx.textAlign = 'right';
+      ctx.fillText(`${mu.pct}%`, padX + innerW, midY);
+      by += barRowH + barGap;
+    }
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+  }
+
+  // ── Record card (gold) ─────────────────────────────────────────────────────
   if (m.record) {
-    ctx.fillStyle = gold900;
-    roundRect(ctx, padX, y, w - padX * 2, 130, 22);
+    roundRect(ctx, padX, recTop, innerW, recH, 26);
+    ctx.fillStyle = C.brassSoft;
     ctx.fill();
-    ctx.fillStyle = goldDim;
-    ctx.font = `600 22px ${FONT}`;
-    ctx.fillText('TOP RECORD', padX + 30, y + 44);
-    ctx.fillStyle = text;
-    ctx.font = `500 34px ${FONT}`;
-    ctx.fillText(ellipsize(ctx, m.record.name, w - padX * 2 - 260), padX + 30, y + 92);
-    ctx.fillStyle = gold;
-    ctx.font = `700 46px ${FONT}`;
+    ctx.strokeStyle = 'rgba(200,168,106,0.34)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = C.brass;
+    ctx.font = `700 22px ${FONT}`;
+    ctx.save();
+    ctx.letterSpacing = '2px';
+    ctx.fillText(
+      '★ ' + ellipsize(ctx, m.record.name.toUpperCase(), innerW - 220),
+      padX + 34,
+      recTop + (story ? 50 : 46),
+    );
+    ctx.restore();
+    ctx.fillStyle = C.text;
+    ctx.font = `800 ${story ? 46 : 40}px ${FONT}`;
     ctx.textAlign = 'right';
-    ctx.fillText(m.record.detail, w - padX - 30, y + 84);
+    ctx.fillText(m.record.detail, padX + innerW - 34, recTop + recH - (story ? 40 : 36));
     ctx.textAlign = 'left';
-    y += 130 + 20;
   }
+
+  // ── Calorie chip (blue) ────────────────────────────────────────────────────
   if (m.kcal) {
+    roundRect(ctx, padX, kcalTop, innerW, kcalH, 24);
     ctx.fillStyle = 'rgba(61,132,201,0.14)';
-    roundRect(ctx, padX, y, w - padX * 2, 86, 20);
     ctx.fill();
-    ctx.fillStyle = kcalBlue;
-    ctx.font = `700 30px ${FONT}`;
-    ctx.fillText('◆', padX + 30, y + 54);
-    ctx.fillStyle = '#cbe0f6';
-    ctx.font = `600 34px ${FONT}`;
-    ctx.fillText(m.kcal, padX + 72, y + 55);
-    y += 86;
+    ctx.strokeStyle = 'rgba(61,132,201,0.32)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // flame glyph
+    ctx.fillStyle = '#3d84c9';
+    ctx.beginPath();
+    const fx = padX + 44;
+    const fy = kcalTop + kcalH / 2;
+    ctx.moveTo(fx, fy - 22);
+    ctx.bezierCurveTo(fx + 20, fy - 6, fx + 16, fy + 22, fx, fy + 22);
+    ctx.bezierCurveTo(fx - 16, fy + 22, fx - 20, fy - 2, fx - 4, fy - 10);
+    ctx.bezierCurveTo(fx - 6, fy + 2, fx + 2, fy + 6, fx + 4, fy - 2);
+    ctx.bezierCurveTo(fx + 6, fy - 10, fx, fy - 14, fx, fy - 22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#8fbde8';
+    ctx.font = `700 ${story ? 40 : 34}px ${FONT}`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ellipsize(ctx, m.kcal, innerW - 120), padX + 84, fy + 2);
+    ctx.textBaseline = 'alphabetic';
   }
 
-  // footer handle
-  ctx.fillStyle = 'rgba(255,255,255,0.12)';
-  ctx.fillRect(padX, h - 92, w - padX * 2, 2);
-  ctx.fillStyle = muted;
-  ctx.font = `500 26px ${FONT}`;
-  ctx.fillText(m.handle, padX, h - 50);
-}
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  txt: string,
-  x: number,
-  y: number,
-  maxW: number,
-  lh: number,
-): void {
-  const words = txt.split(' ');
-  let line = '';
-  let yy = y;
-  for (const wd of words) {
-    const test = line ? `${line} ${wd}` : wd;
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line, x, yy);
-      line = wd;
-      yy += lh;
-    } else line = test;
-  }
-  if (line) ctx.fillText(line, x, yy);
+  // ── Footer handle ──────────────────────────────────────────────────────────
+  ctx.fillStyle = C.faint;
+  ctx.font = `600 24px ${FONT}`;
+  ctx.textAlign = 'center';
+  ctx.save();
+  ctx.letterSpacing = '3px';
+  ctx.fillText(m.handle.toUpperCase(), w / 2, footerBaseline);
+  ctx.restore();
+  ctx.textAlign = 'left';
 }

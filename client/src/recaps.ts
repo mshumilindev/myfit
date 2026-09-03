@@ -68,13 +68,7 @@ export type RecapDelta = number | null; // fraction (+0.18 = up 18%); null = no 
 export interface Recap {
   ref: RecapRef;
   prevExists: boolean;
-  headline:
-    | 'firstPeriod'
-    | 'highestVolume'
-    | 'consistency'
-    | 'records'
-    | 'comeback'
-    | 'steady';
+  headline: 'firstPeriod' | 'highestVolume' | 'consistency' | 'records' | 'comeback' | 'steady';
   // totals
   sessions: number;
   volumeKg: number;
@@ -108,7 +102,11 @@ export interface Recap {
   // trend
   trend: RecapTrendBar[];
   // goals
-  goal: { archetype: string; adherencePct: number; hits: { muscle: FocusMuscle; ok: boolean }[] } | null;
+  goal: {
+    archetype: string;
+    adherencePct: number;
+    hits: { muscle: FocusMuscle; ok: boolean }[];
+  } | null;
   // activities
   recoveryMin: number;
   conditioningMin: number;
@@ -142,9 +140,7 @@ export function recapRefFromId(id: string): RecapRef | null {
 }
 
 function finishedIn(workouts: Workout[], start: number, end: number): Workout[] {
-  return workouts.filter(
-    (w) => w.finishedAt != null && w.startedAt >= start && w.startedAt < end,
-  );
+  return workouts.filter((w) => w.finishedAt != null && w.startedAt >= start && w.startedAt < end);
 }
 
 function statusFor(kind: RecapPeriodKind, closed: boolean, sessions: number): RecapStatus {
@@ -203,7 +199,8 @@ function totals(ws: Workout[], bodyKg: number | null): Totals {
     calories = 0;
   for (const w of ws) {
     volumeKg += workoutVolumeKg(w);
-    timeHours += Math.min(6 * HOUR, Math.max(0, (w.finishedAt ?? w.startedAt) - w.startedAt)) / HOUR;
+    timeHours +=
+      Math.min(6 * HOUR, Math.max(0, (w.finishedAt ?? w.startedAt) - w.startedAt)) / HOUR;
     sets += workoutSets(w);
     for (const e of w.exercises) for (const s of e.sets) reps += setRepsTotal(s);
     calories += workoutCalories(w, bodyKg) ?? 0;
@@ -269,8 +266,8 @@ export function buildRecap(
     }
   }
   // A PR = an e1RM that beats this exercise's all-time best from BEFORE the
-  // period (a first-ever exercise has nothing to beat, so it doesn't count).
-  // Keep the single best PR set per exercise.
+  // period. A first-ever lift (no prior best) also establishes a record, so a
+  // debut month is never shown as 0 PRs. Keep the single best PR set per lift.
   const prBest = new Map<string, RecapRecord>();
   let heaviestSet: Recap['heaviestSet'] = null;
   let biggestSession: Recap['biggestSession'] = null;
@@ -286,10 +283,12 @@ export function buildRecap(
         if (tw > 0 && (!heaviestSet || tw > heaviestSet.weightKg))
           heaviestSet = { name: ex.name, weightKg: tw, reps: s.reps };
         const e = setBestE1rm(s);
-        if (e <= 0 || prior <= 0 || e <= prior) continue;
+        // A PR = a new best for this lift vs the all-time best from BEFORE this
+        // period. First-ever lifts (no prior) establish a record, so they count
+        // too — otherwise a debut month would show zero PRs.
+        if (e <= 0 || e <= prior) continue;
         const cur = prBest.get(ex.name);
-        if (!cur || e > cur.e1rm)
-          prBest.set(ex.name, { name: ex.name, weightKg: tw, e1rm: e });
+        if (!cur || e > cur.e1rm) prBest.set(ex.name, { name: ex.name, weightKg: tw, e1rm: e });
       }
     }
   }
@@ -395,7 +394,7 @@ export function buildRecap(
   // ─ headline ─
   let headline: Recap['headline'] = 'steady';
   if (!prevExists) headline = 'firstPeriod';
-  else if (volumeIsPeak && (t.volumeKg > p.volumeKg)) headline = 'highestVolume';
+  else if (volumeIsPeak && t.volumeKg > p.volumeKg) headline = 'highestVolume';
   else if (prCount >= 2) headline = 'records';
   else if (perfectWeeks >= Math.max(2, weeksInPeriod - 1)) headline = 'consistency';
   else if (t.volumeKg > p.volumeKg * 1.05) headline = 'comeback';

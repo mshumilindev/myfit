@@ -25498,6 +25498,18 @@ button.badge {
   background: var(--color-bg);
   min-height: 100%;
 }
+.rc-topbar .back {
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-neutral-300);
+  font-size: 19px;
+  margin-left: -6px;
+  padding: 4px;
+  cursor: pointer;
+}
 .rc-topbar {
   display: flex;
   align-items: center;
