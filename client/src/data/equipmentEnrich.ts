@@ -2127,4 +2127,91 @@ export const EQUIPMENT_ENRICH: Record<
       { brand: 'Slackline Industries', name: 'Play Line' },
     ],
   },
+
+  // ── Aquatic / extra cardio / studio (tranche 7) ──
+  'aqua-dumbbells': {
+    models: [
+      { brand: 'Hydro-Fit', name: 'Hand Buoys' },
+      { brand: 'Speedo', name: 'Aqua Dumbbells' },
+    ],
+  },
+  'aqua-barbell': {
+    models: [
+      { brand: 'Hydro-Fit', name: 'Buoyancy Bar' },
+      { brand: 'AquaJogger', name: 'Buoyancy Cuffs Bar' },
+    ],
+  },
+  'aqua-jogger-belt': {
+    models: [
+      { brand: 'AquaJogger', name: 'Classic / Pro' },
+      { brand: 'Speedo', name: 'Aqua Fitness Belt' },
+    ],
+  },
+  'aqua-kickboard': {
+    models: [
+      { brand: 'Speedo', name: 'Kickboard' },
+      { brand: 'TYR', name: 'Kickboard' },
+    ],
+  },
+  'aqua-pull-buoy': {
+    models: [
+      { brand: 'FINIS', name: 'Pull Buoy' },
+      { brand: 'TYR', name: 'Pull Float' },
+    ],
+  },
+  'aqua-hand-paddles': {
+    models: [
+      { brand: 'FINIS', name: 'Freestyler' },
+      { brand: 'Speedo', name: 'Power Paddle' },
+    ],
+  },
+  'aqua-fins': {
+    models: [
+      { brand: 'FINIS', name: 'Zoomers' },
+      { brand: 'DMC', name: 'Elite Fins' },
+    ],
+  },
+  'aqua-resistance-gloves': {
+    models: [
+      { brand: 'Speedo', name: 'Aqua Fitness Gloves' },
+      { brand: 'Hydro-Fit', name: 'Wave Web Gloves' },
+    ],
+  },
+  'aqua-snorkel': {
+    models: [
+      { brand: 'FINIS', name: "Swimmer's Snorkel" },
+      { brand: 'Arena', name: 'Swim Snorkel' },
+    ],
+  },
+  'aqua-step': {
+    models: [
+      { brand: 'Hydro-Fit', name: 'Aqua Step' },
+      { brand: 'SPRI', name: 'Aquatic Step' },
+    ],
+  },
+  'cardio-jacobs-ladder': {
+    models: [
+      { brand: 'Jacobs Ladder', name: 'Original / JL2' },
+      { brand: 'Matrix', name: 'Climbmill' },
+    ],
+  },
+  'cardio-treadclimber': { models: [{ brand: 'Bowflex', name: 'TreadClimber TC200' }] },
+  'rec-pilates-ring': {
+    models: [
+      { brand: 'Balanced Body', name: 'Pilates Ring' },
+      { brand: 'Merrithew', name: 'Fitness Circle' },
+    ],
+  },
+  'rec-balance-disc': {
+    models: [
+      { brand: 'TheraBand', name: 'Stability Disc' },
+      { brand: 'URBNFit', name: 'Balance Cushion' },
+    ],
+  },
+  'grip-finger-bands': {
+    models: [
+      { brand: 'IronMind', name: 'Expand-Your-Hand Bands' },
+      { brand: 'TheraBand', name: 'Hand Xtrainer' },
+    ],
+  },
 };
