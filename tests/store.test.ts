@@ -558,7 +558,7 @@ describe('EQ set and exercise volume', () => {
     expect(setRepsTotal(dropSet)).toBe(15);
   });
 
-  it('best e1RM counts drop parts, so a reverse-drop\'s heavier drop still scores', () => {
+  it("best e1RM counts drop parts, so a reverse-drop's heavier drop still scores", () => {
     // Plain working set: best e1RM is the set itself.
     expect(setBestE1rm(set({ reps: 6, weight: 100 }))).toBe(est1rm(100, 6));
     // Reverse-drop: light top (60x8 -> 76) but the ascending drop 100x3 -> 110

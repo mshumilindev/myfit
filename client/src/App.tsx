@@ -327,7 +327,10 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'recap' && parts[1])
     return { tab: 'today', overlay: { screen: 'recap', period: decodeURIComponent(parts[1]) } };
   if (head === 'recap-story' && parts[1])
-    return { tab: 'today', overlay: { screen: 'recap-story', period: decodeURIComponent(parts[1]) } };
+    return {
+      tab: 'today',
+      overlay: { screen: 'recap-story', period: decodeURIComponent(parts[1]) },
+    };
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
@@ -1195,9 +1198,7 @@ export function App() {
             <RecapView
               period={activeOverlay.period}
               desktop
-              onStory={() =>
-                setOverlay({ screen: 'recap-story', period: activeOverlay.period })
-              }
+              onStory={() => setOverlay({ screen: 'recap-story', period: activeOverlay.period })}
               onClose={closeOverlay}
             />
           )}

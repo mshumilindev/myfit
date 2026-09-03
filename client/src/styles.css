@@ -25339,12 +25339,15 @@ button.badge {
 
 /* ═══════════ Recaps (My Fit — Recaps; live in Notifications) ═══════════ */
 :root {
-  --rc-wash: radial-gradient(120% 90% at 20% 0%, rgba(233, 192, 122, 0.22), transparent 60%),
+  --rc-wash:
+    radial-gradient(120% 90% at 20% 0%, rgba(233, 192, 122, 0.22), transparent 60%),
     linear-gradient(160deg, #221d13 0%, #191a1d 62%);
-  --rc-replay: radial-gradient(130% 90% at 82% 4%, rgba(233, 192, 122, 0.34), transparent 52%),
+  --rc-replay:
+    radial-gradient(130% 90% at 82% 4%, rgba(233, 192, 122, 0.34), transparent 52%),
     radial-gradient(120% 100% at 12% 100%, rgba(61, 132, 201, 0.14), transparent 55%),
     linear-gradient(160deg, #2a2113 0%, #1a1a1e 60%, #141518 100%);
-  --rc-wash-cool: radial-gradient(120% 80% at 85% 6%, rgba(61, 132, 201, 0.16), transparent 55%),
+  --rc-wash-cool:
+    radial-gradient(120% 80% at 85% 6%, rgba(61, 132, 201, 0.16), transparent 55%),
     radial-gradient(120% 90% at 8% 100%, rgba(233, 192, 122, 0.08), transparent 55%),
     linear-gradient(165deg, #1c1f24 0%, #16171b 55%, #131417 100%);
 }
@@ -25674,7 +25677,8 @@ button.badge {
   aspect-ratio: 1080 / 1350;
   border-radius: 24px;
   overflow: hidden;
-  background: radial-gradient(120% 80% at 20% 0%, rgba(233, 192, 122, 0.28), transparent 55%),
+  background:
+    radial-gradient(120% 80% at 20% 0%, rgba(233, 192, 122, 0.28), transparent 55%),
     linear-gradient(165deg, #221d13 0%, #17181b 55%, #131417 100%);
   display: flex;
   flex-direction: column;
@@ -25694,7 +25698,6 @@ button.badge {
     grid-column: span 2;
   }
 }
-
 
 /* Recap — buttons & story helpers (app style: outlined, never filled) */
 .rc-btn-block {

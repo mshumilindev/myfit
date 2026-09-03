@@ -1756,7 +1756,8 @@ export const lt: Strings = {
   rcTMoved: (t: string) => `${t} pakelta`,
   rcSetWxR: (w: string, r: number) => `${w} × ${r}`,
   rcMuscleDist: 'Raumenų pasiskirstymas',
-  rcLeastHint: (m: string) => `${m} — mažiausiai darbo šiuo laikotarpiu; verta atkreipti dėmesį kitame bloke.`,
+  rcLeastHint: (m: string) =>
+    `${m} — mažiausiai darbo šiuo laikotarpiu; verta atkreipti dėmesį kitame bloke.`,
   rcWhereWork: 'Kur nukeliavo darbas',
   rcMuscleLed: (a: string, b: string) => `Pirmavo ${a} ir ${b}`,
   rcConsistency: 'Nuoseklumas',
@@ -1792,5 +1793,4 @@ export const lt: Strings = {
   rcYouSetRecords: (n: number) => `${n} nauji asmeniniai rekordai`,
   rcTopRecord: 'Geriausias rekordas',
   rcUp: (pct: string) => `+${pct}`,
-
 };

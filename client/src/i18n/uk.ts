@@ -1747,7 +1747,8 @@ export const uk: Strings = {
   rcTMoved: (t: string) => `${t} піднято`,
   rcSetWxR: (w: string, r: number) => `${w} × ${r}`,
   rcMuscleDist: 'Розподіл по мʼязах',
-  rcLeastHint: (m: string) => `${m} — найменше роботи цього періоду; варто глянути в наступному блоці.`,
+  rcLeastHint: (m: string) =>
+    `${m} — найменше роботи цього періоду; варто глянути в наступному блоці.`,
   rcWhereWork: 'Куди пішла робота',
   rcMuscleLed: (a: string, b: string) => `Провідні — ${a} та ${b}`,
   rcConsistency: 'Постійність',
@@ -1783,5 +1784,4 @@ export const uk: Strings = {
   rcYouSetRecords: (n: number) => `${n} нових особистих рекордів`,
   rcTopRecord: 'Головний рекорд',
   rcUp: (pct: string) => `+${pct}`,
-
 };

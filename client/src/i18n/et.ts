@@ -1742,7 +1742,8 @@ export const et: Strings = {
   rcTMoved: (t: string) => `${t} liigutatud`,
   rcSetWxR: (w: string, r: number) => `${w} × ${r}`,
   rcMuscleDist: 'Lihaste jaotus',
-  rcLeastHint: (m: string) => `${m} sai sel perioodil kõige vähem tööd — tasub järgmises plokis vaadata.`,
+  rcLeastHint: (m: string) =>
+    `${m} sai sel perioodil kõige vähem tööd — tasub järgmises plokis vaadata.`,
   rcWhereWork: 'Kuhu töö läks',
   rcMuscleLed: (a: string, b: string) => `Eesotsas ${a} ja ${b}`,
   rcConsistency: 'Järjepidevus',
@@ -1778,5 +1779,4 @@ export const et: Strings = {
   rcYouSetRecords: (n: number) => `${n} uut isiklikku rekordit`,
   rcTopRecord: 'Parim rekord',
   rcUp: (pct: string) => `+${pct}`,
-
 };

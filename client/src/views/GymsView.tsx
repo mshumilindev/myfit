@@ -341,7 +341,11 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
 
             <div className="gyms-detail-body">
               <div className="gyms-actions">
-                <button className="btn btn-primary" onClick={startAtSelectedGym} disabled={sessionBusy}>
+                <button
+                  className="btn btn-primary"
+                  onClick={startAtSelectedGym}
+                  disabled={sessionBusy}
+                >
                   <Icon name="play" />
                   {t.startSessionHere}
                 </button>

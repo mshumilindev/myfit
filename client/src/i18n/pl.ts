@@ -1748,7 +1748,8 @@ export const pl: Strings = {
   rcTMoved: (t: string) => `${t} podniesione`,
   rcSetWxR: (w: string, r: number) => `${w} × ${r}`,
   rcMuscleDist: 'Rozkład na mięśnie',
-  rcLeastHint: (m: string) => `${m} — najmniej pracy w tym okresie; warto spojrzeć w kolejnym bloku.`,
+  rcLeastHint: (m: string) =>
+    `${m} — najmniej pracy w tym okresie; warto spojrzeć w kolejnym bloku.`,
   rcWhereWork: 'Gdzie poszła praca',
   rcMuscleLed: (a: string, b: string) => `Prowadziły ${a} i ${b}`,
   rcConsistency: 'Regularność',
@@ -1784,5 +1785,4 @@ export const pl: Strings = {
   rcYouSetRecords: (n: number) => `${n} nowych rekordów życiowych`,
   rcTopRecord: 'Najlepszy rekord',
   rcUp: (pct: string) => `+${pct}`,
-
 };

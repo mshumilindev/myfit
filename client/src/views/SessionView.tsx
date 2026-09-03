@@ -461,14 +461,12 @@ export function SessionView(props: {
     const planned = Math.max(0, ex.plannedSets ?? 0);
     return planned > 0 ? ex.sets.length < planned : ex.sets.length === 0;
   };
-  const lastLoggedEx = lastLoggedExId
-    ? sortedExercises.find((e) => e.id === lastLoggedExId)
-    : null;
+  const lastLoggedEx = lastLoggedExId ? sortedExercises.find((e) => e.id === lastLoggedExId) : null;
   const lastLoggedStillGoing =
     lastLoggedEx && !isMarkerExercise(lastLoggedEx)
-      ? (Math.max(0, lastLoggedEx.plannedSets ?? 0) > 0
-          ? lastLoggedEx.sets.length < (lastLoggedEx.plannedSets as number)
-          : true)
+      ? Math.max(0, lastLoggedEx.plannedSets ?? 0) > 0
+        ? lastLoggedEx.sets.length < (lastLoggedEx.plannedSets as number)
+        : true
       : false;
   const activeExerciseId =
     (lastLoggedStillGoing ? lastLoggedEx!.id : null) ??
