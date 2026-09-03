@@ -1,5 +1,6 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { tokenMatch } from '../search';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -2558,7 +2559,7 @@ function AddExerciseSheet(props: {
   const historyMatches =
     kind === 'strength'
       ? known
-          .filter((k) => (needle ? k.name.toLowerCase().includes(needle) : true))
+          .filter((k) => tokenMatch(k.name, needle))
           .map((k) => ({ name: k.name, last: k.last, info: muscleInfoByName(k.name) }))
           .filter(
             (k) =>
@@ -2755,7 +2756,7 @@ function AddExerciseSheet(props: {
       .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
     const visible = all.filter(
       (x) =>
-        (needle ? x.name.toLowerCase().includes(needle) : true) &&
+        tokenMatch(x.name, needle) &&
         (muscle === undefined || x.primary === muscle || x.secondary.includes(muscle)) &&
         (equip === undefined || x.equipment === equip),
     );

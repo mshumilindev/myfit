@@ -6,6 +6,7 @@
  * avoids nesting a Sheet inside a Sheet, which mis-positioned before).
  */
 import { useEffect, useMemo, useState } from 'react';
+import { tokenMatch } from '../search';
 import type { Gym } from '../types';
 import { getCurrentPositionOnce } from '../store';
 import {
@@ -112,7 +113,7 @@ export function GymPicker({
   }, [gyms, coords]);
   const suggested = useMemo(() => suggestGymId(gyms, coords), [gyms, coords]);
   const needle = q.trim().toLowerCase();
-  const filtered = needle ? sorted.filter((g) => g.name.toLowerCase().includes(needle)) : sorted;
+  const filtered = sorted.filter((g) => tokenMatch(g.name, needle));
 
   const body = (
     <>

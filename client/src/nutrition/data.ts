@@ -1,4 +1,5 @@
 import type { CookingMethod, Food } from './types';
+import { tokenMatch } from '../search';
 
 /** Seed product database (per 100 g unless basis 100ml). Stand-in for Open Food Facts. */
 export const PRODUCTS: Food[] = [
@@ -383,7 +384,7 @@ export function searchFoods(q: string, custom: Food[], scope: 'product' | 'dish'
     scope === 'dish' ? DISHES : [...custom.filter((f) => f.kind === 'product'), ...PRODUCTS];
   const s = q.trim().toLowerCase();
   if (!s) return pool.slice(0, 12);
-  return pool.filter((f) => f.name.toLowerCase().includes(s)).slice(0, 20);
+  return pool.filter((f) => tokenMatch(f.name, s)).slice(0, 20);
 }
 
 export function findByBarcode(code: string, custom: Food[]): Food | null {

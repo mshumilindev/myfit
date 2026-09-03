@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { tokenMatch } from '../search';
 import { estimateDish } from './ai';
 import { localDay, makeItem, roundMacros, round, sumMacros } from './calc';
 import {
@@ -174,9 +175,7 @@ function SearchStep({ onPick }: { onPick: (food: Food) => void }) {
   }, [q, scope]);
 
   const local = useMemo(() => searchFoods(q, customFoods, scope), [q, customFoods, scope]);
-  const mine = customFoods.filter(
-    (f) => f.kind === 'product' && f.name.toLowerCase().includes(q.trim().toLowerCase()),
-  );
+  const mine = customFoods.filter((f) => f.kind === 'product' && tokenMatch(f.name, q));
   const results: Food[] =
     scope === 'dish' ? local : [...mine, ...remote, ...(err ? local.filter((f) => !f.custom) : [])];
 

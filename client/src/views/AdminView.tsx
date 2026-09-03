@@ -1,5 +1,6 @@
 /** Admin — design AD-01…AD-06. People table, invites, assignments. */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { tokenMatch } from '../search';
 import { cachePeek, cacheSet, callFn, getUsername } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtSessionClock, useT } from '../i18n';
 import { fullPersonName } from '../name';
@@ -117,12 +118,7 @@ export function AdminView({ onOpenProfile }: { onOpenProfile: (id: string) => vo
         if (filter === 'members' && p.role !== 'member') return false;
         if (filter === 'trainers' && p.role !== 'trainer') return false;
         if (filter === 'pending' && p.status !== 'invited') return false;
-        if (
-          needle &&
-          !p.name.toLowerCase().includes(needle) &&
-          !p.username.toLowerCase().includes(needle)
-        )
-          return false;
+        if (needle && !tokenMatch(p.name, needle) && !tokenMatch(p.username, needle)) return false;
         return true;
       }),
     [people, filter, needle],

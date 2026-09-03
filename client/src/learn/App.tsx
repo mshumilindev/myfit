@@ -13,6 +13,7 @@
  * - Localised UI via useLearnT.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { tokenMatch } from '../search';
 import { Icon, LanguageSelector } from '../ui';
 import { AppRail } from '../components/AppRail';
 import { NotificationsView } from '../views/NotificationsView';
@@ -207,9 +208,7 @@ function HomeScreen({
       lessons.filter(
         (l) =>
           (active.size === 0 || active.has(l.topic)) &&
-          (query.length === 0 ||
-            l.title.toLowerCase().includes(query) ||
-            l.blurb.toLowerCase().includes(query)),
+          (query.length === 0 || tokenMatch(l.title, query) || tokenMatch(l.blurb, query)),
       ),
     [lessons, active, query],
   );

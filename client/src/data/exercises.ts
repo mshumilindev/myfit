@@ -4,6 +4,7 @@
  * older picker/search code.
  */
 import DB_RAW from './exercises.db.json';
+import { tokenMatch } from '../search';
 import RICH_RAW from './exercises.rich.json';
 import SUBREGIONS_RAW from './subregionTags.json';
 import type { EquipmentId } from './equipment';
@@ -402,7 +403,7 @@ export function searchCatalog(
   for (const ex of pool) {
     const names = ex.names.map((n) => n.toLowerCase());
     if (names.some((n) => n.startsWith(q))) starts.push(ex);
-    else if (names.some((n) => n.includes(q))) contains.push(ex);
+    else if (names.some((n) => tokenMatch(n, q))) contains.push(ex);
     if (starts.length >= limit * 2) break;
   }
   return [...starts, ...contains].slice(0, limit);

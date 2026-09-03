@@ -8,6 +8,7 @@
  * full-width on mobile and in the desktop content column.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { tokenMatch } from '../search';
 import { createPortal } from 'react-dom';
 import { fmtDayMonth, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
@@ -133,7 +134,7 @@ export function ChallengesView({ store }: { store: StoreState }) {
       if (!needle) return true;
       const hay =
         `${c.title(t, c.target)} ${c.keywords} ${t.chCat[c.category] ?? ''}`.toLowerCase();
-      return hay.includes(needle);
+      return tokenMatch(hay, needle);
     });
   }, [catalog, cat, q, t]);
 

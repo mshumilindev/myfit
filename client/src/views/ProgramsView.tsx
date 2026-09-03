@@ -1,5 +1,6 @@
 /** Programs — trainer/admin authoring + client assignment (AC-ROLE-06, O-07). */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { tokenMatch } from '../search';
 import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { getRole, getUsername, callFn, currentUid, trackMutation } from '../api';
 import { db } from '../firebase';
@@ -297,7 +298,7 @@ export function ProgramsView({
   const programMatches = useMemo(() => {
     const q = programQuery.trim().toLowerCase();
     if (!q) return programs ?? [];
-    return (programs ?? []).filter((program) => program.name.toLowerCase().includes(q));
+    return (programs ?? []).filter((program) => tokenMatch(program.name, q));
   }, [programQuery, programs]);
   const selectedDayItems = useMemo(
     () =>
@@ -1966,9 +1967,7 @@ function EquipmentSelector({
   }, []);
   const common = EQUIPMENT_IDS.slice(0, 6);
   const q = query.trim().toLowerCase();
-  const matches = (q ? EQUIPMENT_IDS : common).filter((id) =>
-    t.equipmentNames[id].toLowerCase().includes(q),
-  );
+  const matches = (q ? EQUIPMENT_IDS : common).filter((id) => tokenMatch(t.equipmentNames[id], q));
 
   function toggle(id: EquipmentId) {
     onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id]);

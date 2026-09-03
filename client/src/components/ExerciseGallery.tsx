@@ -39,6 +39,7 @@ import {
   type MyExercise,
 } from '../store';
 import { getRole } from '../api';
+import { tokenMatch } from '../search';
 import { useT } from '../i18n';
 import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { equipmentIconName, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
@@ -201,7 +202,7 @@ export function ExerciseGallery({
       rows
         .filter(
           (r) =>
-            (!needle || r.name.toLowerCase().includes(needle)) &&
+            tokenMatch(r.name, needle) &&
             (s.muscle === undefined || r.primary === s.muscle || r.secondary.includes(s.muscle)) &&
             (s.equip === undefined || r.equipment === s.equip) &&
             (s.category === undefined || r.category === s.category) &&
@@ -236,7 +237,7 @@ export function ExerciseGallery({
   const mineMatches = mineRows
     .filter(
       (r) =>
-        (!needle || r.name.toLowerCase().includes(needle)) &&
+        tokenMatch(r.name, needle) &&
         (s.muscle === undefined || r.primary === s.muscle || r.secondary.includes(s.muscle)) &&
         (s.equip === undefined || r.equipment === s.equip),
     )
