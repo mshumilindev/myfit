@@ -11,6 +11,7 @@
 import type { MuscleGroup } from './exercises';
 import type { EquipmentId } from './equipment';
 import { EQUIPMENT_ENRICH } from './equipmentEnrich';
+import { EQUIPMENT_IMAGES } from './equipmentImages.generated';
 
 export type EquipCategory =
   | 'barbell'
@@ -3925,17 +3926,21 @@ export const EQUIPMENT_BY_CATEGORY = EQUIPMENT_CATALOG.reduce<Record<string, Equ
   {},
 );
 
+function merge(item: EquipmentItem): EquipmentItem {
+  const extra = EQUIPMENT_ENRICH[item.id];
+  const img = EQUIPMENT_IMAGES[item.id];
+  let out = item;
+  if (extra) out = { ...out, ...extra };
+  if (img) out = { ...out, image: img };
+  return out;
+}
+
 export function equipmentById(id: string): EquipmentItem | undefined {
   const base = EQUIPMENT_CATALOG.find((e) => e.id === id);
-  if (!base) return undefined;
-  const extra = EQUIPMENT_ENRICH[id];
-  return extra ? { ...base, ...extra } : base;
+  return base ? merge(base) : undefined;
 }
 
 /** The catalog with model lines + images merged in (for lists/search). */
 export function enrichedCatalog(): EquipmentItem[] {
-  return EQUIPMENT_CATALOG.map((e) => {
-    const extra = EQUIPMENT_ENRICH[e.id];
-    return extra ? { ...e, ...extra } : e;
-  });
+  return EQUIPMENT_CATALOG.map(merge);
 }
