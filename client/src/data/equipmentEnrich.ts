@@ -1175,4 +1175,899 @@ export const EQUIPMENT_ENRICH: Record<
       { brand: 'REP Fitness', name: 'Plate Tree' },
     ],
   },
+
+  // ── Barbells (remaining) ──
+  'barbell-curl-cambered': {
+    models: [
+      { brand: 'Rogue', name: 'Cambered Curl Bar' },
+      { brand: 'Ivanko', name: 'Super Curl Bar' },
+    ],
+  },
+  'barbell-curl-fixed': {
+    models: [
+      { brand: 'Troy', name: 'Fixed Curl Bars' },
+      { brand: 'Ivanko', name: 'Fixed EZ Curl' },
+    ],
+  },
+  'barbell-bench-specialist': {
+    models: [
+      { brand: 'Rogue', name: 'Ohio Power Bar' },
+      { brand: 'Texas Power Bars', name: 'Texas Bench Bar' },
+    ],
+  },
+
+  // ── Dumbbells ──
+  'dumbbell-studio': {
+    models: [
+      { brand: 'SPRI', name: 'Vinyl Dumbbells' },
+      { brand: 'Body-Solid', name: 'Vinyl Dumbbells' },
+    ],
+  },
+  'dumbbell-spinlock': {
+    models: [
+      { brand: 'Marcy', name: 'Spinlock Handles' },
+      { brand: 'CAP Barbell', name: 'Spinlock Set' },
+    ],
+  },
+  'grip-globe-db': {
+    models: [
+      { brand: 'Rogue', name: 'Globe Dumbbells' },
+      { brand: 'IronMind', name: 'Globe Dumbbell' },
+    ],
+  },
+
+  // ── Kettlebells ──
+  'kb-powder-coat': {
+    models: [
+      { brand: 'Rogue', name: 'Kettlebell' },
+      { brand: 'Kettlebell Kings', name: 'Powder Coat' },
+    ],
+  },
+
+  // ── Plates ──
+  'plate-technique': {
+    models: [
+      { brand: 'Eleiko', name: 'XF Training Plate' },
+      { brand: 'Rogue', name: 'Technique Plate' },
+    ],
+  },
+
+  // ── Racks ──
+  'rack-jerk-blocks': {
+    models: [
+      { brand: 'Rogue', name: 'Jerk Blocks' },
+      { brand: 'Eleiko', name: 'Jerk Blocks' },
+    ],
+  },
+  'rack-pulling-blocks': {
+    models: [
+      { brand: 'Rogue', name: 'Pull Blocks' },
+      { brand: 'EliteFTS', name: 'Pulling Blocks' },
+    ],
+  },
+
+  // ── Benches ──
+  'bench-decline': {
+    models: [
+      { brand: 'Rogue', name: 'Decline Bench' },
+      { brand: 'Body-Solid', name: 'Decline Bench' },
+    ],
+  },
+  'bench-preacher': {
+    models: [
+      { brand: 'Body-Solid', name: 'Preacher Curl Bench' },
+      { brand: 'Legend Fitness', name: 'Preacher Curl' },
+    ],
+  },
+  'bench-hyper-45': {
+    models: [
+      { brand: 'Rogue', name: '45° Hyper' },
+      { brand: 'Titan Fitness', name: '45 Degree Hyper' },
+    ],
+  },
+  'bench-ab': {
+    models: [
+      { brand: 'Rogue', name: 'Ab Bench' },
+      { brand: 'Body-Solid', name: 'Ab Board' },
+    ],
+  },
+  'bench-seated-shoulder': {
+    models: [
+      { brand: 'Body-Solid', name: 'Shoulder Press Bench' },
+      { brand: 'Rogue', name: 'Vertical Bench' },
+    ],
+  },
+  'bench-roman-chair': {
+    models: [
+      { brand: 'Rogue', name: 'Roman Chair' },
+      { brand: 'Titan Fitness', name: 'Roman Chair' },
+    ],
+  },
+
+  // ── Machines (remaining) ──
+  'm-rotary-torso': {
+    models: [
+      { brand: 'Life Fitness', name: 'Signature Rotary Torso' },
+      { brand: 'Technogym', name: 'Rotary Torso' },
+    ],
+  },
+  'm-neck': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Four-Way Neck' },
+      { brand: 'Nautilus', name: '4-Way Neck' },
+    ],
+  },
+  'm-incline-press': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Select Incline Press' },
+      { brand: 'Life Fitness', name: 'Signature Incline Press' },
+    ],
+  },
+  'm-decline-press': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Select Decline Press' },
+      { brand: 'Panatta', name: 'Decline Press' },
+    ],
+  },
+  'm-converging-press': {
+    models: [
+      { brand: 'Life Fitness', name: 'Insignia Converging Chest' },
+      { brand: 'Precor', name: 'Converging Chest Press' },
+    ],
+  },
+  'm-seated-dip': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Seated Dip' },
+      { brand: 'Cybex', name: 'Dip' },
+    ],
+  },
+  'm-front-raise': { models: [{ brand: 'Panatta', name: 'Front Raise' }] },
+  'm-shrug': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Shrug' },
+      { brand: 'Nautilus', name: 'Shrug' },
+    ],
+  },
+  'm-cable-crunch-station': {
+    models: [
+      { brand: 'Life Fitness', name: 'Signature Abdominal' },
+      { brand: 'Technogym', name: 'Abdominal Crunch' },
+    ],
+  },
+  'm-oblique': {
+    models: [
+      { brand: 'Nautilus', name: 'Oblique' },
+      { brand: 'Technogym', name: 'Rotary Torso' },
+    ],
+  },
+  'm-multi-hip': {
+    models: [
+      { brand: 'Cybex', name: 'Multi-Hip' },
+      { brand: 'Life Fitness', name: 'Multi-Hip' },
+    ],
+  },
+  'm-standing-leg-curl': {
+    models: [
+      { brand: 'Precor', name: 'Standing Leg Curl' },
+      { brand: 'Cybex', name: 'Standing Leg Curl' },
+    ],
+  },
+  'm-single-leg-press': {
+    models: [
+      { brand: 'Cybex', name: 'Single Leg Press' },
+      { brand: 'Hammer Strength', name: 'Iso Single Leg Press' },
+    ],
+  },
+  'm-tibialis': {
+    models: [
+      { brand: 'Panatta', name: 'Tibia' },
+      { brand: 'ATG', name: 'Tib Bar' },
+    ],
+  },
+  'm-wrist-forearm': {
+    models: [
+      { brand: 'Panatta', name: 'Forearm' },
+      { brand: 'IronMind', name: 'Forearm Machine' },
+    ],
+  },
+  'm-hip-thrust': {
+    models: [
+      { brand: 'Technogym', name: 'Pure Glute' },
+      { brand: 'Booty Builder', name: 'Machine' },
+      { brand: 'Life Fitness', name: 'Glute' },
+    ],
+  },
+  'm-adj-cable-crunch': {
+    models: [
+      { brand: 'Technogym', name: 'Kinesis' },
+      { brand: 'Freemotion', name: 'Functional Trainer' },
+    ],
+  },
+  'm-sissy-squat': {
+    models: [
+      { brand: 'Panatta', name: 'Sissy Squat' },
+      { brand: 'Body-Solid', name: 'Sissy Squat' },
+    ],
+  },
+  'm-ab-coaster': { models: [{ brand: 'Ab Coaster', name: 'CS3000 / Max' }] },
+
+  // ── Plate-loaded (remaining) ──
+  'hs-iso-biceps': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Plate-Loaded Biceps' },
+      { brand: 'Panatta', name: 'Arm Curl' },
+    ],
+  },
+  'hs-iso-triceps': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Plate-Loaded Triceps' },
+      { brand: 'Panatta', name: 'Triceps' },
+    ],
+  },
+  'hs-super-row': {
+    models: [
+      { brand: 'Hammer Strength', name: 'Plate-Loaded Row' },
+      { brand: 'Panatta', name: 'Super Row' },
+    ],
+  },
+
+  // ── Cable (remaining) ──
+  'cable-crossover-cage': {
+    models: [
+      { brand: 'REP Fitness', name: 'Ares 2.0' },
+      { brand: 'Rogue', name: 'Cable Attachment' },
+    ],
+  },
+  'cable-wall-pulley': {
+    models: [
+      { brand: 'Freemotion', name: 'Cable Column' },
+      { brand: 'Rogue', name: 'Wall Pulley' },
+    ],
+  },
+  'cable-crossover-half': {
+    models: [
+      { brand: 'REP Fitness', name: 'Ares' },
+      { brand: 'Force USA', name: 'MyRack' },
+    ],
+  },
+
+  // ── Cardio (remaining) ──
+  'cardio-rope-trainer': {
+    models: [
+      { brand: 'Ropeflex', name: 'RX2500' },
+      { brand: 'Marpo', name: 'VLT / Rope Trainer' },
+    ],
+  },
+  'cardio-mini-stepper': {
+    models: [
+      { brand: 'Sunny Health', name: 'Mini Stepper' },
+      { brand: 'Xiser', name: 'Commercial' },
+    ],
+  },
+  'cardio-aqua-bike': {
+    models: [
+      { brand: 'Hydrorider', name: 'Aquabike' },
+      { brand: 'SciFit', name: 'Inclusive Fitness' },
+    ],
+  },
+
+  // ── Bands ──
+  'band-loop-power': {
+    models: [
+      { brand: 'Rogue', name: 'Monster Bands' },
+      { brand: 'EliteFTS', name: 'Pro Bands' },
+      { brand: 'WODFitters', name: 'Resistance Bands' },
+    ],
+  },
+  'band-mini': {
+    models: [
+      { brand: 'Rogue', name: 'Monster Mini Bands' },
+      { brand: 'Perform Better', name: 'Mini Band' },
+    ],
+  },
+  'band-tube-handles': {
+    models: [
+      { brand: 'Bodylastics', name: 'Resistance Tubes' },
+      { brand: 'SPRI', name: 'Xertube' },
+    ],
+  },
+  'band-therapy': {
+    models: [
+      { brand: 'TheraBand', name: 'Resistance Band' },
+      { brand: 'Perform Better', name: 'Exercise Band' },
+    ],
+  },
+  'band-hip-circle': {
+    models: [
+      { brand: 'Sling Shot', name: 'Hip Circle' },
+      { brand: 'Rogue', name: 'Mighty Band' },
+    ],
+  },
+  'band-deadlift': {
+    models: [
+      { brand: 'EliteFTS', name: 'Pro Resistance Bands' },
+      { brand: 'Rogue', name: 'Monster Bands' },
+    ],
+  },
+  'band-clip-set': {
+    models: [
+      { brand: 'Bodylastics', name: 'Clip Tube Set' },
+      { brand: 'Undersun', name: 'Fitness Bands' },
+    ],
+  },
+  'band-pull-apart': {
+    models: [
+      { brand: 'TheraBand', name: 'Loop' },
+      { brand: 'Rogue', name: 'Mobility Band' },
+    ],
+  },
+
+  // ── Suspension / gymnastics (remaining) ──
+  'gym-peg-board': { models: [{ brand: 'Rogue', name: 'Peg Board' }] },
+  'gym-monkey-bars': { models: [{ brand: 'Rogue', name: 'Monster Monkey Bars' }] },
+  'gym-salmon-ladder': { models: [{ brand: 'Rogue', name: 'Salmon Ladder' }] },
+  'gym-nordic-anchor': {
+    models: [
+      { brand: 'Rogue', name: 'Nordic / GHR Strap' },
+      { brand: 'Kabuki Strength', name: 'Nordic' },
+    ],
+  },
+  'sus-stall-bars': {
+    models: [
+      { brand: 'NOHrD', name: 'WallBars' },
+      { brand: 'Artimex', name: 'Stall Bars' },
+    ],
+  },
+  'sus-aerial-straps': {
+    models: [
+      { brand: 'Uplift Active', name: 'Aerial Yoga Hammock' },
+      { brand: 'Aerial Essentials', name: 'Silks' },
+    ],
+  },
+  'sus-parallel-bars': {
+    models: [
+      { brand: 'Gymnova', name: 'Parallel Bars' },
+      { brand: 'Rogue', name: 'Parallel Bars' },
+    ],
+  },
+
+  // ── Conditioning / strongman / speed (remaining) ──
+  'cond-sledgehammer-tire': { models: [{ brand: 'Rogue', name: 'Strength Sledgehammer' }] },
+  'cond-atlas-stones': {
+    models: [
+      { brand: 'Slater Hardware', name: 'Stone Molds' },
+      { brand: 'Rogue', name: 'Atlas Stone Molds' },
+    ],
+  },
+  'cond-keg': {
+    models: [
+      { brand: 'Rogue', name: 'Strongman Keg' },
+      { brand: 'Cerberus', name: 'Training Keg' },
+    ],
+  },
+  'cond-circus-db': {
+    models: [
+      { brand: 'Rogue', name: 'Circus Dumbbell' },
+      { brand: 'Cerberus', name: 'Circus Dumbbell' },
+    ],
+  },
+  'cond-husafell': {
+    models: [
+      { brand: 'Rogue', name: 'Husafell Stone' },
+      { brand: 'Cerberus', name: 'Husafell Bag' },
+    ],
+  },
+  'cond-hurdles': {
+    models: [
+      { brand: 'SKLZ', name: 'Speed Hurdles' },
+      { brand: 'Rogue', name: 'Plyo Hurdles' },
+    ],
+  },
+  'ball-toning': {
+    models: [
+      { brand: 'SPRI', name: 'Toning Ball' },
+      { brand: 'TheraBand', name: 'Soft Weight' },
+    ],
+  },
+  'ball-sandbell': { models: [{ brand: 'Hyperwear', name: 'SandBell' }] },
+  'ball-reaction': { models: [{ brand: 'SKLZ', name: 'Reaction Ball' }] },
+  'ball-power-plyo': {
+    models: [
+      { brand: 'Dynamax', name: 'Medicine Ball' },
+      { brand: 'Rogue', name: 'Med Ball' },
+    ],
+  },
+  'box-double-end': {
+    models: [
+      { brand: 'Everlast', name: 'Double-End Bag' },
+      { brand: 'Title Boxing', name: 'Double-End' },
+    ],
+  },
+  'box-grappling-dummy': {
+    models: [
+      { brand: 'Combat Sports', name: 'Grappling Dummy' },
+      { brand: 'Century', name: 'Grappling Dummy' },
+    ],
+  },
+  'spd-parachute': {
+    models: [
+      { brand: 'SKLZ', name: 'Speed Chute' },
+      { brand: 'Rogue', name: 'Speed Chute' },
+    ],
+  },
+  'spd-sled-harness': {
+    models: [
+      { brand: 'Rogue', name: 'Sled Harness' },
+      { brand: 'SKLZ', name: 'Sled Harness' },
+    ],
+  },
+  'spd-reaction-lights': {
+    models: [
+      { brand: 'BlazePod', name: 'Flash Reflex' },
+      { brand: 'FITLIGHT', name: 'Trainer' },
+    ],
+  },
+  'spd-cones-dots': {
+    models: [
+      { brand: 'SKLZ', name: 'Agility Cones' },
+      { brand: 'Rogue', name: 'Agility Cones' },
+    ],
+  },
+  'spd-resistance-belt': {
+    models: [
+      { brand: 'SKLZ', name: 'Acceleration Trainer' },
+      { brand: 'Rogue', name: 'Resistance Belt' },
+    ],
+  },
+  'cond-aqua-bag': {
+    models: [
+      { brand: 'Kamagon', name: 'Ball' },
+      { brand: 'Aqua Training Bag', name: 'Aqua Bag' },
+    ],
+  },
+  'cond-starting-blocks': {
+    models: [
+      { brand: 'Gill Athletics', name: 'Starting Blocks' },
+      { brand: 'SKLZ', name: 'Starting Blocks' },
+    ],
+  },
+  'cond-weighted-hoop': {
+    models: [
+      { brand: 'Sports Hoop', name: 'Weighted Hoop' },
+      { brand: 'Dynamis', name: 'Smart Hoop' },
+    ],
+  },
+  'cond-power-wheel': { models: [{ brand: 'Lifeline', name: 'Power Wheel' }] },
+
+  // ── Accessories: cable attachments & handles ──
+  'acc-lat-bar': {
+    models: [
+      { brand: 'Rogue', name: 'Lat Bar' },
+      { brand: 'Body-Solid', name: 'Lat Bar' },
+    ],
+  },
+  'acc-row-handle': {
+    models: [
+      { brand: 'Rogue', name: 'V-Handle' },
+      { brand: 'Spud Inc', name: 'Pulley Row Handle' },
+    ],
+  },
+  'acc-rope': {
+    models: [
+      { brand: 'Rogue', name: 'Triceps Rope' },
+      { brand: 'Spud Inc', name: 'Tricep Rope' },
+    ],
+  },
+  'acc-ez-cable-bar': {
+    models: [
+      { brand: 'Rogue', name: 'EZ Curl Cable Bar' },
+      { brand: 'Body-Solid', name: 'Curl Bar' },
+    ],
+  },
+  'acc-ankle-strap': {
+    models: [
+      { brand: 'Spud Inc', name: 'Ankle Strap' },
+      { brand: 'Rogue', name: 'Ankle Strap' },
+    ],
+  },
+  'acc-fat-grips': {
+    models: [
+      { brand: 'Fat Gripz', name: 'Original / Extreme' },
+      { brand: 'Rogue', name: 'Fat Grips' },
+    ],
+  },
+  'acc-glute-band-pad': {
+    models: [
+      { brand: 'Hampton', name: 'Barbell Pad' },
+      { brand: 'Rogue', name: 'Barbell Pad' },
+    ],
+  },
+  'acc-landmine-attach': {
+    models: [
+      { brand: 'Rogue', name: 'Landmine Attachments' },
+      { brand: 'PRIME Fitness', name: 'Landmine Handle' },
+    ],
+  },
+  'rack-deadlift-jack': {
+    models: [
+      { brand: 'Rogue', name: 'Deadlift Bar Jack' },
+      { brand: 'Cerberus', name: 'Deadlift Jack' },
+    ],
+  },
+  'acc-mag-grip': {
+    models: [
+      { brand: 'MAG Grip', name: 'Cable Attachments' },
+      { brand: 'PRIME Fitness', name: 'Handles' },
+    ],
+  },
+  'acc-d-handle': {
+    models: [
+      { brand: 'Rogue', name: 'Single D Handle' },
+      { brand: 'Spud Inc', name: 'D Handle' },
+    ],
+  },
+  'acc-straight-bar': {
+    models: [
+      { brand: 'Rogue', name: 'Straight Bar' },
+      { brand: 'Body-Solid', name: 'Straight Bar' },
+    ],
+  },
+  'acc-triangle': {
+    models: [
+      { brand: 'Rogue', name: 'Close Grip Handle' },
+      { brand: 'Body-Solid', name: 'Triangle Handle' },
+    ],
+  },
+  'acc-multi-grip-row': {
+    models: [
+      { brand: 'PRIME Fitness', name: 'Handles' },
+      { brand: 'Rogue', name: 'MSA Handle' },
+    ],
+  },
+  'acc-stirrup': {
+    models: [
+      { brand: 'Rogue', name: 'Stirrup Handle' },
+      { brand: 'Body-Solid', name: 'Nylon Handle' },
+    ],
+  },
+  'band-pegs': {
+    models: [
+      { brand: 'Rogue', name: 'Band Pegs' },
+      { brand: 'Titan Fitness', name: 'Band Pegs' },
+    ],
+  },
+  'grip-thick-handle': {
+    models: [
+      { brand: 'Rogue', name: 'Fat Bar Handle' },
+      { brand: 'IronMind', name: 'Loadable Thick Handle' },
+    ],
+  },
+  'grip-hub': { models: [{ brand: 'IronMind', name: 'Hub' }] },
+  'acc-lat-bar-wide': {
+    models: [
+      { brand: 'Rogue', name: 'Curl Lat Bar' },
+      { brand: 'Body-Solid', name: 'Wide Lat Bar' },
+    ],
+  },
+  'acc-lat-bar-short': {
+    models: [
+      { brand: 'Rogue', name: 'Neutral Grip Lat Bar' },
+      { brand: 'PRIME Fitness', name: 'Extreme Row Handle' },
+    ],
+  },
+  'acc-pushdown-bar': {
+    models: [
+      { brand: 'Rogue', name: 'Pushdown Bar' },
+      { brand: 'Body-Solid', name: 'Pro-Grip Bar' },
+    ],
+  },
+  'acc-revolving-curl-bar': {
+    models: [
+      { brand: 'Rogue', name: 'Revolving Curl Bar' },
+      { brand: 'Body-Solid', name: 'Revolving Curl Bar' },
+    ],
+  },
+  'acc-double-d': {
+    models: [
+      { brand: 'Rogue', name: 'Double D Handle' },
+      { brand: 'Spud Inc', name: 'Low Row Handle' },
+    ],
+  },
+  'acc-rotating-handle': {
+    models: [
+      { brand: 'PRIME Fitness', name: 'Rotating Handle' },
+      { brand: 'Rogue', name: 'Rotating Handle' },
+    ],
+  },
+  'acc-globe-handle': {
+    models: [
+      { brand: 'Rogue', name: 'Globe Handles' },
+      { brand: 'IronMind', name: 'Globe Handle' },
+    ],
+  },
+  'acc-pro-handle': { models: [{ brand: 'PRIME Fitness', name: 'Pro Handle' }] },
+  'acc-tricep-v': {
+    models: [
+      { brand: 'Rogue', name: 'V-Bar' },
+      { brand: 'Body-Solid', name: 'V-Bar' },
+    ],
+  },
+  'acc-row-footplate': { models: [{ brand: 'Rogue', name: 'Row Footplate' }] },
+  'acc-loading-pin': {
+    models: [
+      { brand: 'Rogue', name: 'Loading Pin' },
+      { brand: 'Spud Inc', name: 'Loading Pin' },
+    ],
+  },
+  'acc-carabiner': {
+    models: [
+      { brand: 'Rogue', name: 'Carabiner' },
+      { brand: 'Spud Inc', name: 'Carabiner' },
+    ],
+  },
+  'acc-hip-belt-cable': {
+    models: [
+      { brand: 'Spud Inc', name: 'Econo Hip Belt' },
+      { brand: 'Rogue', name: 'Dip / Belt Squat Belt' },
+    ],
+  },
+  'sus-ab-straps': {
+    models: [
+      { brand: 'Rogue', name: 'Ab Straps' },
+      { brand: 'Spud Inc', name: 'Ab Straps' },
+    ],
+  },
+  'store-kb-rack': {
+    models: [
+      { brand: 'Rogue', name: 'Ball / KB Storage' },
+      { brand: 'Body-Solid', name: 'KB Rack' },
+    ],
+  },
+  'acc-band-peg-storage': {
+    models: [
+      { brand: 'Rogue', name: 'Bar / Accessory Storage' },
+      { brand: 'Titan Fitness', name: 'Storage Rack' },
+    ],
+  },
+
+  // ── Accessories: grip / strongman feats ──
+  'grip-blob': { models: [{ brand: 'IronMind', name: 'Blob' }] },
+
+  // ── Accessories: powerlifting supports / boards ──
+  'pl-board-press': {
+    models: [
+      { brand: 'EliteFTS', name: 'Bench Boards' },
+      { brand: 'Rogue', name: 'Bench Board' },
+    ],
+  },
+  'pl-bench-blocks': {
+    models: [
+      { brand: 'EliteFTS', name: 'Bench Blocks' },
+      { brand: 'Rogue', name: 'Bar Blocks' },
+    ],
+  },
+  'pl-deadlift-platform': {
+    models: [
+      { brand: 'Rogue', name: 'Deadlift Platform' },
+      { brand: 'EliteFTS', name: 'Drop Pads' },
+    ],
+  },
+  'strap-oly': {
+    models: [
+      { brand: 'SBD', name: 'Weightlifting Straps' },
+      { brand: 'Cerberus', name: 'Snatch Straps' },
+    ],
+  },
+  'acc-neck-harness': {
+    models: [
+      { brand: 'Rogue', name: 'Neck Harness' },
+      { brand: 'IronMind', name: 'Head Strap' },
+    ],
+  },
+  'acc-arm-blaster': {
+    models: [
+      { brand: 'Hyperlethal', name: 'Arm Blaster' },
+      { brand: 'Rogue', name: 'Arm Blaster' },
+    ],
+  },
+  'acc-gym-grips': {
+    models: [
+      { brand: 'Bear KompleX', name: 'Hand Grips' },
+      { brand: 'Victory Grips', name: 'Grips' },
+      { brand: 'WODies', name: 'Grips' },
+    ],
+  },
+  'acc-heel-wedge': {
+    models: [
+      { brand: 'StrongTek', name: 'Squat Wedge' },
+      { brand: 'Rogue', name: 'Squat Wedge' },
+    ],
+  },
+  'acc-ab-mat': {
+    models: [
+      { brand: 'Rogue', name: 'Ab Mat' },
+      { brand: 'GoFit', name: 'Ab Mat' },
+    ],
+  },
+  'acc-pushup-bars': {
+    models: [
+      { brand: 'Perfect Fitness', name: 'Pushup Elite' },
+      { brand: 'Rogue', name: 'Push-Up Bars' },
+    ],
+  },
+  'acc-weight-releasers': {
+    models: [
+      { brand: 'EliteFTS', name: 'Weight Releasers' },
+      { brand: 'Rogue', name: 'Weight Releasers' },
+    ],
+  },
+  'acc-lifting-chains': {
+    models: [
+      { brand: 'Rogue', name: 'Lifting Chains' },
+      { brand: 'EliteFTS', name: 'Chain Package' },
+    ],
+  },
+  'acc-gym-timer': {
+    models: [
+      { brand: 'GymNext', name: 'Flex Timer' },
+      { brand: 'Rogue', name: 'Echo Gym Timer' },
+    ],
+  },
+  'acc-deadlift-socks': {
+    models: [
+      { brand: 'SBD', name: 'Deadlift Socks' },
+      { brand: 'Rogue', name: 'Shin Sleeves' },
+    ],
+  },
+  'acc-ankle-weights': {
+    models: [
+      { brand: 'Bala', name: 'Bangles' },
+      { brand: 'Nordic Lifting', name: 'Ankle Weights' },
+    ],
+  },
+  'acc-band-door-anchor': {
+    models: [
+      { brand: 'Bodylastics', name: 'Door Anchor' },
+      { brand: 'Undersun', name: 'Door Anchor' },
+    ],
+  },
+  'acc-ceiling-anchor': {
+    models: [
+      { brand: 'TRX', name: 'Xmount' },
+      { brand: 'Rogue', name: 'Ceiling Anchor' },
+    ],
+  },
+  'acc-hand-grips-pads': {
+    models: [
+      { brand: 'Harbinger', name: 'Grip Pads' },
+      { brand: 'Cobra Grips', name: 'Pro' },
+    ],
+  },
+
+  // ── Accessories: consumables ──
+  'acc-chalk': {
+    models: [
+      { brand: 'Rogue', name: 'Gym Chalk' },
+      { brand: 'Friction Labs', name: 'Unicorn Dust' },
+    ],
+  },
+  'acc-liquid-chalk': {
+    models: [
+      { brand: 'Friction Labs', name: 'Secret Stuff' },
+      { brand: 'Rogue', name: 'Liquid Chalk' },
+    ],
+  },
+
+  // ── Recovery / mobility (remaining) ──
+  'rec-stretch-mat': {
+    models: [
+      { brand: 'Manduka', name: 'PRO Mat' },
+      { brand: 'Gaiam', name: 'Yoga Mat' },
+    ],
+  },
+  'rec-stretch-strap': {
+    models: [
+      { brand: 'OPTP', name: 'Stretch Out Strap' },
+      { brand: 'Gaiam', name: 'Stretch Strap' },
+    ],
+  },
+  'ball-mini-stability': {
+    models: [
+      { brand: 'TheraBand', name: 'Mini Ball' },
+      { brand: 'Gaiam', name: 'Mini Ball' },
+    ],
+  },
+  'mob-slant-board': {
+    models: [
+      { brand: 'StrongTek', name: 'Slant Board' },
+      { brand: 'Vive', name: 'Slant Board' },
+    ],
+  },
+  'mob-balance-pad': {
+    models: [
+      { brand: 'Airex', name: 'Balance Pad' },
+      { brand: 'TheraBand', name: 'Stability Trainer' },
+    ],
+  },
+  'mob-foot-roller': {
+    models: [
+      { brand: 'TriggerPoint', name: 'Nano Foot Roller' },
+      { brand: 'RAD', name: 'Roller' },
+    ],
+  },
+  'rec-vibrating-roller': {
+    models: [
+      { brand: 'Hyperice', name: 'Vyper 3' },
+      { brand: 'TriggerPoint', name: 'Carbon Vibe' },
+    ],
+  },
+  'rec-yoga-bolster': {
+    models: [
+      { brand: 'Manduka', name: 'Enlight Bolster' },
+      { brand: 'Hugger Mugger', name: 'Bolster' },
+    ],
+  },
+  'rec-massage-table': {
+    models: [
+      { brand: 'Earthlite', name: 'Massage Table' },
+      { brand: 'NRG', name: 'Massage Table' },
+    ],
+  },
+  'rec-red-light': {
+    models: [
+      { brand: 'Joovv', name: 'Solo / Elite' },
+      { brand: 'Mito Red Light', name: 'Panel' },
+    ],
+  },
+  'rec-hanging-boots': { models: [{ brand: 'Teeter', name: 'Gravity Boots' }] },
+  'rec-cupping': {
+    models: [
+      { brand: 'RockTape', name: 'RockPods' },
+      { brand: 'Graston', name: 'IASTM Tools' },
+    ],
+  },
+  'rec-therapy-putty': {
+    models: [
+      { brand: 'TheraPutty', name: 'Hand Putty' },
+      { brand: 'TheraBand', name: 'Hand Xtrainer' },
+    ],
+  },
+  'rec-shoulder-pulley': {
+    models: [
+      { brand: 'RANGEMASTER', name: 'Shoulder Pulley' },
+      { brand: 'Vive', name: 'Shoulder Pulley' },
+    ],
+  },
+  'rec-stretch-table': {
+    models: [
+      { brand: 'StretchLab', name: 'Stretch Table' },
+      { brand: 'Nimble', name: 'Stretch Cage' },
+    ],
+  },
+  'rec-cold-compression': {
+    models: [
+      { brand: 'Game Ready', name: 'GRPro 2.1' },
+      { brand: 'Breg', name: 'Polar Care' },
+    ],
+  },
+  'rec-peanut-ball': {
+    models: [
+      { brand: 'TriggerPoint', name: 'MB2 Roller' },
+      { brand: 'RAD', name: 'Helix' },
+    ],
+  },
+  // ── Accessories: collars ──
+  'acc-collars-spring': {
+    models: [
+      { brand: 'Rogue', name: 'Spring Collars' },
+      { brand: 'Ivanko', name: 'Spring Collars' },
+    ],
+  },
+  'acc-collars-comp': {
+    models: [
+      { brand: 'Rogue', name: 'USAW / Comp Collars' },
+      { brand: 'OSO Barbell', name: 'Bexco Collars' },
+      { brand: 'Lock-Jaw', name: 'Pro' },
+    ],
+  },
 };
