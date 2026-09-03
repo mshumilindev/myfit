@@ -29,6 +29,7 @@ import { fmtTonnes, fmtDurationHM, useT } from '../i18n';
 import { Icon, ConfirmDialog } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
+import { EquipmentBoard } from '../components/EquipmentBoard';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const hhmm = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)}`;
@@ -361,6 +362,8 @@ export function GymDetailView({
           ))}
 
         {isSaved && gym && <BandLibraryCard gym={gym} />}
+
+        {isSaved && gym && <EquipmentBoard gym={gym} />}
 
         {isSaved && (
           <>

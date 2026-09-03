@@ -21,6 +21,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { EQUIPMENT_CATALOG } from './data/equipmentCatalog';
 import {
   AUTO_FINISH_MS,
   type Activity,
@@ -1495,6 +1496,23 @@ export function setGymBandLibrary(gymId: string, rungs: BandRung[]): void {
   const g = state.gyms.find((x) => x.id === gymId);
   if (!g) return;
   upsertGym({ ...g, bandLibrary: rungs });
+}
+
+/** Coarse EquipmentId per catalog item id — derives the gym `inventory` set
+ *  (what the "available at your gym" filters read) from the fine picks. */
+const ITEM_CLS: Record<string, string> = Object.fromEntries(
+  EQUIPMENT_CATALOG.map((e) => [e.id, e.cls as string]),
+);
+
+/** Set a gym's fine equipment picks and derive its coarse inventory. */
+export function setGymEquipment(gymId: string, itemIds: string[]): void {
+  const g = state.gyms.find((x) => x.id === gymId);
+  if (!g) return;
+  const items = Array.from(new Set(itemIds));
+  const inventory = Array.from(
+    new Set(items.map((id) => ITEM_CLS[id]).filter((c): c is string => !!c)),
+  );
+  upsertGym({ ...g, equipmentItems: items, inventory });
 }
 
 /** Activities whose start falls on the given local day key. */

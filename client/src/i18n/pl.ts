@@ -631,6 +631,7 @@ export const pl: Strings = {
   startDay: (name: string) => `Zacznij ${name}`,
   lastVolume: 'Ostatnia objętość',
   inventoryLabel: 'Inwentarz',
+  equipSearchPlaceholder: 'Szukaj sprzętu',
   createExercise: (q) => `Utwórz „${q}”`,
   replaceExercise: 'Zamień ćwiczenie',
   tagExercise: 'Dodaj mięśnie i sprzęt',

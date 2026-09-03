@@ -676,6 +676,7 @@ export const en = {
   startDay: (name: string) => `Start ${name}`,
   lastVolume: 'Last volume',
   inventoryLabel: 'Inventory',
+  equipSearchPlaceholder: 'Search equipment',
   createExercise: (q: string) => `Create “${q}”`,
   replaceExercise: 'Replace exercise',
   tagExercise: 'Add muscles & equipment',

@@ -627,6 +627,7 @@ export const et: Strings = {
   startDay: (name: string) => `Alusta: ${name}`,
   lastVolume: 'Viimane maht',
   inventoryLabel: 'Inventar',
+  equipSearchPlaceholder: 'Otsi varustust',
   createExercise: (q) => `Loo „${q}"`,
   replaceExercise: 'Asenda harjutus',
   tagExercise: 'Lisa lihased ja varustus',

@@ -25854,3 +25854,139 @@ button.badge {
   z-index: 3;
   color: var(--color-neutral-300);
 }
+
+/* ── Equipment board (gym inventory, EQ-3) ─────────────────────────────── */
+.eq-board .eq-count-badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-300);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.eq-board .eq-hint {
+  margin-bottom: var(--space-4);
+}
+.eq-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 40px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  margin-bottom: var(--space-4);
+}
+.eq-search svg {
+  color: var(--color-neutral-500);
+  flex: none;
+  font-size: 17px;
+}
+.eq-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+}
+.eq-search input::placeholder {
+  color: var(--color-neutral-600);
+}
+.eq-search-clear {
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-500);
+  display: flex;
+  padding: 4px;
+  cursor: pointer;
+}
+.eq-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.eq-cat {
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  overflow: hidden;
+}
+.eq-cat-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.eq-cat-head > svg {
+  color: var(--color-neutral-500);
+  font-size: 14px;
+  flex: none;
+}
+.eq-cat-label {
+  flex: 1;
+}
+.eq-cat-count {
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.eq-cat.open .eq-cat-count {
+  color: var(--color-accent-400);
+}
+.eq-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 12px 12px;
+}
+.eq-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: none;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-700);
+  color: var(--color-neutral-300);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.15;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.eq-chip svg {
+  font-size: 13px;
+  flex: none;
+}
+.eq-chip.on {
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  box-shadow: inset 0 0 0 1px var(--color-accent-600);
+}
+.eq-empty {
+  text-align: center;
+  padding: 12px 0;
+}

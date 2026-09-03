@@ -640,6 +640,7 @@ export const lt: Strings = {
   startDay: (name: string) => `Pradėti ${name}`,
   lastVolume: 'Paskutinė apimtis',
   inventoryLabel: 'Inventorius',
+  equipSearchPlaceholder: 'Ieškoti įrangos',
   createExercise: (q) => `Sukurti „${q}“`,
   replaceExercise: 'Pakeisti pratimą',
   tagExercise: 'Pridėti raumenis ir įrangą',

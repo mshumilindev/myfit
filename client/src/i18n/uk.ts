@@ -632,6 +632,7 @@ export const uk: Strings = {
   startDay: (name: string) => `Почати ${name}`,
   lastVolume: 'Останній обсяг',
   inventoryLabel: 'Інвентар',
+  equipSearchPlaceholder: 'Пошук обладнання',
   createExercise: (q) => `Створити «${q}»`,
   replaceExercise: 'Замінити вправу',
   tagExercise: 'Додати мʼязи й еквіпмент',

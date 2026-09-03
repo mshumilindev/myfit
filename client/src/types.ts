@@ -115,6 +115,9 @@ export interface Gym {
   /** Equipment inventory (design EQ-3): what you ticked on this gym.
    *  Absent/empty = never audited → never warn. */
   inventory?: string[];
+  /** Fine-grained equipment picked from the catalog (equipmentCatalog ids).
+   *  The coarse `inventory` above is derived from these items' `cls`. */
+  equipmentItems?: string[];
   /** Band library (Load-entry C-5): colour → estimated resistance in kg, set
    *  once per gym. Absent = use BAND_DEFAULTS. */
   bandLibrary?: BandRung[];
