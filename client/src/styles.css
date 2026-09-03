@@ -2275,8 +2275,13 @@ i > svg {
   .srail-dot.done {
     background: var(--color-accent-700);
   }
-  /* No persistent position highlight — the rail stays quiet and only responds
-     to touch/hover (the dot you're pressing lights up silver). */
+  /* The exercise currently in the viewport (scroll-spy): a bright, larger dot
+     so you can see where you are in the session at a glance. */
+  .srail-dot[aria-current='true'] {
+    background: var(--color-accent);
+    transform: scale(1.4);
+  }
+  /* Pressing/hovering a dot lights it silver, over any other state. */
   .srail-dot:hover,
   .srail-dot:active {
     background: var(--color-neutral-300);
