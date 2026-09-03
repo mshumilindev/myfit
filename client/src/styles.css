@@ -25514,7 +25514,7 @@ button.badge {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 0 10px;
+  padding: 0;
 }
 .rc-hero-band {
   background: var(--rc-wash);
