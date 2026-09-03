@@ -305,10 +305,11 @@ export function buildRecap(
   const muscles: RecapMuscle[] = [...setsByGroup.entries()]
     .map(([group, sets]) => ({ group, sets, pct: Math.round((sets / totalMuscleSets) * 100) }))
     .sort((a, b) => b.sets - a.sets);
+  // Highlight the WHOLE of each top group on the body map — for a split group
+  // like chest that means both sub-regions (upper + lower), not just the first.
   const growMuscles: FocusMuscle[] = [];
   for (const m of muscles.slice(0, 5)) {
-    const f = groupToFocus(m.group)[0];
-    if (f && !growMuscles.includes(f)) growMuscles.push(f);
+    for (const f of groupToFocus(m.group)) if (!growMuscles.includes(f)) growMuscles.push(f);
   }
   const leastMuscle = muscles.length >= 4 ? muscles[muscles.length - 1].group : null;
 

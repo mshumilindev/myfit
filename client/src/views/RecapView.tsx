@@ -1,21 +1,17 @@
 /**
  * Recap views (design "My Fit — Recaps"). RecapView is the scrolling read view;
- * RecapStory is the paged "play" story; RecapShareCard is the portrait card.
- * All three read one Recap built from the live store for a period id.
+ * RecapStory is the paged, auto-advancing "play" story; both read one Recap
+ * built from the live store for a period id. Sharing draws a portrait card on a
+ * canvas (data/shareCard) and hands it to the native share sheet.
  */
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useT, fmtKg, type LocaleId } from '../i18n';
 import { useStore, latestWeight } from '../store';
 import { Icon } from '../ui';
 import { FocusBodyMap } from '../components/Muscle';
 import { focusToGroup } from '../data/subregions';
-import {
-  buildRecap,
-  recapRefFromId,
-  type Recap,
-  type RecapRef,
-  type RecapDelta,
-} from '../recaps';
+import { drawRecapCard, cardBlob, type RecapShareModel } from '../data/shareCard';
+import { buildRecap, recapRefFromId, type Recap, type RecapRef, type RecapDelta } from '../recaps';
 import type { Strings } from '../i18n/en';
 
 type T = Strings;
@@ -23,10 +19,7 @@ type T = Strings;
 // ─── formatting helpers ──────────────────────────────────────────────────────
 export function periodTitle(ref: RecapRef, locale: LocaleId): string {
   if (ref.kind === 'month')
-    return new Date(ref.year, ref.index, 1).toLocaleDateString(locale, {
-      month: 'long',
-      year: 'numeric',
-    });
+    return new Date(ref.year, ref.index, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
   if (ref.kind === 'quarter') return `Q${ref.index} ${ref.year}`;
   return `${ref.year}`;
 }
@@ -41,6 +34,9 @@ export function periodWord(ref: RecapRef, t: T): string {
 }
 function tonnes(kg: number): number {
   return Math.round(kg / 1000);
+}
+function kindLabel(ref: RecapRef, t: T): string {
+  return ref.kind === 'month' ? t.rcKindMonth : ref.kind === 'quarter' ? t.rcKindQuarter : t.rcKindYear;
 }
 function headlineLine(t: T, r: Recap, pw: string): string {
   switch (r.headline) {
@@ -75,21 +71,85 @@ export function useRecap(period: string): { ref: RecapRef; recap: Recap } | null
   }, [period, store.workouts, store.activities, store.goals, store.bodyMetrics]);
 }
 
+// ─── sharing ─────────────────────────────────────────────────────────────────
+function recapShareModel(ref: RecapRef, r: Recap, t: T, locale: LocaleId): RecapShareModel {
+  return {
+    brand: 'Spotter',
+    kicker: kindLabel(ref, t),
+    period: periodTitle(ref, locale),
+    headline: headlineLine(t, r, periodWord(ref, t)),
+    stats: [
+      { value: `${r.sessions}`, label: t.rcSessions },
+      { value: `${tonnes(r.volumeKg)} t`, label: t.rcVolShort },
+      { value: `${r.prCount}`, label: 'PRs' },
+    ],
+    record: r.records[0] ? { name: r.records[0].name, detail: fmtKg(r.records[0].weightKg) } : null,
+    kcal: r.calories > 0 ? `${Math.round(r.calories).toLocaleString(locale)} ${t.rcKcal}` : null,
+    muscles: r.muscles.slice(0, 3).map((m) => ({ name: muscleName(t, m.group), pct: m.pct })),
+    handle: 'spotter.app',
+  };
+}
+function useRecapShare() {
+  const { t, locale } = useT();
+  return useCallback(
+    async (ref: RecapRef, r: Recap) => {
+      const cv = document.createElement('canvas');
+      drawRecapCard(cv, recapShareModel(ref, r, t, locale));
+      const b = await cardBlob(cv);
+      if (!b) return;
+      const file = new File([b], `spotter-${ref.id}.png`, { type: 'image/png' });
+      try {
+        if (navigator.canShare?.({ files: [file] }) && navigator.share) {
+          await navigator.share({ files: [file], title: periodTitle(ref, locale) });
+        } else {
+          const url = URL.createObjectURL(b);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = file.name;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      } catch {
+        /* user cancelled or unsupported */
+      }
+    },
+    [t, locale],
+  );
+}
+
 // ─── small pieces ────────────────────────────────────────────────────────────
 function Delta({ d, suffix }: { d: RecapDelta; suffix?: string }) {
   const { t } = useT();
   if (d == null) return <span className="rc-dn">{t.rcFirstPeriodDelta}</span>;
   const up = d >= 0;
-  const pct = `${Math.abs(Math.round(d * 100))}%`;
   return (
     <span className="rc-delta">
       <Icon name={up ? 'caret-up' : 'caret-down'} weight="bold" className={up ? 'rc-up' : 'rc-dn'} />
       <span className={`rc-num ${up ? 'rc-up' : 'rc-dn'}`}>
         {up ? '+' : '−'}
-        {pct}
+        {Math.abs(Math.round(d * 100))}%
       </span>
       {suffix && <span style={{ color: 'var(--color-neutral-600)' }}>{suffix}</span>}
     </span>
+  );
+}
+
+function StatRow({ r, t }: { r: Recap; t: T }) {
+  return (
+    <div className="rc-herostats3">
+      <div>
+        <div className="rc-num rc-hs-n" style={{ color: 'var(--color-accent-300)' }}>{r.sessions}</div>
+        <div className="rc-lbl" style={{ marginTop: 5, color: 'var(--color-accent-300)' }}>{t.rcSessions}</div>
+      </div>
+      <div>
+        <div className="rc-num rc-hs-n">{tonnes(r.volumeKg)}<span style={{ fontSize: 14 }}>t</span></div>
+        <div className="rc-lbl" style={{ marginTop: 5, color: 'var(--color-accent-300)' }}>{t.rcVolShort}</div>
+      </div>
+      <div>
+        <div className="rc-num rc-hs-n">{r.prCount}</div>
+        <div className="rc-lbl" style={{ marginTop: 5, color: 'var(--color-accent-300)' }}>PRs</div>
+      </div>
+    </div>
   );
 }
 
@@ -107,11 +167,11 @@ export function RecapView({
 }) {
   const { t, locale } = useT();
   const data = useRecap(period);
+  const share = useRecapShare();
   if (!data) return null;
   const { ref, recap: r } = data;
   const pw = periodWord(ref, t);
   const trendMax = Math.max(...r.trend.map((b) => b.value), 0.001);
-  const kindLabel = ref.kind === 'month' ? t.rcKindMonth : ref.kind === 'quarter' ? t.rcKindQuarter : t.rcKindYear;
 
   return (
     <div className={`screen rc-view${desktop ? ' desktop' : ''}`}>
@@ -120,26 +180,22 @@ export function RecapView({
           <Icon name="caret-left" />
         </button>
         <span style={{ flex: 1, fontSize: 14, color: 'var(--color-neutral-400)' }}>{t.rcRecap}</span>
-        <button className="icon-btn" onClick={onStory} aria-label={t.rcPlayStory}>
+        <button className="rc-icon-btn" onClick={onStory} aria-label={t.rcPlayStory}>
           <Icon name="cards" />
+        </button>
+        <button className="rc-icon-btn" onClick={() => share(ref, r)} aria-label={t.rcShare}>
+          <Icon name="export" />
         </button>
       </div>
 
-      {/* hero */}
       <div className="rc-hero-band">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="rc-row-mid">
           <Icon name="barbell" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 15 }} />
-          <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{kindLabel}</span>
+          <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{kindLabel(ref, t)}</span>
         </div>
-        <div style={{ fontSize: 34, letterSpacing: '-0.03em', marginTop: 12, lineHeight: 1.05 }}>
-          {periodTitle(ref, locale)}
-        </div>
-        <div style={{ fontSize: 17, color: 'var(--color-accent-100)', marginTop: 14, lineHeight: 1.4 }}>
-          {headlineLine(t, r, pw)}
-        </div>
-        <div style={{ fontSize: 13, color: 'var(--color-accent-300)', marginTop: 8, lineHeight: 1.5 }}>
-          {t.rcShowedUp(r.sessions)}
-        </div>
+        <div style={{ fontSize: 34, letterSpacing: '-0.03em', marginTop: 12, lineHeight: 1.05 }}>{periodTitle(ref, locale)}</div>
+        <div style={{ fontSize: 17, color: 'var(--color-accent-100)', marginTop: 14, lineHeight: 1.4 }}>{headlineLine(t, r, pw)}</div>
+        <div style={{ fontSize: 13, color: 'var(--color-accent-300)', marginTop: 8, lineHeight: 1.5 }}>{t.rcShowedUp(r.sessions)}</div>
       </div>
 
       <div className="rc-body">
@@ -148,26 +204,22 @@ export function RecapView({
           <div className="rc-lbl" style={{ marginBottom: 12 }}>{t.rcTheTotals}</div>
           <div className="rc-totals">
             <div className="rc-stat">
-              <div className="rc-num" style={{ fontSize: 32, letterSpacing: '-0.03em' }}>{r.sessions}</div>
+              <div className="rc-num rc-stat-n">{r.sessions}</div>
               <div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcSessions}</div>
               <Delta d={r.d.sessions} />
             </div>
             <div className="rc-stat">
-              <div className="rc-num" style={{ fontSize: 32, letterSpacing: '-0.03em' }}>
-                {tonnes(r.volumeKg)}<span style={{ fontSize: 17, color: 'var(--color-neutral-500)' }}> t</span>
-              </div>
+              <div className="rc-num rc-stat-n">{tonnes(r.volumeKg)}<span style={{ fontSize: 17, color: 'var(--color-neutral-500)' }}> t</span></div>
               <div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcVolume}</div>
               <Delta d={r.d.volume} suffix={`${Math.round(r.volumeKg).toLocaleString(locale)} kg`} />
             </div>
             <div className="rc-stat">
-              <div className="rc-num" style={{ fontSize: 32, letterSpacing: '-0.03em' }}>
-                {r.timeHours.toFixed(1)}<span style={{ fontSize: 17, color: 'var(--color-neutral-500)' }}> h</span>
-              </div>
+              <div className="rc-num rc-stat-n">{r.timeHours.toFixed(1)}<span style={{ fontSize: 17, color: 'var(--color-neutral-500)' }}> h</span></div>
               <div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcTimeTrained}</div>
               <Delta d={r.d.time} />
             </div>
             <div className="rc-stat">
-              <div className="rc-num" style={{ fontSize: 32, letterSpacing: '-0.03em' }}>{r.sets}</div>
+              <div className="rc-num rc-stat-n">{r.sets}</div>
               <div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcSetsReps(r.reps.toLocaleString(locale))}</div>
               <Delta d={r.d.sets} />
             </div>
@@ -187,7 +239,7 @@ export function RecapView({
         {/* records */}
         {r.records.length > 0 && (
           <div className="rc-card gold">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="rc-row-mid">
               <Icon name="trophy" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 16 }} />
               <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{t.rcNewRecords}</span>
               <span style={{ flex: 1 }} />
@@ -207,14 +259,14 @@ export function RecapView({
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
               {r.heaviestSet && (
-                <div style={{ flex: 1, background: 'rgba(0,0,0,0.22)', borderRadius: 12, padding: '11px 12px' }}>
+                <div className="rc-mini">
                   <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{t.rcHeaviestSet}</span>
                   <div style={{ fontSize: 14, marginTop: 5 }}>{r.heaviestSet.name}</div>
                   <div className="rc-num" style={{ fontSize: 13, color: 'var(--color-accent-100)' }}>{t.rcSetWxR(fmtKg(r.heaviestSet.weightKg), r.heaviestSet.reps)}</div>
                 </div>
               )}
               {r.biggestSession && (
-                <div style={{ flex: 1, background: 'rgba(0,0,0,0.22)', borderRadius: 12, padding: '11px 12px' }}>
+                <div className="rc-mini">
                   <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{t.rcBiggestSession}</span>
                   <div style={{ fontSize: 14, marginTop: 5 }}>{new Date(r.biggestSession.ts).toLocaleDateString(locale, { day: 'numeric', month: 'short' })}</div>
                   <div className="rc-num" style={{ fontSize: 13, color: 'var(--color-accent-100)' }}>{t.rcTMoved(`${tonnes(r.biggestSession.volumeKg) || (r.biggestSession.volumeKg / 1000).toFixed(1)} t`)}</div>
@@ -245,7 +297,7 @@ export function RecapView({
               </div>
             </div>
             {r.leastMuscle && (
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 14, padding: '10px 12px', borderRadius: 12, background: 'var(--color-neutral-900)' }}>
+              <div className="rc-hint">
                 <Icon name="info" weight="bold" style={{ fontSize: 14, color: 'var(--color-neutral-500)', marginTop: 1 }} />
                 <span style={{ fontSize: 11, color: 'var(--color-neutral-500)', lineHeight: 1.5, flex: 1 }}>{t.rcLeastHint(muscleName(t, r.leastMuscle))}</span>
               </div>
@@ -276,7 +328,7 @@ export function RecapView({
 
         {/* trend */}
         <div className="rc-card">
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="rc-row-mid">
             <span className="rc-lbl" style={{ flex: 1 }}>{ref.kind === 'month' ? t.rcVolTrendWeek : t.rcVolTrendMonth}</span>
             <span style={{ fontSize: 11, color: 'var(--color-neutral-500)' }}>{t.rcTonnes}</span>
           </div>
@@ -332,146 +384,223 @@ export function RecapView({
 
         {/* close / share */}
         <div className="rc-card gold" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 16, color: 'var(--color-accent-100)', lineHeight: 1.45, maxWidth: '28ch', margin: '0 auto' }}>
-            {headlineLine(t, r, pw)}
-          </div>
-          <button className="btn btn-primary" style={{ minHeight: 46, fontSize: 15, gap: 8, marginTop: 16, width: '100%' }} onClick={onStory}>
-            <Icon name="export" weight="bold" />{t.rcShareYours(periodShort(ref, locale))}
+          <div style={{ fontSize: 16, color: 'var(--color-accent-100)', lineHeight: 1.45, maxWidth: '28ch', margin: '0 auto' }}>{headlineLine(t, r, pw)}</div>
+          <button className="btn btn-primary rc-btn-block" style={{ marginTop: 16 }} onClick={() => share(ref, r)}>
+            <Icon name="export" />
+            {t.rcShareYours(periodShort(ref, locale))}
           </button>
-          <div style={{ fontSize: 11, color: 'var(--color-accent-300)', marginTop: 10 }}>{t.rcWatchSave}</div>
+          <button className="rc-textbtn" onClick={onStory}>{t.rcWatchSave}</button>
         </div>
       </div>
     </div>
   );
 }
 
-// ═══ PAGED STORY ═════════════════════════════════════════════════════════════
+// ═══ PAGED, AUTO-ADVANCING STORY ═════════════════════════════════════════════
+const STORY_MS = 5200;
+
 export function RecapStory({ period, onClose }: { period: string; onClose: () => void }) {
   const { t, locale } = useT();
   const data = useRecap(period);
+  const share = useRecapShare();
   const [i, setI] = useState(0);
-  if (!data) return null;
-  const { ref, recap: r } = data;
-  const pw = periodWord(ref, t);
+  const [prog, setProg] = useState(0);
+  const paused = useRef(false);
 
-  const panels: { bg: 'replay' | 'bg'; body: React.ReactNode }[] = [];
-  // 1 opener
-  panels.push({
-    bg: 'replay',
-    body: (
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 26px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Icon name="barbell" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 16 }} />
-          <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{t.rcWrapped(periodShort(ref, locale))}</span>
-        </div>
-        <div style={{ fontSize: 48, letterSpacing: '-0.03em', lineHeight: 1, marginTop: 18 }}>{periodTitle(ref, locale)}</div>
-        <div style={{ fontSize: 19, color: 'var(--color-accent-100)', marginTop: 20, lineHeight: 1.4, maxWidth: '24ch' }}>{headlineLine(t, r, pw)}</div>
-      </div>
-    ),
-  });
-  // 2 totals
-  panels.push({
-    bg: 'bg',
-    body: (
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 26px' }}>
-        <span className="rc-lbl" style={{ marginBottom: 14 }}>{t.rcYouMovedIn(periodShort(ref, locale))}</span>
-        <div className="rc-num" style={{ fontSize: 76, letterSpacing: '-0.04em', lineHeight: 0.9, color: 'var(--color-accent-300)' }}>{tonnes(r.volumeKg)}<span style={{ fontSize: 30, color: 'var(--color-accent-300)' }}> t</span></div>
-        <div style={{ fontSize: 15, color: 'var(--color-neutral-400)', marginTop: 6 }}>{t.rcAcrossSets(`${Math.round(r.volumeKg).toLocaleString(locale)} kg`, r.sets)}</div>
-        <div style={{ display: 'flex', gap: 26, marginTop: 34 }}>
-          <div><div className="rc-num" style={{ fontSize: 30 }}>{r.sessions}</div><div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcSessions}</div></div>
-          <div><div className="rc-num" style={{ fontSize: 30 }}>{r.timeHours.toFixed(1)}<span style={{ fontSize: 14, color: 'var(--color-neutral-500)' }}>h</span></div><div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcTrained}</div></div>
-          <div><div className="rc-num" style={{ fontSize: 30, color: 'var(--color-kcal-text)' }}>{(r.calories / 1000).toFixed(1)}<span style={{ fontSize: 14 }}>k</span></div><div className="rc-lbl" style={{ marginTop: 5, display: 'flex', alignItems: 'center', gap: 4 }}><Icon name="flame" weight="fill" style={{ color: 'var(--color-kcal)' }} />{t.rcKcal}</div></div>
-        </div>
-      </div>
-    ),
-  });
-  // 3 records (if any)
-  if (r.records.length > 0) {
-    panels.push({
+  const panels = useMemo(() => {
+    if (!data) return [] as { bg: 'replay' | 'cool'; body: ReactNode }[];
+    const { ref, recap: r } = data;
+    const pw = periodWord(ref, t);
+    const list: { bg: 'replay' | 'cool'; body: ReactNode }[] = [];
+
+    list.push({
       bg: 'replay',
       body: (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 26px' }}>
-          <Icon name="trophy" weight="fill" style={{ fontSize: 40, color: 'var(--color-accent)' }} />
-          <div style={{ fontSize: 32, letterSpacing: '-0.02em', marginTop: 16, lineHeight: 1.1 }}>{t.rcYouSetRecords(r.prCount)}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 26 }}>
-            {r.records.slice(0, 3).map((rec, n) => (
-              <div key={rec.name} style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-                <span className="rc-num" style={{ fontSize: 15, color: 'var(--color-accent-300)', width: 20 }}>{String(n + 1).padStart(2, '0')}</span>
-                <div style={{ flex: 1 }}><div style={{ fontSize: 17, color: 'var(--color-accent-100)' }}>{rec.name}</div><div style={{ fontSize: 12, color: 'var(--color-accent-300)' }}>{t.rcEst1rm(fmtKg(rec.e1rm))}</div></div>
-                <div className="rc-num" style={{ fontSize: 24, color: 'var(--color-accent-300)' }}>{fmtKg(rec.weightKg)}</div>
-              </div>
-            ))}
+        <div className="rc-story-center">
+          <div className="rc-row-mid">
+            <Icon name="barbell" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 16 }} />
+            <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{t.rcWrapped(periodShort(ref, locale))}</span>
+          </div>
+          <div style={{ fontSize: 48, letterSpacing: '-0.03em', lineHeight: 1, marginTop: 18 }}>{periodTitle(ref, locale)}</div>
+          <div style={{ fontSize: 19, color: 'var(--color-accent-100)', marginTop: 20, lineHeight: 1.4, maxWidth: '24ch' }}>{headlineLine(t, r, pw)}</div>
+        </div>
+      ),
+    });
+
+    list.push({
+      bg: 'cool',
+      body: (
+        <div className="rc-story-center">
+          <span className="rc-lbl" style={{ marginBottom: 14 }}>{t.rcYouMovedIn(periodShort(ref, locale))}</span>
+          <div className="rc-num" style={{ fontSize: 76, letterSpacing: '-0.04em', lineHeight: 0.9, color: 'var(--color-accent-300)' }}>{tonnes(r.volumeKg)}<span style={{ fontSize: 30, color: 'var(--color-accent-300)' }}> t</span></div>
+          <div style={{ fontSize: 15, color: 'var(--color-neutral-400)', marginTop: 6 }}>{t.rcAcrossSets(`${Math.round(r.volumeKg).toLocaleString(locale)} kg`, r.sets)}</div>
+          <div style={{ display: 'flex', gap: 26, marginTop: 34 }}>
+            <div><div className="rc-num" style={{ fontSize: 30 }}>{r.sessions}</div><div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcSessions}</div></div>
+            <div><div className="rc-num" style={{ fontSize: 30 }}>{r.timeHours.toFixed(1)}<span style={{ fontSize: 14, color: 'var(--color-neutral-500)' }}>h</span></div><div className="rc-lbl" style={{ marginTop: 5 }}>{t.rcTrained}</div></div>
+            <div><div className="rc-num" style={{ fontSize: 30, color: 'var(--color-kcal-text)' }}>{(r.calories / 1000).toFixed(1)}<span style={{ fontSize: 14 }}>k</span></div><div className="rc-lbl rc-row-mid" style={{ marginTop: 5, gap: 4 }}><Icon name="flame" weight="fill" style={{ color: 'var(--color-kcal)' }} />{t.rcKcal}</div></div>
           </div>
         </div>
       ),
     });
-  }
-  // 4 muscles
-  if (r.muscles.length > 0) {
-    panels.push({
-      bg: 'bg',
-      body: (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 26px 0' }}>
-          <span className="rc-lbl">{t.rcWhereWork}</span>
-          <div style={{ fontSize: 26, letterSpacing: '-0.02em', marginTop: 10 }}>{t.rcMuscleLed(muscleName(t, r.muscles[0].group), muscleName(t, r.muscles[1]?.group ?? r.muscles[0].group))}</div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 0' }}>
-            <div style={{ width: 200 }}><FocusBodyMap grow={r.growMuscles} ease={[]} view="both" width={200} /></div>
+
+    if (r.records.length > 0) {
+      list.push({
+        bg: 'replay',
+        body: (
+          <div className="rc-story-center">
+            <Icon name="trophy" weight="fill" style={{ fontSize: 40, color: 'var(--color-accent)' }} />
+            <div style={{ fontSize: 32, letterSpacing: '-0.02em', marginTop: 16, lineHeight: 1.1 }}>{t.rcYouSetRecords(r.prCount)}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginTop: 26 }}>
+              {r.records.slice(0, 3).map((rec, n) => (
+                <div key={rec.name} style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+                  <span className="rc-num" style={{ fontSize: 15, color: 'var(--color-accent-300)', width: 20 }}>{String(n + 1).padStart(2, '0')}</span>
+                  <div style={{ flex: 1 }}><div style={{ fontSize: 17, color: 'var(--color-accent-100)' }}>{rec.name}</div><div style={{ fontSize: 12, color: 'var(--color-accent-300)' }}>{t.rcEst1rm(fmtKg(rec.e1rm))}</div></div>
+                  <div className="rc-num" style={{ fontSize: 24, color: 'var(--color-accent-300)' }}>{fmtKg(rec.weightKg)}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 34 }}>
+        ),
+      });
+    }
+
+    if (r.muscles.length > 0) {
+      list.push({
+        bg: 'cool',
+        body: (
+          <div className="rc-story-panel-pad">
+            <span className="rc-lbl">{t.rcWhereWork}</span>
+            <div style={{ fontSize: 26, letterSpacing: '-0.02em', marginTop: 10 }}>{t.rcMuscleLed(muscleName(t, r.muscles[0].group), muscleName(t, r.muscles[1]?.group ?? r.muscles[0].group))}</div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px 0' }}>
+              <div style={{ width: 200 }}><FocusBodyMap grow={r.growMuscles} ease={[]} view="both" width={200} /></div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 20 }}>
+              {r.muscles.slice(0, 3).map((m) => (
+                <div key={m.group} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 14, width: 90 }}>{muscleName(t, m.group)}</span>
+                  <div className="rc-rank"><i style={{ width: `${Math.min(100, (m.sets / r.muscles[0].sets) * 100)}%` }} /></div>
+                  <span className="rc-num" style={{ fontSize: 12, color: 'var(--color-neutral-500)', width: 34, textAlign: 'right' }}>{m.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ),
+      });
+    }
+
+    // closing = the share card (brand · period · headline · stats · map · record · share)
+    list.push({
+      bg: 'replay',
+      body: (
+        <div className="rc-story-panel-pad">
+          <div className="rc-row-mid">
+            <Icon name="barbell" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 16 }} />
+            <span style={{ fontSize: 15, letterSpacing: '0.04em' }}>Spotter</span>
+            <span style={{ flex: 1 }} />
+            <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{kindLabel(ref, t)}</span>
+          </div>
+          <div style={{ fontSize: 30, letterSpacing: '-0.02em', marginTop: 18, lineHeight: 1.1 }}>{periodTitle(ref, locale)}</div>
+          <div style={{ fontSize: 15, color: 'var(--color-accent-100)', marginTop: 8, maxWidth: '26ch' }}>{headlineLine(t, r, pw)}</div>
+          <div style={{ marginTop: 18 }}><StatRow r={r} t={t} /></div>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0, marginTop: 6 }}>
+            <div style={{ width: 220 }}><FocusBodyMap grow={r.growMuscles} ease={[]} view="both" width={220} /></div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
             {r.muscles.slice(0, 3).map((m) => (
               <div key={m.group} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 14, width: 80 }}>{muscleName(t, m.group)}</span>
+                <span style={{ fontSize: 14, width: 96 }}>{muscleName(t, m.group)}</span>
                 <div className="rc-rank"><i style={{ width: `${Math.min(100, (m.sets / r.muscles[0].sets) * 100)}%` }} /></div>
-                <span className="rc-num" style={{ fontSize: 12, color: 'var(--color-neutral-500)', width: 34, textAlign: 'right' }}>{m.pct}%</span>
+                <span className="rc-num" style={{ fontSize: 12, color: 'var(--color-neutral-500)', width: 40, textAlign: 'right' }}>{m.pct}%</span>
               </div>
             ))}
           </div>
+          {r.records[0] && (
+            <div className="rc-rec-row" style={{ marginBottom: 10 }}>
+              <Icon name="medal" weight="fill" style={{ color: 'var(--color-accent)', fontSize: 18 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span className="rc-lbl" style={{ color: 'var(--color-accent-300)' }}>{t.rcTopRecord}</span>
+                <div style={{ fontSize: 14, marginTop: 3 }}>{r.records[0].name}</div>
+              </div>
+              <div className="rc-num" style={{ fontSize: 20, color: 'var(--color-accent-100)' }}>{fmtKg(r.records[0].weightKg)}</div>
+            </div>
+          )}
+          <button className="btn btn-primary rc-btn-block" onClick={() => share(ref, r)}>
+            <Icon name="export" />
+            {t.rcShareCard}
+          </button>
         </div>
       ),
     });
-  }
-  // 5 closing
-  panels.push({
-    bg: 'replay',
-    body: (
-      <>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 26px' }}>
-          <div style={{ fontSize: 14, color: 'var(--color-accent-300)', letterSpacing: '0.02em' }}>{periodTitle(ref, locale).toUpperCase()}</div>
-          <div style={{ fontSize: 30, letterSpacing: '-0.02em', marginTop: 14, lineHeight: 1.2 }}>{headlineLine(t, r, pw)}</div>
-          <div style={{ display: 'flex', gap: 22, marginTop: 26 }}>
-            <div><div className="rc-num" style={{ fontSize: 28, color: 'var(--color-accent-300)' }}>{r.sessions}</div><div className="rc-lbl" style={{ marginTop: 4, color: 'var(--color-accent-300)' }}>{t.rcSessions}</div></div>
-            <div><div className="rc-num" style={{ fontSize: 28, color: 'var(--color-accent-300)' }}>{tonnes(r.volumeKg)}<span style={{ fontSize: 14 }}>t</span></div><div className="rc-lbl" style={{ marginTop: 4, color: 'var(--color-accent-300)' }}>{t.rcVolShort}</div></div>
-            <div><div className="rc-num" style={{ fontSize: 28, color: 'var(--color-accent-300)' }}>{r.prCount}</div><div className="rc-lbl" style={{ marginTop: 4, color: 'var(--color-accent-300)' }}>PRs</div></div>
-          </div>
-        </div>
-        <div style={{ padding: '0 22px 40px' }}>
-          <button className="btn btn-primary" style={{ width: '100%', minHeight: 48, fontSize: 15, gap: 8 }} onClick={onClose}><Icon name="check" weight="bold" />{t.rcShareCard}</button>
-        </div>
-      </>
-    ),
-  });
+
+    return list;
+  }, [data, t, locale, share]);
 
   const n = panels.length;
-  const go = (dir: number) => {
-    const next = i + dir;
-    if (next < 0) return;
-    if (next >= n) return onClose();
-    setI(next);
-  };
+  const advance = useCallback(() => {
+    setI((v) => {
+      if (v + 1 >= n) {
+        onClose();
+        return v;
+      }
+      return v + 1;
+    });
+  }, [n, onClose]);
+
+  // Auto-advancing timed progress (Instagram/Spotify style). Pauses on hold.
+  // All setState happens inside the rAF callback (async), never synchronously
+  // in the effect body.
+  useEffect(() => {
+    const start = performance.now();
+    let lastTs = start;
+    let pausedFor = 0;
+    let raf = 0;
+    const tick = () => {
+      const now = performance.now();
+      if (paused.current) pausedFor += now - lastTs;
+      lastTs = now;
+      const p = Math.min(1, (now - start - pausedFor) / STORY_MS);
+      setProg(p);
+      if (p >= 1) {
+        advance();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [i, advance]);
+
+  if (!data || n === 0) return null;
 
   return (
-    <div className="rc-story" style={{ background: panels[i].bg === 'replay' ? 'var(--rc-replay)' : 'var(--color-bg)' }}>
+    <div
+      className="rc-story"
+      style={{ background: panels[i].bg === 'replay' ? 'var(--rc-replay)' : 'var(--rc-wash-cool)' }}
+      onPointerDown={() => {
+        paused.current = true;
+      }}
+      onPointerUp={() => {
+        paused.current = false;
+      }}
+      onPointerLeave={() => {
+        paused.current = false;
+      }}
+    >
       <div className="rc-progress">
-        {panels.map((_, k) => <i key={k} className={k <= i ? 'on' : ''} />)}
+        {panels.map((_, k) => (
+          <i key={k}>
+            <b style={{ width: k < i ? '100%' : k === i ? `${prog * 100}%` : '0%' }} />
+          </i>
+        ))}
       </div>
-      <div className="rc-story-panel" style={{ position: 'relative' }}>
+      <div className="rc-story-panel">
         {panels[i].body}
         <div className="rc-tapzones">
-          <button aria-label="prev" onClick={() => go(-1)} />
-          <button aria-label="next" onClick={() => go(1)} style={{ flex: 2 }} />
+          <button aria-label="prev" onClick={() => setI((v) => Math.max(0, v - 1))} />
+          <button aria-label="next" onClick={advance} style={{ flex: 2 }} />
         </div>
       </div>
-      <button className="icon-btn" onClick={onClose} aria-label={t.backAction} style={{ position: 'absolute', top: 40, right: 16, zIndex: 2, color: 'var(--color-neutral-300)' }}>
+      <button className="rc-icon-btn rc-story-close" onClick={onClose} aria-label={t.backAction}>
         <Icon name="x" weight="bold" />
       </button>
     </div>

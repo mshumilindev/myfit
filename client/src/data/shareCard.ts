@@ -283,3 +283,184 @@ export function drawShareCard(canvas: HTMLCanvasElement, m: ShareModel, format: 
 export function cardBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'));
 }
+
+// ─── Recap share card (My Fit — Recaps · RC-04) ──────────────────────────────
+export interface RecapShareModel {
+  brand: string;
+  kicker: string; // "Monthly recap"
+  period: string; // "August 2026"
+  headline: string;
+  stats: ShareStat[]; // exactly 3
+  record?: { name: string; detail: string } | null;
+  kcal?: string | null; // "9,840 kcal"
+  muscles: Array<{ name: string; pct: number }>; // top 3
+  handle: string; // "@you · spotter.app"
+}
+
+/** Portrait recap card (1080×1350) — the shareable summary of a period. */
+export function drawRecapCard(canvas: HTMLCanvasElement, m: RecapShareModel): void {
+  const w = 1080;
+  const h = 1350;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const gold = '#e9c07a';
+  const goldDim = '#eed3a5';
+  const gold900 = '#342713';
+  const text = '#e9eaec';
+  const muted = '#90959a';
+  const kcalBlue = '#3d84c9';
+  const padX = 80;
+
+  // ground: warm radial + dark gradient
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#221d13');
+  g.addColorStop(0.55, '#17181b');
+  g.addColorStop(1, '#131417');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  const rg = ctx.createRadialGradient(w * 0.22, 0, 0, w * 0.22, 0, w * 0.9);
+  rg.addColorStop(0, 'rgba(233,192,122,0.26)');
+  rg.addColorStop(0.55, 'rgba(233,192,122,0)');
+  ctx.fillStyle = rg;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.textBaseline = 'alphabetic';
+  // brand row
+  ctx.fillStyle = gold;
+  ctx.font = `700 30px ${FONT}`;
+  ctx.textAlign = 'left';
+  ctx.fillText('◆', padX, 96);
+  ctx.fillStyle = text;
+  ctx.font = `600 34px ${FONT}`;
+  ctx.fillText(m.brand, padX + 46, 96);
+  ctx.fillStyle = goldDim;
+  ctx.font = `600 22px ${FONT}`;
+  ctx.textAlign = 'right';
+  ctx.fillText(m.kicker.toUpperCase(), w - padX, 94);
+  ctx.textAlign = 'left';
+
+  // period + headline
+  ctx.fillStyle = text;
+  ctx.font = `600 76px ${FONT}`;
+  ctx.fillText(ellipsize(ctx, m.period, w - padX * 2), padX, 240);
+  ctx.fillStyle = '#fbf3e6';
+  ctx.font = `500 34px ${FONT}`;
+  wrapText(ctx, m.headline, padX, 300, w - padX * 2, 44);
+
+  // 3 hero stats
+  const sy = 470;
+  const colW = (w - padX * 2) / 3;
+  m.stats.slice(0, 3).forEach((st, i) => {
+    const x = padX + colW * i;
+    ctx.fillStyle = i === 0 ? gold : text;
+    ctx.font = `700 92px ${FONT}`;
+    ctx.fillText(st.value, x, sy);
+    ctx.fillStyle = goldDim;
+    ctx.font = `600 22px ${FONT}`;
+    ctx.fillText(st.label.toUpperCase(), x, sy + 44);
+    if (i > 0) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - 24, sy - 66);
+      ctx.lineTo(x - 24, sy + 30);
+      ctx.stroke();
+    }
+  });
+
+  // muscle distribution (top 3 bars) — the "where the work went" data
+  let y = 660;
+  ctx.fillStyle = goldDim;
+  ctx.font = `600 22px ${FONT}`;
+  ctx.fillText('WHERE THE WORK WENT'.length ? m.muscles.length ? 'MUSCLE FOCUS' : '' : '', padX, y);
+  y += 30;
+  const barX = padX + 220;
+  const barW = w - padX - barX - 90;
+  const maxPct = Math.max(...m.muscles.map((mm) => mm.pct), 1);
+  m.muscles.slice(0, 3).forEach((mm) => {
+    ctx.fillStyle = text;
+    ctx.font = `500 30px ${FONT}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(ellipsize(ctx, mm.name, 200), padX, y + 26);
+    // track
+    ctx.fillStyle = '#262a2d';
+    roundRect(ctx, barX, y + 8, barW, 16, 8);
+    ctx.fill();
+    // fill
+    const gb = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+    gb.addColorStop(0, '#8a642e');
+    gb.addColorStop(1, gold);
+    ctx.fillStyle = gb;
+    roundRect(ctx, barX, y + 8, Math.max(16, (barW * mm.pct) / maxPct), 16, 8);
+    ctx.fill();
+    ctx.fillStyle = muted;
+    ctx.font = `500 26px ${FONT}`;
+    ctx.textAlign = 'right';
+    ctx.fillText(`${mm.pct}%`, w - padX, y + 28);
+    ctx.textAlign = 'left';
+    y += 58;
+  });
+
+  // record + kcal chips row
+  y += 24;
+  if (m.record) {
+    ctx.fillStyle = gold900;
+    roundRect(ctx, padX, y, w - padX * 2, 130, 22);
+    ctx.fill();
+    ctx.fillStyle = goldDim;
+    ctx.font = `600 22px ${FONT}`;
+    ctx.fillText('TOP RECORD', padX + 30, y + 44);
+    ctx.fillStyle = text;
+    ctx.font = `500 34px ${FONT}`;
+    ctx.fillText(ellipsize(ctx, m.record.name, w - padX * 2 - 260), padX + 30, y + 92);
+    ctx.fillStyle = gold;
+    ctx.font = `700 46px ${FONT}`;
+    ctx.textAlign = 'right';
+    ctx.fillText(m.record.detail, w - padX - 30, y + 84);
+    ctx.textAlign = 'left';
+    y += 130 + 20;
+  }
+  if (m.kcal) {
+    ctx.fillStyle = 'rgba(61,132,201,0.14)';
+    roundRect(ctx, padX, y, w - padX * 2, 86, 20);
+    ctx.fill();
+    ctx.fillStyle = kcalBlue;
+    ctx.font = `700 30px ${FONT}`;
+    ctx.fillText('◆', padX + 30, y + 54);
+    ctx.fillStyle = '#cbe0f6';
+    ctx.font = `600 34px ${FONT}`;
+    ctx.fillText(m.kcal, padX + 72, y + 55);
+    y += 86;
+  }
+
+  // footer handle
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.fillRect(padX, h - 92, w - padX * 2, 2);
+  ctx.fillStyle = muted;
+  ctx.font = `500 26px ${FONT}`;
+  ctx.fillText(m.handle, padX, h - 50);
+}
+
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  txt: string,
+  x: number,
+  y: number,
+  maxW: number,
+  lh: number,
+): void {
+  const words = txt.split(' ');
+  let line = '';
+  let yy = y;
+  for (const wd of words) {
+    const test = line ? `${line} ${wd}` : wd;
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, x, yy);
+      line = wd;
+      yy += lh;
+    } else line = test;
+  }
+  if (line) ctx.fillText(line, x, yy);
+}
