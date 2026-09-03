@@ -121,6 +121,7 @@ export function ChallengesView({ store }: { store: StoreState }) {
 
   const activeList = live.filter((l) => l.ac.status === 'active');
   const startedIds = new Set(activeList.map((l) => l.tmpl.id));
+  const doneIds = new Set(live.filter((l) => l.ac.status === 'done').map((l) => l.tmpl.id));
 
   // Catalog filter + search.
   const [cat, setCat] = useState<ChallengeCategory | 'all'>('all');
@@ -226,7 +227,7 @@ export function ChallengesView({ store }: { store: StoreState }) {
                   <CatalogRow
                     key={c.id}
                     c={c}
-                    started={startedIds.has(c.id)}
+                    state={startedIds.has(c.id) ? 'active' : doneIds.has(c.id) ? 'done' : 'idle'}
                     onStart={() => setStartTmpl(c)}
                   />
                 ))}
@@ -372,11 +373,11 @@ function ActiveCard({ l, onOpen }: { l: LiveChallenge; onOpen: () => void }) {
 
 function CatalogRow({
   c,
-  started,
+  state,
   onStart,
 }: {
   c: ChallengeTemplate;
-  started: boolean;
+  state: 'idle' | 'active' | 'done';
   onStart: () => void;
 }) {
   const { t } = useT();
@@ -389,13 +390,33 @@ function CatalogRow({
         <div className="ch-cat-title">{c.title(t, c.target)}</div>
         <div className="ch-cat-sub">{t.chCat[c.category]}</div>
       </div>
-      {started ? (
-        <span className="ch-cat-active" role="img" aria-label={t.chActive} title={t.chActive}>
+      {/* One round chip, three states: start (plus), in-progress (clock), done (check). */}
+      {state === 'active' ? (
+        <span
+          className="ch-cat-chip ch-chip-active"
+          role="img"
+          aria-label={t.chActive}
+          title={t.chActive}
+        >
           <Icon name="clock" weight="bold" />
         </span>
+      ) : state === 'done' ? (
+        <span
+          className="ch-cat-chip ch-chip-done"
+          role="img"
+          aria-label={t.chDone}
+          title={t.chDone}
+        >
+          <Icon name="check" weight="bold" />
+        </span>
       ) : (
-        <button className="ch-start" onClick={onStart}>
-          {t.chStart}
+        <button
+          className="ch-cat-chip ch-chip-start"
+          onClick={onStart}
+          aria-label={t.chStart}
+          title={t.chStart}
+        >
+          <Icon name="plus" weight="bold" />
         </button>
       )}
     </div>

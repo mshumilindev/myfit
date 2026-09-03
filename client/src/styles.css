@@ -24079,42 +24079,36 @@ button.badge {
   color: var(--color-neutral-600);
   margin-top: 2px;
 }
-.ch-start {
-  flex: none;
-  border: none;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 7px 15px;
-  cursor: pointer;
-  color: var(--color-accent-200);
-  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
-}
-.ch-start:disabled {
-  color: var(--color-ok-text);
-  background: color-mix(in srgb, var(--color-ok) 12%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ok) 30%, transparent);
-  cursor: default;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  padding: 7px 0;
-}
-/* Catalog row for a challenge already running: an accent "Active" tag — reads
-   as in-progress, not the green check that used to look like it was completed. */
-.ch-cat-active {
+/* Catalog action chip — one round 34px circle, three states (start / active /
+   done). Fixed square + border-radius:50% keeps every state a true circle. */
+.ch-cat-chip {
   flex: none;
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 999px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
   font-size: 17px;
+  cursor: pointer;
+}
+.ch-chip-start {
+  color: var(--color-accent-200);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+.ch-chip-active {
   color: var(--ch-warn, #e8933f);
   background: color-mix(in srgb, var(--ch-warn, #e8933f) 13%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ch-warn, #e8933f) 32%, transparent);
+  cursor: default;
+}
+.ch-chip-done {
+  color: var(--color-ok-text);
+  background: color-mix(in srgb, var(--color-ok) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ok) 32%, transparent);
+  cursor: default;
 }
 .ch-empty {
   text-align: center;
