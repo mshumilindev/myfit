@@ -150,15 +150,10 @@ export function EquipmentDetailView({
   return (
     <div className="screen exd eqd">
       <div className="eqd-body">
-        <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
-          <Icon name="caret-left" />
-        </button>
-        <div className="eqd-hero">
-          {item.image ? (
-            <img src={item.image.thumbUrl} alt="" onError={hideBroken} />
-          ) : (
-            <span className="eqd-hero-ph" aria-hidden />
-          )}
+        <div className="eqd-topbar">
+          <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
+            <Icon name="caret-left" />
+          </button>
         </div>
 
         <div className="eqd-cat lbl">
@@ -176,6 +171,15 @@ export function EquipmentDetailView({
         </div>
 
         <h1 className="eqd-title">{name}</h1>
+
+        <div className="eqd-hero">
+          {item.image ? (
+            <img src={item.image.thumbUrl} alt="" onError={hideBroken} />
+          ) : (
+            <span className="eqd-hero-ph" aria-hidden />
+          )}
+        </div>
+
         {info && <p className="eqd-info">{info}</p>}
 
         {(item.muscles.length > 0 || secondary.length > 0) && (
