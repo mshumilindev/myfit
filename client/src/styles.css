@@ -15233,6 +15233,12 @@ button.exd-media {
 .session-live .ghost-row {
   padding-right: 36px;
 }
+/* …but the ghost row has no copy icon in that reserved 36px gutter, so pin the
+   Log button to the right edge — its right edge lands on the copy-icon column
+   of the logged rows above (36px gutter minus the icon's 2px inset). */
+.session-live .ghost-row .log-btn {
+  margin-right: -34px;
+}
 
 /* Per-exercise rest count-up (AC-2.8). */
 .ex-resting {
