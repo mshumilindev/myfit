@@ -350,7 +350,7 @@ export const lt: Strings = {
   nExercises: (n: number) => `${n} pratim${n === 1 ? 'as' : n < 10 ? 'ai' : 'ų'}`,
   noItemHere: (item: string) => `Čia nėra: ${item.toLowerCase()}`,
   filtersCombineNote:
-    'Filtrai jungiasi: raumuo ir įranga ir tai, ką turi ši salė. Pratimas, kurio salė negali aprūpinti, lieka matomas 45% ryškumu, o ne dingsta — gal žinai geriau.',
+    'Filtrai jungiasi: raumuo ir įranga ir tai, ką turi ši salė. Pratimas, kurio salė negali aprūpinti, lieka sąraše su prierašu, o ne dingsta — gal žinai geriau.',
   byMuscle: 'Pagal raumenis',
   totalLabel: 'Iš viso',
   volumeTab: 'Apimtis',

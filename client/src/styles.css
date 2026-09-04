@@ -12377,8 +12377,10 @@ h6 {
   text-align: left;
 }
 
+/* Missing gym equipment must NOT read as disabled: full opacity, neutral hint
+   (see .s.eqmiss), never red. The row stays fully pickable. */
 .pick-row.unavailable {
-  opacity: 0.45;
+  opacity: 1;
 }
 
 /* Row + optional "tag it" edit button for a user exercise with no muscle data. */
@@ -12428,6 +12430,16 @@ h6 {
 
 .pick-row .txt .s.warn {
   color: var(--color-danger-text);
+}
+.pick-row .txt .s.eqmiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-neutral-500);
+}
+.pick-row .txt .s.eqmiss i {
+  font-size: 11px;
+  color: var(--color-neutral-600);
 }
 
 .pick-row .eq {
@@ -12724,6 +12736,18 @@ h6 {
   font-size: 14px;
   gap: 8px;
   width: 100%;
+}
+/* Muscle-map button in history details: same shape as Add / Share (moved out of
+   the muscles-worked header into the action row). */
+.session-map-btn {
+  min-height: 46px;
+  font-size: 14px;
+  gap: 8px;
+  width: 100%;
+}
+.session-map-btn i {
+  font-size: 17px;
+  line-height: 0;
 }
 
 /* Discard session: same bordered shape as Add exercise but red, pinned to the
@@ -26594,6 +26618,29 @@ button.badge {
   color: var(--color-neutral-300);
   cursor: pointer;
   font-size: 12px;
+}
+/* Single equipment control on the exercise card: an icon button (no name, no
+   arrow) that opens the picker; selected inventory + search live in the picker.
+   The `.on` tint signals that equipment is chosen. */
+.eq-pick-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  cursor: pointer;
+  font-size: 13px;
+}
+.eq-pick-btn.on {
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  color: var(--color-accent-200, #f4d9a8);
 }
 .equip-picker .ep-title {
   font-size: 17px;

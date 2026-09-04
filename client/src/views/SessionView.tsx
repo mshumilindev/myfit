@@ -74,8 +74,6 @@ import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionSt
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
 import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
-import { equipmentById } from '../data/equipmentCatalog';
-import { localizedEquipName } from '../data/equipmentI18n';
 import { SessionMuscleMap } from '../components/SessionMuscleMap';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -861,23 +859,17 @@ export function SessionView(props: {
         )}
         {showChips && (
           <div className="exercise-chips one-line">
-            {ex.equipmentItems && ex.equipmentItems.length > 0
-              ? ex.equipmentItems.map((id) => {
-                  const it = equipmentById(id);
-                  return (
-                    <span key={id} className="echip">
-                      <Icon name="barbell" />
-                      {it ? localizedEquipName(it, locale) : id}
-                    </span>
-                  );
-                })
-              : equipment.map((id) => <EquipChip key={id} id={id} />)}
             <button
-              className="eq-pick-edit"
+              className={`eq-pick-btn${
+                (ex.equipmentItems && ex.equipmentItems.length > 0) || equipment.length > 0
+                  ? ' on'
+                  : ''
+              }`}
               onClick={() => setSheet({ kind: 'equip', exId: ex.id })}
               aria-label={t.eqEquipment}
+              title={t.eqEquipment}
             >
-              <Icon name="caret-down" />
+              <Icon name="barbell" />
             </button>
             {perHandFactor(ex) === 2 && (
               <span className="echip" title={t.perHandNote}>
@@ -1684,7 +1676,7 @@ export function SessionView(props: {
               <div className="muscles-worked">
                 <div className="section-label mworked-head">
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
-                  {!muscleMapInPill && (
+                  {!muscleMapInPill && !props.past && (
                     <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
                       <Icon name="person-simple" />
                       {t.muscleMapButton}
@@ -2023,6 +2015,15 @@ export function SessionView(props: {
                 >
                   <Icon name="plus" />
                   {props.past ? t.addToSession : t.addExercise}
+                </button>
+              )}
+              {props.past && muscleWorkSorted(workout).length > 0 && (
+                <button
+                  className="btn btn-secondary session-map-btn"
+                  onClick={() => setSheet({ kind: 'musclemap' })}
+                >
+                  <Icon name="person-simple" />
+                  {t.muscleMapButton}
                 </button>
               )}
               {props.past && (
@@ -2999,7 +3000,10 @@ function AddExerciseSheet(props: {
                   <span className="txt">
                     <span className="n">{m.name}</span>
                     {missing ? (
-                      <span className="s warn">{t.noItemHere(t.equipmentNames[missing])}</span>
+                      <span className="s eqmiss">
+                        <Icon name="info" />
+                        {t.noItemHere(t.equipmentNames[missing])}
+                      </span>
                     ) : m.info ? (
                       <span className="s">
                         {[m.info.primary, ...m.info.secondary]
@@ -3049,7 +3053,10 @@ function AddExerciseSheet(props: {
                 <span className="txt">
                   <span className="n">{name}</span>
                   {missing ? (
-                    <span className="s warn">{t.noItemHere(t.equipmentNames[missing])}</span>
+                    <span className="s eqmiss">
+                      <Icon name="info" />
+                      {t.noItemHere(t.equipmentNames[missing])}
+                    </span>
                   ) : c.muscle !== 'cardio' ? (
                     <span className="s">
                       {[c.muscle, ...secondaries].map((x) => t.muscleGroups[x]).join(' · ')}

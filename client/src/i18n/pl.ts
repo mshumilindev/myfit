@@ -341,7 +341,7 @@ export const pl: Strings = {
   nExercises: (n: number) => `${n} ${n === 1 ? 'ćwiczenie' : n < 5 ? 'ćwiczenia' : 'ćwiczeń'}`,
   noItemHere: (item: string) => `Brak tutaj: ${item.toLowerCase()}`,
   filtersCombineNote:
-    'Filtry się łączą: mięsień i sprzęt i to, co ma ta siłownia. Ćwiczenie, którego siłownia nie wyposaży, zostaje widoczne na 45%, zamiast znikać — możesz wiedzieć lepiej.',
+    'Filtry się łączą: mięsień i sprzęt i to, co ma ta siłownia. Ćwiczenie, którego siłownia nie wyposaży, zostaje na liście z adnotacją — możesz wiedzieć lepiej.',
   byMuscle: 'Wg mięśni',
   totalLabel: 'Razem',
   volumeTab: 'Objętość',

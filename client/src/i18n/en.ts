@@ -345,7 +345,7 @@ export const en = {
   nExercises: (n: number) => `${n} ${n === 1 ? 'exercise' : 'exercises'}`,
   noItemHere: (item: string) => `No ${item.toLowerCase()} here`,
   filtersCombineNote:
-    'Filters combine: muscle and equipment and what this gym has. An exercise the gym can’t equip stays visible at 45% rather than disappearing — you may know better.',
+    'Filters combine: muscle and equipment and what this gym has. An exercise the gym can’t equip stays in the list with a note — you may know better.',
   byMuscle: 'By muscle',
   totalLabel: 'Total',
   volumeTab: 'Volume',

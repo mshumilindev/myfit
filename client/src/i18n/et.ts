@@ -337,7 +337,7 @@ export const et: Strings = {
   nExercises: (n: number) => `${n} harjutus${n === 1 ? '' : 't'}`,
   noItemHere: (item: string) => `Siin pole: ${item.toLowerCase()}`,
   filtersCombineNote:
-    'Filtrid liituvad: lihas ja varustus ja see, mis sellel saalil on. Harjutus, mida saal ei varusta, jääb 45% nähtavaks, mitte ei kao — sina võid teada paremini.',
+    'Filtrid liituvad: lihas ja varustus ja see, mis sellel saalil on. Harjutus, mida saal ei varusta, jääb märkega loendisse, mitte ei kao — sina võid teada paremini.',
   byMuscle: 'Lihaste kaupa',
   totalLabel: 'Kokku',
   volumeTab: 'Maht',
