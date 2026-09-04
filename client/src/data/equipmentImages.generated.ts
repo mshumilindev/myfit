@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED — do not edit by hand.
- * 301 equipment images. Sources: Wikimedia Commons + Openverse (CC/PD/BY/BY-SA,
+ * 302 equipment images. Sources: Wikimedia Commons + Openverse (CC/PD/BY/BY-SA,
  * attribution in pageUrl/license/author) and Pexels (free commercial use, no
  * attribution required; credited anyway). Each verified relevant on review.
  * Items with no suitable photo have none (the board shows a placeholder).
@@ -324,12 +324,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://www.pexels.com/photo/black-sneakers-on-gray-concrete-6740819/',
     license: 'Pexels',
     author: 'Mikhail Nilov',
-  },
-  'band-therapy': {
-    thumbUrl: '/equipment/band-therapy.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Strength_band.png',
-    license: 'CC BY-SA 4.0',
-    author: 'Tiia Monto',
   },
   'band-tube-handles': {
     thumbUrl: '/equipment/band-tube-handles.jpg',
@@ -832,12 +826,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Pexels',
     author: 'RDNE Stock project',
   },
-  'cond-aqua-bag': {
-    thumbUrl: '/equipment/cond-aqua-bag.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Aqua_Aerobik.png',
-    license: 'CC BY-SA 4.0',
-    author: 'Kkotwica',
-  },
   'cond-atlas-stones': {
     thumbUrl: '/equipment/cond-atlas-stones.jpg',
     pageUrl:
@@ -882,12 +870,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
       'https://commons.wikimedia.org/wiki/File:2-8_hosts_Jane_Wayne_Day_140930-M-SD875-583.jpg',
     license: 'Public domain',
     author: 'Lance Cpl. David Hersey',
-  },
-  'cond-hurdles': {
-    thumbUrl: '/equipment/cond-hurdles.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Speed_Dreams_%2736GP_front.png',
-    license: 'CC BY-SA 3.0',
-    author: 'Ocirne94',
   },
   'cond-jump-rope': {
     thumbUrl: '/equipment/cond-jump-rope.jpg',
@@ -1213,12 +1195,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Unknown authorUnknown author',
   },
-  'kb-loadable': {
-    thumbUrl: '/equipment/kb-loadable.png',
-    pageUrl: 'https://www.pexels.com/photo/man-training-with-kettlebells-in-gym-28636772/',
-    license: 'Pexels',
-    author: 'Juho Alonen',
-  },
   'kb-powder-coat': {
     thumbUrl: '/equipment/kb-powder-coat.jpg',
     pageUrl:
@@ -1410,24 +1386,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Pexels',
     author: 'Andrea Piacquadio',
   },
-  'm-pilates-chair': {
-    thumbUrl: '/equipment/m-pilates-chair.png',
-    pageUrl: 'https://www.pexels.com/photo/a-modern-fitness-studio-18499504/',
-    license: 'Pexels',
-    author: 'Lê Đức',
-  },
   'm-rear-delt': {
     thumbUrl: '/equipment/m-rear-delt.jpg',
     pageUrl:
       'https://www.pexels.com/photo/serious-sportsman-training-on-exercise-machine-in-modern-gym-3838937/',
     license: 'Pexels',
     author: 'Andrea Piacquadio',
-  },
-  'm-reformer': {
-    thumbUrl: '/equipment/m-reformer.png',
-    pageUrl: 'https://www.pexels.com/photo/a-modern-fitness-studio-18499500/',
-    license: 'Pexels',
-    author: 'Lê Đức',
   },
   'm-seated-dip': {
     thumbUrl: '/equipment/m-seated-dip.jpg',
@@ -1491,12 +1455,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Pexels',
     author: 'Tima Miroshnichenko',
   },
-  parallettes: {
-    thumbUrl: '/equipment/parallettes.jpg',
-    pageUrl: 'https://www.pexels.com/photo/a-woman-balancing-on-metal-bars-10244444/',
-    license: 'Pexels',
-    author: 'Si Ti',
-  },
   'pl-bench-blocks': {
     thumbUrl: '/equipment/pl-bench-blocks.jpg',
     pageUrl:
@@ -1509,18 +1467,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://www.pexels.com/photo/man-lifting-a-barbell-9171160/',
     license: 'Pexels',
     author: 'Abdulrhman Alkady',
-  },
-  'plate-bumper': {
-    thumbUrl: '/equipment/plate-bumper.png',
-    pageUrl: 'https://www.pexels.com/photo/gym-weight-plates-on-rack-in-fitness-center-28636776/',
-    license: 'Pexels',
-    author: 'Juho Alonen',
-  },
-  'plate-competition': {
-    thumbUrl: '/equipment/plate-competition.png',
-    pageUrl: 'https://www.pexels.com/photo/gym-weight-plates-on-rack-in-fitness-center-28636776/',
-    license: 'Pexels',
-    author: 'Juho Alonen',
   },
   'plate-fractional': {
     thumbUrl: '/equipment/plate-fractional.jpg',
@@ -1548,18 +1494,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.5',
     author: '',
   },
-  'plate-tri-grip': {
-    thumbUrl: '/equipment/plate-tri-grip.png',
-    pageUrl: 'https://www.pexels.com/photo/man-holding-weight-plate-in-gym-setting-28636773/',
-    license: 'Pexels',
-    author: 'Juho Alonen',
-  },
-  'plate-urethane': {
-    thumbUrl: '/equipment/plate-urethane.png',
-    pageUrl: 'https://www.pexels.com/photo/gym-weight-plates-on-rack-in-fitness-center-28636776/',
-    license: 'Pexels',
-    author: 'Juho Alonen',
-  },
   'pullup-bar': {
     thumbUrl: '/equipment/pullup-bar.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Sandown_outdoor_gym_pull_ups_equipment.JPG',
@@ -1586,12 +1520,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
       'https://www.pexels.com/photo/a-rack-of-weights-and-other-equipment-in-a-gym-27810162/',
     license: 'Pexels',
     author: 'Jonathan Borba',
-  },
-  'rack-lifting-platform': {
-    thumbUrl: '/equipment/rack-lifting-platform.png',
-    pageUrl: 'https://www.pexels.com/photo/man-adjusting-barbell-weights-in-gym-28636774/',
-    license: 'Pexels',
-    author: 'Juho Alonen',
   },
   'rack-monolift': {
     thumbUrl: '/equipment/rack-monolift.jpg',
@@ -1672,12 +1600,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Pexels',
     author: 'Ketut Subiyanto',
   },
-  'rec-hanging-boots': {
-    thumbUrl: '/equipment/rec-hanging-boots.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Gravity-chess-game.png',
-    license: 'CC BY-SA 3.0',
-    author: 'User:Cburnett',
-  },
   'rec-inversion-table': {
     thumbUrl: '/equipment/rec-inversion-table.jpg',
     pageUrl:
@@ -1685,26 +1607,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'The U.S. Food and Drug Administration',
   },
-  'rec-lacrosse-ball': {
-    thumbUrl: '/equipment/rec-lacrosse-ball.png',
-    pageUrl:
-      'https://commons.wikimedia.org/wiki/File:Burlot%27scher_Widerstandsapparat,_extracted_from_Die_Technik_der_Massage_(1898).png',
-    license: 'Public domain',
-    author: 'Dr. Albert Reibmayr',
-  },
   'rec-massage-gun': {
     thumbUrl: '/equipment/rec-massage-gun.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:Using_a_percution_massage_gun_to_do_a_foot_massage.jpg',
     license: 'CC BY-SA 3.0',
     author: 'Best For My Feet',
-  },
-  'rec-massage-table': {
-    thumbUrl: '/equipment/rec-massage-table.png',
-    pageUrl:
-      'https://commons.wikimedia.org/wiki/File:Burlot%27scher_Widerstandsapparat,_extracted_from_Die_Technik_der_Massage_(1898).png',
-    license: 'Public domain',
-    author: 'Dr. Albert Reibmayr',
   },
   'rec-mobility-bands': {
     thumbUrl: '/equipment/rec-mobility-bands.jpg',
@@ -1726,25 +1634,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 3.0',
     author: 'MBisanz',
   },
-  'rec-red-light': {
-    thumbUrl: '/equipment/rec-red-light.png',
-    pageUrl:
-      'https://commons.wikimedia.org/wiki/File:1e14m_comparison_light_day_week_and_month.png',
-    license: 'CC BY-SA 3.0',
-    author: 'Paul Stansifer, and User:84user (see "source")',
-  },
   'rec-sauna': {
     thumbUrl: '/equipment/rec-sauna.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:Clay_NGC_Fitness_Center_Sauna_(6054064892).jpg',
     license: 'CC BY 2.0',
     author: 'Georgia National Guard from United States',
-  },
-  'rec-stability-ball': {
-    thumbUrl: '/equipment/rec-stability-ball.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Protein_stability_graph.png',
-    license: 'CC BY-SA 4.0',
-    author: 'Thomas Shafee',
   },
   'rec-stretch-mat': {
     thumbUrl: '/equipment/rec-stretch-mat.jpg',
@@ -1777,12 +1672,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
       'https://www.pexels.com/photo/agility-ladder-and-marker-cones-on-a-football-field-13204961/',
     license: 'Pexels',
     author: 'Chris K',
-  },
-  'spd-parachute': {
-    thumbUrl: '/equipment/spd-parachute.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Speed_Dreams_%2736GP_front.png',
-    license: 'CC BY-SA 3.0',
-    author: 'Ocirne94',
   },
   'spd-sled-harness': {
     thumbUrl: '/equipment/spd-sled-harness.jpg',
@@ -1874,12 +1763,6 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Pexels',
     author: 'Ketut Subiyanto',
   },
-  'suspension-trx': {
-    thumbUrl: '/equipment/suspension-trx.png',
-    pageUrl: 'https://commons.wikimedia.org/wiki/File:Suspension_training_equipment.png',
-    license: 'CC BY-SA 4.0',
-    author: 'Alejandro D. Nava B.',
-  },
   'test-force-plate': {
     thumbUrl: '/equipment/test-force-plate.jpg',
     pageUrl: 'https://www.flickr.com/photos/9998127@N06/12811284765',
@@ -1904,5 +1787,130 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
       'https://commons.wikimedia.org/wiki/File:Woman_doing_exercises_with_an_ab_wheel_and_ankle_weights_on_a_yoga_mat_in_the_park._(51540571665).jpg',
     license: 'CC BY 2.0',
     author: 'Nenad Stojkovic',
+  },
+  'acc-row-handle': {
+    thumbUrl: '/equipment/acc-row-handle.jpg',
+    pageUrl: 'https://www.pexels.com/photo/black-and-silver-exercise-equipment-4162542/',
+    license: 'Pexels',
+    author: 'Ivan S',
+  },
+  'acc-stirrup': {
+    thumbUrl: '/equipment/acc-stirrup.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/close-up-of-gym-equipment-in-modern-fitness-center-29495724/',
+    license: 'Pexels',
+    author: 'Arun kachhwaha',
+  },
+  'band-therapy': {
+    thumbUrl: '/equipment/band-therapy.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/crop-anonymous-woman-stretching-elastic-band-near-professional-chiropractor-4506166/',
+    license: 'Pexels',
+    author: 'Kaboompics.com',
+  },
+  'bench-reverse-hyper': {
+    thumbUrl: '/equipment/bench-reverse-hyper.jpg',
+    pageUrl: 'https://www.pexels.com/photo/red-and-black-exercise-equipment-4162538/',
+    license: 'Pexels',
+    author: 'Ivan S',
+  },
+  'cable-wall-pulley': {
+    thumbUrl: '/equipment/cable-wall-pulley.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-gym-equipment-pulley-system-31616767/',
+    license: 'Pexels',
+    author: 'Fahad Puthawala',
+  },
+  'cond-hurdles': {
+    thumbUrl: '/equipment/cond-hurdles.jpg',
+    pageUrl: 'https://www.pexels.com/photo/strong-young-sportsman-jumping-over-barrier-3764580/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'kb-loadable': {
+    thumbUrl: '/equipment/kb-loadable.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-kettlebells-13863727/',
+    license: 'Pexels',
+    author: "Nica's Photo",
+  },
+  'm-pec-deck': {
+    thumbUrl: '/equipment/m-pec-deck.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/muscular-man-exercising-on-the-peck-deck-machine-at-the-gym-18060022/',
+    license: 'Pexels',
+    author: 'marcuschanmedia',
+  },
+  'm-pilates-chair': {
+    thumbUrl: '/equipment/m-pilates-chair.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/side-view-of-a-woman-in-activewear-doing-pilates-reformer-exercise-5473893/',
+    license: 'Pexels',
+    author: 'Maria Charizani',
+  },
+  'm-reformer': {
+    thumbUrl: '/equipment/m-reformer.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-modern-fitness-studio-18499500/',
+    license: 'Pexels',
+    author: 'Lê Đức',
+  },
+  parallettes: {
+    thumbUrl: '/equipment/parallettes.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-balancing-on-parallettes-14074950/',
+    license: 'Pexels',
+    author: 'Rulo Mora',
+  },
+  'plate-bumper': {
+    thumbUrl: '/equipment/plate-bumper.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-barbell-and-weights-in-a-gym-19025673/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'plate-competition': {
+    thumbUrl: '/equipment/plate-competition.jpg',
+    pageUrl: 'https://www.pexels.com/photo/intense-powerlifting-competition-action-shot-38508131/',
+    license: 'Pexels',
+    author: 'CRISTIAN CAMILO ESTRADA',
+  },
+  'plate-tri-grip': {
+    thumbUrl: '/equipment/plate-tri-grip.jpg',
+    pageUrl: 'https://www.pexels.com/photo/person-carrying-a-weight-plate-5837305/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
+  },
+  'plate-urethane': {
+    thumbUrl: '/equipment/plate-urethane.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-gym-weight-plate-on-barbell-39100209/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
+  },
+  'rack-combo': {
+    thumbUrl: '/equipment/rack-combo.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-squat-rack-at-a-home-gym-14440147/',
+    license: 'Pexels',
+    author: 'Chris Brown',
+  },
+  'rec-massage-table': {
+    thumbUrl: '/equipment/rec-massage-table.jpg',
+    pageUrl: 'https://www.pexels.com/photo/person-getting-a-massage-9146381/',
+    license: 'Pexels',
+    author: 'Ron Lach',
+  },
+  'rec-stability-ball': {
+    thumbUrl: '/equipment/rec-stability-ball.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-woman-wearing-grey-sports-bra-3757374/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'spd-parachute': {
+    thumbUrl: '/equipment/spd-parachute.jpg',
+    pageUrl: 'https://www.pexels.com/photo/boy-running-with-a-parachute-19965743/',
+    license: 'Pexels',
+    author: 'Jeffry Surianto',
+  },
+  'suspension-trx': {
+    thumbUrl: '/equipment/suspension-trx.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-woman-in-sportswear-exercising-with-suspension-trainer-8436161/',
+    license: 'Pexels',
+    author: 'Yan Krukau',
   },
 };

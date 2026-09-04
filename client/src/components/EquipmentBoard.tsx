@@ -41,6 +41,9 @@ export function EquipmentBoard({ gym }: { gym: Gym }) {
   const [open, setOpen] = useState<Set<EquipCategory>>(new Set());
   const [picked, setPicked] = useState<Set<string>>(() => new Set(gym.equipmentItems ?? []));
 
+  // Images that 404 at load time fall back to the placeholder.
+  const [broken, setBroken] = useState<Set<string>>(new Set());
+
   const catalog = useMemo(() => enrichedCatalog(), []);
 
   // Group by category, in the fixed display order.
@@ -159,8 +162,13 @@ export function EquipmentBoard({ gym }: { gym: Gym }) {
                           title={info}
                         >
                           <span className="eq-thumb">
-                            {it.image ? (
-                              <img src={it.image.thumbUrl} alt="" loading="lazy" />
+                            {it.image && !broken.has(it.id) ? (
+                              <img
+                                src={it.image.thumbUrl}
+                                alt=""
+                                loading="lazy"
+                                onError={() => setBroken((prev) => new Set(prev).add(it.id))}
+                              />
                             ) : (
                               <span className="eq-thumb-ph" aria-hidden />
                             )}
