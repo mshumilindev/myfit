@@ -36,7 +36,7 @@ export function EquipmentPickerSheet({
   const catalog = useMemo(() => enrichedCatalog(), []);
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog]);
   const [query, setQuery] = useState('');
-  const [open, setOpen] = useState<Set<EquipCategory>>(new Set());
+  const [open, setOpen] = useState<EquipCategory | null>(null);
 
   const selected = useMemo(() => new Set(exercise.equipmentItems ?? []), [exercise.equipmentItems]);
 
@@ -84,13 +84,7 @@ export function EquipmentPickerSheet({
     else next.add(id);
     setExerciseEquipmentItems(workoutId, exercise.id, [...next], gym?.id);
   };
-  const toggleCat = (c: EquipCategory) =>
-    setOpen((prev) => {
-      const n = new Set(prev);
-      if (n.has(c)) n.delete(c);
-      else n.add(c);
-      return n;
-    });
+  const toggleCat = (c: EquipCategory) => setOpen((prev) => (prev === c ? null : c));
 
   return (
     <Sheet onClose={onClose} className="equip-picker">
@@ -132,7 +126,7 @@ export function EquipmentPickerSheet({
         ) : (
           visible.map(({ cat, items }) => {
             const sel = items.reduce((n, it) => n + (selected.has(it.id) ? 1 : 0), 0);
-            const expanded = searching || open.has(cat);
+            const expanded = searching || open === cat;
             return (
               <div className={`eq-cat${expanded ? ' open' : ''}`} key={cat}>
                 <button

@@ -26690,11 +26690,25 @@ button.badge {
 }
 
 /* Session equipment picker — reuses the board's tile grid, scoped + no details */
+/* The sheet itself is the height bound; only .ep-scroll scrolls (so the title +
+   search stay pinned and nested-scroll never fights the sheet's own scroll). */
+.sheet.equip-picker {
+  overflow: hidden;
+}
 .equip-picker .ep-scroll {
-  max-height: 56vh;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   margin: 4px -6px 0;
   padding: 0 6px;
+}
+/* .ep-scroll is a flex column (via .eq-cats). Its bounded height would make the
+   single open category SHRINK to fit and clip its grid (overflow:hidden). Pin the
+   items to their natural height so the column overflows and .ep-scroll scrolls. */
+.equip-picker .eq-cat {
+  flex: none;
 }
 .eq-pick-tile {
   border: none;
