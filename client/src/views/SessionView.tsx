@@ -79,6 +79,7 @@ import { GymThumb } from '../components/GymThumb';
 import {
   EquipChip,
   MuscleChip,
+  MuscleRow,
   MuscleIcon,
   MuscleSetChip,
   MuscleBreakdownList,
@@ -855,16 +856,7 @@ export function SessionView(props: {
           </div>
         )}
         {showChips && (
-          <div className="exercise-chips">
-            {muscles.primary && (
-              <MuscleChip muscle={muscles.primary} tone="primary" onClick={openMuscleHistory} />
-            )}
-            {muscles.primary && muscles.secondary.length > 0 && (
-              <span className="chip-break" aria-hidden />
-            )}
-            {muscles.secondary.map((m) => (
-              <MuscleChip key={m} muscle={m} tone="secondary" onClick={openMuscleHistory} />
-            ))}
+          <div className="exercise-chips one-line">
             {equipment.map((id) => (
               <EquipChip key={id} id={id} />
             ))}
@@ -872,6 +864,20 @@ export function SessionView(props: {
               <span className="echip" title={t.perHandNote}>
                 {t.perHandChip}
               </span>
+            )}
+            {muscles.primary && (
+              <MuscleRow
+                entries={[
+                  { muscle: muscles.primary, sets: ex.sets.length || 1, primary: true },
+                  ...muscles.secondary.map((m) => ({
+                    muscle: m,
+                    sets: (ex.sets.length || 1) * 0.5,
+                    primary: false,
+                  })),
+                ]}
+                refTs={workout!.startedAt}
+                onOpen={openMuscleHistory}
+              />
             )}
           </div>
         )}

@@ -16,7 +16,8 @@
 
 export type LoadType = 'weight' | 'assist' | 'band';
 
-export type BandColor = 'yellow' | 'green' | 'red' | 'blue' | 'black' | 'purple';
+export type BandColor =
+  'yellow' | 'green' | 'red' | 'blue' | 'black' | 'purple' | 'pink' | 'orange' | 'grey' | 'white';
 
 /** One rung of a gym's band set: a colour and its estimated resistance in kg. */
 export interface BandRung {
@@ -25,7 +26,18 @@ export interface BandRung {
 }
 
 /** Canonical colour order, light → heavy (the common Zdrofit/Decathlon set). */
-export const BAND_COLORS: BandColor[] = ['yellow', 'green', 'red', 'blue', 'black', 'purple'];
+export const BAND_COLORS: BandColor[] = [
+  'yellow',
+  'green',
+  'red',
+  'blue',
+  'black',
+  'purple',
+  'pink',
+  'orange',
+  'grey',
+  'white',
+];
 
 /** Sensible starting library when a gym hasn't set its own. Estimates in kg. */
 export const BAND_DEFAULTS: readonly BandRung[] = [
@@ -43,6 +55,10 @@ export const BAND_HEX: Record<BandColor, string> = {
   blue: '#3d84c9',
   black: '#2b2f36',
   purple: '#7b5ea7',
+  pink: '#e06c9f',
+  orange: '#e08a3c',
+  grey: '#9aa0a6',
+  white: '#e9eaec',
 };
 
 /**

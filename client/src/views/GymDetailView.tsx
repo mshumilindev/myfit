@@ -13,9 +13,9 @@ import {
   bandLibraryFor,
   setGymBandLibrary,
 } from '../store';
-import { BAND_HEX, type BandRung } from '../loads';
+import { BAND_HEX, BAND_COLORS, type BandRung, type BandColor } from '../loads';
 import type { Gym } from '../types';
-import { DEFAULT_GYM_RADIUS_M } from '../types';
+import { DEFAULT_GYM_RADIUS_M, INSIDE_RADIUS_M } from '../types';
 import {
   resolveAddress,
   resolveGymMeta,
@@ -43,7 +43,33 @@ function BandLibraryCard({ gym }: { gym: Gym }) {
   const { t } = useT();
   const [rungs, setRungs] = useState<BandRung[]>(() => bandLibraryFor(gym).map((r) => ({ ...r })));
   const [saved, setSaved] = useState(false);
+  const [pick, setPick] = useState<number | null>(null);
   const dirty = JSON.stringify(rungs) !== JSON.stringify(bandLibraryFor(gym));
+
+  const setColor = (i: number, color: BandColor) => {
+    setRungs((list) => list.map((x, xi) => (xi === i ? { ...x, color } : x)));
+    setPick(null);
+    setSaved(false);
+  };
+  const setKg = (i: number, kg: number) => {
+    setRungs((list) => list.map((x, xi) => (xi === i ? { ...x, kg } : x)));
+    setSaved(false);
+  };
+  const removeRow = (i: number) => {
+    setRungs((list) => list.filter((_, xi) => xi !== i));
+    setPick(null);
+    setSaved(false);
+  };
+  const addRow = () => {
+    setRungs((list) => {
+      const used = new Set(list.map((r) => r.color));
+      const nextColor = BAND_COLORS.find((c) => !used.has(c)) ?? 'yellow';
+      const maxKg = list.reduce((m, r) => Math.max(m, r.kg), 0);
+      return [...list, { color: nextColor, kg: maxKg + 5 }];
+    });
+    setSaved(false);
+  };
+
   return (
     <div className="detail-card band-lib-card">
       <div className="detail-card-head">
@@ -54,8 +80,32 @@ function BandLibraryCard({ gym }: { gym: Gym }) {
       <div className="detail-muted band-lib-hint">{t.bandLibHint}</div>
       <div className="band-lib-rows">
         {rungs.map((r, i) => (
-          <div className="band-lib-row" key={r.color}>
-            <span className="band-dot" style={{ background: BAND_HEX[r.color] }} />
+          <div className="band-lib-row" key={i}>
+            <div className="band-pick">
+              <button
+                type="button"
+                className="band-dot-btn"
+                aria-label={t.bandColor(r.color)}
+                onClick={() => setPick((p) => (p === i ? null : i))}
+              >
+                <span className="band-dot" style={{ background: BAND_HEX[r.color] }} />
+              </button>
+              {pick === i && (
+                <div className="band-swatches">
+                  {BAND_COLORS.map((c) => (
+                    <button
+                      type="button"
+                      key={c}
+                      className={`band-swatch${c === r.color ? ' on' : ''}`}
+                      style={{ background: BAND_HEX[c] }}
+                      aria-label={t.bandColor(c)}
+                      title={t.bandColor(c)}
+                      onClick={() => setColor(i, c)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
             <span className="band-lib-name">{t.bandColor(r.color)}</span>
             <input
               type="number"
@@ -63,30 +113,39 @@ function BandLibraryCard({ gym }: { gym: Gym }) {
               min={0}
               step={0.5}
               value={r.kg}
-              onChange={(e) => {
-                const kg = Math.max(0, Number(e.target.value) || 0);
-                setRungs((list) => list.map((x, xi) => (xi === i ? { ...x, kg } : x)));
-                setSaved(false);
-              }}
+              onChange={(e) => setKg(i, Math.max(0, Number(e.target.value) || 0))}
             />
             <span className="band-lib-unit">{t.kgCol.toLowerCase()}</span>
+            <button
+              type="button"
+              className="band-remove"
+              aria-label={t.delete}
+              onClick={() => removeRow(i)}
+            >
+              <Icon name="x" />
+            </button>
           </div>
         ))}
       </div>
-      <button
-        className="btn btn-secondary band-lib-save"
-        disabled={!dirty}
-        onClick={() => {
-          setGymBandLibrary(
-            gym.id,
-            [...rungs].sort((a, b) => a.kg - b.kg),
-          );
-          setSaved(true);
-        }}
-      >
-        <Icon name="check" />
-        {saved && !dirty ? t.bandLibSaved : t.bandLibSave}
-      </button>
+      <div className="band-lib-actions">
+        <button type="button" className="btn btn-secondary band-add" onClick={addRow}>
+          <Icon name="plus" /> {t.bandAdd}
+        </button>
+        <button
+          className="btn btn-secondary band-lib-save"
+          disabled={!dirty}
+          onClick={() => {
+            setGymBandLibrary(
+              gym.id,
+              [...rungs].sort((a, b) => a.kg - b.kg),
+            );
+            setSaved(true);
+          }}
+        >
+          <Icon name="check" />
+          {saved && !dirty ? t.bandLibSaved : t.bandLibSave}
+        </button>
+      </div>
     </div>
   );
 }
@@ -212,7 +271,8 @@ export function GymDetailView({
     ? sessions.reduce((s, w) => s + ((w.finishedAt ?? 0) - w.startedAt), 0) / sessions.length
     : 0;
   const dist = coords ? haversineM(coords, { lat, lng }) : null;
-  const inside = dist !== null && dist <= (gym?.radiusM ?? DEFAULT_GYM_RADIUS_M);
+  const inside =
+    dist !== null && dist <= Math.min(gym?.radiusM ?? DEFAULT_GYM_RADIUS_M, INSIDE_RADIUS_M);
 
   const directionsHref = coords
     ? `https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=${coords.lat}%2C${coords.lng}%3B${lat}%2C${lng}`
@@ -363,7 +423,7 @@ export function GymDetailView({
 
         {isSaved && gym && <BandLibraryCard gym={gym} />}
 
-        {isSaved && gym && <EquipmentBoard gym={gym} />}
+        {isSaved && gym && <EquipmentBoard gym={gym} shell={shell} />}
 
         {isSaved && (
           <>

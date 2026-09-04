@@ -135,6 +135,11 @@ const RecapStory = lazy(() =>
 const GymDetailView = lazy(() =>
   import('./views/GymDetailView').then((module) => ({ default: module.GymDetailView })),
 );
+const EquipmentDetailView = lazy(() =>
+  import('./views/EquipmentDetailView').then((module) => ({
+    default: module.EquipmentDetailView,
+  })),
+);
 const ApexApp = lazy(() =>
   import('./views/ApexApp').then((module) => ({ default: module.ApexApp })),
 );
@@ -168,6 +173,7 @@ export type Overlay =
   | { screen: 'recap-story'; period: string }
   | { screen: 'profile'; userId: string }
   | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
+  | { screen: 'equipment'; itemId: string; gymId?: string }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
 
@@ -275,6 +281,7 @@ function toHash(
   if (overlay?.screen === 'muscle-history') return `#/muscle/${encodeURIComponent(overlay.muscle)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
+  if (overlay?.screen === 'equipment') return `#/equipment/${encodeURIComponent(overlay.itemId)}`;
   if (overlay?.screen === 'library')
     return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
@@ -334,6 +341,11 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'gym' && parts[1])
     return { tab: 'gyms', overlay: { screen: 'gym', gymId: parts[1] } };
   if (head === 'gym') return { tab: 'gyms', overlay: { screen: 'gym' } };
+  if (head === 'equipment' && parts[1])
+    return {
+      tab: 'gyms',
+      overlay: { screen: 'equipment', itemId: decodeURIComponent(parts[1]) },
+    };
   if ((TABS as string[]).includes(head)) return { tab: head as Tab, overlay: null };
   return { tab: 'today', overlay: null };
 }
@@ -1212,6 +1224,14 @@ export function App() {
               candLat={activeOverlay.lat}
               candLng={activeOverlay.lng}
               candAddress={activeOverlay.address}
+              shell={shell}
+              onClose={closeOverlay}
+            />
+          )}
+          {activeOverlay?.screen === 'equipment' && (
+            <EquipmentDetailView
+              itemId={activeOverlay.itemId}
+              gymId={activeOverlay.gymId}
               shell={shell}
               onClose={closeOverlay}
             />

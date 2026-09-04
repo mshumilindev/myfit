@@ -126,6 +126,11 @@ export interface Gym {
 /** Default geofence for a newly saved gym (AC-GYM-05). */
 export const DEFAULT_GYM_RADIUS_M = 50;
 
+/** The "Inside" badge is a tighter presence check than the (wider) save
+ *  geofence: a gym floor is ~30 m across, so 130 m down the street must not
+ *  read as inside. Capped independent of the saved radiusM. */
+export const INSIDE_RADIUS_M = 30;
+
 /** "Був у залі 1год+, але тренування не залоговане" */
 export interface Reminder {
   gymId: string;
