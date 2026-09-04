@@ -10,12 +10,15 @@ import { useMemo, useState } from 'react';
 import type { Gym, Exercise } from '../types';
 import {
   enrichedCatalog,
+  equipmentItemFitsExercise,
   pickerCategoriesForExercise,
+  primaryCategoriesForExercise,
   type EquipCategory,
   type EquipmentItem,
 } from '../data/equipmentCatalog';
+import type { MuscleGroup } from '../data/exercises';
 import { localizedEquipName, equipCategoryLabel } from '../data/equipmentI18n';
-import { equipmentFor, setExerciseEquipmentItems } from '../store';
+import { equipmentFor, resolveMuscles, setExerciseEquipmentItems } from '../store';
 import { useT } from '../i18n';
 import { tokenMatch } from '../search';
 import { MuscleChip } from './Muscle';
@@ -41,20 +44,35 @@ export function EquipmentPickerSheet({
   const selected = useMemo(() => new Set(exercise.equipmentItems ?? []), [exercise.equipmentItems]);
 
   // Categories relevant to this exercise's equipment class.
-  const cats = useMemo(() => pickerCategoriesForExercise(equipmentFor(exercise)), [exercise]);
+  const classes = useMemo(() => equipmentFor(exercise), [exercise]);
+  const cats = useMemo(() => pickerCategoriesForExercise(classes), [classes]);
+  const primaryCats = useMemo(() => new Set(primaryCategoriesForExercise(classes)), [classes]);
+  const muscles = useMemo(() => {
+    const m = resolveMuscles(exercise);
+    return [m.primary, ...m.secondary].filter(Boolean) as MuscleGroup[];
+  }, [exercise]);
 
-  // Relevant items grouped by category, in the fixed order.
+  // Relevant items grouped by category, in the fixed order. Within each category
+  // only items that actually fit the exercise are shown (belts/straps for a
+  // squat, not ab-wheels) — but an already-selected item is always kept so it
+  // can be unpicked, and universal support keeps real alternatives available.
   const groups = useMemo(() => {
     const allow = new Set(cats);
     const byCat = new Map<EquipCategory, EquipmentItem[]>();
     for (const it of catalog) {
       if (!allow.has(it.category)) continue;
+      if (
+        !selected.has(it.id) &&
+        !equipmentItemFitsExercise(it, { classes, muscles, primaryCategories: primaryCats })
+      ) {
+        continue;
+      }
       const arr = byCat.get(it.category) ?? [];
       arr.push(it);
       byCat.set(it.category, arr);
     }
     return cats.filter((c) => byCat.has(c)).map((c) => ({ cat: c, items: byCat.get(c)! }));
-  }, [catalog, cats]);
+  }, [catalog, cats, classes, muscles, primaryCats, selected]);
 
   const hay = (it: EquipmentItem): string =>
     [

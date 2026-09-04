@@ -4918,3 +4918,41 @@ export function pickerCategoriesForExercise(equipIds: readonly string[]): EquipC
   }
   return PICKER_CATEGORY_ORDER.filter((c) => set.has(c));
 }
+
+/** The exercise's own tool categories (the bar / plates / rack / bench for a
+ *  barbell lift, the machine for a machine lift, …) — every picker category that
+ *  is not a cross-exercise universal add-on. Items in these always fit the
+ *  exercise; items in the universal categories get filtered per exercise. */
+export function primaryCategoriesForExercise(equipIds: readonly string[]): EquipCategory[] {
+  const universal = new Set<EquipCategory>(UNIVERSAL_EQUIP_CATEGORIES);
+  return pickerCategoriesForExercise(equipIds).filter((c) => !universal.has(c));
+}
+
+/** Whether an equipment item is worth showing for an exercise in the session
+ *  picker. Tool items (primary categories) always show — they ARE the movement.
+ *  Universal add-ons (accessories, bands) show only when they are general
+ *  support (no muscle of their own), full-body, or actually match this exercise
+ *  by tool class AND muscle — so a squat lists belts / straps / chalk and hip
+ *  work, but not ab-wheels, lat bars or cable ankle straps. */
+export function equipmentItemFitsExercise(
+  item: EquipmentItem,
+  opts: {
+    classes: readonly string[];
+    muscles: readonly MuscleGroup[];
+    primaryCategories: ReadonlySet<EquipCategory>;
+  },
+): boolean {
+  if (opts.primaryCategories.has(item.category)) return true;
+  // A different tool's add-on (a cable handle for a barbell lift) never fits,
+  // even if it's tagged full-body — gate on tool class first. 'other'/'body'
+  // are the generic support classes (belts, chalk, sleeves, vests).
+  const clsOk =
+    opts.classes.includes(item.cls) ||
+    item.cls === 'other' ||
+    item.cls === 'body' ||
+    item.cls === 'bands';
+  if (!clsOk) return false;
+  if (item.muscles.length === 0) return true; // general support (belt, chalk, …)
+  if (item.muscles.includes('fullbody' as MuscleGroup)) return true;
+  return item.muscles.some((m) => opts.muscles.includes(m));
+}
