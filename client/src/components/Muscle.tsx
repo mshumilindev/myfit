@@ -1213,6 +1213,7 @@ export function MuscleRow({
       }
     };
     fit();
+    if (typeof ResizeObserver === 'undefined') return;
     const ro = new ResizeObserver(fit);
     ro.observe(row);
     return () => ro.disconnect();
