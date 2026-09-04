@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   canonicalExerciseName,
   customExercises,
+  loadExerciseInstructions,
   muscleInfoByName,
   richExerciseByName,
   subRegionsByName,
@@ -69,6 +70,20 @@ export function ExerciseDetailView({
   const rich = richExerciseByName(canonical);
   const subR = subRegionsByName(canonical);
   const hasBaseRecord = !!rich;
+
+  // Instructions are lazy-loaded (kept out of the main bundle); fetch per lift.
+  const [instructionSteps, setInstructionSteps] = useState<string[]>([]);
+  useEffect(() => {
+    let live = true;
+    // loadExerciseInstructions(undefined) resolves to [], so no id is handled
+    // here too — without a synchronous setState in the effect body.
+    void loadExerciseInstructions(rich?.id).then((steps) => {
+      if (live) setInstructionSteps(steps);
+    });
+    return () => {
+      live = false;
+    };
+  }, [rich?.id]);
 
   // Custom ("My exercises") entry, if any — editable in place. Recomputed each
   // render so an edit (which emits) refreshes it; not memoised on a stale key.
@@ -219,11 +234,11 @@ export function ExerciseDetailView({
     </div>
   );
 
-  const instructions = rich && rich.instructions.length > 0 && (
+  const instructions = instructionSteps.length > 0 && (
     <div className="exd-section">
       <h6 className="exd-label">{t.instructionsLabel}</h6>
       <div className="exd-instr-list">
-        {rich.instructions.map((step, i) => (
+        {instructionSteps.map((step, i) => (
           <div className="exd-instr" key={i}>
             <span className="exd-instr-n">{i + 1}</span>
             <span>{step}</span>

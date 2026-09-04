@@ -64,7 +64,6 @@ export interface RichExercise {
   equipment: EquipmentId | null;
   primaryMuscles: MuscleGroup[];
   secondaryMuscles: MuscleGroup[];
-  instructions: string[];
   images: string[];
 }
 
@@ -270,6 +269,19 @@ export function richExerciseByName(name: string | null | undefined): RichExercis
   const key = name.trim().toLowerCase();
   const ex = BY_NAME.get(key);
   return (ex ? RICH_BY_ID.get(ex.id) : null) ?? RICH_BY_NAME.get(key) ?? null;
+}
+
+// Step-by-step instructions are ~590 KB of text used only on the exercise-detail
+// screen, so they live in a separate JSON loaded on demand (keeps them out of
+// the initial bundle). The map is fetched once and cached.
+let INSTRUCTIONS: Record<string, string[]> | null = null;
+export async function loadExerciseInstructions(id: string | null | undefined): Promise<string[]> {
+  if (!id) return [];
+  if (!INSTRUCTIONS) {
+    const mod = await import('./exercises.instructions.json');
+    INSTRUCTIONS = (mod.default ?? mod) as Record<string, string[]>;
+  }
+  return INSTRUCTIONS[id] ?? [];
 }
 
 // --- Server catalog: custom exercises authored by admins/trainers -----------
