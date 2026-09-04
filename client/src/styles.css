@@ -26153,10 +26153,20 @@ button.badge {
 /* --- EquipmentBoard: muscle filter + tile tags + details ------------------ */
 .eq-filter {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
   padding: 0 12px 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.eq-filter::-webkit-scrollbar {
+  display: none;
+}
+.eq-filter > * {
+  flex: none;
 }
 .eq-focus-pill {
   display: inline-flex;
@@ -26232,7 +26242,19 @@ button.badge {
 
 /* --- EquipmentDetailView (machine detail, MD-02) -------------------------- */
 .eqd .exd-head {
-  padding: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 10px 16px 0;
+  display: flex;
+  align-self: stretch;
+  justify-content: flex-start;
+}
+.eqd .exd-back {
+  position: static;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
 }
 .eqd-body {
   max-width: 640px;

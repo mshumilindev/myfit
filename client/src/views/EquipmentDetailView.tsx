@@ -15,6 +15,7 @@ import { MuscleChip } from '../components/Muscle';
 import {
   searchCatalog,
   secondaryMusclesOf,
+  richExerciseByName,
   type CatalogExercise,
   type MuscleGroup,
 } from '../data/exercises';
@@ -48,17 +49,28 @@ export function EquipmentDetailView({
   // muscles come first.
   const exercises = useMemo<CatalogExercise[]>(() => {
     if (!item) return [];
-    const prim = new Set<MuscleGroup>(item.muscles);
-    const pool = searchCatalog('', 60, item.cls);
+    // Match by the item's muscles, not just its coarse equipment class — a class
+    // match alone drags in cardio machines (treadmill, bike) for a leg press.
+    const prim = new Set<MuscleGroup>(
+      item.muscles.filter((m) => m !== 'cardio' && m !== 'fullbody'),
+    );
+    const pool = searchCatalog('', 150, item.cls);
     const seen = new Set<string>();
-    const uniq = pool.filter((e) => {
+    const relevant: CatalogExercise[] = [];
+    const fallback: CatalogExercise[] = [];
+    for (const e of pool) {
       const k = e.names[0].toLowerCase();
-      if (seen.has(k)) return false;
+      if (seen.has(k)) continue;
       seen.add(k);
-      return true;
-    });
-    uniq.sort((a, b) => (prim.has(a.muscle) ? 0 : 1) - (prim.has(b.muscle) ? 0 : 1));
-    return uniq.slice(0, 8);
+      if (e.muscle === 'cardio') continue;
+      const rich = richExerciseByName(e.names[0]);
+      if (rich?.category === 'cardio' || rich?.category === 'stretching') continue;
+      const overlaps = prim.has(e.muscle) || secondaryMusclesOf(e).some((m) => prim.has(m));
+      (overlaps ? relevant : fallback).push(e);
+    }
+    relevant.sort((a, b) => (prim.has(a.muscle) ? 0 : 1) - (prim.has(b.muscle) ? 0 : 1));
+    const out = relevant.length > 0 ? relevant : fallback;
+    return out.slice(0, 8);
   }, [item]);
 
   // Secondary muscles = extra muscles the matched exercises hit, minus primary.

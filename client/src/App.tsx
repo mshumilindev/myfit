@@ -344,7 +344,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'equipment' && parts[1])
     return {
       tab: 'gyms',
-      overlay: { screen: 'equipment', itemId: decodeURIComponent(parts[1]) },
+      overlay: { screen: 'equipment', itemId: decodeURIComponent(parts[1]), gymId: parts[2] },
     };
   if ((TABS as string[]).includes(head)) return { tab: head as Tab, overlay: null };
   return { tab: 'today', overlay: null };
