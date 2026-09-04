@@ -1060,10 +1060,14 @@ export function MuscleBreakdownList({
   entries,
   refTs,
   onOpen,
+  showWeek = true,
 }: {
   entries: MuscleEntry[];
   refTs: number;
   onOpen?: (m: MuscleGroup) => void;
+  /** Weekly volume meters + per-entry set counts. Off for a live, not-yet-
+   *  logged exercise, where they'd imply work that hasn't happened. */
+  showWeek?: boolean;
 }) {
   const store = useStore();
   const interactive = !!onOpen;
@@ -1106,30 +1110,31 @@ export function MuscleBreakdownList({
             />
             <div className="md-main">
               <span className="md-name">{s.muscleGroups[e.muscle]}</span>
-              {lm ? (
-                <div className="md-meter">
-                  <span className="md-bar">
-                    <span
-                      className="md-bar-fill"
-                      style={{ width: `${fillW}%`, background: color }}
-                    />
-                  </span>
-                  <span className="md-meter-lab" style={{ color }}>
-                    {fmtSetCount(wk)} / {target}
-                  </span>
-                  <span className="md-week-tag">{s.mdWeekTag}</span>
-                </div>
-              ) : (
-                multi && (
+              {showWeek &&
+                (lm ? (
                   <div className="md-meter">
-                    <span className="md-week-tag">
-                      {s.mdWeekTag}: {fmtSetCount(wk)}
+                    <span className="md-bar">
+                      <span
+                        className="md-bar-fill"
+                        style={{ width: `${fillW}%`, background: color }}
+                      />
                     </span>
+                    <span className="md-meter-lab" style={{ color }}>
+                      {fmtSetCount(wk)} / {target}
+                    </span>
+                    <span className="md-week-tag">{s.mdWeekTag}</span>
                   </div>
-                )
-              )}
+                ) : (
+                  multi && (
+                    <div className="md-meter">
+                      <span className="md-week-tag">
+                        {s.mdWeekTag}: {fmtSetCount(wk)}
+                      </span>
+                    </div>
+                  )
+                ))}
             </div>
-            <span className="md-count tnum">{fmtSetCount(e.sets)}</span>
+            {showWeek && <span className="md-count tnum">{fmtSetCount(e.sets)}</span>}
           </div>
         );
       })}
@@ -1144,17 +1149,19 @@ function MuscleDrawer({
   refTs,
   onOpen,
   onClose,
+  showWeek = true,
 }: {
   entries: MuscleEntry[];
   refTs: number;
   onOpen?: (m: MuscleGroup) => void;
   onClose: () => void;
+  showWeek?: boolean;
 }) {
   return (
     <Sheet onClose={onClose}>
       <div className="muscle-drawer">
         <div className="section-label">{strings().musclesWorkedLabel}</div>
-        <MuscleBreakdownList entries={entries} refTs={refTs} onOpen={onOpen} />
+        <MuscleBreakdownList entries={entries} refTs={refTs} onOpen={onOpen} showWeek={showWeek} />
       </div>
     </Sheet>
   );
@@ -1169,11 +1176,14 @@ export function MuscleRow({
   entries,
   refTs,
   onOpen,
+  showWeek = true,
 }: {
   entries: MuscleEntry[];
   /** Timestamp of the workout these entries belong to — anchors the week sum. */
   refTs: number;
   onOpen?: (m: MuscleGroup) => void;
+  /** Weekly meters in the drawer (off for a live, not-yet-logged exercise). */
+  showWeek?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -1251,6 +1261,7 @@ export function MuscleRow({
               refTs={refTs}
               onOpen={onOpen}
               onClose={() => setOpen(false)}
+              showWeek={showWeek}
             />
           </div>,
           document.body,

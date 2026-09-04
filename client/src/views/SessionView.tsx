@@ -868,15 +868,16 @@ export function SessionView(props: {
             {muscles.primary && (
               <MuscleRow
                 entries={[
-                  { muscle: muscles.primary, sets: ex.sets.length || 1, primary: true },
+                  { muscle: muscles.primary, sets: ex.sets.length, primary: true },
                   ...muscles.secondary.map((m) => ({
                     muscle: m,
-                    sets: (ex.sets.length || 1) * 0.5,
+                    sets: ex.sets.length * 0.5,
                     primary: false,
                   })),
                 ]}
                 refTs={workout!.startedAt}
                 onOpen={openMuscleHistory}
+                showWeek={ex.sets.length > 0}
               />
             )}
           </div>
