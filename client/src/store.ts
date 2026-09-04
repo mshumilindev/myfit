@@ -2052,6 +2052,35 @@ export function deleteCatalogExercise(id: string): void {
   deleteDoc(doc(db, 'exerciseCatalog', id)).catch(onWriteError);
 }
 
+/** Set the fine equipment combination for one exercise in a workout, and add
+ *  any newly-picked items to the gym (shared entity), so picking equipment on
+ *  an exercise stocks the gym too (design Load-entry). */
+export function setExerciseEquipmentItems(
+  workoutId: string,
+  exerciseId: string,
+  itemIds: string[],
+  gymId?: string | null,
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  const ex = w?.exercises.find((e) => e.id === exerciseId);
+  if (!w || !ex) return;
+  const items = Array.from(new Set(itemIds));
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, equipmentItems: items } : e)),
+  });
+  saveWorkout(workoutId);
+  // Stock the gym with anything picked that it doesn't already have.
+  if (gymId) {
+    const g = state.gyms.find((x) => x.id === gymId);
+    if (g) {
+      const have = new Set(g.equipmentItems ?? []);
+      const merged = [...have];
+      for (const id of items) if (!have.has(id)) merged.push(id);
+      if (merged.length !== have.size) setGymEquipment(gymId, merged);
+    }
+  }
+}
+
 export function updateExerciseMeta(
   workoutId: string,
   exerciseId: string,

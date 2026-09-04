@@ -644,6 +644,8 @@ export const uk: Strings = {
   eqTrainsSame: 'Тренує ті самі мʼязи',
   eqInThisGym: 'У цьому залі',
   eqAddToGym: 'Додати до цього залу',
+  eqEquipment: 'Обладнання',
+  eqPickSearchHint: 'У залі поки нічого — знайди, щоб додати',
   eqHere: 'є тут',
   eqNotHere: 'немає тут',
   eqHits: 'Навантажує',

@@ -688,6 +688,8 @@ export const en = {
   eqTrainsSame: 'Trains the same muscles',
   eqInThisGym: 'In this gym',
   eqAddToGym: 'Add to this gym',
+  eqEquipment: 'Equipment',
+  eqPickSearchHint: 'Nothing in this gym yet — search to add one',
   eqHere: 'here',
   eqNotHere: 'not here',
   eqHits: 'Hits',

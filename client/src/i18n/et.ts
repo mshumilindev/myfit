@@ -639,6 +639,8 @@ export const et: Strings = {
   eqTrainsSame: 'Treenib samu lihaseid',
   eqInThisGym: 'Selles saalis',
   eqAddToGym: 'Lisa sellesse saali',
+  eqEquipment: 'Varustus',
+  eqPickSearchHint: 'Saalis pole veel midagi — otsi, et lisada',
   eqHere: 'on siin',
   eqNotHere: 'pole siin',
   eqHits: 'Koormab',

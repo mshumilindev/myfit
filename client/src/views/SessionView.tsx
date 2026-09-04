@@ -73,6 +73,9 @@ import { LiveHero } from '../components/LiveHero';
 import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionStartCoach';
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
+import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
+import { equipmentById } from '../data/equipmentCatalog';
+import { localizedEquipName } from '../data/equipmentI18n';
 import { SessionMuscleMap } from '../components/SessionMuscleMap';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -159,6 +162,7 @@ type SheetState =
     }
   | { kind: 'menu'; exId: string }
   | { kind: 'replace'; exId: string }
+  | { kind: 'equip'; exId: string }
   | { kind: 'group-menu'; groupId: string }
   | { kind: 'superset'; exId: string }
   | { kind: 'gym' }
@@ -857,9 +861,24 @@ export function SessionView(props: {
         )}
         {showChips && (
           <div className="exercise-chips one-line">
-            {equipment.map((id) => (
-              <EquipChip key={id} id={id} />
-            ))}
+            {ex.equipmentItems && ex.equipmentItems.length > 0
+              ? ex.equipmentItems.map((id) => {
+                  const it = equipmentById(id);
+                  return (
+                    <span key={id} className="echip">
+                      <Icon name="barbell" />
+                      {it ? localizedEquipName(it, locale) : id}
+                    </span>
+                  );
+                })
+              : equipment.map((id) => <EquipChip key={id} id={id} />)}
+            <button
+              className="eq-pick-edit"
+              onClick={() => setSheet({ kind: 'equip', exId: ex.id })}
+              aria-label={t.eqEquipment}
+            >
+              <Icon name="caret-down" />
+            </button>
             {perHandFactor(ex) === 2 && (
               <span className="echip" title={t.perHandNote}>
                 {t.perHandChip}
@@ -2389,6 +2408,18 @@ export function SessionView(props: {
           );
         })()}
 
+      {sheet?.kind === 'equip' &&
+        (() => {
+          const ex = workout.exercises.find((e) => e.id === sheet.exId);
+          return ex ? (
+            <EquipmentPickerSheet
+              workoutId={workout.id}
+              exercise={ex}
+              gym={gym}
+              onClose={() => setSheet(null)}
+            />
+          ) : null;
+        })()}
       {sheet?.kind === 'gym' && (
         <GymPicker
           gyms={store.gyms}

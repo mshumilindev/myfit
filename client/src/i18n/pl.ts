@@ -643,6 +643,8 @@ export const pl: Strings = {
   eqTrainsSame: 'Trenuje te same mięśnie',
   eqInThisGym: 'W tej siłowni',
   eqAddToGym: 'Dodaj do tej siłowni',
+  eqEquipment: 'Sprzęt',
+  eqPickSearchHint: 'Nic w tej siłowni — wyszukaj, aby dodać',
   eqHere: 'jest tu',
   eqNotHere: 'nie ma tu',
   eqHits: 'Angażuje',

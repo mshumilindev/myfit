@@ -50,6 +50,11 @@ export interface Exercise {
   plannedReps?: number | null;
   plannedDurationMin?: number | null;
   equipment?: string[];
+  /** Fine equipment picked for this exercise instance (equipmentCatalog ids) —
+   *  a combination is allowed (straps + bar + belt, a band, etc.). Absent =
+   *  auto-suggest from the gym. Distinct from the coarse `equipment` above,
+   *  which drives load-type. */
+  equipmentItems?: string[];
   /** Superset group (design SS-1): null/absent = ungrouped. */
   groupId?: string | null;
   /** Order inside the superset group (0 = A1). */
