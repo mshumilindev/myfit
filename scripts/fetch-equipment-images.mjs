@@ -150,7 +150,7 @@ function loadExistingMap() {
   if (!m) return {};
   try {
     // turn the TS object literal into JSON-ish (keys already quoted or simple)
-    return eval('(' + m[1] + ')');  
+    return eval('(' + m[1] + ')');
   } catch {
     return {};
   }

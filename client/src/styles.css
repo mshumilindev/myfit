@@ -26502,7 +26502,6 @@ button.badge {
   color: var(--ok, #4cbe8c);
 }
 
-
 /* --- EquipmentBoard: funnel toggle + tile corner control ------------------ */
 .eq-searchrow {
   display: flex;
