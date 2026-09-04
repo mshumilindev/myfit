@@ -1,12 +1,38 @@
 /**
  * AUTO-GENERATED — do not edit by hand.
- * 129 equipment images (Wikimedia Commons + Openverse, CC/PD/BY/BY-SA only),
- * each verified relevant. Items with no clean free photo have no image (the
- * board shows a placeholder). Attribution: pageUrl/license/author per image.
+ * 301 equipment images. Sources: Wikimedia Commons + Openverse (CC/PD/BY/BY-SA,
+ * attribution in pageUrl/license/author) and Pexels (free commercial use, no
+ * attribution required; credited anyway). Each verified relevant on review.
+ * Items with no suitable photo have none (the board shows a placeholder).
  */
 import type { EquipmentImage } from './equipmentCatalog';
 
 export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
+  'acc-ab-wheel': {
+    thumbUrl: '/equipment/acc-ab-wheel.jpg',
+    pageUrl: 'https://www.pexels.com/photo/shallow-focus-photo-of-exercise-equipment-8032833/',
+    license: 'Pexels',
+    author: 'MART  PRODUCTION',
+  },
+  'acc-ankle-strap': {
+    thumbUrl: '/equipment/acc-ankle-strap.jpg',
+    pageUrl: 'https://www.pexels.com/photo/person-wrapping-leg-in-elastic-bandage-7991959/',
+    license: 'Pexels',
+    author: 'Annushka  Ahuja',
+  },
+  'acc-band-peg-storage': {
+    thumbUrl: '/equipment/acc-band-peg-storage.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-shirtless-man-lifting-bar-12959247/',
+    license: 'Pexels',
+    author: 'Avinash Salunke',
+  },
+  'acc-carabiner': {
+    thumbUrl: '/equipment/acc-carabiner.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/black-rope-of-modern-exercise-machine-hanging-on-metal-carabiner-3839053/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
   'acc-ceiling-anchor': {
     thumbUrl: '/equipment/acc-ceiling-anchor.jpg',
     pageUrl:
@@ -27,6 +53,37 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Martin Rulsch, Wikimedia Commons',
   },
+  'acc-collars-spring': {
+    thumbUrl: '/equipment/acc-collars-spring.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/dumbbell-near-plates-and-metal-collars-on-asphalt-4793234/',
+    license: 'Pexels',
+    author: 'Anete Lusina',
+  },
+  'acc-d-handle': {
+    thumbUrl: '/equipment/acc-d-handle.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'acc-dip-belt': {
+    thumbUrl: '/equipment/acc-dip-belt.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-exercising-at-a-gym-4162488/',
+    license: 'Pexels',
+    author: 'Ivan S',
+  },
+  'acc-double-d': {
+    thumbUrl: '/equipment/acc-double-d.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-a-woman-working-out-14524650/',
+    license: 'Pexels',
+    author: 'Jessy Mesme',
+  },
+  'acc-fat-grips': {
+    thumbUrl: '/equipment/acc-fat-grips.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
   'acc-globe-handle': {
     thumbUrl: '/equipment/acc-globe-handle.jpg',
     pageUrl:
@@ -46,6 +103,13 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC0',
     author: 'Samson Ssemakadde',
   },
+  'acc-hip-belt-cable': {
+    thumbUrl: '/equipment/acc-hip-belt-cable.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-man-using-the-cable-crossover-machine-at-the-gym-5327505/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
   'acc-lat-bar': {
     thumbUrl: '/equipment/acc-lat-bar.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:PulldownMachineExercise.JPG',
@@ -53,11 +117,139 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     author:
       'No machine-readable author provided. GeorgeStepanek assumed (based on copyright claims).',
   },
+  'acc-lat-bar-short': {
+    thumbUrl: '/equipment/acc-lat-bar-short.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-exercising-in-modern-gym-with-dumbbells-28731770/',
+    license: 'Pexels',
+    author: 'Vika Glitter',
+  },
+  'acc-lat-bar-wide': {
+    thumbUrl: '/equipment/acc-lat-bar-wide.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-in-black-tank-top-working-out-3927026/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'acc-lifting-belt': {
+    thumbUrl: '/equipment/acc-lifting-belt.jpg',
+    pageUrl: 'https://www.pexels.com/photo/barbell-near-belt-949132/',
+    license: 'Pexels',
+    author: 'Victor Freitas',
+  },
+  'acc-loading-pin': {
+    thumbUrl: '/equipment/acc-loading-pin.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-focused-on-gym-workout-with-cable-machine-32695895/',
+    license: 'Pexels',
+    author: 'Asso Myron',
+  },
+  'acc-mag-grip': {
+    thumbUrl: '/equipment/acc-mag-grip.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'acc-multi-grip-row': {
+    thumbUrl: '/equipment/acc-multi-grip-row.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'acc-pushdown-bar': {
+    thumbUrl: '/equipment/acc-pushdown-bar.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-lifting-weights-5327472/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
   'acc-pushup-bars': {
     thumbUrl: '/equipment/acc-pushup-bars.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Push-up_bars.jpg',
     license: 'CC BY-SA 4.0',
     author: 'Tpikonen',
+  },
+  'acc-revolving-curl-bar': {
+    thumbUrl: '/equipment/acc-revolving-curl-bar.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-using-the-cable-crossover-machine-5327510/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'acc-rope': {
+    thumbUrl: '/equipment/acc-rope.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/strong-coach-training-black-woman-exercising-with-battle-ropes-6455777/',
+    license: 'Pexels',
+    author: 'Julia Larson',
+  },
+  'acc-rotating-handle': {
+    thumbUrl: '/equipment/acc-rotating-handle.jpg',
+    pageUrl: 'https://www.pexels.com/photo/fitness-equipment-on-white-surface-14100682/',
+    license: 'Pexels',
+    author: '晶 朱',
+  },
+  'acc-row-footplate': {
+    thumbUrl: '/equipment/acc-row-footplate.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-using-stationary-bike-897064/',
+    license: 'Pexels',
+    author: 'Victor Freitas',
+  },
+  'acc-straight-bar': {
+    thumbUrl: '/equipment/acc-straight-bar.jpg',
+    pageUrl: 'https://www.pexels.com/photo/brunette-woman-exercising-at-gym-19659476/',
+    license: 'Pexels',
+    author: 'Felix Young',
+  },
+  'acc-straps': {
+    thumbUrl: '/equipment/acc-straps.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-preparing-for-workout-with-straps-33867775/',
+    license: 'Pexels',
+    author: 'Body  Reapers',
+  },
+  'acc-triangle': {
+    thumbUrl: '/equipment/acc-triangle.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'acc-tricep-v': {
+    thumbUrl: '/equipment/acc-tricep-v.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-shirtless-man-lifting-bar-12959247/',
+    license: 'Pexels',
+    author: 'Avinash Salunke',
+  },
+  'acc-weight-vest': {
+    thumbUrl: '/equipment/acc-weight-vest.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/side-view-of-a-man-in-a-weighted-vest-holding-a-dumbbell-7697772/',
+    license: 'Pexels',
+    author: 'Mikhail Nilov',
+  },
+  'aid-elbow-sleeves': {
+    thumbUrl: '/equipment/aid-elbow-sleeves.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-lying-down-lifting-weights-13122465/',
+    license: 'Pexels',
+    author: 'Gabrielle  Durant',
+  },
+  'aid-knee-sleeves': {
+    thumbUrl: '/equipment/aid-knee-sleeves.jpg',
+    pageUrl: 'https://www.pexels.com/photo/fit-athlete-in-crossfit-gear-posing-in-studio-30572565/',
+    license: 'Pexels',
+    author: 'Andrea Musto',
+  },
+  'aid-knee-wraps': {
+    thumbUrl: '/equipment/aid-knee-wraps.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-kneeling-on-boxing-ring-5750839/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'aid-slingshot': {
+    thumbUrl: '/equipment/aid-slingshot.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lifting-weights-under-the-american-flag-16890699/',
+    license: 'Pexels',
+    author: 'Felix Mejica',
+  },
+  'aid-wrist-wraps': {
+    thumbUrl: '/equipment/aid-wrist-wraps.jpg',
+    pageUrl: 'https://www.pexels.com/photo/crop-sportsman-wearing-wrist-support-band-3763697/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
   },
   'aqua-kickboard': {
     thumbUrl: '/equipment/aqua-kickboard.jpg',
@@ -84,6 +276,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'FASTILY',
   },
+  'ball-mini-stability': {
+    thumbUrl: '/equipment/ball-mini-stability.jpg',
+    pageUrl: 'https://www.pexels.com/photo/crop-woman-exercising-with-fit-ball-6454182/',
+    license: 'Pexels',
+    author: 'Marta Wave',
+  },
   'ball-power-plyo': {
     thumbUrl: '/equipment/ball-power-plyo.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Powered_by_fitness_(6617897).jpg',
@@ -95,6 +293,37 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Goalkeeper_reflex_ball.jpg',
     license: 'CC BY-SA 4.0',
     author: 'EncyclopedianWP',
+  },
+  'band-deadlift': {
+    thumbUrl: '/equipment/band-deadlift.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-weightlifting-at-gym-15373908/',
+    license: 'Pexels',
+    author: 'Luke Miller',
+  },
+  'band-hip-circle': {
+    thumbUrl: '/equipment/band-hip-circle.jpg',
+    pageUrl: 'https://www.pexels.com/photo/people-workout-using-resistance-bands-6516206/',
+    license: 'Pexels',
+    author: 'Polina Tankilevitch',
+  },
+  'band-loop-power': {
+    thumbUrl: '/equipment/band-loop-power.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-black-shirt-using-the-resistance-band-he-is-using-while-standing-near-brick-wall-6339598/',
+    license: 'Pexels',
+    author: 'Pavel Danilyuk',
+  },
+  'band-mini': {
+    thumbUrl: '/equipment/band-mini.jpg',
+    pageUrl: 'https://www.pexels.com/photo/people-workout-using-resistance-bands-6516206/',
+    license: 'Pexels',
+    author: 'Polina Tankilevitch',
+  },
+  'band-pegs': {
+    thumbUrl: '/equipment/band-pegs.jpg',
+    pageUrl: 'https://www.pexels.com/photo/black-sneakers-on-gray-concrete-6740819/',
+    license: 'Pexels',
+    author: 'Mikhail Nilov',
   },
   'band-therapy': {
     thumbUrl: '/equipment/band-therapy.png',
@@ -121,11 +350,43 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
   },
+  'barbell-buffalo': {
+    thumbUrl: '/equipment/barbell-buffalo.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-gym-with-a-rack-of-weights-and-barbells-19025671/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'barbell-cambered': {
+    thumbUrl: '/equipment/barbell-cambered.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-gym-with-a-rack-of-weights-and-barbells-19025671/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'barbell-curl-fixed': {
+    thumbUrl: '/equipment/barbell-curl-fixed.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/black-sportswoman-in-face-mask-exercising-with-barbell-in-gymnasium-6998865/',
+    license: 'Pexels',
+    author: 'Monstera Production',
+  },
   'barbell-deadlift': {
     thumbUrl: '/equipment/barbell-deadlift.jpg',
     pageUrl: 'https://www.flickr.com/photos/121183998@N08/26502758192',
     license: 'CC BY 2.0',
     author: 'personaltrainertoronto',
+  },
+  'barbell-earthquake': {
+    thumbUrl: '/equipment/barbell-earthquake.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-working-out-at-the-gym-5327456/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'barbell-ez': {
+    thumbUrl: '/equipment/barbell-ez.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/black-athlete-in-cloth-face-mask-working-out-with-barbell-6999014/',
+    license: 'Pexels',
+    author: 'Monstera Production',
   },
   'barbell-fixed': {
     thumbUrl: '/equipment/barbell-fixed.jpg',
@@ -133,11 +394,24 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'RickyBennison',
   },
+  'barbell-junior': {
+    thumbUrl: '/equipment/barbell-junior.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-gym-with-a-rack-of-weights-and-barbells-19025671/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
   'barbell-landmine': {
     thumbUrl: '/equipment/barbell-landmine.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Landmine_Bent-Over_Rows.jpg',
     license: 'CC BY 2.0',
     author: 'Eric Astrauskas, www.PTinTO.com',
+  },
+  'barbell-multi-grip': {
+    thumbUrl: '/equipment/barbell-multi-grip.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/close-up-of-a-person-s-lower-body-holding-barbell-949134/',
+    license: 'Pexels',
+    author: 'Victor Freitas',
   },
   'barbell-oly-weightlifting': {
     thumbUrl: '/equipment/barbell-oly-weightlifting.jpg',
@@ -163,6 +437,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Albeam',
   },
+  'barbell-spider': {
+    thumbUrl: '/equipment/barbell-spider.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-working-out-at-the-gym-5327456/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
   'barbell-squat-specialist': {
     thumbUrl: '/equipment/barbell-squat-specialist.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:A_squat_safety_bar.jpg',
@@ -174,6 +454,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:A_squat_safety_bar.jpg',
     license: 'CC0',
     author: 'RickyBennison',
+  },
+  'barbell-swiss': {
+    thumbUrl: '/equipment/barbell-swiss.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-working-out-at-the-gym-5327456/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
   },
   'barbell-technique': {
     thumbUrl: '/equipment/barbell-technique.jpg',
@@ -187,6 +473,39 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.5',
     author: 'Luis Javier Rodriguez / Yupi666',
   },
+  'barbell-womens': {
+    thumbUrl: '/equipment/barbell-womens.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-working-out-at-a-gym-19132573/',
+    license: 'Pexels',
+    author: 'Hugazo Boss',
+  },
+  'belt-nylon': {
+    thumbUrl: '/equipment/belt-nylon.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-exercising-in-modern-gym-with-dumbbells-28731770/',
+    license: 'Pexels',
+    author: 'Vika Glitter',
+  },
+  'belt-oly': {
+    thumbUrl: '/equipment/belt-oly.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-black-tank-top-putting-weightlifting-belt-5327461/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'belt-pl-lever': {
+    thumbUrl: '/equipment/belt-pl-lever.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-black-tank-top-putting-weightlifting-belt-5327461/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'belt-pl-prong': {
+    thumbUrl: '/equipment/belt-pl-prong.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-black-tank-top-putting-weightlifting-belt-5327461/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
   'bench-ab': {
     thumbUrl: '/equipment/bench-ab.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Inclined_sit-up_bench.jpg',
@@ -198,6 +517,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Weight_benche_15761311874.jpg',
     license: 'CC BY-SA 4.0',
     author: 'Lusokapevy',
+  },
+  'bench-captains-chair': {
+    thumbUrl: '/equipment/bench-captains-chair.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-in-black-tank-top-holding-black-barbell-3916762/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
   },
   'bench-decline': {
     thumbUrl: '/equipment/bench-decline.jpg',
@@ -216,6 +541,72 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Glute_ham_raise.jpg',
     license: 'CC BY-SA 4.0',
     author: 'Iron Tool',
+  },
+  'bench-hyper-45': {
+    thumbUrl: '/equipment/bench-hyper-45.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-in-black-tank-top-holding-black-barbell-3916762/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'bench-nordic': {
+    thumbUrl: '/equipment/bench-nordic.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lifting-weights-5327556/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'bench-olympic': {
+    thumbUrl: '/equipment/bench-olympic.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lying-while-doing-barbell-2204196/',
+    license: 'Pexels',
+    author: 'Bruno Bueno',
+  },
+  'bench-preacher': {
+    thumbUrl: '/equipment/bench-preacher.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-practising-at-the-gym-14598861/',
+    license: 'Pexels',
+    author: 'Viridiana Rivera',
+  },
+  'bench-roman-chair': {
+    thumbUrl: '/equipment/bench-roman-chair.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-in-black-tank-top-holding-black-barbell-3916762/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'bench-seal-row': {
+    thumbUrl: '/equipment/bench-seal-row.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lifting-weights-5327556/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'bench-seated-shoulder': {
+    thumbUrl: '/equipment/bench-seated-shoulder.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-lifting-dumbbells-at-the-gym-18060165/',
+    license: 'Pexels',
+    author: '@marcuschanmedia | IG',
+  },
+  'box-focus-mitts': {
+    thumbUrl: '/equipment/box-focus-mitts.jpg',
+    pageUrl: 'https://www.pexels.com/photo/focus-mitts-on-the-shelf-6296115/',
+    license: 'Pexels',
+    author: 'Pavel Danilyuk',
+  },
+  'box-freestanding-bag': {
+    thumbUrl: '/equipment/box-freestanding-bag.jpg',
+    pageUrl: 'https://www.pexels.com/photo/muscular-man-wearing-black-boxing-gloves-5750823/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'box-gloves': {
+    thumbUrl: '/equipment/box-gloves.jpg',
+    pageUrl: 'https://www.pexels.com/photo/boxing-hand-wraps-being-applied-by-trainer-38674933/',
+    license: 'Pexels',
+    author: 'Kari Alfonso',
+  },
+  'box-grappling-dummy': {
+    thumbUrl: '/equipment/box-grappling-dummy.jpg',
+    pageUrl: 'https://www.pexels.com/photo/grappling-dummy-on-the-floor-6296027/',
+    license: 'Pexels',
+    author: 'Pavel Danilyuk',
   },
   'box-groin-guard': {
     thumbUrl: '/equipment/box-groin-guard.jpg',
@@ -249,6 +640,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'U.S. Navy photo by Mass Communication Specialist 2nd Class Maddelin Angebrand',
   },
+  'box-thai-pads': {
+    thumbUrl: '/equipment/box-thai-pads.jpg',
+    pageUrl: 'https://www.pexels.com/photo/athlete-with-kick-pads-in-hands-19406129/',
+    license: 'Pexels',
+    author: 'Franco Monsalvo',
+  },
   'cable-crossover': {
     thumbUrl: '/equipment/cable-crossover.jpg',
     pageUrl:
@@ -256,12 +653,32 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Nenad Stojkovic',
   },
+  'cable-crossover-cage': {
+    thumbUrl: '/equipment/cable-crossover-cage.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-man-using-the-cable-crossover-machine-at-the-gym-5327505/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
   'cable-functional-trainer': {
     thumbUrl: '/equipment/cable-functional-trainer.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:Functional_Trainer_Exercise_Machine_at_Gym.jpg',
     license: 'CC BY-SA 4.0',
     author: 'KeepActive Australia from Melbourne, VIC, Australia',
+  },
+  'cable-lat-tower': {
+    thumbUrl: '/equipment/cable-lat-tower.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-in-black-tank-top-working-out-3927026/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'cable-single-column': {
+    thumbUrl: '/equipment/cable-single-column.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-man-using-the-cable-crossover-machine-at-the-gym-5327505/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
   },
   'cardio-air-bike': {
     thumbUrl: '/equipment/cardio-air-bike.jpg',
@@ -276,11 +693,29 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Catherine from Australia',
   },
+  'cardio-arc-trainer': {
+    thumbUrl: '/equipment/cardio-arc-trainer.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-man-wearing-red-shirt-4046656/',
+    license: 'Pexels',
+    author: 'ShotPot',
+  },
+  'cardio-assault-runner': {
+    thumbUrl: '/equipment/cardio-assault-runner.jpg',
+    pageUrl: 'https://www.pexels.com/photo/treadmills-at-gym-12250460/',
+    license: 'Pexels',
+    author: 'Mario García',
+  },
   'cardio-bike-erg': {
     thumbUrl: '/equipment/cardio-bike-erg.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:CrossFit_workout_on_a_BikeErg_DSC6229.jpg',
     license: 'CC BY 2.0',
     author: 'Kiet Le (photos · photo sets)',
+  },
+  'cardio-curved-treadmill': {
+    thumbUrl: '/equipment/cardio-curved-treadmill.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-running-on-treadmill-in-gym-31000554/',
+    license: 'Pexels',
+    author: 'Sabina Kallari',
   },
   'cardio-elliptical': {
     thumbUrl: '/equipment/cardio-elliptical.jpg',
@@ -289,11 +724,41 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Federal Bureau of Investigation',
   },
+  'cardio-jacobs-ladder': {
+    thumbUrl: '/equipment/cardio-jacobs-ladder.jpg',
+    pageUrl: 'https://www.pexels.com/photo/treadmills-at-gym-12250460/',
+    license: 'Pexels',
+    author: 'Mario García',
+  },
+  'cardio-lateral-trainer': {
+    thumbUrl: '/equipment/cardio-lateral-trainer.jpg',
+    pageUrl: 'https://www.pexels.com/photo/treadmills-at-gym-12250460/',
+    license: 'Pexels',
+    author: 'Mario García',
+  },
+  'cardio-magnetic-rower': {
+    thumbUrl: '/equipment/cardio-magnetic-rower.jpg',
+    pageUrl: 'https://www.pexels.com/photo/treadmills-at-gym-12250460/',
+    license: 'Pexels',
+    author: 'Mario García',
+  },
   'cardio-rebounder': {
     thumbUrl: '/equipment/cardio-rebounder.jpg',
     pageUrl: 'https://www.flickr.com/photos/141421460@N05/27943029612',
     license: 'CC BY 2.0',
     author: 'http://trampolinestar.com/',
+  },
+  'cardio-recumbent-bike': {
+    thumbUrl: '/equipment/cardio-recumbent-bike.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-gym-interior-8933584/',
+    license: 'Pexels',
+    author: 'Vishwanth PindiBoina',
+  },
+  'cardio-recumbent-stepper': {
+    thumbUrl: '/equipment/cardio-recumbent-stepper.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-gym-interior-8933584/',
+    license: 'Pexels',
+    author: 'Vishwanth PindiBoina',
   },
   'cardio-rower': {
     thumbUrl: '/equipment/cardio-rower.jpg',
@@ -308,12 +773,25 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Colin Van Dervort',
   },
+  'cardio-skillmill': {
+    thumbUrl: '/equipment/cardio-skillmill.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-and-woman-exercising-on-a-treadmill-at-the-gym-4944982/',
+    license: 'Pexels',
+    author: 'Anastasia  Shuraeva',
+  },
   'cardio-spin-bike': {
     thumbUrl: '/equipment/cardio-spin-bike.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:US_Navy_101024-N-7103C-079_Lt._j.g._Neal_Soladay,_left,_from_Columbia,_S.C.,_finishes_his_20-minute_cycle_on_an_exercise_bicycle_during_an_indoor_t.jpg',
     license: 'Public domain',
     author: 'U.S. Navy photo by Mass Communication Specialist 3rd Class David A. Cox',
+  },
+  'cardio-stairclimber': {
+    thumbUrl: '/equipment/cardio-stairclimber.jpg',
+    pageUrl: 'https://www.pexels.com/photo/treadmills-at-gym-12250460/',
+    license: 'Pexels',
+    author: 'Mario García',
   },
   'cardio-treadmill': {
     thumbUrl: '/equipment/cardio-treadmill.jpg',
@@ -322,11 +800,37 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'U.S. Navy photo by Mass Communication Specialist 3rd Class David A. Cox',
   },
+  'cardio-ube': {
+    thumbUrl: '/equipment/cardio-ube.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-white-tank-top-sitting-on-black-stationary-bike-3888101/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
   'cardio-upright-bike': {
     thumbUrl: '/equipment/cardio-upright-bike.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Stationary_bikes_at_a_gym.jpg',
     license: 'CC BY-SA 4.0',
     author: 'KeepActive Australia from Melbourne, VIC, Australia',
+  },
+  'cardio-vertical-climber': {
+    thumbUrl: '/equipment/cardio-vertical-climber.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-white-tank-top-sitting-on-black-stationary-bike-3888101/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'cond-aerobic-step': {
+    thumbUrl: '/equipment/cond-aerobic-step.jpg',
+    pageUrl: 'https://www.pexels.com/photo/person-standing-on-step-at-gym-6285220/',
+    license: 'Pexels',
+    author: 'Gustavo Fring',
+  },
+  'cond-agility-ladder': {
+    thumbUrl: '/equipment/cond-agility-ladder.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-person-doing-cross-fit-training-8401807/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
   },
   'cond-aqua-bag': {
     thumbUrl: '/equipment/cond-aqua-bag.png',
@@ -347,6 +851,31 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'stroopsmma',
   },
+  'cond-circus-db': {
+    thumbUrl: '/equipment/cond-circus-db.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-row-of-dumbbells-in-a-gym-19025674/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'cond-clubbell': {
+    thumbUrl: '/equipment/cond-clubbell.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/modern-indoor-gym-with-kettlebells-and-equipment-32610333/',
+    license: 'Pexels',
+    author: 'Emanuel Pedro',
+  },
+  'cond-conans-wheel': {
+    thumbUrl: '/equipment/cond-conans-wheel.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weights-4162443/',
+    license: 'Pexels',
+    author: 'Ivan S',
+  },
+  'cond-deadball': {
+    thumbUrl: '/equipment/cond-deadball.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-couple-working-out-with-medicine-balls-4853881/',
+    license: 'Pexels',
+    author: 'Ketut Subiyanto',
+  },
   'cond-farmers-handles': {
     thumbUrl: '/equipment/cond-farmers-handles.jpg',
     pageUrl:
@@ -366,11 +895,23 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Pambelle12',
   },
+  'cond-keg': {
+    thumbUrl: '/equipment/cond-keg.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-weightlifting-and-his-friends-cheering-him-9479119/',
+    license: 'Pexels',
+    author: 'Alexa Popovich',
+  },
   'cond-mace': {
     thumbUrl: '/equipment/cond-mace.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Pouria_Rostami_(Rostamace).jpg',
     license: 'CC BY-SA 4.0',
     author: 'JavadMovaghari',
+  },
+  'cond-plyo-box': {
+    thumbUrl: '/equipment/cond-plyo-box.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-and-woman-practicing-plyometrics-7676548/',
+    license: 'Pexels',
+    author: 'cottonbro studio',
   },
   'cond-sandbag': {
     thumbUrl: '/equipment/cond-sandbag.jpg',
@@ -422,6 +963,24 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 3.0',
     author: '',
   },
+  'dumbbell-fixed': {
+    thumbUrl: '/equipment/dumbbell-fixed.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-row-of-dumbbells-in-a-gym-19025674/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'dumbbell-loadable': {
+    thumbUrl: '/equipment/dumbbell-loadable.jpg',
+    pageUrl: 'https://www.pexels.com/photo/black-and-silver-dumbbells-3931367/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'dumbbell-spinlock': {
+    thumbUrl: '/equipment/dumbbell-spinlock.jpg',
+    pageUrl: 'https://www.pexels.com/photo/black-and-silver-dumbbells-3931367/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
   'dumbbell-studio': {
     thumbUrl: '/equipment/dumbbell-studio.jpg',
     pageUrl:
@@ -429,11 +988,54 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Shixart1985',
   },
+  'dumbbell-urethane': {
+    thumbUrl: '/equipment/dumbbell-urethane.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-row-of-dumbbells-in-a-gym-19025674/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
   'grip-campus-board': {
     thumbUrl: '/equipment/grip-campus-board.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Campus_Board_Climbing.jpg',
     license: 'CC BY 2.0',
     author: 'Kumpei Shiraishi',
+  },
+  'grip-globe-db': {
+    thumbUrl: '/equipment/grip-globe-db.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-row-of-dumbbells-in-a-gym-19025674/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'grip-gripper': {
+    thumbUrl: '/equipment/grip-gripper.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'grip-pinch-block': {
+    thumbUrl: '/equipment/grip-pinch-block.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/close-up-view-of-a-person-putting-talc-in-his-hands-7671470/',
+    license: 'Pexels',
+    author: 'cottonbro studio',
+  },
+  'grip-rolling-thunder': {
+    thumbUrl: '/equipment/grip-rolling-thunder.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'grip-thick-handle': {
+    thumbUrl: '/equipment/grip-thick-handle.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'grip-wrist-roller': {
+    thumbUrl: '/equipment/grip-wrist-roller.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-bodybuilder-working-out-14918312/',
+    license: 'Pexels',
+    author: 'Krzysztof Biernat',
   },
   'gym-balance-beam': {
     thumbUrl: '/equipment/gym-balance-beam.jpg',
@@ -460,6 +1062,18 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'brokenchopstick',
   },
+  'gym-nordic-anchor': {
+    thumbUrl: '/equipment/gym-nordic-anchor.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-wearing-black-leggings-exercising-8436159/',
+    license: 'Pexels',
+    author: 'Yan Krukau',
+  },
+  'gym-peg-board': {
+    thumbUrl: '/equipment/gym-peg-board.jpg',
+    pageUrl: 'https://www.pexels.com/photo/indoor-climbing-session-on-a-kilter-board-36855650/',
+    license: 'Pexels',
+    author: 'Beta Boulders',
+  },
   'gym-rings': {
     thumbUrl: '/equipment/gym-rings.jpg',
     pageUrl:
@@ -467,11 +1081,118 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Federal Bureau of Investigation',
   },
+  'gym-salmon-ladder': {
+    thumbUrl: '/equipment/gym-salmon-ladder.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/boy-pulling-himself-on-bars-with-a-wooden-ladder-8430086/',
+    license: 'Pexels',
+    author: 'Yan Krukau',
+  },
+  'hs-belt-squat': {
+    thumbUrl: '/equipment/hs-belt-squat.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-doing-workout-5837247/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
+  },
   'hs-deadlift-machine': {
     thumbUrl: '/equipment/hs-deadlift-machine.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:USMC-08856.jpg',
     license: 'Public domain',
     author: '',
+  },
+  'hs-iso-biceps': {
+    thumbUrl: '/equipment/hs-iso-biceps.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weightlifting-equipment-in-gym-39100211/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
+  },
+  'hs-iso-chest': {
+    thumbUrl: '/equipment/hs-iso-chest.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/fit-male-bodybuilder-exercising-with-metal-machine-in-gym-3837388/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'hs-iso-decline': {
+    thumbUrl: '/equipment/hs-iso-decline.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/fit-male-bodybuilder-exercising-with-metal-machine-in-gym-3837388/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'hs-iso-frontlat': {
+    thumbUrl: '/equipment/hs-iso-frontlat.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-exercising-at-the-gym-17210044/',
+    license: 'Pexels',
+    author: 'Doğu Tuncer',
+  },
+  'hs-iso-highrow': {
+    thumbUrl: '/equipment/hs-iso-highrow.jpg',
+    pageUrl: 'https://www.pexels.com/photo/men-rowing-at-gym-16966341/',
+    license: 'Pexels',
+    author: 'Ardit Mbrati',
+  },
+  'hs-iso-incline': {
+    thumbUrl: '/equipment/hs-iso-incline.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/fit-male-bodybuilder-exercising-with-metal-machine-in-gym-3837388/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'hs-iso-pulldown': {
+    thumbUrl: '/equipment/hs-iso-pulldown.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-exercising-at-the-gym-17210044/',
+    license: 'Pexels',
+    author: 'Doğu Tuncer',
+  },
+  'hs-iso-shoulder': {
+    thumbUrl: '/equipment/hs-iso-shoulder.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/fit-male-bodybuilder-exercising-with-metal-machine-in-gym-3837388/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'hs-iso-triceps': {
+    thumbUrl: '/equipment/hs-iso-triceps.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weightlifting-equipment-in-gym-39100211/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
+  },
+  'hs-linear-leg-press': {
+    thumbUrl: '/equipment/hs-linear-leg-press.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-an-exercising-woman-6844939/',
+    license: 'Pexels',
+    author: 'Jonathan Borba',
+  },
+  'hs-pendulum-squat': {
+    thumbUrl: '/equipment/hs-pendulum-squat.jpg',
+    pageUrl: 'https://www.pexels.com/photo/strong-man-doing-weightlifting-exercise-in-gym-5646011/',
+    license: 'Pexels',
+    author: 'Justin L U C K',
+  },
+  'hs-plate-calf': {
+    thumbUrl: '/equipment/hs-plate-calf.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weightlifting-equipment-in-gym-39100211/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
+  },
+  'hs-plate-leg-ext': {
+    thumbUrl: '/equipment/hs-plate-leg-ext.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weightlifting-equipment-in-gym-39100211/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
+  },
+  'hs-plate-pullover': {
+    thumbUrl: '/equipment/hs-plate-pullover.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weightlifting-equipment-in-gym-39100211/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
+  },
+  'hs-plate-row': {
+    thumbUrl: '/equipment/hs-plate-row.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-weightlifting-equipment-in-gym-39100211/',
+    license: 'Pexels',
+    author: 'KIEU TRUONG',
   },
   'hs-plate-shrug': {
     thumbUrl: '/equipment/hs-plate-shrug.jpg',
@@ -492,6 +1213,25 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Unknown authorUnknown author',
   },
+  'kb-loadable': {
+    thumbUrl: '/equipment/kb-loadable.png',
+    pageUrl: 'https://www.pexels.com/photo/man-training-with-kettlebells-in-gym-28636772/',
+    license: 'Pexels',
+    author: 'Juho Alonen',
+  },
+  'kb-powder-coat': {
+    thumbUrl: '/equipment/kb-powder-coat.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/black-and-yellow-kettlebell-on-gray-concrete-floor-8611295/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
+  },
+  'kettlebell-adjustable': {
+    thumbUrl: '/equipment/kettlebell-adjustable.jpg',
+    pageUrl: 'https://www.pexels.com/photo/kettlebells-on-racks-inside-a-gym-14502821/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
   'kettlebell-cast': {
     thumbUrl: '/equipment/kettlebell-cast.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Cast_Iron_Russian_kettlebell.jpg',
@@ -503,6 +1243,24 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Competition_kettlebell_16_kilo.jpg',
     license: 'CC BY-SA 3.0',
     author: 'Knuckles',
+  },
+  'kettlebell-urethane': {
+    thumbUrl: '/equipment/kettlebell-urethane.jpg',
+    pageUrl: 'https://www.pexels.com/photo/kettlebells-on-racks-inside-a-gym-14502821/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
+  'm-ab-crunch': {
+    thumbUrl: '/equipment/m-ab-crunch.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-woman-doing-bicycle-crunches-7721988/',
+    license: 'Pexels',
+    author: 'Polona Mitar Osolnik',
+  },
+  'm-assisted-pullup': {
+    thumbUrl: '/equipment/m-assisted-pullup.jpg',
+    pageUrl: 'https://www.pexels.com/photo/topless-man-exercising-at-a-gym-4162478/',
+    license: 'Pexels',
+    author: 'Ivan S',
   },
   'm-back-extension': {
     thumbUrl: '/equipment/m-back-extension.jpg',
@@ -516,6 +1274,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=179972391',
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
+  },
+  'm-cable-crunch-station': {
+    thumbUrl: '/equipment/m-cable-crunch-station.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-woman-doing-bicycle-crunches-7721988/',
+    license: 'Pexels',
+    author: 'Polona Mitar Osolnik',
   },
   'm-calf-seated': {
     thumbUrl: '/equipment/m-calf-seated.jpg',
@@ -535,6 +1299,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://www.flickr.com/photos/127311295@N06/37051140632',
     license: 'CC BY-SA 2.0',
     author: 'haswell.fitness Equipment from China',
+  },
+  'm-decline-press': {
+    thumbUrl: '/equipment/m-decline-press.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-woman-doing-workout-6539838/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
   },
   'm-digital-trainer': {
     thumbUrl: '/equipment/m-digital-trainer.jpg',
@@ -576,12 +1346,31 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
   },
+  'm-lat-pulldown': {
+    thumbUrl: '/equipment/m-lat-pulldown.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-exercising-at-the-gym-17210044/',
+    license: 'Pexels',
+    author: 'Doğu Tuncer',
+  },
+  'm-lateral-raise': {
+    thumbUrl: '/equipment/m-lateral-raise.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/fit-male-bodybuilder-exercising-with-metal-machine-in-gym-3837388/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
   'm-leg-curl-lying': {
     thumbUrl: '/equipment/m-leg-curl-lying.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:LyingLegCurlMachineExercise.JPG',
     license: 'CC BY-SA 3.0',
     author:
       'No machine-readable author provided. GeorgeStepanek assumed (based on copyright claims).',
+  },
+  'm-leg-curl-seated': {
+    thumbUrl: '/equipment/m-leg-curl-seated.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-exercising-on-leg-curl-machine-in-gym-28731788/',
+    license: 'Pexels',
+    author: 'Vika Glitter',
   },
   'm-leg-extension': {
     thumbUrl: '/equipment/m-leg-extension.jpg',
@@ -596,11 +1385,55 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
   },
-  'm-pec-deck': {
-    thumbUrl: '/equipment/m-pec-deck.jpg',
-    pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=158071855',
-    license: 'CC BY 3.0',
-    author: "Sam's Fitness - Gym Equipment",
+  'm-multi-gym': {
+    thumbUrl: '/equipment/m-multi-gym.jpg',
+    pageUrl: 'https://www.pexels.com/photo/exercise-equipments-inside-a-room-4716816/',
+    license: 'Pexels',
+    author: 'Denys Gromov',
+  },
+  'm-multi-hip': {
+    thumbUrl: '/equipment/m-multi-hip.jpg',
+    pageUrl: 'https://www.pexels.com/photo/row-of-treadmills-in-gym-20418606/',
+    license: 'Pexels',
+    author: 'Fire Flintq8',
+  },
+  'm-neck': {
+    thumbUrl: '/equipment/m-neck.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/young-determined-sportswoman-doing-exercise-on-weight-machine-in-modern-sports-club-3768913/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'm-oblique': {
+    thumbUrl: '/equipment/m-oblique.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-using-an-exercise-equipment-3931301/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'm-pilates-chair': {
+    thumbUrl: '/equipment/m-pilates-chair.png',
+    pageUrl: 'https://www.pexels.com/photo/a-modern-fitness-studio-18499504/',
+    license: 'Pexels',
+    author: 'Lê Đức',
+  },
+  'm-rear-delt': {
+    thumbUrl: '/equipment/m-rear-delt.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/serious-sportsman-training-on-exercise-machine-in-modern-gym-3838937/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'm-reformer': {
+    thumbUrl: '/equipment/m-reformer.png',
+    pageUrl: 'https://www.pexels.com/photo/a-modern-fitness-studio-18499500/',
+    license: 'Pexels',
+    author: 'Lê Đức',
+  },
+  'm-seated-dip': {
+    thumbUrl: '/equipment/m-seated-dip.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-exercising-in-gym-on-dip-machine-34043576/',
+    license: 'Pexels',
+    author: 'Zeal Creative Studios',
   },
   'm-seated-row': {
     thumbUrl: '/equipment/m-seated-row.jpg',
@@ -615,12 +1448,79 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
   },
+  'm-single-leg-press': {
+    thumbUrl: '/equipment/m-single-leg-press.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-an-exercising-woman-6844939/',
+    license: 'Pexels',
+    author: 'Jonathan Borba',
+  },
+  'm-sissy-squat': {
+    thumbUrl: '/equipment/m-sissy-squat.jpg',
+    pageUrl: 'https://www.pexels.com/photo/strong-man-doing-weightlifting-exercise-in-gym-5646011/',
+    license: 'Pexels',
+    author: 'Justin L U C K',
+  },
+  'm-standing-leg-curl': {
+    thumbUrl: '/equipment/m-standing-leg-curl.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-exercising-on-leg-curl-machine-in-gym-28731788/',
+    license: 'Pexels',
+    author: 'Vika Glitter',
+  },
+  'm-total-gym': {
+    thumbUrl: '/equipment/m-total-gym.jpg',
+    pageUrl: 'https://www.pexels.com/photo/photo-of-man-lifting-a-barbell-4047156/',
+    license: 'Pexels',
+    author: 'ShotPot',
+  },
+  'mob-balance-pad': {
+    thumbUrl: '/equipment/mob-balance-pad.jpg',
+    pageUrl: 'https://www.pexels.com/photo/legs-of-person-in-yoga-position-7597245/',
+    license: 'Pexels',
+    author: 'Pavel Danilyuk',
+  },
   'mob-foot-roller': {
     thumbUrl: '/equipment/mob-foot-roller.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:Samurai_Challenge-_Norwegian_Foot_March_(9399083).jpg',
     license: 'Public domain',
     author: 'U.S. Air Force photo by Airman 1st Class David S. Calcote',
+  },
+  'mob-slant-board': {
+    thumbUrl: '/equipment/mob-slant-board.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-fit-man-using-a-massage-gun-on-his-shoulder-6388978/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  parallettes: {
+    thumbUrl: '/equipment/parallettes.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-woman-balancing-on-metal-bars-10244444/',
+    license: 'Pexels',
+    author: 'Si Ti',
+  },
+  'pl-bench-blocks': {
+    thumbUrl: '/equipment/pl-bench-blocks.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/tired-muscular-male-athlete-resting-after-weightlifting-workout-in-modern-fitness-center-3838705/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'pl-deadlift-platform': {
+    thumbUrl: '/equipment/pl-deadlift-platform.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lifting-a-barbell-9171160/',
+    license: 'Pexels',
+    author: 'Abdulrhman Alkady',
+  },
+  'plate-bumper': {
+    thumbUrl: '/equipment/plate-bumper.png',
+    pageUrl: 'https://www.pexels.com/photo/gym-weight-plates-on-rack-in-fitness-center-28636776/',
+    license: 'Pexels',
+    author: 'Juho Alonen',
+  },
+  'plate-competition': {
+    thumbUrl: '/equipment/plate-competition.png',
+    pageUrl: 'https://www.pexels.com/photo/gym-weight-plates-on-rack-in-fitness-center-28636776/',
+    license: 'Pexels',
+    author: 'Juho Alonen',
   },
   'plate-fractional': {
     thumbUrl: '/equipment/plate-fractional.jpg',
@@ -636,11 +1536,29 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'UNKNOWN',
   },
+  'plate-micro': {
+    thumbUrl: '/equipment/plate-micro.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-barbell-and-weights-in-a-gym-19025673/',
+    license: 'Pexels',
+    author: 'Jason Morrison',
+  },
   'plate-technique': {
     thumbUrl: '/equipment/plate-technique.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Plate_youths_winged_horses_Met_63.152.jpg',
     license: 'CC BY 2.5',
     author: '',
+  },
+  'plate-tri-grip': {
+    thumbUrl: '/equipment/plate-tri-grip.png',
+    pageUrl: 'https://www.pexels.com/photo/man-holding-weight-plate-in-gym-setting-28636773/',
+    license: 'Pexels',
+    author: 'Juho Alonen',
+  },
+  'plate-urethane': {
+    thumbUrl: '/equipment/plate-urethane.png',
+    pageUrl: 'https://www.pexels.com/photo/gym-weight-plates-on-rack-in-fitness-center-28636776/',
+    license: 'Pexels',
+    author: 'Juho Alonen',
   },
   'pullup-bar': {
     thumbUrl: '/equipment/pullup-bar.jpg',
@@ -655,12 +1573,67 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'U.S. Army 37EBCA-JTFE by Sgt. Eduardo Hernandez',
   },
+  'rack-half': {
+    thumbUrl: '/equipment/rack-half.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/woman-performing-front-squat-in-gym-with-trainer-39219652/',
+    license: 'Pexels',
+    author: 'Vitaly Gariev',
+  },
+  'rack-jerk-blocks': {
+    thumbUrl: '/equipment/rack-jerk-blocks.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-rack-of-weights-and-other-equipment-in-a-gym-27810162/',
+    license: 'Pexels',
+    author: 'Jonathan Borba',
+  },
+  'rack-lifting-platform': {
+    thumbUrl: '/equipment/rack-lifting-platform.png',
+    pageUrl: 'https://www.pexels.com/photo/man-adjusting-barbell-weights-in-gym-28636774/',
+    license: 'Pexels',
+    author: 'Juho Alonen',
+  },
+  'rack-monolift': {
+    thumbUrl: '/equipment/rack-monolift.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/woman-performing-front-squat-in-gym-with-trainer-39219652/',
+    license: 'Pexels',
+    author: 'Vitaly Gariev',
+  },
   'rack-power': {
     thumbUrl: '/equipment/rack-power.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:EFTA00003005-Gym_-_Black_server_rack_on_wheels_contains_networking_equipment_and_a_power_supply_unit_positioned_outdoors_near_a_white_fence_and_air_conditioning_unit.jpg',
     license: 'Public domain',
     author: 'Federal Bureau of Investigation',
+  },
+  'rack-pulling-blocks': {
+    thumbUrl: '/equipment/rack-pulling-blocks.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/woman-performing-front-squat-in-gym-with-trainer-39219652/',
+    license: 'Pexels',
+    author: 'Vitaly Gariev',
+  },
+  'rack-rig': {
+    thumbUrl: '/equipment/rack-rig.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/woman-performing-front-squat-in-gym-with-trainer-39219652/',
+    license: 'Pexels',
+    author: 'Vitaly Gariev',
+  },
+  'rack-squat-stand': {
+    thumbUrl: '/equipment/rack-squat-stand.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/woman-performing-front-squat-in-gym-with-trainer-39219652/',
+    license: 'Pexels',
+    author: 'Vitaly Gariev',
+  },
+  'rack-wall-mounted': {
+    thumbUrl: '/equipment/rack-wall-mounted.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-rack-of-weights-and-other-equipment-in-a-gym-27810162/',
+    license: 'Pexels',
+    author: 'Jonathan Borba',
   },
   'rec-balance-board': {
     thumbUrl: '/equipment/rec-balance-board.jpg',
@@ -686,6 +1659,18 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Bosu-dong_Bookstore_Alley_20200523_007.jpg',
     license: 'CC BY-SA 4.0',
     author: 'Mobius6',
+  },
+  'rec-compression-boots': {
+    thumbUrl: '/equipment/rec-compression-boots.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-women-are-working-out-in-a-gym-27730474/',
+    license: 'Pexels',
+    author: 'Jonathan Borba',
+  },
+  'rec-foam-roller': {
+    thumbUrl: '/equipment/rec-foam-roller.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lying-with-a-foam-roller-on-his-back-4804294/',
+    license: 'Pexels',
+    author: 'Ketut Subiyanto',
   },
   'rec-hanging-boots': {
     thumbUrl: '/equipment/rec-hanging-boots.png',
@@ -768,17 +1753,42 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Loren Kerns',
   },
+  'rec-stretch-strap': {
+    thumbUrl: '/equipment/rec-stretch-strap.jpg',
+    pageUrl: 'https://www.pexels.com/photo/athlete-stretching-on-floor-4804327/',
+    license: 'Pexels',
+    author: 'Ketut Subiyanto',
+  },
+  'rec-vibrating-roller': {
+    thumbUrl: '/equipment/rec-vibrating-roller.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-lying-with-a-foam-roller-on-his-back-4804294/',
+    license: 'Pexels',
+    author: 'Ketut Subiyanto',
+  },
   'smith-machine': {
     thumbUrl: '/equipment/smith-machine.jpg',
     pageUrl: 'https://www.rawpixel.com/image/6037808/photo-image-public-domain-free-sport',
     license: 'CC0 1.0',
     author: '',
   },
+  'spd-cones-dots': {
+    thumbUrl: '/equipment/spd-cones-dots.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/agility-ladder-and-marker-cones-on-a-football-field-13204961/',
+    license: 'Pexels',
+    author: 'Chris K',
+  },
   'spd-parachute': {
     thumbUrl: '/equipment/spd-parachute.png',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Speed_Dreams_%2736GP_front.png',
     license: 'CC BY-SA 3.0',
     author: 'Ocirne94',
+  },
+  'spd-sled-harness': {
+    thumbUrl: '/equipment/spd-sled-harness.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-pushing-weight-at-gym-15679568/',
+    license: 'Pexels',
+    author: 'TSquared Lab',
   },
   'store-db-rack': {
     thumbUrl: '/equipment/store-db-rack.jpg',
@@ -792,6 +1802,50 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:12_KG_kettlebell_at_Results_Gym.jpg',
     license: 'CC BY-SA 4.0',
     author: 'Ser Amantio di Nicolao',
+  },
+  'store-plate-tree': {
+    thumbUrl: '/equipment/store-plate-tree.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-carrying-a-weight-plate-5327551/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'strap-figure8': {
+    thumbUrl: '/equipment/strap-figure8.jpg',
+    pageUrl: 'https://www.pexels.com/photo/crop-sportsman-wearing-wrist-support-band-3763697/',
+    license: 'Pexels',
+    author: 'Andrea Piacquadio',
+  },
+  'strap-grips': {
+    thumbUrl: '/equipment/strap-grips.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/man-in-gray-shirt-wearing-wrist-straps-with-powder-on-hands-5837215/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
+  },
+  'strap-hook': {
+    thumbUrl: '/equipment/strap-hook.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-woman-lifting-a-barbell-4234912/',
+    license: 'Pexels',
+    author: 'Javon Thorpe',
+  },
+  'strap-lasso': {
+    thumbUrl: '/equipment/strap-lasso.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-preparing-for-workout-with-straps-33867775/',
+    license: 'Pexels',
+    author: 'Body  Reapers',
+  },
+  'strap-oly': {
+    thumbUrl: '/equipment/strap-oly.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-putting-on-wrist-straps-5837213/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
+  },
+  'sus-ab-straps': {
+    thumbUrl: '/equipment/sus-ab-straps.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-woman-in-sports-bra-with-her-hand-on-her-hair-8436150/',
+    license: 'Pexels',
+    author: 'Yan Krukau',
   },
   'sus-aerial-straps': {
     thumbUrl: '/equipment/sus-aerial-straps.jpg',
@@ -814,6 +1868,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 3.0',
     author: 'Guliolopez',
   },
+  'sus-stall-bars': {
+    thumbUrl: '/equipment/sus-stall-bars.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-stretching-on-the-stall-bars-4804334/',
+    license: 'Pexels',
+    author: 'Ketut Subiyanto',
+  },
   'suspension-trx': {
     thumbUrl: '/equipment/suspension-trx.png',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Suspension_training_equipment.png',
@@ -825,6 +1885,18 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://www.flickr.com/photos/9998127@N06/12811284765',
     license: 'CC BY-SA 2.0',
     author: 'wbaiv',
+  },
+  'weight-fixed-bar': {
+    thumbUrl: '/equipment/weight-fixed-bar.jpg',
+    pageUrl: 'https://www.pexels.com/photo/gray-and-black-barbell-669582/',
+    license: 'Pexels',
+    author: 'Lukas Blazek',
+  },
+  'yoga-block': {
+    thumbUrl: '/equipment/yoga-block.jpg',
+    pageUrl: 'https://www.pexels.com/photo/women-leaning-on-solid-blocks-in-exercising-9288134/',
+    license: 'Pexels',
+    author: 'Nicholas Fu',
   },
   'yoga-wheel': {
     thumbUrl: '/equipment/yoga-wheel.jpg',
