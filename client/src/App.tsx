@@ -172,7 +172,15 @@ export type Overlay =
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
   | { screen: 'profile'; userId: string }
-  | { screen: 'gym'; gymId?: string; name?: string; lat?: number; lng?: number; address?: string }
+  | {
+      screen: 'gym';
+      gymId?: string;
+      name?: string;
+      lat?: number;
+      lng?: number;
+      address?: string;
+      externalId?: string;
+    }
   | { screen: 'equipment'; itemId: string; gymId?: string }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
@@ -1227,6 +1235,7 @@ export function App() {
               candLat={activeOverlay.lat}
               candLng={activeOverlay.lng}
               candAddress={activeOverlay.address}
+              candExternalId={activeOverlay.externalId}
               shell={shell}
               onClose={closeOverlay}
             />

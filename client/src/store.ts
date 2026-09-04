@@ -13,6 +13,8 @@
  */
 import { useSyncExternalStore } from 'react';
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -63,6 +65,7 @@ import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
+const SHARED_GYMS_KEY = 'spotter.sharedGyms';
 const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const GOALS_KEY = 'spotter.goals';
@@ -78,9 +81,21 @@ const EMPTY_BODY: BodyMetrics = { weights: [] };
  *  this only changes how the weight is shown/entered for a given lift/machine. */
 export type DisplayUnit = 'kg' | 'lb';
 
+/** A gym is a shared entity: its equipment inventory is crowdsourced and lives
+ *  in Firestore under sharedGyms/<externalId>, keyed by the venue's stable id.
+ *  Each user still keeps their own per-user gym reference (name, coords, radius,
+ *  favourite); the equipment is overlaid from here. Cached locally; only deltas
+ *  (arrayUnion/arrayRemove) sync. */
+export interface SharedGym {
+  equipmentItems: string[];
+  updatedAt: number;
+}
+
 export interface StoreState {
   workouts: Workout[];
   gyms: Gym[];
+  /** Shared gym inventories by externalId (cache of sharedGyms/*). */
+  sharedGyms: Record<string, SharedGym>;
   reminders: Reminder[];
   /** Planned rest / recovery / vacation windows. */
   restPeriods: RestPeriod[];
@@ -117,6 +132,7 @@ function load<T>(key: string, fallback: T): T {
 let state: StoreState = {
   workouts: load<Workout[]>(STATE_KEY, []),
   gyms: load<Gym[]>(GYMS_KEY, []),
+  sharedGyms: load<Record<string, SharedGym>>(SHARED_GYMS_KEY, {}),
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
@@ -145,6 +161,7 @@ function persist(): void {
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
+    localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
@@ -1504,15 +1521,92 @@ const ITEM_CLS: Record<string, string> = Object.fromEntries(
   EQUIPMENT_CATALOG.map((e) => [e.id, e.cls as string]),
 );
 
-/** Set a gym's fine equipment picks and derive its coarse inventory. */
+/** Coarse inventory (EquipmentId set) from fine catalog picks. */
+function deriveInventory(items: string[]): string[] {
+  return Array.from(new Set(items.map((id) => ITEM_CLS[id]).filter((c): c is string => !!c)));
+}
+
+/** Overlay a gym with its shared (crowdsourced) equipment, when we have it. */
+function applyShared(gym: Gym): Gym {
+  const key = gym.externalId;
+  if (!key) return gym;
+  const shared = state.sharedGyms[key];
+  if (!shared) return gym;
+  return {
+    ...gym,
+    equipmentItems: shared.equipmentItems,
+    inventory: deriveInventory(shared.equipmentItems),
+  };
+}
+
+// --- Shared gym inventory (crowdsourced entity; needs sharedGyms rules) -----
+const sharedUnsub = new Map<string, Unsubscribe>();
+
+/** Subscribe to a shared gym's inventory (deltas only; onSnapshot pushes just
+ *  changes). Cached locally. On permission-denied (rules not deployed) or any
+ *  error, silently unsubscribe — the per-user gym stays the source of truth. */
+export function watchSharedGym(externalId: string): void {
+  if (!externalId || sharedUnsub.has(externalId)) return;
+  try {
+    const unsub = onSnapshot(
+      doc(db, 'sharedGyms', externalId),
+      (snap) => {
+        const data = snap.data() as Partial<SharedGym> | undefined;
+        if (!data || !Array.isArray(data.equipmentItems)) return;
+        const shared: SharedGym = {
+          equipmentItems: data.equipmentItems,
+          updatedAt: data.updatedAt ?? Date.now(),
+        };
+        state = {
+          ...state,
+          sharedGyms: { ...state.sharedGyms, [externalId]: shared },
+        };
+        // Re-overlay the local gyms so filters/board reflect the shared set.
+        state = { ...state, gyms: state.gyms.map(applyShared) };
+        persist();
+        recomputeReminders();
+        emit();
+      },
+      () => {
+        const u = sharedUnsub.get(externalId);
+        if (u) u();
+        sharedUnsub.delete(externalId);
+      },
+    );
+    sharedUnsub.set(externalId, unsub);
+  } catch {
+    /* offline / not signed in — fallback to per-user */
+  }
+}
+
+/** Set a gym's fine equipment picks and derive its coarse inventory. When the
+ *  gym is a known shared entity (has externalId), the change is also written to
+ *  the shared doc as a delta (arrayUnion/arrayRemove), so every user who has
+ *  this gym sees it. */
 export function setGymEquipment(gymId: string, itemIds: string[]): void {
   const g = state.gyms.find((x) => x.id === gymId);
   if (!g) return;
   const items = Array.from(new Set(itemIds));
-  const inventory = Array.from(
-    new Set(items.map((id) => ITEM_CLS[id]).filter((c): c is string => !!c)),
-  );
-  upsertGym({ ...g, equipmentItems: items, inventory });
+  upsertGym({ ...g, equipmentItems: items, inventory: deriveInventory(items) });
+
+  const key = g.externalId;
+  if (key) {
+    const prev = g.equipmentItems ?? [];
+    const added = items.filter((i) => !prev.includes(i));
+    const removed = prev.filter((i) => !items.includes(i));
+    const ref = doc(db, 'sharedGyms', key);
+    const now = Date.now();
+    if (added.length)
+      setDoc(ref, { equipmentItems: arrayUnion(...added), updatedAt: now }, { merge: true }).catch(
+        () => {},
+      );
+    if (removed.length)
+      setDoc(
+        ref,
+        { equipmentItems: arrayRemove(...removed), updatedAt: now },
+        { merge: true },
+      ).catch(() => {});
+  }
 }
 
 /** Activities whose start falls on the given local day key. */
@@ -1762,7 +1856,10 @@ export function startSyncLoop(): () => void {
     onSnapshot(
       collection(db, 'users', uid, 'gyms'),
       (snap) => {
-        state = { ...state, gyms: snap.docs.map((d) => d.data() as Gym) };
+        const gyms = snap.docs.map((d) => applyShared(d.data() as Gym));
+        state = { ...state, gyms };
+        // Subscribe to the shared entity for every gym that has a stable id.
+        gyms.forEach((g) => g.externalId && watchSharedGym(g.externalId));
         recomputeReminders();
         emit();
       },
@@ -2262,11 +2359,13 @@ export function resetLocalData(): void {
   localStorage.removeItem(WEIGHT_UNIT_KEY);
   localStorage.removeItem(EX_UNIT_KEY);
   localStorage.removeItem(EX_LOAD_KEY);
+  localStorage.removeItem(SHARED_GYMS_KEY);
   pings = [];
   dismissals = [];
   state = {
     workouts: [],
     gyms: [],
+    sharedGyms: {},
     reminders: [],
     restPeriods: [],
     activities: [],

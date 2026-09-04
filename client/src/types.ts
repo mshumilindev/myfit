@@ -110,6 +110,9 @@ export interface Gym {
   lat: number;
   lng: number;
   radiusM: number;
+  /** Stable venue id (e.g. "osm:...") linking this per-user gym to the shared
+   *  gym entity (sharedGyms/<externalId>) whose equipment is crowdsourced. */
+  externalId?: string;
   /** User-marked favourite (fallback suggestion when GPS is unavailable). */
   favorite?: boolean;
   /** Equipment inventory (design EQ-3): what you ticked on this gym.

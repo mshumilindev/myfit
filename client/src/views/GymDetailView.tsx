@@ -156,6 +156,7 @@ export function GymDetailView({
   candLat,
   candLng,
   candAddress,
+  candExternalId,
   shell,
   onClose,
 }: {
@@ -164,6 +165,7 @@ export function GymDetailView({
   candLat?: number;
   candLng?: number;
   candAddress?: string;
+  candExternalId?: string;
   shell: Shell;
   onClose: () => void;
 }) {
@@ -261,7 +263,15 @@ export function GymDetailView({
     );
   }
 
-  const ensureSaved = () => gym ?? upsertGym({ name, lat, lng, radiusM: DEFAULT_GYM_RADIUS_M });
+  const ensureSaved = () =>
+    gym ??
+    upsertGym({
+      name,
+      lat,
+      lng,
+      radiusM: DEFAULT_GYM_RADIUS_M,
+      ...(candExternalId ? { externalId: candExternalId } : {}),
+    });
 
   const sessions = gym
     ? store.workouts.filter((w) => w.gymId === gym.id && w.finishedAt !== null)

@@ -120,6 +120,17 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // --- Shared gyms: crowdsourced equipment inventory ----------------------
+    // A gym is a shared entity keyed by its stable venue id (externalId). Its
+    // equipment inventory is contributed by any signed-in user, like a map
+    // amenity — clients write deltas (arrayUnion/arrayRemove). No personal data
+    // lives here (just a list of catalog equipment ids + updatedAt).
+    match /sharedGyms/{gymKey} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
     // --- Programs -----------------------------------------------------------
     // Items are embedded in the program document (an array), like workouts.
     match /programs/{programId} {

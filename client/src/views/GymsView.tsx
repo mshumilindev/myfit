@@ -282,6 +282,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                   lat: r.lat,
                   lng: r.lng,
                   address: r.address,
+                  externalId: r.externalId,
                 });
               }}
               onManualHere={(n) => locateFor(n)}
