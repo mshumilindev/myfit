@@ -1,17 +1,24 @@
 /**
  * EquipmentPickerSheet — pick the equipment used for one exercise in a session
- * (design Load-entry / MD-08). A combination is allowed: straps + bar + belt, a
- * band, etc. Suggests what this gym already has (relevant kit first), lets you
- * change it, and — when the gym doesn't have something — search the whole
- * catalog and add it; adding here stocks the gym too.
+ * (design Load-entry / MD-08). Same tile layout as the gym inventory board
+ * (photo, name, muscle tags) but without the Details jump, and scoped to the
+ * equipment CATEGORIES that make sense for this exercise (pickerCategoriesFor-
+ * Exercise). A combination is allowed — straps + bar + belt, a band, any mix.
+ * Adding something the gym doesn't have stocks the gym too.
  */
 import { useMemo, useState } from 'react';
 import type { Gym, Exercise } from '../types';
-import { enrichedCatalog, type EquipmentItem } from '../data/equipmentCatalog';
+import {
+  enrichedCatalog,
+  pickerCategoriesForExercise,
+  type EquipCategory,
+  type EquipmentItem,
+} from '../data/equipmentCatalog';
 import { localizedEquipName, equipCategoryLabel } from '../data/equipmentI18n';
 import { equipmentFor, setExerciseEquipmentItems } from '../store';
 import { useT } from '../i18n';
 import { tokenMatch } from '../search';
+import { MuscleChip } from './Muscle';
 import { Icon, Sheet } from '../ui';
 
 export function EquipmentPickerSheet({
@@ -29,70 +36,69 @@ export function EquipmentPickerSheet({
   const catalog = useMemo(() => enrichedCatalog(), []);
   const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog]);
   const [query, setQuery] = useState('');
+  const [open, setOpen] = useState<Set<EquipCategory>>(new Set());
 
-  const selected = exercise.equipmentItems ?? [];
-  const gymItems = useMemo(() => gym?.equipmentItems ?? [], [gym]);
-  const classes = useMemo(() => new Set(equipmentFor(exercise)), [exercise]);
+  const selected = useMemo(() => new Set(exercise.equipmentItems ?? []), [exercise.equipmentItems]);
 
-  const commit = (items: string[]) =>
-    setExerciseEquipmentItems(workoutId, exercise.id, items, gym?.id);
-  const toggle = (id: string) =>
-    commit(selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]);
+  // Categories relevant to this exercise's equipment class.
+  const cats = useMemo(() => pickerCategoriesForExercise(equipmentFor(exercise)), [exercise]);
 
-  // Gym's kit, with the exercise-relevant classes first.
-  const gymList = useMemo(() => {
-    const items = gymItems.map((id) => byId.get(id)).filter((x): x is EquipmentItem => !!x);
-    return items.sort((a, b) => (classes.has(b.cls) ? 1 : 0) - (classes.has(a.cls) ? 1 : 0));
-  }, [gymItems, byId, classes]);
+  // Relevant items grouped by category, in the fixed order.
+  const groups = useMemo(() => {
+    const allow = new Set(cats);
+    const byCat = new Map<EquipCategory, EquipmentItem[]>();
+    for (const it of catalog) {
+      if (!allow.has(it.category)) continue;
+      const arr = byCat.get(it.category) ?? [];
+      arr.push(it);
+      byCat.set(it.category, arr);
+    }
+    return cats.filter((c) => byCat.has(c)).map((c) => ({ cat: c, items: byCat.get(c)! }));
+  }, [catalog, cats]);
 
+  const hay = (it: EquipmentItem): string =>
+    [
+      localizedEquipName(it, locale),
+      it.name,
+      (it.aka ?? []).join(' '),
+      (it.brands ?? []).join(' '),
+    ].join(' ');
   const searching = query.trim().length > 0;
-  const results = useMemo(() => {
-    if (!searching) return [];
-    return catalog
-      .filter((it) =>
-        tokenMatch(
-          [
-            localizedEquipName(it, locale),
-            it.name,
-            (it.aka ?? []).join(' '),
-            (it.brands ?? []).join(' '),
-          ].join(' '),
-          query,
-        ),
-      )
-      .slice(0, 25);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, catalog, locale]);
 
-  const row = (it: EquipmentItem) => {
-    const on = selected.includes(it.id);
-    const inGym = gymItems.includes(it.id);
-    return (
-      <button
-        key={it.id}
-        className={`ep-row${on ? ' on' : ''}`}
-        onClick={() => toggle(it.id)}
-        aria-pressed={on}
-      >
-        <span className="ep-row-body">
-          <span className="ep-row-name">{localizedEquipName(it, locale)}</span>
-          <span className="ep-row-meta">
-            {equipCategoryLabel(it.category, locale)}
-            {!inGym && ` · ${t.eqAddToGym}`}
-          </span>
-        </span>
-        <Icon name={on ? 'check' : 'plus'} weight="bold" />
-      </button>
-    );
+  const visible = useMemo(
+    () =>
+      groups
+        .map((g) => ({
+          cat: g.cat,
+          items: searching ? g.items.filter((it) => tokenMatch(hay(it), query)) : g.items,
+        }))
+        .filter((g) => g.items.length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [groups, query, locale],
+  );
+
+  const gymItems = gym?.equipmentItems ?? [];
+  const toggle = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setExerciseEquipmentItems(workoutId, exercise.id, [...next], gym?.id);
   };
+  const toggleCat = (c: EquipCategory) =>
+    setOpen((prev) => {
+      const n = new Set(prev);
+      if (n.has(c)) n.delete(c);
+      else n.add(c);
+      return n;
+    });
 
   return (
     <Sheet onClose={onClose} className="equip-picker">
       <div className="ep-title">{t.eqEquipment}</div>
 
-      {selected.length > 0 && (
+      {selected.size > 0 && (
         <div className="ep-selected">
-          {selected.map((id) => {
+          {[...selected].map((id) => {
             const it = byId.get(id);
             return (
               <button key={id} className="ep-sel" onClick={() => toggle(id)}>
@@ -120,22 +126,79 @@ export function EquipmentPickerSheet({
         )}
       </div>
 
-      {searching ? (
-        <div className="ep-list">
-          {results.length > 0 ? results.map(row) : <div className="detail-muted ep-empty">—</div>}
-        </div>
-      ) : (
-        <>
-          <div className="ep-label">{t.eqInThisGym}</div>
-          <div className="ep-list">
-            {gymList.length > 0 ? (
-              gymList.map(row)
-            ) : (
-              <div className="detail-muted ep-empty">{t.eqPickSearchHint}</div>
-            )}
-          </div>
-        </>
-      )}
+      <div className="ep-scroll eq-cats">
+        {visible.length === 0 ? (
+          <div className="detail-muted ep-empty">—</div>
+        ) : (
+          visible.map(({ cat, items }) => {
+            const sel = items.reduce((n, it) => n + (selected.has(it.id) ? 1 : 0), 0);
+            const expanded = searching || open.has(cat);
+            return (
+              <div className={`eq-cat${expanded ? ' open' : ''}`} key={cat}>
+                <button
+                  className="eq-cat-head"
+                  onClick={() => toggleCat(cat)}
+                  aria-expanded={expanded}
+                >
+                  <Icon name={expanded ? 'caret-down' : 'arrow-right'} />
+                  <span className="eq-cat-label">{equipCategoryLabel(cat, locale)}</span>
+                  <span className="eq-cat-count">
+                    {sel > 0 ? `${sel}/${items.length}` : items.length}
+                  </span>
+                </button>
+                {expanded && (
+                  <div className="eq-grid">
+                    {items.map((it) => {
+                      const on = selected.has(it.id);
+                      const inGym = gymItems.includes(it.id);
+                      return (
+                        <button
+                          key={it.id}
+                          className={`eq-tile eq-pick-tile${on ? ' on' : ''}`}
+                          onClick={() => toggle(it.id)}
+                          aria-pressed={on}
+                          title={localizedEquipName(it, locale)}
+                        >
+                          <span className="eq-thumb">
+                            {it.image ? (
+                              <img
+                                src={it.image.thumbUrl}
+                                alt=""
+                                loading="lazy"
+                                onError={hideBroken}
+                              />
+                            ) : (
+                              <span className="eq-thumb-ph" aria-hidden />
+                            )}
+                            {on && (
+                              <span className="eq-tile-check">
+                                <Icon name="check" weight="bold" />
+                              </span>
+                            )}
+                            {!inGym && !on && <span className="eq-tile-add">＋</span>}
+                          </span>
+                          <span className="eq-tile-name">{localizedEquipName(it, locale)}</span>
+                          {it.muscles.length > 0 && (
+                            <span className="eq-tile-mus">
+                              {it.muscles.slice(0, 2).map((m) => (
+                                <MuscleChip key={m} muscle={m} tone="primary" />
+                              ))}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
     </Sheet>
   );
 }
+
+const hideBroken = (e: { currentTarget: HTMLImageElement }) => {
+  e.currentTarget.style.display = 'none';
+};

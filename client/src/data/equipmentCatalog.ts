@@ -4850,3 +4850,71 @@ export function equipmentById(id: string): EquipmentItem | undefined {
 export function enrichedCatalog(): EquipmentItem[] {
   return EQUIPMENT_CATALOG.map(merge);
 }
+
+/**
+ * Which equipment CATEGORIES make sense to pick for an exercise, keyed by the
+ * exercise's coarse equipment class (EquipmentId). Used by the in-session
+ * equipment picker to show only relevant kit. Accessories and bands are
+ * universal combo add-ons (straps, belt, chalk, a resistance band) and are
+ * always offered on top of the class-specific categories.
+ */
+const EXERCISE_EQUIP_CATEGORIES: Record<EquipmentId, EquipCategory[]> = {
+  barbell: ['barbell', 'plate', 'rack', 'bench'],
+  ezBar: ['barbell', 'plate', 'bench'],
+  dumbbell: ['dumbbell', 'bench'],
+  kettlebell: ['kettlebell'],
+  cable: ['cable'],
+  machine: ['machine', 'plateLoaded'],
+  body: ['rack', 'suspension', 'bench'],
+  bands: ['band'],
+  suspension: ['suspension'],
+  medicineBall: ['conditioning'],
+  exerciseBall: ['recovery'],
+  foamRoll: ['recovery'],
+  other: ['conditioning', 'cardio', 'recovery', 'aquatic', 'assessment'],
+};
+
+const UNIVERSAL_EQUIP_CATEGORIES: EquipCategory[] = ['accessory', 'band'];
+
+const PICKER_CATEGORY_ORDER: EquipCategory[] = [
+  'barbell',
+  'dumbbell',
+  'kettlebell',
+  'plate',
+  'rack',
+  'bench',
+  'machine',
+  'plateLoaded',
+  'cable',
+  'cardio',
+  'band',
+  'suspension',
+  'conditioning',
+  'aquatic',
+  'recovery',
+  'accessory',
+  'assessment',
+];
+
+/** Categories to offer in the session equipment picker for an exercise, given
+ *  its coarse equipment classes (from equipmentFor). Ordered for display. */
+export function pickerCategoriesForExercise(equipIds: readonly string[]): EquipCategory[] {
+  const set = new Set<EquipCategory>(UNIVERSAL_EQUIP_CATEGORIES);
+  for (const id of equipIds) {
+    const cats = EXERCISE_EQUIP_CATEGORIES[id as EquipmentId];
+    if (cats) for (const c of cats) set.add(c);
+  }
+  // Nothing specific matched (unknown/bodyweight-only) → a sensible broad set.
+  if (set.size === UNIVERSAL_EQUIP_CATEGORIES.length) {
+    for (const c of [
+      'barbell',
+      'dumbbell',
+      'machine',
+      'cable',
+      'kettlebell',
+      'bench',
+    ] as EquipCategory[])
+      set.add(c);
+  }
+  return PICKER_CATEGORY_ORDER.filter((c) => set.has(c));
+}

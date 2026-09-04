@@ -26688,3 +26688,34 @@ button.badge {
   padding: 16px 8px;
   font-size: 13px;
 }
+
+/* Session equipment picker — reuses the board's tile grid, scoped + no details */
+.equip-picker .ep-scroll {
+  max-height: 56vh;
+  overflow-y: auto;
+  margin: 4px -6px 0;
+  padding: 0 6px;
+}
+.eq-pick-tile {
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.eq-tile-add {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(10, 11, 13, 0.55);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
