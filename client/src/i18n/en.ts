@@ -687,6 +687,7 @@ export const en = {
   eqAlsoKnownAs: 'Also known as',
   eqTrainsSame: 'Trains the same muscles',
   eqInThisGym: 'In this gym',
+  eqAddToGym: 'Add to this gym',
   eqHere: 'here',
   eqNotHere: 'not here',
   eqHits: 'Hits',

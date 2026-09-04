@@ -281,7 +281,10 @@ function toHash(
   if (overlay?.screen === 'muscle-history') return `#/muscle/${encodeURIComponent(overlay.muscle)}`;
   if (overlay?.screen === 'profile') return `#/profile/${encodeURIComponent(overlay.userId)}`;
   if (overlay?.screen === 'gym') return overlay.gymId ? `#/gym/${overlay.gymId}` : '#/gym';
-  if (overlay?.screen === 'equipment') return `#/equipment/${encodeURIComponent(overlay.itemId)}`;
+  if (overlay?.screen === 'equipment')
+    return overlay.gymId
+      ? `#/equipment/${encodeURIComponent(overlay.itemId)}/${overlay.gymId}`
+      : `#/equipment/${encodeURIComponent(overlay.itemId)}`;
   if (overlay?.screen === 'library')
     return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';

@@ -638,6 +638,7 @@ export const et: Strings = {
   eqAlsoKnownAs: 'Tuntud ka kui',
   eqTrainsSame: 'Treenib samu lihaseid',
   eqInThisGym: 'Selles saalis',
+  eqAddToGym: 'Lisa sellesse saali',
   eqHere: 'on siin',
   eqNotHere: 'pole siin',
   eqHits: 'Koormab',

@@ -642,6 +642,7 @@ export const pl: Strings = {
   eqAlsoKnownAs: 'Znane też jako',
   eqTrainsSame: 'Trenuje te same mięśnie',
   eqInThisGym: 'W tej siłowni',
+  eqAddToGym: 'Dodaj do tej siłowni',
   eqHere: 'jest tu',
   eqNotHere: 'nie ma tu',
   eqHits: 'Angażuje',

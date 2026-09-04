@@ -26227,12 +26227,20 @@ button.badge {
 }
 
 /* --- EquipmentDetailView (machine detail, MD-02) -------------------------- */
-.eqd-topbar {
+.eqd-head {
   display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding-top: 2px;
   margin-bottom: 10px;
 }
+.eqd-headtext {
+  flex: 1;
+  min-width: 0;
+}
 .eqd-back {
+  flex: none;
+  margin-top: 2px;
   width: 36px;
   height: 36px;
   border: none;
@@ -26560,4 +26568,14 @@ button.badge {
   background: var(--color-accent-500);
   color: #1a1206;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Big add/remove-from-gym button under the hero (machine detail) */
+.eqd-gym-btn {
+  width: 100%;
+  margin: 14px 0 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

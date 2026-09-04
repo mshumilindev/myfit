@@ -140,37 +140,26 @@ export function EquipmentDetailView({
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
 
-  function addToGym() {
+  function toggleGym() {
     if (!item || !gym) return;
     const next = new Set(gym.equipmentItems ?? []);
-    next.add(item.id);
+    if (next.has(item.id)) next.delete(item.id);
+    else next.add(item.id);
     setGymEquipment(gym.id, [...next]);
   }
 
   return (
     <div className="screen exd eqd">
       <div className="eqd-body">
-        <div className="eqd-topbar">
+        <div className="eqd-head">
           <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
             <Icon name="caret-left" />
           </button>
+          <div className="eqd-headtext">
+            <div className="eqd-cat lbl">{equipCategoryLabel(item.category, locale)}</div>
+            <h1 className="eqd-title">{name}</h1>
+          </div>
         </div>
-
-        <div className="eqd-cat lbl">
-          {equipCategoryLabel(item.category, locale)}
-          {gym &&
-            (here ? (
-              <span className="eqd-here on">
-                <Icon name="check-circle" weight="fill" /> {t.eqInThisGym}
-              </span>
-            ) : (
-              <button className="eqd-here add" onClick={addToGym}>
-                <Icon name="plus" /> {t.add}
-              </button>
-            ))}
-        </div>
-
-        <h1 className="eqd-title">{name}</h1>
 
         <div className="eqd-hero">
           {item.image ? (
@@ -181,6 +170,16 @@ export function EquipmentDetailView({
         </div>
 
         {info && <p className="eqd-info">{info}</p>}
+
+        {gym && (
+          <button
+            className={`btn ${here ? 'btn-secondary' : 'btn-primary'} eqd-gym-btn`}
+            onClick={toggleGym}
+          >
+            <Icon name={here ? 'check' : 'plus'} weight="bold" />
+            {here ? t.eqInThisGym : t.eqAddToGym}
+          </button>
+        )}
 
         {(item.muscles.length > 0 || secondary.length > 0) && (
           <section className="eqd-sec">

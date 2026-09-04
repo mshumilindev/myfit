@@ -651,6 +651,7 @@ export const lt: Strings = {
   eqAlsoKnownAs: 'Taip pat žinoma kaip',
   eqTrainsSame: 'Treniruoja tuos pačius raumenis',
   eqInThisGym: 'Šioje salėje',
+  eqAddToGym: 'Pridėti į šią salę',
   eqHere: 'yra čia',
   eqNotHere: 'nėra čia',
   eqHits: 'Apkrauna',

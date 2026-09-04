@@ -643,6 +643,7 @@ export const uk: Strings = {
   eqAlsoKnownAs: 'Також відоме як',
   eqTrainsSame: 'Тренує ті самі мʼязи',
   eqInThisGym: 'У цьому залі',
+  eqAddToGym: 'Додати до цього залу',
   eqHere: 'є тут',
   eqNotHere: 'немає тут',
   eqHits: 'Навантажує',
