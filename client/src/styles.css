@@ -26710,6 +26710,13 @@ button.badge {
 .equip-picker .eq-cat {
   flex: none;
 }
+/* Pin the fixed header rows too, or the flex column shrinks the search input
+   (and title) when .ep-scroll takes the slack. */
+.equip-picker .ep-title,
+.equip-picker .ep-selected,
+.equip-picker .ep-search {
+  flex: none;
+}
 .eq-pick-tile {
   border: none;
   background: transparent;
