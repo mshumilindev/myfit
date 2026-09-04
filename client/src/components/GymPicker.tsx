@@ -98,7 +98,10 @@ export function GymPicker({
 
   useEffect(() => {
     let alive = true;
-    getCurrentPositionOnce()
+    // Sort gyms by rough distance without re-prompting: reuse the last known
+    // fix and refresh it silently only when permission is already granted, so
+    // starting a session never re-asks "allow location" once it's been allowed.
+    getCurrentPositionOnce({ maxAgeMs: 10 * 60 * 1000, cacheFirst: true })
       .then((p) => alive && setCoords({ lat: p.lat, lng: p.lng }))
       .catch(() => {});
     return () => {
