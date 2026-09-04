@@ -54,10 +54,12 @@ export function EquipmentDetailView({
     const prim = new Set<MuscleGroup>(
       item.muscles.filter((m) => m !== 'cardio' && m !== 'fullbody'),
     );
+    // No muscle tags → not something you train ON (timer, chalk, mat): show no
+    // exercise list at all rather than a class-only fallback of noise.
+    if (prim.size === 0) return [];
     const pool = searchCatalog('', 150, item.cls);
     const seen = new Set<string>();
     const relevant: CatalogExercise[] = [];
-    const fallback: CatalogExercise[] = [];
     for (const e of pool) {
       const k = e.names[0].toLowerCase();
       if (seen.has(k)) continue;
@@ -65,12 +67,10 @@ export function EquipmentDetailView({
       if (e.muscle === 'cardio') continue;
       const rich = richExerciseByName(e.names[0]);
       if (rich?.category === 'cardio' || rich?.category === 'stretching') continue;
-      const overlaps = prim.has(e.muscle) || secondaryMusclesOf(e).some((m) => prim.has(m));
-      (overlaps ? relevant : fallback).push(e);
+      if (prim.has(e.muscle) || secondaryMusclesOf(e).some((m) => prim.has(m))) relevant.push(e);
     }
     relevant.sort((a, b) => (prim.has(a.muscle) ? 0 : 1) - (prim.has(b.muscle) ? 0 : 1));
-    const out = relevant.length > 0 ? relevant : fallback;
-    return out.slice(0, 8);
+    return relevant.slice(0, 8);
   }, [item]);
 
   // Secondary muscles = extra muscles the matched exercises hit, minus primary.
@@ -118,12 +118,12 @@ export function EquipmentDetailView({
   if (!item) {
     return (
       <div className="screen exd eqd">
-        <div className="exd-head">
-          <button className="exd-back" onClick={onClose} aria-label={t.backAction}>
+        <div className="eqd-body">
+          <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
             <Icon name="caret-left" />
           </button>
+          <div className="detail-muted eqd-empty">—</div>
         </div>
-        <div className="detail-muted eqd-empty">—</div>
       </div>
     );
   }
@@ -149,16 +149,13 @@ export function EquipmentDetailView({
 
   return (
     <div className="screen exd eqd">
-      <div className="exd-head">
-        <button className="exd-back" onClick={onClose} aria-label={t.backAction}>
+      <div className="eqd-body">
+        <button className="eqd-back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
-      </div>
-
-      <div className="eqd-body">
         <div className="eqd-hero">
           {item.image ? (
-            <img src={item.image.thumbUrl} alt="" loading="lazy" onError={hideBroken} />
+            <img src={item.image.thumbUrl} alt="" onError={hideBroken} />
           ) : (
             <span className="eqd-hero-ph" aria-hidden />
           )}
@@ -216,15 +213,13 @@ export function EquipmentDetailView({
           </div>
         )}
 
-        <section className="eqd-sec">
-          <div className="lbl eqd-lbl">
-            {t.eqExercisesOnIt}
-            {exercises.length > 0 && <span className="eqd-count">{exercises.length}</span>}
-          </div>
-          <div className="detail-muted eqd-note">{t.eqFromDb}</div>
-          {exercises.length === 0 ? (
-            <div className="detail-muted eqd-note">{t.eqNoExercises}</div>
-          ) : (
+        {exercises.length > 0 && (
+          <section className="eqd-sec">
+            <div className="lbl eqd-lbl">
+              {t.eqExercisesOnIt}
+              <span className="eqd-count">{exercises.length}</span>
+            </div>
+            <div className="detail-muted eqd-note">{t.eqFromDb}</div>
             <div className="eqd-exs">
               {exercises.map((ex) => (
                 <button
@@ -241,13 +236,11 @@ export function EquipmentDetailView({
                 </button>
               ))}
             </div>
-          )}
-          {exercises.length > 0 && (
             <button className="btn btn-primary eqd-log" onClick={logASet}>
               <Icon name="plus" weight="bold" /> {t.eqLogSet}
             </button>
-          )}
-        </section>
+          </section>
+        )}
 
         {item.models && item.models.length > 0 && (
           <section className="eqd-sec">

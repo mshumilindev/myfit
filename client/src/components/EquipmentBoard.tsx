@@ -1,12 +1,12 @@
 /**
- * EquipmentBoard — the per-gym inventory board (design EQ-3 + "My Fit · Machine
- * Details" MD-01). Tick the fine-grained equipment a gym has, grouped by
- * category, searchable in any word order (name, aliases, brands, models) and
- * filterable by the muscle it trains ("what here trains my grow muscles?" —
- * wired to Goals via "My focus"). Every tile carries its muscle tags and a
- * Details → into the machine detail. Selections persist via setGymEquipment,
- * which also derives the coarse `inventory` set the "available at your gym"
- * filters use elsewhere.
+ * EquipmentBoard — the per-gym inventory board ("My Fit · Machine Details"
+ * MD-01). Tick the equipment a gym has, grouped by category, searchable in any
+ * word order (name, aliases, brands, models) and filterable by the muscle it
+ * trains (behind a funnel toggle; "My focus" loads the block's grow muscles
+ * from Goals). Every tile carries its muscle tags, taps into the machine
+ * detail, and has a corner control to add/remove it from this gym. Selections
+ * persist via setGymEquipment, which also derives the coarse `inventory` set the
+ * "available at your gym" filters use elsewhere.
  */
 import { useMemo, useState } from 'react';
 import type { Gym } from '../types';
@@ -69,6 +69,7 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
   const [open, setOpen] = useState<Set<EquipCategory>>(new Set());
   const [picked, setPicked] = useState<Set<string>>(() => new Set(gym.equipmentItems ?? []));
   const [mfilter, setMfilter] = useState<Set<MuscleGroup>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
 
   // Images that 404 at load time fall back to the placeholder.
   const [broken, setBroken] = useState<Set<string>>(new Set());
@@ -165,43 +166,59 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
       </div>
       <div className="detail-muted eq-hint">{t.inventoryNote}</div>
 
-      <div className="eq-search">
-        <Icon name="magnifying-glass" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t.equipSearchPlaceholder}
-          aria-label={t.equipSearchPlaceholder}
-        />
-        {query && (
-          <button className="eq-search-clear" onClick={() => setQuery('')} aria-label={t.srClose}>
-            <Icon name="x" />
+      <div className="eq-searchrow">
+        <div className="eq-search">
+          <Icon name="magnifying-glass" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t.equipSearchPlaceholder}
+            aria-label={t.equipSearchPlaceholder}
+          />
+          {query && (
+            <button className="eq-search-clear" onClick={() => setQuery('')} aria-label={t.srClose}>
+              <Icon name="x" />
+            </button>
+          )}
+        </div>
+        {filterMuscles.length > 0 && (
+          <button
+            className={`eq-funnel${filtering ? ' on' : ''}`}
+            onClick={() => setShowFilters((v) => !v)}
+            aria-label={t.eqFilterByMuscle}
+            aria-expanded={showFilters}
+          >
+            <Icon name="funnel-simple" />
+            {filtering && <span className="eq-funnel-n">{mfilter.size}</span>}
           </button>
         )}
       </div>
 
-      <div className="eq-filter">
-        {growGroups.length > 0 && (
-          <button className="eq-focus-pill" onClick={loadFocus}>
-            <Icon name="crosshair" weight="fill" /> {t.eqMyFocus}
-          </button>
-        )}
-        {filterMuscles.map((m) => (
-          <span key={m} className={`eq-fchip${mfilter.has(m) ? ' on' : ''}`}>
-            <MuscleChip
-              muscle={m}
-              tone={mfilter.has(m) ? 'primary' : 'secondary'}
-              onClick={toggleMuscle}
-            />
-          </span>
-        ))}
-        {filtering && (
-          <button className="eq-clear" onClick={() => setMfilter(new Set())}>
-            {t.eqClearFilter}
-          </button>
-        )}
-      </div>
+      {showFilters && (
+        <div className="eq-filter">
+          {growGroups.length > 0 && (
+            <button className="eq-focus-pill" onClick={loadFocus}>
+              <Icon name="crosshair" weight="fill" /> {t.eqMyFocus}
+            </button>
+          )}
+          {filterMuscles.map((m) => (
+            <span key={m} className={`eq-fchip${mfilter.has(m) ? ' on' : ''}`}>
+              <MuscleChip
+                muscle={m}
+                tone={mfilter.has(m) ? 'primary' : 'secondary'}
+                onClick={toggleMuscle}
+              />
+            </span>
+          ))}
+          {filtering && (
+            <button className="eq-clear" onClick={() => setMfilter(new Set())}>
+              {t.eqClearFilter}
+            </button>
+          )}
+        </div>
+      )}
+
       {filtering && (
         <div className="detail-muted eq-hint eq-matchline">
           {matchCount} {t.eqMatch}
@@ -237,8 +254,7 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                         <div className={`eq-tile${on ? ' on' : ''}`} key={it.id}>
                           <button
                             className="eq-tile-main"
-                            onClick={() => toggle(it.id)}
-                            aria-pressed={on}
+                            onClick={() => openDetail(it.id)}
                             title={info}
                           >
                             <span className="eq-thumb">
@@ -252,11 +268,6 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                               ) : (
                                 <span className="eq-thumb-ph" aria-hidden />
                               )}
-                              {on && (
-                                <span className="eq-tile-check">
-                                  <Icon name="check" weight="bold" />
-                                </span>
-                              )}
                             </span>
                             <span className="eq-tile-name">{localizedEquipName(it, locale)}</span>
                             {it.muscles.length > 0 && (
@@ -267,8 +278,16 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
                               </span>
                             )}
                           </button>
-                          <button className="eq-tile-details" onClick={() => openDetail(it.id)}>
-                            {t.eqDetails} <Icon name="arrow-right" />
+                          <button
+                            className={`eq-tile-toggle${on ? ' on' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggle(it.id);
+                            }}
+                            aria-pressed={on}
+                            aria-label={on ? t.eqInThisGym : t.add}
+                          >
+                            <Icon name={on ? 'check' : 'plus'} weight="bold" />
                           </button>
                         </div>
                       );

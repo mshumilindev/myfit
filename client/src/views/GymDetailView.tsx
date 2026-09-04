@@ -10,7 +10,6 @@ import {
   upsertGym,
   getCurrentPositionOnce,
   workoutVolumeKg,
-  bandLibraryFor,
   setGymBandLibrary,
 } from '../store';
 import { BAND_HEX, BAND_COLORS, type BandRung, type BandColor } from '../loads';
@@ -41,10 +40,12 @@ const hhmm = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)
  */
 function BandLibraryCard({ gym }: { gym: Gym }) {
   const { t } = useT();
-  const [rungs, setRungs] = useState<BandRung[]>(() => bandLibraryFor(gym).map((r) => ({ ...r })));
+  const [rungs, setRungs] = useState<BandRung[]>(() =>
+    (gym.bandLibrary ?? []).map((r) => ({ ...r })),
+  );
   const [saved, setSaved] = useState(false);
   const [pick, setPick] = useState<number | null>(null);
-  const dirty = JSON.stringify(rungs) !== JSON.stringify(bandLibraryFor(gym));
+  const dirty = JSON.stringify(rungs) !== JSON.stringify(gym.bandLibrary ?? []);
 
   const setColor = (i: number, color: BandColor) => {
     setRungs((list) => list.map((x, xi) => (xi === i ? { ...x, color } : x)));
@@ -64,8 +65,7 @@ function BandLibraryCard({ gym }: { gym: Gym }) {
     setRungs((list) => {
       const used = new Set(list.map((r) => r.color));
       const nextColor = BAND_COLORS.find((c) => !used.has(c)) ?? 'yellow';
-      const maxKg = list.reduce((m, r) => Math.max(m, r.kg), 0);
-      return [...list, { color: nextColor, kg: maxKg + 5 }];
+      return [...list, { color: nextColor, kg: 0 }];
     });
     setSaved(false);
   };
