@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED — do not edit by hand.
- * 302 equipment images. Sources: Wikimedia Commons + Openverse (CC/PD/BY/BY-SA,
+ * 327 equipment images. Sources: Wikimedia Commons + Openverse (CC/PD/BY/BY-SA,
  * attribution in pageUrl/license/author) and Pexels (free commercial use, no
  * attribution required; credited anyway). Each verified relevant on review.
  * Items with no suitable photo have none (the board shows a placeholder).
@@ -1912,5 +1912,164 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
       'https://www.pexels.com/photo/a-woman-in-sportswear-exercising-with-suspension-trainer-8436161/',
     license: 'Pexels',
     author: 'Yan Krukau',
+  },
+  'acc-deadlift-socks': {
+    thumbUrl: '/equipment/acc-deadlift-socks.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-of-a-man-lifting-weights-6796979/',
+    license: 'Pexels',
+    author: 'Geancarlo Peruzzolo',
+  },
+  'acc-gym-timer': {
+    thumbUrl: '/equipment/acc-gym-timer.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-close-up-shot-of-a-boxing-timer-9944852/',
+    license: 'Pexels',
+    author: 'KoolShooters',
+  },
+  'acc-lifting-chains': {
+    thumbUrl: '/equipment/acc-lifting-chains.jpg',
+    pageUrl: 'https://www.pexels.com/photo/equipment-in-gym-16513596/',
+    license: 'Pexels',
+    author: 'Anete Lusina',
+  },
+  'acc-liquid-chalk': {
+    thumbUrl: '/equipment/acc-liquid-chalk.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-person-holding-a-bottle-4793252/',
+    license: 'Pexels',
+    author: 'Anete Lusina',
+  },
+  'aqua-fins': {
+    thumbUrl: '/equipment/aqua-fins.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-shot-of-swimfins-near-a-swimming-pool-8028423/',
+    license: 'Pexels',
+    author: 'SHVETS production',
+  },
+  'band-clip-set': {
+    thumbUrl: '/equipment/band-clip-set.jpg',
+    pageUrl: 'https://www.pexels.com/photo/a-man-using-a-resistance-band-6667512/',
+    license: 'Pexels',
+    author: 'ricky nugraha',
+  },
+  'band-pull-apart': {
+    thumbUrl: '/equipment/band-pull-apart.jpg',
+    pageUrl: 'https://www.pexels.com/photo/people-working-out-pulling-the-resistance-band-6339604/',
+    license: 'Pexels',
+    author: 'Pavel Danilyuk',
+  },
+  'box-headgear': {
+    thumbUrl: '/equipment/box-headgear.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/action-packed-boxing-match-with-protective-gear-31403621/',
+    license: 'Pexels',
+    author: "César O'neill",
+  },
+  'cable-crossover-half': {
+    thumbUrl: '/equipment/cable-crossover-half.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-man-using-the-cable-crossover-machine-at-the-gym-5327505/',
+    license: 'Pexels',
+    author: 'Tima Miroshnichenko',
+  },
+  'cardio-walking-pad': {
+    thumbUrl: '/equipment/cardio-walking-pad.jpg',
+    pageUrl: 'https://www.pexels.com/photo/active-person-walking-on-treadmill-in-gym-31012865/',
+    license: 'Pexels',
+    author: 'Marcia Salido',
+  },
+  'cond-starting-blocks': {
+    thumbUrl: '/equipment/cond-starting-blocks.jpg',
+    pageUrl: 'https://www.pexels.com/photo/starting-blocks-track-14585535/',
+    license: 'Pexels',
+    author: 'Gonzalo Álvarez Balcazar',
+  },
+  'rack-dip-attach': {
+    thumbUrl: '/equipment/rack-dip-attach.jpg',
+    pageUrl: 'https://www.pexels.com/photo/strong-african-man-exercising-outdoors-35745666/',
+    license: 'Pexels',
+    author: 'Mukhtar Shuaib Mukhtar',
+  },
+  'rack-pullup-attach': {
+    thumbUrl: '/equipment/rack-pullup-attach.jpg',
+    pageUrl: 'https://www.pexels.com/photo/close-up-view-of-a-person-doing-pull-ups-7672109/',
+    license: 'Pexels',
+    author: 'cottonbro studio',
+  },
+  'rec-acupressure-mat': {
+    thumbUrl: '/equipment/rec-acupressure-mat.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/close-up-of-a-person-next-to-medical-massage-mat-4482958/',
+    license: 'Pexels',
+    author: 'Anna Shvets',
+  },
+  'rec-cupping': {
+    thumbUrl: '/equipment/rec-cupping.jpg',
+    pageUrl: 'https://www.pexels.com/photo/cups-for-cupping-therapy-in-box-8313420/',
+    license: 'Pexels',
+    author: 'RDNE Stock project',
+  },
+  'rec-ems-tens': {
+    thumbUrl: '/equipment/rec-ems-tens.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/physiotherapy-session-with-electrotherapy-pads-30483032/',
+    license: 'Pexels',
+    author: 'Cansu Hangül',
+  },
+  'rec-lacrosse-ball': {
+    thumbUrl: '/equipment/rec-lacrosse-ball.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/crop-woman-massaging-sore-neck-and-muscle-stretching-4498299/',
+    license: 'Pexels',
+    author: 'Kaboompics.com',
+  },
+  'rec-pilates-ring': {
+    thumbUrl: '/equipment/rec-pilates-ring.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/woman-in-black-sports-bra-holding-a-magic-circle-8769172/',
+    license: 'Pexels',
+    author: 'Gustavo Fring',
+  },
+  'rec-slackline': {
+    thumbUrl: '/equipment/rec-slackline.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-in-t-shirt-walking-on-a-rope-4934328/',
+    license: 'Pexels',
+    author: 'Antonio Friedemann',
+  },
+  'rec-stretch-table': {
+    thumbUrl: '/equipment/rec-stretch-table.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/a-woman-sitting-on-the-therapy-bed-while-stretching-her-arm-5793798/',
+    license: 'Pexels',
+    author: 'Yan Krukau',
+  },
+  'rec-therapy-putty': {
+    thumbUrl: '/equipment/rec-therapy-putty.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/hands-manipulating-putty-for-occupational-therapy-30483024/',
+    license: 'Pexels',
+    author: 'Cansu Hangül',
+  },
+  'sus-doorway-bar': {
+    thumbUrl: '/equipment/sus-doorway-bar.jpg',
+    pageUrl: 'https://www.pexels.com/photo/man-pulling-up-himself-at-gym-14598856/',
+    license: 'Pexels',
+    author: 'Viridiana Rivera',
+  },
+  'test-hand-dynamometer': {
+    thumbUrl: '/equipment/test-hand-dynamometer.jpg',
+    pageUrl: 'https://www.pexels.com/photo/two-black-and-blue-hand-grips-45058/',
+    license: 'Pexels',
+    author: 'Dom J',
+  },
+  'test-skinfold': {
+    thumbUrl: '/equipment/test-skinfold.jpg',
+    pageUrl: 'https://www.pexels.com/photo/woman-in-black-and-white-bikini-7558818/',
+    license: 'Pexels',
+    author: 'Daniel Dan',
+  },
+  'test-metabolic-cart': {
+    thumbUrl: '/equipment/test-metabolic-cart.jpg',
+    pageUrl:
+      'https://www.pexels.com/photo/athletes-wearing-an-athletic-performance-analyzer-masks-and-training-20523368/',
+    license: 'Pexels',
+    author: 'VO2 Master',
   },
 };
