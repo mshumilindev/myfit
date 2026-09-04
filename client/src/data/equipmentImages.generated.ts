@@ -1,9 +1,8 @@
 /**
  * AUTO-GENERATED — do not edit by hand.
- * 118 equipment images from Wikimedia Commons (CC/PD only), each verified
- * relevant (Commons file title matches the item) or hand-confirmed. Stored as
- * repo-local files under public/equipment/. Items without a clean free photo
- * intentionally have no image (the board shows a placeholder).
+ * 129 equipment images (Wikimedia Commons + Openverse, CC/PD/BY/BY-SA only),
+ * each verified relevant. Items with no clean free photo have no image (the
+ * board shows a placeholder). Attribution: pageUrl/license/author per image.
  */
 import type { EquipmentImage } from './equipmentCatalog';
 
@@ -122,6 +121,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
   },
+  'barbell-deadlift': {
+    thumbUrl: '/equipment/barbell-deadlift.jpg',
+    pageUrl: 'https://www.flickr.com/photos/121183998@N08/26502758192',
+    license: 'CC BY 2.0',
+    author: 'personaltrainertoronto',
+  },
   'barbell-fixed': {
     thumbUrl: '/equipment/barbell-fixed.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Trap_bar_jump_exercise_2_of_2.jpg',
@@ -225,6 +230,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Kristen Wong',
   },
+  'box-heavy-bag': {
+    thumbUrl: '/equipment/box-heavy-bag.jpg',
+    pageUrl: 'https://www.flickr.com/photos/194424926@N05/54372304201',
+    license: 'CC BY-SA 2.0',
+    author: 'PattayaPatrol',
+  },
   'box-reflex-bag': {
     thumbUrl: '/equipment/box-reflex-bag.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Goalkeeper_reflex_ball.jpg',
@@ -278,6 +289,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'Federal Bureau of Investigation',
   },
+  'cardio-rebounder': {
+    thumbUrl: '/equipment/cardio-rebounder.jpg',
+    pageUrl: 'https://www.flickr.com/photos/141421460@N05/27943029612',
+    license: 'CC BY 2.0',
+    author: 'http://trampolinestar.com/',
+  },
   'cardio-rower': {
     thumbUrl: '/equipment/cardio-rower.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Ergs_in_the_College_Gym.jpg',
@@ -293,6 +310,13 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
   },
   'cardio-spin-bike': {
     thumbUrl: '/equipment/cardio-spin-bike.jpg',
+    pageUrl:
+      'https://commons.wikimedia.org/wiki/File:US_Navy_101024-N-7103C-079_Lt._j.g._Neal_Soladay,_left,_from_Columbia,_S.C.,_finishes_his_20-minute_cycle_on_an_exercise_bicycle_during_an_indoor_t.jpg',
+    license: 'Public domain',
+    author: 'U.S. Navy photo by Mass Communication Specialist 3rd Class David A. Cox',
+  },
+  'cardio-treadmill': {
+    thumbUrl: '/equipment/cardio-treadmill.jpg',
     pageUrl:
       'https://commons.wikimedia.org/wiki/File:US_Navy_101024-N-7103C-079_Lt._j.g._Neal_Soladay,_left,_from_Columbia,_S.C.,_finishes_his_20-minute_cycle_on_an_exercise_bicycle_during_an_indoor_t.jpg',
     license: 'Public domain',
@@ -355,6 +379,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'Public domain',
     author: 'U.S. Army photo by Staff Sgt. Fred Brown',
   },
+  'cond-slam-ball': {
+    thumbUrl: '/equipment/cond-slam-ball.jpg',
+    pageUrl: 'https://www.flickr.com/photos/121183998@N08/42954041705',
+    license: 'CC BY 2.0',
+    author: 'personaltrainertoronto',
+  },
   'cond-sled': {
     thumbUrl: '/equipment/cond-sled.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Tractor_pulling_sled.jpg',
@@ -379,6 +409,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Yoke_Race.JPG',
     license: 'Public domain',
     author: 'Artur Andrzej',
+  },
+  'dip-station': {
+    thumbUrl: '/equipment/dip-station.jpg',
+    pageUrl: 'https://www.flickr.com/photos/29442760@N00/29109822516',
+    license: 'CC BY-SA 2.0',
+    author: 'Indrid__Cold',
   },
   'dumbbell-adjustable': {
     thumbUrl: '/equipment/dumbbell-adjustable.jpg',
@@ -475,6 +511,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Nenad Stojkovic',
   },
+  'm-biceps-curl': {
+    thumbUrl: '/equipment/m-biceps-curl.jpg',
+    pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=179972391',
+    license: 'CC BY-SA 4.0',
+    author: 'Aliva Sahoo',
+  },
   'm-calf-seated': {
     thumbUrl: '/equipment/m-calf-seated.jpg',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:SeatedCalfRaiseMachineExercise.JPG',
@@ -487,6 +529,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
       'https://commons.wikimedia.org/wiki/File:Outdoor_exercise_machine_at_Bathpool_Park_-_panoramio.jpg',
     license: 'CC BY 3.0',
     author: 'Andrew Woodvine (awo…',
+  },
+  'm-converging-press': {
+    thumbUrl: '/equipment/m-converging-press.jpg',
+    pageUrl: 'https://www.flickr.com/photos/127311295@N06/37051140632',
+    license: 'CC BY-SA 2.0',
+    author: 'haswell.fitness Equipment from China',
   },
   'm-digital-trainer': {
     thumbUrl: '/equipment/m-digital-trainer.jpg',
@@ -548,6 +596,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY-SA 4.0',
     author: 'Aliva Sahoo',
   },
+  'm-pec-deck': {
+    thumbUrl: '/equipment/m-pec-deck.jpg',
+    pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=158071855',
+    license: 'CC BY 3.0',
+    author: "Sam's Fitness - Gym Equipment",
+  },
   'm-seated-row': {
     thumbUrl: '/equipment/m-seated-row.jpg',
     pageUrl:
@@ -557,10 +611,9 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
   },
   'm-shoulder-press': {
     thumbUrl: '/equipment/m-shoulder-press.jpg',
-    pageUrl:
-      'https://commons.wikimedia.org/wiki/File:Strong_woman_performs_shoulder_press_exercise_in_fitness_gym_during_afternoon_workout_session.jpg',
-    license: 'CC BY 2.0',
-    author: 'Shixart1985',
+    pageUrl: 'https://commons.wikimedia.org/w/index.php?curid=179972401',
+    license: 'CC BY-SA 4.0',
+    author: 'Aliva Sahoo',
   },
   'mob-foot-roller': {
     thumbUrl: '/equipment/mob-foot-roller.jpg',
@@ -715,6 +768,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     license: 'CC BY 2.0',
     author: 'Loren Kerns',
   },
+  'smith-machine': {
+    thumbUrl: '/equipment/smith-machine.jpg',
+    pageUrl: 'https://www.rawpixel.com/image/6037808/photo-image-public-domain-free-sport',
+    license: 'CC0 1.0',
+    author: '',
+  },
   'spd-parachute': {
     thumbUrl: '/equipment/spd-parachute.png',
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Speed_Dreams_%2736GP_front.png',
@@ -760,6 +819,12 @@ export const EQUIPMENT_IMAGES: Record<string, EquipmentImage> = {
     pageUrl: 'https://commons.wikimedia.org/wiki/File:Suspension_training_equipment.png',
     license: 'CC BY-SA 4.0',
     author: 'Alejandro D. Nava B.',
+  },
+  'test-force-plate': {
+    thumbUrl: '/equipment/test-force-plate.jpg',
+    pageUrl: 'https://www.flickr.com/photos/9998127@N06/12811284765',
+    license: 'CC BY-SA 2.0',
+    author: 'wbaiv',
   },
   'yoga-wheel': {
     thumbUrl: '/equipment/yoga-wheel.jpg',
