@@ -84,6 +84,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // Sends already-open pages to the new build (public/sw-refresh.js).
         importScripts: ['/sw-refresh.js'],
         globIgnores: ['sw-refresh.js'],
