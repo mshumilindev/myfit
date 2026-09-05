@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react';
 import type { Gym } from '../types';
 import { setGymEquipment, useStore } from '../store';
 import { useT } from '../i18n';
-import { Icon } from '../ui';
+import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { tokenMatch } from '../search';
 import { enrichedCatalog, type EquipCategory, type EquipmentItem } from '../data/equipmentCatalog';
 import { localizedEquipName, localizedEquipInfo, equipCategoryLabel } from '../data/equipmentI18n';
@@ -70,11 +70,16 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
   const [picked, setPicked] = useState<Set<string>>(() => new Set(gym.equipmentItems ?? []));
   const [mfilter, setMfilter] = useState<Set<MuscleGroup>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [manage, setManage] = useState(false);
+  const [confirm, setConfirm] = useState<{ kind: 'one'; id: string } | { kind: 'all' } | null>(
+    null,
+  );
 
   // Images that 404 at load time fall back to the placeholder.
   const [broken, setBroken] = useState<Set<string>>(new Set());
 
   const catalog = useMemo(() => enrichedCatalog(), []);
+  const byId = useMemo(() => new Map(catalog.map((e) => [e.id, e])), [catalog]);
 
   const filterMuscles = useMemo(() => {
     const present = new Set<MuscleGroup>();
@@ -131,6 +136,38 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
     setGymEquipment(gym.id, [...next]);
   };
 
+  // Remove one picked item (from the "selected" sheet) — reversible via snackbar.
+  const removeOne = (id: string) => {
+    const it = byId.get(id);
+    const prev = new Set(picked);
+    const next = new Set(picked);
+    next.delete(id);
+    setPicked(next);
+    setGymEquipment(gym.id, [...next]);
+    if (next.size === 0) setManage(false);
+    shell.snack({
+      text: t.eqRemovedSnack(it ? localizedEquipName(it, locale) : id),
+      onUndo: () => {
+        setPicked(prev);
+        setGymEquipment(gym.id, [...prev]);
+      },
+    });
+  };
+
+  const clearAll = () => {
+    const prev = new Set(picked);
+    setPicked(new Set());
+    setGymEquipment(gym.id, []);
+    setManage(false);
+    shell.snack({
+      text: t.eqClearedSnack(prev.size),
+      onUndo: () => {
+        setPicked(prev);
+        setGymEquipment(gym.id, [...prev]);
+      },
+    });
+  };
+
   const toggleCat = (c: EquipCategory) =>
     setOpen((prev) => {
       const next = new Set(prev);
@@ -162,7 +199,15 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
         <span className="label">
           <Icon name="scales" /> {t.inventoryLabel}
         </span>
-        {total > 0 && <span className="eq-count-badge">{total}</span>}
+        {total > 0 && (
+          <button
+            className="eq-count-badge eq-count-btn"
+            onClick={() => setManage(true)}
+            aria-label={t.eqSelectedTitle}
+          >
+            {total}
+          </button>
+        )}
       </div>
       <div className="detail-muted eq-hint">{t.inventoryNote}</div>
 
@@ -298,6 +343,86 @@ export function EquipmentBoard({ gym, shell }: { gym: Gym; shell: Shell }) {
             );
           })}
         </div>
+      )}
+
+      {manage && (
+        <Sheet onClose={() => setManage(false)} className="eq-manage">
+          <div className="ep-title">
+            {t.eqSelectedTitle} <span className="eq-manage-count">{total}</span>
+          </div>
+          <div className="eq-manage-list">
+            {[...picked]
+              .map((id) => byId.get(id))
+              .filter((x): x is EquipmentItem => !!x)
+              .sort((a, b) =>
+                localizedEquipName(a, locale).localeCompare(localizedEquipName(b, locale)),
+              )
+              .map((it) => (
+                <div className="eq-manage-row" key={it.id}>
+                  <span className="eq-manage-thumb">
+                    {it.image && !broken.has(it.id) ? (
+                      <img
+                        src={it.image.thumbUrl}
+                        alt=""
+                        loading="lazy"
+                        onError={() => setBroken((prev) => new Set(prev).add(it.id))}
+                      />
+                    ) : (
+                      <span className="eq-thumb-ph" aria-hidden />
+                    )}
+                  </span>
+                  <span className="eq-manage-name">{localizedEquipName(it, locale)}</span>
+                  <button
+                    className="eq-manage-x"
+                    onClick={() => setConfirm({ kind: 'one', id: it.id })}
+                    aria-label={t.eqRemove}
+                  >
+                    <Icon name="x" weight="bold" />
+                  </button>
+                </div>
+              ))}
+          </div>
+          <button
+            className="danger-outline eq-clear-all"
+            onClick={() => setConfirm({ kind: 'all' })}
+          >
+            <Icon name="trash" /> {t.eqClearAll}
+          </button>
+        </Sheet>
+      )}
+
+      {confirm?.kind === 'one' &&
+        (() => {
+          const it = byId.get(confirm.id);
+          return (
+            <ConfirmDialog
+              title={t.eqRemoveOneTitle}
+              body={t.eqRemoveOneBody(it ? localizedEquipName(it, locale) : confirm.id)}
+              confirmLabel={t.eqRemove}
+              cancelLabel={t.cancel}
+              danger
+              onConfirm={() => {
+                removeOne(confirm.id);
+                setConfirm(null);
+              }}
+              onCancel={() => setConfirm(null)}
+            />
+          );
+        })()}
+
+      {confirm?.kind === 'all' && (
+        <ConfirmDialog
+          title={t.eqClearAllTitle}
+          body={t.eqClearAllBody(total)}
+          confirmLabel={t.eqClearAll}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            clearAll();
+            setConfirm(null);
+          }}
+          onCancel={() => setConfirm(null)}
+        />
       )}
     </div>
   );

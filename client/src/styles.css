@@ -26792,3 +26792,116 @@ button.badge {
   line-height: 1;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
+
+/* Gym inventory — "selected inventory" management (view / remove one / clear all) */
+.eq-board .eq-count-btn {
+  border: none;
+  cursor: pointer;
+  gap: 4px;
+}
+.eq-board .eq-count-btn::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-1px, -1px);
+  opacity: 0.7;
+}
+.eq-manage .ep-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.eq-manage .eq-manage-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-300);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.eq-manage .eq-manage-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 52vh;
+  overflow-y: auto;
+  margin: 0 -4px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.eq-manage .eq-manage-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px;
+  border-top: 1px solid var(--color-divider);
+}
+.eq-manage .eq-manage-row:first-child {
+  border-top: none;
+}
+.eq-manage .eq-manage-thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+}
+.eq-manage .eq-manage-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.eq-manage .eq-manage-thumb .eq-thumb-ph {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.eq-manage .eq-manage-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+.eq-manage .eq-manage-x {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-400);
+  cursor: pointer;
+}
+.eq-manage .eq-manage-x:hover {
+  color: var(--color-danger-text, #e88);
+}
+.eq-manage .eq-clear-all {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.eq-manage .eq-clear-all i {
+  font-size: 16px;
+}
