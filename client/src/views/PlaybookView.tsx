@@ -132,6 +132,7 @@ export function PlaybookView({
                           count={c.sets}
                           tone={c.primary ? 'primary' : 'secondary'}
                           onClick={openMuscle}
+                          detail
                         />
                       ))}
                     </div>

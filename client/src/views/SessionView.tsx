@@ -1691,6 +1691,7 @@ export function SessionView(props: {
                       count={x.sets}
                       tone={x.primary ? 'primary' : 'secondary'}
                       onClick={openMuscleHistory}
+                      detail
                     />
                   ))}
                 </div>

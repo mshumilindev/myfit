@@ -66,6 +66,7 @@ export function ExerciseHistoryView({
                       tone="primary"
                       size="lg"
                       onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
+                      detail
                     />
                   )}
                   {info?.secondary.map((m) => (
@@ -75,6 +76,7 @@ export function ExerciseHistoryView({
                       tone="secondary"
                       size="lg"
                       onClick={(muscle) => shell.openOverlay({ screen: 'muscle-history', muscle })}
+                      detail
                     />
                   ))}
                   {needs.map((id) => (

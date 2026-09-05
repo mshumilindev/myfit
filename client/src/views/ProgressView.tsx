@@ -708,6 +708,7 @@ export function ProgressView({
                       tone="primary"
                       size="lg"
                       onClick={openMuscleHistory}
+                      detail
                     />
                   )}
                   {info?.secondary.map((m) => (
@@ -717,6 +718,7 @@ export function ProgressView({
                       tone="secondary"
                       size="lg"
                       onClick={openMuscleHistory}
+                      detail
                     />
                   ))}
                   {needs.map((id) => (

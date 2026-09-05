@@ -26905,3 +26905,26 @@ button.badge {
 .eq-manage .eq-clear-all i {
   font-size: 16px;
 }
+
+/* Enlarged single-muscle drawer (tap any muscle label) */
+.muscle-info .mi-name {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.muscle-info .mi-fig {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 6px 0 14px;
+}
+.muscle-info .mi-fig .bodymap {
+  max-width: 320px;
+}
+.muscle-info .mi-action {
+  width: 100%;
+  min-height: 46px;
+  font-size: 14px;
+  font-weight: 600;
+}

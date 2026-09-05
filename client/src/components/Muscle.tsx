@@ -993,46 +993,129 @@ export function MuscleBodyFigure({
 
 /** Graphite muscle chip: silhouette + label (EQ-1). `lg` is the history
  * header size (EQ-3): 11 px text, 9×15 mark, primary label near-white. */
+/**
+ * Enlarged single-muscle drawer (opened by tapping a muscle label anywhere): a
+ * big front+back figure so the drawn region is readable, the muscle name, and a
+ * button carrying whatever action the label had (e.g. open its history).
+ */
+function MuscleInfoDrawer({
+  muscle,
+  tone = 'primary',
+  actionLabel,
+  onAction,
+  onClose,
+}: {
+  muscle: MuscleGroup;
+  tone?: Tone;
+  actionLabel?: string;
+  onAction?: () => void;
+  onClose: () => void;
+}) {
+  if (muscle === 'cardio') return null;
+  return (
+    <Sheet onClose={onClose} className="muscle-info">
+      <div className="mi-name">{strings().muscleGroups[muscle]}</div>
+      <div className="mi-fig">
+        <MuscleFigure primary={[muscle]} view="both" tone={tone} width="100%" />
+      </div>
+      {onAction && actionLabel && (
+        <button
+          className="btn btn-primary mi-action"
+          onClick={() => {
+            onAction();
+            onClose();
+          }}
+        >
+          {actionLabel}
+        </button>
+      )}
+    </Sheet>
+  );
+}
+
+/**
+ * Shared click behaviour for muscle chips. With `detail`, a tap opens the
+ * enlarged MuscleInfoDrawer whose action button runs the label's onClick;
+ * without it (e.g. filter toggles) the onClick fires directly as before.
+ */
+function useMuscleChipTap(
+  muscle: MuscleGroup,
+  tone: Tone,
+  onClick: ((m: MuscleGroup) => void) | undefined,
+  detail: boolean,
+): { fire: () => void; node: ReactNode } {
+  const [open, setOpen] = useState(false);
+  const fire = () => {
+    if (detail && onClick) setOpen(true);
+    else onClick?.(muscle);
+  };
+  const node =
+    open && muscle !== 'cardio'
+      ? createPortal(
+          <div onClick={(e) => e.stopPropagation()}>
+            <MuscleInfoDrawer
+              muscle={muscle}
+              tone={tone}
+              actionLabel={
+                onClick ? strings().muscleHistoryTitle(strings().muscleGroups[muscle]) : undefined
+              }
+              onAction={onClick ? () => onClick(muscle) : undefined}
+              onClose={() => setOpen(false)}
+            />
+          </div>,
+          document.body,
+        )
+      : null;
+  return { fire, node };
+}
+
 export function MuscleChip({
   muscle,
   tone = 'primary',
   size = 'sm',
   onClick,
+  detail = false,
 }: {
   muscle: MuscleGroup;
   tone?: Tone;
   size?: 'sm' | 'lg';
   onClick?: (muscle: MuscleGroup) => void;
+  /** Tap opens the enlarged muscle drawer (with the onClick as its button). */
+  detail?: boolean;
 }) {
+  const { fire, node } = useMuscleChipTap(muscle, tone, onClick, detail);
   if (muscle === 'cardio') return null;
   const interactive = !!onClick;
   return (
-    <span
-      className={`mchip mchip-fig${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onClick={
-        interactive
-          ? (event) => {
-              event.stopPropagation();
-              onClick(muscle);
-            }
-          : undefined
-      }
-      onKeyDown={
-        interactive
-          ? (event) => {
-              if (event.key !== 'Enter' && event.key !== ' ') return;
-              event.preventDefault();
-              event.stopPropagation();
-              onClick(muscle);
-            }
-          : undefined
-      }
-    >
-      <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
-      {strings().muscleGroups[muscle]}
-    </span>
+    <>
+      <span
+        className={`mchip mchip-fig${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}
+        role={interactive ? 'button' : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        onClick={
+          interactive
+            ? (event) => {
+                event.stopPropagation();
+                fire();
+              }
+            : undefined
+        }
+        onKeyDown={
+          interactive
+            ? (event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                event.stopPropagation();
+                fire();
+              }
+            : undefined
+        }
+      >
+        <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
+        {strings().muscleGroups[muscle]}
+      </span>
+      {node}
+    </>
   );
 }
 
@@ -1234,6 +1317,7 @@ export function MuscleRow({
               muscle={e.muscle}
               tone={e.primary ? 'primary' : 'secondary'}
               onClick={onOpen}
+              detail
             />
           </span>
         ))}
@@ -1308,43 +1392,50 @@ export function MuscleSetChip({
   count,
   tone = 'primary',
   onClick,
+  detail = false,
 }: {
   muscle: MuscleGroup;
   count?: number;
   /** brass when the muscle was a direct (primary) target, grey when secondary-only. */
   tone?: 'primary' | 'secondary';
   onClick?: (muscle: MuscleGroup) => void;
+  /** Tap opens the enlarged muscle drawer (with the onClick as its button). */
+  detail?: boolean;
 }) {
+  const { fire, node } = useMuscleChipTap(muscle, tone, onClick, detail);
   if (muscle === 'cardio') return null;
   const interactive = !!onClick;
   return (
-    <span
-      className={`mworked-chip mworked-chip-fig${tone === 'secondary' ? ' secondary' : ''}`}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onClick={
-        interactive
-          ? (event) => {
-              event.stopPropagation();
-              onClick(muscle);
-            }
-          : undefined
-      }
-      onKeyDown={
-        interactive
-          ? (event) => {
-              if (event.key !== 'Enter' && event.key !== ' ') return;
-              event.preventDefault();
-              event.stopPropagation();
-              onClick(muscle);
-            }
-          : undefined
-      }
-    >
-      <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
-      <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
-      {count !== undefined && <span className="mworked-count">{fmtSetCount(count)}</span>}
-    </span>
+    <>
+      <span
+        className={`mworked-chip mworked-chip-fig${tone === 'secondary' ? ' secondary' : ''}`}
+        role={interactive ? 'button' : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        onClick={
+          interactive
+            ? (event) => {
+                event.stopPropagation();
+                fire();
+              }
+            : undefined
+        }
+        onKeyDown={
+          interactive
+            ? (event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                event.stopPropagation();
+                fire();
+              }
+            : undefined
+        }
+      >
+        <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
+        <span className="mworked-name">{strings().muscleGroups[muscle]}</span>
+        {count !== undefined && <span className="mworked-count">{fmtSetCount(count)}</span>}
+      </span>
+      {node}
+    </>
   );
 }
 
