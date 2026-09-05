@@ -73,6 +73,7 @@ const REST_KEY = 'spotter.restPeriods';
 const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
+const EX_SIDES_KEY = 'spotter.exerciseSides';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
@@ -109,6 +110,7 @@ export interface StoreState {
   /** Per-exercise load-type override (Load-entry C). Absent = derive from the
    *  exercise (equipment + name). Local only. */
   exerciseLoadTypes: Record<string, LoadType>;
+  exerciseSides: Record<string, 'one' | 'both'>;
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Goals: physique target, block focus, long-term goals (My Fit). */
@@ -139,6 +141,7 @@ let state: StoreState = {
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
+  exerciseSides: load<Record<string, 'one' | 'both'>>(EX_SIDES_KEY, {}),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   queue: [],
@@ -168,6 +171,7 @@ function persist(): void {
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
     localStorage.setItem(EX_LOAD_KEY, JSON.stringify(state.exerciseLoadTypes));
+    localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
     localStorage.setItem(GOALS_KEY, JSON.stringify(state.goals));
   } catch {
@@ -242,6 +246,10 @@ const TWO_SIDED = new Set(PER_SIDE.twoSided);
 const ONE_SIDED = new Set(PER_SIDE.oneSided);
 
 export function perHandFactor(ex: Pick<Exercise, 'name' | 'equipment'>): number {
+  // An explicit per-exercise Sides choice is the single source of truth and
+  // replaces the heuristic below — so it never double-counts with the auto ×2.
+  const sides = sidesFor(ex.name);
+  if (sides) return sides === 'one' ? 2 : 1;
   const name = ex.name;
   const canon = canonicalExerciseName(name).toLowerCase();
   if (ONE_SIDED.has(canon) || ONE_SIDED.has(name.trim().toLowerCase())) return 1;
@@ -1504,6 +1512,35 @@ export function setExerciseLoadType(name: string, type: LoadType | null): void {
   else next[key] = type;
   setState({ exerciseLoadTypes: next });
 }
+
+// --- Per-exercise sides / laterality (F4) ----------------------------------
+/** Explicit "log both together" vs "log one side (counts ×2)" choice, or null
+ *  when the user hasn't pinned one (the perHandFactor heuristic then decides). */
+export function sidesFor(name: string): 'one' | 'both' | null {
+  return (state.exerciseSides ?? {})[name.trim().toLowerCase()] ?? null;
+}
+/** Pin the sides choice for a lift; null restores the derived default. */
+export function setExerciseSides(name: string, sides: 'one' | 'both' | null): void {
+  const key = name.trim().toLowerCase();
+  const next = { ...(state.exerciseSides ?? {}) };
+  if (sides === null) delete next[key];
+  else next[key] = sides;
+  setState({ exerciseSides: next });
+}
+/** Whether the Sides control makes sense for a lift — dumbbell / cable /
+ *  kettlebell, single-limb machines, and one-arm/one-leg moves. Hidden for
+ *  inherently bilateral lifts (a barbell squat). */
+export function sidesEligible(ex: Pick<Exercise, 'name' | 'equipment'>): boolean {
+  const eq = equipmentFor(ex);
+  if (eq.includes('dumbbell') || eq.includes('cable') || eq.includes('kettlebell')) return true;
+  if (eq.includes('machine')) {
+    const n = `${ex.name} ${canonicalExerciseName(ex.name)}`.toLowerCase();
+    if (ONE_ARM_NAME.test(n) || /\bleg\b|seated|lying/.test(n)) return true;
+  }
+  const name = ex.name.trim().toLowerCase();
+  const canon = canonicalExerciseName(ex.name).toLowerCase();
+  return ONE_ARM_NAME.test(name) || ONE_ARM_NAME.test(canon);
+}
 /** The band library for a gym, falling back to sensible defaults. */
 export function bandLibraryFor(gym: Gym | null | undefined): readonly BandRung[] {
   return gym?.bandLibrary && gym.bandLibrary.length > 0 ? gym.bandLibrary : BAND_DEFAULTS;
@@ -2492,6 +2529,7 @@ export function resetLocalData(): void {
     weightUnit: 'kg',
     exerciseUnits: {},
     exerciseLoadTypes: {},
+    exerciseSides: {},
     bodyMetrics: EMPTY_BODY,
     goals: EMPTY_GOALS,
     queue: [],

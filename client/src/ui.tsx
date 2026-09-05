@@ -24,6 +24,7 @@ import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
 import { ArrowUpRight } from '@phosphor-icons/react/ArrowUpRight';
 import { ArrowsClockwise } from '@phosphor-icons/react/ArrowsClockwise';
 import { ArrowsLeftRight } from '@phosphor-icons/react/ArrowsLeftRight';
+import { ArrowsOutLineHorizontal } from '@phosphor-icons/react/ArrowsOutLineHorizontal';
 import { Archive } from '@phosphor-icons/react/Archive';
 import { Barbell } from '@phosphor-icons/react/Barbell';
 import { Bell } from '@phosphor-icons/react/Bell';
@@ -153,6 +154,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrow-up-right': ArrowUpRight,
   'arrows-clockwise': ArrowsClockwise,
   swap: ArrowsLeftRight,
+  'arrows-out-line-horizontal': ArrowsOutLineHorizontal,
   archive: Archive,
   barbell: Barbell,
   bell: Bell,

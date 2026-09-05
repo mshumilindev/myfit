@@ -27,6 +27,8 @@ import {
   restBeforeSetInWorkout,
   knownExercises,
   perHandFactor,
+  sidesEligible,
+  setExerciseSides,
   muscleSetsInWorkout,
   muscleWorkSorted,
   nextSupersetLetter,
@@ -872,7 +874,8 @@ export function SessionView(props: {
               <Icon name="barbell" />
             </button>
             {perHandFactor(ex) === 2 && (
-              <span className="echip" title={t.perHandNote}>
+              <span className="x2-chip" title={t.perHandNote}>
+                <Icon name="arrows-out-line-horizontal" />
                 {t.perHandChip}
               </span>
             )}
@@ -3440,6 +3443,14 @@ function SetEditorSheet(props: {
   // labelled in; storage stays canonical kg.
   const unitEligible =
     !timed && (isBarbell || equip.includes('dumbbell') || equip.includes('machine'));
+  const sidesOk = sidesEligible(props.exercise);
+  const [sides, setSidesState] = useState<'one' | 'both'>(() =>
+    perHandFactor(props.exercise) === 2 ? 'one' : 'both',
+  );
+  const pickSides = (v: 'one' | 'both') => {
+    setSidesState(v);
+    setExerciseSides(props.exercise.name, v);
+  };
   const [unit, setUnitState] = useState<DisplayUnit>(() => exerciseUnit(props.exercise.name));
   const setUnit = (u: DisplayUnit) => {
     setUnitState(u);
@@ -3847,6 +3858,34 @@ function SetEditorSheet(props: {
               setWeight,
               focused === 'reps' || focused === 'weight' ? focused : null,
             )
+          )}
+          {sidesOk && !isAssist && !isBand && (
+            <div className="sides-block">
+              <div className="toggle-row sides-row">
+                <Icon name="arrows-out-line-horizontal" />
+                <span className="lab">{t.sidesLabel}</span>
+                <div className="seg2 sides-seg">
+                  <button
+                    className={sides === 'both' ? 'active' : ''}
+                    onClick={() => pickSides('both')}
+                  >
+                    {t.sidesBoth}
+                  </button>
+                  <button
+                    className={sides === 'one' ? 'active' : ''}
+                    onClick={() => pickSides('one')}
+                  >
+                    {t.sidesOne}
+                  </button>
+                </div>
+              </div>
+              {sides === 'one' && (
+                <div className="sides-note">
+                  <Icon name="info" />
+                  {t.sidesNote}
+                </div>
+              )}
+            </div>
           )}
           {unitEligible && !isAssist && !isBand && !bw && (
             <div className="toggle-row unit-row">
