@@ -59,6 +59,8 @@ export interface Exercise {
   groupId?: string | null;
   /** Order inside the superset group (0 = A1). */
   groupOrder?: number | null;
+  /** Plain superset vs a round-based circuit (F3). */
+  groupKind?: 'superset' | 'circuit' | null;
   /** Muscle groups (design MG-1): one primary, any number of secondaries. */
   primaryMuscle?: string | null;
   secondaryMuscles?: string[];

@@ -90,6 +90,8 @@ import { Fire } from '@phosphor-icons/react/Fire';
 import { FrameCorners } from '@phosphor-icons/react/FrameCorners';
 import { FunnelSimple } from '@phosphor-icons/react/FunnelSimple';
 import { PersonSimple } from '@phosphor-icons/react/PersonSimple';
+import { Person } from '@phosphor-icons/react/Person';
+import { SlidersHorizontal } from '@phosphor-icons/react/SlidersHorizontal';
 import { Plugs } from '@phosphor-icons/react/Plugs';
 import { Robot } from '@phosphor-icons/react/Robot';
 import { Rows } from '@phosphor-icons/react/Rows';
@@ -216,6 +218,8 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'frame-corners': FrameCorners,
   'funnel-simple': FunnelSimple,
   'person-simple': PersonSimple,
+  person: Person,
+  'sliders-horizontal': SlidersHorizontal,
   plugs: Plugs,
   robot: Robot,
   rows: Rows,

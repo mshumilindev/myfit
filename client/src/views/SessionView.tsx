@@ -167,6 +167,7 @@ type SheetState =
   | { kind: 'superset'; exId: string }
   | { kind: 'gym' }
   | { kind: 'musclemap' }
+  | { kind: 'settings' }
   | { kind: 'coach' }
   | null;
 
@@ -322,6 +323,10 @@ export function SessionView(props: {
   const suggestOn = true;
   const workout = store.workouts.find((w) => w.id === props.workoutId);
   const [sheet, setSheet] = useState<SheetState>(null);
+  const [circuit, setCircuit] = useState<{ on: boolean; groupId: string | null }>({
+    on: false,
+    groupId: null,
+  });
   // Live count-up timer for a timed exercise (TIMED-1/2): Start → count-up, Stop → log held time.
   const [timing, setTiming] = useState<{ exId: string; startedAt: number } | null>(null);
   const [dialog, setDialog] = useState<DialogState>(null);
@@ -1681,7 +1686,7 @@ export function SessionView(props: {
                   <span>{props.past ? t.muscleGroupsWorked : t.musclesWorkedLabel}</span>
                   {!muscleMapInPill && !props.past && (
                     <button className="mm-open" onClick={() => setSheet({ kind: 'musclemap' })}>
-                      <Icon name="person-simple" />
+                      <Icon name="person" />
                       {t.muscleMapButton}
                     </button>
                   )}
@@ -2026,7 +2031,7 @@ export function SessionView(props: {
                   className="btn btn-secondary session-map-btn"
                   onClick={() => setSheet({ kind: 'musclemap' })}
                 >
-                  <Icon name="person-simple" />
+                  <Icon name="person" />
                   {t.muscleMapButton}
                 </button>
               )}
@@ -2065,7 +2070,9 @@ export function SessionView(props: {
       </div>
       {live && !workout.autoFinished && !isDesktop && (
         <div className="session-pill-wrap">
-          <div className="session-pill">
+          {/* Three liquid-glass pills: discard isolated left, add dead-centre
+              (pulsing) flanked by settings + muscle map, finish isolated right. */}
+          <div className="glass-pill">
             <button
               className="sp-btn sp-discard"
               onClick={() => setDialog({ kind: 'del-workout' })}
@@ -2074,6 +2081,24 @@ export function SessionView(props: {
             >
               <Icon name="trash" />
             </button>
+          </div>
+          <div className="glass-pill sp-center">
+            <button
+              className="sp-btn sp-settings"
+              onClick={() => setSheet({ kind: 'settings' })}
+              aria-label={t.sessionSettings}
+              title={t.sessionSettings}
+            >
+              <Icon name="sliders-horizontal" />
+            </button>
+            <button
+              className="sp-btn sp-plus plusfab"
+              onClick={() => setSheet({ kind: 'add' })}
+              aria-label={t.addExercise}
+              title={t.addExercise}
+            >
+              <Icon name="plus" weight="bold" />
+            </button>
             {muscleWorkSorted(workout).length > 0 && (
               <button
                 className="sp-btn sp-map"
@@ -2081,13 +2106,11 @@ export function SessionView(props: {
                 aria-label={t.muscleMapButton}
                 title={t.muscleMapButton}
               >
-                <Icon name="person-simple" />
+                <Icon name="person" />
               </button>
             )}
-            <button className="sp-btn sp-add" onClick={() => setSheet({ kind: 'add' })}>
-              <Icon name="plus" weight="bold" />
-              <span>{t.addExercise}</span>
-            </button>
+          </div>
+          <div className="glass-pill">
             <button
               className="sp-btn sp-finish"
               disabled={entries === 0}
@@ -2205,18 +2228,24 @@ export function SessionView(props: {
           gym={gym}
           suggestions={!props.past && workout.exercises.length === 0}
           onPick={(name, kind, meta) => {
-            addExercise(
-              workout.id,
-              name,
-              kind,
-              meta
+            const base = meta
+              ? {
+                  primaryMuscle: meta.primaryMuscle,
+                  secondaryMuscles: meta.secondaryMuscles,
+                  equipment: meta.equipment,
+                }
+              : {};
+            const plan =
+              circuit.on && circuit.groupId
                 ? {
-                    primaryMuscle: meta.primaryMuscle,
-                    secondaryMuscles: meta.secondaryMuscles,
-                    equipment: meta.equipment,
+                    ...base,
+                    groupId: circuit.groupId,
+                    groupKind: 'circuit' as const,
+                    groupOrder: workout.exercises.filter((e) => e.groupId === circuit.groupId)
+                      .length,
                   }
-                : {},
-            );
+                : base;
+            addExercise(workout.id, name, kind, plan);
             // Single-add: one pick adds the exercise and closes the picker.
             // Re-open to add another (same exercise allowed, e.g. circuits).
             setSheet(null);
@@ -2444,6 +2473,29 @@ export function SessionView(props: {
           onOpenMuscle={openMuscleHistory}
           onClose={() => setSheet(null)}
         />
+      )}
+
+      {sheet?.kind === 'settings' && (
+        <Sheet className="session-settings" onClose={() => setSheet(null)}>
+          <div className="sheet-label">{t.sessionSettings}</div>
+          <button
+            className={`ss-circuit${circuit.on ? ' on' : ''}`}
+            onClick={() =>
+              setCircuit((c) =>
+                c.on ? { on: false, groupId: null } : { on: true, groupId: crypto.randomUUID() },
+              )
+            }
+          >
+            <span className="ss-loop">
+              <Icon name="arrows-clockwise" />
+            </span>
+            <span className="ss-circuit-text">
+              <span className="ss-circuit-title">{t.circuitLabel}</span>
+              <span className="ss-circuit-hint">{t.circuitHint}</span>
+            </span>
+            <Switch on={circuit.on} />
+          </button>
+        </Sheet>
       )}
 
       {sheet?.kind === 'coach' && (

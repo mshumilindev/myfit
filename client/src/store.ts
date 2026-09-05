@@ -594,6 +594,7 @@ interface ExercisePlan {
   equipment?: string[];
   groupId?: string | null;
   groupOrder?: number | null;
+  groupKind?: 'superset' | 'circuit' | null;
   primaryMuscle?: string | null;
   secondaryMuscles?: string[];
 }
@@ -869,6 +870,7 @@ export function addExercise(
     equipment: plan.equipment ?? (info?.equipment ? [info.equipment] : []),
     groupId: plan.groupId ?? null,
     groupOrder: plan.groupOrder ?? null,
+    groupKind: plan.groupKind ?? null,
     primaryMuscle: plan.primaryMuscle ?? (info && info.primary !== 'cardio' ? info.primary : null),
     secondaryMuscles: plan.secondaryMuscles ?? (info ? info.secondary : []),
     sets: [],

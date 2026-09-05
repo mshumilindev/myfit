@@ -15522,18 +15522,19 @@ button.exd-media {
     bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 14px);
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 10px;
     padding: 0 20px;
     pointer-events: none;
     z-index: 46;
   }
-  .session-pill {
+  .glass-pill {
     pointer-events: auto;
     position: relative;
     isolation: isolate;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    max-width: 100%;
+    gap: 10px;
     padding: 8px;
     border-radius: 999px;
     background: transparent;
@@ -15542,7 +15543,10 @@ button.exd-media {
       0 20px 46px rgba(0, 0, 0, 0.6),
       0 3px 10px rgba(0, 0, 0, 0.4);
   }
-  .session-pill::before {
+  .glass-pill.sp-center {
+    padding: 8px 14px;
+  }
+  .glass-pill::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -15552,7 +15556,7 @@ button.exd-media {
     backdrop-filter: blur(3px) saturate(1.9) brightness(1.08);
     filter: url(#liquid-glass);
   }
-  .session-pill::after {
+  .glass-pill::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -15564,66 +15568,51 @@ button.exd-media {
       inset 0 -10px 14px -10px rgba(0, 0, 0, 0.65),
       inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
-  .session-pill .sp-btn {
+  .session-pill-wrap .sp-btn {
     border: none;
     cursor: pointer;
+    background: transparent;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-  }
-  .session-pill .sp-discard,
-  .session-pill .sp-finish {
     flex: none;
     width: 46px;
     height: 46px;
     border-radius: 50%;
   }
-  .session-pill .sp-discard {
-    background: rgba(255, 255, 255, 0.06);
+  .session-pill-wrap .sp-discard {
     color: var(--color-danger);
   }
-  .session-pill .sp-discard i {
-    font-size: 19px;
-  }
-  .session-pill .sp-map {
-    flex: none;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--color-accent-200);
-  }
-  .session-pill .sp-map i {
+  .session-pill-wrap .sp-discard i {
     font-size: 20px;
   }
-  .session-pill .sp-finish {
-    background: var(--color-accent);
-    color: #16171a;
+  .session-pill-wrap .sp-settings,
+  .session-pill-wrap .sp-map {
+    color: var(--color-neutral-300);
   }
-  .session-pill .sp-finish i {
+  .session-pill-wrap .sp-settings i {
+    font-size: 18px;
+  }
+  .session-pill-wrap .sp-map i {
     font-size: 21px;
   }
-  .session-pill .sp-finish:disabled {
+  .session-pill-wrap .sp-plus {
+    background: var(--color-accent);
+    color: #1a1305;
+  }
+  .session-pill-wrap .sp-plus i {
+    font-size: 21px;
+  }
+  .session-pill-wrap .sp-finish {
+    color: var(--color-ok);
+  }
+  .session-pill-wrap .sp-finish i {
+    font-size: 20px;
+  }
+  .session-pill-wrap .sp-finish:disabled {
     opacity: 0.4;
     cursor: default;
-  }
-  .session-pill .sp-add {
-    flex: none;
-    gap: 7px;
-    height: 46px;
-    padding: 0 20px;
-    border-radius: 999px;
-    background: rgba(10, 11, 13, 0.5);
-    color: var(--color-text);
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .session-pill .sp-add i {
-    font-size: 16px;
-    color: var(--color-accent);
-  }
-}
+  }}
 
 /* Compact/today hub: Resume as an icon-only button (Change gym is dropped). */
 .live-resume.icon-only {
@@ -26975,4 +26964,87 @@ button.badge {
   white-space: nowrap;
   padding-left: 12px;
   padding-right: 12px;
+}
+
+/* Pulsing gold + in the session dock (design fabPulse / fabBreathe) */
+@keyframes fabPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 162, 79, 0.32), 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(217, 162, 79, 0), 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 162, 79, 0), 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+@keyframes fabBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
+}
+.plusfab {
+  animation: fabPulse 3.6s ease-in-out infinite;
+}
+.plusfab > i {
+  animation: fabBreathe 3.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .plusfab,
+  .plusfab > i {
+    animation: none;
+  }
+}
+
+/* Session settings — Circuit toggle (F3 · CR-01) */
+.session-settings .ss-circuit {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  cursor: pointer;
+  text-align: left;
+}
+.session-settings .ss-circuit.on {
+  background:
+    radial-gradient(120% 100% at 15% 0%, rgba(233, 192, 122, 0.16), transparent 60%),
+    linear-gradient(160deg, #211c13 0%, #191a1d 62%);
+  box-shadow: inset 0 0 0 1px var(--color-accent-600);
+}
+.session-settings .ss-loop {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-600);
+}
+.session-settings .ss-circuit-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.session-settings .ss-circuit-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.session-settings .ss-circuit-hint {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  line-height: 1.4;
 }
