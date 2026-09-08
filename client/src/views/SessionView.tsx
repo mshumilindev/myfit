@@ -1842,7 +1842,7 @@ export function SessionView(props: {
             </div>
           ) : (
             <>
-              {sessionBlocks(workout).map((block) => {
+              {sessionBlocks(workout).map((block, blockIdx, blocks) => {
                 if (block.kind === 'group' && block.group.circuit) {
                   const building = live && circuit.on && circuit.groupId === block.group.groupId;
                   return (
@@ -1851,6 +1851,7 @@ export function SessionView(props: {
                       group={block.group}
                       past={!!props.past}
                       building={building}
+                      isLast={blockIdx === blocks.length - 1}
                       rounds={circuit.rounds}
                       onMuscle={openMuscleHistory}
                       onRun={() => setSheet({ kind: 'circuit-run', groupId: block.group.groupId })}
@@ -2063,6 +2064,30 @@ export function SessionView(props: {
                 }
                 return renderCard(single, null);
               })}
+              {live &&
+                !circuit.on &&
+                sessionBlocks(workout).some((b) => b.kind === 'group' && b.group.circuit) && (
+                  <button
+                    className="btn btn-secondary circuit-new"
+                    onClick={() =>
+                      setCircuit((c) => ({
+                        ...c,
+                        on: true,
+                        groupId: crypto.randomUUID(),
+                      }))
+                    }
+                  >
+                    <Icon name="plus-circle" />
+                    {t.circuitNewCircuit(
+                      String.fromCharCode(
+                        65 +
+                          sessionBlocks(workout).filter(
+                            (b) => b.kind === 'group' && b.group.circuit,
+                          ).length,
+                      ),
+                    )}
+                  </button>
+                )}
               {/* Energy plaque sits under the exercises, matching their width. */}
               {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
               {props.past && workout.exercises.some((e) => e.groupId) && (
@@ -2562,6 +2587,7 @@ export function SessionView(props: {
             <CircuitRunSheet
               group={block.group}
               onLog={(ex, vals) => logNewSet(ex, vals)}
+              onSetRounds={(r) => setCircuitRounds(workout.id, block.group.groupId, r)}
               onMuscle={openMuscleHistory}
               onClose={() => setSheet(null)}
             />
@@ -4145,8 +4171,10 @@ function CircuitBlock(props: {
   onAddAnother?: () => void;
   onDoneBuilding?: () => void;
   onRounds?: (delta: number) => void;
+  isLast?: boolean;
 }) {
   const { t } = useT();
+  const [expanded, setExpanded] = useState(false);
   const g = props.group;
   const rounds = groupRounds(g);
   const doneRounds = Math.min(...g.exercises.map((e) => e.sets.length));
@@ -4154,6 +4182,9 @@ function CircuitBlock(props: {
   const summary = !props.building && (props.past || complete);
   const letter = g.letter;
   const totalKg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
+  // CR-11 · a finished circuit that isn't the last block collapses to a slim
+  // done-bar; the just-finished one (last block) and history stay expanded.
+  const slim = summary && !props.past && !props.isLast && !expanded;
 
   // CR-02 · building the circuit (mode active) — a plain list, rounds control
   // and the "Done — start" CTA. The loop wash lives in the top banner instead.
@@ -4200,6 +4231,27 @@ function CircuitBlock(props: {
     );
   }
 
+  if (slim) {
+    return (
+      <button className="circuit-block donebar" onClick={() => setExpanded(true)}>
+        <span className="loop sm off">
+          <Icon name="arrows-clockwise" />
+        </span>
+        <div className="cb-htext">
+          <div className="cb-tag">
+            <span className="cb-name off">{t.circuitTitle(letter)}</span>
+            <span className="cb-dot">·</span>
+            <span className="cb-done-tag">{t.circuitStatusDone}</span>
+          </div>
+          <div className="cb-meta">
+            {t.circuitNExercises(g.exercises.length)} · {t.circuitNRounds(rounds)}
+          </div>
+        </div>
+        <Icon name="check-circle" weight="fill" className="cb-donecheck" />
+      </button>
+    );
+  }
+
   if (summary) {
     return (
       <div className="circuit-block done">
@@ -4220,6 +4272,15 @@ function CircuitBlock(props: {
               </div>
             </div>
             {props.past && totalKg > 0 && <span className="cb-vol num">{fmtTonnes(totalKg)}</span>}
+            {!props.past && !props.isLast && (
+              <button
+                className="cb-collapse"
+                aria-label="collapse"
+                onClick={() => setExpanded(false)}
+              >
+                <Icon name="caret-up" />
+              </button>
+            )}
           </div>
           <div className="cb-didhead">
             <span className="section-label">{t.circuitWhatYouDid}</span>
@@ -4321,6 +4382,7 @@ function CircuitBlock(props: {
 function CircuitRunSheet(props: {
   group: SupersetGroup;
   onLog: (ex: Exercise, vals: Omit<SetEntry, 'id' | 'position'>) => void;
+  onSetRounds: (r: number) => void;
   onClose: () => void;
   onMuscle: (m: MuscleGroup) => void;
 }) {
@@ -4332,6 +4394,15 @@ function CircuitRunSheet(props: {
   const [roundIdx, setRoundIdx] = useState(Math.max(0, startRound));
   const firstUnlogged = g.exercises.findIndex((e) => e.sets.length <= startRound);
   const [exIdx, setExIdx] = useState(firstUnlogged < 0 ? 0 : firstUnlogged);
+  // CR-10 · between-rounds panel: the round number just completed (null = running).
+  const [roundDone, setRoundDone] = useState<number | null>(null);
+  const [restSec, setRestSec] = useState(0);
+
+  useEffect(() => {
+    if (roundDone == null) return;
+    const id = setInterval(() => setRestSec((x) => x + 1), 1000);
+    return () => clearInterval(id);
+  }, [roundDone]);
 
   const n = g.exercises.length;
   const cur = g.exercises[Math.min(exIdx, n - 1)];
@@ -4364,12 +4435,74 @@ function CircuitRunSheet(props: {
   }
 
   function completeRound() {
-    if (roundIdx + 1 >= rounds) {
-      props.onClose();
-      return;
-    }
-    setRoundIdx(roundIdx + 1);
+    setRestSec(0);
+    setRoundDone(roundIdx + 1);
+  }
+
+  function startNextRound() {
+    const next = roundDone ?? roundIdx + 1;
+    if (next + 1 > rounds) props.onSetRounds(next + 1);
+    setRoundIdx(next);
     setExIdx(0);
+    setRoundDone(null);
+  }
+
+  const fmtRest = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+
+  // CR-10 · between-rounds panel ------------------------------------------
+  if (roundDone != null) {
+    const doneCount = g.exercises.filter((e) => e.sets.length >= roundDone).length;
+    return (
+      <Sheet className="circuit-run cr-between" onClose={props.onClose}>
+        <div className="crb-body">
+          <span className="crb-check">
+            <Icon name="check-circle" weight="fill" />
+          </span>
+          <div className="crb-title">{t.circuitRoundComplete(roundDone)}</div>
+          <div className="crb-sub">
+            {t.circuitAllLogged(doneCount)} {t.circuitRoundCompleteBody}
+          </div>
+          <div className="crb-pips">
+            {Array.from({ length: rounds }).map((_, r) => (
+              <span
+                key={r}
+                className={`pip${r < roundDone ? ' done' : r === roundDone ? ' active' : ''}`}
+              />
+            ))}
+            <span className="pip open">
+              <Icon name="plus" weight="bold" />
+            </span>
+          </div>
+          <div className="crb-openlbl">
+            {t.circuitNRoundsShort(roundDone, rounds)} · <span>{t.circuitRoundsOpen}</span>
+          </div>
+          <div className="crb-rest">
+            <Icon name="timer" />
+            <span className="crb-rest-lbl">{t.circuitRest}</span>
+            <span className="crb-rest-num num">{fmtRest(restSec)}</span>
+          </div>
+        </div>
+        <div className="crb-actions">
+          <button className="btn btn-primary cr-log" onClick={startNextRound}>
+            <Icon name="play" />
+            {t.circuitStartRound(roundDone + 1)}
+          </button>
+          <div className="crb-actions-row">
+            <button
+              className="btn btn-secondary cr-finish"
+              onClick={() => props.onSetRounds(rounds + 1)}
+            >
+              <Icon name="plus" weight="bold" />
+              {t.circuitAddRound}
+            </button>
+            <button className="btn btn-secondary cr-finish" onClick={props.onClose}>
+              <Icon name="flag-checkered" />
+              {t.circuitFinishAll}
+            </button>
+          </div>
+        </div>
+      </Sheet>
+    );
   }
 
   return (

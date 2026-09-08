@@ -27815,3 +27815,183 @@ button.badge {
 .circuit-run .cr-complete:not(:disabled):active {
   filter: brightness(0.94);
 }
+
+/* --- CR-08 · many exercises: position dots wrap, header pips too --------- */
+.circuit-run .cr-dots {
+  flex-wrap: wrap;
+  max-width: 232px;
+  margin: 0 auto;
+}
+.circuit-run .cr-pips {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 140px;
+}
+
+/* --- CR-10 · between-rounds panel --------------------------------------- */
+.circuit-run.cr-between {
+  gap: 0;
+}
+.crb-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 6px 4px 4px;
+}
+.crb-check {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-ok-tint);
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px var(--color-ok-line);
+}
+.crb-check i {
+  font-size: 30px;
+  color: var(--color-ok);
+}
+.crb-title {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.crb-sub {
+  font-size: 13px;
+  color: var(--color-neutral-500);
+  max-width: 32ch;
+  line-height: 1.5;
+}
+.crb-pips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+.crb-pips .pip.open {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--color-accent-700);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+}
+.crb-pips .pip.open i {
+  font-size: 11px;
+}
+.crb-openlbl {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+}
+.crb-openlbl span {
+  color: var(--color-accent-300);
+}
+.crb-rest {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  margin-top: 14px;
+}
+.crb-rest i {
+  color: var(--color-accent);
+  font-size: 16px;
+}
+.crb-rest-lbl {
+  flex: 1;
+  text-align: left;
+  font-size: 13px;
+}
+.crb-rest-num {
+  font-size: 15px;
+  color: var(--gold-lt);
+}
+.crb-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 18px;
+}
+.crb-actions .cr-log {
+  min-height: 52px;
+  font-size: 16px;
+  margin-top: 0;
+}
+.crb-actions-row {
+  display: flex;
+  gap: 10px;
+}
+.crb-actions-row .cr-finish {
+  flex: 1;
+  min-height: 44px;
+  font-size: 13px;
+  gap: 7px;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+/* --- CR-11 · slim done-bar + new-circuit button ------------------------- */
+.circuit-block.donebar {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px 12px 17px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  border: none;
+  cursor: pointer;
+}
+.circuit-block.donebar::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-accent-800);
+}
+.loop.sm.off {
+  width: 28px;
+  height: 28px;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-400);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-700);
+}
+.circuit-block .cb-name.off {
+  color: var(--color-neutral-500);
+}
+.circuit-block .cb-donecheck {
+  color: var(--color-ok);
+  font-size: 18px;
+  margin-left: auto;
+  flex: none;
+}
+.circuit-block .cb-collapse {
+  border: none;
+  background: none;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.circuit-new {
+  min-height: 48px;
+  font-size: 14px;
+  gap: 8px;
+  margin-top: var(--space-2);
+  border: 1px dashed var(--color-accent-600);
+  color: var(--color-accent);
+  background: transparent;
+}

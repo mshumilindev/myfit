@@ -118,6 +118,7 @@ import { Monitor } from '@phosphor-icons/react/Monitor';
 import { DiscoBall } from '@phosphor-icons/react/DiscoBall';
 import { Star } from '@phosphor-icons/react/Star';
 import { Timer } from '@phosphor-icons/react/Timer';
+import { FlagCheckered } from '@phosphor-icons/react/FlagCheckered';
 import { Trash } from '@phosphor-icons/react/Trash';
 import { Trophy } from '@phosphor-icons/react/Trophy';
 import { UploadSimple } from '@phosphor-icons/react/UploadSimple';
@@ -253,6 +254,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   monitor: Monitor,
   'disco-ball': DiscoBall,
   timer: Timer,
+  'flag-checkered': FlagCheckered,
   trash: Trash,
   trophy: Trophy,
   user: User,
