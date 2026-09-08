@@ -15612,7 +15612,8 @@ button.exd-media {
   .session-pill-wrap .sp-finish:disabled {
     opacity: 0.4;
     cursor: default;
-  }}
+  }
+}
 
 /* Compact/today hub: Resume as an icon-only button (Change gym is dropped). */
 .live-resume.icon-only {
@@ -26969,13 +26970,19 @@ button.badge {
 /* Pulsing gold + in the session dock (design fabPulse / fabBreathe) */
 @keyframes fabPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(217, 162, 79, 0.32), 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 0 0 rgba(217, 162, 79, 0.32),
+      0 2px 8px rgba(0, 0, 0, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 15px rgba(217, 162, 79, 0), 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 0 15px rgba(217, 162, 79, 0),
+      0 2px 8px rgba(0, 0, 0, 0.4);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(217, 162, 79, 0), 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 0 0 0 rgba(217, 162, 79, 0),
+      0 2px 8px rgba(0, 0, 0, 0.4);
   }
 }
 @keyframes fabBreathe {
@@ -27047,4 +27054,624 @@ button.badge {
   font-size: 12px;
   color: var(--color-neutral-500);
   line-height: 1.4;
+}
+
+/* ===========================================================================
+   F3 · Circuit (design CR-02 … CR-07)
+   =========================================================================== */
+:root {
+  --loopwash:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-accent) 11%, transparent),
+      transparent 62%
+    ),
+    var(--color-surface);
+}
+
+/* Loop badge — the brass mark that says "circuit, not superset". */
+.loop {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-600);
+}
+.loop.sm {
+  width: 32px;
+  height: 32px;
+}
+.loop i {
+  font-size: 17px;
+}
+.loop.sm i {
+  font-size: 15px;
+}
+
+/* Round pips (progress across rounds). */
+.pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-neutral-700);
+  transition: all 0.2s;
+}
+.pip.done {
+  background: var(--color-accent-700);
+}
+.pip.active {
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 24%, transparent);
+}
+
+/* Position dots (which exercise within the round). */
+.pos {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-neutral-700);
+  transition: all 0.2s;
+}
+.pos.done {
+  background: var(--color-accent-700);
+}
+.pos.active {
+  width: 22px;
+  background: var(--color-accent);
+}
+
+/* --- CR-02 · "adding to circuit" banner -------------------------------- */
+.circuit-banner {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  border-radius: var(--radius-lg);
+  background: var(--loopwash);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+  margin-bottom: var(--space-4);
+}
+.circuit-banner .cb-text {
+  flex: 1;
+  min-width: 0;
+}
+.circuit-banner .cb-title {
+  font-size: 13px;
+  color: var(--color-accent-100);
+}
+.circuit-banner .cb-sub {
+  font-size: 11px;
+  color: var(--color-accent-300);
+  margin-top: 2px;
+}
+.circuit-banner .cb-rounds {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+}
+.circuit-banner .cb-rounds button {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.circuit-banner .cb-r-num {
+  min-width: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+.circuit-banner .cb-done {
+  min-height: 34px;
+  font-size: 12px;
+  padding: 0 12px;
+}
+
+/* --- CR-03 / CR-07 · circuit block in the session feed ------------------ */
+.circuit-block {
+  position: relative;
+  border-radius: 16px;
+  background: var(--loopwash);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent-700);
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+.circuit-block .cb-spine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(var(--color-accent), var(--color-accent-800));
+}
+.circuit-block .cb-inner {
+  padding: 14px 15px 15px 18px;
+}
+.circuit-block .cb-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.circuit-block .cb-htext {
+  flex: 1;
+  min-width: 0;
+}
+.circuit-block .cb-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.circuit-block .cb-name {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+}
+.circuit-block .cb-dot {
+  color: var(--color-neutral-600);
+}
+.circuit-block .cb-done-tag {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+.circuit-block .cb-meta {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+}
+.circuit-block .cb-counter {
+  text-align: right;
+}
+.circuit-block .cb-counter .num {
+  font-size: 14px;
+  color: var(--color-accent-300);
+  font-variant-numeric: tabular-nums;
+}
+.circuit-block .cb-counter-lbl {
+  display: block;
+  font-size: 9px;
+  color: var(--color-neutral-600);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.circuit-block .cb-vol {
+  font-size: 13px;
+  color: var(--color-accent-200);
+  font-variant-numeric: tabular-nums;
+}
+.circuit-block .cb-pips {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.circuit-block .cb-list {
+  margin-top: 13px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 2px 12px;
+}
+.circuit-block .cb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+}
+.circuit-block .cb-row + .cb-row {
+  box-shadow: 0 -1px 0 var(--color-divider);
+}
+.circuit-block .cb-slot {
+  font-size: 11px;
+  color: var(--color-accent-300);
+  width: 22px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.circuit-block .cb-rname {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.circuit-block .cb-rmus {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+.circuit-block .cb-cta {
+  min-height: 44px;
+  font-size: 14px;
+  gap: 8px;
+  margin-top: 13px;
+  width: 100%;
+}
+
+/* CR-07 · readable summary grid */
+.circuit-block .cb-didhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.circuit-block .cb-didhead .section-label {
+  flex: 1;
+}
+.circuit-block .cb-continue {
+  min-height: 30px;
+  font-size: 11px;
+  padding: 0 11px;
+  gap: 6px;
+}
+.circuit-block .cb-summary {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.circuit-block .cb-srow {
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 11px 12px;
+}
+.circuit-block .cb-sline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.circuit-block .cb-sname {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.circuit-block .cb-scount {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.circuit-block .cb-plates {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+}
+.rplate {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 0;
+  border-radius: 9px;
+  background: var(--color-neutral-900);
+  flex: 1;
+  min-width: 0;
+}
+.rplate.on {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.rplate .rplate-r {
+  font-size: 8px;
+  color: var(--color-accent-300);
+  letter-spacing: 0.08em;
+}
+.rplate .rplate-v {
+  font-size: 12px;
+  color: var(--color-accent-200);
+  font-variant-numeric: tabular-nums;
+}
+.rplate:not(.on) .rplate-v {
+  color: var(--color-neutral-600);
+}
+.rplate:not(.on) .rplate-r {
+  color: var(--color-neutral-600);
+}
+
+/* --- CR-04 … CR-06 · the active gallery -------------------------------- */
+.sheet.circuit-run {
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  padding-top: var(--space-5);
+}
+.circuit-run .cr-loophead {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  background: var(--loopwash);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+  padding: 12px 14px;
+}
+.circuit-run .cr-lh-text {
+  flex: 1;
+  min-width: 0;
+}
+.circuit-run .cr-lh-tag {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent-400);
+}
+.circuit-run .cr-lh-round {
+  font-size: 15px;
+  margin-top: 2px;
+}
+.circuit-run .cr-lh-round .num,
+.circuit-run .cr-pips {
+  font-variant-numeric: tabular-nums;
+}
+.circuit-run .cr-pips {
+  display: flex;
+  gap: 7px;
+}
+
+.circuit-run .cr-nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 2px 8px;
+}
+.circuit-run .cr-arrow {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+.circuit-run .cr-arrow:disabled {
+  color: var(--color-neutral-600);
+  cursor: default;
+}
+.circuit-run .cr-nav-mid {
+  flex: 1;
+  text-align: center;
+}
+.circuit-run .cr-dots {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  align-items: center;
+}
+.circuit-run .cr-nav-lbl {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  margin-top: 8px;
+}
+
+.circuit-run .cr-stage {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 2px 0;
+}
+.circuit-run .cr-card {
+  border-radius: 18px;
+  background: var(--color-surface);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.circuit-run .cr-card.recorded {
+  box-shadow: inset 0 0 0 1px var(--color-ok-line);
+}
+.circuit-run .cr-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.circuit-run .slot {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.circuit-run .slot.ok {
+  color: var(--color-ok-text);
+  background: var(--color-ok-tint);
+  box-shadow: inset 0 0 0 1px var(--color-ok-line);
+}
+.circuit-run .cr-card-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.circuit-run .cr-ok {
+  font-size: 22px;
+  color: var(--color-ok);
+}
+.circuit-run .cr-mus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.circuit-run .cr-goal {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  font-size: 13px;
+  color: var(--color-accent-100);
+}
+.circuit-run .cr-goal i {
+  color: var(--color-accent);
+  font-size: 15px;
+}
+.circuit-run .cr-steppers {
+  margin-top: 18px;
+  display: flex;
+  gap: 14px;
+}
+.circuit-run .cr-step {
+  flex: 1;
+}
+.circuit-run .cr-step .lbl {
+  margin-bottom: 8px;
+}
+.circuit-run .cr-step-ctl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border-radius: 12px;
+  background: var(--color-surface-2, #26282d);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.circuit-run .cr-step-ctl button {
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 4px;
+}
+.circuit-run .cr-step-ctl .num {
+  flex: 1;
+  text-align: center;
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.circuit-run .cr-log {
+  min-height: 48px;
+  font-size: 15px;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+}
+.circuit-run .cr-swipe,
+.circuit-run .cr-noload {
+  margin-top: auto;
+  text-align: center;
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  padding-top: 14px;
+}
+.circuit-run .cr-swipe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.circuit-run .cr-recorded {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-ok-tint);
+  box-shadow: inset 0 0 0 1px var(--color-ok-line);
+}
+.circuit-run .cr-recorded i {
+  font-size: 18px;
+  color: var(--color-ok);
+}
+.circuit-run .cr-rec-text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-ok-text);
+}
+.circuit-run .cr-rec-text .num {
+  font-variant-numeric: tabular-nums;
+}
+.circuit-run .cr-next {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.circuit-run .cr-next-slot {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.circuit-run .cr-next-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--color-accent-100);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.circuit-run .cr-next-go {
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+.circuit-run .cr-foot {
+  flex: none;
+  padding: 14px 2px 6px;
+  display: flex;
+  gap: 10px;
+}
+.circuit-run .cr-complete {
+  flex: 1;
+  min-height: 50px;
+  font-size: 15px;
+  gap: 8px;
+}
+.circuit-run .cr-finish {
+  min-height: 50px;
+  font-size: 13px;
+  padding: 0 16px;
 }

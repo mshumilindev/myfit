@@ -42,6 +42,7 @@ import {
   restoreSet,
   saveCatalogExercise,
   sessionBlocks,
+  setCircuitRounds,
   setDrops,
   setRepsTotal,
   setTypeOf,
@@ -168,6 +169,7 @@ type SheetState =
   | { kind: 'gym' }
   | { kind: 'musclemap' }
   | { kind: 'settings' }
+  | { kind: 'circuit-run'; groupId: string }
   | { kind: 'coach' }
   | null;
 
@@ -323,9 +325,10 @@ export function SessionView(props: {
   const suggestOn = true;
   const workout = store.workouts.find((w) => w.id === props.workoutId);
   const [sheet, setSheet] = useState<SheetState>(null);
-  const [circuit, setCircuit] = useState<{ on: boolean; groupId: string | null }>({
+  const [circuit, setCircuit] = useState<{ on: boolean; groupId: string | null; rounds: number }>({
     on: false,
     groupId: null,
+    rounds: 4,
   });
   // Live count-up timer for a timed exercise (TIMED-1/2): Start → count-up, Stop → log held time.
   const [timing, setTiming] = useState<{ exId: string; startedAt: number } | null>(null);
@@ -1772,6 +1775,51 @@ export function SessionView(props: {
             </div>
           )}
 
+          {live && circuit.on && circuit.groupId && (
+            <div className="circuit-banner">
+              <span className="loop sm">
+                <Icon name="arrows-clockwise" />
+              </span>
+              <div className="cb-text">
+                <div className="cb-title">{t.circuitAdding}</div>
+                <div className="cb-sub">
+                  {t.circuitSoFar(
+                    workout.exercises.filter((e) => e.groupId === circuit.groupId).length,
+                  )}
+                </div>
+              </div>
+              <div className="cb-rounds">
+                <button
+                  aria-label="-"
+                  onClick={() => {
+                    const r = Math.max(1, circuit.rounds - 1);
+                    setCircuit((c) => ({ ...c, rounds: r }));
+                    if (circuit.groupId) setCircuitRounds(workout.id, circuit.groupId, r);
+                  }}
+                >
+                  <Icon name="minus" weight="bold" />
+                </button>
+                <span className="cb-r-num">{circuit.rounds}</span>
+                <button
+                  aria-label="+"
+                  onClick={() => {
+                    const r = Math.min(20, circuit.rounds + 1);
+                    setCircuit((c) => ({ ...c, rounds: r }));
+                    if (circuit.groupId) setCircuitRounds(workout.id, circuit.groupId, r);
+                  }}
+                >
+                  <Icon name="plus" weight="bold" />
+                </button>
+              </div>
+              <button
+                className="btn btn-secondary cb-done"
+                onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
+              >
+                {t.circuitDone}
+              </button>
+            </div>
+          )}
+
           {workout.exercises.length === 0 ? (
             <div className="session-empty">
               <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
@@ -1810,6 +1858,17 @@ export function SessionView(props: {
           ) : (
             <>
               {sessionBlocks(workout).map((block) => {
+                if (block.kind === 'group' && block.group.circuit) {
+                  return (
+                    <CircuitBlock
+                      key={block.group.groupId}
+                      group={block.group}
+                      past={!!props.past}
+                      onMuscle={openMuscleHistory}
+                      onRun={() => setSheet({ kind: 'circuit-run', groupId: block.group.groupId })}
+                    />
+                  );
+                }
                 if (block.kind === 'group') {
                   const g = block.group;
                   const rounds = groupRounds(g);
@@ -2243,6 +2302,7 @@ export function SessionView(props: {
                     groupKind: 'circuit' as const,
                     groupOrder: workout.exercises.filter((e) => e.groupId === circuit.groupId)
                       .length,
+                    plannedSets: circuit.rounds,
                   }
                 : base;
             addExercise(workout.id, name, kind, plan);
@@ -2482,7 +2542,9 @@ export function SessionView(props: {
             className={`ss-circuit${circuit.on ? ' on' : ''}`}
             onClick={() =>
               setCircuit((c) =>
-                c.on ? { on: false, groupId: null } : { on: true, groupId: crypto.randomUUID() },
+                c.on
+                  ? { on: false, groupId: null, rounds: c.rounds }
+                  : { on: true, groupId: crypto.randomUUID(), rounds: c.rounds },
               )
             }
           >
@@ -2497,6 +2559,21 @@ export function SessionView(props: {
           </button>
         </Sheet>
       )}
+
+      {sheet?.kind === 'circuit-run' &&
+        (() => {
+          const block = sessionBlocks(workout).find(
+            (b) => b.kind === 'group' && b.group.groupId === sheet.groupId,
+          );
+          return block?.kind === 'group' ? (
+            <CircuitRunSheet
+              group={block.group}
+              onLog={(ex, vals) => logNewSet(ex, vals)}
+              onMuscle={openMuscleHistory}
+              onClose={() => setSheet(null)}
+            />
+          ) : null;
+        })()}
 
       {sheet?.kind === 'coach' && (
         <Sheet className="coach-sheet" onClose={() => setSheet(null)}>
@@ -4023,5 +4100,433 @@ function SetEditorSheet(props: {
         />
       )}
     </Sheet>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// F3 · Circuit rendering (design CR-03 … CR-07)
+// ---------------------------------------------------------------------------
+
+function circuitPrimaryMuscle(ex: Exercise): MuscleGroup | null {
+  const m = ex.primaryMuscle;
+  if (m && (MUSCLE_IDS as readonly string[]).includes(m)) return m as MuscleGroup;
+  const s = (ex.secondaryMuscles ?? []).find((x) => (MUSCLE_IDS as readonly string[]).includes(x));
+  return (s as MuscleGroup) ?? null;
+}
+
+function circuitMuscleChips(ex: Exercise, onMuscle: (m: MuscleGroup) => void) {
+  const primary = circuitPrimaryMuscle(ex);
+  const secondary = (ex.secondaryMuscles ?? [])
+    .filter((x) => (MUSCLE_IDS as readonly string[]).includes(x) && x !== primary)
+    .slice(0, 1) as MuscleGroup[];
+  return (
+    <>
+      {primary && (
+        <MuscleChip muscle={primary} tone="primary" size="sm" onClick={onMuscle} detail />
+      )}
+      {secondary.map((m) => (
+        <MuscleChip key={m} muscle={m} tone="secondary" size="sm" onClick={onMuscle} detail />
+      ))}
+    </>
+  );
+}
+
+function CircuitBlock(props: {
+  group: SupersetGroup;
+  past: boolean;
+  onRun: () => void;
+  onMuscle: (m: MuscleGroup) => void;
+}) {
+  const { t } = useT();
+  const g = props.group;
+  const rounds = groupRounds(g);
+  const doneRounds = Math.min(...g.exercises.map((e) => e.sets.length));
+  const complete = doneRounds >= rounds;
+  const summary = props.past || complete;
+  const letter = g.letter;
+  const totalKg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
+
+  if (summary) {
+    return (
+      <div className="circuit-block done">
+        <span className="cb-spine" />
+        <div className="cb-inner">
+          <div className="cb-head">
+            <span className="loop sm">
+              <Icon name="arrows-clockwise" />
+            </span>
+            <div className="cb-htext">
+              <div className="cb-tag">
+                <span className="cb-name">{t.circuitTitle(letter)}</span>
+                <span className="cb-dot">·</span>
+                <span className="cb-done-tag">{t.circuitStatusDone}</span>
+              </div>
+              <div className="cb-meta">
+                {t.circuitNExercises(g.exercises.length)} · {t.circuitNRounds(rounds)}
+              </div>
+            </div>
+            {props.past && totalKg > 0 && <span className="cb-vol num">{fmtTonnes(totalKg)}</span>}
+          </div>
+          <div className="cb-didhead">
+            <span className="section-label">{t.circuitWhatYouDid}</span>
+            {!complete && (
+              <button className="btn btn-secondary cb-continue" onClick={props.onRun}>
+                <Icon name="arrow-counter-clockwise" />
+                {t.circuitContinueCircuit}
+              </button>
+            )}
+          </div>
+          <div className="cb-summary">
+            {g.exercises.map((e, i) => (
+              <div key={e.id} className="cb-srow">
+                <div className="cb-sline">
+                  <span className="cb-slot">
+                    {letter}
+                    {i + 1}
+                  </span>
+                  <span className="cb-sname">{e.name}</span>
+                  <span className="cb-scount num">
+                    {t.circuitNRoundsShort(Math.min(e.sets.length, rounds), rounds)}
+                  </span>
+                </div>
+                <div className="cb-plates">
+                  {Array.from({ length: rounds }).map((_, r) => {
+                    const st = e.sets[r];
+                    const on = !!st;
+                    const val = st
+                      ? st.weight != null
+                        ? `${st.reps}×${fmtWeightValue(st.weight)}`
+                        : `${st.reps}`
+                      : '—';
+                    return (
+                      <div key={r} className={`rplate${on ? ' on' : ''}`}>
+                        <span className="rplate-r">R{r + 1}</span>
+                        <span className="rplate-v num">{val}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="circuit-block">
+      <span className="cb-spine" />
+      <div className="cb-inner">
+        <div className="cb-head">
+          <span className="loop sm">
+            <Icon name="arrows-clockwise" />
+          </span>
+          <div className="cb-htext">
+            <div className="cb-tag">
+              <span className="cb-name">{t.circuitTitle(letter)}</span>
+            </div>
+            <div className="cb-meta">
+              {t.circuitNExercises(g.exercises.length)} · {t.circuitNRounds(rounds)}
+            </div>
+          </div>
+          <div className="cb-counter">
+            <span className="num">{t.circuitNRoundsShort(doneRounds, rounds)}</span>
+            <span className="cb-counter-lbl">{t.circuitRoundsShort}</span>
+          </div>
+        </div>
+        <div className="cb-pips">
+          {Array.from({ length: rounds }).map((_, r) => (
+            <span
+              key={r}
+              className={`pip${r < doneRounds ? ' done' : r === doneRounds ? ' active' : ''}`}
+            />
+          ))}
+        </div>
+        <div className="cb-list">
+          {g.exercises.map((e, i) => (
+            <div key={e.id} className="cb-row">
+              <span className="cb-slot">
+                {letter}
+                {i + 1}
+              </span>
+              <span className="cb-rname">{e.name}</span>
+              <span className="cb-rmus">{circuitMuscleChips(e, props.onMuscle)}</span>
+            </div>
+          ))}
+        </div>
+        <button className="btn btn-primary cb-cta" onClick={props.onRun}>
+          <Icon name="play" />
+          {doneRounds === 0 ? t.circuitStart : t.circuitContinueRound(doneRounds + 1)}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CircuitRunSheet(props: {
+  group: SupersetGroup;
+  onLog: (ex: Exercise, vals: Omit<SetEntry, 'id' | 'position'>) => void;
+  onClose: () => void;
+  onMuscle: (m: MuscleGroup) => void;
+}) {
+  const { t } = useT();
+  const g = props.group;
+  const rounds = groupRounds(g);
+  const letter = g.letter;
+  const startRound = Math.min(rounds - 1, Math.min(...g.exercises.map((e) => e.sets.length)));
+  const [roundIdx, setRoundIdx] = useState(Math.max(0, startRound));
+  const firstUnlogged = g.exercises.findIndex((e) => e.sets.length <= startRound);
+  const [exIdx, setExIdx] = useState(firstUnlogged < 0 ? 0 : firstUnlogged);
+
+  const n = g.exercises.length;
+  const cur = g.exercises[Math.min(exIdx, n - 1)];
+  const loggedThisRound = (i: number) => g.exercises[i].sets.length > roundIdx;
+  const curLogged = loggedThisRound(exIdx);
+  const weighted = loadTypeFor(cur) === 'weight';
+
+  const prevSet = cur.sets[cur.sets.length - 1];
+  const goalReps = cur.plannedReps ?? prevSet?.reps ?? 10;
+  const seedReps = prevSet?.reps ?? cur.plannedReps ?? 10;
+  const seedWeight = prevSet?.weight ?? null;
+
+  const recorded = curLogged ? cur.sets[roundIdx] : undefined;
+  const nextEx = (() => {
+    for (let k = 1; k <= n; k++) {
+      const i = (exIdx + k) % n;
+      if (i !== exIdx && !loggedThisRound(i)) return { ex: g.exercises[i], i };
+    }
+    return null;
+  })();
+
+  function advance(justLogged: number) {
+    for (let k = 1; k <= n; k++) {
+      const i = (justLogged + k) % n;
+      if (i !== justLogged && !loggedThisRound(i)) {
+        setExIdx(i);
+        return;
+      }
+    }
+  }
+
+  function completeRound() {
+    if (roundIdx + 1 >= rounds) {
+      props.onClose();
+      return;
+    }
+    setRoundIdx(roundIdx + 1);
+    setExIdx(0);
+  }
+
+  return (
+    <Sheet className="circuit-run" onClose={props.onClose}>
+      <div className="cr-loophead">
+        <span className="loop">
+          <Icon name="arrows-clockwise" />
+        </span>
+        <div className="cr-lh-text">
+          <div className="cr-lh-tag">{t.circuitTitle(letter)}</div>
+          <div className="cr-lh-round">{t.circuitRoundOf(roundIdx + 1, rounds)}</div>
+        </div>
+        <div className="cr-pips">
+          {Array.from({ length: rounds }).map((_, r) => (
+            <span
+              key={r}
+              className={`pip${r < roundIdx ? ' done' : r === roundIdx ? ' active' : ''}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="cr-nav">
+        <button
+          className="cr-arrow"
+          disabled={exIdx === 0}
+          aria-label="prev"
+          onClick={() => setExIdx(Math.max(0, exIdx - 1))}
+        >
+          <Icon name="caret-left" />
+        </button>
+        <div className="cr-nav-mid">
+          <div className="cr-dots">
+            {g.exercises.map((e, i) => (
+              <span
+                key={e.id}
+                className={`pos${i === exIdx ? ' active' : loggedThisRound(i) ? ' done' : ''}`}
+              />
+            ))}
+          </div>
+          <div className="cr-nav-lbl">{t.circuitExerciseOf(exIdx + 1, n)}</div>
+        </div>
+        <button
+          className="cr-arrow"
+          disabled={exIdx >= n - 1}
+          aria-label="next"
+          onClick={() => setExIdx(Math.min(n - 1, exIdx + 1))}
+        >
+          <Icon name="caret-right" />
+        </button>
+      </div>
+
+      <div className="cr-stage">
+        {recorded ? (
+          <div className="cr-card recorded">
+            <div className="cr-card-head">
+              <span className="slot ok">
+                {letter}
+                {exIdx + 1}
+              </span>
+              <span className="cr-card-name">{cur.name}</span>
+              <Icon name="check-circle" weight="fill" className="cr-ok" />
+            </div>
+            <div className="cr-mus">{circuitMuscleChips(cur, props.onMuscle)}</div>
+            <div className="cr-recorded">
+              <Icon name="check-circle" weight="fill" />
+              <span className="cr-rec-text">
+                {t.circuitRecorded} ·{' '}
+                <span className="num">
+                  {recorded.weight != null
+                    ? `${recorded.reps} × ${fmtWeightValue(recorded.weight)} ${t.kgCol.toLowerCase()}`
+                    : `${recorded.reps} ${t.chUnit.reps}`}
+                </span>
+              </span>
+            </div>
+            {nextEx && (
+              <div className="cr-next">
+                <span className="cr-next-slot num">
+                  {letter}
+                  {nextEx.i + 1}
+                </span>
+                <span className="cr-next-name">
+                  {t.circuitNext} · {nextEx.ex.name}
+                </span>
+                <button className="cr-next-go" onClick={() => setExIdx(nextEx.i)}>
+                  {t.circuitNext === 'Next' ? 'Go' : ''}
+                  <Icon name="arrow-right" />
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <CircuitExerciseCard
+            key={`${cur.id}-${roundIdx}`}
+            exercise={cur}
+            slot={`${letter}${exIdx + 1}`}
+            round={roundIdx + 1}
+            goalReps={goalReps}
+            seedReps={seedReps}
+            seedWeight={seedWeight}
+            weighted={weighted}
+            last={exIdx === n - 1}
+            onMuscle={props.onMuscle}
+            onLog={(vals) => {
+              props.onLog(cur, vals);
+              advance(exIdx);
+            }}
+          />
+        )}
+      </div>
+
+      <div className="cr-foot">
+        <button className="btn btn-primary cr-complete" onClick={completeRound}>
+          <Icon name="check-circle" />
+          {t.circuitCompleteRound}
+        </button>
+        <button className="btn btn-secondary cr-finish" onClick={props.onClose}>
+          {t.circuitFinishAll}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
+function CircuitExerciseCard(props: {
+  exercise: Exercise;
+  slot: string;
+  round: number;
+  goalReps: number;
+  seedReps: number;
+  seedWeight: number | null;
+  weighted: boolean;
+  last: boolean;
+  onMuscle: (m: MuscleGroup) => void;
+  onLog: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
+}) {
+  const { t } = useT();
+  const [reps, setReps] = useState(props.seedReps);
+  const [weight, setWeight] = useState<number>(props.seedWeight ?? 0);
+
+  function log() {
+    props.onLog({
+      reps,
+      weight: props.weighted ? weight : null,
+      isWarmup: false,
+      type: 'working',
+      drops: [],
+      durationMin: null,
+      distanceKm: null,
+      calories: null,
+      rpe: null,
+    });
+  }
+
+  return (
+    <div className="cr-card">
+      <div className="cr-card-head">
+        <span className="slot">{props.slot}</span>
+        <span className="cr-card-name">{props.exercise.name}</span>
+      </div>
+      <div className="cr-mus">{circuitMuscleChips(props.exercise, props.onMuscle)}</div>
+      <div className="cr-goal">
+        <Icon name="target" />
+        <span>
+          {t.circuitRoundGoal} ·{' '}
+          <strong>
+            {props.goalReps} {t.chUnit.reps}
+          </strong>
+        </span>
+      </div>
+      <div className="cr-steppers">
+        <div className="cr-step">
+          <div className="lbl">{t.repsCol}</div>
+          <div className="cr-step-ctl">
+            <button aria-label="-" onClick={() => setReps(Math.max(0, reps - 1))}>
+              <Icon name="minus" weight="bold" />
+            </button>
+            <span className="num">{reps}</span>
+            <button aria-label="+" onClick={() => setReps(reps + 1)}>
+              <Icon name="plus" weight="bold" />
+            </button>
+          </div>
+        </div>
+        {props.weighted && (
+          <div className="cr-step">
+            <div className="lbl">{t.kgCol}</div>
+            <div className="cr-step-ctl">
+              <button aria-label="-" onClick={() => setWeight(Math.max(0, weight - 2.5))}>
+                <Icon name="minus" weight="bold" />
+              </button>
+              <span className="num">{fmtWeightValue(weight)}</span>
+              <button aria-label="+" onClick={() => setWeight(weight + 2.5)}>
+                <Icon name="plus" weight="bold" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+      <button className="btn btn-primary cr-log" onClick={log}>
+        <Icon name="check" />
+        {t.circuitLogRound(props.slot, props.round)}
+      </button>
+      {props.weighted ? (
+        <div className="cr-swipe">
+          <Icon name="arrow-left" />
+          {t.circuitSwipeHint}
+          <Icon name="arrow-right" />
+        </div>
+      ) : (
+        <div className="cr-noload">{t.circuitNoLoad}</div>
+      )}
+    </div>
   );
 }

@@ -21,6 +21,7 @@ import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
 import { ArrowCounterClockwise } from '@phosphor-icons/react/ArrowCounterClockwise';
 import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
+import { ArrowLeft } from '@phosphor-icons/react/ArrowLeft';
 import { ArrowUpRight } from '@phosphor-icons/react/ArrowUpRight';
 import { ArrowsClockwise } from '@phosphor-icons/react/ArrowsClockwise';
 import { ArrowsLeftRight } from '@phosphor-icons/react/ArrowsLeftRight';
@@ -92,6 +93,7 @@ import { FunnelSimple } from '@phosphor-icons/react/FunnelSimple';
 import { PersonSimple } from '@phosphor-icons/react/PersonSimple';
 import { Person } from '@phosphor-icons/react/Person';
 import { SlidersHorizontal } from '@phosphor-icons/react/SlidersHorizontal';
+import { Target } from '@phosphor-icons/react/Target';
 import { Plugs } from '@phosphor-icons/react/Plugs';
 import { Robot } from '@phosphor-icons/react/Robot';
 import { Rows } from '@phosphor-icons/react/Rows';
@@ -153,6 +155,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'arrow-clockwise': ArrowClockwise,
   'arrow-counter-clockwise': ArrowCounterClockwise,
   'arrow-right': ArrowRight,
+  'arrow-left': ArrowLeft,
   'arrow-up-right': ArrowUpRight,
   'arrows-clockwise': ArrowsClockwise,
   swap: ArrowsLeftRight,
@@ -220,6 +223,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'person-simple': PersonSimple,
   person: Person,
   'sliders-horizontal': SlidersHorizontal,
+  target: Target,
   plugs: Plugs,
   robot: Robot,
   rows: Rows,

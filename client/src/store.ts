@@ -275,6 +275,8 @@ export interface SupersetGroup {
   groupId: string;
   letter: string;
   exercises: Exercise[];
+  /** A round-based circuit (F3) vs a plain back-to-back superset. */
+  circuit: boolean;
 }
 export type SessionBlock =
   { kind: 'single'; exercise: Exercise } | { kind: 'group'; group: SupersetGroup };
@@ -301,7 +303,12 @@ export function sessionBlocks(w: Workout): SessionBlock[] {
     }
     blocks.push({
       kind: 'group',
-      group: { groupId: gid, letter: String.fromCharCode(65 + letterIdx++), exercises: members },
+      group: {
+        groupId: gid,
+        letter: String.fromCharCode(65 + letterIdx++),
+        exercises: members,
+        circuit: members.some((e) => e.groupKind === 'circuit'),
+      },
     });
   }
   return blocks;
@@ -320,6 +327,19 @@ export function groupRounds(g: SupersetGroup): number {
 export function groupCurrentRound(g: SupersetGroup): number {
   const done = Math.min(...g.exercises.map((e) => e.sets.length));
   return Math.min(done + 1, groupRounds(g));
+}
+
+/** Set the round count for a circuit — stored as plannedSets on each member,
+ *  which is what groupRounds() reads. */
+export function setCircuitRounds(workoutId: string, groupId: string, rounds: number): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  const r = Math.max(1, Math.min(20, Math.round(rounds)));
+  const next = w.exercises.map((e) =>
+    (e.groupId ?? null) === groupId ? { ...e, plannedSets: r } : e,
+  );
+  patchWorkout(workoutId, { exercises: next });
+  saveWorkout(workoutId);
 }
 
 export function groupAsSuperset(workoutId: string, exerciseIds: string[]): void {
