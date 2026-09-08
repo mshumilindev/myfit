@@ -37,7 +37,7 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const workoutCount = finished.length;
-  const totalDays = buildHistoryDays(finished, store.activities).length;
+  const totalDays = buildHistoryDays(finished, store.activities, store.sleeps).length;
   const maxPage = Math.max(0, Math.ceil(totalDays / PAGE_DAYS) - 1);
   const curPage = Math.min(page, maxPage);
 
@@ -60,12 +60,14 @@ export function HistoryListView({ shell, onClose }: { shell: Shell; onClose: () 
           <HistoryTimeline
             workouts={finished}
             activities={store.activities}
+            sleeps={store.sleeps}
             allWorkouts={store.workouts}
             bodyKg={bodyKg}
             maxDays={PAGE_DAYS}
             dayOffset={curPage * PAGE_DAYS}
             onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
             onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
+            onOpenSleep={(id) => shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })}
           />
           {maxPage > 0 && (
             <nav className="exl-pager" aria-label={t.pagination}>

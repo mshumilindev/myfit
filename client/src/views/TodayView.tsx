@@ -232,7 +232,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
-  const historyDayCount = buildHistoryDays(finished, store.activities).length;
+  const historyDayCount = buildHistoryDays(finished, store.activities, store.sleeps).length;
   const [pbNow] = useState(() => Date.now());
   const playbook = useMemo(
     () =>
@@ -1344,11 +1344,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               <HistoryTimeline
                 workouts={finished}
                 activities={store.activities}
+                sleeps={store.sleeps}
                 allWorkouts={store.workouts}
                 bodyKg={bodyKg}
                 maxDays={5}
                 onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
                 onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
+                onOpenSleep={(id) =>
+                  shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })
+                }
                 openMuscleHistory={openMuscleHistory}
                 showMuscles={suggestOn}
               />

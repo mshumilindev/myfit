@@ -221,6 +221,10 @@ export const lt: Strings = {
   sleepNightOf: (d: string) => `Naktis iš ${d}`,
   sleepLastNightTag: 'praėjusi naktis',
 
+  sleepEditNight: 'Redaguoti naktį',
+  sleepDeleteNight: 'Trinti naktį',
+  sleepDeleteConfirm: 'Trinti šią naktį? To nebus galima atšaukti.',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

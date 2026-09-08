@@ -10,6 +10,8 @@ import {
   liveSleep,
   stopSleep,
   cancelSleep,
+  updateSleepNight,
+  removeSleepNight,
   setSleepQuality,
   logSleepNight,
   setSleepSchedule,
@@ -65,18 +67,20 @@ export function SleepView({
   onClose,
   wake,
   mode: initialMode,
+  nightId,
 }: {
   onClose: () => void;
   wake?: boolean;
-  mode?: 'backfill' | 'schedule';
+  mode?: 'backfill' | 'schedule' | 'edit';
+  nightId?: string;
 }) {
   const { t } = useT();
   const store = useStore();
   const live = liveSleep(store.sleeps);
   const [now] = useState(() => Date.now());
-  const [mode, setMode] = useState<'night' | 'wake' | 'logged' | 'hub' | 'backfill' | 'schedule'>(
-    live ? (wake ? 'wake' : 'night') : (initialMode ?? 'hub'),
-  );
+  const [mode, setMode] = useState<
+    'night' | 'wake' | 'logged' | 'hub' | 'backfill' | 'schedule' | 'edit'
+  >(initialMode ?? (live ? (wake ? 'wake' : 'night') : 'hub'));
   const [loggedId, setLoggedId] = useState<string | null>(null);
   const [tick, setTick] = useState(now);
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -164,6 +168,9 @@ export function SleepView({
   if (mode === 'schedule') {
     const back = live ? onClose : () => setMode('hub');
     return <SleepScheduleEditor onDone={() => setMode(live ? 'night' : 'hub')} onBack={back} />;
+  }
+  if (mode === 'edit' && nightId) {
+    return <SleepEditNight nightId={nightId} onClose={onClose} />;
   }
 
   if (mode === 'logged') {
@@ -636,4 +643,140 @@ function tzPlace(): string {
   } catch {
     return '';
   }
+}
+
+/** Edit or delete a logged night (opened from the history timeline). Same
+ *  styled fields + duration + quality as the backfill, minus the day picker
+ *  (the night's date is fixed), plus a Delete. */
+function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => void }) {
+  const { t, locale } = useT();
+  const store = useStore();
+  const night = store.sleeps.find((n) => n.id === nightId);
+  const hh = (ms: number) => {
+    const d = new Date(ms);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+  const [bed, setBed] = useState(night ? hh(night.bedtime) : '23:20');
+  const [woke, setWoke] = useState(night && night.wake ? hh(night.wake) : '06:40');
+  const [quality, setQuality] = useState<SleepQuality | null>(night?.quality ?? null);
+  const [confirmDel, setConfirmDel] = useState(false);
+
+  if (!night) {
+    onClose();
+    return null;
+  }
+
+  const bedDay = new Date(night.bedtime);
+  const build = () => {
+    const [bh, bm] = bed.split(':').map(Number);
+    const b = new Date(bedDay);
+    b.setHours(bh, bm, 0, 0);
+    const bedtime = b.getTime();
+    const [wh, wm] = woke.split(':').map(Number);
+    const w = new Date(bedtime);
+    w.setHours(wh, wm, 0, 0);
+    let wk = w.getTime();
+    if (wk <= bedtime) wk += 86400000;
+    return { bedtime, wake: wk };
+  };
+  const built = build();
+  const mins = Math.round((built.wake - built.bedtime) / 60000);
+  const nightOf = new Date(night.bedtime).toLocaleDateString(locale, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+
+  const save = () => {
+    updateSleepNight(night.id, { ...built, date: sleepDayId(built.wake), quality });
+    onClose();
+  };
+
+  return (
+    <div className="screen sleep-hub sleep-backfill">
+      <SleepTopbar title={t.sleepEditNight} onBack={onClose} />
+      <div className="sleep-nightof">
+        <Icon name="moon" weight="fill" />
+        {t.sleepNightOf(nightOf)}
+      </div>
+
+      <div className="slh-timerow">
+        <label className="slh-timefield">
+          <span className="slh-sec-label">{t.sleepBedtimeLabel}</span>
+          <div className="sleep-field-box">
+            <Icon name="moon" weight="fill" className="sleep-field-ic bed" />
+            <input
+              type="time"
+              className="sleep-time-input"
+              value={bed}
+              onChange={(e) => setBed(e.target.value)}
+            />
+          </div>
+        </label>
+        <label className="slh-timefield">
+          <span className="slh-sec-label">{t.sleepWokeLabel}</span>
+          <div className="sleep-field-box">
+            <Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />
+            <input
+              type="time"
+              className="sleep-time-input"
+              value={woke}
+              onChange={(e) => setWoke(e.target.value)}
+            />
+          </div>
+        </label>
+      </div>
+
+      <div className="sleep-dur-card">
+        <div className="slh-sec-label">{t.sleepDurationLabel}</div>
+        <div className="sleep-dur-big num">{dur(mins)}</div>
+      </div>
+
+      <div className="sleep-quality">
+        <div className="sleep-q-head">
+          {t.sleepHowDidYouSleep} <span className="sleep-q-opt">{t.sleepOptional}</span>
+        </div>
+        <div className="sleep-q-row">
+          {(['restless', 'ok', 'good'] as SleepQuality[]).map((q) => (
+            <button
+              key={q}
+              className={`sleep-q-chip${quality === q ? ' on' : ''}`}
+              onClick={() => setQuality(quality === q ? null : q)}
+            >
+              {t.sleepQuality[q]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <button className="btn btn-primary slh-btn" onClick={save}>
+        <Icon name="check" weight="bold" />
+        {t.sleepSaveNight}
+      </button>
+      {confirmDel ? (
+        <div className="sleep-discard-confirm">
+          <span className="sleep-discard-q">{t.sleepDeleteConfirm}</span>
+          <div className="sleep-discard-row">
+            <button
+              className="sleep-discard-yes"
+              onClick={() => {
+                removeSleepNight(night.id);
+                onClose();
+              }}
+            >
+              {t.sleepDeleteNight}
+            </button>
+            <button className="sleep-discard-no" onClick={() => setConfirmDel(false)}>
+              {t.cancel}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="sleep-delete-link" onClick={() => setConfirmDel(true)}>
+          <Icon name="trash" weight="bold" />
+          {t.sleepDeleteNight}
+        </button>
+      )}
+    </div>
+  );
 }

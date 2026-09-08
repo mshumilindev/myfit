@@ -30478,3 +30478,35 @@ body {
   color: var(--color-text);
   margin-top: 6px;
 }
+
+/* Sleep in the history timeline + delete link */
+.hist-item.cat-sleep .hist-act-icon {
+  color: var(--s-moon);
+}
+.hist-sleep-auto {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  vertical-align: middle;
+}
+.sleep-delete-link {
+  margin: 4px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: none;
+  color: #d98a95;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 8px 10px;
+}
+.sleep-delete-link:hover {
+  color: #ecb3bb;
+}

@@ -218,6 +218,10 @@ export const uk: Strings = {
   sleepNightOf: (d: string) => `Ніч на ${d}`,
   sleepLastNightTag: 'минула ніч',
 
+  sleepEditNight: 'Редагувати ніч',
+  sleepDeleteNight: 'Видалити ніч',
+  sleepDeleteConfirm: 'Видалити цю ніч? Це незворотно.',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

@@ -211,6 +211,10 @@ export const en = {
   sleepNightOf: (d: string) => `Night of ${d}`,
   sleepLastNightTag: 'last night',
 
+  sleepEditNight: 'Edit night',
+  sleepDeleteNight: 'Delete night',
+  sleepDeleteConfirm: 'Delete this night? This can’t be undone.',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

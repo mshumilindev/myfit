@@ -207,6 +207,10 @@ export const et: Strings = {
   sleepNightOf: (d: string) => `Öö: ${d}`,
   sleepLastNightTag: 'eelmine öö',
 
+  sleepEditNight: 'Muuda ööd',
+  sleepDeleteNight: 'Kustuta öö',
+  sleepDeleteConfirm: 'Kustutada see öö? Seda ei saa tagasi võtta.',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

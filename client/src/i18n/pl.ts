@@ -220,6 +220,10 @@ export const pl: Strings = {
   sleepNightOf: (d: string) => `Noc z ${d}`,
   sleepLastNightTag: 'ostatnia noc',
 
+  sleepEditNight: 'Edytuj noc',
+  sleepDeleteNight: 'Usuń noc',
+  sleepDeleteConfirm: 'Usunąć tę noc? Tego nie cofniesz.',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

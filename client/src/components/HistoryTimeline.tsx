@@ -24,9 +24,13 @@ import {
   durationMin as activityDurationMin,
 } from '../activities';
 import type { MuscleGroup } from '../data/exercises';
-import type { Activity, Workout } from '../types';
+import { nightDurationMin } from '../sleep';
+import type { Activity, SleepNight, Workout } from '../types';
 
-type Item = { kind: 'w'; ts: number; w: Workout } | { kind: 'a'; ts: number; a: Activity };
+type Item =
+  | { kind: 'w'; ts: number; w: Workout }
+  | { kind: 'a'; ts: number; a: Activity }
+  | { kind: 's'; ts: number; n: SleepNight };
 
 function dayKey(ts: number): string {
   const d = new Date(ts);
@@ -38,6 +42,7 @@ function dayKey(ts: number): string {
 export function buildHistoryDays(
   workouts: Workout[],
   activities: Activity[],
+  sleeps: SleepNight[] = [],
 ): { key: string; ts: number; items: Item[] }[] {
   const items: Item[] = [
     ...workouts
@@ -46,6 +51,10 @@ export function buildHistoryDays(
     ...activities
       .filter((a) => a.finishedAt !== null)
       .map((a) => ({ kind: 'a' as const, ts: a.startedAt, a })),
+    // A finished night is grouped on the morning it ended (its wake time).
+    ...sleeps
+      .filter((n) => n.wake !== null)
+      .map((n) => ({ kind: 's' as const, ts: n.wake as number, n })),
   ];
   const map = new Map<string, { key: string; ts: number; items: Item[] }>();
   for (const it of items) {
@@ -66,12 +75,14 @@ export function buildHistoryDays(
 export function HistoryTimeline({
   workouts,
   activities,
+  sleeps = [],
   allWorkouts,
   bodyKg,
   maxDays,
   dayOffset = 0,
   onOpenWorkout,
   onOpenActivity,
+  onOpenSleep,
   openMuscleHistory,
   showMuscles = true,
 }: {
@@ -79,6 +90,8 @@ export function HistoryTimeline({
   workouts: Workout[];
   /** Finished activities to show. */
   activities: Activity[];
+  /** Finished sleep nights to show. */
+  sleeps?: SleepNight[];
   /** All workouts — used to resolve program day names. */
   allWorkouts: Workout[];
   bodyKg: number | null;
@@ -89,11 +102,13 @@ export function HistoryTimeline({
   onOpenWorkout: (id: string) => void;
   /** Open a logged activity's detail/edit view. Omit to keep rows non-interactive. */
   onOpenActivity?: (id: string) => void;
+  /** Open a logged night's edit view. Omit to keep rows non-interactive. */
+  onOpenSleep?: (id: string) => void;
   openMuscleHistory?: (m: MuscleGroup) => void;
   showMuscles?: boolean;
 }) {
   const { t, locale } = useT();
-  const allDays = buildHistoryDays(workouts, activities);
+  const allDays = buildHistoryDays(workouts, activities, sleeps);
   const days =
     maxDays != null ? allDays.slice(dayOffset, dayOffset + maxDays) : allDays.slice(dayOffset);
 
@@ -113,7 +128,8 @@ export function HistoryTimeline({
           <span className="hist-day-date">{fmtShortDate(day.items[0].ts, locale)}</span>
           <div className="hist-day-items">
             {day.items.map((it) => {
-              if (it.kind !== 'w')
+              if (it.kind === 's') return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
+              if (it.kind === 'a')
                 return (
                   <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
                 );
@@ -207,5 +223,45 @@ function ActivityRow({
     </button>
   ) : (
     <div className={`hist-item hist-activity cat-${cat}`}>{inner}</div>
+  );
+}
+
+/** One finished night in the timeline — moon icon inline with "Sleep", the
+ *  duration + range in the stats line, an `auto` flag for auto-logged nights. */
+function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void }) {
+  const { t } = useT();
+  const mins = nightDurationMin(n);
+  const pad = (x: number) => String(x).padStart(2, '0');
+  const clk = (ms: number) => {
+    const d = new Date(ms);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const inner = (
+    <>
+      <span className="hist-item-body">
+        <span className="hist-item-name">
+          <Icon name="moon-stars" className="hist-act-icon" />
+          {t.sleepTitle}
+          {n.source === 'auto' && <span className="hist-sleep-auto">{t.sleepAutoBadge}</span>}
+        </span>
+        <div className="hist-item-stats">
+          {fmtDurationHM(mins * 60000)}
+          {n.wake ? ` · ${clk(n.bedtime)}→${clk(n.wake)}` : ''}
+          {n.quality ? ` · ${t.sleepQuality[n.quality]}` : ''}
+        </div>
+      </span>
+      {onOpen && <Icon name="arrow-up-right" className="go" />}
+    </>
+  );
+  return onOpen ? (
+    <button
+      className="hist-item hist-activity cat-sleep"
+      onClick={() => onOpen(n.id)}
+      aria-label={t.sleepTitle}
+    >
+      {inner}
+    </button>
+  ) : (
+    <div className="hist-item hist-activity cat-sleep">{inner}</div>
   );
 }
