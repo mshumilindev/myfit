@@ -28020,3 +28020,811 @@ button.badge {
 .menu-sides .sides-note {
   margin: 0 12px;
 }
+
+/* ===========================================================================
+   F5 · Mastery (design MT-01 … MT-08)
+   =========================================================================== */
+.mst {
+  color: var(--color-text);
+}
+.mst-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.mst .icon-btn {
+  border: none;
+  background: none;
+  color: var(--color-neutral-300);
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  cursor: pointer;
+}
+.mst .icon-btn i {
+  font-size: 20px;
+}
+.mst-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mst-head-title {
+  flex: 1;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.mst .rn {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  background: var(--color-accent-900);
+  padding: 2px 6px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+
+/* shared bar + chips (scoped, so they never touch the app's globals) */
+.mst .bar,
+.mst-practice-sheet .bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-neutral-900);
+  overflow: hidden;
+  display: block;
+}
+.mst .bar > i,
+.mst-practice-sheet .bar > i {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+.mst .chip,
+.mst-practice-sheet .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  line-height: 1;
+}
+.mst .chip.gold,
+.mst-practice-sheet .chip.gold {
+  background: var(--color-accent-900);
+  color: var(--color-accent-100);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst .chip.n,
+.mst-practice-sheet .chip.n {
+  background: var(--color-surface-2, #26282d);
+  color: var(--color-neutral-300);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.mst .chip.ok,
+.mst-practice-sheet .chip.ok {
+  background: var(--color-ok-tint);
+  color: var(--color-ok-text);
+  box-shadow: inset 0 0 0 1px var(--color-ok-line);
+}
+.mst-practice-sheet .mst-st.watch,
+.mst .mst-imp.goldd {
+  background: var(--color-accent-900);
+  color: var(--color-accent-300);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst .mst-imp.gold {
+  background: var(--color-accent-900);
+  color: var(--color-accent-100);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst-practice-sheet .mst-st.low {
+  background: var(--color-surface-2, #26282d);
+  color: var(--color-neutral-300);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+
+/* ring */
+.mst-ring {
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.mst-ring-in {
+  border-radius: 50%;
+  background: #191712;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- MT-03 hero ---------------------------------------------------------- */
+.mst-hero {
+  margin: 0 -20px 0;
+  padding: 10px 18px 20px;
+  background: var(--loopwash);
+  box-shadow: inset 0 -1px 0 var(--color-divider);
+}
+.mst-hero-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.mst-hero-num {
+  font-size: 33px;
+  letter-spacing: -0.02em;
+  color: var(--color-accent-100);
+}
+.mst-hero-num-lbl {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-accent-400);
+  margin-top: 2px;
+}
+.mst-hero-rank {
+  flex: 1;
+  min-width: 0;
+}
+.mst-rank-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mst-rank-name {
+  font-size: 25px;
+  letter-spacing: -0.02em;
+}
+.mst-rank-meaning {
+  font-size: 12px;
+  color: var(--color-accent-300);
+  line-height: 1.5;
+  margin-top: 7px;
+}
+.mst-balance-lbl {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent-300);
+  margin: 20px 0 12px;
+}
+.mst-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.mst-bal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mst-bal-name {
+  width: 128px;
+  flex: none;
+  font-size: 12px;
+  color: var(--color-neutral-300);
+}
+.mst-bal-wt {
+  color: var(--color-neutral-500);
+  font-size: 10px;
+}
+.mst-bal-bar {
+  flex: 1;
+  background: #241b0e;
+}
+.mst-bal-num {
+  width: 30px;
+  text-align: right;
+  font-size: 12px;
+  color: var(--color-neutral-300);
+}
+
+/* --- breakdown tiles ----------------------------------------------------- */
+.mst-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mst-bd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mst-bd-hint {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+.mst-tile {
+  border-radius: 14px;
+  background: var(--color-surface);
+  padding: 14px;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  border: none;
+  width: 100%;
+  text-align: left;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.mst-tile-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mst-tile-head > i {
+  font-size: 18px;
+  color: var(--color-accent);
+}
+.mst-tile-name {
+  flex: 1;
+  font-size: 15px;
+}
+.mst-tile-sub {
+  color: var(--color-neutral-500);
+  font-size: 11px;
+}
+.mst-tile-score {
+  font-size: 15px;
+  color: var(--color-accent-100);
+}
+.mst-tile-max {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+.mst-tile-max.gold {
+  color: var(--color-accent-400);
+}
+.mst-tile-bar {
+  margin: 11px 0 9px;
+}
+.mst-tile-read {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mst-tile-read.gold {
+  color: var(--color-accent-200);
+}
+.mst-src {
+  font-size: 9px;
+  padding: 2px 6px;
+}
+.mst-practice {
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  background: var(--loopwash);
+}
+.mst-practice .mst-tile-bar {
+  background: #241b0e;
+}
+.mst-practice-more {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 11px;
+  padding-top: 11px;
+  box-shadow: 0 -1px 0 var(--color-accent-800);
+  font-size: 11px;
+  color: var(--color-accent-300);
+}
+.mst-practice-more span {
+  flex: 1;
+}
+.mst-cta {
+  min-height: 52px;
+  font-size: 16px;
+  gap: 9px;
+  width: 100%;
+  margin-top: 4px;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #1a1305;
+}
+.mst-cta i {
+  color: #1a1305;
+}
+.mst-ranks-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  font-size: 14px;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+}
+.mst-ranks-link i:last-child {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+
+/* --- MT-08 practice sheet ------------------------------------------------ */
+.mst-ps-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mst-ps-head > i {
+  font-size: 18px;
+  color: var(--color-accent);
+}
+.mst-ps-title {
+  flex: 1;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+.mst-ps-sub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  line-height: 1.5;
+  margin: 9px 0 6px;
+}
+.mst-ps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.mst-ps-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  padding: 9px 14px;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.mst-ps-ic {
+  font-size: 17px;
+  color: var(--color-neutral-500);
+  flex: none;
+}
+.mst-ps-ic.ok {
+  color: var(--color-ok);
+}
+.mst-ps-ic.watch {
+  color: var(--color-accent);
+}
+.mst-ps-text {
+  flex: 1;
+  min-width: 0;
+}
+.mst-ps-name {
+  font-size: 13px;
+}
+.mst-ps-read {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 2px;
+}
+.mst-st {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* --- MT-04 shortfalls ---------------------------------------------------- */
+.mst-sf-next {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border-radius: 14px;
+  background: var(--loopwash);
+  padding: 14px 15px;
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.section-label.gold {
+  color: var(--color-accent-300);
+}
+.mst-sf-nextrank {
+  font-size: 17px;
+  margin-top: 5px;
+}
+.mst-sf-below {
+  text-align: right;
+  flex: none;
+}
+.mst-sf-below .num {
+  font-size: 22px;
+  color: var(--color-accent-100);
+}
+.mst-sf-intro {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  line-height: 1.5;
+  padding: 0 2px;
+}
+.mst-sf-rows {
+  padding: 0;
+  cursor: default;
+}
+.mst-sf-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+}
+.mst-sf-row + .mst-sf-row {
+  box-shadow: 0 -1px 0 var(--color-divider);
+}
+.mst-sf-ic {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.mst-sf-ic.gold {
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst-sf-ic.n {
+  background: var(--color-surface-2, #26282d);
+  color: var(--color-neutral-400);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.mst-sf-body {
+  flex: 1;
+  min-width: 0;
+}
+.mst-sf-title {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.mst-sf-sub {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 3px;
+}
+.mst-imp {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  flex: none;
+}
+.mst-sf-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  line-height: 1.5;
+}
+.mst-sf-note i {
+  font-size: 15px;
+  flex: none;
+}
+
+/* --- MT-05 ladder -------------------------------------------------------- */
+.mst-ladder {
+  gap: 10px;
+}
+.mst-scale {
+  font-size: 11px;
+  color: var(--color-accent-300);
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst-rung {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+}
+.mst-rung.locked {
+  opacity: 0.55;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  padding: 13px 12px;
+}
+.mst-rung-lock,
+.mst-rung-done {
+  font-size: 15px;
+  flex: none;
+}
+.mst-rung-lock {
+  color: var(--color-neutral-500);
+}
+.mst-rung-done {
+  color: var(--color-accent-600);
+}
+.mst-rung-body {
+  flex: 1;
+  min-width: 0;
+}
+.mst-rung-name {
+  font-size: 16px;
+}
+.mst-rung.done .mst-rung-name {
+  color: var(--color-neutral-300);
+  font-size: 15px;
+}
+.mst-rung-mean {
+  font-size: 11px;
+  color: var(--color-neutral-600);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.mst-rung-thr {
+  color: var(--color-neutral-500);
+}
+.mst-rung.current {
+  border-radius: 14px;
+  background: var(--loopwash);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+  padding: 15px;
+}
+.mst-rung-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.mst-here {
+  font-size: 11px;
+  color: var(--color-accent-300);
+}
+.mst-rung.current .mst-rung-mean {
+  color: var(--color-accent-200);
+}
+.mst-pips {
+  display: flex;
+  gap: 4px;
+  margin-top: 9px;
+}
+.mst-pips span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: #241b0e;
+}
+.mst-pips span.on {
+  background: var(--color-accent);
+}
+.mst-rung-thr.gold {
+  color: var(--color-accent-300);
+}
+
+/* --- MT-06 calibration --------------------------------------------------- */
+.mst-calib-hero {
+  padding: 20px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.mst-calib-title {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin-top: 16px;
+}
+.mst-calib-body {
+  font-size: 13px;
+  color: var(--color-neutral-500);
+  line-height: 1.55;
+  margin-top: 8px;
+  max-width: 32ch;
+}
+.mst-calib-prov {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--color-neutral-500);
+}
+.mst-calib-rank {
+  font-size: 18px;
+  color: var(--color-neutral-200);
+}
+.mst-conf-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mst-conf-head .section-label {
+  flex: 1;
+}
+.mst-conf-lvl {
+  font-size: 12px;
+  color: var(--color-accent-300);
+}
+.mst-conf-bars {
+  display: flex;
+  gap: 5px;
+  margin-top: 11px;
+}
+.mst-conf-bars .bar {
+  flex: 1;
+}
+.mst-conf-note {
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: 10px;
+}
+.mst-history {
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  background: var(--loopwash);
+  cursor: default;
+}
+.mst-hist-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mst-hist-head > i {
+  font-size: 17px;
+  color: var(--color-accent);
+}
+.mst-hist-q {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-accent-100);
+}
+.mst-opt {
+  font-size: 9px;
+  color: var(--color-accent-300);
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst-hist-body {
+  font-size: 12px;
+  color: var(--color-accent-200);
+  line-height: 1.5;
+  margin-top: 9px;
+}
+.mst-year {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 13px;
+}
+.mst-year-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #191712;
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex: none;
+}
+.mst-year-val {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--color-accent-100);
+  padding: 12px;
+  border-radius: 10px;
+  background: #191712;
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.mst-patq {
+  font-size: 12px;
+  color: var(--color-accent-200);
+  margin-top: 13px;
+}
+.mst-pat {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mst-pat button {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  font-size: 12px;
+  cursor: pointer;
+}
+.mst-pat button.on {
+  background: var(--color-accent-900);
+  color: var(--color-accent-100);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+}
+.mst-hist-floor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-accent-300);
+  margin-top: 11px;
+}
+.mst-save {
+  min-height: 50px;
+  font-size: 15px;
+  gap: 9px;
+  width: 100%;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #1a1305;
+}
+.mst-save i {
+  color: #1a1305;
+}
+
+/* --- MT-01 / MT-02 header seal badge ------------------------------------- */
+.mst-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
+  border: 0;
+  cursor: pointer;
+}
+.mst-badge.calib {
+  background: var(--color-surface-2, #26282d);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-700);
+  gap: 6px;
+}
+.mst-badge .mst-ring-in {
+  background: #191712;
+}
+.mst-badge-num {
+  font-size: 13px;
+  color: var(--color-accent-100);
+  line-height: 1;
+  font-weight: 500;
+}
+.mst-badge-ring {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.mst-badge-ring.calib {
+  background: conic-gradient(var(--color-neutral-600) 0 30%, var(--color-neutral-900) 30% 100%);
+}
+.mst-badge-in {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  display: grid;
+  place-items: center;
+}
+.mst-badge-dots {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  line-height: 1;
+  letter-spacing: 0.12em;
+}
+.mst-badge.calib .mst-badge-dots {
+  animation: mstCalibPulse 2.2s ease-in-out infinite;
+}
+@keyframes mstCalibPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}

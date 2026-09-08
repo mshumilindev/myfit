@@ -140,6 +140,12 @@ const EquipmentDetailView = lazy(() =>
     default: module.EquipmentDetailView,
   })),
 );
+const MasteryView = lazy(() =>
+  import('./views/MasteryView').then((module) => ({ default: module.MasteryView })),
+);
+const MasteryBadge = lazy(() =>
+  import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
+);
 const ApexApp = lazy(() =>
   import('./views/ApexApp').then((module) => ({ default: module.ApexApp })),
 );
@@ -182,6 +188,7 @@ export type Overlay =
       externalId?: string;
     }
   | { screen: 'equipment'; itemId: string; gymId?: string }
+  | { screen: 'mastery' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
 
@@ -340,6 +347,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'trends' || head === 'feats' || head === 'challenges')
     return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
+  if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
   if (head === 'recap' && parts[1])
@@ -1135,6 +1143,9 @@ export function App() {
               </button>
             </div>
             <div className="app-brand-actions">
+              <Suspense fallback={null}>
+                <MasteryBadge onOpen={() => setOverlay({ screen: 'mastery' })} />
+              </Suspense>
               <button
                 className="app-bell"
                 onClick={() => setOverlay({ screen: 'notifications' })}
@@ -1253,6 +1264,9 @@ export function App() {
           )}
           {activeOverlay?.screen === 'profile' && (
             <ProfileView userId={activeOverlay.userId} shell={shell} onClose={closeOverlay} />
+          )}
+          {activeOverlay?.screen === 'mastery' && (
+            <MasteryView shell={shell} onClose={closeOverlay} />
           )}
         </Suspense>
         {!activeOverlay && (

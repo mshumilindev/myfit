@@ -119,6 +119,17 @@ import { DiscoBall } from '@phosphor-icons/react/DiscoBall';
 import { Star } from '@phosphor-icons/react/Star';
 import { Timer } from '@phosphor-icons/react/Timer';
 import { FlagCheckered } from '@phosphor-icons/react/FlagCheckered';
+import { Hourglass } from '@phosphor-icons/react/Hourglass';
+import { Blueprint } from '@phosphor-icons/react/Blueprint';
+import { Bed } from '@phosphor-icons/react/Bed';
+import { Steps } from '@phosphor-icons/react/Steps';
+import { TrendUp } from '@phosphor-icons/react/TrendUp';
+import { UserSquare } from '@phosphor-icons/react/UserSquare';
+import { ThermometerSimple } from '@phosphor-icons/react/ThermometerSimple';
+import { ListNumbers } from '@phosphor-icons/react/ListNumbers';
+import { SneakerMove } from '@phosphor-icons/react/SneakerMove';
+import { CalendarPlus } from '@phosphor-icons/react/CalendarPlus';
+import { ShieldChevron } from '@phosphor-icons/react/ShieldChevron';
 import { Trash } from '@phosphor-icons/react/Trash';
 import { Trophy } from '@phosphor-icons/react/Trophy';
 import { UploadSimple } from '@phosphor-icons/react/UploadSimple';
@@ -255,6 +266,17 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'disco-ball': DiscoBall,
   timer: Timer,
   'flag-checkered': FlagCheckered,
+  hourglass: Hourglass,
+  blueprint: Blueprint,
+  bed: Bed,
+  steps: Steps,
+  'trend-up': TrendUp,
+  'user-square': UserSquare,
+  'thermometer-simple': ThermometerSimple,
+  'list-numbers': ListNumbers,
+  'sneaker-move': SneakerMove,
+  'calendar-plus': CalendarPlus,
+  'shield-chevron': ShieldChevron,
   trash: Trash,
   trophy: Trophy,
   user: User,

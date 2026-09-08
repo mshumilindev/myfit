@@ -59,6 +59,21 @@ export const MASTERY_RANKS: MasteryRank[] = [
 ];
 const RATING_MAX = 1000;
 
+/** Roughly how continuous the training history is (general, not precise). */
+export type TrainingPattern = 'continuous' | 'occasional' | 'frequent';
+/** Continuity multiplier applied to *self-reported* tenure only. */
+export const PATTERN_FACTOR: Record<TrainingPattern, number> = {
+  continuous: 1,
+  occasional: 0.7, // a few months on, a month or so off
+  frequent: 0.5, // long or frequent breaks (e.g. 6 months on, 3 off)
+};
+
+/** Optional self-reported experience inputs (Experience axis only). */
+export interface MasteryOpts {
+  trainingSinceYear?: number | null;
+  trainingPattern?: TrainingPattern | null;
+}
+
 export type AxisKey = 'strength' | 'consistency' | 'experience' | 'practice';
 export const AXIS_WEIGHT: Record<AxisKey, number> = {
   strength: 0.3,
@@ -217,22 +232,34 @@ function experienceAxis(
   finished: Workout[],
   now: number,
   trainingSinceYear: number | null,
+  trainingPattern: TrainingPattern | null,
 ): AxisScore {
   const nowYear = new Date(now).getFullYear();
-  let years: number;
+  let rawYears: number;
   let selfReported = false;
   if (trainingSinceYear && trainingSinceYear > 1950 && trainingSinceYear <= nowYear) {
-    years = nowYear - trainingSinceYear;
+    rawYears = nowYear - trainingSinceYear;
     selfReported = true;
   } else {
     const first = finished.reduce((min, w) => Math.min(min, w.startedAt ?? Infinity), Infinity);
-    years = Number.isFinite(first) ? (now - first) / (365 * DAY) : 0;
+    rawYears = Number.isFinite(first) ? (now - first) / (365 * DAY) : 0;
   }
-  const score = pct(years / 10); // 10 years saturates; a slow floor
+  // A break-riddled history counts for less — general, not exact. The pattern
+  // discounts self-reported tenure only; app-measured history is real sessions,
+  // so its continuity is already implicit.
+  const pattern: TrainingPattern = trainingPattern ?? 'continuous';
+  const factor = selfReported ? PATTERN_FACTOR[pattern] : 1;
+  const years = rawYears * factor;
+  const score = pct(years / 10); // 10 effective years saturates; a slow floor
   return {
     key: 'experience',
     score,
-    facts: { years: Math.round(years * 10) / 10, selfReported },
+    facts: {
+      years: Math.round(years * 10) / 10,
+      rawYears: Math.round(rawYears * 10) / 10,
+      selfReported,
+      pattern: selfReported ? pattern : null,
+    },
   };
 }
 
@@ -485,12 +512,12 @@ function buildShortfalls(
 
 /**
  * Compute the full Mastery read from the store. Pure — no side effects.
- * `trainingSinceYear` is the optional self-reported start year (Experience only).
+ * `opts` carries optional self-reported Experience inputs (start year + pattern).
  */
 export function computeMastery(
   state: Pick<StoreState, 'workouts' | 'bodyMetrics'>,
   now: number = Date.now(),
-  trainingSinceYear: number | null = null,
+  opts: MasteryOpts = {},
 ): MasteryResult {
   const finished = state.workouts
     .filter((w) => w.finishedAt !== null)
@@ -503,7 +530,12 @@ export function computeMastery(
 
   const strength = strengthAxis(finished, bodyKg, sex);
   const consistency = consistencyAxis(finished, now);
-  const experience = experienceAxis(finished, now, trainingSinceYear);
+  const experience = experienceAxis(
+    finished,
+    now,
+    opts.trainingSinceYear ?? null,
+    opts.trainingPattern ?? null,
+  );
   const signals = practiceSignals(finished, now);
   const practiceScore = signals.length
     ? Math.round(sum(signals.map((s) => s.score)) / signals.length)

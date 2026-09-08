@@ -75,6 +75,7 @@ const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
 const EX_SIDES_KEY = 'spotter.exerciseSides';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
+const MASTERY_KEY = 'spotter.mastery';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -111,6 +112,8 @@ export interface StoreState {
    *  exercise (equipment + name). Local only. */
   exerciseLoadTypes: Record<string, LoadType>;
   exerciseSides: Record<string, 'one' | 'both'>;
+  /** Self-reported training history for the Mastery Experience axis (optional). */
+  mastery: { sinceYear: number | null; pattern: 'continuous' | 'occasional' | 'frequent' | null };
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Goals: physique target, block focus, long-term goals (My Fit). */
@@ -142,6 +145,7 @@ let state: StoreState = {
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
   exerciseSides: load<Record<string, 'one' | 'both'>>(EX_SIDES_KEY, {}),
+  mastery: load<StoreState['mastery']>(MASTERY_KEY, { sinceYear: null, pattern: null }),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   queue: [],
@@ -172,6 +176,7 @@ function persist(): void {
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
     localStorage.setItem(EX_LOAD_KEY, JSON.stringify(state.exerciseLoadTypes));
     localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
+    localStorage.setItem(MASTERY_KEY, JSON.stringify(state.mastery));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
     localStorage.setItem(GOALS_KEY, JSON.stringify(state.goals));
   } catch {
@@ -1549,6 +1554,14 @@ export function setExerciseSides(name: string, sides: 'one' | 'both' | null): vo
   else next[key] = sides;
   setState({ exerciseSides: next });
 }
+
+/** Self-reported training history for the Mastery Experience axis. */
+export function setMasteryHistory(
+  sinceYear: number | null,
+  pattern: 'continuous' | 'occasional' | 'frequent' | null,
+): void {
+  setState({ mastery: { sinceYear, pattern } });
+}
 /** Whether the Sides control makes sense for a lift — dumbbell / cable /
  *  kettlebell, single-limb machines, and one-arm/one-leg moves. Hidden for
  *  inherently bilateral lifts (a barbell squat). */
@@ -2555,6 +2568,7 @@ export function resetLocalData(): void {
     exerciseUnits: {},
     exerciseLoadTypes: {},
     exerciseSides: {},
+    mastery: { sinceYear: null, pattern: null },
     bodyMetrics: EMPTY_BODY,
     goals: EMPTY_GOALS,
     queue: [],
