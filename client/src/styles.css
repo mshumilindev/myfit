@@ -30192,3 +30192,183 @@ body {
   letter-spacing: -0.02em;
   color: var(--color-text);
 }
+
+/* ── Sleep · Good-night / mid-sleep screen (SL-03) ───────────────── */
+.sleep-night {
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+.sleep-night-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+.sleep-moonwrap {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  margin-bottom: 22px;
+}
+.sleep-moonwrap .moon-glyph {
+  position: relative;
+  z-index: 1;
+}
+.sleep-breathe {
+  position: absolute;
+  inset: -26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(159, 178, 230, 0.28), transparent 66%);
+  animation: sleepBreathe 5s ease-in-out infinite;
+  z-index: 0;
+}
+@keyframes sleepBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.09);
+    opacity: 1;
+  }
+}
+.sleep-z {
+  position: absolute;
+  z-index: 2;
+  color: var(--s-moon-lt);
+  font-weight: 600;
+  animation: sleepZpop 3.4s ease-in-out infinite;
+}
+@keyframes sleepZpop {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  35%,
+  65% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+}
+.sleep-z1 {
+  right: -6px;
+  top: 2px;
+  font-size: 13px;
+  animation-delay: 0s;
+}
+.sleep-z2 {
+  right: -17px;
+  top: -8px;
+  font-size: 16px;
+  animation-delay: 1.1s;
+}
+.sleep-z3 {
+  right: -30px;
+  top: -18px;
+  font-size: 20px;
+  animation-delay: 2.2s;
+}
+.sleep-asleep-lbl {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--s-faint);
+}
+.sleep-elapsed {
+  font-size: 44px;
+  letter-spacing: -0.03em;
+  color: var(--s-text);
+  margin-top: 10px;
+  line-height: 1;
+}
+.sleep-since-line {
+  font-size: 13px;
+  color: var(--s-moon-lt);
+  margin-top: 10px;
+}
+.sleep-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 26, 46, 0.6);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  font-size: 11px;
+  color: var(--s-dim);
+}
+.sleep-phase i {
+  color: var(--s-moon-lt);
+  font-size: 13px;
+}
+.sleep-night-foot {
+  font-size: 11px;
+  color: var(--s-fainter);
+  line-height: 1.5;
+  margin: 0 auto 14px;
+  max-width: 34ch;
+}
+.sleep-stop {
+  min-height: 54px;
+  font-size: 15px;
+}
+.sleep-discard {
+  margin: 12px auto 0;
+  border: 0;
+  background: none;
+  color: var(--s-fainter);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+.sleep-discard:hover {
+  color: var(--s-dim);
+}
+.sleep-discard-confirm {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.sleep-discard-q {
+  font-size: 13px;
+  color: var(--s-dim);
+}
+.sleep-discard-row {
+  display: flex;
+  gap: 10px;
+}
+.sleep-discard-yes {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 11px;
+  border: 0;
+  background: rgba(120, 60, 70, 0.35);
+  box-shadow: inset 0 0 0 1px #6b3b48;
+  color: #f0c9d0;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sleep-discard-no {
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 11px;
+  border: 0;
+  background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-dim);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}

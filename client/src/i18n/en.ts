@@ -200,6 +200,11 @@ export const en = {
   sleepAdjustTimes: 'Adjust times',
   sleepLooksRight: 'Looks right',
 
+  sleepAsleepLabel: 'Asleep',
+  sleepSinceClock: (clock: string) => `since ${clock}`,
+  sleepDiscard: 'Discard sleep',
+  sleepDiscardConfirm: 'Discard this sleep? It won’t be logged.',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

@@ -210,6 +210,11 @@ export const lt: Strings = {
   sleepAdjustTimes: 'Keisti laiką',
   sleepLooksRight: 'Viskas gerai',
 
+  sleepAsleepLabel: 'Miegi',
+  sleepSinceClock: (clock: string) => `nuo ${clock}`,
+  sleepDiscard: 'Atmesti miegą',
+  sleepDiscardConfirm: 'Atmesti šį miegą? Jis nebus įrašytas.',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

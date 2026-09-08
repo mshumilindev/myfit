@@ -109,6 +109,7 @@ import { Scales } from '@phosphor-icons/react/Scales';
 import { Ruler } from '@phosphor-icons/react/Ruler';
 import { ShieldCheck } from '@phosphor-icons/react/ShieldCheck';
 import { Sparkle } from '@phosphor-icons/react/Sparkle';
+import { SunHorizon } from '@phosphor-icons/react/SunHorizon';
 import { SignOut } from '@phosphor-icons/react/SignOut';
 import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
 import { GraduationCap } from '@phosphor-icons/react/GraduationCap';
@@ -258,6 +259,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   ruler: Ruler,
   'shield-check': ShieldCheck,
   sparkle: Sparkle,
+  'sun-horizon': SunHorizon,
   lightning: Lightning,
   'floppy-disk': FloppyDisk,
   'sign-out': SignOut,

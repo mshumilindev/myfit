@@ -209,6 +209,11 @@ export const pl: Strings = {
   sleepAdjustTimes: 'Zmień godziny',
   sleepLooksRight: 'Wygląda dobrze',
 
+  sleepAsleepLabel: 'Śpisz',
+  sleepSinceClock: (clock: string) => `od ${clock}`,
+  sleepDiscard: 'Odrzuć sen',
+  sleepDiscardConfirm: 'Odrzucić ten sen? Nie zostanie zapisany.',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

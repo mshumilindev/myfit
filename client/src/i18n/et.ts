@@ -197,6 +197,11 @@ export const et: Strings = {
   sleepAdjustTimes: 'Muuda kellaaegu',
   sleepLooksRight: 'Kõik õige',
 
+  sleepAsleepLabel: 'Magad',
+  sleepSinceClock: (clock: string) => `alates ${clock}`,
+  sleepDiscard: 'Loobu unest',
+  sleepDiscardConfirm: 'Loobuda sellest unest? Seda ei salvestata.',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

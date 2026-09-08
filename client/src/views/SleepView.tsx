@@ -4,11 +4,12 @@
  * schedule editors. Night mode (token flip + Spotter Sky) is applied app-wide by
  * App while a live night runs.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useStore,
   liveSleep,
   stopSleep,
+  cancelSleep,
   setSleepQuality,
   logSleepNight,
   setSleepSchedule,
@@ -18,6 +19,7 @@ import {
 } from '../store';
 import { useT, fmtDurationHuman } from '../i18n';
 import { Icon, Switch } from '../ui';
+import { MoonGlyph } from '../components/MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
 import {
   nightDurationMin,
@@ -76,26 +78,67 @@ export function SleepView({
     live ? (wake ? 'wake' : 'night') : (initialMode ?? 'hub'),
   );
   const [loggedId, setLoggedId] = useState<string | null>(null);
+  const [tick, setTick] = useState(now);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  // Live-tick the elapsed clock while asleep (once a minute is plenty).
+  useEffect(() => {
+    if (!live) return;
+    const id = window.setInterval(() => setTick(Date.now()), 30000);
+    return () => window.clearInterval(id);
+  }, [live]);
   const moon = moonInfo(new Date(now));
   const goalMin = store.sleepSettings.goalMin || 480;
 
   if (mode === 'night' && live) {
-    const mins = nightDurationMin(live, now);
+    const mins = nightDurationMin(live, tick);
     return (
-      <div className="screen sleep-screen">
-        <div className="sleep-moonline">
+      <div className="screen sleep-night">
+        <div className="sleep-night-body">
+          <div className="sleep-moonwrap">
+            <span className="sleep-breathe" aria-hidden="true" />
+            <MoonGlyph size={104} date={now} halo={false} />
+            <span className="sleep-z sleep-z1">z</span>
+            <span className="sleep-z sleep-z2">z</span>
+            <span className="sleep-z sleep-z3">z</span>
+          </div>
+          <div className="sleep-asleep-lbl">{t.sleepAsleepLabel}</div>
+          <div className="sleep-elapsed num">{dur(mins)}</div>
+          <div className="sleep-since-line">{t.sleepSinceClock(hhmm(live.bedtime))}</div>
+          <div className="phase sleep-phase">
+            <Icon name="moon-stars" weight="fill" />
+            {t.sleepNightModeNote}
+          </div>
+        </div>
+        <div className="sleep-night-foot">
           {t.sleepMoonLine(t.moonPhase[moon.name] ?? moon.name, illumPct(moon), tzPlace())}
         </div>
-        <div className="sleep-hero">
-          <div className="sleep-zz">z z z</div>
-          <h1 className="sleep-h1">{t.sleepGoodNight}</h1>
-          <p className="sleep-cap">{t.sleepRestingToo}</p>
-          <div className="sleep-since">{t.sleepAsleepFor(dur(mins), hhmm(live.bedtime))}</div>
-          <div className="sleep-note">{t.sleepNightModeNote}</div>
-        </div>
-        <button className="btn-out-moon sleep-wide" onClick={() => setMode('wake')}>
+        <button className="btn-out-moon sleep-wide sleep-stop" onClick={() => setMode('wake')}>
+          <Icon name="sun-horizon" weight="bold" />
           {t.sleepStopAction}
         </button>
+        {discardOpen ? (
+          <div className="sleep-discard-confirm">
+            <span className="sleep-discard-q">{t.sleepDiscardConfirm}</span>
+            <div className="sleep-discard-row">
+              <button
+                className="sleep-discard-yes"
+                onClick={() => {
+                  cancelSleep();
+                  onClose();
+                }}
+              >
+                {t.sleepDiscard}
+              </button>
+              <button className="sleep-discard-no" onClick={() => setDiscardOpen(false)}>
+                {t.cancel}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="sleep-discard" onClick={() => setDiscardOpen(true)}>
+            {t.sleepDiscard}
+          </button>
+        )}
       </div>
     );
   }

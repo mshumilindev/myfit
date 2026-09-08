@@ -208,6 +208,11 @@ export const uk: Strings = {
   sleepAdjustTimes: 'Змінити час',
   sleepLooksRight: 'Все вірно',
 
+  sleepAsleepLabel: 'Уві сні',
+  sleepSinceClock: (clock: string) => `з ${clock}`,
+  sleepDiscard: 'Скасувати сон',
+  sleepDiscardConfirm: 'Скасувати цей сон? Він не запишеться.',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,
