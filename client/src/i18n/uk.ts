@@ -1036,6 +1036,7 @@ export const uk: Strings = {
   actDeleteBody: 'Її буде прибрано з історії.',
   kcalOut: 'ккал · останні 7 днів',
   energyLifting: (n: number) => `${n} силові`,
+  energyResting: (n: number) => `${n} у спокої`,
   energyCardio: (n: number) => `${n} кардіо`,
   actStart: 'Почати',
   actReadyCap: 'Таймер запуститься, коли натиснеш «Почати».',

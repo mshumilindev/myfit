@@ -14,7 +14,7 @@
  * The number reflects the whole picture and moves as your training does.
  * Everything is derived from data already logged — nothing new is stored.
  */
-import type { Workout, Exercise } from './types';
+import type { Workout, Exercise, SleepNight } from './types';
 import type { MuscleGroup } from './data/exercises';
 import {
   consistencyStreak,
@@ -27,6 +27,7 @@ import {
 } from './store';
 import { computeStandards, LEVELS, type Sex } from './standards';
 import { topHistory, nextTarget } from './progression';
+import { sleepStats, finishedNights } from './sleep';
 
 // --- Ranks -----------------------------------------------------------------
 export type MasteryRankId =
@@ -264,7 +265,12 @@ function experienceAxis(
 }
 
 // --- practice signals ------------------------------------------------------
-function practiceSignals(finished: Workout[], now: number): PracticeSignal[] {
+function practiceSignals(
+  finished: Workout[],
+  now: number,
+  sleeps: SleepNight[],
+  sleepGoalMin: number,
+): PracticeSignal[] {
   const windowStart = now - 56 * DAY;
   const recent = finished.filter((w) => (w.finishedAt ?? 0) >= windowStart);
   const weeks = 8;
@@ -376,7 +382,20 @@ function practiceSignals(finished: Workout[], now: number): PracticeSignal[] {
   // Ideal ~3–5 sessions/wk; penalise 7/7 grind and near-zero alike.
   const cadence =
     perWeek <= 0 ? 0 : perWeek <= 5 ? clamp01(perWeek / 3) : clamp01(1 - (perWeek - 5) / 3);
-  const recoveryScore = pct(cadence);
+  // Sleep is part of the recovery discipline: consistent, sufficient sleep lifts
+  // it; chronic short/irregular sleep drags it. Only blended once nights exist,
+  // so users who never log sleep aren't penalised.
+  const sleepNights = finishedNights(sleeps, now).filter((n) => n.bedtime >= windowStart);
+  let recoveryScore = pct(cadence);
+  let sleepFact: number | undefined;
+  if (sleepNights.length >= 3) {
+    const st = sleepStats(sleeps, now, sleepGoalMin, 28);
+    const durScore = clamp01(st.avgMin / sleepGoalMin);
+    const consScore = clamp01(st.consistencyPct / 100);
+    const sleepScore = 0.6 * durScore + 0.4 * consScore;
+    sleepFact = Math.round(st.avgMin);
+    recoveryScore = pct(0.55 * cadence + 0.45 * sleepScore);
+  }
 
   // 8 · cardio & conditioning (any conditioning logged in the window)
   // Activities aren't muscle sets — count cardio-kind exercises + rough target.
@@ -423,7 +442,10 @@ function practiceSignals(finished: Workout[], now: number): PracticeSignal[] {
     mk('warmup', warmupScore, { pctWarmed: warmupScore }),
     mk('cooldown', cooldownScore, { sessions: sessionsWithCooldown }),
     mk('rest', restScore, { pctOk: restScore, shortish: restShort }),
-    mk('recovery', recoveryScore, { perWeek: Math.round(perWeek * 10) / 10 }),
+    mk('recovery', recoveryScore, {
+      perWeek: Math.round(perWeek * 10) / 10,
+      sleepAvgMin: sleepFact ?? null,
+    }),
     mk('cardio', cardioScore, { sessions: cardioSessions }),
     mk('structure', structureScore, { pctGood: structureScore }),
   ];
@@ -515,7 +537,8 @@ function buildShortfalls(
  * `opts` carries optional self-reported Experience inputs (start year + pattern).
  */
 export function computeMastery(
-  state: Pick<StoreState, 'workouts' | 'bodyMetrics'>,
+  state: Pick<StoreState, 'workouts' | 'bodyMetrics'> &
+    Partial<Pick<StoreState, 'sleeps' | 'sleepSettings'>>,
   now: number = Date.now(),
   opts: MasteryOpts = {},
 ): MasteryResult {
@@ -536,7 +559,12 @@ export function computeMastery(
     opts.trainingSinceYear ?? null,
     opts.trainingPattern ?? null,
   );
-  const signals = practiceSignals(finished, now);
+  const signals = practiceSignals(
+    finished,
+    now,
+    state.sleeps ?? [],
+    state.sleepSettings?.goalMin ?? 480,
+  );
   const practiceScore = signals.length
     ? Math.round(sum(signals.map((s) => s.score)) / signals.length)
     : 0;

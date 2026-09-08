@@ -43,6 +43,7 @@ import {
   type DeloadSuggestion,
 } from '../fatigue';
 import { activityRecoveryBias } from '../activities';
+import { sleepReadinessBias } from '../sleep';
 import {
   personalLandmarks,
   tuneSummary,
@@ -288,7 +289,11 @@ export function ProgressView({
   const fatMap = muscleFatigue(mapWorkouts, nowTs, pLandmarks);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
   for (const f of fatMap.values()) if (f.sets > 0) fatColors[f.muscle] = FATIGUE_COLOR[f.level];
-  const deload = deloadSuggestion(fatMap, activityRecoveryBias(store.activities, nowTs));
+  const deload = deloadSuggestion(
+    fatMap,
+    activityRecoveryBias(store.activities, nowTs) +
+      0.6 * sleepReadinessBias(store.sleeps, nowTs, store.sleepSettings.goalMin),
+  );
   const weekTotal = [...volThisWeek.values()].reduce((a, b) => a + b, 0);
   const emptyMuscles = muscleRows.filter((r) => r.v === 0).map((r) => t.muscleGroups[r.m]);
   const topMuscle = muscleRows.length > 0 && muscleRows[0].v > 0 ? muscleRows[0] : null;

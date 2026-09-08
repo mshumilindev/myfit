@@ -34,6 +34,8 @@ import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet } from '../components/ActivitySheet';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
+import { bmrKcal, overnightKcal } from '../energy';
+import { nightDurationMin, finishedNights } from '../sleep';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
@@ -353,10 +355,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     .filter((w) => w.finishedAt !== null && w.startedAt >= weekAgoTs)
     .reduce((s, w) => s + (workoutCalories(w, bodyKg) ?? 0), 0);
   const activityKcalWeek = activityWeek(store.activities, now, bodyKg).totalKcal;
+  const bmr = bmrKcal(store.bodyMetrics, bodyKg, now);
+  const restKcalWeek = finishedNights(store.sleeps, now)
+    .filter((n) => n.bedtime >= weekAgoTs)
+    .reduce((sum, n) => sum + (overnightKcal(nightDurationMin(n, now), bmr) ?? 0), 0);
   const energyOut = {
     lift: Math.round(liftKcalWeek),
     activities: Math.round(activityKcalWeek),
-    total: Math.round(liftKcalWeek + activityKcalWeek),
+    rest: Math.round(restKcalWeek),
+    total: Math.round(liftKcalWeek + activityKcalWeek + restKcalWeek),
   };
   const byName = new Map<string, { recW: number; recReps: number; recTs: number }>();
   for (const w of finished) {
@@ -1293,6 +1300,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   </div>
                   <div className="te-split">
                     {t.energyLifting(energyOut.lift)} · {t.energyCardio(energyOut.activities)}
+                    {energyOut.rest > 0 ? ` · ${t.energyResting(energyOut.rest)}` : ''}
                   </div>
                 </div>
               </div>
