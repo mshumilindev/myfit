@@ -21,7 +21,6 @@ import { localizedEquipName, equipCategoryLabel } from '../data/equipmentI18n';
 import { equipmentFor, resolveMuscles, setExerciseEquipmentItems } from '../store';
 import { useT } from '../i18n';
 import { tokenMatch } from '../search';
-import { MuscleChip } from './Muscle';
 import { Icon, Sheet } from '../ui';
 
 export function EquipmentPickerSheet({
@@ -190,13 +189,6 @@ export function EquipmentPickerSheet({
                             {!inGym && !on && <span className="eq-tile-add">＋</span>}
                           </span>
                           <span className="eq-tile-name">{localizedEquipName(it, locale)}</span>
-                          {it.muscles.length > 0 && (
-                            <span className="eq-tile-mus">
-                              {it.muscles.slice(0, 2).map((m) => (
-                                <MuscleChip key={m} muscle={m} tone="primary" />
-                              ))}
-                            </span>
-                          )}
                         </button>
                       );
                     })}

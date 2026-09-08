@@ -28,6 +28,7 @@ import {
   knownExercises,
   perHandFactor,
   sidesEligible,
+  sidesFor,
   setExerciseSides,
   muscleSetsInWorkout,
   muscleWorkSorted,
@@ -846,11 +847,11 @@ export function SessionView(props: {
               {grp && !groupDone && grp.active && <span className="ss-now">{t.nowLabel}</span>}
               {!grp && (
                 <button
-                  className="dots"
+                  className="dots ex-settings"
                   onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
                   aria-label={t.menuAction}
                 >
-                  <Icon name="dots-three-vertical" />
+                  <Icon name="sliders-horizontal" />
                 </button>
               )}
             </>
@@ -2381,6 +2382,40 @@ export function SessionView(props: {
           return (
             <Sheet padded={false} onClose={() => setSheet(null)}>
               <div className="sheet-label">{t.exerciseMenuTitle(ex.name, ex.sets.length)}</div>
+              {sidesEligible(ex) &&
+                loadTypeFor(ex) !== 'assist' &&
+                loadTypeFor(ex) !== 'band' &&
+                (() => {
+                  const sv = sidesFor(ex.name) ?? (perHandFactor(ex) === 2 ? 'one' : 'both');
+                  return (
+                    <div className="menu-sides sides-block">
+                      <div className="toggle-row sides-row">
+                        <Icon name="arrows-out-line-horizontal" />
+                        <span className="lab">{t.sidesLabel}</span>
+                        <div className="seg2 sides-seg">
+                          <button
+                            className={sv === 'both' ? 'active' : ''}
+                            onClick={() => setExerciseSides(ex.name, 'both')}
+                          >
+                            {t.sidesBoth}
+                          </button>
+                          <button
+                            className={sv === 'one' ? 'active' : ''}
+                            onClick={() => setExerciseSides(ex.name, 'one')}
+                          >
+                            {t.sidesOne}
+                          </button>
+                        </div>
+                      </div>
+                      {sv === 'one' && (
+                        <div className="sides-note">
+                          <Icon name="info" />
+                          {t.sidesNote}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               <button
                 className="menu-item"
                 onClick={() => setSheet({ kind: 'replace', exId: ex.id })}

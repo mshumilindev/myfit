@@ -1554,14 +1554,17 @@ export function setExerciseSides(name: string, sides: 'one' | 'both' | null): vo
  *  inherently bilateral lifts (a barbell squat). */
 export function sidesEligible(ex: Pick<Exercise, 'name' | 'equipment'>): boolean {
   const eq = equipmentFor(ex);
+  // Free-weight & cable work is inherently per-limb — always offer the choice.
   if (eq.includes('dumbbell') || eq.includes('cable') || eq.includes('kettlebell')) return true;
-  if (eq.includes('machine')) {
-    const n = `${ex.name} ${canonicalExerciseName(ex.name)}`.toLowerCase();
-    if (ONE_ARM_NAME.test(n) || /\bleg\b|seated|lying/.test(n)) return true;
-  }
-  const name = ex.name.trim().toLowerCase();
-  const canon = canonicalExerciseName(ex.name).toLowerCase();
-  return ONE_ARM_NAME.test(name) || ONE_ARM_NAME.test(canon);
+  const n = `${ex.name} ${canonicalExerciseName(ex.name)}`.toLowerCase();
+  // Any explicit one/single-arm/leg or unilateral move, whatever the equipment.
+  if (ONE_ARM_NAME.test(n)) return true;
+  // Single-limb-capable machines: leg extension/curl/press, hip abd/adduction,
+  // calf, glute work. Body-position words (seated/lying) are NOT signals — they
+  // wrongly caught bilateral machines (seated row, lying t-bar row).
+  if (eq.includes('machine') && /\bleg\b|abduct|adduct|kickback|\bcalf\b|glute/.test(n))
+    return true;
+  return false;
 }
 /** The band library for a gym, falling back to sensible defaults. */
 export function bandLibraryFor(gym: Gym | null | undefined): readonly BandRung[] {

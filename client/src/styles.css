@@ -28006,3 +28006,15 @@ button.badge {
   color: var(--color-accent);
   background: transparent;
 }
+
+/* Sides (one/two) control at the top of the exercise settings menu (F4) */
+.menu-sides {
+  margin: 2px 10px 8px;
+  overflow: hidden;
+}
+.menu-sides .sides-row {
+  padding: 12px;
+}
+.menu-sides .sides-note {
+  margin: 0 12px;
+}
