@@ -705,7 +705,10 @@ export function App() {
   // library and detail are always available (no longer flag-gated).
   const overlayBlocked = overlay?.screen === 'settings' && role !== 'admin';
   const activeOverlay = overlayBlocked ? null : overlay;
-  const showTabbar = !activeOverlay || activeOverlay.screen === 'session';
+  // The live session is a focused mode with its own action dock and a back
+  // caret (the workout stays live, resumable from Today) — no global tab bar,
+  // matching FEATURES-AC F-02 (session screens have no tabbar).
+  const showTabbar = !activeOverlay;
   const canEdgeSwipeBack =
     authed &&
     !joinToken &&
