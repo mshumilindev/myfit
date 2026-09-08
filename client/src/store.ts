@@ -44,6 +44,10 @@ import {
   type SyncError,
   type WeightEntry,
   type Workout,
+  type SleepNight,
+  type SleepSchedule,
+  type SleepSettings,
+  type SleepQuality,
 } from './types';
 import {
   canonicalExerciseName,
@@ -76,6 +80,9 @@ const EX_LOAD_KEY = 'spotter.exerciseLoads';
 const EX_SIDES_KEY = 'spotter.exerciseSides';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
 const MASTERY_KEY = 'spotter.mastery';
+const SLEEP_KEY = 'spotter.sleeps';
+const SLEEP_SCHED_KEY = 'spotter.sleep.schedule';
+const SLEEP_SET_KEY = 'spotter.sleep.settings';
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -121,6 +128,12 @@ export interface StoreState {
   };
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
+  /** Logged nights; a live (in-progress) night has wake === null. */
+  sleeps: SleepNight[];
+  /** Intended sleep rhythm (one plan, or per weekday). */
+  sleepSchedule: SleepSchedule;
+  /** Sleep behaviour toggles + goal. */
+  sleepSettings: SleepSettings;
   /** Goals: physique target, block focus, long-term goals (My Fit). */
   goals: FitGoals;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
@@ -156,6 +169,19 @@ let state: StoreState = {
     seenRating: null,
   }),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
+  sleeps: load<SleepNight[]>(SLEEP_KEY, []),
+  sleepSchedule: load<SleepSchedule>(SLEEP_SCHED_KEY, {
+    sameEveryNight: true,
+    every: null,
+    byDay: {},
+  }),
+  sleepSettings: load<SleepSettings>(SLEEP_SET_KEY, {
+    autoDim: false,
+    autoLog: false,
+    goalMin: 480,
+    lastDimDay: null,
+    patternOffer: 'unseen',
+  }),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   queue: [],
   syncStatus: 'pending',
@@ -187,6 +213,9 @@ function persist(): void {
     localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
     localStorage.setItem(MASTERY_KEY, JSON.stringify(state.mastery));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
+    localStorage.setItem(SLEEP_KEY, JSON.stringify(state.sleeps));
+    localStorage.setItem(SLEEP_SCHED_KEY, JSON.stringify(state.sleepSchedule));
+    localStorage.setItem(SLEEP_SET_KEY, JSON.stringify(state.sleepSettings));
     localStorage.setItem(GOALS_KEY, JSON.stringify(state.goals));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
@@ -1576,6 +1605,100 @@ export function setMasteryHistory(
 export function setMasterySeenRating(rating: number): void {
   setState({ mastery: { ...state.mastery, seenRating: rating } });
 }
+
+// ---------------------------------------------------------------------------
+// Sleep — a live night mirrors the open-workout model (wake === null while in
+// progress). Nights persist locally like activities; nothing here re-prompts
+// geolocation.
+// ---------------------------------------------------------------------------
+
+/** Local YYYY-MM-DD for an epoch ms (the night's identity is its wake day). */
+export function sleepDayId(ts: number): string {
+  const d = new Date(ts);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/** The live (in-progress) night, if any. */
+export function liveSleep(list: SleepNight[] | null | undefined): SleepNight | null {
+  return (list ?? []).find((n) => n.wake === null) ?? null;
+}
+
+/** Begin a live night (idempotent — returns the existing one if already asleep). */
+export function startSleep(bedtime: number = Date.now()): SleepNight {
+  const existing = liveSleep(state.sleeps);
+  if (existing) return existing;
+  const night: SleepNight = {
+    id: uuid(),
+    date: sleepDayId(bedtime),
+    bedtime,
+    wake: null,
+    source: 'live',
+    updatedAt: Date.now(),
+  };
+  setState({ sleeps: [night, ...state.sleeps] });
+  return night;
+}
+
+/** End the live night at `wakeAt`; its identity becomes the wake day. */
+export function stopSleep(wakeAt: number = Date.now()): SleepNight | null {
+  const live = liveSleep(state.sleeps);
+  if (!live) return null;
+  const wake = Math.max(wakeAt, live.bedtime + 60000);
+  const updated: SleepNight = { ...live, wake, date: sleepDayId(wake), updatedAt: Date.now() };
+  setState({ sleeps: state.sleeps.map((n) => (n.id === live.id ? updated : n)) });
+  return updated;
+}
+
+/** Discard the live night without logging it. */
+export function cancelSleep(): void {
+  const live = liveSleep(state.sleeps);
+  if (!live) return;
+  setState({ sleeps: state.sleeps.filter((n) => n.id !== live.id) });
+}
+
+/** Add or replace a finished night (backfill / auto / schedule). One night per date. */
+export function logSleepNight(input: {
+  date: string;
+  bedtime: number;
+  wake: number;
+  quality?: SleepQuality | null;
+  source: SleepNight['source'];
+}): SleepNight {
+  const night: SleepNight = { id: uuid(), updatedAt: Date.now(), ...input };
+  const withoutSameDay = state.sleeps.filter((n) => !(n.wake !== null && n.date === input.date));
+  setState({
+    sleeps: [night, ...withoutSameDay].sort((a, b) => b.bedtime - a.bedtime),
+  });
+  return night;
+}
+
+/** Edit a night's times / quality / date. */
+export function updateSleepNight(id: string, patch: Partial<SleepNight>): void {
+  setState({
+    sleeps: state.sleeps.map((n) => (n.id === id ? { ...n, ...patch, updatedAt: Date.now() } : n)),
+  });
+}
+
+/** Remove a logged night. */
+export function removeSleepNight(id: string): void {
+  setState({ sleeps: state.sleeps.filter((n) => n.id !== id) });
+}
+
+/** Set the optional morning quality rating. */
+export function setSleepQuality(id: string, quality: SleepQuality | null): void {
+  updateSleepNight(id, { quality });
+}
+
+/** Replace the sleep schedule. */
+export function setSleepSchedule(schedule: SleepSchedule): void {
+  setState({ sleepSchedule: schedule });
+}
+
+/** Merge sleep settings. */
+export function setSleepSettings(patch: Partial<SleepSettings>): void {
+  setState({ sleepSettings: { ...state.sleepSettings, ...patch } });
+}
 /** Whether the Sides control makes sense for a lift — dumbbell / cable /
  *  kettlebell, single-limb machines, and one-arm/one-leg moves. Hidden for
  *  inherently bilateral lifts (a barbell squat). */
@@ -2565,6 +2688,9 @@ export function resetLocalData(): void {
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
+  localStorage.removeItem(SLEEP_KEY);
+  localStorage.removeItem(SLEEP_SCHED_KEY);
+  localStorage.removeItem(SLEEP_SET_KEY);
   localStorage.removeItem(WEIGHT_UNIT_KEY);
   localStorage.removeItem(EX_UNIT_KEY);
   localStorage.removeItem(EX_LOAD_KEY);
@@ -2584,6 +2710,15 @@ export function resetLocalData(): void {
     exerciseSides: {},
     mastery: { sinceYear: null, pattern: null, seenRating: null },
     bodyMetrics: EMPTY_BODY,
+    sleeps: [],
+    sleepSchedule: { sameEveryNight: true, every: null, byDay: {} },
+    sleepSettings: {
+      autoDim: false,
+      autoLog: false,
+      goalMin: 480,
+      lastDimDay: null,
+      patternOffer: 'unseen',
+    },
     goals: EMPTY_GOALS,
     queue: [],
     syncStatus: 'pending',

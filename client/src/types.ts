@@ -111,6 +111,60 @@ export interface BodyMetrics {
   updatedAt?: number;
 }
 
+// ---------------------------------------------------------------------------
+// Sleep (My Fit · Sleep) — a first-class recovery record.
+// ---------------------------------------------------------------------------
+
+/** How a night got into the log. */
+export type SleepSource = 'live' | 'backfill' | 'auto' | 'schedule';
+/** Optional morning self-rating. */
+export type SleepQuality = 'restless' | 'ok' | 'good';
+
+/** One logged night. A live (in-progress) night has `wake === null`. */
+export interface SleepNight {
+  id: string;
+  /** Local date key (YYYY-MM-DD) of the morning you woke — the night's identity. */
+  date: string;
+  /** Epoch ms you went to bed. */
+  bedtime: number;
+  /** Epoch ms you woke; null while a live night is still in progress. */
+  wake: number | null;
+  quality?: SleepQuality | null;
+  source: SleepSource;
+  updatedAt?: number;
+}
+
+/** Bed/wake for one slot, in minutes from local midnight (wake is the next
+ *  morning, so e.g. bed 1400 / wake 400 = 23:20 → 06:40). */
+export interface SleepDayPlan {
+  bedMin: number;
+  wakeMin: number;
+}
+
+/** The user's intended rhythm — one plan for every night, or per weekday. */
+export interface SleepSchedule {
+  /** Whether one plan applies to every night. */
+  sameEveryNight: boolean;
+  /** The single plan, when sameEveryNight. */
+  every: SleepDayPlan | null;
+  /** Per weekday (0 = Sunday … 6 = Saturday), when !sameEveryNight. */
+  byDay: Partial<Record<number, SleepDayPlan>>;
+}
+
+/** Sleep behaviour toggles + goal. */
+export interface SleepSettings {
+  /** Dim the app at the scheduled bedtime. */
+  autoDim: boolean;
+  /** Fill each night automatically from the learned weekday pattern. */
+  autoLog: boolean;
+  /** Nightly goal in minutes (default 480 = 8h). */
+  goalMin: number;
+  /** Local date key the auto-dim prompt last fired (once per night). */
+  lastDimDay?: string | null;
+  /** State of the "offer to auto-log" prompt. */
+  patternOffer?: 'unseen' | 'declined' | 'accepted';
+}
+
 export interface Gym {
   id: string;
   name: string;
