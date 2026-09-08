@@ -205,6 +205,12 @@ export const en = {
   sleepDiscard: 'Discard sleep',
   sleepDiscardConfirm: 'Discard this sleep? It won’t be logged.',
 
+  sleepBackfillHint:
+    'Missed logging live? Add the night by hand — roughly is fine, you can fix it later.',
+  sleepDurationLabel: 'Duration',
+  sleepNightOf: (d: string) => `Night of ${d}`,
+  sleepLastNightTag: 'last night',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

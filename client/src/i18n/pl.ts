@@ -214,6 +214,12 @@ export const pl: Strings = {
   sleepDiscard: 'Odrzuć sen',
   sleepDiscardConfirm: 'Odrzucić ten sen? Nie zostanie zapisany.',
 
+  sleepBackfillHint:
+    'Nie zapisałeś na żywo? Dodaj noc ręcznie — orientacyjnie też OK, potem poprawisz.',
+  sleepDurationLabel: 'Czas trwania',
+  sleepNightOf: (d: string) => `Noc z ${d}`,
+  sleepLastNightTag: 'ostatnia noc',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

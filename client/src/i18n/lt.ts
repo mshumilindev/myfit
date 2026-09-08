@@ -215,6 +215,12 @@ export const lt: Strings = {
   sleepDiscard: 'Atmesti miegą',
   sleepDiscardConfirm: 'Atmesti šį miegą? Jis nebus įrašytas.',
 
+  sleepBackfillHint:
+    'Nepažymėjai gyvai? Pridėk naktį ranka — apytiksliai irgi tinka, vėliau pataisysi.',
+  sleepDurationLabel: 'Trukmė',
+  sleepNightOf: (d: string) => `Naktis iš ${d}`,
+  sleepLastNightTag: 'praėjusi naktis',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

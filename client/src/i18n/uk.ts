@@ -213,6 +213,11 @@ export const uk: Strings = {
   sleepDiscard: 'Скасувати сон',
   sleepDiscardConfirm: 'Скасувати цей сон? Він не запишеться.',
 
+  sleepBackfillHint: 'Не залогував наживо? Додай ніч вручну — приблизно теж ок, потім виправиш.',
+  sleepDurationLabel: 'Тривалість',
+  sleepNightOf: (d: string) => `Ніч на ${d}`,
+  sleepLastNightTag: 'минула ніч',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

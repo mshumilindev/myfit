@@ -202,6 +202,11 @@ export const et: Strings = {
   sleepDiscard: 'Loobu unest',
   sleepDiscardConfirm: 'Loobuda sellest unest? Seda ei salvestata.',
 
+  sleepBackfillHint: 'Ei jõudnud reaalajas? Lisa öö käsitsi — ligikaudu sobib ka, hiljem parandad.',
+  sleepDurationLabel: 'Kestus',
+  sleepNightOf: (d: string) => `Öö: ${d}`,
+  sleepLastNightTag: 'eelmine öö',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

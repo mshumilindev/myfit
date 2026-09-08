@@ -30372,3 +30372,99 @@ body {
   font-size: 13px;
   cursor: pointer;
 }
+
+/* ── Sleep · backfill / log a past night (SL-13) ─────────────────── */
+.sleep-daycards {
+  display: flex;
+  gap: 8px;
+}
+.sleep-daycard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 9px 0;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.sleep-daycard .dc-wd {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+.sleep-daycard .dc-day {
+  font-size: 17px;
+  color: var(--color-neutral-300);
+}
+.sleep-daycard.on {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.sleep-daycard.on .dc-wd {
+  color: var(--color-accent-300);
+}
+.sleep-daycard.on .dc-day {
+  color: var(--color-accent-100);
+}
+.sleep-nightof {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+  margin-top: -2px;
+}
+.sleep-nightof > i {
+  color: var(--s-moon);
+  font-size: 12px;
+}
+.sleep-nightof .dc-tag {
+  color: var(--color-neutral-300);
+}
+.sleep-field-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  padding: 2px 12px;
+}
+.sleep-field-box .sleep-field-ic {
+  font-size: 15px;
+  flex: none;
+}
+.sleep-field-box .sleep-field-ic.bed {
+  color: var(--s-moon);
+}
+.sleep-field-box .sleep-field-ic.woke {
+  color: var(--color-accent);
+}
+.sleep-field-box .sleep-time-input {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 11px 0;
+  flex: 1;
+  min-width: 0;
+}
+.sleep-dur-card {
+  border-radius: 14px;
+  text-align: center;
+  padding: 15px;
+  background:
+    radial-gradient(130% 100% at 82% 0%, rgba(159, 178, 230, 0.14), transparent 60%),
+    var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+}
+.sleep-dur-big {
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  margin-top: 6px;
+}

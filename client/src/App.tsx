@@ -1457,6 +1457,15 @@ function sleepClock(ms: number): string {
 }
 
 function getDesktopRailMatch(): boolean {
+  // Dev/QA override: force a layout regardless of viewport (used to verify the
+  // mobile design in tooling whose capture viewport is fixed). Harmless in prod.
+  try {
+    const f = localStorage.getItem('spotter.forceLayout');
+    if (f === 'mobile') return false;
+    if (f === 'desktop') return true;
+  } catch {
+    /* ignore */
+  }
   return (
     typeof window !== 'undefined' &&
     !!window.matchMedia &&
@@ -1470,7 +1479,7 @@ function useDesktopRail(): boolean {
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const query = window.matchMedia('(min-width: 720px)');
-    const onChange = () => setMatches(query.matches);
+    const onChange = () => setMatches(getDesktopRailMatch());
     onChange();
     query.addEventListener('change', onChange);
     return () => query.removeEventListener('change', onChange);
