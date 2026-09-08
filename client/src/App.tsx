@@ -1149,6 +1149,7 @@ export function App() {
           onOpenNotifications={() => setOverlay({ screen: 'notifications' })}
           onOpenProfile={() => setOverlay({ screen: 'profile', userId: 'me' })}
           onOpenSettings={() => setOverlay({ screen: 'settings' })}
+          onOpenMastery={() => setOverlay({ screen: 'mastery' })}
         />
       )}
       <div className="main-col">
@@ -1541,6 +1542,7 @@ function Rail(props: {
   onOpenNotifications: () => void;
   onOpenProfile: () => void;
   onOpenSettings: () => void;
+  onOpenMastery: () => void;
 }) {
   const { t } = useT();
   const live = props.openWorkoutStartedAt !== undefined;
@@ -1561,6 +1563,11 @@ function Rail(props: {
       {/* Brand mark — the same across every app's rail. */}
       <div className="rail-brand">
         <SpotterMark size={40} variant="sidebar" />
+      </div>
+      <div className="rail-mastery">
+        <Suspense fallback={null}>
+          <MasteryBadge onOpen={props.onOpenMastery} />
+        </Suspense>
       </div>
       {nav.map((x) => (
         <button

@@ -2106,6 +2106,24 @@ export function SessionView(props: {
                   {props.past ? t.addToSession : t.addExercise}
                 </button>
               )}
+              {live && !workout.autoFinished && isDesktop && (
+                <>
+                  <button
+                    className="btn btn-secondary session-settings-btn"
+                    onClick={() => setSheet({ kind: 'settings' })}
+                  >
+                    <Icon name="sliders-horizontal" />
+                    {t.sessionSettings}
+                  </button>
+                  <button
+                    className="btn btn-secondary session-map-btn"
+                    onClick={() => setSheet({ kind: 'musclemap' })}
+                  >
+                    <Icon name="person" />
+                    {t.muscleMapButton}
+                  </button>
+                </>
+              )}
               {props.past && muscleWorkSorted(workout).length > 0 && (
                 <button
                   className="btn btn-secondary session-map-btn"
