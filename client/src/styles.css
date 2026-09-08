@@ -29247,6 +29247,12 @@ body {
 .act-sleep-last {
   color: var(--s-dim);
   font-size: 13px;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
 }
 .act-sleep-start {
   align-self: flex-start;
@@ -29445,4 +29451,199 @@ body {
   font-size: 13px;
   cursor: pointer;
   margin-top: 4px;
+}
+
+/* Sleep panel links (SL-01) */
+.act-sleep-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 2px;
+}
+.act-sleep-link {
+  background: none;
+  border: 0;
+  color: var(--s-moon);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Sleep hub / history / backfill / schedule (SL-12 / SL-13 / SL-07) */
+.sleep-hub {
+  gap: 14px;
+}
+.sleep-hub .muted {
+  color: var(--color-neutral-500);
+  font-size: 13px;
+}
+.slh-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.slh-stat {
+  background: var(--color-surface);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+}
+.slh-stat-v {
+  font-size: 26px;
+  color: var(--color-accent-100);
+  letter-spacing: -0.02em;
+}
+.slh-stat-l {
+  color: var(--color-neutral-400);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.slh-stat-d {
+  color: var(--color-neutral-500);
+  font-size: 11px;
+  margin-top: 4px;
+}
+.slh-sec-label {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  color: var(--color-neutral-500);
+  margin-top: 6px;
+}
+.slh-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 72px;
+}
+.slh-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.slh-bar-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: var(--color-neutral-900);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.slh-bar-track.sm {
+  height: 44px;
+}
+.slh-bar {
+  width: 100%;
+  background: var(--color-accent-700);
+  border-radius: 4px 4px 0 0;
+  min-height: 3px;
+}
+.slh-bar.met {
+  background: var(--color-accent);
+}
+.slh-goalmet {
+  color: var(--color-neutral-400);
+  font-size: 12px;
+}
+.slh-rhythm {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+.slh-rcol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.slh-rwd {
+  color: var(--color-neutral-500);
+  font-size: 11px;
+}
+.slh-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.slh-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: var(--color-surface);
+  border: 0;
+  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.slh-toggle-t {
+  font-size: 14px;
+  font-weight: 500;
+}
+.slh-toggle-d {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  margin-top: 2px;
+}
+.slh-btn {
+  width: 100%;
+  justify-content: center;
+}
+.slh-daychips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.slh-timerow {
+  display: flex;
+  gap: 12px;
+}
+.slh-timefield {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-neutral-400);
+  font-size: 12px;
+}
+.slh-dur {
+  font-size: 34px;
+  color: var(--color-accent-100);
+  text-align: center;
+}
+.slh-sched-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.slh-sched-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slh-sched-wd {
+  width: 18px;
+  color: var(--color-neutral-400);
+  font-size: 13px;
+}
+.sleep-time-input.sm {
+  padding: 7px 8px;
+  font-size: 13px;
+}
+.slh-sched-arrow {
+  color: var(--color-neutral-500);
+}
+.slh-sched-dur {
+  margin-left: auto;
+  color: var(--color-neutral-400);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }

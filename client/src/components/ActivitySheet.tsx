@@ -81,14 +81,20 @@ function SleepPanel(props: { shell: Shell; onClose: () => void }) {
           <span className="act-sleep-moon" />
         </div>
         <div className="act-sleep-body">
-          <div className="act-sleep-last">
+          <button
+            className="act-sleep-last"
+            onClick={() => {
+              props.shell.openOverlay({ screen: 'sleep' });
+              props.onClose();
+            }}
+          >
             {last && last.wake
               ? t.sleepLastNight(
                   fmtDurationHuman(nightDurationMin(last) * 60000),
                   `${hhmm(last.bedtime)}→${hhmm(last.wake)}`,
                 )
               : t.sleepNoLastNight}
-          </div>
+          </button>
           {live ? (
             <button className="btn-out-moon act-sleep-start" onClick={resume}>
               {t.sleepAsleepSince(hhmm(live.bedtime))}
@@ -99,6 +105,26 @@ function SleepPanel(props: { shell: Shell; onClose: () => void }) {
               {t.sleepStart}
             </button>
           )}
+          <div className="act-sleep-links">
+            <button
+              className="act-sleep-link"
+              onClick={() => {
+                props.shell.openOverlay({ screen: 'sleep', mode: 'backfill' });
+                props.onClose();
+              }}
+            >
+              {t.sleepPastNight}
+            </button>
+            <button
+              className="act-sleep-link"
+              onClick={() => {
+                props.shell.openOverlay({ screen: 'sleep', mode: 'schedule' });
+                props.onClose();
+              }}
+            >
+              {t.sleepMySchedule}
+            </button>
+          </div>
         </div>
       </div>
     </div>

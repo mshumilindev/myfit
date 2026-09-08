@@ -178,7 +178,7 @@ export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 export type Overlay =
   | { screen: 'session'; workoutId: string }
   | { screen: 'activity'; newType?: string; editId?: string }
-  | { screen: 'sleep'; wake?: boolean }
+  | { screen: 'sleep'; wake?: boolean; mode?: 'backfill' | 'schedule' }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
   | { screen: 'exercise-detail'; name: string }
@@ -1253,7 +1253,11 @@ export function App() {
           )}
           {activeOverlay?.screen === 'sleep' && (
             <Suspense fallback={null}>
-              <SleepView wake={activeOverlay.wake} onClose={closeOverlay} />
+              <SleepView
+                wake={activeOverlay.wake}
+                mode={activeOverlay.mode}
+                onClose={closeOverlay}
+              />
             </Suspense>
           )}
           {activeOverlay?.screen === 'past-workout' && (
