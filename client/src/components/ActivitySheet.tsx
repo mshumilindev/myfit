@@ -4,6 +4,9 @@
  * a backfilled one) there. The live timer and backfill both live on the page.
  */
 import type { Shell } from '../App';
+import { startSleep, liveSleep, useStore } from '../store';
+import { lastNight, nightDurationMin } from '../sleep';
+import { fmtDurationHuman } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { useT } from '../i18n';
 import { ACTIVITY_TYPES } from '../activities';
@@ -45,7 +48,59 @@ export function ActivitySheet(props: { shell: Shell; onClose: () => void }) {
             </div>
           </div>
         ))}
+        <SleepPanel shell={props.shell} onClose={props.onClose} />
       </div>
     </Sheet>
+  );
+}
+
+function hhmm(ms: number): string {
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function SleepPanel(props: { shell: Shell; onClose: () => void }) {
+  const { t } = useT();
+  const store = useStore();
+  const live = liveSleep(store.sleeps);
+  const last = lastNight(store.sleeps);
+  const start = () => {
+    startSleep();
+    props.shell.openOverlay({ screen: 'sleep' });
+    props.onClose();
+  };
+  const resume = () => {
+    props.shell.openOverlay({ screen: 'sleep' });
+    props.onClose();
+  };
+  return (
+    <div className="act-group">
+      <div className="act-group-label">{t.sleepTitle}</div>
+      <div className="act-sleep-panel">
+        <div className="act-sleep-sky" aria-hidden>
+          <span className="act-sleep-moon" />
+        </div>
+        <div className="act-sleep-body">
+          <div className="act-sleep-last">
+            {last && last.wake
+              ? t.sleepLastNight(
+                  fmtDurationHuman(nightDurationMin(last) * 60000),
+                  `${hhmm(last.bedtime)}→${hhmm(last.wake)}`,
+                )
+              : t.sleepNoLastNight}
+          </div>
+          {live ? (
+            <button className="btn-out-moon act-sleep-start" onClick={resume}>
+              {t.sleepAsleepSince(hhmm(live.bedtime))}
+            </button>
+          ) : (
+            <button className="btn-moon act-sleep-start" onClick={start}>
+              <Icon name="moon-stars" />
+              {t.sleepStart}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

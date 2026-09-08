@@ -29047,3 +29047,402 @@ button.badge {
     background: rgba(233, 234, 236, 0.05);
   }
 }
+
+/* ===================================================================
+   Sleep · whole-app night mode + Spotter Sky
+   =================================================================== */
+:root {
+  --s-bg: #0a0d18;
+  --s-surface: #141a2e;
+  --s-surface2: #1c233d;
+  --s-text: #eff2fc;
+  --s-dim: #9aa2bf;
+  --s-faint: #7b83a3;
+  --s-fainter: #5f668a;
+  --s-line: #333c68;
+  --s-moon: #9fb2e6;
+  --s-moon-lt: #c3cef4;
+}
+
+/* When a live night is running, every core token flips to the moonlit palette. */
+:root[data-sleep='night'] {
+  --color-bg: var(--s-bg);
+  --color-surface: var(--s-surface);
+  --color-surface-2: var(--s-surface2);
+  --color-text: var(--s-text);
+  --color-divider: rgba(159, 178, 230, 0.14);
+  --color-accent: var(--s-moon);
+  --color-accent-100: #eff2fc;
+  --color-accent-200: #c3cef4;
+  --color-accent-300: #9fb2e6;
+  --color-accent-400: #8296cc;
+  --color-accent-500: #9fb2e6;
+  --color-accent-600: #505d97;
+  --color-accent-700: #3a4578;
+  --color-accent-800: #26305c;
+  --color-accent-900: #1a2140;
+  --color-neutral-100: #eff2fc;
+  --color-neutral-200: #dfe4f5;
+  --color-neutral-300: #c3cef4;
+  --color-neutral-400: #9aa2bf;
+  --color-neutral-500: #7b83a3;
+  --color-neutral-600: #5f668a;
+  --color-neutral-700: #333c68;
+  --color-neutral-800: #222a48;
+  --color-neutral-900: #141a2e;
+  --shadow-sm: 0 0 0 1px #2a335a;
+  --shadow-md: 0 0 0 1px #3a4578, 0 6px 18px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 0 0 1px #47538c, 0 18px 44px rgba(0, 0, 0, 0.7);
+}
+body {
+  transition: background-color 0.9s ease;
+}
+/* The fixed sky sits behind the app; content floats above it. */
+:root[data-sleep='night'] .app {
+  background: transparent;
+}
+:root[data-sleep='night'] .app > .main-col,
+:root[data-sleep='night'] .app > .rail {
+  position: relative;
+  z-index: 1;
+}
+.spotter-sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* Persistent "asleep" strip shown across every tab while a night runs. */
+.sleep-strip {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius-lg, 14px);
+  background: rgba(20, 26, 46, 0.72);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  backdrop-filter: blur(6px);
+}
+.sleep-strip .zz {
+  color: var(--s-moon-lt);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+}
+.sleep-strip-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.sleep-strip-main {
+  color: var(--s-text);
+  font-weight: 600;
+  font-size: 14px;
+}
+.sleep-strip-sub {
+  color: var(--s-faint);
+  font-size: 12px;
+}
+.sleep-strip-stop {
+  flex: none;
+  border: 1px solid #505d97;
+  color: var(--s-moon-lt);
+  background: transparent;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Moonlit primary + outline buttons for the sleep surfaces. */
+.btn-moon {
+  background: var(--s-moon);
+  color: #0c1024;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 16px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+.btn-out-moon {
+  background: transparent;
+  color: var(--s-moon-lt);
+  border: 1px solid #505d97;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+@keyframes sleepZzPop {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.sleep-strip .zz {
+  animation: sleepZzPop 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sleep-strip .zz {
+    animation: none;
+  }
+}
+
+/* Sleep panel in the Log-activity sheet (SL-01) */
+.act-sleep-panel {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  align-items: flex-end;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+}
+.act-sleep-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(140% 90% at 80% 12%, rgba(159, 178, 230, 0.12), transparent 55%),
+    linear-gradient(165deg, #141a2e 0%, #0a0d18 75%);
+}
+.act-sleep-moon {
+  position: absolute;
+  top: 16px;
+  right: 22px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #eaf0ff, #9fb2e6 70%, #6d7bb0);
+  box-shadow: 0 0 22px rgba(159, 178, 230, 0.5);
+}
+.act-sleep-body {
+  position: relative;
+  z-index: 1;
+  padding: 14px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.act-sleep-last {
+  color: var(--s-dim);
+  font-size: 13px;
+}
+.act-sleep-start {
+  align-self: flex-start;
+}
+
+/* Sleep overlay surfaces (night hub / wake / logged) */
+.sleep-screen {
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+.sleep-moonline {
+  color: var(--s-faint);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-top: 6px;
+}
+.sleep-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 8vh 0 0;
+}
+.sleep-zz {
+  color: var(--s-moon-lt);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  animation: sleepZzPop 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sleep-zz {
+    animation: none;
+  }
+}
+.sleep-h1 {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--s-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.sleep-cap {
+  color: var(--s-dim);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 30ch;
+  margin: 0;
+}
+.sleep-since {
+  margin-top: 10px;
+  color: var(--s-moon-lt);
+  font-size: 15px;
+  font-weight: 500;
+}
+.sleep-note {
+  color: var(--s-fainter);
+  font-size: 12px;
+}
+.sleep-wide {
+  width: 100%;
+  max-width: 340px;
+  margin-top: auto;
+}
+.sleep-logged-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-ok);
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 6vh;
+}
+.sleep-bignum {
+  font-size: 52px;
+  font-weight: 300;
+  color: var(--s-text);
+  letter-spacing: -0.02em;
+}
+.sleep-range {
+  color: var(--s-dim);
+  font-size: 14px;
+  margin-top: -6px;
+}
+.sleep-goalrow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--s-faint);
+  font-size: 13px;
+}
+.sleep-rhythm {
+  color: var(--s-moon);
+  font-weight: 500;
+}
+.sleep-quality {
+  width: 100%;
+  max-width: 340px;
+  margin-top: 8px;
+}
+.sleep-q-head {
+  color: var(--s-dim);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.sleep-q-opt {
+  color: var(--s-fainter);
+  font-size: 11px;
+}
+.sleep-q-row {
+  display: flex;
+  gap: 8px;
+}
+.sleep-q-chip {
+  flex: 1;
+  padding: 12px 6px;
+  border-radius: 12px;
+  border: 0;
+  background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-dim);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.sleep-q-chip.on {
+  background: #1a2140;
+  color: var(--s-moon-lt);
+  box-shadow: inset 0 0 0 1px #505d97;
+}
+.sleep-feeds {
+  color: var(--s-fainter);
+  font-size: 12px;
+  max-width: 32ch;
+}
+.sleep-wake-dur {
+  font-size: 46px;
+  font-weight: 300;
+  color: var(--s-text);
+  margin-top: 4vh;
+}
+.sleep-wake-about {
+  color: var(--s-faint);
+  font-size: 13px;
+  margin-top: -6px;
+}
+.sleep-chip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 8px;
+}
+.sleep-chip {
+  padding: 13px 8px;
+  border-radius: 12px;
+  border: 0;
+  background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-dim);
+  font: inherit;
+  cursor: pointer;
+}
+.sleep-chip.on {
+  background: #1a2140;
+  color: var(--s-moon-lt);
+  box-shadow: inset 0 0 0 1px #505d97;
+}
+.sleep-exact-toggle {
+  background: none;
+  border: 0;
+  color: var(--s-moon);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.sleep-time-input {
+  background: var(--s-surface);
+  border: 1px solid var(--s-line);
+  border-radius: 10px;
+  color: var(--s-text);
+  padding: 10px 12px;
+  font: inherit;
+  color-scheme: dark;
+}
+.sleep-link {
+  background: none;
+  border: 0;
+  color: var(--s-faint);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  margin-top: 4px;
+}

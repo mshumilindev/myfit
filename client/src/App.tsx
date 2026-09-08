@@ -27,7 +27,9 @@ import {
   bodyMetricsComplete,
   commitWorkout,
   setMasterySeenRating,
+  liveSleep,
 } from './store';
+import { SpotterSky } from './components/SpotterSky';
 import { useT } from './i18n';
 import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
 import {
@@ -148,6 +150,9 @@ const MasteryView = lazy(() =>
 const MasteryBadge = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
 );
+const SleepView = lazy(() =>
+  import('./views/SleepView').then((module) => ({ default: module.SleepView })),
+);
 const MasteryRankUp = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryRankUp })),
 );
@@ -173,6 +178,7 @@ export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 export type Overlay =
   | { screen: 'session'; workoutId: string }
   | { screen: 'activity'; newType?: string; editId?: string }
+  | { screen: 'sleep'; wake?: boolean }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string }
   | { screen: 'exercise-detail'; name: string }
@@ -293,6 +299,7 @@ function toHash(
   }
   if (overlay?.screen === 'session') return '#/session';
   if (overlay?.screen === 'activity') return '#/activity';
+  if (overlay?.screen === 'sleep') return '#/sleep';
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
     return `#/exercise/${encodeURIComponent(overlay.name)}`;
@@ -323,6 +330,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   const head = parts[0] ?? '';
   if (head === 'session') return { tab: 'today', overlay: { screen: 'session', workoutId: '' } };
   if (head === 'activity') return { tab: 'today', overlay: { screen: 'activity' } };
+  if (head === 'sleep') return { tab: 'today', overlay: { screen: 'sleep' } };
   if (head === 'workout' && parts[1])
     return { tab: 'today', overlay: { screen: 'past-workout', workoutId: parts[1] } };
   if (head === 'exercise' && parts[1])
@@ -535,6 +543,15 @@ export function App() {
     if (m.rating !== seen) setMasterySeenRating(m.rating);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const nightLive = liveSleep(store.sleeps);
+  useEffect(() => {
+    const el = document.documentElement;
+    if (nightLive) el.dataset.sleep = 'night';
+    else delete el.dataset.sleep;
+    return () => {
+      delete el.dataset.sleep;
+    };
+  }, [nightLive]);
   const challenges = useChallenges();
   const rawNotifs = useMemo(
     () => computeNotifs(store, notifNow, t, challenges),
@@ -1137,6 +1154,7 @@ export function App() {
 
   return (
     <div className="app">
+      {nightLive && <SpotterSky />}
       {desktopRail && (
         <Rail
           tab={effectiveTab}
@@ -1153,6 +1171,27 @@ export function App() {
         />
       )}
       <div className="main-col">
+        {nightLive && activeOverlay?.screen !== 'sleep' && (
+          <div className="sleep-strip">
+            <span className="zz">z z z</span>
+            <button
+              className="sleep-strip-txt"
+              onClick={() => setOverlay({ screen: 'sleep' })}
+              aria-label={t.sleepTitle}
+            >
+              <span className="sleep-strip-main">{t.sleepTitle}</span>
+              <span className="sleep-strip-sub">
+                {t.sleepAsleepSince(sleepClock(nightLive.bedtime))}
+              </span>
+            </button>
+            <button
+              className="sleep-strip-stop"
+              onClick={() => setOverlay({ screen: 'sleep', wake: true })}
+            >
+              {t.sleepStopAction}
+            </button>
+          </div>
+        )}
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
             <div className="app-brand-lead">
@@ -1211,6 +1250,11 @@ export function App() {
               editId={activeOverlay.editId}
               onClose={closeOverlay}
             />
+          )}
+          {activeOverlay?.screen === 'sleep' && (
+            <Suspense fallback={null}>
+              <SleepView wake={activeOverlay.wake} onClose={closeOverlay} />
+            </Suspense>
           )}
           {activeOverlay?.screen === 'past-workout' && (
             <SessionView
@@ -1399,6 +1443,11 @@ export function App() {
 function ScreenFallback() {
   const { t } = useT();
   return <ScreenSkeleton label={t.syncing} />;
+}
+
+function sleepClock(ms: number): string {
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function getDesktopRailMatch(): boolean {

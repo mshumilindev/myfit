@@ -19,6 +19,8 @@ import { getMutationPending, subscribeMutation } from './api';
 import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
 import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
+import { Moon } from '@phosphor-icons/react/Moon';
+import { MoonStars } from '@phosphor-icons/react/MoonStars';
 import { ArrowCounterClockwise } from '@phosphor-icons/react/ArrowCounterClockwise';
 import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
 import { ArrowLeft } from '@phosphor-icons/react/ArrowLeft';
@@ -166,6 +168,8 @@ import { exerciseDisplay, localizedExerciseName } from './data/exerciseNames';
  * CSS contract: the SVG is sized 1em.
  */
 const ICONS: Record<string, ComponentType<IconProps>> = {
+  moon: Moon,
+  'moon-stars': MoonStars,
   'android-logo': AndroidLogo,
   'apple-logo': AppleLogo,
   'arrow-clockwise': ArrowClockwise,
