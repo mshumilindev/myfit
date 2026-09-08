@@ -30162,3 +30162,33 @@ body {
   font-size: 13px;
   cursor: pointer;
 }
+
+/* Sleep screens · back-nav header (hub / schedule / backfill) */
+.sleep-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.sleep-back {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 20px;
+  cursor: pointer;
+  margin-left: -8px;
+}
+.sleep-back:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.sleep-topbar-title {
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}

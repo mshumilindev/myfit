@@ -47,6 +47,18 @@ const dur = (min: number) => fmtDurationHuman(Math.max(0, min) * 60000);
 // Display order Mon…Sun mapped to JS getDay() (0 = Sun).
 const WD_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
+function SleepTopbar({ title, onBack }: { title: string; onBack: () => void }) {
+  const { t } = useT();
+  return (
+    <div className="sleep-topbar">
+      <button className="sleep-back" onClick={onBack} aria-label={t.cancel}>
+        <Icon name="caret-left" />
+      </button>
+      <span className="sleep-topbar-title">{title}</span>
+    </div>
+  );
+}
+
 export function SleepView({
   onClose,
   wake,
@@ -103,10 +115,12 @@ export function SleepView({
   }
 
   if (mode === 'backfill') {
-    return <SleepBackfill onDone={() => setMode('hub')} onClose={onClose} />;
+    const back = live ? onClose : () => setMode('hub');
+    return <SleepBackfill onDone={() => setMode(live ? 'night' : 'hub')} onBack={back} />;
   }
   if (mode === 'schedule') {
-    return <SleepScheduleEditor onDone={() => setMode('hub')} />;
+    const back = live ? onClose : () => setMode('hub');
+    return <SleepScheduleEditor onDone={() => setMode(live ? 'night' : 'hub')} onBack={back} />;
   }
 
   if (mode === 'logged') {
@@ -161,6 +175,7 @@ export function SleepView({
   return (
     <SleepHub
       now={now}
+      onClose={onClose}
       onBackfill={() => setMode('backfill')}
       onSchedule={() => setMode('schedule')}
     />
@@ -169,10 +184,12 @@ export function SleepView({
 
 function SleepHub({
   now,
+  onClose,
   onBackfill,
   onSchedule,
 }: {
   now: number;
+  onClose: () => void;
   onBackfill: () => void;
   onSchedule: () => void;
 }) {
@@ -190,7 +207,7 @@ function SleepHub({
 
   return (
     <div className="screen sleep-hub">
-      <h2 className="title-26">{t.sleepTitle}</h2>
+      <SleepTopbar title={t.sleepTitle} onBack={onClose} />
       {stats.nights === 0 ? (
         <p className="muted">{t.sleepEmptyHistory}</p>
       ) : (
@@ -283,7 +300,7 @@ function SleepHub({
   );
 }
 
-function SleepBackfill({ onDone, onClose }: { onDone: () => void; onClose: () => void }) {
+function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
   const { t, locale } = useT();
   const [dayOffset, setDayOffset] = useState(1); // 1 = last night
   const [bed, setBed] = useState('23:20');
@@ -313,7 +330,7 @@ function SleepBackfill({ onDone, onClose }: { onDone: () => void; onClose: () =>
 
   return (
     <div className="screen sleep-hub">
-      <h2 className="title-26">{t.sleepAddPastNight}</h2>
+      <SleepTopbar title={t.sleepAddPastNight} onBack={onBack} />
       <p className="muted">{t.sleepWhichNight}</p>
       <div className="slh-daychips">
         {days.map((d) => {
@@ -358,23 +375,36 @@ function SleepBackfill({ onDone, onClose }: { onDone: () => void; onClose: () =>
       <button className="btn btn-primary slh-btn" onClick={save}>
         {t.sleepSaveNight}
       </button>
-      <button className="sleep-link" onClick={onClose}>
+      <button className="sleep-link" onClick={onBack}>
         {t.cancel}
       </button>
     </div>
   );
 }
 
-function SleepScheduleEditor({ onDone }: { onDone: () => void }) {
+function SleepScheduleEditor({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
   const { t } = useT();
   const store = useStore();
+  const [now] = useState(() => Date.now());
+  // Seed only from what the user has actually given us: a saved schedule first,
+  // then their own learned per-weekday rhythm, and only as a last resort a plain
+  // neutral default (23:00 -> 07:00) that is obviously a starting point to edit.
+  const pat = weekdayPattern(store.sleeps, now);
+  const patDays = Object.entries(pat.byDay);
+  const seedEvery: SleepDayPlan =
+    store.sleepSchedule.every ??
+    (patDays.length
+      ? { bedMin: patDays[0][1]!.bedMin, wakeMin: patDays[0][1]!.wakeMin }
+      : { bedMin: 1380, wakeMin: 420 });
+  const seedByDay: Partial<Record<number, SleepDayPlan>> = Object.keys(store.sleepSchedule.byDay)
+    .length
+    ? { ...store.sleepSchedule.byDay }
+    : Object.fromEntries(
+        patDays.map(([d, pl]) => [Number(d), { bedMin: pl!.bedMin, wakeMin: pl!.wakeMin }]),
+      );
   const [same, setSame] = useState(store.sleepSchedule.sameEveryNight);
-  const [every, setEvery] = useState<SleepDayPlan>(
-    store.sleepSchedule.every ?? { bedMin: 1400, wakeMin: 400 },
-  );
-  const [byDay, setByDay] = useState<Partial<Record<number, SleepDayPlan>>>({
-    ...store.sleepSchedule.byDay,
-  });
+  const [every, setEvery] = useState<SleepDayPlan>(seedEvery);
+  const [byDay, setByDay] = useState<Partial<Record<number, SleepDayPlan>>>(seedByDay);
 
   const setDay = (d: number, patch: Partial<SleepDayPlan>) =>
     setByDay((prev) => ({
@@ -389,7 +419,7 @@ function SleepScheduleEditor({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="screen sleep-hub">
-      <h2 className="title-26">{t.sleepScheduleTitle}</h2>
+      <SleepTopbar title={t.sleepScheduleTitle} onBack={onBack} />
       <p className="muted">{t.sleepScheduleCap}</p>
       <button className="slh-toggle" onClick={() => setSame((v) => !v)}>
         <div className="slh-toggle-t">{t.sleepSameMostNights}</div>
