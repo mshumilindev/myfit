@@ -195,6 +195,11 @@ export const en = {
   sleepConfidenceDesc: 'Weeknights vary under ±20 min · weekends run later.',
   sleepAutoEditableNote: 'You can spot and fix any that were off — auto-logged nights are flagged',
 
+  sleepAutoFilledFrom: (wd: string) =>
+    `Filled from your ${wd} pattern — adjust if it’s off, and the pattern learns from your fix.`,
+  sleepAdjustTimes: 'Adjust times',
+  sleepLooksRight: 'Looks right',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

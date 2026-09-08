@@ -192,6 +192,11 @@ export const et: Strings = {
   sleepConfidenceDesc: 'Argiööd püsivad ±20 min piires · nädalavahetused on pikemad.',
   sleepAutoEditableNote: 'Märkad ja parandad iga eksinu — automaatsed ööd on märgistatud',
 
+  sleepAutoFilledFrom: (wd: string) =>
+    `Täidetud ${wd} mustri järgi — paranda, kui vale; muster õpib parandustest.`,
+  sleepAdjustTimes: 'Muuda kellaaegu',
+  sleepLooksRight: 'Kõik õige',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

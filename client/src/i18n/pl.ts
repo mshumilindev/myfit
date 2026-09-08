@@ -204,6 +204,11 @@ export const pl: Strings = {
   sleepConfidenceDesc: 'Dni robocze trzymają się w ±20 min · weekendy dłuższe.',
   sleepAutoEditableNote: 'Wychwycisz i poprawisz każdą nietrafioną — noce auto są oznaczone',
 
+  sleepAutoFilledFrom: (wd: string) =>
+    `Wypełnione wg wzorca (${wd}) — popraw, jeśli coś nie gra; wzorzec uczy się z poprawek.`,
+  sleepAdjustTimes: 'Zmień godziny',
+  sleepLooksRight: 'Wygląda dobrze',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

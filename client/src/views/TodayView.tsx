@@ -38,7 +38,7 @@ import { bmrKcal, overnightKcal } from '../energy';
 import { nightDurationMin, finishedNights } from '../sleep';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
-import { SleepForgotBanner } from '../components/SleepAutomation';
+import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, ExerciseName, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
@@ -1187,6 +1187,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         {learnHasVideo && learnProgress.done === 0 && learnBanner}
         <NudgeStack nudges={nudges} />
         <SleepForgotBanner
+          onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
+        />
+        <SleepAutoFilledCard
           onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
         />
         {programCard}

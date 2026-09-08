@@ -32,15 +32,16 @@ const SYNODIC = 29.530588853; // days
 // A well-known new moon: 2000-01-06 18:14 UTC.
 const REF_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14, 0);
 
-function nameFor(p: number): MoonPhaseName {
-  if (p < 0.02 || p > 0.98) return 'new';
-  if (p < 0.23) return 'waxingCrescent';
-  if (p < 0.27) return 'firstQuarter';
-  if (p < 0.48) return 'waxingGibbous';
-  if (p < 0.52) return 'full';
-  if (p < 0.73) return 'waningGibbous';
-  if (p < 0.77) return 'lastQuarter';
-  return 'waningCrescent';
+// Name the phase from the illuminated fraction + waxing/waning, so the label
+// always agrees with the disc actually drawn (a moon shown 100% lit reads
+// "full", 0% reads "new") even when the exact syzygy falls a few hours off a
+// day boundary. Illumination is the astronomical truth; phase only picks a side.
+function nameFor(illum: number, waxing: boolean): MoonPhaseName {
+  if (illum <= 0.02) return 'new';
+  if (illum >= 0.98) return 'full';
+  if (illum < 0.46) return waxing ? 'waxingCrescent' : 'waningCrescent';
+  if (illum <= 0.54) return waxing ? 'firstQuarter' : 'lastQuarter';
+  return waxing ? 'waxingGibbous' : 'waningGibbous';
 }
 
 export function moonInfo(date: Date = new Date(), lat = 0): MoonInfo {
@@ -51,7 +52,7 @@ export function moonInfo(date: Date = new Date(), lat = 0): MoonInfo {
   const waxing = phase < 0.5;
   // Northern hemisphere: waxing moon is lit on the right. Flip south of equator.
   const litOnRight = lat < 0 ? !waxing : waxing;
-  return { phase, illum, waxing, name: nameFor(phase), litOnRight };
+  return { phase, illum, waxing, name: nameFor(illum, waxing), litOnRight };
 }
 
 export function illumPct(info: MoonInfo): number {

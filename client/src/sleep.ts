@@ -89,10 +89,24 @@ export function sleepStats(
   const prevAvg = prevDurs.length
     ? Math.round(prevDurs.reduce((s, x) => s + x, 0) / prevDurs.length)
     : 0;
-  const beds = win.map((n) => minutesOfDay(n.bedtime));
-  const usualBed = circularMeanMin(beds);
-  const within = beds.filter((b) => circularDist(b, usualBed) <= 30).length;
-  const consistencyPct = beds.length ? Math.round((within / beds.length) * 100) : 0;
+  // Consistency: how tightly each night holds to THAT WEEKDAY's usual bedtime.
+  // A steady weekday sleeper who drifts later on weekends still scores high —
+  // this is the per-weekday rhythm the whole feature is built around, so it
+  // must not be punished as "inconsistent" against one flat nightly mean.
+  const bedsByWd = new Map<number, number[]>();
+  for (const n of win) {
+    const wd = new Date(n.bedtime).getDay();
+    const arr = bedsByWd.get(wd) ?? [];
+    arr.push(minutesOfDay(n.bedtime));
+    bedsByWd.set(wd, arr);
+  }
+  const wdMean = new Map<number, number>();
+  for (const [wd, arr] of bedsByWd) wdMean.set(wd, circularMeanMin(arr));
+  const within = win.filter(
+    (n) =>
+      circularDist(minutesOfDay(n.bedtime), wdMean.get(new Date(n.bedtime).getDay()) ?? 0) <= 30,
+  ).length;
+  const consistencyPct = win.length ? Math.round((within / win.length) * 100) : 0;
   // streak: consecutive calendar days with a logged night, ending at the latest.
   let streak = 0;
   if (all.length) {

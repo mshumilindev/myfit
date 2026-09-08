@@ -29222,18 +29222,19 @@ body {
   position: absolute;
   inset: 0;
   background:
+    radial-gradient(1px 1px at 22% 34%, rgba(195, 206, 244, 0.6), transparent),
+    radial-gradient(1px 1px at 58% 60%, rgba(195, 206, 244, 0.45), transparent),
+    radial-gradient(1.4px 1.4px at 38% 22%, rgba(195, 206, 244, 0.55), transparent),
+    radial-gradient(1px 1px at 68% 40%, rgba(195, 206, 244, 0.4), transparent),
+    radial-gradient(1px 1px at 15% 66%, rgba(195, 206, 244, 0.4), transparent),
     radial-gradient(140% 90% at 80% 12%, rgba(159, 178, 230, 0.12), transparent 55%),
     linear-gradient(165deg, #141a2e 0%, #0a0d18 75%);
 }
 .act-sleep-moon {
   position: absolute;
-  top: 16px;
-  right: 22px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 38%, #eaf0ff, #9fb2e6 70%, #6d7bb0);
-  box-shadow: 0 0 22px rgba(159, 178, 230, 0.5);
+  top: 12px;
+  right: 16px;
+  line-height: 0;
 }
 .act-sleep-body {
   position: relative;
@@ -29961,6 +29962,7 @@ body {
 /* SL-11 · forgot-to-log banner (Today) */
 .sleep-forgot {
   position: relative;
+  flex: none;
   border-radius: 16px;
   overflow: hidden;
   background: #0b0f1c;
@@ -30040,6 +30042,115 @@ body {
   cursor: pointer;
 }
 .sfg-enter {
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-moon-lt);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sad-intro {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+/* SL-10 · auto-filled morning card (Today) */
+.sleep-autofill {
+  position: relative;
+  flex: none;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0b0f1c;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  margin-bottom: 12px;
+}
+.sleep-autofill .sky-mini {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1px 1px at 20% 30%, rgba(195, 206, 244, 0.7), transparent),
+    radial-gradient(1px 1px at 70% 55%, rgba(195, 206, 244, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 45% 22%, rgba(195, 206, 244, 0.6), transparent),
+    radial-gradient(1px 1px at 85% 38%, rgba(195, 206, 244, 0.5), transparent),
+    radial-gradient(1px 1px at 32% 70%, rgba(195, 206, 244, 0.45), transparent),
+    radial-gradient(120% 120% at 90% 0%, rgba(159, 178, 230, 0.16), transparent 60%);
+  pointer-events: none;
+}
+.saf-body {
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+}
+.saf-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.saf-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: #1a2140;
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-moon-lt);
+  font-size: 18px;
+}
+.saf-txt {
+  flex: 1;
+  min-width: 0;
+}
+.saf-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.saf-line {
+  font-size: 15px;
+  color: var(--s-text);
+}
+.saf-head .sao-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.saf-note {
+  font-size: 12px;
+  color: var(--s-dim);
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.saf-actions {
+  display: flex;
+  gap: 9px;
+  margin-top: 14px;
+}
+.saf-adjust {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--s-moon);
+  color: #0c1024;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.saf-ok {
   flex: none;
   min-height: 44px;
   padding: 0 16px;

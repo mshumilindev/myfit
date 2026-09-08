@@ -203,6 +203,11 @@ export const uk: Strings = {
   sleepConfidenceDesc: 'Будні тримаються в межах ±20 хв · вихідні довші.',
   sleepAutoEditableNote: 'Помітиш і виправиш будь-яку неточність — автоматичні ночі позначені',
 
+  sleepAutoFilledFrom: (wd: string) =>
+    `Заповнено з патерну на ${wd} — виправ, якщо щось не так; патерн вчиться на виправленнях.`,
+  sleepAdjustTimes: 'Змінити час',
+  sleepLooksRight: 'Все вірно',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

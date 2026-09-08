@@ -39,6 +39,19 @@ describe('sleep helpers', () => {
     expect(s.consistencyPct).toBe(100);
   });
 
+  it('scores weekday-relative consistency high despite a weekend shift', () => {
+    // Steady weeknights (~23:00) + consistently later weekends (~01:00): a real
+    // per-weekday rhythm should read as highly consistent, not near-zero.
+    const nights: SleepNight[] = [];
+    for (let d = 1; d <= 14; d++) {
+      const wd = new Date(new Date(now).setDate(new Date(now).getDate() - d)).getDay();
+      const weekend = wd === 5 || wd === 6; // Fri/Sat nights run late
+      nights.push(weekend ? bedNight(d, 1, 0, 480) : bedNight(d, 23, 0, 430));
+    }
+    const s = sleepStats(nights, now, 480, 14);
+    expect(s.consistencyPct).toBeGreaterThanOrEqual(90);
+  });
+
   it('counts goal-met nights', () => {
     const nights = [bedNight(1, 23, 0, 500), bedNight(2, 23, 0, 400)];
     expect(sleepStats(nights, now, 480).goalMet).toBe(1);

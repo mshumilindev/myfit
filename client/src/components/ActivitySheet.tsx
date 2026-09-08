@@ -5,6 +5,7 @@
  */
 import type { Shell } from '../App';
 import { startSleep, liveSleep, useStore } from '../store';
+import { MoonGlyph } from './MoonGlyph';
 import { lastNight, nightDurationMin } from '../sleep';
 import { fmtDurationHuman } from '../i18n';
 import { Icon, Sheet } from '../ui';
@@ -78,7 +79,9 @@ function SleepPanel(props: { shell: Shell; onClose: () => void }) {
       <div className="act-group-label">{t.sleepTitle}</div>
       <div className="act-sleep-panel">
         <div className="act-sleep-sky" aria-hidden>
-          <span className="act-sleep-moon" />
+          <div className="act-sleep-moon">
+            <MoonGlyph size={40} halo={false} />
+          </div>
         </div>
         <div className="act-sleep-body">
           <button

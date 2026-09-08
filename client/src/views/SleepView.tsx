@@ -284,8 +284,7 @@ function SleepHub({
 }
 
 function SleepBackfill({ onDone, onClose }: { onDone: () => void; onClose: () => void }) {
-  const { t } = useT();
-  const store = useStore();
+  const { t, locale } = useT();
   const [dayOffset, setDayOffset] = useState(1); // 1 = last night
   const [bed, setBed] = useState('23:20');
   const [woke, setWoke] = useState('06:40');
@@ -320,7 +319,7 @@ function SleepBackfill({ onDone, onClose }: { onDone: () => void; onClose: () =>
         {days.map((d) => {
           const dd = new Date();
           dd.setDate(dd.getDate() - d);
-          const label = dd.toLocaleDateString(store.sleepSettings ? undefined : undefined, {
+          const label = dd.toLocaleDateString(locale, {
             weekday: 'short',
             day: 'numeric',
           });

@@ -205,6 +205,11 @@ export const lt: Strings = {
   sleepAutoEditableNote:
     'Pastebėsi ir pataisysi bet kurią netikslią — automatinės naktys pažymėtos',
 
+  sleepAutoFilledFrom: (wd: string) =>
+    `Užpildyta pagal ${wd} ritmą — pataisyk, jei netikslu; modelis mokosi iš taisymų.`,
+  sleepAdjustTimes: 'Keisti laiką',
+  sleepLooksRight: 'Viskas gerai',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

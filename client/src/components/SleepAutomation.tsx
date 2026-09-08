@@ -20,6 +20,7 @@ import {
   logSleepNight,
   setSleepSettings,
   sleepDayId,
+  updateSleepNight,
 } from '../store';
 import { weekdayPattern, planForWeekday, planDurationMin, finishedNights } from '../sleep';
 import { Icon } from '../ui';
@@ -163,15 +164,17 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
     return (
       <div className="sleep-auto-scrim night" role="dialog" aria-modal="true">
         <div className="sleep-auto-dim">
-          <div className="sad-moon">
-            <MoonGlyph size={104} date={tick} />
+          <div className="sad-intro">
+            <div className="sad-moon">
+              <MoonGlyph size={104} date={tick} />
+            </div>
+            <div className="sad-phase">
+              <Icon name="moon-stars" weight="fill" />
+              {t.sleepMoonLine(t.moonPhase[moon.name] ?? moon.name, illumPct(moon), tzPlace())}
+            </div>
+            <div className="sad-title">{t.sleepBedtimeArrived}</div>
+            <div className="sad-body">{t.sleepBedtimeBody(clock(plan.bedMin))}</div>
           </div>
-          <div className="sad-phase">
-            <Icon name="moon-stars" weight="fill" />
-            {t.sleepMoonLine(t.moonPhase[moon.name] ?? moon.name, illumPct(moon), tzPlace())}
-          </div>
-          <div className="sad-title">{t.sleepBedtimeArrived}</div>
-          <div className="sad-body">{t.sleepBedtimeBody(clock(plan.bedMin))}</div>
           <div className="sad-actions">
             <button className="btn-moon" onClick={startNow}>
               <Icon name="moon-stars" weight="fill" />
@@ -360,4 +363,67 @@ function sleepAvg(finished: SleepNight[]): number {
   const recent = finished.slice(0, 14);
   const total = recent.reduce((sum, n) => sum + (n.wake ? (n.wake - n.bedtime) / MIN : 0), 0);
   return total / recent.length;
+}
+
+/**
+ * SL-10 — the auto-filled morning card. With auto-log on, last night's record
+ * is simply there when you wake, flagged `auto`; this surfaces it on Today so
+ * you can confirm ("Looks right") or fix it ("Adjust times") — and the fix
+ * teaches the pattern. Confirming clears the flag so it stops nudging.
+ */
+export function SleepAutoFilledCard({ onOpenBackfill }: { onOpenBackfill: () => void }) {
+  const { t } = useT();
+  const store = useStore();
+  const [now] = useState(() => Date.now());
+  const [dismissed, setDismissed] = useState(false);
+  const live = liveSleep(store.sleeps);
+  if (!store.sleepSettings.autoLog || live || dismissed) return null;
+
+  const todayId = sleepDayId(startOfDay(now));
+  const night = store.sleeps.find((n) => n.wake !== null && n.date === todayId);
+  if (!night || night.source !== 'auto') return null;
+
+  const durMin = night.wake ? Math.round((night.wake - night.bedtime) / MIN) : 0;
+  const range = `${hhmm(night.bedtime)}→${hhmm(night.wake as number)}`;
+  const wdName = t.weekDayNames[(new Date(night.bedtime).getDay() + 6) % 7];
+  const looksRight = () => {
+    queueMicrotask(() => updateSleepNight(night.id, { source: 'backfill' }));
+    setDismissed(true);
+  };
+  return (
+    <div className="sleep-autofill">
+      <div className="sky-mini" aria-hidden="true" />
+      <div className="saf-body">
+        <div className="saf-row">
+          <span className="saf-ic">
+            <Icon name="moon-stars" weight="fill" />
+          </span>
+          <div className="saf-txt">
+            <div className="saf-head">
+              <span className="saf-line num">{t.sleepLastNight(dur(durMin), range)}</span>
+              <span className="sao-badge">
+                <Icon name="sparkle" weight="bold" />
+                {t.sleepAutoBadge}
+              </span>
+            </div>
+            <div className="saf-note">{t.sleepAutoFilledFrom(wdName)}</div>
+          </div>
+        </div>
+        <div className="saf-actions">
+          <button className="saf-adjust" onClick={onOpenBackfill}>
+            <Icon name="pencil-simple" weight="bold" />
+            {t.sleepAdjustTimes}
+          </button>
+          <button className="saf-ok" onClick={looksRight}>
+            {t.sleepLooksRight}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function hhmm(ms: number): string {
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
