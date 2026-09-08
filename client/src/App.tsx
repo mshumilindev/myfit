@@ -30,6 +30,7 @@ import {
   liveSleep,
 } from './store';
 import { SpotterSky } from './components/SpotterSky';
+import { SleepAutomation } from './components/SleepAutomation';
 import { useT } from './i18n';
 import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
 import {
@@ -1155,6 +1156,7 @@ export function App() {
   return (
     <div className="app">
       {nightLive && <SpotterSky />}
+      <SleepAutomation onOpenSchedule={() => setOverlay({ screen: 'sleep', mode: 'schedule' })} />
       {desktopRail && (
         <Rail
           tab={effectiveTab}

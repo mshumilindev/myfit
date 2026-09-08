@@ -179,6 +179,30 @@ export const uk: Strings = {
   sleepAutoDimDesc: 'Притлумлювати додаток, коли настає час сну.',
   sleepEmptyHistory: 'Залогуй кілька ночей — і тут зʼявиться твій ритм.',
 
+  sleepBedtimeArrived: 'Час спати',
+  sleepBedtimeBody: (clock: string) =>
+    `Зазвичай ти лягаєш близько ${clock}. Починай сон, коли будеш готовий.`,
+  sleepNotYet15: 'Ще ні — 15 хв',
+  sleepKeepLit: 'Не затемнювати',
+  sleepPatternLearned: 'Патерн вивчено',
+  sleepPatternOffer:
+    'Твої ночі досить стабільні, щоб заповнюватися самі — по днях тижня, а не одним числом. Ти лише правиш винятки.',
+  sleepTurnOnAutoLog: 'Увімкнути авто-лог',
+  sleepNotNow: 'Не зараз',
+  sleepConfidenceHigh: 'Впевненість · висока',
+  sleepAutoBadge: 'авто',
+  sleepAutoFilled: (dur: string, range: string) => `Минула ніч · авто ${dur} · ${range}`,
+  sleepMissingTitle: 'Сон за минулу ніч не записано',
+  sleepMissingBody: (logged: number, total: number) =>
+    `Ти залогував ${logged} з останніх ${total} ночей — заповнити цю? Приблизно — це ок.`,
+  sleepUseUsual: (dur: string) => `Як зазвичай · ${dur}`,
+  sleepEnterManually: 'Ввести',
+
+  sleepAutoDimFoot: 'Автозатемнення йде за твоїм розкладом — вимкни будь-коли в налаштуваннях сну.',
+  sleepAutoLogOfferTitle: 'Хочеш, щоб Spotter записував сон за тебе?',
+  sleepConfidenceDesc: 'Будні тримаються в межах ±20 хв · вихідні довші.',
+  sleepAutoEditableNote: 'Помітиш і виправиш будь-яку неточність — автоматичні ночі позначені',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

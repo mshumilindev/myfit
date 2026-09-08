@@ -171,6 +171,30 @@ export const en = {
   sleepAutoDimDesc: 'Dim the app when your bedtime arrives.',
   sleepEmptyHistory: 'Log a few nights and your rhythm shows up here.',
 
+  sleepBedtimeArrived: 'It’s your bedtime',
+  sleepBedtimeBody: (clock: string) =>
+    `You usually turn in around ${clock}. Start sleep when you’re ready.`,
+  sleepNotYet15: 'Not yet — 15 min',
+  sleepKeepLit: 'Keep app lit',
+  sleepPatternLearned: 'Pattern learned',
+  sleepPatternOffer:
+    'Your nights are steady enough to fill themselves — by weekday, not one flat figure. You just edit the odd night out.',
+  sleepTurnOnAutoLog: 'Turn on auto-log',
+  sleepNotNow: 'Not now',
+  sleepConfidenceHigh: 'Confidence · high',
+  sleepAutoBadge: 'auto',
+  sleepAutoFilled: (dur: string, range: string) => `Last night · auto ${dur} · ${range}`,
+  sleepMissingTitle: 'Last night’s sleep is missing',
+  sleepMissingBody: (logged: number, total: number) =>
+    `You’ve logged ${logged} of the last ${total} nights — want to fill this one? Roughly is fine.`,
+  sleepUseUsual: (dur: string) => `Use my usual · ${dur}`,
+  sleepEnterManually: 'Enter',
+
+  sleepAutoDimFoot: 'Auto-dim follows your schedule — turn it off any time in Sleep settings.',
+  sleepAutoLogOfferTitle: 'Want Spotter to log sleep for you?',
+  sleepConfidenceDesc: 'Weeknights vary under ±20 min · weekends run later.',
+  sleepAutoEditableNote: 'You can spot and fix any that were off — auto-logged nights are flagged',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

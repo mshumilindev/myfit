@@ -29647,3 +29647,407 @@ body {
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
+
+/* ===================================================================
+   Sleep automation · SL-08 auto-dim · SL-09 auto-log offer · SL-11 forgot
+   =================================================================== */
+.moon-glyph {
+  display: block;
+}
+
+.sleep-auto-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(6, 8, 16, 0.7);
+  backdrop-filter: blur(6px);
+  animation: sleepAutoFade 0.3s ease-out;
+}
+@keyframes sleepAutoFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.sleep-auto-scrim.night {
+  background:
+    radial-gradient(120% 80% at 50% 15%, rgba(159, 178, 230, 0.16), transparent 60%),
+    linear-gradient(180deg, #0a0d18, #05070f);
+  align-items: stretch;
+  padding: 0;
+}
+
+/* SL-08 · full-screen night prompt */
+.sleep-auto-dim {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: max(48px, 9vh) 32px 32px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+.sad-moon {
+  margin-bottom: 22px;
+}
+.sad-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--s-moon-lt);
+  margin-bottom: 16px;
+}
+.sad-phase i {
+  font-size: 15px;
+}
+.sad-title {
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  color: var(--s-text);
+}
+.sad-body {
+  font-size: 15px;
+  color: var(--s-dim);
+  line-height: 1.6;
+  margin-top: 12px;
+  max-width: 30ch;
+}
+.sad-actions {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+}
+.sad-actions .btn-moon {
+  width: 100%;
+  min-height: 54px;
+}
+.sad-row {
+  display: flex;
+  gap: 10px;
+}
+.sad-row .btn-out-moon {
+  flex: 1;
+  min-height: 46px;
+  font-size: 13px;
+}
+.sad-quiet {
+  flex: 1;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--s-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-dim);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sad-foot {
+  margin-top: 18px;
+  font-size: 11px;
+  color: var(--s-fainter);
+  line-height: 1.5;
+  max-width: 34ch;
+}
+
+/* SL-09 · auto-log offer card */
+.sleep-auto-offer {
+  width: min(400px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  background: linear-gradient(165deg, #141a2e, #0f1116 72%);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px var(--s-line);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: mstSealRise 0.5s ease-out;
+}
+.sao-sky {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 100% at 85% 0%, rgba(159, 178, 230, 0.2), transparent 60%),
+    #0b0f1c;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  padding: 18px;
+}
+.sao-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  background: #1a2140;
+  color: var(--s-moon-lt);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+.sao-h {
+  font-size: 19px;
+  color: var(--s-text);
+  letter-spacing: -0.01em;
+  margin-top: 12px;
+}
+.sao-sub {
+  font-size: 13px;
+  color: var(--s-dim);
+  line-height: 1.55;
+  margin-top: 8px;
+}
+.sao-conf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  padding: 14px;
+}
+.sao-conf > i {
+  font-size: 17px;
+  color: var(--color-accent);
+}
+.sao-conf-txt {
+  flex: 1;
+}
+.sao-conf-t {
+  font-size: 13px;
+  color: var(--s-text);
+}
+.sao-conf-d {
+  font-size: 11px;
+  color: var(--s-faint);
+  margin-top: 2px;
+}
+.sao-bars {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+}
+.sao-bars span {
+  width: 5px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--s-line);
+}
+.sao-bars span.on {
+  background: var(--color-accent);
+}
+.sao-fill {
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  padding: 14px;
+}
+.sao-fill-lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--s-faint);
+  margin-bottom: 12px;
+}
+.sao-rhythm {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  height: 68px;
+}
+.sao-rcol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.sao-rtrack {
+  width: 100%;
+  height: 56px;
+  border-radius: 4px;
+  background: var(--s-bg);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.sao-rbar {
+  width: 100%;
+  background: var(--s-moon);
+  border-radius: 4px 4px 0 0;
+}
+.sao-rbar.wk {
+  background: var(--color-accent);
+}
+.sao-rwd {
+  font-size: 10px;
+  color: var(--s-faint);
+}
+.sao-rwd.wk {
+  color: var(--color-accent-300);
+}
+.sao-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  font-size: 11px;
+  color: var(--s-faint);
+  line-height: 1.5;
+}
+.sao-note > i {
+  font-size: 14px;
+  color: var(--color-accent);
+  margin-top: 1px;
+  flex: none;
+}
+.sao-badge {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.sao-actions {
+  display: flex;
+  gap: 10px;
+}
+.sao-actions .btn-secondary,
+.sao-actions .btn-primary {
+  min-height: 50px;
+}
+.sao-ghost {
+  flex: none;
+  padding: 0 16px;
+}
+.sao-actions .btn-primary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.sao-manage {
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* SL-11 · forgot-to-log banner (Today) */
+.sleep-forgot {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0b0f1c;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  margin-bottom: 12px;
+}
+.sleep-forgot .sky-mini {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1px 1px at 20% 30%, rgba(195, 206, 244, 0.7), transparent),
+    radial-gradient(1px 1px at 70% 55%, rgba(195, 206, 244, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 45% 22%, rgba(195, 206, 244, 0.6), transparent),
+    radial-gradient(1px 1px at 85% 38%, rgba(195, 206, 244, 0.5), transparent),
+    radial-gradient(1px 1px at 32% 70%, rgba(195, 206, 244, 0.45), transparent),
+    radial-gradient(120% 120% at 90% 0%, rgba(159, 178, 230, 0.14), transparent 60%);
+  pointer-events: none;
+}
+.sfg-body {
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+}
+.sfg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.sfg-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: #1a2140;
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-moon-lt);
+  font-size: 18px;
+}
+.sfg-txt {
+  flex: 1;
+}
+.sfg-t {
+  font-size: 15px;
+  color: var(--s-text);
+}
+.sfg-d {
+  font-size: 12px;
+  color: var(--s-dim);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.sfg-x {
+  border: 0;
+  background: none;
+  color: var(--s-fainter);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+}
+.sfg-actions {
+  display: flex;
+  gap: 9px;
+  margin-top: 14px;
+}
+.sfg-use {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--s-moon);
+  color: #0c1024;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.sfg-enter {
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--s-line);
+  color: var(--s-moon-lt);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}

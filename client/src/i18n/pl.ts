@@ -179,6 +179,31 @@ export const pl: Strings = {
   sleepAutoDimDesc: 'Przygaś aplikację, gdy nadchodzi pora snu.',
   sleepEmptyHistory: 'Zapisz kilka nocy, a Twój rytm pojawi się tutaj.',
 
+  sleepBedtimeArrived: 'Pora spać',
+  sleepBedtimeBody: (clock: string) =>
+    `Zwykle kładziesz się około ${clock}. Rozpocznij sen, gdy będziesz gotowy.`,
+  sleepNotYet15: 'Jeszcze nie — 15 min',
+  sleepKeepLit: 'Nie przygaszaj',
+  sleepPatternLearned: 'Wzorzec nauczony',
+  sleepPatternOffer:
+    'Twoje noce są na tyle stabilne, że wypełnią się same — wg dni tygodnia, nie jedną liczbą. Poprawiasz tylko wyjątki.',
+  sleepTurnOnAutoLog: 'Włącz auto-zapis',
+  sleepNotNow: 'Nie teraz',
+  sleepConfidenceHigh: 'Pewność · wysoka',
+  sleepAutoBadge: 'auto',
+  sleepAutoFilled: (dur: string, range: string) => `Ostatnia noc · auto ${dur} · ${range}`,
+  sleepMissingTitle: 'Brak snu z ostatniej nocy',
+  sleepMissingBody: (logged: number, total: number) =>
+    `Zapisałeś ${logged} z ostatnich ${total} nocy — uzupełnić tę? Orientacyjnie wystarczy.`,
+  sleepUseUsual: (dur: string) => `Jak zwykle · ${dur}`,
+  sleepEnterManually: 'Wprowadź',
+
+  sleepAutoDimFoot:
+    'Auto-ściemnianie działa według Twojego planu — wyłączysz je w ustawieniach snu.',
+  sleepAutoLogOfferTitle: 'Chcesz, żeby Spotter zapisywał sen za Ciebie?',
+  sleepConfidenceDesc: 'Dni robocze trzymają się w ±20 min · weekendy dłuższe.',
+  sleepAutoEditableNote: 'Wychwycisz i poprawisz każdą nietrafioną — noce auto są oznaczone',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

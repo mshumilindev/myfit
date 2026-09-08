@@ -167,6 +167,31 @@ export const et: Strings = {
   sleepAutoDimDesc: 'Tuhmenda rakendus, kui saabub uneaeg.',
   sleepEmptyHistory: 'Logi paar ööd ja su rütm ilmub siia.',
 
+  sleepBedtimeArrived: 'Aeg magama',
+  sleepBedtimeBody: (clock: string) =>
+    `Tavaliselt heidad umbes ${clock}. Alusta und, kui oled valmis.`,
+  sleepNotYet15: 'Veel ei — 15 min',
+  sleepKeepLit: 'Ära tuhmenda',
+  sleepPatternLearned: 'Muster õpitud',
+  sleepPatternOffer:
+    'Su ööd on piisavalt püsivad, et end ise täita — nädalapäeviti, mitte ühe arvuna. Parandad vaid erandid.',
+  sleepTurnOnAutoLog: 'Lülita automaatne logimine sisse',
+  sleepNotNow: 'Mitte praegu',
+  sleepConfidenceHigh: 'Kindlus · kõrge',
+  sleepAutoBadge: 'auto',
+  sleepAutoFilled: (dur: string, range: string) => `Eelmine öö · auto ${dur} · ${range}`,
+  sleepMissingTitle: 'Eelmise öö uni on logimata',
+  sleepMissingBody: (logged: number, total: number) =>
+    `Oled loginud ${logged} viimasest ${total} ööst — täidame selle? Ligikaudu sobib.`,
+  sleepUseUsual: (dur: string) => `Nagu tavaliselt · ${dur}`,
+  sleepEnterManually: 'Sisesta',
+
+  sleepAutoDimFoot:
+    'Automaatne tumendus järgib su ajakava — lülita see une seadetes millal tahes välja.',
+  sleepAutoLogOfferTitle: 'Kas soovid, et Spotter logiks une sinu eest?',
+  sleepConfidenceDesc: 'Argiööd püsivad ±20 min piires · nädalavahetused on pikemad.',
+  sleepAutoEditableNote: 'Märkad ja parandad iga eksinu — automaatsed ööd on märgistatud',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

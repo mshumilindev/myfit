@@ -179,6 +179,32 @@ export const lt: Strings = {
   sleepAutoDimDesc: 'Pritemdyti programą, kai ateina miego laikas.',
   sleepEmptyHistory: 'Užfiksuok kelias naktis — ir čia atsiras tavo ritmas.',
 
+  sleepBedtimeArrived: 'Metas miegoti',
+  sleepBedtimeBody: (clock: string) =>
+    `Paprastai guliesi apie ${clock}. Pradėk miegą, kai būsi pasiruošęs.`,
+  sleepNotYet15: 'Dar ne — 15 min',
+  sleepKeepLit: 'Netemdyti',
+  sleepPatternLearned: 'Ritmas išmoktas',
+  sleepPatternOffer:
+    'Tavo naktys pakankamai pastovios, kad užsipildytų pačios — pagal savaitės dieną, ne vienu skaičiumi. Tik pataisai išimtis.',
+  sleepTurnOnAutoLog: 'Įjungti automatinį žymėjimą',
+  sleepNotNow: 'Ne dabar',
+  sleepConfidenceHigh: 'Patikimumas · aukštas',
+  sleepAutoBadge: 'auto',
+  sleepAutoFilled: (dur: string, range: string) => `Praėjusi naktis · auto ${dur} · ${range}`,
+  sleepMissingTitle: 'Praėjusios nakties miegas neužfiksuotas',
+  sleepMissingBody: (logged: number, total: number) =>
+    `Užfiksavai ${logged} iš paskutinių ${total} naktų — užpildyti šią? Apytiksliai tinka.`,
+  sleepUseUsual: (dur: string) => `Kaip įprasta · ${dur}`,
+  sleepEnterManually: 'Įvesti',
+
+  sleepAutoDimFoot:
+    'Automatinis pritemdymas seka tavo tvarkaraštį — bet kada išjunk miego nustatymuose.',
+  sleepAutoLogOfferTitle: 'Nori, kad „Spotter“ registruotų miegą už tave?',
+  sleepConfidenceDesc: 'Darbo naktys svyruoja iki ±20 min · savaitgaliai ilgesni.',
+  sleepAutoEditableNote:
+    'Pastebėsi ir pataisysi bet kurią netikslią — automatinės naktys pažymėtos',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

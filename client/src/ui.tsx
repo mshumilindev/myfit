@@ -40,6 +40,7 @@ import { Cards } from '@phosphor-icons/react/Cards';
 import { CaretLeft } from '@phosphor-icons/react/CaretLeft';
 import { CaretRight } from '@phosphor-icons/react/CaretRight';
 import { Carrot } from '@phosphor-icons/react/Carrot';
+import { ChartBar } from '@phosphor-icons/react/ChartBar';
 import { ChartLine } from '@phosphor-icons/react/ChartLine';
 import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
 import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
@@ -192,6 +193,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'caret-right': CaretRight,
   carrot: Carrot,
   'chart-line': ChartLine,
+  'chart-bar': ChartBar,
   'chart-line-up': ChartLineUp,
   'check-circle': CheckCircle,
   clock: Clock,
