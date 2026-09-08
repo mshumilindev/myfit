@@ -28847,6 +28847,9 @@ button.badge {
   position: fixed;
   inset: 0;
   z-index: 60;
+  /* Rendered inside the pointer-events:none toast layer — re-enable so the
+     card's buttons (and backdrop-to-close) actually receive clicks. */
+  pointer-events: auto;
   background:
     radial-gradient(120% 80% at 50% 22%, rgba(217, 162, 79, 0.14), transparent 60%),
     rgba(0, 0, 0, 0.5);
