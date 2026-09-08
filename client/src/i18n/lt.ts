@@ -141,6 +141,7 @@ export const lt: Strings = {
   circuitRoundsShort: 'ratų',
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
   circuitStart: 'Pradėti ratą',
+  circuitFinishSet: 'Baigti rinkinį',
   circuitStatusDone: 'baigta',
 
   primaryMuscleLabel: 'Pagrindinis raumuo',

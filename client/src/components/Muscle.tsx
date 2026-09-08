@@ -21,6 +21,8 @@ import {
   useState,
   type CSSProperties,
   type ReactNode,
+  type MouseEvent as ReactMouseEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { FRONT_MUSCLES, BACK_MUSCLES } from 'body-muscles';
@@ -1073,12 +1075,19 @@ export function MuscleChip({
   muscle,
   tone = 'primary',
   size = 'sm',
+  variant = 'fig',
+  icon = false,
   onClick,
   detail = false,
 }: {
   muscle: MuscleGroup;
   tone?: Tone;
   size?: 'sm' | 'lg';
+  /** 'fig' = the muscle-figure chip (default); 'pill' = the compact circuit
+   *  pill (design .mus / .mus2). */
+  variant?: 'fig' | 'pill';
+  /** Pill variant only: show the small run icon (used on the gallery card). */
+  icon?: boolean;
   onClick?: (muscle: MuscleGroup) => void;
   /** Tap opens the enlarged muscle drawer (with the onClick as its button). */
   detail?: boolean;
@@ -1086,30 +1095,42 @@ export function MuscleChip({
   const { fire, node } = useMuscleChipTap(muscle, tone, onClick, detail);
   if (muscle === 'cardio') return null;
   const interactive = !!onClick;
+  const handlers = {
+    role: interactive ? ('button' as const) : undefined,
+    tabIndex: interactive ? 0 : undefined,
+    onClick: interactive
+      ? (event: ReactMouseEvent) => {
+          event.stopPropagation();
+          fire();
+        }
+      : undefined,
+    onKeyDown: interactive
+      ? (event: ReactKeyboardEvent) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          event.stopPropagation();
+          fire();
+        }
+      : undefined,
+  };
+  if (variant === 'pill') {
+    return (
+      <>
+        <span className={`c-mus${tone === 'primary' ? '' : '2'}`} {...handlers}>
+          {icon && tone === 'primary' && (
+            <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
+          )}
+          {strings().muscleGroups[muscle]}
+        </span>
+        {node}
+      </>
+    );
+  }
   return (
     <>
       <span
         className={`mchip mchip-fig${size === 'lg' ? ' lg' : ''}${tone === 'primary' ? ' primary' : ''}`}
-        role={interactive ? 'button' : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        onClick={
-          interactive
-            ? (event) => {
-                event.stopPropagation();
-                fire();
-              }
-            : undefined
-        }
-        onKeyDown={
-          interactive
-            ? (event) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                event.stopPropagation();
-                fire();
-              }
-            : undefined
-        }
+        {...handlers}
       >
         <MuscleIcon muscle={muscle} variant="chipFig" tone={tone} />
         {strings().muscleGroups[muscle]}

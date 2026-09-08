@@ -133,6 +133,7 @@ export const en = {
   circuitRoundsShort: 'rounds',
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
   circuitStart: 'Start circuit',
+  circuitFinishSet: 'Finish set',
   circuitStatusDone: 'done',
 
   primaryMuscleLabel: 'Primary muscle',

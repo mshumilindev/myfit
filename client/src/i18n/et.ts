@@ -129,6 +129,7 @@ export const et: Strings = {
   circuitRoundsShort: 'ringi',
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
   circuitStart: 'Alusta ringi',
+  circuitFinishSet: 'Lõpeta komplekt',
   circuitStatusDone: 'tehtud',
 
   primaryMuscleLabel: 'Peamine lihas',

@@ -94,6 +94,9 @@ import { PersonSimple } from '@phosphor-icons/react/PersonSimple';
 import { Person } from '@phosphor-icons/react/Person';
 import { SlidersHorizontal } from '@phosphor-icons/react/SlidersHorizontal';
 import { Target } from '@phosphor-icons/react/Target';
+import { List } from '@phosphor-icons/react/List';
+import { MinusCircle } from '@phosphor-icons/react/MinusCircle';
+import { PlusCircle } from '@phosphor-icons/react/PlusCircle';
 import { Plugs } from '@phosphor-icons/react/Plugs';
 import { Robot } from '@phosphor-icons/react/Robot';
 import { Rows } from '@phosphor-icons/react/Rows';
@@ -224,6 +227,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   person: Person,
   'sliders-horizontal': SlidersHorizontal,
   target: Target,
+  list: List,
+  'minus-circle': MinusCircle,
+  'plus-circle': PlusCircle,
   plugs: Plugs,
   robot: Robot,
   rows: Rows,

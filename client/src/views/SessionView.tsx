@@ -1781,41 +1781,26 @@ export function SessionView(props: {
                 <Icon name="arrows-clockwise" />
               </span>
               <div className="cb-text">
-                <div className="cb-title">{t.circuitAdding}</div>
+                <div className="cb-title">
+                  {t.circuitAdding}{' '}
+                  {(() => {
+                    const blk = sessionBlocks(workout).find(
+                      (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
+                    );
+                    return blk && blk.kind === 'group' ? blk.group.letter : 'A';
+                  })()}
+                </div>
                 <div className="cb-sub">
                   {t.circuitSoFar(
                     workout.exercises.filter((e) => e.groupId === circuit.groupId).length,
                   )}
                 </div>
               </div>
-              <div className="cb-rounds">
-                <button
-                  aria-label="-"
-                  onClick={() => {
-                    const r = Math.max(1, circuit.rounds - 1);
-                    setCircuit((c) => ({ ...c, rounds: r }));
-                    if (circuit.groupId) setCircuitRounds(workout.id, circuit.groupId, r);
-                  }}
-                >
-                  <Icon name="minus" weight="bold" />
-                </button>
-                <span className="cb-r-num">{circuit.rounds}</span>
-                <button
-                  aria-label="+"
-                  onClick={() => {
-                    const r = Math.min(20, circuit.rounds + 1);
-                    setCircuit((c) => ({ ...c, rounds: r }));
-                    if (circuit.groupId) setCircuitRounds(workout.id, circuit.groupId, r);
-                  }}
-                >
-                  <Icon name="plus" weight="bold" />
-                </button>
-              </div>
               <button
                 className="btn btn-secondary cb-done"
                 onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
               >
-                {t.circuitDone}
+                {t.circuitFinishSet}
               </button>
             </div>
           )}
@@ -1859,13 +1844,23 @@ export function SessionView(props: {
             <>
               {sessionBlocks(workout).map((block) => {
                 if (block.kind === 'group' && block.group.circuit) {
+                  const building = live && circuit.on && circuit.groupId === block.group.groupId;
                   return (
                     <CircuitBlock
                       key={block.group.groupId}
                       group={block.group}
                       past={!!props.past}
+                      building={building}
+                      rounds={circuit.rounds}
                       onMuscle={openMuscleHistory}
                       onRun={() => setSheet({ kind: 'circuit-run', groupId: block.group.groupId })}
+                      onAddAnother={() => setSheet({ kind: 'add' })}
+                      onDoneBuilding={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
+                      onRounds={(delta) => {
+                        const r = Math.max(1, Math.min(20, circuit.rounds + delta));
+                        setCircuit((c) => ({ ...c, rounds: r }));
+                        setCircuitRounds(workout.id, block.group.groupId, r);
+                      }}
                     />
                   );
                 }
@@ -2158,16 +2153,14 @@ export function SessionView(props: {
             >
               <Icon name="plus" weight="bold" />
             </button>
-            {muscleWorkSorted(workout).length > 0 && (
-              <button
-                className="sp-btn sp-map"
-                onClick={() => setSheet({ kind: 'musclemap' })}
-                aria-label={t.muscleMapButton}
-                title={t.muscleMapButton}
-              >
-                <Icon name="person" />
-              </button>
-            )}
+            <button
+              className="sp-btn sp-map"
+              onClick={() => setSheet({ kind: 'musclemap' })}
+              aria-label={t.muscleMapButton}
+              title={t.muscleMapButton}
+            >
+              <Icon name="person" />
+            </button>
           </div>
           <div className="glass-pill">
             <button
@@ -4114,18 +4107,29 @@ function circuitPrimaryMuscle(ex: Exercise): MuscleGroup | null {
   return (s as MuscleGroup) ?? null;
 }
 
-function circuitMuscleChips(ex: Exercise, onMuscle: (m: MuscleGroup) => void) {
+function circuitMuscleChips(
+  ex: Exercise,
+  onMuscle: (m: MuscleGroup) => void,
+  opts?: { icon?: boolean; max?: number },
+) {
   const primary = circuitPrimaryMuscle(ex);
   const secondary = (ex.secondaryMuscles ?? [])
     .filter((x) => (MUSCLE_IDS as readonly string[]).includes(x) && x !== primary)
-    .slice(0, 1) as MuscleGroup[];
+    .slice(0, opts?.max ?? 1) as MuscleGroup[];
   return (
     <>
       {primary && (
-        <MuscleChip muscle={primary} tone="primary" size="sm" onClick={onMuscle} detail />
+        <MuscleChip
+          muscle={primary}
+          tone="primary"
+          variant="pill"
+          icon={opts?.icon}
+          onClick={onMuscle}
+          detail
+        />
       )}
       {secondary.map((m) => (
-        <MuscleChip key={m} muscle={m} tone="secondary" size="sm" onClick={onMuscle} detail />
+        <MuscleChip key={m} muscle={m} tone="secondary" variant="pill" onClick={onMuscle} detail />
       ))}
     </>
   );
@@ -4136,15 +4140,65 @@ function CircuitBlock(props: {
   past: boolean;
   onRun: () => void;
   onMuscle: (m: MuscleGroup) => void;
+  building?: boolean;
+  rounds?: number;
+  onAddAnother?: () => void;
+  onDoneBuilding?: () => void;
+  onRounds?: (delta: number) => void;
 }) {
   const { t } = useT();
   const g = props.group;
   const rounds = groupRounds(g);
   const doneRounds = Math.min(...g.exercises.map((e) => e.sets.length));
   const complete = doneRounds >= rounds;
-  const summary = props.past || complete;
+  const summary = !props.building && (props.past || complete);
   const letter = g.letter;
   const totalKg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
+
+  // CR-02 · building the circuit (mode active) — a plain list, rounds control
+  // and the "Done — start" CTA. The loop wash lives in the top banner instead.
+  if (props.building) {
+    const buildRounds = props.rounds ?? rounds;
+    return (
+      <div className="circuit-building">
+        <div className="section-label cbld-label">{t.circuitBuilding}</div>
+        {g.exercises.map((e, i) => (
+          <div key={e.id} className="cbld-row">
+            <span className="cb-slot">
+              {letter}
+              {i + 1}
+            </span>
+            <div className="cbld-main">
+              <div className="cbld-name">{e.name}</div>
+              <div className="cbld-mus">{circuitMuscleChips(e, props.onMuscle)}</div>
+            </div>
+            <Icon name="list" className="cbld-drag" />
+          </div>
+        ))}
+        <div className="cbld-rounds">
+          <Icon name="arrows-clockwise" className="cbld-loopi" />
+          <span className="cbld-rlabel">{t.circuitRounds}</span>
+          <div className="cbld-stepper">
+            <button aria-label="-" onClick={() => props.onRounds?.(-1)}>
+              <Icon name="minus-circle" />
+            </button>
+            <span className="num">{buildRounds}</span>
+            <button aria-label="+" onClick={() => props.onRounds?.(1)}>
+              <Icon name="plus-circle" />
+            </button>
+          </div>
+        </div>
+        <button className="btn btn-secondary cbld-add" onClick={props.onAddAnother}>
+          <Icon name="plus" weight="bold" />
+          {t.circuitAddAnother}
+        </button>
+        <button className="btn btn-primary cbld-done" onClick={props.onDoneBuilding}>
+          <Icon name="check-circle" />
+          {t.circuitDoneStart(letter)}
+        </button>
+      </div>
+    );
+  }
 
   if (summary) {
     return (
@@ -4379,7 +4433,7 @@ function CircuitRunSheet(props: {
               <span className="cr-card-name">{cur.name}</span>
               <Icon name="check-circle" weight="fill" className="cr-ok" />
             </div>
-            <div className="cr-mus">{circuitMuscleChips(cur, props.onMuscle)}</div>
+            <div className="cr-mus">{circuitMuscleChips(cur, props.onMuscle, { icon: true })}</div>
             <div className="cr-recorded">
               <Icon name="check-circle" weight="fill" />
               <span className="cr-rec-text">
@@ -4476,7 +4530,9 @@ function CircuitExerciseCard(props: {
         <span className="slot">{props.slot}</span>
         <span className="cr-card-name">{props.exercise.name}</span>
       </div>
-      <div className="cr-mus">{circuitMuscleChips(props.exercise, props.onMuscle)}</div>
+      <div className="cr-mus">
+        {circuitMuscleChips(props.exercise, props.onMuscle, { icon: true })}
+      </div>
       <div className="cr-goal">
         <Icon name="target" />
         <span>

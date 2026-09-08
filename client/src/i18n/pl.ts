@@ -141,6 +141,7 @@ export const pl: Strings = {
   circuitRoundsShort: 'rund',
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
   circuitStart: 'Rozpocznij obwód',
+  circuitFinishSet: 'Zakończ zestaw',
   circuitStatusDone: 'ukończono',
 
   primaryMuscleLabel: 'Główny mięsień',

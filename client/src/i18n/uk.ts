@@ -141,6 +141,7 @@ export const uk: Strings = {
   circuitRoundsShort: 'кіл',
   circuitNRoundsShort: (a: number, b: number) => `${a}/${b}`,
   circuitStart: 'Почати кругову',
+  circuitFinishSet: 'Завершити набір',
   circuitStatusDone: 'завершено',
 
   primaryMuscleLabel: 'Основний мʼяз',

@@ -27057,58 +27057,53 @@ button.badge {
 }
 
 /* ===========================================================================
-   F3 · Circuit (design CR-02 … CR-07)
+   F3 · Circuit (design CR-02 … CR-07) — matched to "My Fit - Circuit and Sides"
    =========================================================================== */
 :root {
+  --gold-lt: #e9c07a;
+  /* The warm brass wash that marks a circuit apart from a superset. */
   --loopwash:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--color-accent) 11%, transparent),
-      transparent 62%
-    ),
-    var(--color-surface);
+    radial-gradient(120% 100% at 15% 0%, rgba(233, 192, 122, 0.16), transparent 60%),
+    linear-gradient(160deg, #211c13 0%, #191a1d 62%);
 }
 
-/* Loop badge — the brass mark that says "circuit, not superset". */
+/* --- shared marks --------------------------------------------------------- */
 .loop {
-  width: 36px;
-  height: 36px;
   flex: none;
-  border-radius: 999px;
   display: grid;
   place-items: center;
-  color: var(--color-accent);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   background: var(--color-accent-900);
+  color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent-600);
-}
-.loop.sm {
-  width: 32px;
-  height: 32px;
 }
 .loop i {
   font-size: 17px;
+}
+.loop.sm {
+  width: 30px;
+  height: 30px;
 }
 .loop.sm i {
   font-size: 15px;
 }
 
-/* Round pips (progress across rounds). */
 .pip {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--color-neutral-700);
-  transition: all 0.2s;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-neutral-800);
 }
 .pip.done {
-  background: var(--color-accent-700);
+  background: var(--color-accent);
 }
 .pip.active {
   background: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 24%, transparent);
+  box-shadow: 0 0 0 4px rgba(217, 162, 79, 0.2);
 }
 
-/* Position dots (which exercise within the round). */
 .pos {
   width: 8px;
   height: 8px;
@@ -27124,13 +27119,75 @@ button.badge {
   background: var(--color-accent);
 }
 
-/* --- CR-02 · "adding to circuit" banner -------------------------------- */
+.rplate {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 0;
+  border-radius: 9px;
+  background: var(--color-neutral-900);
+  flex: 1;
+  min-width: 0;
+}
+.rplate.on {
+  background: var(--color-accent-900);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.rplate .rplate-r {
+  font-size: 8px;
+  color: var(--color-accent-300);
+  letter-spacing: 0.08em;
+}
+.rplate .rplate-v {
+  font-size: 12px;
+  color: var(--color-accent-100);
+  font-variant-numeric: tabular-nums;
+}
+.rplate:not(.on) .rplate-r,
+.rplate:not(.on) .rplate-v {
+  color: var(--color-neutral-600);
+}
+
+/* compact circuit muscle pills (design .mus / .mus2), tap opens the drawer */
+.c-mus,
+.c-mus2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  line-height: 1;
+  cursor: pointer;
+}
+.c-mus {
+  background: var(--color-accent-900);
+  color: var(--color-accent-100);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.c-mus2 {
+  background: #26282d;
+  color: var(--color-neutral-300);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+}
+.c-mus svg,
+.c-mus2 svg {
+  width: 12px;
+  height: 12px;
+}
+.c-mus:not([role='button']),
+.c-mus2:not([role='button']) {
+  cursor: default;
+}
+
+/* --- CR-02 · adding-to-circuit banner ------------------------------------ */
 .circuit-banner {
   display: flex;
   align-items: center;
   gap: 11px;
   padding: 11px 13px;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--loopwash);
   box-shadow: inset 0 0 0 1px var(--color-accent-700);
   margin-bottom: var(--space-4);
@@ -27148,38 +27205,112 @@ button.badge {
   color: var(--color-accent-300);
   margin-top: 2px;
 }
-.circuit-banner .cb-rounds {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 6px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.28);
-}
-.circuit-banner .cb-rounds button {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  border: none;
-  background: var(--color-surface);
-  color: var(--color-accent);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-.circuit-banner .cb-r-num {
-  min-width: 16px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  font-size: 14px;
-}
 .circuit-banner .cb-done {
-  min-height: 34px;
-  font-size: 12px;
+  min-height: 32px;
+  font-size: 11px;
   padding: 0 12px;
+  border-color: var(--color-accent-600);
+  color: var(--color-accent);
 }
 
-/* --- CR-03 / CR-07 · circuit block in the session feed ------------------ */
+/* --- CR-02 · building the circuit (mode active) -------------------------- */
+.circuit-building {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: var(--space-4);
+}
+.circuit-building .cbld-label {
+  padding: 0 4px;
+}
+.cbld-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 12px;
+  background: var(--color-surface);
+  padding: 12px 13px;
+  box-shadow: var(--shadow-sm);
+}
+.cbld-main {
+  flex: 1;
+  min-width: 0;
+}
+.cbld-name {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cbld-mus {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+.cbld-drag {
+  color: var(--color-neutral-600);
+  font-size: 15px;
+  flex: none;
+}
+.cbld-rounds {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  background: #26282d;
+  padding: 13px;
+  box-shadow: var(--shadow-sm);
+}
+.cbld-loopi {
+  color: var(--color-accent);
+  font-size: 16px;
+  flex: none;
+}
+.cbld-rlabel {
+  flex: 1;
+  font-size: 14px;
+}
+.cbld-stepper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.cbld-stepper button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-neutral-500);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.cbld-stepper button:last-child {
+  color: var(--color-accent);
+}
+.cbld-stepper i {
+  font-size: 22px;
+}
+.cbld-stepper .num {
+  font-size: 20px;
+  width: 20px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.cbld-add {
+  min-height: 44px;
+  font-size: 14px;
+  gap: 8px;
+  border-color: var(--color-accent-600);
+  color: var(--color-accent);
+}
+.cbld-done {
+  min-height: 50px;
+  font-size: 15px;
+  gap: 9px;
+  width: 100%;
+}
+
+/* --- CR-03 / CR-07 · circuit block in the feed -------------------------- */
 .circuit-block {
   position: relative;
   border-radius: 16px;
@@ -27238,7 +27369,7 @@ button.badge {
 }
 .circuit-block .cb-counter .num {
   font-size: 14px;
-  color: var(--color-accent-300);
+  color: var(--gold-lt);
   font-variant-numeric: tabular-nums;
 }
 .circuit-block .cb-counter-lbl {
@@ -27251,7 +27382,7 @@ button.badge {
 }
 .circuit-block .cb-vol {
   font-size: 13px;
-  color: var(--color-accent-200);
+  color: var(--gold-lt);
   font-variant-numeric: tabular-nums;
 }
 .circuit-block .cb-pips {
@@ -27274,12 +27405,19 @@ button.badge {
 .circuit-block .cb-row + .cb-row {
   box-shadow: 0 -1px 0 var(--color-divider);
 }
-.circuit-block .cb-slot {
-  font-size: 11px;
-  color: var(--color-accent-300);
-  width: 22px;
+.cb-slot {
   flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--color-accent-900);
+  color: var(--color-accent-200);
+  font-size: 12px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
 }
 .circuit-block .cb-rname {
   flex: 1;
@@ -27301,8 +27439,6 @@ button.badge {
   margin-top: 13px;
   width: 100%;
 }
-
-/* CR-07 · readable summary grid */
 .circuit-block .cb-didhead {
   display: flex;
   align-items: center;
@@ -27317,6 +27453,8 @@ button.badge {
   font-size: 11px;
   padding: 0 11px;
   gap: 6px;
+  border-color: var(--color-accent-600);
+  color: var(--color-accent);
 }
 .circuit-block .cb-summary {
   margin-top: 4px;
@@ -27352,39 +27490,8 @@ button.badge {
   gap: 6px;
   margin-top: 9px;
 }
-.rplate {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 0;
-  border-radius: 9px;
-  background: var(--color-neutral-900);
-  flex: 1;
-  min-width: 0;
-}
-.rplate.on {
-  background: var(--color-accent-900);
-  box-shadow: inset 0 0 0 1px var(--color-accent-800);
-}
-.rplate .rplate-r {
-  font-size: 8px;
-  color: var(--color-accent-300);
-  letter-spacing: 0.08em;
-}
-.rplate .rplate-v {
-  font-size: 12px;
-  color: var(--color-accent-200);
-  font-variant-numeric: tabular-nums;
-}
-.rplate:not(.on) .rplate-v {
-  color: var(--color-neutral-600);
-}
-.rplate:not(.on) .rplate-r {
-  color: var(--color-neutral-600);
-}
 
-/* --- CR-04 … CR-06 · the active gallery -------------------------------- */
+/* --- CR-04 … CR-06 · the active gallery --------------------------------- */
 .sheet.circuit-run {
   display: flex;
   flex-direction: column;
@@ -27414,16 +27521,12 @@ button.badge {
 .circuit-run .cr-lh-round {
   font-size: 15px;
   margin-top: 2px;
-}
-.circuit-run .cr-lh-round .num,
-.circuit-run .cr-pips {
   font-variant-numeric: tabular-nums;
 }
 .circuit-run .cr-pips {
   display: flex;
   gap: 7px;
 }
-
 .circuit-run .cr-nav {
   flex: none;
   display: flex;
@@ -27444,7 +27547,7 @@ button.badge {
   cursor: pointer;
 }
 .circuit-run .cr-arrow:disabled {
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-500);
   cursor: default;
 }
 .circuit-run .cr-nav-mid {
@@ -27458,27 +27561,27 @@ button.badge {
   align-items: center;
 }
 .circuit-run .cr-nav-lbl {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-neutral-500);
   margin-top: 8px;
 }
-
 .circuit-run .cr-stage {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding: 6px 2px 0;
+  display: flex;
 }
 .circuit-run .cr-card {
+  flex: 1;
   border-radius: 18px;
   background: var(--color-surface);
   padding: 18px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  min-height: 100%;
 }
 .circuit-run .cr-card.recorded {
   box-shadow: inset 0 0 0 1px var(--color-ok-line);
@@ -27489,17 +27592,18 @@ button.badge {
   gap: 12px;
 }
 .circuit-run .slot {
-  width: 36px;
-  height: 36px;
   flex: none;
-  border-radius: 10px;
   display: grid;
   place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   font-size: 14px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--color-accent);
+  color: var(--color-accent-200);
   background: var(--color-accent-900);
-  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
 }
 .circuit-run .slot.ok {
   color: var(--color-ok-text);
@@ -27556,7 +27660,7 @@ button.badge {
   gap: 10px;
   padding: 9px 13px;
   border-radius: 12px;
-  background: var(--color-surface-2, #26282d);
+  background: #26282d;
   box-shadow: inset 0 0 0 1px var(--color-neutral-800);
 }
 .circuit-run .cr-step-ctl button {
@@ -27567,6 +27671,9 @@ button.badge {
   place-items: center;
   cursor: pointer;
   padding: 4px;
+}
+.circuit-run .cr-step-ctl button:first-child {
+  color: var(--color-neutral-500);
 }
 .circuit-run .cr-step-ctl .num {
   flex: 1;
@@ -27674,4 +27781,37 @@ button.badge {
   min-height: 50px;
   font-size: 13px;
   padding: 0 16px;
+  border-color: var(--color-accent-600);
+  color: var(--color-accent);
+}
+
+/* Solid-gold primary CTAs for the circuit (design .btn-primary override). */
+.cb-cta,
+.cbld-done,
+.circuit-run .cr-log,
+.circuit-run .cr-complete {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #1a1305;
+}
+.cb-cta i,
+.cbld-done i,
+.circuit-run .cr-log i,
+.circuit-run .cr-complete i {
+  color: #1a1305;
+}
+@media (hover: hover) {
+  .cb-cta:not(:disabled):hover,
+  .cbld-done:not(:disabled):hover,
+  .circuit-run .cr-log:not(:disabled):hover,
+  .circuit-run .cr-complete:not(:disabled):hover {
+    background: var(--gold-lt);
+    border-color: var(--gold-lt);
+  }
+}
+.cb-cta:not(:disabled):active,
+.cbld-done:not(:disabled):active,
+.circuit-run .cr-log:not(:disabled):active,
+.circuit-run .cr-complete:not(:disabled):active {
+  filter: brightness(0.94);
 }
