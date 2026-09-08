@@ -41,7 +41,7 @@ import {
 } from '../store';
 import { useT } from '../i18n';
 import { getRole } from '../api';
-import { Icon, useIsDesktop } from '../ui';
+import { ExerciseName, Icon, useIsDesktop } from '../ui';
 import type { Shell } from '../App';
 
 const hideBroken = (e: { currentTarget: HTMLImageElement }) => {
@@ -335,7 +335,7 @@ export function ExerciseDetailView({
               onClick={() => shell.openOverlay({ screen: 'exercise-detail', name: s.name })}
             >
               <div className="swap-head">
-                <span className="swap-name">{s.name}</span>
+                <ExerciseName name={s.name} className="swap-name" />
                 <span className="swap-match">{t.swapMatch(pct)}</span>
               </div>
               <div className="swap-bar">
@@ -385,7 +385,9 @@ export function ExerciseDetailView({
   const titleRow = (lg: boolean) => (
     <div>
       <div className="exd-title-row">
-        <h2 className={`exd-title${lg ? ' lg' : ''}`}>{canonical}</h2>
+        <h2 className={`exd-title${lg ? ' lg' : ''}`}>
+          <ExerciseName name={canonical} />
+        </h2>
       </div>
       {badgesRow}
     </div>

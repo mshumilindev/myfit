@@ -17,6 +17,7 @@ import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   BUILT_IN_CATALOG,
   canonicalExerciseName,
+  exerciseSearchText,
   muscleInfoByName,
   richExerciseByName,
   subRegionsByName,
@@ -41,7 +42,7 @@ import {
 import { getRole } from '../api';
 import { tokenMatch } from '../search';
 import { useT } from '../i18n';
-import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
+import { ConfirmDialog, ExerciseName, Icon, Sheet, useIsDesktop } from '../ui';
 import { equipmentIconName, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import type { Shell } from '../App';
 
@@ -202,7 +203,14 @@ export function ExerciseGallery({
       rows
         .filter(
           (r) =>
-            tokenMatch(r.name, needle) &&
+            tokenMatch(
+              exerciseSearchText(
+                r.name,
+                [r.primary, ...r.secondary].filter((m): m is MuscleGroup => m !== null),
+                r.equipment,
+              ),
+              needle,
+            ) &&
             (s.muscle === undefined || r.primary === s.muscle || r.secondary.includes(s.muscle)) &&
             (s.equip === undefined || r.equipment === s.equip) &&
             (s.category === undefined || r.category === s.category) &&
@@ -246,7 +254,14 @@ export function ExerciseGallery({
   const mineMatches = mineRows
     .filter(
       (r) =>
-        tokenMatch(r.name, needle) &&
+        tokenMatch(
+          exerciseSearchText(
+            r.name,
+            [r.primary, ...r.secondary].filter((m): m is MuscleGroup => m !== null),
+            r.equipment,
+          ),
+          needle,
+        ) &&
         (s.muscle === undefined || r.primary === s.muscle || r.secondary.includes(s.muscle)) &&
         (s.equip === undefined || r.equipment === s.equip),
     )
@@ -479,7 +494,7 @@ export function ExerciseGallery({
       {media(r, i, 'exl-media')}
       <div className="exl-cardbody">
         <div className="exl-cardname">
-          <span>{r.name}</span>
+          <ExerciseName name={r.name} />
         </div>
         <div className="exl-cardmus">{musclesText(r)}</div>
         {/* Always rendered, even when empty: it reserves its own row so a card
@@ -502,7 +517,7 @@ export function ExerciseGallery({
       {media(r, i, 'exl-mthumb')}
       <div className="exl-mbody">
         <div className="exl-mname">
-          <span>{r.name}</span>
+          <ExerciseName name={r.name} />
         </div>
         <div className="exl-mmus">{musclesText(r)}</div>
         <div className="exl-mbadges">

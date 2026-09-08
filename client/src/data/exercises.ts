@@ -5,6 +5,8 @@
  */
 import DB_RAW from './exercises.db.json';
 import { tokenMatch } from '../search';
+import { LOCALES, LOCALE_IDS } from '../i18n';
+import LOC_NAMES from './exerciseNames.generated.json';
 import RICH_RAW from './exercises.rich.json';
 import SUBREGIONS_RAW from './subregionTags.json';
 import type { EquipmentId } from './equipment';
@@ -390,6 +392,50 @@ export function muscleInfoByName(name: string): MuscleInfo | null {
 }
 
 /**
+ * All searchable text for an exercise — every language's name plus its muscle
+ * groups and equipment localized into every locale — so a query in any language
+ * matches regardless of the active locale. Memoized (all-locale, so stable).
+ */
+const LOC_NAME_MAP = LOC_NAMES as Record<string, Partial<Record<string, string>>>;
+const CATALOG_HAYSTACK = new Map<string, string>();
+export function localizedCatalogNames(englishName: string): string[] {
+  const tr = LOC_NAME_MAP[englishName];
+  return tr ? (Object.values(tr).filter(Boolean) as string[]) : [];
+}
+/**
+ * All-language searchable text for an exercise: English + localized names, plus
+ * its muscles and equipment localized into every locale. Query in any language
+ * matches. Memoized by English name (content is locale-independent).
+ */
+export function exerciseSearchText(
+  englishName: string,
+  muscles: MuscleGroup[],
+  equipment: EquipmentId | null,
+): string {
+  const cached = CATALOG_HAYSTACK.get(englishName);
+  if (cached !== undefined) return cached;
+  const parts: string[] = [englishName, ...localizedCatalogNames(englishName)];
+  for (const loc of LOCALE_IDS) {
+    const mg = LOCALES[loc].muscleGroups as Record<string, string>;
+    for (const m of muscles) if (mg[m]) parts.push(mg[m]);
+    if (equipment) {
+      const en = (LOCALES[loc].equipmentNames as Record<string, string>)[equipment];
+      if (en) parts.push(en);
+    }
+  }
+  const hay = parts.join(' ').toLowerCase();
+  CATALOG_HAYSTACK.set(englishName, hay);
+  return hay;
+}
+function catalogHaystack(ex: CatalogExercise): string {
+  return exerciseSearchText(
+    ex.names[0],
+    [ex.muscle, ...secondaryMusclesOf(ex)],
+    ex.equipment ?? null,
+  );
+}
+
+/**
  * Case-insensitive search across imported names. `equipment` narrows results
  * to one type.
  */
@@ -413,9 +459,9 @@ export function searchCatalog(
   const starts: CatalogExercise[] = [];
   const contains: CatalogExercise[] = [];
   for (const ex of pool) {
-    const names = ex.names.map((n) => n.toLowerCase());
+    const names = [...ex.names, ...localizedCatalogNames(ex.names[0])].map((n) => n.toLowerCase());
     if (names.some((n) => n.startsWith(q))) starts.push(ex);
-    else if (names.some((n) => tokenMatch(n, q))) contains.push(ex);
+    else if (tokenMatch(catalogHaystack(ex), q)) contains.push(ex);
     if (starts.length >= limit * 2) break;
   }
   return [...starts, ...contains].slice(0, limit);

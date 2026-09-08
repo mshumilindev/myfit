@@ -157,6 +157,7 @@ import { Wind } from '@phosphor-icons/react/Wind';
 import { HourglassMedium } from '@phosphor-icons/react/HourglassMedium';
 import type { IconProps } from '@phosphor-icons/react/dist/lib/types';
 import { FLAGS, LOCALE_IDS, LOCALES, setLocale, useT } from './i18n';
+import { exerciseDisplay, localizedExerciseName } from './data/exerciseNames';
 
 /**
  * Icons are bundled SVG components (@phosphor-icons/react) — the same Phosphor
@@ -1021,4 +1022,36 @@ export function ServerBusyOverlay() {
       </div>
     </Portal>
   );
+}
+
+/**
+ * Renders an exercise name for the active locale: the localized name as the
+ * prominent primary, with the English name as a smaller, subdued line beneath
+ * when a non-English locale is active and a localized name exists. Falls back
+ * to the plain name (English or a custom entry) otherwise.
+ */
+export function ExerciseName({
+  name,
+  className,
+  secondary = true,
+}: {
+  name: string;
+  className?: string;
+  secondary?: boolean;
+}) {
+  const { locale } = useT();
+  const d = exerciseDisplay(name, locale);
+  const sec = secondary ? d.secondary : null;
+  return (
+    <span className="exn">
+      <span className={className ? `exn-primary ${className}` : 'exn-primary'}>{d.primary}</span>
+      {sec && <span className="exn-secondary">{sec}</span>}
+    </span>
+  );
+}
+
+/** Primary-only localized name, for plain-string contexts (aria-label, title). */
+export function useExerciseName(): (name: string) => string {
+  const { locale } = useT();
+  return (name: string) => localizedExerciseName(name, locale) ?? name;
 }

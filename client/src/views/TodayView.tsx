@@ -37,7 +37,7 @@ import { activityType, activityCategory, activityWeek, workoutCalories } from '.
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
-import { ConfirmDialog, Icon, Sheet } from '../ui';
+import { ConfirmDialog, ExerciseName, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -1393,7 +1393,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   className="record-row"
                   onClick={() => shell.openOverlay({ screen: 'exercise-history', name })}
                 >
-                  <span className="n">{name}</span>
+                  <ExerciseName name={name} className="n" />
                   <span className="v">{r.recW} kg</span>
                   {recent && <span className="tag tag-ok">{t.record}</span>}
                 </button>

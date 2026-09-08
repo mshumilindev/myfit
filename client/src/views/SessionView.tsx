@@ -101,6 +101,7 @@ import {
   muscleInfoByName,
   richExerciseById,
   searchCatalog,
+  exerciseSearchText,
   secondaryMusclesOf,
   type MuscleGroup,
 } from '../data/exercises';
@@ -117,7 +118,16 @@ import {
   fmtTonnes,
   useT,
 } from '../i18n';
-import { ConfirmDialog, Dialog, EmptyState, Icon, Sheet, Switch, useIsDesktop } from '../ui';
+import {
+  ConfirmDialog,
+  Dialog,
+  EmptyState,
+  ExerciseName,
+  Icon,
+  Sheet,
+  Switch,
+  useIsDesktop,
+} from '../ui';
 import { LOCALE_IDS, fmtWeekday } from '../i18n';
 import { getRole } from '../api';
 
@@ -828,7 +838,7 @@ export function SessionView(props: {
                   })
                 }
               >
-                {ex.name}
+                <ExerciseName name={ex.name} />
               </button>
               {(timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>}
               {!grp && !timed && !marker && prev && (
@@ -1664,7 +1674,7 @@ export function SessionView(props: {
                     <div className="current-strip">
                       <Icon name="barbell" />
                       <span className="cur-label">{t.currentKicker}</span>
-                      <span className="cur-name">{activeEx.name}</span>
+                      <ExerciseName name={activeEx.name} className="cur-name" />
                       {nextSet !== null && <span className="cur-set">{t.setNumber(nextSet)}</span>}
                     </div>
                   )}
@@ -2806,8 +2816,17 @@ function AddExerciseSheet(props: {
   const historyMatches =
     kind === 'strength'
       ? known
-          .filter((k) => tokenMatch(k.name, needle))
           .map((k) => ({ name: k.name, last: k.last, info: muscleInfoByName(k.name) }))
+          .filter((k) =>
+            tokenMatch(
+              exerciseSearchText(
+                k.name,
+                k.info ? [k.info.primary, ...k.info.secondary] : [],
+                (k.info?.equipment as EquipmentId | null) ?? null,
+              ),
+              needle,
+            ),
+          )
           .filter(
             (k) =>
               (muscle === undefined ||
@@ -3003,7 +3022,7 @@ function AddExerciseSheet(props: {
       .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
     const visible = all.filter(
       (x) =>
-        tokenMatch(x.name, needle) &&
+        tokenMatch(exerciseSearchText(x.name, [x.primary, ...x.secondary], x.equipment), needle) &&
         (muscle === undefined || x.primary === muscle || x.secondary.includes(muscle)) &&
         (equip === undefined || x.equipment === equip),
     );
@@ -3055,7 +3074,7 @@ function AddExerciseSheet(props: {
     const row = (x: Cand, isSug: boolean) => (
       <button key={x.id} className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
         <span className="add-main">
-          <span className="add-name">{x.name}</span>
+          <ExerciseName name={x.name} className="add-name" />
           <span className="add-tokens">
             <MuscleChip muscle={x.primary} tone="primary" />
             {x.secondary.map((m) => (
@@ -3206,7 +3225,7 @@ function AddExerciseSheet(props: {
                     <span style={{ width: 13 }} />
                   )}
                   <span className="txt">
-                    <span className="n">{m.name}</span>
+                    <ExerciseName name={m.name} className="n" />
                     {missing ? (
                       <span className="s eqmiss">
                         <Icon name="info" />
@@ -3259,7 +3278,7 @@ function AddExerciseSheet(props: {
                   <span style={{ width: 13 }} />
                 )}
                 <span className="txt">
-                  <span className="n">{name}</span>
+                  <ExerciseName name={name} className="n" />
                   {missing ? (
                     <span className="s eqmiss">
                       <Icon name="info" />

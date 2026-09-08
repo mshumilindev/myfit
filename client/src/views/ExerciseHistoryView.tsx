@@ -2,7 +2,7 @@
 import { est1rm, exerciseNeeds, missingAtGym, topSet, useStore } from '../store';
 import { muscleInfoByName } from '../data/exercises';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
-import { Icon } from '../ui';
+import { ExerciseName, Icon } from '../ui';
 import { EquipChip, MuscleChip } from '../components/Muscle';
 import type { Shell } from '../App';
 
@@ -46,7 +46,9 @@ export function ExerciseHistoryView({
           <Icon name="caret-left" />
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 className="title-26">{name}</h2>
+          <h2 className="title-26">
+            <ExerciseName name={name} />
+          </h2>
           {(() => {
             const info = muscleInfoByName(name);
             const needs = exerciseNeeds(name);
