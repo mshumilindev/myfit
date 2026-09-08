@@ -29537,12 +29537,22 @@ body {
 }
 .slh-bar {
   width: 100%;
-  background: var(--color-accent-700);
+  background: #3d6488;
   border-radius: 4px 4px 0 0;
   min-height: 3px;
 }
-.slh-bar.met {
+.slh-bars .slh-bar.met {
+  background: var(--s-moon);
+}
+/* Weekday-rhythm bars: weeknights lazurite, weekends gold (matches SL-12). */
+.slh-rhythm .slh-bar {
+  background: var(--s-moon);
+}
+.slh-rhythm .slh-bar.wk {
   background: var(--color-accent);
+}
+.slh-rwd.wk {
+  color: var(--color-accent-300);
 }
 .slh-goalmet {
   color: var(--color-neutral-400);

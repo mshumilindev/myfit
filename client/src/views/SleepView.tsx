@@ -292,17 +292,18 @@ function SleepHub({
           <div className="slh-rhythm">
             {WD_ORDER.map((d, i) => {
               const p = pattern.byDay[d];
+              const wk = d === 0 || d === 6;
               return (
                 <div key={d} className="slh-rcol">
                   <div className="slh-bar-track sm">
                     {p && (
                       <div
-                        className="slh-bar"
+                        className={`slh-bar${wk ? ' wk' : ''}`}
                         style={{ height: `${Math.round((p.durMin / maxWd) * 100)}%` }}
                       />
                     )}
                   </div>
-                  <div className="slh-rwd">{t.weekDayLetters[i]}</div>
+                  <div className={`slh-rwd${wk ? ' wk' : ''}`}>{t.weekDayLetters[i]}</div>
                 </div>
               );
             })}
