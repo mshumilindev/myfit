@@ -15513,13 +15513,15 @@ button.exd-media {
 @media (max-width: 719.98px) {
   /* Room so the last card clears the floating pill, with breathing space. */
   .session-live .session-body {
-    padding-bottom: calc(104px + max(6px, var(--safe-bottom, 0px)));
+    padding-bottom: calc(92px + max(6px, var(--safe-bottom, 0px)));
   }
   .session-pill-wrap {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: calc(60px + max(6px, var(--safe-bottom, 0px)) + 14px);
+    /* No tab bar on the session screen — sit near the bottom edge, clearing
+       only the home-indicator safe-area. */
+    bottom: calc(max(10px, var(--safe-bottom, 0px)) + 8px);
     display: flex;
     justify-content: center;
     align-items: center;
