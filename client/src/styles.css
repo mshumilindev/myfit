@@ -28170,7 +28170,7 @@ button.badge {
 }
 .mst-rank-line {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   margin-top: 8px;
 }
@@ -28522,6 +28522,19 @@ button.badge {
   align-items: center;
   gap: 12px;
   padding: 12px 4px;
+}
+.mst-rung > svg {
+  flex: none;
+}
+.mst-rung-body {
+  min-width: 0;
+}
+.mst-rung-line {
+  flex-wrap: wrap;
+}
+.mst-rung-thr {
+  flex: none;
+  white-space: nowrap;
 }
 .mst-rung.locked {
   opacity: 0.55;
