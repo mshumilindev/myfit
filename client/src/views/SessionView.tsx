@@ -2566,14 +2566,17 @@ export function SessionView(props: {
               )
             }
           >
-            <span className="ss-loop">
-              <Icon name="arrows-clockwise" />
+            <span className="ss-top">
+              <span className="ss-loop">
+                <Icon name="arrows-clockwise" />
+              </span>
+              <span className="ss-circuit-text">
+                <span className="ss-circuit-title">{t.circuitLabel}</span>
+                <span className="ss-circuit-hint">{t.circuitHint}</span>
+              </span>
+              <Switch on={circuit.on} />
             </span>
-            <span className="ss-circuit-text">
-              <span className="ss-circuit-title">{t.circuitLabel}</span>
-              <span className="ss-circuit-hint">{t.circuitHint}</span>
-            </span>
-            <Switch on={circuit.on} />
+            <span className="ss-desc">{t.circuitSettingDesc}</span>
           </button>
         </Sheet>
       )}

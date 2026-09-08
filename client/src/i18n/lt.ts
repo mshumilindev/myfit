@@ -114,6 +114,8 @@ export const lt: Strings = {
   sessionSettings: 'Sesijos nustatymai',
   circuitLabel: 'Ratas',
   circuitHint: 'Toliau pridedami pratimai jungiami į vieną ratų treniruotę — kaip crossfit blokas.',
+  circuitSettingDesc:
+    'Atlik bet kiek pratimų ratais. Išjunk, kad grįžtum prie įprastų pratimų — tai ne supersetas, tad kilpą matysi visur.',
   circuitAdding: 'Dedu į ratą',
   circuitDone: 'Baigta',
   circuitRoundOf: (a: number, b: number) => `${a} ratas iš ${b}`,

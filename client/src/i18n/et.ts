@@ -102,6 +102,8 @@ export const et: Strings = {
   sessionSettings: 'Sessiooni seaded',
   circuitLabel: 'Ringtreening',
   circuitHint: 'Järgmisena lisatavad harjutused liidetakse üheks ringiks — nagu crossfiti plokk.',
+  circuitSettingDesc:
+    'Tee ükskõik kui palju harjutusi ringidena. Lülita välja, et naasta tavaharjutuste juurde — see pole superseeria, seega näed silmust kõikjal.',
   circuitAdding: 'Lisan ringi',
   circuitDone: 'Valmis',
   circuitRoundOf: (a: number, b: number) => `Ring ${a} / ${b}`,

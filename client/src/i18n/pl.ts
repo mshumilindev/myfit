@@ -114,6 +114,8 @@ export const pl: Strings = {
   sessionSettings: 'Ustawienia sesji',
   circuitLabel: 'Obwód',
   circuitHint: 'Kolejne ćwiczenia trafiają do jednego obwodu z rundami — jak blok crossfit.',
+  circuitSettingDesc:
+    'Wykonuj dowolną liczbę ćwiczeń w rundach. Wyłącz, aby wrócić do zwykłych ćwiczeń — to nie superseria, więc pętlę zobaczysz wszędzie.',
   circuitAdding: 'Dodaję do obwodu',
   circuitDone: 'Gotowe',
   circuitRoundOf: (a: number, b: number) => `Runda ${a} z ${b}`,

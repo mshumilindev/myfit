@@ -106,6 +106,8 @@ export const en = {
   sessionSettings: 'Session settings',
   circuitLabel: 'Circuit',
   circuitHint: 'Exercises you add next join one round-based circuit — like a crossfit block.',
+  circuitSettingDesc:
+    "Run any number of exercises in rounds. Turn it off to go back to normal exercises — it's not a superset, so the loop mark shows wherever it appears.",
   circuitAdding: 'Adding to Circuit',
   circuitDone: 'Done',
   circuitRoundOf: (a: number, b: number) => `Round ${a} of ${b}`,

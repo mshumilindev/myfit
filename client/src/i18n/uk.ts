@@ -114,6 +114,8 @@ export const uk: Strings = {
   sessionSettings: 'Налаштування сесії',
   circuitLabel: 'Кругова',
   circuitHint: 'Наступні вправи додаються в одну кругову з раундами — як блок у кросфіті.',
+  circuitSettingDesc:
+    'Виконуй скільки завгодно вправ колами. Вимкни, щоб повернутися до звичайних вправ — це не суперсет, тож петлю видно всюди, де вона зʼявляється.',
   circuitAdding: 'Додаю в Кругову',
   circuitDone: 'Готово',
   circuitRoundOf: (a: number, b: number) => `Раунд ${a} з ${b}`,
