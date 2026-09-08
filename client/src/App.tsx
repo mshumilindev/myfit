@@ -1566,7 +1566,7 @@ function Rail(props: {
       </div>
       <div className="rail-mastery">
         <Suspense fallback={null}>
-          <MasteryBadge onOpen={props.onOpenMastery} />
+          <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
         </Suspense>
       </div>
       {nav.map((x) => (

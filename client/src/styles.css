@@ -28991,9 +28991,56 @@ button.badge {
   text-transform: none;
 }
 
-/* Mastery badge in the desktop rail */
+/* Mastery badge in the desktop rail — a compact vertical nav-style entry */
 .rail-mastery {
   display: flex;
   justify-content: center;
-  padding: 2px 0 6px;
+  padding: 0 0 8px;
+}
+.mst-railbadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 46px;
+  padding: 5px 0 6px;
+  border: 0;
+  background: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.mst-railbadge .mst-ring-in {
+  background: #191712;
+}
+.mst-railbadge-num {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--color-accent-100);
+}
+.mst-railbadge.calib .mst-railbadge-num {
+  color: var(--color-neutral-400);
+  letter-spacing: 0.12em;
+}
+.mst-railbadge-ring {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--color-neutral-600) 0 30%, var(--color-neutral-900) 30% 100%);
+}
+.mst-railbadge-in {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  display: grid;
+  place-items: center;
+}
+@media (hover: hover) {
+  .mst-railbadge:hover {
+    background: rgba(233, 234, 236, 0.05);
+  }
 }

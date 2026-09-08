@@ -681,7 +681,13 @@ function Calibration({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
 }
 
 // --- MT-01 / MT-02 · the header seal badge ----------------------------------
-export function MasteryBadge({ onOpen }: { onOpen: () => void }) {
+export function MasteryBadge({
+  onOpen,
+  variant = 'header',
+}: {
+  onOpen: () => void;
+  variant?: 'header' | 'rail';
+}) {
   const store = useStore();
   const [now] = useState(() => Date.now());
   const m = useMemo(
@@ -692,6 +698,31 @@ export function MasteryBadge({ onOpen }: { onOpen: () => void }) {
       }),
     [store, now],
   );
+  // Rail variant: a compact vertical badge that reads like a nav item — the
+  // progress ring with the rank insignia, the rating tucked beneath.
+  if (variant === 'rail') {
+    return (
+      <button
+        className={`mst-railbadge${m.calibrating ? ' calib' : ''}`}
+        onClick={onOpen}
+        aria-label="Mastery"
+        title="Mastery"
+      >
+        {m.calibrating ? (
+          <span className="mst-railbadge-ring calib">
+            <span className="mst-railbadge-in">
+              <Seal size={18} dim />
+            </span>
+          </span>
+        ) : (
+          <Ring frac={m.rankProgress} size={38} inner={30}>
+            <RankInsignia index={m.rankIndex} size={19} />
+          </Ring>
+        )}
+        <span className="mst-railbadge-num num">{m.calibrating ? '···' : m.rating}</span>
+      </button>
+    );
+  }
   if (m.calibrating) {
     return (
       <button className="mst-badge calib" onClick={onOpen} aria-label="Mastery">
