@@ -72,6 +72,129 @@ function Seal({ size = 34, dim = false }: { size?: number; dim?: boolean }) {
   );
 }
 
+/** 5-point star points for a rank insignia device. */
+function starPts(cx: number, cy: number, outer: number, inner: number): string {
+  const p: string[] = [];
+  for (let k = 0; k < 10; k++) {
+    const r = k % 2 === 0 ? outer : inner;
+    const a = -Math.PI / 2 + (k * Math.PI) / 5;
+    p.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
+  }
+  return p.join(' ');
+}
+
+/**
+ * A distinct insignia per rank — like military ranks, in our craft interpretation.
+ * The device escalates by tier: chevrons (0-2) -> bars with a chevron cap (3-5) ->
+ * stars, gaining laurels near the top (6-8). Frame is always the Spotter hex.
+ */
+function RankInsignia({
+  index,
+  size = 34,
+  dim = false,
+}: {
+  index: number;
+  size?: number;
+  dim?: boolean;
+}) {
+  const i = Math.max(0, Math.min(MASTERY_RANKS.length - 1, index));
+  const frameFill = dim ? 'none' : i >= 6 ? 'var(--color-accent-800)' : 'var(--color-accent-900)';
+  const frameStroke = dim
+    ? 'var(--color-neutral-700)'
+    : i >= 6
+      ? 'var(--color-accent-500)'
+      : 'var(--color-accent-600)';
+  const ink = dim ? 'var(--color-neutral-500)' : 'var(--color-accent)';
+  const ink2 = dim ? 'var(--color-neutral-600)' : 'var(--color-accent-600)';
+
+  const devices: React.ReactNode[] = [];
+  if (i < 3) {
+    const n = i + 1;
+    const baseY = 30 + n * 6;
+    for (let c = 0; c < n; c++) {
+      const y = baseY - c * 7;
+      devices.push(
+        <path
+          key={`c${c}`}
+          d={`M20 ${y} L32 ${y - 10} L44 ${y}`}
+          fill="none"
+          stroke={ink}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />,
+      );
+    }
+  } else if (i < 6) {
+    const n = i - 2;
+    const baseY = 30 + n * 5;
+    for (let b = 0; b < n; b++) {
+      const y = baseY - b * 8;
+      devices.push(<rect key={`b${b}`} x="18" y={y} width="28" height="4.4" rx="2.2" fill={ink} />);
+    }
+    devices.push(
+      <path
+        key="cap"
+        d="M23 26 L32 18 L41 26"
+        fill="none"
+        stroke={ink2}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />,
+    );
+  } else {
+    const n = i - 5;
+    if (n === 1) {
+      devices.push(<polygon key="s0" points={starPts(32, 33, 12, 5)} fill={ink} />);
+    } else if (n === 2) {
+      devices.push(
+        <polygon key="s0" points={starPts(24, 33, 9, 3.8)} fill={ink} />,
+        <polygon key="s1" points={starPts(40, 33, 9, 3.8)} fill={ink} />,
+      );
+    } else {
+      devices.push(
+        <polygon key="s0" points={starPts(21, 34, 7.5, 3.2)} fill={ink} />,
+        <polygon key="s1" points={starPts(32, 31, 8.5, 3.6)} fill={ink} />,
+        <polygon key="s2" points={starPts(43, 34, 7.5, 3.2)} fill={ink} />,
+      );
+    }
+    if (i >= 7) {
+      devices.push(
+        <path
+          key="lL"
+          d="M17 50 Q9 39 15 27"
+          fill="none"
+          stroke={ink2}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />,
+        <path
+          key="lR"
+          d="M47 50 Q55 39 49 27"
+          fill="none"
+          stroke={ink2}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+        />,
+      );
+    }
+  }
+
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} style={{ display: 'block' }} aria-hidden>
+      <polygon
+        points="32,4 56,17 56,44 32,60 8,44 8,17"
+        fill={frameFill}
+        stroke={frameStroke}
+        strokeWidth="1.8"
+        strokeDasharray={dim ? '5 4' : undefined}
+      />
+      {devices}
+    </svg>
+  );
+}
+
 /** Conic progress ring with a dark inner disc. */
 function Ring({
   frac,
@@ -161,7 +284,7 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
               <span className="mst-hero-num-lbl">{t.masteryRatingLabel}</span>
             </Ring>
             <div className="mst-hero-rank">
-              <Seal size={34} />
+              <RankInsignia index={m.rankIndex} size={34} />
               <div className="mst-rank-line">
                 <span className="mst-rank-name">{rankName(m.rank.id)}</span>
                 <span className="rn">{sublevelRoman(m.sublevel)}</span>
@@ -419,7 +542,7 @@ function Ladder({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
           if (state === 'current')
             return (
               <div key={r.id} className="mst-rung current">
-                <Seal size={40} />
+                <RankInsignia index={r.i} size={40} />
                 <div className="mst-rung-body">
                   <div className="mst-rung-line">
                     <span className="mst-rung-name">{rankName(r.id)}</span>
@@ -438,11 +561,7 @@ function Ladder({ m, onBack }: { m: MasteryResult; onBack: () => void }) {
             );
           return (
             <div key={r.id} className={`mst-rung ${state}`}>
-              {state === 'locked' ? (
-                <Icon name="lock-simple" className="mst-rung-lock" />
-              ) : (
-                <Icon name="check-circle" weight="fill" className="mst-rung-done" />
-              )}
+              <RankInsignia index={r.i} size={30} dim={state === 'locked'} />
               <div className="mst-rung-body">
                 <span className="mst-rung-name">{rankName(r.id)}</span>
                 <div className="mst-rung-mean">{t.masteryRankMeaning[r.id]}</div>
@@ -588,9 +707,75 @@ export function MasteryBadge({ onOpen }: { onOpen: () => void }) {
   return (
     <button className="mst-badge" onClick={onOpen} aria-label="Mastery">
       <Ring frac={m.rankProgress} size={26} inner={20}>
-        <Seal size={11} />
+        <RankInsignia index={m.rankIndex} size={11} />
       </Ring>
       <span className="mst-badge-num num">{m.rating}</span>
     </button>
+  );
+}
+
+// --- MT-07 · rank-up moment (a quiet standing update, not a trophy) ----------
+export function MasteryRankUp({
+  m,
+  onClose,
+  onSeeNext,
+}: {
+  m: MasteryResult;
+  onClose: () => void;
+  onSeeNext: () => void;
+}) {
+  const { t } = useT();
+  const rankName = (id: string) => t.masteryRank[id] ?? id;
+  const topAxes = (['strength', 'consistency', 'experience', 'practice'] as AxisKey[])
+    .map((k) => ({ k, score: m.axes[k].score }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 2);
+  const nextHint = m.shortfalls[0]
+    ? t.masteryFix[m.shortfalls[0].signal ?? m.shortfalls[0].axis]
+    : '';
+  return (
+    <div className="mst-rankup-scrim" onClick={onClose}>
+      <div className="mst-rankup-glow" />
+      <div className="mst-rankup-card" onClick={(e) => e.stopPropagation()}>
+        <button className="mst-rankup-x" aria-label={t.cancel} onClick={onClose}>
+          <Icon name="x" />
+        </button>
+        <div className="section-label gold">{t.masteryRose}</div>
+        <div className="mst-rankup-seal">
+          <RankInsignia index={m.rankIndex} size={104} />
+        </div>
+        <div className="mst-rankup-rank">
+          <span>{rankName(m.rank.id)}</span>
+          <span className="rn">{sublevelRoman(m.sublevel)}</span>
+        </div>
+        <div className="mst-rankup-mean">{t.masteryRankMeaning[m.rank.id]}</div>
+
+        <div className="mst-rankup-moved">
+          <div className="section-label gold">{t.masteryWhatMoved}</div>
+          {topAxes.map((a) => (
+            <div key={a.k} className="mst-rankup-moved-row">
+              <Icon name={AXIS_ICON[a.k]} />
+              <span>
+                {t.masteryAxis[a.k]} · {a.score}
+                <span className="mst-rankup-100">/100</span>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {nextHint && (
+          <div className="mst-rankup-next">
+            <Icon name="flag-checkered" />
+            <span>
+              {m.nextRank ? t.masteryNextRank(rankName(m.nextRank.id)) : ''} — {nextHint}
+            </span>
+          </div>
+        )}
+
+        <button className="btn btn-primary mst-rankup-cta" onClick={onSeeNext}>
+          {t.masterySeeNext}
+        </button>
+      </div>
+    </div>
   );
 }

@@ -113,7 +113,12 @@ export interface StoreState {
   exerciseLoadTypes: Record<string, LoadType>;
   exerciseSides: Record<string, 'one' | 'both'>;
   /** Self-reported training history for the Mastery Experience axis (optional). */
-  mastery: { sinceYear: number | null; pattern: 'continuous' | 'occasional' | 'frequent' | null };
+  mastery: {
+    sinceYear: number | null;
+    pattern: 'continuous' | 'occasional' | 'frequent' | null;
+    /** Last rating we surfaced to the user — drives the rank-up moment. */
+    seenRating: number | null;
+  };
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
   /** Goals: physique target, block focus, long-term goals (My Fit). */
@@ -145,7 +150,11 @@ let state: StoreState = {
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
   exerciseSides: load<Record<string, 'one' | 'both'>>(EX_SIDES_KEY, {}),
-  mastery: load<StoreState['mastery']>(MASTERY_KEY, { sinceYear: null, pattern: null }),
+  mastery: load<StoreState['mastery']>(MASTERY_KEY, {
+    sinceYear: null,
+    pattern: null,
+    seenRating: null,
+  }),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   queue: [],
@@ -1560,7 +1569,12 @@ export function setMasteryHistory(
   sinceYear: number | null,
   pattern: 'continuous' | 'occasional' | 'frequent' | null,
 ): void {
-  setState({ mastery: { sinceYear, pattern } });
+  setState({ mastery: { ...state.mastery, sinceYear, pattern } });
+}
+
+/** Record the rating last surfaced to the user (so the rank-up moment fires once). */
+export function setMasterySeenRating(rating: number): void {
+  setState({ mastery: { ...state.mastery, seenRating: rating } });
 }
 /** Whether the Sides control makes sense for a lift — dumbbell / cable /
  *  kettlebell, single-limb machines, and one-arm/one-leg moves. Hidden for
@@ -2568,7 +2582,7 @@ export function resetLocalData(): void {
     exerciseUnits: {},
     exerciseLoadTypes: {},
     exerciseSides: {},
-    mastery: { sinceYear: null, pattern: null },
+    mastery: { sinceYear: null, pattern: null, seenRating: null },
     bodyMetrics: EMPTY_BODY,
     goals: EMPTY_GOALS,
     queue: [],

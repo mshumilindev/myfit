@@ -28841,3 +28841,128 @@ button.badge {
     opacity: 1;
   }
 }
+
+/* --- MT-07 rank-up moment ------------------------------------------------ */
+.mst-rankup-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background:
+    radial-gradient(120% 80% at 50% 22%, rgba(217, 162, 79, 0.14), transparent 60%),
+    rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 120px 20px 20px;
+}
+.mst-rankup-glow {
+  display: none;
+}
+.mst-rankup-card {
+  position: relative;
+  width: min(350px, 92vw);
+  border-radius: 20px;
+  background: linear-gradient(165deg, #231d13, #191a1d 70%);
+  box-shadow:
+    var(--shadow-md),
+    0 20px 50px rgba(0, 0, 0, 0.6);
+  padding: 30px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: mstSealRise 0.6s ease-out;
+}
+@keyframes mstSealRise {
+  from {
+    transform: translateY(8px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.mst-rankup-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: none;
+  background: none;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+}
+.mst-rankup-seal {
+  margin: 20px 0 6px;
+}
+.mst-rankup-rank {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 8px;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--color-accent-100);
+}
+.mst-rankup-rank .rn {
+  font-size: 12px;
+  padding: 3px 8px;
+}
+.mst-rankup-mean {
+  font-size: 13px;
+  color: var(--color-accent-200);
+  line-height: 1.5;
+  margin-top: 8px;
+  max-width: 30ch;
+}
+.mst-rankup-moved {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: rgba(10, 11, 13, 0.4);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+  padding: 14px;
+  text-align: left;
+}
+.mst-rankup-moved-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--color-neutral-200);
+  margin-top: 8px;
+}
+.mst-rankup-moved-row i {
+  color: var(--color-accent);
+  font-size: 14px;
+}
+.mst-rankup-100 {
+  color: var(--color-neutral-500);
+}
+.mst-rankup-next {
+  width: 100%;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(10, 11, 13, 0.35);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  font-size: 12px;
+  color: var(--color-neutral-300);
+  text-align: left;
+}
+.mst-rankup-next i {
+  color: var(--color-neutral-400);
+  flex: none;
+}
+.mst-rankup-cta {
+  width: 100%;
+  margin-top: 20px;
+  min-height: 48px;
+  font-size: 15px;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #1a1305;
+}

@@ -587,6 +587,14 @@ export function computeMastery(
   };
 }
 
+/** The rank ladder index for a given rating (0-based). */
+export function rankIndexForRating(rating: number): number {
+  let index = 0;
+  for (let i = 0; i < MASTERY_RANKS.length; i++)
+    if (rating >= MASTERY_RANKS[i].threshold) index = i;
+  return index;
+}
+
 /** Roman numeral for a sublevel 1..3. */
 export function sublevelRoman(n: number): string {
   return n === 3 ? 'III' : n === 2 ? 'II' : 'I';

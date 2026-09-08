@@ -26,8 +26,10 @@ import {
   discardBlockingChange,
   bodyMetricsComplete,
   commitWorkout,
+  setMasterySeenRating,
 } from './store';
 import { useT } from './i18n';
+import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
 import {
   Icon,
   LanguageSelector,
@@ -145,6 +147,9 @@ const MasteryView = lazy(() =>
 );
 const MasteryBadge = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
+);
+const MasteryRankUp = lazy(() =>
+  import('./views/MasteryView').then((module) => ({ default: module.MasteryRankUp })),
 );
 const ApexApp = lazy(() =>
   import('./views/ApexApp').then((module) => ({ default: module.ApexApp })),
@@ -513,6 +518,23 @@ export function App() {
   // computes the raw events, feeds them in from an effect, and subscribes for
   // the result (stable timestamps + seen flags, so nothing stale re-surfaces).
   const [notifNow] = useState(() => Date.now());
+  const [rankUp, setRankUp] = useState<MasteryResult | null>(null);
+  // Rank-up moment: once per crossing, compared against the last surfaced rating.
+  useEffect(() => {
+    const m = computeMastery(store, Date.now(), {
+      trainingSinceYear: store.mastery.sinceYear,
+      trainingPattern: store.mastery.pattern,
+    });
+    if (m.calibrating) return;
+    const seen = store.mastery.seenRating;
+    if (seen == null) {
+      setMasterySeenRating(m.rating);
+      return;
+    }
+    if (m.rankIndex > rankIndexForRating(seen)) queueMicrotask(() => setRankUp(m));
+    if (m.rating !== seen) setMasterySeenRating(m.rating);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const challenges = useChallenges();
   const rawNotifs = useMemo(
     () => computeNotifs(store, notifNow, t, challenges),
@@ -1328,6 +1350,18 @@ export function App() {
             <NoticeStrip notices={notices.filter((n) => !n.read)} onDismiss={dismissNotice} />
           )}
           {updateReady && <UpdatePlate />}
+          {rankUp && (
+            <Suspense fallback={null}>
+              <MasteryRankUp
+                m={rankUp}
+                onClose={() => setRankUp(null)}
+                onSeeNext={() => {
+                  setRankUp(null);
+                  setOverlay({ screen: 'mastery' });
+                }}
+              />
+            </Suspense>
+          )}
           {snack && <Snackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
           {toasts.map((tst) => (
             <Toast key={tst.id} toast={tst} id={tst.id} onExpire={removeToast} />
