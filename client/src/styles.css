@@ -28447,7 +28447,7 @@ button.badge {
 }
 .mst-sf-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding: 14px;
 }
