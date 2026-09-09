@@ -1545,11 +1545,15 @@ export function illnessReturn(now: number = Date.now()): { daysOut: number } | n
     .sort((a, b) => b.endDay - a.endDay)[0];
   if (!last) return null;
   if (today - last.endDay > 2) return null;
+  // A single sick day (e.g. "just today") needs no easing-back ritual — once
+  // it's past, it should leave nothing behind. Only ease back after 2+ days out.
+  const daysOut = last.endDay - last.startDay + 1;
+  if (daysOut < 2) return null;
   const trainedSince = state.workouts.some(
     (w) => w.finishedAt !== null && dayKey(w.startedAt) > last.endDay,
   );
   if (trainedSince) return null;
-  return { daysOut: last.endDay - last.startDay + 1 };
+  return { daysOut };
 }
 
 export function restDayKeys(
