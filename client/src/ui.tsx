@@ -47,6 +47,7 @@ import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
 import { XCircle } from '@phosphor-icons/react/XCircle';
 import { Clock } from '@phosphor-icons/react/Clock';
 import { ClockCountdown } from '@phosphor-icons/react/ClockCountdown';
+import { Pulse } from '@phosphor-icons/react/Pulse';
 import { CloudSlash } from '@phosphor-icons/react/CloudSlash';
 import { Copy } from '@phosphor-icons/react/Copy';
 import { Crosshair } from '@phosphor-icons/react/Crosshair';
@@ -199,6 +200,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'check-circle': CheckCircle,
   clock: Clock,
   'clock-countdown': ClockCountdown,
+  pulse: Pulse,
   'cloud-slash': CloudSlash,
   copy: Copy,
   crosshair: Crosshair,
