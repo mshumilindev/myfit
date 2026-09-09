@@ -174,7 +174,7 @@ export const pl: Strings = {
   sleepWhichNight: 'Która noc?',
   sleepManage: 'Zarządzaj snem',
   sleepAutoLogLabel: 'Auto-zapis',
-  sleepAutoLogDesc: 'Wypełniaj każdą noc wg rytmu tygodnia.',
+  sleepAutoLogDesc: 'Sam zaczynaj i kończ każdą noc — według harmonogramu lub tygodniowego rytmu.',
   sleepAutoDimLabel: 'Auto-przygaszenie o porze snu',
   sleepAutoDimDesc: 'Przygaś aplikację, gdy nadchodzi pora snu.',
   sleepEmptyHistory: 'Zapisz kilka nocy, a Twój rytm pojawi się tutaj.',
@@ -232,6 +232,8 @@ export const pl: Strings = {
   sleepReturnToNight: 'Wróć do snu',
 
   sleepReturnToApp: 'Do aplikacji',
+
+  sleepWokeAtLabel: 'Pobudka o',
 
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',

@@ -1625,8 +1625,13 @@ export function liveSleep(list: SleepNight[] | null | undefined): SleepNight | n
   return (list ?? []).find((n) => n.wake === null) ?? null;
 }
 
-/** Begin a live night (idempotent — returns the existing one if already asleep). */
-export function startSleep(bedtime: number = Date.now()): SleepNight {
+/** Begin a live night (idempotent — returns the existing one if already asleep).
+ *  `source` marks how it began ('live' by hand, 'auto' when the app starts it
+ *  at your scheduled bedtime). */
+export function startSleep(
+  bedtime: number = Date.now(),
+  source: SleepNight['source'] = 'live',
+): SleepNight {
   const existing = liveSleep(state.sleeps);
   if (existing) return existing;
   const night: SleepNight = {
@@ -1634,7 +1639,7 @@ export function startSleep(bedtime: number = Date.now()): SleepNight {
     date: sleepDayId(bedtime),
     bedtime,
     wake: null,
-    source: 'live',
+    source,
     updatedAt: Date.now(),
   };
   setState({ sleeps: [night, ...state.sleeps] });
@@ -1642,7 +1647,10 @@ export function startSleep(bedtime: number = Date.now()): SleepNight {
 }
 
 /** End the live night at `wakeAt`; its identity becomes the wake day. */
-export function stopSleep(wakeAt: number = Date.now()): SleepNight | null {
+export function stopSleep(
+  wakeAt: number = Date.now(),
+  source?: SleepNight['source'],
+): SleepNight | null {
   const live = liveSleep(state.sleeps);
   if (!live) return null;
   const wake = Math.max(wakeAt, live.bedtime + 60000);
@@ -1651,6 +1659,7 @@ export function stopSleep(wakeAt: number = Date.now()): SleepNight | null {
     ...live,
     wake,
     date: sleepDayId(wake),
+    source: source ?? live.source,
     awakeMs: awakeMsAt(live, wake),
     awakeSince: null,
     lastSeen: undefined,

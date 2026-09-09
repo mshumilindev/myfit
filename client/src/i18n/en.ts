@@ -166,7 +166,7 @@ export const en = {
   sleepWhichNight: 'Which night?',
   sleepManage: 'Manage sleep',
   sleepAutoLogLabel: 'Auto-log',
-  sleepAutoLogDesc: 'Fill each night from your weekday pattern.',
+  sleepAutoLogDesc: 'Start and end each night on its own, from your schedule or weekday pattern.',
   sleepAutoDimLabel: 'Auto-dim at bedtime',
   sleepAutoDimDesc: 'Dim the app when your bedtime arrives.',
   sleepEmptyHistory: 'Log a few nights and your rhythm shows up here.',
@@ -223,6 +223,8 @@ export const en = {
   sleepReturnToNight: 'Back to sleep',
 
   sleepReturnToApp: 'Use the app',
+
+  sleepWokeAtLabel: 'Woke at',
 
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',

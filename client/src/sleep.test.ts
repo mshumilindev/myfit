@@ -9,6 +9,8 @@ import {
   minutesOfDay,
   awakeMsAt,
   SLEEP_IDLE_MS,
+  lastBedtimeAt,
+  AUTO_START_WINDOW_MS,
 } from './sleep';
 import type { SleepNight, SleepSchedule } from './types';
 
@@ -153,5 +155,39 @@ describe('sleep pause / awake accounting', () => {
     };
     // At/over threshold → capped at lastSeen (5 min of awake).
     expect(awakeMsAt(atThreshold, t0)).toBe(5 * MIN);
+  });
+});
+
+describe('auto sleep scheduling', () => {
+  const MIN = 60000;
+  it("finds tonight's bedtime once the clock has passed it", () => {
+    // 23:10 local, bedtime 23:00 → today's 23:00, 10 min ago.
+    const t = new Date(2025, 8, 15, 23, 10).getTime();
+    const bed = lastBedtimeAt(t, 23 * 60);
+    expect(new Date(bed).getHours()).toBe(23);
+    expect(new Date(bed).getMinutes()).toBe(0);
+    expect(new Date(bed).getDate()).toBe(15);
+    expect(t - bed).toBe(10 * MIN);
+  });
+
+  it("uses yesterday's occurrence when tonight's time is still ahead", () => {
+    // 00:20 local, bedtime 23:00 → yesterday's 23:00 (1h20 ago), not tonight's.
+    const t = new Date(2025, 8, 15, 0, 20).getTime();
+    const bed = lastBedtimeAt(t, 23 * 60);
+    expect(new Date(bed).getDate()).toBe(14);
+    expect(t - bed).toBe(80 * MIN);
+  });
+
+  it('handles an after-midnight bedtime', () => {
+    // 00:35, bedtime 00:30 → today's 00:30, 5 min ago (inside the start window).
+    const t = new Date(2025, 8, 15, 0, 35).getTime();
+    const bed = lastBedtimeAt(t, 30);
+    expect(new Date(bed).getDate()).toBe(15);
+    expect(t - bed).toBe(5 * MIN);
+    expect(t - bed).toBeLessThan(AUTO_START_WINDOW_MS);
+  });
+
+  it('exposes a 45-minute auto-start window', () => {
+    expect(AUTO_START_WINDOW_MS).toBe(45 * MIN);
   });
 });

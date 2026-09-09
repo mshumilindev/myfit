@@ -23,8 +23,16 @@ import {
   updateSleepNight,
   noteSleepPresence,
   reconcileSleep,
+  stopSleep,
 } from '../store';
-import { weekdayPattern, planForWeekday, planDurationMin, finishedNights } from '../sleep';
+import {
+  weekdayPattern,
+  planForWeekday,
+  planDurationMin,
+  finishedNights,
+  lastBedtimeAt,
+  AUTO_START_WINDOW_MS,
+} from '../sleep';
 import { Icon } from '../ui';
 import { MoonGlyph } from './MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
@@ -128,6 +136,39 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.autoLog, live, tick]);
 
+  // ---- Full auto: start tonight's night at the scheduled bedtime -----------
+  // With auto-log on, the app opens a live night on its own at your usual
+  // bedtime (schedule → learned pattern). The pause layer keeps it honest: if
+  // you're still using the app it stays paused and doesn't count.
+  useEffect(() => {
+    if (!s.autoLog || live) return;
+    const plan = planFor(store, new Date(tick).getDay(), tick);
+    if (!plan) return;
+    const bedTs = lastBedtimeAt(tick, plan.bedMin);
+    const sinceBedMs = tick - bedTs;
+    if (sinceBedMs < 0 || sinceBedMs > AUTO_START_WINDOW_MS) return;
+    const bedDayKey = sleepDayId(bedTs + 12 * 60 * MIN); // stable per-evening key
+    if (s.lastAutoNight === bedDayKey) return;
+    queueMicrotask(() => {
+      startSleep(bedTs, 'auto');
+      setSleepSettings({ lastAutoNight: bedDayKey });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.autoLog, s.lastAutoNight, live, tick]);
+
+  // ---- Full auto: end the night at the scheduled wake time -----------------
+  // Once the usual wake time (schedule → pattern) is reached, the app closes
+  // the live night at that time — even if it was shut over the morning.
+  useEffect(() => {
+    if (!s.autoLog || !live) return;
+    const plan = planFor(store, new Date(live.bedtime).getDay(), tick);
+    if (!plan) return;
+    const wakeTs = live.bedtime + planDurationMin(plan) * MIN;
+    if (tick < wakeTs) return;
+    queueMicrotask(() => stopSleep(wakeTs, 'auto'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.autoLog, live, tick]);
+
   // ---- SL-08 auto-dim: is it my usual bedtime right now? -------------------
   const todayId = sleepDayId(tick);
   const plan = planFor(store, new Date(tick).getDay(), tick);
@@ -135,6 +176,7 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
   const sinceBed = plan ? (nowMin - plan.bedMin + 1440) % 1440 : 9999;
   const showDim =
     s.autoDim &&
+    !s.autoLog &&
     !live &&
     !dimDismissed &&
     !!plan &&

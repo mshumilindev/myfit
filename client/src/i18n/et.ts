@@ -162,7 +162,7 @@ export const et: Strings = {
   sleepWhichNight: 'Milline öö?',
   sleepManage: 'Halda und',
   sleepAutoLogLabel: 'Automaatne logimine',
-  sleepAutoLogDesc: 'Täida iga öö nädalarütmi järgi.',
+  sleepAutoLogDesc: 'Alusta ja lõpeta iga öö ise — ajakava või nädalamustri järgi.',
   sleepAutoDimLabel: 'Automaatne tuhmumine magamaajal',
   sleepAutoDimDesc: 'Tuhmenda rakendus, kui saabub uneaeg.',
   sleepEmptyHistory: 'Logi paar ööd ja su rütm ilmub siia.',
@@ -219,6 +219,8 @@ export const et: Strings = {
   sleepReturnToNight: 'Tagasi unne',
 
   sleepReturnToApp: 'Rakendusse',
+
+  sleepWokeAtLabel: 'Ärkasid kell',
 
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',

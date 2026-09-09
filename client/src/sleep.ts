@@ -21,6 +21,20 @@ export function minutesOfDay(ms: number): number {
  *  as "awake" and counts as sleep from your last activity onward. */
 export const SLEEP_IDLE_MS = 5 * 60 * 1000;
 
+/** How long after the scheduled bedtime the app may still auto-start tonight's
+ *  night (beyond this we leave it to retroactive auto-log after wake). */
+export const AUTO_START_WINDOW_MS = 45 * 60 * 1000;
+
+/** The most recent clock occurrence of `bedMin` (minutes from midnight) at or
+ *  before `now`, as epoch ms — today's if it has passed, else yesterday's. */
+export function lastBedtimeAt(now: number, bedMin: number): number {
+  const d = new Date(now);
+  d.setHours(0, 0, 0, 0);
+  let ts = d.getTime() + bedMin * 60000;
+  if (ts > now) ts -= 86400000;
+  return ts;
+}
+
 /** Awake (non-sleep) ms for a night as of `now`: banked intervals plus the
  *  open one, if any. An open interval that has gone idle past SLEEP_IDLE_MS is
  *  capped at the last activity — the idle tail counts as sleep, not awake. */

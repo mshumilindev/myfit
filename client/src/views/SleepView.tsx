@@ -4,7 +4,7 @@
  * schedule editors. Night mode (token flip + Spotter Sky) is applied app-wide by
  * App while a live night runs.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   useStore,
   liveSleep,
@@ -23,6 +23,7 @@ import { useT, fmtDurationHuman } from '../i18n';
 import { ConfirmDialog, Icon, Switch } from '../ui';
 import { MoonGlyph } from '../components/MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
+import { TimeField } from '../components/PickerFields';
 import {
   nightDurationMin,
   lastNight,
@@ -575,15 +576,20 @@ function WakeFlow({
 }) {
   const { t } = useT();
   const [now] = useState(() => Date.now());
-  const [wakeAt, setWakeAt] = useState(now);
-  const [exact, setExact] = useState(false);
+  // Exact wake time via the app's own time picker (default: now).
+  const [wake, setWake] = useState(() => hhmm(now));
+  const wakeAt = useMemo(() => {
+    const [h, m] = wake.split(':').map(Number);
+    const d = new Date(now);
+    d.setHours(h || 0, m || 0, 0, 0);
+    let ts = d.getTime();
+    // Land the chosen clock time on this night: after bedtime, and a morning
+    // pick belongs to today (never more than half a day ahead of now).
+    if (ts <= bedtime) ts += 86400000;
+    if (ts > now + 12 * 3600000) ts -= 86400000;
+    return ts;
+  }, [wake, now, bedtime]);
   const mins = Math.round((wakeAt - bedtime) / 60000);
-  const chips: Array<{ label: string; at: number }> = [
-    { label: t.sleepWokeJustNow, at: now },
-    { label: t.sleepWokeAgo(15), at: now - 15 * 60000 },
-    { label: t.sleepWokeAgo(30), at: now - 30 * 60000 },
-    { label: t.sleepWokeHrAgo(1), at: now - 60 * 60000 },
-  ];
   return (
     <div className="screen sleep-screen">
       <h1 className="sleep-h1">{t.sleepWakeTitle}</h1>
@@ -592,38 +598,10 @@ function WakeFlow({
       <div className="sleep-wake-about">
         {t.sleepWakeAbout(`${hhmm(bedtime)} → ${hhmm(wakeAt)}`)}
       </div>
-      <div className="sleep-chip-grid">
-        {chips.map((c) => (
-          <button
-            key={c.label}
-            className={`sleep-chip${Math.abs(c.at - wakeAt) < 30000 && !exact ? ' on' : ''}`}
-            onClick={() => {
-              setExact(false);
-              setWakeAt(c.at);
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
+      <div className="sleep-wake-field">
+        <span className="slh-sec-label">{t.sleepWokeAtLabel}</span>
+        <TimeField value={wake} onChange={setWake} />
       </div>
-      <button className="sleep-exact-toggle" onClick={() => setExact((x) => !x)}>
-        <Icon name="clock" /> {t.sleepSetExact}
-      </button>
-      {exact && (
-        <input
-          type="time"
-          className="sleep-time-input"
-          defaultValue={hhmm(wakeAt)}
-          onChange={(e) => {
-            const [h, m] = e.target.value.split(':').map(Number);
-            const d = new Date(now);
-            d.setHours(h, m, 0, 0);
-            let ts = d.getTime();
-            if (ts < bedtime) ts += 86400000;
-            setWakeAt(ts);
-          }}
-        />
-      )}
       <button className="btn-moon sleep-wide" onClick={() => onConfirm(wakeAt)}>
         {t.sleepLogAndWake(dur(mins))}
       </button>

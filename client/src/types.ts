@@ -172,6 +172,9 @@ export interface SleepSettings {
   goalMin: number;
   /** Local date key the auto-dim prompt last fired (once per night). */
   lastDimDay?: string | null;
+  /** Bedtime-day key the app last auto-started a night for (once per night,
+   *  so discarding an auto-started night doesn't re-trigger the same evening). */
+  lastAutoNight?: string | null;
   /** State of the "offer to auto-log" prompt. */
   patternOffer?: 'unseen' | 'declined' | 'accepted';
 }

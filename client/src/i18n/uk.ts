@@ -174,7 +174,7 @@ export const uk: Strings = {
   sleepWhichNight: 'Яка ніч?',
   sleepManage: 'Керувати сном',
   sleepAutoLogLabel: 'Авто-лог',
-  sleepAutoLogDesc: 'Заповнювати кожну ніч за твоїм тижневим ритмом.',
+  sleepAutoLogDesc: 'Сам починати й завершувати кожну ніч — за графіком або тижневим ритмом.',
   sleepAutoDimLabel: 'Авто-затемнення на відбій',
   sleepAutoDimDesc: 'Притлумлювати додаток, коли настає час сну.',
   sleepEmptyHistory: 'Залогуй кілька ночей — і тут зʼявиться твій ритм.',
@@ -231,6 +231,8 @@ export const uk: Strings = {
   sleepReturnToNight: 'Назад до сну',
 
   sleepReturnToApp: 'Д о додатка',
+
+  sleepWokeAtLabel: 'Прокинувся о',
 
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',

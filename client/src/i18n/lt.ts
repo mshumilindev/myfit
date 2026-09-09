@@ -174,7 +174,7 @@ export const lt: Strings = {
   sleepWhichNight: 'Kuri naktis?',
   sleepManage: 'Tvarkyti miegą',
   sleepAutoLogLabel: 'Automatinis žymėjimas',
-  sleepAutoLogDesc: 'Užpildyti kiekvieną naktį pagal savaitės ritmą.',
+  sleepAutoLogDesc: 'Pati pradėti ir baigti kiekvieną naktį — pagal grafiką ar savaitės ritmą.',
   sleepAutoDimLabel: 'Automatinis pritemdymas prieš miegą',
   sleepAutoDimDesc: 'Pritemdyti programą, kai ateina miego laikas.',
   sleepEmptyHistory: 'Užfiksuok kelias naktis — ir čia atsiras tavo ritmas.',
@@ -233,6 +233,8 @@ export const lt: Strings = {
   sleepReturnToNight: 'Atgal į miegą',
 
   sleepReturnToApp: 'Ī programą',
+
+  sleepWokeAtLabel: 'Pabudai',
 
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
