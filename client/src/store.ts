@@ -114,6 +114,28 @@ function persistSleepTombstones(): void {
     /* private mode: Firestore is the source of truth anyway */
   }
 }
+// Ids of nights confirmed present on the server (from an authoritative snapshot).
+// Distinguishes a genuine pending upload (never synced -> keep) from a night
+// that was synced and is now gone (deleted here or in another tab -> drop, do
+// not resurrect). Shared across same-origin tabs via localStorage.
+const SLEEP_SYNCED_KEY = 'spotter.sleepSynced.v1';
+const syncedSleepIds = new Set<string>(
+  (() => {
+    try {
+      const raw = localStorage.getItem(SLEEP_SYNCED_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  })(),
+);
+function persistSyncedSleepIds(): void {
+  try {
+    localStorage.setItem(SLEEP_SYNCED_KEY, JSON.stringify([...syncedSleepIds].slice(-500)));
+  } catch {
+    /* ignore */
+  }
+}
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -1849,7 +1871,11 @@ export function mergeServerSleepsWithLocal(
     return sN;
   });
   for (const l of local) {
-    if (!serverIds.has(l.id)) out.push(l); // pending push / not yet on server
+    // Re-add a local-only night only if it was NEVER confirmed on the server
+    // (a genuine pending upload). If it was synced and is now missing, it was
+    // DELETED -- here or in another tab/device -- so drop it. This is what lets
+    // a delete/discard win across every open tab, including a live night.
+    if (!serverIds.has(l.id) && !syncedSleepIds.has(l.id)) out.push(l);
   }
   return out.sort((a, b) => b.bedtime - a.bedtime);
 }
@@ -1857,13 +1883,37 @@ export function mergeServerSleepsWithLocal(
 function pushLocalSleepDiffs(server: SleepNight[], merged: SleepNight[]): void {
   const byId = new Map(server.map((n) => [n.id, n]));
   for (const n of merged) {
+    if (pendingSleepDeletes.has(n.id)) continue;
     const remote = byId.get(n.id);
-    if (!remote || (n.updatedAt ?? 0) > (remote.updatedAt ?? 0)) writeSleepDoc(n);
+    if (remote) {
+      if ((n.updatedAt ?? 0) > (remote.updatedAt ?? 0)) writeSleepDoc(n); // genuine edit
+    } else if (!syncedSleepIds.has(n.id)) {
+      writeSleepDoc(n); // never-synced pending create; synced-then-missing = deleted -> skip
+    }
   }
 }
 
 function applySleepSnapshot(serverSleeps: SleepNight[], fromCache = false): void {
+  // Pick up tombstones set by sibling tabs (same origin) so a discard in one
+  // tab is respected here and can't be resurrected by this tab's state.
+  try {
+    const raw = localStorage.getItem(SLEEP_TOMB_KEY);
+    if (raw) for (const id of JSON.parse(raw) as string[]) pendingSleepDeletes.add(id);
+    const rawS = localStorage.getItem(SLEEP_SYNCED_KEY);
+    if (rawS) for (const id of JSON.parse(rawS) as string[]) syncedSleepIds.add(id);
+  } catch {
+    /* ignore */
+  }
   const serverIds = new Set(serverSleeps.map((n) => n.id));
+  if (!fromCache) {
+    let sChanged = false;
+    for (const id of serverIds)
+      if (!syncedSleepIds.has(id)) {
+        syncedSleepIds.add(id);
+        sChanged = true;
+      }
+    if (sChanged) persistSyncedSleepIds();
+  }
   let tombChanged = false;
   for (const id of Array.from(pendingSleepDeletes)) {
     if (serverIds.has(id)) {
