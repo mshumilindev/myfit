@@ -164,7 +164,7 @@ type GhostValues = {
 };
 
 type SheetState =
-  | { kind: 'add' }
+  | { kind: 'add'; intoGroupId?: string }
   | {
       kind: 'edit';
       exId: string;
@@ -2344,8 +2344,15 @@ export function SessionView(props: {
                   equipment: meta.equipment,
                 }
               : {};
-            const plan =
-              circuit.on && circuit.groupId
+            const plan = sheet.intoGroupId
+              ? {
+                  ...base,
+                  groupId: sheet.intoGroupId,
+                  groupKind: 'superset' as const,
+                  groupOrder: workout.exercises.filter((e) => e.groupId === sheet.intoGroupId)
+                    .length,
+                }
+              : circuit.on && circuit.groupId
                 ? {
                     ...base,
                     groupId: circuit.groupId,
@@ -2570,6 +2577,13 @@ export function SessionView(props: {
               >
                 <Icon name="x" />
                 {t.ungroup}
+              </button>
+              <button
+                className="menu-item"
+                onClick={() => setSheet({ kind: 'add', intoGroupId: sheet.groupId })}
+              >
+                <Icon name="plus" />
+                {t.addExercise}
               </button>
               <div className="sheet-rule" />
               {members.map((e) => (
