@@ -53,9 +53,9 @@ function setDrops(s: StoredSet): StoredDrop[] {
   return t === 'drop' || t === 'reverse-drop' ? (s.drops ?? []) : [];
 }
 
-/** Working-set volume for one set (warm-ups = 0; drop parts included). */
+/** Tonnage for one set — warm-ups included (weight moved is weight moved; PRs
+ *  and working-set counts filter by type elsewhere). Drop parts included. */
 export function setVolumeKg(s: StoredSet): number {
-  if (setTypeOf(s) === 'warmup') return 0;
   const reps = s.reps ?? 0;
   return (
     (s.weight ?? 0) * reps + setDrops(s).reduce((v, d) => v + (d.weight ?? 0) * (d.reps ?? 0), 0)

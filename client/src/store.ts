@@ -268,7 +268,8 @@ export function setRepsTotal(s: SetEntry): number {
   return s.reps + setDrops(s).reduce((n, d) => n + d.reps, 0);
 }
 export function setVolumeKg(s: SetEntry): number {
-  if (setTypeOf(s) === 'warmup') return 0;
+  // Warm-ups count toward tonnage too — it's still weight moved. (They stay out
+  // of PRs / top-set and the working-set counts, which filter by type instead.)
   // Null/0 means bodyweight in the UI, but contributes no external load to total volume.
   const load = (w: number | null): number => w ?? 0;
   return load(s.weight) * s.reps + setDrops(s).reduce((v, d) => v + load(d.weight) * d.reps, 0);
@@ -1025,11 +1026,13 @@ export function upsertSet(
             const gap = Math.round((loggedAt - prevMax) / 1000);
             return gap > 0 && gap < 3 * 3600 ? gap : null;
           })();
+  const warmupManual = set.warmupManual ?? existing?.warmupManual;
   const full: SetEntry = {
     id: set.id ?? uuid(),
     reps: set.reps,
     weight: set.weight,
     isWarmup: type === 'warmup',
+    ...(warmupManual ? { warmupManual: true } : {}),
     type,
     drops: type === 'drop' || type === 'reverse-drop' ? (set.drops ?? []) : [],
     durationMin: set.durationMin ?? null,
@@ -1041,7 +1044,9 @@ export function upsertSet(
     loggedAt,
     restSec,
   };
-  const sets = existing ? ex.sets.map((s) => (s.id === full.id ? full : s)) : [...ex.sets, full];
+  const next = existing ? ex.sets.map((s) => (s.id === full.id ? full : s)) : [...ex.sets, full];
+  // Auto-tag leading light sets as warm-ups (respecting manual choices).
+  const sets = autoWarmupSets(next, loadTypeFor(ex));
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
@@ -2628,6 +2633,43 @@ export function topSet(sets: SetEntry[]): SetEntry | undefined {
   return [...sets]
     .filter((s) => setTypeOf(s) !== 'warmup')
     .sort((a, b) => setTopWeight(b) - setTopWeight(a) || b.reps - a.reps)[0];
+}
+
+/** Fraction of the exercise's heaviest set below which a *leading* set reads as
+ *  a warm-up. Deload-safe: the reference is today's top set, so the bar scales
+ *  with how heavy you actually went. */
+export const WARMUP_FRAC = 0.85;
+
+/**
+ * Auto-classify the leading light sets of a weight exercise as warm-ups: any set
+ * before the first working set whose top weight is under WARMUP_FRAC of the
+ * exercise's heaviest set. Manual choices (warmupManual) and special set types
+ * (drop / static-dynamic) are never touched and anchor the working run. Pure and
+ * idempotent — safe to re-run on every set change.
+ */
+export function autoWarmupSets(sets: SetEntry[], loadType: LoadType): SetEntry[] {
+  if (loadType !== 'weight') return sets;
+  const ref = Math.max(0, ...sets.map(setTopWeight));
+  if (ref <= 0) return sets;
+  const threshold = WARMUP_FRAC * ref;
+  const ordered = [...sets].sort((a, b) => a.position - b.position);
+  let working = false; // reached the first working set yet?
+  const byId = new Map<string, SetEntry>();
+  for (const s of ordered) {
+    const t = setTypeOf(s);
+    if (s.warmupManual || (t !== 'working' && t !== 'warmup')) {
+      if (t !== 'warmup') working = true; // a manual/special working set anchors
+      byId.set(s.id, s);
+      continue;
+    }
+    if (!working && setTopWeight(s) > 0 && setTopWeight(s) < threshold) {
+      byId.set(s.id, t === 'warmup' ? s : { ...s, type: 'warmup', isWarmup: true });
+    } else {
+      working = true;
+      byId.set(s.id, t === 'working' ? s : { ...s, type: 'working', isWarmup: false });
+    }
+  }
+  return sets.map((s) => byId.get(s.id) ?? s);
 }
 export function lastSessionWith(
   name: string,

@@ -18,6 +18,10 @@ export interface SetEntry {
   reps: number;
   weight: number | null;
   isWarmup: boolean;
+  /** True once the athlete has set this set's warm-up/working state by hand
+   *  (the type picker or the warm-up chip). Auto warm-up detection never
+   *  overrides a manual choice. */
+  warmupManual?: boolean;
   /** Absent = derived from isWarmup ('warmup') or 'working'. */
   type?: SetType;
   /** Drop parts for drop/reverse-drop sets, in performed order. */

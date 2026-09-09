@@ -15,6 +15,10 @@ import {
   noteSleepPresence,
   updateSleepNight,
   mergeServerSleepsWithLocal,
+  setVolumeKg,
+  autoWarmupSets,
+  WARMUP_FRAC,
+  setTypeOf,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
 import type { SetEntry, SleepNight, Workout } from './types';
@@ -219,5 +223,66 @@ describe('mergeServerSleepsWithLocal', () => {
   it('keeps a local night the server has not seen yet', () => {
     const merged = mergeServerSleepsWithLocal([], [night({ id: 'pending' })]);
     expect(merged.map((n) => n.id)).toContain('pending');
+  });
+});
+
+describe('setVolumeKg counts warm-ups', () => {
+  it('includes a warm-up set in tonnage', () => {
+    expect(setVolumeKg(set({ weight: 60, reps: 10, isWarmup: true, type: 'warmup' }))).toBe(600);
+  });
+  it('matches a working set of the same load', () => {
+    const warm = setVolumeKg(set({ weight: 50, reps: 8, isWarmup: true, type: 'warmup' }));
+    const work = setVolumeKg(set({ weight: 50, reps: 8 }));
+    expect(warm).toBe(work);
+  });
+});
+
+describe('autoWarmupSets', () => {
+  const S = (over: Partial<SetEntry> & { position: number }): SetEntry => set({ reps: 5, ...over });
+
+  it('tags leading light sets and stops at the first working set', () => {
+    // Top set 100 → threshold 85. 40 and 60 are warm-ups; 100 and a later 90 work.
+    const sets = [
+      S({ position: 0, weight: 40 }),
+      S({ position: 1, weight: 60 }),
+      S({ position: 2, weight: 100 }),
+      S({ position: 3, weight: 90 }),
+    ];
+    const out = autoWarmupSets(sets, 'weight');
+    expect(out.map(setTypeOf)).toEqual(['warmup', 'warmup', 'working', 'working']);
+  });
+
+  it('does not warm-up a light set that comes after a working set (fatigue drop)', () => {
+    const sets = [
+      S({ position: 0, weight: 100 }), // working (the top)
+      S({ position: 1, weight: 40 }), // light, but after working → stays working
+    ];
+    expect(autoWarmupSets(sets, 'weight').map(setTypeOf)).toEqual(['working', 'working']);
+  });
+
+  it('respects a manual choice', () => {
+    const sets = [
+      S({ position: 0, weight: 40, warmupManual: true, type: 'working', isWarmup: false }),
+      S({ position: 1, weight: 100 }),
+    ];
+    // The manual light "working" set anchors — nothing is auto-warmed.
+    expect(setTypeOf(autoWarmupSets(sets, 'weight')[0])).toBe('working');
+  });
+
+  it('leaves special set types alone', () => {
+    const sets = [
+      S({ position: 0, weight: 40, type: 'drop', drops: [{ reps: 5, weight: 30 }] }),
+      S({ position: 1, weight: 100 }),
+    ];
+    expect(setTypeOf(autoWarmupSets(sets, 'weight')[0])).toBe('drop');
+  });
+
+  it('is a no-op for non-weight load (assist / band / bodyweight)', () => {
+    const sets = [S({ position: 0, weight: 10 }), S({ position: 1, weight: 100 })];
+    expect(autoWarmupSets(sets, 'assist')).toBe(sets);
+  });
+
+  it('uses an 85% reference by default', () => {
+    expect(WARMUP_FRAC).toBe(0.85);
   });
 });

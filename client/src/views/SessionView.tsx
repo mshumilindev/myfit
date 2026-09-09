@@ -593,6 +593,9 @@ export function SessionView(props: {
       reps: v.reps,
       weight: v.weight,
       isWarmup: type === 'warmup',
+      // The warm-up chip is a deliberate choice — pin it so auto-detect won't
+      // flip it. A plain (working) quick-log stays auto-classified.
+      ...(type === 'warmup' ? { warmupManual: true } : {}),
       type,
       drops: [],
       durationMin: null,
@@ -3630,6 +3633,9 @@ function SetEditorSheet(props: {
   const isBand = loadType === 'band';
   const [view, setView] = useState<'main' | 'type' | 'load'>('main');
   const [type, setType] = useState<SetType>(props.set ? setTypeOf(props.set) : 'working');
+  // The athlete opened the type picker and chose — pin the warm-up/working
+  // state so auto-detection won't override it.
+  const [typeTouched, setTypeTouched] = useState(false);
   const [drops, setDropsState] = useState<DropEntry[]>(props.set?.drops ?? []);
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
   const [weight, setWeight] = useState(
@@ -3743,6 +3749,7 @@ function SetEditorSheet(props: {
             // so it reads as "BW" while total volume keeps external load at 0.
             weight: bw || weight === 0 ? null : weight,
             isWarmup: type === 'warmup',
+            ...(typeTouched ? { warmupManual: true } : {}),
             type,
             drops: isDropType ? drops : [],
             durationMin: isSD ? holdSec / 60 : null,
@@ -3823,6 +3830,7 @@ function SetEditorSheet(props: {
             className={`stype-row${i === SET_TYPE_ROWS.length - 1 ? ' last' : ''}`}
             onClick={() => {
               setType(row.type);
+              setTypeTouched(true);
               if (row.type === 'warmup') setBw(false);
               setView('main');
             }}
