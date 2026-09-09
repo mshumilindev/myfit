@@ -16,9 +16,27 @@ export function minutesOfDay(ms: number): number {
 }
 
 /** A night's duration in minutes (live nights measure up to `now`). */
+/** After this long with no activity off the sleep screen (or with the app
+ *  closed), we take it that you actually fell asleep: the gap stops counting
+ *  as "awake" and counts as sleep from your last activity onward. */
+export const SLEEP_IDLE_MS = 5 * 60 * 1000;
+
+/** Awake (non-sleep) ms for a night as of `now`: banked intervals plus the
+ *  open one, if any. An open interval that has gone idle past SLEEP_IDLE_MS is
+ *  capped at the last activity — the idle tail counts as sleep, not awake. */
+export function awakeMsAt(n: SleepNight, now: number = Date.now()): number {
+  let awake = n.awakeMs ?? 0;
+  if (n.awakeSince != null) {
+    const cut = n.lastSeen ?? n.awakeSince;
+    const upTo = now - cut >= SLEEP_IDLE_MS ? cut : now;
+    awake += Math.max(0, upTo - n.awakeSince);
+  }
+  return awake;
+}
+
 export function nightDurationMin(n: SleepNight, now: number = Date.now()): number {
   const end = n.wake ?? now;
-  return Math.max(0, Math.round((end - n.bedtime) / 60000));
+  return Math.max(0, Math.round((end - n.bedtime - awakeMsAt(n, now)) / 60000));
 }
 
 /** Finished nights (wake set), newest first, excluding anything in the future. */

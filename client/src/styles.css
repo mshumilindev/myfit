@@ -29161,6 +29161,93 @@ body {
   cursor: pointer;
 }
 
+/* ── Sleep hero — the live-session hero's counterpart while a night runs ───── */
+.live-hero.sleep-hero {
+  background: linear-gradient(120deg, #0c1024 0%, #141a2e 58%, #1b2340 100%);
+  box-shadow: inset 0 -1px 0 var(--s-line);
+}
+.sleep-hero-bg {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+}
+.sleep-hero-bg .moon-glyph {
+  transform: translateX(14px);
+  opacity: 0.92;
+}
+.sleep-hero-scrim {
+  background: linear-gradient(
+    to right,
+    rgba(12, 16, 36, 0.96) 42%,
+    rgba(12, 16, 36, 0.62) 78%,
+    rgba(12, 16, 36, 0.28)
+  );
+}
+.sleep-hero .live-dot {
+  background: var(--s-moon);
+}
+.sleep-hero.paused .live-dot {
+  animation: none;
+  opacity: 0.5;
+}
+.sleep-hero .live-label {
+  color: var(--s-faint);
+}
+.sleep-hero .live-timer {
+  color: var(--s-text);
+}
+.sleep-hero .live-meta {
+  color: var(--s-moon-lt);
+}
+.sleep-hero .live-hero-body {
+  cursor: pointer;
+}
+.sleep-hero .sleep-hero-resume {
+  border: 1px solid #505d97;
+  color: var(--s-moon-lt);
+  background: rgba(20, 26, 46, 0.5);
+}
+.sleep-hero-stop {
+  height: 36px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid #505d97;
+  border-radius: var(--radius-sm, 10px);
+  background: rgba(20, 26, 46, 0.5);
+  color: var(--s-moon-lt);
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+/* Leave the night screen while sleep keeps running (walk the app). */
+.sleep-night {
+  position: relative;
+}
+.sleep-night-back {
+  position: absolute;
+  top: 14px;
+  left: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 0;
+  background: none;
+  color: var(--s-faint);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+.sleep-night-back i {
+  font-size: 18px;
+}
+.sleep-night-back:hover {
+  color: var(--s-dim);
+}
+
 /* Moonlit primary + outline buttons for the sleep surfaces. */
 .btn-moon {
   background: var(--s-moon);

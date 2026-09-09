@@ -6,8 +6,17 @@ import {
   workoutCardioMinutes,
   workoutSets,
   workoutVolumeKg,
+  startSleep,
+  cancelSleep,
+  pauseSleep,
+  resumeSleep,
+  markSleepActivity,
+  reconcileSleep,
+  noteSleepPresence,
+  updateSleepNight,
 } from './store';
-import type { SetEntry, Workout } from './types';
+import { SLEEP_IDLE_MS } from './sleep';
+import type { SetEntry, SleepNight, Workout } from './types';
 
 const set = (over: Partial<SetEntry>): SetEntry => ({
   id: over.id ?? Math.random().toString(36).slice(2),
@@ -97,5 +106,78 @@ describe('workout aggregates', () => {
   it('should sum timed exercise cardio metrics separately', () => {
     expect(workoutCardioMinutes(w)).toBe(20);
     expect(workoutCardioDistanceKm(w)).toBe(6.2);
+  });
+});
+
+describe('sleep pause flow (store)', () => {
+  const MIN = 60000;
+  const readLive = (): SleepNight | null => {
+    const raw = localStorage.getItem('spotter.sleeps');
+    const list: SleepNight[] = raw ? JSON.parse(raw) : [];
+    return list.find((n) => n.wake === null) ?? null;
+  };
+  const fresh = (bedtime: number) => {
+    cancelSleep();
+    startSleep(bedtime);
+  };
+
+  it('banks the browsing gap on pause → resume', () => {
+    const t = Date.now();
+    fresh(t - 180 * MIN);
+    pauseSleep(t - 20 * MIN);
+    resumeSleep(t); // browsed for 20 min
+    const n = readLive()!;
+    expect(n.awakeSince == null).toBe(true);
+    expect(n.awakeMs).toBe(20 * MIN);
+  });
+
+  it('reconcile after idle banks only up to the last activity', () => {
+    const t = Date.now();
+    fresh(t - 180 * MIN);
+    pauseSleep(t - 30 * MIN);
+    updateSleepNight(readLive()!.id, { lastSeen: t - 20 * MIN }); // idle since 20 min ago
+    reconcileSleep(t);
+    const n = readLive()!;
+    expect(n.awakeSince == null).toBe(true); // back to counting
+    expect(n.awakeMs).toBe(10 * MIN); // only awakeSince→lastSeen counts as awake
+  });
+
+  it('does not reconcile while still active', () => {
+    const t = Date.now();
+    fresh(t - 180 * MIN);
+    pauseSleep(t - 10 * MIN);
+    updateSleepNight(readLive()!.id, { lastSeen: t - 1 * MIN }); // active a minute ago
+    reconcileSleep(t);
+    expect(readLive()!.awakeSince).not.toBeNull(); // still paused
+  });
+
+  it('reopen after a long absence banks the idle gap and re-pauses', () => {
+    const t = Date.now();
+    fresh(t - 180 * MIN);
+    // Paused, last active 40 min ago; app was closed; now the user reopens.
+    pauseSleep(t - 45 * MIN);
+    updateSleepNight(readLive()!.id, { lastSeen: t - 40 * MIN });
+    markSleepActivity(t);
+    const n = readLive()!;
+    // The 5 active minutes (45→40 ago) are awake; the 40-min absence is sleep.
+    expect(n.awakeMs).toBe(5 * MIN);
+    // A fresh awake interval opens from now (they're using the app again).
+    expect(n.awakeSince).toBe(t);
+  });
+
+  it('noteSleepPresence pauses off-screen and resumes on the sleep screen', () => {
+    const t = Date.now();
+    fresh(t - 60 * MIN);
+    noteSleepPresence(false, t - 12 * MIN); // left the screen
+    expect(readLive()!.awakeSince).toBe(t - 12 * MIN);
+    noteSleepPresence(true, t); // came back
+    const n = readLive()!;
+    expect(n.awakeSince == null).toBe(true);
+    expect(n.awakeMs).toBe(12 * MIN);
+    cancelSleep();
+  });
+
+  it('exposes the idle threshold as five minutes', () => {
+    expect(SLEEP_IDLE_MS).toBe(5 * MIN);
   });
 });

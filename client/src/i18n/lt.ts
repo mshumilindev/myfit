@@ -228,6 +228,12 @@ export const lt: Strings = {
   sleepWindDownIn: (min: number) => `Nurimk — apie ${min} min iki įprasto miego laiko`,
   sleepPastBedtime: 'Jau vėliau nei įprastas miego laikas — gulies?',
 
+  sleepPausedLabel: 'Pristabdyta',
+  sleepPausedMeta: 'neskaičiuojama',
+  sleepReturnToNight: 'Atgal į miegą',
+
+  sleepReturnToApp: 'Ī programą',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

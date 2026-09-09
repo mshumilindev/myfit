@@ -227,6 +227,12 @@ export const pl: Strings = {
   sleepWindDownIn: (min: number) => `Wycisz się — około ${min} min do zwykłej pory snu`,
   sleepPastBedtime: 'Po zwykłej porze snu — kładziesz się?',
 
+  sleepPausedLabel: 'Wstrzymano',
+  sleepPausedMeta: 'nie liczy się',
+  sleepReturnToNight: 'Wróć do snu',
+
+  sleepReturnToApp: 'Do aplikacji',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

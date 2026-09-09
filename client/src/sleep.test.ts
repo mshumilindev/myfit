@@ -7,6 +7,8 @@ import {
   planForWeekday,
   planDurationMin,
   minutesOfDay,
+  awakeMsAt,
+  SLEEP_IDLE_MS,
 } from './sleep';
 import type { SleepNight, SleepSchedule } from './types';
 
@@ -81,5 +83,75 @@ describe('sleep helpers', () => {
     };
     expect(planForWeekday(sched, 3)).toEqual({ bedMin: 1400, wakeMin: 400 });
     expect(planDurationMin({ bedMin: 1400, wakeMin: 400 })).toBe(440);
+  });
+});
+
+describe('sleep pause / awake accounting', () => {
+  const MIN = 60000;
+  // A live night that began 3h before `t0`.
+  const t0 = new Date(2025, 8, 15, 6, 0).getTime();
+  const bedtime = t0 - 180 * MIN;
+  const base: SleepNight = { id: 'live', date: 'x', bedtime, wake: null, source: 'live' };
+
+  it('counts the whole span when never paused', () => {
+    expect(nightDurationMin(base, t0)).toBe(180);
+    expect(awakeMsAt(base, t0)).toBe(0);
+  });
+
+  it('freezes the timer while paused and recently active', () => {
+    // Paused 10 min ago, active 1 min ago (still browsing → not idle yet).
+    const n: SleepNight = {
+      ...base,
+      awakeSince: t0 - 10 * MIN,
+      lastSeen: t0 - 1 * MIN,
+    };
+    // Open interval grows with now while active → 10 min awake.
+    expect(awakeMsAt(n, t0)).toBe(10 * MIN);
+    expect(nightDurationMin(n, t0)).toBe(180 - 10);
+  });
+
+  it('caps awake at the last activity once idle past the threshold', () => {
+    // Paused 30 min ago; last activity 20 min ago → idle 20 min (> 5 min).
+    const n: SleepNight = {
+      ...base,
+      awakeSince: t0 - 30 * MIN,
+      lastSeen: t0 - 20 * MIN,
+    };
+    // Only the 10 active minutes (awakeSince→lastSeen) count as awake; the
+    // 20 idle minutes count as sleep.
+    expect(awakeMsAt(n, t0)).toBe(10 * MIN);
+    expect(nightDurationMin(n, t0)).toBe(180 - 10);
+  });
+
+  it('subtracts banked awake time from earlier intervals', () => {
+    const n: SleepNight = { ...base, awakeMs: 25 * MIN };
+    expect(nightDurationMin(n, t0)).toBe(180 - 25);
+  });
+
+  it('adds a still-open interval on top of banked time', () => {
+    const n: SleepNight = {
+      ...base,
+      awakeMs: 15 * MIN,
+      awakeSince: t0 - 4 * MIN,
+      lastSeen: t0 - 1 * MIN, // active, not idle
+    };
+    expect(awakeMsAt(n, t0)).toBe(19 * MIN);
+  });
+
+  it('treats the idle threshold as the boundary', () => {
+    const justUnder: SleepNight = {
+      ...base,
+      awakeSince: t0 - 10 * MIN,
+      lastSeen: t0 - (SLEEP_IDLE_MS / MIN - 1) * MIN, // 4 min idle
+    };
+    // Under threshold → open interval runs to now.
+    expect(awakeMsAt(justUnder, t0)).toBe(10 * MIN);
+    const atThreshold: SleepNight = {
+      ...base,
+      awakeSince: t0 - 10 * MIN,
+      lastSeen: t0 - SLEEP_IDLE_MS, // exactly 5 min idle
+    };
+    // At/over threshold → capped at lastSeen (5 min of awake).
+    expect(awakeMsAt(atThreshold, t0)).toBe(5 * MIN);
   });
 });

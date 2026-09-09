@@ -21,6 +21,8 @@ import {
   setSleepSettings,
   sleepDayId,
   updateSleepNight,
+  noteSleepPresence,
+  reconcileSleep,
 } from '../store';
 import { weekdayPattern, planForWeekday, planDurationMin, finishedNights } from '../sleep';
 import { Icon } from '../ui';
@@ -426,4 +428,53 @@ export function SleepAutoFilledCard({ onOpenBackfill }: { onOpenBackfill: () => 
 function hhmm(ms: number): string {
   const d = new Date(ms);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/**
+ * Sleep pause controller. A live night counts as sleep only while you're on the
+ * sleep screen. Leave it (to walk the app) and the timer pauses; but if you
+ * then go quiet for SLEEP_IDLE_MS or close the app, that means you actually
+ * fell asleep, so the timer resumes counting from your last activity. Rendered
+ * once, globally; `onSleepScreen` is derived by the shell from the overlay.
+ */
+export function SleepPauseController({ onSleepScreen }: { onSleepScreen: boolean }) {
+  const store = useStore();
+  const liveId = liveSleep(store.sleeps)?.id ?? null;
+
+  // Count on the sleep screen; pause on leave; resume on return / reopen.
+  useEffect(() => {
+    if (!liveId) return;
+    noteSleepPresence(onSleepScreen);
+  }, [liveId, onSleepScreen]);
+
+  // Off the sleep screen with a live night: track activity + idle, and
+  // reconcile when the tab becomes visible again (covers the app being closed).
+  useEffect(() => {
+    if (!liveId || onSleepScreen) return;
+    let last = 0;
+    const onAct = () => {
+      const t = Date.now();
+      if (t - last < 12000) return;
+      last = t;
+      noteSleepPresence(false, t);
+    };
+    const onVis = () => {
+      if (document.visibilityState === 'visible') noteSleepPresence(false);
+    };
+    const scrollOpts: AddEventListenerOptions = { passive: true, capture: true };
+    window.addEventListener('pointerdown', onAct, { passive: true });
+    window.addEventListener('keydown', onAct);
+    window.addEventListener('scroll', onAct, scrollOpts);
+    document.addEventListener('visibilitychange', onVis);
+    const iv = window.setInterval(() => reconcileSleep(), 30000);
+    return () => {
+      window.removeEventListener('pointerdown', onAct);
+      window.removeEventListener('keydown', onAct);
+      window.removeEventListener('scroll', onAct, scrollOpts);
+      document.removeEventListener('visibilitychange', onVis);
+      window.clearInterval(iv);
+    };
+  }, [liveId, onSleepScreen]);
+
+  return null;
 }

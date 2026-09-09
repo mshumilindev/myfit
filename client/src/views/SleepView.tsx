@@ -97,6 +97,10 @@ export function SleepView({
     const mins = nightDurationMin(live, tick);
     return (
       <div className="screen sleep-night">
+        <button className="sleep-night-back" onClick={onClose} aria-label={t.backAction}>
+          <Icon name="caret-left" />
+          <span>{t.sleepReturnToApp}</span>
+        </button>
         <div className="sleep-night-body">
           <div className="sleep-moonwrap">
             <span className="sleep-breathe" aria-hidden="true" />

@@ -65,6 +65,7 @@ import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
 import { describeDay, type DayReadout } from './data/daySuggest';
+import { awakeMsAt, SLEEP_IDLE_MS } from './sleep';
 import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
@@ -1645,7 +1646,16 @@ export function stopSleep(wakeAt: number = Date.now()): SleepNight | null {
   const live = liveSleep(state.sleeps);
   if (!live) return null;
   const wake = Math.max(wakeAt, live.bedtime + 60000);
-  const updated: SleepNight = { ...live, wake, date: sleepDayId(wake), updatedAt: Date.now() };
+  // Finalize any open awake interval so the night stores a plain awakeMs.
+  const updated: SleepNight = {
+    ...live,
+    wake,
+    date: sleepDayId(wake),
+    awakeMs: awakeMsAt(live, wake),
+    awakeSince: null,
+    lastSeen: undefined,
+    updatedAt: Date.now(),
+  };
   setState({ sleeps: state.sleeps.map((n) => (n.id === live.id ? updated : n)) });
   return updated;
 }
@@ -1655,6 +1665,80 @@ export function cancelSleep(): void {
   const live = liveSleep(state.sleeps);
   if (!live) return;
   setState({ sleeps: state.sleeps.filter((n) => n.id !== live.id) });
+}
+
+/** Patch the live night in place (no updatedAt bump — pause bookkeeping is
+ *  local-only and shouldn't churn sync ordering). */
+function patchLive(patch: Partial<SleepNight>): void {
+  const live = liveSleep(state.sleeps);
+  if (!live) return;
+  setState({ sleeps: state.sleeps.map((n) => (n.id === live.id ? { ...n, ...patch } : n)) });
+}
+
+/** You left the sleep screen: open an awake interval (stop counting sleep). */
+export function pauseSleep(at: number = Date.now()): void {
+  const live = liveSleep(state.sleeps);
+  if (!live || live.awakeSince != null) return;
+  patchLive({ awakeSince: at, lastSeen: at });
+}
+
+/** You returned to the sleep screen: close the open interval at `at` and
+ *  resume counting. */
+export function resumeSleep(at: number = Date.now()): void {
+  const live = liveSleep(state.sleeps);
+  if (!live || live.awakeSince == null) return;
+  patchLive({
+    awakeMs: (live.awakeMs ?? 0) + Math.max(0, at - live.awakeSince),
+    awakeSince: null,
+    lastSeen: undefined,
+  });
+}
+
+/** Activity while off the sleep screen. If the app had gone idle past the
+ *  threshold (you fell asleep, then stirred), bank that gap as sleep and open
+ *  a fresh awake interval from now; otherwise just record the heartbeat. */
+export function markSleepActivity(at: number = Date.now()): void {
+  const live = liveSleep(state.sleeps);
+  if (!live || live.awakeSince == null) return;
+  const cut = live.lastSeen ?? live.awakeSince;
+  if (at - cut >= SLEEP_IDLE_MS) {
+    patchLive({
+      awakeMs: (live.awakeMs ?? 0) + Math.max(0, cut - live.awakeSince),
+      awakeSince: at,
+      lastSeen: at,
+    });
+  } else {
+    patchLive({ lastSeen: at });
+  }
+}
+
+/** No activity for SLEEP_IDLE_MS while paused (or the app was closed): commit
+ *  the idle gap as sleep and resume counting from the last activity. */
+export function reconcileSleep(at: number = Date.now()): void {
+  const live = liveSleep(state.sleeps);
+  if (!live || live.awakeSince == null) return;
+  const cut = live.lastSeen ?? live.awakeSince;
+  if (at - cut >= SLEEP_IDLE_MS) {
+    patchLive({
+      awakeMs: (live.awakeMs ?? 0) + Math.max(0, cut - live.awakeSince),
+      awakeSince: null,
+      lastSeen: undefined,
+    });
+  }
+}
+
+/** Single entry point the pause controller calls. On the sleep screen → count.
+ *  Off it → pause when counting, else treat as activity (heartbeat / re-pause
+ *  after an idle stretch). */
+export function noteSleepPresence(onSleepScreen: boolean, at: number = Date.now()): void {
+  const live = liveSleep(state.sleeps);
+  if (!live) return;
+  if (onSleepScreen) {
+    resumeSleep(at);
+    return;
+  }
+  if (live.awakeSince == null) pauseSleep(at);
+  else markSleepActivity(at);
 }
 
 /** Add or replace a finished night (backfill / auto / schedule). One night per date. */

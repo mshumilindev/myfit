@@ -30,7 +30,8 @@ import {
   liveSleep,
 } from './store';
 import { SpotterSky } from './components/SpotterSky';
-import { SleepAutomation } from './components/SleepAutomation';
+import { SleepAutomation, SleepPauseController } from './components/SleepAutomation';
+import { SleepHero } from './components/SleepHero';
 import { useT } from './i18n';
 import { computeMastery, rankIndexForRating, type MasteryResult } from './mastery';
 import {
@@ -1157,6 +1158,7 @@ export function App() {
     <div className="app">
       {nightLive && <SpotterSky />}
       <SleepAutomation onOpenSchedule={() => setOverlay({ screen: 'sleep', mode: 'schedule' })} />
+      <SleepPauseController onSleepScreen={!!nightLive && activeOverlay?.screen === 'sleep'} />
       {desktopRail && (
         <Rail
           tab={effectiveTab}
@@ -1174,25 +1176,11 @@ export function App() {
       )}
       <div className="main-col">
         {nightLive && activeOverlay?.screen !== 'sleep' && (
-          <div className="sleep-strip">
-            <span className="zz">z z z</span>
-            <button
-              className="sleep-strip-txt"
-              onClick={() => setOverlay({ screen: 'sleep' })}
-              aria-label={t.sleepTitle}
-            >
-              <span className="sleep-strip-main">{t.sleepTitle}</span>
-              <span className="sleep-strip-sub">
-                {t.sleepAsleepSince(sleepClock(nightLive.bedtime))}
-              </span>
-            </button>
-            <button
-              className="sleep-strip-stop"
-              onClick={() => setOverlay({ screen: 'sleep', wake: true })}
-            >
-              {t.sleepStopAction}
-            </button>
-          </div>
+          <SleepHero
+            night={nightLive}
+            onResume={() => setOverlay({ screen: 'sleep' })}
+            onStop={() => setOverlay({ screen: 'sleep', wake: true })}
+          />
         )}
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
@@ -1450,11 +1438,6 @@ export function App() {
 function ScreenFallback() {
   const { t } = useT();
   return <ScreenSkeleton label={t.syncing} />;
-}
-
-function sleepClock(ms: number): string {
-  const d = new Date(ms);
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function getDesktopRailMatch(): boolean {

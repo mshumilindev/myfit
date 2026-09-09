@@ -214,6 +214,12 @@ export const et: Strings = {
   sleepWindDownIn: (min: number) => `Rahune maha — umbes ${min} min tavalise uneajani`,
   sleepPastBedtime: 'Tavaline uneaeg on möödas — kas lähed magama?',
 
+  sleepPausedLabel: 'Peatatud',
+  sleepPausedMeta: 'ei loe',
+  sleepReturnToNight: 'Tagasi unne',
+
+  sleepReturnToApp: 'Rakendusse',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

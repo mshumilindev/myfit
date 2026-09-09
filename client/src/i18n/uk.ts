@@ -226,6 +226,12 @@ export const uk: Strings = {
     `Час заспокоюватись — близько ${min} хв до твого звичного часу сну`,
   sleepPastBedtime: 'Вже пізніше звичного часу сну — лягаємо?',
 
+  sleepPausedLabel: 'На паузі',
+  sleepPausedMeta: 'не рахується',
+  sleepReturnToNight: 'Назад до сну',
+
+  sleepReturnToApp: 'Д о додатка',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

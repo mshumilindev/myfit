@@ -218,6 +218,12 @@ export const en = {
   sleepWindDownIn: (min: number) => `Wind down — about ${min} min to your usual bedtime`,
   sleepPastBedtime: 'Past your usual bedtime — ready to turn in?',
 
+  sleepPausedLabel: 'Paused',
+  sleepPausedMeta: 'not counting',
+  sleepReturnToNight: 'Back to sleep',
+
+  sleepReturnToApp: 'Use the app',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

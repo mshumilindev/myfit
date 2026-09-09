@@ -132,6 +132,17 @@ export interface SleepNight {
   quality?: SleepQuality | null;
   source: SleepSource;
   updatedAt?: number;
+  /** Live nights only: total awake (paused) ms already banked from closed
+   *  intervals — time spent using the app off the sleep screen, which does
+   *  not count as sleep. Absent/0 for backfilled or finished nights. */
+  awakeMs?: number;
+  /** Live nights only: start of the currently-open awake interval (you left
+   *  the sleep screen and are using the app). null/absent = counting as sleep. */
+  awakeSince?: number | null;
+  /** Live nights only: last activity seen while paused. Used to resolve the
+   *  idle-→asleep transition and app-unload: after SLEEP_IDLE_MS of no
+   *  activity (or the app being closed), the gap counts as sleep from here. */
+  lastSeen?: number;
 }
 
 /** Bed/wake for one slot, in minutes from local midnight (wake is the next
