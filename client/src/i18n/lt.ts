@@ -277,7 +277,8 @@ export const lt: Strings = {
   illnessStillUnwell: 'Vis dar sergu',
   illnessReturnKicker: 'Sveikas sugrįžęs',
   illnessReturnTitle: 'Šiandien lengviau',
-  illnessReturnBody: (days: number) => `Nebuvai ${days} d. — serija išlikusi. Grįžk palaipsniui: pirma treniruotė lengvesnė.`,
+  illnessReturnBody: (days: number) =>
+    `Nebuvai ${days} d. — serija išlikusi. Grįžk palaipsniui: pirma treniruotė lengvesnė.`,
   illnessReturnDismiss: 'Supratau',
 
   sleepTitle: 'Miegas',

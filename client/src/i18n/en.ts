@@ -260,14 +260,16 @@ export const en = {
   restStartIllness: 'Mark unwell',
   restCardIllnessKicker: 'Taking care',
   restCardIllnessTitle: (day: number) => `Resting up \u00b7 day ${day}`,
-  restCardIllnessNote: 'Get well first \u2014 nothing counts as missed, and your program is waiting.',
+  restCardIllnessNote:
+    'Get well first \u2014 nothing counts as missed, and your program is waiting.',
   illnessStreakPill: 'Streak protected',
   illnessProgramPill: 'Program paused',
   illnessRecovered: "I'm recovered",
   illnessStillUnwell: 'Still unwell',
   illnessReturnKicker: 'Welcome back',
   illnessReturnTitle: 'Take it easy today',
-  illnessReturnBody: (days: number) => `You were out ${days}${days === 1 ? ' day' : ' days'} \u2014 no streak lost. Ease back in: go lighter on your first session.`,
+  illnessReturnBody: (days: number) =>
+    `You were out ${days}${days === 1 ? ' day' : ' days'} \u2014 no streak lost. Ease back in: go lighter on your first session.`,
   illnessReturnDismiss: 'Got it',
 
   sleepTitle: 'Sleep',

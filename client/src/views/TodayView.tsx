@@ -1208,7 +1208,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                     <div className="prog-banner-acts">
                       {activeRest.mode === 'active' ? (
                         <>
-                          <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
+                          <button
+                            className="prog-banner-cta"
+                            onClick={startSession}
+                            disabled={busy}
+                          >
                             <Icon name="play" weight="bold" />
                             {t.restStartLight}
                           </button>
@@ -1602,8 +1606,7 @@ function RestSheet({ onClose }: { onClose: () => void }) {
       const tk = dayKey(Date.now());
       if (dur === 'today') startRestPeriod({ mode, startDay: tk, endDay: tk });
       else if (dur === 'open') startRestPeriod({ mode, startDay: tk, endDay: tk, open: true });
-      else
-        startRestPeriod({ mode, startDay: Math.min(dk(backFrom), tk), endDay: tk, open: true });
+      else startRestPeriod({ mode, startDay: Math.min(dk(backFrom), tk), endDay: tk, open: true });
     } else {
       startRestPeriod({ mode, startDay: dk(from), endDay: dk(to) });
     }

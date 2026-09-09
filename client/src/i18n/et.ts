@@ -263,7 +263,8 @@ export const et: Strings = {
   illnessStillUnwell: 'Endiselt haige',
   illnessReturnKicker: 'Tere tulemast tagasi',
   illnessReturnTitle: 'Võta täna rahulikult',
-  illnessReturnBody: (days: number) => `Olid eemal ${days} päeva — seeria alles. Naase tasa: esimene trenn kergem.`,
+  illnessReturnBody: (days: number) =>
+    `Olid eemal ${days} päeva — seeria alles. Naase tasa: esimene trenn kergem.`,
   illnessReturnDismiss: 'Selge',
 
   sleepTitle: 'Uni',

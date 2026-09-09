@@ -276,7 +276,8 @@ export const pl: Strings = {
   illnessStillUnwell: 'Wciąż choruję',
   illnessReturnKicker: 'Witaj z powrotem',
   illnessReturnTitle: 'Weź dziś na spokojnie',
-  illnessReturnBody: (days: number) => `Nie było Cię ${days} dni — passa cała. Wracaj łagodnie: pierwsza sesja lżejsza.`,
+  illnessReturnBody: (days: number) =>
+    `Nie było Cię ${days} dni — passa cała. Wracaj łagodnie: pierwsza sesja lżejsza.`,
   illnessReturnDismiss: 'Rozumiem',
 
   sleepTitle: 'Sen',

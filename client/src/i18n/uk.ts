@@ -275,7 +275,8 @@ export const uk: Strings = {
   illnessStillUnwell: 'Ще хворію',
   illnessReturnKicker: 'З поверненням',
   illnessReturnTitle: 'Сьогодні легше',
-  illnessReturnBody: (days: number) => `Тебе не було ${days} дн. — стрік не втрачено. Повертайся плавно: перша сесія легша.`,
+  illnessReturnBody: (days: number) =>
+    `Тебе не було ${days} дн. — стрік не втрачено. Повертайся плавно: перша сесія легша.`,
   illnessReturnDismiss: 'Зрозуміло',
 
   sleepTitle: 'Сон',
