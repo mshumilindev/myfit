@@ -1175,13 +1175,6 @@ export function App() {
         />
       )}
       <div className="main-col">
-        {nightLive && activeOverlay?.screen !== 'sleep' && (
-          <SleepHero
-            night={nightLive}
-            onResume={() => setOverlay({ screen: 'sleep' })}
-            onStop={() => setOverlay({ screen: 'sleep', wake: true })}
-          />
-        )}
         {!desktopRail && (
           <div className="app-brand" aria-label="Spotter">
             <div className="app-brand-lead">
@@ -1217,6 +1210,13 @@ export function App() {
             error={store.syncError}
             onRetry={retrySync}
             onDiscard={discardBlockingChange}
+          />
+        )}
+        {nightLive && activeOverlay?.screen !== 'sleep' && (
+          <SleepHero
+            night={nightLive}
+            onResume={() => setOverlay({ screen: 'sleep' })}
+            onStop={() => setOverlay({ screen: 'sleep', wake: true })}
           />
         )}
         {open && activeOverlay?.screen !== 'session' && (
