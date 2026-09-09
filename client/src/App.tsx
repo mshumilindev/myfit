@@ -60,6 +60,7 @@ import { SpotterMark } from './brand/SpotterMark';
 import type { ApexTab } from './views/ApexApp';
 import type { RosterTab } from './views/RosterApp';
 import { AuthView } from './views/AuthView';
+import { TraineeSessionView } from './views/TraineeSessionView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
 import type { SyncError, Notice } from './types';
@@ -183,7 +184,7 @@ export type Overlay =
   | { screen: 'activity'; newType?: string; editId?: string }
   | { screen: 'sleep'; wake?: boolean; mode?: 'backfill' | 'schedule' | 'edit'; nightId?: string }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
-  | { screen: 'exercise-history'; name: string }
+  | { screen: 'exercise-history'; name: string; userId?: string; userName?: string }
   | { screen: 'exercise-detail'; name: string }
   | { screen: 'muscle-history'; muscle: MuscleGroup }
   | { screen: 'settings' }
@@ -192,6 +193,7 @@ export type Overlay =
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
   | { screen: 'profile'; userId: string }
+  | { screen: 'trainee-session'; athleteId: string; workoutId: string; athleteName?: string }
   | {
       screen: 'gym';
       gymId?: string;
@@ -305,7 +307,11 @@ function toHash(
   if (overlay?.screen === 'sleep') return '#/sleep';
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
-    return `#/exercise/${encodeURIComponent(overlay.name)}`;
+    return overlay.userId
+      ? `#/exercise/${encodeURIComponent(overlay.name)}/${encodeURIComponent(overlay.userId)}`
+      : `#/exercise/${encodeURIComponent(overlay.name)}`;
+  if (overlay?.screen === 'trainee-session')
+    return `#/trainee/${encodeURIComponent(overlay.athleteId)}/${encodeURIComponent(overlay.workoutId)}`;
   if (overlay?.screen === 'exercise-detail')
     return `#/exercise-detail/${encodeURIComponent(overlay.name)}`;
   if (overlay?.screen === 'muscle-history') return `#/muscle/${encodeURIComponent(overlay.muscle)}`;
@@ -339,7 +345,20 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'exercise' && parts[1])
     return {
       tab: 'today',
-      overlay: { screen: 'exercise-history', name: decodeURIComponent(parts[1]) },
+      overlay: {
+        screen: 'exercise-history',
+        name: decodeURIComponent(parts[1]),
+        ...(parts[2] ? { userId: decodeURIComponent(parts[2]) } : {}),
+      },
+    };
+  if (head === 'trainee' && parts[1] && parts[2])
+    return {
+      tab: 'today',
+      overlay: {
+        screen: 'trainee-session',
+        athleteId: decodeURIComponent(parts[1]),
+        workoutId: decodeURIComponent(parts[2]),
+      },
     };
   if (head === 'exercise-detail' && parts[1])
     return {
@@ -1207,7 +1226,22 @@ export function App() {
         />
       )}
       {activeOverlay?.screen === 'exercise-history' && (
-        <ExerciseHistoryView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
+        <ExerciseHistoryView
+          name={activeOverlay.name}
+          userId={activeOverlay.userId}
+          userName={activeOverlay.userName}
+          shell={shell}
+          onClose={closeOverlay}
+        />
+      )}
+      {activeOverlay?.screen === 'trainee-session' && (
+        <TraineeSessionView
+          athleteId={activeOverlay.athleteId}
+          workoutId={activeOverlay.workoutId}
+          athleteName={activeOverlay.athleteName}
+          shell={shell}
+          onClose={closeOverlay}
+        />
       )}
       {activeOverlay?.screen === 'exercise-detail' && (
         <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />

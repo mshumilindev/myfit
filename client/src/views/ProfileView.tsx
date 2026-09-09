@@ -847,7 +847,16 @@ export function ProfileView({
                           key={ex.name}
                           className="profile-row"
                           onClick={() =>
-                            shell.openOverlay({ screen: 'exercise-history', name: ex.name })
+                            shell.openOverlay(
+                              load.viewer.relation === 'self'
+                                ? { screen: 'exercise-history', name: ex.name }
+                                : {
+                                    screen: 'exercise-history',
+                                    name: ex.name,
+                                    userId,
+                                    userName: load.person.name,
+                                  },
+                            )
                           }
                         >
                           <span>
@@ -938,12 +947,20 @@ export function ProfileView({
                       <button
                         key={s.id}
                         className="row"
-                        onClick={() =>
-                          shell.openOverlay({
-                            screen: s.live ? 'session' : 'past-workout',
-                            workoutId: s.id,
-                          })
-                        }
+                        onClick={() => {
+                          if (load.viewer.relation === 'self')
+                            shell.openOverlay({
+                              screen: s.live ? 'session' : 'past-workout',
+                              workoutId: s.id,
+                            });
+                          else if (!s.live)
+                            shell.openOverlay({
+                              screen: 'trainee-session',
+                              athleteId: userId,
+                              workoutId: s.id,
+                              athleteName: load.person.name,
+                            });
+                        }}
                       >
                         <span>{fmtDayMonth(s.startedAt, locale)}</span>
                         <span>{s.gymName ?? '—'}</span>

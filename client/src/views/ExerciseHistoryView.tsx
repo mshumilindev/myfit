@@ -1,5 +1,8 @@
 /** Exercise history — design S-32/S-33 + EQ-3 (muscles, equipment, gyms). */
+import { useEffect, useState } from 'react';
 import { est1rm, exerciseNeeds, missingAtGym, topSet, useStore } from '../store';
+import { callFn } from '../api';
+import type { Workout } from '../types';
 import { muscleInfoByName } from '../data/exercises';
 import { fmtDayMonth, fmtKg, useT } from '../i18n';
 import { ExerciseName, Icon } from '../ui';
@@ -8,18 +11,36 @@ import type { Shell } from '../App';
 
 export function ExerciseHistoryView({
   name,
+  userId,
+  userName,
   shell,
   onClose,
 }: {
   name: string;
+  userId?: string;
+  userName?: string;
   shell: Shell;
   onClose: () => void;
 }) {
   const { t, locale } = useT();
   const store = useStore();
   const needle = name.trim().toLowerCase();
+  const [fetched, setFetched] = useState<{ key: string; workouts: Workout[] } | null>(null);
+  const fkey = `${userId ?? ''}\u0000${name}`;
+  useEffect(() => {
+    if (!userId) return;
+    let alive = true;
+    const key = `${userId}\u0000${name}`;
+    callFn<{ workouts: Workout[] }>('athleteExerciseHistory', { id: userId, name })
+      .then((r) => alive && setFetched({ key, workouts: r.workouts }))
+      .catch(() => alive && setFetched({ key, workouts: [] }));
+    return () => {
+      alive = false;
+    };
+  }, [userId, name]);
 
-  const sessions = store.workouts
+  const source = userId ? (fetched && fetched.key === fkey ? fetched.workouts : []) : store.workouts;
+  const sessions = source
     .filter((w) => w.finishedAt !== null)
     .map((w) => {
       const ex = w.exercises.find((e) => e.name.trim().toLowerCase() === needle);
@@ -49,6 +70,7 @@ export function ExerciseHistoryView({
           <h2 className="title-26">
             <ExerciseName name={name} />
           </h2>
+          {userName ? <div className="sub">{userName}</div> : null}
           {(() => {
             const info = muscleInfoByName(name);
             const needs = exerciseNeeds(name);
@@ -123,7 +145,7 @@ export function ExerciseHistoryView({
         </div>
       </div>
 
-      {store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
+      {!userId && store.gyms.length > 0 && exerciseNeeds(name).length > 0 && (
         <div>
           <div className="section-label" style={{ marginBottom: 8 }}>
             {t.whereYouCanDoIt}

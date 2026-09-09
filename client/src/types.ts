@@ -253,6 +253,8 @@ export interface RestPeriod {
 export interface LiveSession {
   /** Doc id = the athlete's uid. */
   id: string;
+  /** The workout id — lets the coach open the finished session's recap. */
+  workoutId?: string;
   athleteName: string;
   avatarExt?: string | null;
   /** The coach who may read this doc. */

@@ -858,6 +858,7 @@ export function writeLiveSession(w: Workout): void {
   lastLiveBeat = now;
   setDoc(doc(db, 'liveSessions', uid), {
     id: uid,
+    workoutId: w.id,
     athleteName: selfDisplayName(),
     avatarExt: selfProfile.avatarExt ?? null,
     trainerId,
@@ -877,6 +878,7 @@ export function finishLiveSession(w: Workout): void {
   setDoc(
     doc(db, 'liveSessions', uid),
     {
+      workoutId: w.id,
       finishedAt: w.finishedAt ?? Date.now(),
       finalSets: workoutSets(w),
       finalTonnageKg: Math.round(workoutVolumeKg(w)),

@@ -53,11 +53,13 @@ function BigCard({
   card,
   now,
   onOpen,
+  onMain,
   t,
 }: {
   card: TraineeCard;
   now: number;
   onOpen: (id: string) => void;
+  onMain: (card: TraineeCard) => void;
   t: Strings;
 }) {
   const { s, state } = card;
@@ -80,7 +82,7 @@ function BigCard({
             </svg>
           </button>
         </div>
-        <button className="trlive-row" onClick={() => onOpen(s.id)}>
+        <button className="trlive-row" onClick={() => onMain(card)}>
           <span className="trlive-ava-lg">{initials(s.athleteName)}</span>
           <span className="trlive-who">
             <span className="trlive-name">{s.athleteName}</span>
@@ -94,7 +96,7 @@ function BigCard({
             {fmtSessionClock(elapsed(s, now))}
           </span>
         </button>
-        <button className="trlive-last" onClick={() => onOpen(s.id)}>
+        <button className="trlive-last" onClick={() => onMain(card)}>
           <LastLine s={s} t={t} />
           <span className={`trlive-go${state === 'finished' ? ' ok' : ''}`}>
             {action}
@@ -112,17 +114,17 @@ function BigCard({
 function CompactRow({
   card,
   now,
-  onOpen,
+  onMain,
   t,
 }: {
   card: TraineeCard;
   now: number;
-  onOpen: (id: string) => void;
+  onMain: (card: TraineeCard) => void;
   t: Strings;
 }) {
   const { s, state } = card;
   return (
-    <button className={`trlive-crow ${state}`} onClick={() => onOpen(s.id)}>
+    <button className={`trlive-crow ${state}`} onClick={() => onMain(card)}>
       <span className="trlive-ava-sm">{initials(s.athleteName)}</span>
       <span className="trlive-cwho">
         <span className="trlive-cname">{s.athleteName}</span>
@@ -155,6 +157,17 @@ export function TrainerLiveBanner({ trainees, shell }: { trainees: LiveSession[]
   const [big, ...rest] = cards;
   const liveCount = cards.filter((c) => c.state !== 'finished').length;
   const open = (id: string) => shell.openOverlay({ screen: 'profile', userId: id });
+  const openMain = (card: TraineeCard) => {
+    const s = card.s;
+    if (card.state === 'finished' && s.workoutId)
+      shell.openOverlay({
+        screen: 'trainee-session',
+        athleteId: s.id,
+        workoutId: s.workoutId,
+        athleteName: s.athleteName,
+      });
+    else shell.openOverlay({ screen: 'profile', userId: s.id });
+  };
 
   return (
     <div className="trlive">
@@ -167,7 +180,7 @@ export function TrainerLiveBanner({ trainees, shell }: { trainees: LiveSession[]
           </span>
         )}
       </div>
-      <BigCard card={big} now={now} onOpen={open} t={t} />
+      <BigCard card={big} now={now} onOpen={open} onMain={openMain} t={t} />
       {rest.length > 0 && (
         <>
           <div className="trlive-sec">
@@ -175,7 +188,7 @@ export function TrainerLiveBanner({ trainees, shell }: { trainees: LiveSession[]
           </div>
           <div className="trlive-rows">
             {rest.map((c) => (
-              <CompactRow key={c.s.id} card={c} now={now} onOpen={open} t={t} />
+              <CompactRow key={c.s.id} card={c} now={now} onMain={openMain} t={t} />
             ))}
           </div>
         </>

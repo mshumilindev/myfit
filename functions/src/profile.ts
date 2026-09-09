@@ -407,3 +407,63 @@ export const profileUser = onCall(async (req) => {
   await recordAudit(viewer.id, target.id, 'profile');
   return fullProfilePayload(viewer, target, relation);
 });
+
+// --- Athlete drill-downs (trainer/admin, read-only, audited) ---------------
+// Client rules forbid cross-user workout reads, so a trainer's per-session and
+// per-exercise drill-downs are served here via the Admin SDK, gated by the same
+// canReadProfile relation as profileUser and written to the subject's audit log.
+
+/** One session in full detail (sets, drops, supersets, circuits) for a
+ *  trainer/admin to view read-only — the client renders it like the athlete's
+ *  own past-session screen. */
+export const athleteWorkout = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const viewer = await loadUser(uid);
+  const data = (req.data ?? {}) as { id?: unknown; workoutId?: unknown };
+  const targetId = typeof data.id === 'string' && data.id !== 'me' ? data.id : viewer.id;
+  const workoutId = typeof data.workoutId === 'string' ? data.workoutId : '';
+  if (!workoutId) throw new HttpsError('invalid-argument', 'workoutId required');
+  const target = await usersById(targetId);
+  if (!target) throw new HttpsError('not-found', 'not found');
+  const relation = canReadProfile(viewer, target);
+  if (!relation) throw new HttpsError('permission-denied', 'forbidden');
+  const snap = await db
+    .collection('users')
+    .doc(target.id)
+    .collection('workouts')
+    .doc(workoutId)
+    .get();
+  if (!snap.exists) throw new HttpsError('not-found', 'no session');
+  if (relation !== 'self') await recordAudit(viewer.id, target.id, 'session');
+  return { workout: { id: snap.id, ...(snap.data() as Record<string, unknown>) } };
+});
+
+/** Every finished session that includes a given exercise, each trimmed to just
+ *  that exercise, for the trainer's read-only exercise-history + records view. */
+export const athleteExerciseHistory = onCall(async (req) => {
+  const uid = requireAuth(req);
+  const viewer = await loadUser(uid);
+  const data = (req.data ?? {}) as { id?: unknown; name?: unknown };
+  const targetId = typeof data.id === 'string' && data.id !== 'me' ? data.id : viewer.id;
+  const name = typeof data.name === 'string' ? data.name : '';
+  if (!name) throw new HttpsError('invalid-argument', 'name required');
+  const target = await usersById(targetId);
+  if (!target) throw new HttpsError('not-found', 'not found');
+  const relation = canReadProfile(viewer, target);
+  if (!relation) throw new HttpsError('permission-denied', 'forbidden');
+  const needle = name.trim().toLowerCase();
+  const workouts = await listUserWorkouts(target.id);
+  const rows = workouts
+    .filter((w) => w.finishedAt !== null)
+    .map((w) => {
+      const ex = (w.exercises ?? []).find(
+        (e) => ((e as { name?: string }).name ?? '').trim().toLowerCase() === needle,
+      );
+      return ex
+        ? { id: w.id, startedAt: w.startedAt, finishedAt: w.finishedAt, gymId: w.gymId ?? null, exercises: [ex] }
+        : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+  if (relation !== 'self') await recordAudit(viewer.id, target.id, 'exercise');
+  return { workouts: rows };
+});
