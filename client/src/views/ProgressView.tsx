@@ -292,7 +292,7 @@ export function ProgressView({
   const deload = deloadSuggestion(
     fatMap,
     activityRecoveryBias(store.activities, nowTs) +
-      0.6 * sleepReadinessBias(store.sleeps, nowTs, store.sleepSettings.goalMin),
+      0.6 * sleepReadinessBias(store.sleeps, nowTs, store.sleepSettings?.goalMin ?? 480),
   );
   const weekTotal = [...volThisWeek.values()].reduce((a, b) => a + b, 0);
   const emptyMuscles = muscleRows.filter((r) => r.v === 0).map((r) => t.muscleGroups[r.m]);

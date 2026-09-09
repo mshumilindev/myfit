@@ -41,6 +41,7 @@ export default tseslint.config(
       'desktop/src/**/*.ts',
       'functions/src/**/*.ts',
       'scripts/**/*.mjs',
+      'client/scripts/**/*.mjs',
     ],
     languageOptions: {
       globals: {
