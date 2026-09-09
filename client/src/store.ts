@@ -178,6 +178,8 @@ export interface StoreState {
     pattern: 'continuous' | 'occasional' | 'frequent' | null;
     /** Last rating we surfaced to the user — drives the rank-up moment. */
     seenRating: number | null;
+    /** Sync stamp for last-write-wins across devices. */
+    updatedAt?: number;
   };
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
@@ -789,6 +791,14 @@ function writeGoalsDoc(): void {
   if (!uid) return;
   const clean = JSON.parse(JSON.stringify({ ...state.goals, updatedAt: Date.now() }));
   setDoc(doc(db, 'users', uid, 'meta', 'goals'), clean).catch(onWriteError);
+}
+function writeMasteryDoc(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const clean = JSON.parse(
+    JSON.stringify({ ...state.mastery, updatedAt: state.mastery.updatedAt ?? Date.now() }),
+  );
+  setDoc(doc(db, 'users', uid, 'meta', 'mastery'), clean).catch(onWriteError);
 }
 function deleteGymDoc(id: string): void {
   const uid = currentUid();
@@ -1768,12 +1778,14 @@ export function setMasteryHistory(
   sinceYear: number | null,
   pattern: 'continuous' | 'occasional' | 'frequent' | null,
 ): void {
-  setState({ mastery: { ...state.mastery, sinceYear, pattern } });
+  setState({ mastery: { ...state.mastery, sinceYear, pattern, updatedAt: Date.now() } });
+  writeMasteryDoc();
 }
 
 /** Record the rating last surfaced to the user (so the rank-up moment fires once). */
 export function setMasterySeenRating(rating: number): void {
-  setState({ mastery: { ...state.mastery, seenRating: rating } });
+  setState({ mastery: { ...state.mastery, seenRating: rating, updatedAt: Date.now() } });
+  writeMasteryDoc();
 }
 
 // ---------------------------------------------------------------------------
@@ -2754,6 +2766,35 @@ export function startSyncLoop(): () => void {
       (snap) => {
         const data = snap.exists() ? (snap.data() as FitGoals) : EMPTY_GOALS;
         state = { ...state, goals: { ...EMPTY_GOALS, ...data } };
+        persist();
+        emit();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'mastery'),
+      (snap) => {
+        if (!snap.exists()) {
+          // No server copy yet — push existing local mastery up so pre-sync
+          // data is preserved rather than lost. (One-time migration per user.)
+          const m = state.mastery;
+          if (m.sinceYear != null || m.pattern != null || m.seenRating != null) writeMasteryDoc();
+          return;
+        }
+        const data = snap.data() as StoreState['mastery'];
+        // Last-write-wins: keep a newer local edit over a stale server copy.
+        if ((state.mastery.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
+        state = {
+          ...state,
+          mastery: {
+            sinceYear: data.sinceYear ?? null,
+            pattern: data.pattern ?? null,
+            seenRating: data.seenRating ?? null,
+            updatedAt: data.updatedAt,
+          },
+        };
         persist();
         emit();
       },
