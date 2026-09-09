@@ -20,7 +20,7 @@ import {
   latestWeight,
 } from '../store';
 import { useT, fmtDurationHuman } from '../i18n';
-import { Icon, Switch } from '../ui';
+import { ConfirmDialog, Icon, Switch } from '../ui';
 import { MoonGlyph } from '../components/MoonGlyph';
 import { moonInfo, illumPct } from '../moon';
 import {
@@ -120,28 +120,22 @@ export function SleepView({
           <Icon name="sun-horizon" weight="bold" />
           {t.sleepStopAction}
         </button>
-        {discardOpen ? (
-          <div className="sleep-discard-confirm">
-            <span className="sleep-discard-q">{t.sleepDiscardConfirm}</span>
-            <div className="sleep-discard-row">
-              <button
-                className="sleep-discard-yes"
-                onClick={() => {
-                  cancelSleep();
-                  onClose();
-                }}
-              >
-                {t.sleepDiscard}
-              </button>
-              <button className="sleep-discard-no" onClick={() => setDiscardOpen(false)}>
-                {t.cancel}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button className="sleep-discard" onClick={() => setDiscardOpen(true)}>
-            {t.sleepDiscard}
-          </button>
+        <button className="sleep-discard" onClick={() => setDiscardOpen(true)}>
+          {t.sleepDiscard}
+        </button>
+        {discardOpen && (
+          <ConfirmDialog
+            title={t.sleepDiscard}
+            body={t.sleepDiscardConfirm}
+            confirmLabel={t.sleepDiscard}
+            cancelLabel={t.cancel}
+            danger
+            onConfirm={() => {
+              cancelSleep();
+              onClose();
+            }}
+            onCancel={() => setDiscardOpen(false)}
+          />
         )}
       </div>
     );
@@ -753,29 +747,23 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
         <Icon name="check" weight="bold" />
         {t.sleepSaveNight}
       </button>
-      {confirmDel ? (
-        <div className="sleep-discard-confirm">
-          <span className="sleep-discard-q">{t.sleepDeleteConfirm}</span>
-          <div className="sleep-discard-row">
-            <button
-              className="sleep-discard-yes"
-              onClick={() => {
-                removeSleepNight(night.id);
-                onClose();
-              }}
-            >
-              {t.sleepDeleteNight}
-            </button>
-            <button className="sleep-discard-no" onClick={() => setConfirmDel(false)}>
-              {t.cancel}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button className="sleep-delete-link" onClick={() => setConfirmDel(true)}>
-          <Icon name="trash" weight="bold" />
-          {t.sleepDeleteNight}
-        </button>
+      <button className="sleep-delete-link" onClick={() => setConfirmDel(true)}>
+        <Icon name="trash" weight="bold" />
+        {t.sleepDeleteNight}
+      </button>
+      {confirmDel && (
+        <ConfirmDialog
+          title={t.sleepDeleteNight}
+          body={t.sleepDeleteConfirm}
+          confirmLabel={t.sleepDeleteNight}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            removeSleepNight(night.id);
+            onClose();
+          }}
+          onCancel={() => setConfirmDel(false)}
+        />
       )}
     </div>
   );

@@ -25,6 +25,8 @@ import {
 } from '../activities';
 import type { MuscleGroup } from '../data/exercises';
 import { nightDurationMin } from '../sleep';
+import { bmrKcal, overnightKcal } from '../energy';
+import { latestWeight, useStore } from '../store';
 import type { Activity, SleepNight, Workout } from '../types';
 
 type Item =
@@ -230,7 +232,13 @@ function ActivityRow({
  *  duration + range in the stats line, an `auto` flag for auto-logged nights. */
 function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void }) {
   const { t } = useT();
+  const store = useStore();
   const mins = nightDurationMin(n);
+  // Overnight resting burn, same BMR model Today uses — shown like the other rows.
+  const kcal = overnightKcal(
+    mins,
+    bmrKcal(store.bodyMetrics, latestWeight(store.bodyMetrics)?.weight),
+  );
   const pad = (x: number) => String(x).padStart(2, '0');
   const clk = (ms: number) => {
     const d = new Date(ms);
@@ -250,6 +258,11 @@ function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void 
           {n.quality ? ` · ${t.sleepQuality[n.quality]}` : ''}
         </div>
       </span>
+      {kcal != null && (
+        <span className="ta-kcal tnum">
+          <Icon name="flame" weight="fill" />~{kcal}
+        </span>
+      )}
       {onOpen && <Icon name="arrow-up-right" className="go" />}
     </>
   );
