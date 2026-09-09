@@ -39,7 +39,11 @@ export function ExerciseHistoryView({
     };
   }, [userId, name]);
 
-  const source = userId ? (fetched && fetched.key === fkey ? fetched.workouts : []) : store.workouts;
+  const source = userId
+    ? fetched && fetched.key === fkey
+      ? fetched.workouts
+      : []
+    : store.workouts;
   const sessions = source
     .filter((w) => w.finishedAt !== null)
     .map((w) => {

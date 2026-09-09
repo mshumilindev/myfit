@@ -460,7 +460,13 @@ export const athleteExerciseHistory = onCall(async (req) => {
         (e) => ((e as { name?: string }).name ?? '').trim().toLowerCase() === needle,
       );
       return ex
-        ? { id: w.id, startedAt: w.startedAt, finishedAt: w.finishedAt, gymId: w.gymId ?? null, exercises: [ex] }
+        ? {
+            id: w.id,
+            startedAt: w.startedAt,
+            finishedAt: w.finishedAt,
+            gymId: w.gymId ?? null,
+            exercises: [ex],
+          }
         : null;
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);

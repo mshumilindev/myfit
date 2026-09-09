@@ -48,17 +48,7 @@ function KindLabel({ t, s }: { t: Strings; s: SetEntry }) {
   return <span className="kind">{t.working}</span>;
 }
 
-function SetRows({
-  ex,
-  w,
-  t,
-  round,
-}: {
-  ex: Exercise;
-  w: Workout;
-  t: Strings;
-  round?: boolean;
-}) {
+function SetRows({ ex, w, t, round }: { ex: Exercise; w: Workout; t: Strings; round?: boolean }) {
   const sorted = [...ex.sets].sort((a, b) => a.position - b.position);
   return (
     <>
@@ -96,10 +86,7 @@ function SetRows({
                 </div>
                 <div className="set-foot">
                   <span>
-                    {t.dropsFoot(
-                      drops.length + 1,
-                      s.reps + drops.reduce((a, d) => a + d.reps, 0),
-                    )}
+                    {t.dropsFoot(drops.length + 1, s.reps + drops.reduce((a, d) => a + d.reps, 0))}
                   </span>
                   <span>{t.inOneSet(fmtKg(setVolumeKg(s) * perHandFactor(ex)))}</span>
                 </div>
@@ -112,7 +99,17 @@ function SetRows({
   );
 }
 
-function ExerciseCard({ ex, w, t, round }: { ex: Exercise; w: Workout; t: Strings; round?: boolean }) {
+function ExerciseCard({
+  ex,
+  w,
+  t,
+  round,
+}: {
+  ex: Exercise;
+  w: Workout;
+  t: Strings;
+  round?: boolean;
+}) {
   return (
     <div className="exercise-card">
       <div className="head">
@@ -245,8 +242,8 @@ export function TraineeSessionView({
             <div className="sub">
               {fmtDayMonth(w.startedAt, locale)}
               {' · '}
-              {workoutSets(w)} {t.sets} · {fmtTonnes(workoutVolumeKg(w))} ·{' '}
-              {w.exercises.length} {t.exercises}
+              {workoutSets(w)} {t.sets} · {fmtTonnes(workoutVolumeKg(w))} · {w.exercises.length}{' '}
+              {t.exercises}
               {durationMs != null ? ` · ${fmtDurationHM(durationMs)}` : ''}
             </div>
           )}
