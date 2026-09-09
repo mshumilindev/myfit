@@ -260,6 +260,10 @@ export const et: Strings = {
   illnessStreakPill: 'Seeria kaitstud',
   illnessProgramPill: 'Plaan peatatud',
   illnessRecovered: 'Olen terve',
+  illnessRecoveredTitle: 'Naasta pärast haigust?',
+  illnessRecoveredBody:
+    'Haiguspaus lõpeb täna. Spotter hoiab kaitstud seeria alles ja toob sind treeningusse tagasi rahulikult.',
+  illnessRecoveredConfirm: 'Jah, olen terve',
   illnessStillUnwell: 'Endiselt haige',
   illnessReturnKicker: 'Tere tulemast tagasi',
   illnessReturnTitle: 'Võta täna rahulikult',

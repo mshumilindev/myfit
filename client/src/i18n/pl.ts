@@ -273,6 +273,10 @@ export const pl: Strings = {
   illnessStreakPill: 'Passa chroniona',
   illnessProgramPill: 'Plan wstrzymany',
   illnessRecovered: 'Wyzdrowiałem',
+  illnessRecoveredTitle: 'Wrócić po chorobie?',
+  illnessRecoveredBody:
+    'Przerwa chorobowa kończy się dziś. Spotter zachowa chronioną passę i łagodnie przywróci Cię do treningu.',
+  illnessRecoveredConfirm: 'Tak, wyzdrowiałem',
   illnessStillUnwell: 'Wciąż choruję',
   illnessReturnKicker: 'Witaj z powrotem',
   illnessReturnTitle: 'Weź dziś na spokojnie',

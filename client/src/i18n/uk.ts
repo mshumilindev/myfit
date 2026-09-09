@@ -272,6 +272,10 @@ export const uk: Strings = {
   illnessStreakPill: 'Стрік збережено',
   illnessProgramPill: 'Програма на паузі',
   illnessRecovered: 'Я одужав',
+  illnessRecoveredTitle: 'Повернутися після хвороби?',
+  illnessRecoveredBody:
+    'Пауза через хворобу завершиться сьогодні. Спотер збереже захищений стрік і поверне тебе до тренувань плавно.',
+  illnessRecoveredConfirm: 'Так, я одужав',
   illnessStillUnwell: 'Ще хворію',
   illnessReturnKicker: 'З поверненням',
   illnessReturnTitle: 'Сьогодні легше',

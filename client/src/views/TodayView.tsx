@@ -256,6 +256,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     [store.workouts, pbNow],
   );
   const activeRest = activeRestPeriod(pbNow);
+  const confirmRestPeriod = confirmEndRest
+    ? store.restPeriods.find((r) => r.id === confirmEndRest)
+    : null;
+  const confirmEndIllness = confirmRestPeriod?.mode === 'illness';
   const illReturn = activeRest ? null : illnessReturn(pbNow);
   const playName = (pl: Play) =>
     pl.name ?? (pl.readout ? dayReadoutLabel(pl.readout, t) : t.playUntitled);
@@ -1534,11 +1538,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
       {confirmEndRest && (
         <ConfirmDialog
-          title={t.restEndTitle}
-          body={t.restEndBody}
-          confirmLabel={t.restEndNow}
+          title={confirmEndIllness ? t.illnessRecoveredTitle : t.restEndTitle}
+          body={confirmEndIllness ? t.illnessRecoveredBody : t.restEndBody}
+          confirmLabel={confirmEndIllness ? t.illnessRecoveredConfirm : t.restEndNow}
           cancelLabel={t.cancel}
-          danger
+          danger={!confirmEndIllness}
           onConfirm={() => {
             endRestPeriod(confirmEndRest);
             setConfirmEndRest(null);

@@ -265,6 +265,10 @@ export const en = {
   illnessStreakPill: 'Streak protected',
   illnessProgramPill: 'Program paused',
   illnessRecovered: "I'm recovered",
+  illnessRecoveredTitle: 'Come back from illness?',
+  illnessRecoveredBody:
+    'Your sick pause ends today. Spotter will keep the protected streak and ease you back into training.',
+  illnessRecoveredConfirm: "Yes, I'm recovered",
   illnessStillUnwell: 'Still unwell',
   illnessReturnKicker: 'Welcome back',
   illnessReturnTitle: 'Take it easy today',

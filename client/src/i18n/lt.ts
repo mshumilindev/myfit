@@ -274,6 +274,10 @@ export const lt: Strings = {
   illnessStreakPill: 'Serija apsaugota',
   illnessProgramPill: 'Planas sustabdytas',
   illnessRecovered: 'Pasveikau',
+  illnessRecoveredTitle: 'Grįžti po ligos?',
+  illnessRecoveredBody:
+    'Ligos pauzė baigsis šiandien. Spotter išsaugos apsaugotą seriją ir švelniai grąžins tave į treniruotes.',
+  illnessRecoveredConfirm: 'Taip, pasveikau',
   illnessStillUnwell: 'Vis dar sergu',
   illnessReturnKicker: 'Sveikas sugrįžęs',
   illnessReturnTitle: 'Šiandien lengviau',
