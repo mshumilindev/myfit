@@ -1148,8 +1148,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           >
             <span className="prog-sheen" aria-hidden />
             <div className="prog-banner-row">
-              <span className="prog-banner-icon">
-                <Icon name="clock-countdown" weight="bold" />
+              <span
+                className={`prog-banner-icon${activeRest.mode === 'illness' ? ' ill-pulse' : ''}`}
+              >
+                <Icon
+                  name={activeRest.mode === 'illness' ? 'pulse' : 'clock-countdown'}
+                  weight="bold"
+                />
               </span>
               <div className="prog-banner-main">
                 {activeRest.mode === 'illness' ? (

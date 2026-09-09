@@ -31039,6 +31039,25 @@ body {
 .tr-banner.illness .prog-sheen {
   display: none;
 }
+/* Pulse icon beats softly while unwell (cardiology-style ECG mark). */
+.tr-banner.illness .prog-banner-icon.ill-pulse svg {
+  color: var(--care);
+  animation: illBeat 2.4s ease-in-out infinite;
+}
+@keyframes illBeat {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tr-banner.illness .prog-banner-icon.ill-pulse svg {
+    animation: none;
+  }
+}
 .tr-pills {
   display: flex;
   gap: 8px;
