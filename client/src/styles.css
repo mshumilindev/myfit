@@ -29258,6 +29258,41 @@ body {
 .act-sleep-start {
   align-self: flex-start;
 }
+/* Wind-down cue + emphasis when this panel sits at the foot of Today and
+   the usual bedtime is near (or just past). */
+.act-sleep-cue {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--s-moon-lt);
+  letter-spacing: 0.01em;
+  /* keep clear of the moon glyph sitting top-right of the panel */
+  padding-right: 48px;
+}
+.act-sleep-cue > svg {
+  font-size: 14px;
+  flex: none;
+}
+.act-sleep-panel.emph {
+  box-shadow:
+    inset 0 0 0 1px rgba(159, 178, 230, 0.5),
+    0 8px 26px -14px rgba(159, 178, 230, 0.55);
+}
+.act-sleep-panel.emph .act-sleep-sky {
+  background:
+    radial-gradient(1px 1px at 22% 34%, rgba(195, 206, 244, 0.7), transparent),
+    radial-gradient(1px 1px at 58% 60%, rgba(195, 206, 244, 0.55), transparent),
+    radial-gradient(1.4px 1.4px at 38% 22%, rgba(195, 206, 244, 0.65), transparent),
+    radial-gradient(1px 1px at 68% 40%, rgba(195, 206, 244, 0.5), transparent),
+    radial-gradient(1px 1px at 15% 66%, rgba(195, 206, 244, 0.5), transparent),
+    radial-gradient(150% 95% at 80% 8%, rgba(159, 178, 230, 0.2), transparent 55%),
+    linear-gradient(165deg, #1a2138 0%, #0a0d18 75%);
+}
+/* Foot-of-Today sleep panel spacing */
+.today-sleep {
+  margin-top: 4px;
+}
 
 /* Sleep overlay surfaces (night hub / wake / logged) */
 .sleep-screen {

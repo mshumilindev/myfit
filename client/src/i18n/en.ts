@@ -215,6 +215,9 @@ export const en = {
   sleepDeleteNight: 'Delete night',
   sleepDeleteConfirm: 'Delete this night? This can’t be undone.',
 
+  sleepWindDownIn: (min: number) => `Wind down — about ${min} min to your usual bedtime`,
+  sleepPastBedtime: 'Past your usual bedtime — ready to turn in?',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

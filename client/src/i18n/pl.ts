@@ -224,6 +224,9 @@ export const pl: Strings = {
   sleepDeleteNight: 'Usuń noc',
   sleepDeleteConfirm: 'Usunąć tę noc? Tego nie cofniesz.',
 
+  sleepWindDownIn: (min: number) => `Wycisz się — około ${min} min do zwykłej pory snu`,
+  sleepPastBedtime: 'Po zwykłej porze snu — kładziesz się?',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

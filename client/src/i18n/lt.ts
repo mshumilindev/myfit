@@ -225,6 +225,9 @@ export const lt: Strings = {
   sleepDeleteNight: 'Trinti naktį',
   sleepDeleteConfirm: 'Trinti šią naktį? To nebus galima atšaukti.',
 
+  sleepWindDownIn: (min: number) => `Nurimk — apie ${min} min iki įprasto miego laiko`,
+  sleepPastBedtime: 'Jau vėliau nei įprastas miego laikas — gulies?',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

@@ -60,11 +60,21 @@ function hhmm(ms: number): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-function SleepPanel(props: { shell: Shell; onClose: () => void }) {
+export function SleepPanel(props: {
+  shell: Shell;
+  onClose: () => void;
+  /** Minutes until the usual bedtime (schedule/pattern); drives the wind-down
+   *  cue + emphasis on the Today placement. Omit in the activity drawer. */
+  toBedMin?: number | null;
+}) {
   const { t } = useT();
   const store = useStore();
   const live = liveSleep(store.sleeps);
   const last = lastNight(store.sleeps);
+  const toBed = props.toBedMin;
+  const soon = !live && toBed != null && toBed > 0 && toBed <= 60;
+  const past = !live && toBed != null && toBed <= 0 && toBed >= -180;
+  const emph = soon || past;
   const start = () => {
     startSleep();
     props.shell.openOverlay({ screen: 'sleep' });
@@ -77,13 +87,25 @@ function SleepPanel(props: { shell: Shell; onClose: () => void }) {
   return (
     <div className="act-group">
       <div className="act-group-label">{t.sleepTitle}</div>
-      <div className="act-sleep-panel">
+      <div className={`act-sleep-panel${emph ? ' emph' : ''}`}>
         <div className="act-sleep-sky" aria-hidden>
           <div className="act-sleep-moon">
             <MoonGlyph size={40} halo={false} />
           </div>
         </div>
         <div className="act-sleep-body">
+          {soon && (
+            <div className="act-sleep-cue">
+              <Icon name="moon-stars" />
+              {t.sleepWindDownIn(toBed as number)}
+            </div>
+          )}
+          {past && (
+            <div className="act-sleep-cue">
+              <Icon name="moon-stars" />
+              {t.sleepPastBedtime}
+            </div>
+          )}
           <button
             className="act-sleep-last"
             onClick={() => {

@@ -32,13 +32,13 @@ import {
 import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
-import { ActivitySheet } from '../components/ActivitySheet';
+import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
 import { bmrKcal, overnightKcal } from '../energy';
 import { nightDurationMin, finishedNights } from '../sleep';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
-import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
+import { SleepForgotBanner, SleepAutoFilledCard, planFor } from '../components/SleepAutomation';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, ExerciseName, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
@@ -229,6 +229,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const now = useNowTick(!!open);
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
+  // Minutes until the usual bedtime (schedule → pattern), circular in
+  // (-720, 720]; null when Spotter has no bedtime to go on yet.
+  const sleepToBed = useMemo(() => {
+    const plan = planFor(store, new Date(now).getDay(), now);
+    if (!plan) return null;
+    const d = new Date(now);
+    const nowMin = d.getHours() * 60 + d.getMinutes();
+    let diff = (((plan.bedMin - nowMin) % 1440) + 1440) % 1440;
+    if (diff > 720) diff -= 1440;
+    return diff;
+  }, [store, now]);
 
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
@@ -1398,6 +1409,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             {t.servedFromCache}
           </div>
         )}
+
+        <div className="today-sleep">
+          <SleepPanel shell={shell} onClose={() => {}} toBedMin={sleepToBed} />
+        </div>
       </div>
 
       <aside className="pane-side">

@@ -222,6 +222,10 @@ export const uk: Strings = {
   sleepDeleteNight: 'Видалити ніч',
   sleepDeleteConfirm: 'Видалити цю ніч? Це незворотно.',
 
+  sleepWindDownIn: (min: number) =>
+    `Час заспокоюватись — близько ${min} хв до твого звичного часу сну`,
+  sleepPastBedtime: 'Вже пізніше звичного часу сну — лягаємо?',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

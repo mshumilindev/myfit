@@ -211,6 +211,9 @@ export const et: Strings = {
   sleepDeleteNight: 'Kustuta öö',
   sleepDeleteConfirm: 'Kustutada see öö? Seda ei saa tagasi võtta.',
 
+  sleepWindDownIn: (min: number) => `Rahune maha — umbes ${min} min tavalise uneajani`,
+  sleepPastBedtime: 'Tavaline uneaeg on möödas — kas lähed magama?',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,
