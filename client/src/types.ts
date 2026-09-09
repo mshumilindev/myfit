@@ -245,6 +245,35 @@ export interface RestPeriod {
 
 /** Non-lifting load (design feature 6). Conditioning adds systemic load;
  *  recovery (massage, sauna, cold, mobility) counts as recovery. */
+/**
+ * A coached athlete's live (or just-finished) session, mirrored to
+ * `liveSessions/{athleteUid}` so their trainer sees it on Today in real time.
+ * The athlete's own client writes it; the trainer reads by `trainerId`.
+ */
+export interface LiveSession {
+  /** Doc id = the athlete's uid. */
+  id: string;
+  athleteName: string;
+  avatarExt?: string | null;
+  /** The coach who may read this doc. */
+  trainerId: string;
+  /** Epoch ms the session started. */
+  startedAt: number;
+  gymName?: string | null;
+  exerciseCount?: number;
+  /** The athlete's previous finished workout, for context on the banner. */
+  lastName?: string | null;
+  lastSets?: number;
+  lastTonnageKg?: number;
+  lastAt?: number | null;
+  /** Set when the session ends; null while live. Final stats fill in then. */
+  finishedAt?: number | null;
+  finalSets?: number;
+  finalTonnageKg?: number;
+  /** Heartbeat while live — lets the trainer show an offline/last-seen state. */
+  updatedAt: number;
+}
+
 export type ActivityCategory = 'conditioning' | 'recovery';
 
 /** Effort dial that nudges the MET-based calorie estimate. */

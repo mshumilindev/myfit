@@ -238,6 +238,21 @@ export const lt: Strings = {
 
   sleepBusyNote: 'Pirmiau baik tai, kas vyksta — po vieną.',
 
+  trLiveAthletes: 'Tavo sportininkai',
+  trLiveCount: (n: number) => `${n} treniruojasi`,
+  trLiveAlso: 'Taip pat treniruojasi',
+  trLiveTrainingNow: 'Treniruojasi',
+  trLiveOffline: 'Ryšys nutrūko',
+  trLiveFinished: 'Baigė',
+  trLiveReconnecting: 'jungiamasi iš naujo…',
+  trLiveStarted: (clk: string) => `Pradėjo ${clk}`,
+  trLiveExercisesIn: (n: number) => `pratimų: ${n}`,
+  trLiveLast: 'Paskutinė',
+  trLiveNoLast: 'Pirma treniruotė',
+  trLiveView: 'Žiūrėti',
+  trLiveViewRecap: 'Santrauka',
+  trLiveProfile: 'Profilis',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,

@@ -224,6 +224,21 @@ export const et: Strings = {
 
   sleepBusyNote: 'Lõpeta kõigepealt käimasolev — üks korraga.',
 
+  trLiveAthletes: 'Sinu sportlased',
+  trLiveCount: (n: number) => `${n} treenib`,
+  trLiveAlso: 'Ka treenivad',
+  trLiveTrainingNow: 'Treenib',
+  trLiveOffline: 'Ühendus kadus',
+  trLiveFinished: 'Lõpetas',
+  trLiveReconnecting: 'taasühendamine…',
+  trLiveStarted: (clk: string) => `Alustas ${clk}`,
+  trLiveExercisesIn: (n: number) => `harjutusi: ${n}`,
+  trLiveLast: 'Viimane',
+  trLiveNoLast: 'Esimene treening',
+  trLiveView: 'Vaata',
+  trLiveViewRecap: 'Kokkuvõte',
+  trLiveProfile: 'Profiil',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

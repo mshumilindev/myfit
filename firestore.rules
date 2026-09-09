@@ -107,6 +107,17 @@ service cloud.firestore {
       }
     }
 
+    // --- Coached-athlete live sessions -------------------------------------
+    // One doc per athlete (id = their uid), written by the athlete, read by
+    // their coach. The coach's Today queries by trainerId; the read rule scopes
+    // it to their own athletes. No cross-doc lookup needed — the athlete stamps
+    // their own trainerId (they can only expose their OWN session either way).
+    match /liveSessions/{athleteId} {
+      allow read: if isSelf(athleteId)
+        || (isSignedIn() && resource.data.trainerId == request.auth.uid);
+      allow write: if isSelf(athleteId);
+    }
+
     // --- Sleep auto-start queue --------------------------------------------
     // One doc per user: the upcoming bedtimes (as absolute instants the client
     // computed in its timezone) that the auto-start function consumes. Owner

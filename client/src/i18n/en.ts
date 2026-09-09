@@ -228,6 +228,21 @@ export const en = {
 
   sleepBusyNote: 'Finish what’s running first — one at a time.',
 
+  trLiveAthletes: 'Your athletes',
+  trLiveCount: (n: number) => `${n} training now`,
+  trLiveAlso: 'Also training',
+  trLiveTrainingNow: 'Training now',
+  trLiveOffline: 'Connection lost',
+  trLiveFinished: 'Finished',
+  trLiveReconnecting: 'reconnecting…',
+  trLiveStarted: (clk: string) => `Started ${clk}`,
+  trLiveExercisesIn: (n: number) => `${n} exercises in`,
+  trLiveLast: 'Last',
+  trLiveNoLast: 'First tracked session',
+  trLiveView: 'View',
+  trLiveViewRecap: 'View recap',
+  trLiveProfile: 'Open profile',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

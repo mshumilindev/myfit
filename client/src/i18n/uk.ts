@@ -236,6 +236,21 @@ export const uk: Strings = {
 
   sleepBusyNote: 'Спершу заверши поточне — одне за раз.',
 
+  trLiveAthletes: 'Твої атлети',
+  trLiveCount: (n: number) => `${n} тренуються`,
+  trLiveAlso: 'Теж тренуються',
+  trLiveTrainingNow: 'Тренується',
+  trLiveOffline: 'Звʼязок втрачено',
+  trLiveFinished: 'Завершив',
+  trLiveReconnecting: 'відновлення…',
+  trLiveStarted: (clk: string) => `Почав о ${clk}`,
+  trLiveExercisesIn: (n: number) => `вправ: ${n}`,
+  trLiveLast: 'Минуле',
+  trLiveNoLast: 'Перше тренування',
+  trLiveView: 'Дивитись',
+  trLiveViewRecap: 'Підсумок',
+  trLiveProfile: 'Профіль',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

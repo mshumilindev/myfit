@@ -19,7 +19,9 @@ import {
   deleteDoc,
   doc,
   onSnapshot,
+  query,
   setDoc,
+  where,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -34,6 +36,7 @@ import {
   type Exercise,
   type ExerciseKind,
   type Gym,
+  type LiveSession,
   type QueuedMutation,
   type Reminder,
   type RestMode,
@@ -66,7 +69,7 @@ import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './l
 import { isFlagOn } from './data/flags';
 import { describeDay, type DayReadout } from './data/daySuggest';
 import { awakeMsAt, SLEEP_IDLE_MS, computeUpcomingNights } from './sleep';
-import { currentUid, getRole } from './api';
+import { currentUid, getRole, getUsername } from './api';
 
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
@@ -139,6 +142,9 @@ export interface StoreState {
   goals: FitGoals;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
   queue: QueuedMutation[];
+  /** Coached athletes with a live (or just-finished) session — real-time,
+   *  populated only for trainers; never persisted. */
+  liveTrainees: LiveSession[];
   syncStatus: SyncStatus;
   syncError: SyncError | null;
   lastSyncAt: number | null;
@@ -185,6 +191,7 @@ let state: StoreState = {
   }),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   queue: [],
+  liveTrainees: [],
   syncStatus: 'pending',
   syncError: null,
   lastSyncAt: null,
@@ -793,11 +800,106 @@ export function applyAutoFinish(): void {
   if (changed.length) {
     setState({ workouts, syncStatus: bumpPending() });
     for (const id of changed) saveWorkout(id);
+    const done = state.workouts.find((w) => changed.includes(w.id));
+    if (done) finishLiveSession(done);
   }
 }
 
 export function getOpenWorkout(): Workout | undefined {
   return state.workouts.find((w) => w.finishedAt === null);
+}
+
+// ── Coached-athlete live presence (liveSessions/{uid}) ──────────────────────
+// The athlete's own client mirrors an open workout to a small doc their coach
+// can read in real time; cleared/finished when the workout ends.
+let selfProfile: {
+  trainerId: string | null;
+  firstName?: string;
+  lastName?: string;
+  avatarExt?: string | null;
+} = { trainerId: null };
+const LIVE_HEARTBEAT_MS = 45000;
+let lastLiveBeat = 0;
+
+function selfDisplayName(): string {
+  const n = `${selfProfile.firstName ?? ''} ${selfProfile.lastName ?? ''}`.trim();
+  return n || getUsername() || 'Athlete';
+}
+function lastFinishedSummary(): {
+  lastName: string | null;
+  lastSets: number;
+  lastTonnageKg: number;
+  lastAt: number | null;
+} {
+  const done = state.workouts
+    .filter((w) => w.finishedAt !== null)
+    .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))[0];
+  if (!done) return { lastName: null, lastSets: 0, lastTonnageKg: 0, lastAt: null };
+  return {
+    lastName: done.dayName ?? null,
+    lastSets: workoutSets(done),
+    lastTonnageKg: Math.round(workoutVolumeKg(done)),
+    lastAt: done.finishedAt ?? null,
+  };
+}
+function gymNameFor(gymId: string | null | undefined): string | null {
+  return gymId ? (state.gyms.find((g) => g.id === gymId)?.name ?? null) : null;
+}
+/** Mirror an open workout to the athlete's coach-visible liveSessions doc. */
+export function writeLiveSession(w: Workout): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const trainerId = selfProfile.trainerId;
+  if (!trainerId) {
+    deleteDoc(doc(db, 'liveSessions', uid)).catch(() => undefined); // no coach → no doc
+    return;
+  }
+  const now = Date.now();
+  lastLiveBeat = now;
+  setDoc(doc(db, 'liveSessions', uid), {
+    id: uid,
+    athleteName: selfDisplayName(),
+    avatarExt: selfProfile.avatarExt ?? null,
+    trainerId,
+    startedAt: w.startedAt,
+    gymName: gymNameFor(w.gymId),
+    exerciseCount: w.exercises.length,
+    ...lastFinishedSummary(),
+    finishedAt: null,
+    updatedAt: now,
+  }).catch(onWriteError);
+}
+/** Mark the live session finished — kept briefly for the coach's "just
+ *  finished" state, overwritten on the next start. */
+export function finishLiveSession(w: Workout): void {
+  const uid = currentUid();
+  if (!uid || !selfProfile.trainerId) return;
+  setDoc(
+    doc(db, 'liveSessions', uid),
+    {
+      finishedAt: w.finishedAt ?? Date.now(),
+      finalSets: workoutSets(w),
+      finalTonnageKg: Math.round(workoutVolumeKg(w)),
+      exerciseCount: w.exercises.length,
+      updatedAt: Date.now(),
+    },
+    { merge: true },
+  ).catch(onWriteError);
+}
+/** Heartbeat while a workout is open, so the coach can tell live from stale. */
+function heartbeatLiveSession(): void {
+  const uid = currentUid();
+  if (!uid || !selfProfile.trainerId) return;
+  const open = state.workouts.find((w) => w.finishedAt === null);
+  if (!open) return;
+  const now = Date.now();
+  if (now - lastLiveBeat < LIVE_HEARTBEAT_MS) return;
+  lastLiveBeat = now;
+  setDoc(
+    doc(db, 'liveSessions', uid),
+    { updatedAt: now, exerciseCount: open.exercises.length },
+    { merge: true },
+  ).catch(() => undefined);
 }
 
 export function startWorkout(
@@ -858,6 +960,8 @@ export function finishWorkout(id: string, at = Date.now()): void {
   draftWorkouts.delete(id);
   patchWorkout(id, { finishedAt: at, autoFinished: false });
   saveWorkout(id);
+  const done = state.workouts.find((x) => x.id === id);
+  if (done) finishLiveSession(done);
 }
 
 export function updateWorkoutTimes(
@@ -2418,6 +2522,35 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
+  // Own profile doc — trainerId / name / avatar drive the coach-visible live
+  // presence doc this athlete writes. Self-read is always allowed by rules.
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid),
+      (snap) => {
+        const d = snap.exists() ? (snap.data() as Record<string, unknown>) : {};
+        selfProfile = {
+          trainerId: (d.trainerId as string) ?? null,
+          firstName: d.firstName as string | undefined,
+          lastName: d.lastName as string | undefined,
+          avatarExt: (d.avatarExt as string) ?? null,
+        };
+      },
+      () => undefined,
+    ),
+  );
+  // Coach view: athletes this trainer coaches who are training now. Members get
+  // an empty result (no doc names them as trainer); harmless either way.
+  unsubs.push(
+    onSnapshot(
+      query(collection(db, 'liveSessions'), where('trainerId', '==', uid)),
+      (snap) => {
+        setState({ liveTrainees: snap.docs.map((d) => d.data() as LiveSession) });
+      },
+      // Soft: if the liveSessions rule/index isn't deployed yet, don't block sync.
+      () => undefined,
+    ),
+  );
   unsubs.push(
     onSnapshot(
       doc(db, 'users', uid, 'meta', 'body'),
@@ -2477,6 +2610,7 @@ export function startSyncLoop(): () => void {
   const tick = () => {
     applyAutoFinish();
     recordPresence();
+    heartbeatLiveSession();
   };
   presenceTimer = setInterval(tick, 15_000);
   window.addEventListener('online', tick);
@@ -2928,6 +3062,7 @@ export function backfillWorkout(
   // editor closes — so building it doesn't spray writes on every added set.
   draftWorkouts.add(workout.id);
   setState({ workouts: sortWorkouts([workout, ...state.workouts]), syncStatus: state.syncStatus });
+  writeLiveSession(workout);
   return workout;
 }
 
@@ -2983,6 +3118,7 @@ export function resetLocalData(): void {
     },
     goals: EMPTY_GOALS,
     queue: [],
+    liveTrainees: [],
     syncStatus: 'pending',
     syncError: null,
     lastSyncAt: null,

@@ -237,6 +237,21 @@ export const pl: Strings = {
 
   sleepBusyNote: 'Najpierw zakończ to, co trwa — jedno naraz.',
 
+  trLiveAthletes: 'Twoi podopieczni',
+  trLiveCount: (n: number) => `${n} trenuje teraz`,
+  trLiveAlso: 'Też trenują',
+  trLiveTrainingNow: 'Trenuje teraz',
+  trLiveOffline: 'Utracono połączenie',
+  trLiveFinished: 'Zakończył',
+  trLiveReconnecting: 'ponowne łączenie…',
+  trLiveStarted: (clk: string) => `Start o ${clk}`,
+  trLiveExercisesIn: (n: number) => `ćwiczeń: ${n}`,
+  trLiveLast: 'Ostatnio',
+  trLiveNoLast: 'Pierwszy trening',
+  trLiveView: 'Zobacz',
+  trLiveViewRecap: 'Podsumowanie',
+  trLiveProfile: 'Profil',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,
