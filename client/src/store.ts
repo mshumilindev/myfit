@@ -93,6 +93,7 @@ const MASTERY_KEY = 'spotter.mastery';
 const SLEEP_KEY = 'spotter.sleeps';
 const SLEEP_SCHED_KEY = 'spotter.sleep.schedule';
 const SLEEP_SET_KEY = 'spotter.sleep.settings';
+const pendingSleepDeletes = new Set<string>();
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -1764,9 +1765,13 @@ function writeSleepDoc(n: SleepNight): void {
   );
 }
 function deleteSleepDoc(id: string): void {
+  pendingSleepDeletes.add(id);
   const uid = currentUid();
   if (!uid) return;
-  deleteDoc(doc(db, 'users', uid, 'sleeps', id)).catch(onWriteError);
+  deleteDoc(doc(db, 'users', uid, 'sleeps', id)).catch((err) => {
+    pendingSleepDeletes.delete(id);
+    onWriteError(err);
+  });
 }
 /** Sync one night by id — write it if present, else delete the remote copy. */
 function saveSleep(id: string): void {
@@ -1834,6 +1839,24 @@ function pushLocalSleepDiffs(server: SleepNight[], merged: SleepNight[]): void {
     const remote = byId.get(n.id);
     if (!remote || (n.updatedAt ?? 0) > (remote.updatedAt ?? 0)) writeSleepDoc(n);
   }
+}
+
+function applySleepSnapshot(serverSleeps: SleepNight[]): void {
+  const serverIds = new Set(serverSleeps.map((n) => n.id));
+  for (const id of Array.from(pendingSleepDeletes)) {
+    if (!serverIds.has(id)) pendingSleepDeletes.delete(id);
+  }
+  const visibleServerSleeps = serverSleeps.filter((n) => !pendingSleepDeletes.has(n.id));
+  const visibleLocalSleeps = state.sleeps.filter((n) => !pendingSleepDeletes.has(n.id));
+  const sleeps = mergeServerSleepsWithLocal(visibleServerSleeps, visibleLocalSleeps);
+  state = {
+    ...state,
+    sleeps,
+  };
+  backfillSleepKind();
+  pushLocalSleepDiffs(visibleServerSleeps, state.sleeps);
+  persist();
+  emit();
 }
 
 /** Begin a live night (idempotent — returns the existing one if already asleep).
@@ -2594,15 +2617,7 @@ export function startSyncLoop(): () => void {
       collection(db, 'users', uid, 'sleeps'),
       (snap) => {
         const serverSleeps = snap.docs.map((d) => d.data() as SleepNight);
-        const sleeps = mergeServerSleepsWithLocal(serverSleeps, state.sleeps);
-        state = {
-          ...state,
-          sleeps,
-        };
-        backfillSleepKind();
-        pushLocalSleepDiffs(serverSleeps, state.sleeps);
-        persist();
-        emit();
+        applySleepSnapshot(serverSleeps);
       },
       // Soft: if the sleeps rule isn't deployed yet, don't block all sync.
       () => undefined,
@@ -3210,6 +3225,7 @@ export function resetLocalData(): void {
     syncError: null,
     lastSyncAt: null,
   };
+  pendingSleepDeletes.clear();
   emit();
 }
 
@@ -3218,6 +3234,11 @@ export function __getStateForTests(): StoreState {
 }
 export function __replaceStateForTests(next: StoreState): void {
   state = structuredClone(next);
+  pendingSleepDeletes.clear();
   persist();
   emit();
+}
+
+export function __applySleepSnapshotForTests(serverSleeps: SleepNight[]): void {
+  applySleepSnapshot(serverSleeps);
 }

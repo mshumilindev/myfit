@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { StoreState } from '../client/src/store';
-import type { Exercise, SetEntry, Workout } from '../client/src/types';
+import type { Exercise, SetEntry, SleepNight, Workout } from '../client/src/types';
 import {
+  __applySleepSnapshotForTests,
   __getStateForTests,
   __replaceStateForTests,
   addExercise,
@@ -28,6 +29,7 @@ import {
   recordPresence,
   repeatWorkout,
   recordWeight,
+  removeSleepNight,
   renameExercise,
   reorderExercises,
   resetLocalData,
@@ -325,6 +327,24 @@ describe('F-05 Gyms and reminders store', () => {
     expect(next.sleeps).toEqual([]);
     expect(next.sleepSettings.skippedAutoSleepDates).toContain('2026-09-10');
     expect(next.sleepSettings.lastAutoNight).toBe('2026-09-10');
+  });
+
+  it('keeps a discarded sleep hidden while Firestore delete is pending', () => {
+    const night: SleepNight = {
+      id: 'sleep-1',
+      date: '2026-09-10',
+      bedtime: new Date(2026, 8, 9, 23, 0).getTime(),
+      wake: new Date(2026, 8, 10, 7, 0).getTime(),
+      source: 'manual',
+      kind: 'sleep',
+      updatedAt: 1000,
+    };
+    __replaceStateForTests(state({ sleeps: [night] }));
+
+    removeSleepNight(night.id);
+    __applySleepSnapshotForTests([{ ...night, updatedAt: 1000 }]);
+
+    expect(__getStateForTests().sleeps).toEqual([]);
   });
 
   it('updates and deletes gyms', () => {
