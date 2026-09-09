@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type RefObject,
 } from 'react';
 import { collection, doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import {
@@ -665,6 +666,12 @@ export function App() {
   // A fresh build took control → show the reload plate until the user reloads.
   const updateReady = useSyncExternalStore(subscribeUpdateReady, isUpdateReady);
   const desktopRail = useDesktopRail();
+  // Interactive back-swipe: while a drag is live we render the destination
+  // (the tab) beneath the overlay and translate the two layers by hand.
+  const [backSwipe, setBackSwipe] = useState(false);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const overLayerRef = useRef<HTMLDivElement | null>(null);
+  const underLayerRef = useRef<HTMLDivElement | null>(null);
   const snackSeq = useRef(0);
   const toastSeq = useRef(0);
 
@@ -771,7 +778,16 @@ export function App() {
     if (effectiveTab === 'programs' && programsPeer !== 'programs') setProgramsPeer('programs');
   };
 
-  useEdgeSwipeBack(canEdgeSwipeBack, edgeSwipeBack);
+  useEdgeSwipeBack({
+    enabled: canEdgeSwipeBack,
+    interactive: activeOverlay !== null,
+    onBack: edgeSwipeBack,
+    stageRef,
+    overRef: overLayerRef,
+    underRef: underLayerRef,
+    onSwipeStart: () => setBackSwipe(true),
+    onSwipeEnd: () => setBackSwipe(false),
+  });
 
   // State → URL hash, so a refresh lands on the same screen.
   useEffect(() => {
@@ -1154,6 +1170,141 @@ export function App() {
     );
   }
 
+  const overlayContent = activeOverlay ? (
+    <Suspense fallback={<ScreenFallback />}>
+      {activeOverlay?.screen === 'session' && (
+        <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'activity' && (
+        <ActivityView
+          newType={activeOverlay.newType}
+          editId={activeOverlay.editId}
+          onClose={closeOverlay}
+        />
+      )}
+      {activeOverlay?.screen === 'sleep' && (
+        <Suspense fallback={null}>
+          <SleepView
+            wake={activeOverlay.wake}
+            mode={activeOverlay.mode}
+            nightId={activeOverlay.nightId}
+            onClose={closeOverlay}
+          />
+        </Suspense>
+      )}
+      {activeOverlay?.screen === 'past-workout' && (
+        <SessionView
+          workoutId={activeOverlay.workoutId}
+          past
+          startAdd={activeOverlay.startAdd}
+          shell={shell}
+          onClose={() => {
+            // A backfilled draft syncs once here, when its editor closes;
+            // a no-op for an already-synced past workout.
+            commitWorkout(activeOverlay.workoutId);
+            closeOverlay();
+          }}
+        />
+      )}
+      {activeOverlay?.screen === 'exercise-history' && (
+        <ExerciseHistoryView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'exercise-detail' && (
+        <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'muscle-history' && (
+        <MuscleHistoryView muscle={activeOverlay.muscle} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'settings' && role === 'admin' && (
+        <SettingsView onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'history' && (
+        <HistoryListView shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'notifications' && (
+        <NotificationsView
+          notifs={notifs}
+          now={notifNow}
+          state={notifState}
+          onSeen={markNotifsSeen}
+          onMarkAll={markAllNotifsSeen}
+          onClose={closeOverlay}
+          onOpenRecap={(period, story) =>
+            setOverlay({ screen: story ? 'recap-story' : 'recap', period })
+          }
+        />
+      )}
+      {activeOverlay?.screen === 'recap' && (
+        <RecapView
+          period={activeOverlay.period}
+          desktop
+          onStory={() => setOverlay({ screen: 'recap-story', period: activeOverlay.period })}
+          onClose={closeOverlay}
+        />
+      )}
+      {activeOverlay?.screen === 'recap-story' && (
+        <RecapStory period={activeOverlay.period} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'gym' && (
+        <GymDetailView
+          gymId={activeOverlay.gymId}
+          candName={activeOverlay.name}
+          candLat={activeOverlay.lat}
+          candLng={activeOverlay.lng}
+          candAddress={activeOverlay.address}
+          candExternalId={activeOverlay.externalId}
+          shell={shell}
+          onClose={closeOverlay}
+        />
+      )}
+      {activeOverlay?.screen === 'equipment' && (
+        <EquipmentDetailView
+          itemId={activeOverlay.itemId}
+          gymId={activeOverlay.gymId}
+          shell={shell}
+          onClose={closeOverlay}
+        />
+      )}
+      {activeOverlay?.screen === 'profile' && (
+        <ProfileView userId={activeOverlay.userId} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
+    </Suspense>
+  ) : null;
+  const tabContent = (
+    <Suspense fallback={<ScreenFallback />}>
+      {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
+      {effectiveTab === 'progress' && (
+        <ProgressView
+          store={store}
+          shell={shell}
+          sub={progressSub}
+          onSub={setProgressSub}
+          seg={progressSeg}
+          onSeg={setProgressSeg}
+          lens={volumeLens}
+          onLens={setVolumeLens}
+        />
+      )}
+      {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}
+      {effectiveTab === 'programs' &&
+        (programsPeer === 'exercises' ? (
+          <ExerciseLibraryView
+            shell={shell}
+            libTab={libMine ? 'mine' : 'library'}
+            onLibTab={(next) => setLibMine(next === 'mine')}
+            onProgramsTab={goProgramsPeer}
+          />
+        ) : programsPeer === 'playbook' ? (
+          <PlaybookView shell={shell} onProgramsTab={goProgramsPeer} />
+        ) : programsPeer === 'goals' ? (
+          <GoalsView shell={shell} onProgramsTab={goProgramsPeer} />
+        ) : (
+          <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
+        ))}
+    </Suspense>
+  );
+
   return (
     <div className="app">
       {nightLive && <SpotterSky />}
@@ -1230,142 +1381,18 @@ export function App() {
             mode="compact"
           />
         )}
-        <Suspense fallback={<ScreenFallback />}>
-          {activeOverlay?.screen === 'session' && (
-            <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
+        <div className="screen-stage" ref={stageRef} data-back-swipe={backSwipe ? '' : undefined}>
+          {(!activeOverlay || backSwipe) && (
+            <div className="stage-layer under-layer" ref={underLayerRef}>
+              {tabContent}
+            </div>
           )}
-          {activeOverlay?.screen === 'activity' && (
-            <ActivityView
-              newType={activeOverlay.newType}
-              editId={activeOverlay.editId}
-              onClose={closeOverlay}
-            />
+          {activeOverlay && (
+            <div className="stage-layer over-layer" ref={overLayerRef}>
+              {overlayContent}
+            </div>
           )}
-          {activeOverlay?.screen === 'sleep' && (
-            <Suspense fallback={null}>
-              <SleepView
-                wake={activeOverlay.wake}
-                mode={activeOverlay.mode}
-                nightId={activeOverlay.nightId}
-                onClose={closeOverlay}
-              />
-            </Suspense>
-          )}
-          {activeOverlay?.screen === 'past-workout' && (
-            <SessionView
-              workoutId={activeOverlay.workoutId}
-              past
-              startAdd={activeOverlay.startAdd}
-              shell={shell}
-              onClose={() => {
-                // A backfilled draft syncs once here, when its editor closes;
-                // a no-op for an already-synced past workout.
-                commitWorkout(activeOverlay.workoutId);
-                closeOverlay();
-              }}
-            />
-          )}
-          {activeOverlay?.screen === 'exercise-history' && (
-            <ExerciseHistoryView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'exercise-detail' && (
-            <ExerciseDetailView name={activeOverlay.name} shell={shell} onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'muscle-history' && (
-            <MuscleHistoryView muscle={activeOverlay.muscle} shell={shell} onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'settings' && role === 'admin' && (
-            <SettingsView onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'history' && (
-            <HistoryListView shell={shell} onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'notifications' && (
-            <NotificationsView
-              notifs={notifs}
-              now={notifNow}
-              state={notifState}
-              onSeen={markNotifsSeen}
-              onMarkAll={markAllNotifsSeen}
-              onClose={closeOverlay}
-              onOpenRecap={(period, story) =>
-                setOverlay({ screen: story ? 'recap-story' : 'recap', period })
-              }
-            />
-          )}
-          {activeOverlay?.screen === 'recap' && (
-            <RecapView
-              period={activeOverlay.period}
-              desktop
-              onStory={() => setOverlay({ screen: 'recap-story', period: activeOverlay.period })}
-              onClose={closeOverlay}
-            />
-          )}
-          {activeOverlay?.screen === 'recap-story' && (
-            <RecapStory period={activeOverlay.period} onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'gym' && (
-            <GymDetailView
-              gymId={activeOverlay.gymId}
-              candName={activeOverlay.name}
-              candLat={activeOverlay.lat}
-              candLng={activeOverlay.lng}
-              candAddress={activeOverlay.address}
-              candExternalId={activeOverlay.externalId}
-              shell={shell}
-              onClose={closeOverlay}
-            />
-          )}
-          {activeOverlay?.screen === 'equipment' && (
-            <EquipmentDetailView
-              itemId={activeOverlay.itemId}
-              gymId={activeOverlay.gymId}
-              shell={shell}
-              onClose={closeOverlay}
-            />
-          )}
-          {activeOverlay?.screen === 'profile' && (
-            <ProfileView userId={activeOverlay.userId} shell={shell} onClose={closeOverlay} />
-          )}
-          {activeOverlay?.screen === 'mastery' && (
-            <MasteryView shell={shell} onClose={closeOverlay} />
-          )}
-        </Suspense>
-        {!activeOverlay && (
-          <>
-            <Suspense fallback={<ScreenFallback />}>
-              {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
-              {effectiveTab === 'progress' && (
-                <ProgressView
-                  store={store}
-                  shell={shell}
-                  sub={progressSub}
-                  onSub={setProgressSub}
-                  seg={progressSeg}
-                  onSeg={setProgressSeg}
-                  lens={volumeLens}
-                  onLens={setVolumeLens}
-                />
-              )}
-              {effectiveTab === 'gyms' && <GymsView shell={shell} store={store} />}
-              {effectiveTab === 'programs' &&
-                (programsPeer === 'exercises' ? (
-                  <ExerciseLibraryView
-                    shell={shell}
-                    libTab={libMine ? 'mine' : 'library'}
-                    onLibTab={(next) => setLibMine(next === 'mine')}
-                    onProgramsTab={goProgramsPeer}
-                  />
-                ) : programsPeer === 'playbook' ? (
-                  <PlaybookView shell={shell} onProgramsTab={goProgramsPeer} />
-                ) : programsPeer === 'goals' ? (
-                  <GoalsView shell={shell} onProgramsTab={goProgramsPeer} />
-                ) : (
-                  <ProgramsView shell={shell} onProgramsTab={goProgramsPeer} />
-                ))}
-            </Suspense>
-          </>
-        )}
+        </div>
         {showTabbar && (
           <nav className="tabbar">
             {tabs.map((x) => (
@@ -1477,15 +1504,37 @@ function isEdgeSwipeExcluded(target: EventTarget | null): boolean {
   return target.closest(EDGE_BACK_EXCLUDE_SELECTOR) !== null;
 }
 
-function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
-  const onBackRef = useRef(onBack);
+interface EdgeBackOpts {
+  enabled: boolean;
+  /** Do the interactive reveal (an overlay is open). Off = plain threshold back. */
+  interactive: boolean;
+  onBack: () => void;
+  stageRef: RefObject<HTMLDivElement | null>;
+  overRef: RefObject<HTMLDivElement | null>;
+  underRef: RefObject<HTMLDivElement | null>;
+  onSwipeStart: () => void;
+  onSwipeEnd: () => void;
+}
+
+const BACK_PARALLAX = 0.25; // how far the revealed screen sits behind, as a fraction of width
+const BACK_SCRIM = 0.12; // dim over the revealed screen at rest
+
+/**
+ * Interactive iOS-style edge-back. From the left edge, the current overlay
+ * follows the finger to the right while the destination (rendered underneath)
+ * eases in from a slight left parallax with a fading scrim; release past the
+ * halfway point (or a quick flick) completes the pop, otherwise it springs back.
+ * When no overlay is open (e.g. a Programs sub-tab) it falls back to a plain
+ * threshold trigger with no visual.
+ */
+function useEdgeSwipeBack(opts: EdgeBackOpts): void {
+  const ref = useRef(opts);
+  useEffect(() => {
+    ref.current = opts;
+  });
 
   useEffect(() => {
-    onBackRef.current = onBack;
-  }, [onBack]);
-
-  useEffect(() => {
-    if (!enabled || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
 
     let startX = 0;
     let startY = 0;
@@ -1493,14 +1542,72 @@ function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
     let tracking = false;
     let locked = false;
     let cancelled = false;
+    let active = false; // interactive reveal engaged
+    let dx = 0;
+    let width = 1;
+    let raf = 0;
 
+    const layers = () => ({
+      over: ref.current.overRef.current,
+      under: ref.current.underRef.current,
+      stage: ref.current.stageRef.current,
+    });
+    const paint = () => {
+      raf = 0;
+      const { over, under, stage } = layers();
+      const p = Math.max(0, Math.min(1, dx / width));
+      if (over) over.style.transform = `translateX(${Math.max(0, dx)}px)`;
+      if (under) under.style.transform = `translateX(${-(1 - p) * width * BACK_PARALLAX}px)`;
+      if (stage) stage.style.setProperty('--back-scrim', String((1 - p) * BACK_SCRIM));
+    };
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(paint);
+    };
+    const setTransition = (on: boolean) => {
+      const { over, under } = layers();
+      const v = on ? 'transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1)' : 'none';
+      if (over) {
+        over.style.transition = v;
+        void over.offsetWidth; // flush so the release animates from the current spot
+      }
+      if (under) under.style.transition = v;
+    };
+    const clearStyles = () => {
+      const { over, under, stage } = layers();
+      for (const el of [over, under]) {
+        if (!el) continue;
+        el.style.transition = '';
+        el.style.transform = '';
+      }
+      if (stage) stage.style.removeProperty('--back-scrim');
+    };
     const reset = () => {
       tracking = false;
       locked = false;
       cancelled = false;
     };
+    const endInteractive = (commit: boolean) => {
+      const { over, under, stage } = layers();
+      setTransition(true);
+      const p1 = commit ? 1 : 0;
+      if (over) over.style.transform = `translateX(${commit ? width : 0}px)`;
+      if (under) under.style.transform = `translateX(${-(1 - p1) * width * BACK_PARALLAX}px)`;
+      if (stage) stage.style.setProperty('--back-scrim', String((1 - p1) * BACK_SCRIM));
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        clearStyles();
+        active = false;
+        if (commit) ref.current.onBack();
+        ref.current.onSwipeEnd();
+      };
+      if (over) over.addEventListener('transitionend', finish, { once: true });
+      window.setTimeout(finish, 340);
+    };
 
     const onTouchStart = (event: TouchEvent) => {
+      if (!ref.current.enabled || active) return;
       if (event.touches.length !== 1 || isEdgeSwipeExcluded(event.target)) return;
       const touch = event.touches[0];
       if (!touch || touch.clientX > EDGE_BACK_START_PX) return;
@@ -1511,16 +1618,14 @@ function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
       locked = false;
       cancelled = false;
     };
-
     const onTouchMove = (event: TouchEvent) => {
       if (!tracking || cancelled || event.touches.length !== 1) return;
       const touch = event.touches[0];
       if (!touch) return;
-      const dx = touch.clientX - startX;
+      dx = touch.clientX - startX;
       const dy = touch.clientY - startY;
       const absX = Math.abs(dx);
       const absY = Math.abs(dy);
-
       if (dx < -8) {
         reset();
         return;
@@ -1531,11 +1636,18 @@ function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
           tracking = false;
           return;
         }
-        if (dx > EDGE_BACK_LOCK_PX && absX > absY * EDGE_BACK_DOMINANCE) locked = true;
+        if (dx > EDGE_BACK_LOCK_PX && absX > absY * EDGE_BACK_DOMINANCE) {
+          locked = true;
+          if (ref.current.interactive) {
+            active = true;
+            width = window.innerWidth || 1;
+            ref.current.onSwipeStart(); // mount the destination layer
+          }
+        }
       }
       if (locked && event.cancelable) event.preventDefault();
+      if (active) schedule();
     };
-
     const onTouchEnd = (event: TouchEvent) => {
       if (!tracking || cancelled) {
         reset();
@@ -1546,7 +1658,7 @@ function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
         reset();
         return;
       }
-      const dx = touch.clientX - startX;
+      dx = touch.clientX - startX;
       const absY = Math.abs(touch.clientY - startY);
       const elapsed = Date.now() - startTime;
       const intentional =
@@ -1554,24 +1666,31 @@ function useEdgeSwipeBack(enabled: boolean, onBack: () => void): void {
         dx >= EDGE_BACK_TRIGGER_PX &&
         absY <= EDGE_BACK_MAX_VERTICAL_PX &&
         dx > absY * EDGE_BACK_DOMINANCE;
-      const fastIntentional = dx >= 52 && elapsed < 280 && dx > absY * 2;
-
-      if (intentional || fastIntentional) onBackRef.current();
+      const fast = dx >= 52 && elapsed < 280 && dx > absY * 2;
+      if (active) {
+        endInteractive(dx >= width * 0.5 || fast || intentional);
+      } else if (intentional || fast) {
+        ref.current.onBack();
+      }
+      reset();
+    };
+    const onCancel = () => {
+      if (active) endInteractive(false);
       reset();
     };
 
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('touchcancel', reset, { passive: true });
-
+    window.addEventListener('touchcancel', onCancel, { passive: true });
     return () => {
+      if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('touchcancel', reset);
+      window.removeEventListener('touchcancel', onCancel);
     };
-  }, [enabled]);
+  }, []);
 }
 
 /**

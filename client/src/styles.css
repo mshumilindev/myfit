@@ -5171,6 +5171,56 @@ i > svg {
   min-width: 0;
 }
 
+/* ── Screen stage: the swap region between tab content and an overlay, and the
+   host for the interactive back-swipe reveal. ─────────────────────────────── */
+.screen-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.stage-layer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* During a back-swipe the destination sits beneath the overlay; both are
+   absolutely stacked so the top one can translate to reveal the one below. */
+.screen-stage[data-back-swipe] {
+  overflow: hidden;
+}
+.screen-stage[data-back-swipe] .stage-layer {
+  position: absolute;
+  inset: 0;
+}
+.screen-stage[data-back-swipe] .under-layer {
+  z-index: 1;
+}
+.screen-stage[data-back-swipe] .over-layer {
+  z-index: 2;
+  background: var(--color-bg);
+  box-shadow: -14px 0 34px rgba(0, 0, 0, 0.4);
+  will-change: transform;
+}
+/* Dim over the revealed screen, fading out as it eases forward (--back-scrim
+   is driven from 0.12 → 0 by the gesture). */
+.screen-stage[data-back-swipe] .under-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: #000;
+  opacity: var(--back-scrim, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen-stage[data-back-swipe] .over-layer {
+    box-shadow: none;
+  }
+}
+
 /* --- Desktop rail: 74px icon rail, live dot, account chip ----------------- */
 
 .rail {
