@@ -140,7 +140,7 @@ describe('F-03 Workout store (local state)', () => {
 
     expect(finished?.exercises.map((e) => e.name)).toEqual(['Squat']);
     expect(workoutSets(finished!)).toBe(2);
-    expect(workoutVolumeKg(finished!)).toBe(800);
+    expect(workoutVolumeKg(finished!)).toBe(1100);
   });
 
   it('logs cardio, warm-up and cool-down entries without polluting strength volume', () => {
@@ -542,9 +542,9 @@ describe('EQ per-hand loading (perHandFactor)', () => {
 });
 
 describe('EQ set and exercise volume', () => {
-  it('sums start weight plus drops and ignores warm-ups', () => {
+  it('sums start weight plus drops, including warm-up volume', () => {
     expect(setVolumeKg(set({ reps: 8, weight: 100 }))).toBe(800);
-    expect(setVolumeKg(set({ isWarmup: true, reps: 10, weight: 40 }))).toBe(0);
+    expect(setVolumeKg(set({ isWarmup: true, reps: 10, weight: 40 }))).toBe(400);
     const dropSet = set({
       reps: 5,
       weight: 100,
@@ -595,13 +595,13 @@ describe('EQ set and exercise volume', () => {
     ).toBe(20);
   });
 
-  it('applies the per-hand factor to a whole exercise and drops warm-up sets', () => {
+  it('applies the per-hand factor to a whole exercise and counts warm-up volume', () => {
     const curl = ex({
       name: 'Dumbbell Curl',
       equipment: ['dumbbell'],
       sets: [set({ reps: 10, weight: 20 }), set({ isWarmup: true, reps: 10, weight: 10 })],
     });
-    expect(exerciseVolumeKg(curl)).toBe(400);
+    expect(exerciseVolumeKg(curl)).toBe(600);
     const bench = ex({
       name: 'Bench Press',
       equipment: ['barbell'],

@@ -916,7 +916,7 @@ export function startWorkout(
 ): Workout | null {
   // One live mode at a time — never start a workout while an activity or a
   // sleep is running.
-  if (state.activities.some((a) => a.finishedAt === null)) return null;
+  if ((state.activities ?? []).some((a) => a.finishedAt === null)) return null;
   if (liveSleep(state.sleeps)) return null;
   applyAutoFinish();
   const now = Date.now();
@@ -1499,7 +1499,7 @@ function deleteActivityDoc(id: string): void {
 
 /** The live (unfinished) activity, if one is running or paused. */
 export function liveActivity(): Activity | null {
-  return state.activities.find((a) => a.finishedAt === null) ?? null;
+  return (state.activities ?? []).find((a) => a.finishedAt === null) ?? null;
 }
 
 /** Begin a live activity (design feature 6): a persisted, resumable timer that
@@ -1507,7 +1507,7 @@ export function liveActivity(): Activity | null {
 export function startActivity(type: string, category: ActivityCategory): Activity | null {
   // One live mode at a time — never start an activity while a workout or a
   // sleep is running.
-  if (state.workouts.some((w) => w.finishedAt === null)) return null;
+  if ((state.workouts ?? []).some((w) => w.finishedAt === null)) return null;
   if (liveSleep(state.sleeps)) return null;
   const now = Date.now();
   const activity: Activity = {
@@ -1827,6 +1827,14 @@ export function mergeServerSleepsWithLocal(
   return out.sort((a, b) => b.bedtime - a.bedtime);
 }
 
+function pushLocalSleepDiffs(server: SleepNight[], merged: SleepNight[]): void {
+  const byId = new Map(server.map((n) => [n.id, n]));
+  for (const n of merged) {
+    const remote = byId.get(n.id);
+    if (!remote || (n.updatedAt ?? 0) > (remote.updatedAt ?? 0)) writeSleepDoc(n);
+  }
+}
+
 /** Begin a live night (idempotent — returns the existing one if already asleep).
  *  `source` marks how it began ('live' by hand, 'auto' when the app starts it
  *  at your scheduled bedtime). */
@@ -2035,7 +2043,11 @@ export function backfillSleepKind(): void {
   const next = state.sleeps.map((n) => {
     if (n.kind || n.wake == null) return n;
     changed.push(n.id);
-    return { ...n, kind: classifySleepKind(n.bedtime, n.wake, n.awakeMs ?? 0), updatedAt: Date.now() };
+    return {
+      ...n,
+      kind: classifySleepKind(n.bedtime, n.wake, n.awakeMs ?? 0),
+      updatedAt: Date.now(),
+    };
   });
   if (changed.length > 0) {
     setState({ sleeps: next });
@@ -2567,10 +2579,13 @@ export function startSyncLoop(): () => void {
       collection(db, 'users', uid, 'sleeps'),
       (snap) => {
         const serverSleeps = snap.docs.map((d) => d.data() as SleepNight);
+        const sleeps = mergeServerSleepsWithLocal(serverSleeps, state.sleeps);
         state = {
           ...state,
-          sleeps: mergeServerSleepsWithLocal(serverSleeps, state.sleeps),
+          sleeps,
         };
+        backfillSleepKind();
+        pushLocalSleepDiffs(serverSleeps, state.sleeps);
         persist();
         emit();
       },

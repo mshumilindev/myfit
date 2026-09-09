@@ -63,7 +63,7 @@ async function endDueSleeps(): Promise<number> {
     const n = docSnap.data() as { bedtime: number; autoWakeAt?: number };
     if (typeof n.autoWakeAt !== 'number' || n.autoWakeAt > now) continue;
     const wake = Math.max(n.autoWakeAt, (n.bedtime ?? 0) + 60000);
-    batch.update(docSnap.ref, { wake, source: 'auto', updatedAt: now });
+    batch.update(docSnap.ref, { wake, source: 'auto', kind: 'sleep', updatedAt: now });
     ended++;
     if (++ops >= 400) {
       await batch.commit();
