@@ -65,7 +65,7 @@ import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
 import { describeDay, type DayReadout } from './data/daySuggest';
-import { awakeMsAt, SLEEP_IDLE_MS } from './sleep';
+import { awakeMsAt, SLEEP_IDLE_MS, computeUpcomingNights } from './sleep';
 import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
@@ -1625,12 +1625,90 @@ export function liveSleep(list: SleepNight[] | null | undefined): SleepNight | n
   return (list ?? []).find((n) => n.wake === null) ?? null;
 }
 
+/** Push one night to Firestore (durable fields only — the live pause bookkeeping
+ *  awakeSince/lastSeen stays on the device). */
+function writeSleepDoc(n: SleepNight): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const { awakeSince: _a, lastSeen: _l, ...durable } = n;
+  void _a;
+  void _l;
+  setDoc(doc(db, 'users', uid, 'sleeps', n.id), { ...durable, updatedAt: Date.now() }).catch(
+    onWriteError,
+  );
+}
+function deleteSleepDoc(id: string): void {
+  const uid = currentUid();
+  if (!uid) return;
+  deleteDoc(doc(db, 'users', uid, 'sleeps', id)).catch(onWriteError);
+}
+/** Sync one night by id — write it if present, else delete the remote copy. */
+function saveSleep(id: string): void {
+  const n = state.sleeps.find((x) => x.id === id);
+  if (n) writeSleepDoc(n);
+  else deleteSleepDoc(id);
+}
+function saveLiveSleep(): void {
+  const live = liveSleep(state.sleeps);
+  if (live) writeSleepDoc(live);
+}
+
+/** Keep the server auto-start queue (sleepSchedules/{uid}) in step with the
+ *  schedule + settings. The client — which knows the timezone — lays out the
+ *  upcoming bedtimes as absolute instants, so the scheduled function stays pure
+ *  UTC. Removed entirely when auto-log is off or nothing is scheduled. */
+export function syncSleepAutoQueue(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const ref = doc(db, 'sleepSchedules', uid);
+  if (!state.sleepSettings.autoLog) {
+    deleteDoc(ref).catch(onWriteError);
+    return;
+  }
+  const upcoming = computeUpcomingNights(state.sleepSchedule, state.sleeps, Date.now(), 14);
+  if (upcoming.length === 0) {
+    deleteDoc(ref).catch(onWriteError);
+    return;
+  }
+  setDoc(ref, {
+    nextStartAt: upcoming[0].startAt,
+    upcoming,
+    updatedAt: Date.now(),
+  }).catch(onWriteError);
+}
+
+/** Merge server nights with local, preserving a live night's on-device pause
+ *  state and any local edit that is newer than the server copy. */
+export function mergeServerSleepsWithLocal(
+  server: SleepNight[],
+  local: SleepNight[],
+): SleepNight[] {
+  const serverIds = new Set(server.map((n) => n.id));
+  const out: SleepNight[] = server.map((sN) => {
+    const l = local.find((n) => n.id === sN.id);
+    if (!l) return sN;
+    // Both still open: keep the device's live/pause state, adopt server bedtime
+    // /autoWakeAt. If the server has finalized it (auto-end), take the server.
+    if (sN.wake === null && l.wake === null) {
+      return { ...sN, ...l, bedtime: sN.bedtime, autoWakeAt: sN.autoWakeAt ?? l.autoWakeAt };
+    }
+    // A newer local edit wins over the server copy (last-write-wins).
+    if ((l.updatedAt ?? 0) > (sN.updatedAt ?? 0)) return l;
+    return sN;
+  });
+  for (const l of local) {
+    if (!serverIds.has(l.id)) out.push(l); // pending push / not yet on server
+  }
+  return out.sort((a, b) => b.bedtime - a.bedtime);
+}
+
 /** Begin a live night (idempotent — returns the existing one if already asleep).
  *  `source` marks how it began ('live' by hand, 'auto' when the app starts it
  *  at your scheduled bedtime). */
 export function startSleep(
   bedtime: number = Date.now(),
   source: SleepNight['source'] = 'live',
+  autoWakeAt?: number,
 ): SleepNight {
   const existing = liveSleep(state.sleeps);
   if (existing) return existing;
@@ -1640,9 +1718,12 @@ export function startSleep(
     bedtime,
     wake: null,
     source,
+    ...(autoWakeAt != null ? { autoWakeAt } : {}),
     updatedAt: Date.now(),
   };
   setState({ sleeps: [night, ...state.sleeps] });
+  writeSleepDoc(night);
+  syncSleepAutoQueue();
   return night;
 }
 
@@ -1666,6 +1747,8 @@ export function stopSleep(
     updatedAt: Date.now(),
   };
   setState({ sleeps: state.sleeps.map((n) => (n.id === live.id ? updated : n)) });
+  writeSleepDoc(updated);
+  syncSleepAutoQueue();
   return updated;
 }
 
@@ -1674,6 +1757,8 @@ export function cancelSleep(): void {
   const live = liveSleep(state.sleeps);
   if (!live) return;
   setState({ sleeps: state.sleeps.filter((n) => n.id !== live.id) });
+  deleteSleepDoc(live.id);
+  syncSleepAutoQueue();
 }
 
 /** Patch the live night in place (no updatedAt bump — pause bookkeeping is
@@ -1701,6 +1786,7 @@ export function resumeSleep(at: number = Date.now()): void {
     awakeSince: null,
     lastSeen: undefined,
   });
+  saveLiveSleep();
 }
 
 /** Activity while off the sleep screen. If the app had gone idle past the
@@ -1716,6 +1802,7 @@ export function markSleepActivity(at: number = Date.now()): void {
       awakeSince: at,
       lastSeen: at,
     });
+    saveLiveSleep();
   } else {
     patchLive({ lastSeen: at });
   }
@@ -1733,6 +1820,7 @@ export function reconcileSleep(at: number = Date.now()): void {
       awakeSince: null,
       lastSeen: undefined,
     });
+    saveLiveSleep();
   }
 }
 
@@ -1763,6 +1851,8 @@ export function logSleepNight(input: {
   setState({
     sleeps: [night, ...withoutSameDay].sort((a, b) => b.bedtime - a.bedtime),
   });
+  writeSleepDoc(night);
+  syncSleepAutoQueue();
   return night;
 }
 
@@ -1771,11 +1861,14 @@ export function updateSleepNight(id: string, patch: Partial<SleepNight>): void {
   setState({
     sleeps: state.sleeps.map((n) => (n.id === id ? { ...n, ...patch, updatedAt: Date.now() } : n)),
   });
+  saveSleep(id);
 }
 
 /** Remove a logged night. */
 export function removeSleepNight(id: string): void {
   setState({ sleeps: state.sleeps.filter((n) => n.id !== id) });
+  deleteSleepDoc(id);
+  syncSleepAutoQueue();
 }
 
 /** Set the optional morning quality rating. */
@@ -1786,11 +1879,13 @@ export function setSleepQuality(id: string, quality: SleepQuality | null): void 
 /** Replace the sleep schedule. */
 export function setSleepSchedule(schedule: SleepSchedule): void {
   setState({ sleepSchedule: schedule });
+  syncSleepAutoQueue();
 }
 
 /** Merge sleep settings. */
 export function setSleepSettings(patch: Partial<SleepSettings>): void {
   setState({ sleepSettings: { ...state.sleepSettings, ...patch } });
+  syncSleepAutoQueue();
 }
 /** Whether the Sides control makes sense for a lift — dumbbell / cable /
  *  kettlebell, single-limb machines, and one-arm/one-leg moves. Hidden for
@@ -2292,6 +2387,22 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
+      collection(db, 'users', uid, 'sleeps'),
+      (snap) => {
+        const serverSleeps = snap.docs.map((d) => d.data() as SleepNight);
+        state = {
+          ...state,
+          sleeps: mergeServerSleepsWithLocal(serverSleeps, state.sleeps),
+        };
+        persist();
+        emit();
+      },
+      // Soft: if the sleeps rule isn't deployed yet, don't block all sync.
+      () => undefined,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
       doc(db, 'users', uid, 'meta', 'body'),
       (snap) => {
         const data = snap.exists() ? (snap.data() as BodyMetrics) : EMPTY_BODY;
@@ -2354,6 +2465,9 @@ export function startSyncLoop(): () => void {
   window.addEventListener('online', tick);
   window.addEventListener('focus', tick);
   tick();
+
+  // Refresh the server auto-start queue from the current schedule on sign-in.
+  syncSleepAutoQueue();
 
   return () => stopListeners();
 }

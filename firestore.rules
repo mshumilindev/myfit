@@ -65,6 +65,11 @@ service cloud.firestore {
       match /activities/{activityId} {
         allow read, write: if isSelf(userId);
       }
+      // Sleep nights — live and finished. Own read/write; scheduled functions
+      // (auto-start / auto-end) write via the Admin SDK, bypassing these rules.
+      match /sleeps/{sleepId} {
+        allow read, write: if isSelf(userId);
+      }
       // Body metrics (weigh-ins, height, composition) AND Spotter Nutrition,
       // which stores its data in singleton meta/* docs (nutritionLog,
       // nutritionFoods, nutritionGoal, nutritionProfile) under the same account
@@ -100,6 +105,14 @@ service cloud.firestore {
         allow read: if isSelf(userId);
         allow write: if false;
       }
+    }
+
+    // --- Sleep auto-start queue --------------------------------------------
+    // One doc per user: the upcoming bedtimes (as absolute instants the client
+    // computed in its timezone) that the auto-start function consumes. Owner
+    // read/write; the function reads/updates it with the Admin SDK.
+    match /sleepSchedules/{userId} {
+      allow read, write: if isSelf(userId);
     }
 
     // --- Credentials & uniqueness indexes: functions only -------------------

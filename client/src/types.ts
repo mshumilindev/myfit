@@ -143,6 +143,10 @@ export interface SleepNight {
    *  idle-→asleep transition and app-unload: after SLEEP_IDLE_MS of no
    *  activity (or the app being closed), the gap counts as sleep from here. */
   lastSeen?: number;
+  /** Scheduled wake instant (epoch ms) for a live night the app is managing,
+   *  so a server function can auto-finalize it at the usual time even if the
+   *  app never reopens. Absent on manually-run nights with auto off. */
+  autoWakeAt?: number;
 }
 
 /** Bed/wake for one slot, in minutes from local midnight (wake is the next

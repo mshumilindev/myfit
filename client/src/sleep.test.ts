@@ -11,6 +11,9 @@ import {
   SLEEP_IDLE_MS,
   lastBedtimeAt,
   AUTO_START_WINDOW_MS,
+  resolvePlan,
+  computeUpcomingNights,
+  localDayId,
 } from './sleep';
 import type { SleepNight, SleepSchedule } from './types';
 
@@ -189,5 +192,47 @@ describe('auto sleep scheduling', () => {
 
   it('exposes a 45-minute auto-start window', () => {
     expect(AUTO_START_WINDOW_MS).toBe(45 * MIN);
+  });
+});
+
+describe('auto-start queue (computeUpcomingNights)', () => {
+  const MIN = 60000;
+  const sched = (bedMin: number, wakeMin: number): SleepSchedule => ({
+    sameEveryNight: true,
+    every: { bedMin, wakeMin },
+    byDay: {},
+  });
+
+  it('resolves the schedule plan for any weekday', () => {
+    const p = resolvePlan(sched(1380, 420), [], 3, Date.now());
+    expect(p).toEqual({ bedMin: 1380, wakeMin: 420 });
+  });
+
+  it('lays out only future bedtimes, each with wake + local date', () => {
+    // 22:00 local. Bedtime 23:00 (1380), wake 07:00 (+8h).
+    const now = new Date(2025, 8, 15, 22, 0).getTime();
+    const up = computeUpcomingNights(sched(1380, 420), [], now, 3);
+    expect(up.length).toBe(3);
+    // First bedtime is tonight's 23:00, in the future.
+    expect(up[0].startAt).toBe(new Date(2025, 8, 15, 23, 0).getTime());
+    expect(up[0].startAt).toBeGreaterThan(now);
+    // 8-hour night → wake 07:00 next morning, date = that morning.
+    expect(up[0].wakeAt - up[0].startAt).toBe(8 * 60 * MIN);
+    expect(up[0].date).toBe(localDayId(up[0].wakeAt));
+    expect(up[0].date).toBe('2025-09-16');
+    // Strictly increasing, one per day.
+    expect(up[1].startAt).toBe(up[0].startAt + 24 * 60 * MIN);
+  });
+
+  it('skips tonight once its bedtime has already passed', () => {
+    // 23:30, bedtime 23:00 already gone → first slot is tomorrow.
+    const now = new Date(2025, 8, 15, 23, 30).getTime();
+    const up = computeUpcomingNights(sched(1380, 420), [], now, 2);
+    expect(up[0].startAt).toBe(new Date(2025, 8, 16, 23, 0).getTime());
+  });
+
+  it('returns nothing when there is no plan', () => {
+    const empty: SleepSchedule = { sameEveryNight: true, every: null, byDay: {} };
+    expect(computeUpcomingNights(empty, [], Date.now(), 5)).toEqual([]);
   });
 });

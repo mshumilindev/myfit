@@ -14,6 +14,7 @@ import {
   reconcileSleep,
   noteSleepPresence,
   updateSleepNight,
+  mergeServerSleepsWithLocal,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
 import type { SetEntry, SleepNight, Workout } from './types';
@@ -179,5 +180,44 @@ describe('sleep pause flow (store)', () => {
 
   it('exposes the idle threshold as five minutes', () => {
     expect(SLEEP_IDLE_MS).toBe(5 * MIN);
+  });
+});
+
+describe('mergeServerSleepsWithLocal', () => {
+  const night = (over: Partial<SleepNight>): SleepNight => ({
+    id: 'n',
+    date: 'd',
+    bedtime: 1000,
+    wake: 2000,
+    source: 'live',
+    updatedAt: 1,
+    ...over,
+  });
+
+  it("keeps a live night's local pause state over the server copy", () => {
+    const server = [night({ id: 'x', wake: null, awakeMs: 0 })];
+    const local = [night({ id: 'x', wake: null, awakeMs: 5000, awakeSince: 1234, lastSeen: 1500 })];
+    const [m] = mergeServerSleepsWithLocal(server, local);
+    expect(m.awakeSince).toBe(1234); // local live state preserved
+    expect(m.awakeMs).toBe(5000);
+  });
+
+  it('adopts a server-finalized night over a local still-open one (auto-end)', () => {
+    const server = [night({ id: 'x', wake: 9999, source: 'auto', updatedAt: 5 })];
+    const local = [night({ id: 'x', wake: null, awakeSince: 1234 })];
+    const [m] = mergeServerSleepsWithLocal(server, local);
+    expect(m.wake).toBe(9999);
+    expect(m.awakeSince).toBeUndefined();
+  });
+
+  it('keeps a newer local edit (last-write-wins)', () => {
+    const server = [night({ id: 'x', quality: 'ok', updatedAt: 1 })];
+    const local = [night({ id: 'x', quality: 'good', updatedAt: 9 })];
+    expect(mergeServerSleepsWithLocal(server, local)[0].quality).toBe('good');
+  });
+
+  it('keeps a local night the server has not seen yet', () => {
+    const merged = mergeServerSleepsWithLocal([], [night({ id: 'pending' })]);
+    expect(merged.map((n) => n.id)).toContain('pending');
   });
 });

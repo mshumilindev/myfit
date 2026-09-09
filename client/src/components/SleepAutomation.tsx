@@ -149,8 +149,9 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
     if (sinceBedMs < 0 || sinceBedMs > AUTO_START_WINDOW_MS) return;
     const bedDayKey = sleepDayId(bedTs + 12 * 60 * MIN); // stable per-evening key
     if (s.lastAutoNight === bedDayKey) return;
+    const autoWakeAt = bedTs + planDurationMin(plan) * MIN;
     queueMicrotask(() => {
-      startSleep(bedTs, 'auto');
+      startSleep(bedTs, 'auto', autoWakeAt);
       setSleepSettings({ lastAutoNight: bedDayKey });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,6 +165,9 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
     const plan = planFor(store, new Date(live.bedtime).getDay(), tick);
     if (!plan) return;
     const wakeTs = live.bedtime + planDurationMin(plan) * MIN;
+    if (live.autoWakeAt !== wakeTs) {
+      queueMicrotask(() => updateSleepNight(live.id, { autoWakeAt: wakeTs }));
+    }
     if (tick < wakeTs) return;
     queueMicrotask(() => stopSleep(wakeTs, 'auto'));
     // eslint-disable-next-line react-hooks/exhaustive-deps

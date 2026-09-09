@@ -244,3 +244,51 @@ export function planForWeekday(
 export function planDurationMin(p: SleepDayPlan): number {
   return (p.wakeMin - p.bedMin + 1440) % 1440;
 }
+
+/** The plan for a weekday: an explicit schedule slot first, else the learned
+ *  per-weekday pattern. Pure mirror of the app's planFor, without the store. */
+export function resolvePlan(
+  schedule: SleepSchedule,
+  sleeps: SleepNight[],
+  weekday: number,
+  now: number = Date.now(),
+): SleepDayPlan | null {
+  const sched = planForWeekday(schedule, weekday);
+  if (sched) return sched;
+  const pat = weekdayPattern(sleeps, now).byDay[weekday];
+  if (pat) return { bedMin: pat.bedMin, wakeMin: pat.wakeMin };
+  return null;
+}
+
+/** The next `count` scheduled nights (bedtime + scheduled wake), as epoch ms in
+ *  the caller's local timezone. Used to seed the server auto-start queue so the
+ *  functions never need timezone math — the client, which knows the zone, lays
+ *  out the exact instants. Only future bedtimes are returned. */
+/** Local YYYY-MM-DD for an epoch ms — a night's identity is its wake day. */
+export function localDayId(ms: number): string {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate(),
+  ).padStart(2, '0')}`;
+}
+
+export function computeUpcomingNights(
+  schedule: SleepSchedule,
+  sleeps: SleepNight[],
+  now: number = Date.now(),
+  count = 14,
+): Array<{ startAt: number; wakeAt: number; date: string }> {
+  const out: Array<{ startAt: number; wakeAt: number; date: string }> = [];
+  for (let d = 0; d <= count + 1 && out.length < count; d++) {
+    const day = new Date(now);
+    day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() + d);
+    const p = resolvePlan(schedule, sleeps, day.getDay(), now);
+    if (!p) continue;
+    const startAt = day.getTime() + p.bedMin * 60000;
+    if (startAt <= now) continue;
+    const wakeAt = startAt + planDurationMin(p) * 60000;
+    out.push({ startAt, wakeAt, date: localDayId(wakeAt) });
+  }
+  return out;
+}
