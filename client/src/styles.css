@@ -29916,8 +29916,7 @@ body {
   border-radius: 16px;
   overflow: hidden;
   background:
-    radial-gradient(120% 100% at 85% 0%, rgba(159, 178, 230, 0.2), transparent 60%),
-    #0b0f1c;
+    radial-gradient(120% 100% at 85% 0%, rgba(159, 178, 230, 0.2), transparent 60%), #0b0f1c;
   box-shadow: inset 0 0 0 1px var(--s-line);
   padding: 18px;
 }
