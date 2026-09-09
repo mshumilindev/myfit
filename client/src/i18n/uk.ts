@@ -251,6 +251,12 @@ export const uk: Strings = {
   trLiveViewRecap: 'Підсумок',
   trLiveProfile: 'Профіль',
 
+  sleepKindLabel: 'Тип',
+  sleepKindSleep: 'Сон',
+  sleepKindNap: 'Дрімота',
+  sleepNapLogged: 'Дрімоту записано',
+  sleepNaps: 'Дрімоти',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

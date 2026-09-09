@@ -24,7 +24,7 @@ import {
   durationMin as activityDurationMin,
 } from '../activities';
 import type { MuscleGroup } from '../data/exercises';
-import { nightDurationMin } from '../sleep';
+import { nightDurationMin, sleepKindOf } from '../sleep';
 import { bmrKcal, overnightKcal } from '../energy';
 import { latestWeight, useStore } from '../store';
 import type { Activity, SleepNight, Workout } from '../types';
@@ -234,6 +234,7 @@ function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void 
   const { t } = useT();
   const store = useStore();
   const mins = nightDurationMin(n);
+  const nap = sleepKindOf(n) === 'nap';
   // Overnight resting burn, same BMR model Today uses — shown like the other rows.
   const kcal = overnightKcal(
     mins,
@@ -248,8 +249,8 @@ function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void 
     <>
       <span className="hist-item-body">
         <span className="hist-item-name">
-          <Icon name="moon-stars" className="hist-act-icon" />
-          {t.sleepTitle}
+          <Icon name={nap ? 'sun-horizon' : 'moon-stars'} className="hist-act-icon" />
+          {nap ? t.sleepKindNap : t.sleepTitle}
           {n.source === 'auto' && <span className="hist-sleep-auto">{t.sleepAutoBadge}</span>}
         </span>
         <div className="hist-item-stats">

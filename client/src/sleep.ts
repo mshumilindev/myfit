@@ -53,13 +53,38 @@ export function nightDurationMin(n: SleepNight, now: number = Date.now()): numbe
   return Math.max(0, Math.round((end - n.bedtime - awakeMsAt(n, now)) / 60000));
 }
 
-/** Finished nights (wake set), newest first, excluding anything in the future. */
+/** Sleep vs a daytime nap, by best practice: a nap is a short (≤3h) daytime
+ *  sleep that starts in the day (after ~05:00) and doesn't run past midnight;
+ *  everything else — long or overnight — is night sleep. */
+export function classifySleepKind(bedtime: number, wake: number, awakeMs = 0): 'sleep' | 'nap' {
+  const durMin = Math.max(0, (wake - bedtime - awakeMs) / 60000);
+  if (durMin > 180) return 'sleep';
+  const b = new Date(bedtime);
+  const w = new Date(wake);
+  const sameDay =
+    b.getFullYear() === w.getFullYear() &&
+    b.getMonth() === w.getMonth() &&
+    b.getDate() === w.getDate();
+  const startHour = b.getHours() + b.getMinutes() / 60;
+  return sameDay && startHour >= 5 ? 'nap' : 'sleep';
+}
+
+/** A night's kind — an explicit manual choice if set, else the heuristic. Live
+ *  (unfinished) nights read as sleep. */
+export function sleepKindOf(n: SleepNight): 'sleep' | 'nap' {
+  if (n.kind) return n.kind;
+  if (n.wake == null) return 'sleep';
+  return classifySleepKind(n.bedtime, n.wake, awakeMsAt(n));
+}
+
+/** Finished nights (wake set), newest first, excluding anything in the future
+ *  and any daytime nap (naps stay out of the nightly stats). */
 export function finishedNights(
   sleeps: SleepNight[] | null | undefined,
   now: number = Date.now(),
 ): SleepNight[] {
   return (sleeps ?? [])
-    .filter((n) => n.wake !== null && n.bedtime <= now)
+    .filter((n) => n.wake !== null && n.bedtime <= now && sleepKindOf(n) !== 'nap')
     .sort((a, b) => b.bedtime - a.bedtime);
 }
 

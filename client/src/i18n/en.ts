@@ -243,6 +243,12 @@ export const en = {
   trLiveViewRecap: 'View recap',
   trLiveProfile: 'Open profile',
 
+  sleepKindLabel: 'Type',
+  sleepKindSleep: 'Sleep',
+  sleepKindNap: 'Nap',
+  sleepNapLogged: 'Nap logged',
+  sleepNaps: 'Naps',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

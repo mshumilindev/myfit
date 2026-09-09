@@ -68,7 +68,13 @@ import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
 import { describeDay, type DayReadout } from './data/daySuggest';
-import { awakeMsAt, SLEEP_IDLE_MS, computeUpcomingNights } from './sleep';
+import {
+  awakeMsAt,
+  SLEEP_IDLE_MS,
+  computeUpcomingNights,
+  classifySleepKind,
+  sleepKindOf,
+} from './sleep';
 import { currentUid, getRole, getUsername } from './api';
 
 const STATE_KEY = 'spotter.state';
@@ -1867,6 +1873,7 @@ export function stopSleep(
     awakeMs: awakeMsAt(live, wake),
     awakeSince: null,
     lastSeen: undefined,
+    kind: live.kind ?? classifySleepKind(live.bedtime, wake, awakeMsAt(live, wake)),
     updatedAt: Date.now(),
   };
   setState({ sleeps: state.sleeps.map((n) => (n.id === live.id ? updated : n)) });
@@ -1970,7 +1977,14 @@ export function logSleepNight(input: {
   source: SleepNight['source'];
 }): SleepNight {
   const night: SleepNight = { id: uuid(), updatedAt: Date.now(), ...input };
-  const withoutSameDay = state.sleeps.filter((n) => !(n.wake !== null && n.date === input.date));
+  if (!night.kind && night.wake != null)
+    night.kind = classifySleepKind(night.bedtime, night.wake, night.awakeMs ?? 0);
+  const kind = night.kind ?? 'sleep';
+  // Replace only a same-day entry of the SAME kind — a day can hold both a
+  // night and a nap.
+  const withoutSameDay = state.sleeps.filter(
+    (n) => !(n.wake !== null && n.date === input.date && sleepKindOf(n) === kind),
+  );
   setState({
     sleeps: [night, ...withoutSameDay].sort((a, b) => b.bedtime - a.bedtime),
   });
@@ -1997,6 +2011,45 @@ export function removeSleepNight(id: string): void {
 /** Set the optional morning quality rating. */
 export function setSleepQuality(id: string, quality: SleepQuality | null): void {
   updateSleepNight(id, { quality });
+}
+
+/** Manually mark a logged entry as a night's sleep or a daytime nap. An explicit
+ *  choice wins over the auto-classifier. */
+export function setSleepKind(id: string, kind: 'sleep' | 'nap'): void {
+  updateSleepNight(id, { kind });
+}
+
+/** One-time backfill: stamp `kind` on every finished night that predates the
+ *  sleep/nap split, so the stored data reflects the classification (naps drop
+ *  out of the nightly stats). Idempotent, guarded by a local flag; runs once
+ *  sleeps have loaded. */
+const SLEEP_KIND_KEY = 'spotter.sleepKind.v1';
+export function backfillSleepKind(): void {
+  try {
+    if (localStorage.getItem(SLEEP_KIND_KEY)) return;
+  } catch {
+    /* private mode — attempt anyway */
+  }
+  if (state.sleeps.length === 0) return;
+  const changed: string[] = [];
+  const next = state.sleeps.map((n) => {
+    if (n.kind || n.wake == null) return n;
+    changed.push(n.id);
+    return { ...n, kind: classifySleepKind(n.bedtime, n.wake, n.awakeMs ?? 0), updatedAt: Date.now() };
+  });
+  if (changed.length > 0) {
+    setState({ sleeps: next });
+    const byId = new Map(next.map((n) => [n.id, n]));
+    for (const id of changed) {
+      const n = byId.get(id);
+      if (n) writeSleepDoc(n);
+    }
+  }
+  try {
+    localStorage.setItem(SLEEP_KIND_KEY, '1');
+  } catch {
+    /* ignore */
+  }
 }
 
 /** Replace the sleep schedule. */
@@ -2462,6 +2515,7 @@ export function startSyncLoop(): () => void {
         markSynced(snap.metadata.fromCache, snap.metadata.hasPendingWrites);
         applyAutoFinish();
         clearStoredRest();
+        backfillSleepKind();
       },
       onWriteError,
     ),

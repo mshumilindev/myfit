@@ -31,6 +31,7 @@ import {
   sleepStats,
   weekdayPattern,
   planDurationMin,
+  sleepKindOf,
 } from '../sleep';
 import { getUsername } from '../api';
 import { bmrKcal } from '../energy';
@@ -178,23 +179,28 @@ export function SleepView({
     if (night) {
       const mins = nightDurationMin(night, now);
       const pct = Math.min(100, Math.round((mins / goalMin) * 100));
+      const isNap = sleepKindOf(night) === 'nap';
       const name = getUsername();
       const bmr = bmrKcal(store.bodyMetrics, latestWeight(store.bodyMetrics)?.weight, now);
       return (
         <div className="screen sleep-screen">
           <div className="sleep-logged-badge">
             <Icon name="check-circle" weight="fill" />
-            {t.sleepLogged}
+            {isNap ? t.sleepNapLogged : t.sleepLogged}
           </div>
-          <h1 className="sleep-h1">{name ? t.sleepGoodMorningName(name) : t.sleepWakeTitle}</h1>
+          <h1 className="sleep-h1">
+            {isNap ? t.sleepKindNap : name ? t.sleepGoodMorningName(name) : t.sleepWakeTitle}
+          </h1>
           <div className="sleep-bignum num">{dur(mins)}</div>
           <div className="sleep-range">
             {hhmm(night.bedtime)} → {night.wake ? hhmm(night.wake) : ''}
           </div>
-          <div className="sleep-goalrow">
-            <span>{t.sleepYourGoal(dur(goalMin))}</span>
-            <span className="sleep-rhythm">{t.sleepOnRhythm(pct)}</span>
-          </div>
+          {!isNap && (
+            <div className="sleep-goalrow">
+              <span>{t.sleepYourGoal(dur(goalMin))}</span>
+              <span className="sleep-rhythm">{t.sleepOnRhythm(pct)}</span>
+            </div>
+          )}
           <div className="sleep-quality">
             <div className="sleep-q-head">
               {t.sleepHowDidYouSleep} <span className="sleep-q-opt">{t.sleepOptional}</span>
@@ -635,6 +641,7 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
   const [bed, setBed] = useState(night ? hh(night.bedtime) : '23:20');
   const [woke, setWoke] = useState(night && night.wake ? hh(night.wake) : '06:40');
   const [quality, setQuality] = useState<SleepQuality | null>(night?.quality ?? null);
+  const [kind, setKind] = useState<'sleep' | 'nap'>(night ? sleepKindOf(night) : 'sleep');
   const [confirmDel, setConfirmDel] = useState(false);
 
   if (!night) {
@@ -664,7 +671,7 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
   });
 
   const save = () => {
-    updateSleepNight(night.id, { ...built, date: sleepDayId(built.wake), quality });
+    updateSleepNight(night.id, { ...built, date: sleepDayId(built.wake), quality, kind });
     onClose();
   };
 
@@ -672,8 +679,26 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
     <div className="screen sleep-hub sleep-backfill">
       <SleepTopbar title={t.sleepEditNight} onBack={onClose} />
       <div className="sleep-nightof">
-        <Icon name="moon" weight="fill" />
+        <Icon name={kind === 'nap' ? 'sun-horizon' : 'moon'} weight="fill" />
         {t.sleepNightOf(nightOf)}
+      </div>
+
+      <div className="sleep-quality">
+        <div className="sleep-q-head">{t.sleepKindLabel}</div>
+        <div className="sleep-q-row">
+          <button
+            className={`sleep-q-chip${kind === 'sleep' ? ' on' : ''}`}
+            onClick={() => setKind('sleep')}
+          >
+            {t.sleepKindSleep}
+          </button>
+          <button
+            className={`sleep-q-chip${kind === 'nap' ? ' on' : ''}`}
+            onClick={() => setKind('nap')}
+          >
+            {t.sleepKindNap}
+          </button>
+        </div>
       </div>
 
       <div className="slh-timerow">

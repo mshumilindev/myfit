@@ -239,6 +239,12 @@ export const et: Strings = {
   trLiveViewRecap: 'Kokkuvõte',
   trLiveProfile: 'Profiil',
 
+  sleepKindLabel: 'Tüüp',
+  sleepKindSleep: 'Uni',
+  sleepKindNap: 'Uinak',
+  sleepNapLogged: 'Uinak salvestatud',
+  sleepNaps: 'Uinakud',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

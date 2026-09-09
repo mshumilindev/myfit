@@ -252,6 +252,12 @@ export const pl: Strings = {
   trLiveViewRecap: 'Podsumowanie',
   trLiveProfile: 'Profil',
 
+  sleepKindLabel: 'Typ',
+  sleepKindSleep: 'Sen',
+  sleepKindNap: 'Drzemka',
+  sleepNapLogged: 'Zapisano drzemkę',
+  sleepNaps: 'Drzemki',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

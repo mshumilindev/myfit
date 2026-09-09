@@ -135,6 +135,11 @@ export interface SleepNight {
   wake: number | null;
   quality?: SleepQuality | null;
   source: SleepSource;
+  /** Sleep vs a daytime nap. Absent on older data → derived by
+   *  classifySleepKind (a nap is a short ≤3h daytime sleep and stays out of the
+   *  nightly averages/streak/graph). A manual choice in the editor sets this
+   *  explicitly and wins over the heuristic. */
+  kind?: 'sleep' | 'nap';
   updatedAt?: number;
   /** Live nights only: total awake (paused) ms already banked from closed
    *  intervals — time spent using the app off the sleep screen, which does

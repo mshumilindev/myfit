@@ -253,6 +253,12 @@ export const lt: Strings = {
   trLiveViewRecap: 'Santrauka',
   trLiveProfile: 'Profilis',
 
+  sleepKindLabel: 'Tipas',
+  sleepKindSleep: 'Miegas',
+  sleepKindNap: 'Snūstelėjimas',
+  sleepNapLogged: 'Snūstelėjimas įrašytas',
+  sleepNaps: 'Snūsteliai',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,
