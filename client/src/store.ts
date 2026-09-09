@@ -93,7 +93,27 @@ const MASTERY_KEY = 'spotter.mastery';
 const SLEEP_KEY = 'spotter.sleeps';
 const SLEEP_SCHED_KEY = 'spotter.sleep.schedule';
 const SLEEP_SET_KEY = 'spotter.sleep.settings';
-const pendingSleepDeletes = new Set<string>();
+const SLEEP_TOMB_KEY = 'spotter.sleepTombstones.v1';
+// Ids of sleep nights the user discarded, kept until the server confirms the
+// delete. Durable across reloads so stale snapshots cannot resurrect a night
+// while the delete is still in flight.
+const pendingSleepDeletes = new Set<string>(
+  (() => {
+    try {
+      const raw = localStorage.getItem(SLEEP_TOMB_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  })(),
+);
+function persistSleepTombstones(): void {
+  try {
+    localStorage.setItem(SLEEP_TOMB_KEY, JSON.stringify([...pendingSleepDeletes]));
+  } catch {
+    /* private mode: Firestore is the source of truth anyway */
+  }
+}
 
 const EMPTY_BODY: BodyMetrics = { weights: [] };
 
@@ -1766,12 +1786,13 @@ function writeSleepDoc(n: SleepNight): void {
 }
 function deleteSleepDoc(id: string): void {
   pendingSleepDeletes.add(id);
+  persistSleepTombstones();
   const uid = currentUid();
   if (!uid) return;
-  deleteDoc(doc(db, 'users', uid, 'sleeps', id)).catch((err) => {
-    pendingSleepDeletes.delete(id);
-    onWriteError(err);
-  });
+  // Keep the tombstone even if the delete fails: the snapshot handler retries
+  // it and only forgets it once the server confirms the night is gone. Clearing
+  // it here let a failed/late delete resurrect the discarded night.
+  deleteDoc(doc(db, 'users', uid, 'sleeps', id)).catch(onWriteError);
 }
 /** Sync one night by id — write it if present, else delete the remote copy. */
 function saveSleep(id: string): void {
@@ -1841,11 +1862,23 @@ function pushLocalSleepDiffs(server: SleepNight[], merged: SleepNight[]): void {
   }
 }
 
-function applySleepSnapshot(serverSleeps: SleepNight[]): void {
+function applySleepSnapshot(serverSleeps: SleepNight[], fromCache = false): void {
   const serverIds = new Set(serverSleeps.map((n) => n.id));
+  let tombChanged = false;
   for (const id of Array.from(pendingSleepDeletes)) {
-    if (!serverIds.has(id)) pendingSleepDeletes.delete(id);
+    if (serverIds.has(id)) {
+      // The night is still on the server: the delete did not take (lost race or
+      // failure). Re-issue it; keep the tombstone so it stays hidden meanwhile.
+      const uid = currentUid();
+      if (uid) deleteDoc(doc(db, 'users', uid, 'sleeps', id)).catch(onWriteError);
+    } else if (!fromCache) {
+      // Only a server-authoritative snapshot may retire a tombstone. A local
+      // (cache) snapshot that merely lacks the id could still be racing a write.
+      pendingSleepDeletes.delete(id);
+      tombChanged = true;
+    }
   }
+  if (tombChanged) persistSleepTombstones();
   const visibleServerSleeps = serverSleeps.filter((n) => !pendingSleepDeletes.has(n.id));
   const visibleLocalSleeps = state.sleeps.filter((n) => !pendingSleepDeletes.has(n.id));
   const sleeps = mergeServerSleepsWithLocal(visibleServerSleeps, visibleLocalSleeps);
@@ -2617,7 +2650,7 @@ export function startSyncLoop(): () => void {
       collection(db, 'users', uid, 'sleeps'),
       (snap) => {
         const serverSleeps = snap.docs.map((d) => d.data() as SleepNight);
-        applySleepSnapshot(serverSleeps);
+        applySleepSnapshot(serverSleeps, snap.metadata.fromCache);
       },
       // Soft: if the sleeps rule isn't deployed yet, don't block all sync.
       () => undefined,
@@ -3226,6 +3259,7 @@ export function resetLocalData(): void {
     lastSyncAt: null,
   };
   pendingSleepDeletes.clear();
+  persistSleepTombstones();
   emit();
 }
 
@@ -3235,6 +3269,7 @@ export function __getStateForTests(): StoreState {
 export function __replaceStateForTests(next: StoreState): void {
   state = structuredClone(next);
   pendingSleepDeletes.clear();
+  persistSleepTombstones();
   persist();
   emit();
 }
