@@ -326,6 +326,7 @@ export function GymDetailView({
           onClick={() => {
             const g = ensureSaved();
             const w = startWorkout(g.id);
+            if (!w) return;
             shell.openOverlay({ screen: 'session', workoutId: w.id });
           }}
         >

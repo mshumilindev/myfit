@@ -235,6 +235,8 @@ export const pl: Strings = {
 
   sleepWokeAtLabel: 'Pobudka o',
 
+  sleepBusyNote: 'Najpierw zakończ to, co trwa — jedno naraz.',
+
   sleepTitle: 'Sen',
   sleepActivityHint: 'Cardio i regeneracja też się liczą — Spotter widzi całe obciążenie.',
   sleepLastNight: (dur: string, range: string) => `Ostatnia noc ${dur} · ${range}`,

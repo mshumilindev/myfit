@@ -136,6 +136,7 @@ export function EquipmentDetailView({
     if (!item || exercises.length === 0) return;
     const open = store.workouts.find((w) => w.finishedAt === null);
     const w = open ?? startWorkout(null);
+    if (!w) return;
     addExercise(w.id, exercises[0].names[0], 'strength');
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }

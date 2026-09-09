@@ -151,6 +151,7 @@ export function ExerciseDetailView({
   function addToSession() {
     const open = store.workouts.find((w) => w.finishedAt === null);
     const w = open ?? startWorkout(null);
+    if (!w) return;
     addExercise(w.id, canonical, 'strength');
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }

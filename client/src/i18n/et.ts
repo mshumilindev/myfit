@@ -222,6 +222,8 @@ export const et: Strings = {
 
   sleepWokeAtLabel: 'Ärkasid kell',
 
+  sleepBusyNote: 'Lõpeta kõigepealt käimasolev — üks korraga.',
+
   sleepTitle: 'Uni',
   sleepActivityHint: 'Kardio ja taastumine loevad ka — nii näeb Spotter kogu koormust.',
   sleepLastNight: (dur: string, range: string) => `Eelmine öö ${dur} · ${range}`,

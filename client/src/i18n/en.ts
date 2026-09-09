@@ -226,6 +226,8 @@ export const en = {
 
   sleepWokeAtLabel: 'Woke at',
 
+  sleepBusyNote: 'Finish what’s running first — one at a time.',
+
   sleepTitle: 'Sleep',
   sleepActivityHint: 'Cardio & recovery count too — so Spotter sees your whole load.',
   sleepLastNight: (dur: string, range: string) => `Last night ${dur} · ${range}`,

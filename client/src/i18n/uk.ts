@@ -234,6 +234,8 @@ export const uk: Strings = {
 
   sleepWokeAtLabel: 'Прокинувся о',
 
+  sleepBusyNote: 'Спершу заверши поточне — одне за раз.',
+
   sleepTitle: 'Сон',
   sleepActivityHint: 'Кардіо та відновлення теж рахуються — щоб Спотер бачив усе навантаження.',
   sleepLastNight: (dur: string, range: string) => `Минула ніч ${dur} · ${range}`,

@@ -477,6 +477,7 @@ export function OnboardingView({
               onClick={() => {
                 localStorage.removeItem(resumeKey(token));
                 const w = startWorkout(gym?.gymId ?? null);
+                if (!w) return;
                 onDone(w.id);
               }}
             >

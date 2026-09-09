@@ -157,6 +157,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
       return;
     }
     const workout = startWorkout(selectedGym.id);
+    if (!workout) return;
     shell.openOverlay({ screen: 'session', workoutId: workout.id });
   };
 

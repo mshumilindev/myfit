@@ -1153,6 +1153,7 @@ export function ProgramsView({
                           className="btn btn-primary pd-start"
                           onClick={() => {
                             const w = startWorkout(null);
+                            if (!w) return;
                             for (const item of items) {
                               addExercise(w.id, item.name, item.kind, {
                                 plannedSets: item.kind === 'strength' ? item.sets : 1,

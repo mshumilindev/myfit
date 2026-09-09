@@ -803,7 +803,11 @@ export function getOpenWorkout(): Workout | undefined {
 export function startWorkout(
   gymId: string | null = null,
   meta: Pick<Workout, 'dayName' | 'targetMuscles'> = {},
-): Workout {
+): Workout | null {
+  // One live mode at a time — never start a workout while an activity or a
+  // sleep is running.
+  if (state.activities.some((a) => a.finishedAt === null)) return null;
+  if (liveSleep(state.sleeps)) return null;
   applyAutoFinish();
   const now = Date.now();
   const closed: string[] = [];
@@ -1388,7 +1392,11 @@ export function liveActivity(): Activity | null {
 
 /** Begin a live activity (design feature 6): a persisted, resumable timer that
  *  survives closing the page — mirrors how an open workout works. */
-export function startActivity(type: string, category: ActivityCategory): Activity {
+export function startActivity(type: string, category: ActivityCategory): Activity | null {
+  // One live mode at a time — never start an activity while a workout or a
+  // sleep is running.
+  if (state.workouts.some((w) => w.finishedAt === null)) return null;
+  if (liveSleep(state.sleeps)) return null;
   const now = Date.now();
   const activity: Activity = {
     id: uuid(),
@@ -1714,9 +1722,13 @@ export function startSleep(
   bedtime: number = Date.now(),
   source: SleepNight['source'] = 'live',
   autoWakeAt?: number,
-): SleepNight {
+): SleepNight | null {
   const existing = liveSleep(state.sleeps);
   if (existing) return existing;
+  // One live mode at a time — never start a sleep while a workout or an
+  // activity is running.
+  if (state.workouts.some((w) => w.finishedAt === null)) return null;
+  if (state.activities.some((a) => a.finishedAt === null)) return null;
   const night: SleepNight = {
     id: uuid(),
     date: sleepDayId(bedtime),
@@ -2923,6 +2935,7 @@ export function repeatWorkout(sourceId: string): Workout | undefined {
   const src = state.workouts.find((x) => x.id === sourceId);
   if (!src) return undefined;
   const w = startWorkout();
+  if (!w) return undefined;
   for (const e of [...src.exercises].sort((a, b) => a.position - b.position)) {
     addExercise(w.id, e.name, exerciseKind(e));
   }

@@ -66,6 +66,8 @@ export function SleepPanel(props: {
   /** Minutes until the usual bedtime (schedule/pattern); drives the wind-down
    *  cue + emphasis on the Today placement. Omit in the activity drawer. */
   toBedMin?: number | null;
+  /** A live session or activity is running — starting a sleep is blocked. */
+  blocked?: boolean;
 }) {
   const { t } = useT();
   const store = useStore();
@@ -76,7 +78,7 @@ export function SleepPanel(props: {
   const past = !live && toBed != null && toBed <= 0 && toBed >= -180;
   const emph = soon || past;
   const start = () => {
-    startSleep();
+    if (!startSleep()) return; // blocked by a live session/activity
     props.shell.openOverlay({ screen: 'sleep' });
     props.onClose();
   };
@@ -124,6 +126,14 @@ export function SleepPanel(props: {
             <button className="btn-out-moon act-sleep-start" onClick={resume}>
               {t.sleepAsleepSince(hhmm(live.bedtime))}
             </button>
+          ) : props.blocked ? (
+            <>
+              <button className="btn-moon act-sleep-start" disabled>
+                <Icon name="moon-stars" />
+                {t.sleepStart}
+              </button>
+              <div className="act-sleep-blocked">{t.sleepBusyNote}</div>
+            </>
           ) : (
             <button className="btn-moon act-sleep-start" onClick={start}>
               <Icon name="moon-stars" />

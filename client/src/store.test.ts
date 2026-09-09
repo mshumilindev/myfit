@@ -19,6 +19,10 @@ import {
   autoWarmupSets,
   WARMUP_FRAC,
   setTypeOf,
+  startWorkout,
+  startActivity,
+  finishWorkout,
+  finishActivity,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
 import type { SetEntry, SleepNight, Workout } from './types';
@@ -284,5 +288,52 @@ describe('autoWarmupSets', () => {
 
   it('uses an 85% reference by default', () => {
     expect(WARMUP_FRAC).toBe(0.85);
+  });
+});
+
+describe('one live mode at a time (mutual exclusion)', () => {
+  const liveWorkoutId = () => {
+    const raw = localStorage.getItem('spotter.state');
+    const list = raw ? (JSON.parse(raw) as Array<{ id: string; finishedAt: number | null }>) : [];
+    return list.find((w) => w.finishedAt === null)?.id;
+  };
+  const liveActivityId = () => {
+    const raw = localStorage.getItem('spotter.activities');
+    const list = raw ? (JSON.parse(raw) as Array<{ id: string; finishedAt: number | null }>) : [];
+    return list.find((a) => a.finishedAt === null)?.id;
+  };
+  const cleanup = () => {
+    cancelSleep();
+    const w = liveWorkoutId();
+    if (w) finishWorkout(w);
+    const a = liveActivityId();
+    if (a) finishActivity(a);
+  };
+
+  it('a live workout blocks starting an activity or a sleep', () => {
+    cleanup();
+    const w = startWorkout(null);
+    expect(w).not.toBeNull();
+    expect(startActivity('run', 'conditioning')).toBeNull();
+    expect(startSleep()).toBeNull();
+    cleanup();
+  });
+
+  it('a live activity blocks starting a workout or a sleep', () => {
+    cleanup();
+    const a = startActivity('run', 'conditioning');
+    expect(a).not.toBeNull();
+    expect(startWorkout(null)).toBeNull();
+    expect(startSleep()).toBeNull();
+    cleanup();
+  });
+
+  it('a live sleep blocks starting a workout or an activity', () => {
+    cleanup();
+    const n = startSleep();
+    expect(n).not.toBeNull();
+    expect(startWorkout(null)).toBeNull();
+    expect(startActivity('run', 'conditioning')).toBeNull();
+    cleanup();
   });
 });

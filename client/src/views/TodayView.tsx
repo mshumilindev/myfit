@@ -21,6 +21,7 @@ import {
   endRestPeriod,
   startRestPeriod,
   latestWeight,
+  liveSleep,
   logVisitAsWorkout,
   resolveMuscles,
   startWorkout,
@@ -185,45 +186,43 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // the other can't be started (design feature 6).
   const open = store.workouts.find((w) => w.finishedAt === null);
   const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
-  // Feature 6 mutual exclusion: while a session OR an activity is live, neither
-  // a new session nor a new activity can be started. Start controls go disabled;
-  // the live one is resumed via its own hero/banner.
-  const busy = !!open || !!liveAct;
-
-  function beginSession(gymId: string | null) {
+  const sleepLive = liveSleep(store.sleeps);
+  // Mutual exclusion across all three live modes — a session, an activity and a
+  // sleep never overlap. While any one runs, no other can be started: start
+  // controls go disabled and a tap resumes the live one via resumeLive().
+  const busy = !!open || !!liveAct || !!sleepLive;
+  // True for starting a *sleep* specifically (a session/activity blocks it).
+  const sleepBlocked = !!open || !!liveAct;
+  function resumeLive(): boolean {
     if (open) {
       shell.openOverlay({ screen: 'session', workoutId: open.id });
-      return;
+      return true;
     }
     if (liveAct) {
       shell.openOverlay({ screen: 'activity' });
-      return;
+      return true;
     }
+    if (sleepLive) {
+      shell.openOverlay({ screen: 'sleep' });
+      return true;
+    }
+    return false;
+  }
+
+  function beginSession(gymId: string | null) {
+    if (resumeLive()) return;
     setStartPicker(false);
     const w = startWorkout(gymId);
+    if (!w) return;
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
   function startSession() {
-    if (open) {
-      shell.openOverlay({ screen: 'session', workoutId: open.id });
-      return;
-    }
-    if (liveAct) {
-      shell.openOverlay({ screen: 'activity' });
-      return;
-    }
+    if (resumeLive()) return;
     if (store.gyms.length > 0) setStartPicker(true);
     else beginSession(null);
   }
   function openActivitySheet() {
-    if (open) {
-      shell.openOverlay({ screen: 'session', workoutId: open.id });
-      return;
-    }
-    if (liveAct) {
-      shell.openOverlay({ screen: 'activity' });
-      return;
-    }
+    if (resumeLive()) return;
     setActivityOpen(true);
   }
 
@@ -442,6 +441,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   }, [assignment]);
 
   function startProgramDay(day: number) {
+    if (resumeLive()) return;
     if (!assignment) return;
     const items = assignment.program.items
       .filter((item) => item.day === day)
@@ -449,6 +449,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     const dayName = assignment.program.dayNames?.[String(day)] || t.progDay(day);
     const targetMuscles = assignment.program.targetMuscles?.[String(day)] ?? [];
     const w = startWorkout(null, { dayName, targetMuscles });
+    if (!w) return;
     if (items.length > 0) {
       for (const item of items) {
         addExercise(w.id, item.name, item.kind, {
@@ -1411,7 +1412,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         )}
 
         <div className="today-sleep">
-          <SleepPanel shell={shell} onClose={() => {}} toBedMin={sleepToBed} />
+          <SleepPanel
+            shell={shell}
+            onClose={() => {}}
+            toBedMin={sleepToBed}
+            blocked={sleepBlocked}
+          />
         </div>
       </div>
 

@@ -32,6 +32,7 @@ export function FixSheet({ muscle, onClose }: { muscle: MuscleGroup; onClose: ()
       addExercise(open.id, c.name, 'strength', plan);
     } else {
       const w = startWorkout(gym?.id ?? null);
+      if (!w) return;
       addExercise(w.id, c.name, 'strength', plan);
     }
     setAddedName(c.name);

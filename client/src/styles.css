@@ -29345,6 +29345,14 @@ body {
 .act-sleep-start {
   align-self: flex-start;
 }
+.act-sleep-panel .act-sleep-start:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.act-sleep-blocked {
+  font-size: 12px;
+  color: var(--s-faint);
+}
 /* Wind-down cue + emphasis when this panel sits at the foot of Today and
    the usual bedtime is near (or just past). */
 .act-sleep-cue {

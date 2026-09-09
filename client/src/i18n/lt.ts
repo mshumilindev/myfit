@@ -236,6 +236,8 @@ export const lt: Strings = {
 
   sleepWokeAtLabel: 'Pabudai',
 
+  sleepBusyNote: 'Pirmiau baik tai, kas vyksta — po vieną.',
+
   sleepTitle: 'Miegas',
   sleepActivityHint: 'Kardio ir atsigavimas irgi skaičiuojami — kad Spotter matytų visą krūvį.',
   sleepLastNight: (dur: string, range: string) => `Praėjusi naktis ${dur} · ${range}`,
