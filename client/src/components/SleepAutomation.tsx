@@ -111,6 +111,7 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
     if (!s.autoLog || live) return;
     const today0 = startOfDay(tick);
     const existing = new Set(store.sleeps.filter((n) => n.wake !== null).map((n) => n.date));
+    const skipped = new Set(s.skippedAutoSleepDates ?? []);
     const toAdd: Array<{
       date: string;
       bedtime: number;
@@ -122,6 +123,7 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
       const wakeDay0 = today0 - back * DAY;
       const id = sleepDayId(wakeDay0);
       if (existing.has(id)) continue;
+      if (skipped.has(id)) continue;
       const p = planFor(store, new Date(wakeDay0).getDay(), tick);
       if (!p) continue;
       const wake = wakeDay0 + p.wakeMin * MIN;

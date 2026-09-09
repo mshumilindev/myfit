@@ -9,6 +9,7 @@ import {
   applyAutoFinish,
   backfillWorkout,
   clearSets,
+  cancelSleep,
   deleteGym,
   deleteExercise,
   deleteSet,
@@ -34,6 +35,7 @@ import {
   restoreExercise,
   restoreSet,
   startActivity,
+  startSleep,
   startWorkout,
   toggleFavorite,
   topSet,
@@ -303,6 +305,26 @@ describe('F-05 Gyms and reminders store', () => {
 
     expect(merged.map((a) => a.id)).toContain(server.id);
     expect(merged.map((a) => a.id)).toContain(live.id);
+  });
+
+  it('marks an auto sleep date as skipped when discarded', () => {
+    const bedtime = new Date(2026, 8, 9, 23, 0).getTime();
+    const wakeAt = bedtime + 8 * 3600_000;
+    __replaceStateForTests(
+      state({
+        sleeps: [],
+        sleepSettings: { autoDim: false, autoLog: true, goalMin: 480, lastDimDay: null },
+      }),
+    );
+
+    const n = startSleep(bedtime, 'auto', wakeAt);
+    expect(n).not.toBeNull();
+    cancelSleep();
+
+    const next = __getStateForTests();
+    expect(next.sleeps).toEqual([]);
+    expect(next.sleepSettings.skippedAutoSleepDates).toContain('2026-09-10');
+    expect(next.sleepSettings.lastAutoNight).toBe('2026-09-10');
   });
 
   it('updates and deletes gyms', () => {

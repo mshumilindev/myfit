@@ -193,6 +193,7 @@ let state: StoreState = {
     autoLog: false,
     goalMin: 480,
     lastDimDay: null,
+    skippedAutoSleepDates: [],
     patternOffer: 'unseen',
   }),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
@@ -1847,8 +1848,8 @@ export function startSleep(
   if (existing) return existing;
   // One live mode at a time — never start a sleep while a workout or an
   // activity is running.
-  if (state.workouts.some((w) => w.finishedAt === null)) return null;
-  if (state.activities.some((a) => a.finishedAt === null)) return null;
+  if ((state.workouts ?? []).some((w) => w.finishedAt === null)) return null;
+  if ((state.activities ?? []).some((a) => a.finishedAt === null)) return null;
   const night: SleepNight = {
     id: uuid(),
     date: sleepDayId(bedtime),
@@ -1894,7 +1895,21 @@ export function stopSleep(
 export function cancelSleep(): void {
   const live = liveSleep(state.sleeps);
   if (!live) return;
+  const skipDate = live.autoWakeAt ? sleepDayId(live.autoWakeAt) : live.date;
+  const lastAutoNight = sleepDayId(live.bedtime + 12 * 60 * 60000);
+  const skipped = Array.from(
+    new Set([...(state.sleepSettings.skippedAutoSleepDates ?? []), skipDate]),
+  ).slice(-14);
   setState({ sleeps: state.sleeps.filter((n) => n.id !== live.id) });
+  if (state.sleepSettings.autoLog || live.source === 'auto' || live.autoWakeAt != null) {
+    setState({
+      sleepSettings: {
+        ...state.sleepSettings,
+        lastAutoNight,
+        skippedAutoSleepDates: skipped,
+      },
+    });
+  }
   deleteSleepDoc(live.id);
   syncSleepAutoQueue();
 }
@@ -3185,6 +3200,7 @@ export function resetLocalData(): void {
       autoLog: false,
       goalMin: 480,
       lastDimDay: null,
+      skippedAutoSleepDates: [],
       patternOffer: 'unseen',
     },
     goals: EMPTY_GOALS,

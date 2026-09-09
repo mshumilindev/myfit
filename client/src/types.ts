@@ -188,6 +188,9 @@ export interface SleepSettings {
   /** Bedtime-day key the app last auto-started a night for (once per night,
    *  so discarding an auto-started night doesn't re-trigger the same evening). */
   lastAutoNight?: string | null;
+  /** Wake-day keys the user explicitly discarded from auto sleep, so auto-fill
+   *  does not recreate them as soon as the live night disappears. */
+  skippedAutoSleepDates?: string[];
   /** State of the "offer to auto-log" prompt. */
   patternOffer?: 'unseen' | 'declined' | 'accepted';
 }
