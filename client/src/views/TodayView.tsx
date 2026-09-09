@@ -14,6 +14,7 @@ import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
   activeRestPeriod,
+  illnessReturn,
   addExercise,
   backfillWorkout,
   consistencyStreak,
@@ -170,6 +171,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
   const [progSheetOpen, setProgSheetOpen] = useState(false);
   const [restSheetOpen, setRestSheetOpen] = useState(false);
+  const [illDismissed, setIllDismissed] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [confirmEndRest, setConfirmEndRest] = useState<string | null>(null);
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
@@ -254,6 +256,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     [store.workouts, pbNow],
   );
   const activeRest = activeRestPeriod(pbNow);
+  const illReturn = activeRest ? null : illnessReturn(pbNow);
   const playName = (pl: Play) =>
     pl.name ?? (pl.readout ? dayReadoutLabel(pl.readout, t) : t.playUntitled);
   const programReadiness = useMemo(() => programSuggestionReadiness(finished), [finished]);
@@ -1145,56 +1148,110 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <Icon name="clock-countdown" weight="bold" />
               </span>
               <div className="prog-banner-main">
-                <div className="tr-top">
-                  <span className="prog-banner-kicker">
-                    {activeRest.mode === 'active' ? t.restModeActive : t.restModeOff}
-                  </span>
-                  <span className="tr-day">
-                    {t.restDayOf(
-                      Math.min(
-                        dayKey(pbNow) - activeRest.startDay + 1,
-                        activeRest.endDay - activeRest.startDay + 1,
-                      ),
-                      activeRest.endDay - activeRest.startDay + 1,
-                    )}
-                  </span>
-                </div>
-                <div className="prog-banner-title">
-                  {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
-                </div>
-                <div className="tr-bar">
-                  <span
-                    className="tr-fill"
-                    style={{
-                      width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
-                    }}
-                  />
-                </div>
-                <div className="prog-banner-body">
-                  {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
-                </div>
-                <div className="prog-banner-acts">
-                  {activeRest.mode === 'active' ? (
-                    <>
-                      <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
-                        <Icon name="play" weight="bold" />
-                        {t.restStartLight}
-                      </button>
+                {activeRest.mode === 'illness' ? (
+                  <>
+                    <span className="prog-banner-kicker">{t.restCardIllnessKicker}</span>
+                    <div className="prog-banner-title">
+                      {t.restCardIllnessTitle(dayKey(pbNow) - activeRest.startDay + 1)}
+                    </div>
+                    <div className="prog-banner-body">{t.restCardIllnessNote}</div>
+                    <div className="tr-pills">
+                      <span className="tr-pill">
+                        <Icon name="check-circle" weight="bold" />
+                        {t.illnessStreakPill}
+                      </span>
+                      <span className="tr-pill">
+                        <Icon name="pause" weight="bold" />
+                        {t.illnessProgramPill}
+                      </span>
+                    </div>
+                    <div className="prog-banner-acts">
                       <button
-                        className="prog-banner-skip"
+                        className="prog-banner-cta"
                         onClick={() => setConfirmEndRest(activeRest.id)}
                       >
-                        {t.restEndNow}
+                        <Icon name="check" weight="bold" />
+                        {t.illnessRecovered}
                       </button>
-                    </>
-                  ) : (
-                    <button
-                      className="prog-banner-cta"
-                      onClick={() => setConfirmEndRest(activeRest.id)}
-                    >
-                      {t.restEndNow}
-                    </button>
-                  )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="tr-top">
+                      <span className="prog-banner-kicker">
+                        {activeRest.mode === 'active' ? t.restModeActive : t.restModeOff}
+                      </span>
+                      <span className="tr-day">
+                        {t.restDayOf(
+                          Math.min(
+                            dayKey(pbNow) - activeRest.startDay + 1,
+                            activeRest.endDay - activeRest.startDay + 1,
+                          ),
+                          activeRest.endDay - activeRest.startDay + 1,
+                        )}
+                      </span>
+                    </div>
+                    <div className="prog-banner-title">
+                      {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
+                    </div>
+                    <div className="tr-bar">
+                      <span
+                        className="tr-fill"
+                        style={{
+                          width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="prog-banner-body">
+                      {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
+                    </div>
+                    <div className="prog-banner-acts">
+                      {activeRest.mode === 'active' ? (
+                        <>
+                          <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
+                            <Icon name="play" weight="bold" />
+                            {t.restStartLight}
+                          </button>
+                          <button
+                            className="prog-banner-skip"
+                            onClick={() => setConfirmEndRest(activeRest.id)}
+                          >
+                            {t.restEndNow}
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="prog-banner-cta"
+                          onClick={() => setConfirmEndRest(activeRest.id)}
+                        >
+                          {t.restEndNow}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {illReturn && !illDismissed && (
+          <div className="prog-banner analysis-banner gem-rest tr-banner illness fade-in">
+            <div className="prog-banner-row">
+              <span className="prog-banner-icon">
+                <Icon name="hand-waving" weight="bold" />
+              </span>
+              <div className="prog-banner-main">
+                <span className="prog-banner-kicker">{t.illnessReturnKicker}</span>
+                <div className="prog-banner-title">{t.illnessReturnTitle}</div>
+                <div className="prog-banner-body">{t.illnessReturnBody(illReturn.daysOut)}</div>
+                <div className="prog-banner-acts">
+                  <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
+                    <Icon name="play" weight="bold" />
+                    {t.restStartLight}
+                  </button>
+                  <button className="prog-banner-skip" onClick={() => setIllDismissed(true)}>
+                    {t.illnessReturnDismiss}
+                  </button>
                 </div>
               </div>
             </div>
@@ -1525,7 +1582,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 /** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
 function RestSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
-  const [mode, setMode] = useState<'active' | 'off'>('active');
+  const [mode, setMode] = useState<'active' | 'off' | 'illness'>('active');
   const iso = (d: Date) => {
     const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
     return z.toISOString().slice(0, 10);
@@ -1533,49 +1590,100 @@ function RestSheet({ onClose }: { onClose: () => void }) {
   const today = new Date();
   const [from, setFrom] = useState(iso(today));
   const [to, setTo] = useState(iso(new Date(today.getTime() + 6 * 86400000)));
+  const [dur, setDur] = useState<'today' | 'open' | 'back'>('open');
+  const [backFrom, setBackFrom] = useState(iso(today));
   const dk = (ymd: string) => {
     const [y, m, d] = ymd.split('-').map(Number);
     return dayKey(new Date(y, m - 1, d).getTime());
   };
   const days = Math.max(1, dk(to) - dk(from) + 1);
   const start = () => {
-    startRestPeriod({ mode, startDay: dk(from), endDay: dk(to) });
+    if (mode === 'illness') {
+      const tk = dayKey(Date.now());
+      if (dur === 'today') startRestPeriod({ mode, startDay: tk, endDay: tk });
+      else if (dur === 'open') startRestPeriod({ mode, startDay: tk, endDay: tk, open: true });
+      else
+        startRestPeriod({ mode, startDay: Math.min(dk(backFrom), tk), endDay: tk, open: true });
+    } else {
+      startRestPeriod({ mode, startDay: dk(from), endDay: dk(to) });
+    }
     onClose();
   };
   return (
     <Sheet onClose={onClose} className="rest-sheet">
       <div className="ps-title">{t.restStartTitle}</div>
       <div className="rest-modes">
-        {(['active', 'off'] as const).map((m) => (
+        {(['active', 'off', 'illness'] as const).map((m) => (
           <button
             key={m}
-            className={`rest-mode${mode === m ? ' active' : ''}`}
+            className={`rest-mode${mode === m ? ' active' : ''}${m === 'illness' ? ' illness' : ''}`}
             onClick={() => setMode(m)}
           >
-            <span className="rm-name">{m === 'active' ? t.restModeActive : t.restModeOff}</span>
+            <span className="rm-name">
+              {m === 'active' ? t.restModeActive : m === 'off' ? t.restModeOff : t.restModeIllness}
+            </span>
             <span className="rm-desc">
-              {m === 'active' ? t.restModeActiveDesc : t.restModeOffDesc}
+              {m === 'active'
+                ? t.restModeActiveDesc
+                : m === 'off'
+                  ? t.restModeOffDesc
+                  : t.restModeIllnessDesc}
             </span>
           </button>
         ))}
       </div>
-      <div className="rest-dates">
-        <label className="rest-date">
-          <span>{t.restFrom}</span>
-          <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
-        </label>
-        <label className="rest-date">
-          <span>{t.restTo}</span>
-          <input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} />
-        </label>
-      </div>
-      <div className="rest-len">{t.restLength(days)}</div>
+      {mode === 'illness' ? (
+        <div className="ill-panel">
+          <div className="ill-lbl">{t.illnessDur}</div>
+          <div className="ill-seg">
+            {(['today', 'open', 'back'] as const).map((d) => (
+              <button
+                key={d}
+                className={`ill-seg-b${dur === d ? ' on' : ''}`}
+                onClick={() => setDur(d)}
+              >
+                {d === 'today'
+                  ? t.illnessDurToday
+                  : d === 'open'
+                    ? t.illnessDurOpen
+                    : t.illnessDurBack}
+              </button>
+            ))}
+          </div>
+          {dur === 'back' && (
+            <label className="rest-date ill-date">
+              <span>{t.illnessBackDate}</span>
+              <input
+                type="date"
+                value={backFrom}
+                max={iso(today)}
+                onChange={(e) => setBackFrom(e.target.value)}
+              />
+            </label>
+          )}
+          {dur === 'open' && <div className="ill-note">{t.illnessNoEnd}</div>}
+        </div>
+      ) : (
+        <>
+          <div className="rest-dates">
+            <label className="rest-date">
+              <span>{t.restFrom}</span>
+              <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
+            </label>
+            <label className="rest-date">
+              <span>{t.restTo}</span>
+              <input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} />
+            </label>
+          </div>
+          <div className="rest-len">{t.restLength(days)}</div>
+        </>
+      )}
       <div className="rest-actions">
         <button className="btn btn-secondary" onClick={onClose}>
           {t.cancel}
         </button>
         <button className="btn btn-primary" onClick={start}>
-          {t.restStartAction}
+          {mode === 'illness' ? t.restStartIllness : t.restStartAction}
         </button>
       </div>
     </Sheet>

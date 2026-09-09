@@ -31011,3 +31011,105 @@ body {
   color: var(--color-neutral-600);
   flex: none;
 }
+
+/* --- Illness (sick days) — a calm "care" tone atop the rest-period UI ------ */
+:root {
+  --care: #79b4b0;
+  --care-100: #e5f3f1;
+  --care-200: #c9e6e2;
+  --care-300: #a7d6d0;
+  --care-700: #3f7773;
+  --care-800: #2c5754;
+  --care-900: #17302e;
+}
+/* Illness banner: care-teal gem + a calm teal ground (distinct from brass rest) */
+.tr-banner.illness {
+  --gem: var(--care);
+  background: radial-gradient(
+    120% 140% at 100% 0%,
+    var(--care-800) 0%,
+    var(--care-900) 34%,
+    #14201f 70%,
+    var(--color-surface) 100%
+  );
+  box-shadow: inset 0 0 0 1px var(--care-700), var(--shadow-md);
+}
+.tr-banner.illness .prog-sheen {
+  display: none;
+}
+.tr-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 11px;
+}
+.tr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--care-200);
+  background: rgba(10, 11, 13, 0.35);
+  padding: 5px 10px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--care-800);
+}
+.tr-pill i {
+  font-size: 12px;
+  color: var(--care-300);
+}
+/* Unwell mode card in the rest sheet */
+.rest-mode.illness.active {
+  border-color: var(--care);
+  box-shadow: inset 0 0 0 1px var(--care);
+}
+.ill-panel {
+  background: var(--care-900);
+  border: 1px solid var(--care-800);
+  border-radius: var(--radius-md);
+  padding: 13px;
+  margin: 12px 0;
+}
+.ill-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--care-300);
+  margin-bottom: 9px;
+}
+.ill-seg {
+  display: flex;
+  gap: 6px;
+  background: var(--color-bg);
+  border-radius: 10px;
+  padding: 4px;
+}
+.ill-seg-b {
+  flex: 1;
+  border: none;
+  background: none;
+  color: var(--color-neutral-400);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 9px 6px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.2;
+}
+.ill-seg-b.on {
+  background: var(--care-800);
+  color: var(--care-100);
+  box-shadow: inset 0 0 0 1px var(--care-700);
+}
+.ill-date {
+  margin-top: 11px;
+}
+.ill-note {
+  font-size: 12px;
+  color: var(--care-200);
+  opacity: 0.85;
+  margin-top: 10px;
+  line-height: 1.4;
+}

@@ -1481,6 +1481,7 @@ export function startRestPeriod(input: {
   startDay: number;
   endDay: number;
   note?: string | null;
+  open?: boolean;
 }): RestPeriod {
   const period: RestPeriod = {
     id: uuid(),
@@ -1489,6 +1490,7 @@ export function startRestPeriod(input: {
     mode: input.mode,
     createdAt: Date.now(),
     note: input.note ?? null,
+    ...(input.open ? { open: true } : {}),
   };
   setState({ restPeriods: [period, ...state.restPeriods], syncStatus: bumpPending() });
   writeRestPeriodDoc(period);
@@ -1506,7 +1508,9 @@ export function endRestPeriod(id: string, now: number = Date.now()): void {
     deleteRestPeriod(id);
     return;
   }
-  const list = state.restPeriods.map((r) => (r.id === id ? { ...r, endDay: today - 1 } : r));
+  const list = state.restPeriods.map((r) =>
+    r.id === id ? { ...r, endDay: today - 1, open: false } : r,
+  );
   setState({ restPeriods: list, syncStatus: bumpPending() });
   const updated = list.find((r) => r.id === id);
   if (updated) writeRestPeriodDoc(updated);
@@ -1525,15 +1529,40 @@ export function activeRestPeriod(now: number = Date.now()): RestPeriod | null {
   const d = dayKey(now);
   return (
     [...state.restPeriods]
-      .filter((r) => r.startDay <= d && d <= r.endDay)
+      .filter((r) => r.startDay <= d && (r.open === true || d <= r.endDay))
       .sort((a, b) => b.createdAt - a.createdAt)[0] ?? null
   );
 }
 
 /** Every day key covered by any rest period. */
-export function restDayKeys(periods: RestPeriod[] = state.restPeriods): Set<number> {
+/** Just came back from illness: the most recent finished illness period ended
+ *  within the last 2 days and no workout has been logged since. Drives the soft
+ *  "ease back in" return card. */
+export function illnessReturn(now: number = Date.now()): { daysOut: number } | null {
+  const today = dayKey(now);
+  const last = state.restPeriods
+    .filter((r) => r.mode === 'illness' && !r.open && r.endDay < today)
+    .sort((a, b) => b.endDay - a.endDay)[0];
+  if (!last) return null;
+  if (today - last.endDay > 2) return null;
+  const trainedSince = state.workouts.some(
+    (w) => w.finishedAt !== null && dayKey(w.startedAt) > last.endDay,
+  );
+  if (trainedSince) return null;
+  return { daysOut: last.endDay - last.startDay + 1 };
+}
+
+export function restDayKeys(
+  periods: RestPeriod[] = state.restPeriods,
+  now: number = Date.now(),
+): Set<number> {
+  const today = dayKey(now);
   const set = new Set<number>();
-  for (const r of periods) for (let d = r.startDay; d <= r.endDay; d++) set.add(d);
+  for (const r of periods) {
+    // Open-ended (illness) periods count as rest from startDay up to today.
+    const end = r.open ? today : r.endDay;
+    for (let d = r.startDay; d <= end; d++) set.add(d);
+  }
   return set;
 }
 

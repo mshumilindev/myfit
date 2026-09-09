@@ -235,8 +235,9 @@ export interface Reminder {
 
 /** A queued offline mutation = one HTTP request to replay later. */
 /** How light a rest/recovery period is. 'active' = deloaded training still in
- *  the gym; 'off' = fully away from the gym (e.g. a vacation). */
-export type RestMode = 'active' | 'off';
+ *  the gym; 'off' = fully away from the gym (e.g. a vacation); 'illness' = sick
+ *  days (rest up — streak protected, program paused, ease back in on return). */
+export type RestMode = 'active' | 'off' | 'illness';
 
 /** A planned rest / recovery / vacation window. Its days count as rest days in
  *  statistics (not missed) and keep the consistency streak alive. */
@@ -248,6 +249,9 @@ export interface RestPeriod {
   mode: RestMode;
   createdAt: number;
   note?: string | null;
+  /** Open-ended (illness "until I'm better"): no fixed end yet — treated as
+   *  running from startDay up to today until closed via endRestPeriod. */
+  open?: boolean;
   updatedAt?: number;
 }
 
