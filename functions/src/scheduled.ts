@@ -1,18 +1,30 @@
 /**
- * Scheduled maintenance. The client also auto-finishes stale sessions locally
- * (store.applyAutoFinish), but this catches sessions of users who never reopen
- * the app, keeping their history correct across devices.
+ * Scheduled maintenance — a single hourly job. The client does all of this
+ * precisely while it's open (store.applyAutoFinish, the sleep pause controller
+ * and auto-start/auto-end effects); this catches users who never reopen the
+ * app, keeping their history correct across devices.
+ *
+ * Everything is folded into ONE onSchedule handler on purpose: it adds no extra
+ * Cloud Scheduler job and no extra invocations beyond the one that already runs
+ * hourly — only a couple of marginal Firestore reads per run. That keeps the
+ * whole thing comfortably inside the free tier.
  */
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db } from './lib';
 import * as crypto from 'node:crypto';
 
 const AUTO_FINISH_AFTER_MS = 8 * 60 * 60 * 1000;
+const AUTO_START_STALE_MS = 6 * 60 * 60 * 1000; // don't resurrect very old slots
 
-/** Every hour: close any workout still open more than 8h after it started. */
-export const autoFinishStaleWorkouts = onSchedule('every 60 minutes', async () => {
+interface UpcomingNight {
+  startAt: number;
+  wakeAt: number;
+  date: string;
+}
+
+/** Close any workout still open more than 8h after it started. */
+async function finishStaleWorkouts(): Promise<number> {
   const cutoff = Date.now() - AUTO_FINISH_AFTER_MS;
-  // Collection-group across every user's workouts subcollection.
   const open = await db.collectionGroup('workouts').where('finishedAt', '==', null).get();
   let closed = 0;
   let batch = db.batch();
@@ -33,31 +45,21 @@ export const autoFinishStaleWorkouts = onSchedule('every 60 minutes', async () =
     }
   }
   if (ops > 0) await batch.commit();
-  console.log(`[autoFinish] closed ${closed} stale workout(s)`);
-});
-
-const SLEEP_TICK = 'every 15 minutes';
-const AUTO_START_STALE_MS = 6 * 60 * 60 * 1000; // don't resurrect very old slots
-
-interface UpcomingNight {
-  startAt: number;
-  wakeAt: number;
-  date: string;
+  return closed;
 }
 
 /**
- * Every 15 min: finalize any live night whose scheduled wake time has passed —
- * the server counterpart of the client's auto-end, so a night the app is
- * managing still closes at the usual time even if the app never reopens.
- * Mirrors autoFinishStaleWorkouts: one collection-group query + batches.
+ * Finalize any live night whose scheduled wake time has passed — the server
+ * counterpart of the client's auto-end, so a managed night still closes at the
+ * usual time even if the app never reopens. One collection-group query + batches.
  */
-export const autoEndStaleSleeps = onSchedule(SLEEP_TICK, async () => {
+async function endDueSleeps(): Promise<number> {
   const now = Date.now();
-  const open = await db.collectionGroup('sleeps').where('wake', '==', null).get();
+  const openNights = await db.collectionGroup('sleeps').where('wake', '==', null).get();
   let ended = 0;
   let batch = db.batch();
   let ops = 0;
-  for (const docSnap of open.docs) {
+  for (const docSnap of openNights.docs) {
     const n = docSnap.data() as { bedtime: number; autoWakeAt?: number };
     if (typeof n.autoWakeAt !== 'number' || n.autoWakeAt > now) continue;
     const wake = Math.max(n.autoWakeAt, (n.bedtime ?? 0) + 60000);
@@ -70,17 +72,17 @@ export const autoEndStaleSleeps = onSchedule(SLEEP_TICK, async () => {
     }
   }
   if (ops > 0) await batch.commit();
-  console.log(`[autoEndSleeps] ended ${ended} night(s)`);
-});
+  return ended;
+}
 
 /**
- * Every 15 min: open tonight's night for users whose scheduled bedtime has
- * arrived while the app is closed. Scales by an indexed due-queue — one doc per
- * user (sleepSchedules/{uid}) carrying the upcoming bedtimes the client laid out
- * as absolute instants in its own timezone, so this function stays pure UTC and
- * only touches users who are actually due now.
+ * Open tonight's night for users whose scheduled bedtime arrived while the app
+ * was closed. Scales by an indexed due-queue — one doc per user
+ * (sleepSchedules/{uid}) holding the upcoming bedtimes the client laid out as
+ * absolute instants in its own timezone, so this stays pure UTC and reads only
+ * the users who are actually due now.
  */
-export const autoStartScheduledSleeps = onSchedule(SLEEP_TICK, async () => {
+async function startDueSleeps(): Promise<number> {
   const now = Date.now();
   const due = await db.collection('sleepSchedules').where('nextStartAt', '<=', now).get();
   let started = 0;
@@ -88,7 +90,7 @@ export const autoStartScheduledSleeps = onSchedule(SLEEP_TICK, async () => {
     const uid = docSnap.id;
     const data = docSnap.data() as { upcoming?: UpcomingNight[] };
     const upcoming = Array.isArray(data.upcoming) ? [...data.upcoming] : [];
-    // Drop any slots already in the past; act only on the most recent due one.
+    // Drop slots already in the past; act only on the most recent due one.
     let slot: UpcomingNight | undefined;
     while (upcoming.length && upcoming[0].startAt <= now) slot = upcoming.shift();
     const next = upcoming[0];
@@ -121,5 +123,31 @@ export const autoStartScheduledSleeps = onSchedule(SLEEP_TICK, async () => {
     }
     await advance;
   }
-  console.log(`[autoStartSleeps] started ${started} night(s) from ${due.size} due user(s)`);
+  return started;
+}
+
+/**
+ * The one hourly maintenance job. Sleep steps are isolated so a failure there
+ * never blocks the workout sweep (or vice-versa).
+ */
+export const autoFinishStaleWorkouts = onSchedule('every 60 minutes', async () => {
+  let closed = 0;
+  let ended = 0;
+  let started = 0;
+  try {
+    closed = await finishStaleWorkouts();
+  } catch (e) {
+    console.error('[maintenance] workout sweep failed', e);
+  }
+  try {
+    ended = await endDueSleeps();
+  } catch (e) {
+    console.error('[maintenance] sleep auto-end failed', e);
+  }
+  try {
+    started = await startDueSleeps();
+  } catch (e) {
+    console.error('[maintenance] sleep auto-start failed', e);
+  }
+  console.log(`[maintenance] workouts closed=${closed} sleeps ended=${ended} started=${started}`);
 });
