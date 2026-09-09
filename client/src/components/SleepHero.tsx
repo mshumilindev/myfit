@@ -42,7 +42,7 @@ export function SleepHero({
     night.awakeSince != null && now - (night.lastSeen ?? night.awakeSince) < SLEEP_IDLE_MS;
 
   return (
-    <div className={`live-hero sleep-hero${paused ? ' paused' : ''}`}>
+    <div className={`live-hero sleep-live-hero${paused ? ' paused' : ''}`}>
       <div className="live-hero-bg sleep-hero-bg" aria-hidden="true">
         <MoonGlyph size={132} date={night.bedtime} halo={false} />
       </div>
