@@ -745,6 +745,7 @@ export function SessionView(props: {
         : null;
     const groupDone = grp !== null && ex.sets.length >= grp.round;
     const showGhost = !grp || grp.active;
+    const focus = live && !grp && !timed && !marker && activeExerciseId === ex.id;
     const rowCls = grp ? ' rrow' : '';
     const sortedSets = [...ex.sets].sort((a, b) => a.position - b.position);
     return (
@@ -991,6 +992,83 @@ export function SessionView(props: {
                   </button>
                 ))}
             </div>
+          </>
+        ) : focus ? (
+          <>
+            {target && (
+              <div className={`prog-target st-${target.state}`}>
+                <span className="pt-label">{t.progTarget}</span>
+                <span className="pt-val">
+                  {target.weight === null
+                    ? t.progRepsTarget(target.reps)
+                    : `${fmtWeightValue(target.weight)} × ${target.reps}`}
+                </span>
+                {target.deltaKg > 0 && (
+                  <span className="pt-delta up">+{fmtWeightValue(target.deltaKg)}</span>
+                )}
+                {target.deltaKg < 0 && (
+                  <span className="pt-delta down">{fmtWeightValue(target.deltaKg)}</span>
+                )}
+                {target.state === 'hold' && <span className="pt-tag">{t.progHold}</span>}
+                {target.state === 'stall' && <span className="pt-tag warn">{t.progDeload}</span>}
+                {target.state === 'first' && <span className="pt-tag">{t.progFirst}</span>}
+              </div>
+            )}
+            {sortedSets.length > 0 && (
+              <div className="set-timeline">
+                {(() => {
+                  let wk = 0;
+                  return sortedSets.map((s) => {
+                    const stype = setTypeOf(s);
+                    const rec = isRecordSet(ex, s);
+                    const drops = setDrops(s);
+                    const isWarm = stype === 'warmup';
+                    if (!isWarm) wk += 1;
+                    const rsb = restBeforeSetInWorkout(workout!, s);
+                    const rest = rsb != null && rsb > 0 ? mmss(rsb * 1000) : null;
+                    return (
+                      <button
+                        key={s.id}
+                        className={`tl-row${isWarm ? ' warm' : ''}${rec ? ' record' : ''}`}
+                        onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
+                      >
+                        <span className="tl-dot" />
+                        <span className="tl-label">{isWarm ? t.warmupChip : t.setNumber(wk)}</span>
+                        <span className="tl-val">
+                          {s.reps} ×{' '}
+                          {s.weight === null ? t.bodyweightShort : fmtWeightValue(s.weight)}
+                          {drops.length > 0 ? ` · +${drops.length}` : ''}
+                        </span>
+                        {rest && <span className="tl-rest">{t.restLabel(rest)}</span>}
+                        {rec && <span className="tag tag-ok tl-pr">{t.record}</span>}
+                      </button>
+                    );
+                  });
+                })()}
+              </div>
+            )}
+            {live &&
+              ex.id === lastLoggedExId &&
+              lastLoggedAt > 0 &&
+              (() => {
+                const restNow = Math.max(0, now - lastLoggedAt);
+                return (
+                  <div className="ex-resting">
+                    <Icon name="timer" />
+                    <span>{t.restingSince(mmss(restNow))}</span>
+                  </div>
+                );
+              })()}
+            <ActiveSetCard
+              key={`${ex.id}:${ex.sets.length}`}
+              ex={ex}
+              defReps={ghost.reps}
+              defWeightKg={ghost.weight}
+              weightRequired={directLogBlocked}
+              onLog={(v, type) => logGhost(ex, v, type)}
+              onDrop={() => addDropQuick(ex)}
+              onAdvanced={(v) => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: v })}
+            />
           </>
         ) : (
           <>
@@ -3524,6 +3602,67 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
  * − / value / + control. The value is editable; clearing it stays empty while
  * typing (never snaps to 0 mid-edit). Empty blur keeps the previous number.
  */
+function ActiveSetCard(props: {
+  ex: Exercise;
+  defReps: number;
+  defWeightKg: number | null;
+  weightRequired: boolean;
+  onLog: (v: { reps: number; weight: number | null }, type: SetType) => void;
+  onDrop: () => void;
+  onAdvanced: (v: { reps: number; weight: number | null }) => void;
+}) {
+  const { t } = useT();
+  const unit = exerciseUnit(props.ex.name);
+  const [reps, setReps] = useState(Math.max(1, props.defReps || 1));
+  const [weightKg, setWeightKg] = useState<number | null>(props.defWeightKg);
+  const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
+  const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
+  // Bodyweight = no weight and none required (a required-but-unset weight is not
+  // bodyweight — the athlete still has to dial one in before logging).
+  const bw = weightKg === null && !props.weightRequired;
+  const blocked = props.weightRequired && weightKg === null;
+  const v = { reps, weight: weightKg };
+  return (
+    <div className="active-set">
+      <div className="active-steppers">
+        <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
+        <Stepper
+          label={unit === 'lb' ? t.weightLb : t.weightKg}
+          value={toDisp(weightKg ?? 0)}
+          step={unit === 'lb' ? 5 : 2.5}
+          min={0}
+          decimals={unit === 'lb' ? 1 : 2}
+          disabled={bw}
+          placeholder={t.bodyweightShort}
+          onChange={(x) => setWeightKg(fromDisp(x))}
+        />
+      </div>
+      <div className="as-chips">
+        <button className="as-chip" onClick={() => props.onLog(v, 'warmup')}>
+          <Icon name="fire" />
+          {t.warmupChip}
+        </button>
+        <button className="as-chip" onClick={props.onDrop}>
+          <Icon name="caret-line-down" />
+          {t.addADrop}
+        </button>
+        <button className="as-chip more" onClick={() => props.onAdvanced(v)}>
+          {t.advancedSet}
+          <Icon name="dots-three" />
+        </button>
+      </div>
+      <button
+        className="btn btn-primary as-log"
+        disabled={blocked}
+        onClick={() => props.onLog(v, 'working')}
+      >
+        {t.addToLog}
+      </button>
+      {blocked && <div className="ghost-hint">{t.progWeightRequired}</div>}
+    </div>
+  );
+}
+
 function Stepper(props: {
   label: string;
   value: number;

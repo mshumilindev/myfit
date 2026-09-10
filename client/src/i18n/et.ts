@@ -665,6 +665,8 @@ export const et: Strings = {
   inOneSet: (kg: string) => `${kg} ühes seerias`,
   addADrop: 'Lisa dropp',
   warmupChip: 'Soojendus',
+  addToLog: 'Lisa logisse',
+  advancedSet: 'Pooled · kettad · RPE',
   setTypeLabel: 'Seeria tüüp',
   setTypeWorking: 'Töine',
   setTypeWarmup: 'Soojendus',

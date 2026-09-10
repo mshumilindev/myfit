@@ -673,6 +673,8 @@ export const en = {
   inOneSet: (kg: string) => `${kg} in one set`,
   addADrop: 'Add a drop',
   warmupChip: 'Warm-up',
+  addToLog: 'Add to log',
+  advancedSet: 'Sides · plate · RPE',
   setTypeLabel: 'Set type',
   setTypeWorking: 'Working',
   setTypeWarmup: 'Warm-up',

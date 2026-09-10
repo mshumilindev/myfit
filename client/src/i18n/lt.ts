@@ -682,6 +682,8 @@ export const lt: Strings = {
   inOneSet: (kg: string) => `${kg} vienoje serijoje`,
   addADrop: 'Pridėti dropą',
   warmupChip: 'Apšilimas',
+  addToLog: 'Įtraukti į žurnalą',
+  advancedSet: 'Pusės · svoriai · RPE',
   setTypeLabel: 'Serijos tipas',
   setTypeWorking: 'Darbinė',
   setTypeWarmup: 'Apšilimo',
