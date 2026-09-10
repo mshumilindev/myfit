@@ -636,6 +636,31 @@ function readAssignment(): CachedAssignment | null {
  * (or on weekdays it doesn't name) it returns null and the caller shows the
  * muscle readout.
  */
+/** Weekday of a timestamp in program terms: Mon=1 … Sun=7. */
+export function weekdayOf(ts: number): number {
+  return programDay(ts);
+}
+
+/** Weekdays (1–7) the assigned program prescribes training on (items or target
+ *  muscles). Empty when there is no cached program. Drives "missed" markers. */
+export function prescribedTrainingDays(): Set<number> {
+  const a = readAssignment();
+  const set = new Set<number>();
+  if (!a) return set;
+  for (const it of a.program.items ?? []) set.add(it.day);
+  for (const [k, v] of Object.entries(a.program.targetMuscles ?? {})) {
+    if (Array.isArray(v) && v.length > 0) set.add(Number(k));
+  }
+  return set;
+}
+
+/** How many days back a "missed" marker is trustworthy — roughly since the
+ *  program began (bounded by its current week), matching programDayNameFor. */
+export function programLookbackDays(): number {
+  const a = readAssignment();
+  return a ? (a.week ?? 1) * 7 + 6 : 0;
+}
+
 export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
   if (w.dayName) return w.dayName;
   const a = readAssignment();

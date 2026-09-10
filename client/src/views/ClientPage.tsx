@@ -71,6 +71,25 @@ function workoutTitle(s: ClientSession, t: Strings): string {
   return s.exerciseNames[0] ?? t.playUntitled;
 }
 
+/** Group the client's sessions into calendar-day buckets, newest day first. */
+function groupByDay(
+  sessions: ClientSession[],
+): { key: string; ts: number; sessions: ClientSession[] }[] {
+  const map = new Map<string, { key: string; ts: number; sessions: ClientSession[] }>();
+  for (const s of sessions) {
+    const d = new Date(s.startedAt);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    let g = map.get(key);
+    if (!g) {
+      g = { key, ts: s.startedAt, sessions: [] };
+      map.set(key, g);
+    }
+    g.sessions.push(s);
+    if (s.startedAt > g.ts) g.ts = s.startedAt;
+  }
+  return [...map.values()].sort((a, b) => b.ts - a.ts);
+}
+
 export function ClientPage({
   clientId,
   shell,
@@ -193,21 +212,38 @@ export function ClientPage({
         {sessions.length === 0 ? (
           <p className="cp-empty">{t.clientNoSessions}</p>
         ) : (
-          <div className="cp-list">
-            {sessions.map((s) => (
-              <button key={s.id} className="cp-session" onClick={() => openSession(s)}>
-                <div className="cp-session-top">
-                  <span className="name">{workoutTitle(s, t)}</span>
-                  <span className="date">{fmtDayMonth(s.startedAt, locale)}</span>
+          <div className="hist-tl">
+            {groupByDay(sessions).map((day, i, arr) => (
+              <div
+                className={`hist-tl-day st-trained${i === arr.length - 1 ? ' is-last' : ''}`}
+                key={day.key}
+              >
+                <div className="hist-tl-rail">
+                  <span className="hist-tl-node">
+                    <Icon name="check" />
+                  </span>
+                  <span className="hist-tl-line" />
                 </div>
-                <div className="cp-session-meta">
-                  {s.gymName ? `${s.gymName} · ` : ''}
-                  {s.exercises} · {s.sets} {t.setsStat.toLowerCase()} · {fmtTonnes(s.volumeKg)}
+                <div className="hist-tl-body">
+                  <div className="hist-tl-head">
+                    <span className="hist-tl-date">{fmtDayMonth(day.ts, locale)}</span>
+                  </div>
+                  {day.sessions.map((s) => (
+                    <button key={s.id} className="cp-session" onClick={() => openSession(s)}>
+                      <div className="cp-session-top">
+                        <span className="name">{workoutTitle(s, t)}</span>
+                      </div>
+                      <div className="cp-session-meta">
+                        {s.gymName ? `${s.gymName} · ` : ''}
+                        {s.exercises} · {s.sets} {t.setsStat.toLowerCase()} · {fmtTonnes(s.volumeKg)}
+                      </div>
+                      {s.exerciseNames.length > 0 && (
+                        <div className="cp-session-ex">{s.exerciseNames.slice(0, 4).join(' · ')}</div>
+                      )}
+                    </button>
+                  ))}
                 </div>
-                {s.exerciseNames.length > 0 && (
-                  <div className="cp-session-ex">{s.exerciseNames.slice(0, 4).join(' · ')}</div>
-                )}
-              </button>
+              </div>
             ))}
           </div>
         )}

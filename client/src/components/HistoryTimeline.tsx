@@ -1,13 +1,18 @@
 /**
- * Unified history timeline — finished workouts and finished activities merged
- * into one list, grouped by calendar day. The date shows once per day on the
- * left (like the workout-history date column); a day's items stack in
- * chronological order, earliest on top. Used by the Today preview and the full
- * history, capped to `maxDays` days.
+ * History — a grouped-by-day timeline. Each day is a circle node on a rail,
+ * coloured and glyphed by the day's state: trained (green), rest (topaz),
+ * vacation (amber), sick (teal), missed (red). Days you logged a session show
+ * the session cards; days the program prescribed but you rested, were ill, were
+ * away or skipped are surfaced too, so the timeline reads the whole week — not
+ * only what got logged. Used by the Today preview and the full history.
  */
 import {
+  dayKey as dayBucket,
   muscleWorkSorted,
+  prescribedTrainingDays,
   programDayNameFor,
+  programLookbackDays,
+  weekdayOf,
   workoutDayReadout,
   workoutSets,
   workoutVolumeKg,
@@ -33,6 +38,17 @@ type Item =
   | { kind: 'w'; ts: number; w: Workout }
   | { kind: 'a'; ts: number; a: Activity }
   | { kind: 's'; ts: number; n: SleepNight };
+
+/** Per-day state, in priority order when several could apply. */
+type DayState = 'trained' | 'illness' | 'vacation' | 'rest' | 'missed' | 'logged';
+
+const STATE_GLYPH: Record<Exclude<DayState, 'logged'>, string> = {
+  trained: 'check',
+  illness: 'pulse',
+  vacation: 'sun-horizon',
+  rest: 'moon',
+  missed: 'x',
+};
 
 function dayKey(ts: number): string {
   const d = new Date(ts);
@@ -74,6 +90,13 @@ export function buildHistoryDays(
   return days;
 }
 
+interface TlDay {
+  bucket: number;
+  ts: number;
+  items: Item[];
+  state: DayState;
+}
+
 export function HistoryTimeline({
   workouts,
   activities,
@@ -110,9 +133,65 @@ export function HistoryTimeline({
   showMuscles?: boolean;
 }) {
   const { t, locale } = useT();
-  const allDays = buildHistoryDays(workouts, activities, sleeps);
-  const days =
-    maxDays != null ? allDays.slice(dayOffset, dayOffset + maxDays) : allDays.slice(dayOffset);
+  const store = useStore();
+
+  const loggedDays = buildHistoryDays(workouts, activities, sleeps);
+  const byBucket = new Map<number, Item[]>();
+  for (const g of loggedDays) byBucket.set(dayBucket(g.ts), g.items);
+
+  // Enrich: walk calendar days from today back, tagging each with its state and
+  // surfacing rest / illness / vacation / missed days that have no logged items.
+  const todayMid = new Date();
+  todayMid.setHours(0, 0, 0, 0);
+  const todayK = dayBucket(todayMid.getTime());
+  const oldestLogged = loggedDays.length
+    ? dayBucket(loggedDays[loggedDays.length - 1].ts)
+    : todayK;
+  const presc = prescribedTrainingDays();
+  const lookback = programLookbackDays();
+  const rests = store.restPeriods;
+
+  const coveringRest = (dk: number): { mode: string; span: number } | null => {
+    for (const r of rests) {
+      const end = r.open ? todayK : r.endDay;
+      if (dk >= r.startDay && dk <= end) return { mode: r.mode, span: end - r.startDay + 1 };
+    }
+    return null;
+  };
+
+  const entries: TlDay[] = [];
+  const cur = new Date(todayMid);
+  for (let guard = 0; guard < 400; guard++) {
+    const ts = cur.getTime();
+    const dk = dayBucket(ts);
+    const items = byBucket.get(dk) ?? [];
+    const hasWorkout = items.some((it) => it.kind === 'w');
+    const rest = coveringRest(dk);
+    let state: DayState | null = null;
+    if (hasWorkout) state = 'trained';
+    else if (rest?.mode === 'illness') state = 'illness';
+    else if (rest?.mode === 'off') state = rest.span >= 4 ? 'vacation' : 'rest';
+    else if (
+      dk < todayK &&
+      lookback > 0 &&
+      todayK - dk <= lookback &&
+      presc.has(weekdayOf(ts))
+    )
+      state = 'missed';
+    else if (items.length > 0) state = 'logged';
+
+    if (state) {
+      const ets = items.length ? Math.max(...items.map((i) => i.ts)) : ts;
+      entries.push({ bucket: dk, ts: ets, items, state });
+    }
+    // Stop once we've covered every logged day and the missed-lookback window.
+    if (dk < oldestLogged && todayK - dk > lookback) break;
+    if (maxDays != null && entries.length >= dayOffset + maxDays) break;
+    cur.setDate(cur.getDate() - 1);
+  }
+
+  const days = maxDays != null ? entries.slice(dayOffset, dayOffset + maxDays) : entries.slice(dayOffset);
+  if (days.length === 0) return null;
 
   const title = (w: Workout) => {
     const dn = programDayNameFor(w, allWorkouts);
@@ -121,58 +200,87 @@ export function HistoryTimeline({
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };
 
-  if (days.length === 0) return null;
+  const stateLabel: Record<Exclude<DayState, 'trained' | 'logged'>, string> = {
+    rest: t.histStateRest,
+    vacation: t.histStateVacation,
+    illness: t.histStateSick,
+    missed: t.histStateMissed,
+  };
 
   return (
-    <div className="hist-timeline">
-      {days.map((day) => (
-        <div className="hist-day" key={day.key}>
-          <span className="hist-day-date">{fmtShortDate(day.items[0].ts, locale)}</span>
-          <div className="hist-day-items">
-            {day.items.map((it) => {
-              if (it.kind === 's') return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
-              if (it.kind === 'a')
+    <div className="hist-tl">
+      {days.map((day, i) => {
+        const isLast = i === days.length - 1;
+        const showState = day.state !== 'trained' && day.state !== 'logged';
+        return (
+          <div
+            className={`hist-tl-day st-${day.state}${isLast ? ' is-last' : ''}`}
+            key={day.bucket}
+          >
+            <div className="hist-tl-rail">
+              {day.state === 'logged' ? (
+                <span className="hist-tl-dot" />
+              ) : (
+                <span className="hist-tl-node">
+                  <Icon name={STATE_GLYPH[day.state as Exclude<DayState, 'logged'>]} />
+                </span>
+              )}
+              <span className="hist-tl-line" />
+            </div>
+            <div className="hist-tl-body">
+              {/* Date + state pill share one row, centred on the node. */}
+              <div className="hist-tl-head">
+                <span className="hist-tl-date">{fmtShortDate(day.ts, locale)}</span>
+                {showState && (
+                  <div className="hist-tl-state">
+                    <Icon name={STATE_GLYPH[day.state as Exclude<DayState, 'logged'>]} />
+                    {stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>]}
+                  </div>
+                )}
+              </div>
+              {day.items.map((it) => {
+                if (it.kind === 's')
+                  return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
+                if (it.kind === 'a')
+                  return (
+                    <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
+                  );
+                const kc = it.w.finishedAt ? workoutCalories(it.w, bodyKg) : null;
                 return (
-                  <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
-                );
-              // Calories read the same everywhere: a right-aligned flame chip
-              // (never inline in the stats), matching the activity rows — so the
-              // stats text can never collide with the number.
-              const kc = it.w.finishedAt ? workoutCalories(it.w, bodyKg) : null;
-              return (
-                <button
-                  key={it.w.id}
-                  className="hist-item hist-workout"
-                  onClick={() => onOpenWorkout(it.w.id)}
-                >
-                  <span className="hist-item-body">
-                    <span className="hist-item-name">{title(it.w)}</span>
-                    <div className="hist-item-stats">
-                      {workoutSets(it.w)} {t.sets} · {fmtKg(workoutVolumeKg(it.w))}
-                      {it.w.finishedAt
-                        ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
-                        : ''}
-                    </div>
-                    {showMuscles && muscleWorkSorted(it.w).length > 0 && (
-                      <MuscleRow
-                        entries={muscleWorkSorted(it.w)}
-                        refTs={it.w.startedAt}
-                        onOpen={openMuscleHistory}
-                      />
-                    )}
-                  </span>
-                  {kc != null && (
-                    <span className="ta-kcal tnum">
-                      <Icon name="flame" weight="fill" />~{kc}
+                  <button
+                    key={it.w.id}
+                    className="hist-item hist-workout"
+                    onClick={() => onOpenWorkout(it.w.id)}
+                  >
+                    <span className="hist-item-body">
+                      <span className="hist-item-name">{title(it.w)}</span>
+                      <div className="hist-item-stats">
+                        {workoutSets(it.w)} {t.sets} · {fmtKg(workoutVolumeKg(it.w))}
+                        {it.w.finishedAt
+                          ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
+                          : ''}
+                      </div>
+                      {showMuscles && muscleWorkSorted(it.w).length > 0 && (
+                        <MuscleRow
+                          entries={muscleWorkSorted(it.w)}
+                          refTs={it.w.startedAt}
+                          onOpen={openMuscleHistory}
+                        />
+                      )}
                     </span>
-                  )}
-                  <Icon name="arrow-up-right" className="go" />
-                </button>
-              );
-            })}
+                    {kc != null && (
+                      <span className="ta-kcal tnum">
+                        <Icon name="flame" weight="fill" />~{kc}
+                      </span>
+                    )}
+                    <Icon name="arrow-up-right" className="go" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -213,8 +321,6 @@ function ActivityRow({
       {onOpen && <Icon name="arrow-up-right" className="go" />}
     </>
   );
-  // Opens the activity's detail/edit view (like workouts). Non-interactive when
-  // no opener is provided.
   return onOpen ? (
     <button
       className={`hist-item hist-activity cat-${cat}`}
@@ -235,7 +341,6 @@ function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void 
   const store = useStore();
   const mins = nightDurationMin(n);
   const nap = sleepKindOf(n) === 'nap';
-  // Overnight resting burn, same BMR model Today uses — shown like the other rows.
   const kcal = overnightKcal(
     mins,
     bmrKcal(store.bodyMetrics, latestWeight(store.bodyMetrics)?.weight),

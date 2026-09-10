@@ -15098,20 +15098,31 @@ button.exd-media {
 
 /* Full-history link under the Today preview + the history list page */
 .td-history-all {
-  align-self: flex-start;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: var(--space-2);
-  padding: 6px 2px;
-  border: 0;
-  background: none;
-  color: var(--color-accent);
-  font-size: 13px;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 28px;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 60%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
 }
+.td-history-all:active {
+  background: var(--color-neutral-900);
+}
 .td-history-all .ui-icon {
-  font-size: 13px;
+  font-size: 15px;
+  color: var(--color-accent);
 }
 .hist-list .hist-head {
   display: flex;
@@ -23455,6 +23466,123 @@ button.badge {
 .hist-timeline {
   display: flex;
   flex-direction: column;
+}
+
+/* Grouped-by-day timeline (History) — a circle node per day on a bronze rail,
+   coloured/glyphed by state; --nc is the day's state colour. */
+.hist-tl {
+  display: flex;
+  flex-direction: column;
+}
+.hist-tl-day {
+  display: flex;
+  gap: 13px;
+}
+/* Very subtle zebra so consecutive days are easier to scan. */
+.hist-tl-day:nth-child(even) {
+  background: rgba(255, 255, 255, 0.012);
+  border-radius: 10px;
+}
+.hist-tl-day.st-trained {
+  --nc: var(--color-ok);
+}
+.hist-tl-day.st-rest {
+  --nc: var(--color-rest-400);
+}
+.hist-tl-day.st-vacation {
+  --nc: #e8933f;
+}
+.hist-tl-day.st-illness {
+  --nc: var(--care);
+}
+.hist-tl-day.st-missed {
+  --nc: var(--color-danger);
+}
+.hist-tl-day.st-logged {
+  --nc: var(--color-neutral-600);
+}
+.hist-tl-rail {
+  flex: none;
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hist-tl-node {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--nc);
+  background: color-mix(in srgb, var(--nc) 15%, var(--color-surface));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--nc) 55%, transparent);
+}
+.hist-tl-node i {
+  font-size: 15px;
+}
+.hist-tl-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 9px;
+  border-radius: 50%;
+  background: var(--nc);
+  box-shadow: 0 0 0 3px var(--color-bg);
+}
+.hist-tl-line {
+  flex: 1;
+  width: 2px;
+  margin-top: 6px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-accent) 45%, transparent),
+    color-mix(in srgb, var(--color-accent) 5%, transparent)
+  );
+}
+.hist-tl-day.is-last .hist-tl-line {
+  display: none;
+}
+.hist-tl-body {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hist-tl-day.is-last .hist-tl-body {
+  padding-bottom: 0;
+}
+/* Date on the left, state pill pinned to the right edge; centred on the node. */
+.hist-tl-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+.hist-tl-date {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  font-weight: 600;
+}
+.hist-tl-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  height: 28px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nc);
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--nc) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nc) 22%, transparent);
+}
+.hist-tl-state i {
+  font-size: 14px;
 }
 /* One day = a shared date column on the left + a stack of that day's items. */
 .hist-day {
@@ -32160,31 +32288,20 @@ body {
   margin-bottom: calc(-6px - var(--space-4));
 }
 .tcs::before {
-  /* Translucent bronze glass on a masked layer so it dissolves to zero at the
-     bottom (no hard edge) while the avatars above stay fully opaque: an accent
-     catch-light, a hairline geometric weave, and a bronze top sheen. A crisp
-     lit rim across the top reads as a neat bezel. */
+  /* Neutral graphite glass band (our palette, not brass): a translucent grey
+     surface with a soft top sheen and hairline top/bottom borders. */
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(
-      120% 150% at 14% -30%,
-      color-mix(in srgb, var(--color-accent) 6%, transparent),
-      transparent 58%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-accent) 6%, transparent),
-      color-mix(in srgb, var(--color-accent) 2%, transparent) 45%,
-      transparent
-    );
-  backdrop-filter: blur(10px) saturate(1.08);
-  -webkit-backdrop-filter: blur(10px) saturate(1.08);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-accent) 26%, rgba(255, 255, 255, 0.16));
-  -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.005) 45%, transparent),
+    color-mix(in srgb, var(--color-surface) 55%, transparent);
+  backdrop-filter: blur(9px) saturate(1.05);
+  -webkit-backdrop-filter: blur(9px) saturate(1.05);
+  box-shadow: inset 0 1px 0 var(--color-divider);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%);
 }
 .tcs-row {
   display: flex;
