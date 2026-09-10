@@ -16,7 +16,11 @@ import type { Strings } from '../i18n/en';
 import { muscleInfoByName } from '../data/exercises';
 import { Icon } from '../ui';
 import { Avatar } from '../components/Avatar';
+import { HistoryTimeline } from '../components/HistoryTimeline';
+import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 import type { Shell } from '../App';
+
+const NO_DAYS = new Set<number>();
 
 interface ClientSession {
   id: string;
@@ -46,6 +50,12 @@ interface ClientData {
     volumeKg: number;
     bestE1rm: number | null;
   }>;
+  history?: {
+    workouts: Workout[];
+    activities: Activity[];
+    sleeps: SleepNight[];
+    restPeriods: RestPeriod[];
+  };
 }
 
 const PROFILE_TTL_MS = 3 * 60 * 1000;
@@ -69,25 +79,6 @@ function workoutTitle(s: ClientSession, t: Strings): string {
   }
   if (best) return t.muscleGroups[best as keyof typeof t.muscleGroups] ?? best;
   return s.exerciseNames[0] ?? t.playUntitled;
-}
-
-/** Group the client's sessions into calendar-day buckets, newest day first. */
-function groupByDay(
-  sessions: ClientSession[],
-): { key: string; ts: number; sessions: ClientSession[] }[] {
-  const map = new Map<string, { key: string; ts: number; sessions: ClientSession[] }>();
-  for (const s of sessions) {
-    const d = new Date(s.startedAt);
-    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-    let g = map.get(key);
-    if (!g) {
-      g = { key, ts: s.startedAt, sessions: [] };
-      map.set(key, g);
-    }
-    g.sessions.push(s);
-    if (s.startedAt > g.ts) g.ts = s.startedAt;
-  }
-  return [...map.values()].sort((a, b) => b.ts - a.ts);
 }
 
 export function ClientPage({
@@ -209,43 +200,31 @@ export function ClientPage({
 
       <section className="cp-section">
         <div className="section-label">{t.clientHistory}</div>
-        {sessions.length === 0 ? (
-          <p className="cp-empty">{t.clientNoSessions}</p>
+        {data?.history &&
+        data.history.workouts.length +
+          data.history.activities.length +
+          data.history.sleeps.length >
+          0 ? (
+          <HistoryTimeline
+            workouts={data.history.workouts}
+            activities={data.history.activities}
+            sleeps={data.history.sleeps}
+            allWorkouts={data.history.workouts}
+            bodyKg={null}
+            restPeriodsOverride={data.history.restPeriods}
+            prescribedDaysOverride={NO_DAYS}
+            lookbackOverride={0}
+            onOpenWorkout={(id) =>
+              shell.openOverlay({
+                screen: 'trainee-session',
+                athleteId: clientId,
+                workoutId: id,
+                athleteName: data.person.name,
+              })
+            }
+          />
         ) : (
-          <div className="hist-tl">
-            {groupByDay(sessions).map((day, i, arr) => (
-              <div
-                className={`hist-tl-day st-trained${i === arr.length - 1 ? ' is-last' : ''}`}
-                key={day.key}
-              >
-                <div className="hist-tl-rail">
-                  <span className="hist-tl-node">
-                    <Icon name="check" />
-                  </span>
-                  <span className="hist-tl-line" />
-                </div>
-                <div className="hist-tl-body">
-                  <div className="hist-tl-head">
-                    <span className="hist-tl-date">{fmtDayMonth(day.ts, locale)}</span>
-                  </div>
-                  {day.sessions.map((s) => (
-                    <button key={s.id} className="cp-session" onClick={() => openSession(s)}>
-                      <div className="cp-session-top">
-                        <span className="name">{workoutTitle(s, t)}</span>
-                      </div>
-                      <div className="cp-session-meta">
-                        {s.gymName ? `${s.gymName} · ` : ''}
-                        {s.exercises} · {s.sets} {t.setsStat.toLowerCase()} · {fmtTonnes(s.volumeKg)}
-                      </div>
-                      {s.exerciseNames.length > 0 && (
-                        <div className="cp-session-ex">{s.exerciseNames.slice(0, 4).join(' · ')}</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="cp-empty">{t.clientNoSessions}</p>
         )}
       </section>
 

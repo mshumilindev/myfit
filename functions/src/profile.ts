@@ -309,6 +309,19 @@ async function fullProfilePayload(
   const bodyMetrics = bodyRaw
     ? { ...bodyRaw, weights: Array.isArray(bodyRaw.weights) ? bodyRaw.weights : [] }
     : null;
+  // Full logged history so a trainer's client page renders the same timeline as
+  // "My history": workouts (full), activities, sleeps and rest/illness periods.
+  const [actsSnap, sleepsSnap, restSnap] = await Promise.all([
+    db.collection('users').doc(target.id).collection('activities').orderBy('startedAt', 'desc').limit(120).get(),
+    db.collection('users').doc(target.id).collection('sleeps').limit(120).get(),
+    db.collection('users').doc(target.id).collection('restPeriods').get(),
+  ]);
+  const history = {
+    workouts: workouts.slice(0, 80),
+    activities: actsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
+    sleeps: sleepsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
+    restPeriods: restSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
+  };
   return {
     viewer: { id: viewer.id, relation, role: viewer.role },
     person: await personJson(target),
@@ -317,6 +330,7 @@ async function fullProfilePayload(
     sessions: recentSessions(workouts, gymMap),
     gyms: gymStats(workouts, gyms),
     topExercises: topExercises(workouts),
+    history,
     notes: await notesFor(target.id),
     audit: relation === 'self' ? await auditFor(target.id) : [],
     bodyMetrics,

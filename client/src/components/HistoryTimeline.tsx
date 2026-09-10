@@ -32,7 +32,7 @@ import type { MuscleGroup } from '../data/exercises';
 import { nightDurationMin, sleepKindOf } from '../sleep';
 import { bmrKcal, overnightKcal } from '../energy';
 import { latestWeight, useStore } from '../store';
-import type { Activity, SleepNight, Workout } from '../types';
+import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 
 type Item =
   | { kind: 'w'; ts: number; w: Workout }
@@ -110,6 +110,9 @@ export function HistoryTimeline({
   onOpenSleep,
   openMuscleHistory,
   showMuscles = true,
+  restPeriodsOverride,
+  prescribedDaysOverride,
+  lookbackOverride,
 }: {
   /** Finished workouts to show. */
   workouts: Workout[];
@@ -131,6 +134,11 @@ export function HistoryTimeline({
   onOpenSleep?: (id: string) => void;
   openMuscleHistory?: (m: MuscleGroup) => void;
   showMuscles?: boolean;
+  /** Client mode: use this person's rest periods / program instead of the
+   *  signed-in user's store (which HistoryTimeline reads by default). */
+  restPeriodsOverride?: RestPeriod[];
+  prescribedDaysOverride?: Set<number>;
+  lookbackOverride?: number;
 }) {
   const { t, locale } = useT();
   const store = useStore();
@@ -147,9 +155,9 @@ export function HistoryTimeline({
   const oldestLogged = loggedDays.length
     ? dayBucket(loggedDays[loggedDays.length - 1].ts)
     : todayK;
-  const presc = prescribedTrainingDays();
-  const lookback = programLookbackDays();
-  const rests = store.restPeriods;
+  const presc = prescribedDaysOverride ?? prescribedTrainingDays();
+  const lookback = lookbackOverride ?? programLookbackDays();
+  const rests = restPeriodsOverride ?? store.restPeriods;
 
   const coveringRest = (dk: number): { mode: string; span: number } | null => {
     for (const r of rests) {
