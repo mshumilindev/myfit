@@ -1464,7 +1464,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             {t.servedFromCache}
           </div>
         )}
-
       </div>
 
       {startPicker && (

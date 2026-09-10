@@ -17,7 +17,16 @@ import { Icon } from '../ui';
 
 export interface Nudge {
   id: string;
-  tone: 'readiness' | 'recovery' | 'analysis' | 'suggest' | 'plan' | 'body' | 'rest' | 'learn' | 'energy';
+  tone:
+    | 'readiness'
+    | 'recovery'
+    | 'analysis'
+    | 'suggest'
+    | 'plan'
+    | 'body'
+    | 'rest'
+    | 'learn'
+    | 'energy';
   /** Higher = more urgent. Orders the overlay (fixed) and the deck. */
   priority: number;
   icon: string;
