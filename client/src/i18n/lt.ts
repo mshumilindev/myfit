@@ -563,6 +563,8 @@ export const lt: Strings = {
   repeat: (name) => `Pakartoti ${name}`,
   autoClosed: 'Uždaryta automatiškai',
   weekDayLetters: ['P', 'A', 'T', 'K', 'P', 'Š', 'S'],
+  dayIll: 'Liga',
+  dayRest: 'Poilsis',
   weekDayNames: [
     'Pirmadienis',
     'Antradienis',

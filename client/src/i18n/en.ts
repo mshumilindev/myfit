@@ -552,6 +552,8 @@ export const en = {
   repeat: (name: string) => `Repeat ${name}`,
   autoClosed: 'Auto-closed',
   weekDayLetters: ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as string[],
+  dayIll: 'Sick day',
+  dayRest: 'Rest day',
   weekDayNames: [
     'Monday',
     'Tuesday',

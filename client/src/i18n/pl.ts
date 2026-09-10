@@ -561,6 +561,8 @@ export const pl: Strings = {
   repeat: (name) => `Powtórz ${name}`,
   autoClosed: 'Auto-zamknięty',
   weekDayLetters: ['P', 'W', 'Ś', 'C', 'P', 'S', 'N'],
+  dayIll: 'Choroba',
+  dayRest: 'Odpoczynek',
   weekDayNames: ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'],
 
   // Today · desktop 3-column (W-04/W-05)

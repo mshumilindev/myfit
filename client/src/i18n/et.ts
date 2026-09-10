@@ -547,6 +547,8 @@ export const et: Strings = {
   repeat: (name) => `Korda ${name}`,
   autoClosed: 'Auto-suletud',
   weekDayLetters: ['E', 'T', 'K', 'N', 'R', 'L', 'P'],
+  dayIll: 'Haige',
+  dayRest: 'Puhkus',
   weekDayNames: [
     'Esmaspäev',
     'Teisipäev',

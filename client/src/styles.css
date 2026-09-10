@@ -1637,6 +1637,18 @@ i > svg {
 .weekstrip .dot.today {
   background: var(--color-accent);
 }
+.weekstrip .wk-ic {
+  display: block;
+  margin: 3px auto 0;
+  font-size: 13px;
+  line-height: 1;
+}
+.weekstrip .wk-ic.ill {
+  color: var(--color-danger);
+}
+.weekstrip .wk-ic.rest {
+  color: var(--color-rest-300);
+}
 
 .reminder-card {
   display: flex;

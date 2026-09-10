@@ -559,6 +559,8 @@ export const uk: Strings = {
   repeat: (name) => `Повторити ${name}`,
   autoClosed: 'Авто-закрито',
   weekDayLetters: ['П', 'В', 'С', 'Ч', 'П', 'С', 'Н'],
+  dayIll: 'Хворів',
+  dayRest: 'Відпочинок',
   weekDayNames: ['Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота', 'Неділя'],
 
   // Today · desktop 3-column (W-04/W-05)
