@@ -860,8 +860,8 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
-    // Open the editor straight from the ghost row (no set logged yet).
-    await userEvent.click(screen.getByRole('button', { name: '8' }));
+    // Open the editor for the not-yet-logged set from the focused ghost row.
+    await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
     const dialog = screen.getByRole('dialog');
 
     await userEvent.click(within(dialog).getByRole('button', { name: /Set type/ }));
@@ -907,13 +907,13 @@ describe('F-03 session UI', () => {
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
     const cards = [...container.querySelectorAll('.exercise-card')];
-    expect(cards).toHaveLength(2);
+    expect(cards).toHaveLength(1);
     // `.empty-card` is the shared empty-state box (flex, align-items: flex-start);
     // on an exercise card it collapsed the set table to its content width.
     expect(cards.some((c) => c.classList.contains('empty-card'))).toBe(false);
-    const fresh = cards[1];
-    expect(fresh.querySelector('.set-grid.header')).toBeTruthy();
-    expect(fresh.querySelector('.ghost-row')).toBeTruthy();
+    const fresh = cards[0];
+    expect(fresh.querySelector('.gset')).toBeTruthy();
+    expect(within(fresh as HTMLElement).getByRole('button', { name: 'Log' })).toBeTruthy();
   });
 
   it('inserts a warm-up marker card with no sets to log', async () => {
