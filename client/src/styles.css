@@ -9736,6 +9736,31 @@ i > svg {
   margin-bottom: 14px;
 }
 
+/* Weekly volume as a wide stat-style card (matches .td-stat tiles, full width). */
+.td-weekvol {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.td-weekvol-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.td-weekvol-head .l {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.td-weekvol .bars.bars-compact {
+  height: 34px;
+  gap: 5px;
+}
+
 /* Section headings (History, Templates, Records…) get a divider from the block
    above with symmetric breathing room, so every section break reads the same. */
 .section-divide {

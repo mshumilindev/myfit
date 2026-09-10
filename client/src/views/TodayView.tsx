@@ -41,9 +41,9 @@ import { bmrKcal, overnightKcal } from '../energy';
 import { nightDurationMin, finishedNights } from '../sleep';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
-import { SleepForgotBanner, SleepAutoFilledCard, planFor } from '../components/SleepAutomation';
+import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
-import { ConfirmDialog, ExerciseName, Icon, Sheet } from '../ui';
+import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -194,8 +194,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // sleep never overlap. While any one runs, no other can be started: start
   // controls go disabled and a tap resumes the live one via resumeLive().
   const busy = !!open || !!liveAct || !!sleepLive;
-  // True for starting a *sleep* specifically (a session/activity blocks it).
-  const sleepBlocked = !!open || !!liveAct;
   function resumeLive(): boolean {
     if (open) {
       shell.openOverlay({ screen: 'session', workoutId: open.id });
@@ -231,18 +229,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const now = useNowTick(!!open);
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
-  // Minutes until the usual bedtime (schedule → pattern), circular in
-  // (-720, 720]; null when Spotter has no bedtime to go on yet.
-  const sleepToBed = useMemo(() => {
-    const plan = planFor(store, new Date(now).getDay(), now);
-    if (!plan) return null;
-    const d = new Date(now);
-    const nowMin = d.getHours() * 60 + d.getMinutes();
-    let diff = (((plan.bedMin - nowMin) % 1440) + 1440) % 1440;
-    if (diff > 720) diff -= 1440;
-    return diff;
-  }, [store, now]);
-
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
   const historyDayCount = buildHistoryDays(finished, store.activities, store.sleeps).length;
@@ -401,7 +387,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     }
   }
   const newPrs = [...byName.values()].filter((r) => now - r.recTs < 14 * DAY_MS).length;
-  const records = [...byName.entries()].sort((a, b) => b[1].recW - a[1].recW).slice(0, 3);
 
   const thisWeek = weekStartOf(now);
   const weeks: number[] = [];
@@ -1136,6 +1121,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
+        {programCard}
+        {!(assignment && assignedActive) && hasHistory && (
+          <div className="today-weekstrip-card">
+            <WeekStrip />
+          </div>
+        )}
+
         {banners}
         {liveAct && (
           <button
@@ -1291,13 +1283,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <SleepAutoFilledCard
           onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
         />
-        {programCard}
-        {!(assignment && assignedActive) && hasHistory && (
-          <div className="today-weekstrip-card">
-            <WeekStrip />
-          </div>
-        )}
-
         {!liveAct && hasHistory && (
           <div className="td-pill-wrap">
             <svg className="glass-defs" aria-hidden width="0" height="0">
@@ -1394,17 +1379,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               </div>
             </div>
 
-            <div>
-              <div className="td-block-head section-divide">
-                <div className="section-label">{t.weeklyVolume}</div>
+            <div className="td-weekvol">
+              <div className="td-weekvol-head">
+                <span className="l">{t.weeklyVolume}</span>
                 {deltaPct !== null && (
-                  <div className="td-delta">
+                  <span className="td-delta">
                     {deltaPct >= 0 ? '+' : '−'}
                     {Math.abs(deltaPct)}%
-                  </div>
+                  </span>
                 )}
               </div>
-              <div className="bars">
+              <div className="bars bars-compact">
                 {weeks.map((v, i) => (
                   <div
                     key={i}
@@ -1480,37 +1465,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
-        <div className="today-sleep">
-          <SleepPanel
-            shell={shell}
-            onClose={() => {}}
-            toBedMin={sleepToBed}
-            blocked={sleepBlocked}
-          />
-        </div>
       </div>
-
-      <aside className="pane-side">
-        {records.length > 0 && (
-          <>
-            <div className="section-label section-divide">{t.records}</div>
-            {records.map(([name, r]) => {
-              const recent = now - r.recTs < 14 * DAY_MS;
-              return (
-                <button
-                  key={name}
-                  className="record-row"
-                  onClick={() => shell.openOverlay({ screen: 'exercise-history', name })}
-                >
-                  <ExerciseName name={name} className="n" />
-                  <span className="v">{r.recW} kg</span>
-                  {recent && <span className="tag tag-ok">{t.record}</span>}
-                </button>
-              );
-            })}
-          </>
-        )}
-      </aside>
 
       {startPicker && (
         <GymPicker
