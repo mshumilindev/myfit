@@ -173,6 +173,9 @@ const LearnApp = lazy(() => import('./LearnApp').then((module) => ({ default: mo
 const ProfileView = lazy(() =>
   import('./views/ProfileView').then((module) => ({ default: module.ProfileView })),
 );
+const ClientPage = lazy(() =>
+  import('./views/ClientPage').then((module) => ({ default: module.ClientPage })),
+);
 const ProgramsView = lazy(() =>
   import('./views/ProgramsView').then((module) => ({ default: module.ProgramsView })),
 );
@@ -193,6 +196,7 @@ export type Overlay =
   | { screen: 'recap'; period: string }
   | { screen: 'recap-story'; period: string }
   | { screen: 'profile'; userId: string }
+  | { screen: 'client-page'; clientId: string }
   | { screen: 'trainee-session'; athleteId: string; workoutId: string; athleteName?: string }
   | {
       screen: 'gym';
@@ -1302,6 +1306,9 @@ export function App() {
       )}
       {activeOverlay?.screen === 'profile' && (
         <ProfileView userId={activeOverlay.userId} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'client-page' && (
+        <ClientPage clientId={activeOverlay.clientId} shell={shell} onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
     </Suspense>

@@ -35,7 +35,7 @@ import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n
 import { WeekStrip } from '../components/WeekStrip';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
-import { TrainerLiveBanner } from '../components/TrainerLiveBanner';
+import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
 import { bmrKcal, overnightKcal } from '../energy';
 import { nightDurationMin, finishedNights } from '../sleep';
@@ -1101,11 +1101,27 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     });
   }
 
+  // A trainer's Today is just their clients — nothing else, to avoid clutter.
+  if (getRole() === 'trainer') {
+    return (
+      <div className="screen paned">
+        <div className="pane-main">
+          <TrainerClientsStrip
+            onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`screen paned${!liveAct && hasHistory ? ' today-has-pill' : ''}`}>
       <div className="pane-main">
-        {(getRole() === 'trainer' || getRole() === 'admin') && store.liveTrainees.length > 0 && (
-          <TrainerLiveBanner trainees={store.liveTrainees} shell={shell} />
+        {/* An admin who is also a trainer sees their clients atop their own Today. */}
+        {getRole() === 'admin' && (
+          <TrainerClientsStrip
+            onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
+          />
         )}
         {hasHistory ? (
           <div className="td-topbar">
