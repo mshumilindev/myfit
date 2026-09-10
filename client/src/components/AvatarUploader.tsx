@@ -11,6 +11,7 @@ import { db, storage } from '../firebase';
 import { useT } from '../i18n';
 import { Icon } from '../ui';
 import { Avatar, invalidateAvatarCache } from './Avatar';
+import { writeAvatarBlob } from '../avatarStore';
 
 export function AvatarUploader({
   userId,
@@ -207,17 +208,20 @@ export function AvatarUploader({
       if (!uid) throw new Error(t.error);
       // Upload to Storage (access-gated by storage.rules), then flag the photo
       // on the user's own doc so `hasPhoto` persists across devices.
+      const now = Date.now();
       await trackMutation(
         (async () => {
           await uploadBytes(ref(storage, `avatars/${uid}/photo`), blob, {
             contentType: 'image/jpeg',
             cacheControl: 'no-store',
           });
-          await updateDoc(doc(db, 'users', uid), { avatarExt: 'jpg', updatedAt: Date.now() });
+          await updateDoc(doc(db, 'users', uid), { avatarExt: 'jpg', updatedAt: now });
         })(),
       );
       const preview = URL.createObjectURL(blob);
       invalidateAvatarCache(uid);
+      // Persist the fresh photo at its new revision so no reload re-downloads it.
+      writeAvatarBlob(uid, now, blob);
       clearPicked();
       onUploaded(preview);
     } catch (e) {

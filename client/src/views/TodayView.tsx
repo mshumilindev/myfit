@@ -1117,12 +1117,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   return (
     <div className={`screen paned${!liveAct && hasHistory ? ' today-has-pill' : ''}`}>
       <div className="pane-main">
-        {/* An admin who is also a trainer sees their clients atop their own Today. */}
-        {getRole() === 'admin' && (
-          <TrainerClientsStrip
-            onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
-          />
-        )}
         {hasHistory ? (
           <div className="td-topbar">
             <div>
@@ -1166,6 +1160,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
 
+        {/* An admin who is also a trainer sees their clients between the day
+            heading and the calendar. */}
+        {getRole() === 'admin' && (
+          <TrainerClientsStrip
+            onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
+          />
+        )}
         {programCard}
         {!(assignment && assignedActive) && hasHistory && (
           <div className="today-weekstrip-card">

@@ -35,6 +35,8 @@ export interface StoredWorkout {
   finishedAt: number | null;
   autoFinished?: boolean;
   gymId?: string | null;
+  /** Program day name this session came from (e.g. "Push day"); null if none. */
+  dayName?: string | null;
   exercises?: StoredExercise[];
 }
 

@@ -350,10 +350,6 @@ export const LESSON_TX: Record<Lang, Record<string, Tx>> = {
       title: 'Тренування клієнта',
       blurb: 'Відкрийте учасника, щоб переглянути тренування й призначити програму.',
     },
-    'trainer-notes': {
-      title: 'Нотатки тренера',
-      blurb: 'Залишайте приватні нотатки про учасника, які бачать лише тренери.',
-    },
     'users-admin': {
       title: 'Керування користувачами',
       blurb: 'Переглядайте всі акаунти, шукайте й відкривайте користувача як адмін.',
@@ -661,10 +657,6 @@ export const LESSON_TX: Record<Lang, Record<string, Tx>> = {
     'client-detail': {
       title: 'Trenuj klienta',
       blurb: 'Otwórz uczestnika, aby przejrzeć trening i przypisać program.',
-    },
-    'trainer-notes': {
-      title: 'Notatki trenera',
-      blurb: 'Zostawiaj prywatne notatki o uczestniku, widoczne tylko dla trenerów.',
     },
     'users-admin': {
       title: 'Zarządzaj użytkownikami',
@@ -978,10 +970,6 @@ export const LESSON_TX: Record<Lang, Record<string, Tx>> = {
       title: 'Treniruokite klientą',
       blurb: 'Atverkite narį, kad peržiūrėtumėte treniruotes ir priskirtumėte programą.',
     },
-    'trainer-notes': {
-      title: 'Trenerio pastabos',
-      blurb: 'Palikite privačias pastabas apie narį, matomas tik treneriams.',
-    },
     'users-admin': {
       title: 'Tvarkyti naudotojus',
       blurb: 'Peržiūrėkite visas paskyras, ieškokite ir atverkite naudotoją kaip administratorius.',
@@ -1286,10 +1274,6 @@ export const LESSON_TX: Record<Lang, Record<string, Tx>> = {
     'client-detail': {
       title: 'Treeni klienti',
       blurb: 'Ava liige, et vaadata treeninguid ja määrata programm.',
-    },
-    'trainer-notes': {
-      title: 'Treeneri märkmed',
-      blurb: 'Jäta liikme kohta privaatseid märkmeid, mida näevad vaid treenerid.',
     },
     'users-admin': {
       title: 'Halda kasutajaid',

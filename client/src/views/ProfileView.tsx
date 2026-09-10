@@ -88,7 +88,6 @@ interface ProfileData {
     volumeKg: number;
     bestE1rm: number | null;
   }>;
-  notes: Array<{ id: string; text: string; createdAt: number; trainerName: string }>;
   audit: Array<{ at: number; resource: string; readerName: string | null; readerRole: string }>;
   /** Target user's body metrics for read-only admin/trainer view (§6a.4);
    *  null when the user has none. */
@@ -140,10 +139,7 @@ export function ProfileView({
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordEditing, setPasswordEditing] = useState(false);
-  const [trainerNote, setTrainerNote] = useState('');
   const [ptab, setPtab] = useState<'overview' | 'body' | 'settings'>('overview');
-  const [savingNote, setSavingNote] = useState(false);
-  const [noteError, setNoteError] = useState<string | null>(null);
   const [avatarRefresh, setAvatarRefresh] = useState(0);
   const [profileEditing, setProfileEditing] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
@@ -321,25 +317,6 @@ export function ProfileView({
       setPasswordError(e instanceof Error ? e.message : t.error);
     } finally {
       setSavingPassword(false);
-    }
-  }
-
-  async function saveTrainerNote() {
-    if (typeof load !== 'object' || load.viewer.relation !== 'trainer') return;
-    const text = trainerNote.trim();
-    if (!text) return;
-    setSavingNote(true);
-    setNoteError(null);
-    try {
-      await callFn('trainerAddNote', { id: load.person.id, text });
-      const next = await callFn<ProfileData>('profileUser', { id: userId });
-      commitProfile(next);
-      setTrainerNote('');
-      shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileNoteSaved });
-    } catch (e) {
-      setNoteError(e instanceof Error ? e.message : t.error);
-    } finally {
-      setSavingNote(false);
     }
   }
 
@@ -1011,49 +988,6 @@ export function ProfileView({
             </section>
           )}
 
-          {ptab === 'overview' && (load.notes.length > 0 || load.viewer.relation === 'trainer') && (
-            <section className="profile-section profile-notes-section">
-              <div className="field-label">
-                {load.viewer.relation === 'trainer' ? t.trNotes : t.profileNotes}
-              </div>
-              {load.notes.length === 0 ? (
-                <div className="detail-muted">{t.profileNoNotes}</div>
-              ) : (
-                load.notes.map((n) => (
-                  <div key={n.id} className="tr-note">
-                    <div>{n.text}</div>
-                    <div className="m">
-                      {fmtDayMonth(n.createdAt, locale)} ·{' '}
-                      {load.viewer.relation === 'trainer' ? t.trNotePrivate : n.trainerName}
-                    </div>
-                  </div>
-                ))
-              )}
-              {load.viewer.relation === 'trainer' && (
-                <div className="tr-note-add">
-                  <input
-                    className="input"
-                    placeholder={t.trAddNote}
-                    value={trainerNote}
-                    onChange={(e) => setTrainerNote(e.currentTarget.value)}
-                  />
-                  <button
-                    className="btn btn-secondary"
-                    disabled={savingNote || !trainerNote.trim()}
-                    onClick={saveTrainerNote}
-                  >
-                    {t.save}
-                  </button>
-                </div>
-              )}
-              {noteError && (
-                <div className="field-error">
-                  <Icon name="warning-circle" />
-                  {noteError}
-                </div>
-              )}
-            </section>
-          )}
         </>
       )}
       {confirmSignOut && (

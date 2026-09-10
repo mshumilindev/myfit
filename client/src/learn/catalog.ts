@@ -457,12 +457,6 @@ export const CATALOG: Topic[] = [
         'trainer',
       ],
       [
-        'trainer-notes',
-        'Trainer notes',
-        'Leave private notes on a member only coaches can read.',
-        'trainer',
-      ],
-      [
         'users-admin',
         'Manage users',
         'See every account, search, and open a user as an admin.',

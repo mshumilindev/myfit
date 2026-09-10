@@ -4,9 +4,14 @@
  * ring reflects recency: a gold ring for a fresh finished session, a red ring
  * for a dormant client, a quiet ring otherwise. Sorted most-recently-trained
  * first, never-trained last. Shown for trainers and for admins who have clients.
+ *
+ * Cached like the rest of the app: the list paints instantly from localStorage,
+ * the network is skipped while the cache is fresh, and a refetch only re-renders
+ * when the payload actually changed (delta check). Avatars carry a revision so
+ * their photos are served from the persistent blob cache until they change.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { cachePeek, cacheSet, callFn } from '../api';
+import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
 import { Avatar } from './Avatar';
 import { Icon } from '../ui';
 
@@ -14,11 +19,14 @@ interface StripClient {
   id: string;
   name: string;
   avatar: boolean;
+  avatarRev: number;
   lastSessionAt: number | null;
   dormantDays: number | null;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const CLIENTS_TTL_MS = 2 * 60 * 1000;
+const CACHE_KEY = 'trainerClients';
 
 function firstName(name: string): string {
   return name.trim().split(/\s+/)[0] || name;
@@ -26,14 +34,20 @@ function firstName(name: string): string {
 
 export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: string) => void }) {
   const [now] = useState(() => Date.now());
-  const cached = cachePeek<StripClient[]>('trainerClients');
+  const cached = cachePeek<StripClient[]>(CACHE_KEY);
   const [clients, setClients] = useState<StripClient[] | null>(cached?.data ?? null);
 
   const refresh = useCallback(() => {
-    callFn<{ clients: StripClient[] }>('trainerClients')
+    // Skip the network entirely while the cached list is still fresh.
+    if (cacheFresh(cachePeek<StripClient[]>(CACHE_KEY), CLIENTS_TTL_MS)) return;
+    callFn<{ clients: StripClient[] }>(CACHE_KEY)
       .then((d) => {
-        cacheSet('trainerClients', d.clients);
-        setClients(d.clients);
+        const prev = cachePeek<StripClient[]>(CACHE_KEY)?.data;
+        cacheSet(CACHE_KEY, d.clients); // always refresh the freshness stamp
+        // Delta: only re-render when the roster actually changed.
+        if (!prev || JSON.stringify(prev) !== JSON.stringify(d.clients)) {
+          setClients(d.clients);
+        }
       })
       .catch(() => {
         /* keep whatever is cached */
@@ -64,7 +78,13 @@ export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: strin
               aria-label={c.name}
             >
               <span className="tcs-ring">
-                <Avatar userId={c.id} name={c.name} hasPhoto={c.avatar} size={54} />
+                <Avatar
+                  userId={c.id}
+                  name={c.name}
+                  hasPhoto={c.avatar}
+                  rev={c.avatarRev}
+                  size={54}
+                />
                 {dormant && (
                   <span className="tcs-alert" aria-hidden>
                     <Icon name="warning" weight="fill" />

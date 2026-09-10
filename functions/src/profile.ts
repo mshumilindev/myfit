@@ -66,6 +66,7 @@ async function personJson(u: UserDoc) {
     trainerId: u.trainerId,
     trainerName: trainer ? displayName(trainer) : null,
     clientCount,
+    avatarRev: u.avatarExt ? (u.updatedAt ?? 0) : 0,
     avatar: !!u.avatarExt,
   };
 }
@@ -171,6 +172,7 @@ function recentSessions(workouts: StoredWorkout[], gyms: Map<string, GymDoc>) {
       durationMs: w.finishedAt ? w.finishedAt - w.startedAt : null,
       gymId: gym?.id ?? null,
       gymName: gym?.name ?? null,
+      dayName: w.dayName ?? null,
       sets: stats.sets,
       exercises,
       volumeKg: stats.volumeKg,

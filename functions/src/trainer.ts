@@ -73,6 +73,7 @@ export const trainerClients = onCall(async (req) => {
         id: u.id,
         name: displayName(u),
         avatar: !!u.avatarExt,
+        avatarRev: u.avatarExt ? (u.updatedAt ?? 0) : 0,
         lastSessionAt: last.at,
         live: last.live,
         liveStartedAt: last.liveStartedAt,

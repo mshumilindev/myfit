@@ -1,34 +1,44 @@
 /**
  * Client page — the trainer's history-first view of one client (not their
- * profile). Opened from the clients strip on Today. Read-only: training history
- * first, then a compact stats row, top lifts, and trainer notes. No live
- * sessions (a trainer can't see those) — in-progress sessions are filtered out.
+ * profile). Opened from the clients strip on Today. Read-only: a highlighted
+ * "last time on this weekday" card, then the full training history, a compact
+ * stats row and top lifts. No live sessions (a trainer can't see those) — any
+ * in-progress session is filtered out. Every session opens the read-only
+ * session detail (all exercises expanded).
+ *
+ * Cached like the rest of the app: paints instantly from localStorage, skips the
+ * network while the cache is fresh, and only re-renders on a real change (delta).
  */
 import { useCallback, useEffect, useState } from 'react';
-import { cachePeek, cacheSet, callFn } from '../api';
-import { fmtDayMonth, fmtTonnes, useT } from '../i18n';
+import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
+import { fmtDayMonth, fmtTonnes, fmtWeekday, useT } from '../i18n';
+import type { Strings } from '../i18n/en';
+import { muscleInfoByName } from '../data/exercises';
 import { Icon } from '../ui';
 import { Avatar } from '../components/Avatar';
 import type { Shell } from '../App';
 
+interface ClientSession {
+  id: string;
+  startedAt: number;
+  live: boolean;
+  sets: number;
+  exercises: number;
+  volumeKg: number;
+  gymName: string | null;
+  dayName: string | null;
+  exerciseNames: string[];
+}
+
 interface ClientData {
-  person: { id: string; name: string; avatar: boolean; joinedAt: number };
+  person: { id: string; name: string; avatar: boolean; avatarRev: number; joinedAt: number };
   summary: {
     sessions30: number;
     sets: number;
     volume7: number;
     lastSessionAt: number | null;
   };
-  sessions: Array<{
-    id: string;
-    startedAt: number;
-    live: boolean;
-    sets: number;
-    exercises: number;
-    volumeKg: number;
-    gymName: string | null;
-    exerciseNames: string[];
-  }>;
+  sessions: ClientSession[];
   topExercises: Array<{
     name: string;
     sets: number;
@@ -36,11 +46,34 @@ interface ClientData {
     volumeKg: number;
     bestE1rm: number | null;
   }>;
-  notes: Array<{ id: string; text: string; createdAt: number; trainerName: string }>;
+}
+
+const PROFILE_TTL_MS = 3 * 60 * 1000;
+
+/** A display title for a session: the program day it came from, else the
+ *  dominant muscle group across its exercises, else the first exercise. */
+function workoutTitle(s: ClientSession, t: Strings): string {
+  if (s.dayName && s.dayName.trim()) return s.dayName.trim();
+  const tally = new Map<string, number>();
+  for (const nm of s.exerciseNames) {
+    const g = muscleInfoByName(nm)?.primary;
+    if (g) tally.set(g, (tally.get(g) ?? 0) + 1);
+  }
+  let best: string | null = null;
+  let bestN = 0;
+  for (const [g, n] of tally) {
+    if (n > bestN) {
+      best = g;
+      bestN = n;
+    }
+  }
+  if (best) return t.muscleGroups[best as keyof typeof t.muscleGroups] ?? best;
+  return s.exerciseNames[0] ?? t.playUntitled;
 }
 
 export function ClientPage({
   clientId,
+  shell,
   onClose,
 }: {
   clientId: string;
@@ -48,16 +81,17 @@ export function ClientPage({
   onClose: () => void;
 }) {
   const { t, locale } = useT();
+  const [todayDow] = useState(() => new Date().getDay());
   const cacheKey = `profile.${clientId}`;
   const [data, setData] = useState<ClientData | null>(cachePeek<ClientData>(cacheKey)?.data ?? null);
-  const [note, setNote] = useState('');
-  const [savingNote, setSavingNote] = useState(false);
 
   const refresh = useCallback(() => {
+    if (cacheFresh(cachePeek<ClientData>(cacheKey), PROFILE_TTL_MS)) return;
     callFn<ClientData>('profileUser', { id: clientId })
       .then((d) => {
+        const prev = cachePeek<ClientData>(cacheKey)?.data;
         cacheSet(cacheKey, d);
-        setData(d);
+        if (!prev || JSON.stringify(prev) !== JSON.stringify(d)) setData(d);
       })
       .catch(() => {
         /* keep cache */
@@ -68,20 +102,19 @@ export function ClientPage({
     refresh();
   }, [refresh]);
 
-  const addNote = async () => {
-    const text = note.trim();
-    if (!text) return;
-    setSavingNote(true);
-    try {
-      await callFn('trainerAddNote', { id: clientId, text });
-      setNote('');
-      refresh();
-    } finally {
-      setSavingNote(false);
-    }
-  };
-
   const sessions = (data?.sessions ?? []).filter((s) => !s.live);
+  // Most recent finished session on the same weekday the trainer is viewing.
+  const sameDay = sessions.find((s) => new Date(s.startedAt).getDay() === todayDow);
+
+  const openSession = (s: ClientSession) => {
+    if (!data) return;
+    shell.openOverlay({
+      screen: 'trainee-session',
+      athleteId: clientId,
+      workoutId: s.id,
+      athleteName: data.person.name,
+    });
+  };
 
   return (
     <div className="screen client-page">
@@ -91,7 +124,13 @@ export function ClientPage({
         </button>
         {data && (
           <div className="cp-id">
-            <Avatar userId={data.person.id} name={data.person.name} hasPhoto={data.person.avatar} size={52} />
+            <Avatar
+              userId={data.person.id}
+              name={data.person.name}
+              hasPhoto={data.person.avatar}
+              rev={data.person.avatarRev}
+              size={52}
+            />
             <div className="cp-id-text">
               <h2>{data.person.name}</h2>
               {data.summary.lastSessionAt && (
@@ -101,6 +140,23 @@ export function ClientPage({
           </div>
         )}
       </div>
+
+      {sameDay && (
+        <button className="cp-sameday" onClick={() => openSession(sameDay)}>
+          <div className="cp-sameday-label">
+            <Icon name="clock-counter-clockwise" />
+            <span>
+              {t.clientSameDayLabel} · {fmtWeekday(sameDay.startedAt, locale)}
+            </span>
+          </div>
+          <div className="cp-sameday-name">{workoutTitle(sameDay, t)}</div>
+          <div className="cp-sameday-meta">
+            {fmtDayMonth(sameDay.startedAt, locale)} · {sameDay.exercises} ·{' '}
+            {sameDay.sets} {t.setsStat.toLowerCase()}
+          </div>
+          <Icon name="caret-right" className="cp-sameday-go" />
+        </button>
+      )}
 
       {data && (
         <div className="cp-stats">
@@ -119,6 +175,17 @@ export function ClientPage({
         </div>
       )}
 
+      {data && (
+        <button
+          className="cp-profile-btn"
+          onClick={() => shell.openOverlay({ screen: 'profile', userId: clientId })}
+        >
+          <Icon name="user" />
+          <span>{t.clientOpenProfile}</span>
+          <Icon name="arrow-up-right" className="cp-profile-go" />
+        </button>
+      )}
+
       <section className="cp-section">
         <div className="section-label">{t.clientHistory}</div>
         {sessions.length === 0 ? (
@@ -126,18 +193,19 @@ export function ClientPage({
         ) : (
           <div className="cp-list">
             {sessions.map((s) => (
-              <div key={s.id} className="cp-session">
+              <button key={s.id} className="cp-session" onClick={() => openSession(s)}>
                 <div className="cp-session-top">
-                  <span className="d">{fmtDayMonth(s.startedAt, locale)}</span>
-                  {s.gymName && <span className="g">{s.gymName}</span>}
+                  <span className="name">{workoutTitle(s, t)}</span>
+                  <span className="date">{fmtDayMonth(s.startedAt, locale)}</span>
                 </div>
                 <div className="cp-session-meta">
+                  {s.gymName ? `${s.gymName} · ` : ''}
                   {s.exercises} · {s.sets} {t.setsStat.toLowerCase()} · {fmtTonnes(s.volumeKg)}
                 </div>
                 {s.exerciseNames.length > 0 && (
                   <div className="cp-session-ex">{s.exerciseNames.slice(0, 4).join(' · ')}</div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -158,37 +226,6 @@ export function ClientPage({
                 </span>
               </div>
             ))}
-          </div>
-        </section>
-      )}
-
-      {data && (
-        <section className="cp-section">
-          <div className="section-label">{t.clientNotesLabel}</div>
-          <div className="cp-notes">
-            {data.notes.map((n) => (
-              <div key={n.id} className="cp-note">
-                <span className="txt">{n.text}</span>
-                <span className="meta">
-                  {n.trainerName} · {fmtDayMonth(n.createdAt, locale)}
-                </span>
-              </div>
-            ))}
-            <div className="cp-note-add">
-              <input
-                className="input"
-                placeholder={t.trAddNote}
-                value={note}
-                onChange={(e) => setNote(e.currentTarget.value)}
-              />
-              <button
-                className="btn btn-secondary"
-                disabled={savingNote || !note.trim()}
-                onClick={addNote}
-              >
-                <Icon name="plus" />
-              </button>
-            </div>
           </div>
         </section>
       )}

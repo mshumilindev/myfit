@@ -31959,16 +31959,63 @@ body {
 
 /* ── Trainer clients strip (Instagram-stories row on Today) ─────────────── */
 .tcs {
-  padding: 8px 0 14px;
-  margin-bottom: 2px;
-  border-bottom: 1px solid var(--color-divider);
+  /* Full-bleed liquid-glass band (not a border) sets the strip apart from the
+     calendar. The .screen wrapper pads 20px on phones, so pull the band out to
+     the true edges; the row restores that inset so avatars align with every
+     other block. */
+  position: relative;
+  isolation: isolate;
+  /* Top padding is the bezel->avatar gap. The band keeps its full height (the
+     tail below the name just fades out), but the next block is pulled up so the
+     name->next-block gap matches that same top gap (12px): pane gap (--space-4)
+     + this negative margin + the 18px tail = 12px measured from the name. */
+  padding: 12px 0 18px;
+  margin-inline: -20px;
+  margin-bottom: calc(-6px - var(--space-4));
+}
+.tcs::before {
+  /* Translucent bronze glass on a masked layer so it dissolves to zero at the
+     bottom (no hard edge) while the avatars above stay fully opaque: an accent
+     catch-light, a hairline geometric weave, and a bronze top sheen. A crisp
+     lit rim across the top reads as a neat bezel. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      120% 150% at 14% -30%,
+      color-mix(in srgb, var(--color-accent) 6%, transparent),
+      transparent 58%
+    ),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.016) 0 1px, transparent 1px 11px),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-accent) 6%, transparent),
+      color-mix(in srgb, var(--color-accent) 2%, transparent) 45%,
+      transparent
+    );
+  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-accent) 26%, rgba(255, 255, 255, 0.16));
+  -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 50%, transparent 100%);
 }
 .tcs-row {
   display: flex;
   gap: 14px;
   overflow-x: auto;
-  padding: 0 var(--gutter);
+  padding: 0 20px;
   scrollbar-width: none;
+}
+@media (min-width: 720px) {
+  /* On desktop the pane pads 30px instead — match it on both sides. */
+  .tcs {
+    margin-inline: -30px;
+  }
+  .tcs-row {
+    padding: 0 30px;
+  }
 }
 .tcs-row::-webkit-scrollbar {
   display: none;
@@ -32048,8 +32095,9 @@ body {
 }
 .client-page .cp-head {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
 }
 .client-page .cp-head .back {
   width: 38px;
@@ -32104,6 +32152,33 @@ body {
   font-size: 11px;
   color: var(--color-neutral-500);
 }
+/* Secondary route into the person's full profile in the users app. */
+.cp-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.cp-profile-btn:active {
+  background: var(--color-neutral-900);
+}
+.cp-profile-btn > span {
+  flex: 1;
+  text-align: left;
+}
+.cp-profile-btn .cp-profile-go {
+  color: var(--color-neutral-500);
+  font-size: 16px;
+}
 .cp-section {
   display: flex;
   flex-direction: column;
@@ -32121,11 +32196,20 @@ body {
 }
 .cp-session {
   background: var(--color-surface);
+  border: none;
   border-radius: var(--radius-lg);
   padding: 13px 14px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.14s ease;
+}
+.cp-session:active {
+  background: var(--color-neutral-900);
 }
 .cp-session-top {
   display: flex;
@@ -32133,13 +32217,72 @@ body {
   justify-content: space-between;
   gap: 10px;
 }
-.cp-session-top .d {
-  font-size: 15px;
-  font-weight: 600;
+/* Workout name leads; the date is the quiet trailing caption. */
+.cp-session-top .name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
-.cp-session-top .g {
+.cp-session-top .date {
+  flex: none;
   font-size: 12px;
   color: var(--color-neutral-500);
+}
+/* Highlighted "last time on this weekday" card, in the app's bronze accent. */
+.cp-sameday {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 14px 40px 14px 16px;
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 42%, transparent);
+  background:
+    radial-gradient(
+      120% 160% at 90% -20%,
+      color-mix(in srgb, var(--color-accent) 16%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-accent) 12%, transparent),
+      color-mix(in srgb, var(--color-accent) 4%, transparent)
+    );
+}
+.cp-sameday-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.cp-sameday-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.cp-sameday-meta {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.cp-sameday-go {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: color-mix(in srgb, var(--color-accent) 70%, var(--color-neutral-400));
+  font-size: 18px;
 }
 .cp-session-meta {
   font-size: 12px;
