@@ -15104,7 +15104,7 @@ button.exd-media {
   gap: 8px;
   width: 100%;
   margin-top: 16px;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   min-height: 46px;
   padding: 0 16px;
   border: 1px solid var(--color-divider);
@@ -23473,15 +23473,29 @@ button.badge {
 .hist-tl {
   display: flex;
   flex-direction: column;
+  --gap: 26px;
+  --zpad: 9px;
 }
 .hist-tl-day {
   display: flex;
   gap: 13px;
+  position: relative;
 }
-/* Very subtle zebra so consecutive days are easier to scan. */
-.hist-tl-day:nth-child(even) {
-  background: rgba(255, 255, 255, 0.012);
-  border-radius: 10px;
+/* Very subtle zebra so consecutive days are easier to scan. The band bleeds to
+   the screen edges (clipped by .screen's overflow-x) with a small top/bottom
+   inset so consecutive bands stay separated. */
+.hist-tl-day:nth-child(even)::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--zpad));
+  bottom: calc(var(--gap) - var(--zpad));
+  left: -50vw;
+  right: -50vw;
+  background: rgba(255, 255, 255, 0.013);
+}
+.hist-tl-day.is-last:nth-child(even)::before {
+  bottom: calc(-1 * var(--zpad));
 }
 .hist-tl-day.st-trained {
   --nc: var(--color-ok);
@@ -23545,7 +23559,7 @@ button.badge {
 .hist-tl-body {
   flex: 1;
   min-width: 0;
-  padding-bottom: 34px;
+  padding-bottom: var(--gap);
   display: flex;
   flex-direction: column;
   gap: 8px;
