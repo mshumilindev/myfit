@@ -498,6 +498,14 @@ export function SessionView(props: {
     sortedExercises.find(incompleteById)?.id ??
     sortedExercises[0]?.id ??
     null;
+  // The next not-yet-started exercise after the active one — drives the
+  // "start next exercise" shortcut on the active card.
+  const activeIdx = sortedExercises.findIndex((e) => e.id === activeExerciseId);
+  const nextEx =
+    activeIdx >= 0
+      ? (sortedExercises.slice(activeIdx + 1).find((e) => !isMarkerExercise(e) && e.sets.length === 0) ??
+        null)
+      : null;
   // The left milestone rail shows on the phone during a LIVE session once
   // there's more than one exercise (not in history); the screen gets a class so
   // the content can inset to clear it.
@@ -745,7 +753,6 @@ export function SessionView(props: {
         : null;
     const groupDone = grp !== null && ex.sets.length >= grp.round;
     const showGhost = !grp || grp.active;
-    const focus = live && !grp && !timed && !marker && activeExerciseId === ex.id;
     const rowCls = grp ? ' rrow' : '';
     const sortedSets = [...ex.sets].sort((a, b) => a.position - b.position);
     return (
@@ -993,83 +1000,6 @@ export function SessionView(props: {
                 ))}
             </div>
           </>
-        ) : focus ? (
-          <>
-            {target && (
-              <div className={`prog-target st-${target.state}`}>
-                <span className="pt-label">{t.progTarget}</span>
-                <span className="pt-val">
-                  {target.weight === null
-                    ? t.progRepsTarget(target.reps)
-                    : `${fmtWeightValue(target.weight)} × ${target.reps}`}
-                </span>
-                {target.deltaKg > 0 && (
-                  <span className="pt-delta up">+{fmtWeightValue(target.deltaKg)}</span>
-                )}
-                {target.deltaKg < 0 && (
-                  <span className="pt-delta down">{fmtWeightValue(target.deltaKg)}</span>
-                )}
-                {target.state === 'hold' && <span className="pt-tag">{t.progHold}</span>}
-                {target.state === 'stall' && <span className="pt-tag warn">{t.progDeload}</span>}
-                {target.state === 'first' && <span className="pt-tag">{t.progFirst}</span>}
-              </div>
-            )}
-            {sortedSets.length > 0 && (
-              <div className="set-timeline">
-                {(() => {
-                  let wk = 0;
-                  return sortedSets.map((s) => {
-                    const stype = setTypeOf(s);
-                    const rec = isRecordSet(ex, s);
-                    const drops = setDrops(s);
-                    const isWarm = stype === 'warmup';
-                    if (!isWarm) wk += 1;
-                    const rsb = restBeforeSetInWorkout(workout!, s);
-                    const rest = rsb != null && rsb > 0 ? mmss(rsb * 1000) : null;
-                    return (
-                      <button
-                        key={s.id}
-                        className={`tl-row${isWarm ? ' warm' : ''}${rec ? ' record' : ''}`}
-                        onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: s, ghost })}
-                      >
-                        <span className="tl-dot" />
-                        <span className="tl-label">{isWarm ? t.warmupChip : t.setNumber(wk)}</span>
-                        <span className="tl-val">
-                          {s.reps} ×{' '}
-                          {s.weight === null ? t.bodyweightShort : fmtWeightValue(s.weight)}
-                          {drops.length > 0 ? ` · +${drops.length}` : ''}
-                        </span>
-                        {rest && <span className="tl-rest">{t.restLabel(rest)}</span>}
-                        {rec && <span className="tag tag-ok tl-pr">{t.record}</span>}
-                      </button>
-                    );
-                  });
-                })()}
-              </div>
-            )}
-            {live &&
-              ex.id === lastLoggedExId &&
-              lastLoggedAt > 0 &&
-              (() => {
-                const restNow = Math.max(0, now - lastLoggedAt);
-                return (
-                  <div className="ex-resting">
-                    <Icon name="timer" />
-                    <span>{t.restingSince(mmss(restNow))}</span>
-                  </div>
-                );
-              })()}
-            <ActiveSetCard
-              key={`${ex.id}:${ex.sets.length}`}
-              ex={ex}
-              defReps={ghost.reps}
-              defWeightKg={ghost.weight}
-              weightRequired={directLogBlocked}
-              onLog={(v, type) => logGhost(ex, v, type)}
-              onDrop={() => addDropQuick(ex)}
-              onAdvanced={(v) => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: v })}
-            />
-          </>
         ) : (
           <>
             {target && showGhost && !grp && (
@@ -1271,6 +1201,24 @@ export function SessionView(props: {
               )}
             </div>
           </>
+        )}
+        {live && !grp && activeExerciseId === ex.id && nextEx && (
+          <button
+            className="btn btn-secondary start-next"
+            onClick={() => {
+              const nx = nextEx;
+              if (!nx) return;
+              setWokenIds((x) => (x.includes(nx.id) ? x : [...x, nx.id]));
+              requestAnimationFrame(() => {
+                document
+                  .querySelector(`[data-exid="${nx.id}"]`)
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              });
+            }}
+          >
+            <Icon name="arrow-down" />
+            {t.startNext(nextEx.name)}
+          </button>
         )}
         {ex.sets.length === 0 && live && !marker && (
           <div className="ghost-hint">
@@ -2445,9 +2393,21 @@ export function SessionView(props: {
                     plannedSets: circuit.rounds,
                   }
                 : base;
-            addExercise(workout.id, name, kind, plan);
+            const created = addExercise(workout.id, name, kind, plan);
+            // If the current exercise is already underway (>=1 set), open the
+            // newly added one straight away instead of leaving it collapsed in
+            // the queue.
+            const activeEx = workout.exercises.find((e) => e.id === activeExerciseId);
+            if (
+              created &&
+              !sheet.intoGroupId &&
+              !(circuit.on && circuit.groupId) &&
+              activeEx &&
+              activeEx.sets.length > 0
+            ) {
+              setWokenIds((x) => (x.includes(created.id) ? x : [...x, created.id]));
+            }
             // Single-add: one pick adds the exercise and closes the picker.
-            // Re-open to add another (same exercise allowed, e.g. circuits).
             setSheet(null);
           }}
           onClose={() => setSheet(null)}
@@ -3602,67 +3562,6 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
  * − / value / + control. The value is editable; clearing it stays empty while
  * typing (never snaps to 0 mid-edit). Empty blur keeps the previous number.
  */
-function ActiveSetCard(props: {
-  ex: Exercise;
-  defReps: number;
-  defWeightKg: number | null;
-  weightRequired: boolean;
-  onLog: (v: { reps: number; weight: number | null }, type: SetType) => void;
-  onDrop: () => void;
-  onAdvanced: (v: { reps: number; weight: number | null }) => void;
-}) {
-  const { t } = useT();
-  const unit = exerciseUnit(props.ex.name);
-  const [reps, setReps] = useState(Math.max(1, props.defReps || 1));
-  const [weightKg, setWeightKg] = useState<number | null>(props.defWeightKg);
-  const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
-  const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
-  // Bodyweight = no weight and none required (a required-but-unset weight is not
-  // bodyweight — the athlete still has to dial one in before logging).
-  const bw = weightKg === null && !props.weightRequired;
-  const blocked = props.weightRequired && weightKg === null;
-  const v = { reps, weight: weightKg };
-  return (
-    <div className="active-set">
-      <div className="active-steppers">
-        <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
-        <Stepper
-          label={unit === 'lb' ? t.weightLb : t.weightKg}
-          value={toDisp(weightKg ?? 0)}
-          step={unit === 'lb' ? 5 : 2.5}
-          min={0}
-          decimals={unit === 'lb' ? 1 : 2}
-          disabled={bw}
-          placeholder={t.bodyweightShort}
-          onChange={(x) => setWeightKg(fromDisp(x))}
-        />
-      </div>
-      <div className="as-chips">
-        <button className="as-chip" onClick={() => props.onLog(v, 'warmup')}>
-          <Icon name="fire" />
-          {t.warmupChip}
-        </button>
-        <button className="as-chip" onClick={props.onDrop}>
-          <Icon name="caret-line-down" />
-          {t.addADrop}
-        </button>
-        <button className="as-chip more" onClick={() => props.onAdvanced(v)}>
-          {t.advancedSet}
-          <Icon name="dots-three" />
-        </button>
-      </div>
-      <button
-        className="btn btn-primary as-log"
-        disabled={blocked}
-        onClick={() => props.onLog(v, 'working')}
-      >
-        {t.addToLog}
-      </button>
-      {blocked && <div className="ghost-hint">{t.progWeightRequired}</div>}
-    </div>
-  );
-}
-
 function Stepper(props: {
   label: string;
   value: number;

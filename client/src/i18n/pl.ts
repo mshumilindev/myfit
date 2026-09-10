@@ -598,6 +598,7 @@ export const pl: Strings = {
   noExercisesBody:
     'Dodaj pierwsze — ostatnie ćwiczenia i cała historia podpowiadają się podczas pisania.',
   addExercise: 'Dodaj ćwiczenie',
+  startNext: (name: string) => `Następne · ${name}`,
   exerciseKindNames: {
     strength: 'Siłowe',
     cardio: 'Cardio',
@@ -672,8 +673,6 @@ export const pl: Strings = {
   inOneSet: (kg: string) => `${kg} w jednej serii`,
   addADrop: 'Dodaj drop',
   warmupChip: 'Rozgrzewka',
-  addToLog: 'Dodaj do dziennika',
-  advancedSet: 'Strony · talerze · RPE',
   setTypeLabel: 'Typ serii',
   setTypeWorking: 'Robocza',
   setTypeWarmup: 'Rozgrzewkowa',

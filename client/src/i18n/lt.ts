@@ -608,6 +608,7 @@ export const lt: Strings = {
   noExercisesYet: 'Pratimų dar nėra',
   noExercisesBody: 'Pridėk pirmą — rašant iškyla paskutiniai pratimai ir visa istorija.',
   addExercise: 'Pridėti pratimą',
+  startNext: (name: string) => `Toliau · ${name}`,
   exerciseKindNames: {
     strength: 'Jėga',
     cardio: 'Kardio',
@@ -682,8 +683,6 @@ export const lt: Strings = {
   inOneSet: (kg: string) => `${kg} vienoje serijoje`,
   addADrop: 'Pridėti dropą',
   warmupChip: 'Apšilimas',
-  addToLog: 'Įtraukti į žurnalą',
-  advancedSet: 'Pusės · svoriai · RPE',
   setTypeLabel: 'Serijos tipas',
   setTypeWorking: 'Darbinė',
   setTypeWarmup: 'Apšilimo',

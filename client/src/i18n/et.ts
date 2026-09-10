@@ -591,6 +591,7 @@ export const et: Strings = {
   noExercisesYet: 'Harjutusi veel pole',
   noExercisesBody: 'Lisa esimene — kirjutades tulevad ette viimased harjutused ja kogu ajalugu.',
   addExercise: 'Lisa harjutus',
+  startNext: (name: string) => `Järgmine · ${name}`,
   exerciseKindNames: {
     strength: 'Jõud',
     cardio: 'Kardio',
@@ -665,8 +666,6 @@ export const et: Strings = {
   inOneSet: (kg: string) => `${kg} ühes seerias`,
   addADrop: 'Lisa dropp',
   warmupChip: 'Soojendus',
-  addToLog: 'Lisa logisse',
-  advancedSet: 'Pooled · kettad · RPE',
   setTypeLabel: 'Seeria tüüp',
   setTypeWorking: 'Töine',
   setTypeWarmup: 'Soojendus',

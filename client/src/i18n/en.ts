@@ -599,6 +599,7 @@ export const en = {
   noExercisesYet: 'No exercises yet',
   noExercisesBody: 'Add the first one — recent lifts and your whole history come up as you type.',
   addExercise: 'Add exercise',
+  startNext: (name: string) => `Start next · ${name}`,
   exerciseKindNames: {
     strength: 'Strength',
     cardio: 'Cardio',
@@ -673,8 +674,6 @@ export const en = {
   inOneSet: (kg: string) => `${kg} in one set`,
   addADrop: 'Add a drop',
   warmupChip: 'Warm-up',
-  addToLog: 'Add to log',
-  advancedSet: 'Sides · plate · RPE',
   setTypeLabel: 'Set type',
   setTypeWorking: 'Working',
   setTypeWarmup: 'Warm-up',

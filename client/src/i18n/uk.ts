@@ -595,6 +595,7 @@ export const uk: Strings = {
   noExercisesYet: 'Ще немає вправ',
   noExercisesBody: 'Додай першу — недавні вправи й уся історія підкажуться під час вводу.',
   addExercise: 'Додати вправу',
+  startNext: (name: string) => `Наступна · ${name}`,
   exerciseKindNames: {
     strength: 'Силова',
     cardio: 'Кардіо',
@@ -669,8 +670,6 @@ export const uk: Strings = {
   inOneSet: (kg: string) => `${kg} за один підхід`,
   addADrop: 'Додати дроп',
   warmupChip: 'Розминка',
-  addToLog: 'Додати до журналу',
-  advancedSet: 'Сторони · млинці · RPE',
   setTypeLabel: 'Тип підходу',
   setTypeWorking: 'Робочий',
   setTypeWarmup: 'Розминка',
