@@ -99,6 +99,8 @@ import {
   BUILT_IN_CATALOG,
   muscleInfoByName,
   richExerciseById,
+  richExerciseByName,
+  loadExerciseInstructions,
   searchCatalog,
   exerciseSearchText,
   secondaryMusclesOf,
@@ -3195,6 +3197,9 @@ function AddExerciseSheet(props: {
   const [muscle, setMuscle] = useState<MuscleGroup | undefined>(undefined);
   const [checkGym, setCheckGym] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // Exercise-details drawer (opened by the ⓘ on a row; tapping the row still
+  // adds directly). Shows DB details with its own add button.
+  const [info, setInfo] = useState<{ name: string; kind: ExerciseKind } | null>(null);
   // Admins/trainers creating a brand-new exercise set its muscles + equipment
   // here, and it is written to the shared server catalog (EQ-4).
   const [creating, setCreating] = useState<string | null>(null);
@@ -3563,7 +3568,8 @@ function AddExerciseSheet(props: {
   }
 
   return (
-    <Sheet onClose={props.onClose}>
+    <>
+      <Sheet onClose={props.onClose}>
       {props.replacing && <div className="sheet-label">{t.replaceExercise}</div>}
       <div className="searchbar">
         <Icon name="magnifying-glass" />
@@ -3658,6 +3664,15 @@ function AddExerciseSheet(props: {
                     </span>
                   )}
                 </button>
+                <button
+                  type="button"
+                  className="pick-row-info"
+                  aria-label={t.detailsAction}
+                  title={t.detailsAction}
+                  onClick={() => setInfo({ name: m.name, kind })}
+                >
+                  <Icon name="info" />
+                </button>
                 {untagged && (
                   <button
                     className="pick-row-edit"
@@ -3676,11 +3691,11 @@ function AddExerciseSheet(props: {
             const missing = availability(c.equipment ?? null);
             const secondaries = secondaryMusclesOf(c);
             return (
-              <button
-                key={c.id}
-                className={`pick-row${missing ? ' unavailable' : ''}`}
-                onClick={() => props.onPick(name, kind)}
-              >
+              <div key={c.id} className="pick-row-wrap">
+                <button
+                  className={`pick-row${missing ? ' unavailable' : ''}`}
+                  onClick={() => props.onPick(name, kind)}
+                >
                 {c.muscle !== 'cardio' ? (
                   <MuscleIcon muscle={c.muscle} variant="figure" tone="primary" />
                 ) : (
@@ -3705,7 +3720,17 @@ function AddExerciseSheet(props: {
                     {t.equipmentNames[c.equipment]}
                   </span>
                 )}
-              </button>
+                </button>
+                <button
+                  type="button"
+                  className="pick-row-info"
+                  aria-label={t.detailsAction}
+                  title={t.detailsAction}
+                  onClick={() => setInfo({ name, kind })}
+                >
+                  <Icon name="info" />
+                </button>
+              </div>
             );
           })}
         </div>
@@ -3724,6 +3749,122 @@ function AddExerciseSheet(props: {
       {kind === 'strength' && hasInventory && checkGym && (
         <p className="pick-hint">{t.filtersCombineNote}</p>
       )}
+    </Sheet>
+      {info && (
+        <ExerciseInfoSheet
+          name={info.name}
+          onAdd={() => {
+            const picked = info;
+            setInfo(null);
+            props.onPick(picked.name, picked.kind);
+          }}
+          onClose={() => setInfo(null)}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Exercise-details drawer shown from the picker's ⓘ button — DB details (form
+ * photo, classification, muscles worked, step-by-step instructions) with its
+ * own "add" button, layered over the picker so the list stays put.
+ */
+function ExerciseInfoSheet(props: { name: string; onAdd: () => void; onClose: () => void }) {
+  const { t } = useT();
+  const rich = richExerciseByName(props.name);
+  const mi = muscleInfoByName(props.name);
+  const [steps, setSteps] = useState<string[]>([]);
+  useEffect(() => {
+    let live = true;
+    void loadExerciseInstructions(rich?.id).then((v) => {
+      if (live) setSteps(v);
+    });
+    return () => {
+      live = false;
+    };
+  }, [rich?.id]);
+  const primaries: MuscleGroup[] =
+    rich && rich.primaryMuscles.length > 0
+      ? rich.primaryMuscles
+      : mi && mi.primary !== 'cardio'
+        ? [mi.primary]
+        : [];
+  const secondaries: MuscleGroup[] =
+    rich && rich.secondaryMuscles.length > 0 ? rich.secondaryMuscles : (mi?.secondary ?? []);
+  const equipment = rich?.equipment ?? mi?.equipment ?? null;
+  return (
+    <Sheet onClose={props.onClose} className="exinfo-sheet">
+      <div className="exinfo">
+        {rich?.images[0] && (
+          <div className="exinfo-media">
+            <img
+              src={rich.images[0]}
+              alt=""
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+        <div className="exinfo-head">
+          <h3 className="exinfo-title">
+            <ExerciseName name={props.name} />
+          </h3>
+          {(rich?.category || rich?.mechanic || rich?.force || rich?.level || equipment) && (
+            <div className="exd-badges">
+              {rich?.category && <span className="badge b-cat">{t.categoryNames[rich.category]}</span>}
+              {rich?.mechanic && (
+                <span className="badge b-mech">{t.mechanicNames[rich.mechanic]}</span>
+              )}
+              {rich?.force && <span className="badge b-mech">{t.forceNames[rich.force]}</span>}
+              {rich?.level && <span className="badge b-mech">{t.levelNames[rich.level]}</span>}
+              {equipment && (
+                <span className="badge b-eq">
+                  <Icon name={equipmentIconName(equipment)} />
+                  {t.equipmentNames[equipment]}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        {(primaries.length > 0 || secondaries.length > 0) && (
+          <div className="exinfo-section">
+            <h6 className="exinfo-label">{t.musclesWorkedLabel}</h6>
+            <div className="exinfo-muscles">
+              {primaries.map((m) => (
+                <span key={m} className="badge b-mus-pri">
+                  {t.muscleGroups[m]}
+                </span>
+              ))}
+              {secondaries.map((m) => (
+                <span key={m} className="badge b-mus">
+                  {t.muscleGroups[m]}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {steps.length > 0 && (
+          <div className="exinfo-section">
+            <h6 className="exinfo-label">{t.instructionsLabel}</h6>
+            <div className="exinfo-steps">
+              {steps.map((step, i) => (
+                <div className="exinfo-step" key={i}>
+                  <span className="exinfo-step-n">{i + 1}</span>
+                  <span>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="exinfo-foot">
+          <button className="btn btn-primary grow" onClick={props.onAdd}>
+            <Icon name="plus" />
+            {t.addExercise}
+          </button>
+        </div>
+      </div>
     </Sheet>
   );
 }
