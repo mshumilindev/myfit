@@ -3486,21 +3486,33 @@ function AddExerciseSheet(props: {
         equipment: x.equipment ? [x.equipment] : [],
       });
     const row = (x: Cand, isSug: boolean) => (
-      <button key={x.id} className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
-        <span className="add-main">
-          <ExerciseName name={x.name} className="add-name" />
-          <span className="add-tokens">
-            <MuscleChip muscle={x.primary} tone="primary" />
-            {x.secondary.map((m) => (
-              <MuscleChip key={m} muscle={m} tone="secondary" />
-            ))}
+      <div key={x.id} className="add-row-wrap">
+        <button className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
+          <span className="add-main">
+            <ExerciseName name={x.name} className="add-name" />
+            <span className="add-tokens">
+              <MuscleChip muscle={x.primary} tone="primary" />
+              {x.secondary.map((m) => (
+                <MuscleChip key={m} muscle={m} tone="secondary" />
+              ))}
+            </span>
           </span>
-        </span>
-        {!isSug && x.day && <span className="add-day">{DAY_LABEL[x.day]}</span>}
-      </button>
+          {!isSug && x.day && <span className="add-day">{DAY_LABEL[x.day]}</span>}
+        </button>
+        <button
+          type="button"
+          className="pick-row-info"
+          aria-label={t.detailsAction}
+          title={t.detailsAction}
+          onClick={() => setInfo({ name: x.name, kind: 'strength' })}
+        >
+          <Icon name="info" />
+        </button>
+      </div>
     );
 
     return (
+      <>
       <Sheet onClose={props.onClose}>
         <div className="add-head">
           {readout && (
@@ -3564,6 +3576,18 @@ function AddExerciseSheet(props: {
           <div className="add-rows">{rest.map((x) => row(x, false))}</div>
         </div>
       </Sheet>
+      {info && (
+        <ExerciseInfoSheet
+          name={info.name}
+          onAdd={() => {
+            const picked = info;
+            setInfo(null);
+            props.onPick(picked.name, picked.kind);
+          }}
+          onClose={() => setInfo(null)}
+        />
+      )}
+      </>
     );
   }
 
