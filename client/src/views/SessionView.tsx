@@ -885,7 +885,10 @@ export function SessionView(props: {
             <Icon name="caret-left" />
           </button>
           {focusHasNext ? (
-            <button className="btn btn-primary focus-next" onClick={() => setFocusIdx(focusPos + 1)}>
+            <button
+              className="btn btn-primary focus-next"
+              onClick={() => setFocusIdx(focusPos + 1)}
+            >
               {t.focusNext(nx?.name ?? '')}
               <Icon name="caret-right" />
             </button>
@@ -2003,498 +2006,519 @@ export function SessionView(props: {
             renderFocusView()
           ) : (
             <>
-          {workout.autoFinished && (
-            <div className="notice-accent">
-              <Icon name="clock-countdown" />
-              <span>
-                {props.past
-                  ? t.autoCloseNoticePast
-                  : t.autoCloseNotice(fmtClock(workout.finishedAt ?? workout.startedAt))}
-              </span>
-            </div>
-          )}
-
-          {live && prescribedSets > 0 && (
-            <div className="plan-progress">
-              <div className="plan-progress-head">
-                <span>{t.progPlanProgress}</span>
-                <strong>
-                  {planPercent}% · {t.progSetsDone(loggedPrescribedSets, prescribedSets)}
-                </strong>
-              </div>
-              <div className="plan-segments" aria-label={t.progPlanProgress}>
-                {workout.exercises.flatMap((ex) =>
-                  Array.from({ length: Math.max(0, ex.plannedSets ?? 0) }, (_, i) => (
-                    <span key={`${ex.id}-${i}`} className={i < ex.sets.length ? 'done' : ''} />
-                  )),
-                )}
-              </div>
-              <div className="plan-progress-note">{t.progGhostDivision}</div>
-            </div>
-          )}
-
-          {live && circuit.on && circuit.groupId && (
-            <div className="circuit-banner">
-              <span className="loop sm">
-                <Icon name="arrows-clockwise" />
-              </span>
-              <div className="cb-text">
-                <div className="cb-title">
-                  {t.circuitAdding}{' '}
-                  {(() => {
-                    const blk = sessionBlocks(workout).find(
-                      (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
-                    );
-                    return blk && blk.kind === 'group' ? blk.group.letter : 'A';
-                  })()}
+              {workout.autoFinished && (
+                <div className="notice-accent">
+                  <Icon name="clock-countdown" />
+                  <span>
+                    {props.past
+                      ? t.autoCloseNoticePast
+                      : t.autoCloseNotice(fmtClock(workout.finishedAt ?? workout.startedAt))}
+                  </span>
                 </div>
-                <div className="cb-sub">
-                  {t.circuitSoFar(
-                    workout.exercises.filter((e) => e.groupId === circuit.groupId).length,
-                  )}
-                </div>
-              </div>
-              <button
-                className="btn btn-secondary cb-done"
-                onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
-              >
-                {t.circuitFinishSet}
-              </button>
-            </div>
-          )}
+              )}
 
-          {workout.exercises.length === 0 ? (
-            <div className="session-empty">
-              <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
-                {live &&
-                  hasSessionStartCoach(
-                    store.workouts.filter((w) => w.finishedAt !== null),
-                    now,
-                  ) && (
-                    <button
-                      className="btn btn-secondary session-coach-btn"
-                      style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
-                      onClick={() => setSheet({ kind: 'coach' })}
-                    >
-                      <Icon name="heartbeat" weight="fill" />
-                      {t.sessionCoachButton}
-                    </button>
-                  )}
-                <button
-                  className="btn btn-primary"
-                  style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
-                  onClick={() => setSheet({ kind: 'add' })}
-                >
-                  <Icon name="plus" />
-                  {t.addExercise}
-                </button>
-                <button
-                  className="btn session-discard-btn"
-                  style={{ marginTop: 'var(--space-3)' }}
-                  onClick={() => setDialog({ kind: 'del-workout' })}
-                >
-                  <Icon name="trash" />
-                  {t.discardSession}
-                </button>
-              </EmptyState>
-            </div>
-          ) : (
-            <>
-              {sessionBlocks(workout).map((block, blockIdx, blocks) => {
-                if (block.kind === 'group' && block.group.circuit) {
-                  const building = live && circuit.on && circuit.groupId === block.group.groupId;
-                  return (
-                    <CircuitBlock
-                      key={block.group.groupId}
-                      group={block.group}
-                      past={!!props.past}
-                      building={building}
-                      isLast={blockIdx === blocks.length - 1}
-                      rounds={circuit.rounds}
-                      onMuscle={openMuscleHistory}
-                      onRun={() => setSheet({ kind: 'circuit-run', groupId: block.group.groupId })}
-                      onAddAnother={() => setSheet({ kind: 'add' })}
-                      onDoneBuilding={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
-                      onRounds={(delta) => {
-                        const r = Math.max(1, Math.min(20, circuit.rounds + delta));
-                        setCircuit((c) => ({ ...c, rounds: r }));
-                        setCircuitRounds(workout.id, block.group.groupId, r);
-                      }}
-                    />
-                  );
-                }
-                // Not-yet-started upcoming exercises collapse under a QUEUED header.
-                const qExs = block.kind === 'group' ? block.group.exercises : [block.exercise];
-                const isQueued =
-                  live &&
-                  qExs.every(
-                    (e) =>
-                      !isMarkerExercise(e) &&
-                      e.sets.length === 0 &&
-                      e.id !== focusedId &&
-                      e.id !== activeExerciseId,
-                  );
-                if (isQueued) {
-                  const firstQueuedIdx = blocks.findIndex((b) => {
-                    if (b.kind === 'group' && b.group.circuit) return false;
-                    const es = b.kind === 'group' ? b.group.exercises : [b.exercise];
-                    return es.every(
-                      (e) =>
-                        !isMarkerExercise(e) &&
-                        e.sets.length === 0 &&
-                        e.id !== focusedId &&
-                        e.id !== activeExerciseId,
-                    );
-                  });
-                  const header =
-                    blockIdx === firstQueuedIdx ? (
-                      <div className="section-label queued-label">{t.queuedLabel}</div>
-                    ) : null;
-                  if (block.kind === 'group') {
-                    const g = block.group;
-                    return (
-                      <Fragment key={g.groupId}>
-                        {header}
+              {live && prescribedSets > 0 && (
+                <div className="plan-progress">
+                  <div className="plan-progress-head">
+                    <span>{t.progPlanProgress}</span>
+                    <strong>
+                      {planPercent}% · {t.progSetsDone(loggedPrescribedSets, prescribedSets)}
+                    </strong>
+                  </div>
+                  <div className="plan-segments" aria-label={t.progPlanProgress}>
+                    {workout.exercises.flatMap((ex) =>
+                      Array.from({ length: Math.max(0, ex.plannedSets ?? 0) }, (_, i) => (
+                        <span key={`${ex.id}-${i}`} className={i < ex.sets.length ? 'done' : ''} />
+                      )),
+                    )}
+                  </div>
+                  <div className="plan-progress-note">{t.progGhostDivision}</div>
+                </div>
+              )}
+
+              {live && circuit.on && circuit.groupId && (
+                <div className="circuit-banner">
+                  <span className="loop sm">
+                    <Icon name="arrows-clockwise" />
+                  </span>
+                  <div className="cb-text">
+                    <div className="cb-title">
+                      {t.circuitAdding}{' '}
+                      {(() => {
+                        const blk = sessionBlocks(workout).find(
+                          (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
+                        );
+                        return blk && blk.kind === 'group' ? blk.group.letter : 'A';
+                      })()}
+                    </div>
+                    <div className="cb-sub">
+                      {t.circuitSoFar(
+                        workout.exercises.filter((e) => e.groupId === circuit.groupId).length,
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-secondary cb-done"
+                    onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
+                  >
+                    {t.circuitFinishSet}
+                  </button>
+                </div>
+              )}
+
+              {workout.exercises.length === 0 ? (
+                <div className="session-empty">
+                  <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
+                    {live &&
+                      hasSessionStartCoach(
+                        store.workouts.filter((w) => w.finishedAt !== null),
+                        now,
+                      ) && (
                         <button
-                          className="past-ex-card queued-ex-card queued-group"
-                          onClick={() => setExpandedId(g.exercises[0]?.id ?? null)}
+                          className="btn btn-secondary session-coach-btn"
+                          style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                          onClick={() => setSheet({ kind: 'coach' })}
                         >
-                          <span className="n">{g.exercises.map((e) => e.name).join(' · ')}</span>
-                          <span className="count">{t.supersetTag(g.letter)}</span>
+                          <Icon name="heartbeat" weight="fill" />
+                          {t.sessionCoachButton}
                         </button>
-                      </Fragment>
-                    );
-                  }
-                  const qsingle = block.exercise;
-                  const qplanned = Math.max(0, qsingle.plannedSets ?? 0);
-                  return (
-                    <Fragment key={qsingle.id}>
-                      {header}
-                      <div
-                        data-exid={qsingle.id}
-                        className="past-ex-card queued-ex-card"
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => setExpandedId(qsingle.id)}
-                        onKeyDown={(e) => rowKey(e, () => setExpandedId(qsingle.id))}
-                      >
-                        <span className="n">{qsingle.name}</span>
-                        {qplanned > 0 && <span className="count">0 / {qplanned}</span>}
-                        {cardCfg(qsingle.id)}
-                      </div>
-                    </Fragment>
-                  );
-                }
-                if (block.kind === 'group') {
-                  const g = block.group;
-                  const rounds = groupRounds(g);
-                  const round = groupCurrentRound(g);
-                  const minSets = Math.min(...g.exercises.map((e) => e.sets.length));
-                  const activeMemberId =
-                    g.exercises.find((e) => e.sets.length === minSets)?.id ?? null;
-                  void minSets;
-                  const groupActive = g.exercises.some((e) => e.id === focusedId);
-                  const groupIsCurrent = g.exercises.some((e) => e.id === activeExerciseId);
-                  const collapsed = props.past
-                    ? g.exercises.some((e) => e.sets.length > 0) &&
-                      !g.exercises.some((e) => expandedPast.includes(e.id))
-                    : live &&
-                      !groupActive &&
-                      (g.exercises.some((e) => e.sets.length > 0) || groupIsCurrent);
-                  if (collapsed) {
-                    const kg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
-                    return (
-                      <div
-                        key={g.groupId}
-                        className={`ss-block past${
-                          groupIsCurrent && !props.past ? ' is-current' : ''
-                        }`}
-                      >
-                        <div className="ss-bar" />
-                        <div className="ss-body">
-                          <div className="ss-head">
-                            <span className="tag tag-neutral">{t.supersetTag(g.letter)}</span>
-                            {groupIsCurrent && !props.past && (
+                      )}
+                    <button
+                      className="btn btn-primary"
+                      style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                      onClick={() => setSheet({ kind: 'add' })}
+                    >
+                      <Icon name="plus" />
+                      {t.addExercise}
+                    </button>
+                    <button
+                      className="btn session-discard-btn"
+                      style={{ marginTop: 'var(--space-3)' }}
+                      onClick={() => setDialog({ kind: 'del-workout' })}
+                    >
+                      <Icon name="trash" />
+                      {t.discardSession}
+                    </button>
+                  </EmptyState>
+                </div>
+              ) : (
+                <>
+                  {sessionBlocks(workout).map((block, blockIdx, blocks) => {
+                    if (block.kind === 'group' && block.group.circuit) {
+                      const building =
+                        live && circuit.on && circuit.groupId === block.group.groupId;
+                      return (
+                        <CircuitBlock
+                          key={block.group.groupId}
+                          group={block.group}
+                          past={!!props.past}
+                          building={building}
+                          isLast={blockIdx === blocks.length - 1}
+                          rounds={circuit.rounds}
+                          onMuscle={openMuscleHistory}
+                          onRun={() =>
+                            setSheet({ kind: 'circuit-run', groupId: block.group.groupId })
+                          }
+                          onAddAnother={() => setSheet({ kind: 'add' })}
+                          onDoneBuilding={() =>
+                            setCircuit((c) => ({ ...c, on: false, groupId: null }))
+                          }
+                          onRounds={(delta) => {
+                            const r = Math.max(1, Math.min(20, circuit.rounds + delta));
+                            setCircuit((c) => ({ ...c, rounds: r }));
+                            setCircuitRounds(workout.id, block.group.groupId, r);
+                          }}
+                        />
+                      );
+                    }
+                    // Not-yet-started upcoming exercises collapse under a QUEUED header.
+                    const qExs = block.kind === 'group' ? block.group.exercises : [block.exercise];
+                    const isQueued =
+                      live &&
+                      qExs.every(
+                        (e) =>
+                          !isMarkerExercise(e) &&
+                          e.sets.length === 0 &&
+                          e.id !== focusedId &&
+                          e.id !== activeExerciseId,
+                      );
+                    if (isQueued) {
+                      const firstQueuedIdx = blocks.findIndex((b) => {
+                        if (b.kind === 'group' && b.group.circuit) return false;
+                        const es = b.kind === 'group' ? b.group.exercises : [b.exercise];
+                        return es.every(
+                          (e) =>
+                            !isMarkerExercise(e) &&
+                            e.sets.length === 0 &&
+                            e.id !== focusedId &&
+                            e.id !== activeExerciseId,
+                        );
+                      });
+                      const header =
+                        blockIdx === firstQueuedIdx ? (
+                          <div className="section-label queued-label">{t.queuedLabel}</div>
+                        ) : null;
+                      if (block.kind === 'group') {
+                        const g = block.group;
+                        return (
+                          <Fragment key={g.groupId}>
+                            {header}
+                            <button
+                              className="past-ex-card queued-ex-card queued-group"
+                              onClick={() => setExpandedId(g.exercises[0]?.id ?? null)}
+                            >
+                              <span className="n">
+                                {g.exercises.map((e) => e.name).join(' · ')}
+                              </span>
+                              <span className="count">{t.supersetTag(g.letter)}</span>
+                            </button>
+                          </Fragment>
+                        );
+                      }
+                      const qsingle = block.exercise;
+                      const qplanned = Math.max(0, qsingle.plannedSets ?? 0);
+                      return (
+                        <Fragment key={qsingle.id}>
+                          {header}
+                          <div
+                            data-exid={qsingle.id}
+                            className="past-ex-card queued-ex-card"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setExpandedId(qsingle.id)}
+                            onKeyDown={(e) => rowKey(e, () => setExpandedId(qsingle.id))}
+                          >
+                            <span className="n">{qsingle.name}</span>
+                            {qplanned > 0 && <span className="count">0 / {qplanned}</span>}
+                            {cardCfg(qsingle.id)}
+                          </div>
+                        </Fragment>
+                      );
+                    }
+                    if (block.kind === 'group') {
+                      const g = block.group;
+                      const rounds = groupRounds(g);
+                      const round = groupCurrentRound(g);
+                      const minSets = Math.min(...g.exercises.map((e) => e.sets.length));
+                      const activeMemberId =
+                        g.exercises.find((e) => e.sets.length === minSets)?.id ?? null;
+                      void minSets;
+                      const groupActive = g.exercises.some((e) => e.id === focusedId);
+                      const groupIsCurrent = g.exercises.some((e) => e.id === activeExerciseId);
+                      const collapsed = props.past
+                        ? g.exercises.some((e) => e.sets.length > 0) &&
+                          !g.exercises.some((e) => expandedPast.includes(e.id))
+                        : live &&
+                          !groupActive &&
+                          (g.exercises.some((e) => e.sets.length > 0) || groupIsCurrent);
+                      if (collapsed) {
+                        const kg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
+                        return (
+                          <div
+                            key={g.groupId}
+                            className={`ss-block past${
+                              groupIsCurrent && !props.past ? ' is-current' : ''
+                            }`}
+                          >
+                            <div className="ss-bar" />
+                            <div className="ss-body">
+                              <div className="ss-head">
+                                <span className="tag tag-neutral">{t.supersetTag(g.letter)}</span>
+                                {groupIsCurrent && !props.past && (
+                                  <span className="cur-tag">
+                                    <Icon name="barbell" />
+                                    {t.currentKicker}
+                                  </span>
+                                )}
+                                <span className="ss-rounds-meta">
+                                  {t.roundsMeta(rounds, fmtKg(kg))}
+                                </span>
+                              </div>
+                              <button
+                                className="past-ex-card"
+                                onClick={() =>
+                                  props.past
+                                    ? setExpandedPast((x) => [
+                                        ...x,
+                                        ...g.exercises.map((e) => e.id),
+                                      ])
+                                    : setExpandedId(g.exercises[0]?.id ?? null)
+                                }
+                              >
+                                {g.exercises.map((e, i) => (
+                                  <span key={e.id} className="past-ex-row">
+                                    <span className="ss-index">
+                                      {g.letter}
+                                      {i + 1}
+                                    </span>
+                                    <span className="n">{e.name}</span>
+                                    <span className="v">{pastSummary(e)}</span>
+                                  </span>
+                                ))}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
+                      if (isDesktop && live) {
+                        // DS-4 · desktop: the group is one table — bracket outside,
+                        // Muscles and Equipment columns added to grouped tables only.
+                        return (
+                          <div key={g.groupId} className="ss-block ss-desktop">
+                            <div className="ss-bar" />
+                            <div className="ss-desktop-card">
+                              <div className="ss-head">
+                                <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+                                <span className="ss-round">
+                                  {t.roundOf(round, rounds).split(' · ')[0]}
+                                </span>
+                                <button
+                                  className="dots"
+                                  onClick={() =>
+                                    setSheet({ kind: 'group-menu', groupId: g.groupId })
+                                  }
+                                  aria-label={t.menuAction}
+                                >
+                                  <Icon name="dots-three" />
+                                </button>
+                              </div>
+                              <table className="table ss-table">
+                                <thead>
+                                  <tr>
+                                    <th style={{ width: 44 }}></th>
+                                    <th>{t.exerciseLabel}</th>
+                                    <th style={{ width: 210 }}>{t.musclesCol}</th>
+                                    <th style={{ width: 150 }}>{t.progEquipment}</th>
+                                    <th style={{ width: 90 }}>{t.roundCol}</th>
+                                    <th style={{ width: 110 }}>{t.lastCol}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {g.exercises.map((e, i) => {
+                                    const m = resolveMuscles(e);
+                                    const eq = equipmentFor(e);
+                                    const prevL = prevLift(e.name, workout.id);
+                                    return (
+                                      <tr key={e.id}>
+                                        <td className="ss-td-idx">
+                                          {g.letter}
+                                          {i + 1}
+                                        </td>
+                                        <td>{e.name}</td>
+                                        <td>
+                                          <span style={{ display: 'inline-flex', gap: 5 }}>
+                                            {m.primary && (
+                                              <span className="mchip">
+                                                {t.muscleGroups[m.primary]}
+                                              </span>
+                                            )}
+                                            {m.secondary.map((x) => (
+                                              <span key={x} className="mchip">
+                                                {t.muscleGroups[x]}
+                                              </span>
+                                            ))}
+                                          </span>
+                                        </td>
+                                        <td>
+                                          {eq.map((id) => (
+                                            <span key={id} className="eq">
+                                              <Icon name={equipmentIconName(id)} />{' '}
+                                              {equipmentLabelOf(id)}
+                                            </span>
+                                          ))}
+                                        </td>
+                                        <td className="num">
+                                          {e.sets.length} / {rounds}
+                                        </td>
+                                        <td className="num dim">
+                                          {prevL
+                                            ? `${prevL.reps} × ${
+                                                prevL.weight === null
+                                                  ? '—'
+                                                  : fmtWeightValue(prevL.weight)
+                                              }`
+                                            : '—'}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={g.groupId} className={`ss-block${props.past ? ' past' : ''}`}>
+                          <div className="ss-bar" />
+                          <div className="ss-body">
+                            <div className="ss-head">
+                              <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+                              <span className="ss-round">{t.roundOf(round, rounds)}</span>
+                              <button
+                                className="dots"
+                                onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
+                                aria-label={t.menuAction}
+                              >
+                                <Icon name="dots-three-vertical" />
+                              </button>
+                            </div>
+                            {g.exercises.map((e, i) =>
+                              renderCard(e, {
+                                letter: g.letter,
+                                index: i,
+                                active: activeMemberId === e.id,
+                                rounds,
+                                round,
+                              }),
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                    const single = block.exercise;
+                    const singleIsCurrent = !props.past && single.id === activeExerciseId;
+                    if (
+                      props.past
+                        ? single.sets.length > 0 && !expandedPast.includes(single.id)
+                        : live &&
+                          focusedId !== single.id &&
+                          (single.sets.length > 0 || singleIsCurrent)
+                    ) {
+                      const expandSingle = () =>
+                        props.past
+                          ? setExpandedPast((x) => [...x, single.id])
+                          : setExpandedId(single.id);
+                      return (
+                        <div
+                          key={single.id}
+                          data-exid={single.id}
+                          className={`past-ex-card${singleIsCurrent ? ' is-current' : ''}`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={expandSingle}
+                          onKeyDown={(e) => rowKey(e, expandSingle)}
+                        >
+                          <span className="past-ex-row">
+                            {singleIsCurrent && (
                               <span className="cur-tag">
                                 <Icon name="barbell" />
                                 {t.currentKicker}
                               </span>
                             )}
-                            <span className="ss-rounds-meta">
-                              {t.roundsMeta(rounds, fmtKg(kg))}
-                            </span>
-                          </div>
-                          <button
-                            className="past-ex-card"
-                            onClick={() =>
-                              props.past
-                                ? setExpandedPast((x) => [...x, ...g.exercises.map((e) => e.id)])
-                                : setExpandedId(g.exercises[0]?.id ?? null)
-                            }
-                          >
-                            {g.exercises.map((e, i) => (
-                              <span key={e.id} className="past-ex-row">
-                                <span className="ss-index">
-                                  {g.letter}
-                                  {i + 1}
-                                </span>
-                                <span className="n">{e.name}</span>
-                                <span className="v">{pastSummary(e)}</span>
-                              </span>
-                            ))}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (isDesktop && live) {
-                    // DS-4 · desktop: the group is one table — bracket outside,
-                    // Muscles and Equipment columns added to grouped tables only.
-                    return (
-                      <div key={g.groupId} className="ss-block ss-desktop">
-                        <div className="ss-bar" />
-                        <div className="ss-desktop-card">
-                          <div className="ss-head">
-                            <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
-                            <span className="ss-round">
-                              {t.roundOf(round, rounds).split(' · ')[0]}
-                            </span>
-                            <button
-                              className="dots"
-                              onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
-                              aria-label={t.menuAction}
-                            >
-                              <Icon name="dots-three" />
-                            </button>
-                          </div>
-                          <table className="table ss-table">
-                            <thead>
-                              <tr>
-                                <th style={{ width: 44 }}></th>
-                                <th>{t.exerciseLabel}</th>
-                                <th style={{ width: 210 }}>{t.musclesCol}</th>
-                                <th style={{ width: 150 }}>{t.progEquipment}</th>
-                                <th style={{ width: 90 }}>{t.roundCol}</th>
-                                <th style={{ width: 110 }}>{t.lastCol}</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {g.exercises.map((e, i) => {
-                                const m = resolveMuscles(e);
-                                const eq = equipmentFor(e);
-                                const prevL = prevLift(e.name, workout.id);
-                                return (
-                                  <tr key={e.id}>
-                                    <td className="ss-td-idx">
-                                      {g.letter}
-                                      {i + 1}
-                                    </td>
-                                    <td>{e.name}</td>
-                                    <td>
-                                      <span style={{ display: 'inline-flex', gap: 5 }}>
-                                        {m.primary && (
-                                          <span className="mchip">{t.muscleGroups[m.primary]}</span>
-                                        )}
-                                        {m.secondary.map((x) => (
-                                          <span key={x} className="mchip">
-                                            {t.muscleGroups[x]}
-                                          </span>
-                                        ))}
-                                      </span>
-                                    </td>
-                                    <td>
-                                      {eq.map((id) => (
-                                        <span key={id} className="eq">
-                                          <Icon name={equipmentIconName(id)} />{' '}
-                                          {equipmentLabelOf(id)}
-                                        </span>
-                                      ))}
-                                    </td>
-                                    <td className="num">
-                                      {e.sets.length} / {rounds}
-                                    </td>
-                                    <td className="num dim">
-                                      {prevL
-                                        ? `${prevL.reps} × ${
-                                            prevL.weight === null
-                                              ? '—'
-                                              : fmtWeightValue(prevL.weight)
-                                          }`
-                                        : '—'}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={g.groupId} className={`ss-block${props.past ? ' past' : ''}`}>
-                      <div className="ss-bar" />
-                      <div className="ss-body">
-                        <div className="ss-head">
-                          <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
-                          <span className="ss-round">{t.roundOf(round, rounds)}</span>
-                          <button
-                            className="dots"
-                            onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
-                            aria-label={t.menuAction}
-                          >
-                            <Icon name="dots-three-vertical" />
-                          </button>
-                        </div>
-                        {g.exercises.map((e, i) =>
-                          renderCard(e, {
-                            letter: g.letter,
-                            index: i,
-                            active: activeMemberId === e.id,
-                            rounds,
-                            round,
-                          }),
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
-                const single = block.exercise;
-                const singleIsCurrent = !props.past && single.id === activeExerciseId;
-                if (
-                  props.past
-                    ? single.sets.length > 0 && !expandedPast.includes(single.id)
-                    : live && focusedId !== single.id && (single.sets.length > 0 || singleIsCurrent)
-                ) {
-                  const expandSingle = () =>
-                    props.past
-                      ? setExpandedPast((x) => [...x, single.id])
-                      : setExpandedId(single.id);
-                  return (
-                    <div
-                      key={single.id}
-                      data-exid={single.id}
-                      className={`past-ex-card${singleIsCurrent ? ' is-current' : ''}`}
-                      role="button"
-                      tabIndex={0}
-                      onClick={expandSingle}
-                      onKeyDown={(e) => rowKey(e, expandSingle)}
-                    >
-                      <span className="past-ex-row">
-                        {singleIsCurrent && (
-                          <span className="cur-tag">
-                            <Icon name="barbell" />
-                            {t.currentKicker}
+                            <span className="n">{single.name}</span>
+                            {single.sets.length > 0 && (
+                              <span className="v">{pastSummary(single)}</span>
+                            )}
+                            {cardCfg(single.id)}
                           </span>
-                        )}
-                        <span className="n">{single.name}</span>
-                        {single.sets.length > 0 && <span className="v">{pastSummary(single)}</span>}
-                        {cardCfg(single.id)}
-                      </span>
-                    </div>
-                  );
-                }
-                return renderCard(single, null);
-              })}
-              {live &&
-                !circuit.on &&
-                sessionBlocks(workout).some((b) => b.kind === 'group' && b.group.circuit) && (
-                  <button
-                    className="btn btn-secondary circuit-new"
-                    onClick={() =>
-                      setCircuit((c) => ({
-                        ...c,
-                        on: true,
-                        groupId: crypto.randomUUID(),
-                      }))
+                        </div>
+                      );
                     }
-                  >
-                    <Icon name="plus-circle" />
-                    {t.circuitNewCircuit(
-                      String.fromCharCode(
-                        65 +
-                          sessionBlocks(workout).filter(
-                            (b) => b.kind === 'group' && b.group.circuit,
-                          ).length,
-                      ),
+                    return renderCard(single, null);
+                  })}
+                  {live &&
+                    !circuit.on &&
+                    sessionBlocks(workout).some((b) => b.kind === 'group' && b.group.circuit) && (
+                      <button
+                        className="btn btn-secondary circuit-new"
+                        onClick={() =>
+                          setCircuit((c) => ({
+                            ...c,
+                            on: true,
+                            groupId: crypto.randomUUID(),
+                          }))
+                        }
+                      >
+                        <Icon name="plus-circle" />
+                        {t.circuitNewCircuit(
+                          String.fromCharCode(
+                            65 +
+                              sessionBlocks(workout).filter(
+                                (b) => b.kind === 'group' && b.group.circuit,
+                              ).length,
+                          ),
+                        )}
+                      </button>
                     )}
-                  </button>
-                )}
-              {/* Energy plaque sits under the exercises, matching their width. */}
-              {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
-              {props.past && workout.exercises.some((e) => e.groupId) && (
-                <div className="muscle-note" style={{ boxShadow: 'none' }}>
-                  <Icon name="chart-line-up" />
-                  <p style={{ color: 'var(--color-neutral-500)' }}>{t.supersetHistoryNote}</p>
-                </div>
-              )}
-              {!(live && !workout.autoFinished && !isDesktop) && (
-                <button
-                  className="btn btn-secondary session-add-btn"
-                  onClick={() => setSheet({ kind: 'add' })}
-                >
-                  <Icon name="plus" />
-                  {props.past ? t.addToSession : t.addExercise}
-                </button>
-              )}
-              {live && !workout.autoFinished && isDesktop && (
-                <>
-                  <button
-                    className="btn btn-secondary session-settings-btn"
-                    onClick={() => setSheet({ kind: 'settings' })}
-                  >
-                    <Icon name="sliders-horizontal" />
-                    {t.sessionSettings}
-                  </button>
-                  <button
-                    className="btn btn-secondary session-map-btn"
-                    onClick={() => setSheet({ kind: 'musclemap' })}
-                  >
-                    <Icon name="person" />
-                    {t.muscleMapButton}
-                  </button>
+                  {/* Energy plaque sits under the exercises, matching their width. */}
+                  {props.past && sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
+                  {props.past && workout.exercises.some((e) => e.groupId) && (
+                    <div className="muscle-note" style={{ boxShadow: 'none' }}>
+                      <Icon name="chart-line-up" />
+                      <p style={{ color: 'var(--color-neutral-500)' }}>{t.supersetHistoryNote}</p>
+                    </div>
+                  )}
+                  {!(live && !workout.autoFinished && !isDesktop) && (
+                    <button
+                      className="btn btn-secondary session-add-btn"
+                      onClick={() => setSheet({ kind: 'add' })}
+                    >
+                      <Icon name="plus" />
+                      {props.past ? t.addToSession : t.addExercise}
+                    </button>
+                  )}
+                  {live && !workout.autoFinished && isDesktop && (
+                    <>
+                      <button
+                        className="btn btn-secondary session-settings-btn"
+                        onClick={() => setSheet({ kind: 'settings' })}
+                      >
+                        <Icon name="sliders-horizontal" />
+                        {t.sessionSettings}
+                      </button>
+                      <button
+                        className="btn btn-secondary session-map-btn"
+                        onClick={() => setSheet({ kind: 'musclemap' })}
+                      >
+                        <Icon name="person" />
+                        {t.muscleMapButton}
+                      </button>
+                    </>
+                  )}
+                  {props.past && muscleWorkSorted(workout).length > 0 && (
+                    <button
+                      className="btn btn-secondary session-map-btn"
+                      onClick={() => setSheet({ kind: 'musclemap' })}
+                    >
+                      <Icon name="person" />
+                      {t.muscleMapButton}
+                    </button>
+                  )}
+                  {props.past && (
+                    <button
+                      className="btn btn-primary share-cta"
+                      onClick={() => setShareOpen(true)}
+                    >
+                      <Icon name="export" />
+                      {t.shareWorkout}
+                    </button>
+                  )}
+                  {live && !workout.autoFinished && isDesktop && (
+                    <div className="session-discard-row">
+                      <button
+                        className="btn session-discard-btn icon-only"
+                        onClick={() => setDialog({ kind: 'del-workout' })}
+                        aria-label={t.discardSession}
+                        title={t.discardSession}
+                      >
+                        <Icon name="trash" />
+                      </button>
+                      <button
+                        className="btn btn-primary session-finish-docked"
+                        disabled={entries === 0}
+                        onClick={requestFinish}
+                      >
+                        <Icon name="check" />
+                        {t.finish}
+                      </button>
+                    </div>
+                  )}
+                  {/* Live energy counter — quietly under all the session content. */}
+                  {live && sessionKcal != null && <LiveEnergyCounter kcal={sessionKcal} />}
+                  <div ref={contentBottomRef} aria-hidden />
                 </>
               )}
-              {props.past && muscleWorkSorted(workout).length > 0 && (
-                <button
-                  className="btn btn-secondary session-map-btn"
-                  onClick={() => setSheet({ kind: 'musclemap' })}
-                >
-                  <Icon name="person" />
-                  {t.muscleMapButton}
-                </button>
-              )}
-              {props.past && (
-                <button className="btn btn-primary share-cta" onClick={() => setShareOpen(true)}>
-                  <Icon name="export" />
-                  {t.shareWorkout}
-                </button>
-              )}
-              {live && !workout.autoFinished && isDesktop && (
-                <div className="session-discard-row">
-                  <button
-                    className="btn session-discard-btn icon-only"
-                    onClick={() => setDialog({ kind: 'del-workout' })}
-                    aria-label={t.discardSession}
-                    title={t.discardSession}
-                  >
-                    <Icon name="trash" />
-                  </button>
-                  <button
-                    className="btn btn-primary session-finish-docked"
-                    disabled={entries === 0}
-                    onClick={requestFinish}
-                  >
-                    <Icon name="check" />
-                    {t.finish}
-                  </button>
-                </div>
-              )}
-              {/* Live energy counter — quietly under all the session content. */}
-              {live && sessionKcal != null && <LiveEnergyCounter kcal={sessionKcal} />}
-              <div ref={contentBottomRef} aria-hidden />
-            </>
-          )}
             </>
           )}
         </div>
