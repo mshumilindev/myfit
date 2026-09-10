@@ -314,6 +314,8 @@ function toHash(
     return overlay.userId
       ? `#/exercise/${encodeURIComponent(overlay.name)}/${encodeURIComponent(overlay.userId)}`
       : `#/exercise/${encodeURIComponent(overlay.name)}`;
+  if (overlay?.screen === 'client-page')
+    return `#/client/${encodeURIComponent(overlay.clientId)}`;
   if (overlay?.screen === 'trainee-session')
     return `#/trainee/${encodeURIComponent(overlay.athleteId)}/${encodeURIComponent(overlay.workoutId)}`;
   if (overlay?.screen === 'exercise-detail')
@@ -354,6 +356,11 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
         name: decodeURIComponent(parts[1]),
         ...(parts[2] ? { userId: decodeURIComponent(parts[2]) } : {}),
       },
+    };
+  if (head === 'client' && parts[1])
+    return {
+      tab: 'today',
+      overlay: { screen: 'client-page', clientId: decodeURIComponent(parts[1]) },
     };
   if (head === 'trainee' && parts[1] && parts[2])
     return {
