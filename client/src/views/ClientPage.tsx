@@ -261,17 +261,25 @@ export function ClientPage({
                     <span className="hist-tl-date">{fmtDayMonth(day.ts, locale)}</span>
                   </div>
                   {day.sessions.map((s) => (
-                    <button key={s.id} className="cp-session" onClick={() => openSession(s)}>
-                      <div className="cp-session-top">
-                        <span className="name">{workoutTitle(s, t)}</span>
-                      </div>
-                      <div className="cp-session-meta">
-                        {s.gymName ? `${s.gymName} · ` : ''}
-                        {s.exercises} · {s.sets} {t.setsStat.toLowerCase()} · {fmtTonnes(s.volumeKg)}
-                      </div>
-                      {s.exerciseNames.length > 0 && (
-                        <div className="cp-session-ex">{s.exerciseNames.slice(0, 4).join(' · ')}</div>
-                      )}
+                    <button
+                      key={s.id}
+                      className="hist-item hist-workout"
+                      onClick={() => openSession(s)}
+                    >
+                      <span className="hist-item-body">
+                        <span className="hist-item-name">{workoutTitle(s, t)}</span>
+                        <div className="hist-item-stats">
+                          {s.gymName ? `${s.gymName} · ` : ''}
+                          {s.exercises} · {s.sets} {t.setsStat.toLowerCase()} ·{' '}
+                          {fmtTonnes(s.volumeKg)}
+                        </div>
+                        {s.exerciseNames.length > 0 && (
+                          <div className="hist-item-stats">
+                            {s.exerciseNames.slice(0, 4).join(' · ')}
+                          </div>
+                        )}
+                      </span>
+                      <Icon name="arrow-up-right" className="go" />
                     </button>
                   ))}
                 </div>
