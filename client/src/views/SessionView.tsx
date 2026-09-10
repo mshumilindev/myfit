@@ -3502,45 +3502,122 @@ function AddExerciseSheet(props: {
 
     return (
       <>
-      <Sheet onClose={props.onClose}>
-        <div className="add-head">
-          {readout && (
-            <div className="add-banner">
-              <div className="add-banner-title">{t.looksLikeDay(dayLabel)}</div>
-              <div className="add-banner-reason">
-                {from === 'logged'
-                  ? t.reasonFromLogged
-                  : from === 'program'
-                    ? t.reasonProgramTarget
-                    : from === 'weekday'
-                      ? t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))
-                      : t.reasonRecent}
+        <Sheet onClose={props.onClose}>
+          <div className="add-head">
+            {readout && (
+              <div className="add-banner">
+                <div className="add-banner-title">{t.looksLikeDay(dayLabel)}</div>
+                <div className="add-banner-reason">
+                  {from === 'logged'
+                    ? t.reasonFromLogged
+                    : from === 'program'
+                      ? t.reasonProgramTarget
+                      : from === 'weekday'
+                        ? t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))
+                        : t.reasonRecent}
+                </div>
               </div>
+            )}
+            <button className="btn btn-primary add-done" onClick={props.onClose}>
+              {t.pickerDone}
+            </button>
+          </div>
+          <div className="searchbar">
+            <Icon name="magnifying-glass" />
+            <input
+              autoFocus
+              value={q}
+              placeholder={t.searchExercises}
+              onChange={(e) => setQ(e.target.value)}
+            />
+            <button
+              className="searchbar-funnel"
+              onClick={() => setFiltersOpen((x) => !x)}
+              aria-label={t.filters}
+            >
+              <Icon name="funnel-simple" />
+            </button>
+          </div>
+          {renderFilterPanel()}
+          {renderActiveFilters()}
+          <div className="kind-grid three">
+            {TIMED_KINDS.map((id) => (
+              <button
+                key={id}
+                className="kind-card"
+                onClick={() => props.onPick(t.defaultTimedExerciseNames[id], id)}
+              >
+                <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'clock'} />
+                <span>{t.exerciseKindNames[id]}</span>
+              </button>
+            ))}
+          </div>
+          {noneToSuggest ? (
+            <div className="add-note">{t.addedUsualLifts(dayLabel)}</div>
+          ) : suggested.length > 0 ? (
+            <div className="add-section">
+              <div className="section-label">{t.suggestedLabel}</div>
+              <div className="add-rows">{suggested.map((x) => row(x, true))}</div>
             </div>
-          )}
-          <button className="btn btn-primary add-done" onClick={props.onClose}>
-            {t.pickerDone}
-          </button>
-        </div>
+          ) : null}
+          <div className="add-section">
+            <div className="section-label">{t.allExercisesLabel}</div>
+            <div className="add-rows">{rest.map((x) => row(x, false))}</div>
+          </div>
+        </Sheet>
+        {info && (
+          <ExerciseInfoSheet
+            name={info.name}
+            onAdd={() => {
+              const picked = info;
+              setInfo(null);
+              props.onPick(picked.name, picked.kind);
+            }}
+            onClose={() => setInfo(null)}
+          />
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Sheet onClose={props.onClose}>
+        {props.replacing && <div className="sheet-label">{t.replaceExercise}</div>}
         <div className="searchbar">
           <Icon name="magnifying-glass" />
           <input
             autoFocus
             value={q}
-            placeholder={t.searchExercises}
+            placeholder={kind === 'strength' ? t.searchExercises : t.exerciseKindPlaceholders[kind]}
             onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && q.trim()) {
+                if (kind === 'strength' && !exact) setCreating(q.trim());
+                else props.onPick(q.trim(), kind);
+              }
+            }}
           />
-          <button
-            className="searchbar-funnel"
-            onClick={() => setFiltersOpen((x) => !x)}
-            aria-label={t.filters}
-          >
-            <Icon name="funnel-simple" />
-          </button>
+          {kind === 'strength' && (
+            <button
+              className="searchbar-funnel"
+              onClick={() => setFiltersOpen((x) => !x)}
+              aria-label={t.filters}
+            >
+              <Icon name="funnel-simple" />
+            </button>
+          )}
         </div>
-        {renderFilterPanel()}
-        {renderActiveFilters()}
-        <div className="kind-grid three">
+        {/* One row of four large kind buttons. Strength opens the search below;
+          Warm-up inserts a marker card; Cardio / Cool-down log a timed entry. */}
+        <div className="kind-grid">
+          <button
+            className={`kind-card${kind === 'strength' ? ' active' : ''}`}
+            onClick={() => setKind('strength')}
+          >
+            <Icon name="barbell" />
+            <span>{t.exerciseKindNames.strength}</span>
+          </button>
           {TIMED_KINDS.map((id) => (
             <button
               key={id}
@@ -3552,217 +3629,140 @@ function AddExerciseSheet(props: {
             </button>
           ))}
         </div>
-        {noneToSuggest ? (
-          <div className="add-note">{t.addedUsualLifts(dayLabel)}</div>
-        ) : suggested.length > 0 ? (
-          <div className="add-section">
-            <div className="section-label">{t.suggestedLabel}</div>
-            <div className="add-rows">{suggested.map((x) => row(x, true))}</div>
-          </div>
-        ) : null}
-        <div className="add-section">
-          <div className="section-label">{t.allExercisesLabel}</div>
-          <div className="add-rows">{rest.map((x) => row(x, false))}</div>
-        </div>
-      </Sheet>
-      {info && (
-        <ExerciseInfoSheet
-          name={info.name}
-          onAdd={() => {
-            const picked = info;
-            setInfo(null);
-            props.onPick(picked.name, picked.kind);
-          }}
-          onClose={() => setInfo(null)}
-        />
-      )}
-      </>
-    );
-  }
-
-  return (
-    <>
-      <Sheet onClose={props.onClose}>
-      {props.replacing && <div className="sheet-label">{t.replaceExercise}</div>}
-      <div className="searchbar">
-        <Icon name="magnifying-glass" />
-        <input
-          autoFocus
-          value={q}
-          placeholder={kind === 'strength' ? t.searchExercises : t.exerciseKindPlaceholders[kind]}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && q.trim()) {
-              if (kind === 'strength' && !exact) setCreating(q.trim());
-              else props.onPick(q.trim(), kind);
-            }
-          }}
-        />
+        {renderFilterPanel()}
+        {renderActiveFilters()}
+        {kind === 'strength' && totalCount > 0 && (
+          <h6 className="pick-count">{t.nExercises(totalCount)}</h6>
+        )}
         {kind === 'strength' && (
+          <div className="pick-rows">
+            {historyMatches.map((m) => {
+              const missing = availability(m.info?.equipment ?? null);
+              // My own logged exercise with no muscle/equipment data yet — offer to
+              // tag it (opens the meta editor prefilled with its name).
+              const untagged = !m.info;
+              return (
+                <div key={m.name} className={`pick-row-wrap${untagged ? ' taggable' : ''}`}>
+                  <button
+                    className={`pick-row${missing ? ' unavailable' : ''}`}
+                    onClick={() => props.onPick(m.name, kind)}
+                  >
+                    {m.info && m.info.primary !== 'cardio' ? (
+                      <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
+                    ) : (
+                      <span style={{ width: 13 }} />
+                    )}
+                    <span className="txt">
+                      <ExerciseName name={m.name} className="n" />
+                      {missing ? (
+                        <span className="s eqmiss">
+                          <Icon name="info" />
+                          {t.noItemHere(t.equipmentNames[missing])}
+                        </span>
+                      ) : m.info ? (
+                        <span className="s">
+                          {[m.info.primary, ...m.info.secondary]
+                            .filter((x) => x !== 'cardio')
+                            .map((x) => t.muscleGroups[x])
+                            .join(' · ')}
+                        </span>
+                      ) : m.last ? (
+                        <span className="s">{t.lastLift(fmtSet(m.last.weight, m.last.reps))}</span>
+                      ) : null}
+                    </span>
+                    {m.info?.equipment && (
+                      <span className="eq">
+                        <Icon name={equipmentIconName(m.info.equipment)} />
+                        {t.equipmentNames[m.info.equipment]}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="pick-row-info"
+                    aria-label={t.detailsAction}
+                    title={t.detailsAction}
+                    onClick={() => setInfo({ name: m.name, kind })}
+                  >
+                    <Icon name="info" />
+                  </button>
+                  {untagged && (
+                    <button
+                      className="pick-row-edit"
+                      aria-label={t.tagExercise}
+                      title={t.tagExercise}
+                      onClick={() => setCreating(m.name)}
+                    >
+                      <Icon name="pencil-simple" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            {catalog.map((c) => {
+              const name = c.names[li] ?? c.names[0];
+              const missing = availability(c.equipment ?? null);
+              const secondaries = secondaryMusclesOf(c);
+              return (
+                <div key={c.id} className="pick-row-wrap">
+                  <button
+                    className={`pick-row${missing ? ' unavailable' : ''}`}
+                    onClick={() => props.onPick(name, kind)}
+                  >
+                    {c.muscle !== 'cardio' ? (
+                      <MuscleIcon muscle={c.muscle} variant="figure" tone="primary" />
+                    ) : (
+                      <span style={{ width: 13 }} />
+                    )}
+                    <span className="txt">
+                      <ExerciseName name={name} className="n" />
+                      {missing ? (
+                        <span className="s eqmiss">
+                          <Icon name="info" />
+                          {t.noItemHere(t.equipmentNames[missing])}
+                        </span>
+                      ) : c.muscle !== 'cardio' ? (
+                        <span className="s">
+                          {[c.muscle, ...secondaries].map((x) => t.muscleGroups[x]).join(' · ')}
+                        </span>
+                      ) : null}
+                    </span>
+                    {c.equipment && (
+                      <span className="eq">
+                        <Icon name={equipmentIconName(c.equipment)} />
+                        {t.equipmentNames[c.equipment]}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="pick-row-info"
+                    aria-label={t.detailsAction}
+                    title={t.detailsAction}
+                    onClick={() => setInfo({ name, kind })}
+                  >
+                    <Icon name="info" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {q.trim() && !exact && (
           <button
-            className="searchbar-funnel"
-            onClick={() => setFiltersOpen((x) => !x)}
-            aria-label={t.filters}
+            className="result-row create"
+            onClick={() =>
+              kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind)
+            }
           >
-            <Icon name="funnel-simple" />
+            <Icon name="plus" />
+            {t.createExercise(q.trim())}
           </button>
         )}
-      </div>
-      {/* One row of four large kind buttons. Strength opens the search below;
-          Warm-up inserts a marker card; Cardio / Cool-down log a timed entry. */}
-      <div className="kind-grid">
-        <button
-          className={`kind-card${kind === 'strength' ? ' active' : ''}`}
-          onClick={() => setKind('strength')}
-        >
-          <Icon name="barbell" />
-          <span>{t.exerciseKindNames.strength}</span>
-        </button>
-        {TIMED_KINDS.map((id) => (
-          <button
-            key={id}
-            className="kind-card"
-            onClick={() => props.onPick(t.defaultTimedExerciseNames[id], id)}
-          >
-            <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'clock'} />
-            <span>{t.exerciseKindNames[id]}</span>
-          </button>
-        ))}
-      </div>
-      {renderFilterPanel()}
-      {renderActiveFilters()}
-      {kind === 'strength' && totalCount > 0 && (
-        <h6 className="pick-count">{t.nExercises(totalCount)}</h6>
-      )}
-      {kind === 'strength' && (
-        <div className="pick-rows">
-          {historyMatches.map((m) => {
-            const missing = availability(m.info?.equipment ?? null);
-            // My own logged exercise with no muscle/equipment data yet — offer to
-            // tag it (opens the meta editor prefilled with its name).
-            const untagged = !m.info;
-            return (
-              <div key={m.name} className={`pick-row-wrap${untagged ? ' taggable' : ''}`}>
-                <button
-                  className={`pick-row${missing ? ' unavailable' : ''}`}
-                  onClick={() => props.onPick(m.name, kind)}
-                >
-                  {m.info && m.info.primary !== 'cardio' ? (
-                    <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
-                  ) : (
-                    <span style={{ width: 13 }} />
-                  )}
-                  <span className="txt">
-                    <ExerciseName name={m.name} className="n" />
-                    {missing ? (
-                      <span className="s eqmiss">
-                        <Icon name="info" />
-                        {t.noItemHere(t.equipmentNames[missing])}
-                      </span>
-                    ) : m.info ? (
-                      <span className="s">
-                        {[m.info.primary, ...m.info.secondary]
-                          .filter((x) => x !== 'cardio')
-                          .map((x) => t.muscleGroups[x])
-                          .join(' · ')}
-                      </span>
-                    ) : m.last ? (
-                      <span className="s">{t.lastLift(fmtSet(m.last.weight, m.last.reps))}</span>
-                    ) : null}
-                  </span>
-                  {m.info?.equipment && (
-                    <span className="eq">
-                      <Icon name={equipmentIconName(m.info.equipment)} />
-                      {t.equipmentNames[m.info.equipment]}
-                    </span>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className="pick-row-info"
-                  aria-label={t.detailsAction}
-                  title={t.detailsAction}
-                  onClick={() => setInfo({ name: m.name, kind })}
-                >
-                  <Icon name="info" />
-                </button>
-                {untagged && (
-                  <button
-                    className="pick-row-edit"
-                    aria-label={t.tagExercise}
-                    title={t.tagExercise}
-                    onClick={() => setCreating(m.name)}
-                  >
-                    <Icon name="pencil-simple" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-          {catalog.map((c) => {
-            const name = c.names[li] ?? c.names[0];
-            const missing = availability(c.equipment ?? null);
-            const secondaries = secondaryMusclesOf(c);
-            return (
-              <div key={c.id} className="pick-row-wrap">
-                <button
-                  className={`pick-row${missing ? ' unavailable' : ''}`}
-                  onClick={() => props.onPick(name, kind)}
-                >
-                {c.muscle !== 'cardio' ? (
-                  <MuscleIcon muscle={c.muscle} variant="figure" tone="primary" />
-                ) : (
-                  <span style={{ width: 13 }} />
-                )}
-                <span className="txt">
-                  <ExerciseName name={name} className="n" />
-                  {missing ? (
-                    <span className="s eqmiss">
-                      <Icon name="info" />
-                      {t.noItemHere(t.equipmentNames[missing])}
-                    </span>
-                  ) : c.muscle !== 'cardio' ? (
-                    <span className="s">
-                      {[c.muscle, ...secondaries].map((x) => t.muscleGroups[x]).join(' · ')}
-                    </span>
-                  ) : null}
-                </span>
-                {c.equipment && (
-                  <span className="eq">
-                    <Icon name={equipmentIconName(c.equipment)} />
-                    {t.equipmentNames[c.equipment]}
-                  </span>
-                )}
-                </button>
-                <button
-                  type="button"
-                  className="pick-row-info"
-                  aria-label={t.detailsAction}
-                  title={t.detailsAction}
-                  onClick={() => setInfo({ name, kind })}
-                >
-                  <Icon name="info" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {q.trim() && !exact && (
-        <button
-          className="result-row create"
-          onClick={() =>
-            kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind)
-          }
-        >
-          <Icon name="plus" />
-          {t.createExercise(q.trim())}
-        </button>
-      )}
-      {kind === 'strength' && hasInventory && checkGym && (
-        <p className="pick-hint">{t.filtersCombineNote}</p>
-      )}
-    </Sheet>
+        {kind === 'strength' && hasInventory && checkGym && (
+          <p className="pick-hint">{t.filtersCombineNote}</p>
+        )}
+      </Sheet>
       {info && (
         <ExerciseInfoSheet
           name={info.name}
@@ -3810,68 +3810,70 @@ function ExerciseInfoSheet(props: { name: string; onAdd: () => void; onClose: ()
     <Sheet onClose={props.onClose} className="exinfo-sheet">
       <div className="exinfo">
         <div className="exinfo-scroll">
-        {rich?.images[0] && (
-          <div className="exinfo-media">
-            <img
-              src={rich.images[0]}
-              alt=""
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-        )}
-        <div className="exinfo-head">
-          <h3 className="exinfo-title">
-            <ExerciseName name={props.name} />
-          </h3>
-          {(rich?.category || rich?.mechanic || rich?.force || rich?.level || equipment) && (
-            <div className="exd-badges">
-              {rich?.category && <span className="badge b-cat">{t.categoryNames[rich.category]}</span>}
-              {rich?.mechanic && (
-                <span className="badge b-mech">{t.mechanicNames[rich.mechanic]}</span>
-              )}
-              {rich?.force && <span className="badge b-mech">{t.forceNames[rich.force]}</span>}
-              {rich?.level && <span className="badge b-mech">{t.levelNames[rich.level]}</span>}
-              {equipment && (
-                <span className="badge b-eq">
-                  <Icon name={equipmentIconName(equipment)} />
-                  {t.equipmentNames[equipment]}
-                </span>
-              )}
+          {rich?.images[0] && (
+            <div className="exinfo-media">
+              <img
+                src={rich.images[0]}
+                alt=""
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                }}
+              />
             </div>
           )}
-        </div>
-        {(primaries.length > 0 || secondaries.length > 0) && (
-          <div className="exinfo-section">
-            <h6 className="exinfo-label">{t.musclesWorkedLabel}</h6>
-            <div className="exinfo-muscles">
-              {primaries.map((m) => (
-                <span key={m} className="badge b-mus-pri">
-                  {t.muscleGroups[m]}
-                </span>
-              ))}
-              {secondaries.map((m) => (
-                <span key={m} className="badge b-mus">
-                  {t.muscleGroups[m]}
-                </span>
-              ))}
-            </div>
+          <div className="exinfo-head">
+            <h3 className="exinfo-title">
+              <ExerciseName name={props.name} />
+            </h3>
+            {(rich?.category || rich?.mechanic || rich?.force || rich?.level || equipment) && (
+              <div className="exd-badges">
+                {rich?.category && (
+                  <span className="badge b-cat">{t.categoryNames[rich.category]}</span>
+                )}
+                {rich?.mechanic && (
+                  <span className="badge b-mech">{t.mechanicNames[rich.mechanic]}</span>
+                )}
+                {rich?.force && <span className="badge b-mech">{t.forceNames[rich.force]}</span>}
+                {rich?.level && <span className="badge b-mech">{t.levelNames[rich.level]}</span>}
+                {equipment && (
+                  <span className="badge b-eq">
+                    <Icon name={equipmentIconName(equipment)} />
+                    {t.equipmentNames[equipment]}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
-        )}
-        {steps.length > 0 && (
-          <div className="exinfo-section">
-            <h6 className="exinfo-label">{t.instructionsLabel}</h6>
-            <div className="exinfo-steps">
-              {steps.map((step, i) => (
-                <div className="exinfo-step" key={i}>
-                  <span className="exinfo-step-n">{i + 1}</span>
-                  <span>{step}</span>
-                </div>
-              ))}
+          {(primaries.length > 0 || secondaries.length > 0) && (
+            <div className="exinfo-section">
+              <h6 className="exinfo-label">{t.musclesWorkedLabel}</h6>
+              <div className="exinfo-muscles">
+                {primaries.map((m) => (
+                  <span key={m} className="badge b-mus-pri">
+                    {t.muscleGroups[m]}
+                  </span>
+                ))}
+                {secondaries.map((m) => (
+                  <span key={m} className="badge b-mus">
+                    {t.muscleGroups[m]}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+          {steps.length > 0 && (
+            <div className="exinfo-section">
+              <h6 className="exinfo-label">{t.instructionsLabel}</h6>
+              <div className="exinfo-steps">
+                {steps.map((step, i) => (
+                  <div className="exinfo-step" key={i}>
+                    <span className="exinfo-step-n">{i + 1}</span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className="exinfo-foot">
           <button className="btn btn-secondary grow" onClick={props.onClose}>

@@ -3111,11 +3111,7 @@ export const WARMUP_FRAC = 0.85;
  * (drop / static-dynamic) are never touched and anchor the working run. Pure and
  * idempotent — safe to re-run on every set change.
  */
-export function autoWarmupSets(
-  sets: SetEntry[],
-  loadType: LoadType,
-  refFloor = 0,
-): SetEntry[] {
+export function autoWarmupSets(sets: SetEntry[], loadType: LoadType, refFloor = 0): SetEntry[] {
   if (loadType !== 'weight') return sets;
   // Reference the heavier of this session's top set and the known working weight
   // (last session's top), so a light opener is a warm-up on the fly — we already
