@@ -600,6 +600,7 @@ export const en = {
   noExercisesBody: 'Add the first one — recent lifts and your whole history come up as you type.',
   addExercise: 'Add exercise',
   startNext: (name: string) => `Start next · ${name}`,
+  queuedLabel: 'Queued',
   exerciseKindNames: {
     strength: 'Strength',
     cardio: 'Cardio',

@@ -609,6 +609,7 @@ export const lt: Strings = {
   noExercisesBody: 'Pridėk pirmą — rašant iškyla paskutiniai pratimai ir visa istorija.',
   addExercise: 'Pridėti pratimą',
   startNext: (name: string) => `Toliau · ${name}`,
+  queuedLabel: 'Eilėje',
   exerciseKindNames: {
     strength: 'Jėga',
     cardio: 'Kardio',

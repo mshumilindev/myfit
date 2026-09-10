@@ -592,6 +592,7 @@ export const et: Strings = {
   noExercisesBody: 'Lisa esimene — kirjutades tulevad ette viimased harjutused ja kogu ajalugu.',
   addExercise: 'Lisa harjutus',
   startNext: (name: string) => `Järgmine · ${name}`,
+  queuedLabel: 'Järjekorras',
   exerciseKindNames: {
     strength: 'Jõud',
     cardio: 'Kardio',

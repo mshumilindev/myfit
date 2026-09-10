@@ -2256,35 +2256,40 @@ i > svg {
     bottom: 20px;
     width: 2px;
     transform: translateX(-50%);
-    background: var(--color-divider);
+    background: var(--color-neutral-800);
     border-radius: 1px;
   }
   .srail-dot {
     pointer-events: auto;
     position: relative;
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
     padding: 0;
     border: none;
     border-radius: 999px;
-    background: var(--color-neutral-700);
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--color-neutral-700);
     cursor: pointer;
-    transition: background 0.18s ease;
+    transition:
+      box-shadow 0.18s ease,
+      background 0.18s ease;
   }
   /* An exercise whose sets are all logged. */
   .srail-dot.done {
     background: var(--color-accent-700);
+    box-shadow: none;
   }
   /* The exercise currently in the viewport (scroll-spy): a bright, larger dot
      so you can see where you are in the session at a glance. */
   .srail-dot[aria-current='true'] {
     background: var(--color-accent);
-    transform: scale(1.4);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 22%, transparent);
   }
   /* Pressing/hovering a dot lights it silver, over any other state. */
   .srail-dot:hover,
   .srail-dot:active {
     background: var(--color-neutral-300);
+    box-shadow: none;
   }
   /* Inset the scrolling session content so cards (and the rest of the column)
      clear the fixed rail instead of butting against the dots. Raised
@@ -12861,9 +12866,38 @@ h6 {
   font-variant-numeric: tabular-nums;
 }
 
+.queued-ex-card {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+.queued-ex-card .qz-handle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-neutral-600);
+  font-size: 14px;
+}
 .queued-ex-card .n {
-  color: var(--color-neutral-400);
+  flex: 1;
+  min-width: 0;
+  color: var(--color-neutral-300);
   font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.queued-ex-card .count {
+  flex: none;
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.section-label.queued-label {
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-1);
 }
 
 @media (max-width: 719px) {

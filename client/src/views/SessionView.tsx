@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { tokenMatch } from '../search';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
@@ -1905,6 +1905,70 @@ export function SessionView(props: {
                     />
                   );
                 }
+                // Not-yet-started upcoming exercises collapse under a QUEUED header.
+                const qExs = block.kind === 'group' ? block.group.exercises : [block.exercise];
+                const isQueued =
+                  live &&
+                  qExs.every(
+                    (e) =>
+                      !isMarkerExercise(e) &&
+                      e.sets.length === 0 &&
+                      e.id !== activeExerciseId &&
+                      !wokenIds.includes(e.id),
+                  );
+                if (isQueued) {
+                  const firstQueuedIdx = blocks.findIndex((b) => {
+                    if (b.kind === 'group' && b.group.circuit) return false;
+                    const es = b.kind === 'group' ? b.group.exercises : [b.exercise];
+                    return es.every(
+                      (e) =>
+                        !isMarkerExercise(e) &&
+                        e.sets.length === 0 &&
+                        e.id !== activeExerciseId &&
+                        !wokenIds.includes(e.id),
+                    );
+                  });
+                  const header =
+                    blockIdx === firstQueuedIdx ? (
+                      <div className="section-label queued-label">{t.queuedLabel}</div>
+                    ) : null;
+                  if (block.kind === 'group') {
+                    const g = block.group;
+                    return (
+                      <Fragment key={g.groupId}>
+                        {header}
+                        <button
+                          className="past-ex-card queued-ex-card queued-group"
+                          onClick={() => setWokenIds((x) => [...x, ...g.exercises.map((e) => e.id)])}
+                        >
+                          <span className="qz-handle" aria-hidden>
+                            <Icon name="dots-six" />
+                          </span>
+                          <span className="n">{g.exercises.map((e) => e.name).join(' · ')}</span>
+                          <span className="count">{t.supersetTag(g.letter)}</span>
+                        </button>
+                      </Fragment>
+                    );
+                  }
+                  const qsingle = block.exercise;
+                  const qplanned = Math.max(0, qsingle.plannedSets ?? 0);
+                  return (
+                    <Fragment key={qsingle.id}>
+                      {header}
+                      <button
+                        data-exid={qsingle.id}
+                        className="past-ex-card queued-ex-card"
+                        onClick={() => setWokenIds((x) => [...x, qsingle.id])}
+                      >
+                        <span className="qz-handle" aria-hidden>
+                          <Icon name="dots-six" />
+                        </span>
+                        <span className="n">{qsingle.name}</span>
+                        {qplanned > 0 && <span className="count">0 / {qplanned}</span>}
+                      </button>
+                    </Fragment>
+                  );
+                }
                 if (block.kind === 'group') {
                   const g = block.group;
                   const rounds = groupRounds(g);
@@ -2064,30 +2128,6 @@ export function SessionView(props: {
                   );
                 }
                 const single = block.exercise;
-                if (
-                  live &&
-                  isStrengthExercise(single) &&
-                  single.sets.length === 0 &&
-                  Math.max(0, single.plannedSets ?? 0) > 0 &&
-                  activeExerciseId !== single.id &&
-                  !wokenIds.includes(single.id)
-                ) {
-                  return (
-                    <button
-                      key={single.id}
-                      data-exid={single.id}
-                      className="past-ex-card queued-ex-card"
-                      onClick={() => setWokenIds((x) => [...x, single.id])}
-                    >
-                      <span className="past-ex-row">
-                        <span className="n">{single.name}</span>
-                        <span className="count">
-                          {single.sets.length} / {Math.max(0, single.plannedSets ?? 0)}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                }
                 if (
                   (props.past || (live && activeExerciseId !== single.id)) &&
                   single.sets.length > 0 &&

@@ -596,6 +596,7 @@ export const uk: Strings = {
   noExercisesBody: 'Додай першу — недавні вправи й уся історія підкажуться під час вводу.',
   addExercise: 'Додати вправу',
   startNext: (name: string) => `Наступна · ${name}`,
+  queuedLabel: 'У черзі',
   exerciseKindNames: {
     strength: 'Силова',
     cardio: 'Кардіо',

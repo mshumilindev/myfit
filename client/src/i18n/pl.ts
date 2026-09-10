@@ -599,6 +599,7 @@ export const pl: Strings = {
     'Dodaj pierwsze — ostatnie ćwiczenia i cała historia podpowiadają się podczas pisania.',
   addExercise: 'Dodaj ćwiczenie',
   startNext: (name: string) => `Następne · ${name}`,
+  queuedLabel: 'W kolejce',
   exerciseKindNames: {
     strength: 'Siłowe',
     cardio: 'Cardio',
