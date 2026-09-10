@@ -12,7 +12,7 @@ export default tseslint.config(
       '**/node_modules/',
       '**/coverage/',
       '_sync/',
-      '_to_delete/',
+      '**/_to_delete/',
       'functions/lib/',
       'cloudflare/',
       'docs/design/boards/',
