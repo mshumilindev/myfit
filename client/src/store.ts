@@ -752,6 +752,10 @@ function writeWorkoutDoc(w: Workout): void {
  * syncing — an acceptable edge for an interrupted backfill.
  */
 const draftWorkouts = new Set<string>();
+// Editing a past session (or a fresh backfill) is draft work: the original is
+// snapshotted so exiting can revert it, and nothing is pushed to history until
+// the athlete taps Save. A fresh backfill has no snapshot — exiting drops it.
+const pastSnapshots = new Map<string, Workout>();
 
 /** True while a workout is deliberately kept on this device only. */
 function isLocalOnlyWorkout(w: Workout): boolean {
@@ -828,8 +832,15 @@ export function mergeServerWorkoutsWithLocalDrafts(
   localWorkouts: Workout[],
 ): Workout[] {
   const byId = new Set(serverWorkouts.map((w) => w.id));
+  const localById = new Map(localWorkouts.map((w) => [w.id, w]));
+  // For a session being actively edited as a draft, keep the local (edited)
+  // version even though the server still has the original — otherwise a snapshot
+  // arriving mid-edit would clobber unsaved changes.
+  const merged = serverWorkouts.map((sw) =>
+    draftWorkouts.has(sw.id) ? (localById.get(sw.id) ?? sw) : sw,
+  );
   const localOnly = localWorkouts.filter((w) => isLocalOnlyWorkout(w) && !byId.has(w.id));
-  return sortWorkouts([...serverWorkouts, ...localOnly]);
+  return sortWorkouts([...merged, ...localOnly]);
 }
 
 export function mergeServerActivitiesWithLocalLive(
@@ -1084,6 +1095,52 @@ export function commitWorkout(id: string): void {
   if (!w || w.finishedAt === null) return;
   setState({ syncStatus: bumpPending() });
   writeWorkoutDoc(w);
+}
+
+/**
+ * Open a past session for editing as a draft: snapshot the current version so a
+ * later discard can revert it, and mark it local-only so edits don't sync until
+ * Save. A no-op for a fresh backfill (already a draft, and it has no prior
+ * version to snapshot).
+ */
+export function beginPastEdit(id: string): void {
+  if (draftWorkouts.has(id)) return;
+  const w = state.workouts.find((x) => x.id === id);
+  if (!w) return;
+  pastSnapshots.set(id, structuredClone(w));
+  draftWorkouts.add(id);
+}
+
+/** Save a past-session draft to history (commit the edits / the new backfill). */
+export function savePastWorkout(id: string): void {
+  pastSnapshots.delete(id);
+  commitWorkout(id);
+}
+
+/**
+ * Leave a past-session draft without saving: a fresh backfill is dropped
+ * entirely; an edited existing session is reverted to the snapshot taken when
+ * its editor opened. Nothing syncs — the backend still holds the original.
+ */
+export function discardPastWorkout(id: string): void {
+  if (!draftWorkouts.has(id)) return;
+  const snap = pastSnapshots.get(id);
+  pastSnapshots.delete(id);
+  if (snap) {
+    draftWorkouts.delete(id);
+    setState({ workouts: sortWorkouts(state.workouts.map((w) => (w.id === id ? snap : w))) });
+  } else {
+    deleteWorkout(id); // still a draft → dropped locally, nothing on the backend
+  }
+}
+
+/** Delete a past session outright (the trash action), whether or not it's an
+ *  open draft. An edited existing session deletes on the backend too; a fresh
+ *  backfill is only ever local. */
+export function deletePastWorkout(id: string): void {
+  if (pastSnapshots.has(id)) draftWorkouts.delete(id); // existing → real delete
+  pastSnapshots.delete(id);
+  deleteWorkout(id);
 }
 
 export function addExercise(

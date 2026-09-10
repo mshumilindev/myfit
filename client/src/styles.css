@@ -31901,3 +31901,24 @@ body {
   overflow: hidden;
   padding-bottom: 0;
 }
+/* Past-session editor header actions (trash + Save) — the past-hero positions
+   its right action absolutely, so position the wrapper the same way and give the
+   centred title room to clear both buttons. */
+.session-top.past-hero > .past-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto 0;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.session-top.past-hero:has(.past-actions) .mid {
+  padding-right: 150px;
+}
+.past-actions .past-save {
+  min-height: 38px;
+  padding: 0 16px;
+}

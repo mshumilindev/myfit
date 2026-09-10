@@ -37,6 +37,9 @@ import {
   renameExercise,
   replaceExercise,
   reopenWorkout,
+  beginPastEdit,
+  savePastWorkout,
+  deletePastWorkout,
   resolveMuscles,
   restoreExercise,
   restoreSet,
@@ -336,6 +339,12 @@ export function SessionView(props: {
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
   const workout = store.workouts.find((w) => w.id === props.workoutId);
+  // A past session is edited as a draft — snapshot it on open so leaving without
+  // Save reverts (or drops a fresh backfill). Runs once per editor.
+  useEffect(() => {
+    if (props.past) beginPastEdit(props.workoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [sheet, setSheet] = useState<SheetState>(null);
   const [circuit, setCircuit] = useState<{ on: boolean; groupId: string | null; rounds: number }>({
     on: false,
@@ -1866,13 +1875,26 @@ export function SessionView(props: {
                 {t.reopen}
               </button>
             ) : (
-              <button
-                className="trash"
-                onClick={() => setDialog({ kind: 'del-workout' })}
-                aria-label={t.deleteWorkout}
-              >
-                <Icon name="trash" />
-              </button>
+              <div className="past-actions">
+                <button
+                  className="trash"
+                  onClick={() => setDialog({ kind: 'del-workout' })}
+                  aria-label={t.deleteWorkout}
+                >
+                  <Icon name="trash" />
+                </button>
+                {props.past && (
+                  <button
+                    className="btn btn-primary past-save"
+                    onClick={() => {
+                      savePastWorkout(workout.id);
+                      props.onClose();
+                    }}
+                  >
+                    {t.save}
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
@@ -3158,7 +3180,8 @@ export function SessionView(props: {
           confirmLabel={t.delete}
           onCancel={() => setDialog(null)}
           onConfirm={() => {
-            deleteWorkout(workout.id);
+            if (props.past) deletePastWorkout(workout.id);
+            else deleteWorkout(workout.id);
             setDialog(null);
             props.onClose();
           }}

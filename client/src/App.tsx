@@ -26,7 +26,7 @@ import {
   retrySync,
   discardBlockingChange,
   bodyMetricsComplete,
-  commitWorkout,
+  discardPastWorkout,
   setMasterySeenRating,
   liveSleep,
 } from './store';
@@ -1218,9 +1218,10 @@ export function App() {
           startAdd={activeOverlay.startAdd}
           shell={shell}
           onClose={() => {
-            // A backfilled draft syncs once here, when its editor closes;
-            // a no-op for an already-synced past workout.
-            commitWorkout(activeOverlay.workoutId);
+            // Leaving without Save discards the draft: a fresh backfill is
+            // dropped, an edited existing session reverts. Saving happens via the
+            // in-editor Save button (which clears the draft first, so this no-ops).
+            discardPastWorkout(activeOverlay.workoutId);
             closeOverlay();
           }}
         />
