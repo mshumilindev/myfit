@@ -518,7 +518,7 @@ export function SessionView(props: {
   const focusPos = Math.min(Math.max(0, focusIdx), Math.max(0, focusCount - 1));
   const focusEx = focusExercises[focusPos] ?? null;
   const focusHasNext = focusPos < focusCount - 1;
-  const focusView = focusMode && live && !props.past && focusCount > 0;
+  const focusView = focusMode && live && !props.past;
   const focusedId =
     focusView && focusEx
       ? focusEx.id
@@ -763,7 +763,68 @@ export function SessionView(props: {
   }
 
   function renderFocusView() {
-    if (!focusEx) return null;
+    const fmActions = (
+      <div className="fm-actions">
+        <button
+          className="fm-icon-btn fm-discard"
+          onClick={() => setDialog({ kind: 'del-workout' })}
+          aria-label={t.discardSession}
+          title={t.discardSession}
+        >
+          <Icon name="trash" />
+        </button>
+        <button
+          className="fm-icon-btn"
+          onClick={() => setSheet({ kind: 'musclemap' })}
+          aria-label={t.muscleMapButton}
+          title={t.muscleMapButton}
+        >
+          <Icon name="person" />
+        </button>
+        <button
+          className="fm-icon-btn"
+          onClick={() => setSheet({ kind: 'settings' })}
+          aria-label={t.sessionSettings}
+          title={t.sessionSettings}
+        >
+          <Icon name="gear" />
+        </button>
+        <button
+          className="fm-icon-btn fm-finish"
+          disabled={entries === 0}
+          onClick={requestFinish}
+          aria-label={t.finish}
+          title={t.finish}
+        >
+          <Icon name="check" />
+        </button>
+      </div>
+    );
+    if (!focusEx) {
+      return (
+        <div className="focus-view">
+          <div className="fm-modebar">
+            <span className="fm-modelbl">
+              <span className="dotp" aria-hidden />
+              {t.focusMode}
+            </span>
+            {fmActions}
+          </div>
+          <div className="focus-empty">
+            <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
+              <button
+                className="btn btn-primary"
+                style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                onClick={() => setSheet({ kind: 'add' })}
+              >
+                <Icon name="plus" />
+                {t.addExercise}
+              </button>
+            </EmptyState>
+          </div>
+        </div>
+      );
+    }
     const nx = focusExercises[focusPos + 1] ?? null;
     const segs = focusHasNext
       ? focusExercises.map((e, i) => (
@@ -782,10 +843,7 @@ export function SessionView(props: {
             <span className="dotp" aria-hidden />
             {t.focusMode}
           </span>
-          <button className="fm-settings-btn" onClick={() => setSheet({ kind: 'settings' })}>
-            <Icon name="gear" />
-            {t.sessionSettings}
-          </button>
+          {fmActions}
         </div>
         <div className="focus-scroll">
           <div className="plan-progress focus-step">
@@ -833,15 +891,6 @@ export function SessionView(props: {
               <Icon name="caret-right" />
             </button>
           )}
-          <button
-            className="btn focus-finish"
-            disabled={entries === 0}
-            onClick={requestFinish}
-            aria-label={t.finish}
-            title={t.finish}
-          >
-            <Icon name="check" />
-          </button>
         </div>
       </div>
     );
