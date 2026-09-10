@@ -2316,9 +2316,15 @@ i > svg {
   padding: 13px 14px;
   width: 100%;
 }
+/* A hairline that sets the "start next exercise" shortcut apart from the log. */
+.start-next-divider {
+  height: 1px;
+  margin: 16px 0 14px;
+  background: var(--color-neutral-800);
+}
 .start-next {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 0;
   gap: 7px;
 }
 
@@ -11922,6 +11928,24 @@ h6 {
   white-space: nowrap;
 }
 
+/* Icon-only exercise-options button on a collapsed / queued row — mirrors the
+   expanded card's header settings button. Sits at the row's right edge. */
+.past-ex-card .card-cfg {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  color: var(--color-neutral-600);
+  font-size: 16px;
+  cursor: pointer;
+}
+.past-ex-card .card-cfg:active {
+  color: var(--color-neutral-400);
+}
+
 /* --- Dropsets in the set list (DS-2) -------------------------------------- */
 .set-wrap {
   padding: var(--space-2) 0;
@@ -12871,13 +12895,6 @@ h6 {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-}
-.queued-ex-card .qz-handle {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-neutral-600);
-  font-size: 14px;
 }
 .queued-ex-card .n {
   flex: 1;
@@ -15397,8 +15414,10 @@ button.exd-media {
 .session-head-wrap {
   display: contents;
 }
-.session-live .session-head-wrap {
-  display: block;
+/* The wrapper stays display:contents so the hero and the current/rest strips
+   are direct flow children of the scroll pane. Only the hero pins to the top;
+   the strips flow with the exercise list and scroll away under it. */
+.session-live .session-top.live-toolbar {
   position: sticky;
   top: 0;
   z-index: 6;
@@ -22525,6 +22544,97 @@ button.badge {
   font-size: 11px;
   line-height: 1.4;
   color: var(--color-neutral-400);
+}
+
+/* Compact progression hint (replaces the boxed target) — same hint palette. */
+.prog-hint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 7px;
+  margin: 2px 0 12px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+.prog-hint .ph-delta {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.prog-hint .ph-delta.up {
+  color: var(--color-ok-text);
+}
+.prog-hint .ph-delta.down {
+  color: var(--color-accent-200);
+}
+.prog-hint .ph-arrow {
+  color: var(--color-neutral-600);
+}
+.prog-hint .ph-target {
+  color: var(--color-text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.prog-hint .ph-sep {
+  color: var(--color-neutral-700);
+}
+.prog-hint .ph-action {
+  color: var(--color-neutral-300);
+}
+.prog-hint.st-progress .ph-action {
+  color: var(--color-ok-text);
+}
+.prog-hint.st-stall .ph-action {
+  color: var(--color-accent-200);
+}
+.prog-hint .ph-prev {
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Ghost (next-set) logger: reps/weight steppers, then a wide Log + square
+   set-settings button on the row below. */
+.gset {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+.gset-steppers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.gset-actions {
+  display: flex;
+  gap: 10px;
+}
+.gset-log {
+  flex: 1;
+  min-height: 46px;
+  font-size: 15px;
+}
+.gset-cfg {
+  flex: none;
+  width: 46px;
+  min-height: 46px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-400);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.gset-cfg:active {
+  background: var(--color-neutral-900);
+}
+.gset-cfg i {
+  font-size: 18px;
 }
 
 /* Start-rest sheet */

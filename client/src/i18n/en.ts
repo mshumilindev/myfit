@@ -729,6 +729,8 @@ export const en = {
   progRepsTarget: (n: number) => `${n} reps`,
   progHold: 'Hold',
   progFirst: 'New',
+  progAdd: 'Add load',
+  setOptions: 'Set options',
   progDeload: 'Deload',
   progWhyProgress: 'You hit the top of your range — add load.',
   progWhyHold: 'Beat your reps, then the weight goes up.',

@@ -738,6 +738,8 @@ export const lt: Strings = {
   progRepsTarget: (n: number) => `${n} kart.`,
   progHold: 'Laikyk',
   progFirst: 'Nauja',
+  progAdd: 'Pridėk svorio',
+  setOptions: 'Serijos parinktys',
   progDeload: 'Deload',
   progWhyProgress: 'Pasiekei diapazono viršų — pridėk svorio.',
   progWhyHold: 'Pagerink pakartojimus, tada kils svoris.',

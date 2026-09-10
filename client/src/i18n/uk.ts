@@ -725,6 +725,8 @@ export const uk: Strings = {
   progRepsTarget: (n: number) => `${n} повт.`,
   progHold: 'Тримай',
   progFirst: 'Нова',
+  progAdd: 'Додай вагу',
+  setOptions: 'Параметри підходу',
   progDeload: 'Делоад',
   progWhyProgress: 'Дійшов до верху діапазону — додай ваги.',
   progWhyHold: 'Побий свої повтори, тоді підніметься вага.',

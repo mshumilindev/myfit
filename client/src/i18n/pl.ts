@@ -728,6 +728,8 @@ export const pl: Strings = {
   progRepsTarget: (n: number) => `${n} powt.`,
   progHold: 'Trzymaj',
   progFirst: 'Nowe',
+  progAdd: 'Dodaj obciążenie',
+  setOptions: 'Opcje serii',
   progDeload: 'Deload',
   progWhyProgress: 'Osiągnięto górę zakresu — dodaj obciążenie.',
   progWhyHold: 'Pobij powtórzenia, potem wzrośnie ciężar.',

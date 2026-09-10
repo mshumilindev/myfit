@@ -4,7 +4,6 @@ import { tokenMatch } from '../search';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
-  addDropToSet,
   addExercise,
   attachGymToWorkout,
   clearSets,
@@ -355,8 +354,10 @@ export function SessionView(props: {
   const [expandedPast, setExpandedPast] = useState<string[]>([]);
   /** The set logged most recently in this visit — its row reads “just now”. */
   const [recentSetId, setRecentSetId] = useState<string | null>(null);
-  /** Planned-but-untouched exercises the user tapped open (SS-1 queue rows). */
-  const [wokenIds, setWokenIds] = useState<string[]>([]);
+  /** The single card the user has explicitly expanded (queued row tap, or
+   * start/add-next). Overrides the derived active card while it points at a
+   * still-present exercise. */
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const isDesktop = useIsDesktop();
   const startAddConsumed = useRef(false);
 
@@ -427,7 +428,7 @@ export function SessionView(props: {
     );
     cards.forEach((c) => io.observe(c));
     return () => io.disconnect();
-  }, [railExKey, expandedPast, wokenIds, live]);
+  }, [railExKey, expandedPast, expandedId, live]);
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -498,6 +499,13 @@ export function SessionView(props: {
     sortedExercises.find(incompleteById)?.id ??
     sortedExercises[0]?.id ??
     null;
+  // Exactly one card is expanded at a time: normally the derived active
+  // exercise, but tapping a queued row (or starting/adding the next one)
+  // focuses that one instead, until a set is logged returns focus to active.
+  const focusedId =
+    expandedId && sortedExercises.some((e) => e.id === expandedId)
+      ? expandedId
+      : activeExerciseId;
   // The next not-yet-started exercise after the active one — drives the
   // "start next exercise" shortcut on the active card.
   const activeIdx = sortedExercises.findIndex((e) => e.id === activeExerciseId);
@@ -592,6 +600,28 @@ export function SessionView(props: {
     }
   }
 
+  /** Icon-only exercise-options button for a collapsed row — opens the menu
+   * sheet WITHOUT expanding the card (the click stops here). */
+  const cardCfg = (exId: string) => (
+    <button
+      type="button"
+      className="card-cfg"
+      aria-label={t.menuAction}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSheet({ kind: 'menu', exId });
+      }}
+    >
+      <Icon name="sliders-horizontal" />
+    </button>
+  );
+  function rowKey(e: { key: string; preventDefault: () => void }, fn: () => void): void {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fn();
+    }
+  }
+
   function logGhost(
     ex: Exercise,
     v: { reps: number; weight: number | null },
@@ -611,22 +641,11 @@ export function SessionView(props: {
       calories: null,
       rpe: null,
     });
+    // A fresh log returns focus to whatever the derived active exercise is.
+    setExpandedId(null);
   }
 
   /** DS-2 · “Add a drop”: append a lighter part to the last logged set. */
-  function addDropQuick(ex: Exercise): void {
-    const last = [...ex.sets].sort((a, b) => a.position - b.position)[ex.sets.length - 1];
-    if (!last) return;
-    const parts = setDrops(last);
-    const prev = parts[parts.length - 1] ?? { reps: last.reps, weight: last.weight };
-    const drop: DropEntry = {
-      reps: Math.max(1, prev.reps - 2),
-      weight: prev.weight === null ? null : Math.max(0, Math.round((prev.weight * 0.75) / 5) * 5),
-    };
-    addDropToSet(workout!.id, ex.id, last.id, drop);
-    setRecentSetId(last.id);
-  }
-
   /** AC-1: one-tap deep copy of a logged set, inserted right after it. */
   function duplicateSetAction(ex: Exercise, s: SetEntry): void {
     const newId = duplicateSet(workout!.id, ex.id, s.id);
@@ -760,7 +779,7 @@ export function SessionView(props: {
         key={ex.id}
         data-exid={ex.id}
         className={`exercise-card${completed ? ' completed' : ''}${
-          !grp && activeExerciseId === ex.id ? ' active' : ''
+          !grp && focusedId === ex.id ? ' active' : ''
         }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
           marker ? ' warmup-marker' : ''
         }`}
@@ -852,7 +871,7 @@ export function SessionView(props: {
                 <ExerciseName name={ex.name} />
               </button>
               {(timed || marker) && <span className="prev">{t.exerciseKindNames[kind]}</span>}
-              {!grp && !timed && !marker && prev && (
+              {!grp && !timed && !marker && prev && !target && (
                 <span className="prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
               )}
               {!grp && planned > 0 && (
@@ -1003,34 +1022,38 @@ export function SessionView(props: {
         ) : (
           <>
             {target && showGhost && !grp && (
-              <div className={`prog-target st-${target.state}`}>
-                <span className="pt-label">{t.progTarget}</span>
-                <span className="pt-val">
-                  {target.weight === null
-                    ? t.progRepsTarget(target.reps)
-                    : `${fmtWeightValue(target.weight)} × ${target.reps}`}
-                </span>
+              <div className={`prog-hint st-${target.state}`}>
                 {target.deltaKg > 0 && (
-                  <span className="pt-delta up">+{fmtWeightValue(target.deltaKg)}</span>
+                  <span className="ph-delta up">+{fmtWeightValue(target.deltaKg)}</span>
                 )}
                 {target.deltaKg < 0 && (
-                  <span className="pt-delta down">{fmtWeightValue(target.deltaKg)}</span>
+                  <span className="ph-delta down">{fmtWeightValue(target.deltaKg)}</span>
                 )}
-                {target.state === 'hold' && <span className="pt-tag">{t.progHold}</span>}
-                {target.state === 'stall' && <span className="pt-tag warn">{t.progDeload}</span>}
-                {target.state === 'first' && <span className="pt-tag">{t.progFirst}</span>}
-                <span className="pt-why">
-                  {target.state === 'progress'
-                    ? t.progWhyProgress
-                    : target.state === 'hold'
-                      ? t.progWhyHold
-                      : target.state === 'stall'
-                        ? t.progWhyStall
-                        : t.progWhyFirst}
+                <span className="ph-arrow">→</span>
+                <span className="ph-target">
+                  {target.weight === null
+                    ? t.progRepsTarget(target.reps)
+                    : `${fmtWeightValue(target.weight)} ${t.kgCol.toLowerCase()}`}
                 </span>
+                <span className="ph-sep">·</span>
+                <span className="ph-action">
+                  {target.state === 'progress'
+                    ? t.progAdd
+                    : target.state === 'stall'
+                      ? t.progDeload
+                      : target.state === 'hold'
+                        ? t.progHold
+                        : t.progFirst}
+                </span>
+                {prev && (
+                  <>
+                    <span className="ph-sep">·</span>
+                    <span className="ph-prev">{t.prev(fmtSet(prev.weight, prev.reps))}</span>
+                  </>
+                )}
               </div>
             )}
-            {!grp && (
+            {!grp && ex.sets.length > 0 && (
               <div className="set-grid header">
                 <span>#</span>
                 <span>{t.repsCol}</span>
@@ -1159,66 +1182,66 @@ export function SessionView(props: {
                     </div>
                   );
                 })()}
-              {showGhost && (
-                <div className={`ghost-row${rowCls}`}>
-                  <span className="idx">{grp ? `R${ex.sets.length + 1}` : ex.sets.length + 1}</span>
-                  <button
-                    className="gval"
-                    onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
-                  >
-                    {ghost.reps}
-                  </button>
-                  <button
-                    className="gval"
-                    onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
-                  >
-                    {ghost.weight === null ? '—' : fmtWeightValue(ghost.weight)}
-                  </button>
-                  {isDesktop && <span className="kind">{grp ? '' : t.setTypeWorking}</span>}
-                  <button
-                    className="btn btn-primary log-btn"
-                    disabled={directLogBlocked}
-                    onClick={() => logGhost(ex, ghost)}
-                  >
-                    {props.past ? t.add : t.log}
-                  </button>
-                </div>
-              )}
-              {!grp && live && ex.sets.length > 0 && (
-                <div className="ghost-tools">
-                  <button className="ghost-chip" onClick={() => addDropQuick(ex)}>
-                    <Icon name="caret-line-down" />
-                    {t.addADrop}
-                  </button>
-                  <button
-                    className="ghost-chip muted"
-                    onClick={() => logGhost(ex, ghost, 'warmup')}
-                  >
-                    <Icon name="fire" />
-                    {t.warmupChip}
-                  </button>
-                </div>
-              )}
+              {showGhost &&
+                (grp ? (
+                  <div className={`ghost-row${rowCls}`}>
+                    <span className="idx">{`R${ex.sets.length + 1}`}</span>
+                    <button
+                      className="gval"
+                      onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
+                    >
+                      {ghost.reps}
+                    </button>
+                    <button
+                      className="gval"
+                      onClick={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
+                    >
+                      {ghost.weight === null ? '—' : fmtWeightValue(ghost.weight)}
+                    </button>
+                    {isDesktop && <span className="kind" />}
+                    <button
+                      className="btn btn-primary log-btn"
+                      disabled={directLogBlocked}
+                      onClick={() => logGhost(ex, ghost)}
+                    >
+                      {props.past ? t.add : t.log}
+                    </button>
+                  </div>
+                ) : (
+                  <GhostSetRow
+                    key={`${ex.id}:${ex.sets.length}`}
+                    ex={ex}
+                    defReps={ghost.reps}
+                    defWeightKg={ghost.weight}
+                    weightRequired={directLogBlocked}
+                    isPast={!!props.past}
+                    onLog={(v) => logGhost(ex, v)}
+                    onSettings={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
+                  />
+                ))}
             </div>
           </>
         )}
-        {live && !grp && activeExerciseId === ex.id && nextEx && (
-          <button
-            className="btn btn-secondary start-next"
-            onClick={() => {
-              const nx = nextEx;
-              if (!nx) return;
-              setWokenIds((x) => (x.includes(nx.id) ? x : [...x, nx.id]));
-              requestAnimationFrame(() => {
-                document
-                  .querySelector(`[data-exid="${nx.id}"]`)
-                  ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              });
-            }}
-          >
-            <Icon name="arrow-down" />
-            {t.startNext(nextEx.name)}
-          </button>
+        {live && !grp && focusedId === ex.id && activeExerciseId === ex.id && nextEx && (
+          <>
+            <div className="start-next-divider" />
+            <button
+              className="btn btn-secondary start-next"
+              onClick={() => {
+                const nx = nextEx;
+                if (!nx) return;
+                setExpandedId(nx.id);
+                requestAnimationFrame(() => {
+                  document
+                    .querySelector(`[data-exid="${nx.id}"]`)
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+              }}
+            >
+              <Icon name="arrow-down" />
+              {t.startNext(nextEx.name)}
+            </button>
+          </>
         )}
         {ex.sets.length === 0 && live && !marker && (
           <div className="ghost-hint">
@@ -1911,10 +1934,7 @@ export function SessionView(props: {
                   live &&
                   qExs.every(
                     (e) =>
-                      !isMarkerExercise(e) &&
-                      e.sets.length === 0 &&
-                      e.id !== activeExerciseId &&
-                      !wokenIds.includes(e.id),
+                      !isMarkerExercise(e) && e.sets.length === 0 && e.id !== focusedId,
                   );
                 if (isQueued) {
                   const firstQueuedIdx = blocks.findIndex((b) => {
@@ -1922,10 +1942,7 @@ export function SessionView(props: {
                     const es = b.kind === 'group' ? b.group.exercises : [b.exercise];
                     return es.every(
                       (e) =>
-                        !isMarkerExercise(e) &&
-                        e.sets.length === 0 &&
-                        e.id !== activeExerciseId &&
-                        !wokenIds.includes(e.id),
+                        !isMarkerExercise(e) && e.sets.length === 0 && e.id !== focusedId,
                     );
                   });
                   const header =
@@ -1939,11 +1956,8 @@ export function SessionView(props: {
                         {header}
                         <button
                           className="past-ex-card queued-ex-card queued-group"
-                          onClick={() => setWokenIds((x) => [...x, ...g.exercises.map((e) => e.id)])}
+                          onClick={() => setExpandedId(g.exercises[0]?.id ?? null)}
                         >
-                          <span className="qz-handle" aria-hidden>
-                            <Icon name="dots-six" />
-                          </span>
                           <span className="n">{g.exercises.map((e) => e.name).join(' · ')}</span>
                           <span className="count">{t.supersetTag(g.letter)}</span>
                         </button>
@@ -1955,17 +1969,18 @@ export function SessionView(props: {
                   return (
                     <Fragment key={qsingle.id}>
                       {header}
-                      <button
+                      <div
                         data-exid={qsingle.id}
                         className="past-ex-card queued-ex-card"
-                        onClick={() => setWokenIds((x) => [...x, qsingle.id])}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setExpandedId(qsingle.id)}
+                        onKeyDown={(e) => rowKey(e, () => setExpandedId(qsingle.id))}
                       >
-                        <span className="qz-handle" aria-hidden>
-                          <Icon name="dots-six" />
-                        </span>
                         <span className="n">{qsingle.name}</span>
                         {qplanned > 0 && <span className="count">0 / {qplanned}</span>}
-                      </button>
+                        {cardCfg(qsingle.id)}
+                      </div>
                     </Fragment>
                   );
                 }
@@ -1977,7 +1992,7 @@ export function SessionView(props: {
                   const activeMemberId =
                     g.exercises.find((e) => e.sets.length === minSets)?.id ?? null;
                   void minSets;
-                  const groupActive = g.exercises.some((e) => e.id === activeExerciseId);
+                  const groupActive = g.exercises.some((e) => e.id === focusedId);
                   const collapsed =
                     (props.past || (live && !groupActive)) &&
                     g.exercises.some((e) => e.sets.length > 0) &&
@@ -2129,22 +2144,28 @@ export function SessionView(props: {
                 }
                 const single = block.exercise;
                 if (
-                  (props.past || (live && activeExerciseId !== single.id)) &&
+                  (props.past || (live && focusedId !== single.id)) &&
                   single.sets.length > 0 &&
                   !expandedPast.includes(single.id)
                 ) {
                   return (
-                    <button
+                    <div
                       key={single.id}
                       data-exid={single.id}
                       className="past-ex-card"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setExpandedPast((x) => [...x, single.id])}
+                      onKeyDown={(e) =>
+                        rowKey(e, () => setExpandedPast((x) => [...x, single.id]))
+                      }
                     >
                       <span className="past-ex-row">
                         <span className="n">{single.name}</span>
                         <span className="v">{pastSummary(single)}</span>
+                        {cardCfg(single.id)}
                       </span>
-                    </button>
+                    </div>
                   );
                 }
                 return renderCard(single, null);
@@ -2438,14 +2459,18 @@ export function SessionView(props: {
             // newly added one straight away instead of leaving it collapsed in
             // the queue.
             const activeEx = workout.exercises.find((e) => e.id === activeExerciseId);
+            // Auto-open the new exercise (and collapse current) only when it is
+            // genuinely the next one up — i.e. nothing was already queued ahead
+            // of it. If a queue exists, leave the current exercise expanded.
             if (
               created &&
               !sheet.intoGroupId &&
               !(circuit.on && circuit.groupId) &&
               activeEx &&
-              activeEx.sets.length > 0
+              activeEx.sets.length > 0 &&
+              !nextEx
             ) {
-              setWokenIds((x) => (x.includes(created.id) ? x : [...x, created.id]));
+              setExpandedId(created.id);
             }
             // Single-add: one pick adds the exercise and closes the picker.
             setSheet(null);
@@ -3602,6 +3627,59 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
  * − / value / + control. The value is editable; clearing it stays empty while
  * typing (never snaps to 0 mid-edit). Empty blur keeps the previous number.
  */
+function GhostSetRow(props: {
+  ex: Exercise;
+  defReps: number;
+  defWeightKg: number | null;
+  weightRequired: boolean;
+  isPast: boolean;
+  onLog: (v: { reps: number; weight: number | null }) => void;
+  onSettings: () => void;
+}) {
+  const { t } = useT();
+  const unit = exerciseUnit(props.ex.name);
+  const [reps, setReps] = useState(Math.max(1, props.defReps || 1));
+  const [weightKg, setWeightKg] = useState<number | null>(props.defWeightKg);
+  const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
+  const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
+  const bw = weightKg === null && !props.weightRequired;
+  const blocked = props.weightRequired && weightKg === null;
+  return (
+    <div className="gset">
+      <div className="gset-steppers">
+        <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
+        <Stepper
+          label={unit === 'lb' ? t.weightLb : t.weightKg}
+          value={toDisp(weightKg ?? 0)}
+          step={unit === 'lb' ? 5 : 2.5}
+          min={0}
+          decimals={unit === 'lb' ? 1 : 2}
+          disabled={bw}
+          placeholder={t.bodyweightShort}
+          onChange={(x) => setWeightKg(fromDisp(x))}
+        />
+      </div>
+      <div className="gset-actions">
+        <button
+          className="gset-cfg"
+          aria-label={t.setOptions}
+          title={t.setOptions}
+          onClick={props.onSettings}
+        >
+          <Icon name="sliders-horizontal" />
+        </button>
+        <button
+          className="btn btn-primary gset-log"
+          disabled={blocked}
+          onClick={() => props.onLog({ reps, weight: weightKg })}
+        >
+          {props.isPast ? t.add : t.log}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Stepper(props: {
   label: string;
   value: number;

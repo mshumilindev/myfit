@@ -721,6 +721,8 @@ export const et: Strings = {
   progRepsTarget: (n: number) => `${n} kord.`,
   progHold: 'Hoia',
   progFirst: 'Uus',
+  progAdd: 'Lisa raskust',
+  setOptions: 'Seeria valikud',
   progDeload: 'Deload',
   progWhyProgress: 'Jõudsid vahemiku tippu — lisa raskust.',
   progWhyHold: 'Ületa oma kordused, siis tõuseb raskus.',
