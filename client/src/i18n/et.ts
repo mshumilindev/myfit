@@ -1186,6 +1186,7 @@ export const et: Strings = {
   cardioMinutes: 'Kardio min',
   warmupSet: 'Soojendusseeria',
   deleteSet: 'Kustuta seeria',
+  exerciseSettings: 'Harjutuse seaded',
   cancel: 'Tühista',
   restStartCta: 'Puhkus / puhkusereis',
   restStartTitle: 'Alusta puhkeperioodi',

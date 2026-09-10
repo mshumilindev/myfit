@@ -1192,6 +1192,7 @@ export const pl: Strings = {
   cardioMinutes: 'Min cardio',
   warmupSet: 'Seria rozgrzewkowa',
   deleteSet: 'Usuń serię',
+  exerciseSettings: 'Ustawienia ćwiczenia',
   cancel: 'Anuluj',
   restStartCta: 'Odpoczynek / urlop',
   restStartTitle: 'Rozpocznij okres odpoczynku',

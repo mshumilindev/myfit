@@ -31498,9 +31498,15 @@ body {
   font-weight: 500;
 }
 
-/* the focused card: sectioned hierarchy */
+/* the focused card: sectioned hierarchy — melts into the page (concept has
+   no card chrome; only the inner zones carry surfaces). !important beats the
+   live .active / .completed.active hairline overrides. Page background is
+   left untouched — this only clears the CARD surface. */
 .focus-view .exercise-card {
   padding: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 .focus-view .exercise-card .drag-handle,
 .focus-view .exercise-card .start-next,

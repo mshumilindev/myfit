@@ -1057,7 +1057,7 @@ export function SessionView(props: {
                 </span>
               )}
               {grp && !groupDone && grp.active && <span className="ss-now">{t.nowLabel}</span>}
-              {!grp && (
+              {!grp && !focusView && (
                 <button
                   className="dots ex-settings"
                   onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
@@ -2744,6 +2744,9 @@ export function SessionView(props: {
                   )
               : undefined
           }
+          onExerciseSettings={
+            focusView ? () => setSheet({ kind: 'menu', exId: sheet.exId }) : undefined
+          }
           onClose={() => setSheet(null)}
         />
       )}
@@ -4050,6 +4053,7 @@ function SetEditorSheet(props: {
   bandLibrary: readonly BandRung[];
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
+  onExerciseSettings?: () => void;
   onClose: () => void;
 }) {
   const { t } = useT();
@@ -4608,6 +4612,13 @@ function SetEditorSheet(props: {
             <span className="toggle-value">{typeMeta[type].name}</span>
           </button>
         </>
+      )}
+      {props.onExerciseSettings && (
+        <button className="toggle-row se-exset" onClick={props.onExerciseSettings}>
+          <Icon name="gear" />
+          <span className="lab">{t.exerciseSettings}</span>
+          <Icon name="caret-right" />
+        </button>
       )}
       <div className="sheet-actions">
         {props.onDelete && (

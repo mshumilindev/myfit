@@ -1190,6 +1190,7 @@ export const uk: Strings = {
   cardioMinutes: 'Кардіо хв',
   warmupSet: 'Розминковий підхід',
   deleteSet: 'Видалити підхід',
+  exerciseSettings: 'Налаштування вправи',
   cancel: 'Скасувати',
   restStartCta: 'Відпочинок / відпустка',
   restStartTitle: 'Почати період відпочинку',

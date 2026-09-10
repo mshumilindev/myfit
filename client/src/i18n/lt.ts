@@ -1203,6 +1203,7 @@ export const lt: Strings = {
   cardioMinutes: 'Kardio min',
   warmupSet: 'Apšilimo serija',
   deleteSet: 'Ištrinti seriją',
+  exerciseSettings: 'Pratimo nustatymai',
   cancel: 'Atšaukti',
   restStartCta: 'Poilsis / atostogos',
   restStartTitle: 'Pradėti poilsio laikotarpį',

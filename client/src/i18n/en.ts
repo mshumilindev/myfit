@@ -1234,6 +1234,7 @@ export const en = {
   cardioMinutes: 'Cardio min',
   warmupSet: 'Warm-up set',
   deleteSet: 'Delete set',
+  exerciseSettings: 'Exercise settings',
   cancel: 'Cancel',
   restStartCta: 'Rest / vacation',
   restStartTitle: 'Start a rest period',
