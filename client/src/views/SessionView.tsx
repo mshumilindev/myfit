@@ -1887,8 +1887,9 @@ export function SessionView(props: {
                   const activeMemberId =
                     g.exercises.find((e) => e.sets.length === minSets)?.id ?? null;
                   void minSets;
+                  const groupActive = g.exercises.some((e) => e.id === activeExerciseId);
                   const collapsed =
-                    props.past &&
+                    (props.past || (live && !groupActive)) &&
                     g.exercises.some((e) => e.sets.length > 0) &&
                     !g.exercises.some((e) => expandedPast.includes(e.id));
                   if (collapsed) {
@@ -2061,7 +2062,11 @@ export function SessionView(props: {
                     </button>
                   );
                 }
-                if (props.past && single.sets.length > 0 && !expandedPast.includes(single.id)) {
+                if (
+                  (props.past || (live && activeExerciseId !== single.id)) &&
+                  single.sets.length > 0 &&
+                  !expandedPast.includes(single.id)
+                ) {
                   return (
                     <button
                       key={single.id}
