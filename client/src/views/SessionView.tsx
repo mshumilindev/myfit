@@ -372,6 +372,27 @@ export function SessionView(props: {
   const startAddConsumed = useRef(false);
 
   const live = !!workout && workout.finishedAt === null && !props.past;
+  // In focus mode, adding (or duplicating) an exercise jumps the view straight
+  // to it. Kept above the early return so hook order stays stable.
+  const focusIdsKey = workout
+    ? [...workout.exercises]
+        .filter((e) => !isMarkerExercise(e))
+        .sort((a, b) => a.position - b.position)
+        .map((e) => e.id)
+        .join('|')
+    : '';
+  const focusIdsRef = useRef(focusIdsKey);
+  const focusAutoOn = focusMode && live && !props.past;
+  useEffect(() => {
+    const ids = focusIdsKey ? focusIdsKey.split('|') : [];
+    const prev = focusIdsRef.current ? focusIdsRef.current.split('|') : [];
+    if (focusAutoOn && ids.length > prev.length) {
+      const prevSet = new Set(prev);
+      const addedId = ids.find((id) => !prevSet.has(id));
+      if (addedId) setFocusIdx(ids.indexOf(addedId));
+    }
+    focusIdsRef.current = focusIdsKey;
+  }, [focusIdsKey, focusAutoOn]);
   const openMuscleHistory = (muscle: MuscleGroup) =>
     props.shell.openOverlay({ screen: 'muscle-history', muscle });
 
@@ -806,7 +827,7 @@ export function SessionView(props: {
           <div className="fm-modebar">
             <span className="fm-modelbl">
               <span className="dotp" aria-hidden />
-              {t.focusMode}
+              {t.focusModeLabel}
             </span>
             {fmActions}
           </div>
@@ -826,41 +847,27 @@ export function SessionView(props: {
       );
     }
     const nx = focusExercises[focusPos + 1] ?? null;
-    const segs = focusHasNext
-      ? focusExercises.map((e, i) => (
-          <span key={e.id} className={i < focusPos ? 'done' : i === focusPos ? 'cur' : ''} />
-        ))
-      : [
-          ...focusExercises
-            .slice(0, focusPos + 1)
-            .map((e, i) => <span key={e.id} className={i < focusPos ? 'done' : 'cur'} />),
-          <span key="__add" className="add" />,
-        ];
+    const segs = [
+      ...focusExercises.map((e, i) => (
+        <span key={e.id} className={i < focusPos ? 'done' : i === focusPos ? 'cur' : ''} />
+      )),
+      // a dashed placeholder for the next exercise you can still add
+      <span key="__add" className="add" />,
+    ];
     return (
       <div className="focus-view">
         <div className="fm-modebar">
           <span className="fm-modelbl">
             <span className="dotp" aria-hidden />
-            {t.focusMode}
+            {t.focusModeLabel}
           </span>
           {fmActions}
         </div>
         <div className="focus-scroll">
           <div className="plan-progress focus-step">
             <div className="plan-progress-head">
-              {focusHasNext ? (
-                <>
-                  <span>{t.exerciseWord}</span>
-                  <strong>{t.focusStepOf(focusPos + 1, focusCount)}</strong>
-                </>
-              ) : (
-                <>
-                  <span>
-                    {t.exerciseWord} {focusPos + 1}
-                  </span>
-                  <strong className="fm-free">{t.addedAsYouGo}</strong>
-                </>
-              )}
+              <span>{t.exerciseWord}</span>
+              <strong>{t.focusStepOf(focusPos + 1, focusCount)}</strong>
             </div>
             <div className="plan-segments" aria-label={t.exerciseWord}>
               {segs}
@@ -1996,12 +2003,6 @@ export function SessionView(props: {
             renderFocusView()
           ) : (
             <>
-              {live && !props.past && workout.exercises.length > 0 && (
-                <button className="btn btn-secondary focus-enter" onClick={enterFocus}>
-                  <Icon name="frame-corners" />
-                  {t.focusMode}
-                </button>
-              )}
           {workout.autoFinished && (
             <div className="notice-accent">
               <Icon name="clock-countdown" />

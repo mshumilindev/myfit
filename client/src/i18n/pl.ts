@@ -600,6 +600,7 @@ export const pl: Strings = {
   addExercise: 'Dodaj ćwiczenie',
   startNext: (name: string) => `Następne · ${name}`,
   focusMode: 'Skupienie',
+  focusModeLabel: 'Tryb skupienia',
   classicView: 'Widok klasyczny',
   exerciseView: 'Widok ćwiczeń',
   exerciseWord: 'Ćwiczenie',

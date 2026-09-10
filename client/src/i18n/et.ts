@@ -593,6 +593,7 @@ export const et: Strings = {
   addExercise: 'Lisa harjutus',
   startNext: (name: string) => `Järgmine · ${name}`,
   focusMode: 'Fookus',
+  focusModeLabel: 'Fookuse režiim',
   classicView: 'Klassikaline vaade',
   exerciseView: 'Harjutuste vaade',
   exerciseWord: 'Harjutus',

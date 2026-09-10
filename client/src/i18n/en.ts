@@ -601,6 +601,7 @@ export const en = {
   addExercise: 'Add exercise',
   startNext: (name: string) => `Start next · ${name}`,
   focusMode: 'Focus',
+  focusModeLabel: 'Focus mode',
   classicView: 'Classic view',
   exerciseView: 'Exercise view',
   exerciseWord: 'Exercise',

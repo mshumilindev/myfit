@@ -610,6 +610,7 @@ export const lt: Strings = {
   addExercise: 'Pridėti pratimą',
   startNext: (name: string) => `Toliau · ${name}`,
   focusMode: 'Fokusas',
+  focusModeLabel: 'Fokuso režimas',
   classicView: 'Klasikinis vaizdas',
   exerciseView: 'Pratimų vaizdas',
   exerciseWord: 'Pratimas',

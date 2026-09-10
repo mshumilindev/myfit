@@ -597,6 +597,7 @@ export const uk: Strings = {
   addExercise: 'Додати вправу',
   startNext: (name: string) => `Наступна · ${name}`,
   focusMode: 'Фокус',
+  focusModeLabel: 'Режим фокус',
   classicView: 'Класичний вигляд',
   exerciseView: 'Вигляд тренування',
   exerciseWord: 'Вправа',

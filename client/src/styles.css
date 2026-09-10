@@ -31378,6 +31378,13 @@ body {
   gap: 0;
   padding-bottom: 0;
 }
+/* Equal left/right gutters in focus mode — the rail is hidden here, so drop its
+   38px left inset and pad both sides the same. Raised specificity beats the
+   .session-has-rail rule. */
+.session-screen.session-focus .session-body {
+  padding-left: 18px;
+  padding-right: 18px;
+}
 .focus-view {
   flex: 1;
   min-height: 0;
@@ -31389,6 +31396,12 @@ body {
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* breathing room between the set-entry panel and the nav divider below */
+  padding-bottom: 20px;
+}
+.focus-scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* focus mode bar */
@@ -31478,9 +31491,9 @@ body {
   opacity: 0.4;
 }
 
-/* step indicator (reuses .plan-progress) */
+/* step indicator (reuses .plan-progress) — leave room above the name */
 .focus-step {
-  margin: 8px 0 2px;
+  margin: 8px 0 16px;
 }
 .focus-step .plan-progress-note {
   display: none;
@@ -31536,6 +31549,31 @@ body {
 }
 .focus-view .set-line {
   opacity: 0.82;
+}
+/* rest between sets / exercises — a quiet timeline separator (centered time
+   flanked by hairlines) instead of the old right-aligned floating label */
+.focus-view .set-rest {
+  justify-content: center;
+  gap: 10px;
+  min-height: 0;
+  margin: 10px 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-rest-300);
+  opacity: 0.9;
+}
+.focus-view .set-rest::before,
+.focus-view .set-rest::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: color-mix(in srgb, var(--color-rest-400) 22%, transparent);
+}
+.focus-view .set-rest.inter-card {
+  box-shadow: none;
+  margin: 4px 0 10px;
 }
 .focus-view .set-row .kind {
   color: var(--color-neutral-600);
@@ -31615,7 +31653,10 @@ body {
   flex: none;
   display: flex;
   gap: 10px;
-  padding: 12px 0 calc(14px + var(--safe-bottom));
+  /* break out to the container edges so the divider spans full width, keep the
+     buttons inside the 18px gutter, and leave a comfortable bottom margin */
+  margin: 0 -18px;
+  padding: 16px 18px calc(22px + var(--safe-bottom));
   border-top: 1px solid var(--color-divider);
   background: var(--color-bg);
 }
