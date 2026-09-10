@@ -358,6 +358,16 @@ export function SessionView(props: {
    * start/add-next). Overrides the derived active card while it points at a
    * still-present exercise. */
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  /** Focus mode: one exercise full-screen with Back/Next. A toggled view, not a
+   * session type — finish/discard/muscle-map/settings stay in the classic view. */
+  const [focusMode, setFocusMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('spotter.session.focus') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [focusIdx, setFocusIdx] = useState(0);
   const isDesktop = useIsDesktop();
   const startAddConsumed = useRef(false);
 
@@ -502,8 +512,37 @@ export function SessionView(props: {
   // Exactly one card is expanded at a time: normally the derived active
   // exercise, but tapping a queued row (or starting/adding the next one)
   // focuses that one instead, until a set is logged returns focus to active.
+  // Focus mode walks the non-marker exercises one at a time.
+  const focusExercises = sortedExercises.filter((e) => !isMarkerExercise(e));
+  const focusCount = focusExercises.length;
+  const focusPos = Math.min(Math.max(0, focusIdx), Math.max(0, focusCount - 1));
+  const focusEx = focusExercises[focusPos] ?? null;
+  const focusHasNext = focusPos < focusCount - 1;
+  const focusView = focusMode && live && !props.past && focusCount > 0;
   const focusedId =
-    expandedId && sortedExercises.some((e) => e.id === expandedId) ? expandedId : activeExerciseId;
+    focusView && focusEx
+      ? focusEx.id
+      : expandedId && sortedExercises.some((e) => e.id === expandedId)
+        ? expandedId
+        : activeExerciseId;
+  function enterFocus(): void {
+    const i = focusExercises.findIndex((e) => e.id === activeExerciseId);
+    setFocusIdx(i >= 0 ? i : 0);
+    setFocusMode(true);
+    try {
+      localStorage.setItem('spotter.session.focus', '1');
+    } catch {
+      /* ignore */
+    }
+  }
+  function exitFocus(): void {
+    setFocusMode(false);
+    try {
+      localStorage.setItem('spotter.session.focus', '0');
+    } catch {
+      /* ignore */
+    }
+  }
   // The next not-yet-started exercise after the active one — drives the
   // "start next exercise" shortcut on the active card.
   const activeIdx = sortedExercises.findIndex((e) => e.id === activeExerciseId);
@@ -721,6 +760,91 @@ export function SessionView(props: {
             : t.working;
     const cls = `kind${!rec && grp && recentSetId === s.id ? ' just-now' : ''}`;
     return <span className={cls}>{text}</span>;
+  }
+
+  function renderFocusView() {
+    if (!focusEx) return null;
+    const nx = focusExercises[focusPos + 1] ?? null;
+    const segs = focusHasNext
+      ? focusExercises.map((e, i) => (
+          <span key={e.id} className={i < focusPos ? 'done' : i === focusPos ? 'cur' : ''} />
+        ))
+      : [
+          ...focusExercises
+            .slice(0, focusPos + 1)
+            .map((e, i) => <span key={e.id} className={i < focusPos ? 'done' : 'cur'} />),
+          <span key="__add" className="add" />,
+        ];
+    return (
+      <div className="focus-view">
+        <div className="fm-modebar">
+          <span className="fm-modelbl">
+            <span className="dotp" aria-hidden />
+            {t.focusMode}
+          </span>
+          <button className="fm-settings-btn" onClick={() => setSheet({ kind: 'settings' })}>
+            <Icon name="gear" />
+            {t.sessionSettings}
+          </button>
+        </div>
+        <div className="focus-scroll">
+          <div className="plan-progress focus-step">
+            <div className="plan-progress-head">
+              {focusHasNext ? (
+                <>
+                  <span>{t.exerciseWord}</span>
+                  <strong>{t.focusStepOf(focusPos + 1, focusCount)}</strong>
+                </>
+              ) : (
+                <>
+                  <span>
+                    {t.exerciseWord} {focusPos + 1}
+                  </span>
+                  <strong className="fm-free">{t.addedAsYouGo}</strong>
+                </>
+              )}
+            </div>
+            <div className="plan-segments" aria-label={t.exerciseWord}>
+              {segs}
+            </div>
+          </div>
+          {renderCard(focusEx, null)}
+        </div>
+        <div className="focus-nav">
+          <button
+            className="btn btn-secondary focus-back"
+            disabled={focusPos === 0}
+            onClick={() => setFocusIdx(focusPos - 1)}
+            aria-label={t.focusBack}
+          >
+            <Icon name="caret-left" />
+          </button>
+          {focusHasNext ? (
+            <button className="btn btn-primary focus-next" onClick={() => setFocusIdx(focusPos + 1)}>
+              {t.focusNext(nx?.name ?? '')}
+              <Icon name="caret-right" />
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary focus-next"
+              onClick={() => setSheet({ kind: 'add' })}
+            >
+              {t.focusNextExercise}
+              <Icon name="caret-right" />
+            </button>
+          )}
+          <button
+            className="btn focus-finish"
+            disabled={entries === 0}
+            onClick={requestFinish}
+            aria-label={t.finish}
+            title={t.finish}
+          >
+            <Icon name="check" />
+          </button>
+        </div>
+      </div>
+    );
   }
 
   function renderCard(ex: Exercise, grp: GroupCtx | null) {
@@ -1214,6 +1338,7 @@ export function SessionView(props: {
                     defWeightKg={ghost.weight}
                     weightRequired={directLogBlocked}
                     isPast={!!props.past}
+                    title={focusView ? t.enterThisSet : undefined}
                     onLog={(v) => logGhost(ex, v)}
                     onSettings={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
                   />
@@ -1564,7 +1689,7 @@ export function SessionView(props: {
 
   return (
     <div
-      className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}${showRail ? ' session-has-rail' : ''}`}
+      className={`screen paned session-screen${live ? ' session-live' : ''}${props.past ? ' session-past' : ''}${workout.autoFinished ? ' session-auto' : ''}${showSessionSide ? ' session-has-side' : ''}${showRail ? ' session-has-rail' : ''}${focusView ? ' session-focus' : ''}`}
     >
       {live && !workout.autoFinished && !isDesktop && (
         <svg className="glass-defs" aria-hidden width="0" height="0">
@@ -1807,6 +1932,16 @@ export function SessionView(props: {
           })()}
 
         <div className="session-body">
+          {focusView ? (
+            renderFocusView()
+          ) : (
+            <>
+              {live && !props.past && workout.exercises.length > 0 && (
+                <button className="btn btn-secondary focus-enter" onClick={enterFocus}>
+                  <Icon name="frame-corners" />
+                  {t.focusMode}
+                </button>
+              )}
           {workout.autoFinished && (
             <div className="notice-accent">
               <Icon name="clock-countdown" />
@@ -2299,6 +2434,8 @@ export function SessionView(props: {
               <div ref={contentBottomRef} aria-hidden />
             </>
           )}
+            </>
+          )}
         </div>
       </div>
       {live && !workout.autoFinished && !isDesktop && (
@@ -2774,6 +2911,35 @@ export function SessionView(props: {
       {sheet?.kind === 'settings' && (
         <Sheet className="session-settings" onClose={() => setSheet(null)}>
           <div className="sheet-label">{t.sessionSettings}</div>
+          {live && (
+            <div className="ss-viewmode">
+              <span className="ss-vm-label">{t.exerciseView}</span>
+              <div className="ss-vm-seg" role="group" aria-label={t.exerciseView}>
+                <button
+                  type="button"
+                  className={!focusMode ? 'on' : ''}
+                  aria-pressed={!focusMode}
+                  onClick={() => {
+                    exitFocus();
+                    setSheet(null);
+                  }}
+                >
+                  {t.classicView}
+                </button>
+                <button
+                  type="button"
+                  className={focusMode ? 'on' : ''}
+                  aria-pressed={focusMode}
+                  onClick={() => {
+                    enterFocus();
+                    setSheet(null);
+                  }}
+                >
+                  {t.focusMode}
+                </button>
+              </div>
+            </div>
+          )}
           <button
             className={`ss-circuit${circuit.on ? ' on' : ''}`}
             onClick={() =>
@@ -3665,6 +3831,7 @@ function GhostSetRow(props: {
   isPast: boolean;
   onLog: (v: { reps: number; weight: number | null }) => void;
   onSettings: () => void;
+  title?: string;
 }) {
   const { t } = useT();
   const unit = exerciseUnit(props.ex.name);
@@ -3676,6 +3843,7 @@ function GhostSetRow(props: {
   const blocked = props.weightRequired && weightKg === null;
   return (
     <div className="gset">
+      {props.title && <div className="gset-title">{props.title}</div>}
       <div className="gset-steppers">
         <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
         <Stepper
