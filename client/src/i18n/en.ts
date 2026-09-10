@@ -1222,6 +1222,7 @@ export const en = {
   cancel: 'Cancel',
   restStartCta: 'Rest / vacation',
   restStartTitle: 'Start a rest period',
+  restRecoveryTitle: 'Rest & recovery',
   restModeActive: 'Active recovery',
   restModeActiveDesc: 'Light training, reduced targets — still in the gym',
   restModeOff: 'Full rest — no gym',

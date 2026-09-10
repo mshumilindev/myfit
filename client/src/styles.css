@@ -21580,6 +21580,9 @@ button.badge {
 .tone-rest {
   --tone: var(--color-rest-400);
 }
+.tone-energy {
+  --tone: var(--color-kcal, var(--color-accent));
+}
 /* Learn's rubellite/gem accent (Learn app colour) — hardcoded since Learn's
    token ramp only exists under .theme-learn, and this renders in the Gym theme. */
 .tone-learn {

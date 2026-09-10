@@ -563,6 +563,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const nudges: Nudge[] = [];
   const readinessNudge = buildReadinessNudge(finished, now, t);
   if (readinessNudge) nudges.push(readinessNudge);
+  if (energyOut.total > 0) {
+    nudges.push({
+      id: 'energy',
+      tone: 'energy',
+      priority: 40,
+      icon: 'flame',
+      kicker: t.kcalOut,
+      title: `~${energyOut.total.toLocaleString(locale)}`,
+      body: `${t.energyLifting(energyOut.lift)} · ${t.energyCardio(energyOut.activities)}${
+        energyOut.rest > 0 ? ` · ${t.energyResting(energyOut.rest)}` : ''
+      }`,
+    });
+  }
   if (analysisNudge) {
     nudges.push({
       id: 'analysis',
@@ -1381,24 +1394,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               </div>
             </div>
 
-            {energyOut.total > 0 && (
-              <div className="td-energy">
-                <span className="te-icon">
-                  <Icon name="flame" weight="fill" />
-                </span>
-                <div className="te-body">
-                  <div className="te-top">
-                    <span className="te-val tnum">~{energyOut.total.toLocaleString(locale)}</span>
-                    <span className="te-unit">{t.kcalOut}</span>
-                  </div>
-                  <div className="te-split">
-                    {t.energyLifting(energyOut.lift)} · {t.energyCardio(energyOut.activities)}
-                    {energyOut.rest > 0 ? ` · ${t.energyResting(energyOut.rest)}` : ''}
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div>
               <div className="td-block-head section-divide">
                 <div className="section-label">{t.weeklyVolume}</div>
@@ -1540,7 +1535,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
       {activityOpen && <ActivitySheet shell={shell} onClose={() => setActivityOpen(false)} />}
-      {restSheetOpen && <RestSheet onClose={() => setRestSheetOpen(false)} />}
+      {restSheetOpen && <RestSheet shell={shell} onClose={() => setRestSheetOpen(false)} />}
       {confirmEndRest && (
         <ConfirmDialog
           title={confirmEndIllness ? t.illnessRecoveredTitle : t.restEndTitle}
@@ -1593,7 +1588,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 }
 
 /** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
-function RestSheet({ onClose }: { onClose: () => void }) {
+function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   const { t } = useT();
   const [mode, setMode] = useState<'active' | 'off' | 'illness'>('active');
   const iso = (d: Date) => {
@@ -1623,7 +1618,9 @@ function RestSheet({ onClose }: { onClose: () => void }) {
   };
   return (
     <Sheet onClose={onClose} className="rest-sheet">
-      <div className="ps-title">{t.restStartTitle}</div>
+      <div className="ps-title">{t.restRecoveryTitle}</div>
+      <SleepPanel shell={shell} onClose={onClose} />
+      <div className="section-label section-divide rest-sub">{t.restStartTitle}</div>
       <div className="rest-modes">
         {(['active', 'off', 'illness'] as const).map((m) => (
           <button

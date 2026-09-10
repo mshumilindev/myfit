@@ -1174,6 +1174,7 @@ export const et: Strings = {
   cancel: 'Tühista',
   restStartCta: 'Puhkus / puhkusereis',
   restStartTitle: 'Alusta puhkeperioodi',
+  restRecoveryTitle: 'Puhkus ja taastumine',
   restModeActive: 'Aktiivne taastumine',
   restModeActiveDesc: 'Kerge treening, madalamad eesmärgid — endiselt jõusaalis',
   restModeOff: 'Täielik puhkus — ilma saalita',

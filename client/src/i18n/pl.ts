@@ -1180,6 +1180,7 @@ export const pl: Strings = {
   cancel: 'Anuluj',
   restStartCta: 'Odpoczynek / urlop',
   restStartTitle: 'Rozpocznij okres odpoczynku',
+  restRecoveryTitle: 'Odpoczynek i regeneracja',
   restModeActive: 'Aktywna regeneracja',
   restModeActiveDesc: 'Lekki trening, niższe cele — nadal na siłowni',
   restModeOff: 'Pełny odpoczynek — bez siłowni',

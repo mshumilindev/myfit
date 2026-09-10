@@ -49,7 +49,6 @@ export function ActivitySheet(props: { shell: Shell; onClose: () => void }) {
             </div>
           </div>
         ))}
-        <SleepPanel shell={props.shell} onClose={props.onClose} />
       </div>
     </Sheet>
   );

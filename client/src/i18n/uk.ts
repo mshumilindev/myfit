@@ -1178,6 +1178,7 @@ export const uk: Strings = {
   cancel: 'Скасувати',
   restStartCta: 'Відпочинок / відпустка',
   restStartTitle: 'Почати період відпочинку',
+  restRecoveryTitle: 'Відпочинок і відновлення',
   restModeActive: 'Активне відновлення',
   restModeActiveDesc: 'Легкі тренування, знижені цілі — усе ще в залі',
   restModeOff: 'Повний відпочинок — без залу',

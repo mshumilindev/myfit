@@ -1191,6 +1191,7 @@ export const lt: Strings = {
   cancel: 'Atšaukti',
   restStartCta: 'Poilsis / atostogos',
   restStartTitle: 'Pradėti poilsio laikotarpį',
+  restRecoveryTitle: 'Poilsis ir atsigavimas',
   restModeActive: 'Aktyvus atsigavimas',
   restModeActiveDesc: 'Lengvos treniruotės, mažesni tikslai — vis dar salėje',
   restModeOff: 'Visiškas poilsis — be salės',
