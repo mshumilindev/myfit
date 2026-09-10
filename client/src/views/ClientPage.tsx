@@ -221,9 +221,7 @@ export function ClientPage({
       <section className="cp-section">
         <div className="section-label">{t.clientHistory}</div>
         {data?.history &&
-        data.history.workouts.length +
-          data.history.activities.length +
-          data.history.sleeps.length >
+        data.history.workouts.length + data.history.activities.length + data.history.sleeps.length >
           0 ? (
           <HistoryTimeline
             workouts={data.history.workouts}

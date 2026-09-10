@@ -314,8 +314,7 @@ function toHash(
     return overlay.userId
       ? `#/exercise/${encodeURIComponent(overlay.name)}/${encodeURIComponent(overlay.userId)}`
       : `#/exercise/${encodeURIComponent(overlay.name)}`;
-  if (overlay?.screen === 'client-page')
-    return `#/client/${encodeURIComponent(overlay.clientId)}`;
+  if (overlay?.screen === 'client-page') return `#/client/${encodeURIComponent(overlay.clientId)}`;
   if (overlay?.screen === 'trainee-session')
     return `#/trainee/${encodeURIComponent(overlay.athleteId)}/${encodeURIComponent(overlay.workoutId)}`;
   if (overlay?.screen === 'exercise-detail')

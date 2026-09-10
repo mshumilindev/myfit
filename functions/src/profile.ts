@@ -312,7 +312,13 @@ async function fullProfilePayload(
   // Full logged history so a trainer's client page renders the same timeline as
   // "My history": workouts (full), activities, sleeps and rest/illness periods.
   const [actsSnap, sleepsSnap, restSnap] = await Promise.all([
-    db.collection('users').doc(target.id).collection('activities').orderBy('startedAt', 'desc').limit(120).get(),
+    db
+      .collection('users')
+      .doc(target.id)
+      .collection('activities')
+      .orderBy('startedAt', 'desc')
+      .limit(120)
+      .get(),
     db.collection('users').doc(target.id).collection('sleeps').limit(120).get(),
     db.collection('users').doc(target.id).collection('restPeriods').get(),
   ]);

@@ -152,9 +152,7 @@ export function HistoryTimeline({
   const todayMid = new Date();
   todayMid.setHours(0, 0, 0, 0);
   const todayK = dayBucket(todayMid.getTime());
-  const oldestLogged = loggedDays.length
-    ? dayBucket(loggedDays[loggedDays.length - 1].ts)
-    : todayK;
+  const oldestLogged = loggedDays.length ? dayBucket(loggedDays[loggedDays.length - 1].ts) : todayK;
   const presc = prescribedDaysOverride ?? prescribedTrainingDays();
   const lookback = lookbackOverride ?? programLookbackDays();
   const rests = restPeriodsOverride ?? store.restPeriods;
@@ -179,12 +177,7 @@ export function HistoryTimeline({
     if (hasWorkout) state = 'trained';
     else if (rest?.mode === 'illness') state = 'illness';
     else if (rest?.mode === 'off') state = rest.span >= 4 ? 'vacation' : 'rest';
-    else if (
-      dk < todayK &&
-      lookback > 0 &&
-      todayK - dk <= lookback &&
-      presc.has(weekdayOf(ts))
-    )
+    else if (dk < todayK && lookback > 0 && todayK - dk <= lookback && presc.has(weekdayOf(ts)))
       state = 'missed';
     else if (items.length > 0) state = 'logged';
 
@@ -198,7 +191,8 @@ export function HistoryTimeline({
     cur.setDate(cur.getDate() - 1);
   }
 
-  const days = maxDays != null ? entries.slice(dayOffset, dayOffset + maxDays) : entries.slice(dayOffset);
+  const days =
+    maxDays != null ? entries.slice(dayOffset, dayOffset + maxDays) : entries.slice(dayOffset);
   if (days.length === 0) return null;
 
   const title = (w: Workout) => {
