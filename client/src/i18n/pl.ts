@@ -1195,6 +1195,7 @@ export const pl: Strings = {
   deleteSet: 'Usuń serię',
   exerciseSettings: 'Ustawienia ćwiczenia',
   cancel: 'Anuluj',
+  close: 'Zamknij',
   restStartCta: 'Odpoczynek / urlop',
   restStartTitle: 'Rozpocznij okres odpoczynku',
   restRecoveryTitle: 'Odpoczynek i regeneracja',

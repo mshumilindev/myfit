@@ -3486,7 +3486,7 @@ function AddExerciseSheet(props: {
         equipment: x.equipment ? [x.equipment] : [],
       });
     const row = (x: Cand, isSug: boolean) => (
-      <div key={x.id} className="add-row-wrap">
+      <div key={x.id} className={`add-row-wrap${isSug ? ' suggested' : ''}`}>
         <button className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
           <span className="add-main">
             <ExerciseName name={x.name} className="add-name" />
@@ -3820,6 +3820,7 @@ function ExerciseInfoSheet(props: { name: string; onAdd: () => void; onClose: ()
   return (
     <Sheet onClose={props.onClose} className="exinfo-sheet">
       <div className="exinfo">
+        <div className="exinfo-scroll">
         {rich?.images[0] && (
           <div className="exinfo-media">
             <img
@@ -3882,7 +3883,11 @@ function ExerciseInfoSheet(props: { name: string; onAdd: () => void; onClose: ()
             </div>
           </div>
         )}
+        </div>
         <div className="exinfo-foot">
+          <button className="btn btn-secondary grow" onClick={props.onClose}>
+            {t.close}
+          </button>
           <button className="btn btn-primary grow" onClick={props.onAdd}>
             <Icon name="plus" />
             {t.addExercise}

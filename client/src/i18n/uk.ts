@@ -1193,6 +1193,7 @@ export const uk: Strings = {
   deleteSet: 'Видалити підхід',
   exerciseSettings: 'Налаштування вправи',
   cancel: 'Скасувати',
+  close: 'Закрити',
   restStartCta: 'Відпочинок / відпустка',
   restStartTitle: 'Почати період відпочинку',
   restRecoveryTitle: 'Відпочинок і відновлення',

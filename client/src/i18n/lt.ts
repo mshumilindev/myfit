@@ -1206,6 +1206,7 @@ export const lt: Strings = {
   deleteSet: 'Ištrinti seriją',
   exerciseSettings: 'Pratimo nustatymai',
   cancel: 'Atšaukti',
+  close: 'Uždaryti',
   restStartCta: 'Poilsis / atostogos',
   restStartTitle: 'Pradėti poilsio laikotarpį',
   restRecoveryTitle: 'Poilsis ir atsigavimas',

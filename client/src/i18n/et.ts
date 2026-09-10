@@ -1189,6 +1189,7 @@ export const et: Strings = {
   deleteSet: 'Kustuta seeria',
   exerciseSettings: 'Harjutuse seaded',
   cancel: 'Tühista',
+  close: 'Sulge',
   restStartCta: 'Puhkus / puhkusereis',
   restStartTitle: 'Alusta puhkeperioodi',
   restRecoveryTitle: 'Puhkus ja taastumine',

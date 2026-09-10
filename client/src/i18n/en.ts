@@ -1237,6 +1237,7 @@ export const en = {
   deleteSet: 'Delete set',
   exerciseSettings: 'Exercise settings',
   cancel: 'Cancel',
+  close: 'Close',
   restStartCta: 'Rest / vacation',
   restStartTitle: 'Start a rest period',
   restRecoveryTitle: 'Rest & recovery',
