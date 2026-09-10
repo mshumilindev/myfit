@@ -610,6 +610,7 @@ export const en = {
   focusNextExercise: 'Next exercise',
   enterThisSet: 'Enter this set',
   focusBack: 'Previous exercise',
+  focusRestSince: 'since last set',
   queuedLabel: 'Queued',
   exerciseKindNames: {
     strength: 'Strength',

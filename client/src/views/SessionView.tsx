@@ -1347,7 +1347,18 @@ export function SessionView(props: {
                 lastLoggedAt > 0 &&
                 (() => {
                   const restNow = Math.max(0, now - lastLoggedAt);
-                  return (
+                  return focusView ? (
+                    <div className="fm-rest">
+                      <span className="fm-rest-ic">
+                        <Icon name="timer" />
+                      </span>
+                      <div className="fm-rest-txt">
+                        <span className="fm-rest-lbl">{t.restHeaderLabel}</span>
+                        <span className="fm-rest-sub">{t.focusRestSince}</span>
+                      </div>
+                      <span className="fm-rest-clock">{mmss(restNow)}</span>
+                    </div>
+                  ) : (
                     <div className="ex-resting">
                       <Icon name="timer" />
                       <span>{t.restingSince(mmss(restNow))}</span>

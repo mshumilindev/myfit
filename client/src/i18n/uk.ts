@@ -606,6 +606,7 @@ export const uk: Strings = {
   focusNextExercise: 'Наступна вправа',
   enterThisSet: 'Внести підхід',
   focusBack: 'Попередня вправа',
+  focusRestSince: 'від останнього підходу',
   queuedLabel: 'У черзі',
   exerciseKindNames: {
     strength: 'Силова',

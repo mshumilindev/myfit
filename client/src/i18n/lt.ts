@@ -619,6 +619,7 @@ export const lt: Strings = {
   focusNextExercise: 'Kitas pratimas',
   enterThisSet: 'Įvesti seriją',
   focusBack: 'Ankstesnis pratimas',
+  focusRestSince: 'nuo paskutinės serijos',
   queuedLabel: 'Eilėje',
   exerciseKindNames: {
     strength: 'Jėga',

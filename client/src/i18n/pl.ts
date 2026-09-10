@@ -609,6 +609,7 @@ export const pl: Strings = {
   focusNextExercise: 'Następne ćwiczenie',
   enterThisSet: 'Wprowadź serię',
   focusBack: 'Poprzednie ćwiczenie',
+  focusRestSince: 'od ostatniej serii',
   queuedLabel: 'W kolejce',
   exerciseKindNames: {
     strength: 'Siłowe',

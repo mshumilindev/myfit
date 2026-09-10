@@ -602,6 +602,7 @@ export const et: Strings = {
   focusNextExercise: 'Järgmine harjutus',
   enterThisSet: 'Sisesta seeria',
   focusBack: 'Eelmine harjutus',
+  focusRestSince: 'viimasest seeriast',
   queuedLabel: 'Järjekorras',
   exerciseKindNames: {
     strength: 'Jõud',
