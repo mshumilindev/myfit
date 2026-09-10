@@ -1934,7 +1934,10 @@ export function SessionView(props: {
                   live &&
                   qExs.every(
                     (e) =>
-                      !isMarkerExercise(e) && e.sets.length === 0 && e.id !== focusedId,
+                      !isMarkerExercise(e) &&
+                      e.sets.length === 0 &&
+                      e.id !== focusedId &&
+                      e.id !== activeExerciseId,
                   );
                 if (isQueued) {
                   const firstQueuedIdx = blocks.findIndex((b) => {
@@ -1942,7 +1945,10 @@ export function SessionView(props: {
                     const es = b.kind === 'group' ? b.group.exercises : [b.exercise];
                     return es.every(
                       (e) =>
-                        !isMarkerExercise(e) && e.sets.length === 0 && e.id !== focusedId,
+                        !isMarkerExercise(e) &&
+                        e.sets.length === 0 &&
+                        e.id !== focusedId &&
+                        e.id !== activeExerciseId,
                     );
                   });
                   const header =
@@ -1993,18 +1999,32 @@ export function SessionView(props: {
                     g.exercises.find((e) => e.sets.length === minSets)?.id ?? null;
                   void minSets;
                   const groupActive = g.exercises.some((e) => e.id === focusedId);
-                  const collapsed =
-                    (props.past || (live && !groupActive)) &&
-                    g.exercises.some((e) => e.sets.length > 0) &&
-                    !g.exercises.some((e) => expandedPast.includes(e.id));
+                  const groupIsCurrent = g.exercises.some((e) => e.id === activeExerciseId);
+                  const collapsed = props.past
+                    ? g.exercises.some((e) => e.sets.length > 0) &&
+                      !g.exercises.some((e) => expandedPast.includes(e.id))
+                    : live &&
+                      !groupActive &&
+                      (g.exercises.some((e) => e.sets.length > 0) || groupIsCurrent);
                   if (collapsed) {
                     const kg = g.exercises.reduce((v, e) => v + exerciseVolumeKg(e), 0);
                     return (
-                      <div key={g.groupId} className="ss-block past">
+                      <div
+                        key={g.groupId}
+                        className={`ss-block past${
+                          groupIsCurrent && !props.past ? ' is-current' : ''
+                        }`}
+                      >
                         <div className="ss-bar" />
                         <div className="ss-body">
                           <div className="ss-head">
                             <span className="tag tag-neutral">{t.supersetTag(g.letter)}</span>
+                            {groupIsCurrent && !props.past && (
+                              <span className="cur-tag">
+                                <Icon name="barbell" />
+                                {t.currentKicker}
+                              </span>
+                            )}
                             <span className="ss-rounds-meta">
                               {t.roundsMeta(rounds, fmtKg(kg))}
                             </span>
@@ -2012,7 +2032,9 @@ export function SessionView(props: {
                           <button
                             className="past-ex-card"
                             onClick={() =>
-                              setExpandedPast((x) => [...x, ...g.exercises.map((e) => e.id)])
+                              props.past
+                                ? setExpandedPast((x) => [...x, ...g.exercises.map((e) => e.id)])
+                                : setExpandedId(g.exercises[0]?.id ?? null)
                             }
                           >
                             {g.exercises.map((e, i) => (
@@ -2143,26 +2165,39 @@ export function SessionView(props: {
                   );
                 }
                 const single = block.exercise;
+                const singleIsCurrent = !props.past && single.id === activeExerciseId;
                 if (
-                  (props.past || (live && focusedId !== single.id)) &&
-                  single.sets.length > 0 &&
-                  !expandedPast.includes(single.id)
+                  props.past
+                    ? single.sets.length > 0 && !expandedPast.includes(single.id)
+                    : live &&
+                      focusedId !== single.id &&
+                      (single.sets.length > 0 || singleIsCurrent)
                 ) {
+                  const expandSingle = () =>
+                    props.past
+                      ? setExpandedPast((x) => [...x, single.id])
+                      : setExpandedId(single.id);
                   return (
                     <div
                       key={single.id}
                       data-exid={single.id}
-                      className="past-ex-card"
+                      className={`past-ex-card${singleIsCurrent ? ' is-current' : ''}`}
                       role="button"
                       tabIndex={0}
-                      onClick={() => setExpandedPast((x) => [...x, single.id])}
-                      onKeyDown={(e) =>
-                        rowKey(e, () => setExpandedPast((x) => [...x, single.id]))
-                      }
+                      onClick={expandSingle}
+                      onKeyDown={(e) => rowKey(e, expandSingle)}
                     >
                       <span className="past-ex-row">
+                        {singleIsCurrent && (
+                          <span className="cur-tag">
+                            <Icon name="barbell" />
+                            {t.currentKicker}
+                          </span>
+                        )}
                         <span className="n">{single.name}</span>
-                        <span className="v">{pastSummary(single)}</span>
+                        {single.sets.length > 0 && (
+                          <span className="v">{pastSummary(single)}</span>
+                        )}
                         {cardCfg(single.id)}
                       </span>
                     </div>

@@ -11946,6 +11946,33 @@ h6 {
   color: var(--color-neutral-400);
 }
 
+/* "Current" marker on a collapsed row: an accent left bar + a small pill, so
+   the in-progress exercise is easy to spot and tap back into. */
+.past-ex-card.is-current {
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+.ss-block.past.is-current .ss-bar {
+  background: var(--color-accent);
+}
+.cur-tag {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cur-tag i {
+  font-size: 12px;
+}
+
 /* --- Dropsets in the set list (DS-2) -------------------------------------- */
 .set-wrap {
   padding: var(--space-2) 0;
