@@ -10,6 +10,20 @@
   --color-surface: #1f2125;
   --color-text: #e9eaec;
   --color-divider: rgba(233, 234, 236, 0.14);
+  /* Graphite liquid-glass material (frosted card surface): a translucent
+     graphite base under a soft top sheen, a hairline edge and a lit top bezel.
+     Applied to surface cards; border-radius stays whatever each card sets. */
+  --glass-graphite: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.018) 42%,
+      rgba(255, 255, 255, 0.006)
+    ),
+    color-mix(in srgb, var(--color-surface) 72%, transparent);
+  --glass-graphite-border: 1px solid rgba(255, 255, 255, 0.07);
+  --glass-graphite-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 1px 2px rgba(0, 0, 0, 0.22);
+  --glass-graphite-blur: blur(14px) saturate(1.1);
 
   --color-accent: #d9a24f;
   --color-accent-100: #fbf3e6;
@@ -2557,9 +2571,12 @@ i > svg {
 }
 
 .today-program-card {
-  border: 1px solid var(--color-divider);
+  border: var(--glass-graphite-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: var(--glass-graphite);
+  backdrop-filter: var(--glass-graphite-blur);
+  -webkit-backdrop-filter: var(--glass-graphite-blur);
+  box-shadow: var(--glass-graphite-shadow);
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -9739,8 +9756,12 @@ i > svg {
   }
 }
 .td-stat {
-  background: var(--color-surface);
+  background: var(--glass-graphite);
+  border: var(--glass-graphite-border);
   border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-graphite-blur);
+  -webkit-backdrop-filter: var(--glass-graphite-blur);
+  box-shadow: var(--glass-graphite-shadow);
   padding: 14px 16px;
 }
 .td-stat .v {
@@ -9766,8 +9787,12 @@ i > svg {
 
 /* Weekly volume as a wide stat-style card (matches .td-stat tiles, full width). */
 .td-weekvol {
-  background: var(--color-surface);
+  background: var(--glass-graphite);
+  border: var(--glass-graphite-border);
   border-radius: var(--radius-md);
+  backdrop-filter: var(--glass-graphite-blur);
+  -webkit-backdrop-filter: var(--glass-graphite-blur);
+  box-shadow: var(--glass-graphite-shadow);
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
