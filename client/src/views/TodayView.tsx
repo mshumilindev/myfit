@@ -859,7 +859,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const programCard = assignment && assignedActive && (
     <section className="today-program-card">
       <div className="program-card-head">
-        <Icon name="copy" />
+        <Icon name="list-checks" />
         <div className="pch-text">
           <div className="field-label">{t.progTitle}</div>
           <div className="n">{assignment.program.name}</div>
