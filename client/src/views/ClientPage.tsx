@@ -83,7 +83,9 @@ export function ClientPage({
   const { t, locale } = useT();
   const [todayDow] = useState(() => new Date().getDay());
   const cacheKey = `profile.${clientId}`;
-  const [data, setData] = useState<ClientData | null>(cachePeek<ClientData>(cacheKey)?.data ?? null);
+  const [data, setData] = useState<ClientData | null>(
+    cachePeek<ClientData>(cacheKey)?.data ?? null,
+  );
 
   const refresh = useCallback(() => {
     if (cacheFresh(cachePeek<ClientData>(cacheKey), PROFILE_TTL_MS)) return;
@@ -151,8 +153,8 @@ export function ClientPage({
           </div>
           <div className="cp-sameday-name">{workoutTitle(sameDay, t)}</div>
           <div className="cp-sameday-meta">
-            {fmtDayMonth(sameDay.startedAt, locale)} · {sameDay.exercises} ·{' '}
-            {sameDay.sets} {t.setsStat.toLowerCase()}
+            {fmtDayMonth(sameDay.startedAt, locale)} · {sameDay.exercises} · {sameDay.sets}{' '}
+            {t.setsStat.toLowerCase()}
           </div>
           <Icon name="caret-right" className="cp-sameday-go" />
         </button>

@@ -987,7 +987,6 @@ export function ProfileView({
               )}
             </section>
           )}
-
         </>
       )}
       {confirmSignOut && (
