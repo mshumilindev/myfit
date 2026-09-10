@@ -503,16 +503,15 @@ export function SessionView(props: {
   // exercise, but tapping a queued row (or starting/adding the next one)
   // focuses that one instead, until a set is logged returns focus to active.
   const focusedId =
-    expandedId && sortedExercises.some((e) => e.id === expandedId)
-      ? expandedId
-      : activeExerciseId;
+    expandedId && sortedExercises.some((e) => e.id === expandedId) ? expandedId : activeExerciseId;
   // The next not-yet-started exercise after the active one — drives the
   // "start next exercise" shortcut on the active card.
   const activeIdx = sortedExercises.findIndex((e) => e.id === activeExerciseId);
   const nextEx =
     activeIdx >= 0
-      ? (sortedExercises.slice(activeIdx + 1).find((e) => !isMarkerExercise(e) && e.sets.length === 0) ??
-        null)
+      ? (sortedExercises
+          .slice(activeIdx + 1)
+          .find((e) => !isMarkerExercise(e) && e.sets.length === 0) ?? null)
       : null;
   // The left milestone rail shows on the phone during a LIVE session once
   // there's more than one exercise (not in history); the screen gets a class so
@@ -612,7 +611,7 @@ export function SessionView(props: {
         setSheet({ kind: 'menu', exId });
       }}
     >
-      <Icon name="sliders-horizontal" />
+      <Icon name="gear" />
     </button>
   );
   function rowKey(e: { key: string; preventDefault: () => void }, fn: () => void): void {
@@ -891,7 +890,7 @@ export function SessionView(props: {
                   onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
                   aria-label={t.menuAction}
                 >
-                  <Icon name="sliders-horizontal" />
+                  <Icon name="gear" />
                 </button>
               )}
             </>
@@ -2169,9 +2168,7 @@ export function SessionView(props: {
                 if (
                   props.past
                     ? single.sets.length > 0 && !expandedPast.includes(single.id)
-                    : live &&
-                      focusedId !== single.id &&
-                      (single.sets.length > 0 || singleIsCurrent)
+                    : live && focusedId !== single.id && (single.sets.length > 0 || singleIsCurrent)
                 ) {
                   const expandSingle = () =>
                     props.past
@@ -2195,9 +2192,7 @@ export function SessionView(props: {
                           </span>
                         )}
                         <span className="n">{single.name}</span>
-                        {single.sets.length > 0 && (
-                          <span className="v">{pastSummary(single)}</span>
-                        )}
+                        {single.sets.length > 0 && <span className="v">{pastSummary(single)}</span>}
                         {cardCfg(single.id)}
                       </span>
                     </div>
