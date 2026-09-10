@@ -437,40 +437,8 @@ export function SessionView(props: {
   // the viewport (scroll-spy). The observer callback fires asynchronously on
   // scroll, so the only setState here happens there — never synchronously in
   // the effect body.
-  const [viewportExId, setViewportExId] = useState<string | null>(null);
-  const railExKey = (workout?.exercises ?? []).map((e) => e.id).join(',');
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return;
-    const cards = Array.from(document.querySelectorAll<HTMLElement>('.session-screen [data-exid]'));
-    if (cards.length === 0) return;
-    const ratios = new Map<string, number>();
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          const id = (e.target as HTMLElement).dataset.exid;
-          if (!id) continue;
-          if (e.isIntersecting) ratios.set(id, e.intersectionRatio);
-          else ratios.delete(id);
-        }
-        // Most-visible card wins; DOM order breaks ties toward the topmost.
-        let best: string | null = null;
-        let bestRatio = 0;
-        for (const c of cards) {
-          const id = c.dataset.exid;
-          if (!id) continue;
-          const r = ratios.get(id) ?? 0;
-          if (r > bestRatio) {
-            bestRatio = r;
-            best = id;
-          }
-        }
-        setViewportExId(best);
-      },
-      { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1], rootMargin: '-96px 0px -40% 0px' },
-    );
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, [railExKey, expandedPast, expandedId, live]);
+  // The rail highlights whichever exercise is expanded (the one you're working
+  // on), so no scroll-spy observer is needed.
 
   // Records BEFORE this workout, per exercise name — for PR detection.
   const baseline = useMemo(() => {
@@ -577,11 +545,13 @@ export function SessionView(props: {
   }
   // The next not-yet-started exercise after the active one — drives the
   // "start next exercise" shortcut on the active card.
-  const activeIdx = sortedExercises.findIndex((e) => e.id === activeExerciseId);
+  // "Next" is relative to the exercise you're looking at (the expanded one), so
+  // advancing follows what you see rather than a separately-derived active one.
+  const focusedIdx = sortedExercises.findIndex((e) => e.id === focusedId);
   const nextEx =
-    activeIdx >= 0
+    focusedIdx >= 0
       ? (sortedExercises
-          .slice(activeIdx + 1)
+          .slice(focusedIdx + 1)
           .find((e) => !isMarkerExercise(e) && e.sets.length === 0) ?? null)
       : null;
   // The left milestone rail shows on the phone during a LIVE session once
@@ -1427,7 +1397,7 @@ export function SessionView(props: {
             </div>
           </>
         )}
-        {live && !grp && focusedId === ex.id && activeExerciseId === ex.id && nextEx && (
+        {live && !grp && focusedId === ex.id && nextEx && (
           <>
             <div className="start-next-divider" />
             <button
@@ -1804,7 +1774,7 @@ export function SessionView(props: {
         {showRail && (
           <nav className="session-rail" aria-label={t.exerciseRailLabel}>
             {sortedExercises.map((ex) => {
-              const inView = ex.id === viewportExId;
+              const inView = ex.id === focusedId;
               return (
                 <button
                   key={ex.id}
@@ -1813,6 +1783,7 @@ export function SessionView(props: {
                   aria-label={ex.name}
                   aria-current={inView ? 'true' : undefined}
                   onClick={() => {
+                    setExpandedId(ex.id);
                     document
                       .querySelector(`.session-screen [data-exid="${CSS.escape(ex.id)}"]`)
                       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2731,20 +2702,15 @@ export function SessionView(props: {
                   }
                 : base;
             const created = addExercise(workout.id, name, kind, plan);
-            // If the current exercise is already underway (>=1 set), open the
-            // newly added one straight away instead of leaving it collapsed in
-            // the queue.
-            const activeEx = workout.exercises.find((e) => e.id === activeExerciseId);
-            // Auto-open the new exercise (and collapse current) only when it is
-            // genuinely the next one up — i.e. nothing was already queued ahead
-            // of it. If a queue exists, leave the current exercise expanded.
+            // If the exercise you're on already has sets, switch straight to the
+            // one you just added instead of leaving it collapsed in the queue.
+            const curEx = workout.exercises.find((e) => e.id === focusedId);
             if (
               created &&
               !sheet.intoGroupId &&
               !(circuit.on && circuit.groupId) &&
-              activeEx &&
-              activeEx.sets.length > 0 &&
-              !nextEx
+              curEx &&
+              curEx.sets.length > 0
             ) {
               setExpandedId(created.id);
             }
