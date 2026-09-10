@@ -10,20 +10,20 @@
   --color-surface: #1f2125;
   --color-text: #e9eaec;
   --color-divider: rgba(233, 234, 236, 0.14);
-  /* Graphite liquid-glass material (frosted card surface): a translucent
-     graphite base under a soft top sheen, a hairline edge and a lit top bezel.
-     Applied to surface cards; border-radius stays whatever each card sets. */
-  --glass-graphite: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06),
-      rgba(255, 255, 255, 0.018) 42%,
-      rgba(255, 255, 255, 0.006)
-    ),
-    color-mix(in srgb, var(--color-surface) 72%, transparent);
-  --glass-graphite-border: 1px solid rgba(255, 255, 255, 0.07);
-  --glass-graphite-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 1px 2px rgba(0, 0, 0, 0.22);
-  --glass-graphite-blur: blur(14px) saturate(1.1);
+  /* Graphite liquid glass — the same Apple-like material as the floating action
+     pill (.td-pill): a refracting backdrop layer (blur + saturate + the
+     #liquid-glass SVG displacement) under a graphite tint with a bright specular
+     top rim, a soft inner floor shadow and a hairline glass edge. Applied via
+     ::before/::after so a card keeps its own border-radius. */
+  --glass-backdrop: blur(5px) saturate(1.6) brightness(1.06);
+  --glass-tint: linear-gradient(
+    135deg,
+    rgba(52, 54, 60, 0.26),
+    rgba(22, 23, 26, 0.42) 62%
+  );
+  --glass-specular: inset 0 1.2px 0.5px rgba(255, 255, 255, 0.42),
+    inset 0 -12px 16px -12px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --glass-float: 0 8px 22px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.22);
 
   --color-accent: #d9a24f;
   --color-accent-100: #fbf3e6;
@@ -252,6 +252,42 @@ i > svg {
 .app > * {
   position: relative;
   z-index: 1;
+}
+
+/* Seamless bronze rhombus lattice behind every screen — a faint diamond weave
+   (two 45deg hairline grids) over the base surface, fading out toward the bottom
+   of the page. Kept very low-contrast so it textures without dazzling; sits on
+   its own layer below all content (.app > * is z-index 1). Hidden in the sleep
+   theme, which wants a calm, patternless field. */
+.app::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(217, 162, 79, 0.055) 0,
+      rgba(217, 162, 79, 0.055) 1px,
+      transparent 1px,
+      transparent 32px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(217, 162, 79, 0.055) 0,
+      rgba(217, 162, 79, 0.055) 1px,
+      transparent 1px,
+      transparent 32px
+    );
+  /* Fade follows the ambient glow (radial from the upper-right, see .app::before)
+     rather than a flat vertical wipe, so the weave dissolves in the same
+     direction as the background light. */
+  -webkit-mask-image: radial-gradient(135% 108% at 78% -22%, #000 0%, #000 42%, transparent 86%);
+  mask-image: radial-gradient(135% 108% at 78% -22%, #000 0%, #000 42%, transparent 86%);
+}
+:root[data-sleep='night'] .app::after {
+  content: none;
 }
 
 /* Brand row — logo + "spotter · gym" — pinned at the top of every screen on
@@ -2571,16 +2607,41 @@ i > svg {
 }
 
 .today-program-card {
-  border: var(--glass-graphite-border);
+  position: relative;
+  isolation: isolate;
+  border: none;
   border-radius: var(--radius-md);
-  background: var(--glass-graphite);
-  backdrop-filter: var(--glass-graphite-blur);
-  -webkit-backdrop-filter: var(--glass-graphite-blur);
-  box-shadow: var(--glass-graphite-shadow);
+  background: transparent;
+  box-shadow: var(--glass-float);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+/* Graphite liquid glass on Today cards — two layers behind the content, so the
+   card's own border-radius is preserved (see --glass-* tokens). */
+.today-program-card::before,
+.td-stat::before,
+.td-weekvol::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  backdrop-filter: var(--glass-backdrop);
+  filter: url(#liquid-glass);
+}
+.today-program-card::after,
+.td-stat::after,
+.td-weekvol::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--glass-tint);
+  box-shadow: var(--glass-specular);
 }
 
 .program-card-head {
@@ -9756,12 +9817,12 @@ i > svg {
   }
 }
 .td-stat {
-  background: var(--glass-graphite);
-  border: var(--glass-graphite-border);
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  border: none;
   border-radius: var(--radius-md);
-  backdrop-filter: var(--glass-graphite-blur);
-  -webkit-backdrop-filter: var(--glass-graphite-blur);
-  box-shadow: var(--glass-graphite-shadow);
+  box-shadow: var(--glass-float);
   padding: 14px 16px;
 }
 .td-stat .v {
@@ -9787,12 +9848,12 @@ i > svg {
 
 /* Weekly volume as a wide stat-style card (matches .td-stat tiles, full width). */
 .td-weekvol {
-  background: var(--glass-graphite);
-  border: var(--glass-graphite-border);
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  border: none;
   border-radius: var(--radius-md);
-  backdrop-filter: var(--glass-graphite-blur);
-  -webkit-backdrop-filter: var(--glass-graphite-blur);
-  box-shadow: var(--glass-graphite-shadow);
+  box-shadow: var(--glass-float);
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
@@ -31964,13 +32025,15 @@ body {
    danger-tinted with a pulse glyph; a time-off / rest period reads like a
    program rest day (topaz). */
 .program-start-day.state-sick {
-  border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-divider));
+  /* Illness gets the app's care-teal (same as the illness banner), never the
+     danger red used for a genuinely missed day. */
+  border-color: color-mix(in srgb, var(--care) 46%, var(--color-divider));
 }
 .program-start-day.state-sick .program-start-dow,
 .program-start-day.state-sick strong,
 .program-start-day.state-sick .program-start-summary,
 .program-start-day.state-sick .program-start-sick {
-  color: var(--color-danger);
+  color: var(--care);
 }
 .program-start-day.state-off {
   border-color: color-mix(in srgb, var(--color-rest-400) 50%, var(--color-divider));
@@ -32013,7 +32076,6 @@ body {
       color-mix(in srgb, var(--color-accent) 6%, transparent),
       transparent 58%
     ),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.016) 0 1px, transparent 1px 11px),
     linear-gradient(
       180deg,
       color-mix(in srgb, var(--color-accent) 6%, transparent),
