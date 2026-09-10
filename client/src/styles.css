@@ -36,6 +36,16 @@
       color-mix(in srgb, var(--color-accent) 55%, rgba(255, 255, 255, 0.4)),
     inset 0 -12px 16px -12px rgba(0, 0, 0, 0.5),
     inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 32%, rgba(255, 255, 255, 0.08));
+  /* Topaz/rest-tinted variant of the liquid glass (for the rest plate). */
+  --glass-rest-tint: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-rest-400) 16%, rgba(14, 34, 50, 0.26)),
+    color-mix(in srgb, var(--color-rest-400) 7%, rgba(10, 26, 38, 0.32)) 62%
+  );
+  --glass-rest-specular: inset 0 1.2px 0.5px
+      color-mix(in srgb, var(--color-rest-300) 50%, rgba(255, 255, 255, 0.4)),
+    inset 0 -12px 16px -12px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-rest-400) 32%, rgba(255, 255, 255, 0.08));
 
   --color-accent: #d9a24f;
   --color-accent-100: #fbf3e6;
@@ -31691,14 +31701,36 @@ body {
 /* current-rest block — matches the design: icon + REST/since-last-set on the
    left, big countdown on the right. */
 .focus-view .fm-rest {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 18px 0 0;
   padding: 12px 15px;
   border-radius: var(--radius-md);
-  background: var(--color-rest-900);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-rest-400) 32%, transparent);
+  background: transparent;
+  box-shadow: var(--glass-float);
+}
+/* Full liquid glass in the rest/topaz tint (see --glass-rest-* tokens). */
+.focus-view .fm-rest::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  backdrop-filter: var(--glass-backdrop);
+  filter: url(#liquid-glass);
+}
+.focus-view .fm-rest::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--glass-rest-tint);
+  box-shadow: var(--glass-rest-specular);
 }
 .focus-view .fm-rest-ic {
   color: var(--color-rest-300);
