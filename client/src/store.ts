@@ -1272,8 +1272,11 @@ export function upsertSet(
     restSec,
   };
   const next = existing ? ex.sets.map((s) => (s.id === full.id ? full : s)) : [...ex.sets, full];
-  // Auto-tag leading light sets as warm-ups (respecting manual choices).
-  const sets = autoWarmupSets(next, loadTypeFor(ex));
+  // Auto-tag leading light sets as warm-ups (respecting manual choices). Seed the
+  // reference with last session's working weight so a light opener is flagged as
+  // a warm-up straight away, not only once a heavier set follows it.
+  const priorTop = prevLift(ex.name, workoutId)?.weight ?? 0;
+  const sets = autoWarmupSets(next, loadTypeFor(ex), priorTop);
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
@@ -3108,9 +3111,16 @@ export const WARMUP_FRAC = 0.85;
  * (drop / static-dynamic) are never touched and anchor the working run. Pure and
  * idempotent — safe to re-run on every set change.
  */
-export function autoWarmupSets(sets: SetEntry[], loadType: LoadType): SetEntry[] {
+export function autoWarmupSets(
+  sets: SetEntry[],
+  loadType: LoadType,
+  refFloor = 0,
+): SetEntry[] {
   if (loadType !== 'weight') return sets;
-  const ref = Math.max(0, ...sets.map(setTopWeight));
+  // Reference the heavier of this session's top set and the known working weight
+  // (last session's top), so a light opener is a warm-up on the fly — we already
+  // know the working weight, no need to wait for a heavier set to be logged.
+  const ref = Math.max(0, refFloor, ...sets.map(setTopWeight));
   if (ref <= 0) return sets;
   const threshold = WARMUP_FRAC * ref;
   const ordered = [...sets].sort((a, b) => a.position - b.position);

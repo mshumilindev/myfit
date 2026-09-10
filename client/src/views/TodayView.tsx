@@ -282,6 +282,25 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return set;
   })();
 
+  // Rest / illness state per weekday of the current week (day 1..7 → mode), so
+  // the program calendar can show a sick or rest day instead of a plain "missed".
+  const weekRestMode = (() => {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const weekStart = d.getTime();
+    const todayK = dayKey(now);
+    const m = new Map<number, 'active' | 'off' | 'illness'>();
+    for (let day = 1; day <= 7; day++) {
+      const dk = dayKey(weekStart + (day - 1) * DAY_MS);
+      const r = store.restPeriods.find(
+        (rp) => dk >= rp.startDay && dk <= (rp.open ? todayK : rp.endDay),
+      );
+      if (r) m.set(day, r.mode);
+    }
+    return m;
+  })();
+
   // "Likely today" prediction (Today plaque): the usual split + start time for
   // this weekday, from history. Hidden mid-session, without weekday history, or
   // once today's session is already logged.
@@ -895,20 +914,26 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               : items.length === 1
                 ? compactProgramDaySummary(items)
                 : t.progDayWorkoutSummary(items.length, setCount);
+          const restMode = weekRestMode.get(day);
           const isToday = day === todayWeekday;
           const done = weekTrainedDays.has(day);
-          const missed = hasPlan && !done && day < todayWeekday;
-          // Only today is actionable — and only while it hasn't been trained yet.
-          const canStart = isToday && hasPlan && !trainedToday && !done;
+          const missed = hasPlan && !done && day < todayWeekday && !restMode;
+          // Only today is actionable — and only while it hasn't been trained yet
+          // (a sick / rest day is not a "start" prompt).
+          const canStart = isToday && hasPlan && !trainedToday && !done && !restMode;
           const state = !hasPlan
             ? 'rest'
             : done
               ? 'done'
-              : isToday
-                ? 'today'
-                : missed
-                  ? 'missed'
-                  : 'upcoming';
+              : restMode
+                ? restMode === 'illness'
+                  ? 'sick'
+                  : 'off'
+                : isToday
+                  ? 'today'
+                  : missed
+                    ? 'missed'
+                    : 'upcoming';
           return (
             <button
               key={day}
@@ -928,6 +953,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                     <Icon name="check" className="program-start-glyph" />
                   ) : canStart ? (
                     <Icon name="play" weight="fill" className="program-start-glyph" />
+                  ) : restMode === 'illness' ? (
+                    <Icon name="pulse" className="program-start-glyph program-start-sick" />
+                  ) : restMode ? (
+                    <Icon name="moon" className="program-start-glyph program-start-rest" />
                   ) : missed ? (
                     <Icon name="x" className="program-start-glyph" />
                   ) : hasPlan ? (

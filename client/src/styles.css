@@ -31934,3 +31934,25 @@ body {
   min-height: 38px;
   padding: 0 16px;
 }
+
+/* Program calendar: a sick day (rest period, illness) overrides "missed" —
+   danger-tinted with a pulse glyph; a time-off / rest period reads like a
+   program rest day (topaz). */
+.program-start-day.state-sick {
+  border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-divider));
+}
+.program-start-day.state-sick .program-start-dow,
+.program-start-day.state-sick strong,
+.program-start-day.state-sick .program-start-summary,
+.program-start-day.state-sick .program-start-sick {
+  color: var(--color-danger);
+}
+.program-start-day.state-off {
+  border-color: color-mix(in srgb, var(--color-rest-400) 50%, var(--color-divider));
+}
+.program-start-day.state-off .program-start-dow,
+.program-start-day.state-off strong,
+.program-start-day.state-off .program-start-summary,
+.program-start-day.state-off .program-start-rest {
+  color: var(--color-rest-400);
+}
