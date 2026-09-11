@@ -814,6 +814,20 @@ export function SessionView(props: {
           </div>
           <div className="focus-empty">
             <EmptyState icon="list-plus" title={t.noExercisesYet} body={t.noExercisesBody}>
+              {live &&
+                hasSessionStartCoach(
+                  store.workouts.filter((w) => w.finishedAt !== null),
+                  now,
+                ) && (
+                  <button
+                    className="btn btn-secondary session-coach-btn"
+                    style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
+                    onClick={() => setSheet({ kind: 'coach' })}
+                  >
+                    <Icon name="heartbeat" weight="fill" />
+                    {t.sessionCoachButton}
+                  </button>
+                )}
               <button
                 className="btn btn-primary"
                 style={{ minHeight: 46, fontSize: 15, marginTop: 'var(--space-3)' }}
@@ -821,6 +835,14 @@ export function SessionView(props: {
               >
                 <Icon name="plus" />
                 {t.addExercise}
+              </button>
+              <button
+                className="btn session-discard-btn"
+                style={{ marginTop: 'var(--space-3)' }}
+                onClick={() => setDialog({ kind: 'del-workout' })}
+              >
+                <Icon name="trash" />
+                {t.discardSession}
               </button>
             </EmptyState>
           </div>
