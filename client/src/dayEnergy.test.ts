@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { NEAT_FACTOR, autoLifestyle, restingDayKcal, dayElapsedFraction } from './dayEnergy';
-import type { Activity, Workout } from './types';
+import {
+  NEAT_FACTOR,
+  autoLifestyle,
+  restingDayKcal,
+  dayElapsedFraction,
+  weightAsOfKg,
+  restingForDay,
+} from './dayEnergy';
+import type { Activity, BodyMetrics, Workout } from './types';
 
 const DAY = 24 * 3600 * 1000;
 const now = new Date(2025, 5, 15, 12, 0, 0).getTime(); // noon, June 15 2025
@@ -94,5 +101,69 @@ describe('autoLifestyle', () => {
   it('excludes sessions outside the window', () => {
     const ws = [workout(30), workout(40)];
     expect(autoLifestyle(ws, [], now).level).toBe('sedentary');
+  });
+});
+
+describe('weightAsOfKg', () => {
+  const bm: BodyMetrics = {
+    sex: 'male',
+    dob: '1990-01-01',
+    heightCm: 180,
+    weights: [
+      { id: 'a', at: new Date(2025, 0, 1).getTime(), weight: 80 },
+      { id: 'b', at: new Date(2025, 3, 1).getTime(), weight: 78 },
+      { id: 'c', at: new Date(2025, 6, 1).getTime(), weight: 76 },
+    ],
+  };
+  it('picks the most recent weigh-in on or before the moment', () => {
+    expect(weightAsOfKg(bm, new Date(2025, 4, 1).getTime())).toBe(78);
+    expect(weightAsOfKg(bm, new Date(2025, 8, 1).getTime())).toBe(76);
+  });
+  it('falls back to the earliest weigh-in before any exist', () => {
+    expect(weightAsOfKg(bm, new Date(2024, 0, 1).getTime())).toBe(80);
+  });
+  it('is null without weigh-ins', () => {
+    expect(weightAsOfKg({ weights: [] }, now)).toBeNull();
+  });
+});
+
+describe('restingForDay', () => {
+  const bm: BodyMetrics = {
+    sex: 'male',
+    dob: '1990-06-15',
+    heightCm: 180,
+    weights: [{ id: 'a', at: new Date(2025, 0, 1).getTime(), weight: 80 }],
+  };
+  const midnight = (y: number, m: number, d: number) => new Date(y, m, d).getTime();
+
+  it('counts a full completed past day with the sedentary factor', () => {
+    const day = midnight(2025, 5, 10); // no training -> sedentary 1.2
+    // age at 2025-06-11 = 34; BMR = 10*80 + 6.25*180 - 5*34 + 5 = 1760
+    // resting = round(1760 * 1.2) = 2112
+    expect(restingForDay(bm, [], [], day, now)).toBe(2112);
+  });
+  it('prorates today by elapsed fraction', () => {
+    const todayStart = new Date(2025, 5, 15).getTime(); // now is noon that day
+    // ref = now (birthday) -> age 35, BMR = 10*80 + 6.25*180 - 5*35 + 5 = 1755
+    const full = 1755 * 1.2;
+    expect(restingForDay(bm, [], [], todayStart, now)).toBe(Math.round(full * 0.5));
+  });
+  it('returns null for a future day and without body data', () => {
+    expect(restingForDay(bm, [], [], midnight(2025, 5, 20), now)).toBeNull();
+    expect(restingForDay({ weights: [] }, [], [], midnight(2025, 5, 10), now)).toBeNull();
+  });
+  it('uses the weight in effect on that day', () => {
+    const bm2: BodyMetrics = {
+      sex: 'male',
+      dob: '1990-06-15',
+      heightCm: 180,
+      weights: [
+        { id: 'a', at: midnight(2025, 0, 1), weight: 90 },
+        { id: 'b', at: midnight(2025, 5, 12), weight: 80 },
+      ],
+    };
+    // day 2025-06-10 predates the 80kg weigh-in -> uses 90kg
+    // BMR(90) = 10*90 + 6.25*180 - 5*34 + 5 = 1860; resting = round(1860*1.2)=2232
+    expect(restingForDay(bm2, [], [], midnight(2025, 5, 10), now)).toBe(2232);
   });
 });

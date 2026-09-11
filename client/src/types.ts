@@ -116,32 +116,13 @@ export interface BodyMetrics {
 }
 
 // ---------------------------------------------------------------------------
-// Daily resting energy (feature: resting kcal per day)
+// Daily resting energy (feature: resting kcal per day, computed on the fly)
 // ---------------------------------------------------------------------------
 
 /** Auto-inferred lifestyle band → a NEAT (non-exercise activity) multiplier on
  *  BMR. Logged workouts and activities are counted separately on top, so these
  *  factors deliberately exclude structured exercise. */
 export type LifestyleLevel = 'sedentary' | 'light' | 'moderate' | 'active';
-
-/** A per-day snapshot of the resting/baseline burn, written from today forward
- *  (never backfilled). Persisting the value as-of the day keeps history honest
- *  when body weight or lifestyle later change. Keyed by the numeric dayKey. */
-export interface EnergyDay {
-  /** store.dayKey(ts) — the local-calendar day index. */
-  day: number;
-  /** Baseline burn for the whole day = round(bmr * factor). kcal. */
-  restKcal: number;
-  /** BMR used (kcal/day). */
-  bmr: number;
-  /** NEAT multiplier applied. */
-  factor: number;
-  /** Lifestyle band the factor came from. */
-  level: LifestyleLevel;
-  /** Body weight (kg) used for the BMR at snapshot time. */
-  bodyKg: number;
-  updatedAt: number;
-}
 
 // ---------------------------------------------------------------------------
 // Sleep (My Fit · Sleep) — a first-class recovery record.

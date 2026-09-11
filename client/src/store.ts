@@ -51,7 +51,6 @@ import {
   type SleepSchedule,
   type SleepSettings,
   type SleepQuality,
-  type EnergyDay,
 } from './types';
 import {
   canonicalExerciseName,
@@ -77,8 +76,6 @@ import {
   sleepKindOf,
 } from './sleep';
 import { currentUid, getRole } from './api';
-import { autoLifestyle, restingDayKcal } from './dayEnergy';
-import { bmrKcal } from './energy';
 
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
@@ -88,7 +85,6 @@ const BODY_KEY = 'spotter.body';
 const GOALS_KEY = 'spotter.goals';
 const REST_KEY = 'spotter.restPeriods';
 const ACTIVITIES_KEY = 'spotter.activities';
-const ENERGY_KEY = 'spotter.energyDays';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
 const EX_SIDES_KEY = 'spotter.exerciseSides';
@@ -187,9 +183,6 @@ export interface StoreState {
   };
   /** Own body metrics (weigh-ins, height, optional composition). */
   bodyMetrics: BodyMetrics;
-  /** Per-day resting/baseline burn snapshots, keyed by String(dayKey).
-   *  Written from today forward only (never backfilled). */
-  energyDays: Record<string, EnergyDay>;
   /** Logged nights; a live (in-progress) night has wake === null. */
   sleeps: SleepNight[];
   /** Intended sleep rhythm (one plan, or per weekday). */
@@ -234,7 +227,6 @@ let state: StoreState = {
     seenRating: null,
   }),
   bodyMetrics: load<BodyMetrics>(BODY_KEY, EMPTY_BODY),
-  energyDays: load<Record<string, EnergyDay>>(ENERGY_KEY, {}),
   sleeps: load<SleepNight[]>(SLEEP_KEY, []),
   sleepSchedule: load<SleepSchedule>(SLEEP_SCHED_KEY, {
     sameEveryNight: true,
@@ -281,7 +273,6 @@ function persist(): void {
     localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
     localStorage.setItem(MASTERY_KEY, JSON.stringify(state.mastery));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
-    localStorage.setItem(ENERGY_KEY, JSON.stringify(state.energyDays));
     localStorage.setItem(SLEEP_KEY, JSON.stringify(state.sleeps));
     localStorage.setItem(SLEEP_SCHED_KEY, JSON.stringify(state.sleepSchedule));
     localStorage.setItem(SLEEP_SET_KEY, JSON.stringify(state.sleepSettings));
@@ -1521,52 +1512,6 @@ export const dayKey = (ts: number): number => {
   const d = new Date(ts);
   return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / REST_DAY_MS);
 };
-
-// --- Daily resting / baseline energy --------------------------------------
-function writeEnergyDayDoc(e: EnergyDay): void {
-  const uid = currentUid();
-  if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'energyDays', String(e.day)), e).catch(onWriteError);
-}
-
-/**
- * Snapshot today's resting/baseline burn (BMR x auto-lifestyle factor) into the
- * per-day log — from today forward only, never backfilling past days. Idempotent:
- * writes only when today's value materially changed (body weight, lifestyle band
- * or the rounded kcal), so it can be called freely on load and on data changes.
- * A no-op until body metrics are complete enough for an honest BMR.
- */
-export function ensureTodayEnergy(now: number = Date.now()): void {
-  if (!bodyMetricsComplete(state.bodyMetrics)) return;
-  const bodyKg = latestWeight(state.bodyMetrics)?.weight ?? null;
-  if (!bodyKg) return;
-  const bmr = bmrKcal(state.bodyMetrics, bodyKg, now);
-  if (!bmr) return;
-  const ls = autoLifestyle(state.workouts, state.activities, now);
-  const restKcal = restingDayKcal(bmr, ls.factor);
-  if (restKcal == null) return;
-  const day = dayKey(now);
-  const key = String(day);
-  const prev = state.energyDays[key];
-  if (
-    prev &&
-    prev.restKcal === restKcal &&
-    prev.level === ls.level &&
-    Math.round(prev.bodyKg) === Math.round(bodyKg)
-  )
-    return;
-  const entry: EnergyDay = {
-    day,
-    restKcal,
-    bmr,
-    factor: ls.factor,
-    level: ls.level,
-    bodyKg,
-    updatedAt: now,
-  };
-  setState({ energyDays: { ...state.energyDays, [key]: entry } });
-  writeEnergyDayDoc(entry);
-}
 
 function writeRestPeriodDoc(r: RestPeriod): void {
   const uid = currentUid();
@@ -2832,23 +2777,6 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
-      collection(db, 'users', uid, 'energyDays'),
-      (snap) => {
-        const map: Record<string, EnergyDay> = {};
-        for (const d of snap.docs) {
-          const e = d.data() as EnergyDay;
-          map[String(e.day)] = e;
-        }
-        state = { ...state, energyDays: map };
-        persist();
-        emit();
-      },
-      // Soft: if the energyDays rule isn't deployed yet, don't block all sync.
-      () => undefined,
-    ),
-  );
-  unsubs.push(
-    onSnapshot(
       collection(db, 'users', uid, 'activities'),
       (snap) => {
         const serverActivities = snap.docs.map((d) => d.data() as Activity);
@@ -3490,7 +3418,6 @@ export function resetLocalData(): void {
     exerciseSides: {},
     mastery: { sinceYear: null, pattern: null, seenRating: null },
     bodyMetrics: EMPTY_BODY,
-    energyDays: {},
     sleeps: [],
     sleepSchedule: { sameEveryNight: true, every: null, byDay: {} },
     sleepSettings: {

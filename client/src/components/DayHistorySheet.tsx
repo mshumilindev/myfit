@@ -18,6 +18,7 @@ import {
 import { fmtWeekdayDayMonth, useT } from '../i18n';
 import { WorkoutRow, ActivityRow, SleepRow } from './HistoryTimeline';
 import { workoutCalories, activityCalories } from '../activities';
+import { restingForDay } from '../dayEnergy';
 
 type NoteState = 'missed' | 'rest' | 'vacation' | 'illness';
 
@@ -52,6 +53,7 @@ export function DayHistorySheet({
   const store = useStore();
   const end = day + 24 * 3600 * 1000;
   const [todayKey] = useState(() => dayKey(Date.now()));
+  const [nowMs] = useState(() => Date.now());
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
 
   const wrap = (fn?: (id: string) => void) =>
@@ -95,7 +97,7 @@ export function DayHistorySheet({
   // Day energy: the persisted resting/baseline burn for the day (present only
   // from the day this feature shipped — never backfilled) plus the active burn
   // of everything logged that day. Shown when either is available.
-  const restKcal = store.energyDays[String(dayKey(day))]?.restKcal ?? null;
+  const restKcal = restingForDay(store.bodyMetrics, store.workouts, store.activities, day, nowMs);
   let activeKcal = 0;
   for (const w of store.workouts)
     if (w.finishedAt !== null && w.startedAt >= day && w.startedAt < end)

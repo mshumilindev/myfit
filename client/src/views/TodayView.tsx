@@ -20,7 +20,6 @@ import {
   consistencyStreak,
   dayKey,
   endRestPeriod,
-  ensureTodayEnergy,
   startRestPeriod,
   latestWeight,
   liveSleep,
@@ -39,8 +38,7 @@ import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
-import { bmrKcal } from '../energy';
-import { autoLifestyle, restingDayKcal, dayElapsedFraction } from '../dayEnergy';
+import { restingForDay } from '../dayEnergy';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
@@ -383,23 +381,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     .filter((w) => w.finishedAt !== null && w.startedAt >= weekAgoTs)
     .reduce((s, w) => s + (workoutCalories(w, bodyKg) ?? 0), 0);
   const activityKcalWeek = activityWeek(store.activities, now, bodyKg).totalKcal;
-  const bmr = bmrKcal(store.bodyMetrics, bodyKg, now);
-  // Resting / baseline burn across the last 7 days. Each past day counts its
-  // persisted snapshot (written from the day this feature shipped — never
-  // backfilled), and today counts a live figure prorated by how much of the day
-  // has elapsed, so the total climbs honestly through the day.
-  const lifestyle = autoLifestyle(store.workouts, store.activities, now);
+  // Resting / baseline burn across the last 7 days, computed on the fly: each
+  // past day uses the body weight in effect that day and the lifestyle inferred
+  // from its trailing training window; today is prorated by elapsed time, so the
+  // total climbs honestly through the day. No persistence.
   const restKcalWeek = (() => {
-    const todayIdx = dayKey(now);
     const nowD = new Date(now);
     const todayStart = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate()).getTime();
     let sum = 0;
     for (let i = 0; i < 7; i++) {
-      if (i === 0) {
-        sum += restingDayKcal(bmr, lifestyle.factor, dayElapsedFraction(todayStart, now)) ?? 0;
-      } else {
-        sum += store.energyDays[String(todayIdx - i)]?.restKcal ?? 0;
-      }
+      const dayStart = todayStart - i * DAY_MS;
+      sum += restingForDay(store.bodyMetrics, store.workouts, store.activities, dayStart, now) ?? 0;
     }
     return sum;
   })();
@@ -441,22 +433,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const deltaPct = weeks[8] > 0 ? Math.round(((weeks[9] - weeks[8]) / weeks[8]) * 100) : null;
 
   const streakDays = consistencyStreak(pbNow);
-
-  // Snapshot today's resting/baseline burn into the per-day log (today forward
-  // only). Re-runs when the day rolls over or the inputs that move BMR or the
-  // lifestyle band change; ensureTodayEnergy is idempotent and a no-op until
-  // body metrics are complete.
-  const todayIdx = dayKey(now);
-  useEffect(() => {
-    ensureTodayEnergy();
-  }, [
-    todayIdx,
-    store.workouts.length,
-    store.activities.length,
-    store.bodyMetrics.weights.length,
-    store.bodyMetrics.heightCm,
-    store.bodyMetrics.updatedAt,
-  ]);
 
   useEffect(() => {
     callFn<{ assignment: ProgramAssignment | null }>('programMine')

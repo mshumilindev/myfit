@@ -87,12 +87,44 @@ export function dayElapsedFraction(dayStartMs: number, now: number = Date.now())
   return Math.max(0, Math.min(1, f));
 }
 
-/** Convenience: today's baseline burn for the whole day from body + lifestyle. */
-export function todayRestingKcal(
+/** Body weight (kg) in effect at `ts` — the most recent weigh-in on or before
+ *  `ts`, falling back to the earliest recorded weigh-in when `ts` predates them
+ *  all. Null when no weigh-ins exist. */
+export function weightAsOfKg(bm: BodyMetrics | null | undefined, ts: number): number | null {
+  const ws = bm?.weights;
+  if (!ws || ws.length === 0) return null;
+  let best: { at: number; weight: number } | null = null;
+  for (const w of ws) if (w.at <= ts && (!best || w.at > best.at)) best = w;
+  if (best) return best.weight;
+  return ws.reduce((a, b) => (b.at < a.at ? b : a)).weight;
+}
+
+/**
+ * Whole-day resting/baseline burn for one calendar day, computed on the fly from
+ * data already in the store — no persistence. Uses the body weight and age in
+ * effect at that day and the lifestyle inferred from the training/conditioning
+ * frequency in the trailing window ending that day. A completed past day counts
+ * a full day; today is prorated by how much of it has elapsed; future days and
+ * days without enough body data return null.
+ *
+ * `dayStartMs` is local midnight of the day.
+ */
+export function restingForDay(
   bm: BodyMetrics | null | undefined,
-  bodyKg: number | null | undefined,
-  lifestyle: Lifestyle,
+  workouts: Workout[] | null | undefined,
+  activities: Activity[] | null | undefined,
+  dayStartMs: number,
   now: number = Date.now(),
 ): number | null {
-  return restingDayKcal(bmrKcal(bm, bodyKg, now), lifestyle.factor);
+  if (dayStartMs > now) return null;
+  const dayEnd = dayStartMs + DAY_MS;
+  // Evaluate weight, age and lifestyle as of the end of the day (capped at now).
+  const ref = Math.min(dayEnd, now);
+  const bodyKg = weightAsOfKg(bm, ref);
+  if (!bodyKg) return null;
+  const bmr = bmrKcal(bm, bodyKg, ref);
+  if (!bmr) return null;
+  const ls = autoLifestyle(workouts, activities, ref);
+  const fraction = now < dayEnd ? dayElapsedFraction(dayStartMs, now) : 1;
+  return restingDayKcal(bmr, ls.factor, fraction);
 }
