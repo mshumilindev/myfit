@@ -33,6 +33,7 @@ import {
 } from '../store';
 import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
+import { DayHistorySheet } from '../components/DayHistorySheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
@@ -174,6 +175,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const [illDismissed, setIllDismissed] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [confirmEndRest, setConfirmEndRest] = useState<string | null>(null);
+  const [dayDrawer, setDayDrawer] = useState<number | null>(null);
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
   const openMuscleHistory = (muscle: MuscleGroup) =>
     shell.openOverlay({ screen: 'muscle-history', muscle });
@@ -229,6 +231,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const now = useNowTick(!!open);
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
+  const weekMonday = weekStartOf(now);
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
   const historyDayCount = buildHistoryDays(finished, store.activities, store.sleeps).length;
@@ -918,6 +921,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           const isToday = day === todayWeekday;
           const done = weekTrainedDays.has(day);
           const missed = hasPlan && !done && day < todayWeekday && !restMode;
+          // Past days (logged or missed) open a day-history drawer.
+          const cellStart = (() => {
+            const c = new Date(weekMonday);
+            c.setDate(c.getDate() + (day - 1));
+            return c.getTime();
+          })();
+          const canOpenDay = day < todayWeekday && (done || missed);
           // Only today is actionable — and only while it hasn't been trained yet
           // (a sick / rest day is not a "start" prompt).
           const canStart = isToday && hasPlan && !trainedToday && !done && !restMode;
@@ -942,9 +952,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               }${done ? ' is-done' : ''}${missed ? ' is-missed' : ''}${
                 canStart ? ' can-start' : ''
               } state-${state}`}
-              disabled={!canStart}
-              aria-disabled={!canStart}
-              onClick={() => canStart && startProgramDay(day)}
+              disabled={!canStart && !canOpenDay}
+              aria-disabled={!canStart && !canOpenDay}
+              onClick={() => {
+                if (canStart) startProgramDay(day);
+                else if (canOpenDay) setDayDrawer(cellStart);
+              }}
             >
               <span className="program-start-top">
                 <span className="program-start-dow">{t.weekDayLetters[day - 1]}</span>
@@ -1168,6 +1181,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           />
         )}
         {programCard}
+        {dayDrawer != null && (
+          <DayHistorySheet
+            day={dayDrawer}
+            onClose={() => setDayDrawer(null)}
+            onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
+            onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
+            onOpenSleep={(id) => shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })}
+          />
+        )}
         {!(assignment && assignedActive) && hasHistory && (
           <div className="today-weekstrip-card">
             <WeekStrip
