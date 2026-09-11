@@ -565,6 +565,9 @@ export const lt: Strings = {
   weekDayLetters: ['P', 'A', 'T', 'K', 'P', 'Š', 'S'],
   dayIll: 'Liga',
   dayRest: 'Poilsis',
+  dayMissedTitle: 'Praleista treniruotė',
+  dayMissedNamed: (name: string) => `„${name}“ buvo suplanuota šiai dienai — bet nieko neužfiksuota.`,
+  dayMissedGeneric: 'Šiai dienai buvo suplanuota treniruotė — bet nieko neužfiksuota.',
   weekDayNames: [
     'Pirmadienis',
     'Antradienis',

@@ -554,6 +554,9 @@ export const en = {
   weekDayLetters: ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as string[],
   dayIll: 'Sick day',
   dayRest: 'Rest day',
+  dayMissedTitle: 'Missed session',
+  dayMissedNamed: (name: string) => `“${name}” was on your plan for this day — but nothing was logged.`,
+  dayMissedGeneric: 'A gym day was on your plan for this day — but nothing was logged.',
   weekDayNames: [
     'Monday',
     'Tuesday',

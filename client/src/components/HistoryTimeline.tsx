@@ -195,13 +195,6 @@ export function HistoryTimeline({
     maxDays != null ? entries.slice(dayOffset, dayOffset + maxDays) : entries.slice(dayOffset);
   if (days.length === 0) return null;
 
-  const title = (w: Workout) => {
-    const dn = programDayNameFor(w, allWorkouts);
-    if (dn) return dn;
-    const r = workoutDayReadout(w);
-    return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
-  };
-
   const stateLabel: Record<Exclude<DayState, 'trained' | 'logged'>, string> = {
     rest: t.histStateRest,
     vacation: t.histStateVacation,
@@ -247,36 +240,16 @@ export function HistoryTimeline({
                   return (
                     <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
                   );
-                const kc = it.w.finishedAt ? workoutCalories(it.w, bodyKg) : null;
                 return (
-                  <button
+                  <WorkoutRow
                     key={it.w.id}
-                    className="hist-item hist-workout"
-                    onClick={() => onOpenWorkout(it.w.id)}
-                  >
-                    <span className="hist-item-body">
-                      <span className="hist-item-name">{title(it.w)}</span>
-                      <div className="hist-item-stats">
-                        {workoutSets(it.w)} {t.sets} · {fmtKg(workoutVolumeKg(it.w))}
-                        {it.w.finishedAt
-                          ? ` · ${fmtDurationHM(it.w.finishedAt - it.w.startedAt)}`
-                          : ''}
-                      </div>
-                      {showMuscles && muscleWorkSorted(it.w).length > 0 && (
-                        <MuscleRow
-                          entries={muscleWorkSorted(it.w)}
-                          refTs={it.w.startedAt}
-                          onOpen={openMuscleHistory}
-                        />
-                      )}
-                    </span>
-                    {kc != null && (
-                      <span className="ta-kcal tnum">
-                        <Icon name="flame" weight="fill" />~{kc}
-                      </span>
-                    )}
-                    <Icon name="arrow-up-right" className="go" />
-                  </button>
+                    w={it.w}
+                    allWorkouts={allWorkouts}
+                    bodyKg={bodyKg}
+                    showMuscles={showMuscles}
+                    onOpen={onOpenWorkout}
+                    openMuscleHistory={openMuscleHistory}
+                  />
                 );
               })}
             </div>
@@ -287,9 +260,54 @@ export function HistoryTimeline({
   );
 }
 
+/** One finished workout row — program-day title, stats, muscles, kcal, opens
+ *  the session detail. Exported so single-day views (the calendar day drawer)
+ *  can reuse the exact My-history row. */
+export function WorkoutRow({
+  w,
+  allWorkouts,
+  bodyKg,
+  showMuscles = true,
+  onOpen,
+  openMuscleHistory,
+}: {
+  w: Workout;
+  allWorkouts: Workout[];
+  bodyKg: number | null;
+  showMuscles?: boolean;
+  onOpen: (id: string) => void;
+  openMuscleHistory?: (m: MuscleGroup) => void;
+}) {
+  const { t, locale } = useT();
+  const dn = programDayNameFor(w, allWorkouts);
+  const readout = workoutDayReadout(w);
+  const title = dn ?? (readout ? dayReadoutLabel(readout, t) : fmtWeekday(w.startedAt, locale));
+  const kc = w.finishedAt ? workoutCalories(w, bodyKg) : null;
+  return (
+    <button className="hist-item hist-workout" onClick={() => onOpen(w.id)}>
+      <span className="hist-item-body">
+        <span className="hist-item-name">{title}</span>
+        <div className="hist-item-stats">
+          {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
+          {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}
+        </div>
+        {showMuscles && muscleWorkSorted(w).length > 0 && (
+          <MuscleRow entries={muscleWorkSorted(w)} refTs={w.startedAt} onOpen={openMuscleHistory} />
+        )}
+      </span>
+      {kc != null && (
+        <span className="ta-kcal tnum">
+          <Icon name="flame" weight="fill" />~{kc}
+        </span>
+      )}
+      <Icon name="arrow-up-right" className="go" />
+    </button>
+  );
+}
+
 /** One finished activity in the timeline — the type icon sits inline with the
  *  name; the date lives in the shared day column. */
-function ActivityRow({
+export function ActivityRow({
   a,
   bodyKg,
   onOpen,
@@ -338,7 +356,7 @@ function ActivityRow({
 
 /** One finished night in the timeline — moon icon inline with "Sleep", the
  *  duration + range in the stats line, an `auto` flag for auto-logged nights. */
-function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void }) {
+export function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) => void }) {
   const { t } = useT();
   const store = useStore();
   const mins = nightDurationMin(n);

@@ -549,6 +549,9 @@ export const et: Strings = {
   weekDayLetters: ['E', 'T', 'K', 'N', 'R', 'L', 'P'],
   dayIll: 'Haige',
   dayRest: 'Puhkus',
+  dayMissedTitle: 'Vahele jäänud trenn',
+  dayMissedNamed: (name: string) => `„${name}“ oli sel päeval plaanis — kuid midagi ei logitud.`,
+  dayMissedGeneric: 'Sel päeval oli plaanis jõusaalipäev — kuid midagi ei logitud.',
   weekDayNames: [
     'Esmaspäev',
     'Teisipäev',

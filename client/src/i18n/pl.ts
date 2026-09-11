@@ -563,6 +563,9 @@ export const pl: Strings = {
   weekDayLetters: ['P', 'W', 'Ś', 'C', 'P', 'S', 'N'],
   dayIll: 'Choroba',
   dayRest: 'Odpoczynek',
+  dayMissedTitle: 'Pominięty trening',
+  dayMissedNamed: (name: string) => `„${name}” był w planie na ten dzień — ale nic nie zapisano.`,
+  dayMissedGeneric: 'Na ten dzień był w planie trening — ale nic nie zapisano.',
   weekDayNames: ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'],
 
   // Today · desktop 3-column (W-04/W-05)

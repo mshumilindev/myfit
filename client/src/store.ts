@@ -661,6 +661,13 @@ export function programLookbackDays(): number {
   return a ? (a.week ?? 1) * 7 + 6 : 0;
 }
 
+/** The assigned program's day name for a weekday (1=Mon…7=Sun), or null. Used to
+ *  name a missed gym day ("you skipped Legs 2"). */
+export function programDayNameForWeekday(weekday: number): string | null {
+  const a = readAssignment();
+  return a?.program.dayNames?.[String(weekday)] ?? null;
+}
+
 export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
   if (w.dayName) return w.dayName;
   const a = readAssignment();

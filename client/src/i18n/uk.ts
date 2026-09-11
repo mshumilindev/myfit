@@ -561,6 +561,9 @@ export const uk: Strings = {
   weekDayLetters: ['П', 'В', 'С', 'Ч', 'П', 'С', 'Н'],
   dayIll: 'Хворів',
   dayRest: 'Відпочинок',
+  dayMissedTitle: 'Пропущене тренування',
+  dayMissedNamed: (name: string) => `«${name}» було у плані на цей день — але нічого не залоговано.`,
+  dayMissedGeneric: 'На цей день був день у залі за планом — але нічого не залоговано.',
   weekDayNames: ['Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота', 'Неділя'],
 
   // Today · desktop 3-column (W-04/W-05)
