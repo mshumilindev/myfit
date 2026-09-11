@@ -26,7 +26,6 @@ import {
   logVisitAsWorkout,
   resolveMuscles,
   startWorkout,
-  startGeneratedDay,
   topSet,
   workoutDayReadout,
   workoutVolumeKg,
@@ -48,7 +47,6 @@ import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
-import { buildDay } from '../sessionBuilder';
 import { GymThumb } from '../components/GymThumb';
 import { EquipmentIcon, type EquipmentId } from '../data/equipment';
 
@@ -228,22 +226,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   }
   function autoBuild() {
     if (resumeLive()) return;
-    const day = buildDay({
-      finished: store.workouts.filter((w) => w.finishedAt !== null),
-      activities: store.activities,
-      body: store.bodyMetrics,
-      goals: store.goals,
-      gym: null,
-      now: Date.now(),
-      intent: 'muscle',
-      warmup: true,
-      cardio: false,
-      cooldown: true,
-      bodyKg: latestWeight(store.bodyMetrics)?.weight ?? null,
-      sex: store.bodyMetrics.sex,
-    });
-    const w = startGeneratedDay(day, null);
-    if (w) shell.openOverlay({ screen: 'session', workoutId: w.id });
+    shell.openOverlay({ screen: 'builder' });
   }
   function startSession() {
     if (resumeLive()) return;

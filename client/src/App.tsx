@@ -86,6 +86,9 @@ const GymsView = lazy(() =>
 const SessionView = lazy(() =>
   import('./views/SessionView').then((module) => ({ default: module.SessionView })),
 );
+const SessionBuilderView = lazy(() =>
+  import('./views/SessionBuilderView').then((module) => ({ default: module.SessionBuilderView })),
+);
 const ActivityView = lazy(() =>
   import('./views/ActivityView').then((module) => ({ default: module.ActivityView })),
 );
@@ -208,6 +211,7 @@ export type Overlay =
       externalId?: string;
     }
   | { screen: 'equipment'; itemId: string; gymId?: string }
+  | { screen: 'builder' }
   | { screen: 'mastery' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
@@ -330,6 +334,7 @@ function toHash(
     return overlay.libTab === 'mine' ? '#/exercises/mine' : '#/exercises';
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
+  if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'notifications') return '#/notifications';
   if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
   if (overlay?.screen === 'recap-story')
@@ -394,6 +399,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
+  if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
   if (head === 'recap' && parts[1])
     return { tab: 'today', overlay: { screen: 'recap', period: decodeURIComponent(parts[1]) } };
@@ -1203,6 +1209,11 @@ export function App() {
     <Suspense fallback={<ScreenFallback />}>
       {activeOverlay?.screen === 'session' && (
         <SessionView workoutId={activeOverlay.workoutId} shell={shell} onClose={closeOverlay} />
+      )}
+      {activeOverlay?.screen === 'builder' && (
+        <Suspense fallback={null}>
+          <SessionBuilderView shell={shell} onClose={closeOverlay} />
+        </Suspense>
       )}
       {activeOverlay?.screen === 'activity' && (
         <ActivityView
