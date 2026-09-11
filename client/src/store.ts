@@ -962,9 +962,7 @@ function heartbeatLiveSession(): void {
   const now = Date.now();
   if (now - lastLiveBeat < LIVE_HEARTBEAT_MS) return;
   lastLiveBeat = now;
-  setDoc(doc(db, 'liveSessions', uid), { updatedAt: now }, { merge: true }).catch(
-    () => undefined,
-  );
+  setDoc(doc(db, 'liveSessions', uid), { updatedAt: now }, { merge: true }).catch(() => undefined);
 }
 
 export function startWorkout(
