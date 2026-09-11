@@ -30364,13 +30364,22 @@ body {
   margin-top: 2px;
 }
 .act-sleep-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   background: none;
   border: 0;
   color: var(--s-moon);
   font: inherit;
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 0;
+}
+.act-sleep-link .ui-icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
 }
 
 /* Sleep hub / history / backfill / schedule (SL-12 / SL-13 / SL-07) */
@@ -31379,6 +31388,15 @@ body {
   letter-spacing: -0.02em;
   color: var(--color-text);
   margin-top: 6px;
+}
+.sleep-range-invalid {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-danger);
+  margin-top: 6px;
+}
+.sleep-backfill-time {
+  margin-top: 8px;
 }
 
 /* Sleep in the history timeline + delete link */

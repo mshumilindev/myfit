@@ -17,7 +17,7 @@ import {
   type MasteryResult,
 } from '../mastery';
 import { useT } from '../i18n';
-import { Icon, Sheet } from '../ui';
+import { Icon, Sheet, useExerciseName } from '../ui';
 import type { Shell } from '../App';
 
 const AXIS_ICON: Record<AxisKey, string> = {
@@ -401,6 +401,7 @@ export function MasteryView({ shell, onClose }: { shell: Shell; onClose: () => v
 // --- MT-08 · practice signals sheet -----------------------------------------
 function PracticeSheet({ m, onClose }: { m: MasteryResult; onClose: () => void }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const statusClass = (s: SignalStatus) => (s === 'good' ? 'ok' : s === 'watch' ? 'watch' : 'low');
   const signalRead = (sig: PracticeSignal): string => {
     const f = sig.facts;
@@ -414,7 +415,12 @@ function PracticeSheet({ m, onClose }: { m: MasteryResult; onClose: () => void }
         return (f.skipped as string[])?.length ? t.mrSkipped(muscles(f.skipped)) : t.mrCovered;
       case 'progression':
         return (f.flat as string[])?.length
-          ? t.mrFlat(((f.flat as string[]) ?? []).slice(0, 2).join(', '))
+          ? t.mrFlat(
+              ((f.flat as string[]) ?? [])
+                .slice(0, 2)
+                .map((n) => exName(n))
+                .join(', '),
+            )
           : t.mrClimbing;
       case 'volume':
         return (f.belowMEV as string[])?.length ? t.mrBelowMev(muscles(f.belowMEV)) : t.mrVolOk;
@@ -688,6 +694,7 @@ export function MasteryBadge({
   onOpen: () => void;
   variant?: 'header' | 'rail';
 }) {
+  const { t } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());
   const m = useMemo(
@@ -705,8 +712,8 @@ export function MasteryBadge({
       <button
         className={`mst-railbadge${m.calibrating ? ' calib' : ''}`}
         onClick={onOpen}
-        aria-label="Mastery"
-        title="Mastery"
+        aria-label={t.masteryTitle}
+        title={t.masteryTitle}
       >
         {m.calibrating ? (
           <span className="mst-railbadge-ring calib">
@@ -725,7 +732,7 @@ export function MasteryBadge({
   }
   if (m.calibrating) {
     return (
-      <button className="mst-badge calib" onClick={onOpen} aria-label="Mastery">
+      <button className="mst-badge calib" onClick={onOpen} aria-label={t.masteryTitle}>
         <span className="mst-badge-ring calib">
           <span className="mst-badge-in">
             <Seal size={11} dim />
@@ -736,7 +743,7 @@ export function MasteryBadge({
     );
   }
   return (
-    <button className="mst-badge" onClick={onOpen} aria-label="Mastery">
+    <button className="mst-badge" onClick={onOpen} aria-label={t.masteryTitle}>
       <Ring frac={m.rankProgress} size={26} inner={20}>
         <RankInsignia index={m.rankIndex} size={11} />
       </Ring>

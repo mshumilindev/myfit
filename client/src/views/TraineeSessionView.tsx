@@ -21,7 +21,7 @@ import {
 } from '../store';
 import { useT, fmtTonnes, fmtKg, fmtDurationHM, fmtDayMonth } from '../i18n';
 import type { Strings } from '../i18n/en';
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 
 function mmss(sec: number): string {
   const s = Math.max(0, Math.round(sec));
@@ -110,11 +110,12 @@ function ExerciseCard({
   t: Strings;
   round?: boolean;
 }) {
+  const exName = useExerciseName();
   return (
     <div className="exercise-card">
       <div className="head">
         <span className="name" style={{ cursor: 'default' }}>
-          {ex.name}
+          {exName(ex.name)}
         </span>
         {perHandFactor(ex) === 2 && (
           <span className="x2-chip">
@@ -135,6 +136,7 @@ function ExerciseCard({
 }
 
 function CircuitCard({ g, t }: { g: SupersetGroup; t: Strings }) {
+  const exName = useExerciseName();
   const rounds = groupRounds(g);
   return (
     <div className="circuit-block">
@@ -161,7 +163,7 @@ function CircuitCard({ g, t }: { g: SupersetGroup; t: Strings }) {
                   {g.letter}
                   {i + 1}
                 </span>
-                <span className="cb-sname">{e.name}</span>
+                <span className="cb-sname">{exName(e.name)}</span>
                 <span className="cb-scount num">
                   {t.circuitNRoundsShort(Math.min(e.sets.length, rounds), rounds)}
                 </span>

@@ -10,13 +10,20 @@
 import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import type { Workout } from '../types';
-import { addExercise, repeatWorkout, startWorkout, useStore, workoutDayReadout } from '../store';
+import {
+  addExercise,
+  programDayNameFor,
+  repeatWorkout,
+  startWorkout,
+  useStore,
+  workoutDayReadout,
+} from '../store';
 import { computePlaybook, type Play, type PlaySuggestion } from '../playbook';
 import { fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { MuscleSetChip, withMuscleBreak } from '../components/Muscle';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 
 export function PlaybookView({
   shell,
@@ -30,6 +37,7 @@ export function PlaybookView({
   embedded?: boolean;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const store = useStore();
 
   const [now] = useState(() => Date.now());
@@ -68,7 +76,8 @@ export function PlaybookView({
     shell.openOverlay({ screen: 'muscle-history', muscle });
 
   const recentTitle = (w: Workout) => {
-    if (w.dayName) return w.dayName;
+    const dn = programDayNameFor(w, store.workouts);
+    if (dn) return dn;
     const r = workoutDayReadout(w);
     return r ? dayReadoutLabel(r, t) : fmtWeekday(w.startedAt, locale);
   };
@@ -104,7 +113,7 @@ export function PlaybookView({
                     <div className="pb-ex" key={ex.name}>
                       <span className="pb-ex-i">{i + 1}</span>
                       <span className="pb-ex-name">
-                        {ex.name}
+                        {exName(ex.name)}
                         {ex.staple && (
                           <span className="pb-ex-star" title={t.playStaple} aria-hidden>
                             ●

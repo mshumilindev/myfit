@@ -13,7 +13,7 @@ import {
   type useStore,
 } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
-import { EmptyState, Icon, Sheet } from '../ui';
+import { EmptyState, Icon, Sheet, useExerciseName } from '../ui';
 import { EquipChip, MuscleChip, MuscleHeatmap, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import { muscleInfoByName, type MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
@@ -84,6 +84,7 @@ export function ProgressView({
   onLens: (l: 'volume' | 'fatigue' | 'readiness') => void;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const [nowTs] = useState(() => Date.now());
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const setSeg = onSeg;
@@ -539,12 +540,12 @@ export function ProgressView({
               <div className="chart-legend">
                 <span>
                   <span className="sw" style={{ background: 'var(--color-accent)' }} />
-                  {lines[0].name} {lines[0].pts[lines[0].pts.length - 1].rm} kg
+                  {exName(lines[0].name)} {lines[0].pts[lines[0].pts.length - 1].rm} kg
                 </span>
                 {lines[1] && lines[1].pts.length >= 2 && (
                   <span>
                     <span className="sw" style={{ background: 'var(--color-neutral-700)' }} />
-                    {lines[1].name} {lines[1].pts[lines[1].pts.length - 1].rm} kg
+                    {exName(lines[1].name)} {lines[1].pts[lines[1].pts.length - 1].rm} kg
                   </span>
                 )}
               </div>
@@ -599,7 +600,7 @@ export function ProgressView({
                           else shell.openOverlay({ screen: 'exercise-history', name });
                         }}
                       >
-                        <span className="n">{name}</span>
+                        <span className="n">{exName(name)}</span>
                         <span className="v">{r.recW} kg</span>
                         {wksAgo < 2 ? (
                           <span className="tag tag-ok">{t.record}</span>
@@ -692,7 +693,7 @@ export function ProgressView({
         <section className="progress-detail-pane">
           <div>
             <div className="progress-detail-title">
-              <h3>{selected[0]}</h3>
+              <h3>{exName(selected[0])}</h3>
               <button
                 className="link"
                 onClick={() => shell.openOverlay({ screen: 'exercise-history', name: selected[0] })}

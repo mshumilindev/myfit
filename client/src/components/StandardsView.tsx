@@ -43,7 +43,9 @@ export function StandardsView({ finished, body }: { finished: Workout[]; body: B
     <section id={`std-${r.key}`} className="std-card">
       <div className="std-card-head">
         <div className="std-titles">
-          <span className="std-name">{r.name}</span>
+          <span className="std-name">
+            {t.standardNames[r.key as keyof typeof t.standardNames] ?? r.name}
+          </span>
           <span className="std-class">
             <span className={`std-tag ${r.system}`}>
               {r.system === 'rank' ? t.stdRankTag : t.stdLevelTag}

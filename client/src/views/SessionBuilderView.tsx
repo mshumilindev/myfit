@@ -6,7 +6,7 @@
  */
 import { useMemo, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 import { useT } from '../i18n';
 import {
   latestWeight,
@@ -22,6 +22,7 @@ import {
   type BuildContext,
   type PlannedExercise,
   type SessionIntent,
+  type WhyKey,
 } from '../sessionBuilder';
 import { muscleReadiness, READINESS_COLOR } from '../recovery';
 import { ARCHETYPES_BY_SEX, ARCHETYPES, type ArchetypeId } from '../goals';
@@ -126,6 +127,23 @@ export function SessionBuilderView({
     endurance: t.sbIntentEndurance,
     power: t.sbIntentPower,
     conditioning: t.sbIntentConditioning,
+  };
+  const exName = useExerciseName();
+  const whyLabel: Record<WhyKey, string> = {
+    grow: t.sbWhyGrow,
+    staple: t.sbWhyStaple,
+    stale: t.sbWhyStale,
+    progress: t.sbWhyProgress,
+    first: t.sbWhyFirst,
+    fit: t.sbWhyFit,
+    warmup: t.sbWarmupDesc,
+    cardio: t.sbCardioDesc,
+    cooldown: t.sbCooldownDesc,
+  };
+  const blockName: Record<'warmup' | 'cardio' | 'cooldown', string> = {
+    warmup: t.sbWarmupName,
+    cardio: t.sbCardioName,
+    cooldown: t.sbCooldownName,
   };
 
   function toggleMuscle(m: MuscleGroup) {
@@ -307,8 +325,8 @@ export function SessionBuilderView({
           />
         </span>
         <span className="sbw-ex-txt">
-          <b>{ex.name}</b>
-          <span className="sbw-ex-why">{ex.why}</span>
+          <b>{ex.kind === 'strength' ? exName(ex.name) : blockName[ex.kind]}</b>
+          <span className="sbw-ex-why">{whyLabel[ex.whyKey]}</span>
         </span>
         <span className="sbw-ex-meta">
           <span>{sr}</span>
@@ -330,7 +348,7 @@ export function SessionBuilderView({
     <div className="sbw-body">
       <h2 className="sbw-q">{t.sbReviewQ}</h2>
       <div className="sbw-meta">
-        <span className="mchip">{day.dayName}</span>
+        <span className="mchip">{derivedName}</span>
         <span className="mchip">
           {day.estMinutes} {t.sbMinShort}
         </span>
@@ -339,7 +357,7 @@ export function SessionBuilderView({
         </span>
       </div>
       {block(t.sbWarmupOpt, day.warmup)}
-      {block(t.sbStepReview === 'Review' ? 'Main' : t.sbStepDay, day.main)}
+      {block(t.sbMainLifts, day.main)}
       {block(t.sbCardioOpt, day.cardio)}
       {block(t.sbCooldownOpt, day.cooldown)}
       {day.coverage.length > 0 && (

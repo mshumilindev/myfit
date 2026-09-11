@@ -23,6 +23,7 @@ import {
   startActivity,
   finishWorkout,
   finishActivity,
+  programDayNameFor,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
 import type { SetEntry, SleepNight, Workout } from './types';
@@ -335,5 +336,47 @@ describe('one live mode at a time (mutual exclusion)', () => {
     expect(startWorkout(null)).toBeNull();
     expect(startActivity('run', 'conditioning')).toBeNull();
     cleanup();
+  });
+});
+
+describe('programDayNameFor — carried name vs trained muscles', () => {
+  const mk = (dayName: string | null, targetMuscles: string[], primary: string): Workout => ({
+    id: 'w',
+    startedAt: 1_000_000,
+    finishedAt: 1_100_000,
+    autoFinished: false,
+    dayName,
+    targetMuscles,
+    exercises: [
+      {
+        id: 'e1',
+        name: 'X',
+        kind: 'strength',
+        position: 0,
+        primaryMuscle: primary,
+        sets: [set({})],
+      },
+    ],
+  });
+
+  it('keeps the program day name when the trained muscles match its targets', () => {
+    const w = mk('Legs 2', ['quads', 'hamstrings', 'glutes'], 'quads');
+    expect(programDayNameFor(w, [w])).toBe('Legs 2');
+  });
+
+  it('drops a stale program day name when a different muscle group was trained', () => {
+    // Plan said Legs, but the session actually trained back → not "Legs 2".
+    const w = mk('Legs 2', ['quads', 'hamstrings', 'glutes'], 'lats');
+    expect(programDayNameFor(w, [w])).toBeNull();
+  });
+
+  it('matches on the coarse back family (lats target, traps trained)', () => {
+    const w = mk('Back 2', ['lats'], 'traps');
+    expect(programDayNameFor(w, [w])).toBe('Back 2');
+  });
+
+  it('trusts a carried name that declares no target muscles', () => {
+    const w = mk('My Day', [], 'lats');
+    expect(programDayNameFor(w, [w])).toBe('My Day');
   });
 });

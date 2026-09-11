@@ -23,6 +23,8 @@ import {
 } from './store';
 import type { BodyMetrics, Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
+import { t as strings, getLocale, fmtWeekday } from './i18n';
+import { localizedExerciseName } from './data/exerciseNames';
 
 const DAY = 24 * 3600 * 1000;
 const WEEK = 7 * DAY;
@@ -141,10 +143,14 @@ const AREAS: Area[] = [
 ];
 // The "drill-down" half: notable sub-muscles people commonly skip inside an
 // otherwise well-trained area -- the "lots of back but no lower back" nudge.
-const AREA_GAPS: { area: string; member: MuscleGroup; hint: string }[] = [
-  { area: 'back', member: 'lower_back', hint: 'add a hinge (deadlifts or back extensions)' },
-  { area: 'legs', member: 'hamstrings', hint: 'add a hinge or leg curl' },
-  { area: 'legs', member: 'calves', hint: 'add calf raises' },
+const AREA_GAPS: {
+  area: string;
+  member: MuscleGroup;
+  hintKey: 'gapHintHinge' | 'gapHintLegCurl' | 'gapHintCalf';
+}[] = [
+  { area: 'back', member: 'lower_back', hintKey: 'gapHintHinge' },
+  { area: 'legs', member: 'hamstrings', hintKey: 'gapHintLegCurl' },
+  { area: 'legs', member: 'calves', hintKey: 'gapHintCalf' },
 ];
 
 interface AreaSets {
@@ -166,45 +172,6 @@ function areaSetsFrom(perMuscle: Map<MuscleGroup, number>): AreaSets[] {
     return { key: a.key, label: a.label, sets, members };
   });
 }
-const MUSCLE_NAME: Record<string, string> = {
-  chest: 'chest',
-  back: 'back',
-  lats: 'lat',
-  traps: 'trap',
-  lower_back: 'lower-back',
-  shoulders: 'shoulder',
-  biceps: 'biceps',
-  triceps: 'triceps',
-  forearms: 'forearm',
-  quads: 'quad',
-  adductors: 'adductor',
-  hamstrings: 'hamstring',
-  glutes: 'glute',
-  abductors: 'abductor',
-  calves: 'calf',
-  core: 'core',
-  neck: 'neck',
-};
-const MUSCLE_LABEL: Record<string, string> = {
-  chest: 'Chest',
-  back: 'Back',
-  lats: 'Lats',
-  traps: 'Traps',
-  lower_back: 'Lower back',
-  shoulders: 'Shoulders',
-  biceps: 'Biceps',
-  triceps: 'Triceps',
-  forearms: 'Forearms',
-  quads: 'Quads',
-  adductors: 'Adductors',
-  hamstrings: 'Hamstrings',
-  glutes: 'Glutes',
-  abductors: 'Abductors',
-  calves: 'Calves',
-  core: 'Core',
-  neck: 'Neck',
-};
-const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const HZ_LABEL = ['30d', '90d', '180d', '1y'];
 
 function weekStart(ts: number): number {
@@ -233,6 +200,11 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
   const spanDays = chrono.length ? (now - chrono[0].startedAt) / DAY : 0;
 
   const insights: Insight[] = [];
+  const T = strings().trends;
+  const M = strings().muscleGroups;
+  const loc = getLocale();
+  const locName = (n: string): string => localizedExerciseName(n, loc) ?? n;
+  const dayName = (dow: number): string => fmtWeekday(new Date(2024, 0, 7 + dow).getTime());
 
   // per-lift top-weight timelines (actual weight)
   const seriesByLift = new Map<string, { ts: number; w: number }[]>();
@@ -303,11 +275,9 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
       level: skewed ? 'risk' : 'good',
       severity: skewed ? 88 : 60,
       attention: skewed,
-      kicker: skewed ? 'Needs attention' : `${aLabel} / ${bLabel}`,
-      headline: skewed ? `${lowWord} volume is low` : `${aLabel} / ${bLabel} balanced`,
-      detail: skewed
-        ? `Add 4–6 ${lowWord.toLowerCase()} sets — ${addWord}.`
-        : `${a} vs ${b} sets over 90 days — nicely even.`,
+      kicker: skewed ? T.needsAttention : `${aLabel} / ${bLabel}`,
+      headline: skewed ? T.balLow(lowWord) : T.balOk(aLabel, bLabel),
+      detail: skewed ? T.balAdd(addWord) : T.balEven(a, b),
       aLabel,
       bLabel,
       aVal: a,
@@ -334,22 +304,22 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
     }
     balanceCard(
       'balance-pp',
-      'Push',
-      'Pull',
+      T.push,
+      T.pull,
       push,
       pull,
-      pull <= push ? 'Pull' : 'Push',
-      pull <= push ? 'rows or pull-ups' : 'presses or dips',
+      pull <= push ? T.pull : T.push,
+      pull <= push ? T.addRows : T.addPress,
       0.6,
     );
     balanceCard(
       'balance-ul',
-      'Upper',
-      'Lower',
+      T.upper,
+      T.lower,
       upper,
       lower,
-      lower <= upper ? 'Lower body' : 'Upper body',
-      lower <= upper ? 'squats or hinges' : 'presses or rows',
+      lower <= upper ? T.lowerBody : T.upperBody,
+      lower <= upper ? T.addSquats : T.addRowsUpper,
       0.5,
     );
   }
@@ -376,10 +346,10 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         type: 'muscleList',
         level: risk ? 'risk' : 'warn',
         severity: risk ? 95 : 70,
-        kicker: 'Least-trained · 4 wk',
-        detail: `${least[0].label} lags — add a set or two.`,
+        kicker: T.least,
+        detail: T.leastDetail(T.areas[least[0].key]),
         muscles: least.map((a, i) => ({
-          label: a.label,
+          label: T.areas[a.key],
           frac: Math.max(0.08, a.sets / maxAll),
           worst: i === 0,
         })),
@@ -390,10 +360,10 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         type: 'muscleList',
         level: 'info',
         severity: 56,
-        kicker: 'Most-trained · 4 wk',
-        detail: `${most[0].label} gets the most work lately.`,
+        kicker: T.most,
+        detail: T.mostDetail(T.areas[most[0].key]),
         muscles: most.map((a) => ({
-          label: a.label,
+          label: T.areas[a.key],
           frac: Math.max(0.08, a.sets / maxAll),
           worst: false,
         })),
@@ -402,17 +372,22 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
       // Drill-down: a well-trained area with a notable neglected sub-muscle
       // (e.g. plenty of back volume but almost no lower-back).
       const areaByKey = new Map(areas.map((a) => [a.key, a]));
-      let gap: { label: string; member: MuscleGroup; hint: string; areaSets: number } | null = null;
+      let gap: {
+        key: string;
+        member: MuscleGroup;
+        hintKey: 'gapHintHinge' | 'gapHintLegCurl' | 'gapHintCalf';
+        areaSets: number;
+      } | null = null;
       for (const g of AREA_GAPS) {
         const a = areaByKey.get(g.area);
         if (!a || a.sets < 8) continue;
         const memberSets = a.members.get(g.member) ?? 0;
         if (memberSets < 0.12 * a.sets && (!gap || a.sets > gap.areaSets))
-          gap = { label: a.label, member: g.member, hint: g.hint, areaSets: a.sets };
+          gap = { key: a.key, member: g.member, hintKey: g.hintKey, areaSets: a.sets };
       }
       if (gap) {
-        const area = gap.label.toLowerCase();
-        const sub = MUSCLE_NAME[gap.member];
+        const areaLabel = T.areas[gap.key];
+        const sub = M[gap.member];
         insights.push({
           key: `gap:${gap.member}`,
           type: 'tip',
@@ -420,8 +395,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
           severity: 82,
           attention: true,
           icon: 'warning-circle',
-          headline: `Lots of ${area}, little ${sub}`,
-          detail: `Plenty of ${area} volume but barely any ${sub} — ${gap.hint}.`,
+          headline: T.gapHead(areaLabel, sub),
+          detail: T.gapDetail(sub, T[gap.hintKey]),
         });
       }
     }
@@ -447,13 +422,9 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
       type: 'horizon',
       level: down ? 'risk' : up ? 'good' : 'info',
       severity: down ? 84 : 78,
-      kicker: 'Weekly volume',
-      headline: up ? 'Volume trending up' : down ? 'Volume trending down' : 'Weekly volume',
-      detail: up
-        ? 'Higher now than your earlier months — steady overload.'
-        : down
-          ? 'Below your earlier months — nudge sets back up.'
-          : 'Average weekly tonnage in each period.',
+      kicker: T.weeklyVolume,
+      headline: up ? T.volUp : down ? T.volDown : T.weeklyVolume,
+      detail: up ? T.volUpDetail : down ? T.volDownDetail : T.volFlatDetail,
       bars,
     });
   }
@@ -469,11 +440,9 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
       type: 'horizon',
       level: down ? 'warn' : 'info',
       severity: down ? 76 : 72,
-      kicker: 'Sessions / week',
-      headline: down ? 'Training less often' : 'Training frequency',
-      detail: down
-        ? 'Fewer sessions lately than your earlier rhythm.'
-        : 'Average sessions per week in each period.',
+      kicker: T.sessions,
+      headline: down ? T.sessLess : T.sessFreq,
+      detail: down ? T.sessLessDetail : T.sessDetail,
       bars,
     });
   }
@@ -496,11 +465,9 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         type: 'horizon',
         level: up ? 'good' : 'info',
         severity: 80,
-        kicker: `Top set · ${lift}`,
-        headline: up ? `${lift} getting heavier` : `${lift} top set`,
-        detail: up
-          ? 'Your recent top sets beat earlier months — real progress.'
-          : 'Average top-set weight in each period.',
+        kicker: T.topSet(locName(lift)),
+        headline: up ? T.liftHeavier(locName(lift)) : T.liftTop(locName(lift)),
+        detail: up ? T.liftUpDetail : T.liftFlatDetail,
         bars,
       });
     }
@@ -519,12 +486,12 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'good',
         severity: 66,
         icon: 'chart-line-up',
-        kicker: 'Strength',
-        headline: `${lift} climbing`,
-        detail: `Top weight up ${Math.round(bestNow - bestPrev)} kg over ~3 months.`,
+        kicker: T.strength,
+        headline: T.liftClimbing(locName(lift)),
+        detail: T.liftClimbDetail(Math.round(bestNow - bestPrev)),
         spark: series.slice(-10).map((p) => p.w),
         hero: `${Math.round(bestNow)}`,
-        heroUnit: 'kg top',
+        heroUnit: T.kgTop,
         deltaPct: Math.round(((bestNow - bestPrev) / bestPrev) * 100),
       });
       break;
@@ -543,9 +510,9 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'info',
         severity: 34,
         icon: 'scales',
-        kicker: 'Bodyweight',
+        kicker: T.bodyweight,
         headline: `${recentW.toFixed(1)} kg`,
-        detail: `Your weigh-in trend over the last few months.`,
+        detail: T.bwDetail,
         spark: weights.slice(-10).map((x) => x.weight),
         hero: recentW.toFixed(1),
         heroUnit: 'kg',
@@ -572,8 +539,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         type: 'stat',
         level: 'good',
         severity: 54,
-        kicker: 'Heaviest lift',
-        detail: `Your all-time heaviest set — ${bestLift}.`,
+        kicker: T.heaviest,
+        detail: T.heaviestDetail(locName(bestLift)),
         hero: `${Math.round(best)}`,
         heroUnit: 'kg',
         deltaPct: null,
@@ -611,8 +578,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         severity: 92,
         attention: true,
         icon: 'chart-line-up',
-        headline: `${lift} stalling`,
-        detail: `Top weight flat ${flatWeeks} weeks — try a deload or new rep range.`,
+        headline: T.liftStalling(locName(lift)),
+        detail: T.stallDetail(flatWeeks),
       });
       break;
     }
@@ -651,8 +618,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'warn',
         severity: 64,
         icon: 'clock-countdown',
-        headline: `${MUSCLE_LABEL[best.m]} recovery`,
-        detail: `3× in ${best.span + 1} days — space ${MUSCLE_NAME[best.m]} sessions ~48 h.`,
+        headline: T.recovery(M[best.m]),
+        detail: T.recoveryDetail(best.span + 1),
       });
     }
   }
@@ -685,8 +652,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'warn',
         severity: 46,
         icon: 'clock-countdown',
-        headline: 'Long accessory rests',
-        detail: `~${Math.round(worst.avg / 60)} min on ${worst.name} — 60–90 s is enough.`,
+        headline: T.longRests,
+        detail: T.longRestsDetail(Math.round(worst.avg / 60), locName(worst.name)),
       });
     }
   }
@@ -712,16 +679,16 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         shortDay = { dow: d, avg: a };
     }
     if (shortDay) {
-      const day = WEEKDAY[shortDay.dow];
+      const day = dayName(shortDay.dow);
       insights.push({
         key: 'timing',
         type: 'tip',
         level: 'warn',
         severity: 44,
         icon: 'clock-countdown',
-        headline: `Time on ${day}s`,
-        detail: `~${Math.round(shortDay.avg)} min sessions — add a core finisher.`,
-        action: `Add to ${day} →`,
+        headline: T.timeOn(day),
+        detail: T.timeOnDetail(Math.round(shortDay.avg)),
+        action: T.addToDay(day),
         actionHref: '#/programs',
       });
     }
@@ -748,8 +715,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'warn',
         severity: 50,
         icon: 'clock-countdown',
-        headline: `No ${pick.name} in ${pick.weeks} weeks`,
-        detail: `You used to train it often — slot it back in.`,
+        headline: T.neglect(locName(pick.name), pick.weeks),
+        detail: T.neglectDetail,
       });
     }
   }
@@ -772,8 +739,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'warn',
         severity: 68,
         icon: 'warning-circle',
-        headline: 'No rest day',
-        detail: `${bestRun} training days in a row — a rest day helps you recover and grow.`,
+        headline: T.noRest,
+        detail: T.noRestDetail(bestRun),
       });
     }
   }
@@ -798,8 +765,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'warn',
         severity: 66,
         icon: 'chart-line-up',
-        headline: 'Volume ramping fast',
-        detail: `Weekly load up ${pct}% vs the prior month — ramp gradually to stay injury-free.`,
+        headline: T.volSpike,
+        detail: T.volSpikeDetail(pct),
       });
     }
   }
@@ -818,24 +785,23 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
     // (lats/traps/lower_back included) goes quiet -- not when a near-empty
     // generic `back` tag drops while lats/traps carry on.
     const recentByArea = new Map(areaSetsFrom(recent).map((a) => [a.key, a.sets]));
-    let stale: { label: string } | null = null;
+    let stale: { key: string } | null = null;
     let staleN = 0;
     for (const a of areaSetsFrom(hist)) {
       if (a.sets >= 8 && (recentByArea.get(a.key) ?? 0) === 0 && a.sets > staleN) {
         staleN = a.sets;
-        stale = { label: a.label };
+        stale = { key: a.key };
       }
     }
     if (stale) {
-      const area = stale.label.toLowerCase();
       insights.push({
         key: 'stale',
         type: 'tip',
         level: 'warn',
         severity: 62,
         icon: 'warning-circle',
-        headline: `${stale.label} on pause`,
-        detail: `No ${area} work in 2 weeks — you used to train it regularly.`,
+        headline: T.onPause(T.areas[stale.key]),
+        detail: T.onPauseDetail,
       });
     }
   }
@@ -853,8 +819,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'warn',
         severity: 48,
         icon: 'clock-countdown',
-        headline: 'Long sessions',
-        detail: `~${Math.round(a)} min on average — trimming rest or volume keeps quality up.`,
+        headline: T.longSessions,
+        detail: T.longSessionsDetail(Math.round(a)),
       });
     }
   }
@@ -873,8 +839,8 @@ export function computeTrends(finished: Workout[], body: BodyMetrics, now: numbe
         level: 'good',
         severity: 42,
         icon: 'calendar-check',
-        headline: `${run}-week streak`,
-        detail: `Trained every week for ${run} weeks straight — keep it alive.`,
+        headline: T.streak(run),
+        detail: T.streakDetail(run),
       });
     }
   }

@@ -67,7 +67,8 @@ import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
-import { describeDay, type DayReadout } from './data/daySuggest';
+import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
+import { t } from './i18n';
 import {
   awakeMsAt,
   SLEEP_IDLE_MS,
@@ -627,7 +628,8 @@ function readAssignment(): CachedAssignment | null {
 /**
  * The program day name to title a logged session with, or null.
  *
- * A session started from the program carries its own `dayName` — used directly.
+ * A session started from the program carries its own `dayName` — used while it
+ * still matches the muscles actually trained (else the muscle readout wins).
  * For the rest, we read the assigned program (cached from Today) and map the
  * session's weekday to that program day's name — so history reads in program
  * terms ("Legs 2") rather than a raw muscle set ("Legs"). Guards keep it honest:
@@ -670,7 +672,23 @@ export function programDayNameForWeekday(weekday: number): string | null {
 }
 
 export function programDayNameFor(w: Workout, workouts: Workout[]): string | null {
-  if (w.dayName) return w.dayName;
+  // A session that carries its own day name (from the program, the builder, or
+  // "save as a day") uses it — but only while it still matches what was actually
+  // trained. If the trained muscles diverge from the day's intended targets
+  // (e.g. the plan said Legs but you trained Back instead), drop the stale name
+  // so the caller falls back to the muscle readout ("Back", not "Legs 2").
+  if (w.dayName) {
+    const intended = w.targetMuscles ?? [];
+    if (intended.length > 0) {
+      const trainedFam = new Set([...primaryMusclesOf(w)].map(muscleFamily));
+      if (
+        trainedFam.size > 0 &&
+        !intended.some((m) => trainedFam.has(muscleFamily(m as MuscleGroup)))
+      )
+        return null;
+    }
+    return w.dayName;
+  }
   const a = readAssignment();
   if (!a) return null;
   const day = programDay(w.startedAt);
@@ -1053,10 +1071,26 @@ export function pickSessionGym(): Gym | null {
  * blocks with its planned sets, reps and muscles. Returns the live workout.
  */
 export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null): Workout | null {
-  const w = startWorkout(gymId, { dayName: day.dayName, targetMuscles: day.targetMuscles });
+  const tt = t();
+  // Localised, muscle-based day name (matches how logged sessions read in
+  // history) instead of the engine's English label.
+  const readout = describeDay(day.coverage.map((c) => [c.muscle, c.sets] as [MuscleGroup, number]));
+  const dayName = readout ? dayReadoutLabel(readout, tt) : day.dayName;
+  const w = startWorkout(gymId, { dayName, targetMuscles: day.targetMuscles });
   if (!w) return null;
+  // Real lifts keep their canonical (English) catalog name — localised on display
+  // via ExerciseName; the generic warm-up/cardio/cool-down blocks are stored in
+  // the active language.
+  const storedName = (ex: GeneratedDay['warmup'][number]): string =>
+    ex.kind === 'warmup'
+      ? tt.sbWarmupName
+      : ex.kind === 'cardio'
+        ? tt.sbCardioName
+        : ex.kind === 'cooldown'
+          ? tt.sbCooldownName
+          : ex.name;
   for (const ex of [...day.warmup, ...day.main, ...day.cardio, ...day.cooldown]) {
-    addExercise(w.id, ex.name, ex.kind, {
+    addExercise(w.id, storedName(ex), ex.kind, {
       plannedSets: ex.sets > 0 ? ex.sets : null,
       plannedReps: ex.repHigh > 0 ? ex.repHigh : null,
       plannedDurationMin: ex.durationMin ?? null,
@@ -2359,6 +2393,7 @@ export function logSleepNight(input: {
   wake: number;
   quality?: SleepQuality | null;
   source: SleepNight['source'];
+  kind?: 'sleep' | 'nap';
 }): SleepNight {
   const night: SleepNight = { id: uuid(), updatedAt: Date.now(), ...input };
   if (!night.kind && night.wake != null)

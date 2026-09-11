@@ -27,7 +27,7 @@ import { HouseGraphic } from '../components/HouseGraphic';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 
 // Optional place-provider keys, read from Vite env at build time. Absent keys
 // leave that provider "skipped" (chip greyed) — the app works without them.
@@ -49,6 +49,7 @@ type AddState =
 
 export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const [pendingName, setPendingName] = useState('');
   const [add, setAdd] = useState<AddState>({ phase: 'idle' });
   const [justAdded, setJustAdded] = useState<string | null>(null);
@@ -418,7 +419,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                                         });
                                       }}
                                     >
-                                      {exercise.name}
+                                      {exName(exercise.name)}
                                     </span>
                                   </span>
                                 ))

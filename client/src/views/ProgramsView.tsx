@@ -21,7 +21,7 @@ import {
   useStore,
 } from '../store';
 import type { MuscleGroup } from '../data/exercises';
-import { ConfirmDialog, Icon, RowListSkeleton } from '../ui';
+import { ConfirmDialog, Icon, RowListSkeleton, useExerciseName } from '../ui';
 import { useT } from '../i18n';
 import type { Shell } from '../App';
 import { weekDayStatuses, programOutlook, type DayCell } from '../data/programDays';
@@ -136,6 +136,7 @@ export function ProgramsView({
   onProgramsTab?: (peer: ProgramsPeer) => void;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const store = useStore();
   const role = getRole();
   const initialSeed = useMemo(() => peekProgramSeed(), []);
@@ -1080,7 +1081,7 @@ export function ProgramsView({
                                 <div key={item.id} className="program-prescription-row pdr">
                                   <span className={`pdr-bar${gid ? ' on' : ''}`} />
                                   <span className="n">
-                                    {item.name}
+                                    {exName(item.name)}
                                     {letter && (
                                       <span className="pdr-index">
                                         {letter}

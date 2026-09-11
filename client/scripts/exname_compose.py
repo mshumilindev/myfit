@@ -69,11 +69,15 @@ def parse(name):
     for i,t in enumerate(toks):
         if i==bidx: continue
         if t in IGNORE: continue
+        # A recognized modifier whose slot is already filled is a redundant
+        # qualifier (e.g. "Incline Bench Press" — Bench after Incline): drop it
+        # rather than bail to English. Only a genuinely unknown token (or a
+        # second base word = a risky combo) forces the English fallback.
         if t in MODS: c['mods'].append(MODS[t])
-        elif t in EQUIP and c['equip'] is None: c['equip']=EQUIP[t]
-        elif t in POS and c['pos'] is None: c['pos']=POS[t]
-        elif t in GRIP and c['grip'] is None: c['grip']=GRIP[t]
-        elif t in LAT and c['lat'] is None: c['lat']=LAT[t]
+        elif t in EQUIP: (c.__setitem__('equip', EQUIP[t]) if c['equip'] is None else None)
+        elif t in POS: (c.__setitem__('pos', POS[t]) if c['pos'] is None else None)
+        elif t in GRIP: (c.__setitem__('grip', GRIP[t]) if c['grip'] is None else None)
+        elif t in LAT: (c.__setitem__('lat', LAT[t]) if c['lat'] is None else None)
         elif t in REGION: c['region'].append(REGION[t])
         elif t in BASE: c['unknown'].append(t)   # a second base word = combo -> risky
         elif t in FILLER: pass
@@ -690,6 +694,51 @@ OVER_ET.update({
  'Glute Bridge':'Tuharasild','Hip Thrust':'Puusatõuge','Barbell Hip Thrust':'Puusatõuge kangiga',
  'Incline Bench Press':'Kaldpingil surumine','Decline Bench Press':'Langpingil surumine',
  'Close-Grip Bench Press':'Kitsa haardega surumine','Concentration Curl':'Kontsentreeritud biitsepsi kõverdus',
+})
+
+
+# --- curated common accessories (bodyweight, cable & named curls) ----------
+OVER_UK.update({
+ 'Barbell Ab Rollout':'Розкатування зі штангою','Barbell Ab Rollout - On Knees':'Розкатування зі штангою з колін',
+ 'Ab Roller':'Розкатування на ролику для преса','Drag Curl':'Драг-згинання на біцепс',
+ 'High Cable Curls':'Згинання на біцепс на верхньому блоці','Spider Curl':'Спайдер-згинання на біцепс',
+ 'Zottman Curl':'Згинання Зоттмана','Incline Push-Up':'Віджимання від піднятої опори',
+ 'Decline Push-Up':'Віджимання з піднятими ногами','Push-Up Wide':'Віджимання широким хватом',
+ 'Handstand Push-Ups':'Віджимання в стійці на руках','Muscle Up':'Вихід силою',
+ 'Ring Dips':'Віджимання на кільцях','Inverted Row':'Австралійські підтягування',
+ 'Scapular Pull-Up':'Лопаткові підтягування','Plyo Push-up':'Пліометричні віджимання',
+ 'Clock Push-Up':'Віджимання «годинник»',
+})
+OVER_PL.update({
+ 'Barbell Ab Rollout':'Rollout ze sztangą','Barbell Ab Rollout - On Knees':'Rollout ze sztangą z kolan',
+ 'Ab Roller':'Rollout na kółku do brzucha','Drag Curl':'Uginanie ramion (drag)',
+ 'High Cable Curls':'Uginanie ramion na górnym wyciągu','Spider Curl':'Uginanie ramion (spider)',
+ 'Zottman Curl':'Uginanie Zottmana','Incline Push-Up':'Pompki z rękami na podwyższeniu',
+ 'Decline Push-Up':'Pompki z nogami na podwyższeniu','Push-Up Wide':'Pompki szerokim rozstawem rąk',
+ 'Handstand Push-Ups':'Pompki w staniu na rękach','Muscle Up':'Muscle up',
+ 'Ring Dips':'Pompki na kółkach gimnastycznych','Inverted Row':'Wiosłowanie australijskie',
+ 'Scapular Pull-Up':'Podciąganie łopatkowe','Plyo Push-up':'Pompki pliometryczne',
+ 'Clock Push-Up':'Pompki zegarowe',
+})
+OVER_LT.update({
+ 'Barbell Ab Rollout':'Rollout su štanga','Barbell Ab Rollout - On Knees':'Rollout su štanga nuo kelių',
+ 'Ab Roller':'Pilvo ratukas','Drag Curl':'Bicepso lenkimas (drag)',
+ 'High Cable Curls':'Bicepso lenkimas prie viršutinio bloko','Spider Curl':'Bicepso lenkimas (spider)',
+ 'Zottman Curl':'Zottmano lenkimas','Incline Push-Up':'Atsispaudimai nuo paaukštinimo',
+ 'Decline Push-Up':'Atsispaudimai su pakeltomis kojomis','Push-Up Wide':'Atsispaudimai plačiu rankų mostu',
+ 'Handstand Push-Ups':'Atsispaudimai stovint ant rankų','Muscle Up':'Muscle up',
+ 'Ring Dips':'Atsispaudimai ant žiedų','Inverted Row':'Australiški prisitraukimai',
+ 'Scapular Pull-Up':'Menčių prisitraukimai','Plyo Push-up':'Pliometriniai atsispaudimai',
+})
+OVER_ET.update({
+ 'Barbell Ab Rollout':'Rollout kangiga','Barbell Ab Rollout - On Knees':'Rollout kangiga põlvedelt',
+ 'Ab Roller':'Kõharull','Drag Curl':'Biitsepsi kõverdus (drag)',
+ 'High Cable Curls':'Biitsepsi kõverdus ülemiselt plokilt','Spider Curl':'Biitsepsi kõverdus (spider)',
+ 'Zottman Curl':'Zottmani kõverdus','Incline Push-Up':'Kätekõverdused kõrgemalt toelt',
+ 'Decline Push-Up':'Kätekõverdused tõstetud jalgadega','Push-Up Wide':'Laia haardega kätekõverdused',
+ 'Handstand Push-Ups':'Kätekõverdused käteseisus','Muscle Up':'Muscle up',
+ 'Ring Dips':'Rõngastel kätekõverdused','Inverted Row':'Horisontaalsed lõuatõmbed',
+ 'Scapular Pull-Up':'Abaluu lõuatõmbed','Plyo Push-up':'Plüomeetrilised kätekõverdused',
 })
 
 # ---------------- run: build all four + JSON ----------------

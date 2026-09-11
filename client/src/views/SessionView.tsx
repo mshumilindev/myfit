@@ -127,6 +127,7 @@ import {
   Dialog,
   EmptyState,
   ExerciseName,
+  useExerciseName,
   Icon,
   Sheet,
   Switch,
@@ -335,6 +336,7 @@ export function SessionView(props: {
   onClose: () => void;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const store = useStore();
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
@@ -1791,7 +1793,7 @@ export function SessionView(props: {
                   key={ex.id}
                   type="button"
                   className={`srail-dot${exerciseDone(ex) ? ' done' : ''}`}
-                  aria-label={ex.name}
+                  aria-label={exName(ex.name)}
                   aria-current={inView ? 'true' : undefined}
                   onClick={() => {
                     setExpandedId(ex.id);
@@ -2194,7 +2196,7 @@ export function SessionView(props: {
                             onClick={() => setExpandedId(qsingle.id)}
                             onKeyDown={(e) => rowKey(e, () => setExpandedId(qsingle.id))}
                           >
-                            <span className="n">{qsingle.name}</span>
+                            <span className="n">{exName(qsingle.name)}</span>
                             {qplanned > 0 && <span className="count">0 / {qplanned}</span>}
                             {cardCfg(qsingle.id)}
                           </div>
@@ -2257,7 +2259,7 @@ export function SessionView(props: {
                                       {g.letter}
                                       {i + 1}
                                     </span>
-                                    <span className="n">{e.name}</span>
+                                    <span className="n">{exName(e.name)}</span>
                                     <span className="v">{pastSummary(e)}</span>
                                   </span>
                                 ))}
@@ -2310,7 +2312,7 @@ export function SessionView(props: {
                                           {g.letter}
                                           {i + 1}
                                         </td>
-                                        <td>{e.name}</td>
+                                        <td>{exName(e.name)}</td>
                                         <td>
                                           <span style={{ display: 'inline-flex', gap: 5 }}>
                                             {m.primary && (
@@ -2412,7 +2414,7 @@ export function SessionView(props: {
                                 {t.currentKicker}
                               </span>
                             )}
-                            <span className="n">{single.name}</span>
+                            <span className="n">{exName(single.name)}</span>
                             {single.sets.length > 0 && (
                               <span className="v">{pastSummary(single)}</span>
                             )}
@@ -2957,7 +2959,7 @@ export function SessionView(props: {
                   onClick={() => setSheet({ kind: 'menu', exId: e.id })}
                 >
                   <Icon name="dots-three-vertical" />
-                  {e.name}
+                  {exName(e.name)}
                 </button>
               ))}
             </Sheet>
@@ -3913,6 +3915,7 @@ function NewExerciseSheet(props: {
   onCreate: (meta: NewExerciseMeta) => void;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const [primary, setPrimary] = useState<MuscleGroup | null>(null);
   const [secondary, setSecondary] = useState<MuscleGroup[]>([]);
   const [equipment, setEquipment] = useState<string[]>([]);
@@ -3930,7 +3933,7 @@ function NewExerciseSheet(props: {
         <button className="sheet-back" onClick={props.onBack} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
-        <span className="t">{props.name}</span>
+        <span className="t">{exName(props.name)}</span>
       </div>
       <p className="sheet-note">{props.canAuthor ? t.newExerciseAuthorNote : t.newExerciseNote}</p>
 
@@ -4006,6 +4009,7 @@ function SupersetSheet(props: {
   onGroup: (ids: string[]) => void;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const [sel, setSel] = useState<string[]>([]);
   const letter = nextSupersetLetter(props.workout);
   const candidates = [...props.workout.exercises]
@@ -4043,7 +4047,7 @@ function SupersetSheet(props: {
               ) : (
                 <span className="idx" />
               )}
-              <span className="n">{e.name}</span>
+              <span className="n">{exName(e.name)}</span>
               <span className={`cbx${on ? ' on' : ''}`}>{on && <Icon name="check" />}</span>
             </button>
           );
@@ -4898,6 +4902,7 @@ function CircuitBlock(props: {
   isLast?: boolean;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const [expanded, setExpanded] = useState(false);
   const g = props.group;
   const rounds = groupRounds(g);
@@ -4924,7 +4929,7 @@ function CircuitBlock(props: {
               {i + 1}
             </span>
             <div className="cbld-main">
-              <div className="cbld-name">{e.name}</div>
+              <div className="cbld-name">{exName(e.name)}</div>
               <div className="cbld-mus">{circuitMuscleChips(e, props.onMuscle)}</div>
             </div>
             <Icon name="list" className="cbld-drag" />
@@ -4999,7 +5004,7 @@ function CircuitBlock(props: {
             {!props.past && !props.isLast && (
               <button
                 className="cb-collapse"
-                aria-label="collapse"
+                aria-label={t.navCollapse}
                 onClick={() => setExpanded(false)}
               >
                 <Icon name="caret-up" />
@@ -5023,7 +5028,7 @@ function CircuitBlock(props: {
                     {letter}
                     {i + 1}
                   </span>
-                  <span className="cb-sname">{e.name}</span>
+                  <span className="cb-sname">{exName(e.name)}</span>
                   <span className="cb-scount num">
                     {t.circuitNRoundsShort(Math.min(e.sets.length, rounds), rounds)}
                   </span>
@@ -5089,7 +5094,7 @@ function CircuitBlock(props: {
                 {letter}
                 {i + 1}
               </span>
-              <span className="cb-rname">{e.name}</span>
+              <span className="cb-rname">{exName(e.name)}</span>
               <span className="cb-rmus">{circuitMuscleChips(e, props.onMuscle)}</span>
             </div>
           ))}
@@ -5111,6 +5116,7 @@ function CircuitRunSheet(props: {
   onMuscle: (m: MuscleGroup) => void;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const g = props.group;
   const rounds = groupRounds(g);
   const letter = g.letter;
@@ -5253,7 +5259,7 @@ function CircuitRunSheet(props: {
         <button
           className="cr-arrow"
           disabled={exIdx === 0}
-          aria-label="prev"
+          aria-label={t.navPrev}
           onClick={() => setExIdx(Math.max(0, exIdx - 1))}
         >
           <Icon name="caret-left" />
@@ -5272,7 +5278,7 @@ function CircuitRunSheet(props: {
         <button
           className="cr-arrow"
           disabled={exIdx >= n - 1}
-          aria-label="next"
+          aria-label={t.navNext}
           onClick={() => setExIdx(Math.min(n - 1, exIdx + 1))}
         >
           <Icon name="caret-right" />
@@ -5287,7 +5293,7 @@ function CircuitRunSheet(props: {
                 {letter}
                 {exIdx + 1}
               </span>
-              <span className="cr-card-name">{cur.name}</span>
+              <span className="cr-card-name">{exName(cur.name)}</span>
               <Icon name="check-circle" weight="fill" className="cr-ok" />
             </div>
             <div className="cr-mus">{circuitMuscleChips(cur, props.onMuscle, { icon: true })}</div>

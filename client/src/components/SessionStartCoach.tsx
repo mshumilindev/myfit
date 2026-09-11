@@ -10,7 +10,7 @@
  *     (add load / hold / deload / first time) — the same coaching the exercise
  *     cards show, previewed before you add them.
  */
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 import { useT } from '../i18n';
 import { MuscleIcon } from './Muscle';
 import {
@@ -86,6 +86,7 @@ function ExerciseTargetRow({
   now: number;
   t: T;
 }) {
+  const exName = useExerciseName();
   const { primary } = resolveMuscles(ex);
   const target = nextTarget(topHistory(finished, ex.name, now), {
     plannedReps: ex.plannedReps,
@@ -106,7 +107,7 @@ function ExerciseTargetRow({
     );
   return (
     <div className="ssc-ex">
-      <span className="ssc-ex-name">{ex.name}</span>
+      <span className="ssc-ex-name">{exName(ex.name)}</span>
       {target.weight !== null && (
         <span className="ssc-ex-target tnum">
           {fmtW(target.weight)} × {target.reps}

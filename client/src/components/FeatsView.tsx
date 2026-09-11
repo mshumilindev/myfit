@@ -1,6 +1,14 @@
 /** Feats tab (in Progress): achievements across many axes, derived from history. */
 import { useEffect, useRef, useState } from 'react';
-import { CATEGORIES, computeFeats, fmtAchValue, type Ach, type FeatGroup } from '../feats';
+import {
+  CATEGORIES,
+  computeFeats,
+  featDesc,
+  featLabel,
+  fmtAchValue,
+  type Ach,
+  type FeatGroup,
+} from '../feats';
 import type { BodyMetrics, Workout } from '../types';
 import { fmtDayMonth, useT } from '../i18n';
 import { EmptyState } from '../ui';
@@ -172,7 +180,7 @@ export function FeatsView({
           return (
             <section key={cat.group} className="feats-section">
               <div className="feats-section-head">
-                <span className="fs-label">{cat.label}</span>
+                <span className="fs-label">{featLabel(cat.group)}</span>
                 <span className="fs-count num">
                   {unlocked}/{list.length}
                 </span>
@@ -210,7 +218,8 @@ export function FeatsView({
             <div className="feat-listpop" onClick={(e) => e.stopPropagation()}>
               <div className="flp-head">
                 <span className="flp-title">
-                  {popCat.label} · {popup.kind === 'prev' ? t.featsEarned : t.featsUpcoming}
+                  {featLabel(popup.group)} ·{' '}
+                  {popup.kind === 'prev' ? t.featsEarned : t.featsUpcoming}
                 </span>
                 <span className="flp-count num">{popList.length}</span>
               </div>
@@ -239,7 +248,7 @@ export function FeatsView({
             <div className="feat-detail" onClick={(e) => e.stopPropagation()}>
               <div className="fd-emoji">{open.emoji}</div>
               <div className="fd-name">{open.title}</div>
-              {openCat.desc && <p className="fd-explain">{openCat.desc}</p>}
+              {featDesc(open.group) && <p className="fd-explain">{featDesc(open.group)}</p>}
               {open.unlocked ? (
                 open.unlockAt && (
                   <span className="feat-badge ok">
@@ -253,7 +262,7 @@ export function FeatsView({
               )}
               <div className="fd-rows">
                 <div className="fd-row">
-                  <span>{openCat.label}</span>
+                  <span>{featLabel(open.group)}</span>
                   <b className="num">{fmtAchValue(open.unit, open.value)}</b>
                 </div>
                 <div className="fd-row ghost">

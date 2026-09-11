@@ -16,7 +16,7 @@ import type { Strings } from '../i18n/en';
 import { muscleInfoByName } from '../data/exercises';
 import { useStore } from '../store';
 import { classifyTrainee } from '../trainerLive';
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 import { Avatar } from '../components/Avatar';
 import { HistoryTimeline } from '../components/HistoryTimeline';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
@@ -113,6 +113,7 @@ export function ClientPage({
   onClose: () => void;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const [todayDow] = useState(() => new Date().getDay());
   const [liveNow, setLiveNow] = useState(() => Date.now());
   useEffect(() => {
@@ -315,7 +316,7 @@ export function ClientPage({
             {data.topExercises.slice(0, 6).map((e) => (
               <div key={e.name} className="cp-lift">
                 <div className="cp-lift-name">
-                  <span className="n">{e.name}</span>
+                  <span className="n">{exName(e.name)}</span>
                   <span className="s">{fmtDayMonth(e.lastAt, locale)}</span>
                 </div>
                 <span className="cp-lift-val">

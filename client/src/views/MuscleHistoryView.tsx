@@ -4,7 +4,7 @@ import { exerciseVolumeKg, resolveMuscles, topSet, useStore } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
 import { MuscleIcon } from '../components/Muscle';
 import { type MuscleGroup } from '../data/exercises';
-import { Icon } from '../ui';
+import { Icon, useExerciseName } from '../ui';
 import type { Shell } from '../App';
 
 const WEEK_MS = 7 * 24 * 3600 * 1000;
@@ -26,6 +26,7 @@ export function MuscleHistoryView({
   onClose: () => void;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const store = useStore();
   const [nowTs] = useState(() => Date.now());
   const finished = store.workouts
@@ -152,7 +153,7 @@ export function MuscleHistoryView({
                 className="record-row"
                 onClick={() => shell.openOverlay({ screen: 'exercise-history', name })}
               >
-                <span className="n">{name}</span>
+                <span className="n">{exName(name)}</span>
                 <span className="v">{fmtKg(row.volume)}</span>
                 <span className="when num">{row.sets}</span>
               </button>

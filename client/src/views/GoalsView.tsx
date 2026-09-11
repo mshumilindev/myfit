@@ -18,7 +18,7 @@ import { LANDMARKS } from '../volume';
 import { exercisesForSubRegions } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
 import type { Shell } from '../App';
-import { Icon, ConfirmDialog } from '../ui';
+import { Icon, ConfirmDialog, useExerciseName } from '../ui';
 
 export function GoalsView({
   onProgramsTab,
@@ -27,6 +27,7 @@ export function GoalsView({
   onProgramsTab?: (peer: ProgramsPeer) => void;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   const store = useStore();
   const [editingFocus, setEditingFocus] = useState(false);
   const [editingPhysique, setEditingPhysique] = useState(false);
@@ -193,7 +194,7 @@ export function GoalsView({
               {suggestedMoves.map((mv) => (
                 <div className="goals-move" key={mv.name}>
                   <Icon name="chart-line-up" />
-                  <span className="goals-move-name">{mv.name}</span>
+                  <span className="goals-move-name">{exName(mv.name)}</span>
                   <span className="goals-chip grow">{label(mv.region)}</span>
                 </div>
               ))}

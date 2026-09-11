@@ -1063,5 +1063,5 @@ export function ExerciseName({
 /** Primary-only localized name, for plain-string contexts (aria-label, title). */
 export function useExerciseName(): (name: string) => string {
   const { locale } = useT();
-  return (name: string) => localizedExerciseName(name, locale) ?? name;
+  return useCallback((name: string) => localizedExerciseName(name, locale) ?? name, [locale]);
 }

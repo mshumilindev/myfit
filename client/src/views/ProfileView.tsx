@@ -15,7 +15,15 @@ import {
 } from '../api';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
-import { ConfirmDialog, Icon, LanguageSelector, Sheet, Switch, ProfileSkeleton } from '../ui';
+import {
+  ConfirmDialog,
+  Icon,
+  LanguageSelector,
+  Sheet,
+  Switch,
+  ProfileSkeleton,
+  useExerciseName,
+} from '../ui';
 import { Avatar, invalidateAvatarCache, seedAvatarCache } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { BodyMetricsSection } from '../components/BodyMetrics';
@@ -123,6 +131,7 @@ export function ProfileView({
   embedded?: boolean;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const weightUnit = useStore().weightUnit;
   const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => {
     const cached = cachePeek<ProfileData>(`profile.${userId}`);
@@ -837,7 +846,7 @@ export function ProfileView({
                           }
                         >
                           <span>
-                            <span className="n">{ex.name}</span>
+                            <span className="n">{exName(ex.name)}</span>
                             <span className="s">
                               {ex.sessions} · {ex.sets} {t.sets}
                             </span>

@@ -42,7 +42,7 @@ import {
 import { getRole } from '../api';
 import { tokenMatch } from '../search';
 import { useT } from '../i18n';
-import { ConfirmDialog, ExerciseName, Icon, Sheet, useIsDesktop } from '../ui';
+import { ConfirmDialog, ExerciseName, Icon, Sheet, useIsDesktop, useExerciseName } from '../ui';
 import { equipmentIconName, MuscleIcon, MUSCLE_IDS } from '../components/Muscle';
 import type { Shell } from '../App';
 
@@ -123,6 +123,7 @@ export function ExerciseGallery({
   onLibTab?: (t: 'library' | 'mine') => void;
 }) {
   const { t } = useT();
+  const exName = useExerciseName();
   useStore();
   const isDesktop = useIsDesktop();
   const [local, setLocal] = useState<GalleryState>(state ?? DEFAULT_STATE);
@@ -549,7 +550,7 @@ export function ExerciseGallery({
       <div key={r.key} className="exl-mrow exg-mine-row">
         <button className="exg-mine-open" onClick={() => open(r)}>
           <div className="exl-mbody">
-            <div className="exl-mname">{r.name}</div>
+            <div className="exl-mname">{exName(r.name)}</div>
             <div className="exl-mmus">{musclesText(r) || t.libNoClassInline}</div>
             {r.equipment && (
               <div className="exl-mbadges">

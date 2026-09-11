@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useT, fmtKg, type LocaleId } from '../i18n';
 import { useStore, latestWeight } from '../store';
-import { Icon, Sheet, useIsDesktop } from '../ui';
+import { Icon, Sheet, useIsDesktop, useExerciseName } from '../ui';
 import { FocusBodyMap, focusBodyMapSvg } from '../components/Muscle';
 import { focusToGroup } from '../data/subregions';
 import {
@@ -303,6 +303,7 @@ export function RecapView({
   desktop?: boolean;
 }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const data = useRecap(period);
   const [shareOpen, setShareOpen] = useState(false);
   if (!data) return null;
@@ -442,7 +443,7 @@ export function RecapView({
                     style={{ color: 'var(--color-accent)', fontSize: 18 }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14 }}>{rec.name}</div>
+                    <div style={{ fontSize: 14 }}>{exName(rec.name)}</div>
                     <div style={{ fontSize: 11, color: 'var(--color-accent-300)' }}>
                       {t.rcEst1rm(fmtKg(rec.e1rm))}
                     </div>
@@ -750,6 +751,7 @@ const STORY_MS = 5200;
 
 export function RecapStory({ period, onClose }: { period: string; onClose: () => void }) {
   const { t, locale } = useT();
+  const exName = useExerciseName();
   const data = useRecap(period);
   const [i, setI] = useState(0);
   const [prog, setProg] = useState(0);
@@ -881,7 +883,9 @@ export function RecapStory({ period, onClose }: { period: string; onClose: () =>
                     {String(n + 1).padStart(2, '0')}
                   </span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 17, color: 'var(--color-accent-100)' }}>{rec.name}</div>
+                    <div style={{ fontSize: 17, color: 'var(--color-accent-100)' }}>
+                      {exName(rec.name)}
+                    </div>
                     <div style={{ fontSize: 12, color: 'var(--color-accent-300)' }}>
                       {t.rcEst1rm(fmtKg(rec.e1rm))}
                     </div>
@@ -1043,7 +1047,7 @@ export function RecapStory({ period, onClose }: { period: string; onClose: () =>
     });
 
     return list;
-  }, [data, t, locale, openShare]);
+  }, [data, t, locale, openShare, exName]);
 
   const n = panels.length;
   const advance = useCallback(() => {

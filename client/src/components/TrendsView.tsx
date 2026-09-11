@@ -6,18 +6,12 @@ import type { BodyMetrics, Workout } from '../types';
 import { useT } from '../i18n';
 import { EmptyState, Icon } from '../ui';
 
-const LEVEL_LABEL: Record<Level, string> = {
-  risk: 'Risk',
-  warn: 'Warning',
-  info: 'Info',
-  good: 'On track',
-};
-
 function Badge({ level }: { level: Level }) {
+  const { t } = useT();
   return (
     <span className={`ai-badge lvl-${level}`}>
       <span className="ai-badge-dot" />
-      {LEVEL_LABEL[level]}
+      {t.trends.levels[level]}
     </span>
   );
 }

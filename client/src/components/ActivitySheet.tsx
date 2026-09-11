@@ -143,20 +143,12 @@ export function SleepPanel(props: {
             <button
               className="act-sleep-link"
               onClick={() => {
-                props.shell.openOverlay({ screen: 'sleep', mode: 'backfill' });
+                props.shell.openOverlay({ screen: 'sleep' });
                 props.onClose();
               }}
             >
-              {t.sleepPastNight}
-            </button>
-            <button
-              className="act-sleep-link"
-              onClick={() => {
-                props.shell.openOverlay({ screen: 'sleep', mode: 'schedule' });
-                props.onClose();
-              }}
-            >
-              {t.sleepMySchedule}
+              <Icon name="moon-stars" />
+              {t.sleepOpenHub}
             </button>
           </div>
         </div>

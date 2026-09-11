@@ -297,7 +297,8 @@ export interface PlannedExercise {
   deltaKg: number;
   progState: string;
   warmup: PlannedSet[];
-  why: string;
+  /** Stable reason code — localised for display (see WhyKey). */
+  whyKey: WhyKey;
   /** Dynamic ordering weight — bigger/base lifts first (see exercisePriority). */
   priority: number;
   durationMin?: number | null;
@@ -344,20 +345,23 @@ function playForMuscles(finished: Workout[], now: number, muscles: MuscleGroup[]
   return best?.play ?? null;
 }
 
+/** Stable reason codes for why a lift is in the day — localised at display. */
+export type WhyKey =
+  'grow' | 'staple' | 'stale' | 'progress' | 'first' | 'fit' | 'warmup' | 'cardio' | 'cooldown';
+
 function whyFor(
   primary: MuscleGroup | null,
   emph: Map<MuscleGroup, Emphasis>,
   state: ReadyState | undefined,
   progState: string,
   fromPlay: boolean,
-): string {
-  if (primary && emph.get(primary) === 'grow')
-    return 'A grow-focus muscle — earns extra work today.';
-  if (fromPlay) return 'One of your staples on this day.';
-  if (state === 'stale') return "Hasn't been trained in a while — bringing it back.";
-  if (progState === 'progress') return 'Recovered and due to add load.';
-  if (progState === 'first') return 'New lift — start light and find your working weight.';
-  return 'Fits the day and your recovery.';
+): WhyKey {
+  if (primary && emph.get(primary) === 'grow') return 'grow';
+  if (fromPlay) return 'staple';
+  if (state === 'stale') return 'stale';
+  if (progState === 'progress') return 'progress';
+  if (progState === 'first') return 'first';
+  return 'fit';
 }
 
 // ---------------------------------------------------------------------------
@@ -481,7 +485,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
       deltaKg: target.deltaKg,
       progState: target.state,
       warmup: warmupSets,
-      why: whyFor(primary, emph, ready.get(primary as MuscleGroup)?.state, target.state, false),
+      whyKey: whyFor(primary, emph, ready.get(primary as MuscleGroup)?.state, target.state, false),
       priority: exercisePriority({
         selMuscle,
         anchor: isAnchor,
@@ -523,7 +527,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
         true,
         anchorSets,
       );
-      if (playName) ex.why = 'One of your staples on this day.';
+      if (playName) ex.whyKey = 'staple';
       main.push(ex);
       budget -= anchorSets;
     }
@@ -572,7 +576,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           deltaKg: 0,
           progState: 'first',
           warmup: [],
-          why: 'Raise the heart rate and prime the day’s patterns.',
+          whyKey: 'warmup',
           priority: 0,
           durationMin: 5,
         },
@@ -595,7 +599,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           deltaKg: 0,
           progState: 'first',
           warmup: [],
-          why: 'Zone-2 finisher to round out the day.',
+          whyKey: 'cardio',
           priority: 0,
           durationMin: 12,
         },
@@ -618,7 +622,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           deltaKg: 0,
           progState: 'first',
           warmup: [],
-          why: 'Ease down and stretch the muscles you trained.',
+          whyKey: 'cooldown',
           priority: 0,
           durationMin: 4,
         },

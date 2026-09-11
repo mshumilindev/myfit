@@ -14,6 +14,7 @@ import {
   workoutVolumeKg,
 } from './store';
 import type { SetEntry, Workout } from './types';
+import { t as strings } from './i18n';
 
 export type FeatGroup =
   | 'volume'
@@ -297,6 +298,30 @@ export const CATEGORIES: FeatCategory[] = [
   },
 ];
 
+const COMPACT_GROUPS = new Set<FeatGroup>(['sets', 'reps', 'bigDay', 'distance']);
+const catByGroupConst = new Map(CATEGORIES.map((c) => [c.group, c]));
+
+/** Localised category label (falls back to English). */
+export function featLabel(group: FeatGroup): string {
+  return strings().feats.labels[group] ?? catByGroupConst.get(group)?.label ?? group;
+}
+/** Localised category description (falls back to English). */
+export function featDesc(group: FeatGroup): string {
+  return strings().feats.descs[group] ?? catByGroupConst.get(group)?.desc ?? '';
+}
+/** Localised tier title for a group/threshold (falls back to the English title). */
+function tierTitleFor(group: FeatGroup, value: number, fallback: string): string {
+  const f = strings().feats;
+  if (group === 'volume') {
+    const idx = VOLUME_TIERS.findIndex((tr) => tr.value === value);
+    return (idx >= 0 && f.volumeTiers[idx]) || fallback;
+  }
+  const fn = f.tierTitle[group];
+  if (!fn) return fallback;
+  const numStr = COMPACT_GROUPS.has(group) ? fmtCompact(value) : String(value);
+  return fn(numStr);
+}
+
 export interface Ach {
   key: string;
   group: FeatGroup;
@@ -481,7 +506,7 @@ export function computeFeats(finished: Workout[]): FeatsResult {
         key: `${cat.group}:${tier.value}`,
         group: cat.group,
         emoji: tier.emoji,
-        title: tier.title,
+        title: tierTitleFor(cat.group, tier.value, tier.title),
         threshold: tier.value,
         unit: cat.unit,
         value: v,

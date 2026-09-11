@@ -358,96 +358,120 @@ function SleepHub({
 
 function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
   const { t, locale } = useT();
-  const [dayOffset, setDayOffset] = useState(1); // 1 = last night
+  // A backfilled entry is either a full night's sleep or a daytime nap, and you
+  // pick the day AND time you fell asleep and the day AND time you woke — so a
+  // sleep that crosses midnight (or a nap earlier today) is logged exactly.
+  const [kind, setKind] = useState<'sleep' | 'nap'>('sleep');
+  const [bedOffset, setBedOffset] = useState(1); // 1 = yesterday
+  const [wakeOffset, setWakeOffset] = useState(0); // 0 = today
   const [bed, setBed] = useState('23:20');
   const [woke, setWoke] = useState('06:40');
   const [quality, setQuality] = useState<SleepQuality | null>(null);
-  const days = [1, 2, 3, 4, 5];
+  const days = [0, 1, 2, 3, 4, 5, 6];
 
-  function build(): { bedtime: number; wake: number; date: string } {
-    const bedDay = new Date();
-    bedDay.setDate(bedDay.getDate() - dayOffset);
-    const [bh, bm] = bed.split(':').map(Number);
-    bedDay.setHours(bh, bm, 0, 0);
-    const bedtime = bedDay.getTime();
-    const [wh, wm] = woke.split(':').map(Number);
-    const wakeD = new Date(bedtime);
-    wakeD.setHours(wh, wm, 0, 0);
-    let wake = wakeD.getTime();
-    if (wake <= bedtime) wake += 86400000;
-    return { bedtime, wake, date: sleepDayId(wake) };
-  }
-  const built = build();
-  const mins = Math.round((built.wake - built.bedtime) / 60000);
-  const nightOf = new Date(built.bedtime).toLocaleDateString(locale, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
+  const pickKind = (k: 'sleep' | 'nap') => {
+    setKind(k);
+    if (k === 'nap') {
+      setBedOffset(0);
+      setWakeOffset(0);
+      setBed('14:00');
+      setWoke('14:45');
+    } else {
+      setBedOffset(1);
+      setWakeOffset(0);
+      setBed('23:20');
+      setWoke('06:40');
+    }
+  };
+
+  const atOffset = (offset: number, hhmm: string): number => {
+    const d = new Date();
+    d.setDate(d.getDate() - offset);
+    const [h, m] = hhmm.split(':').map(Number);
+    d.setHours(h, m, 0, 0);
+    return d.getTime();
+  };
+  const bedtime = atOffset(bedOffset, bed);
+  const wake = atOffset(wakeOffset, woke);
+  const valid = wake > bedtime;
+  const mins = valid ? Math.round((wake - bedtime) / 60000) : 0;
 
   const save = () => {
-    logSleepNight({ ...built, source: 'backfill', quality });
+    if (!valid) return;
+    logSleepNight({ date: sleepDayId(wake), bedtime, wake, source: 'backfill', quality, kind });
     onDone();
   };
+
+  const dayRow = (sel: number, set: (n: number) => void) => (
+    <div className="sleep-daycards">
+      {days.map((d) => {
+        const dd = new Date();
+        dd.setDate(dd.getDate() - d);
+        return (
+          <button
+            key={d}
+            className={`sleep-daycard${sel === d ? ' on' : ''}`}
+            onClick={() => set(d)}
+          >
+            <span className="dc-wd">
+              {d === 0 ? t.sleepTodayTag : dd.toLocaleDateString(locale, { weekday: 'short' })}
+            </span>
+            <span className="dc-day num">{dd.getDate()}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="screen sleep-hub sleep-backfill">
       <SleepTopbar title={t.sleepAddPastNight} onBack={onBack} />
       <p className="muted">{t.sleepBackfillHint}</p>
 
-      <div className="slh-sec-label">{t.sleepWhichNight}</div>
-      <div className="sleep-daycards">
-        {days.map((d) => {
-          const dd = new Date();
-          dd.setDate(dd.getDate() - d);
-          return (
-            <button
-              key={d}
-              className={`sleep-daycard${dayOffset === d ? ' on' : ''}`}
-              onClick={() => setDayOffset(d)}
-            >
-              <span className="dc-wd">{dd.toLocaleDateString(locale, { weekday: 'short' })}</span>
-              <span className="dc-day num">{dd.getDate()}</span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="sleep-nightof">
-        <Icon name="moon" weight="fill" />
-        {t.sleepNightOf(nightOf)}
-        {dayOffset === 1 && <span className="dc-tag">{t.sleepLastNightTag}</span>}
+      <div className="slh-sec-label">{t.sleepKindLabel}</div>
+      <div className="sleep-q-row">
+        {(['sleep', 'nap'] as const).map((k) => (
+          <button
+            key={k}
+            className={`sleep-q-chip${kind === k ? ' on' : ''}`}
+            onClick={() => pickKind(k)}
+          >
+            {k === 'sleep' ? t.sleepKindSleep : t.sleepKindNap}
+          </button>
+        ))}
       </div>
 
-      <div className="slh-timerow">
-        <label className="slh-timefield">
-          <span className="slh-sec-label">{t.sleepBedtimeLabel}</span>
-          <div className="sleep-field-box">
-            <Icon name="moon" weight="fill" className="sleep-field-ic bed" />
-            <input
-              type="time"
-              className="sleep-time-input"
-              value={bed}
-              onChange={(e) => setBed(e.target.value)}
-            />
-          </div>
-        </label>
-        <label className="slh-timefield">
-          <span className="slh-sec-label">{t.sleepWokeLabel}</span>
-          <div className="sleep-field-box">
-            <Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />
-            <input
-              type="time"
-              className="sleep-time-input"
-              value={woke}
-              onChange={(e) => setWoke(e.target.value)}
-            />
-          </div>
-        </label>
+      <div className="slh-sec-label">{t.sleepFellAsleep}</div>
+      {dayRow(bedOffset, setBedOffset)}
+      <div className="sleep-field-box sleep-backfill-time">
+        <Icon name="moon" weight="fill" className="sleep-field-ic bed" />
+        <input
+          type="time"
+          className="sleep-time-input"
+          value={bed}
+          onChange={(e) => setBed(e.target.value)}
+        />
+      </div>
+
+      <div className="slh-sec-label">{t.sleepWokeUp}</div>
+      {dayRow(wakeOffset, setWakeOffset)}
+      <div className="sleep-field-box sleep-backfill-time">
+        <Icon name="sun-horizon" weight="fill" className="sleep-field-ic woke" />
+        <input
+          type="time"
+          className="sleep-time-input"
+          value={woke}
+          onChange={(e) => setWoke(e.target.value)}
+        />
       </div>
 
       <div className="sleep-dur-card">
         <div className="slh-sec-label">{t.sleepDurationLabel}</div>
-        <div className="sleep-dur-big num">{dur(mins)}</div>
+        {valid ? (
+          <div className="sleep-dur-big num">{dur(mins)}</div>
+        ) : (
+          <div className="sleep-range-invalid">{t.sleepRangeInvalid}</div>
+        )}
       </div>
 
       <div className="sleep-quality">
@@ -467,13 +491,14 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
         </div>
       </div>
 
-      <button className="btn btn-primary slh-btn" onClick={save}>
+      <button className="btn btn-primary slh-btn" onClick={save} disabled={!valid}>
         <Icon name="check" weight="bold" />
         {t.sleepSaveNight}
       </button>
     </div>
   );
 }
+
 function SleepScheduleEditor({ onDone, onBack }: { onDone: () => void; onBack: () => void }) {
   const { t } = useT();
   const store = useStore();
