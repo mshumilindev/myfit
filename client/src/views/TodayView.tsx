@@ -927,7 +927,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             c.setDate(c.getDate() + (day - 1));
             return c.getTime();
           })();
-          const canOpenDay = day < todayWeekday && (done || missed);
+          const canOpenDay = day < todayWeekday && (done || missed || !!restMode);
           // Only today is actionable — and only while it hasn't been trained yet
           // (a sick / rest day is not a "start" prompt).
           const canStart = isToday && hasPlan && !trainedToday && !done && !restMode;

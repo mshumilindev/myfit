@@ -552,6 +552,9 @@ export const et: Strings = {
   dayMissedTitle: 'Vahele jäänud trenn',
   dayMissedNamed: (name: string) => `„${name}“ oli sel päeval plaanis — kuid midagi ei logitud.`,
   dayMissedGeneric: 'Sel päeval oli plaanis jõusaalipäev — kuid midagi ei logitud.',
+  dayRestBody: 'Puhkepäev — taastumine, trenni pole plaanis.',
+  dayVacationBody: 'Puhkus — aeg saalist eemal.',
+  daySickBody: 'Haige — taastumine trenni asemel.',
   weekDayNames: [
     'Esmaspäev',
     'Teisipäev',

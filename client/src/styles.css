@@ -1756,35 +1756,38 @@ i > svg {
   letter-spacing: -0.01em;
   text-transform: capitalize;
 }
-.day-sheet-missed {
+.day-sheet-note {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   padding: 14px;
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-danger) 22%, transparent);
+  background: color-mix(in srgb, var(--nc) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nc) 22%, transparent);
 }
-.day-sheet-missed .dsm-ic {
+.day-sheet-note .dsm-ic {
   flex: none;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: var(--color-danger);
-  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  color: var(--nc);
+  background: color-mix(in srgb, var(--nc) 14%, transparent);
 }
-.day-sheet-missed .dsm-title {
+.day-sheet-note .dsm-title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-danger);
+  color: var(--nc);
 }
-.day-sheet-missed .dsm-body {
+.day-sheet-note .dsm-body {
   font-size: 13px;
   color: var(--color-neutral-300);
   line-height: 1.45;
   margin-top: 3px;
+}
+.day-sheet-note + .day-sheet-items {
+  margin-top: 12px;
 }
 
 .reminder-card {

@@ -62,7 +62,7 @@ export function WeekStrip({
         : missed
           ? 'missed'
           : 'none';
-    const clickable = isPast && (logged || missed);
+    const clickable = isPast && state !== 'none';
     return { letter: t.weekDayLetters[i], state, isToday, start, clickable };
   });
 

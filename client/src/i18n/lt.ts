@@ -568,6 +568,9 @@ export const lt: Strings = {
   dayMissedTitle: 'Praleista treniruotė',
   dayMissedNamed: (name: string) => `„${name}“ buvo suplanuota šiai dienai — bet nieko neužfiksuota.`,
   dayMissedGeneric: 'Šiai dienai buvo suplanuota treniruotė — bet nieko neužfiksuota.',
+  dayRestBody: 'Poilsio diena — atsigavimas, treniruočių neplanuota.',
+  dayVacationBody: 'Atostogos — laikas ne salėje.',
+  daySickBody: 'Serga — atsigavimas vietoje treniruotės.',
   weekDayNames: [
     'Pirmadienis',
     'Antradienis',

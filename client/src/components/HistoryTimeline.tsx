@@ -286,7 +286,10 @@ export function WorkoutRow({
   return (
     <button className="hist-item hist-workout" onClick={() => onOpen(w.id)}>
       <span className="hist-item-body">
-        <span className="hist-item-name">{title}</span>
+        <span className="hist-item-name">
+          <Icon name="barbell" className="hist-act-icon" />
+          {title}
+        </span>
         <div className="hist-item-stats">
           {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
           {w.finishedAt ? ` · ${fmtDurationHM(w.finishedAt - w.startedAt)}` : ''}

@@ -566,6 +566,9 @@ export const pl: Strings = {
   dayMissedTitle: 'Pominięty trening',
   dayMissedNamed: (name: string) => `„${name}” był w planie na ten dzień — ale nic nie zapisano.`,
   dayMissedGeneric: 'Na ten dzień był w planie trening — ale nic nie zapisano.',
+  dayRestBody: 'Dzień odpoczynku — regeneracja, brak treningu w planie.',
+  dayVacationBody: 'Urlop — czas poza siłownią.',
+  daySickBody: 'Choroba — regeneracja zamiast treningu.',
   weekDayNames: ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'],
 
   // Today · desktop 3-column (W-04/W-05)

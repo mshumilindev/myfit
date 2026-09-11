@@ -1,10 +1,11 @@
 /**
  * A drawer for one calendar day, opened from the Today calendars (week strip and
  * program calendar). Shows that day's logged history — workouts, activities and
- * sleep, each opening its own detail — or, when a program day was skipped (and
- * it wasn't rest / illness / vacation), a "missed session" note.
+ * sleep merged in chronological order (earliest on top), each opening its own
+ * detail — plus a note when the day was rest / vacation / illness, or a "missed
+ * session" note when a program day was skipped.
  */
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Icon, Sheet } from '../ui';
 import {
   dayKey,
@@ -16,6 +17,21 @@ import {
 } from '../store';
 import { fmtWeekdayDayMonth, useT } from '../i18n';
 import { WorkoutRow, ActivityRow, SleepRow } from './HistoryTimeline';
+
+type NoteState = 'missed' | 'rest' | 'vacation' | 'illness';
+
+const NOTE_ICON: Record<NoteState, string> = {
+  missed: 'x',
+  rest: 'moon',
+  vacation: 'sun-horizon',
+  illness: 'pulse',
+};
+const NOTE_COLOR: Record<NoteState, string> = {
+  missed: 'var(--color-danger)',
+  rest: 'var(--color-rest-400)',
+  vacation: '#e8933f',
+  illness: 'var(--care)',
+};
 
 export function DayHistorySheet({
   day,
@@ -35,22 +51,6 @@ export function DayHistorySheet({
   const store = useStore();
   const end = day + 24 * 3600 * 1000;
   const [todayKey] = useState(() => dayKey(Date.now()));
-
-  const workouts = store.workouts.filter(
-    (w) => w.finishedAt !== null && w.startedAt >= day && w.startedAt < end,
-  );
-  const acts = store.activities.filter(
-    (a) => a.finishedAt !== null && a.startedAt >= day && a.startedAt < end,
-  );
-  const sleeps = store.sleeps.filter((n) => n.wake !== null && n.wake >= day && n.wake < end);
-
-  const dk = dayKey(day);
-  const rest = store.restPeriods.find(
-    (r) => dk >= r.startDay && dk <= (r.open ? todayKey : r.endDay),
-  );
-  const empty = workouts.length === 0 && acts.length === 0 && sleeps.length === 0;
-  const missed = empty && !rest && prescribedTrainingDays().has(weekdayOf(day));
-  const missedName = programDayNameForWeekday(weekdayOf(day));
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
 
   const wrap = (fn?: (id: string) => void) =>
@@ -61,47 +61,75 @@ export function DayHistorySheet({
         }
       : undefined;
 
+  // Every logged thing on the day, merged and sorted earliest-first.
+  const rows: { ts: number; node: ReactNode }[] = [];
+  for (const w of store.workouts)
+    if (w.finishedAt !== null && w.startedAt >= day && w.startedAt < end)
+      rows.push({
+        ts: w.startedAt,
+        node: (
+          <WorkoutRow
+            key={w.id}
+            w={w}
+            allWorkouts={store.workouts}
+            bodyKg={bodyKg}
+            onOpen={wrap(onOpenWorkout) ?? (() => {})}
+          />
+        ),
+      });
+  for (const a of store.activities)
+    if (a.finishedAt !== null && a.startedAt >= day && a.startedAt < end)
+      rows.push({
+        ts: a.startedAt,
+        node: <ActivityRow key={a.id} a={a} bodyKg={bodyKg} onOpen={wrap(onOpenActivity)} />,
+      });
+  for (const n of store.sleeps)
+    if (n.wake !== null && n.wake >= day && n.wake < end)
+      rows.push({
+        ts: n.wake,
+        node: <SleepRow key={n.id} n={n} onOpen={wrap(onOpenSleep)} />,
+      });
+  rows.sort((a, b) => a.ts - b.ts);
+
+  // Day state note (rest / vacation / illness, or a skipped program day).
+  const dk = dayKey(day);
+  const rest = store.restPeriods.find(
+    (r) => dk >= r.startDay && dk <= (r.open ? todayKey : r.endDay),
+  );
+  const restSpan = rest ? (rest.open ? todayKey : rest.endDay) - rest.startDay + 1 : 0;
+  let note: NoteState | null = null;
+  if (rest) note = rest.mode === 'illness' ? 'illness' : restSpan >= 4 ? 'vacation' : 'rest';
+  else if (rows.length === 0 && prescribedTrainingDays().has(weekdayOf(day))) note = 'missed';
+
+  const missedName = programDayNameForWeekday(weekdayOf(day));
+  const noteText: Record<NoteState, { title: string; body: string }> = {
+    missed: {
+      title: t.dayMissedTitle,
+      body: missedName ? t.dayMissedNamed(missedName) : t.dayMissedGeneric,
+    },
+    rest: { title: t.histStateRest, body: t.dayRestBody },
+    vacation: { title: t.histStateVacation, body: t.dayVacationBody },
+    illness: { title: t.histStateSick, body: t.daySickBody },
+  };
+
   return (
     <Sheet onClose={onClose}>
       <div className="day-sheet-head">
         <span className="t">{fmtWeekdayDayMonth(day, locale)}</span>
       </div>
-      {missed ? (
-        <div className="day-sheet-missed">
+      {note && (
+        <div className="day-sheet-note" style={{ ['--nc' as string]: NOTE_COLOR[note] }}>
           <span className="dsm-ic">
-            <Icon name="x" />
+            <Icon name={NOTE_ICON[note]} />
           </span>
           <div className="dsm-text">
-            <div className="dsm-title">{t.dayMissedTitle}</div>
-            <div className="dsm-body">
-              {missedName ? t.dayMissedNamed(missedName) : t.dayMissedGeneric}
-            </div>
+            <div className="dsm-title">{noteText[note].title}</div>
+            <div className="dsm-body">{noteText[note].body}</div>
           </div>
         </div>
-      ) : (
-        <div className="hist-timeline day-sheet-items">
-          {[...workouts]
-            .sort((a, b) => a.startedAt - b.startedAt)
-            .map((w) => (
-              <WorkoutRow
-                key={w.id}
-                w={w}
-                allWorkouts={store.workouts}
-                bodyKg={bodyKg}
-                onOpen={wrap(onOpenWorkout) ?? (() => {})}
-              />
-            ))}
-          {[...acts]
-            .sort((a, b) => a.startedAt - b.startedAt)
-            .map((a) => (
-              <ActivityRow key={a.id} a={a} bodyKg={bodyKg} onOpen={wrap(onOpenActivity)} />
-            ))}
-          {[...sleeps]
-            .sort((a, b) => (a.wake ?? 0) - (b.wake ?? 0))
-            .map((n) => (
-              <SleepRow key={n.id} n={n} onOpen={wrap(onOpenSleep)} />
-            ))}
-        </div>
+      )}
+      {rows.length > 0 && (
+        <div className="hist-timeline day-sheet-items">{rows.map((r) => r.node)}</div>
       )}
     </Sheet>
   );

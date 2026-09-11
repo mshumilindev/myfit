@@ -557,6 +557,9 @@ export const en = {
   dayMissedTitle: 'Missed session',
   dayMissedNamed: (name: string) => `“${name}” was on your plan for this day — but nothing was logged.`,
   dayMissedGeneric: 'A gym day was on your plan for this day — but nothing was logged.',
+  dayRestBody: 'Rest day — recovery, no training planned.',
+  dayVacationBody: 'Time off — away from the gym.',
+  daySickBody: 'Sick day — resting up over training.',
   weekDayNames: [
     'Monday',
     'Tuesday',
