@@ -179,6 +179,17 @@ export function HistoryTimeline({
     else if (rest?.mode === 'off') state = rest.span >= 4 ? 'vacation' : 'rest';
     else if (dk < todayK && lookback > 0 && todayK - dk <= lookback && presc.has(weekdayOf(ts)))
       state = 'missed';
+    // Program rest days: a non-training weekday inside the program window with
+    // nothing logged is a planned rest — surface it the same way missed days are.
+    else if (
+      items.length === 0 &&
+      dk <= todayK &&
+      lookback > 0 &&
+      presc.size > 0 &&
+      todayK - dk <= lookback &&
+      !presc.has(weekdayOf(ts))
+    )
+      state = 'rest';
     else if (items.length > 0) state = 'logged';
 
     if (state) {
