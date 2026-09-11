@@ -211,7 +211,7 @@ export type Overlay =
       externalId?: string;
     }
   | { screen: 'equipment'; itemId: string; gymId?: string }
-  | { screen: 'builder'; hasProgram?: boolean }
+  | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
   | { screen: 'mastery' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
@@ -1214,7 +1214,8 @@ export function App() {
         <Suspense fallback={null}>
           <SessionBuilderView
             shell={shell}
-            hasProgram={activeOverlay.hasProgram ?? false}
+            programMode={activeOverlay.programMode ?? 'none'}
+            programDays={activeOverlay.programDays ?? []}
             onClose={closeOverlay}
           />
         </Suspense>

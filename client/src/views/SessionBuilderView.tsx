@@ -25,6 +25,7 @@ import {
 import { muscleReadiness, READINESS_COLOR } from '../recovery';
 import { ARCHETYPES_BY_SEX, ARCHETYPES, type ArchetypeId } from '../goals';
 import type { MuscleGroup } from '../data/exercises';
+import { describeDay, dayReadoutLabel } from '../data/daySuggest';
 
 const INTENTS: SessionIntent[] = ['strength', 'muscle', 'endurance', 'power', 'conditioning'];
 const UPPER: MuscleGroup[] = [
@@ -40,14 +41,16 @@ const LOWER: MuscleGroup[] = ['quads', 'hamstrings', 'glutes', 'calves', 'lower_
 
 export function SessionBuilderView({
   shell,
-  hasProgram,
+  programMode,
+  programDays,
   onClose,
 }: {
   shell: Shell;
-  hasProgram: boolean;
+  programMode: 'none' | 'own' | 'other';
+  programDays: number[];
   onClose: () => void;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());
 
@@ -132,17 +135,31 @@ export function SessionBuilderView({
   }
 
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
+  const [selWd, setSelWd] = useState(todayWeekday);
+  const [filled, setFilled] = useState<number[]>(programDays);
   const [saving, setSaving] = useState(false);
+  const [savedWd, setSavedWd] = useState<number | null>(null);
   async function saveDay() {
     if (saving) return;
     setSaving(true);
     try {
-      await saveGeneratedDayAsProgram(day, todayWeekday);
+      const res = await saveGeneratedDayAsProgram(day, selWd, nameInput || derivedName);
+      setFilled(res.days);
+      setSavedWd(selWd);
     } finally {
       setSaving(false);
     }
-    start();
   }
+  const wdShort = (n: number) =>
+    new Date(2024, 0, 1 + (n - 1)).toLocaleDateString(locale, { weekday: 'short' });
+  const [nameInput, setNameInput] = useState('');
+  const derivedName = useMemo(() => {
+    const readout = describeDay(
+      day.coverage.map((c) => [c.muscle, c.sets] as [MuscleGroup, number]),
+    );
+    return readout ? dayReadoutLabel(readout, t) : day.dayName;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day]);
 
   // ---- step bodies -------------------------------------------------------
   const goalBody = (
@@ -334,6 +351,30 @@ export function SessionBuilderView({
           ))}
         </div>
       )}
+      {programMode !== 'other' && (
+        <div className="sbw-block">
+          <span className="section-title">{t.sbDayNameLabel}</span>
+          <input
+            className="sbw-name"
+            type="text"
+            value={nameInput}
+            placeholder={derivedName}
+            onChange={(e) => setNameInput(e.target.value)}
+          />
+          <span className="section-title">{t.sbSaveOn}</span>
+          <div className="sbw-wdrow">
+            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+              <button
+                key={n}
+                className={`sbw-wd${n === selWd ? ' on' : ''}${filled.includes(n) ? ' filled' : ''}`}
+                onClick={() => setSelWd(n)}
+              >
+                {wdShort(n)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 
@@ -375,9 +416,9 @@ export function SessionBuilderView({
         ) : null}
         {cur === 'review' ? (
           <>
-            {!hasProgram && (
+            {programMode !== 'other' && (
               <button className="btn btn-secondary sbw-save" onClick={saveDay} disabled={saving}>
-                {t.sbSaveDay}
+                {savedWd === selWd ? t.sbSaved : t.sbSaveDay}
               </button>
             )}
             <button className="btn btn-primary sbw-go" onClick={start}>

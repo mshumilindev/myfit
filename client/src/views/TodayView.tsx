@@ -6,7 +6,7 @@ import { db } from '../firebase';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
 import type { ExerciseKind, Gym } from '../types';
-import { callFn, getRole } from '../api';
+import { callFn, currentUid, getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
@@ -112,6 +112,7 @@ interface ProgramItem {
 interface ProgramAssignment {
   program: {
     id: string;
+    authorId?: string;
     name: string;
     weeks: number;
     daysPerWeek: number;
@@ -226,7 +227,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   }
   function autoBuild() {
     if (resumeLive()) return;
-    shell.openOverlay({ screen: 'builder', hasProgram: !!assignment && assignedActive });
+    const active = !!assignment && assignedActive;
+    const own = active && assignment!.program.authorId === currentUid();
+    const programMode: 'none' | 'own' | 'other' = !active ? 'none' : own ? 'own' : 'other';
+    const programDays = own
+      ? [...new Set(assignment!.program.items.map((i) => i.day))].sort((a, b) => a - b)
+      : [];
+    shell.openOverlay({ screen: 'builder', programMode, programDays });
   }
   function startSession() {
     if (resumeLive()) return;

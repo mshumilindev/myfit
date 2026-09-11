@@ -1038,12 +1038,13 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
 export async function saveGeneratedDayAsProgram(
   day: GeneratedDay,
   weekday: number,
-): Promise<'active' | 'draft'> {
+  name: string,
+): Promise<{ status: 'active' | 'draft'; days: number[] }> {
+  const dayName = name.trim() || day.dayName;
   const uid = currentUid();
   if (!uid) throw new Error('not signed in');
   const wd = String(weekday);
-  const id = uuid();
-  const items = day.main.map((ex, idx) => ({
+  const newItems = day.main.map((ex, idx) => ({
     id: uuid(),
     day: weekday,
     position: idx,
@@ -1057,25 +1058,69 @@ export async function saveGeneratedDayAsProgram(
     groupOrder: null as number | null,
     dropLast: false,
   }));
+
+  // Append to the athlete's OWN active program if there is one (so the wizard
+  // can build a whole week, one day at a time); otherwise create a fresh
+  // one-day program and self-activate it.
+  interface OwnProgram {
+    id: string;
+    authorId: string;
+    name: string;
+    weeks: number;
+    daysPerWeek: number;
+    dayNames?: Record<string, string>;
+    targetMuscles?: Record<string, string[]>;
+    items: Array<Record<string, unknown> & { day: number }>;
+  }
+  let existing: OwnProgram | null = null;
+  try {
+    const mine = await callFn<{ assignment: { program: OwnProgram } | null }>('programMine');
+    const prog = mine?.assignment?.program;
+    if (prog && prog.authorId === uid) existing = prog;
+  } catch {
+    /* offline / no assignment — fall through to create */
+  }
+
+  if (existing) {
+    const items = existing.items
+      .filter((it) => Number(it.day) !== weekday)
+      .concat(newItems as unknown as OwnProgram['items']);
+    const days = [...new Set(items.map((it) => Number(it.day)))].sort((a, b) => a - b);
+    const prog = {
+      ...existing,
+      dayNames: { ...(existing.dayNames ?? {}), [wd]: dayName },
+      targetMuscles: { ...(existing.targetMuscles ?? {}), [wd]: day.targetMuscles },
+      items,
+      daysPerWeek: days.length,
+      status: 'active' as const,
+      updatedAt: Date.now(),
+    };
+    await setDoc(doc(db, 'programs', existing.id), prog);
+    return { status: 'active', days };
+  }
+
+  const id = uuid();
   const program = {
     id,
     authorId: uid,
-    name: day.dayName,
+    name: dayName,
     weeks: 0,
     daysPerWeek: 1,
     status: 'draft' as const,
-    dayNames: { [wd]: day.dayName },
+    dayNames: { [wd]: dayName },
     targetMuscles: { [wd]: day.targetMuscles },
-    items,
+    items: newItems,
     updatedAt: Date.now(),
   };
   await setDoc(doc(db, 'programs', id), program);
+  let status: 'active' | 'draft' = 'draft';
   try {
     await callFn('setProgramStatus', { id, status: 'active' });
-    return 'active';
+    status = 'active';
   } catch {
-    return 'draft';
+    /* validation not yet deployed for this weekday — stays a draft */
   }
+  return { status, days: [weekday] };
 }
 
 function patchWorkout(id: string, patch: Partial<Workout>): void {
