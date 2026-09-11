@@ -33,6 +33,15 @@ service cloud.firestore {
     function isTrainerOrAdmin() {
       return role() == 'trainer' || role() == 'admin';
     }
+    function validLiveSession(athleteId) {
+      return request.resource.data.keys().hasOnly(['id', 'trainerId', 'startedAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['id', 'trainerId', 'startedAt', 'updatedAt'])
+        && request.resource.data.id == athleteId
+        && request.resource.data.trainerId is string
+        && request.resource.data.trainerId == get(/databases/$(database)/documents/users/$(athleteId)).data.trainerId
+        && request.resource.data.startedAt is int
+        && request.resource.data.updatedAt is int;
+    }
 
     // --- Users: public-ish profile document ---------------------------------
     // Sensitive credentials (password hash) live in /credentials, never here.
@@ -110,12 +119,13 @@ service cloud.firestore {
     // --- Coached-athlete live sessions -------------------------------------
     // One doc per athlete (id = their uid), written by the athlete, read by
     // their coach. The coach's Today queries by trainerId; the read rule scopes
-    // it to their own athletes. No cross-doc lookup needed — the athlete stamps
-    // their own trainerId (they can only expose their OWN session either way).
+    // it to their own athletes. Writes are strictly active-session presence
+    // only: no exercises, sets, loads, notes or other workout details.
     match /liveSessions/{athleteId} {
       allow read: if isSelf(athleteId)
         || (isSignedIn() && resource.data.trainerId == request.auth.uid);
-      allow write: if isSelf(athleteId);
+      allow create, update: if isSelf(athleteId) && validLiveSession(athleteId);
+      allow delete: if isSelf(athleteId);
     }
 
     // --- Sleep auto-start queue --------------------------------------------
