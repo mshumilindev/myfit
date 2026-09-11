@@ -32450,6 +32450,48 @@ body {
   font-size: 9px;
   box-shadow: 0 0 0 2px var(--color-bg);
 }
+/* Training-now: a green ring with a gentle glow pulse (subtle, unobtrusive),
+   plus a small live dot. Overrides the recency ring while live. */
+.tcs-item.live .tcs-ring {
+  padding: 2.5px;
+  background: linear-gradient(135deg, #7fe6b8, var(--color-ok) 55%, #2f8f68);
+  animation: tcsLivePulse 2.4s ease-in-out infinite;
+}
+.tcs-item.live .tcs-ring > :first-child {
+  box-shadow: 0 0 0 2px var(--color-bg);
+  border-radius: 50%;
+}
+@keyframes tcsLivePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ok) 50%, transparent);
+  }
+  55% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-ok) 0%, transparent);
+  }
+}
+.tcs-live {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-ok);
+  box-shadow: 0 0 0 2.5px var(--color-bg);
+}
+.tcs-live::after {
+  content: '';
+  position: absolute;
+  inset: 3.5px;
+  border-radius: 50%;
+  background: #0d1f16;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tcs-item.live .tcs-ring {
+    animation: none;
+  }
+}
 .tcs-name {
   font-size: 11px;
   color: var(--color-neutral-300);
@@ -32609,6 +32651,49 @@ body {
   font-size: 12px;
   color: var(--color-neutral-500);
 }
+/* Live: the client is training right now (no details until it ends). */
+.cp-live {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-ok) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ok) 30%, transparent);
+}
+.cp-live-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-ok);
+  animation: cpLivePulse 2s ease-in-out infinite;
+}
+@keyframes cpLivePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ok) 55%, transparent);
+  }
+  55% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-ok) 0%, transparent);
+  }
+}
+.cp-live-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ok);
+}
+.cp-live-body {
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+  margin-top: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cp-live-dot {
+    animation: none;
+  }
+}
+
 /* Highlighted "last time on this weekday" card, in the app's bronze accent. */
 .cp-sameday {
   position: relative;

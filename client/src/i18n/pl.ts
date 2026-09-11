@@ -1559,6 +1559,8 @@ export const pl: Strings = {
   clientNoSessions: 'Brak treningów',
   clientSameDayLabel: 'Ostatnio w ten dzień',
   clientOpenProfile: 'Pełny profil',
+  clientLiveTitle: 'Trening w toku',
+  clientLiveBody: 'Szczegóły pojawią się po zakończeniu sesji.',
   histStateRest: 'Dzień odpoczynku',
   histStateVacation: 'Urlop',
   histStateSick: 'Choroba',

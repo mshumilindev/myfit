@@ -1555,6 +1555,8 @@ export const uk: Strings = {
   clientNoSessions: 'Ще немає тренувань',
   clientSameDayLabel: 'Минулого разу цього дня',
   clientOpenProfile: 'Повний профіль',
+  clientLiveTitle: 'Тренування триває',
+  clientLiveBody: 'Деталі зʼявляться, коли сесія завершиться.',
   histStateRest: 'День відпочинку',
   histStateVacation: 'Відпустка',
   histStateSick: 'Хворів',

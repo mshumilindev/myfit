@@ -1606,6 +1606,8 @@ export const en = {
   clientNoSessions: 'No sessions logged yet',
   clientSameDayLabel: 'Last time on this day',
   clientOpenProfile: 'Full profile',
+  clientLiveTitle: 'Training in progress',
+  clientLiveBody: 'Details will appear once the session ends.',
   histStateRest: 'Rest day',
   histStateVacation: 'Vacation',
   histStateSick: 'Sick day',

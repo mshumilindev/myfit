@@ -14,6 +14,8 @@ import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
 import { fmtDayMonth, fmtTonnes, fmtWeekday, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { muscleInfoByName } from '../data/exercises';
+import { useStore } from '../store';
+import { classifyTrainee } from '../trainerLive';
 import { Icon } from '../ui';
 import { Avatar } from '../components/Avatar';
 import { HistoryTimeline } from '../components/HistoryTimeline';
@@ -112,6 +114,14 @@ export function ClientPage({
 }) {
   const { t, locale } = useT();
   const [todayDow] = useState(() => new Date().getDay());
+  const [liveNow, setLiveNow] = useState(() => Date.now());
+  useEffect(() => {
+    const tm = setInterval(() => setLiveNow(Date.now()), 30000);
+    return () => clearInterval(tm);
+  }, []);
+  const isLive = useStore().liveTrainees.some(
+    (s) => s.id === clientId && classifyTrainee(s, liveNow) === 'live',
+  );
   const cacheKey = `profile.${clientId}`;
   const [data, setData] = useState<ClientData | null>(
     cachePeek<ClientData>(cacheKey)?.data ?? null,
@@ -173,6 +183,15 @@ export function ClientPage({
         )}
       </div>
 
+      {isLive && (
+        <div className="cp-live">
+          <span className="cp-live-dot" aria-hidden />
+          <div className="cp-live-text">
+            <div className="cp-live-title">{t.clientLiveTitle}</div>
+            <div className="cp-live-body">{t.clientLiveBody}</div>
+          </div>
+        </div>
+      )}
       {sameDay && (
         <button className="cp-sameday" onClick={() => openSession(sameDay)}>
           <div className="cp-sameday-label">

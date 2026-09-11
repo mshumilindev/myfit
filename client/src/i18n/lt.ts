@@ -1569,6 +1569,8 @@ export const lt: Strings = {
   clientNoSessions: 'Dar nėra treniruočių',
   clientSameDayLabel: 'Paskutinį kartą šią dieną',
   clientOpenProfile: 'Visas profilis',
+  clientLiveTitle: 'Treniruotė vyksta',
+  clientLiveBody: 'Detalės pasirodys pasibaigus sesijai.',
   histStateRest: 'Poilsio diena',
   histStateVacation: 'Atostogos',
   histStateSick: 'Serga',

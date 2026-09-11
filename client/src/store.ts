@@ -75,7 +75,7 @@ import {
   classifySleepKind,
   sleepKindOf,
 } from './sleep';
-import { currentUid, getRole, getUsername } from './api';
+import { currentUid, getRole } from './api';
 
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
@@ -904,7 +904,7 @@ export function applyAutoFinish(): void {
     setState({ workouts, syncStatus: bumpPending() });
     for (const id of changed) saveWorkout(id);
     const done = state.workouts.find((w) => changed.includes(w.id));
-    if (done) finishLiveSession(done);
+    if (done) finishLiveSession();
   }
 }
 
@@ -924,30 +924,6 @@ let selfProfile: {
 const LIVE_HEARTBEAT_MS = 45000;
 let lastLiveBeat = 0;
 
-function selfDisplayName(): string {
-  const n = `${selfProfile.firstName ?? ''} ${selfProfile.lastName ?? ''}`.trim();
-  return n || getUsername() || 'Athlete';
-}
-function lastFinishedSummary(): {
-  lastName: string | null;
-  lastSets: number;
-  lastTonnageKg: number;
-  lastAt: number | null;
-} {
-  const done = state.workouts
-    .filter((w) => w.finishedAt !== null)
-    .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))[0];
-  if (!done) return { lastName: null, lastSets: 0, lastTonnageKg: 0, lastAt: null };
-  return {
-    lastName: done.dayName ?? null,
-    lastSets: workoutSets(done),
-    lastTonnageKg: Math.round(workoutVolumeKg(done)),
-    lastAt: done.finishedAt ?? null,
-  };
-}
-function gymNameFor(gymId: string | null | undefined): string | null {
-  return gymId ? (state.gyms.find((g) => g.id === gymId)?.name ?? null) : null;
-}
 /** Mirror an open workout to the athlete's coach-visible liveSessions doc. */
 export function writeLiveSession(w: Workout): void {
   const uid = currentUid();
@@ -957,39 +933,25 @@ export function writeLiveSession(w: Workout): void {
     deleteDoc(doc(db, 'liveSessions', uid)).catch(() => undefined); // no coach → no doc
     return;
   }
+  // Only "a session is active" — nothing about its contents. The coach sees the
+  // in-progress state on the strip / client page; the details appear from normal
+  // history once the session is finished.
   const now = Date.now();
   lastLiveBeat = now;
   setDoc(doc(db, 'liveSessions', uid), {
     id: uid,
-    workoutId: w.id,
-    athleteName: selfDisplayName(),
-    avatarExt: selfProfile.avatarExt ?? null,
     trainerId,
     startedAt: w.startedAt,
-    gymName: gymNameFor(w.gymId),
-    exerciseCount: w.exercises.length,
-    ...lastFinishedSummary(),
-    finishedAt: null,
     updatedAt: now,
   }).catch(onWriteError);
 }
 /** Mark the live session finished — kept briefly for the coach's "just
  *  finished" state, overwritten on the next start. */
-export function finishLiveSession(w: Workout): void {
+export function finishLiveSession(): void {
   const uid = currentUid();
-  if (!uid || !selfProfile.trainerId) return;
-  setDoc(
-    doc(db, 'liveSessions', uid),
-    {
-      workoutId: w.id,
-      finishedAt: w.finishedAt ?? Date.now(),
-      finalSets: workoutSets(w),
-      finalTonnageKg: Math.round(workoutVolumeKg(w)),
-      exerciseCount: w.exercises.length,
-      updatedAt: Date.now(),
-    },
-    { merge: true },
-  ).catch(onWriteError);
+  if (!uid) return;
+  // Session ended — remove the active-session doc entirely.
+  deleteDoc(doc(db, 'liveSessions', uid)).catch(() => undefined);
 }
 /** Heartbeat while a workout is open, so the coach can tell live from stale. */
 function heartbeatLiveSession(): void {
@@ -1000,11 +962,9 @@ function heartbeatLiveSession(): void {
   const now = Date.now();
   if (now - lastLiveBeat < LIVE_HEARTBEAT_MS) return;
   lastLiveBeat = now;
-  setDoc(
-    doc(db, 'liveSessions', uid),
-    { updatedAt: now, exerciseCount: open.exercises.length },
-    { merge: true },
-  ).catch(() => undefined);
+  setDoc(doc(db, 'liveSessions', uid), { updatedAt: now }, { merge: true }).catch(
+    () => undefined,
+  );
 }
 
 export function startWorkout(
@@ -1043,6 +1003,7 @@ export function startWorkout(
     syncStatus: closed.length > 0 ? bumpPending() : state.syncStatus,
   });
   for (const id of closed) saveWorkout(id);
+  writeLiveSession(workout);
   return workout;
 }
 
@@ -1066,7 +1027,7 @@ export function finishWorkout(id: string, at = Date.now()): void {
   patchWorkout(id, { finishedAt: at, autoFinished: false });
   saveWorkout(id);
   const done = state.workouts.find((x) => x.id === id);
-  if (done) finishLiveSession(done);
+  if (done) finishLiveSession();
 }
 
 export function updateWorkoutTimes(
@@ -3415,7 +3376,6 @@ export function backfillWorkout(
   // editor closes — so building it doesn't spray writes on every added set.
   draftWorkouts.add(workout.id);
   setState({ workouts: sortWorkouts([workout, ...state.workouts]), syncStatus: state.syncStatus });
-  writeLiveSession(workout);
   return workout;
 }
 

@@ -1,8 +1,8 @@
 /**
  * Trainer's clients as an Instagram-stories-style row at the top of Today.
- * Read-only, history-only (no live sessions — a trainer can't see those). The
- * ring reflects recency: a gold ring for a fresh finished session, a red ring
- * for a dormant client, a quiet ring otherwise. Sorted most-recently-trained
+ * Read-only history recency (gold ring = fresh finished session, red = dormant,
+ * quiet otherwise) plus a live pulse for anyone training right now (from the
+ * realtime liveSessions feed). Live clients lead; then most-recently-trained
  * first, never-trained last. Shown for trainers and for admins who have clients.
  *
  * Cached like the rest of the app: the list paints instantly from localStorage,
@@ -12,6 +12,8 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
+import { useStore } from '../store';
+import { classifyTrainee } from '../trainerLive';
 import { Avatar } from './Avatar';
 import { Icon } from '../ui';
 
@@ -33,7 +35,15 @@ function firstName(name: string): string {
 }
 
 export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: string) => void }) {
-  const [now] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(t);
+  }, []);
+  const liveTrainees = useStore().liveTrainees;
+  const liveIds = new Set(
+    liveTrainees.filter((sn) => classifyTrainee(sn, now) === 'live').map((sn) => sn.id),
+  );
   const cached = cachePeek<StripClient[]>(CACHE_KEY);
   const [clients, setClients] = useState<StripClient[] | null>(cached?.data ?? null);
 
@@ -60,20 +70,26 @@ export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: strin
 
   if (!clients || clients.length === 0) return null;
 
-  // Most-recently-trained first; clients who never trained sort to the end.
-  const sorted = [...clients].sort((a, b) => (b.lastSessionAt ?? 0) - (a.lastSessionAt ?? 0));
+  // Anyone training now leads; then most-recently-trained first, never-trained last.
+  const sorted = [...clients].sort((a, b) => {
+    const la = liveIds.has(a.id) ? 1 : 0;
+    const lb = liveIds.has(b.id) ? 1 : 0;
+    if (la !== lb) return lb - la;
+    return (b.lastSessionAt ?? 0) - (a.lastSessionAt ?? 0);
+  });
 
   return (
     <div className="tcs">
       <div className="tcs-row">
         {sorted.map((c) => {
+          const live = liveIds.has(c.id);
           const fresh = c.lastSessionAt !== null && now - c.lastSessionAt < 2 * DAY_MS;
           const dormant = c.dormantDays !== null;
           const state = fresh ? 'fresh' : dormant ? 'dormant' : 'quiet';
           return (
             <button
               key={c.id}
-              className={`tcs-item ${state}`}
+              className={`tcs-item ${state}${live ? ' live' : ''}`}
               onClick={() => onOpenClient(c.id)}
               aria-label={c.name}
             >
@@ -85,7 +101,8 @@ export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: strin
                   rev={c.avatarRev}
                   size={54}
                 />
-                {dormant && (
+                {live && <span className="tcs-live" aria-hidden />}
+                {dormant && !live && (
                   <span className="tcs-alert" aria-hidden>
                     <Icon name="warning" weight="fill" />
                   </span>

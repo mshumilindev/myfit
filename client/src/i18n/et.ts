@@ -1551,6 +1551,8 @@ export const et: Strings = {
   clientNoSessions: 'Treeninguid veel pole',
   clientSameDayLabel: 'Viimati sel päeval',
   clientOpenProfile: 'Täisprofiil',
+  clientLiveTitle: 'Treening käib',
+  clientLiveBody: 'Üksikasjad ilmuvad, kui sessioon lõpeb.',
   histStateRest: 'Puhkepäev',
   histStateVacation: 'Puhkus',
   histStateSick: 'Haige',
