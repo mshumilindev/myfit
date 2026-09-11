@@ -22366,6 +22366,20 @@ button.badge {
   color: var(--color-neutral-300);
   font-weight: 500;
 }
+
+/* Energy nudge breakdown — active (lifting / cardio) on one line, the passive
+   basal burn on its own, quieter line so it reads as a separate category. */
+.nudge-energy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nudge-energy .ne-active {
+  color: var(--color-neutral-300);
+}
+.nudge-energy .ne-passive {
+  color: var(--color-neutral-500);
+}
 .nudge-plays {
   display: flex;
   flex-wrap: wrap;

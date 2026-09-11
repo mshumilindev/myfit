@@ -156,7 +156,7 @@ export function DayHistorySheet({
               ~{totalKcal.toLocaleString(locale)} <span className="de-unit">{t.kcalShort}</span>
             </div>
             <div className="de-break">
-              {restKcal != null ? t.dayEnergyResting(restKcal) : ''}
+              {restKcal != null ? t.dayEnergyPassive(restKcal) : ''}
               {restKcal != null && activeKcal > 0 ? ' · ' : ''}
               {activeKcal > 0 ? t.dayEnergyActive(activeKcal) : ''}
             </div>

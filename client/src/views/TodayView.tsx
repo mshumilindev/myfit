@@ -398,7 +398,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const energyOut = {
     lift: Math.round(liftKcalWeek),
     activities: Math.round(activityKcalWeek),
-    rest: Math.round(restKcalWeek),
+    // Passive / basal burn — the whole-day resting baseline. Its own category,
+    // kept apart from the active (lifting / cardio) buckets and from the app's
+    // "rest day" concept.
+    passive: Math.round(restKcalWeek),
     total: Math.round(liftKcalWeek + activityKcalWeek + restKcalWeek),
   };
   const byName = new Map<string, { recW: number; recReps: number; recTs: number }>();
@@ -587,9 +590,20 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       icon: 'flame',
       kicker: t.kcalOut,
       title: `~${energyOut.total.toLocaleString(locale)}`,
-      body: `${t.energyLifting(energyOut.lift)} · ${t.energyCardio(energyOut.activities)}${
-        energyOut.rest > 0 ? ` · ${t.energyResting(energyOut.rest)}` : ''
-      }`,
+      body: (() => {
+        const fmt = (n: number) => n.toLocaleString(locale);
+        const active: string[] = [];
+        if (energyOut.lift > 0) active.push(t.energyLifting(fmt(energyOut.lift)));
+        if (energyOut.activities > 0) active.push(t.energyCardio(fmt(energyOut.activities)));
+        return (
+          <span className="nudge-energy">
+            {active.length > 0 && <span className="ne-active">{active.join(' · ')}</span>}
+            {energyOut.passive > 0 && (
+              <span className="ne-passive">{t.energyPassive(fmt(energyOut.passive))}</span>
+            )}
+          </span>
+        );
+      })(),
     });
   }
   if (analysisNudge) {
