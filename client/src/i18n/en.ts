@@ -1236,6 +1236,8 @@ export const en = {
   energyLifting: (n: number) => `${n} lifting`,
   energyResting: (n: number) => `${n} resting`,
   energyCardio: (n: number) => `${n} cardio`,
+  dayEnergyResting: (n: number) => `${n} resting`,
+  dayEnergyActive: (n: number) => `${n} active`,
   actStart: 'Start',
   actReadyCap: 'The timer starts when you press Start.',
   actFinishTitle: 'Finish activity?',

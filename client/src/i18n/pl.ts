@@ -1193,6 +1193,8 @@ export const pl: Strings = {
   energyLifting: (n: number) => `${n} siłowo`,
   energyResting: (n: number) => `${n} w spoczynku`,
   energyCardio: (n: number) => `${n} cardio`,
+  dayEnergyResting: (n: number) => `${n} spoczynkowo`,
+  dayEnergyActive: (n: number) => `${n} aktywnie`,
   actStart: 'Start',
   actReadyCap: 'Stoper ruszy po naciśnięciu Start.',
   actFinishTitle: 'Zakończyć aktywność?',

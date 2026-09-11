@@ -1205,6 +1205,8 @@ export const lt: Strings = {
   energyLifting: (n: number) => `${n} jėga`,
   energyResting: (n: number) => `${n} ramybės`,
   energyCardio: (n: number) => `${n} kardio`,
+  dayEnergyResting: (n: number) => `${n} ramybėje`,
+  dayEnergyActive: (n: number) => `${n} aktyviai`,
   actStart: 'Pradėti',
   actReadyCap: 'Laikmatis pradės, kai paspausi Pradėti.',
   actFinishTitle: 'Baigti veiklą?',

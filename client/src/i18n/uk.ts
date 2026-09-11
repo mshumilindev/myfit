@@ -1192,6 +1192,8 @@ export const uk: Strings = {
   energyLifting: (n: number) => `${n} силові`,
   energyResting: (n: number) => `${n} у спокої`,
   energyCardio: (n: number) => `${n} кардіо`,
+  dayEnergyResting: (n: number) => `${n} у спокої`,
+  dayEnergyActive: (n: number) => `${n} активно`,
   actStart: 'Почати',
   actReadyCap: 'Таймер запуститься, коли натиснеш «Почати».',
   actFinishTitle: 'Завершити активність?',

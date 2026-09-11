@@ -17,6 +17,7 @@ import {
 } from '../store';
 import { fmtWeekdayDayMonth, useT } from '../i18n';
 import { WorkoutRow, ActivityRow, SleepRow } from './HistoryTimeline';
+import { workoutCalories, activityCalories } from '../activities';
 
 type NoteState = 'missed' | 'rest' | 'vacation' | 'illness';
 
@@ -91,6 +92,21 @@ export function DayHistorySheet({
       });
   rows.sort((a, b) => a.ts - b.ts);
 
+  // Day energy: the persisted resting/baseline burn for the day (present only
+  // from the day this feature shipped — never backfilled) plus the active burn
+  // of everything logged that day. Shown when either is available.
+  const restKcal = store.energyDays[String(dayKey(day))]?.restKcal ?? null;
+  let activeKcal = 0;
+  for (const w of store.workouts)
+    if (w.finishedAt !== null && w.startedAt >= day && w.startedAt < end)
+      activeKcal += workoutCalories(w, bodyKg) ?? 0;
+  for (const a of store.activities)
+    if (a.finishedAt !== null && a.startedAt >= day && a.startedAt < end)
+      activeKcal += activityCalories(a, bodyKg) ?? 0;
+  activeKcal = Math.round(activeKcal);
+  const totalKcal = (restKcal ?? 0) + activeKcal;
+  const showEnergy = restKcal != null || activeKcal > 0;
+
   // Day state note (rest / vacation / illness, or a skipped program day).
   const dk = dayKey(day);
   const rest = store.restPeriods.find(
@@ -125,6 +141,23 @@ export function DayHistorySheet({
           <div className="dsm-text">
             <div className="dsm-title">{noteText[note].title}</div>
             <div className="dsm-body">{noteText[note].body}</div>
+          </div>
+        </div>
+      )}
+      {showEnergy && (
+        <div className="day-energy">
+          <span className="de-ic">
+            <Icon name="flame" weight="fill" />
+          </span>
+          <div className="de-body">
+            <div className="de-total tnum">
+              ~{totalKcal.toLocaleString(locale)} <span className="de-unit">{t.kcalShort}</span>
+            </div>
+            <div className="de-break">
+              {restKcal != null ? t.dayEnergyResting(restKcal) : ''}
+              {restKcal != null && activeKcal > 0 ? ' · ' : ''}
+              {activeKcal > 0 ? t.dayEnergyActive(activeKcal) : ''}
+            </div>
           </div>
         </div>
       )}

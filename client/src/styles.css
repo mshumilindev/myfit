@@ -1790,6 +1790,47 @@ i > svg {
   margin-top: 12px;
 }
 
+/* Day energy summary — resting/baseline burn (from the feature-start day
+   forward) plus the active burn of everything logged that day. */
+.day-energy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-kcal) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-kcal) 22%, transparent);
+}
+.day-energy .de-ic {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--color-kcal);
+  background: color-mix(in srgb, var(--color-kcal) 14%, transparent);
+}
+.day-energy .de-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-kcal-text);
+}
+.day-energy .de-unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-neutral-400);
+}
+.day-energy .de-break {
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+  margin-top: 2px;
+}
+.day-energy + .day-sheet-items {
+  margin-top: 12px;
+}
+
 .reminder-card {
   display: flex;
   gap: 11px;

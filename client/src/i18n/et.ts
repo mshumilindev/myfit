@@ -1187,6 +1187,8 @@ export const et: Strings = {
   energyLifting: (n: number) => `${n} jõusaal`,
   energyResting: (n: number) => `${n} puhkeenergia`,
   energyCardio: (n: number) => `${n} kardio`,
+  dayEnergyResting: (n: number) => `${n} rahuolekus`,
+  dayEnergyActive: (n: number) => `${n} aktiivselt`,
   actStart: 'Alusta',
   actReadyCap: 'Taimer käivitub, kui vajutad Alusta.',
   actFinishTitle: 'Lõpeta tegevus?',
