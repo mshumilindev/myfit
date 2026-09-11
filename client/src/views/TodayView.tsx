@@ -1195,7 +1195,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             <WeekStrip
               onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
               onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
-              onOpenSleep={(id) => shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })}
+              onOpenSleep={(id) =>
+                shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })
+              }
             />
           </div>
         )}

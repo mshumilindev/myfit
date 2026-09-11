@@ -566,7 +566,8 @@ export const lt: Strings = {
   dayIll: 'Liga',
   dayRest: 'Poilsis',
   dayMissedTitle: 'Praleista treniruotė',
-  dayMissedNamed: (name: string) => `„${name}“ buvo suplanuota šiai dienai — bet nieko neužfiksuota.`,
+  dayMissedNamed: (name: string) =>
+    `„${name}“ buvo suplanuota šiai dienai — bet nieko neužfiksuota.`,
   dayMissedGeneric: 'Šiai dienai buvo suplanuota treniruotė — bet nieko neužfiksuota.',
   dayRestBody: 'Poilsio diena — atsigavimas, treniruočių neplanuota.',
   dayVacationBody: 'Atostogos — laikas ne salėje.',

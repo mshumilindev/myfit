@@ -562,7 +562,8 @@ export const uk: Strings = {
   dayIll: 'Хворів',
   dayRest: 'Відпочинок',
   dayMissedTitle: 'Пропущене тренування',
-  dayMissedNamed: (name: string) => `«${name}» було у плані на цей день — але нічого не залоговано.`,
+  dayMissedNamed: (name: string) =>
+    `«${name}» було у плані на цей день — але нічого не залоговано.`,
   dayMissedGeneric: 'На цей день був день у залі за планом — але нічого не залоговано.',
   dayRestBody: 'День відпочинку — відновлення, тренувань не заплановано.',
   dayVacationBody: 'Відпустка — час поза залом.',
