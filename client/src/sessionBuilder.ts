@@ -298,6 +298,8 @@ export interface PlannedExercise {
   progState: string;
   warmup: PlannedSet[];
   why: string;
+  /** Dynamic ordering weight — bigger/base lifts first (see exercisePriority). */
+  priority: number;
   durationMin?: number | null;
 }
 
@@ -358,6 +360,71 @@ function whyFor(
   return 'Fits the day and your recovery.';
 }
 
+// ---------------------------------------------------------------------------
+// Exercise ordering priority — computed dynamically from catalog attributes
+// (mechanic, muscles crossed, equipment, load, skill), never a hardcoded list.
+// The bigger, more systemic "base" lifts sort to the front of the day; light
+// isolation sorts to the back.
+// ---------------------------------------------------------------------------
+// Muscle-group training order — large, compound-driving groups first, the small
+// arms/forearms later, core/abs at the very END of the session. This dominates
+// ordering; catalog attributes (below) only rank lifts WITHIN the same muscle.
+// A principled size ranking, not a per-exercise hardcode.
+const MUSCLE_PRIORITY: Record<string, number> = {
+  quads: 13,
+  hamstrings: 12,
+  glutes: 11,
+  chest: 10,
+  lats: 9,
+  traps: 8,
+  lower_back: 7,
+  shoulders: 6,
+  triceps: 5,
+  biceps: 4,
+  calves: 3,
+  forearms: 2,
+  core: -5, // abs/core come last — never mid-session
+  cardio: -10,
+};
+const EQUIP_PRIORITY: Record<string, number> = {
+  barbell: 6,
+  body: 5,
+  dumbbell: 4,
+  kettlebell: 4,
+  'e-z-curl-bar': 2,
+  cable: 2,
+  machine: 1,
+  bands: 0,
+};
+const LEVEL_PRIORITY: Record<string, number> = { expert: 2, intermediate: 1, beginner: 0 };
+
+/**
+ * Ordering weight for a planned main lift. The muscle it was picked for dominates
+ * (large groups first, core last); within a muscle the day's anchor leads, then
+ * real compounds before isolation, heavier/more-systemic before lighter. The
+ * catalog's `mechanic` flag is noisy (some curls/ab work read as "compound"), so
+ * it never crosses muscle blocks — it only orders lifts inside one. No hardcoded
+ * exercise list.
+ */
+function exercisePriority(p: {
+  selMuscle: MuscleGroup;
+  anchor: boolean;
+  compound: boolean;
+  secondary: MuscleGroup[];
+  equipment: string[];
+  level: RichExercise['level'];
+  hasRamp: boolean;
+}): number {
+  let s = (MUSCLE_PRIORITY[p.selMuscle] ?? 1) * 1000; // muscle group dominates
+  if (p.anchor) s += 300; // the muscle's primary lift leads its block
+  if (p.compound) s += 100; // compounds before isolation
+  s += Math.min(p.secondary.length, 5) * 10; // more muscles crossed = more systemic
+  if (p.hasRamp) s += 20; // heavy enough for a warm-up ramp → earlier
+  s += EQUIP_PRIORITY[p.equipment[0] ?? ''] ?? 0; // free weights nudge ahead
+  s += LEVEL_PRIORITY[p.level ?? ''] ?? 0; // technical lifts while fresh
+  return s;
+}
+
 /** Build a full training day from the context. */
 export function buildDay(ctx: BuildContext): GeneratedDay {
   const spec = intentSpec(ctx.intent);
@@ -379,6 +446,9 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
     secondary: MuscleGroup[],
     equipment: string | null,
     compound: boolean,
+    level: RichExercise['level'],
+    selMuscle: MuscleGroup,
+    isAnchor: boolean,
     sets: number,
   ): PlannedExercise => {
     const loadType = deriveLoadType(name, equipment ? [equipment] : []);
@@ -396,6 +466,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
         ctx.sex,
       );
     }
+    const warmupSets = warmupRamp(weight, { loadType, compound });
     return {
       name,
       kind: 'strength',
@@ -409,8 +480,17 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
       targetWeight: weight,
       deltaKg: target.deltaKg,
       progState: target.state,
-      warmup: warmupRamp(weight, { loadType, compound }),
+      warmup: warmupSets,
       why: whyFor(primary, emph, ready.get(primary as MuscleGroup)?.state, target.state, false),
+      priority: exercisePriority({
+        selMuscle,
+        anchor: isAnchor,
+        compound,
+        secondary,
+        equipment: equipment ? [equipment] : [],
+        level,
+        hasRamp: warmupSets.length > 0,
+      }),
     };
   };
 
@@ -438,6 +518,9 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
         anchor.secondary,
         anchor.equipment,
         anchor.compound,
+        anchor.level,
+        m,
+        true,
         anchorSets,
       );
       if (playName) ex.why = 'One of your staples on this day.';
@@ -451,13 +534,27 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
       if (used.has(c.name)) continue;
       used.add(c.name);
       const sets = clamp(budget, spec.setsMin, spec.setsMax);
-      main.push(makeExercise(c.name, c.primary, c.secondary, c.equipment, c.compound, sets));
+      main.push(
+        makeExercise(
+          c.name,
+          c.primary,
+          c.secondary,
+          c.equipment,
+          c.compound,
+          c.level,
+          m,
+          false,
+          sets,
+        ),
+      );
       budget -= sets;
     }
   }
 
-  // Order: compounds before isolation, keeping muscle grouping roughly intact.
-  main.sort((a, b) => Number(b.warmup.length > 0) - Number(a.warmup.length > 0));
+  // Order the whole day: large muscle groups first, core/abs last; within each
+  // muscle the anchor and real compounds lead — all from exercisePriority, not a
+  // hardcoded list. Stable sort keeps insertion order within ties.
+  main.sort((a, b) => b.priority - a.priority);
 
   const warmup: PlannedExercise[] = ctx.warmup
     ? [
@@ -476,6 +573,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           progState: 'first',
           warmup: [],
           why: 'Raise the heart rate and prime the day’s patterns.',
+          priority: 0,
           durationMin: 5,
         },
       ]
@@ -498,6 +596,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           progState: 'first',
           warmup: [],
           why: 'Zone-2 finisher to round out the day.',
+          priority: 0,
           durationMin: 12,
         },
       ]
@@ -520,6 +619,7 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
           progState: 'first',
           warmup: [],
           why: 'Ease down and stretch the muscles you trained.',
+          priority: 0,
           durationMin: 4,
         },
       ]

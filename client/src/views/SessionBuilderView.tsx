@@ -1,8 +1,8 @@
 /**
- * Session Builder wizard. Auto-build lands here on the Review step with a full
- * day already generated; the numbered stepper lets you step back to adjust the
- * intent, muscles or the day's extras (and your physique goal if it isn't set),
- * with the plan re-generated live. Start materialises it into a live session.
+ * Session Builder wizard. It opens on step 1 and walks the whole flow — physique
+ * goal (only if unset), intent, muscles, the day's extras — regenerating the plan
+ * live and ending on a Review of the full generated day. Start materialises it
+ * into a live session; the gym is auto-chosen (nearest, else the usual one).
  */
 import { useMemo, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
@@ -10,6 +10,7 @@ import { Icon } from '../ui';
 import { useT } from '../i18n';
 import {
   latestWeight,
+  pickSessionGym,
   saveGeneratedDayAsProgram,
   startGeneratedDay,
   setPhysiqueTarget,
@@ -53,6 +54,9 @@ export function SessionBuilderView({
   const { t, locale } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());
+  // Gym is auto-selected (nearest by cached location, else the usual one) — no
+  // manual gym step in the wizard.
+  const [sessionGym] = useState(() => pickSessionGym());
 
   const [intent, setIntent] = useState<SessionIntent>('muscle');
   const [muscles, setMuscles] = useState<MuscleGroup[] | null>(null); // null = auto
@@ -65,7 +69,7 @@ export function SessionBuilderView({
   const steps = goalNeeded
     ? (['goal', 'intent', 'muscles', 'day', 'review'] as const)
     : (['intent', 'muscles', 'day', 'review'] as const);
-  const [step, setStep] = useState(steps.length - 1); // auto-build lands on Review
+  const [step, setStep] = useState(0); // always open on step 1 — the whole wizard, step by step
 
   const finished = useMemo(
     () => store.workouts.filter((w) => w.finishedAt !== null),
@@ -76,7 +80,7 @@ export function SessionBuilderView({
     activities: store.activities,
     body: store.bodyMetrics,
     goals: store.goals,
-    gym: null,
+    gym: sessionGym,
     now,
     intent,
     targetMuscles: muscles ?? undefined,
@@ -130,8 +134,9 @@ export function SessionBuilderView({
   }
 
   function start() {
-    const w = startGeneratedDay(day, null);
-    if (w) shell.openOverlay({ screen: 'session', workoutId: w.id });
+    const w = startGeneratedDay(day, sessionGym?.id ?? null);
+    // Replace (not stack) the wizard, so discarding the session returns to Today.
+    if (w) shell.replaceOverlay({ screen: 'session', workoutId: w.id });
   }
 
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
@@ -397,7 +402,12 @@ export function SessionBuilderView({
 
       <div className="sbw-steps">
         {steps.map((s, i) => (
-          <button key={s} className="sbw-st" onClick={() => setStep(i)} aria-current={i === step}>
+          <button
+            key={s}
+            className={`sbw-st${i <= step ? ' reached' : ''}`}
+            onClick={() => setStep(i)}
+            aria-current={i === step}
+          >
             <span className={`sbw-cir${i === step ? ' on' : i < step ? ' done' : ''}`}>
               {i < step ? <Icon name="check" /> : i + 1}
             </span>

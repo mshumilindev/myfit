@@ -218,6 +218,7 @@ export type Overlay =
 
 export interface Shell {
   openOverlay: (o: Overlay) => void;
+  replaceOverlay: (o: Overlay) => void;
   goTab: (t: Tab) => void;
   goPlaybook: () => void;
   toast: (t: ToastState) => void;
@@ -696,6 +697,13 @@ export function App() {
       return { cur: o, stack: n.cur === null ? n.stack : [...n.stack, n.cur] };
     });
   }, []);
+  /** Replace the current overlay in place, keeping its logical parent stack, so
+   * closing the replacement returns PAST it — used when the builder hands off to
+   * the session it just started, so discarding that session lands on Today, not
+   * back in the wizard. */
+  const replaceOverlay = useCallback((o: Overlay) => {
+    setOverlayNav((n) => ({ cur: o, stack: n.stack }));
+  }, []);
   const [toasts, setToasts] = useState<Array<ToastState & { id: number }>>([]);
   const [snack, setSnack] = useState<SnackState | null>(null);
   // A fresh build took control → show the reload plate until the user reloads.
@@ -734,6 +742,7 @@ export function App() {
 
   const shell: Shell = {
     openOverlay: setOverlay,
+    replaceOverlay,
     goTab: (x) => {
       setOverlay(null);
       setTab(x);

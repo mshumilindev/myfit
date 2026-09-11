@@ -1007,6 +1007,47 @@ export function startWorkout(
 }
 
 /**
+ * Auto-pick the gym for a session with no explicit choice (e.g. the session
+ * builder). Preference, most→least confident: a gym we're physically near right
+ * now (from the cached location fix, so no permission prompt), else the gym we
+ * train at most often lately, else our most recent gym, else the only gym we
+ * have — else none. Pure and synchronous; safe to call at session start.
+ */
+export function pickSessionGym(): Gym | null {
+  const gyms = state.gyms;
+  if (gyms.length === 0) return null;
+  if (gyms.length === 1) return gyms[0];
+
+  // 1) Near a gym now, by the cached position (never prompts).
+  const pos = readPosCache();
+  if (pos) {
+    let near: { g: Gym; d: number } | null = null;
+    for (const g of gyms) {
+      const d = haversineM(pos.lat, pos.lng, g.lat, g.lng);
+      if (d <= g.radiusM + pos.accuracy && (!near || d < near.d)) near = { g, d };
+    }
+    if (near) return near.g;
+  }
+
+  // 2) The gym we usually train at — most frequent across recent finished
+  //    workouts, most-recent as the tiebreak.
+  const RECENT_MS = 90 * 24 * 60 * 60 * 1000;
+  const since = Date.now() - RECENT_MS;
+  const count = new Map<string, number>();
+  let latest: { gymId: string; at: number } | null = null;
+  for (const w of state.workouts) {
+    if (w.finishedAt === null || !w.gymId) continue;
+    if (!gyms.some((g) => g.id === w.gymId)) continue;
+    if (w.startedAt >= since) count.set(w.gymId, (count.get(w.gymId) ?? 0) + 1);
+    if (!latest || w.startedAt > latest.at) latest = { gymId: w.gymId, at: w.startedAt };
+  }
+  let best: { id: string; n: number } | null = null;
+  for (const [id, n] of count) if (!best || n > best.n) best = { id, n };
+  const chosenId = best?.id ?? latest?.gymId ?? null;
+  return gyms.find((g) => g.id === chosenId) ?? null;
+}
+
+/**
  * Materialise a generated day (session builder) into a live workout: start it,
  * then add every planned exercise across the warm-up / main / cardio / cool-down
  * blocks with its planned sets, reps and muscles. Returns the live workout.
