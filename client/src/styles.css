@@ -1747,6 +1747,95 @@ i > svg {
 }
 
 /* Day-history drawer (opened from the week strip). */
+/* Session launch chooser (start-session entry) */
+.sbl-head {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+.sbl-head .t {
+  font-size: 17px;
+  font-weight: 700;
+}
+.sbl-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sbl-opt {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+}
+.sbl-opt:active {
+  background: var(--color-neutral-900);
+}
+.sbl-opt.accent {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-accent) 34%, transparent);
+}
+.sbl-opt .sbl-ic {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-300);
+  font-size: 20px;
+}
+.sbl-opt.accent .sbl-ic {
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  color: var(--color-accent);
+}
+.sbl-opt .sbl-txt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.sbl-opt .sbl-txt b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.sbl-opt .sbl-txt span {
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+}
+.sbl-opt.accent .sbl-txt span {
+  color: var(--color-accent-300);
+}
+.sbl-opt .sbl-go {
+  flex: none;
+  color: var(--color-neutral-600);
+  font-size: 18px;
+}
+.sbl-goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-900);
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+}
+.sbl-goal .ui-icon {
+  color: var(--color-accent-400);
+}
+
 .day-sheet-head {
   margin-bottom: 2px;
 }

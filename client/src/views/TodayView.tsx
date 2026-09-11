@@ -26,6 +26,7 @@ import {
   logVisitAsWorkout,
   resolveMuscles,
   startWorkout,
+  startGeneratedDay,
   topSet,
   workoutDayReadout,
   workoutVolumeKg,
@@ -34,6 +35,7 @@ import {
 import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
 import { DayHistorySheet } from '../components/DayHistorySheet';
+import { SessionLaunchSheet } from '../components/SessionLaunchSheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
@@ -46,6 +48,7 @@ import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
+import { buildDay } from '../sessionBuilder';
 import { GymThumb } from '../components/GymThumb';
 import { EquipmentIcon, type EquipmentId } from '../data/equipment';
 
@@ -166,6 +169,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
   const [startPicker, setStartPicker] = useState(false);
+  const [launch, setLaunch] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
@@ -218,10 +222,32 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     if (!w) return;
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
-  function startSession() {
-    if (resumeLive()) return;
+  function startScratch() {
     if (store.gyms.length > 0) setStartPicker(true);
     else beginSession(null);
+  }
+  function autoBuild() {
+    if (resumeLive()) return;
+    const day = buildDay({
+      finished: store.workouts.filter((w) => w.finishedAt !== null),
+      activities: store.activities,
+      body: store.bodyMetrics,
+      goals: store.goals,
+      gym: null,
+      now: Date.now(),
+      intent: 'muscle',
+      warmup: true,
+      cardio: false,
+      cooldown: true,
+      bodyKg: latestWeight(store.bodyMetrics)?.weight ?? null,
+      sex: store.bodyMetrics.sex,
+    });
+    const w = startGeneratedDay(day, null);
+    if (w) shell.openOverlay({ screen: 'session', workoutId: w.id });
+  }
+  function startSession() {
+    if (resumeLive()) return;
+    setLaunch(true);
   }
   function openActivitySheet() {
     if (resumeLive()) return;
@@ -684,6 +710,19 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     }
     return { dayName, labels, startMin, mealMin };
   })();
+
+  // Today's program-day exercises → the "from my program" launch option.
+  const progItemsToday =
+    assignment && assignedActive && !trainedToday
+      ? assignment.program.items.filter((i) => i.day === todayWeekday)
+      : [];
+  const launchProgramSub =
+    progItemsToday.length > 0
+      ? t.sbFromProgramSub(
+          assignment!.program.dayNames?.[String(todayWeekday)] || t.progDay(todayWeekday),
+          progItemsToday.length,
+        )
+      : null;
 
   // A program rest day: an active plan is assigned but this weekday prescribes
   // no work — and nothing's been logged yet, nor is a rest period already running.
@@ -1563,6 +1602,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         )}
       </div>
 
+      {launch && (
+        <SessionLaunchSheet
+          onClose={() => setLaunch(false)}
+          programSub={launchProgramSub}
+          onProgram={launchProgramSub ? () => startProgramDay(todayWeekday) : undefined}
+          onScratch={startScratch}
+          onAuto={autoBuild}
+        />
+      )}
       {startPicker && (
         <GymPicker
           gyms={store.gyms}

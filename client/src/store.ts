@@ -76,6 +76,7 @@ import {
   sleepKindOf,
 } from './sleep';
 import { currentUid, getRole } from './api';
+import type { GeneratedDay } from './sessionBuilder';
 
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
@@ -1003,6 +1004,27 @@ export function startWorkout(
   for (const id of closed) saveWorkout(id);
   writeLiveSession(workout);
   return workout;
+}
+
+/**
+ * Materialise a generated day (session builder) into a live workout: start it,
+ * then add every planned exercise across the warm-up / main / cardio / cool-down
+ * blocks with its planned sets, reps and muscles. Returns the live workout.
+ */
+export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null): Workout | null {
+  const w = startWorkout(gymId, { dayName: day.dayName, targetMuscles: day.targetMuscles });
+  if (!w) return null;
+  for (const ex of [...day.warmup, ...day.main, ...day.cardio, ...day.cooldown]) {
+    addExercise(w.id, ex.name, ex.kind, {
+      plannedSets: ex.sets > 0 ? ex.sets : null,
+      plannedReps: ex.repHigh > 0 ? ex.repHigh : null,
+      plannedDurationMin: ex.durationMin ?? null,
+      equipment: ex.equipment,
+      primaryMuscle: ex.primary && ex.primary !== 'cardio' ? ex.primary : null,
+      secondaryMuscles: ex.secondary,
+    });
+  }
+  return state.workouts.find((x) => x.id === w.id) ?? w;
 }
 
 function patchWorkout(id: string, patch: Partial<Workout>): void {
