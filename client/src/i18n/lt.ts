@@ -130,6 +130,7 @@ export const lt: Strings = {
   sbCooldownOpt: 'Atvėsimas',
   sbReviewQ: 'Dienos peržiūra',
   sbStartNow: 'Pradėti',
+  sbSaveDay: 'Išsaugoti kaip dieną',
   sbTodayCovers: 'Šiandien apima',
   sbGoalQ: 'Tavo figūra',
   sbReps: 'kart.',

@@ -118,6 +118,7 @@ export const et: Strings = {
   sbCooldownOpt: 'Mahajahtumine',
   sbReviewQ: 'Päeva ülevaade',
   sbStartNow: 'Alusta',
+  sbSaveDay: 'Salvesta päevana',
   sbTodayCovers: 'Täna katab',
   sbGoalQ: 'Sinu figuur',
   sbReps: 'kord.',

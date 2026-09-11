@@ -130,6 +130,7 @@ export const pl: Strings = {
   sbCooldownOpt: 'Wyciszenie',
   sbReviewQ: 'Przegląd dnia',
   sbStartNow: 'Zacznij',
+  sbSaveDay: 'Zapisz jako dzień',
   sbTodayCovers: 'Dziś obejmuje',
   sbGoalQ: 'Twoja sylwetka',
   sbReps: 'powt.',

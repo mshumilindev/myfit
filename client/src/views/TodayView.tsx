@@ -226,7 +226,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   }
   function autoBuild() {
     if (resumeLive()) return;
-    shell.openOverlay({ screen: 'builder' });
+    shell.openOverlay({ screen: 'builder', hasProgram: !!assignment && assignedActive });
   }
   function startSession() {
     if (resumeLive()) return;

@@ -211,7 +211,7 @@ export type Overlay =
       externalId?: string;
     }
   | { screen: 'equipment'; itemId: string; gymId?: string }
-  | { screen: 'builder' }
+  | { screen: 'builder'; hasProgram?: boolean }
   | { screen: 'mastery' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
@@ -1212,7 +1212,11 @@ export function App() {
       )}
       {activeOverlay?.screen === 'builder' && (
         <Suspense fallback={null}>
-          <SessionBuilderView shell={shell} onClose={closeOverlay} />
+          <SessionBuilderView
+            shell={shell}
+            hasProgram={activeOverlay.hasProgram ?? false}
+            onClose={closeOverlay}
+          />
         </Suspense>
       )}
       {activeOverlay?.screen === 'activity' && (

@@ -122,6 +122,7 @@ export const en = {
   sbCooldownOpt: 'Cool-down',
   sbReviewQ: 'Review your day',
   sbStartNow: 'Start now',
+  sbSaveDay: 'Save as a day',
   sbTodayCovers: 'Today covers',
   sbGoalQ: 'Your physique',
   sbReps: 'reps',

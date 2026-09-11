@@ -130,6 +130,7 @@ export const uk: Strings = {
   sbCooldownOpt: 'Заминка',
   sbReviewQ: 'Огляд дня',
   sbStartNow: 'Почати',
+  sbSaveDay: 'Зберегти як день',
   sbTodayCovers: 'Сьогодні працює',
   sbGoalQ: 'Твоя статура',
   sbReps: 'повт.',

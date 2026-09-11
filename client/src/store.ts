@@ -75,7 +75,7 @@ import {
   classifySleepKind,
   sleepKindOf,
 } from './sleep';
-import { currentUid, getRole } from './api';
+import { currentUid, getRole, callFn } from './api';
 import type { GeneratedDay } from './sessionBuilder';
 
 const STATE_KEY = 'spotter.state';
@@ -1025,6 +1025,57 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
     });
   }
   return state.workouts.find((x) => x.id === w.id) ?? w;
+}
+
+/**
+ * Save a generated day as a repeating program day (session builder → "Save as a
+ * day"). Creates a one-training-day program placed on the given weekday (Mon=1…
+ * Sun=7) — every other weekday is a rest day by absence — and activates it as
+ * the member's own program. Returns 'active' when activation succeeded, else
+ * 'draft' (the program is created but activation was rejected, e.g. before the
+ * relaxed validation is deployed). Throws only if not signed in.
+ */
+export async function saveGeneratedDayAsProgram(
+  day: GeneratedDay,
+  weekday: number,
+): Promise<'active' | 'draft'> {
+  const uid = currentUid();
+  if (!uid) throw new Error('not signed in');
+  const wd = String(weekday);
+  const id = uuid();
+  const items = day.main.map((ex, idx) => ({
+    id: uuid(),
+    day: weekday,
+    position: idx,
+    name: ex.name,
+    kind: ex.kind,
+    sets: ex.sets,
+    reps: ex.repHigh,
+    durationMin: ex.durationMin ?? null,
+    equipment: ex.equipment,
+    groupId: null as string | null,
+    groupOrder: null as number | null,
+    dropLast: false,
+  }));
+  const program = {
+    id,
+    authorId: uid,
+    name: day.dayName,
+    weeks: 0,
+    daysPerWeek: 1,
+    status: 'draft' as const,
+    dayNames: { [wd]: day.dayName },
+    targetMuscles: { [wd]: day.targetMuscles },
+    items,
+    updatedAt: Date.now(),
+  };
+  await setDoc(doc(db, 'programs', id), program);
+  try {
+    await callFn('setProgramStatus', { id, status: 'active' });
+    return 'active';
+  } catch {
+    return 'draft';
+  }
 }
 
 function patchWorkout(id: string, patch: Partial<Workout>): void {

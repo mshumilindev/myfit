@@ -31,7 +31,7 @@ interface ProgramDoc {
   status: 'draft' | 'active' | 'archived';
   dayNames: Record<string, string>;
   targetMuscles?: Record<string, string[]>;
-  items: Array<{ day: number }>;
+  items: Array<{ day: number; name?: string }>;
   updatedAt: number;
 }
 interface AssignmentDoc {
@@ -99,14 +99,17 @@ export const setProgramStatus = onCall(async (req) => {
   const p = await programById(id);
   if (!p || p.authorId !== uid) throw new HttpsError('permission-denied', 'not yours');
   if (status === 'active') {
-    for (let day = 1; day <= p.daysPerWeek; day++) {
-      const key = String(day);
-      const hasItems = (p.items ?? []).some((it) => Number(it.day) === day);
-      const hasTargets =
-        Array.isArray(p.targetMuscles?.[key]) && (p.targetMuscles?.[key] ?? []).length > 0;
-      if (!hasItems && !hasTargets)
-        throw new HttpsError('failed-precondition', 'incomplete', { day });
-    }
+    // A program is activatable when it has at least one training day with
+    // content. Training days are the weekdays it actually prescribes (distinct
+    // item days + target-muscle days), so non-contiguous weeks (e.g. Mon/Wed/Fri)
+    // and single-day plans on any weekday activate — not only contiguous
+    // day-1..N blocks.
+    const trainingDays = new Set<number>();
+    for (const it of p.items ?? []) if ((it.name ?? '').trim()) trainingDays.add(Number(it.day));
+    for (const [k, v] of Object.entries(p.targetMuscles ?? {}))
+      if (Array.isArray(v) && v.length > 0) trainingDays.add(Number(k));
+    if (trainingDays.size === 0)
+      throw new HttpsError('failed-precondition', 'incomplete', { day: 1 });
   }
   const me = await loadUser(uid);
   const now = Date.now();

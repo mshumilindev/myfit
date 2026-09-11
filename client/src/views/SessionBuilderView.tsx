@@ -8,7 +8,13 @@ import { useMemo, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { Icon } from '../ui';
 import { useT } from '../i18n';
-import { latestWeight, startGeneratedDay, setPhysiqueTarget, useStore } from '../store';
+import {
+  latestWeight,
+  saveGeneratedDayAsProgram,
+  startGeneratedDay,
+  setPhysiqueTarget,
+  useStore,
+} from '../store';
 import {
   buildDay,
   intentSpec,
@@ -32,7 +38,15 @@ const UPPER: MuscleGroup[] = [
 ];
 const LOWER: MuscleGroup[] = ['quads', 'hamstrings', 'glutes', 'calves', 'lower_back', 'core'];
 
-export function SessionBuilderView({ shell, onClose }: { shell: Shell; onClose: () => void }) {
+export function SessionBuilderView({
+  shell,
+  hasProgram,
+  onClose,
+}: {
+  shell: Shell;
+  hasProgram: boolean;
+  onClose: () => void;
+}) {
   const { t } = useT();
   const store = useStore();
   const [now] = useState(() => Date.now());
@@ -115,6 +129,19 @@ export function SessionBuilderView({ shell, onClose }: { shell: Shell; onClose: 
   function start() {
     const w = startGeneratedDay(day, null);
     if (w) shell.openOverlay({ screen: 'session', workoutId: w.id });
+  }
+
+  const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
+  const [saving, setSaving] = useState(false);
+  async function saveDay() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await saveGeneratedDayAsProgram(day, todayWeekday);
+    } finally {
+      setSaving(false);
+    }
+    start();
   }
 
   // ---- step bodies -------------------------------------------------------
@@ -347,9 +374,16 @@ export function SessionBuilderView({ shell, onClose }: { shell: Shell; onClose: 
           </button>
         ) : null}
         {cur === 'review' ? (
-          <button className="btn btn-primary sbw-go" onClick={start}>
-            {t.sbStartNow}
-          </button>
+          <>
+            {!hasProgram && (
+              <button className="btn btn-secondary sbw-save" onClick={saveDay} disabled={saving}>
+                {t.sbSaveDay}
+              </button>
+            )}
+            <button className="btn btn-primary sbw-go" onClick={start}>
+              {t.sbStartNow}
+            </button>
+          </>
         ) : (
           <button className="btn btn-primary sbw-go" onClick={() => setStep(step + 1)}>
             {stepLabel[steps[Math.min(step + 1, steps.length - 1)]]}
