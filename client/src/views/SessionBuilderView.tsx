@@ -4,7 +4,7 @@
  * live and ending on a Review of the full generated day. Start materialises it
  * into a live session; the gym is auto-chosen (nearest, else the usual one).
  */
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, useRef, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { Icon, useExerciseName } from '../ui';
 import { useT } from '../i18n';
@@ -16,14 +16,20 @@ import {
   setPhysiqueTarget,
   useStore,
 } from '../store';
+import { protectedMuscles as selProtected, loadCaps as selLoadCaps } from '../injury';
 import {
   buildDay,
   intentSpec,
+  rankExercisesForMuscle,
+  warmupRamp,
   type BuildContext,
   type PlannedExercise,
+  type Candidate,
   type SessionIntent,
   type WhyKey,
 } from '../sessionBuilder';
+import { nextTarget, topHistory } from '../progression';
+import { deriveLoadType } from '../loads';
 import { muscleReadiness, READINESS_COLOR } from '../recovery';
 import { ARCHETYPES_BY_SEX, ARCHETYPES, type ArchetypeId } from '../goals';
 import type { MuscleGroup } from '../data/exercises';
@@ -85,6 +91,8 @@ export function SessionBuilderView({
     now,
     intent,
     targetMuscles: muscles ?? undefined,
+    protectedMuscles: [...selProtected(store.injuries)],
+    loadCaps: selLoadCaps(store.injuries),
     lengthMin,
     warmup,
     cardio,
@@ -109,6 +117,95 @@ export function SessionBuilderView({
       now,
     ],
   );
+
+  // Review edits: the user can reorder (drag) and swap the MAIN lifts before
+  // starting. Held as an override; reset whenever the plan regenerates.
+  const [mainEdit, setMainEdit] = useState<PlannedExercise[] | null>(null);
+  // Drop the override whenever the plan regenerates (inputs changed) — the
+  // render-time reset pattern, no effect needed.
+  const [planRef, setPlanRef] = useState(day);
+  if (planRef !== day) {
+    setPlanRef(day);
+    setMainEdit(null);
+  }
+  const mainList = mainEdit ?? day.main;
+  const [dragI, setDragI] = useState<number | null>(null);
+  const dragIRef = useRef<number | null>(null);
+  const rowEls = useRef<(HTMLDivElement | null)[]>([]);
+  const setDrag = (v: number | null) => {
+    dragIRef.current = v;
+    setDragI(v);
+  };
+  const reorderMain = (from: number, to: number) =>
+    setMainEdit(() => {
+      const a = [...mainList];
+      if (to < 0 || to >= a.length || from === to) return a;
+      const [x] = a.splice(from, 1);
+      a.splice(to, 0, x);
+      return a;
+    });
+  const onDragMove = (clientY: number) => {
+    const cur = dragIRef.current;
+    if (cur == null) return;
+    let target = cur;
+    rowEls.current.forEach((el, idx) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (clientY >= r.top && clientY <= r.bottom) target = idx;
+    });
+    if (target !== cur) {
+      reorderMain(cur, target);
+      setDrag(target);
+    }
+  };
+  const buildSwap = (cand: Candidate, slot: PlannedExercise): PlannedExercise => {
+    const equipment = cand.equipment ? [cand.equipment] : [];
+    const loadType = deriveLoadType(cand.name, equipment);
+    const target = nextTarget(topHistory(finished, cand.name, now), {
+      plannedReps: slot.repHigh,
+      equipment,
+      primary: cand.primary ?? undefined,
+      loadType,
+    });
+    return {
+      name: cand.name,
+      kind: 'strength',
+      primary: cand.primary,
+      secondary: cand.secondary,
+      equipment,
+      loadType,
+      sets: slot.sets,
+      repLow: slot.repLow,
+      repHigh: slot.repHigh,
+      targetWeight: target.weight,
+      deltaKg: target.deltaKg,
+      progState: target.state,
+      warmup: warmupRamp(target.weight, { loadType, compound: cand.compound }),
+      whyKey: slot.whyKey,
+      priority: slot.priority,
+    };
+  };
+  const swapMain = (i: number) => {
+    const cur = mainList[i];
+    if (!cur.primary) return;
+    const cands = rankExercisesForMuscle(cur.primary, sessionGym);
+    if (cands.length < 2) return;
+    const used = new Set(mainList.map((x) => x.name));
+    const start = Math.max(
+      0,
+      cands.findIndex((c) => c.name === cur.name),
+    );
+    for (let k = 1; k <= cands.length; k++) {
+      const c = cands[(start + k) % cands.length];
+      if (!c || c.name === cur.name || used.has(c.name)) continue;
+      setMainEdit(() => {
+        const a = [...mainList];
+        a[i] = buildSwap(c, cur);
+        return a;
+      });
+      return;
+    }
+  };
 
   const ready = useMemo(() => muscleReadiness(finished, now), [finished, now]);
   const selected = muscles ?? day.targetMuscles;
@@ -152,7 +249,7 @@ export function SessionBuilderView({
   }
 
   function start() {
-    const w = startGeneratedDay(day, sessionGym?.id ?? null);
+    const w = startGeneratedDay({ ...day, main: mainList }, sessionGym?.id ?? null);
     // Replace (not stack) the wizard, so discarding the session returns to Today.
     if (w) shell.replaceOverlay({ screen: 'session', workoutId: w.id });
   }
@@ -304,7 +401,7 @@ export function SessionBuilderView({
     </div>
   );
 
-  const exRow = (ex: PlannedExercise) => {
+  const exRow = (ex: PlannedExercise, editable = false, index = -1) => {
     const w =
       ex.targetWeight != null
         ? `${ex.targetWeight} ${t.kgCol.toLowerCase()}`
@@ -318,12 +415,57 @@ export function SessionBuilderView({
           ? `${ex.durationMin} ${t.sbMinShort}`
           : '';
     return (
-      <div key={ex.name} className="sbw-ex">
-        <span className="sbw-ex-ic">
-          <Icon
-            name={ex.kind === 'cardio' ? 'heartbeat' : ex.kind === 'strength' ? 'barbell' : 'wind'}
-          />
-        </span>
+      <div
+        key={`${ex.name}:${index}`}
+        className="sbw-ex"
+        ref={
+          editable
+            ? (el) => {
+                rowEls.current[index] = el;
+              }
+            : undefined
+        }
+        style={editable && dragI === index ? { opacity: 0.55 } : undefined}
+      >
+        {editable ? (
+          <span
+            className="sbw-ex-drag"
+            title={t.reorder}
+            aria-label={t.reorder}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+              setDrag(index);
+            }}
+            onPointerMove={(e) => onDragMove(e.clientY)}
+            onPointerUp={(e) => {
+              try {
+                (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+              } catch {
+                /* ignore */
+              }
+              setDrag(null);
+            }}
+            style={{
+              touchAction: 'none',
+              cursor: 'grab',
+              display: 'inline-flex',
+              color: 'var(--color-neutral-500)',
+              padding: '2px 4px',
+              flex: 'none',
+            }}
+          >
+            <Icon name="dots-six" />
+          </span>
+        ) : (
+          <span className="sbw-ex-ic">
+            <Icon
+              name={
+                ex.kind === 'cardio' ? 'heartbeat' : ex.kind === 'strength' ? 'barbell' : 'wind'
+              }
+            />
+          </span>
+        )}
         <span className="sbw-ex-txt">
           <b>{ex.kind === 'strength' ? exName(ex.name) : blockName[ex.kind]}</b>
           <span className="sbw-ex-why">{whyLabel[ex.whyKey]}</span>
@@ -332,15 +474,38 @@ export function SessionBuilderView({
           <span>{sr}</span>
           {w && <b>{w}</b>}
         </span>
+        {editable && (
+          <button
+            className="sbw-ex-swap"
+            title={t.replaceExercise}
+            aria-label={t.replaceExercise}
+            onClick={() => swapMain(index)}
+            style={{
+              flex: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              border: '1px solid var(--color-divider)',
+              background: 'transparent',
+              color: 'var(--color-neutral-300)',
+              cursor: 'pointer',
+            }}
+          >
+            <Icon name="arrows-clockwise" />
+          </button>
+        )}
       </div>
     );
   };
 
-  const block = (label: string, list: PlannedExercise[]) =>
+  const block = (label: string, list: PlannedExercise[], editable = false) =>
     list.length > 0 ? (
       <div className="sbw-block">
         <span className="section-title">{label}</span>
-        {list.map(exRow)}
+        {list.map((ex, i) => exRow(ex, editable, i))}
       </div>
     ) : null;
 
@@ -357,7 +522,7 @@ export function SessionBuilderView({
         </span>
       </div>
       {block(t.sbWarmupOpt, day.warmup)}
-      {block(t.sbMainLifts, day.main)}
+      {block(t.sbMainLifts, mainList, true)}
       {block(t.sbCardioOpt, day.cardio)}
       {block(t.sbCooldownOpt, day.cooldown)}
       {day.coverage.length > 0 && (

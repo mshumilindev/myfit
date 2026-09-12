@@ -41,6 +41,12 @@ import {
   type Reminder,
   type RestMode,
   type RestPeriod,
+  type Injury,
+  type RehabStageId,
+  type CheckinFeel,
+  type RehabCheckin,
+  type RehabReason,
+  type InjurySide,
   type SetEntry,
   type SetType,
   type SyncStatus,
@@ -69,6 +75,7 @@ import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './l
 import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t } from './i18n';
+import { applyCheckin, nextStage, activeInjuries as selectActiveInjuries } from './injury';
 import {
   awakeMsAt,
   SLEEP_IDLE_MS,
@@ -86,6 +93,7 @@ const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const GOALS_KEY = 'spotter.goals';
 const REST_KEY = 'spotter.restPeriods';
+const INJURY_KEY = 'spotter.injuries';
 const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
@@ -163,6 +171,8 @@ export interface StoreState {
   reminders: Reminder[];
   /** Planned rest / recovery / vacation windows. */
   restPeriods: RestPeriod[];
+  /** Tracked injuries with feel-driven rehab plans. */
+  injuries: Injury[];
   /** Logged non-lifting activities (cardio & recovery). */
   activities: Activity[];
   /** Account-wide weight unit (Load-entry B): the default everything is shown
@@ -218,6 +228,7 @@ let state: StoreState = {
   sharedGyms: load<Record<string, SharedGym>>(SHARED_GYMS_KEY, {}),
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
+  injuries: load<Injury[]>(INJURY_KEY, []),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
@@ -268,6 +279,7 @@ function persist(): void {
     localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
+    localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
@@ -1814,6 +1826,141 @@ export function restDayKeys(
   return set;
 }
 
+// --- Injuries & rehab -------------------------------------------------------
+function writeInjuryDoc(i: Injury): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'injuries', i.id), { ...i, updatedAt: Date.now() }).catch(
+    onWriteError,
+  );
+}
+function deleteInjuryDoc(id: string): void {
+  const uid = currentUid();
+  if (!uid) return;
+  deleteDoc(doc(db, 'users', uid, 'injuries', id)).catch(onWriteError);
+}
+
+/** Log a new injury with its starting rehab stage. */
+export function startInjury(input: {
+  reason: RehabReason;
+  bodyPart: string;
+  side?: InjurySide;
+  muscles: MuscleGroup[];
+  stage: RehabStageId;
+  fullRestUntil?: number | null;
+  note?: string | null;
+  now?: number;
+}): Injury {
+  const now = input.now ?? Date.now();
+  const inj: Injury = {
+    id: uuid(),
+    reason: input.reason,
+    bodyPart: input.bodyPart,
+    side: input.side,
+    muscles: [...input.muscles],
+    stage: input.stage,
+    startDay: dayKey(now),
+    createdAt: now,
+    checkins: [],
+    note: input.note ?? null,
+    fullRestUntil: input.fullRestUntil ?? null,
+    healedDay: null,
+  };
+  setState({ injuries: [inj, ...state.injuries], syncStatus: bumpPending() });
+  writeInjuryDoc(inj);
+  return inj;
+}
+
+function patchInjury(id: string, patch: (i: Injury) => Injury): void {
+  let updated: Injury | undefined;
+  const list = state.injuries.map((i) => {
+    if (i.id !== id) return i;
+    updated = { ...patch(i), updatedAt: Date.now() };
+    return updated;
+  });
+  if (!updated) return;
+  setState({ injuries: list, syncStatus: bumpPending() });
+  writeInjuryDoc(updated);
+}
+
+/** Edit which muscles an injury protects. */
+export function setInjuryMuscles(id: string, muscles: MuscleGroup[]): void {
+  patchInjury(id, (i) => ({ ...i, muscles: [...muscles] }));
+}
+
+/** Manually move to a stage (from the manage screen). */
+export function setInjuryStage(id: string, stage: RehabStageId): void {
+  patchInjury(id, (i) => ({ ...i, stage }));
+}
+
+/** Edit the clinician full-rest window (Stage 0). null clears it. */
+export function setInjuryTimeframe(id: string, fullRestUntil: number | null): void {
+  patchInjury(id, (i) => ({ ...i, fullRestUntil }));
+}
+
+/**
+ * Log a post-session rehab check-in and apply the feel-driven progression
+ * (advance / hold / regress). Returns the outcome so the UI can react.
+ */
+export function logRehabCheckin(
+  id: string,
+  feel: CheckinFeel,
+  now: number = Date.now(),
+): { outcome: 'ready' | 'hold' | 'regress'; stage: RehabStageId } | null {
+  const inj = state.injuries.find((i) => i.id === id);
+  if (!inj) return null;
+  const res = applyCheckin(inj, feel);
+  const checkin: RehabCheckin = {
+    id: uuid(),
+    day: dayKey(now),
+    at: now,
+    feel,
+    stage: inj.stage,
+  };
+  patchInjury(id, (i) => {
+    const base = { ...i, checkins: [...i.checkins, checkin] };
+    // Progression is offered, never automatic: a regress eases back a stage now;
+    // a 'ready' only flags the offer; the user confirms via advanceInjury.
+    if (res.outcome === 'regress') return { ...base, stage: res.stage, pendingAdvance: false };
+    if (res.outcome === 'ready') return { ...base, pendingAdvance: true };
+    return base;
+  });
+  return res;
+}
+
+/** Confirm the offered step up (from the check-in result or the Today banner). */
+export function advanceInjury(id: string): void {
+  patchInjury(id, (i) => ({ ...i, stage: nextStage(i.stage), pendingAdvance: false }));
+}
+
+/** Decline the offer and stay at the current stage a while longer. */
+export function dismissAdvance(id: string): void {
+  patchInjury(id, (i) => ({ ...i, pendingAdvance: false }));
+}
+
+/** Mark an injury healed — it becomes history, no longer shaping training. */
+export function healInjury(id: string, now: number = Date.now()): void {
+  patchInjury(id, (i) => ({ ...i, healedDay: dayKey(now) }));
+}
+
+export function deleteInjury(id: string): void {
+  setState({
+    injuries: state.injuries.filter((i) => i.id !== id),
+    syncStatus: bumpPending(),
+  });
+  deleteInjuryDoc(id);
+}
+
+/** The most recently logged active (not-healed) injury, if any. */
+export function activeInjury(): Injury | null {
+  return selectActiveInjuries(state.injuries)[0] ?? null;
+}
+
+/** All active injuries. */
+export function activeInjuryList(): Injury[] {
+  return selectActiveInjuries(state.injuries);
+}
+
 // --- Activities (design feature 6: cardio & recovery + calories) -----------
 function writeActivityDoc(a: Activity): void {
   const uid = currentUid();
@@ -2971,6 +3118,18 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
+      collection(db, 'users', uid, 'injuries'),
+      (snap) => {
+        state = { ...state, injuries: snap.docs.map((d) => d.data() as Injury) };
+        persist();
+        emit();
+      },
+      // Soft: if the injuries rule isn't deployed yet, don't block all sync.
+      () => undefined,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
       collection(db, 'users', uid, 'activities'),
       (snap) => {
         const serverActivities = snap.docs.map((d) => d.data() as Activity);
@@ -3589,6 +3748,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
+  localStorage.removeItem(INJURY_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
   localStorage.removeItem(SLEEP_KEY);
   localStorage.removeItem(SLEEP_SCHED_KEY);
@@ -3605,6 +3765,7 @@ export function resetLocalData(): void {
     sharedGyms: {},
     reminders: [],
     restPeriods: [],
+    injuries: [],
     activities: [],
     weightUnit: 'kg',
     exerciseUnits: {},

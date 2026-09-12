@@ -4,6 +4,7 @@
  * A drop/reverse-drop is still ONE set; its parts live in `drops`.
  */
 import type { BandRung } from './loads';
+import type { MuscleGroup } from './data/exercises';
 
 export type SetType = 'working' | 'warmup' | 'drop' | 'reverse-drop' | 'static-dynamic';
 
@@ -262,6 +263,65 @@ export interface RestPeriod {
    *  running from startDay up to today until closed via endRestPeriod. */
   open?: boolean;
   updatedAt?: number;
+}
+
+/** A rehab stage. Protect (out) → Reintroduce (light) → Rebuild (graded) →
+ *  Return (full). See injury.ts for the phase engine. */
+export type RehabStageId = 'protect' | 'reintroduce' | 'rebuild' | 'return';
+
+/** How a session touching the injured area felt — the pain traffic-light that
+ *  drives progression. fine = no pain / gone within a day; sore = settled the
+ *  same day; pain = sharp or lingering. */
+export type CheckinFeel = 'fine' | 'sore' | 'pain';
+
+/** One post-session rehab check-in. */
+export interface RehabCheckin {
+  id: string;
+  /** Local day key (see dayKey). */
+  day: number;
+  at: number;
+  feel: CheckinFeel;
+  /** Stage the injury was in when this check-in was logged. */
+  stage: RehabStageId;
+}
+
+/** Setup branch: a localised injury (muscle-derived) or a general/non-muscle
+ *  situation that eases the whole body back rather than protecting one area. */
+export type RehabReason = 'injury' | 'surgery' | 'illness' | 'break' | 'cautious';
+
+/** Which side, for a localised injury. */
+export type InjurySide = 'left' | 'right' | 'both';
+
+/** A tracked injury with a guided, feel-driven rehab plan. Mirrors the
+ *  RestPeriod pattern (localStorage + per-user Firestore subcollection). */
+export interface Injury {
+  id: string;
+  /** Setup branch. 'injury' = a localised body part (default); the rest are the
+   *  general/non-muscle branch (post-surgery, illness, long break, caution). */
+  reason: RehabReason;
+  /** Body-part key (see BODY_PARTS in injury.ts). Empty on the general branch. */
+  bodyPart: string;
+  /** Side of a localised injury. */
+  side?: InjurySide;
+  /** Muscles protected while rehabbing (derived from the body part, editable). */
+  muscles: MuscleGroup[];
+  stage: RehabStageId;
+  /** Local day key the injury was logged. */
+  startDay: number;
+  createdAt: number;
+  updatedAt?: number;
+  /** Newest last. */
+  checkins: RehabCheckin[];
+  /** Two good check-ins in a row have offered the next stage; the user confirms
+   *  (advance) or stays. Progression is offered, never automatic. */
+  pendingAdvance?: boolean;
+  note?: string | null;
+  /** Clinician-set no-load window (Stage 0 · Full rest): the day key training
+   *  resumes. While today < this, the plan is date-bound full rest, shown in
+   *  rest-blue; after it, the by-feel stages begin. null = go by feel from now. */
+  fullRestUntil?: number | null;
+  /** Set when marked healed; a healed injury is history, not active. */
+  healedDay?: number | null;
 }
 
 /** Non-lifting load (design feature 6). Conditioning adds systemic load;

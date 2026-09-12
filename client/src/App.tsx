@@ -154,6 +154,9 @@ const EquipmentDetailView = lazy(() =>
 const MasteryView = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryView })),
 );
+const InjuryView = lazy(() =>
+  import('./views/InjuryView').then((module) => ({ default: module.InjuryView })),
+);
 const MasteryBadge = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
 );
@@ -213,6 +216,7 @@ export type Overlay =
   | { screen: 'equipment'; itemId: string; gymId?: string }
   | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
   | { screen: 'mastery' }
+  | { screen: 'injury'; injuryId?: string; checkin?: boolean }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
 
@@ -336,6 +340,7 @@ function toHash(
   if (overlay?.screen === 'settings') return '#/settings';
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'builder') return '#/builder';
+  if (overlay?.screen === 'injury') return '#/injury';
   if (overlay?.screen === 'notifications') return '#/notifications';
   if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
   if (overlay?.screen === 'recap-story')
@@ -399,6 +404,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
+  if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
@@ -1342,6 +1348,13 @@ export function App() {
         <ClientPage clientId={activeOverlay.clientId} shell={shell} onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'injury' && (
+        <InjuryView
+          injuryId={activeOverlay.injuryId}
+          checkin={activeOverlay.checkin}
+          onClose={closeOverlay}
+        />
+      )}
     </Suspense>
   ) : null;
   const tabContent = (

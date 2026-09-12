@@ -242,6 +242,12 @@ export interface BuildContext {
   now: number;
   intent: SessionIntent;
   targetMuscles?: MuscleGroup[];
+  /** Muscles fully protected by an active injury (Protect stage) — excluded
+   *  from auto-picked days and dropped from an explicit target list. */
+  protectedMuscles?: MuscleGroup[];
+  /** Per-muscle rehab load cap (0..1) for Reintroduce/Rebuild — scales target
+   *  weights so a returning muscle eases back instead of jumping to old loads. */
+  loadCaps?: Map<MuscleGroup, number>;
   lengthMin?: number;
   warmup?: boolean;
   cardio?: boolean;
@@ -258,7 +264,9 @@ export function pickMuscles(ctx: BuildContext): MuscleGroup[] {
   const emph = groupEmphasis(ctx.goals);
 
   const scored: { m: MuscleGroup; score: number; state: ReadyState }[] = [];
+  const protectedSet = new Set(ctx.protectedMuscles ?? []);
   for (const m of VOLUME_MUSCLES) {
+    if (protectedSet.has(m)) continue; // out during Protect — don't load it
     const r = ready.get(m);
     if (r && r.state === 'recovering') continue; // never hammer unrecovered tissue
     const lm = lms.get(m) ?? LANDMARKS[m];
@@ -432,8 +440,10 @@ function exercisePriority(p: {
 /** Build a full training day from the context. */
 export function buildDay(ctx: BuildContext): GeneratedDay {
   const spec = intentSpec(ctx.intent);
-  const muscles =
-    ctx.targetMuscles && ctx.targetMuscles.length > 0 ? ctx.targetMuscles : pickMuscles(ctx);
+  const protectedSet = new Set(ctx.protectedMuscles ?? []);
+  const muscles = (
+    ctx.targetMuscles && ctx.targetMuscles.length > 0 ? ctx.targetMuscles : pickMuscles(ctx)
+  ).filter((m) => !protectedSet.has(m));
   const lms = focusAdjustLandmarks(personalLandmarks(ctx.finished, ctx.now), ctx.goals);
   const week = weeklyMuscleSets(ctx.finished, ctx.now);
   const ready = muscleReadiness(ctx.finished, ctx.now);
@@ -463,6 +473,12 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
       loadType,
     });
     let weight = target.weight;
+    const cap = primary != null ? ctx.loadCaps?.get(primary) : undefined;
+    if (weight != null && cap != null && cap < 1 && loadType === 'weight') {
+      // Graded return to load: ease the returning muscle back instead of
+      // jumping to old working weights. Round to a 2.5-unit step.
+      weight = Math.max(2.5, Math.round((weight * cap) / 2.5) * 2.5);
+    }
     if (weight == null && loadType === 'weight') {
       weight = coldStartWeight(
         patternOf(name, compound ? 'compound' : 'isolation'),

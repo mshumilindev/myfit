@@ -20,6 +20,29 @@ import { AndroidLogo } from '@phosphor-icons/react/AndroidLogo';
 import { AppleLogo } from '@phosphor-icons/react/AppleLogo';
 import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
 import { Moon } from '@phosphor-icons/react/Moon';
+import { Confetti } from '@phosphor-icons/react/Confetti';
+import { Pause } from '@phosphor-icons/react/Pause';
+import { Bell } from '@phosphor-icons/react/Bell';
+import { Clock } from '@phosphor-icons/react/Clock';
+import { Info } from '@phosphor-icons/react/Info';
+import { Plus } from '@phosphor-icons/react/Plus';
+import { Check } from '@phosphor-icons/react/Check';
+import { Target } from '@phosphor-icons/react/Target';
+import { Heartbeat } from '@phosphor-icons/react/Heartbeat';
+import { Minus } from '@phosphor-icons/react/Minus';
+import { Medal } from '@phosphor-icons/react/Medal';
+import { Bandaids } from '@phosphor-icons/react/Bandaids';
+import { Path } from '@phosphor-icons/react/Path';
+import { DotsThreeCircle } from '@phosphor-icons/react/DotsThreeCircle';
+import { HandPalm } from '@phosphor-icons/react/HandPalm';
+import { HandTap } from '@phosphor-icons/react/HandTap';
+import { ThumbsUp } from '@phosphor-icons/react/ThumbsUp';
+import { FirstAidKit } from '@phosphor-icons/react/FirstAidKit';
+import { Virus } from '@phosphor-icons/react/Virus';
+import { ArrowFatUp } from '@phosphor-icons/react/ArrowFatUp';
+import { ArrowFatDown } from '@phosphor-icons/react/ArrowFatDown';
+import { ArrowsDownUp } from '@phosphor-icons/react/ArrowsDownUp';
+import { Warning } from '@phosphor-icons/react/Warning';
 import { MoonStars } from '@phosphor-icons/react/MoonStars';
 import { ArrowCounterClockwise } from '@phosphor-icons/react/ArrowCounterClockwise';
 import { ArrowRight } from '@phosphor-icons/react/ArrowRight';
@@ -30,7 +53,6 @@ import { ArrowsLeftRight } from '@phosphor-icons/react/ArrowsLeftRight';
 import { ArrowsOutLineHorizontal } from '@phosphor-icons/react/ArrowsOutLineHorizontal';
 import { Archive } from '@phosphor-icons/react/Archive';
 import { Barbell } from '@phosphor-icons/react/Barbell';
-import { Bell } from '@phosphor-icons/react/Bell';
 import { Export } from '@phosphor-icons/react/Export';
 import { CalendarBlank } from '@phosphor-icons/react/CalendarBlank';
 import { CalendarCheck } from '@phosphor-icons/react/CalendarCheck';
@@ -45,7 +67,6 @@ import { ChartLine } from '@phosphor-icons/react/ChartLine';
 import { ChartLineUp } from '@phosphor-icons/react/ChartLineUp';
 import { CheckCircle } from '@phosphor-icons/react/CheckCircle';
 import { XCircle } from '@phosphor-icons/react/XCircle';
-import { Clock } from '@phosphor-icons/react/Clock';
 import { ClockCountdown } from '@phosphor-icons/react/ClockCountdown';
 import { Pulse } from '@phosphor-icons/react/Pulse';
 import { CloudSlash } from '@phosphor-icons/react/CloudSlash';
@@ -67,7 +88,6 @@ import { Gear } from '@phosphor-icons/react/Gear';
 import { House } from '@phosphor-icons/react/House';
 import { Lightning } from '@phosphor-icons/react/Lightning';
 import { ImageSquare } from '@phosphor-icons/react/ImageSquare';
-import { Info } from '@phosphor-icons/react/Info';
 import { Key } from '@phosphor-icons/react/Key';
 import { ListChecks } from '@phosphor-icons/react/ListChecks';
 import { ListPlus } from '@phosphor-icons/react/ListPlus';
@@ -81,11 +101,9 @@ import { Play } from '@phosphor-icons/react/Play';
 import { PlayCircle } from '@phosphor-icons/react/PlayCircle';
 import { YoutubeLogo } from '@phosphor-icons/react/YoutubeLogo';
 import { SpeakerSimpleSlash } from '@phosphor-icons/react/SpeakerSimpleSlash';
-import { Plus } from '@phosphor-icons/react/Plus';
 import { QrCode } from '@phosphor-icons/react/QrCode';
 import { CaretLineDown } from '@phosphor-icons/react/CaretLineDown';
 import { CaretLineUp } from '@phosphor-icons/react/CaretLineUp';
-import { Check } from '@phosphor-icons/react/Check';
 import { Circle } from '@phosphor-icons/react/Circle';
 import { Columns } from '@phosphor-icons/react/Columns';
 import { Cylinder } from '@phosphor-icons/react/Cylinder';
@@ -97,7 +115,6 @@ import { FunnelSimple } from '@phosphor-icons/react/FunnelSimple';
 import { PersonSimple } from '@phosphor-icons/react/PersonSimple';
 import { Person } from '@phosphor-icons/react/Person';
 import { SlidersHorizontal } from '@phosphor-icons/react/SlidersHorizontal';
-import { Target } from '@phosphor-icons/react/Target';
 import { List } from '@phosphor-icons/react/List';
 import { MinusCircle } from '@phosphor-icons/react/MinusCircle';
 import { PlusCircle } from '@phosphor-icons/react/PlusCircle';
@@ -141,7 +158,6 @@ import { UploadSimple } from '@phosphor-icons/react/UploadSimple';
 import { User } from '@phosphor-icons/react/User';
 import { UserFocus } from '@phosphor-icons/react/UserFocus';
 import { WarningCircle } from '@phosphor-icons/react/WarningCircle';
-import { Heartbeat } from '@phosphor-icons/react/Heartbeat';
 import { PersonSimpleRun } from '@phosphor-icons/react/PersonSimpleRun';
 import { Bicycle } from '@phosphor-icons/react/Bicycle';
 import { PersonSimpleSwim } from '@phosphor-icons/react/PersonSimpleSwim';
@@ -151,9 +167,7 @@ import { HandHeart } from '@phosphor-icons/react/HandHeart';
 import { Snowflake } from '@phosphor-icons/react/Snowflake';
 import { ClockCounterClockwise } from '@phosphor-icons/react/ClockCounterClockwise';
 import { FlowerLotus } from '@phosphor-icons/react/FlowerLotus';
-import { Minus } from '@phosphor-icons/react/Minus';
 import { Stack } from '@phosphor-icons/react/Stack';
-import { Medal } from '@phosphor-icons/react/Medal';
 import { FlagBanner } from '@phosphor-icons/react/FlagBanner';
 import { X } from '@phosphor-icons/react/X';
 import { CaretUp } from '@phosphor-icons/react/CaretUp';
@@ -171,7 +185,6 @@ import { exerciseDisplay, localizedExerciseName } from './data/exerciseNames';
  * CSS contract: the SVG is sized 1em.
  */
 const ICONS: Record<string, ComponentType<IconProps>> = {
-  moon: Moon,
   'moon-stars': MoonStars,
   'android-logo': AndroidLogo,
   'apple-logo': AppleLogo,
@@ -260,6 +273,21 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   scales: Scales,
   ruler: Ruler,
   'shield-check': ShieldCheck,
+  confetti: Confetti,
+  pause: Pause,
+  bandaids: Bandaids,
+  path: Path,
+  'dots-three-circle': DotsThreeCircle,
+  'hand-palm': HandPalm,
+  'hand-tap': HandTap,
+  'thumbs-up': ThumbsUp,
+  'first-aid-kit': FirstAidKit,
+  virus: Virus,
+  'arrow-fat-up': ArrowFatUp,
+  'arrow-fat-down': ArrowFatDown,
+  'arrows-down-up': ArrowsDownUp,
+  warning: Warning,
+  moon: Moon,
   sparkle: Sparkle,
   'sun-horizon': SunHorizon,
   lightning: Lightning,

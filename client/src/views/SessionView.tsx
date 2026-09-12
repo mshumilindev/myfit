@@ -96,6 +96,7 @@ import {
 } from '../components/Muscle';
 import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
+import { warmupRamp } from '../sessionBuilder';
 import { describeDay, dayReadoutLabel, exerciseDay, type TrainingDay } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
 import {
@@ -451,7 +452,12 @@ export function SessionView(props: {
       if (!m.has(key)) m.set(key, recordWeight(e.name, props.workoutId));
     }
     return m;
-  }, [workout?.exercises.length]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Depend on the whole history, not just this workout's exercise count:
+    // recordWeight() reads every past session, so a resumed session or a cold
+    // open (history still syncing in when the view mounts) must recompute once
+    // the prior sessions arrive — otherwise the all-time best stays stale (often
+    // 0) and a sub-PR set is wrongly tagged a record.
+  }, [store.workouts, props.workoutId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!workout) return null;
 
@@ -577,11 +583,53 @@ export function SessionView(props: {
   const showSessionSide =
     !!(live || props.past) && !!(gym || lastTimeRows.length > 0 || entries > 0);
 
-  function ghostFor(ex: Exercise): { reps: number; weight: number | null } {
-    const last = ex.sets[ex.sets.length - 1];
-    if (last && !last.isWarmup) return { reps: last.reps, weight: last.weight ?? 0 };
+  /**
+   * What the next set should be. Once a working set is logged, repeat it (the
+   * user may have tuned the load). Before that — with nothing logged, or only
+   * warm-ups so far — walk the recommended ramp: warm-up weights first, then the
+   * working target (which already carries this session's progression bump, so it
+   * can sit at or above last time's working weight). `warmup` marks the ramp
+   * phase so the quick-log stores those as warm-up sets and the sequence climbs.
+   */
+  function ghostFor(ex: Exercise): { reps: number; weight: number | null; warmup?: boolean } {
+    const sets = ex.sets;
+    // Continue from the last logged WORKING set.
+    for (let i = sets.length - 1; i >= 0; i--) {
+      const s = sets[i];
+      if (!s.isWarmup && setTypeOf(s) !== 'warmup') return { reps: s.reps, weight: s.weight ?? 0 };
+    }
+    // No working set yet — sequence the ramp, then the working target.
+    if (isStrengthExercise(ex)) {
+      const loadType = loadTypeFor(ex);
+      const target = nextTarget(
+        topHistory(
+          store.workouts.filter((w) => w.finishedAt !== null),
+          ex.name,
+          workout!.startedAt,
+        ),
+        {
+          plannedReps: ex.plannedReps,
+          equipment: ex.equipment,
+          primary: (ex.primaryMuscle as MuscleGroup | null) ?? undefined,
+          loadType,
+        },
+      );
+      if (loadType === 'weight' && target.weight != null && target.weight > 0) {
+        const compound = richExerciseByName(ex.name)?.mechanic === 'compound';
+        const ramp = warmupRamp(target.weight, { loadType, compound });
+        const warmDone = sets.filter((s) => s.isWarmup || setTypeOf(s) === 'warmup').length;
+        if (warmDone < ramp.length) {
+          const w = ramp[warmDone];
+          return { reps: w.reps, weight: w.weight ?? null, warmup: true };
+        }
+        return { reps: target.reps, weight: target.weight };
+      }
+      if (target.weight != null) return { reps: target.reps, weight: target.weight };
+    }
+    // Fallbacks: previous session, then the last set, then the plan.
     const prev = prevLift(ex.name, workout!.id);
     if (prev) return { reps: ex.plannedReps ?? prev.reps, weight: prev.weight };
+    const last = sets[sets.length - 1];
     if (last) return { reps: last.reps, weight: last.weight ?? 0 };
     if (ex.plannedReps) return { reps: ex.plannedReps, weight: null };
     return { reps: 8, weight: 20 };
@@ -1344,11 +1392,13 @@ export function SessionView(props: {
                   </div>
                 );
               })}
-              {/* Live rest count-up only on the exercise that owns the most
-                  recent set — logging in another card ends this one's rest. */}
+              {/* Live rest count-up on the exercise that owns the most recent
+                  set, AND on a freshly focused exercise with no sets yet — the
+                  rest carries over from the previous exercise's last set, so the
+                  new card shows the (full-width) counter before its first set. */}
               {live &&
-                ex.id === lastLoggedExId &&
                 lastLoggedAt > 0 &&
+                (ex.id === lastLoggedExId || (focusedId === ex.id && ex.sets.length === 0)) &&
                 (() => {
                   const restNow = Math.max(0, now - lastLoggedAt);
                   return focusView ? (
@@ -1389,7 +1439,7 @@ export function SessionView(props: {
                     <button
                       className="btn btn-primary log-btn"
                       disabled={directLogBlocked}
-                      onClick={() => logGhost(ex, ghost)}
+                      onClick={() => logGhost(ex, ghost, ghost.warmup ? 'warmup' : 'working')}
                     >
                       {props.past ? t.add : t.log}
                     </button>
@@ -1403,7 +1453,7 @@ export function SessionView(props: {
                     weightRequired={directLogBlocked}
                     isPast={!!props.past}
                     title={focusView ? t.enterThisSet : undefined}
-                    onLog={(v) => logGhost(ex, v)}
+                    onLog={(v) => logGhost(ex, v, ghost.warmup ? 'warmup' : 'working')}
                     onSettings={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
                   />
                 ))}

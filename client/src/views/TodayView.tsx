@@ -14,6 +14,10 @@ import { dayReadoutLabel } from '../data/daySuggest';
 import type { MuscleGroup } from '../data/exercises';
 import {
   activeRestPeriod,
+  activeInjury,
+  advanceInjury,
+  dismissAdvance,
+  healInjury,
   illnessReturn,
   addExercise,
   backfillWorkout,
@@ -45,6 +49,7 @@ import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
+import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 import { DateField, TimeField, DurationField } from '../components/PickerFields';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -260,6 +265,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     [store.workouts, pbNow],
   );
   const activeRest = activeRestPeriod(pbNow);
+  const activeInj = activeInjury();
+  const injToday = dayKey(pbNow);
+  const injFullRest = activeInj ? inFullRest(activeInj, injToday) : false;
   const confirmRestPeriod = confirmEndRest
     ? store.restPeriods.find((r) => r.id === confirmEndRest)
     : null;
@@ -1273,6 +1281,247 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             </span>
           </button>
         )}
+        {activeInj && injFullRest && activeInj.fullRestUntil != null && (
+          <div
+            className="prog-banner analysis-banner gem-rest tr-banner fade-in"
+            style={{
+              background:
+                'linear-gradient(150deg,var(--color-rest-tint,#0e2a3b),var(--color-surface))',
+              borderColor: 'var(--color-rest-line,#134a68)',
+            }}
+          >
+            <span className="prog-sheen" aria-hidden />
+            <div className="prog-banner-row">
+              <span
+                className="prog-banner-icon"
+                style={{
+                  background: 'rgba(51,168,224,.16)',
+                  color: 'var(--color-rest-400,#33a8e0)',
+                }}
+              >
+                <Icon name="moon" weight="fill" />
+              </span>
+              <div className="prog-banner-main">
+                <span
+                  className="prog-banner-kicker"
+                  style={{ color: 'var(--color-rest-300,#93d4f2)' }}
+                >
+                  {t.injStage0}
+                </span>
+                <div
+                  className="prog-banner-title"
+                  style={{ color: 'var(--color-rest-200,#d3edfb)' }}
+                >
+                  {t.injStage0Left(activeInj.fullRestUntil - injToday)}
+                </div>
+                <div className="prog-banner-body">{t.injStage0Note}</div>
+                <div className="tr-pills">
+                  <span className="tr-pill">
+                    <Icon name="pause" weight="bold" />
+                    {t.illnessProgramPill}
+                  </span>
+                </div>
+                <div className="prog-banner-acts">
+                  <button
+                    className="prog-banner-cta"
+                    onClick={() => shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })}
+                  >
+                    <Icon name="list-checks" weight="bold" />
+                    {t.injViewPlan}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeInj && !injFullRest && activeInj.stage === 'return' && (
+          <div
+            className="prog-banner analysis-banner gem-rest tr-banner fade-in"
+            style={{
+              background:
+                'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
+              borderColor: 'var(--color-ok-line,#2f6f52)',
+              textAlign: 'center',
+            }}
+          >
+            <span className="prog-sheen" aria-hidden />
+            <div style={{ padding: '4px 2px' }}>
+              <div
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: '50%',
+                  margin: '0 auto',
+                  background: 'rgba(76,190,140,.16)',
+                  border: '1px solid var(--color-ok-line,#2f6f52)',
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: 'var(--color-ok)',
+                  fontSize: 26,
+                }}
+              >
+                <Icon name="confetti" weight="fill" />
+              </div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  marginTop: 12,
+                  color: 'var(--color-ok-text,#b7e8cf)',
+                }}
+              >
+                {t.injDoneTitle}
+              </div>
+              <div className="prog-banner-body" style={{ marginTop: 6 }}>
+                {t.injDoneBody}
+              </div>
+              <div
+                style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '12px 0 4px' }}
+              >
+                {REHAB_STAGES.map((sid) => (
+                  <span
+                    key={sid}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: 'var(--color-ok)',
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="prog-banner-acts" style={{ justifyContent: 'center' }}>
+                <button className="prog-banner-cta" onClick={() => healInjury(activeInj.id)}>
+                  <Icon name="check-circle" weight="bold" />
+                  {t.injBackToProgram}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeInj && !injFullRest && activeInj.stage !== 'return' && activeInj.pendingAdvance && (
+          <div
+            className="prog-banner analysis-banner gem-rest tr-banner fade-in"
+            style={{
+              background:
+                'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
+              borderColor: 'var(--color-ok-line,#2f6f52)',
+            }}
+          >
+            <span className="prog-sheen" aria-hidden />
+            <div className="prog-banner-row">
+              <span
+                className="prog-banner-icon"
+                style={{ background: 'rgba(76,190,140,.16)', color: 'var(--color-ok)' }}
+              >
+                <Icon name="arrow-fat-up" weight="fill" />
+              </span>
+              <div className="prog-banner-main">
+                <span className="prog-banner-kicker" style={{ color: 'var(--color-ok)' }}>
+                  {t.injReadyKicker}
+                </span>
+                <div
+                  className="prog-banner-title"
+                  style={{ color: 'var(--color-ok-text,#b7e8cf)' }}
+                >
+                  {t.injReadyTitle(t.injStage[nextStage(activeInj.stage)])}
+                </div>
+                <div className="prog-banner-body">{t.injReadyBody}</div>
+                <div className="prog-banner-acts">
+                  <button
+                    className="prog-banner-cta ghost"
+                    onClick={() => dismissAdvance(activeInj.id)}
+                  >
+                    {t.injStayLonger}
+                  </button>
+                  <button
+                    className="prog-banner-cta"
+                    style={{ color: 'var(--color-ok)', borderColor: 'var(--color-ok)' }}
+                    onClick={() => advanceInjury(activeInj.id)}
+                  >
+                    {t.injMoveUpShort} <Icon name="arrow-right" weight="bold" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {activeInj && !injFullRest && activeInj.stage !== 'return' && !activeInj.pendingAdvance && (
+          <div className="prog-banner analysis-banner gem-rest tr-banner illness rehab fade-in">
+            <span className="prog-sheen" aria-hidden />
+            <div className="prog-banner-row">
+              <span className="prog-banner-icon">
+                <Icon name="heartbeat" weight="bold" />
+              </span>
+              <div className="prog-banner-main">
+                <span className="prog-banner-kicker">
+                  {t.injBannerStage(
+                    stageIndex(activeInj.stage) + 1,
+                    REHAB_STAGES.length,
+                    t.injStage[activeInj.stage],
+                  )}
+                </span>
+                <div className="prog-banner-title">
+                  {t.injBannerTitle(
+                    activeInj.reason === 'injury'
+                      ? (t.injBodyParts[activeInj.bodyPart] ?? activeInj.bodyPart)
+                      : t.injReason[activeInj.reason],
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 6, margin: '8px 0 2px' }}>
+                  {REHAB_STAGES.map((sid, i) => (
+                    <span
+                      key={sid}
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background:
+                          i < stageIndex(activeInj.stage)
+                            ? 'var(--color-ok)'
+                            : i === stageIndex(activeInj.stage)
+                              ? 'var(--color-danger)'
+                              : 'var(--color-neutral-700)',
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="prog-banner-body">{t.injBannerBody}</div>
+                <div className="tr-pills">
+                  {activeInj.muscles.slice(0, 4).map((m) => (
+                    <span key={m} className="tr-pill">
+                      {t.muscleGroups[m] ?? m}
+                    </span>
+                  ))}
+                </div>
+                <div className="prog-banner-acts">
+                  <button
+                    className="prog-banner-cta"
+                    onClick={() => shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })}
+                  >
+                    <Icon name="list-checks" weight="bold" />
+                    {t.injViewPlan}
+                  </button>
+                  {activeInj.stage !== 'protect' && (
+                    <button
+                      className="prog-banner-cta ghost"
+                      onClick={() =>
+                        shell.openOverlay({
+                          screen: 'injury',
+                          injuryId: activeInj.id,
+                          checkin: true,
+                        })
+                      }
+                    >
+                      <Icon name="heartbeat" weight="bold" />
+                      {t.injBannerCheckin}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         {activeRest && (
           <div
             className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
@@ -1679,7 +1928,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 /** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
 function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   const { t } = useT();
-  const [mode, setMode] = useState<'active' | 'off' | 'illness'>('active');
+  const [mode, setMode] = useState<'active' | 'off' | 'illness' | 'rehab'>('active');
   const iso = (d: Date) => {
     const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
     return z.toISOString().slice(0, 10);
@@ -1695,6 +1944,7 @@ function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   };
   const days = Math.max(1, dk(to) - dk(from) + 1);
   const start = () => {
+    if (mode === 'rehab') return;
     if (mode === 'illness') {
       const tk = dayKey(Date.now());
       if (dur === 'today') startRestPeriod({ mode, startDay: tk, endDay: tk });
@@ -1708,7 +1958,7 @@ function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   return (
     <Sheet onClose={onClose} className="rest-sheet">
       <div className="ps-title">{t.restRecoveryTitle}</div>
-      <SleepPanel shell={shell} onClose={onClose} />
+      <SleepPanel shell={shell} onClose={onClose} compact />
       <div className="section-label section-divide rest-sub">{t.restStartTitle}</div>
       <div className="rest-modes">
         {(['active', 'off', 'illness'] as const).map((m) => (
@@ -1729,8 +1979,27 @@ function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
             </span>
           </button>
         ))}
+        <button
+          className={`rest-mode rehab${mode === 'rehab' ? ' active' : ''}`}
+          onClick={() => setMode('rehab')}
+        >
+          <span className="rmi">
+            <Icon name="bandaids" weight="bold" />
+          </span>
+          <span style={{ flex: 1, textAlign: 'left' }}>
+            <span className="rm-name">{t.injRestEntry}</span>
+            <span className="rm-desc" style={{ display: 'block' }}>
+              {t.injRestEntryDesc}
+            </span>
+          </span>
+        </button>
       </div>
-      {mode === 'illness' ? (
+      {mode === 'rehab' ? (
+        <div className="rest-rehab-note">
+          <Icon name="path" weight="bold" />
+          <span>{t.injRestReplaceNote}</span>
+        </div>
+      ) : mode === 'illness' ? (
         <div className="ill-panel">
           <div className="ill-lbl">{t.illnessDur}</div>
           <div className="ill-seg">
@@ -1780,8 +2049,22 @@ function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
         <button className="btn btn-secondary" onClick={onClose}>
           {t.cancel}
         </button>
-        <button className="btn btn-primary" onClick={start}>
-          {mode === 'illness' ? t.restStartIllness : t.restStartAction}
+        <button
+          className="btn btn-primary"
+          onClick={
+            mode === 'rehab'
+              ? () => {
+                  onClose();
+                  shell.openOverlay({ screen: 'injury' });
+                }
+              : start
+          }
+        >
+          {mode === 'rehab'
+            ? t.injSetupPlan
+            : mode === 'illness'
+              ? t.restStartIllness
+              : t.restStartAction}
         </button>
       </div>
     </Sheet>

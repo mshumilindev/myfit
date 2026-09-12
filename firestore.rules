@@ -69,6 +69,10 @@ service cloud.firestore {
       match /restPeriods/{periodId} {
         allow read, write: if isSelf(userId);
       }
+      // Injuries & rehab plans — own read/write only.
+      match /injuries/{injuryId} {
+        allow read, write: if isSelf(userId);
+      }
       // Cardio / recovery activities — live timers stay local until finish, then
       // the finished activity is written here by the owner.
       match /activities/{activityId} {
