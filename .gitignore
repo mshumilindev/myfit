@@ -40,3 +40,10 @@ tutorials/out/
 # FUSE mount temp files (deleted-but-open)
 .fuse_hidden*
 **/.fuse_hidden*
+
+# Exercise image pipeline — heavy/private working files (manifest + review stay local too)
+assets/exercise-images/source/
+assets/exercise-images/generated/
+assets/exercise-images/review/
+assets/exercise-images/.manifest.lock
+assets/exercise-images/**/*.tmp

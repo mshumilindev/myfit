@@ -1,0 +1,241 @@
+# Exercise image generation
+
+Dev-only tool that re-shoots the bundled exercise photos (873 exercises × start/end frames,
+`client/public/exercise-img/<id>/{0,1}.jpg`) as one consistent premium photo set: **the same
+athlete** (shirtless, plain charcoal shorts, dark grey shoes), a controlled studio gym, and a dark
+wall tinted by the exercise's primary muscle group, derived from the app theme tokens.
+
+Priority order, baked into every prompt and the QA checks:
+**exercise correctness > character consistency > visual beauty.**
+
+The tool lives in `scripts/exercise-images/` and is **isolated from the app runtime**. The only
+app-side hook is `client/src/data/exerciseImageOverrides.json`: `exercises.ts` uses an override
+when one exists and otherwise falls back to the original photos. Nothing is generated
+automatically, the CLI never touches the originals, and the app changes only when a human runs
+`apply --write`.
+
+---
+
+## 1. Setup
+
+```bash
+npm install                  # installs sharp (root devDependency) for WebP post-processing
+cp .env.example .env         # .env is gitignored — put OPENAI_API_KEY there, never commit it
+```
+
+| Variable                           | Default                     | Meaning                                                                                        |
+| ---------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `IMAGE_PROVIDER`                   | `openai`                    | `openai`, or `mock` for offline plumbing tests (returns the reference photo; QA always passes) |
+| `OPENAI_API_KEY`                   | —                           | required for `openai`                                                                          |
+| `OPENAI_BASE_URL`                  | `https://api.openai.com/v1` | proxy / compatible endpoint                                                                    |
+| `IMAGE_MODEL`                      | `gpt-image-1`               | image-edit model (reference images are sent as inputs)                                         |
+| `IMAGE_QUALITY`                    | `high`                      | provider quality                                                                               |
+| `IMAGE_SIZE`                       | `1536x1024`                 | size requested from the provider (3:2)                                                         |
+| `IMAGE_OUTPUT_SIZE`                | `960x640`                   | final app asset (same 3:2 as the originals, which the UI crops with `object-fit: cover`)       |
+| `IMAGE_OUTPUT_FORMAT` / `_QUALITY` | `webp` / `80`               | final encoding (encoded once from the lossless source)                                         |
+| `IMAGE_GENERATION_CONCURRENCY`     | `1`                         | exercises processed in parallel. Keep it at 1 until the anchor is proven                       |
+| `IMAGE_GENERATION_RETRIES`         | `3`                         | transport retries (429/5xx/timeouts, exponential backoff with jitter, honours `Retry-After`)   |
+| `IMAGE_GENERATION_TIMEOUT_MS`      | `180000`                    | per-request timeout                                                                            |
+| `IMAGE_QA_ENABLED`                 | `true`                      | vision QA after each image                                                                     |
+| `IMAGE_QA_MODEL`                   | `gpt-4.1`                   | vision model for QA (JSON mode)                                                                |
+| `IMAGE_QA_MIN_SCORE`               | `8`                         | minimum QA score (0–10)                                                                        |
+| `IMAGE_MAX_QA_ATTEMPTS`            | `2`                         | QA-driven regenerations before an image goes to manual review                                  |
+| `IMAGE_BULK_THRESHOLD`             | `24`                        | jobs larger than this refuse to run without `--confirm-bulk`                                   |
+| `IMAGE_STATES`                     | `start,end`                 | frames to produce                                                                              |
+| `IMAGE_KEEP_SOURCE`                | `true`                      | keep the raw provider image (gitignored)                                                       |
+
+## 2. Files
+
+```
+scripts/exercise-images/
+  cli.ts          commands + flags (npm run exercise-images -- …)
+  config.ts       env schema (zod), paths
+  catalog.ts      exercises.rich.json + instructions + localized names → CatalogExercise
+                  (unilateral + body-position detection, reference paths)
+  style.ts        THE visual system: athlete, wardrobe, photography, composition, negatives.
+                  Bump PROMPT_VERSION whenever it changes.
+  palette.ts      muscle group → theme token → dark wall / glow colours
+  prompt.ts       deterministic prompt builder
+  manifest.ts     resumable manifest, statuses, fingerprints, decide(), lock file
+  generate.ts     plan → cost summary → per-exercise run (start, then end), QA loop
+  provider.ts     provider interfaces; providers/openai.ts, providers/mock.ts
+  postprocess.ts  sharp: EXIF rotate → cover resize → sRGB → WebP, metadata stripped
+  qa.ts           mechanical checks + vision-QA JSON validation / pass rule
+  review.ts       static review page
+  apply.ts        reversible apply into the app
+  pilot.ts        22 hand-picked pilot exercises
+assets/exercise-images/
+  manifest.json   committed state (statuses, hashes, QA, prompts)
+  anchor/         identity anchor image (committed): THE athlete
+  apply-history/  overrides backups (committed), one per apply
+  generated/      final WebPs         (gitignored)
+  source/         raw provider output (gitignored)
+  review/         review page         (gitignored)
+client/public/exercise-img-v2/<id>/{0,1}.webp   applied images (new folder, originals untouched)
+client/src/data/exerciseImageOverrides.json     id → new URLs (the app reads this)
+```
+
+## 3. How one exercise is made
+
+The tool works **exercise by exercise, one at a time by default**, so you can see immediately
+whether the athlete changed.
+
+1. **Start frame.** Attached images: the original start photo (a strict blueprint for the pose and
+   equipment) + the identity anchor (when set). The prompt tells the model to copy the mechanics
+   and equipment from the reference, but not its person, clothes, background or lighting.
+2. **End frame.** Attached: the original end photo + the anchor + **the start frame just
+   generated**, so the pair shares the athlete, set, camera and lighting and only the joint
+   angles change.
+3. Each image is saved raw (`source/`) → normalised to WebP (`generated/`) → mechanically checked
+   (decodes, format, exact size, not tiny) → vision QA.
+4. **Vision QA** returns JSON: `passed, score, exerciseCorrect, equipmentCorrect, poseCorrect,
+anatomyCorrect, styleCorrect, identityConsistent, issues[], retryInstruction`. The pass rule
+   does not trust `passed` alone: every correctness boolean must be true, `score ≥ MIN_SCORE`, and
+   identity must not be flagged. On failure, `retryInstruction` is appended to the prompt and the
+   image is regenerated, up to `IMAGE_MAX_QA_ATTEMPTS` times. After that the status becomes
+   `rejected` (waiting for a person).
+5. The manifest is saved atomically after every image, and the review page is rewritten after
+   every exercise.
+
+Statuses: `pending → generating → generated → approved | retry | rejected | failed | skipped`.
+Humans add `manualApproval: approved | rejected` on top.
+
+## 4. Idempotency and resume
+
+Each image stores fingerprints: `promptVersion`, `promptHash`, `referenceHash` (sha256 of the
+original photo), `exerciseHash`, `configKey` (model/size/quality/format) and `anchorHash`.
+`decide()` redoes an image only when needed:
+
+| Situation                                                         | Redone?                                                           |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------- |
+| new / `pending` / `retry` / `failed` / interrupted (`generating`) | yes                                                               |
+| prompt version, prompt text, reference or exercise data changed   | yes                                                               |
+| only config or anchor changed                                     | only with `--include-config-changes`                              |
+| manually approved                                                 | only if the prompt version or reference changed (or `--force`)    |
+| QA-rejected                                                       | no. It waits for a person; `--status rejected` retries on purpose |
+| manually rejected                                                 | yes, with your note as the correction instruction                 |
+
+If you interrupt a run with Ctrl-C, it finishes the current image, saves and stops. Run the same
+command again to continue. A lock file (`.manifest.lock`) prevents two runs at once, and a stale
+lock from a dead process is reclaimed.
+
+## 5. Workflow
+
+```bash
+# 0. See the plan and the exact first prompt. Nothing is sent.
+npm run exercise-images -- generate --pilot --dry-run
+
+# 1. First exercise only, then look at it.
+npm run exercise-images -- generate --exercise Barbell_Bench_Press_-_Medium_Grip
+open assets/exercise-images/review/index.html
+
+# 2. Pick the best frame as THE athlete (identity anchor). Every later image references it.
+npm run exercise-images -- set-anchor --exercise Barbell_Bench_Press_-_Medium_Grip --state start
+
+# 3. The rest of the pilot, pausing after each exercise (Enter = next, q = stop).
+npm run exercise-images -- generate --pilot --step
+#    Keep the review page open with "auto-refresh" on. It updates after every exercise.
+
+# 4. Review: Approve / Reject (reject asks what is wrong) → "Export decisions" → import.
+npm run exercise-images -- review --import ~/Downloads/exercise-image-decisions.json
+#    or from the CLI:
+npm run exercise-images -- reject --exercise Face_Pull --state end --note "rope must reach the forehead"
+
+# 5. Rejected images come back with your note as the correction.
+npm run exercise-images -- generate --pilot --step
+
+# 6. Put approved pairs into the app (dry-run first, then write; reversible).
+npm run exercise-images -- apply --require-manual
+npm run exercise-images -- apply --require-manual --write
+npm run exercise-images -- apply --revert latest
+```
+
+After the pilot is signed off, work in batches by muscle group or equipment. The bulk guard asks
+for an explicit flag:
+
+```bash
+npm run exercise-images -- generate --muscle chest --dry-run
+npm run exercise-images -- generate --muscle chest --step --confirm-bulk
+npm run exercise-images -- generate --equipment cable --from 0 --limit 10 --confirm-bulk
+npm run exercise-images -- status
+```
+
+A full-catalog run needs `--all --confirm-bulk`. **Do not run it** until the pilot and a few
+muscle batches are approved.
+
+### Identity anchor
+
+- `set-anchor` copies a generated image to `anchor/athlete.png` and records its hash.
+- When the anchor changes, earlier images are **not** redone automatically. Run with
+  `--include-config-changes` for a group that has drifted.
+- Model limitation: reference-conditioned image editing keeps a face and body _similar_ but not
+  pixel-identical. The anchor plus the start-frame chaining keeps drift small. Watch the review
+  page and reject drifted frames with a note like "same face as the anchor: shorter hair, no
+  beard".
+
+## 6. Selection flags
+
+`--all`, `--pilot`, `--exercise <id|slug>[,…]`, `--muscle <primary or palette group>`,
+`--equipment <e>`, `--category <c>`, `--status <status>`, `--from <n> --limit <n>` (counted in
+exercises, so a start/end pair is never split), `--states start,end`.
+
+Run flags: `--dry-run`, `--confirm-bulk`, `--force`, `--include-config-changes`, `--no-qa`,
+`--step`.
+
+## 7. Cost control
+
+Every run first prints: number of exercises, number of images, minimum and maximum API calls
+including QA regenerations, QA calls, model, size and concurrency. Jobs above
+`IMAGE_BULK_THRESHOLD` images need `--confirm-bulk`. `--dry-run` prints the plan and the first
+full prompt without sending anything. Check the provider's current per-image pricing before a
+batch. The full catalog is about 1,750 images plus QA calls and regenerations.
+
+## 8. Colour system
+
+`palette.ts` maps each primary muscle to a palette group (chest, back, shoulders, biceps, triceps,
+forearms, core, quadriceps, hamstrings, glutes, calves, neck, cardio, stretching, other). Each
+group names a theme token or hex hue, a mix strength and words for the prompt. The wall colour is
+`mix(--color-bg, hue, strength)`, read from `client/src/styles.css`, so it stays dark and on-brand.
+Only the wall and rim light are tinted; skin stays natural.
+
+## 9. Review page
+
+`assets/exercise-images/review/index.html` is static and needs no server. It shows reference and
+generated images side by side for each frame, with status, QA score, issues and the retry
+instruction. You can filter by status (including "pending review"), muscle, equipment, QA score
+and text. Decisions are stored in the browser until you export them as JSON and import them with
+`review --import`.
+
+## 10. Applying and rollback
+
+- `apply` only considers exercises whose **every** frame is approved (`--require-manual` means
+  approved by a human).
+- `--write` copies WebPs to `client/public/exercise-img-v2/<id>/`, backs up the current overrides
+  to `apply-history/`, then writes `exerciseImageOverrides.json` atomically.
+- `--revert latest|<file>` restores a backup. The original `exercise-img/` photos are never
+  modified, so reverting to `{}` restores the old catalog completely.
+
+## 11. Changing the look
+
+Edit `style.ts` or `palette.ts` and bump `PROMPT_VERSION`. Every image, including approved ones,
+becomes eligible again. Check a few with `--dry-run` and `--exercise` before any batch.
+
+## 12. Tests
+
+`npm run test:unit -- tests/exercise-images` covers pure logic only: prompt determinism and
+content (wardrobe, incline, unilateral/alternating, retry), catalog detectors, pilot ids,
+selection/slicing, manifest decisions, palette, QA pass rule, errors/backoff, image headers and
+apply planning. No test calls a provider.
+
+Typecheck: `npx tsc -p scripts/exercise-images/tsconfig.json`.
+
+## 13. Known limitations
+
+- Image models can still get equipment details wrong (cable routing, grip, machine geometry). QA
+  catches many of these errors, but not all, so human review of every pair before `apply` is part
+  of the process.
+- Identity consistency is approximate (see Identity anchor).
+- Some references are low quality or ambiguous. When a reference is wrong, fix or replace it
+  (the reference hash change triggers a redo) rather than prompting around it.
+- 14 cardio and 123 stretching exercises may need a different composition. Pilot them separately
+  before batching.

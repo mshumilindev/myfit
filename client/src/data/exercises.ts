@@ -7,6 +7,7 @@ import DB_RAW from './exercises.db.json';
 import { tokenMatch } from '../search';
 import { LOCALES, LOCALE_IDS } from '../i18n';
 import LOC_NAMES from './exerciseNames.generated.json';
+import IMAGE_OVERRIDES_RAW from './exerciseImageOverrides.json';
 import RICH_RAW from './exercises.rich.json';
 import SUBREGIONS_RAW from './subregionTags.json';
 import type { EquipmentId } from './equipment';
@@ -75,7 +76,16 @@ export interface RichExercise {
 
 type DbRow = [string, EquipmentId | null, MuscleGroup];
 const DB_ROWS = DB_RAW as DbRow[];
-const RICH_EXERCISES = RICH_RAW as RichExercise[];
+/**
+ * Approved regenerated photos (written only by `npm run exercise-images -- apply --write`).
+ * Maps exercise id → image URLs; originals under /exercise-img stay untouched, so an empty
+ * file (or a revert) falls straight back to them.
+ */
+const IMAGE_OVERRIDES = IMAGE_OVERRIDES_RAW as Record<string, string[] | undefined>;
+const RICH_EXERCISES = (RICH_RAW as RichExercise[]).map((e) => {
+  const images = IMAGE_OVERRIDES[e.id];
+  return images && images.length ? { ...e, images } : e;
+});
 
 const RICH_BY_ID = new Map<string, RichExercise>(RICH_EXERCISES.map((e) => [e.id, e]));
 const RICH_BY_NAME = new Map<string, RichExercise>(

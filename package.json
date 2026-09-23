@@ -17,6 +17,7 @@
     "typecheck": "npm run typecheck -w server && npm run typecheck -w client && npm run typecheck -w desktop",
     "lint": "eslint .",
     "i18n:check": "node scripts/check-i18n.mjs",
+    "exercise-images": "tsx scripts/exercise-images/cli.ts",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -42,6 +43,7 @@
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.3",
+    "sharp": "^0.35.4",
     "supertest": "^7.2.2",
     "typescript-eslint": "^8.59.3",
     "vitest": "^4.1.10"
