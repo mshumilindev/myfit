@@ -217,7 +217,9 @@ export function HistoryTimeline({
     <div className="hist-tl">
       {days.map((day, i) => {
         const isLast = i === days.length - 1;
-        const showState = day.state !== 'trained' && day.state !== 'logged';
+        // Missed days read from the red ✕ node alone — no duplicate pill.
+        const showState =
+          day.state !== 'trained' && day.state !== 'logged' && day.state !== 'missed';
         return (
           <div
             className={`hist-tl-day st-${day.state}${isLast ? ' is-last' : ''}`}
@@ -227,7 +229,19 @@ export function HistoryTimeline({
               {day.state === 'logged' ? (
                 <span className="hist-tl-dot" />
               ) : (
-                <span className="hist-tl-node">
+                <span
+                  className="hist-tl-node"
+                  title={
+                    day.state === 'trained'
+                      ? undefined
+                      : stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>]
+                  }
+                  aria-label={
+                    day.state === 'trained'
+                      ? undefined
+                      : stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>]
+                  }
+                >
                   <Icon name={STATE_GLYPH[day.state as Exclude<DayState, 'logged'>]} />
                 </span>
               )}
