@@ -909,30 +909,33 @@ export function SessionView(props: {
   function renderFocusView() {
     // Focus header keeps only Finish; everything else lives behind the one
     // options door (sliders next to Log, or here when nothing is focused yet).
-    const fmActions = (
+    // Focus header: the gym stays in the hero above, Finish sits next to Next
+    // at the bottom, everything else lives behind the options door. Only an
+    // empty focus (nothing to log yet) needs a door up here.
+    const fmActions = !focusEx ? (
       <div className="fm-actions">
-        {!focusEx && (
-          <button
-            className="fm-icon-btn"
-            onClick={() =>
-              setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
-            }
-            aria-label={t.sessionSettings}
-            title={t.sessionSettings}
-          >
-            <Icon name="sliders-horizontal" />
-          </button>
-        )}
         <button
-          className="fm-icon-btn fm-finish"
-          disabled={entries === 0}
-          onClick={requestFinish}
-          aria-label={t.finish}
-          title={t.finish}
+          className="fm-icon-btn"
+          onClick={() =>
+            setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
+          }
+          aria-label={t.sessionSettings}
+          title={t.sessionSettings}
         >
-          <Icon name="check" />
+          <Icon name="sliders-horizontal" />
         </button>
       </div>
+    ) : null;
+    const finishBtn = (
+      <button
+        className="btn focus-finish"
+        disabled={entries === 0}
+        onClick={requestFinish}
+        aria-label={t.finish}
+        title={t.finish}
+      >
+        <Icon name="check" weight="bold" />
+      </button>
     );
     if (!focusEx) {
       return (
@@ -1030,6 +1033,7 @@ export function SessionView(props: {
               <Icon name="caret-right" />
             </button>
           )}
+          {finishBtn}
         </div>
       </div>
     );

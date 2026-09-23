@@ -32386,7 +32386,8 @@ body {
 }
 .focus-nav .focus-finish {
   flex: none;
-  width: 48px;
+  width: 54px;
+  font-size: 20px;
   min-height: 52px;
   padding: 0;
   background: var(--color-ok);

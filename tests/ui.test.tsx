@@ -1070,10 +1070,12 @@ describe('F-03 session UI', () => {
     localStorage.setItem('spotter.session.focus', '1');
     __replaceStateForTests(sampleStore());
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
-    // the focus header keeps only Finish — discard / muscle map / settings moved behind the door
+    // the focus header is clean — Finish moved next to Next, the rest behind the door
     const bar = container.querySelector('.fm-modebar') as HTMLElement;
     expect(within(bar).queryByRole('button', { name: 'Discard session' })).toBeNull();
-    expect(within(bar).getByRole('button', { name: 'Finish' })).toBeTruthy();
+    expect(within(bar).queryByRole('button', { name: 'Finish' })).toBeNull();
+    const nav = container.querySelector('.focus-nav') as HTMLElement;
+    expect(within(nav).getByRole('button', { name: 'Finish' })).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
     const dialog = screen.getByRole('dialog');
     expect(
