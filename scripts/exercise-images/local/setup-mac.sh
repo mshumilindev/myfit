@@ -57,15 +57,40 @@ else
 fi
 uv pip install --python .venv/bin/python -r custom_nodes/ComfyUI-GGUF/requirements.txt
 
+remote_size() { # final Content-Length after redirects ("" if unknown)
+  curl -sIL --retry 3 "$1" | tr -d '\r' | awk 'tolower($1)=="content-length:" {n=$2} END {print n}'
+}
+
 fetch() { # fetch <models subdir> <file name> <url>
-  local dir="models/$1" dest="models/$1/$2"
+  local dir="models/$1" dest="models/$1/$2" url="$3" want have
   mkdir -p "$dir"
-  if [[ -s "$dest" && ! -e "$dest.part" ]]; then
+  # Another downloader (e.g. an earlier run) may still be writing this file — wait for it.
+  while pgrep -f -- "$2" | grep -vq "^$$\$"; do
+    echo "  … $2 is being downloaded by another process, waiting"
+    sleep 30
+  done
+  want="$(remote_size "$url")"
+  if [[ -f "$dest" ]]; then
+    have=$(stat -f %z "$dest")
+    if [[ -z "$want" || "$have" == "$want" ]]; then
+      echo "  ✓ $2"
+      return
+    fi
+    # Complete-looking name but short: continue it as a partial download.
+    [[ -e "$dest.part" ]] || mv "$dest" "$dest.part"
+  fi
+  if [[ -n "$want" && -f "$dest.part" && "$(stat -f %z "$dest.part")" == "$want" ]]; then
+    mv "$dest.part" "$dest"
     echo "  ✓ $2"
     return
   fi
-  echo "  ↓ $2"
-  curl -fL --retry 5 --retry-delay 5 -C - -o "$dest.part" "$3"
+  echo "  ↓ $2 ($((${want:-0} / 1024 / 1024)) MB)"
+  curl -fL --retry 10 --retry-delay 5 --retry-all-errors -C - -# -o "$dest.part" "$url"
+  have=$(stat -f %z "$dest.part")
+  if [[ -n "$want" && "$have" != "$want" ]]; then
+    echo "  ✗ $2: got $have of $want bytes — rerun the script to resume" >&2
+    exit 1
+  fi
   mv "$dest.part" "$dest"
 }
 
