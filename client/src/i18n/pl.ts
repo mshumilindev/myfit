@@ -1647,6 +1647,16 @@ export const pl: Strings = {
   failSuggestDrop: 'Ostatni drop do upadku',
   failSuggestRoom: (rir) =>
     `Ostatnia seria, ~${rir} powt. w zapasie — tę można bezpiecznie do upadku`,
+  failAutoNote: (why) => `Wygląda na upadek — ${why}`,
+  failNotFailure: 'To nie upadek',
+  failWhy: {
+    rpe: 'ocena RPE 10',
+    partials: 'niepełne powtórzenia po pełnych',
+    missed: '2+ powt. mniej niż cel',
+    collapse: 'ostry spadek powtórzeń po poprzedniej serii',
+    effort: 'historia mówi, że nic nie zostało',
+    drop: 'drop kończy się upadkiem',
+  },
   rpeHintF: 'Do upadku — kolejne powtórzenie już nie weszło. Działa z każdym typem serii.',
   rpeHintFAuto: 'Aplikacja oznaczyła upadek — wybierz inną wartość, jeśli nie.',
   rpeEstHint: (v) =>

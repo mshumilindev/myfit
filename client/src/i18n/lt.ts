@@ -1659,6 +1659,16 @@ export const lt: Strings = {
   failSuggestDrop: 'Paskutinis dropas iki nesėkmės',
   failSuggestRoom: (rir) =>
     `Paskutinis priėjimas, ~${rir} pakart. atsargoje — šį saugu iki nesėkmės`,
+  failAutoNote: (why) => `Panašu į nesėkmę — ${why}`,
+  failNotFailure: 'Ne nesėkmė',
+  failWhy: {
+    rpe: 'įvertinta RPE 10',
+    partials: 'daliniai pakartojimai po pilnų',
+    missed: '2+ pakart. mažiau nei tikslas',
+    collapse: 'staigus pakartojimų kritimas po ankstesnio',
+    effort: 'pagal istoriją atsargos neliko',
+    drop: 'dropas baigiasi nesėkme',
+  },
   rpeHintF: 'Iki nesėkmės — kitas pakartojimas jau nebėjo. Tinka bet kuriam priėjimo tipui.',
   rpeHintFAuto: 'Programa pažymėjo nesėkmę — pasirink kitą reikšmę, jei ne.',
   rpeEstHint: (v) =>

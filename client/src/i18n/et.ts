@@ -1643,6 +1643,16 @@ export const et: Strings = {
   failSuggestDrop: 'Viimane drop läbikukkumiseni',
   failSuggestRoom: (rir) =>
     `Viimane seeria, ~${rir} kordust varus — selle võib ohutult läbikukkumiseni teha`,
+  failAutoNote: (why) => `Paistab läbikukkumine — ${why}`,
+  failNotFailure: 'Ei olnud',
+  failWhy: {
+    rpe: 'hinnatud RPE 10',
+    partials: 'osalised kordused pärast täis kordusi',
+    missed: '2+ kordust alla eesmärgi',
+    collapse: 'korduste järsk langus eelmise seeria järel',
+    effort: 'ajaloo järgi varu ei jäänud',
+    drop: 'drop lõpeb läbikukkumisega',
+  },
   rpeHintF: 'Läbikukkumiseni — järgmine kordus enam ei läinud. Sobib iga seeriatüübiga.',
   rpeHintFAuto: 'Rakendus märkis läbikukkumise — vali muu väärtus, kui ei olnud.',
   rpeEstHint: (v) =>

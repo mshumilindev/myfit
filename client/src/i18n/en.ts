@@ -1688,6 +1688,16 @@ export const en = {
   failSuggestDrop: 'The last drop goes to failure',
   failSuggestRoom: (rir: string) =>
     `Last set, ~${rir} reps in reserve — a safe one to take to failure`,
+  failAutoNote: (why: string) => `Read as to failure — ${why}`,
+  failNotFailure: 'Not failure',
+  failWhy: {
+    rpe: 'rated RPE 10',
+    partials: 'partial reps after the full ones',
+    missed: '2+ reps short of the target',
+    collapse: 'reps dropped hard vs the last set',
+    effort: 'your history says nothing was left',
+    drop: 'drop sets end at failure',
+  },
   rpeHintF: 'To failure — the next rep wouldn’t go. Works with any set type.',
   rpeHintFAuto: 'Marked to failure by the app — tap another value if it wasn’t.',
   rpeEstHint: (v: string) =>

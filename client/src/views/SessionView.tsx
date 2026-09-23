@@ -1570,68 +1570,93 @@ export function SessionView(props: {
       const frac = done || goal === 0 ? 1 : Math.max(0, Math.min(1, left / goal));
       const nudge = (d: number) =>
         setRestAdj({ at: lastLoggedAt, delta: adj.delta + d, skip: false });
-      return (
-        <div className={`rst-card${done ? ' done' : ''}`}>
-          <RestAlarm
-            dueAt={lastLoggedAt + goal * 1000}
-            enabled={goal > 0}
-            prefs={store.restPrefs ?? REST_PREFS_DEFAULT}
-            title={t.restNoteTitle}
-            body={nextLine}
-          />
-          <button
-            type="button"
-            className="rst-ring"
-            aria-label={t.restSettingsAria}
-            onClick={() => setSheet({ kind: 'rest', exName: lastEx.name })}
-          >
-            <svg viewBox="0 0 112 112" aria-hidden>
-              <circle className="rst-track" cx="56" cy="56" r={R} />
-              <circle
-                className="rst-arc"
-                cx="56"
-                cy="56"
-                r={R}
-                strokeDasharray={`${(C * frac).toFixed(1)} ${C.toFixed(1)}`}
-              />
-            </svg>
-            <span className="rst-center">
-              {done ? (
-                <>
-                  <span className="rst-go">{t.restGo}</span>
-                  <span className="rst-time">+{fmtCountdown(-left)}</span>
-                </>
-              ) : (
-                <>
-                  <span className="rst-time">{fmtCountdown(left)}</span>
-                  <span className="rst-of">{t.restOf(fmtCountdown(goal))}</span>
-                </>
+      // The set just logged was read as failure → say so, and why, with an
+      // easy "no". (The row keeps its dashed F? tag either way.)
+      const justSet = lastChrono.s;
+      const failNote =
+        justSet.failure === 'auto' && lastEx.id === ex.id ? (
+          <div className="fail-note" role="status">
+            <Icon name="flame" weight="fill" />
+            <span className="fail-note-text">
+              {t.failAutoNote(
+                (t.failWhy as Record<string, string>)[justSet.failureWhy ?? ''] ?? t.failShort,
               )}
             </span>
-          </button>
-          <div className="rst-body">
-            <div className="rst-lbl">
-              <Icon name="timer" />
-              {done ? t.restOverTitle : t.restHeaderLabel}
-            </div>
-            <div className="rst-next">{nextLine}</div>
-            {!done && exerciseRestSec(lastEx.name) === null && whyLine && (
-              <div className="rst-why">{whyLine}</div>
-            )}
-            {done ? (
-              <div className="rst-note">{t.restOverNote}</div>
-            ) : (
-              <div className="rst-btns">
-                <button type="button" aria-label={t.restMinus15} onClick={() => nudge(-15)}>
-                  −15
-                </button>
-                <button type="button" aria-label={t.restPlus15} onClick={() => nudge(15)}>
-                  +15
-                </button>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() =>
+                upsertSet(workout!.id, lastEx.id, { ...justSet, failure: 'no', failureWhy: null })
+              }
+            >
+              {t.failNotFailure}
+            </button>
           </div>
-        </div>
+        ) : null;
+      return (
+        <>
+          {failNote}
+          <div className={`rst-card${done ? ' done' : ''}`}>
+            <RestAlarm
+              dueAt={lastLoggedAt + goal * 1000}
+              enabled={goal > 0}
+              prefs={store.restPrefs ?? REST_PREFS_DEFAULT}
+              title={t.restNoteTitle}
+              body={nextLine}
+            />
+            <button
+              type="button"
+              className="rst-ring"
+              aria-label={t.restSettingsAria}
+              onClick={() => setSheet({ kind: 'rest', exName: lastEx.name })}
+            >
+              <svg viewBox="0 0 112 112" aria-hidden>
+                <circle className="rst-track" cx="56" cy="56" r={R} />
+                <circle
+                  className="rst-arc"
+                  cx="56"
+                  cy="56"
+                  r={R}
+                  strokeDasharray={`${(C * frac).toFixed(1)} ${C.toFixed(1)}`}
+                />
+              </svg>
+              <span className="rst-center">
+                {done ? (
+                  <>
+                    <span className="rst-go">{t.restGo}</span>
+                    <span className="rst-time">+{fmtCountdown(-left)}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="rst-time">{fmtCountdown(left)}</span>
+                    <span className="rst-of">{t.restOf(fmtCountdown(goal))}</span>
+                  </>
+                )}
+              </span>
+            </button>
+            <div className="rst-body">
+              <div className="rst-lbl">
+                <Icon name="timer" />
+                {done ? t.restOverTitle : t.restHeaderLabel}
+              </div>
+              <div className="rst-next">{nextLine}</div>
+              {!done && exerciseRestSec(lastEx.name) === null && whyLine && (
+                <div className="rst-why">{whyLine}</div>
+              )}
+              {done ? (
+                <div className="rst-note">{t.restOverNote}</div>
+              ) : (
+                <div className="rst-btns">
+                  <button type="button" aria-label={t.restMinus15} onClick={() => nudge(-15)}>
+                    −15
+                  </button>
+                  <button type="button" aria-label={t.restPlus15} onClick={() => nudge(15)}>
+                    +15
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       );
     }
     if (!restRunning || isMarkerExercise(ex)) return null;
