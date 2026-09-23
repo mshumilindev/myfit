@@ -643,6 +643,53 @@ export function MuscleHeatmap({
 }
 
 /**
+ * One silhouette (front or back) with a set of groups painted one colour and
+ * the rest dimmed — the exercise picker's muscle-family tiles, where the colour
+ * is the family's readiness. Fine regions (FOCUS_LIB_IDS) are accepted too.
+ */
+export function FamilyFigure({
+  groups,
+  focus = [],
+  color,
+  view,
+  width,
+  height,
+  className,
+}: {
+  groups: MuscleGroup[];
+  focus?: FocusMuscle[];
+  color: string;
+  view: BView;
+  width?: number;
+  height?: number;
+  className?: string;
+}) {
+  const lit = new Set<string>();
+  for (const g of groups) if (g !== 'cardio') for (const id of LIB[g][view]) lit.add(id);
+  for (const f of focus) for (const id of FOCUS_LIB_IDS[f]?.[view] ?? []) lit.add(id);
+  return (
+    <svg
+      className={className}
+      viewBox={VIEWBOX[view].full}
+      width={width}
+      height={height}
+      aria-hidden
+      style={{ display: 'block', flexShrink: 0 }}
+    >
+      {VIEW_PATHS[view].map(({ id, path }) => (
+        <path
+          key={id}
+          d={path}
+          fill={lit.has(id) ? color : DIM}
+          stroke={lit.has(id) ? 'none' : DIM_STROKE}
+          strokeWidth={0.12}
+        />
+      ))}
+    </svg>
+  );
+}
+
+/**
  * Focus map (Goals): the shared body figure with GROW muscles tinted accent and
  * EASE-off muscles tinted danger, everything else dimmed. Fine sub-regions (the
  * three delt heads, upper/lower chest) light their exact library paths; other

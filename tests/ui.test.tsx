@@ -836,12 +836,11 @@ describe('F-03 session UI', () => {
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
-    expect(screen.getByPlaceholderText('Search exercises')).toBeTruthy();
-    // The four large kind buttons: Strength keeps the search open; the three
-    // timed kinds (Cardio/Warm-up/Cool-down) log a session of that kind
-    // directly and close the sheet.
+    const search = 'Search by name, muscle or equipment';
+    expect(screen.getByPlaceholderText(search)).toBeTruthy();
+    // Strength keeps the picker open; Cardio moves on to the machine list.
     await userEvent.click(screen.getAllByRole('button', { name: 'Cardio' })[0]);
-    await waitFor(() => expect(screen.queryByPlaceholderText('Search exercises')).toBeNull());
+    await waitFor(() => expect(screen.queryByPlaceholderText(search)).toBeNull());
 
     cleanup();
     __replaceStateForTests(s);
@@ -985,6 +984,86 @@ describe('F-03 session UI', () => {
     const fresh = cards[0];
     expect(fresh.querySelector('.gset')).toBeTruthy();
     expect(within(fresh as HTMLElement).getByRole('button', { name: 'Log' })).toBeTruthy();
+  });
+
+  it('picker: a family opens its photo grid, a tap adds, ⓘ only shows details', async () => {
+    __replaceStateForTests(sampleStore());
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    const count = () =>
+      __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises.length;
+    const before = count();
+
+    // Home: muscle-family tiles; Back drills into sub-muscles + a grid.
+    const backTile = [...document.querySelectorAll('.xp-fam')].find((b) =>
+      b.textContent?.startsWith('Back'),
+    ) as HTMLElement;
+    await userEvent.click(backTile);
+    expect(screen.getByRole('button', { name: 'Back to muscle groups' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Lats' })).toBeTruthy();
+
+    // ⓘ opens the details sheet and adds nothing.
+    await userEvent.click(screen.getAllByRole('button', { name: 'Details' })[0]);
+    expect(screen.getByRole('button', { name: 'Add to session' })).toBeTruthy();
+    expect(count()).toBe(before);
+    const backs = screen.getAllByRole('button', { name: 'Back' });
+    await userEvent.click(backs[backs.length - 1]);
+
+    // Tapping a card adds it straight away.
+    const card = document.querySelector('.xp-card .xp-card-main') as HTMLElement;
+    await userEvent.click(card);
+    expect(count()).toBe(before + 1);
+  });
+
+  it('picker: search marks what was already done today, without blocking it', async () => {
+    __replaceStateForTests(sampleStore());
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    await userEvent.type(
+      screen.getByPlaceholderText('Search by name, muscle or equipment'),
+      'bench press',
+    );
+    const done = [...document.querySelectorAll('.xp-row')].find((r) =>
+      r.querySelector('.xp-badge.done'),
+    ) as HTMLElement | undefined;
+    expect(done).toBeTruthy();
+    const main = done!.querySelector('.xp-row-main') as HTMLButtonElement;
+    expect(main.disabled).toBe(false);
+  });
+
+  it('lets warm-up, cool-down and cardio be removed, also from focus mode', async () => {
+    localStorage.setItem('spotter.session.focus', '1');
+    const s = sampleStore();
+    s.workouts[0].exercises.push(
+      { id: 'wu', name: 'Warm-up', kind: 'warmup', position: -1, sets: [] },
+      { id: 'cd', name: 'Cool-down', kind: 'cooldown', position: 5, sets: [] },
+      { id: 'bike', name: 'Upright bike', kind: 'cardio', position: 4, sets: [] },
+    );
+    __replaceStateForTests(s);
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    const ids = () =>
+      __getStateForTests()
+        .workouts.find((w) => w.id === 'open')!
+        .exercises.map((e) => e.id);
+    for (const id of ['wu', 'cd', 'bike']) {
+      // walk the focus slides until this exercise is shown
+      for (let i = 0; i < 8 && !container.querySelector(`[data-exid="${id}"]`); i++) {
+        const next = container.querySelector('.focus-next') as HTMLElement | null;
+        const back = container.querySelector('.focus-back') as HTMLButtonElement | null;
+        if (back && !back.disabled && i === 0) {
+          for (let k = 0; k < 8 && !back.disabled; k++) await userEvent.click(back);
+          continue;
+        }
+        if (next) await userEvent.click(next);
+      }
+      const card = container.querySelector(`[data-exid="${id}"]`) as HTMLElement;
+      expect(card).toBeTruthy();
+      await userEvent.click(within(card).getByRole('button', { name: 'Menu' }));
+      expect(screen.queryByText('Clear all sets')).toBeNull();
+      await userEvent.click(screen.getByRole('button', { name: 'Delete exercise' }));
+      expect(ids()).not.toContain(id);
+    }
+    localStorage.removeItem('spotter.session.focus');
   });
 
   it('inserts a warm-up marker card with no sets to log', async () => {

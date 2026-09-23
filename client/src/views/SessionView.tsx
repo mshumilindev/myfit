@@ -1,6 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { tokenMatch } from '../search';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -24,7 +23,6 @@ import {
   isTimedExercise,
   isMarkerExercise,
   restBeforeSetInWorkout,
-  knownExercises,
   perHandFactor,
   sidesEligible,
   sidesFor,
@@ -84,6 +82,7 @@ import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
 import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
 import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
+import { ExercisePicker } from '../components/ExercisePicker';
 import {
   cardioMachineOf,
   cardioProfile,
@@ -105,22 +104,12 @@ import {
   equipmentIconName,
   withMuscleBreak,
 } from '../components/Muscle';
-import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
+import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
 import { warmupRamp } from '../sessionBuilder';
-import { describeDay, dayReadoutLabel, exerciseDay, type TrainingDay } from '../data/daySuggest';
+import { dayReadoutLabel } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
-import {
-  BUILT_IN_CATALOG,
-  muscleInfoByName,
-  richExerciseById,
-  richExerciseByName,
-  loadExerciseInstructions,
-  searchCatalog,
-  exerciseSearchText,
-  secondaryMusclesOf,
-  type MuscleGroup,
-} from '../data/exercises';
+import { richExerciseByName, type MuscleGroup } from '../data/exercises';
 import {
   fmtClock,
   fmtDayMonth,
@@ -145,11 +134,9 @@ import {
   Switch,
   useIsDesktop,
 } from '../ui';
-import { LOCALE_IDS, fmtWeekday } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { getRole } from '../api';
 
-const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
 /** m:ss for a static-dynamic hold time stored as fractional minutes. */
@@ -1240,7 +1227,9 @@ export function SessionView(props: {
                 </span>
               )}
               {grp && !groupDone && grp.active && <span className="ss-now">{t.nowLabel}</span>}
-              {!grp && !focusView && (
+              {/* Settings stay reachable in focus mode too — markers and cardio have
+                  no set editor to reach them from, so this is how they're removed. */}
+              {!grp && (
                 <button
                   className="dots ex-settings"
                   onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
@@ -2942,7 +2931,6 @@ export function SessionView(props: {
         <AddExerciseSheet
           workout={workout}
           gym={gym}
-          suggestions={!props.past && workout.exercises.length === 0}
           onPick={(name, kind, meta) => {
             const base = meta
               ? {
@@ -3079,23 +3067,29 @@ export function SessionView(props: {
                     </div>
                   );
                 })()}
-              <button
-                className="menu-item"
-                onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
-              >
-                <Icon name="swap" />
-                {t.replaceExercise}
-              </button>
-              <button
-                className="menu-item"
-                onClick={() => {
-                  duplicateExercise(workout.id, ex.id);
-                  setSheet(null);
-                }}
-              >
-                <Icon name="copy" />
-                {t.duplicateWithSets}
-              </button>
+              {/* Warm-up / cool-down markers only need removing; cardio keeps the
+                  set tools but has no catalog details or lift history. */}
+              {isStrengthExercise(ex) && (
+                <button
+                  className="menu-item"
+                  onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
+                >
+                  <Icon name="swap" />
+                  {t.replaceExercise}
+                </button>
+              )}
+              {!isMarkerExercise(ex) && (
+                <button
+                  className="menu-item"
+                  onClick={() => {
+                    duplicateExercise(workout.id, ex.id);
+                    setSheet(null);
+                  }}
+                >
+                  <Icon name="copy" />
+                  {t.duplicateWithSets}
+                </button>
+              )}
               {isStrengthExercise(ex) &&
                 !ex.groupId &&
                 sortedExercises.filter((e) => isStrengthExercise(e) && !e.groupId).length > 1 && (
@@ -3119,44 +3113,50 @@ export function SessionView(props: {
                   {t.ungroup}
                 </button>
               )}
-              <button
-                className="menu-item"
-                onClick={() => {
-                  props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
-                  setSheet(null);
-                }}
-              >
-                <Icon name="info" />
-                {t.detailsAction}
-              </button>
-              <button
-                className="menu-item"
-                onClick={() => {
-                  props.shell.openOverlay({ screen: 'exercise-history', name: ex.name });
-                  setSheet(null);
-                }}
-              >
-                <Icon name="chart-line-up" />
-                {t.openHistory}
-              </button>
-              <button
-                className="menu-item"
-                onClick={() => {
-                  const removed = clearSets(workout.id, ex.id);
-                  setSheet(null);
-                  if (removed.length > 0) {
-                    props.shell.snack({
-                      text: t.exerciseDeleted(ex.name, removed.length),
-                      onUndo: () => {
-                        for (const s of removed) restoreSet(workout.id, ex.id, s);
-                      },
-                    });
-                  }
-                }}
-              >
-                <Icon name="eraser" />
-                {t.clearAllSets}
-              </button>
+              {isStrengthExercise(ex) && (
+                <>
+                  <button
+                    className="menu-item"
+                    onClick={() => {
+                      props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
+                      setSheet(null);
+                    }}
+                  >
+                    <Icon name="info" />
+                    {t.detailsAction}
+                  </button>
+                  <button
+                    className="menu-item"
+                    onClick={() => {
+                      props.shell.openOverlay({ screen: 'exercise-history', name: ex.name });
+                      setSheet(null);
+                    }}
+                  >
+                    <Icon name="chart-line-up" />
+                    {t.openHistory}
+                  </button>
+                </>
+              )}
+              {ex.sets.length > 0 && (
+                <button
+                  className="menu-item"
+                  onClick={() => {
+                    const removed = clearSets(workout.id, ex.id);
+                    setSheet(null);
+                    if (removed.length > 0) {
+                      props.shell.snack({
+                        text: t.exerciseDeleted(ex.name, removed.length),
+                        onUndo: () => {
+                          for (const s of removed) restoreSet(workout.id, ex.id, s);
+                        },
+                      });
+                    }
+                  }}
+                >
+                  <Icon name="eraser" />
+                  {t.clearAllSets}
+                </button>
+              )}
               <div className="sheet-rule" />
               <button
                 className="menu-item danger"
@@ -3460,32 +3460,17 @@ interface NewExerciseMeta {
 function AddExerciseSheet(props: {
   workout: Workout;
   gym: Gym | null;
-  suggestions?: boolean;
   /** Substitute an existing exercise rather than add a new one — the pick swaps
    *  the target's identity and keeps its sets. */
   replacing?: boolean;
   onPick: (name: string, kind: ExerciseKind, meta?: NewExerciseMeta) => void;
   onClose: () => void;
 }) {
-  const { t, locale } = useT();
-  const store = useStore();
-  const [q, setQ] = useState('');
-  const [kind, setKind] = useState<ExerciseKind>('strength');
-  const [equip, setEquip] = useState<EquipmentId | undefined>(undefined);
-  const [muscle, setMuscle] = useState<MuscleGroup | undefined>(undefined);
-  const [checkGym, setCheckGym] = useState(true);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  // Exercise-details drawer (opened by the ⓘ on a row; tapping the row still
-  // adds directly). Shows DB details with its own add button.
-  const [info, setInfo] = useState<{ name: string; kind: ExerciseKind } | null>(null);
+  const { t } = useT();
   // Admins/trainers creating a brand-new exercise set its muscles + equipment
   // here, and it is written to the shared server catalog (EQ-4).
   const [creating, setCreating] = useState<string | null>(null);
   const canAuthor = getRole() === 'admin' || getRole() === 'trainer';
-  const known = useMemo(() => knownExercises(), []);
-  const needle = q.trim().toLowerCase();
-  const li = LOCALE_IDS.indexOf(locale);
-  const hasInventory = !!props.gym?.inventory && props.gym.inventory.length > 0;
   // Cardio asks "which machine?" before adding — the machine decides the
   // entry's fields and how its calories are worked out.
   const [machineView, setMachineView] = useState(false);
@@ -3528,684 +3513,25 @@ function AddExerciseSheet(props: {
     );
   }
 
-  const historyMatches =
-    kind === 'strength'
-      ? known
-          .map((k) => ({ name: k.name, last: k.last, info: muscleInfoByName(k.name) }))
-          .filter((k) =>
-            tokenMatch(
-              exerciseSearchText(
-                k.name,
-                k.info ? [k.info.primary, ...k.info.secondary] : [],
-                (k.info?.equipment as EquipmentId | null) ?? null,
-              ),
-              needle,
-            ),
-          )
-          .filter(
-            (k) =>
-              (muscle === undefined ||
-                (k.info && (k.info.primary === muscle || k.info.secondary.includes(muscle)))) &&
-              (equip === undefined || k.info?.equipment === equip),
-          )
-          .slice(0, needle || muscle !== undefined || equip !== undefined ? 24 : 6)
-      : [];
-  const exact = kind === 'strength' && known.some((k) => k.name.toLowerCase() === needle);
-  const catalog =
-    kind === 'strength' && (needle || equip !== undefined || muscle !== undefined)
-      ? searchCatalog(
-          needle,
-          equip !== undefined || muscle !== undefined ? 14 : 8,
-          equip,
-          muscle,
-        ).filter(
-          (c) =>
-            !historyMatches.some((m) =>
-              c.names.some((n) => n.toLowerCase() === m.name.toLowerCase()),
-            ),
-        )
-      : [];
-  const totalCount = historyMatches.length + catalog.length;
-
-  function availability(equipment: EquipmentId | null | undefined): EquipmentId | null {
-    if (!checkGym || !hasInventory || !equipment) return null;
-    return props.gym!.inventory!.includes(equipment) ? null : equipment;
-  }
-
-  // Exercise rows are picked with a plain onClick: a native click fires only on
-  // a genuine tap (press + release without scrolling), so dragging to scroll the
-  // list never selects a row. No pointerdown handling — that fired on touch-start
-  // and grabbed a pick the moment a scroll began.
-
-  function renderFilterPanel() {
-    if (kind !== 'strength' || !filtersOpen) return null;
-    return (
-      <div className="filter-panel">
-        <div className="filter-group">
-          <div className="filter-group-label">{t.muscleGroupsLabel}</div>
-          <div className="filter-chips lg">
-            {MUSCLE_IDS.map((m) => (
-              <button
-                key={m}
-                className={`fchip lg${muscle === m ? ' active' : ''}`}
-                onClick={() => setMuscle((x) => (x === m ? undefined : m))}
-              >
-                <MuscleIcon
-                  muscle={m}
-                  variant="chipLg"
-                  tone={muscle === m ? 'onAccent' : 'secondary'}
-                />
-                {t.muscleGroups[m]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="filter-group">
-          <div className="filter-group-label">{t.equipmentLabelField}</div>
-          <div className="filter-chips lg">
-            {EQUIPMENT_IDS.map((id) => (
-              <button
-                key={id}
-                className={`fchip lg${equip === id ? ' active' : ''}`}
-                onClick={() => setEquip((x) => (x === id ? undefined : id))}
-              >
-                <Icon name={equipmentIconName(id)} />
-                {t.equipmentNames[id]}
-              </button>
-            ))}
-          </div>
-        </div>
-        {hasInventory && (
-          <button
-            className={`fchip lg${checkGym ? ' active' : ''}`}
-            onClick={() => setCheckGym((x) => !x)}
-          >
-            {t.availableHere}
-            {checkGym && <Icon className="x" name="x" />}
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  function renderActiveFilters() {
-    if (kind !== 'strength' || filtersOpen || (!muscle && !equip)) return null;
-    return (
-      <div className="filter-chips">
-        {muscle && (
-          <button className="fchip active" onClick={() => setMuscle(undefined)}>
-            <MuscleIcon muscle={muscle} variant="chip" tone="onAccent" />
-            {t.muscleGroups[muscle]}
-            <Icon className="x" name="x" />
-          </button>
-        )}
-        {equip && (
-          <button className="fchip active" onClick={() => setEquip(undefined)}>
-            <Icon name={equipmentIconName(equip)} />
-            {t.equipmentNames[equip]}
-            <Icon className="x" name="x" />
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  // --- Day-aware picker (Ex suggestions, AC-1) -----------------------------
-  if (props.suggestions) {
-    // Read the day from the muscle GROUPS trained — never a hardcoded guess:
-    //   • one dominant group        → name it ("Back"),
-    //   • several in one split       → the split ("Pull"),
-    //   • several across splits      → the actual groups ("Shoulders + Back"),
-    //   • many groups                → full body.
-    // Reference: program-day targets, else this session's own logged exercises,
-    // else the most recent session on this weekday, else the most recent session
-    // overall. Groups are ordered by the exercise trained first, so the main
-    // lift leads the label.
-    const weekday = new Date(props.workout.startedAt).getDay();
-    const past = store.workouts
-      .filter((w) => w.finishedAt !== null && w.id !== props.workout.id)
-      .sort((a, b) => b.startedAt - a.startedAt);
-    const orderedGroups = (w: Workout, requireSet: boolean): [MuscleGroup, number][] => {
-      const order: MuscleGroup[] = [];
-      const counts = new Map<MuscleGroup, number>();
-      for (const e of [...w.exercises].sort((a, b) => a.position - b.position)) {
-        if (requireSet && e.sets.length === 0) continue;
-        const p = resolveMuscles(e).primary;
-        if (!p || p === 'cardio') continue;
-        if (!counts.has(p)) order.push(p);
-        counts.set(p, (counts.get(p) ?? 0) + Math.max(1, e.sets.length));
-      }
-      return order.map((m) => [m, counts.get(m) as number]);
-    };
-    const programTargets = (props.workout.targetMuscles ?? []).filter((m): m is MuscleGroup =>
-      PICKER_TARGET_MUSCLES.has(m),
-    );
-    let refGroups: [MuscleGroup, number][] = programTargets.map((m) => [m, 1]);
-    let from: 'program' | 'logged' | 'weekday' | 'overall' | null = refGroups.length
-      ? 'program'
-      : null;
-    if (!refGroups.length) {
-      refGroups = orderedGroups(props.workout, true);
-      if (refGroups.length) from = 'logged';
-    }
-    if (!refGroups.length) {
-      const sameWd = past.find((w) => new Date(w.startedAt).getDay() === weekday);
-      if (sameWd) {
-        refGroups = orderedGroups(sameWd, false);
-        if (refGroups.length) from = 'weekday';
-      }
-      if (!refGroups.length && past[0]) {
-        refGroups = orderedGroups(past[0], false);
-        if (refGroups.length) from = 'overall';
-      }
-    }
-    const readout = describeDay(refGroups);
-    const DAY_LABEL: Record<TrainingDay, string> = {
-      push: t.dayPush,
-      pull: t.dayPull,
-      legs: t.dayLegs,
-      core: t.dayCore,
-      full: t.dayFull,
-    };
-    // Collapse fine muscles into split names ("Legs + Core"), same as the
-    // history day readout -- not a long "Quads + Hamstrings + Adductors + ..."
-    const dayLabel = readout ? dayReadoutLabel(readout, t) : '';
-    const matchesReadout = (primary: MuscleGroup): boolean => {
-      if (!readout) return false;
-      if (readout.kind === 'split') return exerciseDay(primary) === readout.split;
-      if (readout.kind === 'full') return true;
-      return readout.groups.includes(primary);
-    };
-    type Cand = {
-      id: string;
-      name: string;
-      primary: MuscleGroup;
-      secondary: MuscleGroup[];
-      equipment: EquipmentId | null;
-      day: TrainingDay | null;
-    };
-    const inSession = new Set(props.workout.exercises.map((e) => e.name.trim().toLowerCase()));
-    const all: Cand[] = BUILT_IN_CATALOG.filter((c) => c.muscle !== 'cardio')
-      .map((c) => ({
-        id: c.id,
-        name: c.names[li] ?? c.names[0],
-        primary: c.muscle as MuscleGroup,
-        secondary: secondaryMusclesOf(c),
-        equipment: (c.equipment ?? null) as EquipmentId | null,
-        day: exerciseDay(c.muscle as MuscleGroup),
-      }))
-      .filter((x) => !inSession.has(x.name.trim().toLowerCase()));
-    const visible = all.filter(
-      (x) =>
-        tokenMatch(exerciseSearchText(x.name, [x.primary, ...x.secondary], x.equipment), needle) &&
-        (muscle === undefined || x.primary === muscle || x.secondary.includes(muscle)) &&
-        (equip === undefined || x.equipment === equip),
-    );
-    const targetSet = new Set(refGroups.map(([m]) => m));
-    const suggestionScore = (x: Cand): number => {
-      const rich = richExerciseById(x.id);
-      let score = 0;
-      if (targetSet.has(x.primary)) score += 80;
-      for (const m of x.secondary) {
-        if (targetSet.has(m)) score += 18;
-      }
-      if (rich?.category === 'strength') score += 18;
-      else if (rich?.category === 'powerlifting') score += 10;
-      else if (rich?.category === 'stretching') score -= 20;
-      else if (rich?.category === 'plyometrics') score -= 8;
-      if (rich?.level === 'beginner') score += 8;
-      else if (rich?.level === 'intermediate') score += 5;
-      else if (rich?.level === 'expert') score -= 8;
-      if (
-        x.equipment === 'body' ||
-        x.equipment === 'dumbbell' ||
-        x.equipment === 'barbell' ||
-        x.equipment === 'cable' ||
-        x.equipment === 'machine'
-      ) {
-        score += 4;
-      }
-      return score - x.name.length / 100;
-    };
-    const suggested = readout
-      ? visible
-          .filter((x) => matchesReadout(x.primary))
-          .sort((a, b) => suggestionScore(b) - suggestionScore(a) || a.name.localeCompare(b.name))
-          .slice(0, 4)
-      : [];
-    const suggestedIds = new Set(suggested.map((x) => x.id));
-    const rest = visible
-      .filter((x) => !suggestedIds.has(x.id))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    const noneToSuggest =
-      !!readout && suggested.length === 0 && !all.some((x) => matchesReadout(x.primary));
-
-    const pick = (x: Cand) =>
-      props.onPick(x.name, 'strength', {
-        primaryMuscle: x.primary,
-        secondaryMuscles: x.secondary,
-        equipment: x.equipment ? [x.equipment] : [],
-      });
-    const row = (x: Cand, isSug: boolean) => (
-      <div key={x.id} className={`add-row-wrap${isSug ? ' suggested' : ''}`}>
-        <button className={`add-row${isSug ? ' suggested' : ''}`} onClick={() => pick(x)}>
-          <span className="add-main">
-            <ExerciseName name={x.name} className="add-name" />
-            <span className="add-tokens">
-              <MuscleChip muscle={x.primary} tone="primary" />
-              {x.secondary.map((m) => (
-                <MuscleChip key={m} muscle={m} tone="secondary" />
-              ))}
-            </span>
-          </span>
-          {!isSug && x.day && <span className="add-day">{DAY_LABEL[x.day]}</span>}
-        </button>
-        <button
-          type="button"
-          className="pick-row-info"
-          aria-label={t.detailsAction}
-          title={t.detailsAction}
-          onClick={() => setInfo({ name: x.name, kind: 'strength' })}
-        >
-          <Icon name="info" />
-        </button>
-      </div>
-    );
-
-    return (
-      <>
-        <Sheet onClose={props.onClose}>
-          <div className="add-head">
-            {readout && (
-              <div className="add-banner">
-                <div className="add-banner-title">{t.looksLikeDay(dayLabel)}</div>
-                <div className="add-banner-reason">
-                  {from === 'logged'
-                    ? t.reasonFromLogged
-                    : from === 'program'
-                      ? t.reasonProgramTarget
-                      : from === 'weekday'
-                        ? t.reasonUsualSplit(fmtWeekday(props.workout.startedAt, locale))
-                        : t.reasonRecent}
-                </div>
-              </div>
-            )}
-            <button className="btn btn-primary add-done" onClick={props.onClose}>
-              {t.pickerDone}
-            </button>
-          </div>
-          <div className="searchbar">
-            <Icon name="magnifying-glass" />
-            <input
-              autoFocus
-              value={q}
-              placeholder={t.searchExercises}
-              onChange={(e) => setQ(e.target.value)}
-            />
-            <button
-              className="searchbar-funnel"
-              onClick={() => setFiltersOpen((x) => !x)}
-              aria-label={t.filters}
-            >
-              <Icon name="funnel-simple" />
-            </button>
-          </div>
-          {renderFilterPanel()}
-          {renderActiveFilters()}
-          <div className="kind-grid three">
-            {TIMED_KINDS.map((id) => (
-              <button
-                key={id}
-                className="kind-card"
-                onClick={() =>
-                  id === 'cardio'
-                    ? setMachineView(true)
-                    : props.onPick(t.defaultTimedExerciseNames[id], id)
-                }
-              >
-                <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'wind'} />
-                <span>{t.exerciseKindNames[id]}</span>
-              </button>
-            ))}
-          </div>
-          {noneToSuggest ? (
-            <div className="add-note">{t.addedUsualLifts(dayLabel)}</div>
-          ) : suggested.length > 0 ? (
-            <div className="add-section">
-              <div className="section-label">{t.suggestedLabel}</div>
-              <div className="add-rows">{suggested.map((x) => row(x, true))}</div>
-            </div>
-          ) : null}
-          <div className="add-section">
-            <div className="section-label">{t.allExercisesLabel}</div>
-            <div className="add-rows">{rest.map((x) => row(x, false))}</div>
-          </div>
-        </Sheet>
-        {info && (
-          <ExerciseInfoSheet
-            name={info.name}
-            onAdd={() => {
-              const picked = info;
-              setInfo(null);
-              props.onPick(picked.name, picked.kind);
-            }}
-            onClose={() => setInfo(null)}
-          />
-        )}
-      </>
-    );
-  }
-
+  // Picker v2: one pick per tap, ⓘ for details; warm-up / cool-down add a
+  // marker, cardio goes through the machine list above.
   return (
-    <>
-      <Sheet onClose={props.onClose}>
-        {props.replacing && <div className="sheet-label">{t.replaceExercise}</div>}
-        <div className="searchbar">
-          <Icon name="magnifying-glass" />
-          <input
-            autoFocus
-            value={q}
-            placeholder={kind === 'strength' ? t.searchExercises : t.exerciseKindPlaceholders[kind]}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && q.trim()) {
-                if (kind === 'strength' && !exact) setCreating(q.trim());
-                else props.onPick(q.trim(), kind);
-              }
-            }}
-          />
-          {kind === 'strength' && (
-            <button
-              className="searchbar-funnel"
-              onClick={() => setFiltersOpen((x) => !x)}
-              aria-label={t.filters}
-            >
-              <Icon name="funnel-simple" />
-            </button>
-          )}
-        </div>
-        {/* One row of four large kind buttons. Strength opens the search below;
-          Warm-up / Cool-down insert a marker card; Cardio logs a timed entry. */}
-        <div className="kind-grid">
-          <button
-            className={`kind-card${kind === 'strength' ? ' active' : ''}`}
-            onClick={() => setKind('strength')}
-          >
-            <Icon name="barbell" />
-            <span>{t.exerciseKindNames.strength}</span>
-          </button>
-          {TIMED_KINDS.map((id) => (
-            <button
-              key={id}
-              className="kind-card"
-              onClick={() =>
-                id === 'cardio'
-                  ? setMachineView(true)
-                  : props.onPick(t.defaultTimedExerciseNames[id], id)
-              }
-            >
-              <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'wind'} />
-              <span>{t.exerciseKindNames[id]}</span>
-            </button>
-          ))}
-        </div>
-        {renderFilterPanel()}
-        {renderActiveFilters()}
-        {kind === 'strength' && totalCount > 0 && (
-          <h6 className="pick-count">{t.nExercises(totalCount)}</h6>
-        )}
-        {kind === 'strength' && (
-          <div className="pick-rows">
-            {historyMatches.map((m) => {
-              const missing = availability(m.info?.equipment ?? null);
-              // My own logged exercise with no muscle/equipment data yet — offer to
-              // tag it (opens the meta editor prefilled with its name).
-              const untagged = !m.info;
-              return (
-                <div key={m.name} className={`pick-row-wrap${untagged ? ' taggable' : ''}`}>
-                  <button
-                    className={`pick-row${missing ? ' unavailable' : ''}`}
-                    onClick={() => props.onPick(m.name, kind)}
-                  >
-                    {m.info && m.info.primary !== 'cardio' ? (
-                      <MuscleIcon muscle={m.info.primary} variant="figure" tone="primary" />
-                    ) : (
-                      <span style={{ width: 13 }} />
-                    )}
-                    <span className="txt">
-                      <ExerciseName name={m.name} className="n" />
-                      {missing ? (
-                        <span className="s eqmiss">
-                          <Icon name="info" />
-                          {t.noItemHere(t.equipmentNames[missing])}
-                        </span>
-                      ) : m.info ? (
-                        <span className="s">
-                          {[m.info.primary, ...m.info.secondary]
-                            .filter((x) => x !== 'cardio')
-                            .map((x) => t.muscleGroups[x])
-                            .join(' · ')}
-                        </span>
-                      ) : m.last ? (
-                        <span className="s">{t.lastLift(fmtSet(m.last.weight, m.last.reps))}</span>
-                      ) : null}
-                    </span>
-                    {m.info?.equipment && (
-                      <span className="eq">
-                        <Icon name={equipmentIconName(m.info.equipment)} />
-                        {t.equipmentNames[m.info.equipment]}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    className="pick-row-info"
-                    aria-label={t.detailsAction}
-                    title={t.detailsAction}
-                    onClick={() => setInfo({ name: m.name, kind })}
-                  >
-                    <Icon name="info" />
-                  </button>
-                  {untagged && (
-                    <button
-                      className="pick-row-edit"
-                      aria-label={t.tagExercise}
-                      title={t.tagExercise}
-                      onClick={() => setCreating(m.name)}
-                    >
-                      <Icon name="pencil-simple" />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-            {catalog.map((c) => {
-              const name = c.names[li] ?? c.names[0];
-              const missing = availability(c.equipment ?? null);
-              const secondaries = secondaryMusclesOf(c);
-              return (
-                <div key={c.id} className="pick-row-wrap">
-                  <button
-                    className={`pick-row${missing ? ' unavailable' : ''}`}
-                    onClick={() => props.onPick(name, kind)}
-                  >
-                    {c.muscle !== 'cardio' ? (
-                      <MuscleIcon muscle={c.muscle} variant="figure" tone="primary" />
-                    ) : (
-                      <span style={{ width: 13 }} />
-                    )}
-                    <span className="txt">
-                      <ExerciseName name={name} className="n" />
-                      {missing ? (
-                        <span className="s eqmiss">
-                          <Icon name="info" />
-                          {t.noItemHere(t.equipmentNames[missing])}
-                        </span>
-                      ) : c.muscle !== 'cardio' ? (
-                        <span className="s">
-                          {[c.muscle, ...secondaries].map((x) => t.muscleGroups[x]).join(' · ')}
-                        </span>
-                      ) : null}
-                    </span>
-                    {c.equipment && (
-                      <span className="eq">
-                        <Icon name={equipmentIconName(c.equipment)} />
-                        {t.equipmentNames[c.equipment]}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    className="pick-row-info"
-                    aria-label={t.detailsAction}
-                    title={t.detailsAction}
-                    onClick={() => setInfo({ name, kind })}
-                  >
-                    <Icon name="info" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {q.trim() && !exact && (
-          <button
-            className="result-row create"
-            onClick={() =>
-              kind === 'strength' ? setCreating(q.trim()) : props.onPick(q.trim(), kind)
-            }
-          >
-            <Icon name="plus" />
-            {t.createExercise(q.trim())}
-          </button>
-        )}
-        {kind === 'strength' && hasInventory && checkGym && (
-          <p className="pick-hint">{t.filtersCombineNote}</p>
-        )}
-      </Sheet>
-      {info && (
-        <ExerciseInfoSheet
-          name={info.name}
-          onAdd={() => {
-            const picked = info;
-            setInfo(null);
-            props.onPick(picked.name, picked.kind);
-          }}
-          onClose={() => setInfo(null)}
-        />
-      )}
-    </>
-  );
-}
-
-/**
- * Exercise-details drawer shown from the picker's ⓘ button — DB details (form
- * photo, classification, muscles worked, step-by-step instructions) with its
- * own "add" button, layered over the picker so the list stays put.
- */
-function ExerciseInfoSheet(props: { name: string; onAdd: () => void; onClose: () => void }) {
-  const { t } = useT();
-  const rich = richExerciseByName(props.name);
-  const mi = muscleInfoByName(props.name);
-  const [steps, setSteps] = useState<string[]>([]);
-  useEffect(() => {
-    let live = true;
-    void loadExerciseInstructions(rich?.id).then((v) => {
-      if (live) setSteps(v);
-    });
-    return () => {
-      live = false;
-    };
-  }, [rich?.id]);
-  const primaries: MuscleGroup[] =
-    rich && rich.primaryMuscles.length > 0
-      ? rich.primaryMuscles
-      : mi && mi.primary !== 'cardio'
-        ? [mi.primary]
-        : [];
-  const secondaries: MuscleGroup[] =
-    rich && rich.secondaryMuscles.length > 0 ? rich.secondaryMuscles : (mi?.secondary ?? []);
-  const equipment = rich?.equipment ?? mi?.equipment ?? null;
-  return (
-    <Sheet onClose={props.onClose} className="exinfo-sheet">
-      <div className="exinfo">
-        <div className="exinfo-scroll">
-          {rich?.images[0] && (
-            <div className="exinfo-media">
-              <img
-                src={rich.images[0]}
-                alt=""
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-          )}
-          <div className="exinfo-head">
-            <h3 className="exinfo-title">
-              <ExerciseName name={props.name} />
-            </h3>
-            {(rich?.category || rich?.mechanic || rich?.force || rich?.level || equipment) && (
-              <div className="exd-badges">
-                {rich?.category && (
-                  <span className="badge b-cat">{t.categoryNames[rich.category]}</span>
-                )}
-                {rich?.mechanic && (
-                  <span className="badge b-mech">{t.mechanicNames[rich.mechanic]}</span>
-                )}
-                {rich?.force && <span className="badge b-mech">{t.forceNames[rich.force]}</span>}
-                {rich?.level && <span className="badge b-mech">{t.levelNames[rich.level]}</span>}
-                {equipment && (
-                  <span className="badge b-eq">
-                    <Icon name={equipmentIconName(equipment)} />
-                    {t.equipmentNames[equipment]}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-          {(primaries.length > 0 || secondaries.length > 0) && (
-            <div className="exinfo-section">
-              <h6 className="exinfo-label">{t.musclesWorkedLabel}</h6>
-              <div className="exinfo-muscles">
-                {primaries.map((m) => (
-                  <span key={m} className="badge b-mus-pri">
-                    {t.muscleGroups[m]}
-                  </span>
-                ))}
-                {secondaries.map((m) => (
-                  <span key={m} className="badge b-mus">
-                    {t.muscleGroups[m]}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {steps.length > 0 && (
-            <div className="exinfo-section">
-              <h6 className="exinfo-label">{t.instructionsLabel}</h6>
-              <div className="exinfo-steps">
-                {steps.map((step, i) => (
-                  <div className="exinfo-step" key={i}>
-                    <span className="exinfo-step-n">{i + 1}</span>
-                    <span>{step}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="exinfo-foot">
-          <button className="btn btn-secondary grow" onClick={props.onClose}>
-            {t.close}
-          </button>
-          <button className="btn btn-primary grow" onClick={props.onAdd}>
-            <Icon name="plus" />
-            {t.addExercise}
-          </button>
-        </div>
-      </div>
-    </Sheet>
+    <ExercisePicker
+      workout={props.workout}
+      gym={props.gym}
+      replacing={props.replacing}
+      onPick={(i) =>
+        props.onPick(i.name, 'strength', {
+          primaryMuscle: i.primary,
+          secondaryMuscles: i.secondary,
+          equipment: i.equipment ? [i.equipment] : [],
+        })
+      }
+      onMarker={(k) => props.onPick(t.defaultTimedExerciseNames[k], k)}
+      onCardio={() => setMachineView(true)}
+      onCreate={setCreating}
+      onClose={props.onClose}
+    />
   );
 }
 
