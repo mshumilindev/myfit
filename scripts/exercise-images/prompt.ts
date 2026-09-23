@@ -82,7 +82,8 @@ function refLine(refs: RefRole[]): string {
     identity: 'identity reference (the athlete)',
     'start-frame': 'start frame (already re-shot, keep everything but the pose)',
   };
-  return `Attached images, in order: ${refs.map((r, i) => `#${i + 1} ${label[r]}`).join('; ')}.`;
+  // "Picture N" is how Qwen-Image-Edit labels its inputs; other models read it just as well.
+  return `Attached images, in order: ${refs.map((r, i) => `Picture ${i + 1} = ${label[r]}`).join('; ')}.`;
 }
 
 export function buildPrompt(input: PromptInput): BuiltPrompt {

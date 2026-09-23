@@ -156,7 +156,11 @@ async function main(): Promise<void> {
       `${toRun.length} images > IMAGE_BULK_THRESHOLD (${c.bulkThreshold}). Re-run with --confirm-bulk after checking the summary.`,
     );
   }
-  if (c.provider === 'openai' && !c.apiKey) throw new Error('OPENAI_API_KEY is not set');
+  if ((c.provider === 'openai' || (qa && c.qaProvider === 'openai')) && !c.apiKey)
+    throw new Error(
+      'OPENAI_API_KEY is not set (or use IMAGE_PROVIDER=comfyui for free local generation)',
+    );
+  await provider.preflight?.();
   const release = acquireLock(PATHS.lock);
   try {
     await run(planned, m, c, provider, qa ? await createQaProvider(c) : null, {

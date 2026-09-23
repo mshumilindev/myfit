@@ -18,6 +18,8 @@
     "lint": "eslint .",
     "i18n:check": "node scripts/check-i18n.mjs",
     "exercise-images": "tsx scripts/exercise-images/cli.ts",
+    "exercise-images:setup-local": "bash scripts/exercise-images/local/setup-mac.sh",
+    "exercise-images:comfyui": "bash scripts/exercise-images/local/start-comfyui.sh",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

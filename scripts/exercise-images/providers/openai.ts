@@ -11,6 +11,8 @@ import { z } from 'zod';
 import type { PipelineConfig } from '../config';
 import { ProviderError, isRetryableStatus, parseRetryAfter } from '../errors';
 import { fetchWithTimeout } from '../pool';
+import { mimeOf } from '../imageInfo';
+import { QA_SYSTEM, qaUserText } from '../qa';
 import type {
   ExerciseImageProvider,
   GenerateRequest,
@@ -25,11 +27,6 @@ const ImagesResponse = z.object({
 const ChatResponse = z.object({
   choices: z.array(z.object({ message: z.object({ content: z.string().nullable() }) })).min(1),
 });
-
-function mimeOf(p: string): string {
-  const ext = path.extname(p).toLowerCase();
-  return ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
-}
 
 async function failFrom(res: Response): Promise<never> {
   let msg = `${res.status} ${res.statusText}`;
@@ -88,24 +85,6 @@ export class OpenAIImageProvider implements ExerciseImageProvider {
   }
 }
 
-const QA_SYSTEM = `You are a strict QA reviewer for an exercise-instruction image library.
-You get: (1) the ORIGINAL reference photo of the exercise, (2) the NEW generated image,
-optionally (3) the IDENTITY reference of the library's athlete, and the exercise metadata.
-Judge the NEW image. Exercise correctness matters far more than beauty.
-Check: same exercise; same equipment type, placement and setup (bench angle, seat, cable/pulley
-height and attachment, machine geometry, Smith vs free bar); body orientation and stance;
-grip orientation and width; which limbs work (unilateral stays unilateral); the requested
-start/end state; anatomy (hands, fingers, joints); equipment plausibility (cables connected,
-no floating plates, straight bars); style (dark restrained studio set, athlete shirtless in
-plain dark shorts and shoes, no text/logos/other people); identity match with (3) if given;
-obvious AI artifacts.
-Respond ONLY with JSON:
-{"passed":bool,"score":number 0-10,"exerciseCorrect":bool,"equipmentCorrect":bool,
-"poseCorrect":bool,"anatomyCorrect":bool,"styleCorrect":bool,"identityConsistent":bool,
-"issues":[string],"retryInstruction":string|null}
-retryInstruction: one or two concrete, physical corrections for a regeneration (e.g.
-"Keep the pulley at knee height as in the reference; only the right arm moves."), or null.`;
-
 function dataUrl(p: string): string {
   return `data:${mimeOf(p)};base64,${fs.readFileSync(p).toString('base64')}`;
 }
@@ -119,7 +98,7 @@ export class OpenAIQaProvider implements QaProvider {
     const content: unknown[] = [
       {
         type: 'text',
-        text: `Exercise metadata: ${req.exerciseSummary}\nRequested frame: ${req.state}.\nImage 1 = ORIGINAL reference, image 2 = NEW generated${req.identity ? ', image 3 = IDENTITY reference' : ''}.`,
+        text: qaUserText(req),
       },
       { type: 'image_url', image_url: { url: dataUrl(req.reference) } },
       { type: 'image_url', image_url: { url: dataUrl(req.generated) } },

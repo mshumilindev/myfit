@@ -138,6 +138,18 @@ export function costSummary(
   const run = items.filter((i) => i.decision.run);
   const exercises = new Set(run.map((i) => i.exercise.id)).size;
   const worst = run.length * (1 + c.maxQaAttempts);
+  if (c.provider === 'comfyui') {
+    return [
+      `exercises to process : ${exercises}`,
+      `images to generate   : ${run.length}  (skipped: ${items.length - run.length})`,
+      `model                : local ComfyUI · ${c.model}`,
+      `size                 : ~${c.size.w}x${c.size.h} → output ${c.outputSize.w}x${c.outputSize.h} ${c.outputFormat}`,
+      `cost                 : free — runs on this computer, nothing is uploaded`,
+      `generations          : ${run.length} minimum, up to ${worst} with QA regenerations`,
+      `QA                   : ${qa ? `${c.qaProvider} · ${c.qaModel}` : 'disabled'}`,
+      `time (M4 Pro, rough) : ${c.comfy.preset === 'flux2-klein-4b' || c.comfy.lora ? '1–3' : '8–20'} min per image; the first one is slower (model load)`,
+    ].join('\n');
+  }
   return [
     `exercises to process : ${exercises}`,
     `images to generate   : ${run.length}  (skipped: ${items.length - run.length})`,
@@ -285,7 +297,9 @@ export async function run(
         const result = await withRetry(
           () => {
             e.attempts += 1;
-            return provider.generate({ prompt, references: refs, size: c.size });
+            // New seed per attempt (QA retries, reruns); same attempt → same seed.
+            const seed = parseInt(sha256(`${key}#${e.attempts}`).slice(0, 12), 16);
+            return provider.generate({ prompt, references: refs, size: c.size, seed });
           },
           {
             retries: c.retries,
@@ -337,6 +351,9 @@ export async function run(
       e.status = 'validating';
       e.qaAttempts = qaRound + 1;
       save();
+      // Local image + local QA models don't both fit in unified memory.
+      if (c.provider === 'comfyui' && c.qaProvider === 'ollama' && c.comfy.freeBeforeQa)
+        await provider.release?.();
       try {
         const raw = await withRetry(
           () =>

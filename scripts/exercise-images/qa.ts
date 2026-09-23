@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import type { CatalogExercise } from './catalog';
 import type { PipelineConfig } from './config';
+import type { QaRequest } from './provider';
 import { readImageInfo } from './imageInfo';
 import { QaResultSchema, type QaResult } from './manifest';
 
@@ -61,5 +62,32 @@ export function qaPasses(r: QaResult, c: Pick<PipelineConfig, 'qaMinScore'>): bo
     r.anatomyCorrect &&
     r.styleCorrect &&
     r.identityConsistent !== false
+  );
+}
+
+/** System prompt shared by every QA provider (OpenAI vision, local Ollama). */
+export const QA_SYSTEM = `You are a strict QA reviewer for an exercise-instruction image library.
+You get: (1) the ORIGINAL reference photo of the exercise, (2) the NEW generated image,
+optionally (3) the IDENTITY reference of the library's athlete, and the exercise metadata.
+Judge the NEW image. Exercise correctness matters far more than beauty.
+Check: same exercise; same equipment type, placement and setup (bench angle, seat, cable/pulley
+height and attachment, machine geometry, Smith vs free bar); body orientation and stance;
+grip orientation and width; which limbs work (unilateral stays unilateral); the requested
+start/end state; anatomy (hands, fingers, joints); equipment plausibility (cables connected,
+no floating plates, straight bars); style (dark restrained studio set, athlete shirtless in
+plain dark shorts and shoes, no text/logos/other people); identity match with (3) if given;
+obvious AI artifacts.
+Respond ONLY with JSON:
+{"passed":bool,"score":number 0-10,"exerciseCorrect":bool,"equipmentCorrect":bool,
+"poseCorrect":bool,"anatomyCorrect":bool,"styleCorrect":bool,"identityConsistent":bool,
+"issues":[string],"retryInstruction":string|null}
+retryInstruction: one or two concrete, physical corrections for a regeneration (e.g.
+"Keep the pulley at knee height as in the reference; only the right arm moves."), or null.`;
+
+export function qaUserText(req: QaRequest): string {
+  return (
+    `Exercise metadata: ${req.exerciseSummary}\nRequested frame: ${req.state}.\n` +
+    `Image 1 = ORIGINAL reference, image 2 = NEW generated` +
+    `${req.identity ? ', image 3 = IDENTITY reference' : ''}.`
   );
 }

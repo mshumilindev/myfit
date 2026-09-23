@@ -50,3 +50,9 @@ export function readImageInfo(b: Buffer): ImageInfo | null {
   }
   return null;
 }
+
+/** MIME type from a file extension (inputs we send to providers). */
+export function mimeOf(p: string): string {
+  const ext = p.slice(p.lastIndexOf('.')).toLowerCase();
+  return ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+}
