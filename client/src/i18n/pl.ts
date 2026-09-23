@@ -1414,6 +1414,8 @@ export const pl: Strings = {
   log: 'Zapisz',
   prev: (v) => `poprz. ${v}`,
   ghostHint: 'Wypełnione z ostatniego razu · dotknij liczby, by ją poprawić',
+  ghostWarmupHint: (w) => `Rozgrzewka do ${w} — potem serie robocze`,
+  warmupRampTitle: (i, n) => `Rozgrzewka ${i} z ${n}`,
   timedGhostHint:
     'Start, gdy zaczynasz, Koniec, gdy kończysz — odczyty z maszyny dodasz potem. Może być kilka interwałów.',
   warmupMarkerTitle: 'Gdy gotowy — ruszaj',

@@ -1408,6 +1408,8 @@ export const et: Strings = {
   log: 'Logi',
   prev: (v) => `eelm. ${v}`,
   ghostHint: 'Eeltäidetud eelmisest korrast · puuduta numbrit, et kohendada',
+  ghostWarmupHint: (w) => `Soojendus kuni ${w} — siis tööseeriad`,
+  warmupRampTitle: (i, n) => `Soojendus ${i}/${n}`,
   timedGhostHint:
     'Start, kui alustad, Lõpeta, kui peatud — masina näidud lisad pärast. Intervalle võib olla mitu.',
   warmupMarkerTitle: 'Kui valmis — edasi',

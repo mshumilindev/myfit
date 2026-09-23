@@ -1456,6 +1456,8 @@ export const en = {
   log: 'Log',
   prev: (v: string) => `prev ${v}`,
   ghostHint: 'Prefilled from last time · tap a number to nudge it',
+  ghostWarmupHint: (w: string) => `Warm-up ramp toward ${w} — working sets come next`,
+  warmupRampTitle: (i: number, n: number) => `Warm-up ${i} of ${n}`,
   timedGhostHint:
     'Start when you begin, Finish when you stop — add the console readings after. Several intervals are fine.',
   warmupMarkerTitle: 'Ready when you are',

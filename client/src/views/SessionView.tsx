@@ -670,7 +670,13 @@ export function SessionView(props: {
    * can sit at or above last time's working weight). `warmup` marks the ramp
    * phase so the quick-log stores those as warm-up sets and the sequence climbs.
    */
-  function ghostFor(ex: Exercise): { reps: number; weight: number | null; warmup?: boolean } {
+  function ghostFor(ex: Exercise): {
+    reps: number;
+    weight: number | null;
+    warmup?: boolean;
+    /** Warm-up ramp position (1-based) / length / the working weight it builds to. */
+    ramp?: { i: number; n: number; toKg: number };
+  } {
     const sets = ex.sets;
     // Continue from the last logged WORKING set.
     for (let i = sets.length - 1; i >= 0; i--) {
@@ -699,7 +705,12 @@ export function SessionView(props: {
         const warmDone = sets.filter((s) => s.isWarmup || setTypeOf(s) === 'warmup').length;
         if (warmDone < ramp.length) {
           const w = ramp[warmDone];
-          return { reps: w.reps, weight: w.weight ?? null, warmup: true };
+          return {
+            reps: w.reps,
+            weight: w.weight ?? null,
+            warmup: true,
+            ramp: { i: warmDone + 1, n: ramp.length, toKg: target.weight },
+          };
         }
         return { reps: target.reps, weight: target.weight };
       }
@@ -902,7 +913,7 @@ export function SessionView(props: {
           : isDesktop
             ? t.setTypeWorking
             : t.working;
-    const cls = `kind${!rec && grp && recentSetId === s.id ? ' just-now' : ''}`;
+    const cls = `kind${type === 'warmup' && !rec ? ' twarm' : ''}${!rec && grp && recentSetId === s.id ? ' just-now' : ''}`;
     return <span className={cls}>{text}</span>;
   }
 
@@ -1663,7 +1674,14 @@ export function SessionView(props: {
                     defWeightKg={ghost.weight}
                     weightRequired={directLogBlocked}
                     isPast={!!props.past}
-                    title={focusView ? t.enterThisSet : undefined}
+                    title={
+                      focusView
+                        ? ghost.ramp
+                          ? t.warmupRampTitle(ghost.ramp.i, ghost.ramp.n)
+                          : t.enterThisSet
+                        : undefined
+                    }
+                    kind={ghost.warmup ? 'warmup' : 'working'}
                     onLog={(v) => logGhost(ex, v, ghost.warmup ? 'warmup' : 'working')}
                     onSettings={() =>
                       setSheet(
@@ -1706,7 +1724,9 @@ export function SessionView(props: {
                 ? t.progGhostDivision
                 : timed
                   ? t.timedGhostHint
-                  : t.ghostHint}
+                  : ghost.ramp
+                    ? t.ghostWarmupHint(fmtWeightKg(ghost.ramp.toKg))
+                    : t.ghostHint}
           </div>
         )}
       </div>
@@ -3934,6 +3954,8 @@ function GhostSetRow(props: {
   onLog: (v: { reps: number; weight: number | null }) => void;
   onSettings: () => void;
   title?: string;
+  /** Set type the row proposes — colours the card (warm-up ramp vs working). */
+  kind?: 'warmup' | 'working';
 }) {
   const { t } = useT();
   const unit = exerciseUnit(props.ex.name);
@@ -3944,7 +3966,7 @@ function GhostSetRow(props: {
   const bw = weightKg === null && !props.weightRequired;
   const blocked = props.weightRequired && weightKg === null;
   return (
-    <div className="gset">
+    <div className={`gset kind-${props.kind ?? 'working'}`}>
       {props.title && <div className="gset-title">{props.title}</div>}
       <div className="gset-steppers">
         <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />

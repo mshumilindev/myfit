@@ -1425,6 +1425,8 @@ export const lt: Strings = {
   log: 'Fiksuoti',
   prev: (v) => `ankst. ${v}`,
   ghostHint: 'Užpildyta iš praėjusio karto · paliesk skaičių, kad pakoreguotum',
+  ghostWarmupHint: (w) => `Apšilimas iki ${w} — toliau darbiniai priėjimai`,
+  warmupRampTitle: (i, n) => `Apšilimas ${i} iš ${n}`,
   timedGhostHint:
     'Pradėk, kai pradedi, Baik, kai sustoji — treniruoklio rodmenis įvesi po to. Intervalų gali būti keli.',
   warmupMarkerTitle: 'Kai pasiruošęs — pirmyn',
