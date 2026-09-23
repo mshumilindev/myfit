@@ -241,7 +241,9 @@
   background: color-mix(in srgb, var(--color-ok-tint) 94%, transparent);
   color: var(--color-ok-text);
 }
-.xp-noimg {
+/* element+class so it beats the image-size classes it shares (xp-sug-img,
+   xp-card-img…), which set display:block — the icon then sits dead centre */
+span.xp-noimg {
   display: grid;
   place-items: center;
   background: var(--color-neutral-900);
@@ -489,12 +491,24 @@
   font-weight: 700;
   letter-spacing: -0.01em;
 }
-.xp-chips,
-.xp-eqrow {
+.xp-chips {
   display: flex;
   gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
+}
+/* segmented switcher: one track, the chosen option is a raised pill */
+.xp-eqrow {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--color-neutral-900);
+  overflow-x: auto;
+  scrollbar-width: none;
+  align-self: flex-start;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .xp-chip {
   flex: none;
@@ -525,8 +539,11 @@
   height: 30px;
   padding: 0 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 7px;
   background: transparent;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   color: var(--color-neutral-500);
   font: inherit;
   font-size: 12.5px;
@@ -537,9 +554,10 @@
   color: var(--color-neutral-600);
 }
 .xp-eq.on {
-  background: var(--color-neutral-900);
+  background: var(--color-neutral-800);
   color: var(--color-text);
   font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 .xp-eq.on .n {
   color: var(--color-accent-600);
@@ -1276,4 +1294,19 @@
   .xp-preview {
     display: none;
   }
+}
+
+/* keep the no-photo placeholder centred wherever it stands in for a photo */
+.xp-frames .xp-noimg,
+.xp-swaps .xp-noimg,
+.xp-sug .xp-noimg,
+.xp-card .xp-noimg,
+.xp-row .xp-noimg,
+.xp-best .xp-noimg {
+  display: grid;
+  place-items: center;
+}
+.xp-noimg > .ui-icon {
+  display: grid;
+  place-items: center;
 }

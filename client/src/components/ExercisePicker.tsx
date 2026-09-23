@@ -539,11 +539,16 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </div>
   );
 
+  // Equipment switcher: one choice at a time (Any, or one kind of kit). The
+  // multi-select lives in the filter sheet on the start screen.
+  const eqValue = equip.length === 1 ? equip[0] : equip.length === 0 ? 'any' : null;
   const equipRow = fam && groupEquip.length > 1 && (
-    <div className="xp-eqrow">
+    <div className="xp-eqrow" role="radiogroup" aria-label={t.pickEquipAll}>
       <button
         type="button"
-        className={`xp-eq${equip.length === 0 ? ' on' : ''}`}
+        role="radio"
+        aria-checked={eqValue === 'any'}
+        className={`xp-eq${eqValue === 'any' ? ' on' : ''}`}
         onClick={() => setEquip([])}
       >
         {t.pickAny}
@@ -553,10 +558,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <button
           key={id}
           type="button"
-          className={`xp-eq${equip.includes(id) ? ' on' : ''}`}
-          onClick={() =>
-            setEquip((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))
-          }
+          role="radio"
+          aria-checked={eqValue === id}
+          className={`xp-eq${eqValue === id ? ' on' : ''}`}
+          onClick={() => setEquip(eqValue === id ? [] : [id])}
         >
           {t.equipmentNames[id]}
           <span className="n">{n}</span>
