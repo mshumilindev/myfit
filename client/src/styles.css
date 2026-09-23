@@ -34748,3 +34748,345 @@ body {
   box-shadow: 0 0 0 2px var(--color-bg);
   pointer-events: none;
 }
+
+/* ---- Set editor: inline type / effort / load + grouped toggles (design "One door") ---- */
+.se-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.se-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-neutral-500);
+}
+.se-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.se-type {
+  --tc: var(--set-working);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-neutral-800);
+  background: transparent;
+  color: var(--color-neutral-400);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.se-type.t-warmup {
+  --tc: var(--set-warmup);
+}
+.se-type.t-drop {
+  --tc: var(--set-drop);
+}
+.se-type.t-reverse-drop {
+  --tc: var(--set-reverse);
+}
+.se-type.t-static-dynamic {
+  --tc: var(--set-sd);
+}
+.se-type .se-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tc);
+}
+.se-type.on {
+  border-color: var(--tc);
+  background: color-mix(in srgb, var(--tc) 14%, transparent);
+  color: var(--tc);
+  font-weight: 600;
+}
+.se-hint {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.se-rpe {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+.se-rpe button {
+  min-height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-400);
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.se-rpe button.on {
+  background: var(--color-accent);
+  color: #1b1407;
+  font-weight: 700;
+}
+.se-load {
+  flex: none;
+}
+.se-load button {
+  padding: 10px 0;
+  font-size: 13px;
+}
+.se-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 16px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.se-group > .toggle-row,
+.se-group > .sides-block,
+.se-group > .unit-equiv {
+  border-radius: 0;
+  background: var(--color-neutral-900);
+}
+.se-group > .sides-block {
+  padding: 0;
+}
+.se-group > .sides-block .toggle-row {
+  background: transparent;
+}
+.se-group .toggle-row i {
+  color: var(--color-accent);
+}
+.se-group:empty {
+  display: none;
+}
+/* the sheet's own action row breathes after the grouped block */
+.se-group + .sheet-actions,
+.se-block + .sheet-actions {
+  margin-top: 16px;
+}
+
+/* ---- Options sheet: Exercise tab quick actions, compact circuit ---- */
+.opts-sheet .opts-quick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+.opts-sheet .opts-quick button {
+  min-height: 60px;
+  border: none;
+  border-radius: 14px;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-300);
+  font: inherit;
+  font-size: 12.5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.opts-sheet .opts-quick button i {
+  font-size: 18px;
+  color: var(--color-accent);
+}
+.opts-sheet .opts-quick button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.opts-sheet .opts-quick + .sheet-rule {
+  display: none;
+}
+.opts-sheet .opts-list .menu-item.danger {
+  margin-top: 12px;
+  border-radius: 14px;
+}
+.opts-sheet .session-settings .ss-circuit {
+  padding: 12px 14px;
+  border-radius: 14px;
+}
+.opts-sheet .session-settings .ss-desc {
+  display: none;
+}
+.opts-sheet .ss-viewmode {
+  margin-bottom: 12px;
+}
+.opts-sheet .opts-rows .menu-item:first-child {
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+}
+.opts-sheet .opts-rows .menu-item:last-child {
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+}
+.opts-sheet .opts-rows .menu-item {
+  background: var(--color-neutral-900);
+  border-radius: 0;
+  min-height: 50px;
+  padding: 12px 14px;
+}
+.opts-sheet .opts-rows .menu-item i {
+  color: var(--color-ok);
+}
+.opts-sheet .opts-body > .sheet-head {
+  margin-top: 0;
+}
+
+/* ---- Focus: Next shows where you're going ---- */
+.focus-nav .focus-next .fn-thumb {
+  width: 36px;
+  height: 27px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex: none;
+}
+.focus-nav .focus-next .fn-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Plate calculator polish ---- */
+.plate-sheet .pl-bb {
+  max-width: none;
+  height: 150px;
+  margin: 0;
+  border-radius: 16px;
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-900);
+}
+.plate-sheet .pl-bb-stack {
+  gap: 4px;
+}
+.plate-sheet .pl-bb-grip {
+  min-width: 110px;
+  max-width: 150px;
+  height: 10px;
+}
+.plate-sheet .pl-bb-cap {
+  width: 10px;
+  height: 28px;
+}
+.plate-sheet .pl-bb-sleeve {
+  width: 22px;
+  height: 18px;
+}
+.plate-sheet .pl-bb-collar {
+  width: 10px;
+  height: 20px;
+}
+.plate-sheet .pl-bb-plate {
+  width: 18px;
+}
+.plate-sheet .pl-readout {
+  gap: 10px;
+  margin-top: 4px;
+}
+.plate-sheet .pl-total {
+  font-size: 34px;
+  font-weight: 600;
+}
+.plate-sheet .pl-rack {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.plate-sheet .pl-rack-plate {
+  min-width: 0;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+.plate-sheet .pl-rack-clear {
+  width: auto;
+  height: 48px;
+  border-radius: 12px;
+}
+.plate-sheet .pl-controls {
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--color-neutral-900);
+}
+.plate-sheet .pl-optchip {
+  min-height: 36px;
+  padding: 0 14px;
+}
+.plate-sheet .pl-unit {
+  width: 140px;
+}
+.plate-sheet .pl-unit button {
+  padding: 9px 0;
+}
+.plate-sheet .pl-ctl-row {
+  justify-content: space-between;
+}
+.plate-sheet .pl-apply {
+  min-height: 54px;
+  border: none;
+  background: var(--color-accent);
+  color: #1b1407;
+  font-weight: 700;
+  font-size: 16px;
+}
+.opts-sheet .opts-quick:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* Rail sits right under the hero — no "Exercise · 1 of N" caption */
+.focus-view .focus-step {
+  margin: 2px 0 18px;
+}
+.focus-view .focus-step .plan-progress-head {
+  display: none;
+}
+.focus-view .fm-modebar {
+  justify-content: flex-end;
+}
+/* Last rail segment = "add an exercise" (dashed); a taller invisible hit area */
+.focus-step .plan-segments button.add {
+  position: relative;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px dashed var(--color-neutral-700);
+  background: transparent;
+  cursor: pointer;
+}
+.focus-step .plan-segments button.add::before {
+  content: '';
+  position: absolute;
+  inset: -14px 0;
+}
+.focus-step .plan-segments button.add:hover {
+  border-color: var(--color-accent);
+}
+/* Compact head: the set is the main thing on the screen */
+.focus-view .exn-primary {
+  font-size: 20px;
+}
+.focus-view .exercise-chips {
+  margin-top: 6px;
+  padding-bottom: 12px;
+}
+.focus-view .prog-hint {
+  margin: 12px 0 4px;
+}
+.focus-view .gset {
+  margin-top: 14px;
+}
+.focus-nav .focus-next {
+  min-width: 0;
+}
+/* In the options sheet the save action is the primary one — filled, like Log */
+.opts-sheet .sheet-actions .btn-primary {
+  background: var(--color-accent);
+  color: #1b1407;
+  border: none;
+  font-weight: 700;
+}

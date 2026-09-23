@@ -835,7 +835,8 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(s);
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    // focus is the only live view: the bottom "next" opens the picker on the last exercise
+    await userEvent.click(document.querySelector('.focus-next') as HTMLElement);
     const search = 'Search by name, muscle or equipment';
     expect(screen.getByPlaceholderText(search)).toBeTruthy();
     // Strength keeps the picker open; Cardio moves on to the machine list.
@@ -851,8 +852,9 @@ describe('F-03 session UI', () => {
     cleanup();
     __replaceStateForTests(s);
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    expect(screen.getByText('Bench press · 1 sets')).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
+    await userEvent.click(screen.getByRole('tab', { name: /Exercise/ }));
+    expect(screen.getByRole('button', { name: /Replace exercise/ })).toBeTruthy();
   });
 
   it('keeps the chosen set type and its drops when logging a brand-new set', async () => {
@@ -863,7 +865,7 @@ describe('F-03 session UI', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
     const dialog = screen.getByRole('dialog');
 
-    await userEvent.click(within(dialog).getByRole('button', { name: /Set type/ }));
+    // set types are inline chips now — no sub-view
     await userEvent.click(within(dialog).getByRole('button', { name: /^Dropset/ }));
     await userEvent.click(within(dialog).getByRole('button', { name: /Add another drop/ }));
     await userEvent.click(within(dialog).getByRole('button', { name: 'Log' }));
@@ -960,13 +962,17 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(s);
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
+    const go = async (id: string) => {
+      for (let k = 0; k < 6 && !container.querySelector(`.focus-view [data-exid="${id}"]`); k++)
+        await userEvent.click(container.querySelector('.focus-next') as HTMLElement);
+    };
+    await go('bike');
     const bike = container.querySelector('[data-exid="bike"]') as HTMLElement;
-    expect(bike.querySelector('.ex-resting')).toBeTruthy();
-    expect(container.querySelector('.rest-strip')).toBeTruthy();
+    expect(bike.querySelector('.fm-rest')).toBeTruthy();
 
+    await go('cd');
     await userEvent.click(screen.getByRole('button', { name: 'Start cool-down' }));
-    expect(container.querySelector('.ex-resting')).toBeNull();
-    expect(container.querySelector('.rest-strip')).toBeNull();
+    expect(container.querySelector('.fm-rest')).toBeNull();
     expect(screen.getByText('Cooling down — the rest clock is off')).toBeTruthy();
   });
 
@@ -989,7 +995,7 @@ describe('F-03 session UI', () => {
   it('picker: a family opens its photo grid, a tap adds, ⓘ only shows details', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    await userEvent.click(document.querySelector('.focus-next') as HTMLElement);
     const count = () =>
       __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises.length;
     const before = count();
@@ -1003,7 +1009,8 @@ describe('F-03 session UI', () => {
     expect(screen.getByRole('button', { name: 'Lats' })).toBeTruthy();
 
     // ⓘ opens the details sheet and adds nothing.
-    await userEvent.click(screen.getAllByRole('button', { name: 'Details' })[0]);
+    const picker = screen.getByRole('dialog');
+    await userEvent.click(within(picker).getAllByRole('button', { name: 'Details' })[0]);
     expect(screen.getByRole('button', { name: 'Add to session' })).toBeTruthy();
     expect(count()).toBe(before);
     const backs = screen.getAllByRole('button', { name: 'Back' });
@@ -1018,7 +1025,7 @@ describe('F-03 session UI', () => {
   it('picker: search marks what was already done today, without blocking it', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    await userEvent.click(document.querySelector('.focus-next') as HTMLElement);
     await userEvent.type(
       screen.getByPlaceholderText('Search by name, muscle or equipment'),
       'bench press',
@@ -1071,9 +1078,7 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(sampleStore());
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
     // the focus header is clean — Finish moved next to Next, the rest behind the door
-    const bar = container.querySelector('.fm-modebar') as HTMLElement;
-    expect(within(bar).queryByRole('button', { name: 'Discard session' })).toBeNull();
-    expect(within(bar).queryByRole('button', { name: 'Finish' })).toBeNull();
+    expect(container.querySelector('.fm-modebar')).toBeNull();
     const nav = container.querySelector('.focus-nav') as HTMLElement;
     expect(within(nav).getByRole('button', { name: 'Finish' })).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
@@ -1098,7 +1103,7 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add exercise' }));
+    await userEvent.click(document.querySelector('.focus-next') as HTMLElement);
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Warm-up' }));
 

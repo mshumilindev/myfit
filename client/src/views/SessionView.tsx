@@ -444,15 +444,10 @@ export function SessionView(props: {
    * start/add-next). Overrides the derived active card while it points at a
    * still-present exercise. */
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  /** Focus mode: one exercise full-screen with Back/Next. A toggled view, not a
-   * session type — finish/discard/muscle-map/settings stay in the classic view. */
-  const [focusMode, setFocusMode] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('spotter.session.focus') === '1';
-    } catch {
-      return false;
-    }
-  });
+  /** Focus is the only live-session view: one exercise full-screen with
+   *  Back/Next (past sessions still show the list). */
+  const focusMode = true;
+  const [focusStarted, setFocusStarted] = useState(false);
   const [focusIdx, setFocusIdx] = useState(0);
   const isDesktop = useIsDesktop();
   const startAddConsumed = useRef(false);
@@ -609,28 +604,16 @@ export function SessionView(props: {
       : expandedId && sortedExercises.some((e) => e.id === expandedId)
         ? expandedId
         : activeExerciseId;
-  function enterFocus(): void {
-    // Nothing logged yet and the session opens with a warm-up → start on it.
+  // Open on the exercise you're on: the first warm-up of a fresh session,
+  // otherwise the active one. Once per mount — after that Back/Next rule.
+  if (!focusStarted && focusView) {
+    setFocusStarted(true);
     const fresh = sortedExercises.every((e) => e.sets.length === 0);
     const i =
       fresh && focusExercises[0] && isMarkerExercise(focusExercises[0])
         ? 0
         : focusExercises.findIndex((e) => e.id === activeExerciseId);
-    setFocusIdx(i >= 0 ? i : 0);
-    setFocusMode(true);
-    try {
-      localStorage.setItem('spotter.session.focus', '1');
-    } catch {
-      /* ignore */
-    }
-  }
-  function exitFocus(): void {
-    setFocusMode(false);
-    try {
-      localStorage.setItem('spotter.session.focus', '0');
-    } catch {
-      /* ignore */
-    }
+    if (i > 0 && i !== focusIdx) setFocusIdx(i);
   }
   // The next not-yet-started exercise after the active one — drives the
   // "start next exercise" shortcut on the active card.
@@ -683,7 +666,9 @@ export function SessionView(props: {
     // Continue from the last logged WORKING set.
     for (let i = sets.length - 1; i >= 0; i--) {
       const s = sets[i];
-      if (!s.isWarmup && setTypeOf(s) !== 'warmup') return { reps: s.reps, weight: s.weight ?? 0 };
+      // null = bodyweight: keep it, so a pull-up ghost reads BW, not 0 kg
+      if (!s.isWarmup && setTypeOf(s) !== 'warmup')
+        return { reps: s.reps, weight: s.weight ?? null };
     }
     // No working set yet — sequence the ramp, then the working target.
     if (isStrengthExercise(ex)) {
@@ -722,7 +707,7 @@ export function SessionView(props: {
     const prev = prevLift(ex.name, workout!.id);
     if (prev) return { reps: ex.plannedReps ?? prev.reps, weight: prev.weight };
     const last = sets[sets.length - 1];
-    if (last) return { reps: last.reps, weight: last.weight ?? 0 };
+    if (last) return { reps: last.reps, weight: last.weight ?? null };
     if (ex.plannedReps) return { reps: ex.plannedReps, weight: null };
     return { reps: 8, weight: 20 };
   }
@@ -953,13 +938,7 @@ export function SessionView(props: {
     if (!focusEx) {
       return (
         <div className="focus-view">
-          <div className="fm-modebar">
-            <span className="fm-modelbl">
-              <span className="dotp" aria-hidden />
-              {t.focusModeLabel}
-            </span>
-            {fmActions}
-          </div>
+          <div className="fm-modebar">{fmActions}</div>
           <div className="focus-empty">
             <div className="fe-inner">
               <span className="fe-glyph" aria-hidden>
@@ -997,23 +976,20 @@ export function SessionView(props: {
         />
       )),
       // a dashed placeholder for the next exercise you can still add
-      <span key="__add" className="add" />,
+      <button
+        key="__add"
+        type="button"
+        className="add"
+        aria-label={t.addExercise}
+        title={t.addExercise}
+        onClick={() => setSheet({ kind: 'add' })}
+      />,
     ];
     return (
       <div className="focus-view">
-        <div className="fm-modebar">
-          <span className="fm-modelbl">
-            <span className="dotp" aria-hidden />
-            {t.focusModeLabel}
-          </span>
-          {fmActions}
-        </div>
+        {fmActions && <div className="fm-modebar">{fmActions}</div>}
         <div className="focus-scroll">
           <div className="plan-progress focus-step">
-            <div className="plan-progress-head">
-              <span>{t.exerciseWord}</span>
-              <strong>{t.focusStepOf(focusPos + 1, focusCount)}</strong>
-            </div>
             <div className="plan-segments" aria-label={t.exerciseWord}>
               {segs}
             </div>
@@ -1034,7 +1010,11 @@ export function SessionView(props: {
               className="btn btn-secondary focus-next"
               onClick={() => setFocusIdx(focusPos + 1)}
             >
-              {t.focusNext(nx?.name ?? '')}
+              {(() => {
+                const img = nx ? richExerciseByName(nx.name)?.images?.[0] : undefined;
+                return img ? <img className="fn-thumb" src={img} alt="" /> : null;
+              })()}
+              <span className="fn-label">{t.focusNext(nx?.name ?? '')}</span>
               <Icon name="caret-right" />
             </button>
           ) : (
@@ -1093,7 +1073,14 @@ export function SessionView(props: {
     const showPace = !!cardioId && /rower|ski-erg/.test(cardioId);
     const planned = Math.max(0, ex.plannedSets ?? 0);
     const completed = planned > 0 && ex.sets.length >= planned;
-    const directLogBlocked = !timed && !marker && planned > 0 && ghost.weight === null;
+    // A weight is required for a planned lift — unless this lift is already being
+    // logged as bodyweight (then null is "BW", not "missing").
+    const directLogBlocked =
+      !timed &&
+      !marker &&
+      planned > 0 &&
+      ghost.weight === null &&
+      !ex.sets.some((s) => s.weight === null);
     const muscles = resolveMuscles(ex);
     const equipment = equipmentFor(ex);
     const loadType = loadTypeFor(ex);
@@ -1209,25 +1196,6 @@ export function SessionView(props: {
                   <Icon name="dots-six" />
                 </span>
               )}
-              {focusView &&
-                !grp &&
-                (() => {
-                  const img = richExerciseByName(ex.name)?.images?.[0];
-                  return img ? (
-                    <button
-                      className="fm-thumb"
-                      onClick={() =>
-                        props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name })
-                      }
-                      aria-label={t.detailsAction}
-                    >
-                      <img src={img} alt="" />
-                      <span className="fm-thumb-i" aria-hidden>
-                        <Icon name="info" />
-                      </span>
-                    </button>
-                  ) : null;
-                })()}
               <button
                 className="name"
                 draggable={!grp}
@@ -1803,20 +1771,7 @@ export function SessionView(props: {
           {t.eqEquipment}
         </button>
       )}
-      {tabs && !isMarkerExercise(ex) && (
-        <button
-          className="menu-item"
-          onClick={() => {
-            setRenaming(ex.id);
-            setRenameVal(ex.name);
-            setSheet(null);
-          }}
-        >
-          <Icon name="pencil-simple" />
-          {t.rename}
-        </button>
-      )}
-      {!isMarkerExercise(ex) && (
+      {!tabs && !isMarkerExercise(ex) && (
         <button
           className="menu-item"
           onClick={() => {
@@ -1873,7 +1828,41 @@ export function SessionView(props: {
           </button>
         </>
       )}
-      {ex.sets.length > 0 && (
+      {tabs && !isMarkerExercise(ex) && (
+        <div className="opts-quick">
+          <button
+            type="button"
+            onClick={() => {
+              duplicateExercise(workout!.id, ex.id);
+              setSheet(null);
+            }}
+          >
+            <Icon name="copy" />
+            {t.duplicateWithSets}
+          </button>
+          {ex.sets.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const removed = clearSets(workout!.id, ex.id);
+                setSheet(null);
+                if (removed.length > 0) {
+                  props.shell.snack({
+                    text: t.exerciseDeleted(ex.name, removed.length),
+                    onUndo: () => {
+                      for (const s of removed) restoreSet(workout!.id, ex.id, s);
+                    },
+                  });
+                }
+              }}
+            >
+              <Icon name="eraser" />
+              {t.clearAllSets}
+            </button>
+          )}
+        </div>
+      )}
+      {!tabs && ex.sets.length > 0 && (
         <button
           className="menu-item"
           onClick={() => {
@@ -1915,35 +1904,6 @@ export function SessionView(props: {
    *  options sheet's "Session" tab (which adds add / readiness / gym rows). */
   const renderSessionOptions = (tabs: boolean) => (
     <>
-      {live && (
-        <div className="ss-viewmode">
-          <span className="ss-vm-label">{t.exerciseView}</span>
-          <div className="ss-vm-seg" role="group" aria-label={t.exerciseView}>
-            <button
-              type="button"
-              className={!focusMode ? 'on' : ''}
-              aria-pressed={!focusMode}
-              onClick={() => {
-                exitFocus();
-                setSheet(null);
-              }}
-            >
-              {t.classicView}
-            </button>
-            <button
-              type="button"
-              className={focusMode ? 'on' : ''}
-              aria-pressed={focusMode}
-              onClick={() => {
-                enterFocus();
-                setSheet(null);
-              }}
-            >
-              {t.focusMode}
-            </button>
-          </div>
-        </div>
-      )}
       <button
         className={`ss-circuit${circuit.on ? ' on' : ''}`}
         onClick={() =>
@@ -1968,10 +1928,6 @@ export function SessionView(props: {
       </button>
       {tabs && live && (
         <div className="opts-rows">
-          <button className="menu-item" onClick={() => setSheet({ kind: 'add' })}>
-            <Icon name="plus" />
-            {t.addExercise}
-          </button>
           {hasSessionStartCoach(
             store.workouts.filter((w) => w.finishedAt !== null),
             now,
@@ -3111,7 +3067,7 @@ export function SessionView(props: {
           )}
         </div>
       </div>
-      {live && !workout.autoFinished && !isDesktop && (
+      {live && !workout.autoFinished && !isDesktop && !focusView && (
         <div className="session-pill-wrap">
           {/* Three liquid-glass pills: discard isolated left, add dead-centre
               (pulsing) flanked by settings + muscle map, finish isolated right. */}
@@ -4300,7 +4256,7 @@ function SetEditorSheet(props: {
             durationMin: isSD ? holdSec / 60 : null,
             distanceKm: null,
             calories: null,
-            rpe: null,
+            rpe: rpe > 0 ? rpe : null,
           },
     );
   }
@@ -4677,90 +4633,126 @@ function SetEditorSheet(props: {
               focused === 'reps' || focused === 'weight' ? focused : null,
             )
           )}
-          {sidesOk && !isAssist && !isBand && (
-            <div className="sides-block">
-              <div className="toggle-row sides-row">
-                <Icon name="arrows-out-line-horizontal" />
-                <span className="lab">{t.sidesLabel}</span>
-                <div className="seg2 sides-seg">
-                  <button
-                    className={sides === 'both' ? 'active' : ''}
-                    onClick={() => pickSides('both')}
-                  >
-                    {t.sidesBoth}
-                  </button>
-                  <button
-                    className={sides === 'one' ? 'active' : ''}
-                    onClick={() => pickSides('one')}
-                  >
-                    {t.sidesOne}
-                  </button>
+          {/* Set type · effort · load inline (design "One door"), rarer toggles grouped below. */}
+          <div className="se-block">
+            <div className="se-label">{t.setTypeLabel}</div>
+            <div className="se-types">
+              {SET_TYPE_ROWS.map((row) => (
+                <button
+                  key={row.type}
+                  type="button"
+                  className={`se-type t-${row.type}${type === row.type ? ' on' : ''}`}
+                  aria-pressed={type === row.type}
+                  onClick={() => {
+                    setType(row.type);
+                    setTypeTouched(true);
+                    if (row.type === 'warmup') setBw(false);
+                  }}
+                >
+                  <span className="se-dot" aria-hidden />
+                  {typeMeta[row.type].name}
+                </button>
+              ))}
+            </div>
+            {typeMeta[type].hint ? <div className="se-hint">{typeMeta[type].hint}</div> : null}
+          </div>
+          <div className="se-block">
+            <div className="se-label">{t.rpe}</div>
+            <div className="se-rpe">
+              {[0, 6, 7, 8, 9, 10].map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  className={rpe === v ? 'on' : ''}
+                  aria-pressed={rpe === v}
+                  onClick={() => setRpe(v)}
+                >
+                  {v === 0 ? '—' : v}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="se-block">
+            <div className="se-label">{t.loadTypeLabel}</div>
+            <div className="seg2 se-load">
+              {LOAD_ROWS.map((r) => (
+                <button
+                  key={r.key}
+                  type="button"
+                  className={loadType === r.key ? 'active' : ''}
+                  onClick={() => pickLoadType(r.key)}
+                >
+                  {r.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="se-group">
+            {sidesOk && !isAssist && !isBand && (
+              <div className="sides-block">
+                <div className="toggle-row sides-row">
+                  <Icon name="arrows-out-line-horizontal" />
+                  <span className="lab">{t.sidesLabel}</span>
+                  <div className="seg2 sides-seg">
+                    <button
+                      className={sides === 'both' ? 'active' : ''}
+                      onClick={() => pickSides('both')}
+                    >
+                      {t.sidesBoth}
+                    </button>
+                    <button
+                      className={sides === 'one' ? 'active' : ''}
+                      onClick={() => pickSides('one')}
+                    >
+                      {t.sidesOne}
+                    </button>
+                  </div>
+                </div>
+                {sides === 'one' && (
+                  <div className="sides-note">
+                    <Icon name="info" />
+                    {t.sidesNote}
+                  </div>
+                )}
+              </div>
+            )}
+            {unitEligible && !isAssist && !isBand && !bw && (
+              <div className="toggle-row unit-row">
+                <Icon name="scales" />
+                <span className="lab">{t.unitLabel}</span>
+                <div className="seg2 unit-seg">
+                  {(['kg', 'lb'] as DisplayUnit[]).map((u) => (
+                    <button
+                      key={u}
+                      className={unit === u ? 'active' : ''}
+                      onClick={() => setUnit(u)}
+                    >
+                      {u}
+                    </button>
+                  ))}
                 </div>
               </div>
-              {sides === 'one' && (
-                <div className="sides-note">
-                  <Icon name="info" />
-                  {t.sidesNote}
-                </div>
-              )}
-            </div>
-          )}
-          {unitEligible && !isAssist && !isBand && !bw && (
-            <div className="toggle-row unit-row">
-              <Icon name="scales" />
-              <span className="lab">{t.unitLabel}</span>
-              <div className="seg2 unit-seg">
-                {(['kg', 'lb'] as DisplayUnit[]).map((u) => (
-                  <button key={u} className={unit === u ? 'active' : ''} onClick={() => setUnit(u)}>
-                    {u}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          {unitEligible && !isAssist && !isBand && unit === 'lb' && !bw && weight > 0 && (
-            <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
-          )}
-          {isBarbell && !isAssist && !isBand && !bw && (
-            <button className="toggle-row" onClick={() => setPlateOpen(true)}>
-              <Icon name="barbell" />
-              <span className="lab">{t.plateTitle}</span>
-              <span className="toggle-value">
-                {fmtWeightValue(weight)} {t.kgCol.toLowerCase()}
-              </span>
-            </button>
-          )}
-          {!isAssist && !isBand && (
-            <button className="toggle-row" onClick={() => setBw((x) => !x)}>
-              <Icon name="barbell" />
-              <span className="lab">{t.bodyweightSet}</span>
-              <Switch on={bw} />
-            </button>
-          )}
-          <button className="toggle-row" onClick={() => setView('load')}>
-            <Icon name={isAssist ? 'scales' : isBand ? 'wave-sine' : 'barbell'} />
-            <span className="lab">{t.loadTypeLabel}</span>
-            <span className="toggle-value">
-              {isAssist ? t.loadAssist : isBand ? t.loadBand : t.loadWeight}
-            </span>
-          </button>
-          <button className="toggle-row" onClick={() => setView('type')}>
-            <Icon
-              name={
-                type === 'working'
-                  ? 'equals'
-                  : type === 'warmup'
-                    ? 'fire'
-                    : type === 'drop'
-                      ? 'caret-line-down'
-                      : type === 'reverse-drop'
-                        ? 'caret-line-up'
-                        : 'wave-sine'
-              }
-            />
-            <span className="lab">{t.setTypeLabel}</span>
-            <span className="toggle-value">{typeMeta[type].name}</span>
-          </button>
+            )}
+            {unitEligible && !isAssist && !isBand && unit === 'lb' && !bw && weight > 0 && (
+              <div className="unit-equiv">{t.unitStoredKg(fmtWeightValue(weight))}</div>
+            )}
+            {isBarbell && !isAssist && !isBand && !bw && (
+              <button className="toggle-row" onClick={() => setPlateOpen(true)}>
+                <Icon name="barbell" />
+                <span className="lab">{t.plateTitle}</span>
+                <span className="toggle-value">
+                  {fmtWeightValue(weight)} {t.kgCol.toLowerCase()}
+                </span>
+              </button>
+            )}
+            {!isAssist && !isBand && (
+              <button className="toggle-row" onClick={() => setBw((x) => !x)}>
+                <Icon name="barbell" />
+                <span className="lab">{t.bodyweightSet}</span>
+                <Switch on={bw} />
+              </button>
+            )}
+          </div>
         </>
       )}
       {props.onExerciseSettings && (
