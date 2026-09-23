@@ -30,7 +30,7 @@ What causes the "looks wrong" problem — **this is what we fix**:
    (`styles.css` is 34k lines; class prefixes: `program` 247, `mst` 175, `session` 130,
    `sleep` 110, `rx` 102, `sbw` 76, `focus` 73, …). Each reinvention drifts a little.
 2. **More than one button system.** Global `.btn .btn-primary/.btn-secondary/.btn-sm/…`
-   *and* a second `.rx .btn.p/.s/.b/.hot` ported from a design file. New code picks whichever
+   _and_ a second `.rx .btn.p/.s/.b/.hot` ported from a design file. New code picks whichever
    → inconsistency.
 3. **Heavy inline styles in views** (RecapView 146, InjuryView 111, TodayView 43, …). Inline
    one‑offs can't be reused or kept consistent, and they bypass the tokens.
@@ -49,12 +49,12 @@ Small piece → verify live → fix → re‑verify → never break. Concretely,
 
 1. **Pick one tiny piece** (one primitive, or one screen's migration). Nothing bigger.
 2. **Look at it live first.** Run the dev server (`npm run dev` in `client/`), open the
-   affected screen(s) in the browser, screenshot how it works and looks *before* touching it.
+   affected screen(s) in the browser, screenshot how it works and looks _before_ touching it.
 3. **Make the change.**
 4. **Gates (all must pass):** `tsc -p tsconfig.json --noEmit` = 0, `eslint` = 0, `vitest run`
    green, and a clean production build.
 5. **Re‑verify live.** Screenshot the same screen(s) + the UI gallery; compare before/after —
-   pixels should match (a refactor slice changes *code*, not *appearance*).
+   pixels should match (a refactor slice changes _code_, not _appearance_).
 6. **Only then** delete the now‑dead CSS/classes for that piece. Never delete ahead of migration.
 
 Guardrails baked into the loop:
@@ -93,7 +93,7 @@ Rules:
   colour/radius app‑wide.
 - **Every primitive is in the gallery** in all its variants and states.
 - Feature‑specific composition still lives in the feature (e.g. the rehab stage ladder), but it
-  is *built out of* kit primitives (Card, ListRow, Chip, ProgressDots), not bespoke CSS.
+  is _built out of_ kit primitives (Card, ListRow, Chip, ProgressDots), not bespoke CSS.
 
 ---
 
@@ -257,7 +257,7 @@ Colours/radii come only from tokens; variants pick the semantic family
 
 - **Regressions from mass edits** → we never mass‑edit; one primitive or one screen per slice,
   live‑verified, old kept until migrated.
-- **Perf (34k‑line CSS)** → extracting to co‑located blocks doesn't add weight; we only *move*
+- **Perf (34k‑line CSS)** → extracting to co‑located blocks doesn't add weight; we only _move_
   rules, and delete dead ones after migration, so CSS shrinks over time.
 - **Design drift creeping in during a refactor slice** → refactor slices are behaviour‑preserving;
   any intended visual change is a separate, flagged task.
