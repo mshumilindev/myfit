@@ -1099,6 +1099,36 @@ describe('F-03 session UI', () => {
     localStorage.removeItem('spotter.session.focus');
   });
 
+  it('warm-up ramp follows what was logged: reaching the working weight ends it', async () => {
+    const s = sampleStore();
+    const done = s.workouts.find((w) => w.id === 'done')!;
+    done.exercises.push({
+      id: 'sq-bench',
+      name: 'Bench press',
+      position: 1,
+      sets: [
+        { id: 'h1', reps: 6, weight: 80, isWarmup: false, position: 0 },
+        { id: 'h2', reps: 6, weight: 80, isWarmup: false, position: 1 },
+      ],
+    });
+    const bench = s.workouts[0].exercises[0];
+    bench.sets = [];
+    __replaceStateForTests(s);
+    const { container, unmount } = render(
+      <SessionView workoutId="open" shell={shell} onClose={vi.fn()} />,
+    );
+    // fresh: the card proposes a warm-up
+    expect(container.querySelector('.gset.kind-warmup')).toBeTruthy();
+    unmount();
+
+    // the athlete jumped straight to 85 kg — no more warm-ups, and it counts as work
+    bench.sets = [{ id: 'w1', reps: 10, weight: 85, isWarmup: true, position: 0 }];
+    __replaceStateForTests(s);
+    const r2 = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    expect(r2.container.querySelector('.gset.kind-warmup')).toBeNull();
+    expect(r2.container.querySelector('.gset.kind-working')).toBeTruthy();
+  });
+
   it('inserts a warm-up marker card with no sets to log', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);

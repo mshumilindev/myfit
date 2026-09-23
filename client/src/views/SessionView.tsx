@@ -689,14 +689,19 @@ export function SessionView(props: {
       if (loadType === 'weight' && target.weight != null && target.weight > 0) {
         const compound = richExerciseByName(ex.name)?.mechanic === 'compound';
         const ramp = warmupRamp(target.weight, { loadType, compound });
-        const warmDone = sets.filter((s) => s.isWarmup || setTypeOf(s) === 'warmup').length;
-        if (warmDone < ramp.length) {
-          const w = ramp[warmDone];
+        // The ramp follows what was actually logged: steps at or below the
+        // heaviest set so far are done, and once you've reached the working
+        // weight (however you got there) the warm-ups are over.
+        const heaviest = sets.reduce((m, s) => Math.max(m, s.weight ?? 0), 0);
+        const left =
+          heaviest >= target.weight ? [] : ramp.filter((w) => (w.weight ?? 0) > heaviest);
+        if (left.length > 0) {
+          const w = left[0];
           return {
             reps: w.reps,
             weight: w.weight ?? null,
             warmup: true,
-            ramp: { i: warmDone + 1, n: ramp.length, toKg: target.weight },
+            ramp: { i: ramp.length - left.length + 1, n: ramp.length, toKg: target.weight },
           };
         }
         return { reps: target.reps, weight: target.weight };
@@ -710,6 +715,16 @@ export function SessionView(props: {
     if (last) return { reps: last.reps, weight: last.weight ?? null };
     if (ex.plannedReps) return { reps: ex.plannedReps, weight: null };
     return { reps: 8, weight: 20 };
+  }
+
+  /** A proposed warm-up the athlete loads up to the working weight is logged
+   *  as a working set — the ramp is a suggestion, not a label to enforce. */
+  function ghostKind(
+    g: { warmup?: boolean; ramp?: { toKg: number } },
+    kg: number | null,
+  ): 'warmup' | 'working' {
+    if (!g.warmup) return 'working';
+    return g.ramp && kg !== null && kg >= g.ramp.toKg ? 'working' : 'warmup';
   }
 
   function timedGhostFor(ex: Exercise): TimedGhost {
@@ -1636,7 +1651,7 @@ export function SessionView(props: {
                     <button
                       className="btn btn-primary log-btn"
                       disabled={directLogBlocked}
-                      onClick={() => logGhost(ex, ghost, ghost.warmup ? 'warmup' : 'working')}
+                      onClick={() => logGhost(ex, ghost, ghostKind(ghost, ghost.weight))}
                     >
                       {props.past ? t.add : t.log}
                     </button>
@@ -1657,7 +1672,7 @@ export function SessionView(props: {
                         : undefined
                     }
                     kind={ghost.warmup ? 'warmup' : 'working'}
-                    onLog={(v) => logGhost(ex, v, ghost.warmup ? 'warmup' : 'working')}
+                    onLog={(v) => logGhost(ex, v, ghostKind(ghost, v.weight))}
                     onSettings={() =>
                       setSheet(
                         focusView
