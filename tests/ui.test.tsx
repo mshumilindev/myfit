@@ -1157,7 +1157,9 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(s);
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
     expect(container.querySelector('.gset.kind-drop')).toBeTruthy();
-    expect(screen.getByText(/\+ 60/)).toBeTruthy();
+    // One row for the start + one per drop, pre-filled from the last drop set.
+    expect(container.querySelectorAll('.gset-part')).toHaveLength(2);
+    expect(screen.getByText('Drop 1')).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Log' }));
     const logged = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets[1];
     expect(logged.type).toBe('drop');

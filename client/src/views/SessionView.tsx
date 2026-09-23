@@ -1862,12 +1862,17 @@ export function SessionView(props: {
                     kind={ghost.type ?? (ghost.warmup ? 'warmup' : 'working')}
                     note={ghostTechniqueNote(ghost)}
                     defHoldSec={ghost.holdMin ? Math.round(ghost.holdMin * 60) : undefined}
+                    defDrops={ghost.drops}
                     onLog={(v) =>
                       logGhost(
                         ex,
                         v,
                         ghostKind(ghost, v.weight),
-                        v.holdMin ? { ...ghost, holdMin: v.holdMin } : ghost,
+                        v.holdMin
+                          ? { ...ghost, holdMin: v.holdMin }
+                          : v.drops
+                            ? { weight: v.weight, drops: v.drops }
+                            : ghost,
                       )
                     }
                     onSettings={() =>
@@ -4153,9 +4158,16 @@ function GhostSetRow(props: {
   defWeightKg: number | null;
   weightRequired: boolean;
   isPast: boolean;
-  onLog: (v: { reps: number; weight: number | null; holdMin?: number }) => void;
+  onLog: (v: {
+    reps: number;
+    weight: number | null;
+    holdMin?: number;
+    drops?: DropEntry[];
+  }) => void;
   onSettings: () => void;
   title?: string;
+  /** Drop / reverse drop: the parts of the last such set — one row each. */
+  defDrops?: DropEntry[];
   /** Static-dynamic: default hold in seconds (the card swaps Reps for Hold). */
   defHoldSec?: number;
   /** Set type the row proposes — colours the card (warm-up, working, drop…). */
@@ -4169,6 +4181,23 @@ function GhostSetRow(props: {
   const [weightKg, setWeightKg] = useState<number | null>(props.defWeightKg);
   const isSd = props.kind === 'static-dynamic';
   const [holdSec, setHoldSec] = useState(Math.max(5, props.defHoldSec ?? 30));
+  const isDrop =
+    (props.kind === 'drop' || props.kind === 'reverse-drop') && !!props.defDrops?.length;
+  const [drops, setDrops] = useState<DropEntry[]>(() =>
+    (props.defDrops ?? []).map((d) => ({ ...d })),
+  );
+  const patchDrop = (i: number, patch: Partial<DropEntry>) =>
+    setDrops((list) => list.map((d, xi) => (xi === i ? { ...d, ...patch } : d)));
+  // Moving the start weight carries the drops along (80→60→40 becomes 85→65→45).
+  const setStartWeight = (kg: number) => {
+    if (isDrop && weightKg !== null) {
+      const delta = kg - weightKg;
+      setDrops((list) =>
+        list.map((d) => (d.weight === null ? d : { ...d, weight: Math.max(0, d.weight + delta) })),
+      );
+    }
+    setWeightKg(kg);
+  };
   const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
   const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
   const bw = weightKg === null && !props.weightRequired;
@@ -4176,23 +4205,74 @@ function GhostSetRow(props: {
   return (
     <div className={`gset kind-${props.kind ?? 'working'}`}>
       {props.title && <div className="gset-title">{props.title}</div>}
-      <div className="gset-steppers">
-        {!isSd && <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />}
-        <Stepper
-          label={unit === 'lb' ? t.weightLb : t.weightKg}
-          value={toDisp(weightKg ?? 0)}
-          step={unit === 'lb' ? 5 : 2.5}
-          min={0}
-          decimals={unit === 'lb' ? 1 : 2}
-          disabled={bw}
-          placeholder={t.bodyweightShort}
-          onChange={(x) => setWeightKg(fromDisp(x))}
-        />
-        {isSd && (
-          <Stepper label={t.holdSecLabel} value={holdSec} step={5} min={5} onChange={setHoldSec} />
-        )}
-      </div>
-      {props.note && <div className="gset-note">{props.note}</div>}
+      {isDrop ? (
+        <div className="gset-drops">
+          <div className="gset-part">
+            <div className="gset-part-lab">{t.startLabel}</div>
+            <div className="gset-steppers">
+              <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
+              <Stepper
+                label={unit === 'lb' ? t.weightLb : t.weightKg}
+                value={toDisp(weightKg ?? 0)}
+                step={unit === 'lb' ? 5 : 2.5}
+                min={0}
+                decimals={unit === 'lb' ? 1 : 2}
+                disabled={bw}
+                placeholder={t.bodyweightShort}
+                onChange={(x) => setStartWeight(fromDisp(x))}
+              />
+            </div>
+          </div>
+          {drops.map((d, i) => (
+            <div className="gset-part" key={i}>
+              <div className="gset-part-lab">{t.dropRowN(i + 1)}</div>
+              <div className="gset-steppers">
+                <Stepper
+                  label={t.reps}
+                  value={d.reps}
+                  step={1}
+                  min={0}
+                  onChange={(n) => patchDrop(i, { reps: n })}
+                />
+                <Stepper
+                  label={unit === 'lb' ? t.weightLb : t.weightKg}
+                  value={toDisp(d.weight ?? 0)}
+                  step={unit === 'lb' ? 5 : 2.5}
+                  min={0}
+                  decimals={unit === 'lb' ? 1 : 2}
+                  disabled={d.weight === null}
+                  placeholder={t.bodyweightShort}
+                  onChange={(x) => patchDrop(i, { weight: fromDisp(x) })}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="gset-steppers">
+          {!isSd && <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />}
+          <Stepper
+            label={unit === 'lb' ? t.weightLb : t.weightKg}
+            value={toDisp(weightKg ?? 0)}
+            step={unit === 'lb' ? 5 : 2.5}
+            min={0}
+            decimals={unit === 'lb' ? 1 : 2}
+            disabled={bw}
+            placeholder={t.bodyweightShort}
+            onChange={(x) => setWeightKg(fromDisp(x))}
+          />
+          {isSd && (
+            <Stepper
+              label={t.holdSecLabel}
+              value={holdSec}
+              step={5}
+              min={5}
+              onChange={setHoldSec}
+            />
+          )}
+        </div>
+      )}
+      {props.note && !isDrop && <div className="gset-note">{props.note}</div>}
       <div className="gset-actions">
         <button
           className="gset-cfg"
@@ -4209,7 +4289,9 @@ function GhostSetRow(props: {
             props.onLog(
               isSd
                 ? { reps: 1, weight: weightKg, holdMin: holdSec / 60 }
-                : { reps, weight: weightKg },
+                : isDrop
+                  ? { reps, weight: weightKg, drops }
+                  : { reps, weight: weightKg },
             )
           }
         >
