@@ -22,6 +22,9 @@ say() { printf '\n\033[1;33m▸ %s\033[0m\n' "$*"; }
   exit 1
 }
 
+# Partial downloads from the old curl-based fetch may be corrupt (and huge) — drop them first.
+find "$COMFYUI_DIR/models" -name '*.part' -print -delete 2>/dev/null || true
+
 need_gb=30
 [[ "$PRESET" == "flux2-klein-4b" ]] && need_gb=24
 [[ "$PRESET" == "all" ]] && need_gb=45
@@ -61,62 +64,58 @@ remote_size() { # final Content-Length after redirects ("" if unknown)
   curl -sIL --retry 3 "$1" | tr -d '\r' | awk 'tolower($1)=="content-length:" {n=$2} END {print n}'
 }
 
-fetch() { # fetch <models subdir> <file name> <url>
-  local dir="models/$1" dest="models/$1/$2" url="$3" want have
+# Hugging Face's own downloader: resumable, parallel, checksum-verified.
+# (curl --retry with -C - can append duplicate bytes to a partial file.)
+hf() { uvx --quiet --from 'huggingface_hub[hf_xet]' hf "$@"; }
+
+fetch() { # fetch <models subdir> <file name> <repo> <path in repo>
+  local dir="models/$1" dest="models/$1/$2" repo="$3" src="$4" want have
+  local stage="models/.hf-download"
   mkdir -p "$dir"
-  # Another downloader (e.g. an earlier run) may still be writing this file — wait for it.
-  while pgrep -f -- "$2" | grep -vq "^$$\$"; do
-    echo "  … $2 is being downloaded by another process, waiting"
-    sleep 30
-  done
-  want="$(remote_size "$url")"
+  rm -f "$dest.part" # leftovers from the old curl downloader (possibly corrupt)
+  want="$(remote_size "$HF/$repo/resolve/main/$src")"
   if [[ -f "$dest" ]]; then
     have=$(stat -f %z "$dest")
     if [[ -z "$want" || "$have" == "$want" ]]; then
       echo "  ✓ $2"
       return
     fi
-    # Complete-looking name but short: continue it as a partial download.
-    [[ -e "$dest.part" ]] || mv "$dest" "$dest.part"
-  fi
-  if [[ -n "$want" && -f "$dest.part" && "$(stat -f %z "$dest.part")" == "$want" ]]; then
-    mv "$dest.part" "$dest"
-    echo "  ✓ $2"
-    return
+    echo "  ✗ $2 has $have bytes, expected $want — downloading again"
+    rm -f "$dest"
   fi
   echo "  ↓ $2 ($((${want:-0} / 1024 / 1024)) MB)"
-  curl -fL --retry 10 --retry-delay 5 --retry-all-errors -C - -# -o "$dest.part" "$url"
-  have=$(stat -f %z "$dest.part")
+  hf download "$repo" "$src" --local-dir "$stage"
+  have=$(stat -f %z "$stage/$src")
   if [[ -n "$want" && "$have" != "$want" ]]; then
     echo "  ✗ $2: got $have of $want bytes — rerun the script to resume" >&2
     exit 1
   fi
-  mv "$dest.part" "$dest"
+  mv -f "$stage/$src" "$dest"
 }
 
 if [[ "$PRESET" == "qwen-edit-2511" || "$PRESET" == "all" ]]; then
   say "Qwen-Image-Edit-2511 (Apache-2.0) — GGUF Q4_K_M + Lightning 4-step LoRA"
   fetch unet qwen-image-edit-2511-Q4_K_M.gguf \
-    "$HF/unsloth/Qwen-Image-Edit-2511-GGUF/resolve/main/qwen-image-edit-2511-Q4_K_M.gguf"
+    unsloth/Qwen-Image-Edit-2511-GGUF qwen-image-edit-2511-Q4_K_M.gguf
   fetch text_encoders Qwen2.5-VL-7B-Instruct-UD-Q4_K_XL.gguf \
-    "$HF/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/Qwen2.5-VL-7B-Instruct-UD-Q4_K_XL.gguf"
+    unsloth/Qwen2.5-VL-7B-Instruct-GGUF Qwen2.5-VL-7B-Instruct-UD-Q4_K_XL.gguf
   # The vision tower must share the text encoder's name prefix to be picked up.
   fetch text_encoders Qwen2.5-VL-7B-Instruct-mmproj-BF16.gguf \
-    "$HF/unsloth/Qwen2.5-VL-7B-Instruct-GGUF/resolve/main/mmproj-BF16.gguf"
+    unsloth/Qwen2.5-VL-7B-Instruct-GGUF mmproj-BF16.gguf
   fetch vae qwen_image_vae.safetensors \
-    "$HF/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors"
+    Comfy-Org/Qwen-Image_ComfyUI split_files/vae/qwen_image_vae.safetensors
   fetch loras Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors \
-    "$HF/lightx2v/Qwen-Image-Edit-2511-Lightning/resolve/main/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors"
+    lightx2v/Qwen-Image-Edit-2511-Lightning Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors
 fi
 
 if [[ "$PRESET" == "flux2-klein-4b" || "$PRESET" == "all" ]]; then
   say "FLUX.2 [klein] 4B (Apache-2.0) — bf16 (fp8 files don't run on Metal)"
   fetch diffusion_models flux-2-klein-4b.safetensors \
-    "$HF/black-forest-labs/FLUX.2-klein-4B/resolve/main/flux-2-klein-4b.safetensors"
+    black-forest-labs/FLUX.2-klein-4B flux-2-klein-4b.safetensors
   fetch text_encoders qwen_3_4b.safetensors \
-    "$HF/Comfy-Org/flux2-klein-4B/resolve/main/split_files/text_encoders/qwen_3_4b.safetensors"
+    Comfy-Org/flux2-klein-4B split_files/text_encoders/qwen_3_4b.safetensors
   fetch vae flux2-vae.safetensors \
-    "$HF/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors"
+    Comfy-Org/flux2-dev split_files/vae/flux2-vae.safetensors
 fi
 
 say "Ollama + $QA_MODEL (local QA)"
