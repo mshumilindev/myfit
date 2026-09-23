@@ -454,6 +454,10 @@ export function SessionView(props: {
   const focusMode = true;
   const [focusStarted, setFocusStarted] = useState(false);
   const [focusIdx, setFocusIdx] = useState(0);
+  /** An exercise just added/duplicated — the focus jumps to its step. */
+  const [focusJumpId, setFocusJumpId] = useState<string | null>(null);
+  /** A superset member picked by hand — holds until the group's next log. */
+  const [focusPick, setFocusPick] = useState<{ id: string; logged: number } | null>(null);
   const isDesktop = useIsDesktop();
   const startAddConsumed = useRef(false);
 
@@ -474,7 +478,7 @@ export function SessionView(props: {
     if (focusAutoOn && ids.length > prev.length) {
       const prevSet = new Set(prev);
       const addedId = ids.find((id) => !prevSet.has(id));
-      if (addedId) setFocusIdx(ids.indexOf(addedId));
+      if (addedId) setFocusJumpId(addedId);
     }
     focusIdsRef.current = focusIdsKey;
   }, [focusIdsKey, focusAutoOn]);
@@ -597,11 +601,34 @@ export function SessionView(props: {
   // focuses that one instead, until a set is logged returns focus to active.
   // Focus mode walks every exercise one at a time — a warm-up marker gets its
   // own slide too, so it doesn't silently vanish from the focus flow.
-  const focusExercises = sortedExercises;
-  const focusCount = focusExercises.length;
+  // A superset or circuit is ONE focus step: its members are done in turns,
+  // so they share a slide (the same block the classic list rendered).
+  const focusBlocks = sessionBlocks(workout);
+  const focusSteps = focusBlocks.map((b) =>
+    b.kind === 'group' ? b.group.exercises : [b.exercise],
+  );
+  const focusCount = focusSteps.length;
   const focusPos = Math.min(Math.max(0, focusIdx), Math.max(0, focusCount - 1));
-  const focusEx = focusExercises[focusPos] ?? null;
+  const focusBlock = focusBlocks[focusPos] ?? null;
+  const focusGroup = focusBlock?.kind === 'group' ? focusBlock.group : null;
+  // In a group, the member whose turn it is (fewest sets logged, in order).
+  const focusGroupLogged = focusGroup
+    ? focusGroup.exercises.reduce((n, e) => n + e.sets.length, 0)
+    : 0;
+  const focusEx = focusGroup
+    ? (() => {
+        const picked =
+          focusPick && focusPick.logged === focusGroupLogged
+            ? focusGroup.exercises.find((e) => e.id === focusPick.id)
+            : undefined;
+        if (picked) return picked;
+        const min = Math.min(...focusGroup.exercises.map((e) => e.sets.length));
+        return focusGroup.exercises.find((e) => e.sets.length === min) ?? null;
+      })()
+    : (focusSteps[focusPos]?.[0] ?? null);
   const focusHasNext = focusPos < focusCount - 1;
+  const focusStepOf = (exId: string): number =>
+    focusSteps.findIndex((st) => st.some((e) => e.id === exId));
   const focusView = focusMode && live && !props.past;
   const focusedId =
     focusView && focusEx
@@ -615,10 +642,17 @@ export function SessionView(props: {
     setFocusStarted(true);
     const fresh = sortedExercises.every((e) => e.sets.length === 0);
     const i =
-      fresh && focusExercises[0] && isMarkerExercise(focusExercises[0])
+      fresh && focusSteps[0]?.[0] && isMarkerExercise(focusSteps[0][0])
         ? 0
-        : focusExercises.findIndex((e) => e.id === activeExerciseId);
+        : activeExerciseId
+          ? focusStepOf(activeExerciseId)
+          : 0;
     if (i > 0 && i !== focusIdx) setFocusIdx(i);
+  }
+  if (focusJumpId) {
+    const i = focusStepOf(focusJumpId);
+    setFocusJumpId(null);
+    if (i >= 0 && i !== focusIdx) setFocusIdx(i);
   }
   // The next not-yet-started exercise after the active one — drives the
   // "start next exercise" shortcut on the active card.
@@ -1016,16 +1050,20 @@ export function SessionView(props: {
         </div>
       );
     }
-    const nx = focusExercises[focusPos + 1] ?? null;
+    const nx = focusSteps[focusPos + 1]?.[0] ?? null;
+    const nxBlock = focusBlocks[focusPos + 1] ?? null;
     const segs = [
-      ...focusExercises.map((e, i) => (
-        <span
-          key={e.id}
-          className={`${i < focusPos ? 'done' : i === focusPos ? 'cur' : ''}${
-            isMarkerExercise(e) ? (exerciseKind(e) === 'cooldown' ? ' cd' : ' wu') : ''
-          }`}
-        />
-      )),
+      ...focusSteps.map((st, i) => {
+        const e = st[0];
+        return (
+          <span
+            key={e.id}
+            className={`${i < focusPos ? 'done' : i === focusPos ? 'cur' : ''}${
+              isMarkerExercise(e) ? (exerciseKind(e) === 'cooldown' ? ' cd' : ' wu') : ''
+            }${st.length > 1 ? ' grp' : ''}`}
+          />
+        );
+      }),
       // a dashed placeholder for the next exercise you can still add
       <button
         key="__add"
@@ -1045,7 +1083,8 @@ export function SessionView(props: {
               {segs}
             </div>
           </div>
-          {renderCard(focusEx, null)}
+          {circuitBanner}
+          {focusGroup ? renderGroupStep(focusGroup) : renderCard(focusEx, null)}
         </div>
         <div className="focus-nav">
           <button
@@ -1065,7 +1104,15 @@ export function SessionView(props: {
                 const img = nx ? richExerciseByName(nx.name)?.images?.[0] : undefined;
                 return img ? <img className="fn-thumb" src={img} alt="" /> : null;
               })()}
-              <span className="fn-label">{t.focusNext(nx?.name ?? '')}</span>
+              <span className="fn-label">
+                {nxBlock?.kind === 'group'
+                  ? t.focusNext(
+                      nxBlock.group.circuit
+                        ? t.circuitTitle(nxBlock.group.letter)
+                        : t.supersetTag(nxBlock.group.letter),
+                    )
+                  : t.focusNext(nx?.name ?? '')}
+              </span>
               <Icon name="caret-right" />
             </button>
           ) : (
@@ -1108,6 +1155,105 @@ export function SessionView(props: {
       </div>
     );
   }
+
+  // Building a circuit: exercises added now join it (shown in both views).
+  const circuitBanner =
+    live && circuit.on && circuit.groupId ? (
+      <div className="circuit-banner">
+        <span className="loop sm">
+          <Icon name="arrows-clockwise" />
+        </span>
+        <div className="cb-text">
+          <div className="cb-title">
+            {t.circuitAdding}{' '}
+            {(() => {
+              const blk = sessionBlocks(workout).find(
+                (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
+              );
+              return blk && blk.kind === 'group' ? blk.group.letter : 'A';
+            })()}
+          </div>
+          <div className="cb-sub">
+            {t.circuitSoFar(workout.exercises.filter((e) => e.groupId === circuit.groupId).length)}
+          </div>
+        </div>
+        <button
+          className="btn btn-secondary cb-done"
+          onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
+        >
+          {t.circuitFinishSet}
+        </button>
+      </div>
+    ) : null;
+
+  /** Focus step for a superset / circuit: the whole group on one slide. */
+  const renderGroupStep = (g: SupersetGroup) => {
+    if (g.circuit)
+      return (
+        <CircuitBlock
+          key={g.groupId}
+          group={g}
+          past={false}
+          building={circuit.on && circuit.groupId === g.groupId}
+          isLast
+          rounds={circuit.rounds}
+          onMuscle={openMuscleHistory}
+          onRun={() => setSheet({ kind: 'circuit-run', groupId: g.groupId })}
+          onAddAnother={() => setSheet({ kind: 'add' })}
+          onDoneBuilding={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
+          onRounds={(delta) => {
+            const r = Math.max(1, Math.min(20, circuit.rounds + delta));
+            setCircuit((c) => ({ ...c, rounds: r }));
+            setCircuitRounds(workout.id, g.groupId, r);
+          }}
+        />
+      );
+    // Superset: a strip of its members (whose turn, how far) above the normal
+    // focus card for the member whose turn it is — logging moves to the next.
+    const rounds = groupRounds(g);
+    const round = groupCurrentRound(g);
+    const cur = focusEx ?? g.exercises[0];
+    return (
+      <>
+        <div className="fss" key={g.groupId}>
+          <div className="fss-head">
+            <span className="tag tag-accent">{t.supersetTag(g.letter)}</span>
+            <span className="fss-round">{t.roundOf(round, rounds)}</span>
+            <button
+              className="dots"
+              onClick={() => setSheet({ kind: 'group-menu', groupId: g.groupId })}
+              aria-label={t.menuAction}
+            >
+              <Icon name="dots-three-vertical" />
+            </button>
+          </div>
+          <div className="fss-members">
+            {g.exercises.map((e, i) => {
+              const done = e.sets.length >= rounds;
+              return (
+                <button
+                  key={e.id}
+                  type="button"
+                  className={`fss-m${e.id === cur.id ? ' on' : ''}${done ? ' done' : ''}`}
+                  aria-pressed={e.id === cur.id}
+                  onClick={() => setFocusPick({ id: e.id, logged: focusGroupLogged })}
+                >
+                  <span className="fss-idx">
+                    {done ? <Icon name="check" weight="bold" /> : `${g.letter}${i + 1}`}
+                  </span>
+                  <span className="fss-name">{exName(e.name)}</span>
+                  <span className="fss-count">
+                    {e.sets.length}/{rounds}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {renderCard(cur, null)}
+      </>
+    );
+  };
 
   function renderCard(ex: Exercise, grp: GroupCtx | null) {
     const ghost = ghostFor(ex);
@@ -2646,35 +2792,7 @@ export function SessionView(props: {
                 </div>
               )}
 
-              {live && circuit.on && circuit.groupId && (
-                <div className="circuit-banner">
-                  <span className="loop sm">
-                    <Icon name="arrows-clockwise" />
-                  </span>
-                  <div className="cb-text">
-                    <div className="cb-title">
-                      {t.circuitAdding}{' '}
-                      {(() => {
-                        const blk = sessionBlocks(workout).find(
-                          (b) => b.kind === 'group' && b.group.groupId === circuit.groupId,
-                        );
-                        return blk && blk.kind === 'group' ? blk.group.letter : 'A';
-                      })()}
-                    </div>
-                    <div className="cb-sub">
-                      {t.circuitSoFar(
-                        workout.exercises.filter((e) => e.groupId === circuit.groupId).length,
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    className="btn btn-secondary cb-done"
-                    onClick={() => setCircuit((c) => ({ ...c, on: false, groupId: null }))}
-                  >
-                    {t.circuitFinishSet}
-                  </button>
-                </div>
-              )}
+              {circuitBanner}
 
               {workout.exercises.length === 0 ? (
                 <div className="session-empty">

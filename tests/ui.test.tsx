@@ -1192,6 +1192,32 @@ describe('F-03 session UI', () => {
     expect(Math.round((logged.durationMin ?? 0) * 60)).toBe(35);
   });
 
+  it('a superset is one focus step: members take turns, logging moves to the next', async () => {
+    const s = sampleStore();
+    const ex = s.workouts[0].exercises;
+    Object.assign(ex[0], { groupId: 'ss', groupKind: 'superset', groupOrder: 0, plannedSets: 3 });
+    ex.push({
+      id: 'row',
+      name: 'Cable row',
+      position: 1,
+      groupId: 'ss',
+      groupKind: 'superset',
+      groupOrder: 1,
+      plannedSets: 3,
+      sets: [],
+    } as never);
+    __replaceStateForTests(s);
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    const members = container.querySelectorAll('.fss-m');
+    expect(members).toHaveLength(2);
+    // Bench has a set, the row doesn't — it's the row's turn.
+    expect(container.querySelector('.fss-m.on')!.textContent).toMatch(/Cable row/);
+    await userEvent.click(screen.getByRole('button', { name: 'Log' }));
+    const w = __getStateForTests().workouts.find((x) => x.id === 'open')!;
+    expect(w.exercises.find((e) => e.id === 'row')!.sets).toHaveLength(1);
+    expect(container.querySelector('.fss-m.on')!.textContent).toMatch(/Bench/);
+  });
+
   it('inserts a warm-up marker card with no sets to log', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
