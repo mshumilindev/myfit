@@ -1,5 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import type { Shell } from '../App';
 import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
 import {
@@ -205,6 +205,8 @@ function cardioFieldVal(s: Partial<SetEntry>, f: CardioField): number | null {
   return v != null && v > 0 ? Math.round(v * 10) / 10 : null;
 }
 
+type OptsTab = 'set' | 'exercise' | 'session';
+
 type SheetState =
   | { kind: 'add'; intoGroupId?: string }
   | {
@@ -215,6 +217,14 @@ type SheetState =
       ghost: GhostValues;
     }
   | { kind: 'menu'; exId: string }
+  /** Focus mode's single options door: This set · Exercise · Session tabs. */
+  | {
+      kind: 'opts';
+      tab: OptsTab;
+      exId: string | null;
+      set: SetEntry | null;
+      ghost: GhostValues | null;
+    }
   | { kind: 'replace'; exId: string }
   | { kind: 'equip'; exId: string }
   | { kind: 'cardio-machine'; exId: string }
@@ -897,32 +907,22 @@ export function SessionView(props: {
   }
 
   function renderFocusView() {
+    // Focus header keeps only Finish; everything else lives behind the one
+    // options door (sliders next to Log, or here when nothing is focused yet).
     const fmActions = (
       <div className="fm-actions">
-        <button
-          className="fm-icon-btn fm-discard"
-          onClick={() => setDialog({ kind: 'del-workout' })}
-          aria-label={t.discardSession}
-          title={t.discardSession}
-        >
-          <Icon name="trash" />
-        </button>
-        <button
-          className="fm-icon-btn"
-          onClick={() => setSheet({ kind: 'musclemap' })}
-          aria-label={t.muscleMapButton}
-          title={t.muscleMapButton}
-        >
-          <Icon name="person" />
-        </button>
-        <button
-          className="fm-icon-btn"
-          onClick={() => setSheet({ kind: 'settings' })}
-          aria-label={t.sessionSettings}
-          title={t.sessionSettings}
-        >
-          <Icon name="gear" />
-        </button>
+        {!focusEx && (
+          <button
+            className="fm-icon-btn"
+            onClick={() =>
+              setSheet({ kind: 'opts', tab: 'session', exId: null, set: null, ghost: null })
+            }
+            aria-label={t.sessionSettings}
+            title={t.sessionSettings}
+          >
+            <Icon name="sliders-horizontal" />
+          </button>
+        )}
         <button
           className="fm-icon-btn fm-finish"
           disabled={entries === 0}
@@ -1192,6 +1192,25 @@ export function SessionView(props: {
                   <Icon name="dots-six" />
                 </span>
               )}
+              {focusView &&
+                !grp &&
+                (() => {
+                  const img = richExerciseByName(ex.name)?.images?.[0];
+                  return img ? (
+                    <button
+                      className="fm-thumb"
+                      onClick={() =>
+                        props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name })
+                      }
+                      aria-label={t.detailsAction}
+                    >
+                      <img src={img} alt="" />
+                      <span className="fm-thumb-i" aria-hidden>
+                        <Icon name="info" />
+                      </span>
+                    </button>
+                  ) : null;
+                })()}
               <button
                 className="name"
                 draggable={!grp}
@@ -1229,13 +1248,27 @@ export function SessionView(props: {
               {grp && !groupDone && grp.active && <span className="ss-now">{t.nowLabel}</span>}
               {/* Settings stay reachable in focus mode too — markers and cardio have
                   no set editor to reach them from, so this is how they're removed. */}
-              {!grp && (
+              {/* In focus mode strength sets reach options via the sliders next to
+                  Log; markers and cardio have no set row, so they keep a door here. */}
+              {!grp && (!focusView || marker || timed) && (
                 <button
                   className="dots ex-settings"
-                  onClick={() => setSheet({ kind: 'menu', exId: ex.id })}
+                  onClick={() =>
+                    setSheet(
+                      focusView
+                        ? {
+                            kind: 'opts',
+                            tab: 'exercise',
+                            exId: ex.id,
+                            set: null,
+                            ghost: timed ? timedSheetGhost : null,
+                          }
+                        : { kind: 'menu', exId: ex.id },
+                    )
+                  }
                   aria-label={t.menuAction}
                 >
-                  <Icon name="gear" />
+                  <Icon name={focusView ? 'sliders-horizontal' : 'gear'} />
                 </button>
               )}
             </>
@@ -1628,7 +1661,13 @@ export function SessionView(props: {
                     isPast={!!props.past}
                     title={focusView ? t.enterThisSet : undefined}
                     onLog={(v) => logGhost(ex, v, ghost.warmup ? 'warmup' : 'working')}
-                    onSettings={() => setSheet({ kind: 'edit', exId: ex.id, set: null, ghost })}
+                    onSettings={() =>
+                      setSheet(
+                        focusView
+                          ? { kind: 'opts', tab: 'set', exId: ex.id, set: null, ghost }
+                          : { kind: 'edit', exId: ex.id, set: null, ghost },
+                      )
+                    }
                   />
                 ))}
             </div>
@@ -1669,6 +1708,259 @@ export function SessionView(props: {
       </div>
     );
   }
+
+  /** Exercise options — the classic ⚙ menu and the focus options sheet's
+   *  "Exercise" tab share this list; the tab adds group labels and the
+   *  equipment / rename / machine rows the focus card no longer shows. */
+  const renderExerciseOptions = (ex: Exercise, tabs: boolean) => (
+    <>
+      {tabs && <div className="opts-group-label">{t.optsGroupChange}</div>}
+      {tabs && isTimedExercise(ex) && exerciseKind(ex) === 'cardio' && !props.past && (
+        <button
+          className="menu-item"
+          onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
+        >
+          <Icon name="swap" />
+          {t.cardioChangeMachine}
+        </button>
+      )}
+      {sidesEligible(ex) &&
+        loadTypeFor(ex) !== 'assist' &&
+        loadTypeFor(ex) !== 'band' &&
+        (() => {
+          const sv = sidesFor(ex.name) ?? (perHandFactor(ex) === 2 ? 'one' : 'both');
+          return (
+            <div className="menu-sides sides-block">
+              <div className="toggle-row sides-row">
+                <Icon name="arrows-out-line-horizontal" />
+                <span className="lab">{t.sidesLabel}</span>
+                <div className="seg2 sides-seg">
+                  <button
+                    className={sv === 'both' ? 'active' : ''}
+                    onClick={() => setExerciseSides(ex.name, 'both')}
+                  >
+                    {t.sidesBoth}
+                  </button>
+                  <button
+                    className={sv === 'one' ? 'active' : ''}
+                    onClick={() => setExerciseSides(ex.name, 'one')}
+                  >
+                    {t.sidesOne}
+                  </button>
+                </div>
+              </div>
+              {sv === 'one' && (
+                <div className="sides-note">
+                  <Icon name="info" />
+                  {t.sidesNote}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      {/* Warm-up / cool-down markers only need removing; cardio keeps the
+          set tools but has no catalog details or lift history. */}
+      {isStrengthExercise(ex) && (
+        <button className="menu-item" onClick={() => setSheet({ kind: 'replace', exId: ex.id })}>
+          <Icon name="swap" />
+          {t.replaceExercise}
+        </button>
+      )}
+      {tabs && isStrengthExercise(ex) && (
+        <button className="menu-item" onClick={() => setSheet({ kind: 'equip', exId: ex.id })}>
+          <Icon name="barbell" />
+          {t.eqEquipment}
+        </button>
+      )}
+      {tabs && !isMarkerExercise(ex) && (
+        <button
+          className="menu-item"
+          onClick={() => {
+            setRenaming(ex.id);
+            setRenameVal(ex.name);
+            setSheet(null);
+          }}
+        >
+          <Icon name="pencil-simple" />
+          {t.rename}
+        </button>
+      )}
+      {!isMarkerExercise(ex) && (
+        <button
+          className="menu-item"
+          onClick={() => {
+            duplicateExercise(workout!.id, ex.id);
+            setSheet(null);
+          }}
+        >
+          <Icon name="copy" />
+          {t.duplicateWithSets}
+        </button>
+      )}
+      {isStrengthExercise(ex) &&
+        !ex.groupId &&
+        sortedExercises.filter((e) => isStrengthExercise(e) && !e.groupId).length > 1 && (
+          <button className="menu-item" onClick={() => setSheet({ kind: 'superset', exId: ex.id })}>
+            <Icon name="rows" />
+            {t.supersetWith}
+          </button>
+        )}
+      {ex.groupId && (
+        <button
+          className="menu-item"
+          onClick={() => {
+            ungroupSuperset(workout!.id, ex.groupId!);
+            setSheet(null);
+          }}
+        >
+          <Icon name="x" />
+          {t.ungroup}
+        </button>
+      )}
+      {isStrengthExercise(ex) && (
+        <>
+          {tabs && <div className="opts-group-label">{t.optsGroupLookUp}</div>}
+          <button
+            className="menu-item"
+            onClick={() => {
+              props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
+              setSheet(null);
+            }}
+          >
+            <Icon name="info" />
+            {t.detailsAction}
+          </button>
+          <button
+            className="menu-item"
+            onClick={() => {
+              props.shell.openOverlay({ screen: 'exercise-history', name: ex.name });
+              setSheet(null);
+            }}
+          >
+            <Icon name="chart-line-up" />
+            {t.openHistory}
+          </button>
+        </>
+      )}
+      {ex.sets.length > 0 && (
+        <button
+          className="menu-item"
+          onClick={() => {
+            const removed = clearSets(workout!.id, ex.id);
+            setSheet(null);
+            if (removed.length > 0) {
+              props.shell.snack({
+                text: t.exerciseDeleted(ex.name, removed.length),
+                onUndo: () => {
+                  for (const s of removed) restoreSet(workout!.id, ex.id, s);
+                },
+              });
+            }
+          }}
+        >
+          <Icon name="eraser" />
+          {t.clearAllSets}
+        </button>
+      )}
+      <div className="sheet-rule" />
+      <button
+        className="menu-item danger"
+        onClick={() => {
+          if (ex.sets.length > 0) {
+            setDialog({ kind: 'del-ex', exId: ex.id });
+            setSheet(null);
+          } else {
+            removeExercise(ex);
+          }
+        }}
+      >
+        <Icon name="trash" />
+        {t.deleteExercise}
+      </button>
+    </>
+  );
+
+  /** Session options — the classic session-settings sheet and the focus
+   *  options sheet's "Session" tab (which adds add / readiness / gym rows). */
+  const renderSessionOptions = (tabs: boolean) => (
+    <>
+      {live && (
+        <div className="ss-viewmode">
+          <span className="ss-vm-label">{t.exerciseView}</span>
+          <div className="ss-vm-seg" role="group" aria-label={t.exerciseView}>
+            <button
+              type="button"
+              className={!focusMode ? 'on' : ''}
+              aria-pressed={!focusMode}
+              onClick={() => {
+                exitFocus();
+                setSheet(null);
+              }}
+            >
+              {t.classicView}
+            </button>
+            <button
+              type="button"
+              className={focusMode ? 'on' : ''}
+              aria-pressed={focusMode}
+              onClick={() => {
+                enterFocus();
+                setSheet(null);
+              }}
+            >
+              {t.focusMode}
+            </button>
+          </div>
+        </div>
+      )}
+      <button
+        className={`ss-circuit${circuit.on ? ' on' : ''}`}
+        onClick={() =>
+          setCircuit((c) =>
+            c.on
+              ? { on: false, groupId: null, rounds: c.rounds }
+              : { on: true, groupId: crypto.randomUUID(), rounds: c.rounds },
+          )
+        }
+      >
+        <span className="ss-top">
+          <span className="ss-loop">
+            <Icon name="arrows-clockwise" />
+          </span>
+          <span className="ss-circuit-text">
+            <span className="ss-circuit-title">{t.circuitLabel}</span>
+            <span className="ss-circuit-hint">{t.circuitHint}</span>
+          </span>
+          <Switch on={circuit.on} />
+        </span>
+        <span className="ss-desc">{t.circuitSettingDesc}</span>
+      </button>
+      {tabs && live && (
+        <div className="opts-rows">
+          <button className="menu-item" onClick={() => setSheet({ kind: 'add' })}>
+            <Icon name="plus" />
+            {t.addExercise}
+          </button>
+          {hasSessionStartCoach(
+            store.workouts.filter((w) => w.finishedAt !== null),
+            now,
+          ) && (
+            <button className="menu-item" onClick={() => setSheet({ kind: 'coach' })}>
+              <Icon name="heartbeat" />
+              {t.sessionCoachButton}
+            </button>
+          )}
+          <button className="menu-item" onClick={() => setSheet({ kind: 'gym' })}>
+            <Icon name="map-pin" />
+            <span className="mi-text">
+              {t.changeGym}
+              {gym ? <span className="mi-sub">{gym.name}</span> : null}
+            </span>
+          </button>
+        </div>
+      )}
+    </>
+  );
 
   function startTiming(ex: Exercise): void {
     setTiming({ exId: ex.id, startedAt: Date.now() });
@@ -3020,11 +3312,108 @@ export function SessionView(props: {
               : undefined
           }
           onExerciseSettings={
-            focusView ? () => setSheet({ kind: 'menu', exId: sheet.exId }) : undefined
+            focusView
+              ? () =>
+                  setSheet({
+                    kind: 'opts',
+                    tab: 'exercise',
+                    exId: sheet.exId,
+                    set: sheet.set,
+                    ghost: sheet.ghost,
+                  })
+              : undefined
           }
           onClose={() => setSheet(null)}
         />
       )}
+
+      {sheet?.kind === 'opts' &&
+        (() => {
+          const ex = sheet.exId
+            ? (workout.exercises.find((e) => e.id === sheet.exId) ?? null)
+            : null;
+          const canSet = !!ex && !isMarkerExercise(ex) && sheet.ghost !== null;
+          const tab: OptsTab =
+            sheet.tab === 'set' && !canSet
+              ? ex
+                ? 'exercise'
+                : 'session'
+              : sheet.tab === 'exercise' && !ex
+                ? 'session'
+                : sheet.tab;
+          const img = ex ? richExerciseByName(ex.name)?.images?.[0] : undefined;
+          const tabsDef: { k: OptsTab; label: string; icon: string; off: boolean }[] = [
+            { k: 'set', label: t.optsTabSet, icon: 'sliders-horizontal', off: !canSet },
+            { k: 'exercise', label: t.optsTabExercise, icon: 'barbell', off: !ex },
+            { k: 'session', label: t.optsTabSession, icon: 'timer', off: false },
+          ];
+          return (
+            <Sheet className="opts-sheet" onClose={() => setSheet(null)}>
+              <div className="opts-head">
+                {img ? <img className="opts-thumb" src={img} alt="" /> : null}
+                <div className="opts-head-text">
+                  <span className="opts-title">{ex ? exName(ex.name) : t.sessionSettings}</span>
+                  <span className="opts-sub">{ex ? `${t.setsStat} · ${ex.sets.length}` : ''}</span>
+                </div>
+              </div>
+              <div className="opts-tabs" role="tablist">
+                {tabsDef.map((d) => (
+                  <button
+                    key={d.k}
+                    role="tab"
+                    aria-selected={tab === d.k}
+                    className={tab === d.k ? 'on' : ''}
+                    disabled={d.off}
+                    onClick={() => setSheet({ ...sheet, tab: d.k })}
+                  >
+                    <Icon name={d.icon} />
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              <div className="opts-body">
+                {tab === 'set' && ex && sheet.ghost ? (
+                  <SetEditorSheet
+                    embedded
+                    key={sheet.set?.id ?? 'ghost'}
+                    exercise={ex}
+                    set={sheet.set}
+                    ghost={sheet.ghost}
+                    bandLibrary={bandLibraryFor(gym)}
+                    onSave={(vals) => {
+                      if (sheet.set) upsertSet(workout.id, ex.id, { ...vals, id: sheet.set.id });
+                      else logNewSet(ex, vals);
+                      setSheet(null);
+                    }}
+                    onDelete={sheet.set ? () => removeSet(ex, sheet.set!) : undefined}
+                    onClose={() => setSheet(null)}
+                  />
+                ) : tab === 'exercise' && ex ? (
+                  <div className="opts-list">{renderExerciseOptions(ex, true)}</div>
+                ) : (
+                  <div className="opts-list session-settings">{renderSessionOptions(true)}</div>
+                )}
+              </div>
+              <div className="opts-pinned">
+                <button type="button" onClick={() => setSheet({ kind: 'musclemap' })}>
+                  <Icon name="person" />
+                  {t.muscleMapButton}
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => {
+                    setSheet(null);
+                    setDialog({ kind: 'del-workout' });
+                  }}
+                >
+                  <Icon name="trash" />
+                  {t.discardSession}
+                </button>
+              </div>
+            </Sheet>
+          );
+        })()}
 
       {sheet?.kind === 'menu' &&
         (() => {
@@ -3033,145 +3422,7 @@ export function SessionView(props: {
           return (
             <Sheet padded={false} onClose={() => setSheet(null)}>
               <div className="sheet-label">{t.exerciseMenuTitle(ex.name, ex.sets.length)}</div>
-              {sidesEligible(ex) &&
-                loadTypeFor(ex) !== 'assist' &&
-                loadTypeFor(ex) !== 'band' &&
-                (() => {
-                  const sv = sidesFor(ex.name) ?? (perHandFactor(ex) === 2 ? 'one' : 'both');
-                  return (
-                    <div className="menu-sides sides-block">
-                      <div className="toggle-row sides-row">
-                        <Icon name="arrows-out-line-horizontal" />
-                        <span className="lab">{t.sidesLabel}</span>
-                        <div className="seg2 sides-seg">
-                          <button
-                            className={sv === 'both' ? 'active' : ''}
-                            onClick={() => setExerciseSides(ex.name, 'both')}
-                          >
-                            {t.sidesBoth}
-                          </button>
-                          <button
-                            className={sv === 'one' ? 'active' : ''}
-                            onClick={() => setExerciseSides(ex.name, 'one')}
-                          >
-                            {t.sidesOne}
-                          </button>
-                        </div>
-                      </div>
-                      {sv === 'one' && (
-                        <div className="sides-note">
-                          <Icon name="info" />
-                          {t.sidesNote}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              {/* Warm-up / cool-down markers only need removing; cardio keeps the
-                  set tools but has no catalog details or lift history. */}
-              {isStrengthExercise(ex) && (
-                <button
-                  className="menu-item"
-                  onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
-                >
-                  <Icon name="swap" />
-                  {t.replaceExercise}
-                </button>
-              )}
-              {!isMarkerExercise(ex) && (
-                <button
-                  className="menu-item"
-                  onClick={() => {
-                    duplicateExercise(workout.id, ex.id);
-                    setSheet(null);
-                  }}
-                >
-                  <Icon name="copy" />
-                  {t.duplicateWithSets}
-                </button>
-              )}
-              {isStrengthExercise(ex) &&
-                !ex.groupId &&
-                sortedExercises.filter((e) => isStrengthExercise(e) && !e.groupId).length > 1 && (
-                  <button
-                    className="menu-item"
-                    onClick={() => setSheet({ kind: 'superset', exId: ex.id })}
-                  >
-                    <Icon name="rows" />
-                    {t.supersetWith}
-                  </button>
-                )}
-              {ex.groupId && (
-                <button
-                  className="menu-item"
-                  onClick={() => {
-                    ungroupSuperset(workout.id, ex.groupId!);
-                    setSheet(null);
-                  }}
-                >
-                  <Icon name="x" />
-                  {t.ungroup}
-                </button>
-              )}
-              {isStrengthExercise(ex) && (
-                <>
-                  <button
-                    className="menu-item"
-                    onClick={() => {
-                      props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
-                      setSheet(null);
-                    }}
-                  >
-                    <Icon name="info" />
-                    {t.detailsAction}
-                  </button>
-                  <button
-                    className="menu-item"
-                    onClick={() => {
-                      props.shell.openOverlay({ screen: 'exercise-history', name: ex.name });
-                      setSheet(null);
-                    }}
-                  >
-                    <Icon name="chart-line-up" />
-                    {t.openHistory}
-                  </button>
-                </>
-              )}
-              {ex.sets.length > 0 && (
-                <button
-                  className="menu-item"
-                  onClick={() => {
-                    const removed = clearSets(workout.id, ex.id);
-                    setSheet(null);
-                    if (removed.length > 0) {
-                      props.shell.snack({
-                        text: t.exerciseDeleted(ex.name, removed.length),
-                        onUndo: () => {
-                          for (const s of removed) restoreSet(workout.id, ex.id, s);
-                        },
-                      });
-                    }
-                  }}
-                >
-                  <Icon name="eraser" />
-                  {t.clearAllSets}
-                </button>
-              )}
-              <div className="sheet-rule" />
-              <button
-                className="menu-item danger"
-                onClick={() => {
-                  if (ex.sets.length > 0) {
-                    setDialog({ kind: 'del-ex', exId: ex.id });
-                    setSheet(null);
-                  } else {
-                    removeExercise(ex);
-                  }
-                }}
-              >
-                <Icon name="trash" />
-                {t.deleteExercise}
-              </button>
+              {renderExerciseOptions(ex, false)}
             </Sheet>
           );
         })()}
@@ -3276,57 +3527,7 @@ export function SessionView(props: {
       {sheet?.kind === 'settings' && (
         <Sheet className="session-settings" onClose={() => setSheet(null)}>
           <div className="sheet-label">{t.sessionSettings}</div>
-          {live && (
-            <div className="ss-viewmode">
-              <span className="ss-vm-label">{t.exerciseView}</span>
-              <div className="ss-vm-seg" role="group" aria-label={t.exerciseView}>
-                <button
-                  type="button"
-                  className={!focusMode ? 'on' : ''}
-                  aria-pressed={!focusMode}
-                  onClick={() => {
-                    exitFocus();
-                    setSheet(null);
-                  }}
-                >
-                  {t.classicView}
-                </button>
-                <button
-                  type="button"
-                  className={focusMode ? 'on' : ''}
-                  aria-pressed={focusMode}
-                  onClick={() => {
-                    enterFocus();
-                    setSheet(null);
-                  }}
-                >
-                  {t.focusMode}
-                </button>
-              </div>
-            </div>
-          )}
-          <button
-            className={`ss-circuit${circuit.on ? ' on' : ''}`}
-            onClick={() =>
-              setCircuit((c) =>
-                c.on
-                  ? { on: false, groupId: null, rounds: c.rounds }
-                  : { on: true, groupId: crypto.randomUUID(), rounds: c.rounds },
-              )
-            }
-          >
-            <span className="ss-top">
-              <span className="ss-loop">
-                <Icon name="arrows-clockwise" />
-              </span>
-              <span className="ss-circuit-text">
-                <span className="ss-circuit-title">{t.circuitLabel}</span>
-                <span className="ss-circuit-hint">{t.circuitHint}</span>
-              </span>
-              <Switch on={circuit.on} />
-            </span>
-            <span className="ss-desc">{t.circuitSettingDesc}</span>
-          </button>
+          {renderSessionOptions(false)}
         </Sheet>
       )}
 
@@ -3880,6 +4081,15 @@ function Stepper(props: {
   );
 }
 
+/** The set editor either owns its sheet or lives inside the focus options sheet. */
+function SetEditorFrame(props: { embedded: boolean; onClose: () => void; children: ReactNode }) {
+  return props.embedded ? (
+    <>{props.children}</>
+  ) : (
+    <Sheet onClose={props.onClose}>{props.children}</Sheet>
+  );
+}
+
 function SetEditorSheet(props: {
   exercise: Exercise;
   set: SetEntry | null;
@@ -3888,6 +4098,8 @@ function SetEditorSheet(props: {
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
   onExerciseSettings?: () => void;
+  /** Rendered inside the focus options sheet (tabs) instead of its own sheet. */
+  embedded?: boolean;
   onClose: () => void;
 }) {
   const { t } = useT();
@@ -4105,7 +4317,7 @@ function SetEditorSheet(props: {
   // --- DS-1: the four types, one list --------------------------------------
   if (!timed && view === 'type') {
     return (
-      <Sheet onClose={props.onClose}>
+      <SetEditorFrame embedded={!!props.embedded} onClose={props.onClose}>
         <div className="sheet-head">
           <span className="t">{t.setN(idx, props.exercise.name)}</span>
         </div>
@@ -4139,14 +4351,14 @@ function SetEditorSheet(props: {
             {t.dropNote2}
           </p>
         </div>
-      </Sheet>
+      </SetEditorFrame>
     );
   }
 
   // --- Load type (Load-entry C): weight · assist · band --------------------
   if (!timed && view === 'load') {
     return (
-      <Sheet onClose={props.onClose}>
+      <SetEditorFrame embedded={!!props.embedded} onClose={props.onClose}>
         <div className="sheet-head">
           <span className="t">{t.loadTypeLabel}</span>
         </div>
@@ -4171,12 +4383,12 @@ function SetEditorSheet(props: {
           <Icon name="info" />
           <p>{t.loadTypeNote}</p>
         </div>
-      </Sheet>
+      </SetEditorFrame>
     );
   }
 
   return (
-    <Sheet onClose={props.onClose}>
+    <SetEditorFrame embedded={!!props.embedded} onClose={props.onClose}>
       <div className="sheet-head">
         <span className="t">
           {timed ? t.entryN(idx, props.exercise.name) : t.setN(idx, props.exercise.name)}
@@ -4531,7 +4743,7 @@ function SetEditorSheet(props: {
           onClose={() => setPlateOpen(false)}
         />
       )}
-    </Sheet>
+    </SetEditorFrame>
   );
 }
 

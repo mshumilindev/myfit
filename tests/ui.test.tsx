@@ -1066,6 +1066,32 @@ describe('F-03 session UI', () => {
     localStorage.removeItem('spotter.session.focus');
   });
 
+  it('focus mode has one options door: sliders → This set · Exercise · Session', async () => {
+    localStorage.setItem('spotter.session.focus', '1');
+    __replaceStateForTests(sampleStore());
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    // the focus header keeps only Finish — discard / muscle map / settings moved behind the door
+    const bar = container.querySelector('.fm-modebar') as HTMLElement;
+    expect(within(bar).queryByRole('button', { name: 'Discard session' })).toBeNull();
+    expect(within(bar).getByRole('button', { name: 'Finish' })).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Set options' }));
+    const dialog = screen.getByRole('dialog');
+    expect(
+      within(dialog)
+        .getByRole('tab', { name: /This set/ })
+        .getAttribute('aria-selected'),
+    ).toBe('true');
+    await userEvent.click(within(dialog).getByRole('tab', { name: /Exercise/ }));
+    expect(within(dialog).getByRole('button', { name: /Replace exercise/ })).toBeTruthy();
+    expect(within(dialog).getByRole('button', { name: /Equipment/ })).toBeTruthy();
+    await userEvent.click(within(dialog).getByRole('tab', { name: /Session/ }));
+    expect(within(dialog).getByRole('button', { name: /Circuit/ })).toBeTruthy();
+    // pinned on every tab
+    expect(within(dialog).getByRole('button', { name: /Muscle map/ })).toBeTruthy();
+    expect(within(dialog).getByRole('button', { name: /Discard session/ })).toBeTruthy();
+    localStorage.removeItem('spotter.session.focus');
+  });
+
   it('inserts a warm-up marker card with no sets to log', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
