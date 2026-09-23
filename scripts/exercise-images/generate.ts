@@ -97,6 +97,7 @@ export function plan(
   const anchorPath = m.anchor ? path.join(REPO_ROOT, m.anchor.path) : null;
   const anchorHash = m.anchor?.hash ?? null;
   const configKey = generationConfigKey(c);
+  const promptStyle = c.provider === 'comfyui' ? 'edit' : 'describe';
   const out: PlannedItem[] = [];
   for (const ex of exercises) {
     const palette = resolvePalette(ex.paletteKey, tokens);
@@ -110,9 +111,21 @@ export function plan(
       const refs = referencePlan(ex, state, anchorPath, startFrame);
       const roles: RefRole[] = refs.map((r) => r.role);
       if (willHaveStart && !roles.includes('start-frame')) roles.push('start-frame');
-      const basePrompt = buildPrompt({ exercise: ex, state, palette, refs: roles }).text;
+      const basePrompt = buildPrompt({
+        exercise: ex,
+        state,
+        palette,
+        refs: roles,
+        style: promptStyle,
+      }).text;
       const fingerprint: Fingerprint = {
-        promptVersion: buildPrompt({ exercise: ex, state, palette, refs: roles }).version,
+        promptVersion: buildPrompt({
+          exercise: ex,
+          state,
+          palette,
+          refs: roles,
+          style: promptStyle,
+        }).version,
         promptHash: sha256(basePrompt),
         referenceHash: fileHash(ex.references[state]),
         exerciseHash: exerciseHash(ex),
@@ -288,6 +301,7 @@ export async function run(
         palette,
         refs: refs.map((r) => r.role),
         retryInstruction,
+        style: c.provider === 'comfyui' ? 'edit' : 'describe',
       }).text;
       e.prompt = prompt;
       e.status = 'generating';

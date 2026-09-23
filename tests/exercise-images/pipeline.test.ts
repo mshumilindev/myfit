@@ -153,7 +153,8 @@ describe('prompt builder', () => {
     expect(t).toMatch(/shirtless/i);
     expect(t).toMatch(/shorts/i);
     expect(t).toMatch(/shoes/i);
-    expect(t).not.toMatch(/t-shirt|tank top/i);
+    expect(t).toMatch(/white crew socks/i);
+    expect(t).toMatch(/no tank top/i);
   });
   it('puts exercise correctness first and carries the incline + colour', () => {
     const t = buildPrompt(base).text;
@@ -184,6 +185,14 @@ describe('prompt builder', () => {
     expect(full.length).toBeGreaterThan(plain.length);
     expect(full).toMatch(/Picture 2 = identity/);
     expect(full).toMatch(/Picture 3 = start frame/);
+  });
+  it('uses short numbered edit instructions for local edit models', () => {
+    const t = buildPrompt({ ...base, style: 'edit' }).text;
+    expect(t.length).toBeLessThan(1600);
+    expect(t).toMatch(/SHIRTLESS/);
+    expect(t).toMatch(/white crew socks/);
+    expect(t).toMatch(/his back/);
+    expect(t).toMatch(/armpit hair/);
   });
   it('appends a QA retry instruction and changes the hash input', () => {
     const t = buildPrompt({ ...base, retryInstruction: 'Bench must be inclined ~30°.' }).text;

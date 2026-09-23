@@ -5,7 +5,7 @@
  */
 import type { BodyPosition } from './catalog';
 
-export const PROMPT_VERSION = 'v1-2026-09-23';
+export const PROMPT_VERSION = 'v2-2026-09-23';
 
 /** Order of priorities the model is reminded of in every prompt. */
 export const PRIORITIES =
@@ -17,17 +17,20 @@ export const PRIORITIES =
 export const ATHLETE =
   'The athlete: one adult man, late 20s, athletic and clearly trained with an aesthetic, ' +
   'natural physique (not a competition bodybuilder), realistic low-but-healthy body fat, ' +
-  'natural skin texture, short neat dark hair, clean-shaven, neutral calm expression, ' +
-  'no tattoos, no jewellery, no watch, no headphones.';
+  'short neat dark hair, clean-shaven face, neutral calm expression, no tattoos, no ' +
+  'jewellery, no watch, no headphones. Natural, unshaved body hair: hairy legs, visible ' +
+  'armpit hair, moderate chest hair and a light trail on the stomach. Real skin: visible ' +
+  'pores, slight sheen of sweat, small natural imperfections — not airbrushed, not waxy.';
 
 /** Wardrobe per owner request: shirtless so the working muscles read clearly. */
 export const WARDROBE =
-  'Wardrobe: shirtless (bare torso, so the working muscles are clearly visible); plain ' +
-  'matte charcoal athletic shorts, mid-thigh length; plain dark grey training shoes; ' +
-  'no socks visible above the ankle; absolutely no logos, text, stripes or prints on anything.';
+  'Wardrobe — exactly three items and nothing else: plain matte charcoal athletic shorts ' +
+  '(mid-thigh), plain white crew socks, plain dark grey training shoes. SHIRTLESS: bare ' +
+  'torso so the working muscles are clearly visible — no tank top, no singlet, no T-shirt, ' +
+  'no vest, no top of any kind. No logos, text, stripes or prints on anything.';
 
 export const PHOTOGRAPHY =
-  'Photorealistic editorial fitness photography for a premium training app, one ' +
+  'Raw, true-to-life photograph (not a render, not CGI, not illustration) — editorial fitness photography for a premium training app, one ' +
   'continuous professional studio-gym shoot: a controlled minimal gym set, matte ' +
   'seamless wall, dark rubber floor, only the equipment the exercise needs. Soft large ' +
   'key light from front-left at about 45°, gentle fill, a subtle coloured rim light from ' +

@@ -74,8 +74,8 @@ Check: same exercise; same equipment type, placement and setup (bench angle, sea
 height and attachment, machine geometry, Smith vs free bar); body orientation and stance;
 grip orientation and width; which limbs work (unilateral stays unilateral); the requested
 start/end state; anatomy (hands, fingers, joints); equipment plausibility (cables connected,
-no floating plates, straight bars); style (dark restrained studio set, athlete shirtless in
-plain dark shorts and shoes, no text/logos/other people); identity match with (3) if given;
+no floating plates, straight bars); style (dark restrained studio set, athlete shirtless (no tank top or shirt) in
+plain dark shorts, white socks and shoes, no text/logos/other people); identity match with (3) if given;
 obvious AI artifacts.
 Respond ONLY with JSON:
 {"passed":bool,"score":number 0-10,"exerciseCorrect":bool,"equipmentCorrect":bool,

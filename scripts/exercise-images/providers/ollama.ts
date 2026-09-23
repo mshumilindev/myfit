@@ -93,6 +93,10 @@ export function normalizeLocalQa(raw: unknown): unknown {
   ]) {
     if (r[k] === 'true') r[k] = true;
     if (r[k] === 'false') r[k] = false;
+    // null = "couldn't tell": identity is optional, every other check fails safe.
+    if (r[k] === null || r[k] === undefined)
+      if (k === 'identityConsistent') delete r[k];
+      else r[k] = false;
   }
   if (!Array.isArray(r.issues))
     r.issues = typeof r.issues === 'string' && r.issues ? [r.issues] : [];
