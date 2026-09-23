@@ -28,6 +28,8 @@ import { personalLandmarks } from './personalize';
 import { focusAdjustLandmarks, groupEmphasis, type Emphasis, type FitGoals } from './goals';
 import { computePlaybook, type Play } from './playbook';
 import { deriveLoadType, type LoadType } from './loads';
+import { pickCardioMachine } from './cardio';
+import { equipmentById } from './data/equipmentCatalog';
 
 const clamp = (n: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, n));
 const roundToStep = (n: number, step: number): number => Math.round(n / step) * step;
@@ -310,6 +312,8 @@ export interface PlannedExercise {
   /** Dynamic ordering weight — bigger/base lifts first (see exercisePriority). */
   priority: number;
   durationMin?: number | null;
+  /** Fine equipment — for the cardio block, the machine to use. */
+  equipmentItems?: string[];
 }
 
 export interface GeneratedDay {
@@ -599,10 +603,20 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
       ]
     : [];
 
-  const cardio: PlannedExercise[] = ctx.cardio
+  // Cardio goes on a real machine (history → gym → treadmill), so the entry
+  // gets that machine's fields and calorie maths. A treadmill stays the
+  // "incline walk" zone-2 finisher.
+  const machine = ctx.cardio
+    ? pickCardioMachine(ctx.finished, ctx.gym?.equipmentItems ?? null)
+    : null;
+  const cardio: PlannedExercise[] = machine
     ? [
         {
-          name: 'Incline walk',
+          name:
+            machine === 'cardio-treadmill'
+              ? 'Incline walk'
+              : (equipmentById(machine)?.name ?? 'Cardio'),
+          equipmentItems: [machine],
           kind: 'cardio',
           primary: 'cardio',
           secondary: [],

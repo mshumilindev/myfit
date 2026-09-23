@@ -36,6 +36,9 @@ import {
   recordWeight,
   renameExercise,
   replaceExercise,
+  setCardioMachine,
+  setMarkerStarted,
+  cooldownInProgress,
   reopenWorkout,
   beginPastEdit,
   savePastWorkout,
@@ -80,6 +83,14 @@ import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionSt
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
 import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
+import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
+import {
+  cardioMachineOf,
+  cardioProfile,
+  entrySpeedKmh,
+  pace500Sec,
+  type CardioField,
+} from '../cardio';
 import { SessionMuscleMap } from '../components/SessionMuscleMap';
 import { GymPicker } from '../components/GymPicker';
 import { GymThumb } from '../components/GymThumb';
@@ -135,6 +146,7 @@ import {
   useIsDesktop,
 } from '../ui';
 import { LOCALE_IDS, fmtWeekday } from '../i18n';
+import type { Strings } from '../i18n/en';
 import { getRole } from '../api';
 
 const TIMED_KINDS: ExerciseKind[] = ['warmup', 'cardio', 'cooldown'];
@@ -166,8 +178,45 @@ type GhostValues = {
   reps: number;
   weight: number | null;
   durationMin?: number;
-  distanceKm?: number | null;
-};
+} & Partial<MachineReadings>;
+
+/** Cardio console readings carried from the last entry into the next one. */
+type MachineReadings = Pick<
+  SetEntry,
+  'distanceKm' | 'speedKmh' | 'inclinePct' | 'watts' | 'level' | 'floors'
+>;
+type TimedGhost = { durationMin: number } & MachineReadings;
+
+/** Column header for a cardio field in the set grid. */
+function cardioFieldCol(t: Strings, f: CardioField): string {
+  return f === 'distance'
+    ? t.distanceKmCol
+    : f === 'speed'
+      ? t.speedCol
+      : f === 'incline'
+        ? t.inclineCol
+        : f === 'watts'
+          ? t.wattsCol
+          : f === 'level'
+            ? t.levelCol
+            : t.floorsCol;
+}
+/** The value one cardio field reads on an entry (speed derived if not typed). */
+function cardioFieldVal(s: Partial<SetEntry>, f: CardioField): number | null {
+  const v =
+    f === 'distance'
+      ? s.distanceKm
+      : f === 'speed'
+        ? s.speedKmh || entrySpeedKmh(s as SetEntry)
+        : f === 'incline'
+          ? s.inclinePct
+          : f === 'watts'
+            ? s.watts
+            : f === 'level'
+              ? s.level
+              : s.floors;
+  return v != null && v > 0 ? Math.round(v * 10) / 10 : null;
+}
 
 type SheetState =
   | { kind: 'add'; intoGroupId?: string }
@@ -181,6 +230,7 @@ type SheetState =
   | { kind: 'menu'; exId: string }
   | { kind: 'replace'; exId: string }
   | { kind: 'equip'; exId: string }
+  | { kind: 'cardio-machine'; exId: string }
   | { kind: 'group-menu'; groupId: string }
   | { kind: 'superset'; exId: string }
   | { kind: 'gym' }
@@ -355,7 +405,30 @@ export function SessionView(props: {
     rounds: 4,
   });
   // Live count-up timer for a timed exercise (TIMED-1/2): Start → count-up, Stop → log held time.
-  const [timing, setTiming] = useState<{ exId: string; startedAt: number } | null>(null);
+  // Cardio interval timer (Start → Finish, repeatable). Persisted per workout so
+  // a screen lock, reload or hopping to another screen mid-interval keeps it.
+  const [timingRaw, setTimingRaw] = useState<{
+    workoutId: string;
+    exId: string;
+    startedAt: number;
+  } | null>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('spotter.session.timing') ?? 'null');
+    } catch {
+      return null;
+    }
+  });
+  const timing = timingRaw && timingRaw.workoutId === props.workoutId ? timingRaw : null;
+  const setTiming = (v: { exId: string; startedAt: number } | null): void => {
+    const next = v ? { ...v, workoutId: props.workoutId } : null;
+    setTimingRaw(next);
+    try {
+      if (next) localStorage.setItem('spotter.session.timing', JSON.stringify(next));
+      else localStorage.removeItem('spotter.session.timing');
+    } catch {
+      /* ignore */
+    }
+  };
   const [dialog, setDialog] = useState<DialogState>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const dragId = useRef<string | null>(null);
@@ -390,7 +463,6 @@ export function SessionView(props: {
   // to it. Kept above the early return so hook order stays stable.
   const focusIdsKey = workout
     ? [...workout.exercises]
-        .filter((e) => !isMarkerExercise(e))
         .sort((a, b) => a.position - b.position)
         .map((e) => e.id)
         .join('|')
@@ -493,6 +565,10 @@ export function SessionView(props: {
   const lastChrono = allSetsChrono[allSetsChrono.length - 1] ?? null;
   const lastLoggedAt = lastChrono ? (lastChrono.s.loggedAt as number) : 0;
   const lastLoggedExId = lastChrono ? lastChrono.exId : null;
+  // Rest only runs between efforts — it's off while a cardio interval is on the
+  // clock and for the whole cool-down (back on once a set is logged again).
+  const cooldownNow = live ? cooldownInProgress(workout) : null;
+  const restRunning = live && lastLoggedAt > 0 && !timing && !cooldownNow;
 
   // "Current" follows where you are actually working. If your most-recently
   // logged set is on an exercise that still has sets to go (planned remaining,
@@ -520,8 +596,9 @@ export function SessionView(props: {
   // Exactly one card is expanded at a time: normally the derived active
   // exercise, but tapping a queued row (or starting/adding the next one)
   // focuses that one instead, until a set is logged returns focus to active.
-  // Focus mode walks the non-marker exercises one at a time.
-  const focusExercises = sortedExercises.filter((e) => !isMarkerExercise(e));
+  // Focus mode walks every exercise one at a time — a warm-up marker gets its
+  // own slide too, so it doesn't silently vanish from the focus flow.
+  const focusExercises = sortedExercises;
   const focusCount = focusExercises.length;
   const focusPos = Math.min(Math.max(0, focusIdx), Math.max(0, focusCount - 1));
   const focusEx = focusExercises[focusPos] ?? null;
@@ -534,7 +611,12 @@ export function SessionView(props: {
         ? expandedId
         : activeExerciseId;
   function enterFocus(): void {
-    const i = focusExercises.findIndex((e) => e.id === activeExerciseId);
+    // Nothing logged yet and the session opens with a warm-up → start on it.
+    const fresh = sortedExercises.every((e) => e.sets.length === 0);
+    const i =
+      fresh && focusExercises[0] && isMarkerExercise(focusExercises[0])
+        ? 0
+        : focusExercises.findIndex((e) => e.id === activeExerciseId);
     setFocusIdx(i >= 0 ? i : 0);
     setFocusMode(true);
     try {
@@ -635,9 +717,18 @@ export function SessionView(props: {
     return { reps: 8, weight: 20 };
   }
 
-  function timedGhostFor(ex: Exercise): { durationMin: number; distanceKm: number | null } {
+  function timedGhostFor(ex: Exercise): TimedGhost {
     const last = ex.sets[ex.sets.length - 1];
-    if (last) return { durationMin: last.durationMin ?? 10, distanceKm: last.distanceKm ?? null };
+    if (last)
+      return {
+        durationMin: last.durationMin ?? 10,
+        distanceKm: last.distanceKm ?? null,
+        speedKmh: last.speedKmh ?? null,
+        inclinePct: last.inclinePct ?? null,
+        watts: last.watts ?? null,
+        level: last.level ?? null,
+        floors: last.floors ?? null,
+      };
     const kind = exerciseKind(ex);
     if (ex.plannedDurationMin) {
       return {
@@ -645,7 +736,9 @@ export function SessionView(props: {
         distanceKm: kind === 'cardio' ? null : null,
       };
     }
-    return { durationMin: kind === 'cardio' ? 20 : 8, distanceKm: kind === 'cardio' ? 2 : null };
+    // A machine without a distance console shouldn't be pre-filled with 2 km.
+    const withDistance = kind === 'cardio' && cardioProfile(ex).fields.includes('distance');
+    return { durationMin: kind === 'cardio' ? 20 : 8, distanceKm: withDistance ? 2 : null };
   }
 
   function isRecordSet(ex: Exercise, s: SetEntry): boolean {
@@ -666,7 +759,7 @@ export function SessionView(props: {
    * timed fields survive — the sheet can create any kind of set, not just a
    * plain working one.
    */
-  function logNewSet(ex: Exercise, vals: Omit<SetEntry, 'id' | 'position'>): void {
+  function logNewSet(ex: Exercise, vals: Omit<SetEntry, 'id' | 'position'>): string {
     const base = Math.max(
       baseline.get(ex.name.toLowerCase()) ?? 0,
       ...ex.sets.filter((s) => setTypeOf(s) !== 'warmup').map((s) => s.weight ?? 0),
@@ -688,6 +781,7 @@ export function SessionView(props: {
         text: t.newRecordToast(ex.name, `${fmtWeightKg(vals.weight)} × ${vals.reps}`),
       });
     }
+    return id;
   }
 
   /** Icon-only exercise-options button for a collapsed row — opens the menu
@@ -751,7 +845,8 @@ export function SessionView(props: {
 
   /** One-line reading of a finished exercise (SS-3): «3 × 8 · 75 kg». */
   function pastSummary(ex: Exercise): string {
-    if (isMarkerExercise(ex)) return t.warmupMarkerTitle;
+    if (isMarkerExercise(ex))
+      return exerciseKind(ex) === 'cooldown' ? t.exerciseKindNames.cooldown : t.warmupMarkerTitle;
     if (isTimedExercise(ex)) {
       const min = ex.sets.reduce((n, s) => n + (s.durationMin ?? 0), 0);
       return `${Math.round(min)} ${t.minShort}`;
@@ -891,7 +986,12 @@ export function SessionView(props: {
     const nx = focusExercises[focusPos + 1] ?? null;
     const segs = [
       ...focusExercises.map((e, i) => (
-        <span key={e.id} className={i < focusPos ? 'done' : i === focusPos ? 'cur' : ''} />
+        <span
+          key={e.id}
+          className={`${i < focusPos ? 'done' : i === focusPos ? 'cur' : ''}${
+            isMarkerExercise(e) ? (exerciseKind(e) === 'cooldown' ? ' cd' : ' wu') : ''
+          }`}
+        />
       )),
       // a dashed placeholder for the next exercise you can still add
       <span key="__add" className="add" />,
@@ -928,7 +1028,7 @@ export function SessionView(props: {
           </button>
           {focusHasNext ? (
             <button
-              className="btn btn-primary focus-next"
+              className="btn btn-secondary focus-next"
               onClick={() => setFocusIdx(focusPos + 1)}
             >
               {t.focusNext(nx?.name ?? '')}
@@ -936,7 +1036,7 @@ export function SessionView(props: {
             </button>
           ) : (
             <button
-              className="btn btn-primary focus-next"
+              className="btn btn-secondary focus-next"
               onClick={() => setSheet({ kind: 'add' })}
             >
               {t.focusNextExercise}
@@ -944,6 +1044,32 @@ export function SessionView(props: {
             </button>
           )}
         </div>
+      </div>
+    );
+  }
+
+  /** Live rest count-up on the exercise that owns the most recent set (strength
+   *  or cardio), AND on a freshly focused exercise with no sets yet — rest
+   *  carries over from the previous exercise's last set. */
+  function renderRest(ex: Exercise) {
+    if (!restRunning || isMarkerExercise(ex)) return null;
+    if (!(ex.id === lastLoggedExId || (focusedId === ex.id && ex.sets.length === 0))) return null;
+    const restNow = Math.max(0, now - lastLoggedAt);
+    return focusView ? (
+      <div className="fm-rest">
+        <span className="fm-rest-ic">
+          <Icon name="timer" />
+        </span>
+        <div className="fm-rest-txt">
+          <span className="fm-rest-lbl">{t.restHeaderLabel}</span>
+          <span className="fm-rest-sub">{t.focusRestSince}</span>
+        </div>
+        <span className="fm-rest-clock">{mmss(restNow)}</span>
+      </div>
+    ) : (
+      <div className="ex-resting">
+        <Icon name="timer" />
+        <span>{t.restingSince(mmss(restNow))}</span>
       </div>
     );
   }
@@ -956,6 +1082,11 @@ export function SessionView(props: {
     const kind = exerciseKind(ex);
     const marker = isMarkerExercise(ex);
     const timed = isTimedExercise(ex) && !marker;
+    // Cardio: the machine decides which console readings the entry carries.
+    const cardioFields = timed ? cardioProfile(ex).fields : [];
+    const cardioCol: CardioField | null = cardioFields[0] ?? null;
+    const cardioId = cardioMachineOf(ex);
+    const showPace = !!cardioId && /rower|ski-erg/.test(cardioId);
     const planned = Math.max(0, ex.plannedSets ?? 0);
     const completed = planned > 0 && ex.sets.length >= planned;
     const directLogBlocked = !timed && !marker && planned > 0 && ghost.weight === null;
@@ -1005,7 +1136,7 @@ export function SessionView(props: {
         className={`exercise-card${completed ? ' completed' : ''}${
           !grp && focusedId === ex.id ? ' active' : ''
         }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
-          marker ? ' warmup-marker' : ''
+          marker ? ` warmup-marker${kind === 'cooldown' ? ' cooldown-marker' : ''}` : ''
         }`}
         onDragOver={(e) => {
           if (!grp && dragId.current && dragId.current !== ex.id) e.preventDefault();
@@ -1172,74 +1303,150 @@ export function SessionView(props: {
         {marker ? (
           <div className="warmup-marker-body">
             <span className="warmup-marker-icon" aria-hidden>
-              <Icon name="flame" weight="fill" />
+              <Icon name={kind === 'cooldown' ? 'wind' : 'flame'} weight="fill" />
             </span>
             <div className="warmup-marker-copy">
-              <span className="warmup-marker-title">{t.warmupMarkerTitle}</span>
-              <span className="warmup-marker-sub">{t.warmupMarkerBody}</span>
+              <span className="warmup-marker-title">
+                {kind === 'cooldown' ? t.cooldownMarkerTitle : t.warmupMarkerTitle}
+                {ex.plannedDurationMin ? ` · ~${ex.plannedDurationMin} ${t.minShort}` : ''}
+              </span>
+              <span className="warmup-marker-sub">
+                {kind === 'cooldown' ? t.cooldownMarkerBody : t.warmupMarkerBody}
+              </span>
             </div>
           </div>
-        ) : timed ? (
-          <>
-            <div className="set-grid header timed">
-              <span>#</span>
-              <span>{t.durationMinCol}</span>
-              <span>{t.distanceKmCol}</span>
-              <span>{t.rpeShort}</span>
+        ) : null}
+        {marker && kind === 'cooldown' && live ? (
+          cooldownNow?.id === ex.id ? (
+            <div className="cooldown-on">
+              <Icon name="pause" />
+              <span>{t.cooldownRestOff}</span>
+              {ex.markerAt ? (
+                <button onClick={() => setMarkerStarted(workout!.id, ex.id, null)}>{t.undo}</button>
+              ) : null}
             </div>
-            <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
-              {sortedSets.map((s, i) => (
-                <button
-                  key={s.id}
-                  className="set-row timed"
-                  onClick={() =>
-                    setSheet({ kind: 'edit', exId: ex.id, set: s, ghost: timedSheetGhost })
-                  }
-                >
-                  <span className="idx">{i + 1}</span>
-                  <span className="val">{s.durationMin ?? 0}</span>
-                  <span className="val">{s.distanceKm ?? '—'}</span>
-                  <span className="kind">{s.rpe ?? t.optionalMark}</span>
-                </button>
-              ))}
-              <div className="ghost-row timed">
-                <span className="idx">{ex.sets.length + 1}</span>
-                <button
-                  className="gval"
-                  onClick={() =>
-                    setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
-                  }
-                >
-                  {timedGhost.durationMin}
-                </button>
-                <button
-                  className="gval"
-                  onClick={() =>
-                    setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
-                  }
-                >
-                  {timedGhost.distanceKm ?? '—'}
-                </button>
-                <button
-                  className="btn btn-primary log-btn"
-                  onClick={() => logTimedGhost(ex, timedGhost)}
-                >
-                  {props.past ? t.add : t.log}
-                </button>
+          ) : (
+            <button
+              className="btn btn-secondary cooldown-start"
+              onClick={() => setMarkerStarted(workout!.id, ex.id, Date.now())}
+            >
+              <Icon name="wind" />
+              {t.cooldownStart}
+            </button>
+          )
+        ) : null}
+        {marker ? null : timed ? (
+          <>
+            {kind === 'cardio' && !props.past && (
+              <button
+                className="cardio-machine-chip"
+                onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
+              >
+                <Icon name="swap" />
+                {t.cardioChangeMachine}
+              </button>
+            )}
+            {(ex.sets.length > 0 || !live) && (
+              <div className="set-grid header timed">
+                <span>#</span>
+                <span>{t.durationMinCol}</span>
+                <span>{cardioCol ? cardioFieldCol(t, cardioCol) : ''}</span>
+                <span>{t.rpeShort}</span>
               </div>
+            )}
+            <div style={renaming === ex.id ? { opacity: 0.6 } : undefined}>
+              {sortedSets.map((s, i) => {
+                // The row shows the machine's headline reading; the rest of the
+                // console (speed, incline, watts, pace…) reads as a quiet line.
+                const extras = cardioFields
+                  .slice(1)
+                  .map((f) => {
+                    const v = cardioFieldVal(s, f);
+                    if (v === null) return null;
+                    return f === 'level' ? `${t.levelCol} ${v}` : `${v} ${cardioFieldCol(t, f)}`;
+                  })
+                  .filter((x): x is string => x !== null);
+                const pace = showPace ? pace500Sec(s) : null;
+                if (pace) extras.push(t.pace500(mmss(pace * 1000)));
+                return (
+                  <Fragment key={s.id}>
+                    <button
+                      className="set-row timed"
+                      onClick={() =>
+                        setSheet({ kind: 'edit', exId: ex.id, set: s, ghost: timedSheetGhost })
+                      }
+                    >
+                      <span className="idx">{i + 1}</span>
+                      <span className="val">{s.durationMin ?? 0}</span>
+                      <span className="val">
+                        {cardioCol ? (cardioFieldVal(s, cardioCol) ?? '—') : ''}
+                      </span>
+                      <span className="kind">{s.rpe ?? t.optionalMark}</span>
+                    </button>
+                    {extras.length > 0 && <div className="timed-extra">{extras.join(' · ')}</div>}
+                  </Fragment>
+                );
+              })}
+              {/* Past sessions have no clock to run — enter the entry by hand. */}
+              {!live && (
+                <div className="ghost-row timed">
+                  <span className="idx">{ex.sets.length + 1}</span>
+                  <button
+                    className="gval"
+                    onClick={() =>
+                      setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
+                    }
+                  >
+                    {timedGhost.durationMin}
+                  </button>
+                  <button
+                    className="gval"
+                    onClick={() =>
+                      setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
+                    }
+                  >
+                    {cardioCol ? (cardioFieldVal(timedGhost, cardioCol) ?? '—') : ''}
+                  </button>
+                  <button
+                    className="btn btn-primary log-btn"
+                    onClick={() => logTimedGhost(ex, timedGhost)}
+                  >
+                    {props.past ? t.add : t.log}
+                  </button>
+                </div>
+              )}
+              {renderRest(ex)}
+              {/* Live: one clear action — Start, then Finish. Repeat for more
+                  intervals; each Finish logs an entry. Manual entry stays as a
+                  quiet link for when the clock wasn't running. */}
               {live &&
                 (timing?.exId === ex.id ? (
                   <div className="timed-timer running">
                     <span className="tt-count num">{mmss(now - timing.startedAt)}</span>
                     <button className="btn btn-primary tt-stop" onClick={() => stopTiming(ex)}>
+                      <Icon name="stop" weight="fill" />
                       {t.timerStop}
                     </button>
                   </div>
                 ) : (
-                  <button className="timed-timer start" onClick={() => startTiming(ex)}>
-                    <Icon name="timer" />
-                    {t.timerStart}
-                  </button>
+                  <>
+                    <button
+                      className="btn btn-primary timed-timer start"
+                      disabled={!!timing}
+                      onClick={() => startTiming(ex)}
+                    >
+                      <Icon name="play" weight="fill" />
+                      {ex.sets.length > 0 ? t.timerStartN(ex.sets.length + 1) : t.timerStart}
+                    </button>
+                    <button
+                      className="timed-manual"
+                      onClick={() =>
+                        setSheet({ kind: 'edit', exId: ex.id, set: null, ghost: timedSheetGhost })
+                      }
+                    >
+                      {t.timedLogManual}
+                    </button>
+                  </>
                 ))}
             </div>
           </>
@@ -1396,29 +1603,7 @@ export function SessionView(props: {
                   set, AND on a freshly focused exercise with no sets yet — the
                   rest carries over from the previous exercise's last set, so the
                   new card shows the (full-width) counter before its first set. */}
-              {live &&
-                lastLoggedAt > 0 &&
-                (ex.id === lastLoggedExId || (focusedId === ex.id && ex.sets.length === 0)) &&
-                (() => {
-                  const restNow = Math.max(0, now - lastLoggedAt);
-                  return focusView ? (
-                    <div className="fm-rest">
-                      <span className="fm-rest-ic">
-                        <Icon name="timer" />
-                      </span>
-                      <div className="fm-rest-txt">
-                        <span className="fm-rest-lbl">{t.restHeaderLabel}</span>
-                        <span className="fm-rest-sub">{t.focusRestSince}</span>
-                      </div>
-                      <span className="fm-rest-clock">{mmss(restNow)}</span>
-                    </div>
-                  ) : (
-                    <div className="ex-resting">
-                      <Icon name="timer" />
-                      <span>{t.restingSince(mmss(restNow))}</span>
-                    </div>
-                  );
-                })()}
+              {renderRest(ex)}
               {showGhost &&
                 (grp ? (
                   <div className={`ghost-row${rowCls}`}>
@@ -1499,33 +1684,47 @@ export function SessionView(props: {
   function startTiming(ex: Exercise): void {
     setTiming({ exId: ex.id, startedAt: Date.now() });
   }
+  /** Finish an interval: log it with the measured time straight away (so it's
+   *  never lost), then open it so the console readings — km, watts, level… —
+   *  can go in while they're still on the screen. A stray tap under ~6 s is
+   *  just cancelled. */
   function stopTiming(ex: Exercise): void {
     if (!timing || timing.exId !== ex.id) return;
     const min = Math.max(0, (Date.now() - timing.startedAt) / 60000);
+    setTiming(null);
+    if (min < 0.1) return;
     const kind = exerciseKind(ex);
-    logNewSet(ex, {
+    const vals = {
       reps: 0,
       weight: null,
       isWarmup: kind === 'warmup',
-      durationMin: Math.round(min * 100) / 100,
+      durationMin: Math.round(min * 10) / 10,
       distanceKm: null,
       calories: null,
       rpe: null,
+    };
+    const id = logNewSet(ex, vals);
+    setSheet({
+      kind: 'edit',
+      exId: ex.id,
+      set: { ...vals, id, position: ex.sets.length },
+      ghost: { reps: 0, weight: null, ...timedGhostFor(ex) },
     });
-    setTiming(null);
   }
 
-  function logTimedGhost(
-    ex: Exercise,
-    v: { durationMin: number; distanceKm: number | null },
-  ): void {
+  function logTimedGhost(ex: Exercise, v: TimedGhost): void {
     const kind = exerciseKind(ex);
     logNewSet(ex, {
       reps: 0,
       weight: null,
       isWarmup: kind === 'warmup',
       durationMin: v.durationMin,
-      distanceKm: v.distanceKm,
+      distanceKm: v.distanceKm ?? null,
+      speedKmh: v.speedKmh ?? null,
+      inclinePct: v.inclinePct ?? null,
+      watts: v.watts ?? null,
+      level: v.level ?? null,
+      floors: v.floors ?? null,
       calories: null,
       rpe: null,
     });
@@ -1536,6 +1735,11 @@ export function SessionView(props: {
     if (s.distanceKm !== null && s.distanceKm !== undefined && s.distanceKm > 0) {
       parts.push(`${s.distanceKm} ${t.kmShort}`);
     }
+    if (s.speedKmh && s.speedKmh > 0) parts.push(`${s.speedKmh} ${t.speedCol}`);
+    if (s.inclinePct && s.inclinePct > 0) parts.push(`${s.inclinePct}%`);
+    if (s.watts && s.watts > 0) parts.push(`${s.watts} ${t.wattsCol}`);
+    if (s.level && s.level > 0) parts.push(`${t.levelCol} ${s.level}`);
+    if (s.floors && s.floors > 0) parts.push(`${s.floors} ${t.floorsCol}`);
     if (s.calories !== null && s.calories !== undefined && s.calories > 0) {
       parts.push(`${s.calories} ${t.kcalShort}`);
     }
@@ -1965,7 +2169,8 @@ export function SessionView(props: {
 
           {live &&
             (() => {
-              const activeEx = sortedExercises.find((e) => e.id === activeExerciseId) ?? null;
+              const activeEx =
+                cooldownNow ?? sortedExercises.find((e) => e.id === activeExerciseId) ?? null;
               const nextSet =
                 activeEx && !isMarkerExercise(activeEx) ? activeEx.sets.length + 1 : null;
               if (!activeEx && !lastLoggedAt) return null;
@@ -1976,13 +2181,13 @@ export function SessionView(props: {
                       exercise, with the set number only when it applies. */}
                   {activeEx && (
                     <div className="current-strip">
-                      <Icon name="barbell" />
+                      <Icon name={activeEx === cooldownNow ? 'wind' : 'barbell'} />
                       <span className="cur-label">{t.currentKicker}</span>
                       <ExerciseName name={activeEx.name} className="cur-name" />
                       {nextSet !== null && <span className="cur-set">{t.setNumber(nextSet)}</span>}
                     </div>
                   )}
-                  {lastLoggedAt > 0 && (
+                  {restRunning && (
                     <div className="rest-strip">
                       <Icon name="timer" />
                       <span className="rest-label">{t.restHeaderLabel}</span>
@@ -2744,6 +2949,7 @@ export function SessionView(props: {
                   primaryMuscle: meta.primaryMuscle,
                   secondaryMuscles: meta.secondaryMuscles,
                   equipment: meta.equipment,
+                  ...(meta.equipmentItems ? { equipmentItems: meta.equipmentItems } : {}),
                 }
               : {};
             const plan = sheet.intoGroupId
@@ -2791,6 +2997,9 @@ export function SessionView(props: {
           replacing
           onPick={(name, kind, meta) => {
             replaceExercise(workout.id, sheet.exId, name, kind, meta);
+            if (kind === 'cardio') {
+              setCardioMachine(workout.id, sheet.exId, meta?.equipmentItems?.[0] ?? null, name);
+            }
             setSheet(null);
           }}
           onClose={() => setSheet(null)}
@@ -3028,6 +3237,21 @@ export function SessionView(props: {
             />
           ) : null;
         })()}
+      {sheet?.kind === 'cardio-machine' &&
+        (() => {
+          const ex = workout.exercises.find((e) => e.id === sheet.exId);
+          return ex ? (
+            <CardioMachineSheet
+              gym={gym}
+              current={cardioMachineOf(ex)}
+              onPick={(id, name) => {
+                setCardioMachine(workout.id, ex.id, id, name);
+                setSheet(null);
+              }}
+              onClose={() => setSheet(null)}
+            />
+          ) : null;
+        })()}
       {sheet?.kind === 'gym' && (
         <GymPicker
           gyms={store.gyms}
@@ -3229,6 +3453,8 @@ interface NewExerciseMeta {
   primaryMuscle: MuscleGroup | null;
   secondaryMuscles: MuscleGroup[];
   equipment: string[];
+  /** Fine equipment — the cardio machine picked. */
+  equipmentItems?: string[];
 }
 
 function AddExerciseSheet(props: {
@@ -3260,6 +3486,29 @@ function AddExerciseSheet(props: {
   const needle = q.trim().toLowerCase();
   const li = LOCALE_IDS.indexOf(locale);
   const hasInventory = !!props.gym?.inventory && props.gym.inventory.length > 0;
+  // Cardio asks "which machine?" before adding — the machine decides the
+  // entry's fields and how its calories are worked out.
+  const [machineView, setMachineView] = useState(false);
+
+  if (machineView) {
+    return (
+      <Sheet onClose={props.onClose}>
+        <div className="sheet-label">{t.cardioMachineTitle}</div>
+        <CardioMachineList
+          gym={props.gym}
+          onPick={(id, name) =>
+            props.onPick(
+              name,
+              'cardio',
+              id
+                ? { primaryMuscle: null, secondaryMuscles: [], equipment: [], equipmentItems: [id] }
+                : undefined,
+            )
+          }
+        />
+      </Sheet>
+    );
+  }
 
   if (creating !== null) {
     return (
@@ -3608,9 +3857,13 @@ function AddExerciseSheet(props: {
               <button
                 key={id}
                 className="kind-card"
-                onClick={() => props.onPick(t.defaultTimedExerciseNames[id], id)}
+                onClick={() =>
+                  id === 'cardio'
+                    ? setMachineView(true)
+                    : props.onPick(t.defaultTimedExerciseNames[id], id)
+                }
               >
-                <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'clock'} />
+                <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'wind'} />
                 <span>{t.exerciseKindNames[id]}</span>
               </button>
             ))}
@@ -3672,7 +3925,7 @@ function AddExerciseSheet(props: {
           )}
         </div>
         {/* One row of four large kind buttons. Strength opens the search below;
-          Warm-up inserts a marker card; Cardio / Cool-down log a timed entry. */}
+          Warm-up / Cool-down insert a marker card; Cardio logs a timed entry. */}
         <div className="kind-grid">
           <button
             className={`kind-card${kind === 'strength' ? ' active' : ''}`}
@@ -3685,9 +3938,13 @@ function AddExerciseSheet(props: {
             <button
               key={id}
               className="kind-card"
-              onClick={() => props.onPick(t.defaultTimedExerciseNames[id], id)}
+              onClick={() =>
+                id === 'cardio'
+                  ? setMachineView(true)
+                  : props.onPick(t.defaultTimedExerciseNames[id], id)
+              }
             >
-              <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'clock'} />
+              <Icon name={id === 'cardio' ? 'timer' : id === 'warmup' ? 'flame' : 'wind'} />
               <span>{t.exerciseKindNames[id]}</span>
             </button>
           ))}
@@ -4340,6 +4597,15 @@ function SetEditorSheet(props: {
   );
   const [calories, setCalories] = useState(props.set?.calories ?? 0);
   const [rpe, setRpe] = useState(props.set?.rpe ?? 0);
+  // Cardio console readings — which ones show depends on the machine.
+  const cardioFields: CardioField[] = timed ? cardioProfile(props.exercise).fields : [];
+  const seed = (k: 'speedKmh' | 'inclinePct' | 'watts' | 'level' | 'floors'): number =>
+    props.set?.[k] ?? props.ghost[k] ?? 0;
+  const [speedKmh, setSpeedKmh] = useState(() => seed('speedKmh'));
+  const [inclinePct, setInclinePct] = useState(() => seed('inclinePct'));
+  const [watts, setWatts] = useState(() => seed('watts'));
+  const [level, setLevel] = useState(() => seed('level'));
+  const [floors, setFloors] = useState(() => seed('floors'));
   // Bodyweight = weight stored as null (pull-ups, dips, planks…).
   const [bw, setBw] = useState(props.set ? props.set.weight === null : false);
   const [holdSec, setHoldSec] = useState(
@@ -4426,7 +4692,12 @@ function SetEditorSheet(props: {
             weight: null,
             isWarmup: kind === 'warmup',
             durationMin,
-            distanceKm: distanceKm > 0 ? distanceKm : null,
+            distanceKm: cardioFields.includes('distance') && distanceKm > 0 ? distanceKm : null,
+            speedKmh: cardioFields.includes('speed') && speedKmh > 0 ? speedKmh : null,
+            inclinePct: cardioFields.includes('incline') && inclinePct > 0 ? inclinePct : null,
+            watts: cardioFields.includes('watts') && watts > 0 ? watts : null,
+            level: cardioFields.includes('level') && level > 0 ? level : null,
+            floors: cardioFields.includes('floors') && floors > 0 ? floors : null,
             calories: calories > 0 ? calories : null,
             rpe: rpe > 0 ? rpe : null,
           }
@@ -4593,22 +4864,60 @@ function SetEditorSheet(props: {
               label={t.durationMinutes}
               value={durationMin}
               step={1}
-              min={1}
+              min={0.1}
+              decimals={1}
               focused={focused === 'duration'}
               onFocus={() => setFocused('duration')}
               onChange={setDurationMin}
             />
-            <Stepper
-              label={t.distanceKm}
-              value={distanceKm}
-              step={0.1}
-              min={0}
-              decimals={1}
-              focused={focused === 'distance'}
-              onFocus={() => setFocused('distance')}
-              onChange={setDistanceKm}
-            />
+            {cardioFields.includes('distance') && (
+              <Stepper
+                label={t.distanceKm}
+                value={distanceKm}
+                step={0.1}
+                min={0}
+                decimals={1}
+                focused={focused === 'distance'}
+                onFocus={() => setFocused('distance')}
+                onChange={setDistanceKm}
+              />
+            )}
           </div>
+          {cardioFields.some((f) => f !== 'distance') && (
+            <div className="steppers secondary-steppers">
+              {cardioFields.includes('speed') && (
+                <Stepper
+                  label={t.speedKmh}
+                  value={speedKmh}
+                  step={0.5}
+                  min={0}
+                  max={30}
+                  decimals={1}
+                  onChange={setSpeedKmh}
+                />
+              )}
+              {cardioFields.includes('incline') && (
+                <Stepper
+                  label={t.inclinePct}
+                  value={inclinePct}
+                  step={0.5}
+                  min={0}
+                  max={40}
+                  decimals={1}
+                  onChange={setInclinePct}
+                />
+              )}
+              {cardioFields.includes('watts') && (
+                <Stepper label={t.watts} value={watts} step={5} min={0} onChange={setWatts} />
+              )}
+              {cardioFields.includes('level') && (
+                <Stepper label={t.level} value={level} step={1} min={0} onChange={setLevel} />
+              )}
+              {cardioFields.includes('floors') && (
+                <Stepper label={t.floors} value={floors} step={1} min={0} onChange={setFloors} />
+              )}
+            </div>
+          )}
           <div className="steppers secondary-steppers">
             <Stepper label={t.calories} value={calories} step={10} min={0} onChange={setCalories} />
             <Stepper

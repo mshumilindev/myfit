@@ -31,6 +31,13 @@ export interface SetEntry {
   distanceKm?: number | null;
   calories?: number | null;
   rpe?: number | null;
+  /** Cardio machine readings (absent on strength sets / older entries). */
+  speedKmh?: number | null;
+  inclinePct?: number | null;
+  watts?: number | null;
+  /** Resistance level — brand-specific, logged for progress only. */
+  level?: number | null;
+  floors?: number | null;
   position: number;
   /**
    * When this set was logged (ms epoch). Written on log/duplicate; drives the
@@ -66,6 +73,9 @@ export interface Exercise {
   groupOrder?: number | null;
   /** Plain superset vs a round-based circuit (F3). */
   groupKind?: 'superset' | 'circuit' | null;
+  /** Cool-down marker: when the athlete started it (ms). Rest stops from here
+   *  until a set is logged again. */
+  markerAt?: number | null;
   /** Muscle groups (design MG-1): one primary, any number of secondaries. */
   primaryMuscle?: string | null;
   secondaryMuscles?: string[];

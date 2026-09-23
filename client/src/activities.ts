@@ -6,6 +6,7 @@
  * fatigue model. No store or React imports, so it unit-tests as plain data.
  */
 import type { Activity, ActivityCategory, ActivityEffort, Workout } from './types';
+import { timedEntryKcal } from './cardio';
 
 const DAY = 24 * 3600 * 1000;
 
@@ -139,8 +140,9 @@ export function liftingCalories(minutes: number, bodyKg: number | null | undefin
  * time spent mostly resting — the thing a single blended MET can't capture:
  *
  *   • Work — each logged set counts a short burst of active effort at a
- *     vigorous resistance MET. A timed hold (static-dynamic / cardio set) uses
- *     its own duration; a normal set is reps × ~3 s (a rep is ~1.5 s up +
+ *     vigorous resistance MET. A timed hold (static-dynamic) uses its own
+ *     duration; cardio entries are costed per machine (cardio.ts) and their
+ *     minutes leave the lifting clock; a normal set is reps × ~3 s (a rep is ~1.5 s up +
  *     1.5 s down) with a floor so heavy low-rep sets still register.
  *   • Rest — everything else is time on the gym floor (racking plates, walking,
  *     bracing, recovering with heart rate elevated) at a moderate resistance
@@ -172,14 +174,26 @@ export function workoutCalories(
   const totalSec = Math.max(0, (end - w.startedAt) / 1000);
   if (totalSec <= 0) return null;
   let workSec = 0;
+  // Cardio (and legacy timed warm-up/cool-down) entries carry their own
+  // machine-aware estimate and take their minutes out of the lifting clock.
+  let timedSec = 0;
+  let timedKcal = 0;
   for (const ex of w.exercises) {
+    const timed = ex.kind === 'cardio' || ex.kind === 'cooldown' || ex.kind === 'warmup';
     for (const s of ex.sets) {
-      workSec += setWorkSeconds(s.reps, s.durationMin);
+      if (timed && s.durationMin && s.durationMin > 0) {
+        timedSec += s.durationMin * 60;
+        timedKcal += timedEntryKcal(ex, s, bodyKg) ?? 0;
+      } else {
+        workSec += setWorkSeconds(s.reps, s.durationMin);
+      }
     }
   }
-  workSec = Math.min(workSec, totalSec);
-  const restSec = totalSec - workSec;
-  const kcal = (bodyKg / 3600) * (LIFT_WORK_MET * workSec + LIFT_REST_MET * restSec);
+  timedSec = Math.min(timedSec, totalSec);
+  const liftSec = totalSec - timedSec;
+  workSec = Math.min(workSec, liftSec);
+  const restSec = liftSec - workSec;
+  const kcal = (bodyKg / 3600) * (LIFT_WORK_MET * workSec + LIFT_REST_MET * restSec) + timedKcal;
   return Math.round(kcal);
 }
 

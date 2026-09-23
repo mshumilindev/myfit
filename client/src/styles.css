@@ -2675,6 +2675,55 @@ i > svg {
   grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 44px;
 }
 
+/* cardio: the rest of the console under an entry (speed, incline, W, pace…) */
+.timed-extra {
+  padding: 0 8px 6px 34px;
+  margin-top: -4px;
+  font-size: 11.5px;
+  color: var(--color-neutral-500);
+  font-variant-numeric: tabular-nums;
+}
+.cardio-machine-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 10px;
+  padding: 5px 10px;
+  border: 1px solid var(--color-neutral-800);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-neutral-400);
+  font-size: 12px;
+  cursor: pointer;
+}
+.cardio-machine-row {
+  justify-content: flex-start;
+}
+.cardio-machine-row > svg:last-child {
+  margin-left: auto;
+  color: var(--color-accent);
+}
+.cardio-machine-row .cm-ic {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-300);
+  font-size: 16px;
+}
+.cardio-machine-row .cm-hint {
+  font-size: 11.5px;
+  color: var(--color-neutral-500);
+}
+.cardio-machines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .set-grid.header {
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -5297,6 +5346,49 @@ i > svg {
   font-size: 12px;
   line-height: 1.45;
   color: var(--color-neutral-500);
+}
+
+/* cool-down marker: same card, a calm blue tint instead of the warm-up amber */
+.exercise-card.cooldown-marker {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(96, 156, 214, 0.14), transparent 55%),
+    var(--color-surface);
+  box-shadow: inset 0 0 0 1px rgba(96, 156, 214, 0.16);
+}
+.cooldown-marker .warmup-marker-icon {
+  color: rgb(120, 172, 224);
+  background: rgba(96, 156, 214, 0.14);
+}
+.cooldown-marker .warmup-marker-title {
+  color: rgb(150, 190, 230);
+}
+
+/* cool-down: start it (rest clock stops) / it's on */
+.cooldown-start {
+  width: 100%;
+  margin-top: 10px;
+  gap: 8px;
+  min-height: 44px;
+}
+.cooldown-on {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(96, 156, 214, 0.1);
+  color: rgb(150, 190, 230);
+  font-size: 13px;
+}
+.cooldown-on button {
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--color-neutral-400);
+  font-size: 12.5px;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* --- Gyms ----------------------------------------------------------------- */
@@ -20505,7 +20597,33 @@ button.badge {
   color: var(--color-text);
 }
 .timed-timer .tt-stop {
-  min-width: 96px;
+  min-width: 110px;
+  gap: 6px;
+}
+/* Start is the card's one primary action (filled, like Log on strength) */
+.timed-timer.start.btn-primary {
+  gap: 8px;
+  min-height: 48px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: #1b1710;
+  font-weight: 700;
+}
+.timed-timer.start.btn-primary:disabled {
+  opacity: 0.4;
+}
+.timed-manual {
+  display: block;
+  margin: 10px auto 0;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--color-neutral-500);
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 /* Profile: sub-tabs (Overview / Body / Settings) */
@@ -32019,6 +32137,13 @@ body {
 .focus-step .plan-segments span.cur {
   background: var(--color-accent);
 }
+/* the warm-up slide reads as warm-up in the stepper until you're past it */
+.focus-step .plan-segments span.wu:not(.done):not(.cur) {
+  background: rgba(217, 162, 79, 0.4);
+}
+.focus-step .plan-segments span.cd:not(.done):not(.cur) {
+  background: rgba(96, 156, 214, 0.4);
+}
 .focus-step .plan-segments span.add {
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--color-neutral-700);
@@ -32244,6 +32369,20 @@ body {
   gap: 6px;
   white-space: normal;
   line-height: 1.2;
+}
+/* One primary action per screen: Log (in the set panel) owns the accent, so
+   Next is a quiet outlined button — never the same look as Log right above it. */
+.focus-nav .focus-next {
+  background: transparent;
+  box-shadow: none;
+  border: 1px solid var(--color-neutral-700);
+  color: var(--color-neutral-200);
+  font-weight: 500;
+  font-size: 14px;
+}
+.focus-nav .focus-next .ph,
+.focus-nav .focus-next svg {
+  color: var(--color-neutral-400);
 }
 .focus-nav .focus-finish {
   flex: none;

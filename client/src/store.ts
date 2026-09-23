@@ -74,7 +74,8 @@ import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
-import { t } from './i18n';
+import { t, getLocale, type LocaleId } from './i18n';
+import { localizedEquipName } from './data/equipmentI18n';
 import { applyCheckin, nextStage, activeInjuries as selectActiveInjuries } from './injury';
 import {
   awakeMsAt,
@@ -323,9 +324,14 @@ export function isStrengthExercise(ex: Exercise): boolean {
 export function isTimedExercise(ex: Exercise): boolean {
   return exerciseKind(ex) !== 'strength';
 }
-/** Warm-up as an exercise kind is a session marker — no sets to log. */
+/**
+ * Warm-up and cool-down are session markers — no sets to log (stretching,
+ * rolling, mobility). A cool-down logged with minutes before it became a
+ * marker keeps showing as a timed entry, so history stays intact.
+ */
 export function isMarkerExercise(ex: Exercise): boolean {
-  return exerciseKind(ex) === 'warmup';
+  const k = exerciseKind(ex);
+  return k === 'warmup' || (k === 'cooldown' && ex.sets.length === 0);
 }
 
 // --- Set types & drops (design DS-1…DS-4, EQ-4) ----------------------------
@@ -784,6 +790,8 @@ interface ExercisePlan {
   groupKind?: 'superset' | 'circuit' | null;
   primaryMuscle?: string | null;
   secondaryMuscles?: string[];
+  /** Fine equipment (catalog ids) — e.g. the cardio machine picked. */
+  equipmentItems?: string[];
 }
 
 // --- Firestore writes -------------------------------------------------------
@@ -1082,6 +1090,18 @@ export function pickSessionGym(): Gym | null {
  * then add every planned exercise across the warm-up / main / cardio / cool-down
  * blocks with its planned sets, reps and muscles. Returns the live workout.
  */
+/** Display name of a generated cardio block: the machine, or the treadmill's
+ *  "incline walk" finisher. */
+export function cardioBlockName(
+  machine: string | null,
+  inclineWalk: string,
+  locale: LocaleId,
+): string {
+  if (!machine || machine === 'cardio-treadmill') return inclineWalk;
+  const item = EQUIPMENT_CATALOG.find((e) => e.id === machine);
+  return item ? localizedEquipName(item, locale) : inclineWalk;
+}
+
 export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null): Workout | null {
   const tt = t();
   // Localised, muscle-based day name (matches how logged sessions read in
@@ -1097,7 +1117,7 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
     ex.kind === 'warmup'
       ? tt.sbWarmupName
       : ex.kind === 'cardio'
-        ? tt.sbCardioName
+        ? cardioBlockName(ex.equipmentItems?.[0] ?? null, tt.sbCardioName, getLocale())
         : ex.kind === 'cooldown'
           ? tt.sbCooldownName
           : ex.name;
@@ -1109,6 +1129,7 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
       equipment: ex.equipment,
       primaryMuscle: ex.primary && ex.primary !== 'cardio' ? ex.primary : null,
       secondaryMuscles: ex.secondary,
+      ...(ex.equipmentItems?.length ? { equipmentItems: ex.equipmentItems } : {}),
     });
   }
   return state.workouts.find((x) => x.id === w.id) ?? w;
@@ -1361,11 +1382,35 @@ export function addExercise(
     groupKind: plan.groupKind ?? null,
     primaryMuscle: plan.primaryMuscle ?? (info && info.primary !== 'cardio' ? info.primary : null),
     secondaryMuscles: plan.secondaryMuscles ?? (info ? info.secondary : []),
+    ...(plan.equipmentItems?.length ? { equipmentItems: plan.equipmentItems } : {}),
     sets: [],
   };
   patchWorkout(workoutId, { exercises: [...(w?.exercises ?? []), exercise] });
   saveWorkout(workoutId);
   return exercise;
+}
+
+/**
+ * Switch the machine a cardio exercise is done on: swaps the cardio catalog id
+ * in its fine equipment (keeping anything else picked) and renames it, so the
+ * card, history and calorie maths all follow the new machine. null = no machine.
+ */
+export function setCardioMachine(
+  workoutId: string,
+  exerciseId: string,
+  machineId: string | null,
+  name: string,
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w?.exercises.find((e) => e.id === exerciseId)) return;
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => {
+      if (e.id !== exerciseId) return e;
+      const rest = (e.equipmentItems ?? []).filter((id) => !id.startsWith('cardio-'));
+      return { ...e, name, equipmentItems: machineId ? [machineId, ...rest] : rest };
+    }),
+  });
+  saveWorkout(workoutId);
 }
 
 export function renameExercise(workoutId: string, exerciseId: string, name: string): void {
@@ -1462,6 +1507,13 @@ export function upsertSet(
     distanceKm: set.distanceKm ?? null,
     calories: set.calories ?? null,
     rpe: set.rpe ?? null,
+    // Cardio machine readings — only written when present, so strength sets
+    // stay lean.
+    ...(set.speedKmh != null ? { speedKmh: set.speedKmh } : {}),
+    ...(set.inclinePct != null ? { inclinePct: set.inclinePct } : {}),
+    ...(set.watts != null ? { watts: set.watts } : {}),
+    ...(set.level != null ? { level: set.level } : {}),
+    ...(set.floors != null ? { floors: set.floors } : {}),
     position: existing ? existing.position : ex.sets.length,
     // Rest timer (AC-2.1): stamp new sets; keep the original stamp on edits.
     loggedAt,
@@ -1573,7 +1625,8 @@ export function restBeforeSet(
 }
 
 /** As restBeforeSet, but finds the previous logged set anywhere in the workout,
- *  so rest carried across exercise cards is captured too. */
+ *  so rest carried across exercise cards is captured too. A cool-down started
+ *  in that gap means it wasn't rest at all — null. */
 export function restBeforeSetInWorkout(w: Workout, set: SetEntry): number | null {
   if (!set.loggedAt) return null;
   let prev = 0;
@@ -1582,7 +1635,54 @@ export function restBeforeSetInWorkout(w: Workout, set: SetEntry): number | null
       const ts = s.loggedAt ?? 0;
       if (ts > prev && ts < set.loggedAt) prev = ts;
     }
-  return prev > 0 ? restBeforeSet(prev, set) : null;
+  if (prev <= 0) return null;
+  const cooledDown = w.exercises.some(
+    (e) => e.kind === 'cooldown' && e.markerAt && e.markerAt > prev && e.markerAt < set.loggedAt!,
+  );
+  return cooledDown ? null : restBeforeSet(prev, set);
+}
+
+/** Start (or undo) a cool-down marker: from `at` the rest clock stops until a
+ *  set is logged again. */
+export function setMarkerStarted(workoutId: string, exerciseId: string, at: number | null): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w?.exercises.find((e) => e.id === exerciseId)) return;
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, markerAt: at } : e)),
+  });
+  saveWorkout(workoutId);
+}
+
+/**
+ * Is the session in its cool-down right now (so no rest clock)? Either the
+ * athlete started a cool-down after their last set, or — on a planned day —
+ * every planned exercise before a cool-down is complete and nothing after it
+ * has been logged yet. Logging a set again (an extra exercise after the
+ * cool-down) brings the rest clock back.
+ */
+export function cooldownInProgress(w: Workout): Exercise | null {
+  let lastAt = 0;
+  let lastEx: Exercise | null = null;
+  for (const e of w.exercises)
+    for (const s of e.sets)
+      if ((s.loggedAt ?? 0) > lastAt) {
+        lastAt = s.loggedAt ?? 0;
+        lastEx = e;
+      }
+  const cooldowns = w.exercises.filter((e) => isMarkerExercise(e) && e.kind === 'cooldown');
+  const started = cooldowns.find((c) => c.markerAt && c.markerAt >= lastAt);
+  if (started) return started;
+  if (!lastEx) return null;
+  const lastPos = lastEx.position;
+  for (const c of [...cooldowns].sort((a, b) => a.position - b.position)) {
+    if (c.position < lastPos) continue;
+    const before = w.exercises.filter((e) => !isMarkerExercise(e) && e.position < c.position);
+    const allPlannedDone =
+      before.length > 0 &&
+      before.every((e) => (e.plannedSets ?? 0) > 0 && e.sets.length >= (e.plannedSets ?? 0));
+    if (allPlannedDone) return c;
+  }
+  return null;
 }
 
 /**

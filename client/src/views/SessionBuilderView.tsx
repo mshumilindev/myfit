@@ -15,6 +15,7 @@ import {
   startGeneratedDay,
   setPhysiqueTarget,
   useStore,
+  cardioBlockName,
 } from '../store';
 import { protectedMuscles as selProtected, loadCaps as selLoadCaps } from '../injury';
 import {
@@ -467,7 +468,13 @@ export function SessionBuilderView({
           </span>
         )}
         <span className="sbw-ex-txt">
-          <b>{ex.kind === 'strength' ? exName(ex.name) : blockName[ex.kind]}</b>
+          <b>
+            {ex.kind === 'strength'
+              ? exName(ex.name)
+              : ex.kind === 'cardio'
+                ? cardioBlockName(ex.equipmentItems?.[0] ?? null, blockName.cardio, locale)
+                : blockName[ex.kind]}
+          </b>
           <span className="sbw-ex-why">{whyLabel[ex.whyKey]}</span>
         </span>
         <span className="sbw-ex-meta">

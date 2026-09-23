@@ -22,6 +22,7 @@ import { ArrowClockwise } from '@phosphor-icons/react/ArrowClockwise';
 import { Moon } from '@phosphor-icons/react/Moon';
 import { Confetti } from '@phosphor-icons/react/Confetti';
 import { Pause } from '@phosphor-icons/react/Pause';
+import { Stop } from '@phosphor-icons/react/Stop';
 import { Bell } from '@phosphor-icons/react/Bell';
 import { Clock } from '@phosphor-icons/react/Clock';
 import { Info } from '@phosphor-icons/react/Info';
@@ -242,6 +243,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'pencil-simple': PencilSimple,
   phone: Phone,
   play: Play,
+  stop: Stop,
   'play-circle': PlayCircle,
   'youtube-logo': YoutubeLogo,
   'speaker-simple-slash': SpeakerSimpleSlash,

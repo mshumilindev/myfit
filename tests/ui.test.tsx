@@ -888,7 +888,8 @@ describe('F-03 session UI', () => {
     __replaceStateForTests(s);
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
-    await userEvent.click(screen.getByRole('button', { name: '20' }));
+    // Live cardio leads with Start/Finish; manual entry is the quiet link.
+    await userEvent.click(screen.getByRole('button', { name: 'Log without the timer' }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Log' }));
 
@@ -898,6 +899,76 @@ describe('F-03 session UI', () => {
     expect(run.sets).toHaveLength(1);
     expect(run.sets[0].durationMin).toBe(20);
     expect(run.sets[0].distanceKm).toBe(2);
+  });
+
+  it('logs a cardio interval per Start → Stop, then opens it for the readings', async () => {
+    localStorage.removeItem('spotter.session.timing');
+    const s = sampleStore();
+    s.workouts[0].exercises.push({
+      id: 'row',
+      name: 'Rower',
+      kind: 'cardio',
+      position: 1,
+      equipmentItems: ['cardio-rower'],
+      sets: [],
+    });
+    __replaceStateForTests(s);
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+
+    const t0 = Date.now();
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(t0);
+    await userEvent.click(screen.getByRole('button', { name: 'Start' }));
+    clock.mockReturnValue(t0 + 4 * 60000);
+    await userEvent.click(screen.getByRole('button', { name: 'Stop' }));
+    clock.mockRestore();
+
+    // Logged at once with the measured time; the sheet opens for the readings.
+    const row = () =>
+      __getStateForTests()
+        .workouts.find((w) => w.id === 'open')!
+        .exercises.find((e) => e.id === 'row')!;
+    expect(row().sets).toHaveLength(1);
+    expect(row().sets[0].durationMin).toBe(4);
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    // A second interval is offered straight away.
+    expect(screen.getByRole('button', { name: 'Start · interval 2' })).toBeTruthy();
+  });
+
+  it('shows rest between cardio intervals, and stops it for the whole cool-down', async () => {
+    const s = sampleStore();
+    const now = Date.now();
+    s.workouts[0].exercises.push(
+      {
+        id: 'bike',
+        name: 'Upright bike',
+        kind: 'cardio',
+        position: 1,
+        equipmentItems: ['cardio-upright-bike'],
+        sets: [
+          {
+            id: 'b1',
+            reps: 0,
+            weight: null,
+            isWarmup: false,
+            position: 0,
+            durationMin: 3,
+            loggedAt: now - 30000,
+          },
+        ],
+      },
+      { id: 'cd', name: 'Cool-down', kind: 'cooldown', position: 2, sets: [] },
+    );
+    __replaceStateForTests(s);
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+
+    const bike = container.querySelector('[data-exid="bike"]') as HTMLElement;
+    expect(bike.querySelector('.ex-resting')).toBeTruthy();
+    expect(container.querySelector('.rest-strip')).toBeTruthy();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Start cool-down' }));
+    expect(container.querySelector('.ex-resting')).toBeNull();
+    expect(container.querySelector('.rest-strip')).toBeNull();
+    expect(screen.getByText('Cooling down — the rest clock is off')).toBeTruthy();
   });
 
   it('keeps an exercise with no logged sets on the exercise-card layout', () => {
