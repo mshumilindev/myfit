@@ -35642,3 +35642,23 @@ body {
 .gset-drops + .gset-actions {
   margin-top: 14px;
 }
+
+/* Quick tiles (Duplicate / Clear): icon inline with the label, like the rows. */
+.opts-sheet .opts-quick button {
+  flex-direction: row;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: left;
+}
+.opts-sheet .opts-quick button i {
+  flex: none;
+}
+.opts-sheet .opts-quick {
+  grid-template-columns: minmax(0, 1fr);
+}
+.opts-sheet .opts-quick button {
+  white-space: nowrap;
+}
