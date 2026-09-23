@@ -68,7 +68,7 @@ export function referencePlan(
 ): ReferenceImage[] {
   const refs: ReferenceImage[] = [{ role: 'exercise', path: ex.references[state]! }];
   if (anchorPath) refs.push({ role: 'identity', path: anchorPath });
-  if (state === 'end' && startFrame) refs.push({ role: 'start-frame', path: startFrame });
+  if (state !== 'start' && startFrame) refs.push({ role: 'start-frame', path: startFrame });
   return refs;
 }
 
@@ -105,8 +105,8 @@ export function plan(
       if (!ex.references[state]) continue;
       const startEntry = m.entries[entryKey(ex.id, 'start')];
       const startFile = startEntry?.sourcePath ?? startEntry?.outputPath;
-      const startFrame = state === 'end' && startFile ? path.join(REPO_ROOT, startFile) : null;
-      const willHaveStart = state === 'end' && (startRuns || !!startFrame);
+      const startFrame = state !== 'start' && startFile ? path.join(REPO_ROOT, startFile) : null;
+      const willHaveStart = state !== 'start' && (startRuns || !!startFrame);
       const refs = referencePlan(ex, state, anchorPath, startFrame);
       const roles: RefRole[] = refs.map((r) => r.role);
       if (willHaveStart && !roles.includes('start-frame')) roles.push('start-frame');
@@ -120,7 +120,7 @@ export function plan(
         anchorHash,
       };
       let decision = decide(m.entries[entryKey(ex.id, state)], fingerprint, opts);
-      if (state === 'end' && startRuns && !decision.run)
+      if (state !== 'start' && startRuns && !decision.run)
         decision = { run: true, reason: 'start frame redone' };
       if (state === 'start') startRuns = decision.run;
       out.push({ exercise: ex, state, fingerprint, basePrompt, refs, decision });
@@ -257,7 +257,7 @@ export async function run(
     m.entries[key] = e;
     // End frames use the start frame produced a moment ago in this same run.
     const refs = [...p.refs];
-    if (p.state === 'end' && !refs.some((r) => r.role === 'start-frame')) {
+    if (p.state !== 'start' && !refs.some((r) => r.role === 'start-frame')) {
       const s = m.entries[entryKey(p.exercise.id, 'start')];
       // Lossless source when kept, otherwise the delivered WebP.
       const frame = s?.sourcePath ?? s?.outputPath;

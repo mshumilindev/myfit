@@ -12,6 +12,7 @@ import {
   COMPOSITION_BY_POSITION,
   IDENTITY_RULES,
   NEGATIVE_CONSTRAINTS,
+  HERO_PAIR_RULES,
   PAIR_RULES,
   PHOTOGRAPHY,
   PRIORITIES,
@@ -68,7 +69,11 @@ function stateLine(state: ImageState, ex: CatalogExercise): string {
     return 'Frame: the STARTING position of the movement, exactly as in the exercise reference.';
   if (state === 'end')
     return 'Frame: the END (contracted / finishing) position of the movement, exactly as in the exercise reference.';
-  return `Frame: the single most recognisable moment of the ${ex.name}, as in the exercise reference.`;
+  return (
+    `Frame: HERO shot — the single most recognisable mid-movement moment of the ${ex.name} ` +
+    '(roughly halfway between start and end, under visible effort). The exercise reference ' +
+    'fixes the equipment, setup and grip; only the body position moves along the movement path.'
+  );
 }
 
 function refLine(refs: RefRole[]): string {
@@ -111,7 +116,7 @@ export function buildPrompt(input: PromptInput): BuiltPrompt {
     refLine(refs),
     REFERENCE_RULES,
     refs.includes('identity') ? IDENTITY_RULES : '',
-    refs.includes('start-frame') ? PAIR_RULES : '',
+    refs.includes('start-frame') ? (state === 'hero' ? HERO_PAIR_RULES : PAIR_RULES) : '',
     stateLine(state, ex),
     facts.join(' '),
     ATHLETE,

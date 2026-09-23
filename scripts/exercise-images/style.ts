@@ -75,6 +75,12 @@ export const IDENTITY_RULES =
   'face, hair, skin tone, physique, proportions and wardrobe exactly. Do not take pose or ' +
   'equipment from it.';
 
+/** Hero frames reuse the re-shot start frame for athlete/set/light, but pick their own pose. */
+export const HERO_PAIR_RULES =
+  'The image labelled start frame is this same exercise already re-shot: keep the same ' +
+  'athlete, wardrobe, set, lighting, camera position and equipment — only the body position ' +
+  'changes, to the most recognisable mid-movement moment described here.';
+
 export const PAIR_RULES =
   'The image labelled start frame is this same exercise already re-shot: keep everything ' +
   'identical — athlete, wardrobe, set, lighting, camera position, equipment and its ' +
