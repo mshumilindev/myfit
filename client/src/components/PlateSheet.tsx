@@ -27,7 +27,7 @@ const fmtW = (kg: number): string => (Number.isInteger(kg) ? String(kg) : kg.toF
 /** Plate height (px) scaled by weight for the barbell drawing. */
 function plateHeight(denom: number, unit: PlateUnit): number {
   const kg = unit === 'kg' ? denom : lbToKg(denom);
-  return Math.round(44 + Math.min(kg, 25) * 2.1); // ~45px (0.5 kg) → ~97px (25 kg)
+  return Math.round(40 + Math.min(kg, 25) * 2.4); // ~41px (0.5 kg) → ~100px (25 kg)
 }
 
 /**
@@ -37,6 +37,8 @@ function plateHeight(denom: number, unit: PlateUnit): number {
  * the bar reads as a barbell rather than a stubby dumbbell.
  */
 function Barbell({ perSide, unit }: { perSide: number[]; unit: PlateUnit }) {
+  // Fixed geometry: the grip and both sleeves keep their width; plates live on
+  // the sleeves and shrink (never overflow) when a heavy load stacks many.
   const plate = (d: number, key: string) => (
     <span
       key={key}
@@ -48,14 +50,14 @@ function Barbell({ perSide, unit }: { perSide: number[]; unit: PlateUnit }) {
     <div className="pl-bb" aria-hidden>
       <div className="pl-bb-stack">
         <span className="pl-bb-cap" />
-        <span className="pl-bb-sleeve" />
-        {/* left side mirrors the right: smallest outboard, heaviest by the collar */}
-        {[...perSide].reverse().map((d, i) => plate(d, `l${i}`))}
+        {/* left sleeve: heaviest by the collar, smallest outboard */}
+        <span className="pl-bb-side left">
+          {[...perSide].reverse().map((d, i) => plate(d, `l${i}`))}
+        </span>
         <span className="pl-bb-collar" />
         <span className="pl-bb-grip" />
         <span className="pl-bb-collar" />
-        {perSide.map((d, i) => plate(d, `r${i}`))}
-        <span className="pl-bb-sleeve" />
+        <span className="pl-bb-side right">{perSide.map((d, i) => plate(d, `r${i}`))}</span>
         <span className="pl-bb-cap" />
       </div>
     </div>

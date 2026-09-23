@@ -1562,12 +1562,31 @@ export const et: Strings = {
   cardioMinutes: 'Kardio min',
   warmupSet: 'Soojendusseeria',
   deleteSet: 'Kustuta seeria',
+  deleteSetTitle: (n) => `Kustutada seeria ${n}?`,
+  deleteSetBody: (set, ex) =>
+    `${set} eemaldatakse harjutusest ${ex}. Kohe pärast saab tagasi võtta.`,
   exerciseSettings: 'Harjutuse seaded',
   optsTabSet: 'See seeria',
   optsTabExercise: 'Harjutus',
   optsTabSession: 'Sessioon',
   optsGroupChange: 'Muuda',
   optsGroupLookUp: 'Vaata',
+  seGroupMore: 'Rohkem',
+  rpeLabel: 'Pingutus (RPE)',
+  rpeNone: 'Jäta',
+  rpeHint: (v) =>
+    v >= 10
+      ? 'Maksimum — midagi ei jäänud'
+      : v >= 9
+        ? 'Varus 1 kordus'
+        : v >= 8
+          ? 'Varus 2 kordust'
+          : v >= 7
+            ? 'Varus 3 kordust'
+            : v >= 6
+              ? 'Kerge — varus 4+ kordust'
+              : 'Kui raske seeria tundus, 6–10. Valikuline — puuduta numbrit, et jälgida.',
+  bandEditLink: (gym) => `Muuda kumme · ${gym}`,
   cancel: 'Tühista',
   close: 'Sulge',
   restStartCta: 'Puhkus / puhkusereis',

@@ -1579,12 +1579,31 @@ export const lt: Strings = {
   cardioMinutes: 'Kardio min',
   warmupSet: 'Apšilimo serija',
   deleteSet: 'Ištrinti seriją',
+  deleteSetTitle: (n) => `Ištrinti ${n} priėjimą?`,
+  deleteSetBody: (set, ex) =>
+    `${set} bus pašalintas iš pratimo ${ex}. Iškart po to galėsi atšaukti.`,
   exerciseSettings: 'Pratimo nustatymai',
   optsTabSet: 'Šis priėjimas',
   optsTabExercise: 'Pratimas',
   optsTabSession: 'Sesija',
   optsGroupChange: 'Keisti',
   optsGroupLookUp: 'Peržiūrėti',
+  seGroupMore: 'Daugiau',
+  rpeLabel: 'Pastangos (RPE)',
+  rpeNone: 'Be',
+  rpeHint: (v) =>
+    v >= 10
+      ? 'Maksimumas — nieko nebeliko'
+      : v >= 9
+        ? 'Liko 1 pakartojimas'
+        : v >= 8
+          ? 'Liko 2 pakartojimai'
+          : v >= 7
+            ? 'Liko 3 pakartojimai'
+            : v >= 6
+              ? 'Lengva — liko 4+ pakartojimai'
+              : 'Kaip sunkus buvo priėjimas, 6–10. Neprivaloma — bakstelėk skaičių, kad sektum.',
+  bandEditLink: (gym) => `Redaguoti gumas · ${gym}`,
   cancel: 'Atšaukti',
   close: 'Uždaryti',
   restStartCta: 'Poilsis / atostogos',

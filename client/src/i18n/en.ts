@@ -1609,12 +1609,30 @@ export const en = {
   cardioMinutes: 'Cardio min',
   warmupSet: 'Warm-up set',
   deleteSet: 'Delete set',
+  deleteSetTitle: (n: number) => `Delete set ${n}?`,
+  deleteSetBody: (set: string, ex: string) => `${set} leaves ${ex}. You can undo right after.`,
   exerciseSettings: 'Exercise settings',
   optsTabSet: 'This set',
   optsTabExercise: 'Exercise',
   optsTabSession: 'Session',
   optsGroupChange: 'Change',
   optsGroupLookUp: 'Look up',
+  seGroupMore: 'More',
+  rpeLabel: 'Effort (RPE)',
+  rpeNone: 'Skip',
+  rpeHint: (v: number): string =>
+    v >= 10
+      ? 'Max — nothing left in the tank'
+      : v >= 9
+        ? '1 more rep was possible'
+        : v >= 8
+          ? '2 more reps were possible'
+          : v >= 7
+            ? '3 more reps were possible'
+            : v >= 6
+              ? 'Easy — 4+ reps left'
+              : 'How hard the set felt, 6–10. Optional — tap a number to track it.',
+  bandEditLink: (gym: string) => `Edit bands · ${gym}`,
   cancel: 'Cancel',
   close: 'Close',
   restStartCta: 'Rest / vacation',

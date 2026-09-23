@@ -532,7 +532,16 @@ export function ProfileSkeleton() {
 
 function Portal(props: { children: ReactNode }) {
   if (typeof document === 'undefined') return <>{props.children}</>;
-  return createPortal(props.children, document.body);
+  // React bubbles portal events through the COMPONENT tree, not the DOM: a tap
+  // on a sheet's scrim (or anything inside it) would otherwise reach whatever
+  // row/button rendered the sheet and trigger it "under" the drawer. The
+  // wrapper is layout-neutral and stops clicks at the portal boundary.
+  return createPortal(
+    <div className="portal-layer" onClick={(e) => e.stopPropagation()}>
+      {props.children}
+    </div>,
+    document.body,
+  );
 }
 
 function clamp(n: number, min: number, max: number): number {

@@ -1129,6 +1129,69 @@ describe('F-03 session UI', () => {
     expect(r2.container.querySelector('.gset.kind-working')).toBeTruthy();
   });
 
+  it('deletes a logged set only after a confirm', async () => {
+    __replaceStateForTests(sampleStore());
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    const sets = () =>
+      __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets;
+    await userEvent.click(screen.getByRole('button', { name: 'Delete set' }));
+    expect(screen.getByText('Delete set 1?')).toBeTruthy();
+    expect(sets()).toHaveLength(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(sets()).toHaveLength(0);
+  });
+
+  it('keeps going with a drop set: the next quick log is a drop set with shifted drops', async () => {
+    const s = sampleStore();
+    s.workouts[0].exercises[0].sets = [
+      {
+        id: 'd1',
+        reps: 8,
+        weight: 80,
+        isWarmup: false,
+        position: 0,
+        type: 'drop',
+        drops: [{ reps: 8, weight: 60 }],
+      },
+    ];
+    __replaceStateForTests(s);
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    expect(container.querySelector('.gset.kind-drop')).toBeTruthy();
+    expect(screen.getByText(/\+ 60/)).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Log' }));
+    const logged = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets[1];
+    expect(logged.type).toBe('drop');
+    expect(logged.drops).toEqual([{ reps: 8, weight: 60 }]);
+  });
+
+  it('static-dynamic ghost: hold seconds are set by hand and logged', async () => {
+    const s = sampleStore();
+    s.workouts[0].exercises[0].sets = [
+      {
+        id: 'sd1',
+        reps: 1,
+        weight: 20,
+        isWarmup: false,
+        position: 0,
+        type: 'static-dynamic',
+        durationMin: 0.5,
+      },
+    ];
+    __replaceStateForTests(s);
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    const card = container.querySelector('.gset.kind-static-dynamic')!;
+    expect(card).toBeTruthy();
+    const steppers = card.querySelectorAll('.stepper');
+    expect(steppers).toHaveLength(2);
+    expect(steppers[1].textContent).toMatch(/Hold/);
+    const plus = steppers[1].querySelectorAll('button');
+    await userEvent.click(plus[plus.length - 1]);
+    await userEvent.click(screen.getByRole('button', { name: 'Log' }));
+    const logged = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets[1];
+    expect(logged.type).toBe('static-dynamic');
+    expect(Math.round((logged.durationMin ?? 0) * 60)).toBe(35);
+  });
+
   it('inserts a warm-up marker card with no sets to log', async () => {
     __replaceStateForTests(sampleStore());
     render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);

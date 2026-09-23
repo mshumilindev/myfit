@@ -10,7 +10,6 @@ import {
   deleteSet,
   deleteWorkout,
   duplicateExercise,
-  duplicateSet,
   equipmentFor,
   est1rm,
   exerciseKind,
@@ -80,6 +79,7 @@ import { LiveHero } from '../components/LiveHero';
 import { SessionStartCoach, hasSessionStartCoach } from '../components/SessionStartCoach';
 import { EnergyPlaque, LiveEnergyCounter } from '../components/SessionEnergy';
 import { PlateSheet } from '../components/PlateSheet';
+import { BandLibraryCard } from '../components/BandLibraryCard';
 import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
 import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
 import { ExercisePicker } from '../components/ExercisePicker';
@@ -167,6 +167,10 @@ type GhostValues = {
   reps: number;
   weight: number | null;
   durationMin?: number;
+  /** A continued drop / reverse / static-dynamic set opens the editor already typed. */
+  type?: SetType;
+  drops?: DropEntry[];
+  holdMin?: number | null;
 } & Partial<MachineReadings>;
 
 /** Cardio console readings carried from the last entry into the next one. */
@@ -241,6 +245,7 @@ type SheetState =
 
 type DialogState =
   | { kind: 'del-ex'; exId: string }
+  | { kind: 'del-set'; exId: string; setId: string }
   | { kind: 'finish-warn'; emptyName: string | null }
   | { kind: 'del-workout' }
   | null;
@@ -661,14 +666,29 @@ export function SessionView(props: {
     warmup?: boolean;
     /** Warm-up ramp position (1-based) / length / the working weight it builds to. */
     ramp?: { i: number; n: number; toKg: number };
+    /** Carried from the last set when it was a drop / reverse / static-dynamic,
+     *  so the next set continues the same technique. */
+    type?: SetType;
+    drops?: DropEntry[];
+    holdMin?: number | null;
   } {
     const sets = ex.sets;
     // Continue from the last logged WORKING set.
     for (let i = sets.length - 1; i >= 0; i--) {
       const s = sets[i];
       // null = bodyweight: keep it, so a pull-up ghost reads BW, not 0 kg
-      if (!s.isWarmup && setTypeOf(s) !== 'warmup')
+      if (!s.isWarmup && setTypeOf(s) !== 'warmup') {
+        const ty = setTypeOf(s);
+        if (ty === 'drop' || ty === 'reverse-drop' || ty === 'static-dynamic')
+          return {
+            reps: s.reps,
+            weight: s.weight ?? null,
+            type: ty,
+            drops: s.drops ?? [],
+            holdMin: s.durationMin ?? null,
+          };
         return { reps: s.reps, weight: s.weight ?? null };
+      }
     }
     // No working set yet — sequence the ramp, then the working target.
     if (isStrengthExercise(ex)) {
@@ -717,12 +737,24 @@ export function SessionView(props: {
     return { reps: 8, weight: 20 };
   }
 
+  /** "then 60 × 8 · 40 × 8" under a continued drop set; hold time for S/D. */
+  function ghostTechniqueNote(g: {
+    type?: SetType;
+    drops?: DropEntry[];
+    holdMin?: number | null;
+  }): string | undefined {
+    if ((g.type === 'drop' || g.type === 'reverse-drop') && g.drops?.length)
+      return `+ ${g.drops.map((d) => fmtSet(d.weight, d.reps)).join(' · ')}`;
+    return undefined;
+  }
+
   /** A proposed warm-up the athlete loads up to the working weight is logged
    *  as a working set — the ramp is a suggestion, not a label to enforce. */
   function ghostKind(
-    g: { warmup?: boolean; ramp?: { toKg: number } },
+    g: { warmup?: boolean; ramp?: { toKg: number }; type?: SetType },
     kg: number | null,
-  ): 'warmup' | 'working' {
+  ): SetType {
+    if (g.type) return g.type;
     if (!g.warmup) return 'working';
     return g.ramp && kg !== null && kg >= g.ramp.toKg ? 'working' : 'warmup';
   }
@@ -820,7 +852,18 @@ export function SessionView(props: {
     ex: Exercise,
     v: { reps: number; weight: number | null },
     type: SetType = 'working',
+    carry?: { weight: number | null; drops?: DropEntry[]; holdMin?: number | null },
   ): void {
+    // A continued drop set keeps its drops, shifted by however much the main
+    // weight moved (80→60→40 at 80 becomes 85→65→45 at 85).
+    const shift = carry && carry.weight !== null && v.weight !== null ? v.weight - carry.weight : 0;
+    const drops =
+      (type === 'drop' || type === 'reverse-drop') && carry?.drops
+        ? carry.drops.map((d) => ({
+            reps: d.reps,
+            weight: d.weight === null ? null : Math.max(0, d.weight + shift),
+          }))
+        : [];
     logNewSet(ex, {
       reps: v.reps,
       weight: v.weight,
@@ -829,8 +872,8 @@ export function SessionView(props: {
       // flip it. A plain (working) quick-log stays auto-classified.
       ...(type === 'warmup' ? { warmupManual: true } : {}),
       type,
-      drops: [],
-      durationMin: null,
+      drops,
+      durationMin: type === 'static-dynamic' ? (carry?.holdMin ?? null) : null,
       distanceKm: null,
       calories: null,
       rpe: null,
@@ -840,13 +883,6 @@ export function SessionView(props: {
   }
 
   /** DS-2 · “Add a drop”: append a lighter part to the last logged set. */
-  /** AC-1: one-tap deep copy of a logged set, inserted right after it. */
-  function duplicateSetAction(ex: Exercise, s: SetEntry): void {
-    const newId = duplicateSet(workout!.id, ex.id, s.id);
-    if (!newId) return;
-    setRecentSetId(newId);
-    props.shell.toast({ kind: 'ok', icon: 'copy', text: t.setDuplicated });
-  }
 
   function equipmentLabelOf(id: string): string {
     const names = t.equipmentNames as Record<string, string>;
@@ -1541,15 +1577,15 @@ export function SessionView(props: {
                       {t.restLabel(mmss(restBefore))}
                     </div>
                   ) : null;
-                const dupBtn = live ? (
+                const delBtn = live ? (
                   <button
                     type="button"
-                    className="set-dup"
-                    title={t.duplicateSet}
-                    aria-label={t.duplicateSet}
-                    onClick={() => duplicateSetAction(ex, s)}
+                    className="set-del"
+                    title={t.deleteSet}
+                    aria-label={t.deleteSet}
+                    onClick={() => setDialog({ kind: 'del-set', exId: ex.id, setId: s.id })}
                   >
-                    <Icon name="copy" />
+                    <Icon name="trash" />
                   </button>
                 ) : null;
                 const row = (
@@ -1582,7 +1618,7 @@ export function SessionView(props: {
                       {restLine}
                       <div className="set-main">
                         {row}
-                        {dupBtn}
+                        {delBtn}
                       </div>
                     </div>
                   );
@@ -1592,7 +1628,7 @@ export function SessionView(props: {
                     {restLine}
                     <div className="set-main">
                       {row}
-                      {dupBtn}
+                      {delBtn}
                     </div>
                     <div className="drops">
                       <div className="dbar" />
@@ -1651,7 +1687,7 @@ export function SessionView(props: {
                     <button
                       className="btn btn-primary log-btn"
                       disabled={directLogBlocked}
-                      onClick={() => logGhost(ex, ghost, ghostKind(ghost, ghost.weight))}
+                      onClick={() => logGhost(ex, ghost, ghostKind(ghost, ghost.weight), ghost)}
                     >
                       {props.past ? t.add : t.log}
                     </button>
@@ -1668,11 +1704,26 @@ export function SessionView(props: {
                       focusView
                         ? ghost.ramp
                           ? t.warmupRampTitle(ghost.ramp.i, ghost.ramp.n)
-                          : t.enterThisSet
+                          : ghost.type === 'drop'
+                            ? t.setTypeDrop
+                            : ghost.type === 'reverse-drop'
+                              ? t.setTypeReverse
+                              : ghost.type === 'static-dynamic'
+                                ? t.setTypeStaticDynamic
+                                : t.enterThisSet
                         : undefined
                     }
-                    kind={ghost.warmup ? 'warmup' : 'working'}
-                    onLog={(v) => logGhost(ex, v, ghostKind(ghost, v.weight))}
+                    kind={ghost.type ?? (ghost.warmup ? 'warmup' : 'working')}
+                    note={ghostTechniqueNote(ghost)}
+                    defHoldSec={ghost.holdMin ? Math.round(ghost.holdMin * 60) : undefined}
+                    onLog={(v) =>
+                      logGhost(
+                        ex,
+                        v,
+                        ghostKind(ghost, v.weight),
+                        v.holdMin ? { ...ghost, holdMin: v.holdMin } : ghost,
+                      )
+                    }
                     onSettings={() =>
                       setSheet(
                         focusView
@@ -3308,6 +3359,7 @@ export function SessionView(props: {
           set={sheet.set}
           ghost={sheet.ghost}
           bandLibrary={bandLibraryFor(gym)}
+          gym={gym}
           onSave={(vals) => {
             const ex = workout.exercises.find((e) => e.id === sheet.exId)!;
             if (sheet.set) {
@@ -3397,6 +3449,7 @@ export function SessionView(props: {
                     set={sheet.set}
                     ghost={sheet.ghost}
                     bandLibrary={bandLibraryFor(gym)}
+                    gym={gym}
                     onSave={(vals) => {
                       if (sheet.set) upsertSet(workout.id, ex.id, { ...vals, id: sheet.set.id });
                       else logNewSet(ex, vals);
@@ -3613,6 +3666,44 @@ export function SessionView(props: {
               }
             >
               {t.deleteExerciseBody(t.nLoggedSets(ex.sets.length, list))}
+            </Dialog>
+          );
+        })()}
+
+      {dialog?.kind === 'del-set' &&
+        (() => {
+          const ex = workout.exercises.find((e) => e.id === dialog.exId);
+          const set = ex?.sets.find((x) => x.id === dialog.setId);
+          if (!ex || !set) return null;
+          const n =
+            [...ex.sets].sort((a, b) => a.position - b.position).findIndex((x) => x.id === set.id) +
+            1;
+          return (
+            <Dialog
+              danger
+              title={t.deleteSetTitle(n)}
+              onClose={() => setDialog(null)}
+              actions={
+                <>
+                  <button className="btn btn-secondary" onClick={() => setDialog(null)}>
+                    {t.keep}
+                  </button>
+                  <button
+                    className="danger-outline"
+                    onClick={() => {
+                      setDialog(null);
+                      removeSet(ex, set);
+                    }}
+                  >
+                    {t.delete}
+                  </button>
+                </>
+              }
+            >
+              {t.deleteSetBody(
+                isTimedExercise(ex) ? formatTimedEntry(set) : fmtSetSnack(set.reps, set.weight),
+                ex.name,
+              )}
             </Dialog>
           );
         })()}
@@ -3944,16 +4035,22 @@ function GhostSetRow(props: {
   defWeightKg: number | null;
   weightRequired: boolean;
   isPast: boolean;
-  onLog: (v: { reps: number; weight: number | null }) => void;
+  onLog: (v: { reps: number; weight: number | null; holdMin?: number }) => void;
   onSettings: () => void;
   title?: string;
-  /** Set type the row proposes — colours the card (warm-up ramp vs working). */
-  kind?: 'warmup' | 'working';
+  /** Static-dynamic: default hold in seconds (the card swaps Reps for Hold). */
+  defHoldSec?: number;
+  /** Set type the row proposes — colours the card (warm-up, working, drop…). */
+  kind?: SetType;
+  /** Small line under the steppers (e.g. the drops a continued drop set carries). */
+  note?: string;
 }) {
   const { t } = useT();
   const unit = exerciseUnit(props.ex.name);
   const [reps, setReps] = useState(Math.max(1, props.defReps || 1));
   const [weightKg, setWeightKg] = useState<number | null>(props.defWeightKg);
+  const isSd = props.kind === 'static-dynamic';
+  const [holdSec, setHoldSec] = useState(Math.max(5, props.defHoldSec ?? 30));
   const toDisp = (kg: number): number => (unit === 'lb' ? Math.round(kgToLb(kg) * 10) / 10 : kg);
   const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
   const bw = weightKg === null && !props.weightRequired;
@@ -3962,7 +4059,7 @@ function GhostSetRow(props: {
     <div className={`gset kind-${props.kind ?? 'working'}`}>
       {props.title && <div className="gset-title">{props.title}</div>}
       <div className="gset-steppers">
-        <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
+        {!isSd && <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />}
         <Stepper
           label={unit === 'lb' ? t.weightLb : t.weightKg}
           value={toDisp(weightKg ?? 0)}
@@ -3973,7 +4070,11 @@ function GhostSetRow(props: {
           placeholder={t.bodyweightShort}
           onChange={(x) => setWeightKg(fromDisp(x))}
         />
+        {isSd && (
+          <Stepper label={t.holdSecLabel} value={holdSec} step={5} min={5} onChange={setHoldSec} />
+        )}
       </div>
+      {props.note && <div className="gset-note">{props.note}</div>}
       <div className="gset-actions">
         <button
           className="gset-cfg"
@@ -3986,7 +4087,13 @@ function GhostSetRow(props: {
         <button
           className="btn btn-primary gset-log"
           disabled={blocked}
-          onClick={() => props.onLog({ reps, weight: weightKg })}
+          onClick={() =>
+            props.onLog(
+              isSd
+                ? { reps: 1, weight: weightKg, holdMin: holdSec / 60 }
+                : { reps, weight: weightKg },
+            )
+          }
         >
           {props.isPast ? t.add : t.log}
         </button>
@@ -4114,6 +4221,8 @@ function SetEditorSheet(props: {
   set: SetEntry | null;
   ghost: GhostValues;
   bandLibrary: readonly BandRung[];
+  /** The session's gym — its band library can be edited right from here. */
+  gym?: Gym | null;
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
   onExerciseSettings?: () => void;
@@ -4134,11 +4243,13 @@ function SetEditorSheet(props: {
   const isAssist = loadType === 'assist';
   const isBand = loadType === 'band';
   const [view, setView] = useState<'main' | 'type' | 'load'>('main');
-  const [type, setType] = useState<SetType>(props.set ? setTypeOf(props.set) : 'working');
+  const [type, setType] = useState<SetType>(
+    props.set ? setTypeOf(props.set) : (props.ghost.type ?? 'working'),
+  );
   // The athlete opened the type picker and chose — pin the warm-up/working
   // state so auto-detection won't override it.
   const [typeTouched, setTypeTouched] = useState(false);
-  const [drops, setDropsState] = useState<DropEntry[]>(props.set?.drops ?? []);
+  const [drops, setDropsState] = useState<DropEntry[]>(props.set?.drops ?? props.ghost.drops ?? []);
   const [reps, setReps] = useState(props.set?.reps ?? props.ghost.reps);
   const [weight, setWeight] = useState(
     props.set?.weight ?? props.ghost.weight ?? (isBand ? defaultBandKg : 0),
@@ -4168,7 +4279,9 @@ function SetEditorSheet(props: {
   const [holdSec, setHoldSec] = useState(
     props.set && setTypeOf(props.set) === 'static-dynamic' && props.set.durationMin != null
       ? Math.round(props.set.durationMin * 60)
-      : 35,
+      : props.ghost.holdMin
+        ? Math.round(props.ghost.holdMin * 60)
+        : 35,
   );
   const [openedAt] = useState(() => Date.now());
   const [focused, setFocused] = useState<'reps' | 'weight' | 'duration' | 'distance'>(
@@ -4177,6 +4290,7 @@ function SetEditorSheet(props: {
   // Plate calculator (Load-entry A): offered on barbell lifts to work out what
   // goes on the bar for the entered weight.
   const [plateOpen, setPlateOpen] = useState(false);
+  const [bandsOpen, setBandsOpen] = useState(false);
   const equip = equipmentFor(props.exercise);
   const isBarbell = equip.includes('barbell');
   // Per-exercise weight unit (Load-entry B): log in the unit the machine is
@@ -4494,163 +4608,198 @@ function SetEditorSheet(props: {
         </>
       ) : (
         <>
-          {isSD ? (
-            <div className="steppers">
-              <Stepper
-                label={unit === 'lb' ? t.weightLb : t.weightKg}
-                value={toDisp(weight)}
-                step={unit === 'lb' ? 5 : 2.5}
-                min={0}
-                decimals={unit === 'lb' ? 1 : 2}
-                focused={focused === 'weight'}
-                disabled={bw}
-                placeholder={t.bodyweightShort}
-                onFocus={() => setFocused('weight')}
-                onChange={(v) => setWeight(fromDisp(v))}
-              />
-              <Stepper
-                label={t.holdSecLabel}
-                value={holdSec}
-                step={5}
-                min={5}
-                focused={focused === 'duration'}
-                onFocus={() => setFocused('duration')}
-                onChange={setHoldSec}
-              />
+          {/* Load type first — it decides what the steppers below mean. Each
+              block is a labelled card, like the Exercise tab's groups. */}
+          <div className="se-label se-label-first">{t.loadTypeLabel}</div>
+          <div className="se-card se-card-load">
+            <div className="seg2 se-load">
+              {LOAD_ROWS.map((r) => (
+                <button
+                  key={r.key}
+                  type="button"
+                  className={loadType === r.key ? 'active' : ''}
+                  onClick={() => pickLoadType(r.key)}
+                >
+                  {r.name}
+                </button>
+              ))}
             </div>
-          ) : isDropType ? (
-            <div className="dropedit-rows">
-              <div className="drop-part">
-                <div className="drop-part-lab">{t.startLabel}</div>
-                {strengthSteppers(
-                  reps,
-                  bw ? null : weight,
-                  setReps,
-                  setWeight,
-                  focused === 'reps' || focused === 'weight' ? focused : null,
-                )}
+            {isSD ? (
+              <div className="steppers">
+                <Stepper
+                  label={unit === 'lb' ? t.weightLb : t.weightKg}
+                  value={toDisp(weight)}
+                  step={unit === 'lb' ? 5 : 2.5}
+                  min={0}
+                  decimals={unit === 'lb' ? 1 : 2}
+                  focused={focused === 'weight'}
+                  disabled={bw}
+                  placeholder={t.bodyweightShort}
+                  onFocus={() => setFocused('weight')}
+                  onChange={(v) => setWeight(fromDisp(v))}
+                />
+                <Stepper
+                  label={t.holdSecLabel}
+                  value={holdSec}
+                  step={5}
+                  min={5}
+                  focused={focused === 'duration'}
+                  onFocus={() => setFocused('duration')}
+                  onChange={setHoldSec}
+                />
               </div>
-              {drops.map((d, i) => (
-                <div key={i} className="drop-part">
-                  <div className="drop-part-lab">
-                    <span>{t.dropRowN(i + 1)}</span>
-                    <button
-                      type="button"
-                      className="drop-trash"
-                      aria-label={t.delete}
-                      onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
-                    >
-                      <Icon name="trash" />
-                    </button>
-                  </div>
+            ) : isDropType ? (
+              <div className="dropedit-rows">
+                <div className="drop-part">
+                  <div className="drop-part-lab">{t.startLabel}</div>
                   {strengthSteppers(
-                    d.reps,
-                    d.weight,
-                    (n) => patchDrop(i, { reps: n }),
-                    (n) => patchDrop(i, { weight: n }),
-                    null,
+                    reps,
+                    bw ? null : weight,
+                    setReps,
+                    setWeight,
+                    focused === 'reps' || focused === 'weight' ? focused : null,
                   )}
                 </div>
-              ))}
-              <button type="button" className="dropedit-add" onClick={addDropPart}>
-                <Icon name="plus" />
-                <span className="n">{t.addAnotherDrop}</span>
-                <span className="m">{t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}</span>
-              </button>
-              {type === 'reverse-drop' && (
-                <div className="sheet-note">
-                  <Icon name="caret-line-up" />
-                  <p>{t.reverseNote}</p>
-                </div>
-              )}
-            </div>
-          ) : isAssist ? (
-            <>
-              <div className="steppers">
-                <Stepper
-                  label={t.reps}
-                  value={reps}
-                  step={1}
-                  min={0}
-                  focused={focused === 'reps'}
-                  onFocus={() => setFocused('reps')}
-                  onChange={setReps}
-                />
-                <Stepper
-                  label={t.assistLabel}
-                  value={Math.abs(weight)}
-                  step={5}
-                  min={0}
-                  focused={focused === 'weight'}
-                  onFocus={() => setFocused('weight')}
-                  onChange={(v) => setWeight(-Math.abs(v))}
-                />
-              </div>
-              <div className="load-chips assist-chips">
-                {assistStack(weight).map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    className={`load-chip${weight === v ? ' on' : ''}`}
-                    onClick={() => setWeight(v)}
-                  >
-                    {fmtWeightValue(v)}
-                  </button>
+                {drops.map((d, i) => (
+                  <div key={i} className="drop-part">
+                    <div className="drop-part-lab">
+                      <span>{t.dropRowN(i + 1)}</span>
+                      <button
+                        type="button"
+                        className="drop-trash"
+                        aria-label={t.delete}
+                        onClick={() => setDropsState((list) => list.filter((_, xi) => xi !== i))}
+                      >
+                        <Icon name="trash" />
+                      </button>
+                    </div>
+                    {strengthSteppers(
+                      d.reps,
+                      d.weight,
+                      (n) => patchDrop(i, { reps: n }),
+                      (n) => patchDrop(i, { weight: n }),
+                      null,
+                    )}
+                  </div>
                 ))}
+                <button type="button" className="dropedit-add" onClick={addDropPart}>
+                  <Icon name="plus" />
+                  <span className="n">{t.addAnotherDrop}</span>
+                  <span className="m">{t.dropTotals(dropRepsTotal, fmtKg(dropKgTotal))}</span>
+                </button>
+                {type === 'reverse-drop' && (
+                  <div className="sheet-note">
+                    <Icon name="caret-line-up" />
+                    <p>{t.reverseNote}</p>
+                  </div>
+                )}
               </div>
-              <div className="load-note">{t.assistNote}</div>
-            </>
-          ) : isBand ? (
-            <>
-              <div className="steppers">
-                <Stepper
-                  label={t.reps}
-                  value={reps}
-                  step={1}
-                  min={0}
-                  focused={focused === 'reps'}
-                  onFocus={() => setFocused('reps')}
-                  onChange={setReps}
-                />
-                <div className="band-readout">
-                  <span className="band-readout-lab">{t.bandLabel}</span>
-                  <span
-                    className="band-readout-val"
-                    style={{ color: currentBand ? BAND_HEX[currentBand.color] : undefined }}
-                  >
-                    {currentBand
-                      ? `${t.bandColor(currentBand.color)} · ~${fmtWeightValue(currentBand.kg)} ${t.kgCol.toLowerCase()}`
-                      : '—'}
-                  </span>
+            ) : isAssist ? (
+              <>
+                <div className="steppers">
+                  <Stepper
+                    label={t.reps}
+                    value={reps}
+                    step={1}
+                    min={0}
+                    focused={focused === 'reps'}
+                    onFocus={() => setFocused('reps')}
+                    onChange={setReps}
+                  />
+                  <Stepper
+                    label={t.assistLabel}
+                    value={Math.abs(weight)}
+                    step={5}
+                    min={0}
+                    focused={focused === 'weight'}
+                    onFocus={() => setFocused('weight')}
+                    onChange={(v) => setWeight(-Math.abs(v))}
+                  />
                 </div>
-              </div>
-              <div className="load-chips band-chips">
-                {bandLib.map((r) => (
-                  <button
-                    key={r.color}
-                    type="button"
-                    className={`band-chip${currentBand?.color === r.color ? ' on' : ''}`}
-                    onClick={() => setWeight(r.kg)}
-                  >
-                    <span className="band-dot" style={{ background: BAND_HEX[r.color] }} />
-                    {t.bandColor(r.color)}
+                <div className="load-chips assist-chips">
+                  {assistStack(weight).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      className={`load-chip${weight === v ? ' on' : ''}`}
+                      onClick={() => setWeight(v)}
+                    >
+                      {fmtWeightValue(v)}
+                    </button>
+                  ))}
+                </div>
+                <div className="load-note">{t.assistNote}</div>
+              </>
+            ) : isBand ? (
+              <>
+                <div className="steppers">
+                  <Stepper
+                    label={t.reps}
+                    value={reps}
+                    step={1}
+                    min={0}
+                    focused={focused === 'reps'}
+                    onFocus={() => setFocused('reps')}
+                    onChange={setReps}
+                  />
+                  <div className="band-readout">
+                    {/* Same height as the Reps stepper: label row (with ~kg), value row. */}
+                    <span className="band-readout-head">
+                      <span className="band-readout-lab">{t.bandLabel}</span>
+                      {currentBand ? (
+                        <span className="band-readout-kg">
+                          ~{fmtWeightValue(currentBand.kg)} {t.kgCol.toLowerCase()}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="band-readout-val">
+                      <span
+                        className="band-readout-dot"
+                        style={{
+                          background: currentBand ? BAND_HEX[currentBand.color] : undefined,
+                        }}
+                      />
+                      {currentBand ? t.bandColor(currentBand.color) : '—'}
+                    </span>
+                  </div>
+                </div>
+                <div className="band-grid">
+                  {bandLib.map((r) => (
+                    <button
+                      key={r.color}
+                      type="button"
+                      className={`band-tile${currentBand?.color === r.color ? ' on' : ''}`}
+                      onClick={() => setWeight(r.kg)}
+                      aria-pressed={currentBand?.color === r.color}
+                    >
+                      <span className="band-swatch" style={{ background: BAND_HEX[r.color] }} />
+                      <span className="band-name">{t.bandColor(r.color)}</span>
+                      <span className="band-kg">~{fmtWeightValue(r.kg)}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="load-note">{t.bandNote}</div>
+                {props.gym && (
+                  <button type="button" className="band-edit" onClick={() => setBandsOpen(true)}>
+                    <Icon name="sliders-horizontal" />
+                    <span className="lab">{t.bandEditLink(props.gym.name)}</span>
+                    <Icon name="caret-right" />
                   </button>
-                ))}
-              </div>
-              <div className="load-note">{t.bandNote}</div>
-            </>
-          ) : (
-            strengthSteppers(
-              reps,
-              bw ? null : weight,
-              setReps,
-              setWeight,
-              focused === 'reps' || focused === 'weight' ? focused : null,
-            )
-          )}
-          {/* Set type · effort · load inline (design "One door"), rarer toggles grouped below. */}
-          <div className="se-block">
-            <div className="se-label">{t.setTypeLabel}</div>
+                )}
+              </>
+            ) : (
+              strengthSteppers(
+                reps,
+                bw ? null : weight,
+                setReps,
+                setWeight,
+                focused === 'reps' || focused === 'weight' ? focused : null,
+              )
+            )}
+          </div>
+          {/* Set type · effort (design "One door"), rarer toggles grouped below. */}
+          <div className="se-label">{t.setTypeLabel}</div>
+          <div className="se-card">
             <div className="se-types">
               {SET_TYPE_ROWS.map((row) => (
                 <button
@@ -4671,8 +4820,8 @@ function SetEditorSheet(props: {
             </div>
             {typeMeta[type].hint ? <div className="se-hint">{typeMeta[type].hint}</div> : null}
           </div>
-          <div className="se-block">
-            <div className="se-label">{t.rpe}</div>
+          <div className="se-label">{t.rpeLabel}</div>
+          <div className="se-card">
             <div className="se-rpe">
               {[0, 6, 7, 8, 9, 10].map((v) => (
                 <button
@@ -4682,26 +4831,13 @@ function SetEditorSheet(props: {
                   aria-pressed={rpe === v}
                   onClick={() => setRpe(v)}
                 >
-                  {v === 0 ? '—' : v}
+                  {v === 0 ? t.rpeNone : v}
                 </button>
               ))}
             </div>
+            <div className="se-hint">{t.rpeHint(rpe)}</div>
           </div>
-          <div className="se-block">
-            <div className="se-label">{t.loadTypeLabel}</div>
-            <div className="seg2 se-load">
-              {LOAD_ROWS.map((r) => (
-                <button
-                  key={r.key}
-                  type="button"
-                  className={loadType === r.key ? 'active' : ''}
-                  onClick={() => pickLoadType(r.key)}
-                >
-                  {r.name}
-                </button>
-              ))}
-            </div>
-          </div>
+          <div className="se-label se-label-more">{t.seGroupMore}</div>
           <div className="se-group">
             {sidesOk && !isAssist && !isBand && (
               <div className="sides-block">
@@ -4801,6 +4937,11 @@ function SetEditorSheet(props: {
           }}
           onClose={() => setPlateOpen(false)}
         />
+      )}
+      {bandsOpen && props.gym && (
+        <Sheet onClose={() => setBandsOpen(false)} className="band-sheet">
+          <BandLibraryCard gym={props.gym} seedDefaults onSaved={() => setBandsOpen(false)} />
+        </Sheet>
       )}
     </SetEditorFrame>
   );

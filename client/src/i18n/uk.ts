@@ -1566,12 +1566,30 @@ export const uk: Strings = {
   cardioMinutes: 'Кардіо хв',
   warmupSet: 'Розминковий підхід',
   deleteSet: 'Видалити підхід',
+  deleteSetTitle: (n) => `Видалити підхід ${n}?`,
+  deleteSetBody: (set, ex) => `${set} зникне з вправи ${ex}. Одразу після цього можна скасувати.`,
   exerciseSettings: 'Налаштування вправи',
   optsTabSet: 'Цей підхід',
   optsTabExercise: 'Вправа',
   optsTabSession: 'Сесія',
   optsGroupChange: 'Змінити',
   optsGroupLookUp: 'Переглянути',
+  seGroupMore: 'Додатково',
+  rpeLabel: 'Зусилля (RPE)',
+  rpeNone: 'Без',
+  rpeHint: (v) =>
+    v >= 10
+      ? 'Максимум — більше жодного'
+      : v >= 9
+        ? 'Міг би ще 1 повтор'
+        : v >= 8
+          ? 'Міг би ще 2 повтори'
+          : v >= 7
+            ? 'Міг би ще 3 повтори'
+            : v >= 6
+              ? 'Легко — лишалось 4+ повтори'
+              : 'Наскільки важким був підхід, 6–10. Необовʼязково — тапни число, щоб відстежувати.',
+  bandEditLink: (gym) => `Налаштувати резинки · ${gym}`,
   cancel: 'Скасувати',
   close: 'Закрити',
   restStartCta: 'Відпочинок / відпустка',

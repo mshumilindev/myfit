@@ -1567,12 +1567,30 @@ export const pl: Strings = {
   cardioMinutes: 'Min cardio',
   warmupSet: 'Seria rozgrzewkowa',
   deleteSet: 'Usuń serię',
+  deleteSetTitle: (n) => `Usunąć serię ${n}?`,
+  deleteSetBody: (set, ex) => `${set} zniknie z ćwiczenia ${ex}. Zaraz potem można to cofnąć.`,
   exerciseSettings: 'Ustawienia ćwiczenia',
   optsTabSet: 'Ta seria',
   optsTabExercise: 'Ćwiczenie',
   optsTabSession: 'Sesja',
   optsGroupChange: 'Zmień',
   optsGroupLookUp: 'Podgląd',
+  seGroupMore: 'Więcej',
+  rpeLabel: 'Wysiłek (RPE)',
+  rpeNone: 'Pomiń',
+  rpeHint: (v) =>
+    v >= 10
+      ? 'Maksimum — nic w zapasie'
+      : v >= 9
+        ? 'W zapasie 1 powtórzenie'
+        : v >= 8
+          ? 'W zapasie 2 powtórzenia'
+          : v >= 7
+            ? 'W zapasie 3 powtórzenia'
+            : v >= 6
+              ? 'Lekko — w zapasie 4+ powtórzenia'
+              : 'Jak ciężka była seria, 6–10. Opcjonalnie — stuknij liczbę, by to śledzić.',
+  bandEditLink: (gym) => `Edytuj gumy · ${gym}`,
   cancel: 'Anuluj',
   close: 'Zamknij',
   restStartCta: 'Odpoczynek / urlop',
