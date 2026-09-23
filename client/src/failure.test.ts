@@ -1,0 +1,104 @@
+import { describe, expect, it } from 'vitest';
+import { inferFailure, suggestFailure } from './failure';
+import { estimateRpe, readinessFactor, type RpeContext } from './rpe';
+import { defaultRestSec } from './restTimer';
+import type { SetEntry } from './types';
+
+const set = (reps: number, weight: number | null, extra: Partial<SetEntry> = {}): SetEntry => ({
+  id: Math.random().toString(36),
+  reps,
+  weight,
+  isWarmup: false,
+  position: 0,
+  ...extra,
+});
+
+describe('inferFailure', () => {
+  it('RPE 10 and partials are failure', () => {
+    expect(inferFailure({ ...set(8, 80), rpe: 10 }, { before: [] })).toBe('rpe');
+    expect(inferFailure({ ...set(8, 80), partials: 2 }, { before: [] })).toBe('partials');
+  });
+  it('missing the target by 2+ reps at the target load', () => {
+    expect(inferFailure(set(6, 80), { target: { reps: 8, weight: 80 }, before: [] })).toBe(
+      'missed',
+    );
+    expect(inferFailure(set(7, 80), { target: { reps: 8, weight: 80 }, before: [] })).toBeNull();
+    // lighter than proposed: a choice, not a failure
+    expect(inferFailure(set(6, 70), { target: { reps: 8, weight: 80 }, before: [] })).toBeNull();
+    // tiny targets are too noisy
+    expect(inferFailure(set(1, 120), { target: { reps: 3, weight: 120 }, before: [] })).toBeNull();
+  });
+  it('a rep collapse at the same load', () => {
+    const before = [set(10, 60), set(10, 60)];
+    expect(inferFailure(set(6, 60), { before })).toBe('collapse');
+    expect(inferFailure(set(8, 60), { before })).toBeNull(); // normal fatigue
+    expect(inferFailure(set(6, 65), { before })).toBeNull(); // heavier: expected
+  });
+  it('never infers warm-ups, holds or explicit marks', () => {
+    expect(inferFailure({ ...set(3, 40), type: 'warmup', rpe: 10 }, { before: [] })).toBeNull();
+    expect(inferFailure({ ...set(8, 80), rpe: 10, failure: 'no' }, { before: [] })).toBeNull();
+  });
+  it('drop sets are run to failure', () => {
+    expect(inferFailure({ ...set(8, 80), type: 'drop' }, { before: [] })).toBe('drop');
+  });
+});
+
+describe('suggestFailure', () => {
+  it('keeps going after a manual failure set', () => {
+    expect(
+      suggestFailure({
+        type: 'working',
+        current: [set(8, 80, { failure: 'manual' })],
+        plannedSets: 0,
+        past: [],
+      }),
+    ).toBe('streak');
+  });
+  it('last planned set when the habit is there', () => {
+    const past = [
+      { sets: [set(8, 80), set(7, 80, { failure: 'manual' })] },
+      { sets: [set(8, 80), set(6, 80, { failure: 'auto' })] },
+      { sets: [set(8, 80), set(8, 80)] },
+    ];
+    const current = [set(8, 80), set(8, 80)];
+    expect(suggestFailure({ type: 'working', current, plannedSets: 3, past })).toBe('habit');
+    expect(
+      suggestFailure({ type: 'working', current: [set(8, 80)], plannedSets: 3, past }),
+    ).toBeNull();
+  });
+});
+
+describe('estimateRpe', () => {
+  const ctx: RpeContext = {
+    refE1: 100,
+    daysSinceLift: 3,
+    illnessDaysAgo: null,
+    muscleFatigue: 0,
+    sleepShortH: 0,
+    priorSets: 0,
+  };
+  it('follows the e1RM model', () => {
+    // 100 e1RM → 75 kg max ≈ 10 reps: 10 reps = RPE 10, 8 reps = RPE 8
+    expect(estimateRpe(75, 10, ctx)).toBe(10);
+    expect(estimateRpe(75, 8, ctx)).toBe(8);
+    expect(estimateRpe(75, 2, ctx)).toBe(6);
+  });
+  it('a worse day makes the same set harder', () => {
+    const sick = { ...ctx, illnessDaysAgo: 0, sleepShortH: 2, priorSets: 3 };
+    expect(readinessFactor(sick).factor).toBeLessThan(0.9);
+    expect(estimateRpe(75, 3, sick)!).toBeGreaterThan(estimateRpe(75, 3, ctx)!);
+  });
+  it('no estimate without history or for bodyweight', () => {
+    expect(estimateRpe(75, 8, { ...ctx, refE1: 0 })).toBeNull();
+    expect(estimateRpe(0, 8, ctx)).toBeNull();
+  });
+});
+
+describe('defaultRestSec', () => {
+  it('by set and lift type', () => {
+    expect(defaultRestSec({ compound: true, lastType: 'working', midRound: false })).toBe(150);
+    expect(defaultRestSec({ compound: false, lastType: 'working', midRound: false })).toBe(90);
+    expect(defaultRestSec({ compound: true, lastType: 'warmup', midRound: false })).toBe(60);
+    expect(defaultRestSec({ compound: true, lastType: 'working', midRound: true })).toBe(0);
+  });
+});

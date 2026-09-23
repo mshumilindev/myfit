@@ -14,6 +14,8 @@ export interface DropEntry {
   weight: number | null;
 }
 
+export type FailureMark = 'manual' | 'auto' | 'no';
+
 export interface SetEntry {
   id: string;
   reps: number;
@@ -31,6 +33,22 @@ export interface SetEntry {
   distanceKm?: number | null;
   calories?: number | null;
   rpe?: number | null;
+  /**
+   * Taken to failure — the next rep wouldn't go. 'manual' = the athlete said
+   * so (F / flame), 'auto' = the app inferred it at log time (see failure.ts,
+   * `failureWhy` says why), 'no' = an inference the athlete dismissed.
+   * Absent = not to failure.
+   */
+  failure?: FailureMark | null;
+  /** Why an 'auto' failure was inferred (failure.ts reason code). */
+  failureWhy?: string | null;
+  /** The rest target that was running when this set was logged (seconds) —
+   *  lets the table flag a rest cut short. */
+  restTargetSec?: number | null;
+  /** The app's effort estimate (rpe.ts) when the athlete didn't rate the set. */
+  rpeAuto?: number | null;
+  /** Partial reps squeezed out after failure. */
+  partials?: number | null;
   /** Cardio machine readings (absent on strength sets / older entries). */
   speedKmh?: number | null;
   inclinePct?: number | null;

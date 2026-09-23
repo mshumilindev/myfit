@@ -72,6 +72,7 @@ import type { ExerciseSubRegions } from './data/subregions';
 import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from './goals';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
+import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
 import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t, getLocale, type LocaleId } from './i18n';
@@ -99,6 +100,8 @@ const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
 const EX_SIDES_KEY = 'spotter.exerciseSides';
+const EX_REST_KEY = 'spotter.exerciseRest';
+const REST_PREFS_KEY = 'spotter.restPrefs';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
 const MASTERY_KEY = 'spotter.mastery';
 const SLEEP_KEY = 'spotter.sleeps';
@@ -185,6 +188,10 @@ export interface StoreState {
    *  exercise (equipment + name). Local only. */
   exerciseLoadTypes: Record<string, LoadType>;
   exerciseSides: Record<string, 'one' | 'both'>;
+  /** Remembered rest target per exercise (lower-cased name → seconds). Local only. */
+  exerciseRest: Record<string, number>;
+  /** Rest-timer alerts: vibrate / chime / keep screen on / notify. Local only. */
+  restPrefs: RestPrefs;
   /** Self-reported training history for the Mastery Experience axis (optional). */
   mastery: {
     sinceYear: number | null;
@@ -235,6 +242,8 @@ let state: StoreState = {
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
   exerciseLoadTypes: load<Record<string, LoadType>>(EX_LOAD_KEY, {}),
   exerciseSides: load<Record<string, 'one' | 'both'>>(EX_SIDES_KEY, {}),
+  exerciseRest: load<Record<string, number>>(EX_REST_KEY, {}),
+  restPrefs: { ...REST_PREFS_DEFAULT, ...load<Partial<RestPrefs>>(REST_PREFS_KEY, {}) },
   mastery: load<StoreState['mastery']>(MASTERY_KEY, {
     sinceYear: null,
     pattern: null,
@@ -286,6 +295,8 @@ function persist(): void {
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
     localStorage.setItem(EX_LOAD_KEY, JSON.stringify(state.exerciseLoadTypes));
     localStorage.setItem(EX_SIDES_KEY, JSON.stringify(state.exerciseSides));
+    localStorage.setItem(EX_REST_KEY, JSON.stringify(state.exerciseRest));
+    localStorage.setItem(REST_PREFS_KEY, JSON.stringify(state.restPrefs));
     localStorage.setItem(MASTERY_KEY, JSON.stringify(state.mastery));
     localStorage.setItem(BODY_KEY, JSON.stringify(state.bodyMetrics));
     localStorage.setItem(SLEEP_KEY, JSON.stringify(state.sleeps));
@@ -1507,6 +1518,13 @@ export function upsertSet(
     distanceKm: set.distanceKm ?? null,
     calories: set.calories ?? null,
     rpe: set.rpe ?? null,
+    ...(set.failure ? { failure: set.failure } : {}),
+    ...(set.failure === 'auto' && set.failureWhy ? { failureWhy: set.failureWhy } : {}),
+    ...(set.partials ? { partials: set.partials } : {}),
+    ...(set.rpeAuto != null && set.rpe == null ? { rpeAuto: set.rpeAuto } : {}),
+    ...((set.restTargetSec ?? existing?.restTargetSec) != null
+      ? { restTargetSec: set.restTargetSec ?? existing?.restTargetSec }
+      : {}),
     // Cardio machine readings — only written when present, so strength sets
     // stay lean.
     ...(set.speedKmh != null ? { speedKmh: set.speedKmh } : {}),
@@ -2262,6 +2280,26 @@ export function setExerciseUnit(name: string, unit: DisplayUnit): void {
   if (unit === state.weightUnit) delete next[key];
   else next[key] = unit;
   setState({ exerciseUnits: next });
+}
+
+// --- Rest timer ------------------------------------------------------------
+/** The athlete's remembered rest target for a lift (seconds), if any. */
+export function exerciseRestSec(name: string): number | null {
+  return (state.exerciseRest ?? {})[name.trim().toLowerCase()] ?? null;
+}
+/** Pin a lift's rest target, or `null` to go back to the automatic one. */
+export function setExerciseRestSec(name: string, sec: number | null): void {
+  const next = { ...(state.exerciseRest ?? {}) };
+  const key = name.trim().toLowerCase();
+  if (sec === null) delete next[key];
+  else next[key] = sec;
+  setState({ exerciseRest: next });
+}
+export function restPrefs(): RestPrefs {
+  return state.restPrefs ?? REST_PREFS_DEFAULT;
+}
+export function setRestPrefs(patch: Partial<RestPrefs>): void {
+  setState({ restPrefs: { ...restPrefs(), ...patch } });
 }
 
 // --- Per-exercise load type (Load-entry C) ---------------------------------
@@ -3619,6 +3657,58 @@ export function recordWeight(name: string, excludeWorkoutId?: string): number {
   }
   return max;
 }
+/** Best e1RM of a lift before a workout (warm-ups excluded, drops included). */
+export function recordE1rm(name: string, excludeWorkoutId?: string): number {
+  const needle = name.trim().toLowerCase();
+  let max = 0;
+  for (const w of state.workouts) {
+    if (w.id === excludeWorkoutId) continue;
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e) || e.name.trim().toLowerCase() !== needle) continue;
+      for (const s of e.sets) max = Math.max(max, setBestE1rm(s));
+    }
+  }
+  return max;
+}
+/** The lift's sets in its most recent finished sessions, newest first. */
+export function recentSessionsOf(
+  name: string,
+  excludeWorkoutId: string | undefined,
+  n: number,
+): { sets: SetEntry[] }[] {
+  const needle = name.trim().toLowerCase();
+  return state.workouts
+    .filter((w) => w.id !== excludeWorkoutId && w.finishedAt !== null)
+    .sort((a, b) => b.startedAt - a.startedAt)
+    .map((w) => w.exercises.find((e) => e.name.trim().toLowerCase() === needle))
+    .filter((e): e is Exercise => !!e && e.sets.length > 0)
+    .slice(0, n)
+    .map((e) => ({ sets: e.sets }));
+}
+/** A lift's reference strength for effort estimates: best e1RM over the last
+ *  `days` (else all-time) and how long since it was last trained. */
+export function liftReference(
+  name: string,
+  excludeWorkoutId: string | undefined,
+  days = 56,
+  now: number = Date.now(),
+): { refE1: number; daysSinceLift: number | null } {
+  const needle = name.trim().toLowerCase();
+  let recent = 0;
+  let last: number | null = null;
+  for (const w of state.workouts) {
+    if (w.id === excludeWorkoutId || w.finishedAt === null) continue;
+    const e = w.exercises.find((x) => x.name.trim().toLowerCase() === needle);
+    if (!e || e.sets.length === 0) continue;
+    if (last === null || w.startedAt > last) last = w.startedAt;
+    if (now - w.startedAt <= days * 86400000)
+      for (const s of e.sets) recent = Math.max(recent, setBestE1rm(s));
+  }
+  return {
+    refE1: recent > 0 ? recent : recordE1rm(name, excludeWorkoutId),
+    daysSinceLift: last === null ? null : Math.floor((now - last) / 86400000),
+  };
+}
 export const E1RM_MAX_REPS = 10;
 
 export function est1rm(weight: number, reps: number): number {
@@ -3856,6 +3946,8 @@ export function resetLocalData(): void {
   localStorage.removeItem(WEIGHT_UNIT_KEY);
   localStorage.removeItem(EX_UNIT_KEY);
   localStorage.removeItem(EX_LOAD_KEY);
+  localStorage.removeItem(EX_REST_KEY);
+  localStorage.removeItem(REST_PREFS_KEY);
   localStorage.removeItem(SHARED_GYMS_KEY);
   pings = [];
   dismissals = [];
@@ -3871,6 +3963,8 @@ export function resetLocalData(): void {
     exerciseUnits: {},
     exerciseLoadTypes: {},
     exerciseSides: {},
+    exerciseRest: {},
+    restPrefs: REST_PREFS_DEFAULT,
     mastery: { sinceYear: null, pattern: null, seenRating: null },
     bodyMetrics: EMPTY_BODY,
     sleeps: [],

@@ -1,7 +1,42 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
-import { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  Fragment,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Shell } from '../App';
-import type { DropEntry, Exercise, ExerciseKind, Gym, SetEntry, SetType, Workout } from '../types';
+import type {
+  DropEntry,
+  Exercise,
+  ExerciseKind,
+  FailureMark,
+  Gym,
+  SetEntry,
+  SetType,
+  Workout,
+} from '../types';
+import { inferFailure, isFailure, suggestFailure, suggestionPresets } from '../failure';
+import { StatShareSheet } from '../components/StatShareSheet';
+import type { StatShareModel } from '../data/shareCard';
+import { estimateRpe, readinessFactor, type RpeContext } from '../rpe';
+import { muscleFatigue } from '../fatigue';
+import { lastNight } from '../sleep';
+import {
+  REST_PRESETS,
+  REST_PREFS_DEFAULT,
+  planRest,
+  type RestReason,
+  fmtCountdown,
+  primeRestAudio,
+  requestRestNotifications,
+  restAlert,
+  useWakeLock,
+  type RestPrefs,
+} from '../restTimer';
 import {
   addExercise,
   attachGymToWorkout,
@@ -31,6 +66,14 @@ import {
   nextSupersetLetter,
   prevLift,
   recordWeight,
+  recordE1rm,
+  recentSessionsOf,
+  exerciseRestSec,
+  setExerciseRestSec,
+  setRestPrefs,
+  setBestE1rm,
+  liftReference,
+  dayKey,
   renameExercise,
   replaceExercise,
   setCardioMachine,
@@ -213,6 +256,15 @@ function cardioFieldVal(s: Partial<SetEntry>, f: CardioField): number | null {
 
 type OptsTab = 'set' | 'exercise' | 'session';
 
+/** Wall-clock ms for event handlers (kept out of render purity checks). */
+const wallClock = (): number => Date.now();
+
+/** autoRestFor results by set state (see there). */
+const restPlanCache = new Map<
+  string,
+  { sec: number; reasons: { key: RestReason; sec: number }[] }
+>();
+
 type SheetState =
   | { kind: 'add'; intoGroupId?: string }
   | {
@@ -241,6 +293,8 @@ type SheetState =
   | { kind: 'settings' }
   | { kind: 'circuit-run'; groupId: string }
   | { kind: 'coach' }
+  /** Rest target + alert prefs for one lift (tap the rest ring). */
+  | { kind: 'rest'; exName: string }
   | null;
 
 type DialogState =
@@ -445,6 +499,27 @@ export function SessionView(props: {
   const [expandedPast, setExpandedPast] = useState<string[]>([]);
   /** The set logged most recently in this visit — its row reads “just now”. */
   const [recentSetId, setRecentSetId] = useState<string | null>(null);
+  /** This rest's ±15 s nudges / skip, keyed by the set that started it. */
+  const [restAdj, setRestAdj] = useState<{ at: number; delta: number; skip: boolean }>({
+    at: 0,
+    delta: 0,
+    skip: false,
+  });
+  /** The record's share-card sheet (same as the app's other share cards). */
+  const [prShare, setPrShare] = useState<StatShareModel | null>(null);
+  /** A record just set — shown as a celebration card, then folds into rest. */
+  const [prMoment, setPrMoment] = useState<{
+    setId: string;
+    at: number;
+    name: string;
+    w: number;
+    reps: number;
+    e1: number;
+    e1Prev: number;
+    wPrev: number;
+    vol: number;
+    volPrev: number;
+  } | null>(null);
   /** The single card the user has explicitly expanded (queued row tap, or
    * start/add-next). Overrides the derived active card while it points at a
    * still-present exercise. */
@@ -462,6 +537,8 @@ export function SessionView(props: {
   const startAddConsumed = useRef(false);
 
   const live = !!workout && workout.finishedAt === null && !props.past;
+  // Keep the screen on through a live workout so the rest alert fires on time.
+  useWakeLock(live && (store.restPrefs ?? REST_PREFS_DEFAULT).keepAwake);
   // In focus mode, adding (or duplicating) an exercise jumps the view straight
   // to it. Kept above the early return so hook order stays stable.
   const focusIdsKey = workout
@@ -835,27 +912,106 @@ export function SessionView(props: {
    * timed fields survive — the sheet can create any kind of set, not just a
    * plain working one.
    */
-  function logNewSet(ex: Exercise, vals: Omit<SetEntry, 'id' | 'position'>): string {
+  function logNewSet(
+    ex: Exercise,
+    vals: Omit<SetEntry, 'id' | 'position'>,
+    /** What the set card proposed — lets a missed target read as failure. */
+    target?: { reps: number; weight: number | null } | null,
+  ): string {
     const base = Math.max(
       baseline.get(ex.name.toLowerCase()) ?? 0,
       ...ex.sets.filter((s) => setTypeOf(s) !== 'warmup').map((s) => s.weight ?? 0),
     );
-    const id = uuid();
-    upsertSet(workout!.id, ex.id, { ...vals, id });
-    setRecentSetId(id);
+    const e1Base = Math.max(recordE1rm(ex.name, workout!.id), ...ex.sets.map(setBestE1rm));
     const type: SetType = vals.type ?? (vals.isWarmup ? 'warmup' : 'working');
-    if (
-      type === 'working' &&
-      loadTypeFor(ex) === 'weight' &&
-      vals.weight !== null &&
-      vals.weight > base &&
-      base > 0
-    ) {
-      props.shell.toast({
-        kind: 'ok',
-        icon: 'trophy',
-        text: t.newRecordToast(ex.name, `${fmtWeightKg(vals.weight)} × ${vals.reps}`),
-      });
+    // Nobody rated the effort → estimate it from history + today's state.
+    const priorWorking = ex.sets.filter((s) => setTypeOf(s) !== 'warmup').length;
+    const rpeAuto =
+      vals.rpe == null && type !== 'warmup' && type !== 'static-dynamic'
+        ? rpeEstimateFor(ex, vals.weight, vals.reps, priorWorking)
+        : null;
+    // Failure: an explicit mark (F / flame) wins; otherwise infer it from what
+    // was actually logged (failure.ts) and tag it 'auto' — dismissable.
+    let failure: FailureMark | null = vals.failure ?? null;
+    let failureWhy: string | null = null;
+    if (!failure && isStrengthExercise(ex)) {
+      const why = inferFailure(
+        {
+          ...vals,
+          type,
+          rpeAuto,
+          restSec: lastLoggedAt > 0 ? Math.round((wallClock() - lastLoggedAt) / 1000) : null,
+        },
+        { target, before: ex.sets },
+      );
+      if (why) {
+        failure = 'auto';
+        failureWhy = why;
+      }
+    }
+    // The rest that this set ends: remember its target so the table can say
+    // when it was cut short.
+    let restTarget: number | null = null;
+    if (live && restRunning && lastChrono) {
+      const lastEx = workout!.exercises.find((e) => e.id === lastLoggedExId);
+      if (lastEx && !isMarkerExercise(lastEx)) {
+        const base = restTargetSec(lastEx, lastChrono.s);
+        const d = restAdj.at === lastLoggedAt ? restAdj.delta : 0;
+        restTarget = base > 0 ? Math.max(0, base + d) : null;
+      }
+    }
+    const id = uuid();
+    upsertSet(workout!.id, ex.id, {
+      ...vals,
+      ...(restTarget ? { restTargetSec: restTarget } : {}),
+      ...(failure ? { failure, failureWhy } : {}),
+      ...(rpeAuto != null ? { rpeAuto } : {}),
+      id,
+    });
+    setRecentSetId(id);
+    primeRestAudio();
+    const w = vals.weight ?? 0;
+    if (type === 'working' && loadTypeFor(ex) === 'weight' && w > 0) {
+      const e1 = est1rm(w, vals.reps);
+      const weightRecord = w > base && base > 0;
+      const e1Record = e1 > e1Base && e1Base > 0;
+      if (weightRecord || e1Record) {
+        if (focusView) {
+          const volPrev = Math.max(
+            0,
+            ...recentSessionsOf(ex.name, workout!.id, 30).flatMap((x) =>
+              x.sets.filter((s) => setTypeOf(s) === 'working').map((s) => (s.weight ?? 0) * s.reps),
+            ),
+            ...ex.sets
+              .filter((s) => setTypeOf(s) === 'working')
+              .map((s) => (s.weight ?? 0) * s.reps),
+          );
+          setPrMoment({
+            setId: id,
+            at: wallClock(),
+            name: ex.name,
+            w,
+            reps: vals.reps,
+            e1,
+            e1Prev: e1Base,
+            wPrev: base,
+            vol: w * vals.reps,
+            volPrev,
+          });
+          try {
+            if ((store.restPrefs ?? REST_PREFS_DEFAULT).vibrate && 'vibrate' in navigator)
+              navigator.vibrate([60, 50, 60, 50, 160]);
+          } catch {
+            /* ignore */
+          }
+        } else if (weightRecord) {
+          props.shell.toast({
+            kind: 'ok',
+            icon: 'trophy',
+            text: t.newRecordToast(ex.name, `${fmtWeightKg(w)} × ${vals.reps}`),
+          });
+        }
+      }
     }
     return id;
   }
@@ -882,11 +1038,124 @@ export function SessionView(props: {
     }
   }
 
+  /** What we know about the athlete today for an effort estimate (rpe.ts):
+   *  the lift's recent strength, time away, illness, fatigue, sleep and the
+   *  sets already done on it this session. */
+  function rpeCtxFor(ex: Exercise, priorSets: number): RpeContext {
+    const at = wallClock();
+    const ref = liftReference(ex.name, workout!.id, 56, at);
+    // Today's own sets count too: a stronger day raises the reference, so the
+    // next sets aren't all read as maximal.
+    ref.refE1 = Math.max(ref.refE1, ...ex.sets.map(setBestE1rm));
+    const today = dayKey(at);
+    let illnessDaysAgo: number | null = null;
+    for (const r of store.restPeriods ?? []) {
+      if (r.mode !== 'illness' || r.startDay > today) continue;
+      const ago = r.open || r.endDay >= today ? 0 : today - r.endDay;
+      if (ago < 14 && (illnessDaysAgo === null || ago < illnessDaysAgo)) illnessDaysAgo = ago;
+    }
+    const primary = resolveMuscles(ex).primary;
+    const fat = primary
+      ? (muscleFatigue(
+          store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id),
+          at,
+        ).get(primary)?.score ?? 0)
+      : 0;
+    const night = lastNight(store.sleeps, at);
+    const slept =
+      night && night.wake !== null && at - night.wake < 18 * 3600000
+        ? (night.wake - night.bedtime) / 3600000
+        : null;
+    return {
+      refE1: ref.refE1,
+      daysSinceLift: ref.daysSinceLift,
+      illnessDaysAgo,
+      muscleFatigue: fat,
+      sleepShortH: slept !== null ? Math.max(0, 7 - slept) : 0,
+      priorSets,
+    };
+  }
+
+  /** Effort estimate for a weight × reps on a lift, or null. */
+  function rpeEstimateFor(ex: Exercise, weight: number | null, reps: number, priorSets: number) {
+    if (!isStrengthExercise(ex) || loadTypeFor(ex) !== 'weight' || !weight) return null;
+    return estimateRpe(weight, reps, rpeCtxFor(ex, priorSets));
+  }
+
+  /** Failure suggestion for the next set (failure.ts): copy + whether the
+   *  flame starts on (streak / habit / drop) or it's only a hint ("room"). */
+  function ghostFailSuggest(
+    ex: Exercise,
+    g: {
+      reps: number;
+      weight: number | null;
+      warmup?: boolean;
+      ramp?: { toKg: number };
+      type?: SetType;
+    },
+  ): { text: string; preset: boolean } | null {
+    if (!isStrengthExercise(ex) || props.past) return null;
+    const kind = ghostKind(g, g.weight);
+    const priorWorking = ex.sets.filter((x) => setTypeOf(x) !== 'warmup').length;
+    const est = rpeEstimateFor(ex, g.weight, g.reps, priorWorking);
+    const eq = equipmentFor(ex);
+    const compound =
+      richExerciseByName(ex.name)?.mechanic === 'compound' &&
+      resolveMuscles(ex).secondary.length >= 1;
+    const why = suggestFailure({
+      type: kind,
+      estRpe: est,
+      safeToFail: !compound || (eq.length > 0 && eq.every((e) => e === 'machine' || e === 'cable')),
+      current: ex.sets,
+      plannedSets: Math.max(0, ex.plannedSets ?? 0),
+      past: recentSessionsOf(ex.name, workout!.id, 3),
+    });
+    if (!why) return null;
+    const text =
+      why === 'streak'
+        ? t.failSuggestStreak
+        : why === 'habit'
+          ? t.failSuggestHabit
+          : why === 'drop'
+            ? t.failSuggestDrop
+            : t.failSuggestRoom(String(Math.max(1, Math.round(10 - (est ?? 8)))));
+    return { text, preset: suggestionPresets(why) };
+  }
+
+  /** "PR attempt" before the set: the proposal would beat a weight or e1RM best. */
+  function ghostPrHint(
+    ex: Exercise,
+    g: {
+      reps: number;
+      weight: number | null;
+      warmup?: boolean;
+      ramp?: { toKg: number };
+      type?: SetType;
+    },
+  ): { title: string; line: string } | null {
+    if (!focusView || !isStrengthExercise(ex) || loadTypeFor(ex) !== 'weight') return null;
+    if (ghostKind(g, g.weight) !== 'working') return null;
+    const w = g.weight ?? 0;
+    if (w <= 0) return null;
+    const title = t.prAttemptTitle(ex.sets.length + 1);
+    const base = Math.max(
+      baseline.get(ex.name.toLowerCase()) ?? 0,
+      ...ex.sets.filter((s) => setTypeOf(s) !== 'warmup').map((s) => s.weight ?? 0),
+    );
+    if (base > 0 && w > base)
+      return { title, line: t.prAttemptWeight(fmtWeightKg(w - base), fmtWeightKg(base)) };
+    const e1Base = Math.max(recordE1rm(ex.name, workout!.id), ...ex.sets.map(setBestE1rm));
+    if (e1Base > 0 && est1rm(w, g.reps) > e1Base)
+      return { title, line: t.prAttemptE1(g.reps, fmtWeightKg(e1Base)) };
+    return null;
+  }
+
   function logGhost(
     ex: Exercise,
-    v: { reps: number; weight: number | null },
+    v: { reps: number; weight: number | null; failure?: FailureMark | null; partials?: number },
     type: SetType = 'working',
     carry?: { weight: number | null; drops?: DropEntry[]; holdMin?: number | null },
+    target?: { reps: number; weight: number | null } | null,
   ): void {
     // A continued drop set keeps its drops, shifted by however much the main
     // weight moved (80→60→40 at 80 becomes 85→65→45 at 85).
@@ -898,20 +1167,26 @@ export function SessionView(props: {
             weight: d.weight === null ? null : Math.max(0, d.weight + shift),
           }))
         : [];
-    logNewSet(ex, {
-      reps: v.reps,
-      weight: v.weight,
-      isWarmup: type === 'warmup',
-      // The warm-up chip is a deliberate choice — pin it so auto-detect won't
-      // flip it. A plain (working) quick-log stays auto-classified.
-      ...(type === 'warmup' ? { warmupManual: true } : {}),
-      type,
-      drops,
-      durationMin: type === 'static-dynamic' ? (carry?.holdMin ?? null) : null,
-      distanceKm: null,
-      calories: null,
-      rpe: null,
-    });
+    logNewSet(
+      ex,
+      {
+        reps: v.reps,
+        weight: v.weight,
+        isWarmup: type === 'warmup',
+        // The warm-up chip is a deliberate choice — pin it so auto-detect won't
+        // flip it. A plain (working) quick-log stays auto-classified.
+        ...(type === 'warmup' ? { warmupManual: true } : {}),
+        type,
+        drops,
+        durationMin: type === 'static-dynamic' ? (carry?.holdMin ?? null) : null,
+        distanceKm: null,
+        calories: null,
+        rpe: null,
+        ...(v.failure ? { failure: v.failure } : {}),
+        ...(v.partials ? { partials: v.partials } : {}),
+      },
+      target,
+    );
     // A fresh log returns focus to whatever the derived active exercise is.
     setExpandedId(null);
   }
@@ -1133,7 +1408,232 @@ export function SessionView(props: {
   /** Live rest count-up on the exercise that owns the most recent set (strength
    *  or cardio), AND on a freshly focused exercise with no sets yet — rest
    *  carries over from the previous exercise's last set. */
+  /** The automatic rest after a set (restTimer.planRest): load vs today's
+   *  strength, lift type, equipment, muscle size, effort/failure, technique,
+   *  weekly muscle fatigue, illness and sleep. Cached per set state — it reads
+   *  the whole history, and the view re-renders every second. */
+  function autoRestFor(
+    ex: Exercise,
+    s: SetEntry,
+  ): { sec: number; reasons: { key: RestReason; sec: number }[] } {
+    const blk = focusBlocks.find(
+      (b) => b.kind === 'group' && b.group.exercises.some((e) => e.id === ex.id),
+    );
+    const midRound =
+      blk?.kind === 'group' &&
+      !blk.group.circuit &&
+      blk.group.exercises.some((e) => e.sets.length < ex.sets.length);
+    const key = [s.id, s.weight, s.reps, s.type, s.failure, s.rpe, s.rpeAuto, midRound].join('|');
+    const hit = restPlanCache.get(key);
+    if (hit) return hit;
+    const idx = ex.sets.findIndex((x) => x.id === s.id);
+    const prior = ex.sets
+      .slice(0, idx < 0 ? ex.sets.length : idx)
+      .filter((x) => setTypeOf(x) !== 'warmup').length;
+    const ctx = rpeCtxFor(ex, prior);
+    const m = resolveMuscles(ex);
+    const e1Today = ctx.refE1 * readinessFactor(ctx).factor;
+    const w = s.weight ?? 0;
+    const plan = planRest({
+      compound: richExerciseByName(ex.name)?.mechanic === 'compound' && m.secondary.length >= 1,
+      equipment: equipmentFor(ex),
+      primary: m.primary,
+      lastType: setTypeOf(s),
+      intensity: loadTypeFor(ex) === 'weight' && w > 0 && e1Today > 0 ? w / e1Today : null,
+      reps: s.reps,
+      failure: isFailure(s),
+      rpe: s.rpe ?? s.rpeAuto ?? null,
+      muscleFatigue: ctx.muscleFatigue,
+      illness: ctx.illnessDaysAgo !== null && ctx.illnessDaysAgo < 7,
+      shortSleep: ctx.sleepShortH >= 1.5,
+      midRound,
+    });
+    restPlanCache.set(key, plan);
+    return plan;
+  }
+
+  /** Rest target: a superset hand-off is always none; else the lift's pinned
+   *  target (rest sheet) if any, else the automatic plan. */
+  function restTargetSec(ex: Exercise, s: SetEntry): number {
+    const plan = autoRestFor(ex, s);
+    if (plan.sec === 0 && plan.reasons[0]?.key === 'superset') return 0;
+    if (setTypeOf(s) === 'warmup') return plan.sec;
+    return exerciseRestSec(ex.name) ?? plan.sec;
+  }
+
+  /** The record card stays up for 30 s (or until dismissed). */
+  const prShowing = !!prMoment && live && now - prMoment.at < 30000;
+
+  /** B · the record moment: a celebration card that folds into the rest timer. */
+  function renderPrCard() {
+    const pm = prMoment!;
+    const tile = (label: string, val: string, delta: number) => (
+      <div className="pr-tile">
+        <span className="pr-tile-lab">{label}</span>
+        <span className="pr-tile-val">{val}</span>
+        <span className={`pr-tile-d${delta > 0 ? ' up' : ''}`}>
+          {delta > 0 ? `+${fmtWeightValue(Math.round(delta * 10) / 10)}` : '—'}
+        </span>
+      </div>
+    );
+    const setText = `${fmtWeightKg(pm.w)} × ${pm.reps}`;
+    return (
+      <div className="pr-card" role="status">
+        <div className="pr-confetti" aria-hidden>
+          {Array.from({ length: 14 }, (_, i) => (
+            <span key={i} style={{ '--i': i } as CSSProperties} />
+          ))}
+        </div>
+        <span className="pr-badge">
+          <Icon name="trophy" weight="fill" />
+        </span>
+        <div className="pr-kicker">{t.prNewRecord(exName(pm.name))}</div>
+        <div className="pr-main">{setText}</div>
+        <div className="pr-stats">
+          {tile(t.prE1, fmtWeightValue(pm.e1), pm.e1Prev > 0 ? pm.e1 - pm.e1Prev : 0)}
+          {tile(t.prBestWeight, fmtWeightValue(pm.w), pm.wPrev > 0 ? pm.w - pm.wPrev : 0)}
+          {tile(t.prSetVolume, fmtWeightValue(pm.vol), pm.volPrev > 0 ? pm.vol - pm.volPrev : 0)}
+        </div>
+        <div className="pr-actions">
+          <button
+            type="button"
+            className="pr-share"
+            onClick={() =>
+              setPrShare({
+                brand: 'spotter',
+                kicker: t.prNewRecord(exName(pm.name)),
+                headline: exName(pm.name),
+                hero: { value: setText, label: t.record },
+                rows: [
+                  {
+                    lead: '↑',
+                    name: t.prE1,
+                    detail: `${fmtWeightKg(pm.e1)}${pm.e1Prev > 0 && pm.e1 > pm.e1Prev ? ` (+${fmtWeightValue(pm.e1 - pm.e1Prev)})` : ''}`,
+                    accent: true,
+                  },
+                  {
+                    lead: '↑',
+                    name: t.prBestWeight,
+                    detail: `${fmtWeightKg(pm.w)}${pm.wPrev > 0 && pm.w > pm.wPrev ? ` (+${fmtWeightValue(pm.w - pm.wPrev)})` : ''}`,
+                  },
+                  { lead: '·', name: t.prSetVolume, detail: fmtWeightKg(pm.vol) },
+                ],
+                handle: 'spotter.app',
+              })
+            }
+          >
+            <Icon name="share-network" />
+            {t.prShare}
+          </button>
+          <button type="button" className="pr-ok" onClick={() => setPrMoment(null)}>
+            {t.prNiceRest}
+          </button>
+        </div>
+        <div className="pr-fold">{t.prFolds}</div>
+      </div>
+    );
+  }
+
+  /** Live rest count-up on the exercise that owns the most recent set (strength
+   *  or cardio), AND on a freshly focused exercise with no sets yet — rest
+   *  carries over from the previous exercise's last set. In focus mode it's a
+   *  countdown to the rest target that alerts when it's over. */
   function renderRest(ex: Exercise) {
+    if (focusView) {
+      if (ex.id !== focusedId || isMarkerExercise(ex)) return null;
+      if (prShowing) return renderPrCard();
+      if (!restRunning || !lastChrono) return null;
+      const lastEx = workout!.exercises.find((e) => e.id === lastLoggedExId);
+      if (!lastEx) return null;
+      const target = restTargetSec(lastEx, lastChrono.s);
+      const adj =
+        restAdj.at === lastLoggedAt ? restAdj : { at: lastLoggedAt, delta: 0, skip: false };
+      const goal = adj.skip ? 0 : Math.max(0, target + adj.delta);
+      const whyLine = autoRestFor(lastEx, lastChrono.s)
+        .reasons.filter((r) => r.key !== 'superset')
+        .slice(0, 3)
+        .map((r) => t.restWhy[r.key])
+        .join(' · ');
+      const elapsed = Math.max(0, (now - lastLoggedAt) / 1000);
+      const left = goal - elapsed;
+      const done = left <= 0;
+      // Long past the target the timer means nothing any more (a break, a
+      // reopened session) — let it go.
+      if (left < -600) return null;
+      const g = ghostFor(ex);
+      const nextLine =
+        focusGroup && focusGroup.exercises.some((e) => e.id === ex.id) && ex.id !== lastEx.id
+          ? t.restGoTo(exName(ex.name))
+          : t.restNext(`${t.setNumber(ex.sets.length + 1)} · ${fmtSet(g.weight, g.reps)}`);
+      const R = 50;
+      const C = 2 * Math.PI * R;
+      const frac = done || goal === 0 ? 1 : Math.max(0, Math.min(1, left / goal));
+      const nudge = (d: number) =>
+        setRestAdj({ at: lastLoggedAt, delta: adj.delta + d, skip: false });
+      return (
+        <div className={`rst-card${done ? ' done' : ''}`}>
+          <RestAlarm
+            dueAt={lastLoggedAt + goal * 1000}
+            enabled={goal > 0}
+            prefs={store.restPrefs ?? REST_PREFS_DEFAULT}
+            title={t.restNoteTitle}
+            body={nextLine}
+          />
+          <button
+            type="button"
+            className="rst-ring"
+            aria-label={t.restSettingsAria}
+            onClick={() => setSheet({ kind: 'rest', exName: lastEx.name })}
+          >
+            <svg viewBox="0 0 112 112" aria-hidden>
+              <circle className="rst-track" cx="56" cy="56" r={R} />
+              <circle
+                className="rst-arc"
+                cx="56"
+                cy="56"
+                r={R}
+                strokeDasharray={`${(C * frac).toFixed(1)} ${C.toFixed(1)}`}
+              />
+            </svg>
+            <span className="rst-center">
+              {done ? (
+                <>
+                  <span className="rst-go">{t.restGo}</span>
+                  <span className="rst-time">+{fmtCountdown(-left)}</span>
+                </>
+              ) : (
+                <>
+                  <span className="rst-time">{fmtCountdown(left)}</span>
+                  <span className="rst-of">{t.restOf(fmtCountdown(goal))}</span>
+                </>
+              )}
+            </span>
+          </button>
+          <div className="rst-body">
+            <div className="rst-lbl">
+              <Icon name="timer" />
+              {done ? t.restOverTitle : t.restHeaderLabel}
+            </div>
+            <div className="rst-next">{nextLine}</div>
+            {!done && exerciseRestSec(lastEx.name) === null && whyLine && (
+              <div className="rst-why">{whyLine}</div>
+            )}
+            {done ? (
+              <div className="rst-note">{t.restOverNote}</div>
+            ) : (
+              <div className="rst-btns">
+                <button type="button" aria-label={t.restMinus15} onClick={() => nudge(-15)}>
+                  −15
+                </button>
+                <button type="button" aria-label={t.restPlus15} onClick={() => nudge(15)}>
+                  +15
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
     if (!restRunning || isMarkerExercise(ex)) return null;
     if (!(ex.id === lastLoggedExId || (focusedId === ex.id && ex.sets.length === 0))) return null;
     const restNow = Math.max(0, now - lastLoggedAt);
@@ -1314,7 +1814,8 @@ export function SessionView(props: {
           )
         : null;
     const groupDone = grp !== null && ex.sets.length >= grp.round;
-    const showGhost = !grp || grp.active;
+    // While the record card is up it owns the space — the next set waits.
+    const showGhost = (!grp || grp.active) && !(focusView && prShowing && ex.id === focusedId);
     const rowCls = grp ? ' rrow' : '';
     const sortedSets = [...ex.sets].sort((a, b) => a.position - b.position);
     return (
@@ -1717,10 +2218,17 @@ export function SessionView(props: {
                 const restSecBefore = restBeforeSetInWorkout(workout!, s);
                 const restBefore = restSecBefore != null ? restSecBefore * 1000 : null;
                 const interCard = i === 0;
+                const planned = s.restTargetSec ?? null;
+                const cutShort =
+                  planned !== null && restSecBefore != null && restSecBefore < planned * 0.8;
                 const restLine =
                   restBefore !== null && restBefore > 0 ? (
-                    <div className={`set-rest${interCard ? ' inter-card' : ''}`}>
-                      {t.restLabel(mmss(restBefore))}
+                    <div
+                      className={`set-rest${interCard ? ' inter-card' : ''}${cutShort ? ' short' : ''}`}
+                    >
+                      {cutShort
+                        ? t.restShortLabel(mmss(restBefore), mmss(planned * 1000))
+                        : t.restLabel(mmss(restBefore))}
                     </div>
                   ) : null;
                 const delBtn = live ? (
@@ -1744,11 +2252,49 @@ export function SessionView(props: {
                     <span className="idx">{idx}</span>
                     <span className="val">
                       {type === 'static-dynamic' ? fmtHold(s.durationMin) : s.reps}
+                      {s.partials ? <span className="partials">+{s.partials}p</span> : null}
                     </span>
                     <span className={`val${loadType === 'assist' ? ' assist-val' : ''}`}>
                       {loadCell(s.weight)}
                     </span>
-                    {setKindLabel(ex, s, grp)}
+                    {(() => {
+                      // Tags cell: effort, failure and record as small pills
+                      // (the plain "working" word only when there's nothing else).
+                      const fail = isFailure(s);
+                      const rpeV = type === 'warmup' ? null : (s.rpe ?? null);
+                      // F already says RPE 10 — no separate estimate next to it.
+                      const rpeEst = type === 'warmup' || rpeV || fail ? null : (s.rpeAuto ?? null);
+                      if (!rec && !fail && rpeV === null && rpeEst === null)
+                        return setKindLabel(ex, s, grp);
+                      return (
+                        <span className="kind set-tags">
+                          {!rec && type !== 'working' ? setKindLabel(ex, s, grp) : null}
+                          {rpeV !== null ? (
+                            <span className="tag-rpe">@{rpeV}</span>
+                          ) : rpeEst !== null ? (
+                            <span className="tag-rpe est" title={t.rpeEstHint(String(rpeEst))}>
+                              ~{rpeEst}
+                            </span>
+                          ) : null}
+                          {fail && (
+                            <span
+                              className={`tag-fail${s.failure === 'auto' ? ' auto' : ''}`}
+                              title={s.failure === 'auto' ? t.failAutoShort : t.failShort}
+                              aria-label={s.failure === 'auto' ? t.failAutoShort : t.failShort}
+                            >
+                              <Icon name="flame" weight="fill" />
+                              {s.failure === 'auto' ? 'F?' : 'F'}
+                            </span>
+                          )}
+                          {rec && (
+                            <span className="tag-pr" aria-label={t.record}>
+                              <Icon name="trophy" weight="fill" />
+                              PR
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })()}
                     {isDesktop && (
                       <span className="cell5">
                         {drops.length > 0
@@ -1863,6 +2409,8 @@ export function SessionView(props: {
                     note={ghostTechniqueNote(ghost)}
                     defHoldSec={ghost.holdMin ? Math.round(ghost.holdMin * 60) : undefined}
                     defDrops={ghost.drops}
+                    failSuggest={ghostFailSuggest(ex, ghost)}
+                    prHint={ghostPrHint(ex, ghost)}
                     onLog={(v) =>
                       logGhost(
                         ex,
@@ -1873,6 +2421,7 @@ export function SessionView(props: {
                           : v.drops
                             ? { weight: v.weight, drops: v.drops }
                             : ghost,
+                        { reps: ghost.reps, weight: ghost.weight },
                       )
                     }
                     onSettings={() =>
@@ -2188,7 +2737,7 @@ export function SessionView(props: {
    *  just cancelled. */
   function stopTiming(ex: Exercise): void {
     if (!timing || timing.exId !== ex.id) return;
-    const min = Math.max(0, (Date.now() - timing.startedAt) / 60000);
+    const min = Math.max(0, (wallClock() - timing.startedAt) / 60000);
     setTiming(null);
     if (min < 0.1) return;
     const kind = exerciseKind(ex);
@@ -3488,7 +4037,11 @@ export function SessionView(props: {
             if (sheet.set) {
               upsertSet(workout.id, ex.id, { ...vals, id: sheet.set.id });
             } else {
-              logNewSet(ex, vals);
+              logNewSet(
+                ex,
+                vals,
+                sheet.ghost ? { reps: sheet.ghost.reps, weight: sheet.ghost.weight } : null,
+              );
             }
             setSheet(null);
           }}
@@ -3573,9 +4126,24 @@ export function SessionView(props: {
                     ghost={sheet.ghost}
                     bandLibrary={bandLibraryFor(gym)}
                     gym={gym}
+                    rpeEstimate={(w, r) =>
+                      rpeEstimateFor(
+                        ex,
+                        w,
+                        r,
+                        ex.sets.filter((x) => setTypeOf(x) !== 'warmup').length,
+                      )
+                    }
                     onSave={(vals) => {
                       if (sheet.set) upsertSet(workout.id, ex.id, { ...vals, id: sheet.set.id });
-                      else logNewSet(ex, vals);
+                      else
+                        logNewSet(
+                          ex,
+                          vals,
+                          sheet.ghost
+                            ? { reps: sheet.ghost.reps, weight: sheet.ghost.weight }
+                            : null,
+                        );
                       setSheet(null);
                     }}
                     onDelete={sheet.set ? () => removeSet(ex, sheet.set!) : undefined}
@@ -3724,6 +4292,25 @@ export function SessionView(props: {
         </Sheet>
       )}
 
+      {prShare && (
+        <StatShareSheet
+          model={prShare}
+          fileBase="spotter-record"
+          onClose={() => setPrShare(null)}
+        />
+      )}
+      {sheet?.kind === 'rest' && (
+        <RestSheet
+          exName={sheet.exName}
+          displayName={exName(sheet.exName)}
+          auto={(() => {
+            const e = workout.exercises.find((x) => x.name === sheet.exName);
+            const last = e?.sets[e.sets.length - 1];
+            return e && last ? autoRestFor(e, last) : null;
+          })()}
+          onClose={() => setSheet(null)}
+        />
+      )}
       {sheet?.kind === 'circuit-run' &&
         (() => {
           const block = sessionBlocks(workout).find(
@@ -4152,6 +4739,130 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
  * − / value / + control. The value is editable; clearing it stays empty while
  * typing (never snaps to 0 mid-edit). Empty blur keeps the previous number.
  */
+/** Fires the rest alert once, at `dueAt` (a timer, not the 1 s tick, so it
+ *  lands on time). Nothing if the moment already passed (a reload, a skip). */
+function RestAlarm(props: {
+  dueAt: number;
+  enabled: boolean;
+  prefs: RestPrefs;
+  title: string;
+  body: string;
+}) {
+  const { dueAt, enabled, prefs, title, body } = props;
+  useEffect(() => {
+    if (!enabled) return;
+    const ms = dueAt - Date.now();
+    if (ms <= 0) return;
+    const id = window.setTimeout(() => restAlert(prefs, { title, body }), ms);
+    return () => window.clearTimeout(id);
+  }, [dueAt, enabled, prefs, title, body]);
+  return null;
+}
+
+/** Rest target for one lift + how the end of rest is announced. */
+function RestSheet(props: {
+  exName: string;
+  displayName: string;
+  /** The automatic plan after the lift's last set (null = no set yet). */
+  auto: { sec: number; reasons: { key: RestReason; sec: number }[] } | null;
+  onClose: () => void;
+}) {
+  const { t } = useT();
+  const st = useStore();
+  const [target, setTarget] = useState<number | 'auto'>(
+    () => exerciseRestSec(props.exName) ?? 'auto',
+  );
+  const [prefs, setPrefs] = useState<RestPrefs>(st.restPrefs ?? REST_PREFS_DEFAULT);
+  const row = (key: keyof RestPrefs, label: string, sub: string) => (
+    <button
+      type="button"
+      className="toggle-row rest-pref"
+      aria-pressed={prefs[key]}
+      onClick={async () => {
+        const on = !prefs[key];
+        if (key === 'notify' && on && !(await requestRestNotifications())) return;
+        setPrefs((p) => ({ ...p, [key]: on }));
+      }}
+    >
+      <span className="rest-pref-text">
+        <span className="lab">{label}</span>
+        <span className="sub">{sub}</span>
+      </span>
+      <Switch on={prefs[key]} />
+    </button>
+  );
+  return (
+    <Sheet onClose={props.onClose} className="rest-sheet">
+      <div className="sheet-head">
+        <h3>{t.restSheetTitle(props.displayName)}</h3>
+      </div>
+      <div className="se-label se-label-first">{t.restTarget}</div>
+      <div className="rest-presets">
+        <button
+          type="button"
+          className={`rest-auto${target === 'auto' ? ' on' : ''}`}
+          aria-pressed={target === 'auto'}
+          onClick={() => setTarget('auto')}
+        >
+          {t.restAuto}
+          {props.auto && props.auto.sec > 0 ? ` · ${fmtCountdown(props.auto.sec)}` : ''}
+        </button>
+        {REST_PRESETS.map((sec) => (
+          <button
+            key={sec}
+            type="button"
+            className={target === sec ? 'on' : ''}
+            aria-pressed={target === sec}
+            onClick={() => setTarget(sec)}
+          >
+            {fmtCountdown(sec)}
+          </button>
+        ))}
+      </div>
+      {target === 'auto' && props.auto && props.auto.sec > 0 ? (
+        <div className="rest-why-box">
+          <div className="se-hint">{t.restAutoHint(fmtCountdown(props.auto.sec))}</div>
+          <div className="rest-why-chips">
+            {props.auto.reasons.map((r) => (
+              <span
+                key={r.key}
+                className={`rest-why-chip${r.sec > 0 ? ' up' : r.sec < 0 ? ' down' : ''}`}
+              >
+                {t.restWhy[r.key]}
+                {r.sec !== 0 ? ` ${r.sec > 0 ? '+' : '−'}${Math.abs(r.sec)} s` : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="se-hint rest-hint">{t.restTargetHint}</div>
+      )}
+      <div className="se-label">{t.restWhenEnds}</div>
+      <div className="se-group">
+        {row('vibrate', t.restVibrate, t.restVibrateSub)}
+        {row('sound', t.restSound, t.restSoundSub)}
+        {row('keepAwake', t.restKeepAwake, t.restKeepAwakeSub)}
+        {row('notify', t.restNotify, t.restNotifySub)}
+      </div>
+      <div className="sheet-actions">
+        <button className="btn btn-secondary grow" onClick={props.onClose}>
+          {t.cancel}
+        </button>
+        <button
+          className="btn btn-primary grow"
+          onClick={() => {
+            setExerciseRestSec(props.exName, target === 'auto' ? null : target);
+            setRestPrefs(prefs);
+            props.onClose();
+          }}
+        >
+          {t.save}
+        </button>
+      </div>
+    </Sheet>
+  );
+}
+
 function GhostSetRow(props: {
   ex: Exercise;
   defReps: number;
@@ -4163,9 +4874,14 @@ function GhostSetRow(props: {
     weight: number | null;
     holdMin?: number;
     drops?: DropEntry[];
+    failure?: FailureMark | null;
   }) => void;
   onSettings: () => void;
   title?: string;
+  /** Failure suggestion: copy, and whether the flame starts on. */
+  failSuggest?: { text: string; preset: boolean } | null;
+  /** The proposal would be a record — gold card with this title/line. */
+  prHint?: { title: string; line: string } | null;
   /** Drop / reverse drop: the parts of the last such set — one row each. */
   defDrops?: DropEntry[];
   /** Static-dynamic: default hold in seconds (the card swaps Reps for Hold). */
@@ -4202,9 +4918,27 @@ function GhostSetRow(props: {
   const fromDisp = (v: number): number => (unit === 'lb' ? Math.round(lbToKg(v) * 100) / 100 : v);
   const bw = weightKg === null && !props.weightRequired;
   const blocked = props.weightRequired && weightKg === null;
+  // Flame: "this set goes to failure". Starts on when the app suggests it;
+  // switching a suggestion off is an explicit "no".
+  const canFail = props.kind !== 'warmup' && !isSd && !props.isPast;
+  const [fail, setFail] = useState(!!props.failSuggest?.preset && canFail);
+  const failMark: FailureMark | null = fail
+    ? 'manual'
+    : props.failSuggest?.preset && canFail
+      ? 'no'
+      : null;
+  const pr = props.prHint && !fail ? props.prHint : null;
   return (
-    <div className={`gset kind-${props.kind ?? 'working'}`}>
-      {props.title && <div className="gset-title">{props.title}</div>}
+    <div
+      className={`gset kind-${props.kind ?? 'working'}${fail ? ' fail-on' : ''}${pr ? ' pr' : ''}`}
+    >
+      {(pr || props.title) && (
+        <div className="gset-title">
+          {pr && <Icon name="trophy" />}
+          {pr ? pr.title : props.title}
+          {fail && <span className="gset-fail-tag"> · {t.failTitle}</span>}
+        </div>
+      )}
       {isDrop ? (
         <div className="gset-drops">
           <div className="gset-part">
@@ -4273,6 +5007,18 @@ function GhostSetRow(props: {
         </div>
       )}
       {props.note && !isDrop && <div className="gset-note">{props.note}</div>}
+      {pr && (
+        <div className="gset-pr">
+          <Icon name="trophy" />
+          {pr.line}
+        </div>
+      )}
+      {props.failSuggest && canFail && (fail || !props.failSuggest.preset) && (
+        <div className={`gset-fail-hint${fail ? '' : ' idle'}`}>
+          <Icon name="flame" />
+          {props.failSuggest.text}
+        </div>
+      )}
       <div className="gset-actions">
         <button
           className="gset-cfg"
@@ -4282,6 +5028,18 @@ function GhostSetRow(props: {
         >
           <Icon name="sliders-horizontal" />
         </button>
+        {canFail && (
+          <button
+            type="button"
+            className={`gset-fail${fail ? ' on' : ''}`}
+            aria-pressed={fail}
+            aria-label={t.failToggle}
+            title={t.failToggle}
+            onClick={() => setFail((x) => !x)}
+          >
+            <Icon name="flame" weight={fail ? 'fill' : 'bold'} />
+          </button>
+        )}
         <button
           className="btn btn-primary gset-log"
           disabled={blocked}
@@ -4290,8 +5048,8 @@ function GhostSetRow(props: {
               isSd
                 ? { reps: 1, weight: weightKg, holdMin: holdSec / 60 }
                 : isDrop
-                  ? { reps, weight: weightKg, drops }
-                  : { reps, weight: weightKg },
+                  ? { reps, weight: weightKg, drops, failure: failMark }
+                  : { reps, weight: weightKg, failure: failMark },
             )
           }
         >
@@ -4423,6 +5181,8 @@ function SetEditorSheet(props: {
   bandLibrary: readonly BandRung[];
   /** The session's gym — its band library can be edited right from here. */
   gym?: Gym | null;
+  /** Effort estimate for a weight × reps (rpe.ts), shown when nobody rated it. */
+  rpeEstimate?: (weight: number | null, reps: number) => number | null;
   onSave: (vals: Omit<SetEntry, 'id' | 'position'>) => void;
   onDelete?: () => void;
   onExerciseSettings?: () => void;
@@ -4465,6 +5225,10 @@ function SetEditorSheet(props: {
   );
   const [calories, setCalories] = useState(props.set?.calories ?? 0);
   const [rpe, setRpe] = useState(props.set?.rpe ?? 0);
+  // To failure: F at the end of the effort row. 'auto' = the app inferred it.
+  const [fail, setFail] = useState<FailureMark | null>(props.set?.failure ?? null);
+  const [partials, setPartials] = useState(props.set?.partials ?? 0);
+  const failOn = fail === 'manual' || fail === 'auto';
   // Cardio console readings — which ones show depends on the machine.
   const cardioFields: CardioField[] = timed ? cardioProfile(props.exercise).fields : [];
   const seed = (k: 'speedKmh' | 'inclinePct' | 'watts' | 'level' | 'floors'): number =>
@@ -4543,6 +5307,13 @@ function SetEditorSheet(props: {
     : props.exercise.sets.length + 1;
   const isDropType = type === 'drop' || type === 'reverse-drop';
   const isSD = type === 'static-dynamic';
+  // The app's effort estimate when nobody rated the set (dashed on the row).
+  const rpeEst =
+    timed || isSD || isAssist || isBand || bw || type === 'warmup'
+      ? null
+      : props.set
+        ? (props.set.rpeAuto ?? null)
+        : (props.rpeEstimate?.(weight, reps) ?? null);
   const dropRepsTotal = reps + drops.reduce((n, d) => n + d.reps, 0);
   const dropKgTotal =
     (bw ? 0 : weight) * reps + drops.reduce((v, d) => v + (d.weight ?? 0) * d.reps, 0);
@@ -4586,6 +5357,10 @@ function SetEditorSheet(props: {
             distanceKm: null,
             calories: null,
             rpe: rpe > 0 ? rpe : null,
+            failure: isSD ? null : fail,
+            failureWhy: fail === 'auto' ? (props.set?.failureWhy ?? null) : null,
+            partials: failOn && partials > 0 ? partials : null,
+            rpeAuto: rpe > 0 ? null : (props.set?.rpeAuto ?? null),
           },
     );
   }
@@ -5027,15 +5802,61 @@ function SetEditorSheet(props: {
                 <button
                   key={v}
                   type="button"
-                  className={rpe === v ? 'on' : ''}
-                  aria-pressed={rpe === v}
-                  onClick={() => setRpe(v)}
+                  className={
+                    rpe === v && !failOn
+                      ? 'on'
+                      : rpe === 0 && !failOn && rpeEst !== null && v === Math.round(rpeEst)
+                        ? 'est'
+                        : ''
+                  }
+                  aria-pressed={rpe === v && !failOn}
+                  onClick={() => {
+                    setRpe(v);
+                    // Picking an effort below 10 says "not to failure"; 10 or
+                    // Skip leave it to the app (an 'auto' mark is dismissed).
+                    setFail(v >= 6 && v < 10 ? 'no' : fail === 'auto' ? 'no' : null);
+                  }}
                 >
                   {v === 0 ? t.rpeNone : v}
                 </button>
               ))}
+              {!isSD && (
+                <button
+                  type="button"
+                  className={`rpe-f${failOn ? ' on' : ''}${fail === 'auto' ? ' auto' : ''}`}
+                  aria-pressed={failOn}
+                  aria-label={t.failToggle}
+                  onClick={() => {
+                    setFail('manual');
+                    setRpe(10);
+                  }}
+                >
+                  F
+                </button>
+              )}
             </div>
-            <div className="se-hint">{t.rpeHint(rpe)}</div>
+            <div className="se-hint">
+              {failOn
+                ? fail === 'auto'
+                  ? t.rpeHintFAuto
+                  : t.rpeHintF
+                : rpe === 0 && rpeEst !== null
+                  ? t.rpeEstHint(String(rpeEst))
+                  : t.rpeHint(rpe)}
+            </div>
+            {failOn && (
+              <div className="se-partials">
+                <span className="lab">{t.partialsLabel}</span>
+                <Stepper
+                  label=""
+                  value={partials}
+                  step={1}
+                  min={0}
+                  max={20}
+                  onChange={setPartials}
+                />
+              </div>
+            )}
           </div>
           <div className="se-label se-label-more">{t.seGroupMore}</div>
           <div className="se-group">

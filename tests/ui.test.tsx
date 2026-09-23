@@ -968,11 +968,11 @@ describe('F-03 session UI', () => {
     };
     await go('bike');
     const bike = container.querySelector('[data-exid="bike"]') as HTMLElement;
-    expect(bike.querySelector('.fm-rest')).toBeTruthy();
+    expect(bike.querySelector('.rst-card')).toBeTruthy();
 
     await go('cd');
     await userEvent.click(screen.getByRole('button', { name: 'Start cool-down' }));
-    expect(container.querySelector('.fm-rest')).toBeNull();
+    expect(container.querySelector('.rst-card')).toBeNull();
     expect(screen.getByText('Cooling down — the rest clock is off')).toBeTruthy();
   });
 
@@ -1218,6 +1218,30 @@ describe('F-03 session UI', () => {
     const w = __getStateForTests().workouts.find((x) => x.id === 'open')!;
     expect(w.exercises.find((e) => e.id === 'row')!.sets).toHaveLength(1);
     expect(container.querySelector('.fss-m.on')!.textContent).toMatch(/Bench/);
+  });
+
+  it('a set that falls 2+ reps short of the card is marked failure automatically', async () => {
+    __replaceStateForTests(sampleStore());
+    const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    const reps = container.querySelector('.gset .stepper') as HTMLElement;
+    const minus = reps.querySelector('button') as HTMLElement;
+    for (let i = 0; i < 3; i++) await userEvent.click(minus);
+    await userEvent.click(screen.getByRole('button', { name: 'Log' }));
+    const sets = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets;
+    const last = sets[sets.length - 1];
+    expect(last.reps).toBe(5);
+    expect(last.failure).toBe('auto');
+    expect(last.failureWhy).toBe('missed');
+    expect(container.querySelector('.tag-fail.auto')).toBeTruthy();
+  });
+
+  it('the flame marks a set to failure by hand', async () => {
+    __replaceStateForTests(sampleStore());
+    render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'To failure' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Log' }));
+    const sets = __getStateForTests().workouts.find((w) => w.id === 'open')!.exercises[0].sets;
+    expect(sets[sets.length - 1].failure).toBe('manual');
   });
 
   it('inserts a warm-up marker card with no sets to log', async () => {
