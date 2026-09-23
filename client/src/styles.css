@@ -35312,8 +35312,7 @@ body {
 }
 .se-card .stepper,
 .se-card .band-readout,
-.se-card .se-rpe button,
-.se-card .drop-part {
+.se-card .se-rpe button {
   background: var(--color-bg);
 }
 .se-card .se-load {
@@ -35557,4 +35556,55 @@ body {
   background: transparent;
   color: var(--color-neutral-400);
   cursor: pointer;
+}
+
+/* ---- Drop / reverse parts inside the load card ---- */
+.se-card .dropedit-rows {
+  gap: 12px;
+}
+.se-card .drop-part {
+  gap: 6px;
+  background: transparent;
+}
+.se-card .drop-part + .drop-part {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-neutral-800);
+}
+.se-card .drop-part-lab {
+  min-height: 28px;
+  padding: 0 2px 0 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-neutral-400);
+}
+.se-card .drop-part-lab .drop-trash {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-neutral-500);
+  font-size: 16px;
+  cursor: pointer;
+}
+.se-card .drop-part-lab .drop-trash:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-tint);
+}
+.se-card .dropedit-add {
+  min-height: 44px;
+  border-radius: 12px;
+}
+.se-card .sheet-note {
+  margin: 0;
+  padding: 2px 4px 0;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  color: var(--color-neutral-500);
 }
