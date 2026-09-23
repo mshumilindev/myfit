@@ -1,0 +1,151 @@
+/* Button / IconButton — Spotter UI kit primitive.
+   Canonical control built on design tokens (design spec: 46px / 15px / 600).
+   Absorbs the global .btn* family and the .rx .btn.p/.s/.b system into one.
+   Variants map to token families only; no raw hex. */
+
+.uibtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 16px;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.uibtn:disabled,
+.uibtn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.uibtn--full {
+  width: 100%;
+}
+
+/* Sizes */
+.uibtn--sm {
+  min-height: 36px;
+  font-size: 13px;
+  padding: 0 12px;
+  gap: 6px;
+}
+.uibtn--lg {
+  min-height: 60px;
+  font-size: 16px;
+  border-radius: var(--radius-lg);
+  gap: 10px;
+}
+
+/* Variants — colours from token families only */
+.uibtn--primary {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.uibtn--secondary {
+  border-color: var(--color-divider);
+  color: var(--color-text);
+}
+.uibtn--ghost {
+  border-color: transparent;
+  color: var(--color-text);
+}
+.uibtn--danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+.uibtn--rest {
+  color: var(--color-rest-400);
+  border-color: var(--color-rest-700);
+}
+.uibtn--fill {
+  background: var(--color-accent);
+  color: var(--color-accent-900);
+  border-color: var(--color-accent);
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .uibtn--primary:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  }
+  .uibtn--secondary:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  }
+  .uibtn--ghost:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  }
+  .uibtn--danger:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  }
+  .uibtn--rest:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-rest-400) 12%, transparent);
+  }
+  .uibtn--fill:not(:disabled):hover {
+    background: var(--color-accent-400);
+  }
+}
+
+.uibtn--primary:not(:disabled):active {
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  border-color: var(--color-accent-400);
+}
+.uibtn--fill:not(:disabled):active {
+  background: var(--color-accent-600);
+}
+
+/* Icons scale with the label */
+.uibtn .ui-icon {
+  font-size: 1.15em;
+  flex: none;
+}
+
+/* Icon-only */
+.uibtn--icon {
+  padding: 0;
+  width: 46px;
+}
+.uibtn--icon.uibtn--sm {
+  width: 36px;
+}
+.uibtn--icon.uibtn--lg {
+  width: 60px;
+}
+
+/* Loading: hide content, show a spinner in the current variant colour */
+.uibtn.is-loading {
+  pointer-events: none;
+}
+.uibtn.is-loading .uibtn-label,
+.uibtn.is-loading .ui-icon {
+  visibility: hidden;
+}
+.uibtn-spin {
+  position: absolute;
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: uibtn-spin 0.6s linear infinite;
+}
+
+@keyframes uibtn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,48 @@
+/* Card — Spotter UI kit primitive.
+   The canonical surface container. Absorbs the .rx .card / .card.r/.g/.bl
+   tone system and the many bespoke card divs. Tones map to token families
+   only; no raw hex. */
+
+.uicard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+/* Padding scale */
+.uicard--pad-sm {
+  padding: 12px;
+}
+.uicard--pad-md {
+  padding: 16px;
+}
+.uicard--pad-lg {
+  padding: 20px;
+}
+
+/* Tones — neutral is the default surface */
+.uicard--danger {
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-line);
+}
+.uicard--ok {
+  background: var(--color-ok-tint);
+  border-color: var(--color-ok-line);
+}
+.uicard--rest {
+  background: var(--color-rest-900);
+  border-color: var(--color-rest-800);
+}
+.uicard--accent {
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+
+.uicard-header {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}

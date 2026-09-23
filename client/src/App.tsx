@@ -157,6 +157,9 @@ const MasteryView = lazy(() =>
 const InjuryView = lazy(() =>
   import('./views/InjuryView').then((module) => ({ default: module.InjuryView })),
 );
+const Gallery = lazy(() =>
+  import('./components/ui/Gallery').then((module) => ({ default: module.Gallery })),
+);
 const MasteryBadge = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
 );
@@ -217,6 +220,7 @@ export type Overlay =
   | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
   | { screen: 'mastery' }
   | { screen: 'injury'; injuryId?: string; checkin?: boolean }
+  | { screen: 'uikit' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
 
@@ -341,6 +345,7 @@ function toHash(
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
+  if (overlay?.screen === 'uikit') return '#/uikit';
   if (overlay?.screen === 'notifications') return '#/notifications';
   if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
   if (overlay?.screen === 'recap-story')
@@ -405,6 +410,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
+  if (head === 'uikit') return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
@@ -1355,6 +1361,7 @@ export function App() {
           onClose={closeOverlay}
         />
       )}
+      {activeOverlay?.screen === 'uikit' && <Gallery onClose={closeOverlay} />}
     </Suspense>
   ) : null;
   const tabContent = (
