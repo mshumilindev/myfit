@@ -30,7 +30,10 @@ import {
   buildPickItems,
   dayReference,
   equipmentCounts,
+  familyMain,
+  familyOf,
   familyReadiness,
+  weekSets,
   fitsDay,
   isFocusSub,
   readinessByGroup,
@@ -155,6 +158,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const [onlyGym, setOnlyGym] = useState(true);
   const [equipOpen, setEquipOpen] = useState(false);
   const [info, setInfo] = useState<PickItem | null>(null);
+  /** Search screen (D): opened by typing, or the group header's search icon. */
+  const [searching, setSearching] = useState(false);
   const [preview, setPreview] = useState<PickItem | null>(null);
   // Page size resets whenever what's being browsed changes.
   const [page, setPage] = useState({ key: '', n: PAGE });
@@ -169,6 +174,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
     [props.workout, store.workouts, props.gym],
   );
   const readiness = useMemo(() => readinessByGroup(finished, now), [finished, now]);
+  const famReady = useMemo(
+    () => new Map(FAMILIES.map((f) => [f.id, familyReadiness(f, finished, now)])),
+    [finished, now],
+  );
   const day = useMemo(() => dayReference(props.workout, finished), [props.workout, finished]);
   const dayLabel = day.readout ? dayReadoutLabel(day.readout, t) : '';
   const todayFamilies = useMemo(
@@ -184,6 +193,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
     () => suggest(eqFiltered, day, finished, readiness, now, { beforeTs: props.workout.startedAt }),
     [eqFiltered, day, finished, readiness, now, props.workout.startedAt],
   );
+  const suggestedKeys = useMemo(() => new Set(suggestions.map((x) => x.item.key)), [suggestions]);
   const doneToday = props.workout.exercises.filter(
     (e) => e.sets.length > 0 && (e.kind ?? 'strength') === 'strength',
   );
@@ -301,7 +311,12 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </div>
   );
 
-  const searchBar = (
+  const inSearch = searching || !!needle;
+  const cancelSearch = () => {
+    setQ('');
+    setSearching(false);
+  };
+  const searchInput = (
     <label className="xp-search">
       <Icon name="magnifying-glass" />
       <input
@@ -310,6 +325,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         placeholder={t.pickSearch}
         aria-label={t.pickSearchShort}
         onChange={(e) => setQ(e.target.value)}
+        onFocus={() => setSearching(true)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && needle) {
             if (results[0]) pick(results[0]);
@@ -324,11 +340,23 @@ export function ExercisePicker(props: ExercisePickerProps) {
       )}
     </label>
   );
+  const searchBar = isDesktop ? (
+    searchInput
+  ) : (
+    <div className="xp-searchrow">
+      {searchInput}
+      {inSearch && (
+        <button type="button" className="xp-cancel" onClick={cancelSearch}>
+          {t.cancel}
+        </button>
+      )}
+    </div>
+  );
 
   const equipChip = (
     <button type="button" className="xp-eqchip" onClick={() => setEquipOpen(true)}>
-      <Icon name="barbell" />
-      {equip.length ? t.pickEquipN(equip.length) : t.pickAnyEquipment}
+      <Icon name={equipmentIconName('dumbbell')} />
+      {equip.length ? t.pickEquipN(equip.length) : t.pickEquipAll}
       <Icon name="caret-down" />
     </button>
   );
@@ -407,14 +435,18 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <ExerciseName name={i.name} className="xp-row-name" secondary={false} />
           <span className="xp-row-meta">{itemMeta(t, i)}</span>
         </span>
-        <Badge item={i} t={t} />
+        {suggestedKeys.has(i.key) && !i.doneToday ? (
+          <span className="xp-badge sug">{t.pickSuggestedTag}</span>
+        ) : (
+          <Badge item={i} t={t} />
+        )}
       </button>
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
 
   const familyTile = (f: Family) => {
-    const r = familyReadiness(f, readiness);
+    const r = famReady.get(f.id)!;
     const color = readinessColor(r);
     const today = todayFamilies.has(f.id);
     return (
@@ -424,12 +456,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
         className={`xp-fam${today ? ' today' : ''}`}
         onClick={() => openFamily(f.id)}
       >
+        {today && <span className="xp-today corner">{t.pickToday}</span>}
         <FamilyFigure groups={f.groups} color={color} view={f.view} width={38} height={72} />
         <span className="xp-fam-body">
-          <span className="xp-fam-name">
-            {t.pickFamilies[f.id]}
-            {today && <span className="xp-today">{t.pickToday}</span>}
-          </span>
+          <span className="xp-fam-name">{t.pickFamilies[f.id]}</span>
           <span className="xp-fam-state">
             <span className="dot" style={{ background: color }} />
             {readinessLabel(t, r)}
@@ -443,7 +473,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   };
 
   const railItem = (f: Family) => {
-    const r = familyReadiness(f, readiness);
+    const r = famReady.get(f.id)!;
     const color = readinessColor(r);
     const open = activeFamily === f.id;
     return (
@@ -528,7 +558,6 @@ export function ExercisePicker(props: ExercisePickerProps) {
             setEquip((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))
           }
         >
-          <Icon name={equipmentIconName(id)} />
           {t.equipmentNames[id]}
           <span className="n">{n}</span>
         </button>
@@ -551,16 +580,52 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </>
   );
 
+  // "Browse all of …": the family (and sub) most results belong to.
+  const browseFamily = (() => {
+    const top = results[0];
+    const fid = top ? familyOf(top.primary) : null;
+    return fid ? (FAMILIES.find((f) => f.id === fid) ?? null) : null;
+  })();
+  const browseSub: SubId | null =
+    browseFamily && results[0]?.primary && browseFamily.subs.includes(results[0].primary)
+      ? results[0].primary
+      : null;
   const searchResults = (
     <div className="xp-results">
-      <div className="xp-label">{t.pickResults(results.length)}</div>
-      {results.slice(0, limit).map(row)}
+      {needle ? (
+        <div className="xp-label">{t.pickResults(results.length)}</div>
+      ) : (
+        <div className="xp-label accent">
+          {dayLabel ? t.pickSuggestedFor(dayLabel) : t.pickSuggestedYou}
+        </div>
+      )}
+      {(needle ? results.slice(0, limit) : suggestions.map((x) => x.item)).map(row)}
       {results.length > limit && (
         <button type="button" className="xp-more" onClick={() => setLimit((n) => n + PAGE)}>
           {t.pickShowMore(Math.min(PAGE, results.length - limit))}
         </button>
       )}
-      {!exact && (
+      {browseFamily && (
+        <button
+          type="button"
+          className="xp-browse"
+          onClick={() => {
+            openFamily(browseFamily.id);
+            if (browseSub) setSub(browseSub);
+            setSearching(false);
+          }}
+        >
+          <span>
+            {t.pickBrowseIn(
+              browseSub
+                ? `${t.pickFamilies[browseFamily.id]} › ${subLabel(t, browseSub)}`
+                : t.pickFamilies[browseFamily.id],
+            )}
+          </span>
+          <Icon name="caret-right" />
+        </button>
+      )}
+      {!exact && needle && (
         <button type="button" className="xp-create" onClick={() => props.onCreate(q.trim())}>
           <Icon name="plus" />
           {t.createExercise(q.trim())}
@@ -600,7 +665,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </div>
   );
 
-  const famHeaderState = fam ? familyReadiness(fam, readiness) : null;
+  const famHeaderState = fam ? famReady.get(fam.id)! : null;
 
   const equipSheet = equipOpen && (
     <EquipmentFilterSheet
@@ -631,7 +696,13 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <header className="xp-mhead">
             <span className="xp-title">
               <b>{props.replacing ? t.replaceExercise : t.addExercise}</b>
-              {dayLabel && <small>{dayLabel}</small>}
+              {(dayLabel || doneToday.length > 0) && (
+                <small>
+                  {[dayLabel, doneToday.length ? t.pickNDone(doneToday.length) : '']
+                    .filter(Boolean)
+                    .join(' · ')}
+                </small>
+              )}
             </span>
             {searchBar}
             {kindTabs}
@@ -709,10 +780,20 @@ export function ExercisePicker(props: ExercisePickerProps) {
   }
 
   // --- mobile ---
+  const doneN = doneToday.length;
+  const headSub = [dayLabel, doneN ? t.pickNDone(doneN) : ''].filter(Boolean).join(' · ');
+  const weekLine = (g: MuscleGroup) => {
+    const w = weekSets(g, finished, now);
+    return t.pickSetsWeek(w.done, w.target);
+  };
   let body: ReactNode;
-  if (needle) {
+  const groupView = !inSearch && !!fam && !!famHeaderState;
+  if (inSearch) {
     body = searchResults;
   } else if (fam && famHeaderState) {
+    const subState = sub ? subReadiness(sub, readiness) : null;
+    const st = subState ?? famHeaderState;
+    const mainG: MuscleGroup = sub && !isFocusSub(sub) ? sub : familyMain(fam.id);
     body = (
       <>
         <div className="xp-ghead m">
@@ -729,16 +810,30 @@ export function ExercisePicker(props: ExercisePickerProps) {
           </button>
           <span className="xp-ghead-txt">
             <b>{t.pickFamilies[fam.id]}</b>
-            <span className="xp-fam-state">
-              <span className="dot" style={{ background: readinessColor(famHeaderState) }} />
-              {readinessLabel(t, famHeaderState)}
+            <span className="xp-ghead-sub">
+              <span className="st" style={{ color: readinessColor(st) }}>
+                {readinessLabel(t, st)}
+              </span>
+              {' · '}
+              {weekLine(mainG)}
             </span>
           </span>
+          <button
+            type="button"
+            className="xp-back"
+            aria-label={t.pickSearchShort}
+            onClick={() => {
+              setSearching(true);
+              window.setTimeout(() => searchRef.current?.focus(), 0);
+            }}
+          >
+            <Icon name="magnifying-glass" />
+          </button>
         </div>
         {subChips}
         {equipRow}
         {bestCard}
-        <div className="xp-head">
+        <div className="xp-head gh">
           <span className="xp-label">
             {sub ? subLabel(t, sub) : t.pickFamilies[fam.id]} · {groupShown.length}
           </span>
@@ -750,9 +845,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
   } else {
     body = (
       <>
+        {kindTabs}
         {doneStrip}
         {suggestionsBlock}
-        <div className="xp-head">
+        <div className="xp-head fh">
           <span className="xp-label">{t.pickOrGroup}</span>
           {equipChip}
         </div>
@@ -764,10 +860,16 @@ export function ExercisePicker(props: ExercisePickerProps) {
   return (
     <>
       <Sheet onClose={props.onClose} className="xp-sheet">
+        {/* The search field keeps one stable slot in the tree, so focusing it
+            (which switches to the search screen) never remounts the input. */}
         <div className="xp">
-          {props.replacing && <div className="sheet-label">{t.replaceExercise}</div>}
-          {searchBar}
-          {kindTabs}
+          {!inSearch && !groupView && (
+            <div className="xp-title-row">
+              <b>{props.replacing ? t.replaceExercise : t.addExercise}</b>
+              {headSub && <span>{headSub}</span>}
+            </div>
+          )}
+          {!groupView && searchBar}
           {body}
         </div>
       </Sheet>
@@ -929,7 +1031,10 @@ export function ExerciseDetail(props: {
           <div className="xp-label">{t.pickKeyCues}</div>
           <ol className="xp-cues">
             {cues.map((s, i) => (
-              <li key={i}>{s}</li>
+              <li key={i}>
+                <span className="n">{i + 1} ·</span>
+                {s}
+              </li>
             ))}
           </ol>
           {steps.length > cues.length || allSteps ? (
@@ -994,7 +1099,11 @@ function EquipmentFilterSheet(props: {
                 )}
                 <Icon name={equipmentIconName(id)} />
                 <b>{t.equipmentNames[id]}</b>
-                {missing && <small>{t.noItemHere(t.equipmentNames[id])}</small>}
+                {inv.length > 0 && (
+                  <small>
+                    {id === 'body' ? t.pickAlways : missing ? t.pickNotInGym : t.pickInGym}
+                  </small>
+                )}
               </button>
             );
           })}

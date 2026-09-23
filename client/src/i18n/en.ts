@@ -930,6 +930,13 @@ export const en = {
   pickResults: (n: number) => `Results · ${n}`,
   pickBrowseIn: (m: string) => `Browse all of ${m}`,
   pickNeverDone: 'New for you',
+  pickNDone: (n: number) => `${n} done`,
+  pickSetsWeek: (a: number, b: number) => `${a} of ${b} sets this week`,
+  pickInGym: 'in gym',
+  pickNotInGym: 'not in gym',
+  pickAlways: 'always',
+  pickSuggestedTag: 'Suggested',
+  pickEquipAll: 'Equipment',
   pickFamilies: {
     chest: 'Chest',
     back: 'Back',

@@ -927,6 +927,13 @@ export const uk: Strings = {
   pickResults: (n: number) => `Результати · ${n}`,
   pickBrowseIn: (m: string) => `Усе: ${m}`,
   pickNeverDone: 'Нова для тебе',
+  pickNDone: (n: number) => `виконано ${n}`,
+  pickSetsWeek: (a: number, b: number) => `${a} з ${b} сетів цього тижня`,
+  pickInGym: 'є в залі',
+  pickNotInGym: 'немає в залі',
+  pickAlways: 'завжди',
+  pickSuggestedTag: 'Пропозиція',
+  pickEquipAll: 'Обладнання',
   pickFamilies: {
     chest: 'Груди',
     back: 'Спина',

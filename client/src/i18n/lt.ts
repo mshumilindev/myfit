@@ -940,6 +940,13 @@ export const lt: Strings = {
   pickResults: (n: number) => `Rezultatai · ${n}`,
   pickBrowseIn: (m: string) => `Viskas: ${m}`,
   pickNeverDone: 'Nauja tau',
+  pickNDone: (n: number) => `atlikta: ${n}`,
+  pickSetsWeek: (a: number, b: number) => `${a} iš ${b} serijų šią savaitę`,
+  pickInGym: 'yra salėje',
+  pickNotInGym: 'nėra salėje',
+  pickAlways: 'visada',
+  pickSuggestedTag: 'Pasiūlymas',
+  pickEquipAll: 'Įranga',
   pickFamilies: {
     chest: 'Krūtinė',
     back: 'Nugara',

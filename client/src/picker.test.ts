@@ -7,10 +7,8 @@ import {
   familyReadiness,
   sortForBrowse,
   suggest,
-  type Readiness,
 } from './picker';
 import type { Exercise, SetEntry, Workout } from './types';
-import type { MuscleGroup } from './data/exercises';
 
 const DAY = 86400000;
 const NOW = Date.UTC(2026, 8, 23, 12);
@@ -38,18 +36,26 @@ const wk = (id: string, startedAt: number, exercises: Exercise[], done = true): 
 });
 
 describe('families', () => {
-  it('reads the worst state among the groups that were trained', () => {
+  it('reads readiness from direct work only — spill-over does not load a family', () => {
     const back = FAMILIES.find((f) => f.id === 'back')!;
-    const map = new Map<MuscleGroup, Readiness>([
-      ['lats', { state: 'ready', days: 5 }],
-      ['traps', { state: 'recovering', days: 1 }],
-      ['lower_back', { state: 'stale', days: null }],
+    // Lats trained 8 days ago; yesterday a leg day with RDLs (lower back = secondary).
+    const old = wk('a', NOW - 8 * DAY, [ex('Wide-Grip Lat Pulldown', [set(), set(), set()])]);
+    const legs = wk('b', NOW - 1 * DAY, [ex('Romanian Deadlift', [set(), set(), set(), set()])]);
+    const r = familyReadiness(back, [old, legs], NOW);
+    expect(r.days).toBe(8);
+    expect(r.state).not.toBe('recovering');
+  });
+  it('a family trained yesterday is recovering', () => {
+    const back = FAMILIES.find((f) => f.id === 'back')!;
+    const y = wk('y', NOW - 0.5 * DAY, [
+      ex('Wide-Grip Lat Pulldown', [set(), set(), set(), set()]),
     ]);
-    expect(familyReadiness(back, map).state).toBe('recovering');
+    expect(familyReadiness(back, [y], NOW).state).toBe('recovering');
     expect(
       familyReadiness(
         FAMILIES.find((f) => f.id === 'core')!,
-        new Map(),
+        [],
+        NOW,
       ).days,
     ).toBeNull();
   });

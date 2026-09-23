@@ -929,6 +929,13 @@ export const pl: Strings = {
   pickResults: (n: number) => `Wyniki · ${n}`,
   pickBrowseIn: (m: string) => `Wszystko: ${m}`,
   pickNeverDone: 'Nowe dla ciebie',
+  pickNDone: (n: number) => `zrobione: ${n}`,
+  pickSetsWeek: (a: number, b: number) => `${a} z ${b} serii w tym tygodniu`,
+  pickInGym: 'na siłowni',
+  pickNotInGym: 'brak na siłowni',
+  pickAlways: 'zawsze',
+  pickSuggestedTag: 'Propozycja',
+  pickEquipAll: 'Sprzęt',
   pickFamilies: {
     chest: 'Klatka',
     back: 'Plecy',

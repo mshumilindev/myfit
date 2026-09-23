@@ -20,7 +20,8 @@ import {
 import type { EquipmentId } from './data/equipment';
 import type { FocusMuscle } from './data/subregions';
 import { describeDay, exerciseDay, type DayReadout } from './data/daySuggest';
-import { muscleReadiness, type ReadyState } from './recovery';
+import { RECOVERY_DAYS, computeReadiness, type ReadyState } from './recovery';
+import { LANDMARKS } from './volume';
 import { volumeWeakPoints } from './weakpoints';
 import { nextTarget, topHistory, type Target } from './progression';
 import { isStrengthExercise, resolveMuscles, topSet } from './store';
@@ -95,38 +96,92 @@ export interface Readiness {
   days: number | null;
 }
 
-const SEVERITY: Record<ReadyState, number> = { recovering: 3, nearly: 2, ready: 1, stale: 0 };
+/** The muscle whose recovery clock a family runs on. */
+const MAIN: Record<FamilyId, MuscleGroup> = {
+  chest: 'chest',
+  back: 'lats',
+  shoulders: 'shoulders',
+  arms: 'biceps',
+  legs: 'quads',
+  core: 'core',
+};
+const LOOKBACK_DAYS = 28;
 
-/** Worst state among the groups (so a half-recovered family never reads "ready"). */
-function worst(list: Readiness[]): Readiness {
-  const trained = list.filter((r) => r.days !== null);
-  if (trained.length === 0) return { state: 'stale', days: null };
-  return trained.reduce((a, b) =>
-    SEVERITY[b.state] > SEVERITY[a.state] ||
-    (SEVERITY[b.state] === SEVERITY[a.state] && (b.days ?? 0) < (a.days ?? 0))
-      ? b
-      : a,
+/**
+ * Readiness from DIRECT work only: the last session where an exercise's primary
+ * muscle was one of `groups`, run through the shared recovery maths. Secondary
+ * spill-over (lower back on a leg day's RDLs, traps on shrug-free rows…) does
+ * not make a muscle you haven't trained in a week read as loaded — that's the
+ * question the picker answers ("can I train back today?").
+ */
+export function directReadiness(
+  groups: MuscleGroup[],
+  main: MuscleGroup,
+  finished: Workout[],
+  now: number,
+): Readiness {
+  const set = new Set(groups);
+  const since = now - LOOKBACK_DAYS * 86400000;
+  const recent = finished
+    .filter((w) => w.startedAt >= since && w.startedAt <= now)
+    .sort((a, b) => b.startedAt - a.startedAt);
+  let hit: { days: number; dose: number } | null = null;
+  for (const w of recent) {
+    let dose = 0;
+    for (const e of w.exercises) {
+      if (!isStrengthExercise(e) || e.sets.length === 0) continue;
+      const p = resolveMuscles(e).primary;
+      if (p && set.has(p)) dose += e.sets.length;
+    }
+    if (dose > 0) {
+      hit = { days: (now - w.startedAt) / 86400000, dose };
+      break;
+    }
+  }
+  const r = computeReadiness(
+    hit ? hit.days : null,
+    hit?.dose ?? 0,
+    RECOVERY_DAYS[main] ?? 2,
+    LANDMARKS[main]?.mav || 12,
   );
+  return { state: r.state, days: hit ? Math.floor(hit.days) : null };
 }
 
+/** Direct-work readiness for every trainable group (sub chips, suggestions). */
 export function readinessByGroup(finished: Workout[], now: number): Map<MuscleGroup, Readiness> {
   const out = new Map<MuscleGroup, Readiness>();
-  for (const [m, r] of muscleReadiness(finished, now)) {
-    out.set(m, {
-      state: r.state,
-      days: r.daysSince === null ? null : Math.floor(r.daysSince),
-    });
-  }
+  for (const g of TRAINABLE) out.set(g, directReadiness([g], g, finished, now));
   return out;
 }
 
-export function familyReadiness(f: Family, map: Map<MuscleGroup, Readiness>): Readiness {
-  return worst(f.groups.map((g) => map.get(g)).filter((x): x is Readiness => !!x));
+export function familyReadiness(f: Family, finished: Workout[], now: number): Readiness {
+  return directReadiness(f.groups, MAIN[f.id], finished, now);
 }
 
 export function subReadiness(s: SubId, map: Map<MuscleGroup, Readiness>): Readiness | null {
   if (isFocusSub(s)) return map.get(s.startsWith('delt') ? 'shoulders' : 'chest') ?? null;
   return map.get(s) ?? null;
+}
+
+/** Direct sets this week for a group vs its most-adaptive volume (MAV). */
+export function weekSets(
+  g: MuscleGroup,
+  finished: Workout[],
+  now: number,
+): { done: number; target: number } {
+  const since = now - 7 * 86400000;
+  let done = 0;
+  for (const w of finished) {
+    if (w.startedAt < since || w.startedAt > now) continue;
+    for (const e of w.exercises) {
+      if (isStrengthExercise(e) && resolveMuscles(e).primary === g) done += e.sets.length;
+    }
+  }
+  return { done, target: LANDMARKS[g]?.mav ?? 12 };
+}
+
+export function familyMain(f: FamilyId): MuscleGroup {
+  return MAIN[f];
 }
 
 // --- Today's day reference (which muscles the session is about) --------------

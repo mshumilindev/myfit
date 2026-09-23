@@ -923,6 +923,13 @@ export const et: Strings = {
   pickResults: (n: number) => `Tulemused · ${n}`,
   pickBrowseIn: (m: string) => `Kõik: ${m}`,
   pickNeverDone: 'Sinu jaoks uus',
+  pickNDone: (n: number) => `tehtud: ${n}`,
+  pickSetsWeek: (a: number, b: number) => `${a}/${b} seeriat sel nädalal`,
+  pickInGym: 'saalis olemas',
+  pickNotInGym: 'saalis pole',
+  pickAlways: 'alati',
+  pickSuggestedTag: 'Soovitus',
+  pickEquipAll: 'Varustus',
   pickFamilies: {
     chest: 'Rind',
     back: 'Selg',
