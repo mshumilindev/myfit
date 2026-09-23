@@ -107,6 +107,8 @@ import {
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
 import { warmupRamp } from '../sessionBuilder';
+import { directReadiness } from '../picker';
+import { READINESS_COLOR } from '../recovery';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
 import { richExerciseByName, type MuscleGroup } from '../data/exercises';
@@ -1333,6 +1335,11 @@ export function SessionView(props: {
                 refTs={workout!.startedAt}
                 onOpen={openMuscleHistory}
                 showWeek={ex.sets.length > 0}
+                dots={
+                  focusView && live
+                    ? readinessDots([muscles.primary, ...muscles.secondary])
+                    : undefined
+                }
               />
             )}
           </div>
@@ -1738,7 +1745,7 @@ export function SessionView(props: {
    *  equipment / rename / machine rows the focus card no longer shows. */
   const renderExerciseOptions = (ex: Exercise, tabs: boolean) => (
     <>
-      {tabs && <div className="opts-group-label">{t.optsGroupChange}</div>}
+      {tabs && !isMarkerExercise(ex) && <div className="opts-group-label">{t.optsGroupChange}</div>}
       {tabs && isTimedExercise(ex) && exerciseKind(ex) === 'cardio' && !props.past && (
         <button
           className="menu-item"
@@ -1985,6 +1992,19 @@ export function SessionView(props: {
       )}
     </>
   );
+
+  /** Readiness before this session, per muscle — the dots on focus muscle chips
+   *  (green ready, brass nearly, red recovering; same colours as the picker). */
+  const readinessDots = (ms: MuscleGroup[]): Partial<Record<MuscleGroup, string>> => {
+    const finished = store.workouts.filter((w) => w.finishedAt !== null);
+    const out: Partial<Record<MuscleGroup, string>> = {};
+    for (const m of ms) {
+      const r = directReadiness([m], m, finished, workout!.startedAt);
+      // 'stale' (not trained lately) gets no dot — only a real recovery reading does.
+      if (r.days !== null && r.state !== 'stale') out[m] = READINESS_COLOR[r.state];
+    }
+    return out;
+  };
 
   function startTiming(ex: Exercise): void {
     setTiming({ exId: ex.id, startedAt: Date.now() });
@@ -3377,7 +3397,9 @@ export function SessionView(props: {
                 {img ? <img className="opts-thumb" src={img} alt="" /> : null}
                 <div className="opts-head-text">
                   <span className="opts-title">{ex ? exName(ex.name) : t.sessionSettings}</span>
-                  <span className="opts-sub">{ex ? `${t.setsStat} · ${ex.sets.length}` : ''}</span>
+                  <span className="opts-sub">
+                    {ex && !isMarkerExercise(ex) ? `${t.setsStat} · ${ex.sets.length}` : ''}
+                  </span>
                 </div>
               </div>
               <div className="opts-tabs" role="tablist">
@@ -4417,7 +4439,11 @@ function SetEditorSheet(props: {
     <SetEditorFrame embedded={!!props.embedded} onClose={props.onClose}>
       <div className="sheet-head">
         <span className="t">
-          {timed ? t.entryN(idx, props.exercise.name) : t.setN(idx, props.exercise.name)}
+          {props.embedded
+            ? t.setNumber(idx)
+            : timed
+              ? t.entryN(idx, props.exercise.name)
+              : t.setN(idx, props.exercise.name)}
         </span>
         {props.set && <span className="m">{t.loggedAt(fmtClock(openedAt))}</span>}
       </div>

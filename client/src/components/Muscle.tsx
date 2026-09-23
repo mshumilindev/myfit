@@ -1328,6 +1328,7 @@ export function MuscleRow({
   refTs,
   onOpen,
   showWeek = true,
+  dots,
 }: {
   entries: MuscleEntry[];
   /** Timestamp of the workout these entries belong to — anchors the week sum. */
@@ -1335,6 +1336,8 @@ export function MuscleRow({
   onOpen?: (m: MuscleGroup) => void;
   /** Weekly meters in the drawer (off for a live, not-yet-logged exercise). */
   showWeek?: boolean;
+  /** Readiness dot per muscle (a CSS colour) — shown on the chip's corner. */
+  dots?: Partial<Record<MuscleGroup, string>>;
 }) {
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -1387,6 +1390,9 @@ export function MuscleRow({
               onClick={onOpen}
               detail
             />
+            {dots?.[e.muscle] ? (
+              <span className="mrow-dot" style={{ background: dots[e.muscle] }} aria-hidden />
+            ) : null}
           </span>
         ))}
         <span

@@ -34734,3 +34734,17 @@ body {
   background: color-mix(in srgb, var(--set-drop) 18%, transparent);
   color: #d4bdf6;
 }
+/* Readiness dot on a muscle chip (focus mode) */
+.mrow-item {
+  position: relative;
+}
+.mrow-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--color-bg);
+  pointer-events: none;
+}
