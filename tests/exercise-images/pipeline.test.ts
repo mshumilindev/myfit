@@ -6,11 +6,6 @@
 import { describe, expect, it } from 'vitest';
 import { planApply } from '../../scripts/exercise-images/apply';
 import {
-  buildComfyGraph,
-  requiredModels,
-} from '../../scripts/exercise-images/providers/comfyGraph';
-import { normalizeLocalQa } from '../../scripts/exercise-images/providers/ollama';
-import {
   detectBodyPosition,
   detectUnilateral,
   slugify,
@@ -185,14 +180,6 @@ describe('prompt builder', () => {
     expect(full.length).toBeGreaterThan(plain.length);
     expect(full).toMatch(/Picture 2 = identity/);
     expect(full).toMatch(/Picture 3 = start frame/);
-  });
-  it('uses short numbered edit instructions for local edit models', () => {
-    const t = buildPrompt({ ...base, style: 'edit' }).text;
-    expect(t.length).toBeLessThan(1600);
-    expect(t).toMatch(/SHIRTLESS/);
-    expect(t).toMatch(/white crew socks/);
-    expect(t).toMatch(/his back/);
-    expect(t).toMatch(/armpit hair/);
   });
   it('appends a QA retry instruction and changes the hash input', () => {
     const t = buildPrompt({ ...base, retryInstruction: 'Bench must be inclined ~30°.' }).text;
@@ -422,82 +409,5 @@ describe('apply planning (never overwrites originals)', () => {
     const p = planApply(m(pair()), cur, { states: ['start', 'end'], requireManual: false });
     expect(p.unchanged).toEqual(['A']);
     expect(p.add).toHaveLength(0);
-  });
-});
-
-describe('local generation (ComfyUI + Ollama)', () => {
-  const g = {
-    prompt: 'P',
-    images: ['a.jpg', 'b.png', 'c.png'],
-    seed: 42,
-    size: { w: 1248, h: 832 },
-  };
-  const types = (nodes: Record<string, { class_type: string }>) =>
-    Object.values(nodes).map((n) => n.class_type);
-
-  it('defaults to the best-quality local preset, free of API keys', () => {
-    const c = loadConfig({ IMAGE_PROVIDER: 'comfyui' });
-    expect(c.comfy.preset).toBe('qwen-edit-2511');
-    expect(c.comfy.unet).toMatch(/qwen-image-edit-2511.*\.gguf$/);
-    expect(c.comfy.steps).toBe(4); // Lightning LoRA
-    expect(c.qaProvider).toBe('ollama');
-    expect(c.timeoutMs).toBeGreaterThan(180_000);
-    const full = loadConfig({ IMAGE_PROVIDER: 'comfyui', COMFYUI_LORA: 'none' });
-    expect(full.comfy.lora).toBeNull();
-    expect(full.comfy.steps).toBeGreaterThan(4);
-    expect(full.model).not.toBe(c.model); // config change → opt-in redo
-  });
-
-  it('builds the Qwen-Image-Edit graph with all three pictures and the seed', () => {
-    const c = loadConfig({ IMAGE_PROVIDER: 'comfyui' }).comfy;
-    const graph = buildComfyGraph(c, g);
-    const t = types(graph.nodes);
-    expect(t).toEqual(
-      expect.arrayContaining([
-        'UnetLoaderGGUF',
-        'CLIPLoaderGGUF',
-        'LoraLoaderModelOnly',
-        'KSampler',
-      ]),
-    );
-    expect(t.filter((x) => x === 'LoadImage')).toHaveLength(3);
-    const enc = Object.values(graph.nodes).find(
-      (n) => n.class_type === 'TextEncodeQwenImageEditPlus' && n.inputs.prompt === 'P',
-    )!;
-    expect(enc.inputs).toHaveProperty('image3');
-    const ks = Object.values(graph.nodes).find((n) => n.class_type === 'KSampler')!;
-    expect(ks.inputs.seed).toBe(42);
-    expect(graph.nodes[graph.output].class_type).toBe('PreviewImage');
-    // every link points at an existing node
-    for (const n of Object.values(graph.nodes))
-      for (const v of Object.values(n.inputs))
-        if (Array.isArray(v)) expect(graph.nodes[v[0]]).toBeDefined();
-    expect(() => buildComfyGraph(c, { ...g, images: ['1', '2', '3', '4'] })).toThrow();
-  });
-
-  it('builds the FLUX.2 klein graph with one reference latent per image', () => {
-    const c = loadConfig({ IMAGE_PROVIDER: 'comfyui', COMFYUI_PRESET: 'flux2-klein-4b' }).comfy;
-    const t = types(buildComfyGraph(c, g).nodes);
-    expect(t.filter((x) => x === 'ReferenceLatent')).toHaveLength(6);
-    expect(t).toContain('EmptyFlux2LatentImage');
-    expect(requiredModels(c).map((r) => r.node)).toEqual(['UNETLoader', 'CLIPLoader', 'VAELoader']);
-  });
-
-  it('normalises sloppy local QA answers before strict validation', () => {
-    const r = normalizeLocalQa({
-      passed: 'true',
-      score: '85',
-      exerciseCorrect: true,
-      equipmentCorrect: true,
-      poseCorrect: true,
-      anatomyCorrect: true,
-      styleCorrect: true,
-      issues: 'bar slightly bent',
-      retryInstruction: '',
-    });
-    const qa = parseQa(r);
-    expect(qa.score).toBe(8.5);
-    expect(qa.issues).toEqual(['bar slightly bent']);
-    expect(qa.retryInstruction).toBeNull();
   });
 });

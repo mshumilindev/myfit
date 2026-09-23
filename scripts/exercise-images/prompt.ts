@@ -32,11 +32,6 @@ export interface PromptInput {
   refs: RefRole[];
   /** Correction from the previous QA round, if any. */
   retryInstruction?: string | null;
-  /**
-   * describe = long photographic brief (API models) · edit = short numbered edit
-   * instructions, which local instruction-edit models (Qwen-Image-Edit) follow far better.
-   */
-  style?: 'describe' | 'edit';
 }
 
 export interface BuiltPrompt {
@@ -87,48 +82,10 @@ function refLine(refs: RefRole[]): string {
     identity: 'identity reference (the athlete)',
     'start-frame': 'start frame (already re-shot, keep everything but the pose)',
   };
-  // "Picture N" is how Qwen-Image-Edit labels its inputs; other models read it just as well.
   return `Attached images, in order: ${refs.map((r, i) => `Picture ${i + 1} = ${label[r]}`).join('; ')}.`;
 }
 
-/** Short, imperative edit instructions for local edit models. */
-function buildEditPrompt(input: PromptInput): BuiltPrompt {
-  const { exercise: ex, state, palette, refs } = input;
-  const pic = (role: RefRole) => `Picture ${refs.indexOf(role) + 1}`;
-  const frame =
-    state === 'start'
-      ? 'the starting position'
-      : state === 'end'
-        ? 'the end (contracted) position'
-        : 'the most recognisable mid-movement moment';
-  const lines = [
-    `Edit ${pic('exercise')} into a clean studio photo of the same exercise (${ex.name}, ${frame}).`,
-    `1. Keep exactly as in ${pic('exercise')}: the movement, body position, grip, which arm/leg works, ` +
-      'the equipment and its geometry, and the camera angle — if we see his back, still show his back; ' +
-      'if we see his side, still his side.',
-    refs.includes('identity')
-      ? `2. The man must be the same person as in ${pic('identity')}: same face, hair, skin tone and physique.`
-      : '2. The man: late 20s, athletic natural physique, short neat dark hair, clean-shaven face, no tattoos, no jewellery.',
-    '3. Clothing — only three items: plain charcoal shorts, white crew socks, dark grey training shoes. SHIRTLESS: remove any tank top or shirt, bare torso. No logos.',
-    `4. Replace the whole background: a plain seamless matte wall in dark desaturated ${palette.words} (${palette.wall}), ` +
-      'dark rubber floor. Remove everything else from the wall and room — sockets, switches, posters, other equipment.',
-    '5. Natural unshaved body hair: hairy legs, visible armpit hair, moderate chest hair.',
-    '6. Raw true-to-life photograph, not a render: real skin with pores and a slight sweat sheen, ' +
-      'soft studio key light from the front-left, subtle rim light, 50mm lens, sharp focus, high detail.',
-    refs.includes('start-frame')
-      ? `7. ${pic('start-frame')} is the start of this same exercise already edited: keep that athlete, clothes, set, light and camera identical — only the body position changes.`
-      : '',
-    ex.unilateral && !/alternat/i.test(ex.name)
-      ? 'Single-side exercise: only one arm/leg works, as in the reference.'
-      : '',
-    input.retryInstruction ? `Fix: ${input.retryInstruction}` : '',
-    'No text, no watermark, no extra people, no extra or missing limbs or fingers.',
-  ].filter(Boolean);
-  return { version: PROMPT_VERSION, text: lines.join('\n') };
-}
-
 export function buildPrompt(input: PromptInput): BuiltPrompt {
-  if (input.style === 'edit') return buildEditPrompt(input);
   const { exercise: ex, state, palette, refs } = input;
   // First two steps describe setup/start; later ones describe the motion.
   const cues = ex.instructions.slice(0, state === 'end' ? 4 : 2).join(' ');

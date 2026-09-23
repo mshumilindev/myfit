@@ -65,7 +65,7 @@ export function qaPasses(r: QaResult, c: Pick<PipelineConfig, 'qaMinScore'>): bo
   );
 }
 
-/** System prompt shared by every QA provider (OpenAI vision, local Ollama). */
+/** QA system prompt (vision model). */
 export const QA_SYSTEM = `You are a strict QA reviewer for an exercise-instruction image library.
 You get: (1) the ORIGINAL reference photo of the exercise, (2) the NEW generated image,
 optionally (3) the IDENTITY reference of the library's athlete, and the exercise metadata.

@@ -97,7 +97,6 @@ export function plan(
   const anchorPath = m.anchor ? path.join(REPO_ROOT, m.anchor.path) : null;
   const anchorHash = m.anchor?.hash ?? null;
   const configKey = generationConfigKey(c);
-  const promptStyle = c.provider === 'comfyui' ? 'edit' : 'describe';
   const out: PlannedItem[] = [];
   for (const ex of exercises) {
     const palette = resolvePalette(ex.paletteKey, tokens);
@@ -116,7 +115,6 @@ export function plan(
         state,
         palette,
         refs: roles,
-        style: promptStyle,
       }).text;
       const fingerprint: Fingerprint = {
         promptVersion: buildPrompt({
@@ -124,7 +122,6 @@ export function plan(
           state,
           palette,
           refs: roles,
-          style: promptStyle,
         }).version,
         promptHash: sha256(basePrompt),
         referenceHash: fileHash(ex.references[state]),
@@ -151,18 +148,6 @@ export function costSummary(
   const run = items.filter((i) => i.decision.run);
   const exercises = new Set(run.map((i) => i.exercise.id)).size;
   const worst = run.length * (1 + c.maxQaAttempts);
-  if (c.provider === 'comfyui') {
-    return [
-      `exercises to process : ${exercises}`,
-      `images to generate   : ${run.length}  (skipped: ${items.length - run.length})`,
-      `model                : local ComfyUI · ${c.model}`,
-      `size                 : ~${c.size.w}x${c.size.h} → output ${c.outputSize.w}x${c.outputSize.h} ${c.outputFormat}`,
-      `cost                 : free — runs on this computer, nothing is uploaded`,
-      `generations          : ${run.length} minimum, up to ${worst} with QA regenerations`,
-      `QA                   : ${qa ? `${c.qaProvider} · ${c.qaModel}` : 'disabled'}`,
-      `time (M4 Pro, rough) : ${c.comfy.preset === 'flux2-klein-4b' || c.comfy.lora ? '1–3' : '8–20'} min per image; the first one is slower (model load)`,
-    ].join('\n');
-  }
   return [
     `exercises to process : ${exercises}`,
     `images to generate   : ${run.length}  (skipped: ${items.length - run.length})`,
@@ -301,7 +286,6 @@ export async function run(
         palette,
         refs: refs.map((r) => r.role),
         retryInstruction,
-        style: c.provider === 'comfyui' ? 'edit' : 'describe',
       }).text;
       e.prompt = prompt;
       e.status = 'generating';
@@ -365,9 +349,6 @@ export async function run(
       e.status = 'validating';
       e.qaAttempts = qaRound + 1;
       save();
-      // Local image + local QA models don't both fit in unified memory.
-      if (c.provider === 'comfyui' && c.qaProvider === 'ollama' && c.comfy.freeBeforeQa)
-        await provider.release?.();
       try {
         const raw = await withRetry(
           () =>

@@ -35,8 +35,6 @@ export interface ExerciseImageProvider {
   generate(req: GenerateRequest): Promise<GenerateResult>;
   /** Fail fast before a run (server reachable, model files present). */
   preflight?(): Promise<void>;
-  /** Free memory (e.g. unload local models before a local QA model runs). */
-  release?(): Promise<void>;
 }
 
 export interface QaRequest {
@@ -54,13 +52,10 @@ export interface QaProvider {
 
 export async function createProvider(c: PipelineConfig): Promise<ExerciseImageProvider> {
   if (c.provider === 'mock') return new (await import('./providers/mock')).MockProvider();
-  if (c.provider === 'comfyui') return new (await import('./providers/comfyui')).ComfyUIProvider(c);
   return new (await import('./providers/openai')).OpenAIImageProvider(c);
 }
 
 export async function createQaProvider(c: PipelineConfig): Promise<QaProvider> {
-  if (c.qaProvider === 'mock') return new (await import('./providers/mock')).MockQaProvider();
-  if (c.qaProvider === 'ollama')
-    return new (await import('./providers/ollama')).OllamaQaProvider(c);
+  if (c.provider === 'mock') return new (await import('./providers/mock')).MockQaProvider();
   return new (await import('./providers/openai')).OpenAIQaProvider(c);
 }
