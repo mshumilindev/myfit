@@ -17,6 +17,8 @@ bash scripts/exercise-images/local/setup-mac.sh "${COMFYUI_PRESET:-qwen-edit-251
   exit 1
 }
 
+# Always start a fresh ComfyUI with our memory flags (an old one may still hold queued jobs).
+pkill -f "main.py --listen 127.0.0.1" 2>/dev/null && sleep 3
 if ! curl -s http://127.0.0.1:8188/system_stats >/dev/null; then
   echo "▸ starting ComfyUI (log: assets/exercise-images/comfyui.log)"
   bash scripts/exercise-images/local/start-comfyui.sh >assets/exercise-images/comfyui.log 2>&1 &

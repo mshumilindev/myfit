@@ -13,4 +13,7 @@ fi
 cd "$COMFYUI_DIR"
 # Let PyTorch fall back to CPU for the few ops Metal lacks instead of crashing.
 export PYTORCH_ENABLE_MPS_FALLBACK=1
-exec .venv/bin/python main.py --listen 127.0.0.1 --port "${COMFYUI_PORT:-8188}" "$@"
+# 24 GB unified memory: don't keep models resident between runs, don't cache node outputs —
+# the text encoder is released before the diffusion model samples, so nothing swaps.
+exec .venv/bin/python main.py --listen 127.0.0.1 --port "${COMFYUI_PORT:-8188}" \
+  --disable-smart-memory --cache-none "$@"
