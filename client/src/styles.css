@@ -35662,3 +35662,26 @@ body {
 .opts-sheet .opts-quick button {
   white-space: nowrap;
 }
+
+/* ---- Options drawer: header + tabs and Muscle map / Discard stay put; only
+   the tab body scrolls between them. ---- */
+.sheet.opts-sheet {
+  overflow: hidden;
+  padding-bottom: calc(var(--space-4) + var(--safe-bottom));
+}
+.opts-sheet > .opts-head,
+.opts-sheet > .opts-tabs,
+.opts-sheet > .opts-pinned {
+  flex: none;
+}
+.opts-sheet > .opts-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0 var(--gutter) 4px;
+}
+.opts-sheet > .opts-pinned {
+  margin-top: 0;
+}
