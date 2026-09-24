@@ -95,7 +95,7 @@ export interface PlannedSet {
 }
 
 /**
- * A ramp of warm-up sets up to the first working weight. Only for loaded
+ * A ramp of three warm-up sets up to the first working weight. Only for loaded
  * compound work heavy enough to warrant it; light isolation and non-weight
  * load types get none. Each rung is rounded to a loadable step.
  */
@@ -107,10 +107,11 @@ export function warmupRamp(
   if (loadType !== 'weight' || !compound || !workingKg || workingKg <= 0) return [];
   if (workingKg < barKg * 1.5) return [];
   const out: PlannedSet[] = [{ reps: 10, weight: barKg, type: 'warmup' }];
+  // Three sets: the empty bar, then ~60% × 5 and ~80% × 2 — enough to groove
+  // the pattern and prime the load without eating into the working sets.
   for (const [f, reps] of [
-    [0.55, 5],
-    [0.75, 3],
-    [0.9, 1],
+    [0.6, 5],
+    [0.8, 2],
   ] as [number, number][]) {
     const w = roundToStep(workingKg * f, step);
     if (w > out[out.length - 1].weight! && w < workingKg)

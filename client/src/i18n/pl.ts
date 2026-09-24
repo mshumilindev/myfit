@@ -1591,6 +1591,21 @@ export const pl: Strings = {
               ? 'Lekko — w zapasie 4+ powtórzenia'
               : 'Jak ciężka była seria, 6–10. Opcjonalnie — stuknij liczbę, by to śledzić.',
   bandEditLink: (gym) => `Edytuj gumy · ${gym}`,
+  tiredTitle: (m) => `${m}: zmęczenie`,
+  tiredSub: (pct, n) => `O ${pct}% słabiej niż najlepsza seria · ${n} ciężkich serii`,
+  tiredSubSets: (n) => `${n} ciężkich serii dziś`,
+  tiredWhyLabel: 'Dlaczego:',
+  tiredWhy: (m, n, pct) =>
+    `${m} dostały dziś już ${n} ciężkich serii${pct >= 1 ? `, a ostatnia seria była o ${pct}% słabsza od najlepszej` : ''}. Dalsze serie dają głównie zmęczenie, nie mięśnie.`,
+  tiredNextPlan: 'DALEJ W PLANIE',
+  tiredNextUsual: 'ZWYKLE NASTĘPNE',
+  tiredFresh: (m) => `ŚWIEŻY MIĘSIEŃ · ${m.toUpperCase()}`,
+  tiredFreshSub: 'dziś prawie nie pracował',
+  worthTitle: 'Zysk dla mięśni z tej serii',
+  worthLow: 'Mały',
+  worthMid: 'Średni',
+  worthText: (pct) =>
+    `Około ${pct}% tego, co dała pierwsza seria — a męczy tak samo. Zapisz, jeśli chcesz.`,
   restOf: (t) => `z ${t}`,
   restGo: 'START',
   restOverTitle: 'Koniec przerwy',

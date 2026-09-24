@@ -54,9 +54,8 @@ describe('warmupRamp', () => {
   it('ramps a loaded compound to plates', () => {
     expect(warmupRamp(100, {})).toEqual([
       { reps: 10, weight: 20, type: 'warmup' },
-      { reps: 5, weight: 55, type: 'warmup' },
-      { reps: 3, weight: 75, type: 'warmup' },
-      { reps: 1, weight: 90, type: 'warmup' },
+      { reps: 5, weight: 60, type: 'warmup' },
+      { reps: 2, weight: 80, type: 'warmup' },
     ]);
   });
   it('skips light or non-weight work', () => {

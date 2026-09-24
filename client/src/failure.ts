@@ -84,10 +84,9 @@ export function inferFailure(
   // the previous one at this load or of the target — a smaller drop than a
   // collapse, but with the estimate agreeing it's the same story.
   const est = s.rpeAuto ?? null;
-  // The effort model reads the set as maximal on its own (it declines to
-  // estimate sets well past what it expects, so 10 means "right at the max").
-  if (est !== null && est >= 10 && w > 0) return 'effort';
-  if (est !== null && est >= 9.5 && w > 0) {
+  // Never on the first working set: the model is least sure there, and a
+  // fresh first set is rarely a true failure.
+  if (est !== null && est >= 9.5 && w > 0 && prev) {
     const fellShort =
       (prev && (prev.weight ?? 0) === w && prev.reps - s.reps >= 2) ||
       (tg && s.reps < tg.reps && w >= (tg.weight ?? 0));

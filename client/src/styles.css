@@ -36328,3 +36328,205 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ---- K1 · per-set bar: height = how much the set built, intensity = drop ---- */
+.focus-view .set-row.metered {
+  position: relative;
+  padding-left: 18px;
+}
+.focus-view .set-row.metered::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  bottom: calc(50% - 14px);
+  width: 5px;
+  height: calc(28px * var(--stim, 0));
+  min-height: 3px;
+  border-radius: 3px;
+  background: color-mix(
+    in srgb,
+    rgb(240, 113, 79) calc(var(--fat, 0) * 100%),
+    var(--color-accent)
+  );
+}
+.focus-view .set-row.metered::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  bottom: calc(50% - 14px);
+  width: 5px;
+  height: 28px;
+  border-radius: 3px;
+  background: var(--color-neutral-900);
+  z-index: -1;
+}
+
+/* ---- Worth of the next set (on the set card) ---- */
+.gset-worth {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gw-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12.5px;
+  color: var(--color-neutral-300);
+}
+.gw-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+.gw-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--color-neutral-400);
+}
+.gw-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+}
+
+/* ---- V9 · tired-muscle banner (under the set card, collapsible) ---- */
+.tired-banner {
+  margin: 12px 0 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--color-neutral-900);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tired-banner.collapsed {
+  padding: 8px 12px;
+}
+.tb-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tb-ic {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(240, 113, 79, 0.18);
+  color: rgb(240, 113, 79);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+}
+.tb-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tb-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+.tb-sub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  line-height: 1.35;
+}
+.tb-chev {
+  flex: none;
+  color: var(--color-neutral-500);
+  font-size: 16px;
+}
+.tb-why {
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-neutral-400);
+}
+.tb-why b {
+  color: var(--color-neutral-300);
+}
+.tb-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.tb-tile {
+  min-width: 0;
+  padding: 8px;
+  border: none;
+  border-radius: 14px;
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-text);
+  font: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  cursor: pointer;
+}
+.tb-tile.primary {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+.tb-tile img,
+.tb-tile .tb-noimg {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #fff;
+}
+.tb-tile .tb-noimg {
+  background: var(--color-neutral-900);
+}
+.tb-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-neutral-500);
+}
+.tb-tile.primary .tb-kicker {
+  color: var(--color-accent);
+}
+.tb-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.tb-tsub {
+  font-size: 11.5px;
+  color: var(--color-neutral-500);
+}
+/* One suggestion only: a wide row instead of a half-width tile. */
+.tb-tiles:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.tb-tiles:has(> :only-child) .tb-tile {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  grid-auto-rows: min-content;
+  column-gap: 12px;
+  row-gap: 3px;
+  align-content: center;
+}
+.tb-tiles:has(> :only-child) .tb-tile > img,
+.tb-tiles:has(> :only-child) .tb-tile > .tb-noimg {
+  grid-row: 1 / span 3;
+  width: 112px;
+}

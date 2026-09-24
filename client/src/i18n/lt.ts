@@ -1604,6 +1604,21 @@ export const lt: Strings = {
               ? 'Lengva — liko 4+ pakartojimai'
               : 'Kaip sunkus buvo priėjimas, 6–10. Neprivaloma — bakstelėk skaičių, kad sektum.',
   bandEditLink: (gym) => `Redaguoti gumas · ${gym}`,
+  tiredTitle: (m) => `${m}: nuovargis`,
+  tiredSub: (pct, n) => `${pct}% silpniau nei geriausias priėjimas · ${n} sunkių priėjimų`,
+  tiredSubSets: (n) => `${n} sunkių priėjimų šiandien`,
+  tiredWhyLabel: 'Kodėl:',
+  tiredWhy: (m, n, pct) =>
+    `${m} šiandien jau gavo ${n} sunkių priėjimų${pct >= 1 ? `, o paskutinis buvo ${pct}% silpnesnis už geriausią` : ''}. Toliau papildomi priėjimai daugiausia duoda nuovargį, ne raumenis.`,
+  tiredNextPlan: 'TOLIAU PLANE',
+  tiredNextUsual: 'PAPRASTAI TOLIAU',
+  tiredFresh: (m) => `ŠVIEŽIAS RAUMUO · ${m.toUpperCase()}`,
+  tiredFreshSub: 'šiandien beveik nedirbo',
+  worthTitle: 'Nauda raumenims iš šio priėjimo',
+  worthLow: 'Maža',
+  worthMid: 'Vidutinė',
+  worthText: (pct) =>
+    `Apie ${pct}% to, ką davė pirmas priėjimas, — o vargina taip pat. Įrašyk, jei nori.`,
   restOf: (t) => `iš ${t}`,
   restGo: 'PIRMYN',
   restOverTitle: 'Poilsis baigtas',

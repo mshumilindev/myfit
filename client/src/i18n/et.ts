@@ -1587,6 +1587,21 @@ export const et: Strings = {
               ? 'Kerge — varus 4+ kordust'
               : 'Kui raske seeria tundus, 6–10. Valikuline — puuduta numbrit, et jälgida.',
   bandEditLink: (gym) => `Muuda kumme · ${gym}`,
+  tiredTitle: (m) => `${m}: väsinud`,
+  tiredSub: (pct, n) => `${pct}% nõrgem kui parim seeria · ${n} rasket seeriat`,
+  tiredSubSets: (n) => `${n} rasket seeriat täna`,
+  tiredWhyLabel: 'Miks:',
+  tiredWhy: (m, n, pct) =>
+    `${m} on täna saanud juba ${n} rasket seeriat${pct >= 1 ? ` ja viimane seeria oli ${pct}% nõrgem kui parim` : ''}. Edasi annavad lisaseeriad peamiselt väsimust, mitte lihast.`,
+  tiredNextPlan: 'JÄRGMINE PLAANIS',
+  tiredNextUsual: 'TAVALISELT JÄRGMINE',
+  tiredFresh: (m) => `VÄRSKE LIHAS · ${m.toUpperCase()}`,
+  tiredFreshSub: 'täna vaevu töötas',
+  worthTitle: 'Lihaskasu sellest seeriast',
+  worthLow: 'Väike',
+  worthMid: 'Keskmine',
+  worthText: (pct) =>
+    `Umbes ${pct}% sellest, mida andis esimene seeria — aga väsitab sama palju. Logi, kui soovid.`,
   restOf: (t) => `/${t}`,
   restGo: 'MINE',
   restOverTitle: 'Puhkus läbi',

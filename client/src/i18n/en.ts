@@ -1633,6 +1633,21 @@ export const en = {
               ? 'Easy — 4+ reps left'
               : 'How hard the set felt, 6–10. Optional — tap a number to track it.',
   bandEditLink: (gym: string) => `Edit bands · ${gym}`,
+  tiredTitle: (m: string) => `${m} ${/s$/i.test(m) && !/^chest$/i.test(m) ? 'are' : 'is'} tired`,
+  tiredSub: (pct: number, n: number) => `${pct}% weaker than your best set · ${n} hard sets done`,
+  tiredSubSets: (n: number) => `${n} hard sets done today`,
+  tiredWhyLabel: 'Why:',
+  tiredWhy: (m: string, n: number, pct: number) =>
+    `your ${m} got ${n} hard sets today${pct >= 1 ? `, and your last set was ${pct}% weaker than your best one` : ''}. Past this point extra sets mostly add tiredness, not muscle.`,
+  tiredNextPlan: 'NEXT IN TODAY’S PLAN',
+  tiredNextUsual: 'NEXT IN YOUR ROUTINE',
+  tiredFresh: (m: string) => `FRESH MUSCLE · ${m.toUpperCase()}`,
+  tiredFreshSub: 'barely worked today',
+  worthTitle: 'Muscle gain from this set',
+  worthLow: 'Low',
+  worthMid: 'Medium',
+  worthText: (pct: number) =>
+    `About ${pct}% of what your first set gave — but it tires you just as much. Log it if you want.`,
   restOf: (t: string) => `of ${t}`,
   restGo: 'GO',
   restOverTitle: "Rest's over",

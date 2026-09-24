@@ -102,3 +102,33 @@ describe('defaultRestSec', () => {
     expect(defaultRestSec({ compound: true, lastType: 'working', midRound: true })).toBe(0);
   });
 });
+
+import { marginalStimulus, performanceDrops, tiredVerdict, usualNext } from './stimulus';
+
+describe('stimulus', () => {
+  it('diminishing returns per extra hard set', () => {
+    expect(marginalStimulus(0)).toBe(1);
+    expect(marginalStimulus(6)).toBeCloseTo(0.5);
+    expect(marginalStimulus(10)).toBeLessThan(0.3);
+  });
+  it('performance drop vs the best set so far', () => {
+    const s = [set(8, 80), set(8, 80), set(6, 80)];
+    const d = performanceDrops(s);
+    expect(d.get(s[0].id)).toBe(0);
+    expect(d.get(s[2].id)!).toBeCloseTo(1 - (80 * (1 + 6 / 30)) / (80 * (1 + 8 / 30)), 3);
+  });
+  it('enough by drop or volume; a plan only yields to a big drop', () => {
+    const sets = [set(8, 80), set(8, 80), set(7, 80), set(6, 80), set(4, 80)];
+    expect(tiredVerdict({ sets, muscleSets: 5, plannedLeft: 0 }).enough).toBe(true);
+    const mild = [set(8, 80), set(8, 80), set(7, 80)];
+    expect(tiredVerdict({ sets: mild, muscleSets: 3, plannedLeft: 0 }).enough).toBe(false);
+    expect(tiredVerdict({ sets: mild, muscleSets: 10, plannedLeft: 0 }).enough).toBe(true);
+    expect(tiredVerdict({ sets: mild, muscleSets: 10, plannedLeft: 2 }).enough).toBe(false);
+  });
+  it('usual next from history', () => {
+    const s = (...n: string[]) => n.map((name, position) => ({ name, position }));
+    const hist = [s('Bench', 'Incline'), s('Bench', 'Incline'), s('Bench', 'Fly')];
+    expect(usualNext(hist, 'Bench', new Set())).toBe('Incline');
+    expect(usualNext(hist, 'Bench', new Set(['incline']))).toBe('Fly');
+  });
+});
