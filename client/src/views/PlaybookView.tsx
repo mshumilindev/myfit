@@ -56,6 +56,7 @@ export function PlaybookView({
       targetMuscles: p.coverage.filter((c) => c.primary).map((c) => c.muscle),
     });
     if (!w) return;
+    if (p.opensWithWarmup) addExercise(w.id, t.defaultTimedExerciseNames.warmup, 'warmup');
     for (const ex of p.exercises) {
       addExercise(w.id, ex.name, 'strength', {
         plannedSets: ex.sets,

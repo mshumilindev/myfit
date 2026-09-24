@@ -168,6 +168,7 @@ import {
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
 import { starterPlan } from '../starterPlan';
+import { computePlaybook, playForWeekday, type Play } from '../playbook';
 import { equipmentById } from '../data/equipmentCatalog';
 import { muscleTintClass, photoTintClass } from '../photoTint';
 import { GymKitCard, GymKitTray, GymKitUndo } from '../components/GymKit';
@@ -541,6 +542,8 @@ export function SessionView(props: {
   const [tiredCollapsed, setTiredCollapsed] = useState<Record<string, boolean>>({});
   /** Exercise details opened from a suggestion tile (ⓘ). */
   const [tiredInfo, setTiredInfo] = useState<string | null>(null);
+  // Empty session: the Playbook day offered when the big card is tapped.
+  const [playSheet, setPlaySheet] = useState<{ play: Play; hero: TiredPick } | null>(null);
   // Gym kit nudge: items dismissed this session, and the Undo after an add.
   const [kitDismissed, setKitDismissed] = useState<string[]>([]);
   const [kitUndo, setKitUndo] = useState<{ items: string[]; inventory: string[] } | null>(null);
@@ -1542,6 +1545,108 @@ export function SessionView(props: {
     return muscleTintClass(resolveMuscles({ name: p.name, kind: 'strength' } as Exercise).primary);
   }
 
+  /** Apply a Playbook day to the (empty) live session: warm-up when you open
+   *  with one, then every lift with its usual sets and reps. */
+  function applyPlay(play: Play): void {
+    const wid = workout!.id;
+    if (play.opensWithWarmup) addExercise(wid, t.defaultTimedExerciseNames.warmup, 'warmup');
+    for (const ex of play.exercises)
+      addExercise(wid, ex.name, 'strength', {
+        plannedSets: ex.sets,
+        plannedReps: ex.repHigh || ex.repLow || null,
+        primaryMuscle: ex.primary ?? undefined,
+        secondaryMuscles: ex.secondary,
+      });
+  }
+  function renderPlaySheet() {
+    if (!playSheet) return null;
+    const { play, hero } = playSheet;
+    const day = new Intl.DateTimeFormat(t.locale, { weekday: 'long' }).format(workout!.startedAt);
+    const steps = play.exercises.length + (play.opensWithWarmup ? 1 : 0);
+    const mins = Math.round(
+      (play.opensWithWarmup ? 5 : 0) + play.exercises.reduce((n, e) => n + e.sets * 2.5, 0),
+    );
+    const reps = (e: Play['exercises'][number]) =>
+      e.repLow && e.repHigh && e.repLow !== e.repHigh
+        ? `${e.repLow}–${e.repHigh}`
+        : `${e.repHigh || e.repLow || ''}`;
+    let i = 0;
+    return (
+      <Sheet onClose={() => setPlaySheet(null)} className="pb-sheet">
+        <div className="pbs-head">
+          <b>{t.pbSheetTitle}</b>
+          <span>{t.pbSheetSub(day)}</span>
+        </div>
+        <div className="pbs-card">
+          <div className="pbs-card-head">
+            <span className="pbs-ic">
+              <Icon name="book-open" />
+            </span>
+            <span className="pbs-card-text">
+              <span className="pbs-kicker">{t.pbKicker(day)}</span>
+              <b>
+                {(play.name ?? (play.readout ? dayReadoutLabel(play.readout, t) : t.playUntitled)) +
+                  ' · ' +
+                  t.pbMeta(steps, mins)}
+              </b>
+              <span>{t.pbLearned(play.sessions)}</span>
+            </span>
+          </div>
+          <div className="pbs-list">
+            {play.opensWithWarmup && (
+              <div className="pbs-row warm">
+                <span className="pbs-n">{++i}</span>
+                <img src={MARKER_IMAGES.warmup} alt="" />
+                <span className="pbs-row-text">
+                  <b>{t.defaultTimedExerciseNames.warmup}</b>
+                  <span>{t.pickWarmupSub}</span>
+                </span>
+              </div>
+            )}
+            {play.exercises.map((e) => {
+              const img = exerciseImage(e.name, 'strength');
+              return (
+                <div key={e.name} className="pbs-row">
+                  <span className="pbs-n">{++i}</span>
+                  {img ? <img src={img} alt="" /> : <span className="pbs-noimg" />}
+                  <span className="pbs-row-text">
+                    <b>{exName(e.name)}</b>
+                    <span className="num">
+                      {e.sets} × {reps(e)}
+                      {e.topWeight ? ` · ${fmtWeightKg(e.topWeight)}` : ''}
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary pbs-apply"
+            onClick={() => {
+              applyPlay(play);
+              setPlaySheet(null);
+            }}
+          >
+            <Icon name="book-open" />
+            {t.pbApply}
+          </button>
+        </div>
+        <button
+          type="button"
+          className="btn btn-secondary pbs-custom"
+          onClick={() => {
+            setPlaySheet(null);
+            openPick(hero);
+          }}
+        >
+          <Icon name="pencil-simple" />
+          {t.pbCustom}
+        </button>
+      </Sheet>
+    );
+  }
+
   function renderEmptyStart() {
     const at = workout!.startedAt;
     const finished = store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id);
@@ -1689,7 +1794,20 @@ export function SessionView(props: {
             <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}${tintOf(hero)}`}>
               {hero.img ? <img src={hero.img} alt="" /> : <span className="es-hero-noimg" />}
               <span className="photo-tint-layer" aria-hidden />
-              <button type="button" className="es-hero-main" onClick={() => openPick(hero!)}>
+              <button
+                type="button"
+                className="es-hero-main"
+                onClick={() => {
+                  // Enough history for this weekday → offer the whole day;
+                  // otherwise just start with this (the custom scenario).
+                  const play = playForWeekday(
+                    computePlaybook(finished, now).plays,
+                    new Date(at).getDay(),
+                  );
+                  if (play) setPlaySheet({ play, hero: hero! });
+                  else openPick(hero!);
+                }}
+              >
                 <span className="es-hero-text">
                   <span className="es-kicker">{heroKicker}</span>
                   <span className="es-hero-name">{exName(hero.name)}</span>
@@ -5215,6 +5333,7 @@ export function SessionView(props: {
           onClose={() => setPrShare(null)}
         />
       )}
+      {renderPlaySheet()}
       {tiredInfo &&
         (() => {
           const items = buildPickItems(workout, store.workouts, gym);

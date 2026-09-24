@@ -16,7 +16,14 @@
  * store mutation, no React — the view renders it and `startPlay` (store) begins
  * a session from one.
  */
-import { isStrengthExercise, resolveMuscles, setTopWeight, setTypeOf } from './store';
+import {
+  exerciseKind,
+  isMarkerExercise,
+  isStrengthExercise,
+  resolveMuscles,
+  setTopWeight,
+  setTypeOf,
+} from './store';
 import type { Exercise, Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import { describeDay, exerciseDay, type DayReadout, type TrainingDay } from './data/daySuggest';
@@ -80,6 +87,11 @@ export interface Play {
   suggestions: PlaySuggestion[];
   /** Most recent source session — used to start/repeat exactly if wanted. */
   sampleWorkoutId: string;
+  /** Sessions of this play per weekday (0 = Sunday … 6 = Saturday). */
+  weekdays: number[];
+  /** You usually open this day with a warm-up (marker or cardio first) — or
+   *  history has no markers at all (unknown → the safe default: yes). */
+  opensWithWarmup: boolean;
 }
 
 export interface PlaybookResult {
@@ -182,28 +194,61 @@ export function computePlaybook(finished: Workout[], now: number): PlaybookResul
     }
   }
 
-  // Cluster sessions by day signature.
+  // Cluster sessions into days. Your own day name wins; unnamed sessions are
+  // grouped by what they actually trained — the lifts in common and the muscle
+  // mix — not only by a push/pull/legs bucket (which merged e.g. a chest day and
+  // a shoulders day into one "Push" and dropped days that didn't fit a bucket).
   const clusters = new Map<
     string,
     { name: string | null; dayType: TrainingDay | null; workouts: Workout[] }
   >();
-  for (const w of done) {
-    const { key, name, dayType } = dayKey(w);
+  const sigs: { key: string; names: Map<string, number>; muscles: Map<string, number> }[] = [];
+  const usedKeys = new Set<string>();
+  for (const w of [...done].reverse()) {
+    const { key: namedKey, name, dayType } = dayKey(w);
+    let key = namedKey;
+    if (!name) {
+      const sig = workoutSignature(w);
+      let best: { i: number; sim: number } | null = null;
+      sigs.forEach((c, i) => {
+        const sim = similarity(sig, c);
+        if (sim >= SAME_DAY && (!best || sim > best.sim)) best = { i, sim };
+      });
+      if (best) {
+        const c = sigs[(best as { i: number }).i];
+        key = c.key;
+        for (const [n, v] of sig.names) c.names.set(n, (c.names.get(n) ?? 0) + v);
+        for (const [m, v] of sig.muscles) c.muscles.set(m, (c.muscles.get(m) ?? 0) + v);
+      } else {
+        const top = [...sig.muscles.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 2)
+          .map(([m]) => m)
+          .sort()
+          .join('+');
+        let k = `sig:${top || 'other'}`;
+        for (let n = 2; usedKeys.has(k); n++) k = `sig:${top || 'other'}:${n}`;
+        usedKeys.add(k);
+        key = k;
+        sigs.push({ key, names: new Map(sig.names), muscles: new Map(sig.muscles) });
+      }
+    }
     let c = clusters.get(key);
     if (!c) {
       c = { name, dayType, workouts: [] };
       clusters.set(key, c);
     }
-    // Prefer a concrete name/day-type if the first session lacked one.
     if (!c.name && name) c.name = name;
     if (!c.dayType && dayType) c.dayType = dayType;
     c.workouts.push(w);
   }
+  for (const c of clusters.values()) c.workouts.sort((a, b) => b.startedAt - a.startedAt);
+  const markersKnown = done.some((w) => w.exercises.some((e) => isMarkerExercise(e)));
 
   const plays: Play[] = [];
   for (const [key, c] of clusters) {
     if (c.workouts.length < MIN_SESSIONS) continue;
-    const play = synthesize(key, c, globalTop, globalSessions, globalPrimary, now);
+    const play = synthesize(key, c, globalTop, globalSessions, globalPrimary, now, markersKnown);
     if (play && play.exercises.length > 0) plays.push(play);
   }
   // Most recently trained day first — that's what you're most likely to run.
@@ -230,6 +275,7 @@ function synthesize(
   globalSessions: Map<string, number>,
   globalPrimary: Map<string, MuscleGroup | null>,
   now: number,
+  markersKnown: boolean,
 ): Play | null {
   const sessions = c.workouts.length;
   // Aggregate per-exercise occurrences across the cluster's sessions.
@@ -352,9 +398,23 @@ function synthesize(
     now,
   );
 
+  const weekdays = [0, 0, 0, 0, 0, 0, 0];
+  let warmOpen = 0;
+  for (const w of c.workouts) {
+    weekdays[new Date(w.startedAt).getDay()] += 1;
+    const first = [...w.exercises]
+      .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
+      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))[0];
+    if (first && (exerciseKind(first) === 'warmup' || exerciseKind(first) === 'cardio'))
+      warmOpen += 1;
+  }
+  const opensWithWarmup = !markersKnown || warmOpen >= c.workouts.length / 3;
+
   return {
     id: key,
     name: c.name,
+    weekdays,
+    opensWithWarmup,
     readout,
     dayType,
     sessions,
@@ -426,4 +486,62 @@ function buildSuggestions(
   }
 
   return out.slice(0, 3);
+}
+
+/** Two sessions this alike are the same day (0..1). */
+const SAME_DAY = 0.5;
+
+function workoutSignature(w: Workout): {
+  names: Map<string, number>;
+  muscles: Map<string, number>;
+} {
+  const names = new Map<string, number>();
+  const muscles = new Map<string, number>();
+  for (const e of w.exercises) {
+    if (!isStrengthExercise(e) || e.sets.length === 0) continue;
+    names.set(e.name.trim().toLowerCase(), 1);
+    const m = resolveMuscles(e).primary;
+    if (m && m !== 'cardio')
+      muscles.set(m, (muscles.get(m) ?? 0) + Math.max(1, workingSets(e).length));
+  }
+  return { names, muscles };
+}
+
+/** Lifts in common (Jaccard, a cluster counts a lift once) blended with the
+ *  muscle mix (cosine of working-set vectors). */
+function similarity(
+  a: { names: Map<string, number>; muscles: Map<string, number> },
+  b: { names: Map<string, number>; muscles: Map<string, number> },
+): number {
+  let inter = 0;
+  for (const n of a.names.keys()) if (b.names.has(n)) inter += 1;
+  const union = a.names.size + b.names.size - inter;
+  const jac = union > 0 ? inter / union : 0;
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (const [m, v] of a.muscles) {
+    na += v * v;
+    dot += v * (b.muscles.get(m) ?? 0);
+  }
+  for (const v of b.muscles.values()) nb += v * v;
+  const cos = na > 0 && nb > 0 ? dot / Math.sqrt(na * nb) : 0;
+  return 0.6 * jac + 0.4 * cos;
+}
+
+/** The play you usually run on this weekday (0 = Sunday), when history has at
+ *  least `min` sessions of it on that day; else null. */
+export function playForWeekday(plays: Play[], dow: number, min = MIN_SESSIONS): Play | null {
+  let best: Play | null = null;
+  for (const p of plays) {
+    const n = p.weekdays[dow] ?? 0;
+    if (n < min) continue;
+    if (
+      !best ||
+      n > best.weekdays[dow] ||
+      (n === best.weekdays[dow] && p.lastTrainedAt > best.lastTrainedAt)
+    )
+      best = p;
+  }
+  return best;
 }

@@ -136,6 +136,7 @@ import { SignOut } from '@phosphor-icons/react/SignOut';
 import { SquaresFour } from '@phosphor-icons/react/SquaresFour';
 import { GraduationCap } from '@phosphor-icons/react/GraduationCap';
 import { BookmarkSimple } from '@phosphor-icons/react/BookmarkSimple';
+import { BookOpen } from '@phosphor-icons/react/BookOpen';
 import { RocketLaunch } from '@phosphor-icons/react/RocketLaunch';
 import { PencilSimpleLine } from '@phosphor-icons/react/PencilSimpleLine';
 import { Compass } from '@phosphor-icons/react/Compass';
@@ -305,6 +306,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'squares-four': SquaresFour,
   'graduation-cap': GraduationCap,
   'bookmark-simple': BookmarkSimple,
+  'book-open': BookOpen,
   'rocket-launch': RocketLaunch,
   'pencil-simple-line': PencilSimpleLine,
   compass: Compass,
