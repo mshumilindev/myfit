@@ -37026,11 +37026,11 @@ body {
   gap: 8px;
 }
 
-/* Empty live session on a wide screen: a bounded two-column layout instead of
-   full-width bands — the usual first lift big on the left, the at-a-glance
-   column (readiness, circuit, the one primary action) on the right, and the
-   other four starts as one row of equal cards below. Photos keep their aspect
-   ratio instead of being cropped into strips. */
+/* Empty live session on a wide screen — a bounded bento, not full-width bands:
+   readiness as one compact strip on top; the usual first lift (big) next to the
+   other four starts (2×2) as the content; the actions in one bottom row, where
+   the phone has them too (circuit under the lift, the primary Add under the
+   starts). Nothing stretches to fill the height, so spacing stays even. */
 @media (min-width: 900px) {
   .focus-view.focus-view-empty {
     align-items: center;
@@ -37039,17 +37039,15 @@ body {
     width: 100%;
     max-width: 1120px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     grid-template-areas:
-      'hero ready'
-      'hero circuit'
-      'hero add'
-      'tiles tiles';
-    grid-template-rows: auto auto 1fr auto;
-    column-gap: 20px;
-    row-gap: 14px;
+      'ready ready'
+      'hero tiles'
+      'circuit add';
+    grid-template-rows: auto auto auto;
     align-content: start;
-    padding-top: 8px;
+    gap: 16px;
+    padding: 20px 0 24px;
     overflow-y: auto;
   }
   .es-scroll {
@@ -37057,9 +37055,7 @@ body {
   }
   .es-ready {
     grid-area: ready;
-  }
-  .es-ready-cards {
-    flex-direction: column;
+    gap: 8px;
   }
   .es-rc {
     display: grid;
@@ -37077,10 +37073,10 @@ body {
   .es-hero {
     grid-area: hero;
     height: auto;
-    max-height: none;
     min-height: 0;
-    aspect-ratio: 2 / 1;
+    max-height: none;
     flex: none;
+    align-self: stretch;
   }
   .es-hero-name {
     font-size: 22px;
@@ -37090,20 +37086,26 @@ body {
     grid-area: tiles;
   }
   .es-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 12px;
   }
   .es-tile-main > img,
   .es-tile-main > .es-noimg {
     height: auto;
     aspect-ratio: 16 / 10;
+    /* shorter windows shrink the photos so the action row stays in view */
+    max-height: max(72px, calc((100dvh - 560px) / 2));
   }
   .es-circuit {
     grid-area: circuit;
+    align-self: stretch;
   }
   .es-dock {
     grid-area: add;
-    align-self: start;
     padding: 0;
+    display: flex;
+  }
+  .es-dock .es-add {
+    min-height: 0;
+    height: 100%;
   }
 }
