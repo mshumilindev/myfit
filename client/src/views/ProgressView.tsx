@@ -33,6 +33,7 @@ import {
   type Zone,
 } from '../volume';
 import { TrendsView } from '../components/TrendsView';
+import { AtlasNotesPanel } from '../components/AtlasNotesPanel';
 import { FixSheet } from '../components/FixSheet';
 import { ReadinessLens } from '../components/Readiness';
 import {
@@ -401,7 +402,7 @@ export function ProgressView({
         className={ptab === 'trends' ? 'active' : ''}
         onClick={() => setPtab('trends')}
       >
-        {t.trendsTab}
+        {store.coach.enabled ? t.atlasName : t.trendsTab}
       </button>
     </div>
   );
@@ -411,6 +412,7 @@ export function ProgressView({
       <div className="screen progress-page progress-alt">
         <div className="progress-tabbar">{pTabs}</div>
         <div className="progress-alt-body">
+          {store.coach.enabled && <AtlasNotesPanel />}
           <TrendsView finished={finished} body={store.bodyMetrics} />
         </div>
       </div>

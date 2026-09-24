@@ -28,7 +28,8 @@ import { templateById, type ActiveChallenge } from './challenges';
 
 type T = ReturnType<typeof useT>['t'];
 
-export type NotifKind = 'standard' | 'pr' | 'feat' | 'trend' | 'streak' | 'volume' | 'challenge';
+export type NotifKind =
+  'standard' | 'pr' | 'feat' | 'trend' | 'streak' | 'volume' | 'challenge' | 'atlas';
 
 export interface Notif {
   id: string;

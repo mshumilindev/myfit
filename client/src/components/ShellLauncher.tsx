@@ -4,6 +4,7 @@
  * and Nutrition (coming soon). Silver, neutral chrome — the apps supply the
  * colour. One account, one training history.
  */
+import { AtlasFace } from './AtlasFace';
 import { useState } from 'react';
 import { useT } from '../i18n';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
@@ -25,6 +26,7 @@ export function ShellLauncher({
   onNutrition,
   nutritionEnabled,
   onLearn,
+  onCoach,
   onSignOut,
   onClose,
 }: {
@@ -41,10 +43,13 @@ export function ShellLauncher({
   onNutrition: () => void;
   nutritionEnabled: boolean;
   onLearn: () => void;
+  /** Gym app only: open Atlas. */
+  onCoach?: () => void;
   onSignOut: () => void;
   onClose: () => void;
 }) {
   const { t } = useT();
+  const coach = store.coach;
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const sessionsWeek = store.workouts.filter(
     (w) => w.finishedAt !== null && w.startedAt >= now - 7 * DAY,
@@ -147,6 +152,25 @@ export function ShellLauncher({
             <Icon name="caret-right" className="shell-go" />
           )}
         </button>
+
+        {onCoach && (
+          <button className="shell-tile" onClick={onCoach}>
+            <span className="shell-ic shell-ic-coach">
+              <AtlasFace temper={coach.enabled ? coach.temper : 3} size={36} ring={false} />
+            </span>
+            <div className="shell-tile-main">
+              <div className="shell-tile-name">{t.atlasName}</div>
+              <div className="shell-tile-sub">
+                {coach.enabled
+                  ? `${t.atlasTemper[coach.temper - 1]} · ${
+                      coach.role === 'main' ? t.atlasRoleMainShort : t.atlasRoleExtraShort
+                    }`
+                  : t.atlasInviteLine}
+              </div>
+            </div>
+            <Icon name="caret-right" className="shell-go" />
+          </button>
+        )}
 
         <button
           className={`shell-tile${current === 'learn' ? ' current' : ''}`}

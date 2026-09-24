@@ -22,6 +22,7 @@ const KIND_ICON: Record<NotifKind, string> = {
   streak: 'fire',
   volume: 'check-circle',
   challenge: 'flag-banner',
+  atlas: 'robot',
 };
 
 const PAGE = 24;

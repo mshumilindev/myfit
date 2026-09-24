@@ -1,4 +1,5 @@
 import { refreshPush, setAppBadge } from './push';
+import { useAtlasNotes } from './atlas/notes';
 import {
   lazy,
   Suspense,
@@ -612,10 +613,33 @@ export function App() {
     };
   }, [nightLive]);
   const challenges = useChallenges();
+  // Atlas's notes join the bell (same feed as his thread; tap opens it).
+  const atlas = useAtlasNotes();
   const rawNotifs = useMemo(
-    () => computeNotifs(store, notifNow, t, challenges),
+    () => [
+      ...computeNotifs(store, notifNow, t, challenges),
+      ...(store.coach.enabled
+        ? atlas.notes.map((n) => ({
+            id: `atlas:${n.id}`,
+            kind: 'atlas' as const,
+            ts: n.at,
+            title: t.atlasName,
+            subtitle: n.text,
+            nav: '#/coach',
+          }))
+        : []),
+    ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t],
+    [
+      store.workouts,
+      store.bodyMetrics,
+      store.exerciseLoadTypes,
+      challenges,
+      notifNow,
+      t,
+      store.coach.enabled,
+      atlas.notes,
+    ],
   );
   useEffect(() => {
     syncNotifs(rawNotifs);
@@ -1571,6 +1595,10 @@ export function App() {
           onNutrition={openNutrition}
           nutritionEnabled={nutritionEnabled}
           onLearn={openLearn}
+          onCoach={() => {
+            setShellOpen(false);
+            setOverlay({ screen: 'coach' });
+          }}
           onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />

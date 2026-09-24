@@ -1785,6 +1785,7 @@ export const uk: Strings = {
   atlasTemperLabel: 'Характер',
   atlasRoleLabel: 'Роль',
   atlasTurnOff: 'Вимкнути Atlas',
+  atlasNumbers: 'Цифри',
   atlasMuteToday: 'Тихо на сьогодні',
   atlasOpen: 'Відкрити Atlas',
   atlasPlanOffer:

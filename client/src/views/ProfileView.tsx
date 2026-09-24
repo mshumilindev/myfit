@@ -132,7 +132,7 @@ export function ProfileView({
 }) {
   const { t, locale } = useT();
   const exName = useExerciseName();
-  const weightUnit = useStore().weightUnit;
+  const { weightUnit, coach } = useStore();
   const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => {
     const cached = cachePeek<ProfileData>(`profile.${userId}`);
     return { userId, value: cached ? cached.data : 'loading' };
@@ -590,6 +590,17 @@ export function ProfileView({
                     ))}
                   </div>
                 </div>
+                <button
+                  className="profile-setting-row"
+                  onClick={() => shell.openOverlay({ screen: 'coach' })}
+                >
+                  <Icon name="robot" />
+                  <span>
+                    {t.atlasName}
+                    {coach.enabled ? ` · ${t.atlasTemper[coach.temper - 1]}` : ''}
+                  </span>
+                  <Icon name="arrow-right" className="profile-setting-caret" />
+                </button>
                 <button className="profile-setting-row" onClick={() => setPasswordEditing(true)}>
                   <Icon name="key" />
                   <span>{t.password}</span>

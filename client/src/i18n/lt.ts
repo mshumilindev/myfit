@@ -1799,6 +1799,7 @@ export const lt: Strings = {
   atlasTemperLabel: 'Būdas',
   atlasRoleLabel: 'Vaidmuo',
   atlasTurnOff: 'Išjungti Atlas',
+  atlasNumbers: 'Skaičiai',
   atlasMuteToday: 'Nutildyti šiandien',
   atlasOpen: 'Atidaryti Atlas',
   atlasPlanOffer:
