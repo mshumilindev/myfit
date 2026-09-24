@@ -107,7 +107,16 @@ async function startDueSleeps(): Promise<number> {
         .where('wake', '==', null)
         .limit(1)
         .get();
-      if (openSnap.empty) {
+      // …and not when this night is already logged (the app started or filled
+      // it itself) — that's how the same night got recorded twice.
+      const sameDay = await db
+        .collection('users')
+        .doc(uid)
+        .collection('sleeps')
+        .where('date', '==', slot.date)
+        .limit(1)
+        .get();
+      if (openSnap.empty && sameDay.empty) {
         const id = crypto.randomUUID();
         await db.collection('users').doc(uid).collection('sleeps').doc(id).set({
           id,

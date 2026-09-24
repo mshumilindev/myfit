@@ -452,3 +452,45 @@ describe('cool-down', () => {
     finishWorkout(w.id);
   });
 });
+
+describe('sleep log stays one night per sleep', () => {
+  it('drops the duplicate of the same night and keeps the hand-logged one', async () => {
+    const { duplicateSleepIds } = await import('./sleep');
+    const H = 3600000;
+    const bed = Date.UTC(2026, 8, 22, 21);
+    const a = {
+      id: 'a',
+      date: '2026-09-23',
+      bedtime: bed,
+      wake: bed + 8 * H,
+      source: 'auto',
+      updatedAt: 1,
+    };
+    const b = {
+      id: 'b',
+      date: '2026-09-22',
+      bedtime: bed + 0.5 * H,
+      wake: bed + 8 * H,
+      source: 'live',
+      updatedAt: 2,
+    };
+    const nap = {
+      id: 'n',
+      date: '2026-09-23',
+      bedtime: bed + 17 * H,
+      wake: bed + 18 * H,
+      source: 'live',
+      kind: 'nap',
+      updatedAt: 3,
+    };
+    const next = {
+      id: 'c',
+      date: '2026-09-24',
+      bedtime: bed + 24 * H,
+      wake: bed + 32 * H,
+      source: 'auto',
+      updatedAt: 4,
+    };
+    expect(duplicateSleepIds([a, b, nap, next] as never, bed + 40 * H)).toEqual(['a']);
+  });
+});

@@ -317,3 +317,41 @@ export function computeUpcomingNights(
   }
   return out;
 }
+
+/** Overlap of two time ranges, ms. */
+function overlapMs(a0: number, a1: number, b0: number, b1: number): number {
+  return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+}
+
+/** Two records of the same sleep: same kind and they overlap for at least half
+ *  of the shorter one (an open night counts up to `now`). */
+export function sameSleep(a: SleepNight, b: SleepNight, now: number = Date.now()): boolean {
+  if (sleepKindOf(a) !== sleepKindOf(b)) return false;
+  const aEnd = a.wake ?? Math.max(now, a.autoWakeAt ?? 0);
+  const bEnd = b.wake ?? Math.max(now, b.autoWakeAt ?? 0);
+  const shorter = Math.min(aEnd - a.bedtime, bEnd - b.bedtime);
+  if (shorter <= 0) return false;
+  return overlapMs(a.bedtime, aEnd, b.bedtime, bEnd) >= shorter * 0.5;
+}
+
+const SOURCE_RANK: Record<string, number> = { live: 3, backfill: 2, auto: 1 };
+
+/**
+ * Duplicate sleep records to drop. Several things can open or log the same
+ * night (the app at bedtime, the server's hourly job, the morning auto-fill,
+ * another device), so the same sleep can land twice. Keeps one per overlap:
+ * a finished record over an open one, then what you logged/edited by hand over
+ * automatic ones, then the most recently edited.
+ */
+export function duplicateSleepIds(list: SleepNight[], now: number = Date.now()): string[] {
+  const score = (n: SleepNight) =>
+    (n.wake !== null ? 1e15 : 0) + (SOURCE_RANK[n.source] ?? 0) * 1e13 + (n.updatedAt ?? 0);
+  const sorted = [...list].sort((a, b) => score(b) - score(a));
+  const kept: SleepNight[] = [];
+  const drop: string[] = [];
+  for (const n of sorted) {
+    if (kept.some((k) => sameSleep(k, n, now))) drop.push(n.id);
+    else kept.push(n);
+  }
+  return drop;
+}

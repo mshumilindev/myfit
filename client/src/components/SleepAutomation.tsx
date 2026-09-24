@@ -29,6 +29,7 @@ import {
   weekdayPattern,
   planForWeekday,
   planDurationMin,
+  sameSleep,
   finishedNights,
   lastBedtimeAt,
   AUTO_START_WINDOW_MS,
@@ -128,7 +129,12 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
       if (!p) continue;
       const wake = wakeDay0 + p.wakeMin * MIN;
       if (wake > tick) continue; // usual wake time not reached yet
-      toAdd.push(nightFromPlan(wakeDay0, p));
+      const cand = nightFromPlan(wakeDay0, p);
+      // Already have this sleep under another date (e.g. closed by the server
+      // before its day was fixed) → don't log it a second time.
+      const probe = { ...cand, id: 'probe', kind: 'sleep' as const } as SleepNight;
+      if (store.sleeps.some((n) => sameSleep(n, probe, tick))) continue;
+      toAdd.push(cand);
     }
     if (toAdd.length) {
       queueMicrotask(() => {
@@ -163,9 +169,16 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
   // Once the usual wake time (schedule → pattern) is reached, the app closes
   // the live night at that time — even if it was shut over the morning.
   useEffect(() => {
-    if (!s.autoLog || !live) return;
+    if (!live) return;
     const plan = planFor(store, new Date(live.bedtime).getDay(), tick);
-    if (!plan) return;
+    // A night left open far too long (the app never saw you wake) blocks every
+    // later night from starting — close it at a normal length.
+    if (tick - live.bedtime > 16 * 60 * MIN) {
+      const len = plan ? planDurationMin(plan) : 8 * 60;
+      queueMicrotask(() => stopSleep(live.bedtime + len * MIN, 'auto'));
+      return;
+    }
+    if (!s.autoLog || !plan) return;
     const wakeTs = live.bedtime + planDurationMin(plan) * MIN;
     if (live.autoWakeAt !== wakeTs) {
       queueMicrotask(() => updateSleepNight(live.id, { autoWakeAt: wakeTs }));

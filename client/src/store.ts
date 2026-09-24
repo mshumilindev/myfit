@@ -86,6 +86,7 @@ import {
   computeUpcomingNights,
   classifySleepKind,
   sleepKindOf,
+  duplicateSleepIds,
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
 import type { GeneratedDay } from './sessionBuilder';
@@ -2565,9 +2566,33 @@ function applySleepSnapshot(serverSleeps: SleepNight[], fromCache = false): void
     sleeps,
   };
   backfillSleepKind();
+  normalizeSleeps();
   pushLocalSleepDiffs(visibleServerSleeps, state.sleeps);
   persist();
   emit();
+}
+
+/**
+ * Keep the sleep log honest after any sync: a finished night is dated by the
+ * morning it ended (the server's auto-end can't compute local dates), and the
+ * same sleep recorded twice (app + server + auto-fill + another device) is
+ * collapsed to one.
+ */
+export function normalizeSleeps(now: number = Date.now()): void {
+  const redated: SleepNight[] = [];
+  const fixed = state.sleeps.map((n) => {
+    if (n.wake !== null && n.date !== sleepDayId(n.wake)) {
+      const r = { ...n, date: sleepDayId(n.wake), updatedAt: Date.now() };
+      redated.push(r);
+      return r;
+    }
+    return n;
+  });
+  const drop = new Set(duplicateSleepIds(fixed, now));
+  if (redated.length === 0 && drop.size === 0) return;
+  state = { ...state, sleeps: fixed.filter((n) => !drop.has(n.id)) };
+  for (const n of redated) if (!drop.has(n.id)) writeSleepDoc(n);
+  for (const id of drop) deleteSleepDoc(id);
 }
 
 /** Begin a live night (idempotent — returns the existing one if already asleep).
@@ -2586,7 +2611,9 @@ export function startSleep(
   if ((state.activities ?? []).some((a) => a.finishedAt === null)) return null;
   const night: SleepNight = {
     id: uuid(),
-    date: sleepDayId(bedtime),
+    // A night's identity is the morning it ends — set it from the start, so a
+    // night the server closes (it can't recompute local dates) keeps the right day.
+    date: sleepDayId(autoWakeAt ?? bedtime),
     bedtime,
     wake: null,
     source,
@@ -2761,6 +2788,18 @@ export function updateSleepNight(id: string, patch: Partial<SleepNight>): void {
 
 /** Remove a logged night. */
 export function removeSleepNight(id: string): void {
+  const gone = state.sleeps.find((n) => n.id === id);
+  // Deleting an automatic night means "that wasn't a night" — don't auto-fill it
+  // straight back the next minute.
+  if (gone && gone.source === 'auto' && gone.wake !== null)
+    setState({
+      sleepSettings: {
+        ...state.sleepSettings,
+        skippedAutoSleepDates: Array.from(
+          new Set([...(state.sleepSettings.skippedAutoSleepDates ?? []), gone.date]),
+        ).slice(-14),
+      },
+    });
   setState({ sleeps: state.sleeps.filter((n) => n.id !== id) });
   deleteSleepDoc(id);
   syncSleepAutoQueue();
