@@ -1468,7 +1468,14 @@ export function SessionView(props: {
           exerciseKind(e) === 'cardio' ||
           isCardioExerciseName(e.name)),
     );
-    if (warmOpen.length > 0 && warmOpen.length >= src.length / 3) {
+    // Sessions finished before markers were kept on finish carry no trace of
+    // a warm-up at all; no marker anywhere is "unknown", not "never" — then
+    // the default is the recommended one: warm up before lifting.
+    const markersKnown = src.some((w) => w.exercises.some((e) => isMarkerExercise(e)));
+    const warmsUp =
+      (warmOpen.length > 0 && warmOpen.length >= src.length / 3) ||
+      (!markersKnown && src.length > 0);
+    if (warmsUp) {
       const cardio = warmOpen.filter((e) => exerciseKind(e!) !== 'warmup');
       const kicker = kickerAt(0);
       if (cardio.length > warmOpen.length / 2) {
@@ -1526,9 +1533,11 @@ export function SessionView(props: {
       resolveMuscles({ name, kind: 'strength' } as Exercise).primary;
     const mName = (m: string | null) =>
       m ? ((t.muscleGroups as Record<string, string>)[m] ?? m) : '';
-    let hero: TiredPick | null = lifts[0] ?? null;
+    // What you do first is the hero — the warm-up when you open with one,
+    // then the lifts count on from 2nd.
+    let hero: TiredPick | null = lead[0] ?? lifts[0] ?? null;
     let heroKicker = day ? t.esHeroDay(day) : t.esHeroRecent;
-    let tiles: TiredPick[] = hero ? [...lead, ...lifts.slice(1)] : [...lead];
+    let tiles: TiredPick[] = lead[0] ? [...lead.slice(1), ...lifts] : hero ? lifts.slice(1) : [];
     // No (or too little) history: fill from how a training week is usually
     // split, dodging muscles that are still recovering.
     if (!hero || tiles.length < 4) {
@@ -1550,17 +1559,15 @@ export function SessionView(props: {
           kind: 'strength' as const,
         }));
       if (!hero && extra.length > 0) {
-        hero = extra.shift()!;
+        // No history: the right order is warm-up first, then the lifts.
+        hero = {
+          name: t.defaultTimedExerciseNames.warmup,
+          kicker: t.exerciseKindNames.warmup,
+          sub: t.pickWarmupSub,
+          img: MARKER_IMAGES.warmup,
+          kind: 'warmup',
+        };
         heroKicker = t.esStarterKicker(dayName).toLocaleUpperCase(t.locale);
-        // A first session starts with a warm-up.
-        if (tiles.length === 0)
-          tiles.push({
-            name: t.defaultTimedExerciseNames.warmup,
-            kicker: t.exerciseKindNames.warmup,
-            sub: t.pickWarmupSub,
-            img: MARKER_IMAGES.warmup,
-            kind: 'warmup',
-          });
       }
       tiles = [...tiles, ...extra];
     }
@@ -1585,7 +1592,8 @@ export function SessionView(props: {
     // Hero line: last time and today's aim (or the rep range for a first go).
     const load = (w: number | null) => (w == null || w <= 0 ? t.bodyweightShort : fmtWeightKg(w));
     let heroSub = '';
-    if (hero) {
+    if (hero && hero.kind !== 'strength') heroSub = hero.sub;
+    else if (hero) {
       const tg = nextTarget(topHistory(finished, hero.name, now), {
         primary: muscleOf(hero.name),
       });
@@ -1670,7 +1678,7 @@ export function SessionView(props: {
                   <Icon name="play" weight="fill" />
                 </span>
               </button>
-              {infoBtn(hero.name, 'es-info')}
+              {hero.kind === 'strength' && infoBtn(hero.name, 'es-info')}
             </div>
           )}
           {tiles.length > 0 && (
