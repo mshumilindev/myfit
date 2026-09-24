@@ -7457,7 +7457,7 @@ function CircuitRunSheet(props: {
             {g.exercises.map((e, i) => (
               <span
                 key={e.id}
-                className={`pos${i === exIdx ? ' active' : loggedThisRound(i) ? ' done' : ''}`}
+                className={`crb-pos${i === exIdx ? ' active' : loggedThisRound(i) ? ' done' : ''}`}
               />
             ))}
           </div>

@@ -8,13 +8,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { tokenMatch } from '../search';
 import type { Gym } from '../types';
-import { getCurrentPositionOnce } from '../store';
+import { getCurrentPositionOnce, upsertGym } from '../store';
+import { DEFAULT_GYM_RADIUS_M } from '../types';
 import {
   haversineM,
   fmtDistance,
   resolveGymMeta,
   parseOpeningHours,
+  searchNearbyGyms,
   type Coords,
+  type PlaceResult,
 } from '../data/gymProviders';
 import { useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
@@ -95,6 +98,9 @@ export function GymPicker({
   const { t } = useT();
   const [coords, setCoords] = useState<Coords | null>(null);
   const [q, setQ] = useState('');
+  // Gyms around you that aren't saved yet (sheet only): pick one and it's
+  // saved and used in one tap.
+  const [nearby, setNearby] = useState<PlaceResult[] | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -108,6 +114,33 @@ export function GymPicker({
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (variant !== 'sheet' || !coords) return;
+    const ctl = new AbortController();
+    searchNearbyGyms(coords, 3000, gyms, ctl.signal)
+      .then((rs) =>
+        setNearby(
+          rs
+            .filter((r) => !r.sources.includes('local'))
+            .filter((r) => !gyms.some((g) => haversineM(g, r) < 60))
+            .slice(0, 6),
+        ),
+      )
+      .catch(() => setNearby([]));
+    return () => ctl.abort();
+  }, [coords, gyms, variant]);
+
+  const pickNew = (r: PlaceResult) => {
+    const g = upsertGym({
+      name: r.name,
+      lat: r.lat,
+      lng: r.lng,
+      radiusM: DEFAULT_GYM_RADIUS_M,
+      ...(r.externalId ? { externalId: r.externalId } : {}),
+    });
+    onPick(g.id);
+  };
 
   const sorted = useMemo(() => {
     const list = [...gyms];
@@ -123,7 +156,7 @@ export function GymPicker({
       <div className="sheet-head">
         <span className="t">{title}</span>
       </div>
-      {gyms.length > 4 && (
+      {(gyms.length > 4 || (nearby?.length ?? 0) > 0) && (
         <div className="searchbar sm">
           <Icon name="magnifying-glass" />
           <input
@@ -161,6 +194,36 @@ export function GymPicker({
             </button>
           );
         })}
+        {variant === 'sheet' && (
+          <>
+            <div className="gym-pick-sub">{t.pickGymNearby}</div>
+            {nearby === null ? (
+              <div className="gym-pick-note">
+                {coords ? t.pickGymSearching : t.pickGymNoLocation}
+              </div>
+            ) : nearby.filter((r) => tokenMatch(r.name, needle)).length === 0 ? (
+              <div className="gym-pick-note">{t.pickGymNoneNearby}</div>
+            ) : (
+              nearby
+                .filter((r) => tokenMatch(r.name, needle))
+                .map((r) => (
+                  <button key={r.key} className="gym-pick-row new" onClick={() => pickNew(r)}>
+                    <span className="thumb">
+                      <GymThumb name={r.name} lat={r.lat} lng={r.lng} size={44} />
+                    </span>
+                    <span className="body">
+                      <span className="n">{r.name}</span>
+                      <span className="s">
+                        {coords ? fmtDistance(haversineM(coords, r)) : ''}
+                        {r.address ? ` · ${r.address}` : ''}
+                      </span>
+                    </span>
+                    <span className="tag">{t.pickGymAdd}</span>
+                  </button>
+                ))
+            )}
+          </>
+        )}
         <button className="gym-pick-row none" onClick={() => onPick(null)}>
           <span className="thumb">
             <Icon name="map-pin-slash" />

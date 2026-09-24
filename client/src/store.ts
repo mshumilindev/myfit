@@ -3235,6 +3235,27 @@ export function getCurrentPositionOnce(opts?: {
   });
 }
 
+/**
+ * The saved gym you're standing in right now, if any — so starting a workout
+ * can skip "which gym?". Uses a fix up to 2 min old (or a fresh one, capped at
+ * 2.5 s so the start never hangs). Honest about GPS: the fix must be good
+ * enough (accuracy ≤ 60 m) and fall inside one gym's radius; two gyms both in
+ * range → nearest. Anything unsure → null (the picker asks).
+ */
+export async function gymAtCurrentPosition(gyms: Gym[]): Promise<Gym | null> {
+  if (gyms.length === 0) return null;
+  const pos = await Promise.race([
+    getCurrentPositionOnce({ maxAgeMs: 2 * 60 * 1000 }).catch(() => null),
+    new Promise<null>((r) => setTimeout(() => r(null), 2500)),
+  ]);
+  if (!pos || pos.accuracy > 60) return null;
+  const inside = gyms
+    .map((g) => ({ g, d: haversineM(pos.lat, pos.lng, g.lat, g.lng) }))
+    .filter((x) => x.d <= x.g.radiusM)
+    .sort((a, b) => a.d - b.d);
+  return inside[0]?.g ?? null;
+}
+
 // --- Reminders (computed client-side from own pings + workouts) ------------
 
 const LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;

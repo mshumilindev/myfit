@@ -28009,17 +28009,17 @@ button.badge {
   box-shadow: 0 0 0 4px rgba(217, 162, 79, 0.2);
 }
 
-.pos {
+.crb-pos {
   width: 8px;
   height: 8px;
   border-radius: 999px;
   background: var(--color-neutral-700);
   transition: all 0.2s;
 }
-.pos.done {
+.crb-pos.done {
   background: var(--color-accent-700);
 }
-.pos.active {
+.crb-pos.active {
   width: 22px;
   background: var(--color-accent);
 }
@@ -37829,4 +37829,23 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
   box-shadow: none;
+}
+
+/* Gym picker: gyms nearby that aren't saved yet */
+.gym-pick-sub {
+  margin: 12px 2px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+.gym-pick-note {
+  padding: 8px 2px;
+  font-size: 13px;
+  color: var(--color-neutral-500);
+}
+.gym-pick-row.new .tag {
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-700);
 }

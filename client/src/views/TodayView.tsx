@@ -34,6 +34,7 @@ import {
   workoutDayReadout,
   workoutVolumeKg,
   type useStore,
+  gymAtCurrentPosition,
 } from '../store';
 import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n';
 import { WeekStrip } from '../components/WeekStrip';
@@ -226,9 +227,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     if (!w) return;
     shell.openOverlay({ screen: 'session', workoutId: w.id });
   }
-  function startScratch() {
-    if (store.gyms.length > 0) setStartPicker(true);
-    else beginSession(null);
+  async function startScratch() {
+    // Standing in one of your gyms → no question, just start there. Otherwise
+    // ask — the picker also finds gyms nearby that aren't saved yet.
+    const here = await gymAtCurrentPosition(store.gyms);
+    if (here) beginSession(here.id);
+    else setStartPicker(true);
   }
   function autoBuild() {
     if (resumeLive()) return;
