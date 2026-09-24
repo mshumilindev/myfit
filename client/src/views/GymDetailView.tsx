@@ -10,6 +10,7 @@ import {
   upsertGym,
   getCurrentPositionOnce,
   workoutVolumeKg,
+  gymKitEvidence,
 } from '../store';
 import { DEFAULT_GYM_RADIUS_M, INSIDE_RADIUS_M } from '../types';
 import {
@@ -26,10 +27,15 @@ import { Icon, ConfirmDialog } from '../ui';
 import { GymThumb } from '../components/GymThumb';
 import { RouteMap } from '../components/RouteMap';
 import { EquipmentBoard } from '../components/EquipmentBoard';
+import { GymKitCard } from '../components/GymKit';
+import { gymHasNoList } from '../gymEvidence';
 import { BandLibraryCard } from '../components/BandLibraryCard';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const hhmm = (min: number) => `${pad(Math.floor(min / 60) % 24)}:${pad(min % 60)}`;
+
+/** Wall-clock read outside render purity (evidence windows are day-coarse). */
+const wallClock = (): number => Date.now();
 
 export function GymDetailView({
   gymId,
@@ -312,6 +318,23 @@ export function GymDetailView({
           ) : (
             <div className="detail-muted">{t.gymNoStats}</div>
           ))}
+
+        {isSaved &&
+          gym &&
+          (() => {
+            // Kit you've used here that the list lacks — or, for a gym with no
+            // list yet, everything you've used here (build it in one go).
+            const items = gymKitEvidence(gym.id, wallClock());
+            const noList = gymHasNoList(gym);
+            return (
+              <GymKitCard
+                gym={gym}
+                items={items}
+                title={noList ? t.gkBuildTitle : t.gkCardTitle}
+                sub={noList ? t.gkBuildSub(items.length) : t.gkCardSub}
+              />
+            );
+          })()}
 
         {isSaved && gym && <BandLibraryCard gym={gym} />}
 

@@ -37126,3 +37126,257 @@ body {
 .es-tile.warm .es-tile-main {
   border-color: color-mix(in srgb, var(--set-warmup) 55%, transparent);
 }
+
+/* ===========================================================================
+   Gym kit from your workouts (canvas V8 · Tray + undo) — graphite liquid glass.
+   =========================================================================== */
+.gk-glass {
+  position: relative;
+  isolation: isolate;
+  border-radius: 18px;
+  box-shadow: var(--glass-float);
+}
+.gk-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: inherit;
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  backdrop-filter: var(--glass-backdrop);
+  filter: url(#liquid-glass);
+}
+.gk-glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--glass-tint);
+  box-shadow: var(--glass-specular);
+}
+.gk-thumb {
+  flex: none;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #fff;
+}
+.gk-thumb-empty {
+  display: grid;
+  place-items: center;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-500);
+}
+/* the tray */
+.gk-float-wrap {
+  position: relative;
+  height: 0;
+  z-index: 6;
+}
+.gk-tray {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 16px;
+}
+.gk-tray.floating {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  box-shadow:
+    0 20px 46px rgba(0, 0, 0, 0.6),
+    0 3px 10px rgba(0, 0, 0, 0.4);
+}
+.gk-tray-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-neutral-400);
+}
+.gk-tray-text b {
+  font-size: 13.5px;
+  line-height: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.gk-x {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-neutral-400);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.gk-add {
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: #1c1406;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.gk-undo {
+  padding: 10px 10px 10px 14px;
+}
+.gk-ok {
+  flex: none;
+  color: var(--color-ok);
+  font-size: 18px;
+  display: grid;
+}
+.gk-link {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 8px 6px;
+  cursor: pointer;
+}
+.gk-link.small {
+  align-self: flex-start;
+  padding: 2px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-neutral-400);
+}
+/* evidence dots: a recent session here each; filled = used */
+.gk-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.gk-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--color-neutral-700);
+}
+.gk-dot.on {
+  background: var(--color-accent);
+  box-shadow: none;
+}
+.gk-dot.none {
+  opacity: 0.35;
+}
+/* rows (sheet + card) */
+.gk-rows {
+  display: flex;
+  flex-direction: column;
+}
+.gk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.gk-row.compact {
+  padding: 8px 0;
+}
+.gk-row:last-child {
+  border-bottom: none;
+}
+.gk-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.gk-row-text b {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.gk-row-meta {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gk-switch {
+  flex: none;
+  width: 44px;
+  height: 26px;
+  border: none;
+  border-radius: 13px;
+  padding: 0;
+  background: var(--color-neutral-800);
+  position: relative;
+  cursor: pointer;
+}
+.gk-switch > span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-neutral-500);
+  transition: left 0.15s;
+}
+.gk-switch.on {
+  background: var(--color-accent-800);
+}
+.gk-switch.on > span {
+  left: 21px;
+  background: var(--color-accent);
+}
+.gk-lead {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  line-height: 19px;
+  color: var(--color-neutral-400);
+}
+.gk-shared {
+  margin: 12px 0 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.gk-primary {
+  width: 100%;
+  min-height: 48px;
+}
+/* card (gym page / recap) */
+.gk-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+}
+.gk-card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 4px;
+}
+.gk-card-head b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.gk-card-head span {
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+}
+.gk-card .gk-primary {
+  margin-top: 8px;
+}

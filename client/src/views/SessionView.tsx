@@ -63,6 +63,7 @@ import {
   deleteWorkout,
   duplicateExercise,
   equipmentFor,
+  gymKitEvidence,
   est1rm,
   exerciseKind,
   exerciseVolumeKg,
@@ -168,6 +169,8 @@ import {
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
 import { starterPlan } from '../starterPlan';
+import { GymKitCard, GymKitTray, GymKitUndo } from '../components/GymKit';
+import { gymHasNoList, type KitEvidence } from '../gymEvidence';
 import { warmupRamp } from '../sessionBuilder';
 import { directReadiness } from '../picker';
 import { READINESS_COLOR, muscleReadiness } from '../recovery';
@@ -537,6 +540,9 @@ export function SessionView(props: {
   const [tiredCollapsed, setTiredCollapsed] = useState<Record<string, boolean>>({});
   /** Exercise details opened from a suggestion tile (ⓘ). */
   const [tiredInfo, setTiredInfo] = useState<string | null>(null);
+  // Gym kit nudge: items dismissed this session, and the Undo after an add.
+  const [kitDismissed, setKitDismissed] = useState<string[]>([]);
+  const [kitUndo, setKitUndo] = useState<{ items: string[]; inventory: string[] } | null>(null);
   /** The record's share-card sheet (same as the app's other share cards). */
   const [prShare, setPrShare] = useState<StatShareModel | null>(null);
   /** A record just set — shown as a celebration card, then folds into rest. */
@@ -2001,6 +2007,45 @@ export function SessionView(props: {
     return <span className={cls}>{text}</span>;
   }
 
+  /** Kit this lift used that the session's gym doesn't list (medium evidence,
+   *  only once a set is in — the moment of proof). */
+  function kitNudge(ex: Exercise | null): KitEvidence | null {
+    if (!live || !gym || gymHasNoList(gym) || !ex || !isStrengthExercise(ex)) return null;
+    if (ex.sets.length === 0) return null;
+    const classes = equipmentFor(ex);
+    const items = ex.equipmentItems ?? [];
+    return (
+      gymKitEvidence(gym.id, wallClock()).find(
+        (e) =>
+          e.medium &&
+          !kitDismissed.includes(e.itemId) &&
+          (items.includes(e.itemId) || classes.includes(e.cls)),
+      ) ?? null
+    );
+  }
+  function renderKitTray() {
+    if (!gym) return null;
+    if (kitUndo)
+      return (
+        <div className="gk-float-wrap">
+          <GymKitUndo gym={gym} prev={kitUndo} count={1} floating onDone={() => setKitUndo(null)} />
+        </div>
+      );
+    const ev = kitNudge(focusEx);
+    if (!ev) return null;
+    return (
+      <div className="gk-float-wrap">
+        <GymKitTray
+          key={ev.itemId}
+          gym={gym}
+          ev={ev}
+          onDismiss={() => setKitDismissed((d) => [...d, ev.itemId])}
+          onAdded={(prev) => setKitUndo(prev)}
+        />
+      </div>
+    );
+  }
+
   function renderFocusView() {
     // Focus header keeps only Finish; everything else lives behind the one
     // options door (sliders next to Log, or here when nothing is focused yet).
@@ -2102,6 +2147,7 @@ export function SessionView(props: {
           {circuitBanner}
           {focusGroup ? renderGroupStep(focusGroup) : renderCard(focusEx, null)}
         </div>
+        {renderKitTray()}
         <div className="focus-nav">
           <button
             type="button"
@@ -3764,6 +3810,23 @@ export function SessionView(props: {
           )}
         </div>
         {sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
+        {gym &&
+          !gymHasNoList(gym) &&
+          (() => {
+            // Kit today's lifts used that the gym's list lacks — reviewed while
+            // there's a minute, right after the workout.
+            const items = gymKitEvidence(gym.id, wallClock()).filter(
+              (e) => e.lastAt >= workout.startedAt,
+            );
+            return (
+              <GymKitCard
+                gym={gym}
+                items={items}
+                title={t.gkRecapTitle(items.length)}
+                sub={gym.name}
+              />
+            );
+          })()}
         {suggestOn &&
           (() => {
             const entries = muscleWorkSorted(workout);

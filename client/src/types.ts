@@ -250,6 +250,9 @@ export interface Gym {
   /** Fine-grained equipment picked from the catalog (equipmentCatalog ids).
    *  The coarse `inventory` above is derived from these items' `cls`. */
   equipmentItems?: string[];
+  /** Kit the athlete said "not at this gym" to (catalog ids): never suggested
+   *  again from their workouts here. Personal, never shared. */
+  equipmentNotHere?: string[];
   /** Band library (Load-entry C-5): colour → estimated resistance in kg, set
    *  once per gym. Absent = use BAND_DEFAULTS. */
   bandLibrary?: BandRung[];

@@ -69,6 +69,7 @@ import {
   type MuscleGroup,
   isCardioExerciseName,
 } from './data/exercises';
+import { kitEvidence, type KitEvidence } from './gymEvidence';
 import type { ExerciseSubRegions } from './data/subregions';
 import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from './goals';
 import PER_SIDE from './data/per-side.json';
@@ -2911,6 +2912,55 @@ export function watchSharedGym(externalId: string): void {
   } catch {
     /* offline / not signed in — fallback to per-user */
   }
+}
+
+/**
+ * Add kit to a gym's list straight from your workouts (catalog item ids).
+ * Goes to the shared list at once (same path as ticking it by hand). The
+ * coarse inventory keeps whatever it already had — a gym audited only at the
+ * class level must not lose classes just because it gains a fine item.
+ * Returns the previous list so the caller can undo.
+ */
+export function addGymKit(
+  gymId: string,
+  itemIds: string[],
+): { items: string[]; inventory: string[] } | null {
+  const g = state.gyms.find((x) => x.id === gymId);
+  if (!g) return null;
+  const prev = { items: [...(g.equipmentItems ?? [])], inventory: [...(g.inventory ?? [])] };
+  setGymEquipment(gymId, [...prev.items, ...itemIds]);
+  const now = state.gyms.find((x) => x.id === gymId);
+  if (now) {
+    const inventory = Array.from(new Set([...prev.inventory, ...(now.inventory ?? [])]));
+    if (inventory.length !== (now.inventory ?? []).length) upsertGym({ ...now, inventory });
+  }
+  return prev;
+}
+
+/** Kit used at a gym that isn't on its list yet (see gymEvidence.ts). */
+export function gymKitEvidence(gymId: string, now: number): KitEvidence[] {
+  const g = state.gyms.find((x) => x.id === gymId);
+  if (!g) return [];
+  return kitEvidence(g, state.workouts, now, {
+    classesOf: (ex) => equipmentFor(ex),
+    clsOfItem: (id) => ITEM_CLS[id] ?? null,
+    isLift: (ex) => isStrengthExercise(ex) && !isCardioExerciseName(ex.name),
+  });
+}
+
+/** Undo `addGymKit`: put the list back exactly as it was. */
+export function restoreGymKit(gymId: string, prev: { items: string[]; inventory: string[] }): void {
+  setGymEquipment(gymId, prev.items);
+  const now = state.gyms.find((x) => x.id === gymId);
+  if (now) upsertGym({ ...now, inventory: prev.inventory });
+}
+
+/** "Not at this gym": never suggest this item from your workouts here again. */
+export function markGymKitNotHere(gymId: string, itemId: string): void {
+  const g = state.gyms.find((x) => x.id === gymId);
+  if (!g) return;
+  const notHere = Array.from(new Set([...(g.equipmentNotHere ?? []), itemId]));
+  upsertGym({ ...g, equipmentNotHere: notHere });
 }
 
 /** Set a gym's fine equipment picks and derive its coarse inventory. When the
