@@ -1757,6 +1757,9 @@ export const en = {
   restVibrateSubIos:
     'On iPhone: a tick when you log a set; the end of rest comes as sound and a notification',
   restTestAlert: 'Test the alert',
+  pushNeedsInstall:
+    'Add Spotter to your Home Screen first (Share → Add to Home Screen) — iPhone only allows notifications there.',
+  pushDenied: 'Notifications are blocked for Spotter. Allow them in the phone’s settings.',
   restSound: 'Sound',
   restSoundSub: 'Soft chime',
   restKeepAwake: 'Keep screen on',

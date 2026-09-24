@@ -1710,6 +1710,9 @@ export const et: Strings = {
   restVibrateSub: 'Lühike topeltvärin',
   restVibrateSubIos: "iPhone'is: värin seeria salvestamisel; puhkuse lõpp — heli ja teavitusega",
   restTestAlert: 'Proovi signaali',
+  pushNeedsInstall:
+    'Lisa Spotter esmalt avakuvale (Jaga → Lisa avakuvale) — iPhone lubab teavitusi ainult seal.',
+  pushDenied: 'Spotteri teavitused on blokeeritud. Luba need telefoni seadetes.',
   restSound: 'Heli',
   restSoundSub: 'Vaikne kõll',
   restKeepAwake: 'Hoia ekraan sees',

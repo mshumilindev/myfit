@@ -1726,6 +1726,9 @@ export const lt: Strings = {
   restVibrateSub: 'Trumpa dviguba',
   restVibrateSubIos: 'iPhone: vibracija įrašant seriją; poilsio pabaiga — garsu ir pranešimu',
   restTestAlert: 'Išbandyti signalą',
+  pushNeedsInstall:
+    'Pirmiausia pridėkite Spotter prie pradžios ekrano (Bendrinti → Į pradžios ekraną) — iPhone leidžia pranešimus tik ten.',
+  pushDenied: 'Spotter pranešimai užblokuoti. Leiskite juos telefono nustatymuose.',
   restSound: 'Garsas',
   restSoundSub: 'Tylus skambutis',
   restKeepAwake: 'Neišjungti ekrano',

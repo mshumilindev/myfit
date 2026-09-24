@@ -1715,6 +1715,9 @@ export const pl: Strings = {
   restVibrateSubIos:
     'Na iPhonie: wibracja przy zapisie serii; koniec przerwy — dźwiękiem i powiadomieniem',
   restTestAlert: 'Przetestuj sygnał',
+  pushNeedsInstall:
+    'Najpierw dodaj Spotter do ekranu głównego (Udostępnij → Do ekranu początkowego) — iPhone pozwala na powiadomienia tylko tam.',
+  pushDenied: 'Powiadomienia dla Spotter są zablokowane. Zezwól na nie w ustawieniach telefonu.',
   restSound: 'Dźwięk',
   restSoundSub: 'Cichy dzwonek',
   restKeepAwake: 'Nie wygaszaj ekranu',

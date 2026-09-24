@@ -1712,6 +1712,9 @@ export const uk: Strings = {
   restVibrateSub: 'Коротке подвійне',
   restVibrateSubIos: 'На iPhone: відгук при записі сету; кінець відпочинку — звуком і нотифікацією',
   restTestAlert: 'Перевірити сигнал',
+  pushNeedsInstall:
+    'Спершу додай Spotter на головний екран (Поділитися → На початковий екран) — iPhone дозволяє нотифікації лише там.',
+  pushDenied: 'Нотифікації для Spotter заблоковані. Дозволь їх у налаштуваннях телефону.',
   restSound: 'Звук',
   restSoundSub: 'Тихий дзвіночок',
   restKeepAwake: 'Не гасити екран',

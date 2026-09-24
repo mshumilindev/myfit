@@ -11,6 +11,7 @@
  */
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db } from './lib';
+import { sendDueOutbox } from './push';
 import * as crypto from 'node:crypto';
 
 const AUTO_FINISH_AFTER_MS = 8 * 60 * 60 * 1000;
@@ -158,5 +159,13 @@ export const autoFinishStaleWorkouts = onSchedule('every 60 minutes', async () =
   } catch (e) {
     console.error('[maintenance] sleep auto-start failed', e);
   }
-  console.log(`[maintenance] workouts closed=${closed} sleeps ended=${ended} started=${started}`);
+  let pushed = 0;
+  try {
+    pushed = await sendDueOutbox();
+  } catch (e) {
+    console.error('[maintenance] push outbox failed', e);
+  }
+  console.log(
+    `[maintenance] workouts closed=${closed} sleeps ended=${ended} started=${started} pushed=${pushed}`,
+  );
 });

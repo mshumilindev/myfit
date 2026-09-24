@@ -55,6 +55,7 @@ import {
   type RestPrefs,
 } from '../restTimer';
 import { haptic, isAppleTouch } from '../haptics';
+import { cancelRestPush, enablePush, pushState, scheduleRestPush } from '../push';
 import {
   addExercise,
   attachGymToWorkout,
@@ -2518,6 +2519,7 @@ export function SessionView(props: {
           {failNote}
           <div className={`rst-card${done ? ' done' : ''}`}>
             <RestAlarm
+              setId={lastChrono!.s.id}
               dueAt={lastLoggedAt + goal * 1000}
               enabled={goal > 0}
               prefs={store.restPrefs ?? REST_PREFS_DEFAULT}
@@ -5788,13 +5790,15 @@ const SET_TYPE_ROWS: Array<{ type: SetType; icon: string }> = [
 /** Fires the rest alert once, at `dueAt` (a timer, not the 1 s tick, so it
  *  lands on time). Nothing if the moment already passed (a reload, a skip). */
 function RestAlarm(props: {
+  /** The logged set this rest follows — keys the server-side push. */
+  setId: string;
   dueAt: number;
   enabled: boolean;
   prefs: RestPrefs;
   title: string;
   body: string;
 }) {
-  const { dueAt, enabled, prefs, title, body } = props;
+  const { setId, dueAt, enabled, prefs, title, body } = props;
   useEffect(() => {
     if (!enabled) return;
     const ms = dueAt - Date.now();
@@ -5802,8 +5806,31 @@ function RestAlarm(props: {
     const id = window.setTimeout(() => restAlert(prefs, { title, body }), ms);
     return () => window.clearTimeout(id);
   }, [dueAt, enabled, prefs, title, body]);
+  // A locked phone suspends this page, so the exact-time alert also goes out as
+  // a push. Still here and visible just before the end → cancel it (the local
+  // alert covers it); a new set or skipped rest cancels it too.
+  useEffect(() => {
+    if (!enabled || !prefs.notify) return;
+    const ms = dueAt - Date.now();
+    if (ms <= REST_PUSH_CANCEL_LEAD_MS) return;
+    scheduleRestPush(setId, dueAt, title, body);
+    let settled = false;
+    const guard = window.setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        settled = true;
+        cancelRestPush(setId);
+      }
+    }, ms - REST_PUSH_CANCEL_LEAD_MS);
+    return () => {
+      window.clearTimeout(guard);
+      if (!settled && Date.now() < dueAt) cancelRestPush(setId);
+    };
+  }, [setId, dueAt, enabled, prefs.notify, title, body]);
   return null;
 }
+
+/** How long before the rest ends a visible page cancels the rest push. */
+const REST_PUSH_CANCEL_LEAD_MS = 3000;
 
 /** Rest target for one lift + how the end of rest is announced. */
 function RestSheet(props: {
@@ -5813,12 +5840,13 @@ function RestSheet(props: {
   auto: { sec: number; reasons: { key: RestReason; sec: number }[] } | null;
   onClose: () => void;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const st = useStore();
   const [target, setTarget] = useState<number | 'auto'>(
     () => exerciseRestSec(props.exName) ?? 'auto',
   );
   const [prefs, setPrefs] = useState<RestPrefs>(st.restPrefs ?? REST_PREFS_DEFAULT);
+  const [pushHint, setPushHint] = useState<string | null>(null);
   const row = (key: keyof RestPrefs, label: string, sub: string) => (
     <button
       type="button"
@@ -5826,7 +5854,24 @@ function RestSheet(props: {
       aria-pressed={prefs[key]}
       onClick={async () => {
         const on = !prefs[key];
-        if (key === 'notify' && on && !(await requestRestNotifications())) return;
+        if (key === 'notify' && on) {
+          const ps = pushState();
+          if (ps === 'needs-install') {
+            setPushHint(t.pushNeedsInstall);
+            return;
+          }
+          // Push where the device supports it (reaches a locked phone); the
+          // plain notification permission otherwise.
+          const ok =
+            ps === 'unsupported'
+              ? await requestRestNotifications()
+              : (await enablePush(locale)) === 'on';
+          if (!ok) {
+            setPushHint(t.pushDenied);
+            return;
+          }
+          setPushHint(null);
+        }
         setPrefs((p) => ({ ...p, [key]: on }));
       }}
     >
@@ -5890,6 +5935,7 @@ function RestSheet(props: {
         {row('keepAwake', t.restKeepAwake, t.restKeepAwakeSub)}
         {row('notify', t.restNotify, t.restNotifySub)}
       </div>
+      {pushHint && <div className="se-hint rest-push-hint">{pushHint}</div>}
       <button
         type="button"
         className="rest-test"

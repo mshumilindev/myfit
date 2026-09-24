@@ -86,8 +86,8 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         // Sends already-open pages to the new build (public/sw-refresh.js).
-        importScripts: ['/sw-refresh.js'],
-        globIgnores: ['sw-refresh.js'],
+        importScripts: ['/sw-refresh.js', '/sw-push.js'],
+        globIgnores: ['sw-refresh.js', 'sw-push.js'],
         // App shell is precached; API goes network-only (the app has its own
         // offline queue in localStorage, so we must never serve stale API data).
         navigateFallback: '/index.html',

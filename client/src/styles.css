@@ -37868,3 +37868,8 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+.rest-push-hint {
+  margin-top: 8px;
+  color: var(--color-warn, #e0b24a);
+}

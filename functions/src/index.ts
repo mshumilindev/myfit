@@ -26,5 +26,7 @@ export * from './trainer';
 export * from './programs';
 export * from './profile';
 export * from './scheduled';
+// Web push delivery: outbox + exact-time rest alerts.
+export * from './push';
 // Notices, mark-read, reminders and reminder-dismissals are plain Firestore
 // reads/writes on the client (guarded by rules) — no functions needed.

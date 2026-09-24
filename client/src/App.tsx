@@ -1,3 +1,4 @@
+import { refreshPush, setAppBadge } from './push';
 import {
   lazy,
   Suspense,
@@ -516,7 +517,7 @@ function isLearnHash(hash: string): boolean {
 }
 
 export function App() {
-  const { t } = useT();
+  const { t, locale } = useT();
   const store = useStore();
   const [authed, setAuthed] = useState<boolean>(() => !!currentUid());
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -615,6 +616,14 @@ export function App() {
   }, [rawNotifs]);
   const { notifs, state: notifState } = useNotifs();
   const notifUnread = unreadCount(notifState, notifs);
+  // Home Screen icon badge mirrors the bell.
+  useEffect(() => {
+    setAppBadge(notifUnread);
+  }, [notifUnread]);
+  // Keep this device's push token fresh (FCM rotates it; iOS can drop it).
+  useEffect(() => {
+    if (authed) void refreshPush(locale);
+  }, [authed, locale]);
 
   // Apex (gamification) is a full-screen mode; the Shell launcher switches apps.
   const activeChallengeCount = challenges.filter((c) => c.status === 'active').length;

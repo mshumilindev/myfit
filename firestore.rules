@@ -94,6 +94,23 @@ service cloud.firestore {
       match /pings/{pingId} {
         allow read, write: if isSelf(userId);
       }
+      // Web push: this user's device tokens and the messages their client
+      // planned (Cloud Functions deliver both with the admin SDK).
+      match /push/{deviceId} {
+        allow read, delete: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.token is string
+          && request.resource.data.token.size() < 4096;
+      }
+      match /outbox/{messageId} {
+        allow read, delete: if isSelf(userId);
+        allow create, update: if isSelf(userId)
+          && request.resource.data.dueAt is number
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 120
+          && request.resource.data.body is string
+          && request.resource.data.body.size() <= 400;
+      }
       match /reminderDismissals/{dismissId} {
         allow read, write: if isSelf(userId);
       }
