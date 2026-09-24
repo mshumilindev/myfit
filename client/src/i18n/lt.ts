@@ -1752,11 +1752,7 @@ export const lt: Strings = {
   atlasTemperSub: 'Tas pats treneris, tos pačios smegenys — kita burna.',
   atlasFineTitle: 'Jis bus grubus.',
   atlasFineBody:
-    'Negailestingas Atlas šaiposi iš tingių setų, trumpo poilsio ir praleistų dienų. Tokia esmė. Šių ribų jis niekada neperžengia:',
-  atlasRuleEffort: 'Juokiasi iš pastangų, niekada iš kūno',
-  atlasRuleEffortSub: 'Svoris, išvaizda ir sveikata – draudžiamos temos',
-  atlasRuleSoften: 'Sušvelnėja, kai esi traumuotas ar sergi',
-  atlasRuleSoftenSub: 'Skausmas, liga, trumpa naktis ar ilga pertrauka → tą dieną Ramus',
+    'Negailestingas Atlas šaiposi iš tingių setų, trumpo poilsio ir praleistų dienų. Tokia esmė. Jis niekada nesišaipo iš kūno ir sušvelnėja, kai esi traumuotas ar sergi.',
   atlasRuleMom: '„Tavo mama“ juokeliai',
   atlasRuleMomSub: 'Klasika',
   atlasRuleSwear: 'Keiksmai',

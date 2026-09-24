@@ -1736,11 +1736,7 @@ export const et: Strings = {
   atlasTemperSub: 'Sama treener, sama aju — teine suu.',
   atlasFineTitle: 'Ta on ebaviisakas.',
   atlasFineBody:
-    'Halastamatu Atlas pilkab laiskade seeriate, lühikese puhkuse ja vahele jäänud päevade üle. See ongi mõte. Neid piire ta kunagi ei ületa:',
-  atlasRuleEffort: 'Pilkab pingutuse, mitte kunagi keha üle',
-  atlasRuleEffortSub: 'Kaal, välimus ja tervis on keelatud',
-  atlasRuleSoften: 'Leebub, kui oled vigastatud või haige',
-  atlasRuleSoftenSub: 'Valu, haigus, lühike öö või pikk paus → päevaks Rahulik',
+    'Halastamatu Atlas pilkab laiskade seeriate, lühikese puhkuse ja vahele jäänud päevade üle. See ongi mõte. Ta ei pilka kunagi su keha ja leebub, kui oled vigastatud või haige.',
   atlasRuleMom: '„Su ema“ naljad',
   atlasRuleMomSub: 'Klassika',
   atlasRuleSwear: 'Vandumine',

@@ -1741,11 +1741,7 @@ export const pl: Strings = {
   atlasTemperSub: 'Ten sam trener, ten sam mózg — inny język.',
   atlasFineTitle: 'Będzie niemiły.',
   atlasFineBody:
-    'Bezlitosny Atlas kpi z leniwych serii, krótkich przerw i opuszczonych dni. O to chodzi. Tych granic nigdy nie przekracza:',
-  atlasRuleEffort: 'Szydzi z wysiłku, nigdy z ciała',
-  atlasRuleEffortSub: 'Waga, wygląd i zdrowie są nietykalne',
-  atlasRuleSoften: 'Łagodnieje, gdy jesteś kontuzjowany lub chory',
-  atlasRuleSoftenSub: 'Ból, choroba, krótka noc lub długa przerwa → na dzień Spokojny',
+    'Bezlitosny Atlas kpi z leniwych serii, krótkich przerw i opuszczonych dni. O to chodzi. Nigdy nie kpi z twojego ciała i łagodnieje, gdy jesteś kontuzjowany lub chory.',
   atlasRuleMom: 'Żarty „twoja mama”',
   atlasRuleMomSub: 'Klasyka',
   atlasRuleSwear: 'Przekleństwa',

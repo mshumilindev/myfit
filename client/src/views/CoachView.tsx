@@ -175,8 +175,6 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
             <p className="atl-sub">{t.atlasFineBody}</p>
           </div>
           <div className="atl-rules">
-            <RuleRow label={t.atlasRuleEffort} sub={t.atlasRuleEffortSub} on locked />
-            <RuleRow label={t.atlasRuleSoften} sub={t.atlasRuleSoftenSub} on locked />
             <RuleRow
               label={t.atlasRuleMom}
               sub={t.atlasRuleMomSub}
@@ -1133,8 +1131,6 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           locked={!swearAllowed(draft.temper)}
           onToggle={() => edit({ swearing: !draft.swearing })}
         />
-        <RuleRow label={t.atlasRuleEffort} sub={t.atlasRuleEffortSub} on locked />
-        <RuleRow label={t.atlasRuleSoften} sub={t.atlasRuleSoftenSub} on locked />
       </div>
       <div className="se-group atl-danger-group">
         <button

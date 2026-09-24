@@ -1783,11 +1783,7 @@ export const en = {
   atlasTemperSub: 'Same coach, same brain — different mouth.',
   atlasFineTitle: 'He will be rude.',
   atlasFineBody:
-    'Merciless Atlas mocks lazy sets, short rest and skipped days. That’s the point. These lines he never crosses:',
-  atlasRuleEffort: 'Roasts effort, never your body',
-  atlasRuleEffortSub: 'Weight, looks and health are off-limits',
-  atlasRuleSoften: 'Backs off when you’re hurt or ill',
-  atlasRuleSoftenSub: 'Pain, illness, a short night or a long break → Steady for the day',
+    'Merciless Atlas mocks lazy sets, short rest and skipped days. That’s the point. He never mocks your body, and backs off when you’re hurt or ill.',
   atlasRuleMom: '“Your mom” jokes',
   atlasRuleMomSub: 'The classics',
   atlasRuleSwear: 'Swearing',
