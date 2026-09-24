@@ -16,14 +16,7 @@
  * store mutation, no React — the view renders it and `startPlay` (store) begins
  * a session from one.
  */
-import {
-  exerciseKind,
-  isMarkerExercise,
-  isStrengthExercise,
-  resolveMuscles,
-  setTopWeight,
-  setTypeOf,
-} from './store';
+import { isStrengthExercise, warmupHabit, resolveMuscles, setTopWeight, setTypeOf } from './store';
 import type { Exercise, Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import { describeDay, exerciseDay, type DayReadout, type TrainingDay } from './data/daySuggest';
@@ -243,17 +236,11 @@ export function computePlaybook(finished: Workout[], now: number): PlaybookResul
     c.workouts.push(w);
   }
   for (const c of clusters.values()) c.workouts.sort((a, b) => b.startedAt - a.startedAt);
-  // Warm-up markers are only kept on finish since a recent version: older
-  // sessions carry no trace of them. Judge the habit only on sessions from
-  // when markers were recorded (none yet → unknown → default yes).
-  const markerEra = Math.min(
-    ...done.filter((w) => w.exercises.some((e) => isMarkerExercise(e))).map((w) => w.startedAt),
-  );
 
   const plays: Play[] = [];
   for (const [key, c] of clusters) {
     if (c.workouts.length < MIN_SESSIONS) continue;
-    const play = synthesize(key, c, globalTop, globalSessions, globalPrimary, now, markerEra);
+    const play = synthesize(key, c, globalTop, globalSessions, globalPrimary, now);
     if (play && play.exercises.length > 0) plays.push(play);
   }
   // Most recently trained day first — that's what you're most likely to run.
@@ -280,7 +267,6 @@ function synthesize(
   globalSessions: Map<string, number>,
   globalPrimary: Map<string, MuscleGroup | null>,
   now: number,
-  markerEra: number,
 ): Play | null {
   const sessions = c.workouts.length;
   // Aggregate per-exercise occurrences across the cluster's sessions.
@@ -404,19 +390,8 @@ function synthesize(
   );
 
   const weekdays = [0, 0, 0, 0, 0, 0, 0];
-  let warmOpen = 0;
-  let judged = 0;
-  for (const w of c.workouts) {
-    weekdays[new Date(w.startedAt).getDay()] += 1;
-    if (w.startedAt < markerEra) continue;
-    judged += 1;
-    const first = [...w.exercises]
-      .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
-      .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))[0];
-    if (first && (exerciseKind(first) === 'warmup' || exerciseKind(first) === 'cardio'))
-      warmOpen += 1;
-  }
-  const opensWithWarmup = judged === 0 || warmOpen >= judged / 3;
+  for (const w of c.workouts) weekdays[new Date(w.startedAt).getDay()] += 1;
+  const opensWithWarmup = warmupHabit(c.workouts);
 
   return {
     id: key,

@@ -64,6 +64,8 @@ import {
   duplicateExercise,
   equipmentFor,
   gymKitEvidence,
+  opensWithWarmupSession,
+  warmupHabit,
   est1rm,
   exerciseKind,
   exerciseVolumeKg,
@@ -1470,28 +1472,17 @@ export function SessionView(props: {
     const day =
       sameDay.length > 0 ? new Intl.DateTimeFormat(t.locale, { weekday: 'long' }).format(at) : null;
     const picks: TiredPick[] = [];
-    // Do these sessions usually open with a warm-up (a warm-up marker or a
-    // cardio bout before the first lift)? Then that's the first tile.
-    const openers = src.map(
-      (w) =>
-        [...w.exercises]
-          .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
-          .sort((a, b) => a.position - b.position)[0],
-    );
-    const warmOpen = openers.filter(
-      (e) =>
-        e &&
-        (exerciseKind(e) === 'warmup' ||
-          exerciseKind(e) === 'cardio' ||
-          isCardioExerciseName(e.name)),
-    );
-    // Sessions finished before markers were kept on finish carry no trace of
-    // a warm-up at all; no marker anywhere is "unknown", not "never" — then
-    // the default is the recommended one: warm up before lifting.
-    const markersKnown = src.some((w) => w.exercises.some((e) => isMarkerExercise(e)));
-    const warmsUp =
-      (warmOpen.length > 0 && warmOpen.length >= src.length / 3) ||
-      (!markersKnown && src.length > 0);
+    // Do these sessions usually open with a warm-up (marker or cardio first)?
+    // Same rule as the Playbook (store.warmupHabit), so both agree.
+    const warmOpen = src
+      .filter(opensWithWarmupSession)
+      .map(
+        (w) =>
+          [...w.exercises]
+            .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
+            .sort((a, b) => a.position - b.position)[0],
+      );
+    const warmsUp = src.length > 0 && warmupHabit(src);
     if (warmsUp) {
       const cardio = warmOpen.filter((e) => exerciseKind(e!) !== 'warmup');
       const kicker = kickerAt(0);

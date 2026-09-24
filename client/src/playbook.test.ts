@@ -3,8 +3,10 @@ import { computePlaybook, playForWeekday } from './playbook';
 import type { Exercise, Workout } from './types';
 
 const DAY = 86400000;
-// 2026-01-05 is a Monday.
-const MON = Date.UTC(2026, 0, 5, 17);
+// 2026-10-05 is a Monday (after warm-up markers started being kept).
+const MON = Date.UTC(2026, 9, 5, 17);
+// 2026-01-05, a Monday before that.
+const OLD_MON = Date.UTC(2026, 0, 5, 17);
 let n = 0;
 const lift = (name: string, pos: number): Exercise =>
   ({
@@ -60,9 +62,15 @@ const LEGS = ['Barbell Squat', 'Romanian Deadlift', 'Leg Press', 'Standing Calf 
 describe('warm-up habit ignores sessions from before markers were kept', () => {
   it('old marker-less sessions do not outvote the new ones', () => {
     const ws: Workout[] = [];
-    for (let wk = 0; wk < 6; wk++) ws.push(session(MON + wk * 7 * DAY, CHEST, wk >= 4));
-    const pb = computePlaybook(ws, MON + 50 * DAY);
-    expect(pb.plays[0].opensWithWarmup).toBe(true);
+    // 8 old sessions (markers were dropped then), 2 new ones with a warm-up.
+    for (let wk = 0; wk < 8; wk++) ws.push(session(OLD_MON + wk * 7 * DAY, CHEST));
+    for (let wk = 0; wk < 2; wk++) ws.push(session(MON + wk * 7 * DAY, CHEST, true));
+    expect(computePlaybook(ws, MON + 20 * DAY).plays[0].opensWithWarmup).toBe(true);
+    // Only old sessions: can't tell → warm up (safe default).
+    expect(computePlaybook(ws.slice(0, 8), MON).plays[0].opensWithWarmup).toBe(true);
+    // New sessions without a warm-up: learned "no".
+    const noWarm = [0, 1, 2].map((wk) => session(MON + wk * 7 * DAY, CHEST));
+    expect(computePlaybook(noWarm, MON + 30 * DAY).plays[0].opensWithWarmup).toBe(false);
   });
 });
 

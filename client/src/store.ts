@@ -4008,6 +4008,37 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
   restoreExercise(workoutId, copy);
 }
 
+/** Warm-up / cool-down markers are kept on finish since this build; sessions
+ *  finished earlier lost them, so they can't say whether you warmed up. */
+export const MARKERS_KEPT_SINCE = Date.UTC(2026, 8, 24);
+
+/** The first thing a session opened with (markers included). */
+function sessionOpener(w: Workout): Exercise | undefined {
+  return [...w.exercises]
+    .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
+    .sort((a, b) => a.position - b.position)[0];
+}
+/** Opened with a warm-up: the marker, or cardio before the first lift. */
+export function opensWithWarmupSession(w: Workout): boolean {
+  const e = sessionOpener(w);
+  return (
+    !!e &&
+    (exerciseKind(e) === 'warmup' || exerciseKind(e) === 'cardio' || isCardioExerciseName(e.name))
+  );
+}
+/**
+ * Do these sessions usually start with a warm-up? Judged on sessions that
+ * could tell: those since markers were kept, plus any older one that shows a
+ * warm-up anyway (cardio first). Nothing to judge → yes (the safe default).
+ */
+export function warmupHabit(sessions: Workout[]): boolean {
+  const judged = sessions.filter(
+    (w) => w.startedAt >= MARKERS_KEPT_SINCE || opensWithWarmupSession(w),
+  );
+  if (judged.length === 0) return true;
+  return judged.filter(opensWithWarmupSession).length >= judged.length / 3;
+}
+
 export function finishWorkoutClean(id: string): Workout | undefined {
   const w = state.workouts.find((x) => x.id === id);
   if (!w) return undefined;

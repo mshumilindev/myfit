@@ -37806,3 +37806,9 @@ body {
   margin-left: 12px;
   margin-right: 12px;
 }
+/* plain step numbers, no discs */
+.pbs-n,
+.pbs-row.warm .pbs-n {
+  background: none;
+  font-size: 13px;
+}
