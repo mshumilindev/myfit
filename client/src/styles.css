@@ -37109,3 +37109,20 @@ body {
     height: 100%;
   }
 }
+
+/* Warm-up starts wear the warm-up colour (the set-type blue), not brass. */
+.es-hero.warm,
+.es-hero.warm .es-hero-main {
+  box-shadow: inset 0 0 0 1.5px var(--set-warmup);
+}
+.es-hero.warm .es-kicker,
+.es-tile.warm .es-kicker {
+  color: var(--set-warmup);
+}
+.es-hero.warm .es-play {
+  background: var(--set-warmup);
+  color: #0b1a2a;
+}
+.es-tile.warm .es-tile-main {
+  border-color: color-mix(in srgb, var(--set-warmup) 55%, transparent);
+}

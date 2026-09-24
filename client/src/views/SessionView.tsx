@@ -1666,7 +1666,7 @@ export function SessionView(props: {
             )}
           </div>
           {hero && (
-            <div className="es-hero">
+            <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}`}>
               {hero.img ? <img src={hero.img} alt="" /> : <span className="es-hero-noimg" />}
               <button type="button" className="es-hero-main" onClick={() => openPick(hero!)}>
                 <span className="es-hero-text">
@@ -1685,7 +1685,7 @@ export function SessionView(props: {
             <div className="es-more">
               <div className="es-grid">
                 {tiles.map((p) => (
-                  <div key={p.name} className="es-tile">
+                  <div key={p.name} className={`es-tile${p.kind === 'strength' ? '' : ' warm'}`}>
                     <button type="button" className="es-tile-main" onClick={() => openPick(p)}>
                       {p.img ? (
                         <img src={p.img} alt="" />
