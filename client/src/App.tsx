@@ -1,5 +1,7 @@
-import { refreshPush, setAppBadge } from './push';
-import { useAtlasNotes } from './atlas/notes';
+import { pushState, refreshPush, setAppBadge } from './push';
+import { useAtlasFmt, useAtlasNotes } from './atlas/notes';
+import { planOutbox, syncOutbox } from './atlas/schedule';
+import { computePlaybook } from './playbook';
 import {
   lazy,
   Suspense,
@@ -650,6 +652,31 @@ export function App() {
   useEffect(() => {
     setAppBadge(notifUnread);
   }, [notifUnread]);
+  // Atlas's planned pushes (skipped day, Sunday review) → the server outbox.
+  const atlasFmt = useAtlasFmt();
+  useEffect(() => {
+    if (!authed || pushState() !== 'on') return;
+    const id = window.setTimeout(() => {
+      const finished = store.workouts.filter((w) => w.finishedAt !== null);
+      const now = Date.now();
+      const msgs = store.coach.enabled
+        ? planOutbox({
+            coach: store.coach,
+            temper: atlas.temper,
+            finished,
+            plays: computePlaybook(finished, now).plays,
+            now,
+            locale,
+            fmt: atlasFmt,
+            title: t.atlasName,
+            reviewBody: t.atlasPushReview,
+          })
+        : [];
+      void syncOutbox(msgs).catch((err) => console.warn('atlas: outbox sync failed', err));
+    }, 3000);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, store.workouts, store.coach, atlas.temper, locale]);
   // Keep this device's push token fresh (FCM rotates it; iOS can drop it).
   useEffect(() => {
     if (authed) void refreshPush(locale);

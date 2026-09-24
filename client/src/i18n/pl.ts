@@ -1788,6 +1788,7 @@ export const pl: Strings = {
   atlasTemperLabel: 'Temperament',
   atlasRoleLabel: 'Rola',
   atlasTurnOff: 'Wyłącz Atlasa',
+  atlasPushReview: 'Tydzień zamknięty. Wpadnij usłyszeć, co o nim myślę.',
   atlasNumbers: 'Liczby',
   atlasMuteToday: 'Wycisz na dziś',
   atlasOpen: 'Otwórz Atlasa',

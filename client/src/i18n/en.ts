@@ -1831,6 +1831,7 @@ export const en = {
   atlasTemperLabel: 'Temper',
   atlasRoleLabel: 'Role',
   atlasTurnOff: 'Turn Atlas off',
+  atlasPushReview: 'Your week is in. Come and hear what I think of it.',
   atlasNumbers: 'The numbers',
   atlasMuteToday: 'Mute for today',
   atlasOpen: 'Open Atlas',

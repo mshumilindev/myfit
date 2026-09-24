@@ -1783,6 +1783,7 @@ export const et: Strings = {
   atlasTemperLabel: 'Iseloom',
   atlasRoleLabel: 'Roll',
   atlasTurnOff: 'Lülita Atlas välja',
+  atlasPushReview: 'Nädal on koos. Tule kuula, mida ma sellest arvan.',
   atlasNumbers: 'Numbrid',
   atlasMuteToday: 'Vaigista täna',
   atlasOpen: 'Ava Atlas',
