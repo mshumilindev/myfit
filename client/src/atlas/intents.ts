@@ -29,6 +29,7 @@ import {
   type Tr,
 } from './intentKit';
 import { INTENTS_MORE } from './intentsMore';
+import { INTENTS_THIRD } from './intentsThird';
 
 export type { AskCtx } from './intentKit';
 
@@ -907,7 +908,7 @@ export function answerLocally(question: string, c: AskCtx): LocalAnswer | null {
   const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
   const weight = (it: Intent) =>
     matchedWords(words, it.all) + (it.needs ? 2 : 0) + (it.priority ? 100 : 0);
-  const ranked = [...INTENTS, ...INTENTS_MORE]
+  const ranked = [...INTENTS, ...INTENTS_MORE, ...INTENTS_THIRD]
     .filter(
       (it) =>
         (!it.maxWords || words.length <= it.maxWords) &&

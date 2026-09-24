@@ -19,7 +19,8 @@ export interface AskCtx {
   s: Pick<
     StoreState,
     'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics' | 'restPeriods' | 'exerciseRest'
-  >;
+  > &
+    Partial<Pick<StoreState, 'activities' | 'gyms' | 'goals'>>;
   now: number;
   locale: LocaleId;
   temper: Temper;
