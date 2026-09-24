@@ -130,7 +130,11 @@ export const cancelRestPush = onCall(async (req) => {
 });
 
 export const restPushTask = onTaskDispatched<RestTask>(
-  { retryConfig: { maxAttempts: 1 }, rateLimits: { maxConcurrentDispatches: 50 } },
+  {
+    invoker: 'firebase-adminsdk-fbsvc@spotter-64c3b.iam.gserviceaccount.com',
+    retryConfig: { maxAttempts: 1 },
+    rateLimits: { maxConcurrentDispatches: 50 },
+  },
   async (req) => {
     const { uid, title, body } = req.data;
     if (!uid) return;
