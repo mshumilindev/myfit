@@ -36343,11 +36343,7 @@ body {
   height: calc(28px * var(--stim, 0));
   min-height: 3px;
   border-radius: 3px;
-  background: color-mix(
-    in srgb,
-    rgb(240, 113, 79) calc(var(--fat, 0) * 100%),
-    var(--color-accent)
-  );
+  background: color-mix(in srgb, rgb(240, 113, 79) calc(var(--fat, 0) * 100%), var(--color-accent));
 }
 .focus-view .set-row.metered::after {
   content: '';
