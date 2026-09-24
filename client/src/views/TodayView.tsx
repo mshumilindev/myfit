@@ -43,6 +43,7 @@ import { SessionLaunchSheet } from '../components/SessionLaunchSheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
+import { AtlasSoloStrip, AtlasStoryItem } from '../components/AtlasStrip';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
 import { restingForDay } from '../dayEnergy';
 import { buildReadinessNudge } from '../components/Readiness';
@@ -1178,6 +1179,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     });
   }
 
+  // Atlas lives in the stories strip: first bubble next to clients, or a
+  // full-width row of the same height when he is alone (or the invite, if off).
+  const openCoach = () => shell.openOverlay({ screen: 'coach' });
+  const atlasLead = store.coach.enabled ? <AtlasStoryItem onOpen={openCoach} /> : undefined;
+  const atlasSolo =
+    store.coach.enabled || !store.coach.inviteDismissed ? (
+      <AtlasSoloStrip onOpen={openCoach} />
+    ) : null;
+
   // A trainer's Today is just their clients — nothing else, to avoid clutter.
   if (getRole() === 'trainer') {
     return (
@@ -1185,6 +1195,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <div className="pane-main">
           <TrainerClientsStrip
             onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
+            lead={atlasLead}
+            solo={atlasSolo}
           />
         </div>
       </div>
@@ -1239,10 +1251,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {/* An admin who is also a trainer sees their clients between the day
             heading and the calendar. */}
-        {getRole() === 'admin' && (
+        {getRole() === 'admin' ? (
           <TrainerClientsStrip
             onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
+            lead={atlasLead}
+            solo={atlasSolo}
           />
+        ) : (
+          atlasSolo
         )}
         {programCard}
         {dayDrawer != null && (

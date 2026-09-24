@@ -39,6 +39,8 @@ export interface CoachSettings {
   swearing: boolean;
   /** Muted for today from a debrief ("Mute for today"): until this ms. */
   mutedUntil?: number | null;
+  /** "Not now" on the invite — hides Atlas from the Today strip until opened elsewhere. */
+  inviteDismissed?: boolean;
   /** Notes newer than this are unread (the ring in the stories strip). */
   readAt: number;
   /** Last local edit (last-write-wins against the synced copy). */

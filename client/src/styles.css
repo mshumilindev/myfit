@@ -38254,3 +38254,89 @@ body {
   background: var(--color-neutral-800);
   color: var(--color-text);
 }
+
+/* Atlas in the stories strip (components/AtlasStrip.tsx) */
+.atl-story .tcs-ring {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--atl) 45%, transparent);
+}
+.atl-story.unread .tcs-ring {
+  padding: 2.5px;
+  box-shadow: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--atl) 60%, #fff), var(--atl) 60%);
+}
+.atl-story.unread .tcs-ring > :first-child {
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+.atl-story .tcs-name {
+  color: var(--atl);
+}
+.atl-story-split {
+  flex: none;
+  width: 1px;
+  margin: 8px 0 24px;
+  background: var(--color-divider);
+}
+.atl-solo {
+  flex: 1;
+  min-width: 0;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px 0 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.atl-solo-ring {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--atl) 45%, transparent);
+}
+.atl-solo.unread .atl-solo-ring {
+  padding: 2.5px;
+  box-shadow: none;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--atl) 60%, #fff), var(--atl) 60%);
+}
+.atl-solo.unread .atl-solo-ring > :first-child {
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+.atl-solo-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.atl-solo-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+.atl-solo-line {
+  font-size: 13.5px;
+  line-height: 18px;
+  color: var(--color-neutral-300);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.atl-solo-count {
+  flex: none;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--atl);
+  color: #140c0d;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.atl-solo-go {
+  flex: none;
+  color: var(--color-neutral-500);
+}

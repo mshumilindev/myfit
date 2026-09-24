@@ -10,7 +10,7 @@
  * when the payload actually changed (delta check). Avatars carry a revision so
  * their photos are served from the persistent blob cache until they change.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
 import { useStore } from '../store';
 import { classifyTrainee } from '../trainerLive';
@@ -34,7 +34,17 @@ function firstName(name: string): string {
   return name.trim().split(/\s+/)[0] || name;
 }
 
-export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: string) => void }) {
+export function TrainerClientsStrip({
+  onOpenClient,
+  lead,
+  solo,
+}: {
+  onOpenClient: (id: string) => void;
+  /** Rendered first in the row (Atlas). */
+  lead?: ReactNode;
+  /** Rendered instead of the strip when there are no clients. */
+  solo?: ReactNode;
+}) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30000);
@@ -68,7 +78,7 @@ export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: strin
     refresh();
   }, [refresh]);
 
-  if (!clients || clients.length === 0) return null;
+  if (!clients || clients.length === 0) return solo ?? null;
 
   // Anyone training now leads; then most-recently-trained first, never-trained last.
   const sorted = [...clients].sort((a, b) => {
@@ -81,6 +91,7 @@ export function TrainerClientsStrip({ onOpenClient }: { onOpenClient: (id: strin
   return (
     <div className="tcs">
       <div className="tcs-row">
+        {lead}
         {sorted.map((c) => {
           const live = liveIds.has(c.id);
           const fresh = c.lastSessionAt !== null && now - c.lastSessionAt < 2 * DAY_MS;
