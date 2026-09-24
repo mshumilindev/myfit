@@ -37514,7 +37514,8 @@ body {
 }
 .focus-view .warmup-marker-body .warmup-marker-photo-wrap {
   width: 100%;
-  height: clamp(200px, 40dvh, 360px);
+  height: auto;
+  aspect-ratio: 16 / 9;
   border-radius: 0;
 }
 .focus-view .warmup-marker-body .warmup-marker-photo {
@@ -37553,4 +37554,11 @@ body {
   place-items: start center;
   padding-top: 22px;
   box-sizing: border-box;
+}
+
+/* Cool-down badge over the photo: an opaque disc like the warm-up one (the
+   translucent tint vanished against the picture), in the cool-down blue. */
+.cooldown-marker .warmup-marker-body .warmup-marker-photo-wrap + .warmup-marker-icon {
+  background: #15263a;
+  color: rgb(120, 172, 224);
 }
