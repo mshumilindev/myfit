@@ -1744,7 +1744,7 @@ export const et: Strings = {
   atlasRuleMom: '„Su ema“ naljad',
   atlasRuleMomSub: 'Klassika',
   atlasRuleSwear: 'Vandumine',
-  atlasRuleSwearSub: 'Vaikimisi puhas',
+  atlasRuleSwearSub: 'Mõõdukalt ja harva',
   atlasTakeIt: 'Ma kannatan välja',
   atlasSofter: 'Vali leebem',
   atlasRoleAsk: 'Kas mina juhin su programmi — või jääd kellegi teisega ja mina ainult vaatan?',
@@ -1802,6 +1802,8 @@ export const et: Strings = {
   atlasClearAsk: 'Tühjendada vestlus?',
   atlasClearBody:
     'Kogu vestlus ja tema senised märkmed kaovad. Päevik ja see, mida ta sinust mäletab, jäävad.',
+  atlasClearSub: 'Vestlus ja märkmed — päevik jääb',
+  atlasTurnOffSub: 'Ilma märkmete ja kavata — tagasi millal tahes',
   atlasRuleHardOnly: 'Ainult Drill ja Merciless',
   atlasRuleMercilessOnly: 'Ainult Merciless',
   atlasLocalUnknown:

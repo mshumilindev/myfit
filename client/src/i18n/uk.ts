@@ -1746,7 +1746,7 @@ export const uk: Strings = {
   atlasRuleMom: 'Жарти «твоя мама»',
   atlasRuleMomSub: 'Класика',
   atlasRuleSwear: 'Лайка',
-  atlasRuleSwearSub: 'За замовчуванням без неї',
+  atlasRuleSwearSub: 'Легка й зрідка',
   atlasTakeIt: 'Я витримаю',
   atlasSofter: 'Обрати м’якший характер',
   atlasRoleAsk: 'Я веду твою програму — чи ти лишаєш когось іншого, а я лише спостерігаю?',
@@ -1804,6 +1804,8 @@ export const uk: Strings = {
   atlasClearAsk: 'Очистити чат?',
   atlasClearBody:
     'Уся розмова і його нотатки дотепер зникнуть. Журнал і те, що він про тебе пам’ятає, лишаються.',
+  atlasClearSub: 'Розмова й нотатки — журнал лишається',
+  atlasTurnOffSub: 'Без нотаток і плану — повернути можна будь-коли',
   atlasRuleHardOnly: 'Лише «Муштра» і «Безжальний»',
   atlasRuleMercilessOnly: 'Лише «Безжальний»',
   atlasLocalUnknown:

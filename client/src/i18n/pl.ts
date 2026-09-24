@@ -1749,7 +1749,7 @@ export const pl: Strings = {
   atlasRuleMom: 'Żarty „twoja mama”',
   atlasRuleMomSub: 'Klasyka',
   atlasRuleSwear: 'Przekleństwa',
-  atlasRuleSwearSub: 'Domyślnie bez',
+  atlasRuleSwearSub: 'Lekko i rzadko',
   atlasTakeIt: 'Wytrzymam',
   atlasSofter: 'Wybierz łagodniejszy',
   atlasRoleAsk: 'Prowadzę twój program — czy zostajesz z kimś innym, a ja tylko patrzę?',
@@ -1808,6 +1808,8 @@ export const pl: Strings = {
   atlasClearAsk: 'Wyczyścić czat?',
   atlasClearBody:
     'Cała rozmowa i dotychczasowe notatki znikną. Dziennik i to, co o tobie pamięta, zostają.',
+  atlasClearSub: 'Rozmowa i notatki — dziennik zostaje',
+  atlasTurnOffSub: 'Bez notatek i planu — wrócisz w każdej chwili',
   atlasRuleHardOnly: 'Tylko Drill i Merciless',
   atlasRuleMercilessOnly: 'Tylko Merciless',
   atlasLocalUnknown:

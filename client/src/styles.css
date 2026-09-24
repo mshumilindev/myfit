@@ -38860,3 +38860,40 @@ body {
     transform: scale(0.97);
   }
 }
+/* Chat actions in Atlas settings: list rows, not loose buttons. */
+.atl-danger-group {
+  margin-top: 14px;
+}
+.atl-act-row {
+  text-align: left;
+}
+.atl-act-ic {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--color-neutral-800);
+  color: var(--color-neutral-300);
+}
+.atl-act-row > i:last-child,
+.atl-act-row > svg:last-child {
+  color: var(--color-neutral-500);
+}
+.atl-act-row.danger .lab,
+.atl-act-row.danger .atl-act-ic {
+  color: var(--color-danger);
+}
+.atl-act-row.danger .atl-act-ic {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+/* The sheet scrolls — its groups must not shrink (rows were being clipped). */
+.atl-sheet .se-group,
+.atl-sheet .se-group > * {
+  flex-shrink: 0;
+}
+.atl-sheet .atl-act-ic i,
+.atl-sheet .atl-act-ic svg {
+  color: inherit;
+}

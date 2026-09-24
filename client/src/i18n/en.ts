@@ -1791,7 +1791,7 @@ export const en = {
   atlasRuleMom: '“Your mom” jokes',
   atlasRuleMomSub: 'The classics',
   atlasRuleSwear: 'Swearing',
-  atlasRuleSwearSub: 'Clean by default',
+  atlasRuleSwearSub: 'Mild and rare',
   atlasTakeIt: 'I can take it',
   atlasSofter: 'Pick a softer temper',
   atlasRoleAsk:
@@ -1851,6 +1851,8 @@ export const en = {
   atlasClearAsk: 'Clear the chat?',
   atlasClearBody:
     'The whole conversation and his notes so far disappear. Your log and what he remembers about you stay.',
+  atlasClearSub: 'Conversation and notes — your log stays',
+  atlasTurnOffSub: 'Stops notes and the plan — back any time',
   atlasRuleHardOnly: 'Drill and Merciless only',
   atlasRuleMercilessOnly: 'Merciless only',
   atlasLocalUnknown:

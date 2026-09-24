@@ -9,7 +9,15 @@ import { Icon, Sheet, Switch } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useSelfTrainerId, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock } from '../atlas/notes';
-import { TEMPER_COLOR, TEMPERS, type CoachRole, type Temper } from '../atlas/types';
+import {
+  extrasFor,
+  momAllowed,
+  swearAllowed,
+  TEMPER_COLOR,
+  TEMPERS,
+  type CoachRole,
+  type Temper,
+} from '../atlas/types';
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
@@ -63,7 +71,15 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   const color = TEMPER_COLOR[temper];
 
   const finish = () => {
-    setCoach({ enabled: true, temper, role, yoMama, swearing, startedAt: Date.now(), readAt: 0 });
+    setCoach({
+      enabled: true,
+      temper,
+      role,
+      yoMama: yoMama && momAllowed(temper),
+      swearing: swearing && swearAllowed(temper),
+      startedAt: Date.now(),
+      readAt: 0,
+    });
   };
   const afterData = () => {
     const ps = pushState();
@@ -122,7 +138,12 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                 aria-checked={temper === i}
                 className={`atl-temper${temper === i ? ' on' : ''}`}
                 style={{ ['--tc' as string]: TEMPER_COLOR[i] }}
-                onClick={() => setTemper(i)}
+                onClick={() => {
+                  setTemper(i);
+                  const x = extrasFor(i);
+                  setYoMama(x.yoMama);
+                  setSwearing(x.swearing);
+                }}
               >
                 <span className="atl-temper-bar" />
                 <AtlasFace temper={i} size={40} />
@@ -1013,17 +1034,17 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
   const [draft, setDraft] = useState(() => ({
     temper: coach.temper,
     role: human ? ('extra' as CoachRole) : coach.role,
-    yoMama: coach.yoMama,
-    swearing: coach.swearing,
+    yoMama: coach.yoMama && momAllowed(coach.temper),
+    swearing: coach.swearing && swearAllowed(coach.temper),
   }));
   const dirty =
     draft.temper !== coach.temper ||
     draft.role !== coach.role ||
-    draft.yoMama !== coach.yoMama ||
-    draft.swearing !== coach.swearing;
+    draft.yoMama !== (coach.yoMama && momAllowed(coach.temper)) ||
+    draft.swearing !== (coach.swearing && swearAllowed(coach.temper));
   const edit = (patch: Partial<typeof draft>) => setDraft((d) => ({ ...d, ...patch }));
   const [confirm, setConfirm] = useState<'off' | 'clear' | null>(null);
-  const hard = draft.temper >= 4;
+  const hard = momAllowed(draft.temper);
 
   if (confirm)
     return (
@@ -1073,7 +1094,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
             aria-pressed={draft.temper === i}
             className={draft.temper === i ? 'on' : ''}
             style={{ ['--tc' as string]: TEMPER_COLOR[i] }}
-            onClick={() => edit({ temper: i })}
+            onClick={() => edit(i === draft.temper ? {} : { temper: i, ...extrasFor(i) })}
           >
             <AtlasFace temper={i} size={52} />
             <span>{t.atlasTemper[i - 1]}</span>
@@ -1097,34 +1118,64 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
       </div>
       {human && <p className="atl-hint atl-hint-left">{t.atlasRoleHumanCoach}</p>}
       <div className="se-group">
+        {/* Locked off for tempers that don't do it. */}
         <RuleRow
           label={t.atlasRuleMom}
           sub={hard ? t.atlasRuleMomSub : t.atlasRuleHardOnly}
-          on={draft.yoMama}
+          on={hard && draft.yoMama}
+          locked={!hard}
           onToggle={() => edit({ yoMama: !draft.yoMama })}
         />
         <RuleRow
           label={t.atlasRuleSwear}
-          sub={draft.temper === 5 ? t.atlasRuleSwearSub : t.atlasRuleMercilessOnly}
-          on={draft.swearing}
+          sub={swearAllowed(draft.temper) ? t.atlasRuleSwearSub : t.atlasRuleMercilessOnly}
+          on={swearAllowed(draft.temper) && draft.swearing}
+          locked={!swearAllowed(draft.temper)}
           onToggle={() => edit({ swearing: !draft.swearing })}
         />
         <RuleRow label={t.atlasRuleEffort} sub={t.atlasRuleEffortSub} on locked />
         <RuleRow label={t.atlasRuleSoften} sub={t.atlasRuleSoftenSub} on locked />
       </div>
-      <button type="button" className="atl-clear" onClick={() => setConfirm('clear')}>
-        <Icon name="trash" />
-        {t.atlasClear}
-      </button>
-      <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={() => setConfirm('off')}>
-          {t.atlasTurnOff}
+      <div className="se-group atl-danger-group">
+        <button
+          type="button"
+          className="toggle-row atl-act-row"
+          onClick={() => setConfirm('clear')}
+        >
+          <span className="atl-act-ic">
+            <Icon name="trash" />
+          </span>
+          <span className="rest-pref-text">
+            <span className="lab">{t.atlasClear}</span>
+            <span className="sub">{t.atlasClearSub}</span>
+          </span>
+          <Icon name="caret-right" />
         </button>
+        <button
+          type="button"
+          className="toggle-row atl-act-row danger"
+          onClick={() => setConfirm('off')}
+        >
+          <span className="atl-act-ic">
+            <Icon name="sign-out" />
+          </span>
+          <span className="rest-pref-text">
+            <span className="lab">{t.atlasTurnOff}</span>
+            <span className="sub">{t.atlasTurnOffSub}</span>
+          </span>
+          <Icon name="caret-right" />
+        </button>
+      </div>
+      <div className="sheet-actions">
         <button
           className="btn btn-primary grow"
           disabled={!dirty}
           onClick={() => {
-            setCoach(draft);
+            setCoach({
+              ...draft,
+              yoMama: draft.yoMama && momAllowed(draft.temper),
+              swearing: draft.swearing && swearAllowed(draft.temper),
+            });
             onClose();
           }}
         >

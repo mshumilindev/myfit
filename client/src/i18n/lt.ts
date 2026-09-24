@@ -1760,7 +1760,7 @@ export const lt: Strings = {
   atlasRuleMom: '„Tavo mama“ juokeliai',
   atlasRuleMomSub: 'Klasika',
   atlasRuleSwear: 'Keiksmai',
-  atlasRuleSwearSub: 'Pagal nutylėjimą be jų',
+  atlasRuleSwearSub: 'Švelniai ir retai',
   atlasTakeIt: 'Aš atlaikysiu',
   atlasSofter: 'Rinktis švelnesnį',
   atlasRoleAsk: 'Ar aš vedu tavo programą — ar lieki su kitu, o aš tik stebiu?',
@@ -1819,6 +1819,8 @@ export const lt: Strings = {
   atlasClearAsk: 'Išvalyti pokalbį?',
   atlasClearBody:
     'Visas pokalbis ir jo pastabos išnyks. Žurnalas ir tai, ką jis apie tave prisimena, lieka.',
+  atlasClearSub: 'Pokalbis ir pastabos — žurnalas lieka',
+  atlasTurnOffSub: 'Be pastabų ir plano — grąžinsi bet kada',
   atlasRuleHardOnly: 'Tik Drill ir Merciless',
   atlasRuleMercilessOnly: 'Tik Merciless',
   atlasLocalUnknown:

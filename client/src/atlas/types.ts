@@ -54,6 +54,12 @@ export interface CoachSettings {
   updatedAt?: number;
 }
 
+/** What each temper may do: "your mom" from Drill up, swearing only Merciless. */
+export const momAllowed = (t: Temper) => t >= 4;
+export const swearAllowed = (t: Temper) => t === 5;
+/** Picking a temper resets the extras to its defaults (all on for Merciless). */
+export const extrasFor = (t: Temper) => ({ yoMama: momAllowed(t), swearing: swearAllowed(t) });
+
 export const COACH_DEFAULT: CoachSettings = {
   enabled: false,
   temper: 3,
