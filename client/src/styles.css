@@ -37025,3 +37025,85 @@ body {
   font-weight: 700;
   gap: 8px;
 }
+
+/* Empty live session on a wide screen: a bounded two-column layout instead of
+   full-width bands — the usual first lift big on the left, the at-a-glance
+   column (readiness, circuit, the one primary action) on the right, and the
+   other four starts as one row of equal cards below. Photos keep their aspect
+   ratio instead of being cropped into strips. */
+@media (min-width: 900px) {
+  .focus-view.focus-view-empty {
+    align-items: center;
+  }
+  .es {
+    width: 100%;
+    max-width: 1120px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-areas:
+      'hero ready'
+      'hero circuit'
+      'hero add'
+      'tiles tiles';
+    grid-template-rows: auto auto 1fr auto;
+    column-gap: 20px;
+    row-gap: 14px;
+    align-content: start;
+    padding-top: 8px;
+    overflow-y: auto;
+  }
+  .es-scroll {
+    display: contents;
+  }
+  .es-ready {
+    grid-area: ready;
+  }
+  .es-ready-cards {
+    flex-direction: column;
+  }
+  .es-rc {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 6px;
+  }
+  .es-rc-top {
+    display: contents;
+  }
+  .es-rc-bar {
+    grid-column: 1 / -1;
+  }
+  .es-hero {
+    grid-area: hero;
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    aspect-ratio: 2 / 1;
+    flex: none;
+  }
+  .es-hero-name {
+    font-size: 22px;
+    line-height: 27px;
+  }
+  .es-more {
+    grid-area: tiles;
+  }
+  .es-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .es-tile-main > img,
+  .es-tile-main > .es-noimg {
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+  .es-circuit {
+    grid-area: circuit;
+  }
+  .es-dock {
+    grid-area: add;
+    align-self: start;
+    padding: 0;
+  }
+}

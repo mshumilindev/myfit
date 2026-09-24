@@ -793,7 +793,11 @@ export function SessionView(props: {
     .map((e) => ({ name: e.name, prev: prevLift(e.name, workout.id) }))
     .filter((r) => r.prev);
   const showSessionSide =
-    !!(live || props.past) && !!(gym || lastTimeRows.length > 0 || entries > 0);
+    !!(live || props.past) &&
+    !!(gym || lastTimeRows.length > 0 || entries > 0) &&
+    // an empty live session (draft) has nothing to sum up yet — its own
+    // layout uses the full width
+    !(live && workout.exercises.length === 0);
 
   /**
    * What the next set should be. Once a working set is logged, repeat it (the
