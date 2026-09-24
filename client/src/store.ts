@@ -1437,6 +1437,9 @@ export function addExercise(
     primaryMuscle: plan.primaryMuscle ?? (info && info.primary !== 'cardio' ? info.primary : null),
     secondaryMuscles: plan.secondaryMuscles ?? (info ? info.secondary : []),
     ...(plan.equipmentItems?.length ? { equipmentItems: plan.equipmentItems } : {}),
+    // Adding a cool-down during a live session starts it: the rest clock
+    // stops on its own (no separate "Start cool-down" step).
+    ...(kind === 'cooldown' && w?.finishedAt === null ? { markerAt: Date.now() } : {}),
     sets: [],
   };
   patchWorkout(workoutId, { exercises: [...(w?.exercises ?? []), exercise] });

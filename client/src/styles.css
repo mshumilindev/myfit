@@ -37562,3 +37562,58 @@ body {
   background: #15263a;
   color: rgb(120, 172, 224);
 }
+
+/* Focus slides for markers + cardio: options where a lift has them (the
+   sliders button beside the main action), and a photo for cardio. */
+.focus-view .warmup-marker-body .warmup-marker-copy {
+  padding-right: 72px;
+}
+.warmup-marker-cfg {
+  position: absolute;
+  right: 14px;
+  bottom: 16px;
+}
+.warmup-marker-body {
+  position: relative;
+}
+.gset-actions.timed-actions {
+  width: 100%;
+}
+.gset-actions.timed-actions .timed-timer.start {
+  flex: 1;
+}
+.cardio-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 12px;
+}
+.cardio-photo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Starts: a stronger dark fade from the bottom so the text always reads. */
+.es-tile-main .es-tile-text {
+  padding-top: 44px;
+  background: linear-gradient(
+    to top,
+    rgba(12, 13, 15, 0.97) 0%,
+    rgba(12, 13, 15, 0.86) 45%,
+    rgba(12, 13, 15, 0.45) 75%,
+    rgba(12, 13, 15, 0) 100%
+  );
+}
+.es-hero-main {
+  background: linear-gradient(
+    to top,
+    rgba(12, 13, 15, 0.97) 0%,
+    rgba(12, 13, 15, 0.85) 38%,
+    rgba(12, 13, 15, 0.35) 65%,
+    rgba(12, 13, 15, 0) 85%
+  );
+}

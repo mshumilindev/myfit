@@ -95,7 +95,6 @@ import {
   renameExercise,
   replaceExercise,
   setCardioMachine,
-  setMarkerStarted,
   cooldownInProgress,
   reopenWorkout,
   beginPastEdit,
@@ -169,6 +168,7 @@ import {
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
 import { starterPlan } from '../starterPlan';
+import { equipmentById } from '../data/equipmentCatalog';
 import { muscleTintClass, photoTintClass } from '../photoTint';
 import { GymKitCard, GymKitTray, GymKitUndo } from '../components/GymKit';
 import { gymHasNoList, type KitEvidence } from '../gymEvidence';
@@ -2599,6 +2599,32 @@ export function SessionView(props: {
     const ghost = ghostFor(ex);
     const timedGhost = timedGhostFor(ex);
     const timedSheetGhost: GhostValues = { ...ghost, ...timedGhost };
+    // Focus mode: options live in the same sliders button as next to Log.
+    const openExOpts = () =>
+      setSheet({
+        kind: 'opts',
+        tab: 'exercise',
+        exId: ex.id,
+        set: null,
+        ghost: isTimedExercise(ex) && !isMarkerExercise(ex) ? timedSheetGhost : null,
+      });
+    const cfgBtn = (
+      <button
+        className="gset-cfg"
+        aria-label={t.setOptions}
+        title={t.setOptions}
+        onClick={openExOpts}
+      >
+        <Icon name="sliders-horizontal" />
+      </button>
+    );
+    // Cardio photo: the chosen machine, else the lift catalog's photo.
+    const cardioImg =
+      exerciseKind(ex) === 'cardio'
+        ? ((ex.equipmentItems ?? [])
+            .map((id) => equipmentById(id)?.image?.thumbUrl)
+            .find(Boolean) ?? exerciseImage(ex.name, 'strength'))
+        : undefined;
     const prev = prevLift(ex.name, workout!.id);
     const kind = exerciseKind(ex);
     const marker = isMarkerExercise(ex);
@@ -2774,7 +2800,7 @@ export function SessionView(props: {
                   no set editor to reach them from, so this is how they're removed. */}
               {/* In focus mode strength sets reach options via the sliders next to
                   Log; markers and cardio have no set row, so they keep a door here. */}
-              {!grp && (!focusView || marker || timed) && (
+              {!grp && !focusView && (
                 <button
                   className="dots ex-settings"
                   onClick={() =>
@@ -2873,29 +2899,22 @@ export function SessionView(props: {
                 {kind === 'cooldown' ? t.cooldownMarkerBody : t.warmupMarkerBody}
               </span>
             </div>
+            {focusView && <span className="warmup-marker-cfg">{cfgBtn}</span>}
           </div>
         ) : null}
-        {marker && kind === 'cooldown' && live ? (
-          cooldownNow?.id === ex.id ? (
-            <div className="cooldown-on">
-              <Icon name="pause" />
-              <span>{t.cooldownRestOff}</span>
-              {ex.markerAt ? (
-                <button onClick={() => setMarkerStarted(workout!.id, ex.id, null)}>{t.undo}</button>
-              ) : null}
-            </div>
-          ) : (
-            <button
-              className="btn btn-secondary cooldown-start"
-              onClick={() => setMarkerStarted(workout!.id, ex.id, Date.now())}
-            >
-              <Icon name="wind" />
-              {t.cooldownStart}
-            </button>
-          )
+        {marker && kind === 'cooldown' && live && cooldownNow?.id === ex.id ? (
+          <div className="cooldown-on">
+            <Icon name="pause" />
+            <span>{t.cooldownRestOff}</span>
+          </div>
         ) : null}
         {marker ? null : timed ? (
           <>
+            {focusView && cardioImg && (
+              <span className="cardio-photo">
+                <img src={cardioImg} alt="" />
+              </span>
+            )}
             {kind === 'cardio' && !props.past && (
               <button
                 className="cardio-machine-chip"
@@ -2989,14 +3008,17 @@ export function SessionView(props: {
                   </div>
                 ) : (
                   <>
-                    <button
-                      className="btn btn-primary timed-timer start"
-                      disabled={!!timing}
-                      onClick={() => startTiming(ex)}
-                    >
-                      <Icon name="play" weight="fill" />
-                      {ex.sets.length > 0 ? t.timerStartN(ex.sets.length + 1) : t.timerStart}
-                    </button>
+                    <div className="gset-actions timed-actions">
+                      {focusView && cfgBtn}
+                      <button
+                        className="btn btn-primary timed-timer start"
+                        disabled={!!timing}
+                        onClick={() => startTiming(ex)}
+                      >
+                        <Icon name="play" weight="fill" />
+                        {ex.sets.length > 0 ? t.timerStartN(ex.sets.length + 1) : t.timerStart}
+                      </button>
+                    </div>
                     <button
                       className="timed-manual"
                       onClick={() =>
@@ -3327,14 +3349,14 @@ export function SessionView(props: {
             </button>
           </>
         )}
-        {ex.sets.length === 0 && live && !marker && (
+        {ex.sets.length === 0 && live && !marker && !timed && (
           <div className="ghost-hint">
             {directLogBlocked
               ? t.progWeightRequired
               : planned > 0
                 ? t.progGhostDivision
                 : timed
-                  ? t.timedGhostHint
+                  ? null
                   : ghost.ramp
                     ? t.ghostWarmupHint(fmtWeightKg(ghost.ramp.toKg))
                     : t.ghostHint}

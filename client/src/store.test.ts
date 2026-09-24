@@ -29,6 +29,8 @@ import {
   pruneEmptyLiveWorkouts,
   finishWorkoutClean,
   __getStateForTests,
+  cooldownInProgress,
+  upsertSet,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
 import type { SetEntry, SleepNight, Workout } from './types';
@@ -431,5 +433,22 @@ describe('a live session starts with its first exercise', () => {
     addExercise(w.id, 'Barbell Squat');
     const done = finishWorkoutClean(w.id)!;
     expect(done.exercises.map((e) => e.kind)).toEqual(['warmup']);
+  });
+});
+
+describe('cool-down', () => {
+  it('adding a cool-down mid-session stops the rest by itself', async () => {
+    const w = startWorkout(null)!;
+    const lift = addExercise(w.id, 'Barbell Squat');
+    upsertSet(w.id, lift.id, {
+      reps: 5,
+      weight: 100,
+      isWarmup: false,
+      loggedAt: Date.now() - 1000,
+    });
+    const cd = addExercise(w.id, 'Cool-down', 'cooldown');
+    const live = __getStateForTests().workouts.find((x) => x.id === w.id)!;
+    expect(cooldownInProgress(live)?.id).toBe(cd.id);
+    finishWorkout(w.id);
   });
 });
