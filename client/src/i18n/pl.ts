@@ -1594,8 +1594,8 @@ export const pl: Strings = {
   startTitleDay: (d) => `W ${d} zwykle zaczynasz od`,
   startTitleRecent: 'Ostatnie treningi zaczynały się od',
   startSub: (n) => `z ostatnich ${n} treningów`,
-  startKickerDay: (d) => `ZWYKLE PIERWSZE · ${d.toUpperCase()}`,
-  startKickerRecent: 'OSTATNIO PIERWSZE',
+  startKickerDay: (n) => `ZWYKLE ${['PIERWSZE', 'DRUGIE', 'TRZECIE'][Math.min(2, n - 1)]}`,
+  startKickerRecent: (n) => `OSTATNIO ${['PIERWSZE', 'DRUGIE', 'TRZECIE'][Math.min(2, n - 1)]}`,
   tiredAlreadyTitle: (m) => `${m}: na dziś już wystarczy`,
   pickSamePart: (p) => `TEN SAM MIĘSIEŃ · ${p.toUpperCase()}`,
   pickHasRoom: 'ma jeszcze zapas',
@@ -1604,6 +1604,7 @@ export const pl: Strings = {
   pickFinishLabel: 'NA KONIEC',
   pickCardioSub: 'cardio na zakończenie',
   pickCooldownSub: 'wszystko przepracowane — schłodzenie',
+  pickWarmupSub: 'rozgrzej się przed pierwszym ćwiczeniem',
   tiredPartTitle: (p) => `${p}: wystarczy`,
   tiredPartSub: (s) => `${s}: jest jeszcze zapas`,
   tiredPartWhy: (p, n, s) =>

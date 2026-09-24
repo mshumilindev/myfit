@@ -1607,8 +1607,8 @@ export const lt: Strings = {
   startTitleDay: (d) => `${d} paprastai pradedi nuo`,
   startTitleRecent: 'Paskutinės treniruotės prasidėjo nuo',
   startSub: (n) => `pagal paskutines ${n} treniruotes`,
-  startKickerDay: (d) => `PAPRASTAI PIRMAS · ${d.toUpperCase()}`,
-  startKickerRecent: 'NESENIAI PIRMAS',
+  startKickerDay: (n) => `PAPRASTAI ${['PIRMAS', 'ANTRAS', 'TREČIAS'][Math.min(2, n - 1)]}`,
+  startKickerRecent: (n) => `NESENIAI ${['PIRMAS', 'ANTRAS', 'TREČIAS'][Math.min(2, n - 1)]}`,
   tiredAlreadyTitle: (m) => `${m}: šiandien jau gana`,
   pickSamePart: (p) => `TAS PATS RAUMUO · ${p.toUpperCase()}`,
   pickHasRoom: 'dar turi atsargos',
@@ -1617,6 +1617,7 @@ export const lt: Strings = {
   pickFinishLabel: 'PABAIGAI',
   pickCardioSub: 'kardio pabaigai',
   pickCooldownSub: 'viskas padaryta — atvėsimas',
+  pickWarmupSub: 'apšilk prieš pirmą pratimą',
   tiredPartTitle: (p) => `${p}: gana`,
   tiredPartSub: (s) => `${s}: dar yra atsargos`,
   tiredPartWhy: (p, n, s) =>

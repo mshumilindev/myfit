@@ -1636,8 +1636,8 @@ export const en = {
   startTitleDay: (d: string) => `On ${d} you usually start with`,
   startTitleRecent: 'Your last sessions started with',
   startSub: (n: number) => `from your last ${n} sessions`,
-  startKickerDay: (d: string) => `USUALLY FIRST · ${d.toUpperCase()}`,
-  startKickerRecent: 'RECENTLY FIRST',
+  startKickerDay: (n: number) => `USUALLY ${['FIRST', 'SECOND', 'THIRD'][Math.min(2, n - 1)]}`,
+  startKickerRecent: (n: number) => `RECENTLY ${['FIRST', 'SECOND', 'THIRD'][Math.min(2, n - 1)]}`,
   tiredAlreadyTitle: (m: string) => `${m} already had enough today`,
   pickSamePart: (p: string) => `SAME MUSCLE · ${p.toUpperCase()}`,
   pickHasRoom: 'still has room today',
@@ -1646,6 +1646,7 @@ export const en = {
   pickFinishLabel: 'FINISH',
   pickCardioSub: 'cardio to wrap up',
   pickCooldownSub: 'everything’s worked — cool down',
+  pickWarmupSub: 'get warm before the first lift',
   tiredPartTitle: (p: string) => `${p}: had enough`,
   tiredPartSub: (s: string) => `${s} still has room`,
   tiredPartWhy: (p: string, n: number, s: string) =>

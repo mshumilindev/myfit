@@ -1590,8 +1590,8 @@ export const et: Strings = {
   startTitleDay: (d) => `${d} alustad tavaliselt`,
   startTitleRecent: 'Viimased treeningud algasid',
   startSub: (n) => `viimase ${n} treeningu põhjal`,
-  startKickerDay: (d) => `TAVALISELT ESIMENE · ${d.toUpperCase()}`,
-  startKickerRecent: 'HILJUTI ESIMENE',
+  startKickerDay: (n) => `TAVALISELT ${['ESIMENE', 'TEINE', 'KOLMAS'][Math.min(2, n - 1)]}`,
+  startKickerRecent: (n) => `HILJUTI ${['ESIMENE', 'TEINE', 'KOLMAS'][Math.min(2, n - 1)]}`,
   tiredAlreadyTitle: (m) => `${m}: täna juba piisab`,
   pickSamePart: (p) => `SAMA LIHAS · ${p.toUpperCase()}`,
   pickHasRoom: 'on veel varu',
@@ -1600,6 +1600,7 @@ export const et: Strings = {
   pickFinishLabel: 'LÕPETUSEKS',
   pickCardioSub: 'kardio lõpetuseks',
   pickCooldownSub: 'kõik tehtud — jahtumine',
+  pickWarmupSub: 'soojenda enne esimest harjutust',
   tiredPartTitle: (p) => `${p}: piisab`,
   tiredPartSub: (s) => `${s}: on veel varu`,
   tiredPartWhy: (p, n, s) =>

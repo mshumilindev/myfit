@@ -1593,8 +1593,8 @@ export const uk: Strings = {
   startTitleDay: (d) => `У ${d} ти зазвичай починаєш з`,
   startTitleRecent: 'Останні тренування починались з',
   startSub: (n) => `за останніми ${n} тренуваннями`,
-  startKickerDay: (d) => `ЗАЗВИЧАЙ ПЕРША · ${d.toUpperCase()}`,
-  startKickerRecent: 'НЕЩОДАВНО ПЕРША',
+  startKickerDay: (n) => `ЗАЗВИЧАЙ ${['ПЕРША', 'ДРУГА', 'ТРЕТЯ'][Math.min(2, n - 1)]}`,
+  startKickerRecent: (n) => `НЕЩОДАВНО ${['ПЕРША', 'ДРУГА', 'ТРЕТЯ'][Math.min(2, n - 1)]}`,
   tiredAlreadyTitle: (m) => `${m}: на сьогодні вже досить`,
   pickSamePart: (p) => `ТОЙ САМИЙ М’ЯЗ · ${p.toUpperCase()}`,
   pickHasRoom: 'ще є запас сьогодні',
@@ -1603,6 +1603,7 @@ export const uk: Strings = {
   pickFinishLabel: 'НАОСТАНОК',
   pickCardioSub: 'кардіо на завершення',
   pickCooldownSub: 'все пропрацьовано — заминка',
+  pickWarmupSub: 'розігрійся перед першою вправою',
   tiredPartTitle: (p) => `${p}: досить`,
   tiredPartSub: (s) => `${s}: ще є запас`,
   tiredPartWhy: (p, n, s) =>

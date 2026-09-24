@@ -1223,7 +1223,7 @@ export function SessionView(props: {
     kicker: string;
     sub: string;
     img?: string;
-    kind: 'strength' | 'cardio' | 'cooldown';
+    kind: 'strength' | 'cardio' | 'cooldown' | 'warmup';
   };
   /** Where to go next, in order: the other part of the same muscle (when only
    *  a part is done), today's plan, what you usually do in sessions like this
@@ -1286,24 +1286,32 @@ export function SessionView(props: {
         });
         break;
       }
-    // 3 · What you usually do in sessions like this one: past sessions that
-    // share lifts with today score their other lifts; the one that usually
-    // comes right after this lift gets a bonus.
+    // 3 · What you usually do NEXT in sessions like this one. Past sessions that
+    // share lifts with today are aligned to where you are now (the furthest of
+    // today's lifts in that session); lifts right after that point score most,
+    // fading with distance — so a lift you always leave for the very end (core,
+    // say) ranks after the ones that usually come straight next. Lifts that sat
+    // before that point (normally already done by now) count only a little.
     {
       const score = new Map<string, number>();
+      const me = ex.name.trim().toLowerCase();
       for (const w of finished.slice(0, 40)) {
-        const names = w.exercises.map((e) => e.name.trim().toLowerCase());
+        const sorted = [...w.exercises]
+          .filter((e) => e.sets.length > 0)
+          .sort((a, b) => a.position - b.position);
+        const names = sorted.map((e) => e.name.trim().toLowerCase());
         const overlap = names.filter((n) => done.has(n)).length;
         if (overlap === 0) continue;
-        const sorted = [...w.exercises].sort((a, b) => a.position - b.position);
-        const at = sorted.findIndex(
-          (e) => e.name.trim().toLowerCase() === ex.name.trim().toLowerCase(),
-        );
+        const atMe = names.indexOf(me);
+        const point = atMe >= 0 ? atMe : Math.max(...names.map((n, i) => (done.has(n) ? i : -1)));
+        const weight = overlap / Math.max(1, done.size);
         sorted.forEach((e, i) => {
-          if (!isStrengthExercise(e) || e.sets.length === 0) return;
+          if (!isStrengthExercise(e)) return;
           const k = e.name.trim();
           if (done.has(k.toLowerCase()) || saturated(muscleOf(k))) return;
-          score.set(k, (score.get(k) ?? 0) + overlap + (at >= 0 && i === at + 1 ? 2 : 0));
+          const d = i - point;
+          const s = d > 0 ? 1 / d : 0.1 / (1 - d);
+          score.set(k, (score.get(k) ?? 0) + weight * s);
         });
       }
       for (const [n] of [...score.entries()].sort((a, b) => b[1] - a[1])) {
@@ -1370,11 +1378,17 @@ export function SessionView(props: {
                 <img src={p.img} alt="" />
               ) : (
                 <span className="tb-noimg">
-                  <Icon name={p.kind === 'strength' ? 'barbell' : 'wind'} />
+                  <Icon
+                    name={
+                      p.kind === 'strength' ? 'barbell' : p.kind === 'warmup' ? 'flame' : 'wind'
+                    }
+                  />
                 </span>
               )}
               <span className="tb-kicker">{p.kicker}</span>
-              <span className="tb-name">{p.kind === 'cooldown' ? p.name : exName(p.name)}</span>
+              <span className="tb-name">
+                {p.kind === 'cooldown' || p.kind === 'warmup' ? p.name : exName(p.name)}
+              </span>
               {p.sub && <span className="tb-tsub">{p.sub}</span>}
             </button>
             {p.kind === 'strength' && (
@@ -1405,6 +1419,9 @@ export function SessionView(props: {
     const sameDay = finished.filter((w) => new Date(w.startedAt).getDay() === dow).slice(0, 6);
     const src = sameDay.length > 0 ? sameDay : finished.slice(0, 4);
     const score = new Map<string, number>();
+    // Where each lift actually sat (1st/2nd/3rd lift) in those sessions, so a
+    // tile says "usually second" when that's the truth, not "first" for all.
+    const slots = new Map<string, number[]>();
     src.forEach((w, k) => {
       const firsts = [...w.exercises]
         .filter((e) => isStrengthExercise(e) && e.sets.length > 0)
@@ -1413,25 +1430,70 @@ export function SessionView(props: {
       firsts.forEach((e, i) => {
         const n = e.name.trim();
         score.set(n, (score.get(n) ?? 0) + (1 / (k + 1)) * ((3 - i) / 3));
+        slots.set(n, [...(slots.get(n) ?? []), i]);
       });
     });
+    const slotOf = (n: string) => {
+      const xs = [...(slots.get(n) ?? [0])].sort((a, b) => a - b);
+      return xs[Math.floor((xs.length - 1) / 2)];
+    };
+    const kickerAt = (slot: number) =>
+      day ? t.startKickerDay(slot + 1) : t.startKickerRecent(slot + 1);
     const hist = [...finished, workout!];
     const day =
       sameDay.length > 0 ? new Intl.DateTimeFormat(t.locale, { weekday: 'long' }).format(at) : null;
     const picks: TiredPick[] = [];
+    // Do these sessions usually open with a warm-up (a warm-up marker or a
+    // cardio bout before the first lift)? Then that's the first tile.
+    const openers = src.map(
+      (w) =>
+        [...w.exercises]
+          .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
+          .sort((a, b) => a.position - b.position)[0],
+    );
+    const warmOpen = openers.filter(
+      (e) => e && (exerciseKind(e) === 'warmup' || exerciseKind(e) === 'cardio'),
+    );
+    if (warmOpen.length > 0 && warmOpen.length >= src.length / 3) {
+      const cardio = warmOpen.filter((e) => exerciseKind(e!) === 'cardio');
+      const kicker = kickerAt(0);
+      if (cardio.length > warmOpen.length / 2) {
+        const name = cardio[0]!.name.trim();
+        picks.push({
+          name,
+          kicker,
+          sub: t.pickWarmupSub,
+          img: richExerciseByName(name)?.images?.[0],
+          kind: 'cardio',
+        });
+      } else {
+        picks.push({
+          name: t.defaultTimedExerciseNames.warmup,
+          kicker,
+          sub: t.pickWarmupSub,
+          kind: 'warmup',
+        });
+      }
+    }
     for (const [n] of [...score.entries()].sort((a, b) => b[1] - a[1])) {
       const m = resolveMuscles({ name: n, kind: 'strength' } as Exercise).primary;
       if (m && directReadiness([m], m, hist, now).state === 'recovering') continue;
       picks.push({
         name: n,
-        kicker: day ? t.startKickerDay(day) : t.startKickerRecent,
+        kicker: kickerAt(slotOf(n)),
         sub: m ? ((t.muscleGroups as Record<string, string>)[m] ?? m) : '',
         img: richExerciseByName(n)?.images?.[0],
         kind: 'strength',
       });
       if (picks.length >= 6) break;
     }
-    return { picks, day, n: src.length };
+    // Show them in the order you'd do them (a leading warm-up stays first).
+    const lead = picks[0]?.kind === 'strength' ? [] : picks.splice(0, 1);
+    const ordered = picks
+      .map((p, i) => ({ p, i, slot: slotOf(p.name) }))
+      .sort((a, b) => a.slot - b.slot || a.i - b.i)
+      .map((x) => x.p);
+    return { picks: [...lead, ...ordered], day, n: src.length };
   }
   function renderStartBanner() {
     const { picks, day, n } = startPicks();
