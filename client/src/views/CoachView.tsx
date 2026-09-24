@@ -80,17 +80,9 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
             <button className="btn btn-primary atl-cta" onClick={() => setStep('temper')}>
               {t.atlasChooseTemper}
             </button>
-            {!store.coach.inviteDismissed && (
-              <button
-                className="btn btn-secondary atl-cta"
-                onClick={() => {
-                  setCoach({ inviteDismissed: true });
-                  onClose();
-                }}
-              >
-                {t.atlasNotNow}
-              </button>
-            )}
+            <button className="btn btn-secondary atl-cta" onClick={onClose}>
+              {t.atlasNotNow}
+            </button>
           </div>
         </div>
       )}
@@ -694,7 +686,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
         <button
           className="btn btn-secondary grow"
           onClick={() => {
-            setCoach({ enabled: false, inviteDismissed: true });
+            setCoach({ enabled: false });
             onClose();
           }}
         >

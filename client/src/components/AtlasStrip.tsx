@@ -13,14 +13,18 @@ import { Icon } from '../ui';
 
 export function AtlasStoryItem({ onOpen }: { onOpen: () => void }) {
   const { t } = useT();
-  const { temper, unread } = useAtlasNotes();
+  const { coach } = useStore();
+  const notes = useAtlasNotes();
+  const on = coach.enabled;
+  const temper = on ? notes.temper : 3;
+  const unread = on ? notes.unread : 0;
   return (
     <>
       <button
-        className={`tcs-item atl-story${unread ? ' unread' : ''}`}
+        className={`tcs-item atl-story${unread || !on ? ' unread' : ''}`}
         style={{ ['--atl' as string]: TEMPER_COLOR[temper] }}
         onClick={onOpen}
-        aria-label={unread ? t.atlasStoryUnread(unread) : t.atlasName}
+        aria-label={!on ? t.atlasInvite : unread ? t.atlasStoryUnread(unread) : t.atlasName}
       >
         <span className="tcs-ring">
           <AtlasFace temper={temper} size={54} ring={false} />

@@ -1622,10 +1622,6 @@ export function App() {
           onNutrition={openNutrition}
           nutritionEnabled={nutritionEnabled}
           onLearn={openLearn}
-          onCoach={() => {
-            setShellOpen(false);
-            setOverlay({ screen: 'coach' });
-          }}
           onSignOut={() => shell.signOut()}
           onClose={() => setShellOpen(false)}
         />

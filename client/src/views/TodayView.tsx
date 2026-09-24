@@ -1179,14 +1179,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     });
   }
 
-  // Atlas lives in the stories strip: first bubble next to clients, or a
-  // full-width row of the same height when he is alone (or the invite, if off).
+  // Atlas always lives in the stories strip (his only entry point for now):
+  // first bubble next to clients, or a full-width row of the same height when
+  // he is alone — the invite while he isn't set up yet.
   const openCoach = () => shell.openOverlay({ screen: 'coach' });
-  const atlasLead = store.coach.enabled ? <AtlasStoryItem onOpen={openCoach} /> : undefined;
-  const atlasSolo =
-    store.coach.enabled || !store.coach.inviteDismissed ? (
-      <AtlasSoloStrip onOpen={openCoach} />
-    ) : null;
+  const atlasLead = <AtlasStoryItem onOpen={openCoach} />;
+  const atlasSolo = <AtlasSoloStrip onOpen={openCoach} />;
 
   // A trainer's Today is just their clients — nothing else, to avoid clutter.
   if (getRole() === 'trainer') {

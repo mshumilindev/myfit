@@ -38541,9 +38541,6 @@ body {
   text-transform: uppercase;
   color: var(--color-neutral-500);
 }
-.shell-ic-coach {
-  background: transparent;
-}
 
 /* Atlas chat: my messages, typing, composer */
 .atl-me {
