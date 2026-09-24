@@ -2,113 +2,35 @@
  * Atlas's own answer base — the first responder in chat. Each intent is a set
  * of keyword groups (all must match, typo-tolerant, en + uk) and an answer
  * built from YOUR data (history, plan, readiness, sleep). Only when nothing
- * here fits does the question go to Gemini.
+ * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
-import type { StoreState } from '../store';
 import { consistencyStreak, est1rm, latestWeight, setTopWeight, setTypeOf, topSet } from '../store';
-import type { LocaleId } from '../i18n';
-import type { MuscleGroup } from '../data/exercises';
 import { muscleReadiness } from '../recovery';
 import { nextTarget, topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { activeInjuries } from '../injury';
-import { computePlaybook, playForWeekday } from '../playbook';
 import { blockWeek, isDeloadWeek, planDayFor } from './plan';
-import { findExercise, findMuscle, groupMatches, normalize, tokens } from './nlu';
+import { findExercise, findMuscle, groupMatches, matchedWords, normalize, tokens } from './nlu';
 import { usualSessionsPerWeek } from './facts';
-import { hashId, type Fmt } from './voice';
+import { hashId } from './voice';
 import type { Temper } from './types';
+import {
+  DAY,
+  WEEK,
+  date,
+  finishedOf,
+  loggedLifts,
+  todayLine,
+  wd,
+  type AskCtx,
+  type Intent,
+  type Parsed,
+  type Tr,
+} from './intentKit';
+import { INTENTS_MORE } from './intentsMore';
 
-const DAY = 86_400_000;
-const WEEK = 7 * DAY;
-
-export interface AskCtx {
-  s: Pick<
-    StoreState,
-    'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics' | 'restPeriods' | 'exerciseRest'
-  >;
-  now: number;
-  locale: LocaleId;
-  temper: Temper;
-  fmt: Fmt;
-}
-
-interface Parsed {
-  words: string[];
-  phrase: string;
-  exercise: string | null;
-  muscle: MuscleGroup | null;
-}
-
-type Tr = (en: string, uk: string) => string;
-
-interface Intent {
-  id: string;
-  /** Keyword groups — every group must match. */
-  all: string[][];
-  /** Needs a lift / a muscle in the question. */
-  needs?: 'exercise' | 'muscle';
-  /** Only for short messages (greetings, "ok"). */
-  maxWords?: number;
-  /** Spoken plainly in every temper (pain, bodyweight). */
-  neutral?: boolean;
-  /** Wins over everything else when it matches (pain). */
-  priority?: boolean;
-  answer: (c: AskCtx, p: Parsed, L: Tr) => string | null;
-}
-
-// ---- helpers ----------------------------------------------------------------
-
-function finishedOf(c: AskCtx) {
-  return c.s.workouts
-    .filter((w) => w.finishedAt !== null)
-    .sort((a, b) => b.startedAt - a.startedAt);
-}
-const wd = (c: AskCtx, weekday: number) =>
-  new Intl.DateTimeFormat(c.locale, { weekday: 'long' }).format(new Date(2026, 0, 4 + weekday));
-const date = (c: AskCtx, ts: number) => new Date(ts).toLocaleDateString(c.locale);
-
-function loggedLifts(c: AskCtx): { name: string; count: number }[] {
-  const counts = new Map<string, number>();
-  for (const w of c.s.workouts)
-    for (const e of w.exercises)
-      if (e.sets.some((x) => setTypeOf(x) !== 'warmup'))
-        counts.set(e.name, (counts.get(e.name) ?? 0) + 1);
-  return [...counts].map(([name, count]) => ({ name, count }));
-}
-
-function todayLine(c: AskCtx, L: Tr, at: number): string {
-  const plan = c.s.coach.enabled && c.s.coach.role === 'main' ? c.s.coach.plan : null;
-  if (plan) {
-    const day = planDayFor(plan, at);
-    if (!day) return L('Rest day in your plan.', 'За планом — день відпочинку.');
-    const ms = day.muscles.map((m) => c.fmt.muscle(m)).join(', ');
-    return `${day.name ?? day.split}: ${ms}.`;
-  }
-  const finished = finishedOf(c);
-  const play = playForWeekday(computePlaybook(finished, at).plays, new Date(at).getDay());
-  if (play) {
-    const ms = play.coverage.filter((x) => x.primary).map((x) => c.fmt.muscle(x.muscle));
-    const lifts = play.exercises
-      .slice(0, 4)
-      .map((e) => c.fmt.exercise(e.name))
-      .join(', ');
-    return L(
-      `Usually ${play.name ?? ms.join(' + ')} on this day: ${lifts}.`,
-      `Зазвичай цього дня ${play.name ?? ms.join(' + ')}: ${lifts}.`,
-    );
-  }
-  const ready = muscleReadiness(finished, at);
-  const fresh = VOLUME_MUSCLES.filter((m) => {
-    const r = ready.get(m);
-    return !r || r.state === 'ready' || r.state === 'stale';
-  })
-    .slice(0, 3)
-    .map((m) => c.fmt.muscle(m))
-    .join(', ');
-  return L(`Fresh today: ${fresh}. Train those.`, `Сьогодні свіжі: ${fresh}. Їх і тренуй.`);
-}
+export type { AskCtx } from './intentKit';
 
 // ---- the base ---------------------------------------------------------------
 
@@ -160,7 +82,20 @@ export const INTENTS: Intent[] = [
     id: 'rest',
     all: [
       ['rest*', 'break', 'pause', 'відпоч*', 'отдых*', 'пауз*', 'перерв*', 'рест'],
-      [...HOW_MUCH, ...WHY, 'between', 'між', 'треба', 'маю', 'optimal', 'оптимальн*'],
+      [
+        ...HOW_MUCH,
+        ...WHY,
+        'between',
+        'між',
+        'треба',
+        'маю',
+        'optimal',
+        'оптимальн*',
+        'should',
+        'need',
+        'long',
+        'довго',
+      ],
     ],
     answer: (c, p, L) => {
       const rule = L(
@@ -847,7 +782,6 @@ export const INTENTS: Intent[] = [
         'kinder',
         'rude',
         'harsh',
-        'mean',
         'мякше',
         'добріше',
         'грубий',
@@ -971,13 +905,16 @@ export function answerLocally(question: string, c: AskCtx): LocalAnswer | null {
     muscle: findMuscle(words, phrase),
   };
   const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
-  const weight = (it: Intent) => it.all.length * 2 + (it.needs ? 1 : 0) + (it.priority ? 10 : 0);
-  const ranked = INTENTS.filter(
-    (it) =>
-      (!it.maxWords || words.length <= it.maxWords) &&
-      (!it.needs || (it.needs === 'exercise' ? p.exercise : p.muscle)) &&
-      it.all.every((g) => groupMatches(words, phrase, g)),
-  ).sort((a, b) => weight(b) - weight(a));
+  const weight = (it: Intent) =>
+    matchedWords(words, it.all) + (it.needs ? 2 : 0) + (it.priority ? 100 : 0);
+  const ranked = [...INTENTS, ...INTENTS_MORE]
+    .filter(
+      (it) =>
+        (!it.maxWords || words.length <= it.maxWords) &&
+        (!it.needs || (it.needs === 'exercise' ? p.exercise : p.muscle)) &&
+        it.all.every((g) => groupMatches(words, phrase, g)),
+    )
+    .sort((a, b) => weight(b) - weight(a));
   for (const it of ranked) {
     const core = it.answer(c, p, L);
     if (!core) continue;

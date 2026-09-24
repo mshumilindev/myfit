@@ -93,7 +93,7 @@ describe('answerLocally', () => {
 
   it('hands unknown questions to Gemini (null)', () => {
     expect(answerLocally('what is the capital of France', ctx('en'))).toBeNull();
-    expect(answerLocally('розкажи анекдот про космос', ctx('uk'))).toBeNull();
+    expect(answerLocally('хто виграв чемпіонат світу з футболу', ctx('uk'))).toBeNull();
   });
 
   it('pain stays calm even for Merciless', () => {

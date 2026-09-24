@@ -49,7 +49,8 @@ export function editDistance(a: string, b: string, max = 3): number {
 
 /** Typos allowed for a word of this length. */
 function tolerance(len: number): number {
-  return len <= 3 ? 0 : len <= 7 ? 1 : 2;
+  // Short words must match exactly: last≠lats, belt≠best, good≠food.
+  return len <= 4 ? 0 : len <= 7 ? 1 : 2;
 }
 
 /**
@@ -81,6 +82,19 @@ export function groupMatches(words: string[], phrase: string, group: string[]): 
     }
     return words.some((w) => wordMatches(w, kw));
   });
+}
+
+/** How many of the question's words the groups account for (ranking signal). */
+export function matchedWords(words: string[], groups: string[][]): number {
+  const hit = new Set<number>();
+  for (const g of groups)
+    for (const kw of g) {
+      const parts = kw.split(' ');
+      for (let i = 0; i + parts.length <= words.length; i++)
+        if (parts.every((p, j) => wordMatches(words[i + j], p)))
+          for (let j = 0; j < parts.length; j++) hit.add(i + j);
+    }
+  return hit.size;
 }
 
 // ---- Entities ---------------------------------------------------------------

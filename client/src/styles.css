@@ -37876,15 +37876,12 @@ body {
 
 /* ===== Atlas — the coach (views/CoachView.tsx) ===== */
 .atl-face {
-  display: inline-flex;
+  display: inline-block;
   flex: none;
-  align-items: center;
-  justify-content: center;
   border-radius: 50%;
   overflow: hidden;
-}
-.atl-face svg {
-  display: block;
+  background-size: cover;
+  background-position: center;
 }
 .atl-heat {
   display: inline-flex;
