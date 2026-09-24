@@ -49,6 +49,12 @@ export interface Intent {
   /** Wins over everything else when it matches (pain). */
   priority?: boolean;
   answer: (c: AskCtx, p: Parsed, L: Tr) => string | null;
+  /** "Why?" right after this answer — where the answer comes from. */
+  why?: (c: AskCtx, p: Parsed, L: Tr) => string | null;
+  /** Follow-up questions offered as chips under the answer. */
+  suggest?: (L: Tr) => string[];
+  /** Pain / illness intents: skipped when the words are negated ("no pain"). */
+  negatable?: boolean;
 }
 
 // ---- helpers ----------------------------------------------------------------

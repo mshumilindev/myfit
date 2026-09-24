@@ -98,7 +98,7 @@ describe('answerLocally', () => {
 
   it('pain stays calm even for Merciless', () => {
     const a = answerLocally('my back hurts', ctx('en', 5));
-    expect(a?.text.startsWith('Pain')).toBe(true);
+    expect(a?.text).toMatch(/Pain.* is not something to push through/);
     expect(a?.text).not.toMatch(/keep up|disappoint/);
   });
 });

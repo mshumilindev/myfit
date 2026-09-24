@@ -9,6 +9,10 @@ export interface ChatMsg {
   pending?: boolean;
   /** A system line (e.g. Gemini's quota ran out), shown as a centred pill. */
   notice?: boolean;
+  /** Follow-up suggestions under this message (tap = send). */
+  chips?: string[];
+  /** Offer to switch the app to this language (buttons under the message). */
+  langOffer?: import('../i18n').LocaleId;
 }
 
 const KEY = 'spotter.atlasChat';

@@ -1831,6 +1831,12 @@ export const en = {
   atlasTemperLabel: 'Temper',
   atlasRoleLabel: 'Role',
   atlasTurnOff: 'Turn Atlas off',
+  atlasSuggestToday: "What should I train today?",
+  atlasSuggestProgress: "How am I doing?",
+  atlasSuggestRest: "How long should I rest?",
+  atlasLangOffer: (n: string) => `Switch the app language to ${n}? I understand you either way — I just answer in the app’s language.`,
+  atlasLangKeep: "No, keep it",
+  atlasLangDone: "Done — English from here on.",
   atlasLocalUnknown:
     'That one’s outside what I know yet. Ask me about your training: what to do today, rest, the next weight, records, recovery, sleep, your programme.',
   atlasQuotaNotice: (time: string) =>

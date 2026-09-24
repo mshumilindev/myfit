@@ -70,6 +70,7 @@ interface FactBase {
 
 export type CoachFact = FactBase &
   (
+    | { kind: 'intro'; sessions: number }
     | { kind: 'session'; workoutId: string; sets: number; volumeKg: number; minutes: number }
     | { kind: 'pr'; exercise: string; weight: number; reps: number; prevWeight: number }
     | { kind: 'stall'; exercise: string; weight: number; sessions: number }

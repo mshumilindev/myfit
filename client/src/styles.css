@@ -38615,3 +38615,41 @@ body {
   line-height: 17px;
   text-align: center;
 }
+
+/* Atlas chat: follow-up chips under the latest answer */
+.atl-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.atl-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 36px;
+}
+.atl-suggest .atl-chip {
+  min-height: 36px;
+  font-size: 13px;
+  text-align: left;
+}
+/* Rule rows (Merciless fine print, settings): text reads left, not centred. */
+.atl-rule,
+.atl-rule .rest-pref-text {
+  text-align: left;
+}
+.atl-rule .rest-pref-text {
+  flex: 1;
+  align-items: flex-start;
+}
+/* Coach thread header runs edge to edge. */
+.atl-head {
+  margin-inline: -20px;
+  padding-inline: 16px 20px;
+}
+@media (min-width: 720px) {
+  .atl-head {
+    margin-inline: -30px;
+    padding-inline: 26px 30px;
+  }
+}

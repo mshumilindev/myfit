@@ -1799,6 +1799,12 @@ export const lt: Strings = {
   atlasTemperLabel: 'Būdas',
   atlasRoleLabel: 'Vaidmuo',
   atlasTurnOff: 'Išjungti Atlas',
+  atlasSuggestToday: "Ką šiandien treniruoti?",
+  atlasSuggestProgress: "Kaip man sekasi?",
+  atlasSuggestRest: "Kiek ilsėtis?",
+  atlasLangOffer: (n: string) => `Pakeisti programėlės kalbą į „${n}“? Suprantu bet kuria kalba, bet atsakau programėlės kalba.`,
+  atlasLangKeep: "Ne, palikti",
+  atlasLangDone: "Atlikta — toliau lietuviškai.",
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
   atlasQuotaNotice: (time: string) =>

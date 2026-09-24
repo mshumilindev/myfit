@@ -1783,6 +1783,12 @@ export const et: Strings = {
   atlasTemperLabel: 'Iseloom',
   atlasRoleLabel: 'Roll',
   atlasTurnOff: 'Lülita Atlas välja',
+  atlasSuggestToday: "Mida täna treenida?",
+  atlasSuggestProgress: "Kuidas mul läheb?",
+  atlasSuggestRest: "Kui kaua puhata?",
+  atlasLangOffer: (n: string) => `Kas vahetan rakenduse keeleks „${n}“? Saan aru igas keeles, aga vastan rakenduse keeles.`,
+  atlasLangKeep: "Ei, jäta nii",
+  atlasLangDone: "Valmis — edaspidi eesti keeles.",
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
   atlasQuotaNotice: (time: string) =>

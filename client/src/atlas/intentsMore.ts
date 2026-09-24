@@ -772,6 +772,7 @@ export const INTENTS_MORE: Intent[] = [
       ],
     ],
     neutral: true,
+    negatable: true,
     answer: (_c, _p, L) =>
       L(
         'Fever or symptoms below the neck: rest, no training. A mild head cold: a light session is OK. Log an illness rest period — your streak and plan pause, and I go easy.',

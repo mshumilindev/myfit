@@ -43,9 +43,18 @@ export function buildNotes(
   const finished = s.workouts
     .filter((w) => w.finishedAt !== null)
     .sort((a, b) => a.startedAt - b.startedAt);
-  const since = now - NOTES_WINDOW_DAYS * DAY;
-  const facts: CoachFact[] = [];
-  for (const w of finished) if (w.startedAt >= since) facts.push(...sessionFacts(w, finished));
+  // No backfill: the conversation starts when you took Atlas on. Only
+  // sessions finished since then (and within the window) get notes.
+  // (Older profiles have no start stamp: begin at the latest session so the
+  // intro keeps a stable id instead of moving with the clock.)
+  const start = s.coach.startedAt || (finished[finished.length - 1]?.finishedAt ?? now);
+  const since = Math.max(now - NOTES_WINDOW_DAYS * DAY, start);
+  const facts: CoachFact[] = [
+    { kind: 'intro', id: `intro:${start}`, at: start, sessions: finished.length },
+  ];
+  for (const w of finished)
+    if ((w.finishedAt ?? w.startedAt) >= since)
+      facts.push(...sessionFacts(w, finished).filter((f) => f.kind !== 'session' || f.sets > 0));
   facts.push(
     ...dayFacts({
       finished,
@@ -66,6 +75,7 @@ export function buildNotes(
   });
   const seen = new Set<string>();
   const notes = facts
+    .filter((f) => f.at >= start)
     .filter((f) => (seen.has(f.id) ? false : (seen.add(f.id), true)))
     .sort((a, b) => a.at - b.at)
     .map((fact) => ({

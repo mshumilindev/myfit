@@ -4,6 +4,13 @@ import type { PhraseBook } from '../atlas/voice';
 const pct = (n: number) => `${n > 0 ? '+' : '−'}${Math.abs(n)}%`;
 
 export const EN: PhraseBook = {
+  intro: {
+    1: [(f) => `Hi! I’m Atlas. I’ve looked through your ${f.sessions} sessions — from now on I’ll cheer every one.`],
+    2: [(f) => `Atlas here. I’ve read your ${f.sessions} sessions. From today I’ll note each workout and what to change.`],
+    3: [(f) => `Atlas. ${f.sessions} sessions reviewed. I’ll comment on every workout from here. Short and honest.`],
+    4: [(f) => `ATLAS REPORTING. ${f.sessions} sessions on file. Every workout from now on gets inspected. No excuses.`],
+    5: [(f) => `I’ve read your ${f.sessions} sessions. Illuminating. From now on I comment on every one — brace yourself.`],
+  },
   session: {
     1: [
       (f) => `Session done — ${f.sets} sets in ${f.minutes} min. Proud of you!`,

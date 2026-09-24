@@ -16,6 +16,7 @@ export function normalize(text: string): string {
     .normalize('NFC')
     .replace(/[’'`ʼ]/g, '')
     .replace(/ё/g, 'е')
+    .replace(/%/g, ' percent ')
     .replace(/[^\p{L}\p{N}:.]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -162,4 +163,61 @@ export function findExercise(
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score || b.ex.count - a.ex.count);
   return byName[0]?.ex.name ?? null;
+}
+
+// ---- Negation, transliteration, catalog ------------------------------------
+
+const NEGATORS = new Set(['no', 'not', 'never', 'without', 'dont', 'don', 'doesnt', 'isnt', 'не', 'ні', 'без', 'нема', 'немає', 'ніде', 'нічого']);
+
+/** Is the word matching `keywords` preceded (within 2 words) by a negation? */
+export function negated(words: string[], keywords: string[]): boolean {
+  for (let i = 0; i < words.length; i++) {
+    if (!keywords.some((k) => wordMatches(words[i], k))) continue;
+    for (let j = Math.max(0, i - 2); j < i; j++) if (NEGATORS.has(words[j])) return true;
+  }
+  return false;
+}
+
+const TRANSLIT: [string, string][] = [
+  ['shch', 'щ'], ['zh', 'ж'], ['kh', 'х'], ['ts', 'ц'], ['ch', 'ч'], ['sh', 'ш'],
+  ['yu', 'ю'], ['ya', 'я'], ['ye', 'є'], ['yi', 'ї'], ['ia', 'я'], ['iu', 'ю'], ['ie', 'є'],
+  ['a', 'а'], ['b', 'б'], ['v', 'в'], ['h', 'г'], ['g', 'г'], ['d', 'д'], ['e', 'е'], ['z', 'з'],
+  ['y', 'и'], ['i', 'і'], ['j', 'й'], ['k', 'к'], ['l', 'л'], ['m', 'м'], ['n', 'н'], ['o', 'о'],
+  ['p', 'п'], ['r', 'р'], ['s', 'с'], ['t', 'т'], ['u', 'у'], ['f', 'ф'], ['c', 'ц'], ['w', 'в'],
+  ['x', 'кс'], ['q', 'к'],
+];
+
+/** Latin-typed Ukrainian ("skilky vidpochyvaty") → Cyrillic, for a second try. */
+export function translitToUk(text: string): string {
+  let out = '';
+  const t = text.toLowerCase();
+  for (let i = 0; i < t.length; ) {
+    const hit = TRANSLIT.find(([lat]) => t.startsWith(lat, i));
+    if (hit) {
+      out += hit[1];
+      i += hit[0].length;
+    } else {
+      out += t[i];
+      i += 1;
+    }
+  }
+  return out;
+}
+
+export const hasCyrillic = (s: string) => /[\u0400-\u04ff]/.test(s);
+
+/** A catalog name for a lift mentioned by alias (for lifts you haven't logged yet). */
+export function findCatalogExercise(words: string[], phrase: string, names: string[]): string | null {
+  const frags = LIFT_ALIASES.filter(([kws]) => groupMatches(words, phrase, kws)).map(([, f]) => f);
+  // A muscle word alone ("chest") names a muscle, not a lift.
+  const plain = words.filter((w) => !MUSCLE_WORDS.some(([, kws]) => groupMatches([w], w, kws)));
+  let best: { name: string; score: number } | null = null;
+  for (const name of names) {
+    const lower = name.toLowerCase();
+    const nameWords = tokens(name).filter((w) => w.length >= 4);
+    const hits = nameWords.filter((nw) => plain.some((w) => wordMatches(w, nw))).length;
+    const score = hits * 2 + (frags.some((f) => lower.includes(f)) ? 3 : 0) - lower.length / 100;
+    if (score >= 3 && (!best || score > best.score)) best = { name, score };
+  }
+  return best?.name ?? null;
 }

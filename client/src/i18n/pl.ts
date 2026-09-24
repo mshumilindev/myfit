@@ -1788,6 +1788,12 @@ export const pl: Strings = {
   atlasTemperLabel: 'Temperament',
   atlasRoleLabel: 'Rola',
   atlasTurnOff: 'Wyłącz Atlasa',
+  atlasSuggestToday: "Co dziś trenować?",
+  atlasSuggestProgress: "Jak mi idzie?",
+  atlasSuggestRest: "Ile odpoczywać?",
+  atlasLangOffer: (n: string) => `Zmienić język aplikacji na „${n}”? Rozumiem każdy język, ale odpowiadam w języku aplikacji.`,
+  atlasLangKeep: "Nie, zostaw",
+  atlasLangDone: "Gotowe — od teraz po polsku.",
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
   atlasQuotaNotice: (time: string) =>

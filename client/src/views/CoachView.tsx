@@ -4,7 +4,7 @@
  * After that: his notes as a chat thread, newest at the bottom, plus settings.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useT } from '../i18n';
+import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet, Switch } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
@@ -14,10 +14,11 @@ import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
 import { askAtlas } from '../atlas/chat';
-import { answerLocally } from '../atlas/intents';
+import { answerLocally, type Convo } from '../atlas/intents';
 import { buildChatFacts } from '../atlas/chatFacts';
 import { pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
 import { useChatAccess } from '../atlas/chatAccess';
+import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
 import { fmtBodyWeightKg } from '../i18n';
 
 /** Wall clock for event handlers (kept out of render). */
@@ -416,30 +417,72 @@ function CoachThread({ onClose }: { onClose: () => void }) {
   const [consent, setConsent] = useState<string | null>(null);
   const busy = chat.some((m) => m.pending);
 
-  const send = async (text: string, consented = false) => {
+  const convo = useRef<Convo>({});
+  /** Reveal a local answer word by word — reads like a live reply, not a lookup. */
+  const typeOut = (id: string, at: number, text: string, chips?: string[]) =>
+    new Promise<void>((resolve) => {
+      const words = text.split(' ');
+      pushChat({ id, at, from: 'atlas', text: '…', pending: true });
+      let i = 0;
+      const step = Math.max(1, Math.round(words.length / 18));
+      const tick = () => {
+        i = Math.min(words.length, i + step);
+        const done = i >= words.length;
+        updateChat(id, { text: words.slice(0, i).join(' '), pending: !done, ...(done && chips?.length ? { chips } : {}) });
+        if (done) resolve();
+        else window.setTimeout(tick, 35);
+      };
+      window.setTimeout(tick, 280);
+    });
+
+  /** Typed in another language → answer in the app's language, then offer the switch once. */
+  const send = async (text: string, consented = false, typed = true) => {
     const q = text.trim();
     if (!q || busy) return;
+    let offer: ReturnType<typeof langOffer>['offer'] = null;
+    if (typed) {
+      const r = langOffer(q, locale, loadOfferState());
+      saveOfferState(r.state);
+      offer = r.offer;
+    }
+    const answered = await reply(q, consented);
+    if (offer && answered) {
+      const at = wallClock();
+      pushChat({ id: `lang-${at}`, at, from: 'atlas', text: t.atlasLangOffer(LOCALES[offer].locale), langOffer: offer });
+    }
+  };
+
+  /** Answer one message; false when it stopped for the Gemini consent sheet. */
+  const reply = async (q: string, consented: boolean): Promise<boolean> => {
     setDraft('');
     const at = wallClock();
     const history = chat.filter((m) => !m.notice);
     pushChat({ id: `me-${at}`, at, from: 'me', text: q });
     const rid = `at-${at}`;
-    // 1) Atlas's own answer base — instant, offline, from your data.
-    const local = answerLocally(q, { s: store, now: at, locale, temper, fmt });
-    if (local) {
-      pushChat({ id: rid, at: at + 1, from: 'atlas', text: local.text });
-      return;
+    // 1) Atlas's own answer base — instant, offline, from your data, and it
+    //    follows the thread ("why?", "more", "and squat?").
+    const local = answerLocally(q, { s: store, now: at, locale, temper, fmt }, convo.current);
+    if (local && !(local.escalate && canChat)) {
+      convo.current = local.convo;
+      await typeOut(rid, at + 1, local.text, local.chips);
+      return true;
     }
+    if (local?.escalate) convo.current = local.convo;
     // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread.
     if (!canChat) {
-      pushChat({ id: rid, at: at + 1, from: 'atlas', text: t.atlasLocalUnknown });
-      return;
+      await typeOut(rid, at + 1, t.atlasLocalUnknown, [
+        t.atlasSuggestToday,
+        t.atlasSuggestProgress,
+        t.atlasSuggestRest,
+      ]);
+      return true;
     }
     if (!store.coach.chatConsent && !consented) {
       setConsent(q);
-      return;
+      return false;
     }
     await sendGemini(q, history);
+    return true;
   };
 
   /** The Gemini leg of a message (the question is already in the thread). */
@@ -492,6 +535,8 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     text: string;
     pending?: boolean;
     notice?: boolean;
+    chips?: string[];
+    langOffer?: ChatMsg['langOffer'];
   };
   const items: Item[] = useMemo(
     () =>
@@ -503,6 +548,14 @@ function CoachThread({ onClose }: { onClose: () => void }) {
   );
 
   const lastText = items[items.length - 1]?.text;
+  // Follow-up chips live on the newest answer until you write again
+  // (a language offer after it doesn't hide them).
+  let chipsId: string | null = null;
+  for (let i = items.length - 1; i >= 0 && items[i].from !== 'me'; i--)
+    if (items[i].chips?.length) {
+      chipsId = items[i].id;
+      break;
+    }
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [items.length, lastText]);
@@ -561,9 +614,40 @@ function CoachThread({ onClose }: { onClose: () => void }) {
                   {n.text}
                 </div>
               ) : (
-                <Bubble key={n.id} temper={temper}>
-                  <span className={n.pending ? 'atl-typing' : undefined}>{n.text}</span>
-                </Bubble>
+                <div key={n.id} className="atl-msg">
+                  <Bubble temper={temper}>
+                    <span className={n.pending ? 'atl-typing' : undefined}>{n.text}</span>
+                  </Bubble>
+                  {n.chips && n.id === chipsId && !busy && (
+                    <div className="atl-suggest">
+                      {n.chips.map((ch) => (
+                        <button key={ch} type="button" className="atl-chip" onClick={() => void send(ch, false, false)}>
+                          {ch}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {n.langOffer && !busy && (
+                    <div className="atl-suggest">
+                      <button
+                        type="button"
+                        className="atl-chip"
+                        onClick={() => {
+                          const to = n.langOffer!;
+                          updateChat(n.id, { langOffer: undefined });
+                          setLocale(to);
+                          const at = wallClock();
+                          pushChat({ id: `lang-ok-${at}`, at, from: 'atlas', text: LOCALES[to].atlasLangDone });
+                        }}
+                      >
+                        {FLAGS[n.langOffer]} {LOCALES[n.langOffer].locale}
+                      </button>
+                      <button type="button" className="atl-chip" onClick={() => updateChat(n.id, { langOffer: undefined })}>
+                        {t.atlasLangKeep}
+                      </button>
+                    </div>
+                  )}
+                </div>
               ),
             )}
           </div>

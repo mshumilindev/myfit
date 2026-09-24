@@ -1785,6 +1785,12 @@ export const uk: Strings = {
   atlasTemperLabel: 'Характер',
   atlasRoleLabel: 'Роль',
   atlasTurnOff: 'Вимкнути Atlas',
+  atlasSuggestToday: "Що тренувати сьогодні?",
+  atlasSuggestProgress: "Як мій прогрес?",
+  atlasSuggestRest: "Скільки відпочивати?",
+  atlasLangOffer: (n: string) => `Змінити мову додатку на «${n}»? Я розумію будь-якою, але відповідаю мовою додатку.`,
+  atlasLangKeep: "Ні, залишити",
+  atlasLangDone: "Готово — далі українською.",
   atlasLocalUnknown:
     'Цього я поки не знаю. Питай про тренування: що робити сьогодні, відпочинок, наступну вагу, рекорди, відновлення, сон, програму.',
   atlasQuotaNotice: (time: string) =>
