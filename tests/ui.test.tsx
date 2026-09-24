@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../client/src/App';
 import { App } from '../client/src/App';
 import type { StoreState } from '../client/src/store';
+import { COACH_DEFAULT } from '../client/src/atlas/types';
 import { TodayView } from '../client/src/views/TodayView';
 import { ProgressView } from '../client/src/views/ProgressView';
 import { GymsView } from '../client/src/views/GymsView';
@@ -44,6 +45,7 @@ function store(patch: Partial<StoreState> = {}): StoreState {
     queue: [],
     syncStatus: 'synced',
     lastSyncAt: Date.now(),
+    coach: { ...COACH_DEFAULT },
     ...patch,
   };
 }
