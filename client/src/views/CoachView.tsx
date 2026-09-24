@@ -8,15 +8,20 @@ import { useT } from '../i18n';
 import { Icon, Sheet, Switch } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
-import { useAtlasNotes, useMinuteClock } from '../atlas/notes';
+import { useAtlasFmt, useAtlasNotes, useMinuteClock } from '../atlas/notes';
 import { TEMPER_COLOR, TEMPERS, type CoachRole, type Temper } from '../atlas/types';
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
 import { askAtlas } from '../atlas/chat';
+import { answerLocally } from '../atlas/intents';
 import { buildChatFacts } from '../atlas/chatFacts';
 import { pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
+import { useChatAccess } from '../atlas/chatAccess';
 import { fmtBodyWeightKg } from '../i18n';
+
+/** Wall clock for event handlers (kept out of render). */
+const wallClock = (): number => Date.now();
 
 type Step = 'meet' | 'temper' | 'fine' | 'role' | 'data' | 'push';
 
@@ -404,6 +409,8 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     if (newest > store.coach.readAt) setCoach({ readAt: newest });
   }, [notes, store.coach.readAt]);
 
+  const canChat = useChatAccess();
+  const fmt = useAtlasFmt();
   const chat = useChatLog();
   const [draft, setDraft] = useState('');
   const [consent, setConsent] = useState<string | null>(null);
@@ -412,19 +419,37 @@ function CoachThread({ onClose }: { onClose: () => void }) {
   const send = async (text: string, consented = false) => {
     const q = text.trim();
     if (!q || busy) return;
+    setDraft('');
+    const at = wallClock();
+    const history = chat.filter((m) => !m.notice);
+    pushChat({ id: `me-${at}`, at, from: 'me', text: q });
+    const rid = `at-${at}`;
+    // 1) Atlas's own answer base — instant, offline, from your data.
+    const local = answerLocally(q, { s: store, now: at, locale, temper, fmt });
+    if (local) {
+      pushChat({ id: rid, at: at + 1, from: 'atlas', text: local.text });
+      return;
+    }
+    // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread.
+    if (!canChat) {
+      pushChat({ id: rid, at: at + 1, from: 'atlas', text: t.atlasLocalUnknown });
+      return;
+    }
     if (!store.coach.chatConsent && !consented) {
       setConsent(q);
       return;
     }
-    setDraft('');
-    const at = Date.now();
-    const history = chat.map((m) => ({ from: m.from, text: m.text }));
-    pushChat({ id: `me-${at}`, at, from: 'me', text: q });
+    await sendGemini(q, history);
+  };
+
+  /** The Gemini leg of a message (the question is already in the thread). */
+  const sendGemini = async (q: string, history = chat.filter((m) => !m.notice)) => {
+    const at = wallClock();
     const rid = `at-${at}`;
-    pushChat({ id: rid, at: at + 1, from: 'atlas', text: '…', pending: true });
+    pushChat({ id: rid, at, from: 'atlas', text: '…', pending: true });
     const res = await askAtlas({
       question: q,
-      history,
+      history: history.map((m) => ({ from: m.from, text: m.text })),
       temper,
       coach: { ...store.coach, chatConsent: true },
       locale,
@@ -432,6 +457,20 @@ function CoachThread({ onClose }: { onClose: () => void }) {
       now: at,
       onText: (partial) => updateChat(rid, { text: partial }),
     });
+    if (!res.ok && res.reason === 'quota') {
+      updateChat(rid, { pending: false, text: t.atlasLocalUnknown });
+      const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
+        res.until ?? at,
+      );
+      pushChat({
+        id: `n-${at}`,
+        at: at + 1,
+        from: 'atlas',
+        notice: true,
+        text: t.atlasQuotaNotice(time),
+      });
+      return;
+    }
     updateChat(rid, {
       pending: false,
       text: res.ok
@@ -446,7 +485,14 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     });
   };
 
-  type Item = { id: string; at: number; from: 'me' | 'atlas'; text: string; pending?: boolean };
+  type Item = {
+    id: string;
+    at: number;
+    from: 'me' | 'atlas';
+    text: string;
+    pending?: boolean;
+    notice?: boolean;
+  };
   const items: Item[] = useMemo(
     () =>
       [
@@ -506,7 +552,11 @@ function CoachThread({ onClose }: { onClose: () => void }) {
           <div key={g.label} className="atl-group">
             <span className="atl-day">{g.label}</span>
             {g.items.map((n) =>
-              n.from === 'me' ? (
+              n.notice ? (
+                <div key={n.id} className="atl-notice" role="status">
+                  {n.text}
+                </div>
+              ) : n.from === 'me' ? (
                 <div key={n.id} className="atl-me">
                   {n.text}
                 </div>
@@ -559,7 +609,7 @@ function CoachThread({ onClose }: { onClose: () => void }) {
                 const q = consent;
                 setCoach({ chatConsent: true });
                 setConsent(null);
-                void send(q, true);
+                void sendGemini(q);
               }}
             >
               {t.atlasConsentOk}

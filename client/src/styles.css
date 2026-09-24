@@ -38606,3 +38606,15 @@ body {
 .atl-end {
   scroll-margin-bottom: calc(84px + var(--safe-bottom));
 }
+
+.atl-notice {
+  align-self: center;
+  max-width: 320px;
+  padding: 8px 14px;
+  border-radius: 99px;
+  background: var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  font-size: 12.5px;
+  line-height: 17px;
+  text-align: center;
+}

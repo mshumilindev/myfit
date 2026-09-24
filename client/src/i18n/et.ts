@@ -1783,6 +1783,10 @@ export const et: Strings = {
   atlasTemperLabel: 'Iseloom',
   atlasRoleLabel: 'Roll',
   atlasTurnOff: 'Lülita Atlas välja',
+  atlasLocalUnknown:
+    'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
+  atlasQuotaNotice: (time: string) =>
+    `Gemini tasuta limiit on otsas. Kuni ${time} vastab Atlas oma teadmiste põhjal.`,
   atlasAsk: 'Küsi Atlaselt trenni kohta…',
   atlasSend: 'Saada',
   atlasConsentTitle: 'Vestlus Atlasega',

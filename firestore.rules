@@ -169,6 +169,13 @@ service cloud.firestore {
     }
 
     // --- Shared exercise catalog -------------------------------------------
+    // App-wide switches edited by the owner in the console (read-only here).
+    // config/atlas: { chatUsers: [username…], chatUids: [uid…] } — who may
+    // use Atlas's free-form Gemini chat while it is in closed testing.
+    match /config/{docId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
     match /exerciseCatalog/{entryId} {
       allow read: if isSignedIn();
       allow create, update: if isTrainerOrAdmin();

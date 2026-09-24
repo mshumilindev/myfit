@@ -1831,6 +1831,10 @@ export const en = {
   atlasTemperLabel: 'Temper',
   atlasRoleLabel: 'Role',
   atlasTurnOff: 'Turn Atlas off',
+  atlasLocalUnknown:
+    'That one’s outside what I know yet. Ask me about your training: what to do today, rest, the next weight, records, recovery, sleep, your programme.',
+  atlasQuotaNotice: (time: string) =>
+    `Gemini’s free limit is used up. Until ${time} Atlas answers from his own knowledge.`,
   atlasAsk: 'Ask Atlas about your training…',
   atlasSend: 'Send',
   atlasConsentTitle: 'Chat with Atlas',

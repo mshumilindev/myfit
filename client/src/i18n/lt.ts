@@ -1799,6 +1799,10 @@ export const lt: Strings = {
   atlasTemperLabel: 'Būdas',
   atlasRoleLabel: 'Vaidmuo',
   atlasTurnOff: 'Išjungti Atlas',
+  atlasLocalUnknown:
+    'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
+  atlasQuotaNotice: (time: string) =>
+    `Nemokamas Gemini limitas išnaudotas. Iki ${time} Atlas atsako iš savo žinių.`,
   atlasAsk: 'Paklausk Atlas apie treniruotes…',
   atlasSend: 'Siųsti',
   atlasConsentTitle: 'Pokalbis su Atlas',

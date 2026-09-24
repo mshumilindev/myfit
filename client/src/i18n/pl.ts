@@ -1788,6 +1788,10 @@ export const pl: Strings = {
   atlasTemperLabel: 'Temperament',
   atlasRoleLabel: 'Rola',
   atlasTurnOff: 'Wyłącz Atlasa',
+  atlasLocalUnknown:
+    'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
+  atlasQuotaNotice: (time: string) =>
+    `Darmowy limit Gemini się wyczerpał. Do ${time} Atlas odpowiada z własnej wiedzy.`,
   atlasAsk: 'Zapytaj Atlasa o trening…',
   atlasSend: 'Wyślij',
   atlasConsentTitle: 'Czat z Atlasem',

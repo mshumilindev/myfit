@@ -47,3 +47,24 @@ describe('chat facts', () => {
     expect(JSON.parse(buildChatFacts(store as never, [], 2, Date.now())).bodyweightKg).toBe(90);
   });
 });
+
+describe('chat access (closed testing)', () => {
+  it('lets in only listed accounts; no config → nobody', async () => {
+    const { chatAllowed } = await import('./chatAccess');
+    expect(chatAllowed(null, 'u1', 'mykola')).toBe(false);
+    expect(chatAllowed({ chatUsers: ['Mykola'] }, 'u1', 'mykola ')).toBe(true);
+    expect(chatAllowed({ chatUids: ['u1'] }, 'u1', null)).toBe(true);
+    expect(chatAllowed({ chatUsers: ['mykola'] }, 'u2', 'anna')).toBe(false);
+  });
+});
+
+describe('Gemini quota', () => {
+  it('recognises quota errors and pauses until the daily reset', async () => {
+    const { isQuotaError, nextQuotaReset, geminiPausedUntil } = await import('./chat');
+    expect(isQuotaError(new Error('[429] RESOURCE_EXHAUSTED: quota exceeded'))).toBe(true);
+    expect(isQuotaError(new Error('network down'))).toBe(false);
+    const now = Date.UTC(2026, 9, 7, 20);
+    expect(nextQuotaReset(now)).toBe(Date.UTC(2026, 9, 8, 8));
+    expect(geminiPausedUntil(now)).toBe(0);
+  });
+});

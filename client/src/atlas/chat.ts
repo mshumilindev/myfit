@@ -80,7 +80,29 @@ function underCap(now: number): boolean {
 }
 
 export type AskResult =
-  { ok: true; text: string } | { ok: false; reason: 'offline' | 'cap' | 'error' | 'blocked' };
+  | { ok: true; text: string }
+  | { ok: false; reason: 'offline' | 'cap' | 'error' | 'blocked' | 'quota'; until?: number };
+
+const QUOTA_KEY = 'spotter.atlasGeminiPausedUntil';
+/** The free tier resets at midnight Pacific ≈ 08:00 UTC; pause until then. */
+export function nextQuotaReset(now: number): number {
+  const d = new Date(now);
+  const reset = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 8);
+  return reset > now ? reset : reset + 86_400_000;
+}
+/** When Gemini's quota ran out: ms until which we don't call it (0 = available). */
+export function geminiPausedUntil(now: number): number {
+  try {
+    const until = Number(localStorage.getItem(QUOTA_KEY) ?? 0);
+    return until > now ? until : 0;
+  } catch {
+    return 0;
+  }
+}
+export function isQuotaError(err: unknown): boolean {
+  const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err);
+  return /\b429\b|RESOURCE_EXHAUSTED|quota|rate.?limit/i.test(msg);
+}
 
 /**
  * Ask Atlas. Streams partial text through `onText`; resolves with the final
@@ -98,6 +120,8 @@ export async function askAtlas(p: {
 }): Promise<AskResult> {
   if (typeof navigator !== 'undefined' && navigator.onLine === false)
     return { ok: false, reason: 'offline' };
+  const paused = geminiPausedUntil(p.now);
+  if (paused) return { ok: false, reason: 'quota', until: paused };
   if (!underCap(p.now)) return { ok: false, reason: 'cap' };
   try {
     const ai = getAI(app, { backend: new GoogleAIBackend() });
@@ -124,6 +148,15 @@ export async function askAtlas(p: {
     return { ok: true, text };
   } catch (err) {
     console.warn('atlas: chat failed', err);
+    if (isQuotaError(err)) {
+      const until = nextQuotaReset(p.now);
+      try {
+        localStorage.setItem(QUOTA_KEY, String(until));
+      } catch {
+        /* ignore */
+      }
+      return { ok: false, reason: 'quota', until };
+    }
     return { ok: false, reason: 'error' };
   }
 }

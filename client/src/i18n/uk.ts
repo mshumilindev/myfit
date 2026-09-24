@@ -1785,6 +1785,10 @@ export const uk: Strings = {
   atlasTemperLabel: 'Характер',
   atlasRoleLabel: 'Роль',
   atlasTurnOff: 'Вимкнути Atlas',
+  atlasLocalUnknown:
+    'Цього я поки не знаю. Питай про тренування: що робити сьогодні, відпочинок, наступну вагу, рекорди, відновлення, сон, програму.',
+  atlasQuotaNotice: (time: string) =>
+    `Безкоштовний ліміт Gemini вичерпано. До ${time} Atlas відповідає з власних знань.`,
   atlasAsk: 'Спитай Atlas про тренування…',
   atlasSend: 'Надіслати',
   atlasConsentTitle: 'Чат з Atlas',

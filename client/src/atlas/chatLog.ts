@@ -7,6 +7,8 @@ export interface ChatMsg {
   from: 'me' | 'atlas';
   text: string;
   pending?: boolean;
+  /** A system line (e.g. Gemini's quota ran out), shown as a centred pill. */
+  notice?: boolean;
 }
 
 const KEY = 'spotter.atlasChat';
