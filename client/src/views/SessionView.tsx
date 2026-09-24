@@ -2902,12 +2902,6 @@ export function SessionView(props: {
             {focusView && <span className="warmup-marker-cfg">{cfgBtn}</span>}
           </div>
         ) : null}
-        {marker && kind === 'cooldown' && live && cooldownNow?.id === ex.id ? (
-          <div className="cooldown-on">
-            <Icon name="pause" />
-            <span>{t.cooldownRestOff}</span>
-          </div>
-        ) : null}
         {marker ? null : timed ? (
           <>
             {focusView && cardioImg && (
