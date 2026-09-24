@@ -24,6 +24,11 @@ import {
   finishWorkout,
   finishActivity,
   programDayNameFor,
+  addExercise,
+  deleteExercise,
+  pruneEmptyLiveWorkouts,
+  finishWorkoutClean,
+  __getStateForTests,
 } from './store';
 import { SLEEP_IDLE_MS } from './sleep';
 import type { SetEntry, SleepNight, Workout } from './types';
@@ -396,5 +401,35 @@ describe('programDayNameFor — carried name vs trained muscles', () => {
   it('trusts a carried name that declares no target muscles', () => {
     const w = mk('My Day', [], 'lats');
     expect(programDayNameFor(w, [w])).toBe('My Day');
+  });
+});
+
+describe('a live session starts with its first exercise', () => {
+  const byId = (id: string) => __getStateForTests().workouts.find((w) => w.id === id);
+  it('clock starts at the first exercise, resets when the last one is removed, drafts are pruned', async () => {
+    const w = startWorkout(null)!;
+    await new Promise((r) => setTimeout(r, 5));
+    const ex = addExercise(w.id, 'Barbell Squat');
+    expect(byId(w.id)!.startedAt).toBeGreaterThan(w.startedAt);
+    deleteExercise(w.id, ex.id);
+    expect(byId(w.id)!.exercises).toHaveLength(0);
+    pruneEmptyLiveWorkouts(w.id);
+    expect(byId(w.id)).toBeDefined();
+    pruneEmptyLiveWorkouts(null);
+    expect(byId(w.id)).toBeUndefined();
+  });
+  it('pure cardio picked by name becomes a cardio entry', () => {
+    const w = startWorkout(null)!;
+    expect(addExercise(w.id, 'Walking, Treadmill').kind).toBe('cardio');
+    expect(addExercise(w.id, 'Barbell Squat').kind).toBe('strength');
+    pruneEmptyLiveWorkouts(null);
+    finishWorkout(w.id);
+  });
+  it('finishing keeps warm-up markers (history learns the session shape)', () => {
+    const w = startWorkout(null)!;
+    addExercise(w.id, 'Warm-up', 'warmup');
+    addExercise(w.id, 'Barbell Squat');
+    const done = finishWorkoutClean(w.id)!;
+    expect(done.exercises.map((e) => e.kind)).toEqual(['warmup']);
   });
 });

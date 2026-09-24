@@ -38,28 +38,32 @@ export function LiveHero({
   const [now, setNow] = useState(() => Date.now());
   const [picker, setPicker] = useState(false);
   const closed = workout.autoFinished || workout.finishedAt !== null;
+  // No exercise yet → not started: the clock waits at 0:00.
+  const draft = !closed && workout.exercises.length === 0;
 
   useEffect(() => {
-    if (closed) return;
+    if (closed || draft) return;
     const iv = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(iv);
-  }, [closed]);
+  }, [closed, draft]);
 
-  const elapsed = (workout.finishedAt ?? now) - workout.startedAt;
+  const elapsed = draft ? 0 : (workout.finishedAt ?? now) - workout.startedAt;
   const sets = workoutSets(workout);
   const volume = fmtTonnes(workoutVolumeKg(workout));
-  const state = closed ? 'closed' : offline ? 'offline' : 'live';
+  const state = closed ? 'closed' : draft ? 'draft' : offline ? 'offline' : 'live';
   const label = closed
     ? t.liveClosedAuto
-    : mode === 'session'
-      ? offline
-        ? `${t.inSession} · ${t.liveOfflineQueued(queued)}`
-        : gym
-          ? t.inSessionAt(gym.name)
-          : t.inSession
-      : offline
-        ? `${t.liveLabel} · ${t.liveOfflineQueued(queued)}`
-        : `${t.liveLabel} · ${gym ? gym.name : t.liveNoGym}`;
+    : draft
+      ? t.sessionNotStarted
+      : mode === 'session'
+        ? offline
+          ? `${t.inSession} · ${t.liveOfflineQueued(queued)}`
+          : gym
+            ? t.inSessionAt(gym.name)
+            : t.inSession
+        : offline
+          ? `${t.liveLabel} · ${t.liveOfflineQueued(queued)}`
+          : `${t.liveLabel} · ${gym ? gym.name : t.liveNoGym}`;
   const meta =
     mode === 'session'
       ? `${sets} ${t.sets} · ${volume} · ${workout.exercises.length} ${t.exercises}`

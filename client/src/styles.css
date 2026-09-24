@@ -36643,3 +36643,385 @@ body {
   min-width: 0;
   padding: 0;
 }
+
+/* Warm-up / cool-down marker: a photo with the flame/wind badge over its corner. */
+.warmup-marker-body {
+  position: relative;
+}
+.warmup-marker-photo {
+  flex: none;
+  width: 76px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.warmup-marker-body .warmup-marker-photo + .warmup-marker-icon {
+  position: absolute;
+  left: 70px;
+  top: 8px;
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+
+/* Live session draft (no exercise yet): the dot and clock wait. */
+.live-hero.draft .live-dot {
+  background: var(--color-neutral-600);
+  animation: none;
+}
+.live-hero.draft .live-timer {
+  color: var(--color-neutral-400);
+}
+
+/* ===========================================================================
+   Empty live session (design F): readiness, the usual first lift, four more
+   starts, a circuit shortcut, one pinned Add. Sized to fit one iPhone 17 Pro
+   Max screen (440×956) with no scrolling; smaller screens shrink the photos,
+   then scroll above the pinned Add.
+   =========================================================================== */
+.focus-view.focus-view-empty {
+  padding-top: 0;
+}
+.es {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.es-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.es-ready {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.es-ready-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-neutral-400);
+}
+.es-ready-line .ph,
+.es-ready-line svg {
+  color: #6aa7e8;
+  font-size: 16px;
+}
+.es-ready-line b {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.es-ready-cards {
+  display: flex;
+  gap: 8px;
+}
+.es-rc {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 11px;
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+/* design C: the muscle over a big percentage, then the bar */
+.es-rc-top {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.es-rc-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-neutral-400);
+}
+.es-rc-pct {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 700;
+}
+.es-rc-bar {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--color-neutral-900);
+  overflow: hidden;
+}
+.es-rc-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+}
+.es-kicker {
+  /* copy comes upper-cased from i18n, so ordinals keep "1st" / "1-ша" */
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 14px;
+  color: var(--color-neutral-500);
+}
+/* the usual first lift: a photo card with the text on a scrim */
+.es-hero {
+  position: relative;
+  /* 184 on a 956-tall screen; takes spare room (no circuit card), gives it
+     back down to 132 before anything has to scroll. */
+  flex: 1 1 184px;
+  min-height: 132px;
+  max-height: 260px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  background: var(--color-surface);
+}
+.es-hero > img,
+.es-hero > .es-hero-noimg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.es-hero-main {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
+  border: none;
+  border-radius: inherit;
+  text-align: left;
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  background: linear-gradient(
+    to top,
+    rgba(18, 19, 22, 0.96) 0%,
+    rgba(18, 19, 22, 0.78) 42%,
+    rgba(18, 19, 22, 0) 75%
+  );
+  cursor: pointer;
+}
+.es-hero-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.es-hero .es-kicker {
+  color: var(--color-accent);
+}
+.es-hero-name {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.es-hero-sub {
+  font-size: 12.5px;
+  color: var(--color-neutral-300);
+}
+.es-play {
+  flex: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-accent);
+  color: #1c1406;
+  font-size: 20px;
+}
+.es-info {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 16, 18, 0.72);
+  color: #fff;
+  font-size: 17px;
+  cursor: pointer;
+}
+.es-info.sm {
+  top: 5px;
+  right: 5px;
+  width: 28px;
+  height: 28px;
+  font-size: 15px;
+}
+/* four more ways to start */
+.es-more {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.es-more-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.es-more-src {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.es-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.es-tile {
+  position: relative;
+  min-width: 0;
+  display: flex;
+}
+.es-tile-main {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--color-neutral-800);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.es-tile-main > img,
+.es-tile-main > .es-noimg {
+  width: 100%;
+  height: clamp(56px, calc((100dvh - 784px) / 2), 86px);
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-500);
+  font-size: 22px;
+}
+.es-tile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 10px 9px;
+  min-width: 0;
+}
+.es-tile-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.es-tile-sub {
+  font-size: 12px;
+  line-height: 15px;
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* circuit shortcut — the settings card's look, with a Start button */
+.es-circuit {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 14px;
+  background: var(--loopwash);
+  box-shadow: inset 0 0 0 1px var(--color-accent-800);
+}
+.es-loop {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-600);
+}
+.es-circuit-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.es-circuit-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 19px;
+}
+.es-circuit-sub {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--color-accent-300);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.es-circuit-go {
+  flex: none;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 99px;
+  border: 1px solid var(--color-accent-600);
+  background: var(--color-accent-900);
+  color: var(--color-accent);
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+/* the one pinned action */
+.es-dock {
+  flex: none;
+  /* same bottom breathing room as the focus nav's buttons */
+  padding: 12px 0 calc(22px + var(--safe-bottom));
+}
+.es-add {
+  width: 100%;
+  border: none;
+  background: var(--color-accent);
+  color: #1c1406;
+  min-height: 54px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  gap: 8px;
+}

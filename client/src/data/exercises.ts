@@ -364,6 +364,34 @@ function CUSTOM_SECONDARIES(id: string): MuscleGroup[] | null {
   return hit ? hit.secondaryMuscles : null;
 }
 
+/**
+ * Pure cardio (treadmill, bike, rower, stairs…): these belong to the Cardio
+ * flow (minutes, not sets), never to the strength exercise list.
+ */
+export function isCardioExerciseName(name: string | null | undefined): boolean {
+  if (!name) return false;
+  const rich = richExerciseByName(name);
+  if (rich) return rich.category === 'cardio';
+  return muscleInfoByName(name)?.primary === 'cardio';
+}
+
+/** Photos for the warm-up / cool-down session markers — from the same photo
+ *  set as the lifts (free-exercise-db: a dynamic stretch, child's pose). */
+export const MARKER_IMAGES = {
+  warmup: '/markers/warmup.jpg',
+  cooldown: '/markers/cooldown.jpg',
+} as const;
+
+/** The photo for an exercise row/tile: markers get their own, lifts the
+ *  catalog photo. */
+export function exerciseImage(
+  name: string | null | undefined,
+  kind?: string | null,
+): string | undefined {
+  if (kind === 'warmup' || kind === 'cooldown') return MARKER_IMAGES[kind];
+  return richExerciseByName(name)?.images?.[0];
+}
+
 /** Catalog lookup by (any-locale) exercise name; null for unknown names. */
 export function muscleInfoByName(name: string): MuscleInfo | null {
   const key = name.trim().toLowerCase();

@@ -167,15 +167,19 @@ import {
 } from '../components/Muscle';
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
+import { starterPlan } from '../starterPlan';
 import { warmupRamp } from '../sessionBuilder';
 import { directReadiness } from '../picker';
-import { READINESS_COLOR } from '../recovery';
+import { READINESS_COLOR, muscleReadiness } from '../recovery';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
 import {
   canonicalExerciseName,
   exercisesForSubRegions,
   richExerciseByName,
+  exerciseImage,
+  isCardioExerciseName,
+  MARKER_IMAGES,
   subRegionsByName,
   type MuscleGroup,
 } from '../data/exercises';
@@ -1257,7 +1261,8 @@ export function SessionView(props: {
     const freq = new Map<string, number>();
     for (const w of finished.slice(0, 40))
       for (const e of w.exercises)
-        if (e.sets.length > 0) freq.set(e.name.trim(), (freq.get(e.name.trim()) ?? 0) + 1);
+        if (e.sets.length > 0 && isStrengthExercise(e) && !isCardioExerciseName(e.name))
+          freq.set(e.name.trim(), (freq.get(e.name.trim()) ?? 0) + 1);
     const byFreq = [...freq.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n);
 
     // 1 · The other part of the same muscle.
@@ -1306,7 +1311,7 @@ export function SessionView(props: {
         const point = atMe >= 0 ? atMe : Math.max(...names.map((n, i) => (done.has(n) ? i : -1)));
         const weight = overlap / Math.max(1, done.size);
         sorted.forEach((e, i) => {
-          if (!isStrengthExercise(e)) return;
+          if (!isStrengthExercise(e) || isCardioExerciseName(e.name)) return;
           const k = e.name.trim();
           if (done.has(k.toLowerCase()) || saturated(muscleOf(k))) return;
           const d = i - point;
@@ -1348,9 +1353,10 @@ export function SessionView(props: {
     }
     if (!workout!.exercises.some((e) => exerciseKind(e) === 'cooldown'))
       push({
-        name: t.exerciseKindNames.cooldown,
+        name: t.defaultTimedExerciseNames.cooldown,
         kicker: t.pickFinishLabel,
         sub: t.pickCooldownSub,
+        img: MARKER_IMAGES.cooldown,
         kind: 'cooldown',
       });
     return picks.slice(0, 6);
@@ -1424,7 +1430,7 @@ export function SessionView(props: {
     const slots = new Map<string, number[]>();
     src.forEach((w, k) => {
       const firsts = [...w.exercises]
-        .filter((e) => isStrengthExercise(e) && e.sets.length > 0)
+        .filter((e) => isStrengthExercise(e) && e.sets.length > 0 && !isCardioExerciseName(e.name))
         .sort((a, b) => a.position - b.position)
         .slice(0, 3);
       firsts.forEach((e, i) => {
@@ -1452,10 +1458,14 @@ export function SessionView(props: {
           .sort((a, b) => a.position - b.position)[0],
     );
     const warmOpen = openers.filter(
-      (e) => e && (exerciseKind(e) === 'warmup' || exerciseKind(e) === 'cardio'),
+      (e) =>
+        e &&
+        (exerciseKind(e) === 'warmup' ||
+          exerciseKind(e) === 'cardio' ||
+          isCardioExerciseName(e.name)),
     );
     if (warmOpen.length > 0 && warmOpen.length >= src.length / 3) {
-      const cardio = warmOpen.filter((e) => exerciseKind(e!) === 'cardio');
+      const cardio = warmOpen.filter((e) => exerciseKind(e!) !== 'warmup');
       const kicker = kickerAt(0);
       if (cardio.length > warmOpen.length / 2) {
         const name = cardio[0]!.name.trim();
@@ -1471,6 +1481,7 @@ export function SessionView(props: {
           name: t.defaultTimedExerciseNames.warmup,
           kicker,
           sub: t.pickWarmupSub,
+          img: MARKER_IMAGES.warmup,
           kind: 'warmup',
         });
       }
@@ -1495,6 +1506,231 @@ export function SessionView(props: {
       .map((x) => x.p);
     return { picks: [...lead, ...ordered], day, n: src.length };
   }
+  /** The new empty live session: readiness at a glance, the lift you usually
+   *  open with (or a science-based first session when there's no history), four
+   *  more ways to start, a circuit shortcut when you use circuits, and one
+   *  pinned Add button. Everything here is a suggestion — nothing is added
+   *  until you tap. */
+  function renderEmptyStart() {
+    const at = workout!.startedAt;
+    const finished = store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id);
+    const hist = [...finished, workout!];
+    const { picks, day } = startPicks();
+    const lead = picks.filter((p) => p.kind !== 'strength');
+    const lifts = picks.filter((p) => p.kind === 'strength');
+    const muscleOf = (name: string) =>
+      resolveMuscles({ name, kind: 'strength' } as Exercise).primary;
+    const mName = (m: string | null) =>
+      m ? ((t.muscleGroups as Record<string, string>)[m] ?? m) : '';
+    let hero: TiredPick | null = lifts[0] ?? null;
+    let heroKicker = day ? t.esHeroDay(day) : t.esHeroRecent;
+    let tiles: TiredPick[] = hero ? [...lead, ...lifts.slice(1)] : [...lead];
+    // No (or too little) history: fill from how a training week is usually
+    // split, dodging muscles that are still recovering.
+    if (!hero || tiles.length < 4) {
+      const plan = starterPlan({
+        weekday: new Date(at).getDay(),
+        finishedCount: finished.length,
+        items: buildPickItems(workout!, store.workouts, gym),
+        recovering: (m) => directReadiness([m], m, hist, now).state === 'recovering',
+      });
+      const taken = new Set([hero, ...tiles].filter(Boolean).map((p) => p!.name.toLowerCase()));
+      const dayName = t.splitNames[plan.day];
+      const extra: TiredPick[] = plan.lifts
+        .filter((l) => !taken.has(l.name.toLowerCase()))
+        .map((l) => ({
+          name: l.name,
+          kicker: dayName,
+          sub: mName(l.muscle),
+          img: l.image ?? undefined,
+          kind: 'strength' as const,
+        }));
+      if (!hero && extra.length > 0) {
+        hero = extra.shift()!;
+        heroKicker = t.esStarterKicker(dayName).toLocaleUpperCase(t.locale);
+        // A first session starts with a warm-up.
+        if (tiles.length === 0)
+          tiles.push({
+            name: t.defaultTimedExerciseNames.warmup,
+            kicker: t.exerciseKindNames.warmup,
+            sub: t.pickWarmupSub,
+            img: MARKER_IMAGES.warmup,
+            kind: 'warmup',
+          });
+      }
+      tiles = [...tiles, ...extra];
+    }
+    tiles = tiles.slice(0, 4);
+    // One "1st" only: the hero; history lifts in the tiles count on from 2nd in
+    // the order they're shown. Warm-up and starter picks keep their own label.
+    {
+      let rank = 1;
+      tiles = tiles.map((p) =>
+        p.kind === 'strength' && lifts.some((l) => l.name === p.name)
+          ? { ...p, kicker: t.esOrd(++rank) }
+          : {
+              ...p,
+              kicker: (p.kind === 'strength'
+                ? p.kicker
+                : t.exerciseKindNames.warmup
+              ).toLocaleUpperCase(t.locale),
+            },
+      );
+    }
+
+    // Hero line: last time and today's aim (or the rep range for a first go).
+    const load = (w: number | null) => (w == null || w <= 0 ? t.bodyweightShort : fmtWeightKg(w));
+    let heroSub = '';
+    if (hero) {
+      const tg = nextTarget(topHistory(finished, hero.name, now), {
+        primary: muscleOf(hero.name),
+      });
+      heroSub =
+        tg.state === 'first' || tg.prevReps == null
+          ? t.esFirst(tg.repLow, tg.repHigh)
+          : `${t.esLast(load(tg.prevWeight), tg.prevReps)} · ${t.esAim(load(tg.weight), tg.reps)}`;
+    }
+
+    // Readiness of the muscles these starts would train (up to three).
+    const ready = muscleReadiness(finished, now);
+    const ms: MuscleGroup[] = [];
+    for (const p of [hero, ...tiles]) {
+      if (!p || p.kind !== 'strength') continue;
+      const m = muscleOf(p.name);
+      if (m && m !== 'cardio' && !ms.includes(m)) ms.push(m);
+    }
+    const rows = ms.slice(0, 3).map((m) => {
+      const r = ready.get(m);
+      const state = r?.state ?? 'ready';
+      return { m, pct: Math.round((r?.readiness ?? 1) * 100), state };
+    });
+    const tired = rows
+      .filter((r) => r.state === 'recovering' || r.state === 'nearly')
+      .map((r) => mName(r.m));
+    const readLine =
+      tired.length > 0
+        ? t.esRecovering(tired.join(', '))
+        : finished.length === 0
+          ? t.esNoHistory
+          : t.esAllFresh;
+
+    const infoBtn = (name: string, cls: string) => (
+      <button
+        type="button"
+        className={cls}
+        aria-label={t.detailsAction}
+        title={t.detailsAction}
+        onClick={() => setTiredInfo(name)}
+      >
+        <Icon name="info" />
+      </button>
+    );
+    return (
+      <div className="es">
+        <div className="es-scroll">
+          <div className="es-ready">
+            <div className="es-ready-line">
+              <Icon name="heartbeat" weight="fill" />
+              <span>
+                {t.esReadiness} · <b>{readLine}</b>
+              </span>
+            </div>
+            {rows.length > 0 && (
+              <div className="es-ready-cards">
+                {rows.map((r) => (
+                  <div key={r.m} className="es-rc">
+                    <div className="es-rc-top">
+                      <span className="es-rc-name">{mName(r.m)}</span>
+                      <span className="es-rc-pct num" style={{ color: READINESS_COLOR[r.state] }}>
+                        {r.pct}%
+                      </span>
+                    </div>
+                    <span className="es-rc-bar">
+                      <span style={{ width: `${r.pct}%`, background: READINESS_COLOR[r.state] }} />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {hero && (
+            <div className="es-hero">
+              {hero.img ? <img src={hero.img} alt="" /> : <span className="es-hero-noimg" />}
+              <button type="button" className="es-hero-main" onClick={() => openPick(hero!)}>
+                <span className="es-hero-text">
+                  <span className="es-kicker">{heroKicker}</span>
+                  <span className="es-hero-name">{exName(hero.name)}</span>
+                  <span className="es-hero-sub num">{heroSub}</span>
+                </span>
+                <span className="es-play" aria-hidden>
+                  <Icon name="play" weight="fill" />
+                </span>
+              </button>
+              {infoBtn(hero.name, 'es-info')}
+            </div>
+          )}
+          {tiles.length > 0 && (
+            <div className="es-more">
+              <div className="es-grid">
+                {tiles.map((p) => (
+                  <div key={p.name} className="es-tile">
+                    <button type="button" className="es-tile-main" onClick={() => openPick(p)}>
+                      {p.img ? (
+                        <img src={p.img} alt="" />
+                      ) : (
+                        <span className="es-noimg">
+                          <Icon name={p.kind === 'strength' ? 'barbell' : 'wind'} />
+                        </span>
+                      )}
+                      <span className="es-tile-text">
+                        <span className="es-kicker">{p.kicker}</span>
+                        <span className="es-tile-name">
+                          {p.kind === 'strength' || p.kind === 'cardio' ? exName(p.name) : p.name}
+                        </span>
+                        <span className="es-tile-sub">{p.sub || '\u00a0'}</span>
+                      </span>
+                    </button>
+                    {p.kind === 'strength' && infoBtn(p.name, 'es-info sm')}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="es-circuit">
+            <span className="es-loop" aria-hidden>
+              <Icon name="arrows-clockwise" />
+            </span>
+            <span className="es-circuit-text">
+              <span className="es-circuit-title">{t.circuitLabel}</span>
+              <span className="es-circuit-sub">{t.esCircuitSub}</span>
+            </span>
+            <button
+              type="button"
+              className="es-circuit-go"
+              onClick={() => {
+                setCircuit((c) => ({ on: true, groupId: crypto.randomUUID(), rounds: c.rounds }));
+                setSheet({ kind: 'add' });
+              }}
+            >
+              <Icon name="play" weight="fill" />
+              {t.esCircuitStart}
+            </button>
+          </div>
+        </div>
+        <div className="es-dock">
+          <button
+            type="button"
+            className="btn btn-primary es-add"
+            onClick={() => setSheet({ kind: 'add' })}
+          >
+            <Icon name="plus" weight="bold" />
+            {t.addExercise}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   function renderStartBanner() {
     const { picks, day, n } = startPicks();
     if (picks.length === 0) return null;
@@ -1784,6 +2020,9 @@ export function SessionView(props: {
         <Icon name="check" weight="bold" />
       </button>
     );
+    if (!focusEx && live && workout!.exercises.length === 0) {
+      return <div className="focus-view focus-view-empty">{renderEmptyStart()}</div>;
+    }
     if (!focusEx) {
       return (
         <div className="focus-view">
@@ -1875,7 +2114,7 @@ export function SessionView(props: {
               onClick={() => setFocusIdx(focusPos + 1)}
             >
               {(() => {
-                const img = nx ? richExerciseByName(nx.name)?.images?.[0] : undefined;
+                const img = nx ? exerciseImage(nx.name, exerciseKind(nx)) : undefined;
                 return img ? <img className="fn-thumb" src={img} alt="" /> : null;
               })()}
               <span className="fn-label">
@@ -2537,6 +2776,11 @@ export function SessionView(props: {
         )}
         {marker ? (
           <div className="warmup-marker-body">
+            <img
+              className="warmup-marker-photo"
+              src={MARKER_IMAGES[kind === 'cooldown' ? 'cooldown' : 'warmup']}
+              alt=""
+            />
             <span className="warmup-marker-icon" aria-hidden>
               <Icon name={kind === 'cooldown' ? 'wind' : 'flame'} weight="fill" />
             </span>
@@ -4632,7 +4876,7 @@ export function SessionView(props: {
               : sheet.tab === 'exercise' && !ex
                 ? 'session'
                 : sheet.tab;
-          const img = ex ? richExerciseByName(ex.name)?.images?.[0] : undefined;
+          const img = ex ? exerciseImage(ex.name, exerciseKind(ex)) : undefined;
           const tabsDef: { k: OptsTab; label: string; icon: string; off: boolean }[] = [
             { k: 'set', label: t.optsTabSet, icon: 'sliders-horizontal', off: !canSet },
             { k: 'exercise', label: t.optsTabExercise, icon: 'barbell', off: !ex },

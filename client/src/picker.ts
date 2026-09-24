@@ -17,6 +17,7 @@ import {
   secondaryMusclesOf,
   subRegionsById,
   type MuscleGroup,
+  isCardioExerciseName,
 } from './data/exercises';
 import type { EquipmentId } from './data/equipment';
 import type { FocusMuscle } from './data/subregions';
@@ -386,6 +387,8 @@ export function buildPickItems(workout: Workout, all: Workout[], gym: Gym | null
   // History-only (custom) exercises.
   for (const [key, h] of hist) {
     if (seen.has(key)) continue;
+    // Cardio logged as a lift in the past stays out of the lift list.
+    if (isCardioExerciseName(h.raw)) continue;
     seen.add(key);
     const info = muscleInfoByName(h.raw);
     const rich = richExerciseByName(h.raw);

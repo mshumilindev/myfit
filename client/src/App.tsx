@@ -21,6 +21,7 @@ import {
 import { db } from './firebase';
 import {
   getOpenWorkout,
+  pruneEmptyLiveWorkouts,
   startSyncLoop,
   useStore,
   retrySync,
@@ -698,6 +699,14 @@ export function App() {
     return { cur: o, stack: [] };
   });
   const overlay = overlayNav.cur;
+  // A live session starts with its first exercise; a draft nobody added to is
+  // thrown away once its screen is left (back, swipe, another tab, a reload) —
+  // unless it's still open somewhere in the overlay stack.
+  const draftKeepId =
+    [overlayNav.cur, ...overlayNav.stack].find((o) => o?.screen === 'session')?.workoutId ?? null;
+  useEffect(() => {
+    pruneEmptyLiveWorkouts(draftKeepId);
+  }, [draftKeepId]);
   /** Open an overlay, remembering the current one as its logical parent.
    * Passing null resets the whole overlay stack (used when switching tabs). */
   const setOverlay = useCallback((o: Overlay) => {

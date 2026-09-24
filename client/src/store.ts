@@ -67,6 +67,7 @@ import {
   customExercises,
   type CustomExercise,
   type MuscleGroup,
+  isCardioExerciseName,
 } from './data/exercises';
 import type { ExerciseSubRegions } from './data/subregions';
 import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from './goals';
@@ -943,6 +944,18 @@ function bumpPending(): SyncStatus {
 export function applyAutoFinish(): void {
   const now = Date.now();
   const changed: string[] = [];
+  // A draft (no exercise yet) left open that long is just dropped — never a
+  // finished, empty workout in history.
+  const staleDrafts = new Set(
+    state.workouts
+      .filter(
+        (w) =>
+          w.finishedAt === null && w.exercises.length === 0 && w.startedAt + AUTO_FINISH_MS <= now,
+      )
+      .map((w) => w.id),
+  );
+  if (staleDrafts.size)
+    setState({ workouts: state.workouts.filter((w) => !staleDrafts.has(w.id)) });
   const workouts = state.workouts.map((w) => {
     if (w.finishedAt === null && w.startedAt + AUTO_FINISH_MS <= now) {
       changed.push(w.id);
@@ -960,6 +973,27 @@ export function applyAutoFinish(): void {
 
 export function getOpenWorkout(): Workout | undefined {
   return state.workouts.find((w) => w.finishedAt === null);
+}
+
+/**
+ * A live session only really starts with its first exercise (a lift, a
+ * warm-up, cardio — anything). Until then it's a draft: the clock doesn't run,
+ * the coach isn't told, and leaving it throws it away (there's nothing to
+ * discard). Deleting every exercise turns it back into that draft.
+ */
+export function isSessionStarted(w: Pick<Workout, 'exercises'>): boolean {
+  return w.exercises.length > 0;
+}
+
+/** Drop live sessions that never got an exercise (all, or all but `keepId`). */
+export function pruneEmptyLiveWorkouts(keepId: string | null = null): void {
+  const drop = state.workouts.filter(
+    (w) => w.finishedAt === null && w.exercises.length === 0 && w.id !== keepId,
+  );
+  if (drop.length === 0) return;
+  for (const w of drop) draftWorkouts.delete(w.id);
+  const ids = new Set(drop.map((w) => w.id));
+  setState({ workouts: state.workouts.filter((w) => !ids.has(w.id)) });
 }
 
 // ── Coached-athlete live presence (liveSessions/{uid}) ──────────────────────
@@ -1024,6 +1058,8 @@ export function startWorkout(
   if ((state.activities ?? []).some((a) => a.finishedAt === null)) return null;
   if (liveSleep(state.sleeps)) return null;
   applyAutoFinish();
+  // An earlier draft that never got an exercise is replaced, not closed.
+  pruneEmptyLiveWorkouts(null);
   const now = Date.now();
   const closed: string[] = [];
   const workouts = state.workouts.map((w) => {
@@ -1051,7 +1087,7 @@ export function startWorkout(
     syncStatus: closed.length > 0 ? bumpPending() : state.syncStatus,
   });
   for (const id of closed) saveWorkout(id);
-  writeLiveSession(workout);
+  // The coach sees the session once it really starts (first exercise).
   return workout;
 }
 
@@ -1374,11 +1410,17 @@ export function deletePastWorkout(id: string): void {
 export function addExercise(
   workoutId: string,
   name: string,
-  kind: ExerciseKind = 'strength',
+  kindIn: ExerciseKind = 'strength',
   plan: ExercisePlan = {},
 ): Exercise {
+  // Pure cardio picked by name is a cardio entry (minutes), never a lift.
+  const kind: ExerciseKind =
+    kindIn === 'strength' && isCardioExerciseName(name) ? 'cardio' : kindIn;
   const w = state.workouts.find((x) => x.id === workoutId);
   const info = kind === 'strength' ? muscleInfoByName(name) : null;
+  // The first exercise is what starts a live session: the clock runs from now.
+  const starting = !!w && w.finishedAt === null && w.exercises.length === 0;
+  if (starting) patchWorkout(workoutId, { startedAt: Date.now() });
   const exercise: Exercise = {
     id: uuid(),
     name,
@@ -1398,6 +1440,10 @@ export function addExercise(
   };
   patchWorkout(workoutId, { exercises: [...(w?.exercises ?? []), exercise] });
   saveWorkout(workoutId);
+  if (starting) {
+    const live = state.workouts.find((x) => x.id === workoutId);
+    if (live) writeLiveSession(live);
+  }
   return exercise;
 }
 
@@ -1471,8 +1517,13 @@ export function replaceExercise(
 export function deleteExercise(workoutId: string, exerciseId: string): void {
   const w = state.workouts.find((x) => x.id === workoutId);
   if (!w) return;
-  patchWorkout(workoutId, { exercises: w.exercises.filter((e) => e.id !== exerciseId) });
+  const exercises = w.exercises.filter((e) => e.id !== exerciseId);
+  // Removing the last exercise of a live session turns it back into a draft:
+  // the clock resets and waits for the next first exercise.
+  const backToDraft = w.finishedAt === null && exercises.length === 0;
+  patchWorkout(workoutId, backToDraft ? { exercises, startedAt: Date.now() } : { exercises });
   saveWorkout(workoutId);
+  if (backToDraft) finishLiveSession();
 }
 
 export function upsertSet(
@@ -3907,7 +3958,10 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
 export function finishWorkoutClean(id: string): Workout | undefined {
   const w = state.workouts.find((x) => x.id === id);
   if (!w) return undefined;
-  const kept = w.exercises.filter((e) => e.sets.length > 0);
+  // Drop lifts that never got a set — but keep warm-up / cool-down markers
+  // (they never have sets): they're how the app learns a session's shape,
+  // e.g. "on Thursdays you start with a warm-up".
+  const kept = w.exercises.filter((e) => e.sets.length > 0 || isMarkerExercise(e));
   if (kept.length !== w.exercises.length) patchWorkout(id, { exercises: kept });
   finishWorkout(id);
   return state.workouts.find((x) => x.id === id);
