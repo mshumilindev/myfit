@@ -11,6 +11,8 @@ import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasNotes, useMinuteClock, type AtlasNote } from '../atlas/notes';
 import { TEMPER_COLOR, TEMPERS, type CoachRole, type Temper } from '../atlas/types';
 import { enablePush, pushState } from '../push';
+import { computePlaybook } from '../playbook';
+import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
 import { fmtBodyWeightKg } from '../i18n';
 
 type Step = 'meet' | 'temper' | 'fine' | 'role' | 'data' | 'push';
@@ -449,6 +451,7 @@ function CoachThread({ onClose }: { onClose: () => void }) {
         </button>
       </div>
       <div className="atl-feed">
+        {store.coach.role === 'main' && <PlanCard temper={temper} now={now} />}
         {notes.length === 0 && <p className="atl-empty">{t.atlasEmpty}</p>}
         {groups.map((g) => (
           <div key={g.label} className="atl-group">
@@ -463,6 +466,68 @@ function CoachThread({ onClose }: { onClose: () => void }) {
         <div ref={endRef} />
       </div>
       {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
+    </div>
+  );
+}
+
+/** The programme: offer to write it, or show the block and its weekdays. */
+function PlanCard({ temper, now }: { temper: Temper; now: number }) {
+  const { t, locale } = useT();
+  const store = useStore();
+  const plan = store.coach.plan ?? null;
+  const write = () => {
+    const finished = store.workouts.filter((w) => w.finishedAt !== null);
+    const next: CoachPlan = proposePlan({
+      finished,
+      plays: computePlaybook(finished, now).plays,
+      now,
+    });
+    setCoach({ plan: next });
+  };
+  if (!plan)
+    return (
+      <div className="atl-group">
+        <Bubble temper={temper}>{t.atlasPlanOffer}</Bubble>
+        <div className="atl-replies">
+          <button className="atl-chip on" onClick={write}>
+            {t.atlasPlanWrite}
+          </button>
+        </div>
+      </div>
+    );
+  const week = blockWeek(plan, now);
+  const done = week > plan.weeks;
+  const today = new Date(now).getDay();
+  const wd = (d: number) =>
+    new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2026, 0, 4 + d));
+  const mName = (m: string) => (t.muscleGroups as Record<string, string>)[m] ?? m;
+  return (
+    <div className="atl-plan">
+      <span className="atl-plan-kicker">
+        {done ? t.atlasPlanDone : t.atlasPlanKicker(week, plan.weeks, plan.days.length)}
+        {!done && isDeloadWeek(plan, now) ? ` · ${t.atlasPlanDeload}` : ''}
+      </span>
+      <span className="atl-plan-bar" aria-hidden>
+        {Array.from({ length: plan.weeks }, (_, i) => (
+          <span key={i} className={i + 1 < week ? 'done' : i + 1 === week ? 'now' : ''} />
+        ))}
+      </span>
+      {plan.days.map((d) => (
+        <div key={d.weekday} className={`atl-plan-day${d.weekday === today ? ' today' : ''}`}>
+          <span className="atl-plan-wd">{wd(d.weekday)}</span>
+          <span className="atl-plan-name">
+            <b>{d.name ?? t.splitNames[d.split]}</b>
+            <span>{d.muscles.map(mName).join(' · ')}</span>
+          </span>
+          {d.weekday === today && <span className="atl-plan-today">{t.atlasToday}</span>}
+        </div>
+      ))}
+      <div className="atl-plan-meta">
+        {t.atlasPlanMeta(plan.lengthMin, plan.warmup)}
+        <button className="atl-link" onClick={write}>
+          {done ? t.atlasPlanNewBlock : t.atlasPlanRewrite}
+        </button>
+      </div>
     </div>
   );
 }

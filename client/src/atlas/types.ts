@@ -5,6 +5,7 @@
  * voiced from a phrase table (voice.ts).
  */
 import type { MuscleGroup } from '../data/exercises';
+import type { CoachPlan } from './plan';
 
 /** 1 Warm · 2 Steady · 3 Blunt · 4 Drill · 5 Merciless. */
 export type Temper = 1 | 2 | 3 | 4 | 5;
@@ -43,6 +44,8 @@ export interface CoachSettings {
   inviteDismissed?: boolean;
   /** Notes newer than this are unread (the ring in the stories strip). */
   readAt: number;
+  /** The programme (main-coach role); null until Atlas writes one. */
+  plan?: CoachPlan | null;
   /** Last local edit (last-write-wins against the synced copy). */
   updatedAt?: number;
 }

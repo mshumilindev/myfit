@@ -1783,6 +1783,20 @@ export const et: Strings = {
   atlasTemperLabel: 'Iseloom',
   atlasRoleLabel: 'Roll',
   atlasTurnOff: 'Lülita Atlas välja',
+  atlasPlanOffer:
+    'Kirjutan sulle programmi: sinu päevad, sinu pikkus, kergem viimane nädal. Valmis?',
+  atlasPlanWrite: 'Kirjuta programm',
+  atlasPlanDone: 'PLOKK LÄBI',
+  atlasPlanDeload: 'KERGEM NÄDAL',
+  atlasPlanRewrite: 'Kirjuta ümber',
+  atlasPlanNewBlock: 'Alusta uut plokki',
+  atlasPlanCardKicker: 'ATLASE TÄNANE PLAAN',
+  atlasPlanStart: 'Alusta',
+  atlasPlanKicker: (w: number, of: number, days: number) =>
+    `PLOKK · NÄDAL ${w}/${of} · ${days} PÄEVA`,
+  atlasPlanMeta: (min: number, warm: boolean) =>
+    `~${min} min trenni kohta${warm ? ' · kõigepealt soojendus' : ''}`,
+  atlasPlanCardMeta: (min: number, lifts: number) => `~${min} min · harjutusi: ${lifts}`,
   atlasInvite: 'Tutvu: Atlas, sinu treener',
   atlasInviteLine: 'Treener, kes loeb iga seeriat. Karmuse valid sina.',
   atlasStoryUnread: (n: number) => `Atlas, uusi: ${n}`,

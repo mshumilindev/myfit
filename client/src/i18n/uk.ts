@@ -1785,6 +1785,20 @@ export const uk: Strings = {
   atlasTemperLabel: 'Характер',
   atlasRoleLabel: 'Роль',
   atlasTurnOff: 'Вимкнути Atlas',
+  atlasPlanOffer:
+    'Я напишу тобі програму: твої дні, твоя тривалість, легший останній тиждень. Готовий?',
+  atlasPlanWrite: 'Написати програму',
+  atlasPlanDone: 'БЛОК ЗАВЕРШЕНО',
+  atlasPlanDeload: 'ЛЕГШИЙ ТИЖДЕНЬ',
+  atlasPlanRewrite: 'Переписати',
+  atlasPlanNewBlock: 'Почати новий блок',
+  atlasPlanCardKicker: 'ПЛАН ATLAS НА СЬОГОДНІ',
+  atlasPlanStart: 'Почати',
+  atlasPlanKicker: (w: number, of: number, days: number) =>
+    `БЛОК · ТИЖДЕНЬ ${w} З ${of} · ${days} ДН.`,
+  atlasPlanMeta: (min: number, warm: boolean) =>
+    `~${min} хв на тренування${warm ? ' · спершу розминка' : ''}`,
+  atlasPlanCardMeta: (min: number, lifts: number) => `~${min} хв · вправ: ${lifts}`,
   atlasInvite: 'Знайомся: Atlas, твій тренер',
   atlasInviteLine: 'Тренер, що читає кожен сет. Жорсткість обираєш ти.',
   atlasStoryUnread: (n: number) => `Atlas, нових: ${n}`,

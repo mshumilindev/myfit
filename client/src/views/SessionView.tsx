@@ -56,6 +56,9 @@ import {
 } from '../restTimer';
 import { haptic, isAppleTouch } from '../haptics';
 import { cancelRestPush, enablePush, pushState, scheduleRestPush } from '../push';
+import { useTodayPlan } from '../atlas/useTodayPlan';
+import { AtlasFace } from '../components/AtlasFace';
+import { TEMPER_COLOR } from '../atlas/types';
 import {
   addExercise,
   attachGymToWorkout,
@@ -135,6 +138,7 @@ import {
   bandLibraryFor,
   type DisplayUnit,
   type SupersetGroup,
+  addGeneratedDayTo,
 } from '../store';
 import { workoutCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
@@ -530,6 +534,11 @@ export function SessionView(props: {
   const [renameVal, setRenameVal] = useState('');
   const [summary, setSummary] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  // Atlas's day, offered on an empty session (main-coach role, a plan weekday).
+  const todayPlan = useTodayPlan(
+    workout && workout.exercises.length === 0 && !props.past ? workout.startedAt : 0,
+    props.workoutId,
+  );
   /** Share-summary bottom sheet open (AC-3.2). */
   const [shareOpen, setShareOpen] = useState(false);
   /** Past workout cards start collapsed for reading (SS-3). */
@@ -1754,6 +1763,29 @@ export function SessionView(props: {
     return (
       <div className={`es${photoTintClass}`}>
         <div className="es-scroll">
+          {todayPlan && (
+            <div
+              className="atl-plancard"
+              style={{ ['--atl' as string]: TEMPER_COLOR[store.coach.temper] }}
+            >
+              <AtlasFace temper={store.coach.temper} size={36} />
+              <span className="atl-plancard-text">
+                <span>{t.atlasPlanCardKicker}</span>
+                <b>{todayPlan.day.name ?? t.splitNames[todayPlan.day.split]}</b>
+                <span>
+                  {t.atlasPlanCardMeta(todayPlan.built.estMinutes, todayPlan.built.main.length)}
+                </span>
+              </span>
+              <button
+                type="button"
+                className="atl-plancard-go"
+                onClick={() => addGeneratedDayTo(workout!.id, todayPlan.built)}
+              >
+                <Icon name="play" weight="fill" />
+                {t.atlasPlanStart}
+              </button>
+            </div>
+          )}
           <div className="es-ready">
             <div className="es-ready-line">
               <Icon name="heartbeat" weight="fill" />

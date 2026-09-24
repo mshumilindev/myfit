@@ -38340,3 +38340,144 @@ body {
   flex: none;
   color: var(--color-neutral-500);
 }
+
+/* Atlas programme card (thread) and today's plan on an empty session */
+.atl-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--atl) 14%, var(--color-surface)),
+    var(--color-surface) 70%
+  );
+  border: 1px solid color-mix(in srgb, var(--atl) 40%, transparent);
+}
+.atl-plan-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--atl);
+}
+.atl-plan-bar {
+  display: flex;
+  gap: 4px;
+}
+.atl-plan-bar > span {
+  flex: 1;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--color-neutral-800);
+}
+.atl-plan-bar > span.done {
+  background: var(--color-ok);
+}
+.atl-plan-bar > span.now {
+  background: var(--atl);
+}
+.atl-plan-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid var(--color-divider);
+}
+.atl-plan-wd {
+  width: 34px;
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-neutral-400);
+}
+.atl-plan-day.today .atl-plan-wd {
+  color: var(--atl);
+}
+.atl-plan-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.atl-plan-name b {
+  font-size: 14px;
+}
+.atl-plan-name span {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.atl-plan-today {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--atl);
+}
+.atl-plan-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.atl-link {
+  min-height: 36px;
+  border: none;
+  background: none;
+  color: var(--atl);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.atl-plancard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--atl) 16%, var(--color-surface)),
+    var(--color-surface) 70%
+  );
+  border: 1px solid color-mix(in srgb, var(--atl) 45%, transparent);
+}
+.atl-plancard-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.atl-plancard-text > span:first-child {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--atl);
+}
+.atl-plancard-text b {
+  font-size: 16px;
+}
+.atl-plancard-text > span:last-child {
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.atl-plancard-go {
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--atl);
+  color: #140c0d;
+  font: inherit;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}

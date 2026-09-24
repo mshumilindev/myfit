@@ -1799,6 +1799,20 @@ export const lt: Strings = {
   atlasTemperLabel: 'Būdas',
   atlasRoleLabel: 'Vaidmuo',
   atlasTurnOff: 'Išjungti Atlas',
+  atlasPlanOffer:
+    'Parašysiu tau programą: tavo dienos, tavo trukmė, lengvesnė paskutinė savaitė. Pasiruošęs?',
+  atlasPlanWrite: 'Parašyti programą',
+  atlasPlanDone: 'BLOKAS BAIGTAS',
+  atlasPlanDeload: 'LENGVESNĖ SAVAITĖ',
+  atlasPlanRewrite: 'Perrašyti',
+  atlasPlanNewBlock: 'Pradėti naują bloką',
+  atlasPlanCardKicker: 'ATLAS ŠIANDIENOS PLANAS',
+  atlasPlanStart: 'Pradėti',
+  atlasPlanKicker: (w: number, of: number, days: number) =>
+    `BLOKAS · ${w} SAVAITĖ IŠ ${of} · ${days} D.`,
+  atlasPlanMeta: (min: number, warm: boolean) =>
+    `~${min} min treniruotei${warm ? ' · pirma apšilimas' : ''}`,
+  atlasPlanCardMeta: (min: number, lifts: number) => `~${min} min · pratimų: ${lifts}`,
   atlasInvite: 'Susipažink: Atlas, tavo treneris',
   atlasInviteLine: 'Treneris, kuris skaito kiekvieną setą. Griežtumą renkiesi tu.',
   atlasStoryUnread: (n: number) => `Atlas, naujų: ${n}`,

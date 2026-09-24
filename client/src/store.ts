@@ -1171,6 +1171,13 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
   const dayName = readout ? dayReadoutLabel(readout, tt) : day.dayName;
   const w = startWorkout(gymId, { dayName, targetMuscles: day.targetMuscles });
   if (!w) return null;
+  addGeneratedDayTo(w.id, day);
+  return state.workouts.find((x) => x.id === w.id) ?? w;
+}
+
+/** Add a generated day's blocks (warm-up → lifts → cardio → cool-down) to a workout. */
+export function addGeneratedDayTo(workoutId: string, day: GeneratedDay): void {
+  const tt = t();
   // Real lifts keep their canonical (English) catalog name — localised on display
   // via ExerciseName; the generic warm-up/cardio/cool-down blocks are stored in
   // the active language.
@@ -1183,7 +1190,7 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
           ? tt.sbCooldownName
           : ex.name;
   for (const ex of [...day.warmup, ...day.main, ...day.cardio, ...day.cooldown]) {
-    addExercise(w.id, storedName(ex), ex.kind, {
+    addExercise(workoutId, storedName(ex), ex.kind, {
       plannedSets: ex.sets > 0 ? ex.sets : null,
       plannedReps: ex.repHigh > 0 ? ex.repHigh : null,
       plannedDurationMin: ex.durationMin ?? null,
@@ -1193,7 +1200,6 @@ export function startGeneratedDay(day: GeneratedDay, gymId: string | null = null
       ...(ex.equipmentItems?.length ? { equipmentItems: ex.equipmentItems } : {}),
     });
   }
-  return state.workouts.find((x) => x.id === w.id) ?? w;
 }
 
 /**
