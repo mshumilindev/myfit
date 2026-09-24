@@ -37812,3 +37812,21 @@ body {
   background: none;
   font-size: 13px;
 }
+
+/* Every rest line in the focus table — between sets, between exercises and a
+   rest cut short — sits the same way: centred between equal hairlines, same
+   spacing (the live-mode right padding was only for the classic list). */
+.session-live .focus-view .set-rest,
+.session-live .focus-view .set-rest.inter-card,
+.focus-view .set-rest,
+.focus-view .set-rest.inter-card,
+.focus-view .set-rest.short {
+  justify-content: center;
+  padding: 0;
+  margin: 10px 0;
+  min-height: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  box-shadow: none;
+}
