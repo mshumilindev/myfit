@@ -173,10 +173,13 @@ export function ExercisePicker(props: ExercisePickerProps) {
     () => buildPickItems(props.workout, store.workouts, props.gym),
     [props.workout, store.workouts, props.gym],
   );
-  const readiness = useMemo(() => readinessByGroup(finished, now), [finished, now]);
+  // Readiness counts TODAY's session too: 20 chest sets an hour ago means
+  // chest is recovering now, not "almost ready" from last week.
+  const withToday = useMemo(() => [...finished, props.workout], [finished, props.workout]);
+  const readiness = useMemo(() => readinessByGroup(withToday, now), [withToday, now]);
   const famReady = useMemo(
-    () => new Map(FAMILIES.map((f) => [f.id, familyReadiness(f, finished, now)])),
-    [finished, now],
+    () => new Map(FAMILIES.map((f) => [f.id, familyReadiness(f, withToday, now)])),
+    [withToday, now],
   );
   const day = useMemo(() => dayReference(props.workout, finished), [props.workout, finished]);
   const dayLabel = day.readout ? dayReadoutLabel(day.readout, t) : '';

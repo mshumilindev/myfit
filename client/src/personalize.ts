@@ -144,6 +144,38 @@ export function personalLandmarks(
   return out;
 }
 
+/**
+ * Personal landmarks for app-wide use, memoised: the whole app (recovery,
+ * fatigue, the in-session "muscle is done" read, rest times, volume colours)
+ * should judge volume against what THIS athlete tolerates, not the population
+ * average. Recomputed when the finished history changes or the day rolls.
+ */
+let plCache: { key: string; map: Map<MuscleGroup, PersonalLandmark> } | null = null;
+export function cachedPersonalLandmarks(
+  workouts: Workout[],
+  now: number,
+): Map<MuscleGroup, PersonalLandmark> {
+  const finished = workouts.filter((w) => w.finishedAt !== null);
+  const last = finished.reduce((m, w) => Math.max(m, w.finishedAt ?? 0), 0);
+  const key = `${finished.length}:${last}:${Math.floor(now / DAY)}`;
+  if (plCache?.key === key) return plCache.map;
+  const map = personalLandmarks(finished, now);
+  plCache = { key, map };
+  return map;
+}
+/** A muscle's landmark: personal when history supports it, else the default. */
+export function landmarkFor(
+  m: MuscleGroup,
+  workouts: Workout[] | null | undefined,
+  now: number,
+): Landmark | undefined {
+  if (workouts && workouts.length > 0) {
+    const p = cachedPersonalLandmarks(workouts, now).get(m);
+    if (p) return p;
+  }
+  return LANDMARKS[m];
+}
+
 /** Sum member personal landmarks into one landmark for a zone. */
 export function personalZoneLandmark(
   pmap: Map<MuscleGroup, PersonalLandmark>,

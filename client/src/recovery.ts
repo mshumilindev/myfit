@@ -11,6 +11,7 @@
  */
 import { muscleSetsInWorkout } from './store';
 import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
+import { landmarkFor } from './personalize';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 
@@ -116,7 +117,8 @@ export function muscleReadiness(
   const out = new Map<MuscleGroup, MuscleReadiness>();
   for (const m of VOLUME_MUSCLES) {
     const base = RECOVERY_DAYS[m] ?? 2;
-    const mav = (LANDMARKS[m] as Landmark).mav || 12;
+    // The athlete's own tolerance (personalised MAV) sets how long a dose takes.
+    const mav = (landmarkFor(m, finished, now) ?? (LANDMARKS[m] as Landmark)).mav || 12;
     const hit = last.get(m) ?? null;
     const r = computeReadiness(
       hit ? hit.daysSince : null,

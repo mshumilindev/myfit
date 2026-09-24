@@ -243,6 +243,24 @@ describe('setVolumeKg counts warm-ups', () => {
 });
 
 describe('autoWarmupSets', () => {
+  it('a PR later in the session does not turn earlier working sets into warm-ups', () => {
+    const mk = (id: string, w: number, position: number): SetEntry => ({
+      id,
+      reps: 8,
+      weight: w,
+      isWarmup: false,
+      position,
+    });
+    const sets = [mk('a', 40, 0), mk('b', 60, 1), mk('c', 80, 2), mk('d', 80, 3), mk('e', 100, 4)];
+    expect(autoWarmupSets(sets, 'weight', 80).map(setTypeOf)).toEqual([
+      'warmup',
+      'warmup',
+      'working',
+      'working',
+      'working',
+    ]);
+  });
+
   const S = (over: Partial<SetEntry> & { position: number }): SetEntry => set({ reps: 5, ...over });
 
   it('tags leading light sets and stops at the first working set', () => {

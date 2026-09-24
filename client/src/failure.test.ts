@@ -122,8 +122,15 @@ describe('stimulus', () => {
     expect(tiredVerdict({ sets, muscleSets: 5, plannedLeft: 0 }).enough).toBe(true);
     const mild = [set(8, 80), set(8, 80), set(7, 80)];
     expect(tiredVerdict({ sets: mild, muscleSets: 3, plannedLeft: 0 }).enough).toBe(false);
-    expect(tiredVerdict({ sets: mild, muscleSets: 10, plannedLeft: 0 }).enough).toBe(true);
-    expect(tiredVerdict({ sets: mild, muscleSets: 10, plannedLeft: 2 }).enough).toBe(false);
+    expect(tiredVerdict({ sets: mild, muscleSets: 11, plannedLeft: 0 }).enough).toBe(true);
+    // a plan with sets left doesn't hide it once the muscle is past its plateau
+    expect(tiredVerdict({ sets: mild, muscleSets: 11, plannedLeft: 2 }).enough).toBe(true);
+    // a brand-new lift on a muscle that already had enough
+    expect(tiredVerdict({ sets: [], muscleSets: 12, plannedLeft: 0 }).enough).toBe(true);
+    // a tolerant athlete's higher plateau
+    expect(tiredVerdict({ sets: mild, muscleSets: 12, plannedLeft: 0, plateau: 14 }).enough).toBe(
+      false,
+    );
   });
   it('usual next from history', () => {
     const s = (...n: string[]) => n.map((name, position) => ({ name, position }));

@@ -25,15 +25,22 @@ import type { StatShareModel } from '../data/shareCard';
 import { estimateRpe, readinessFactor, type RpeContext } from '../rpe';
 import {
   SESSION_PLATEAU,
+  dropTolerance,
+  finalDrop,
+  regionShares,
+  sessionPlateau,
+  setHardness,
+  workingKg,
   marginalStimulus,
   muscleTally,
   performanceDrops,
   setStimuli,
   tiredVerdict,
-  usualNext,
   type SessionLift,
 } from '../stimulus';
-import { muscleFatigue } from '../fatigue';
+import { muscleFatigue, stalledMuscles } from '../fatigue';
+import { cachedPersonalLandmarks } from '../personalize';
+import { SPLIT_GROUPS } from '../data/subregions';
 import { lastNight } from '../sleep';
 import {
   REST_PRESETS,
@@ -135,7 +142,8 @@ import { PlateSheet } from '../components/PlateSheet';
 import { BandLibraryCard } from '../components/BandLibraryCard';
 import { EquipmentPickerSheet } from '../components/EquipmentPickerSheet';
 import { CardioMachineList, CardioMachineSheet } from '../components/CardioMachineList';
-import { ExercisePicker } from '../components/ExercisePicker';
+import { ExercisePicker, ExerciseDetail } from '../components/ExercisePicker';
+import { buildPickItems } from '../picker';
 import {
   cardioMachineOf,
   cardioProfile,
@@ -164,7 +172,13 @@ import { directReadiness } from '../picker';
 import { READINESS_COLOR } from '../recovery';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
-import { richExerciseByName, type MuscleGroup } from '../data/exercises';
+import {
+  canonicalExerciseName,
+  exercisesForSubRegions,
+  richExerciseByName,
+  subRegionsByName,
+  type MuscleGroup,
+} from '../data/exercises';
 import {
   fmtClock,
   fmtDayMonth,
@@ -517,6 +531,8 @@ export function SessionView(props: {
   });
   /** Tired-muscle banner collapsed, per exercise (never dismissed). */
   const [tiredCollapsed, setTiredCollapsed] = useState<Record<string, boolean>>({});
+  /** Exercise details opened from a suggestion tile (ⓘ). */
+  const [tiredInfo, setTiredInfo] = useState<string | null>(null);
   /** The record's share-card sheet (same as the app's other share cards). */
   const [prShare, setPrShare] = useState<StatShareModel | null>(null);
   /** A record just set — shown as a celebration card, then folds into rest. */
@@ -1071,6 +1087,7 @@ export function SessionView(props: {
       ? (muscleFatigue(
           store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id),
           at,
+          cachedPersonalLandmarks(store.workouts, at),
         ).get(primary)?.score ?? 0)
       : 0;
     const night = lastNight(store.sleeps, at);
@@ -1116,31 +1133,103 @@ export function SessionView(props: {
     return muscleTally(earlier.map(liftOf)).get(primary) ?? 0;
   }
   /** Per-set stimulus (bar height) and performance drop (bar colour) for rows. */
+  // Personal volume tolerance: per-session plateau scales with this athlete's
+  // tolerated weekly volume (personalize.ts), drop tolerance with their habit
+  // on the lift.
+  function plateauFor(m: string | null): number {
+    if (!m) return SESSION_PLATEAU;
+    const p = cachedPersonalLandmarks(store.workouts, wallClock()).get(m as MuscleGroup);
+    return sessionPlateau(p?.mrv, p?.base.mrv);
+  }
+  function dropToleranceFor(ex: Exercise): number {
+    const past = recentSessionsOf(ex.name, workout!.id, 6)
+      .map((x) => finalDrop(x.sets))
+      .filter((n): n is number => n !== null);
+    const primary = resolveMuscles(ex).primary;
+    const finished = store.workouts.filter((w) => w.finishedAt !== null);
+    const stalled = !!primary && stalledMuscles(finished, wallClock()).has(primary);
+    return dropTolerance(past, stalled);
+  }
   function rowMeters(ex: Exercise): { stim: Map<string, number>; drop: Map<string, number> } {
-    return { stim: setStimuli(ex.sets, priorBefore(ex)), drop: performanceDrops(ex.sets) };
+    const primary = resolveMuscles(ex).primary;
+    return {
+      stim: setStimuli(ex.sets, priorBefore(ex), plateauFor(primary)),
+      drop: performanceDrops(ex.sets),
+    };
   }
   /** Growth value of one more set of this lift vs the first set (0..1). */
   function nextWorth(ex: Exercise): number | null {
     if (!isStrengthExercise(ex) || ex.sets.length === 0) return null;
     const primary = resolveMuscles(ex).primary;
     if (!primary) return null;
-    return marginalStimulus(sessionTally().get(primary) ?? 0);
+    return marginalStimulus(sessionTally().get(primary) ?? 0, plateauFor(primary));
   }
-  function tiredFor(ex: Exercise) {
+  /** Fractional hard sets per muscle PART (upper/lower chest, delt heads). */
+  function regionTally(): Map<string, number> {
+    const m = new Map<string, number>();
+    for (const e of workout!.exercises) {
+      if (!isStrengthExercise(e) || e.sets.length === 0) continue;
+      const shares = regionShares(subRegionsByName(e.name));
+      if (shares.size === 0) continue;
+      const ref = workingKg(e.sets);
+      const hard = e.sets.reduce((n, s) => n + setHardness(s, ref), 0);
+      for (const [r, k] of shares) m.set(r, (m.get(r) ?? 0) + hard * k);
+    }
+    return m;
+  }
+  type Tired =
+    | { kind: 'group'; muscle: string; sets: number; drop: number; tally: Map<string, number> }
+    | {
+        kind: 'region';
+        muscle: string;
+        region: string;
+        sibling: string;
+        sets: number;
+        drop: number;
+        tally: Map<string, number>;
+      };
+  function tiredFor(ex: Exercise): Tired | null {
     if (!isStrengthExercise(ex) || isMarkerExercise(ex)) return null;
     const primary = resolveMuscles(ex).primary;
     if (!primary) return null;
     const tally = sessionTally();
+    const plateau = plateauFor(primary);
     const v = tiredVerdict({
       sets: ex.sets,
       muscleSets: tally.get(primary) ?? 0,
       plannedLeft: Math.max(0, (ex.plannedSets ?? 0) - ex.sets.length),
+      plateau,
+      dropEnough: dropToleranceFor(ex),
     });
-    return v.enough ? { ...v, muscle: primary, tally } : null;
+    if (v.enough) return { kind: 'group', muscle: primary, sets: v.sets, drop: v.drop, tally };
+    // The whole muscle still has room, but this lift's PART may be done: e.g.
+    // lots of incline work — upper chest had enough, lower chest barely any.
+    const parts = SPLIT_GROUPS[primary as MuscleGroup];
+    const mine = subRegionsByName(ex.name)?.primary ?? [];
+    if (!parts || mine.length !== 1 || ex.sets.length < 2) return null;
+    const rt = regionTally();
+    const partPlateau = plateau * 0.6;
+    const region = mine[0];
+    const done = rt.get(region) ?? 0;
+    const sibling = parts
+      .filter((p) => p !== region)
+      .sort((a, b) => (rt.get(a) ?? 0) - (rt.get(b) ?? 0))[0];
+    if (sibling && done >= partPlateau && (rt.get(sibling) ?? 0) < partPlateau * 0.5)
+      return { kind: 'region', muscle: primary, region, sibling, sets: done, drop: v.drop, tally };
+    return null;
   }
-  type TiredPick = { name: string; kicker: string; sub: string; img?: string };
-  /** Two ways on: the routine's next lift, and a lift for a fresh muscle. */
-  function tiredPicks(ex: Exercise, muscle: string, tally: Map<string, number>): TiredPick[] {
+  type TiredPick = {
+    name: string;
+    kicker: string;
+    sub: string;
+    img?: string;
+    kind: 'strength' | 'cardio' | 'cooldown';
+  };
+  /** Where to go next, in order: the other part of the same muscle (when only
+   *  a part is done), today's plan, what you usually do in sessions like this
+   *  one, core, then cardio / cool-down. Always two options when possible. */
+  function tiredPicks(ex: Exercise, v: Tired): TiredPick[] {
+    const tally = v.tally;
     const done = new Set(
       workout!.exercises.filter((e) => e.sets.length > 0).map((e) => e.name.trim().toLowerCase()),
     );
@@ -1148,89 +1237,249 @@ export function SessionView(props: {
     const muscleOf = (name: string) =>
       resolveMuscles({ name, kind: 'strength' } as Exercise).primary;
     const saturated = (m: string | null) =>
-      !!m && (m === muscle || (tally.get(m) ?? 0) >= SESSION_PLATEAU);
+      !!m && ((v.kind === 'group' && m === v.muscle) || (tally.get(m) ?? 0) >= plateauFor(m));
     const img = (name: string) => richExerciseByName(name)?.images?.[0];
     const mName = (m: string | null) =>
       m ? ((t.muscleGroups as Record<string, string>)[m] ?? m) : '';
+    const partName = (r: string) => (t.subMuscleNames as Record<string, string>)[r] ?? r;
     const picks: TiredPick[] = [];
-    // 1 · Next in the routine: today's plan first, then what usually follows.
-    const idx = sortedExercises.findIndex((e) => e.id === ex.id);
-    const planned = sortedExercises
-      .slice(idx + 1)
-      .find(
-        (e) =>
-          e.sets.length === 0 && isStrengthExercise(e) && !saturated(resolveMuscles(e).primary),
-      );
-    if (planned)
-      picks.push({
-        name: planned.name,
-        kicker: t.tiredNextPlan,
-        sub: mName(resolveMuscles(planned).primary),
-        img: img(planned.name),
-      });
-    else {
-      const hist = store.workouts
-        .filter((w) => w.finishedAt !== null && w.id !== workout!.id)
-        .sort((a, b) => b.startedAt - a.startedAt)
-        .slice(0, 30)
-        .map((w) => w.exercises.map((e) => ({ name: e.name, position: e.position })));
-      const excl = new Set(done);
-      let nx: string | null = null;
-      for (let k = 0; k < 4; k++) {
-        nx = usualNext(hist, ex.name, excl);
-        if (!nx || !saturated(muscleOf(nx))) break;
-        excl.add(nx.toLowerCase());
-        nx = null;
-      }
-      if (nx)
-        picks.push({ name: nx, kicker: t.tiredNextUsual, sub: mName(muscleOf(nx)), img: img(nx) });
-    }
-    // 2 · A fresh muscle: what you train most often lately that's barely
-    // touched today.
+    const taken = new Set<string>();
+    const push = (p: TiredPick) => {
+      const k = p.name.trim().toLowerCase();
+      if (taken.has(k) || (p.kind === 'strength' && done.has(k))) return;
+      taken.add(k);
+      picks.push(p);
+    };
+    const finished = store.workouts
+      .filter((w) => w.finishedAt !== null && w.id !== workout!.id)
+      .sort((a, b) => b.startedAt - a.startedAt);
+    // Lifts you've done lately, most frequent first.
     const freq = new Map<string, number>();
-    const since = wallClock() - 60 * 86400000;
-    for (const w of store.workouts)
-      if (w.finishedAt !== null && w.startedAt >= since)
-        for (const e of w.exercises)
-          if (isStrengthExercise(e) && e.sets.length > 0)
-            freq.set(e.name.trim(), (freq.get(e.name.trim()) ?? 0) + 1);
-    const taken = new Set(picks.map((p) => p.name.toLowerCase()));
-    const fresh = [...freq.entries()]
-      .filter(([n]) => !done.has(n.toLowerCase()) && !taken.has(n.toLowerCase()))
-      .map(([n, c]) => ({ n, c, m: muscleOf(n) }))
-      .filter((x) => x.m && x.m !== muscle && (tally.get(x.m) ?? 0) < 4)
-      .sort((a, b) => b.c - a.c)[0];
-    if (fresh)
-      picks.push({
-        name: fresh.n,
-        kicker: t.tiredFresh(mName(fresh.m)),
-        sub: t.tiredFreshSub,
-        img: img(fresh.n),
+    for (const w of finished.slice(0, 40))
+      for (const e of w.exercises)
+        if (e.sets.length > 0) freq.set(e.name.trim(), (freq.get(e.name.trim()) ?? 0) + 1);
+    const byFreq = [...freq.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n);
+
+    // 1 · The other part of the same muscle.
+    if (v.kind === 'region') {
+      const mine = byFreq.find((n) => subRegionsByName(n)?.primary.includes(v.sibling as never));
+      const name = mine ?? exercisesForSubRegions([v.sibling as never], 1, 1)[0]?.name;
+      if (name)
+        push({
+          name,
+          kicker: t.pickSamePart(partName(v.sibling)),
+          sub: t.pickHasRoom,
+          img: img(name),
+          kind: 'strength',
+        });
+    }
+    // 2 · Today's plan.
+    const idx = sortedExercises.findIndex((e) => e.id === ex.id);
+    for (const e of [...sortedExercises.slice(idx + 1), ...sortedExercises.slice(0, idx)])
+      if (e.sets.length === 0 && isStrengthExercise(e) && !saturated(resolveMuscles(e).primary)) {
+        push({
+          name: e.name,
+          kicker: t.tiredNextPlan,
+          sub: mName(resolveMuscles(e).primary),
+          img: img(e.name),
+          kind: 'strength',
+        });
+        break;
+      }
+    // 3 · What you usually do in sessions like this one: past sessions that
+    // share lifts with today score their other lifts; the one that usually
+    // comes right after this lift gets a bonus.
+    {
+      const score = new Map<string, number>();
+      for (const w of finished.slice(0, 40)) {
+        const names = w.exercises.map((e) => e.name.trim().toLowerCase());
+        const overlap = names.filter((n) => done.has(n)).length;
+        if (overlap === 0) continue;
+        const sorted = [...w.exercises].sort((a, b) => a.position - b.position);
+        const at = sorted.findIndex(
+          (e) => e.name.trim().toLowerCase() === ex.name.trim().toLowerCase(),
+        );
+        sorted.forEach((e, i) => {
+          if (!isStrengthExercise(e) || e.sets.length === 0) return;
+          const k = e.name.trim();
+          if (done.has(k.toLowerCase()) || saturated(muscleOf(k))) return;
+          score.set(k, (score.get(k) ?? 0) + overlap + (at >= 0 && i === at + 1 ? 2 : 0));
+        });
+      }
+      for (const [n] of [...score.entries()].sort((a, b) => b[1] - a[1])) {
+        if (picks.length >= 5) break;
+        push({
+          name: n,
+          kicker: t.tiredNextUsual,
+          sub: mName(muscleOf(n)),
+          img: img(n),
+          kind: 'strength',
+        });
+      }
+    }
+    // 4 · Core, while it isn't worked out yet.
+    if ((tally.get('core') ?? 0) < plateauFor('core') * 0.6) {
+      const core = byFreq.find((n) => muscleOf(n) === 'core' && !done.has(n.toLowerCase()));
+      const name = core ?? exercisesForSubRegions(['abs'], 1, 1)[0]?.name;
+      if (name)
+        push({ name, kicker: t.pickCore, sub: t.pickCoreSub, img: img(name), kind: 'strength' });
+    }
+    // 5 · Everything's worked: finish with cardio or the cool-down.
+    {
+      const cardio = finished
+        .flatMap((w) => w.exercises)
+        .find((e) => exerciseKind(e) === 'cardio' && e.sets.length > 0);
+      if (cardio)
+        push({
+          name: cardio.name,
+          kicker: t.pickFinishLabel,
+          sub: t.pickCardioSub,
+          img: img(cardio.name),
+          kind: 'cardio',
+        });
+    }
+    if (!workout!.exercises.some((e) => exerciseKind(e) === 'cooldown'))
+      push({
+        name: t.exerciseKindNames.cooldown,
+        kicker: t.pickFinishLabel,
+        sub: t.pickCooldownSub,
+        kind: 'cooldown',
       });
-    return picks.slice(0, 2);
+    return picks.slice(0, 6);
   }
-  function openPick(name: string): void {
+  function openPick(p: TiredPick): void {
     const existing = workout!.exercises.find(
-      (e) => e.name.trim().toLowerCase() === name.trim().toLowerCase() && e.sets.length === 0,
+      (e) => e.name.trim().toLowerCase() === p.name.trim().toLowerCase() && e.sets.length === 0,
     );
     if (existing) {
       const i = focusStepOf(existing.id);
       if (i >= 0) setFocusIdx(i);
       return;
     }
-    addExercise(workout!.id, name);
+    addExercise(workout!.id, p.name, p.kind);
   }
-  /** V9 · under the set card when the lift's main muscle is done for today.
-   *  A suggestion only: collapses to its header, never blocks or dismisses. */
+  /** Suggestion tiles (photo, what, why) — two in view, the rest scroll. */
+  function renderPickTiles(picks: TiredPick[]) {
+    if (picks.length === 0) return null;
+    return (
+      <div className="tb-tiles">
+        {picks.map((p, i) => (
+          <div key={p.name} className={`tb-tile${i === 0 ? ' primary' : ''}`}>
+            <button type="button" className="tb-tile-main" onClick={() => openPick(p)}>
+              {p.img ? (
+                <img src={p.img} alt="" />
+              ) : (
+                <span className="tb-noimg">
+                  <Icon name={p.kind === 'strength' ? 'barbell' : 'wind'} />
+                </span>
+              )}
+              <span className="tb-kicker">{p.kicker}</span>
+              <span className="tb-name">{p.kind === 'cooldown' ? p.name : exName(p.name)}</span>
+              {p.sub && <span className="tb-tsub">{p.sub}</span>}
+            </button>
+            {p.kind === 'strength' && (
+              <button
+                type="button"
+                className="tb-info"
+                aria-label={t.detailsAction}
+                title={t.detailsAction}
+                onClick={() => setTiredInfo(p.name)}
+              >
+                <Icon name="info" />
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  /** Empty session: how this weekday usually starts (else the last sessions),
+   *  skipping muscles still recovering. Suggestions only. */
+  function startPicks(): { picks: TiredPick[]; day: string | null; n: number } {
+    const at = new Date(workout!.startedAt);
+    const dow = at.getDay();
+    const finished = store.workouts
+      .filter((w) => w.finishedAt !== null && w.id !== workout!.id)
+      .sort((a, b) => b.startedAt - a.startedAt);
+    const sameDay = finished.filter((w) => new Date(w.startedAt).getDay() === dow).slice(0, 6);
+    const src = sameDay.length > 0 ? sameDay : finished.slice(0, 4);
+    const score = new Map<string, number>();
+    src.forEach((w, k) => {
+      const firsts = [...w.exercises]
+        .filter((e) => isStrengthExercise(e) && e.sets.length > 0)
+        .sort((a, b) => a.position - b.position)
+        .slice(0, 3);
+      firsts.forEach((e, i) => {
+        const n = e.name.trim();
+        score.set(n, (score.get(n) ?? 0) + (1 / (k + 1)) * ((3 - i) / 3));
+      });
+    });
+    const hist = [...finished, workout!];
+    const day =
+      sameDay.length > 0 ? new Intl.DateTimeFormat(t.locale, { weekday: 'long' }).format(at) : null;
+    const picks: TiredPick[] = [];
+    for (const [n] of [...score.entries()].sort((a, b) => b[1] - a[1])) {
+      const m = resolveMuscles({ name: n, kind: 'strength' } as Exercise).primary;
+      if (m && directReadiness([m], m, hist, now).state === 'recovering') continue;
+      picks.push({
+        name: n,
+        kicker: day ? t.startKickerDay(day) : t.startKickerRecent,
+        sub: m ? ((t.muscleGroups as Record<string, string>)[m] ?? m) : '',
+        img: richExerciseByName(n)?.images?.[0],
+        kind: 'strength',
+      });
+      if (picks.length >= 6) break;
+    }
+    return { picks, day, n: src.length };
+  }
+  function renderStartBanner() {
+    const { picks, day, n } = startPicks();
+    if (picks.length === 0) return null;
+    return (
+      <div className="tired-banner start-banner">
+        <div className="tb-head">
+          <span className="tb-ic start">
+            <Icon name="calendar-check" />
+          </span>
+          <span className="tb-text">
+            <span className="tb-title">{day ? t.startTitleDay(day) : t.startTitleRecent}</span>
+            <span className="tb-sub">{t.startSub(n)}</span>
+          </span>
+        </div>
+        {renderPickTiles(picks)}
+      </div>
+    );
+  }
+
+  /** V9 · under the set card when the lift's muscle (or its part) is done for
+   *  today. A suggestion only: collapses to its header, never blocks. */
   function renderTiredBanner(ex: Exercise) {
     const v = tiredFor(ex);
     if (!v) return null;
     const muscleName = (t.muscleGroups as Record<string, string>)[v.muscle] ?? v.muscle;
+    const partName = (r: string) => (t.subMuscleNames as Record<string, string>)[r] ?? r;
     const sets = Math.round(v.sets);
     const dropPct = Math.round(v.drop * 100);
-    const sub = dropPct >= 1 ? t.tiredSub(dropPct, sets) : t.tiredSubSets(sets);
+    const fresh = ex.sets.filter((x) => setTypeOf(x) !== 'warmup').length === 0;
+    const title =
+      v.kind === 'region'
+        ? t.tiredPartTitle(partName(v.region))
+        : fresh
+          ? t.tiredAlreadyTitle(muscleName)
+          : t.tiredTitle(muscleName);
+    const sub =
+      v.kind === 'region'
+        ? t.tiredPartSub(partName(v.sibling))
+        : dropPct >= 1
+          ? t.tiredSub(dropPct, sets)
+          : t.tiredSubSets(sets);
+    const why =
+      v.kind === 'region'
+        ? t.tiredPartWhy(partName(v.region).toLowerCase(), sets, partName(v.sibling).toLowerCase())
+        : t.tiredWhy(muscleName.toLowerCase(), sets, dropPct);
     const collapsed = tiredCollapsed[ex.id] ?? false;
-    const picks = collapsed ? [] : tiredPicks(ex, v.muscle, v.tally);
+    const picks = collapsed ? [] : tiredPicks(ex, v);
     return (
       <div className={`tired-banner${collapsed ? ' collapsed' : ''}`}>
         <button
@@ -1243,7 +1492,7 @@ export function SessionView(props: {
             <Icon name="barbell" />
           </span>
           <span className="tb-text">
-            <span className="tb-title">{t.tiredTitle(muscleName)}</span>
+            <span className="tb-title">{title}</span>
             <span className="tb-sub">{sub}</span>
           </span>
           <Icon name={collapsed ? 'caret-down' : 'caret-up'} className="tb-chev" />
@@ -1251,25 +1500,9 @@ export function SessionView(props: {
         {!collapsed && (
           <>
             <div className="tb-why">
-              <b>{t.tiredWhyLabel}</b> {t.tiredWhy(muscleName.toLowerCase(), sets, dropPct)}
+              <b>{t.tiredWhyLabel}</b> {why}
             </div>
-            {picks.length > 0 && (
-              <div className="tb-tiles">
-                {picks.map((p, i) => (
-                  <button
-                    key={p.name}
-                    type="button"
-                    className={`tb-tile${i === 0 ? ' primary' : ''}`}
-                    onClick={() => openPick(p.name)}
-                  >
-                    {p.img ? <img src={p.img} alt="" /> : <span className="tb-noimg" />}
-                    <span className="tb-kicker">{p.kicker}</span>
-                    <span className="tb-name">{exName(p.name)}</span>
-                    {p.sub && <span className="tb-tsub">{p.sub}</span>}
-                  </button>
-                ))}
-              </div>
-            )}
+            {renderPickTiles(picks)}
           </>
         )}
       </div>
@@ -1515,6 +1748,7 @@ export function SessionView(props: {
                   </button>
                 )}
             </div>
+            {live && renderStartBanner()}
           </div>
         </div>
       );
@@ -1556,6 +1790,15 @@ export function SessionView(props: {
           {focusGroup ? renderGroupStep(focusGroup) : renderCard(focusEx, null)}
         </div>
         <div className="focus-nav">
+          <button
+            type="button"
+            className="btn focus-discard"
+            onClick={() => setDialog({ kind: 'del-workout' })}
+            aria-label={t.discardSession}
+            title={t.discardSession}
+          >
+            <Icon name="trash" />
+          </button>
           <button
             className="btn btn-secondary focus-back"
             disabled={focusPos === 0}
@@ -2427,13 +2670,18 @@ export function SessionView(props: {
               {sortedSets.map((s, i) => {
                 // K1 · a bar per set: height = how much it built, colour
                 // intensity = how far performance had dropped.
-                const meter =
-                  meters && setTypeOf(s) !== 'warmup' ? meters.stim.get(s.id) : undefined;
+                const meter = meters ? meters.stim.get(s.id) : undefined;
                 const meterStyle =
                   meter !== undefined
                     ? ({
-                        '--stim': meter.toFixed(2),
-                        '--fat': Math.min(1, (meters!.drop.get(s.id) ?? 0) / 0.1).toFixed(2),
+                        // √ so light sets (warm-ups) still read as a small bar.
+                        '--stim': Math.sqrt(meter).toFixed(2),
+                        // Colour = the worse of: how far performance dropped, and how
+                        // little this set still built (diminishing returns).
+                        '--fat': Math.min(
+                          1,
+                          Math.max((meters!.drop.get(s.id) ?? 0) / 0.1, 1 - meter),
+                        ).toFixed(2),
                       } as CSSProperties)
                     : undefined;
                 const rec = isRecordSet(ex, s);
@@ -2950,13 +3198,15 @@ export function SessionView(props: {
     </>
   );
 
-  /** Readiness before this session, per muscle — the dots on focus muscle chips
-   *  (green ready, brass nearly, red recovering; same colours as the picker). */
+  /** Readiness right now, per muscle — the dots on focus muscle chips (green
+   *  ready, brass nearly, red recovering; same colours as the picker). Today's
+   *  sets count: a muscle worked hard this session turns red. */
   const readinessDots = (ms: MuscleGroup[]): Partial<Record<MuscleGroup, string>> => {
-    const finished = store.workouts.filter((w) => w.finishedAt !== null);
+    const hist = [...store.workouts.filter((w) => w.finishedAt !== null), workout!];
+    const at = live ? now : workout!.startedAt;
     const out: Partial<Record<MuscleGroup, string>> = {};
     for (const m of ms) {
-      const r = directReadiness([m], m, finished, workout!.startedAt);
+      const r = directReadiness([m], m, hist, at);
       // 'stale' (not trained lately) gets no dot — only a real recovery reading does.
       if (r.days !== null && r.state !== 'stale') out[m] = READINESS_COLOR[r.state];
     }
@@ -4534,6 +4784,29 @@ export function SessionView(props: {
           onClose={() => setPrShare(null)}
         />
       )}
+      {tiredInfo &&
+        (() => {
+          const items = buildPickItems(workout, store.workouts, gym);
+          const key = canonicalExerciseName(tiredInfo).toLowerCase();
+          const item = items.find((i) => i.key === key) ?? items.find((i) => i.name === tiredInfo);
+          if (!item) return null;
+          return (
+            <Sheet onClose={() => setTiredInfo(null)} className="xp-detail-sheet">
+              <ExerciseDetail
+                item={item}
+                items={items}
+                gym={gym}
+                finished={store.workouts.filter((w) => w.finishedAt !== null)}
+                onPick={(i) => {
+                  setTiredInfo(null);
+                  openPick({ name: i.name, kicker: '', sub: '', kind: 'strength' });
+                }}
+                onSwap={(i) => setTiredInfo(i.name)}
+                onBack={() => setTiredInfo(null)}
+              />
+            </Sheet>
+          );
+        })()}
       {sheet?.kind === 'rest' && (
         <RestSheet
           exName={sheet.exName}
@@ -5251,7 +5524,14 @@ function GhostSetRow(props: {
             <b>{props.worth < 0.3 ? t.worthLow : t.worthMid}</b>
           </div>
           <div className="gw-bar">
-            <span style={{ width: `${Math.round(props.worth * 100)}%` }} />
+            <span
+              style={
+                {
+                  width: `${Math.round(props.worth * 100)}%`,
+                  '--fat': (1 - props.worth).toFixed(2),
+                } as CSSProperties
+              }
+            />
           </div>
           <div className="gw-text">{t.worthText(Math.round(props.worth * 100))}</div>
         </div>

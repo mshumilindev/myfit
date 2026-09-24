@@ -6,6 +6,7 @@
  * weak point, good fit) with a progression target. Pure over its inputs (the
  * workouts, the gym, "now"), so it unit-tests without React.
  */
+import { landmarkFor } from './personalize';
 import type { Gym, Workout } from './types';
 import {
   BUILT_IN_CATALOG,
@@ -142,7 +143,7 @@ export function directReadiness(
     hit ? hit.days : null,
     hit?.dose ?? 0,
     RECOVERY_DAYS[main] ?? 2,
-    LANDMARKS[main]?.mav || 12,
+    landmarkFor(main, finished, now)?.mav || 12,
   );
   return { state: r.state, days: hit ? Math.floor(hit.days) : null };
 }

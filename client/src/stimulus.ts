@@ -4,8 +4,12 @@
  *
  * Evidence it rests on (directions, not exact per-person limits):
  *  - Hypertrophy rises with hard sets per muscle but with diminishing returns;
- *    per session it flattens out around ~10 hard "fractional" sets
- *    (Pelland et al., Sports Med 2025 dose–response meta-regressions).
+ *    per session the benefit stops being detectable around ~11 fractional
+ *    sets (Remmert et al. 2025 per-session meta-regressions; Pelland et al.,
+ *    Sports Med 2025 for weekly volume). Strength plateaus far earlier.
+ *  - People differ: trained lifters who add volume on top of what they already
+ *    do tend to grow more (Scarpelli et al. 2020/2024), so the plateau and the
+ *    drop tolerance are scaled to the athlete's own tolerated volume and habits.
  *  - Sets count when they're reasonably close to failure (≤ ~3–4 reps in
  *    reserve); easy sets count for less.
  *  - A growing drop in performance within an exercise (the rep/velocity-loss
@@ -20,16 +24,66 @@ import type { SetEntry, SetType } from './types';
 const typeOf = (s: Pick<SetEntry, 'type' | 'isWarmup'>): SetType =>
   s.type ?? (s.isWarmup ? 'warmup' : 'working');
 
-/** Per-session plateau (fractional hard sets per muscle). */
-export const SESSION_PLATEAU = 10;
+/** Per-session plateau (fractional hard sets per muscle), population value. */
+export const SESSION_PLATEAU = 11;
+
+/** Personal per-session plateau: scaled by how much weekly volume this athlete
+ *  tolerates vs the population (personal MRV / default MRV), bounded. */
+export function sessionPlateau(personalMrv?: number | null, baseMrv?: number | null): number {
+  if (!personalMrv || !baseMrv) return SESSION_PLATEAU;
+  const k = Math.min(1.35, Math.max(0.8, personalMrv / baseMrv));
+  return Math.round(SESSION_PLATEAU * k * 2) / 2;
+}
+
+/** Personal drop tolerance for a lift: how far the athlete usually lets it
+ *  fall by the last set while still progressing. Needs ≥3 past sessions;
+ *  a stalled lift keeps the default. */
+export function dropTolerance(pastFinalDrops: number[], stalled: boolean): number {
+  if (pastFinalDrops.length < 3 || stalled) return DROP_ENOUGH;
+  const xs = [...pastFinalDrops].sort((a, b) => a - b);
+  const med = xs[Math.floor(xs.length / 2)];
+  return Math.min(0.18, Math.max(0.08, med + 0.02));
+}
+
+/** Final working set's drop vs the best set, per past session of a lift. */
+export function finalDrop(sets: SetEntry[]): number | null {
+  const d = performanceDrops(sets);
+  const w = sets.filter((s) => typeOf(s) !== 'warmup' && d.has(s.id));
+  if (w.length < 2) return null;
+  return d.get(w[w.length - 1].id) ?? null;
+}
+
+/** Sub-region share of a lift: its primary regions split one set between them,
+ *  secondary regions half a set. */
+export function regionShares(
+  regions: { primary: string[]; secondary?: string[] } | null,
+): Map<string, number> {
+  const m = new Map<string, number>();
+  if (!regions || regions.primary.length === 0) return m;
+  for (const r of regions.primary) m.set(r, (m.get(r) ?? 0) + 1 / regions.primary.length);
+  const sec = regions.secondary ?? [];
+  for (const r of sec) m.set(r, (m.get(r) ?? 0) + 0.5 / sec.length);
+  return m;
+}
 /** Performance drop within an exercise that says "enough" on its own. */
 export const DROP_ENOUGH = 0.1;
 
-/** How "hard" a set was, 0–1: RPE ≥ 7 (or failure) = 1, lighter counts less. */
+/**
+ * How "hard" a set was, 0–1: RPE ≥ 7 (or failure) = 1, lighter counts less.
+ * Warm-ups sit far from failure, so they add only a little — more as they
+ * approach the working weight (`workKg`): a bar-only set ≈ 0, a last ramp set
+ * at ~80% ≈ 0.15. (Sets many reps from failure recruit few of the fibres that
+ * grow — the "effective reps" idea — so they're counted, but barely.)
+ */
 export function setHardness(
-  s: Pick<SetEntry, 'rpe' | 'rpeAuto' | 'failure' | 'type' | 'isWarmup'>,
+  s: Pick<SetEntry, 'rpe' | 'rpeAuto' | 'failure' | 'type' | 'isWarmup' | 'weight'>,
+  workKg = 0,
 ): number {
-  if (typeOf(s) === 'warmup') return 0;
+  if (typeOf(s) === 'warmup') {
+    const w = s.weight ?? 0;
+    if (w <= 0 || workKg <= 0) return 0.05;
+    return Math.min(0.25, 0.25 * (w / workKg) ** 2);
+  }
   if (s.failure === 'manual' || s.failure === 'auto') return 1;
   const r = s.rpe ?? s.rpeAuto ?? null;
   if (r === null) return 1; // an unrated working set is assumed to be real work
@@ -38,10 +92,17 @@ export function setHardness(
   return 0.25;
 }
 
+/** Heaviest working weight of a lift (the reference for its warm-ups). */
+export function workingKg(sets: SetEntry[]): number {
+  return Math.max(0, ...sets.filter((s) => typeOf(s) !== 'warmup').map((s) => s.weight ?? 0));
+}
+
 /** Marginal growth stimulus of the next hard set given `prior` fractional hard
  *  sets on that muscle today: 1 for the first, ~½ at 6, ~¼ at 10. */
-export function marginalStimulus(prior: number): number {
-  return 1 / (1 + (Math.max(0, prior) / 6) ** 2);
+export function marginalStimulus(prior: number, plateau = SESSION_PLATEAU): number {
+  // Half-value point scales with the plateau (6 of 11 by default).
+  const half = (6 / SESSION_PLATEAU) * plateau;
+  return 1 / (1 + (Math.max(0, prior) / half) ** 2);
 }
 
 /** Best e1RM-like strength of a set (Epley, capped to sensible reps). */
@@ -78,24 +139,31 @@ export function muscleTally(lifts: SessionLift[]): Map<string, number> {
     if (!k || v <= 0) return;
     m.set(k, (m.get(k) ?? 0) + v);
   };
-  for (const l of lifts)
+  for (const l of lifts) {
+    const ref = workingKg(l.sets);
     for (const s of l.sets) {
-      const h = setHardness(s);
+      const h = setHardness(s, ref);
       add(l.primary, h);
       for (const x of l.secondary) add(x, h * 0.5);
     }
+  }
   return m;
 }
 
 /** Per-set growth stimulus (0–1) for one lift, in session order, accounting
  *  for what the main muscle had already done earlier in the session. */
-export function setStimuli(sets: SetEntry[], priorBefore: number): Map<string, number> {
+export function setStimuli(
+  sets: SetEntry[],
+  priorBefore: number,
+  plateau = SESSION_PLATEAU,
+): Map<string, number> {
   const out = new Map<string, number>();
   let prior = priorBefore;
+  const ref = workingKg(sets);
   for (const s of sets) {
-    const h = setHardness(s);
+    const h = setHardness(s, ref);
     if (h <= 0) continue;
-    out.set(s.id, marginalStimulus(prior) * h);
+    out.set(s.id, marginalStimulus(prior, plateau) * h);
     prior += h;
   }
   return out;
@@ -122,17 +190,26 @@ export function tiredVerdict(p: {
   sets: SetEntry[];
   muscleSets: number;
   plannedLeft: number;
+  /** Personal per-session plateau (default 11). */
+  plateau?: number;
+  /** Personal drop tolerance for the lift (default 10%). */
+  dropEnough?: number;
 }): TiredVerdict {
+  const plateau = p.plateau ?? SESSION_PLATEAU;
+  const dropEnough = p.dropEnough ?? DROP_ENOUGH;
   const drops = performanceDrops(p.sets);
   const working = p.sets.filter((s) => typeOf(s) !== 'warmup');
   const last = working[working.length - 1];
   const drop = last ? (drops.get(last.id) ?? 0) : 0;
-  const nextWorth = marginalStimulus(p.muscleSets);
-  const byVolume = p.muscleSets >= SESSION_PLATEAU;
-  const byDrop = drop >= DROP_ENOUGH;
-  const combined = drop >= 0.05 && p.muscleSets >= 8;
+  const nextWorth = marginalStimulus(p.muscleSets, plateau);
+  const byVolume = p.muscleSets >= plateau;
+  const byDrop = drop >= dropEnough;
+  const combined = drop >= dropEnough / 2 && p.muscleSets >= plateau * 0.75;
+  // Enough volume for the muscle today shows even before this lift's first
+  // set (a new chest exercise after 20 chest sets); the in-lift signals need
+  // two working sets, and a plan with sets left only yields to a big drop.
   const enough =
-    working.length >= 2 && (p.plannedLeft > 0 ? byDrop : byVolume || byDrop || combined);
+    byVolume || (working.length >= 2 && (p.plannedLeft > 0 ? byDrop : byDrop || combined));
   return { enough, drop, sets: p.muscleSets, nextWorth };
 }
 

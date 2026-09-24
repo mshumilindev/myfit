@@ -20,7 +20,8 @@ import {
 import { computeStandards } from './standards';
 import { computeFeats } from './feats';
 import { computeTrends } from './trends';
-import { LANDMARKS, VOLUME_MUSCLES, classifyZone, weeklyMuscleSets } from './volume';
+import { VOLUME_MUSCLES, classifyZone, weeklyMuscleSets } from './volume';
+import { landmarkFor } from './personalize';
 import { fmtKg, fmtShortDate, fmtWeekday, type LocaleId } from './i18n';
 import type { useT } from './i18n';
 import { templateById, type ActiveChallenge } from './challenges';
@@ -178,7 +179,7 @@ export function computeNotifs(
   // --- Weekly volume goal: every landmarked muscle in its productive range+.
   const per = weeklyMuscleSets(finished, now, 7);
   const allProductive = VOLUME_MUSCLES.every((m) => {
-    const lm = LANDMARKS[m];
+    const lm = landmarkFor(m, finished, now);
     if (!lm) return true;
     const z = classifyZone(per.get(m) ?? 0, lm);
     return z === 'productive' || z === 'high' || z === 'over';

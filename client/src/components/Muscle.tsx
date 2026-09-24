@@ -14,6 +14,7 @@
  * precision. `MuscleIcon` therefore renders a library figure at figure/row/full
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
+import { landmarkFor } from '../personalize';
 import {
   useLayoutEffect,
   useMemo,
@@ -32,7 +33,7 @@ import { EQUIPMENT_IDS, type EquipmentId } from '../data/equipment';
 import { t as strings } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { useStore, muscleSetsInWorkout } from '../store';
-import { LANDMARKS, classifyZone, ZONE_COLOR } from '../volume';
+import { classifyZone, ZONE_COLOR } from '../volume';
 
 /** Muscles in the vocabulary order of the filter bar (MG-5). */
 export const MUSCLE_IDS: Exclude<MuscleGroup, 'cardio'>[] = [
@@ -1240,7 +1241,7 @@ export function MuscleBreakdownList({
   return (
     <div className="md-list">
       {entries.map((e) => {
-        const lm = LANDMARKS[e.muscle];
+        const lm = landmarkFor(e.muscle, store.workouts, refTs);
         const wk = Math.max(week.get(e.muscle) ?? e.sets, e.sets);
         const target = lm ? lm.mav : 0;
         const multi = wk > e.sets + 0.01;

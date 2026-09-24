@@ -1541,8 +1541,7 @@ export function upsertSet(
   // Auto-tag leading light sets as warm-ups (respecting manual choices). Seed the
   // reference with last session's working weight so a light opener is flagged as
   // a warm-up straight away, not only once a heavier set follows it.
-  const priorTop = prevLift(ex.name, workoutId)?.weight ?? 0;
-  const sets = autoWarmupSets(next, loadTypeFor(ex), priorTop);
+  const sets = autoWarmupSets(next, loadTypeFor(ex), historicalWorkingKg(ex.name, workoutId));
   patchWorkout(workoutId, {
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, sets } : e)),
   });
@@ -3593,12 +3592,33 @@ export const WARMUP_FRAC = 0.85;
  * (drop / static-dynamic) are never touched and anchor the working run. Pure and
  * idempotent — safe to re-run on every set change.
  */
-export function autoWarmupSets(sets: SetEntry[], loadType: LoadType, refFloor = 0): SetEntry[] {
+/**
+ * The athlete's usual working weight on a lift, from history (not today's
+ * session): the most common working weight of the last session, heavier one on
+ * ties. A single heavy top set or a PR doesn't move it. 0 = no history.
+ */
+export function historicalWorkingKg(name: string, currentWorkoutId?: string): number {
+  const found = lastSessionWith(name, currentWorkoutId);
+  if (!found) return 0;
+  const counts = new Map<number, number>();
+  for (const s of found.exercise.sets) {
+    if (setTypeOf(s) === 'warmup') continue;
+    const w = s.weight ?? 0;
+    if (w > 0) counts.set(w, (counts.get(w) ?? 0) + 1);
+  }
+  let best = 0;
+  let n = 0;
+  for (const [w, c] of counts) if (c > n || (c === n && w > best)) [best, n] = [w, c];
+  return best;
+}
+
+export function autoWarmupSets(sets: SetEntry[], loadType: LoadType, histRef = 0): SetEntry[] {
   if (loadType !== 'weight') return sets;
-  // Reference the heavier of this session's top set and the known working weight
-  // (last session's top), so a light opener is a warm-up on the fly — we already
-  // know the working weight, no need to wait for a heavier set to be logged.
-  const ref = Math.max(0, refFloor, ...sets.map(setTopWeight));
+  // Reference the known working weight from history, so a light opener is a
+  // warm-up on the fly and a PR later in the session never turns the real
+  // working sets before it into "warm-ups". Only without history does today's
+  // top set serve as the reference.
+  const ref = histRef > 0 ? histRef : Math.max(0, ...sets.map(setTopWeight));
   if (ref <= 0) return sets;
   const threshold = WARMUP_FRAC * ref;
   const ordered = [...sets].sort((a, b) => a.position - b.position);
