@@ -108,6 +108,7 @@ describe('F-03 Workout store (local state)', () => {
   it('starts one open workout and auto-closes the previous one', () => {
     const first = startWorkout();
     expect(getOpenWorkout()?.id).toBe(first.id);
+    addExercise(first.id, 'Squat');
     vi.setSystemTime(new Date('2026-07-31T12:05:00Z'));
     const second = startWorkout();
     const s = __getStateForTests();
@@ -122,7 +123,16 @@ describe('F-03 Workout store (local state)', () => {
   it('auto-finishes stale open workouts at startedAt + 8h', () => {
     const startedAt = Date.now() - 9 * 3600_000;
     __replaceStateForTests(
-      state({ workouts: [workout({ id: 'old', startedAt, finishedAt: null })] }),
+      state({
+        workouts: [
+          workout({
+            id: 'old',
+            startedAt,
+            finishedAt: null,
+            exercises: [{ id: 'squat', name: 'Squat', position: 0, sets: [] }],
+          }),
+        ],
+      }),
     );
 
     applyAutoFinish();
@@ -131,6 +141,26 @@ describe('F-03 Workout store (local state)', () => {
       finishedAt: startedAt + 8 * 3600_000,
       autoFinished: true,
     });
+  });
+
+  it('replaces an empty draft without adding a finished workout to history', () => {
+    const draft = startWorkout();
+    const next = startWorkout();
+
+    expect(__getStateForTests().workouts.map((w) => w.id)).toEqual([next.id]);
+    expect(__getStateForTests().workouts.some((w) => w.id === draft.id)).toBe(false);
+    expect(getOpenWorkout()?.id).toBe(next.id);
+  });
+
+  it('drops stale empty drafts instead of auto-finishing them', () => {
+    __replaceStateForTests(
+      state({ workouts: [workout({ startedAt: Date.now() - 9 * 3600_000, finishedAt: null })] }),
+    );
+
+    applyAutoFinish();
+
+    expect(__getStateForTests().workouts).toEqual([]);
+    expect(getOpenWorkout()).toBeUndefined();
   });
 
   it('adds exercises, upserts sets, computes volume and drops empty exercises on finish', () => {
