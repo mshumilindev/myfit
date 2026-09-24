@@ -193,7 +193,9 @@ export const UK: PhraseBook = {
   },
   mom: {
     session: [(f) => `${f.sets} сетів. Твоя мама в неділю робить більше.`],
-    stall: [(f, x) => `${x.kg(f.weight)}, знову. Твоя мама цим розминається.`],
+    stall: [
+      (f, x) => `${x.exercise(f.exercise)}, ${x.kg(f.weight)}, знову. Твоя мама цим розминається.`,
+    ],
     restShort: [
       (f, x) => `${x.mmss(f.restSec)} відпочинку. Твоя мама між повідомленнями відпочиває довше.`,
     ],

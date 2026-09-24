@@ -191,7 +191,10 @@ export const EN: PhraseBook = {
   },
   mom: {
     session: [(f) => `${f.sets} sets. Your mom does more on a Sunday.`],
-    stall: [(f, x) => `${x.kg(f.weight)}, again. Your mom warms up with that.`],
+    stall: [
+      (f, x) =>
+        `${x.exercise(f.exercise)} at ${x.kg(f.weight)}, again. Your mom warms up with that.`,
+    ],
     restShort: [(f, x) => `${x.mmss(f.restSec)} of rest. Your mom rests longer between texts.`],
     skipped: [() => `Your mom already trained today. Just saying.`],
     week: [(f) => `${f.sessions} sessions. Your mom can do better.`],

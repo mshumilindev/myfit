@@ -39,6 +39,10 @@ export interface CoachSettings {
   swearing: boolean;
   /** Muted for today from a debrief ("Mute for today"): until this ms. */
   mutedUntil?: number | null;
+  /** Notes newer than this are unread (the ring in the stories strip). */
+  readAt: number;
+  /** Last local edit (last-write-wins against the synced copy). */
+  updatedAt?: number;
 }
 
 export const COACH_DEFAULT: CoachSettings = {
@@ -49,6 +53,7 @@ export const COACH_DEFAULT: CoachSettings = {
   yoMama: true,
   swearing: false,
   mutedUntil: null,
+  readAt: 0,
 };
 
 interface FactBase {

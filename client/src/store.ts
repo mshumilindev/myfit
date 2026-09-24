@@ -11,6 +11,7 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
+import { COACH_DEFAULT, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
   arrayRemove,
@@ -107,6 +108,7 @@ const EX_REST_KEY = 'spotter.exerciseRest';
 const REST_PREFS_KEY = 'spotter.restPrefs';
 const WEIGHT_UNIT_KEY = 'spotter.weightUnit';
 const MASTERY_KEY = 'spotter.mastery';
+const COACH_KEY = 'spotter.coach';
 const SLEEP_KEY = 'spotter.sleeps';
 const SLEEP_SCHED_KEY = 'spotter.sleep.schedule';
 const SLEEP_SET_KEY = 'spotter.sleep.settings';
@@ -214,6 +216,8 @@ export interface StoreState {
   sleepSettings: SleepSettings;
   /** Goals: physique target, block focus, long-term goals (My Fit). */
   goals: FitGoals;
+  /** Atlas, the built-in coach: on/off, temper, role (synced, last-write-wins). */
+  coach: CoachSettings;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
   queue: QueuedMutation[];
   /** Coached athletes with a live (or just-finished) session — real-time,
@@ -268,6 +272,7 @@ let state: StoreState = {
     patternOffer: 'unseen',
   }),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
+  coach: { ...COACH_DEFAULT, ...load<Partial<CoachSettings>>(COACH_KEY, {}) },
   queue: [],
   liveTrainees: [],
   syncStatus: 'pending',
@@ -288,6 +293,7 @@ function emit(): void {
 function persist(): void {
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
+    localStorage.setItem(COACH_KEY, JSON.stringify(state.coach));
     localStorage.setItem(GYMS_KEY, JSON.stringify(state.gyms));
     localStorage.setItem(SHARED_GYMS_KEY, JSON.stringify(state.sharedGyms));
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
@@ -888,6 +894,12 @@ function writeMasteryDoc(): void {
     JSON.stringify({ ...state.mastery, updatedAt: state.mastery.updatedAt ?? Date.now() }),
   );
   setDoc(doc(db, 'users', uid, 'meta', 'mastery'), clean).catch(onWriteError);
+}
+function writeCoachDoc(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const clean = JSON.parse(JSON.stringify(state.coach));
+  setDoc(doc(db, 'users', uid, 'meta', 'coach'), clean).catch(onWriteError);
 }
 function deleteGymDoc(id: string): void {
   const uid = currentUid();
@@ -2405,6 +2417,12 @@ export function setMasterySeenRating(rating: number): void {
   writeMasteryDoc();
 }
 
+/** Atlas settings (temper, role, read mark…); synced to users/{uid}/meta/coach. */
+export function setCoach(patch: Partial<CoachSettings>): void {
+  setState({ coach: { ...state.coach, ...patch, updatedAt: Date.now() } });
+  writeCoachDoc();
+}
+
 // ---------------------------------------------------------------------------
 // Sleep — a live night mirrors the open-workout model (wake === null while in
 // progress). Nights persist locally like activities; nothing here re-prompts
@@ -3541,6 +3559,24 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
+      doc(db, 'users', uid, 'meta', 'coach'),
+      (snap) => {
+        if (!snap.exists()) {
+          if (state.coach.enabled) writeCoachDoc();
+          return;
+        }
+        const data = snap.data() as Partial<CoachSettings>;
+        // Last-write-wins: keep a newer local edit over a stale server copy.
+        if ((state.coach.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
+        state = { ...state, coach: { ...COACH_DEFAULT, ...data } };
+        persist();
+        emit();
+      },
+      onWriteError,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
       collection(db, 'users', uid, 'pings'),
       (snap) => {
         pings = snap.docs.map((d) => d.data() as { gymId: string; at: number });
@@ -4156,6 +4192,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(REMINDERS_KEY);
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
+  localStorage.removeItem(COACH_KEY);
   localStorage.removeItem(INJURY_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
   localStorage.removeItem(SLEEP_KEY);
@@ -4196,6 +4233,7 @@ export function resetLocalData(): void {
       patternOffer: 'unseen',
     },
     goals: EMPTY_GOALS,
+    coach: { ...COACH_DEFAULT },
     queue: [],
     liveTrainees: [],
     syncStatus: 'pending',

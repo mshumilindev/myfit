@@ -153,6 +153,9 @@ const EquipmentDetailView = lazy(() =>
     default: module.EquipmentDetailView,
   })),
 );
+const CoachView = lazy(() =>
+  import('./views/CoachView').then((module) => ({ default: module.CoachView })),
+);
 const MasteryView = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryView })),
 );
@@ -221,6 +224,7 @@ export type Overlay =
   | { screen: 'equipment'; itemId: string; gymId?: string }
   | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
   | { screen: 'mastery' }
+  | { screen: 'coach' }
   | { screen: 'injury'; injuryId?: string; checkin?: boolean }
   | { screen: 'uikit' }
   | { screen: 'library'; libTab?: 'mine' }
@@ -349,6 +353,7 @@ function toHash(
   if (overlay?.screen === 'injury') return '#/injury';
   if (overlay?.screen === 'uikit') return '#/uikit';
   if (overlay?.screen === 'notifications') return '#/notifications';
+  if (overlay?.screen === 'coach') return '#/coach';
   if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
   if (overlay?.screen === 'recap-story')
     return `#/recap-story/${encodeURIComponent(overlay.period)}`;
@@ -411,6 +416,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
     return { tab: 'progress', overlay: null };
   if (head === 'settings') return { tab: 'today', overlay: { screen: 'settings' } };
   if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
+  if (head === 'coach') return { tab: 'today', overlay: { screen: 'coach' } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   if (head === 'uikit') return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
@@ -1372,6 +1378,7 @@ export function App() {
         <ClientPage clientId={activeOverlay.clientId} shell={shell} onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'coach' && <CoachView onClose={closeOverlay} />}
       {activeOverlay?.screen === 'injury' && (
         <InjuryView
           injuryId={activeOverlay.injuryId}

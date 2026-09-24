@@ -63,6 +63,9 @@ describe('sessionFacts', () => {
     const b = session(T0 - 7 * DAY, [lift('Squat', 140, [5])]);
     const c = session(T0, [lift('Squat', 140, [5])]);
     expect(sessionFacts(c, [a, b, c]).some((f) => f.kind === 'stall')).toBe(true);
+    // …and only once: a fourth session at the same weight is not news again.
+    const d = session(T0 + 7 * DAY, [lift('Squat', 140, [5])]);
+    expect(sessionFacts(d, [a, b, c, d]).some((f) => f.kind === 'stall')).toBe(false);
     // No history → neither a PR nor a stall.
     expect(sessionFacts(c, [c]).filter((f) => f.kind !== 'session')).toEqual([]);
   });
@@ -82,6 +85,24 @@ describe('sessionFacts', () => {
     expect(sessionFacts(now, [old, now]).find((f) => f.kind === 'comeback')).toMatchObject({
       daysOff: 20,
     });
+  });
+});
+
+describe('highlights', () => {
+  it('keeps at most two lift notes per session, records first', () => {
+    const lifts = ['A', 'B', 'C', 'D'];
+    const old = session(
+      T0 - 7 * DAY,
+      lifts.map((x) => lift(x, 50, [8])),
+    );
+    const now = session(
+      T0,
+      lifts.map((x, i) => lift(x, 55 + i, [8])),
+    );
+    const facts = sessionFacts(now, [old, now]);
+    const liftNotes = facts.filter((f) => f.kind !== 'session' && f.kind !== 'comeback');
+    expect(liftNotes).toHaveLength(2);
+    expect(liftNotes.map((f) => (f as { exercise: string }).exercise)).toEqual(['D', 'C']);
   });
 });
 

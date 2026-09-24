@@ -100,8 +100,10 @@ export function sessionFacts(w: Workout, history: Workout[]): CoachFact[] {
         prevWeight: Math.max(...tops),
       });
     } else if (
+      // Reported once, when the stall begins — not again every session after.
       tops.length >= STALL_SESSIONS - 1 &&
-      tops.slice(0, STALL_SESSIONS - 1).every((t) => t === weight)
+      tops.slice(0, STALL_SESSIONS - 1).every((t) => t === weight) &&
+      tops[STALL_SESSIONS - 1] !== weight
     ) {
       out.push({
         kind: 'stall',
@@ -134,7 +136,30 @@ export function sessionFacts(w: Workout, history: Workout[]): CoachFact[] {
         });
     }
   }
-  return out;
+  return pickHighlights(out);
+}
+
+/** Per session: at most this many notes about individual lifts. */
+export const MAX_LIFT_NOTES = 2;
+
+/**
+ * Keep a session's notes readable: the summary, a comeback, then the lifts
+ * that matter most — records first (biggest jump), then the worst short rest,
+ * then the heaviest stall.
+ */
+function pickHighlights(facts: CoachFact[]): CoachFact[] {
+  const head = facts.filter((f) => f.kind === 'session' || f.kind === 'comeback');
+  const prs = facts
+    .filter((f): f is Extract<CoachFact, { kind: 'pr' }> => f.kind === 'pr')
+    .sort((a, b) => b.weight / b.prevWeight - a.weight / a.prevWeight);
+  const rests = facts
+    .filter((f): f is Extract<CoachFact, { kind: 'restShort' }> => f.kind === 'restShort')
+    .sort((a, b) => a.restSec / a.targetSec - b.restSec / b.targetSec);
+  const stalls = facts
+    .filter((f): f is Extract<CoachFact, { kind: 'stall' }> => f.kind === 'stall')
+    .sort((a, b) => b.weight - a.weight);
+  const lifts = [...prs, ...rests.slice(0, 1), ...stalls.slice(0, 1)].slice(0, MAX_LIFT_NOTES);
+  return [...head, ...lifts];
 }
 
 export interface DayContext {
