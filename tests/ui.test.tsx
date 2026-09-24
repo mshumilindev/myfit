@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Shell } from '../client/src/App';
@@ -15,7 +15,7 @@ import { ProfileView } from '../client/src/views/ProfileView';
 import { AdminView } from '../client/src/views/AdminView';
 import { TrainerView } from '../client/src/views/TrainerView';
 import { ProgramsView } from '../client/src/views/ProgramsView';
-import { __getStateForTests, __replaceStateForTests } from '../client/src/store';
+import { addExercise, __getStateForTests, __replaceStateForTests } from '../client/src/store';
 import { setRole } from '../client/src/api';
 
 // Test shim standing in for the removed setAuth: mark a signed-in user so
@@ -938,27 +938,24 @@ describe('F-03 session UI', () => {
   it('shows rest between cardio intervals, and stops it for the whole cool-down', async () => {
     const s = sampleStore();
     const now = Date.now();
-    s.workouts[0].exercises.push(
-      {
-        id: 'bike',
-        name: 'Upright bike',
-        kind: 'cardio',
-        position: 1,
-        equipmentItems: ['cardio-upright-bike'],
-        sets: [
-          {
-            id: 'b1',
-            reps: 0,
-            weight: null,
-            isWarmup: false,
-            position: 0,
-            durationMin: 3,
-            loggedAt: now - 30000,
-          },
-        ],
-      },
-      { id: 'cd', name: 'Cool-down', kind: 'cooldown', position: 2, sets: [] },
-    );
+    s.workouts[0].exercises.push({
+      id: 'bike',
+      name: 'Upright bike',
+      kind: 'cardio',
+      position: 1,
+      equipmentItems: ['cardio-upright-bike'],
+      sets: [
+        {
+          id: 'b1',
+          reps: 0,
+          weight: null,
+          isWarmup: false,
+          position: 0,
+          durationMin: 3,
+          loggedAt: now - 30000,
+        },
+      ],
+    });
     __replaceStateForTests(s);
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
 
@@ -970,10 +967,21 @@ describe('F-03 session UI', () => {
     const bike = container.querySelector('[data-exid="bike"]') as HTMLElement;
     expect(bike.querySelector('.rst-card')).toBeTruthy();
 
-    await go('cd');
-    await userEvent.click(screen.getByRole('button', { name: 'Start cool-down' }));
+    let cooldownId = '';
+    act(() => {
+      cooldownId = addExercise('open', 'Cool-down', 'cooldown').id;
+    });
+    await go(cooldownId);
+    const cooldown = __getStateForTests()
+      .workouts.find((w) => w.id === 'open')!
+      .exercises.find((e) => e.id === cooldownId)!;
+    expect(cooldown.markerAt).toBeGreaterThanOrEqual(now);
+    expect(screen.queryByRole('button', { name: 'Start cool-down' })).toBeNull();
     expect(container.querySelector('.rst-card')).toBeNull();
-    expect(screen.getByText('Cooling down — the rest clock is off')).toBeTruthy();
+    for (let k = 0; k < 6 && !container.querySelector('[data-exid="bike"]'); k++)
+      await userEvent.click(container.querySelector('.focus-back') as HTMLElement);
+    expect(container.querySelector('[data-exid="bike"]')).toBeTruthy();
+    expect(container.querySelector('.rst-card')).toBeNull();
   });
 
   it('keeps an exercise with no logged sets on the exercise-card layout', () => {
@@ -1065,7 +1073,7 @@ describe('F-03 session UI', () => {
       }
       const card = container.querySelector(`[data-exid="${id}"]`) as HTMLElement;
       expect(card).toBeTruthy();
-      await userEvent.click(within(card).getByRole('button', { name: 'Menu' }));
+      await userEvent.click(within(card).getByRole('button', { name: 'Set options' }));
       expect(screen.queryByText('Clear all sets')).toBeNull();
       await userEvent.click(screen.getByRole('button', { name: 'Delete exercise' }));
       expect(ids()).not.toContain(id);
