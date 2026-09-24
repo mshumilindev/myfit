@@ -2904,19 +2904,30 @@ export function SessionView(props: {
         ) : null}
         {marker ? null : timed ? (
           <>
-            {focusView && cardioImg && (
+            {focusView && cardioImg ? (
               <span className="cardio-photo">
                 <img src={cardioImg} alt="" />
+                {!props.past && (
+                  <button
+                    className="cardio-machine-chip on-photo"
+                    onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
+                  >
+                    <Icon name="swap" />
+                    {t.cardioChangeMachine}
+                  </button>
+                )}
               </span>
-            )}
-            {kind === 'cardio' && !props.past && (
-              <button
-                className="cardio-machine-chip"
-                onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
-              >
-                <Icon name="swap" />
-                {t.cardioChangeMachine}
-              </button>
+            ) : (
+              kind === 'cardio' &&
+              !props.past && (
+                <button
+                  className="cardio-machine-chip"
+                  onClick={() => setSheet({ kind: 'cardio-machine', exId: ex.id })}
+                >
+                  <Icon name="swap" />
+                  {t.cardioChangeMachine}
+                </button>
+              )
             )}
             {(ex.sets.length > 0 || !live) && (
               <div className="set-grid header timed">
