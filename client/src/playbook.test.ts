@@ -57,6 +57,15 @@ const BACK = [
 ];
 const LEGS = ['Barbell Squat', 'Romanian Deadlift', 'Leg Press', 'Standing Calf Raises'];
 
+describe('warm-up habit ignores sessions from before markers were kept', () => {
+  it('old marker-less sessions do not outvote the new ones', () => {
+    const ws: Workout[] = [];
+    for (let wk = 0; wk < 6; wk++) ws.push(session(MON + wk * 7 * DAY, CHEST, wk >= 4));
+    const pb = computePlaybook(ws, MON + 50 * DAY);
+    expect(pb.plays[0].opensWithWarmup).toBe(true);
+  });
+});
+
 describe('playbook: every day you train gets its own play', () => {
   const ws: Workout[] = [];
   for (let wk = 0; wk < 4; wk++) {

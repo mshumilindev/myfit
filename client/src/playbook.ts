@@ -243,12 +243,17 @@ export function computePlaybook(finished: Workout[], now: number): PlaybookResul
     c.workouts.push(w);
   }
   for (const c of clusters.values()) c.workouts.sort((a, b) => b.startedAt - a.startedAt);
-  const markersKnown = done.some((w) => w.exercises.some((e) => isMarkerExercise(e)));
+  // Warm-up markers are only kept on finish since a recent version: older
+  // sessions carry no trace of them. Judge the habit only on sessions from
+  // when markers were recorded (none yet → unknown → default yes).
+  const markerEra = Math.min(
+    ...done.filter((w) => w.exercises.some((e) => isMarkerExercise(e))).map((w) => w.startedAt),
+  );
 
   const plays: Play[] = [];
   for (const [key, c] of clusters) {
     if (c.workouts.length < MIN_SESSIONS) continue;
-    const play = synthesize(key, c, globalTop, globalSessions, globalPrimary, now, markersKnown);
+    const play = synthesize(key, c, globalTop, globalSessions, globalPrimary, now, markerEra);
     if (play && play.exercises.length > 0) plays.push(play);
   }
   // Most recently trained day first — that's what you're most likely to run.
@@ -275,7 +280,7 @@ function synthesize(
   globalSessions: Map<string, number>,
   globalPrimary: Map<string, MuscleGroup | null>,
   now: number,
-  markersKnown: boolean,
+  markerEra: number,
 ): Play | null {
   const sessions = c.workouts.length;
   // Aggregate per-exercise occurrences across the cluster's sessions.
@@ -400,15 +405,18 @@ function synthesize(
 
   const weekdays = [0, 0, 0, 0, 0, 0, 0];
   let warmOpen = 0;
+  let judged = 0;
   for (const w of c.workouts) {
     weekdays[new Date(w.startedAt).getDay()] += 1;
+    if (w.startedAt < markerEra) continue;
+    judged += 1;
     const first = [...w.exercises]
       .filter((e) => isMarkerExercise(e) || e.sets.length > 0)
       .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))[0];
     if (first && (exerciseKind(first) === 'warmup' || exerciseKind(first) === 'cardio'))
       warmOpen += 1;
   }
-  const opensWithWarmup = !markersKnown || warmOpen >= c.workouts.length / 3;
+  const opensWithWarmup = judged === 0 || warmOpen >= judged / 3;
 
   return {
     id: key,

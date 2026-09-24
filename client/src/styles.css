@@ -37793,3 +37793,16 @@ body {
   box-shadow: none;
   font-weight: 700;
 }
+
+/* numbers centred under the Playbook icon; photos start where its text does */
+.pbs-row {
+  gap: 0;
+}
+.pbs-n {
+  margin: 0 9px;
+}
+.pbs-row img,
+.pbs-noimg {
+  margin-left: 12px;
+  margin-right: 12px;
+}
