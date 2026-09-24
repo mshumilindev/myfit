@@ -8,11 +8,14 @@ import { useT } from '../i18n';
 import { Icon, Sheet, Switch } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
-import { useAtlasNotes, useMinuteClock, type AtlasNote } from '../atlas/notes';
+import { useAtlasNotes, useMinuteClock } from '../atlas/notes';
 import { TEMPER_COLOR, TEMPERS, type CoachRole, type Temper } from '../atlas/types';
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
+import { askAtlas } from '../atlas/chat';
+import { buildChatFacts } from '../atlas/chatFacts';
+import { pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
 import { fmtBodyWeightKg } from '../i18n';
 
 type Step = 'meet' | 'temper' | 'fine' | 'role' | 'data' | 'push';
@@ -408,19 +411,73 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     const newest = notes.reduce((m, n) => Math.max(m, n.at), 0);
     if (newest > store.coach.readAt) setCoach({ readAt: newest });
   }, [notes, store.coach.readAt]);
+
+  const chat = useChatLog();
+  const [draft, setDraft] = useState('');
+  const [consent, setConsent] = useState<string | null>(null);
+  const busy = chat.some((m) => m.pending);
+
+  const send = async (text: string, consented = false) => {
+    const q = text.trim();
+    if (!q || busy) return;
+    if (!store.coach.chatConsent && !consented) {
+      setConsent(q);
+      return;
+    }
+    setDraft('');
+    const at = Date.now();
+    const history = chat.map((m) => ({ from: m.from, text: m.text }));
+    pushChat({ id: `me-${at}`, at, from: 'me', text: q });
+    const rid = `at-${at}`;
+    pushChat({ id: rid, at: at + 1, from: 'atlas', text: '…', pending: true });
+    const res = await askAtlas({
+      question: q,
+      history,
+      temper,
+      coach: { ...store.coach, chatConsent: true },
+      locale,
+      factsJson: buildChatFacts(store, notes, temper, at),
+      now: at,
+      onText: (partial) => updateChat(rid, { text: partial }),
+    });
+    updateChat(rid, {
+      pending: false,
+      text: res.ok
+        ? res.text
+        : res.reason === 'offline'
+          ? t.atlasChatOffline
+          : res.reason === 'cap'
+            ? t.atlasChatCap
+            : res.reason === 'blocked'
+              ? t.atlasChatBlocked
+              : t.atlasChatError,
+    });
+  };
+
+  type Item = { id: string; at: number; from: 'me' | 'atlas'; text: string; pending?: boolean };
+  const items: Item[] = useMemo(
+    () =>
+      [
+        ...notes.map((n) => ({ id: n.id, at: n.at, from: 'atlas' as const, text: n.text })),
+        ...chat.map((m: ChatMsg) => m),
+      ].sort((a, b) => a.at - b.at),
+    [notes, chat],
+  );
+
+  const lastText = items[items.length - 1]?.text;
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
-  }, [notes.length]);
+  }, [items.length, lastText]);
 
   const groups = useMemo(() => {
-    const out: { label: string; items: AtlasNote[] }[] = [];
-    for (const n of notes) {
+    const out: { label: string; items: Item[] }[] = [];
+    for (const n of items) {
       const label = dayLabel(n.at, now, t, locale);
       if (out.length && out[out.length - 1].label === label) out[out.length - 1].items.push(n);
       else out.push({ label, items: [n] });
     }
     return out;
-  }, [notes, now, t, locale]);
+  }, [items, now, t, locale]);
 
   return (
     <div
@@ -456,15 +513,68 @@ function CoachThread({ onClose }: { onClose: () => void }) {
         {groups.map((g) => (
           <div key={g.label} className="atl-group">
             <span className="atl-day">{g.label}</span>
-            {g.items.map((n) => (
-              <Bubble key={n.id} temper={temper}>
-                {n.text}
-              </Bubble>
-            ))}
+            {g.items.map((n) =>
+              n.from === 'me' ? (
+                <div key={n.id} className="atl-me">
+                  {n.text}
+                </div>
+              ) : (
+                <Bubble key={n.id} temper={temper}>
+                  <span className={n.pending ? 'atl-typing' : undefined}>{n.text}</span>
+                </Bubble>
+              ),
+            )}
           </div>
         ))}
-        <div ref={endRef} />
+        <div ref={endRef} className="atl-end" />
       </div>
+      <form
+        className="atl-composer"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void send(draft);
+        }}
+      >
+        <label className="sr-only" htmlFor="atl-input">
+          {t.atlasAsk}
+        </label>
+        <input
+          id="atl-input"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={t.atlasAsk}
+          maxLength={400}
+          autoComplete="off"
+          enterKeyHint="send"
+        />
+        <button type="submit" aria-label={t.atlasSend} disabled={!draft.trim() || busy}>
+          <Icon name="arrow-up" />
+        </button>
+      </form>
+      {consent !== null && (
+        <Sheet onClose={() => setConsent(null)} className="atl-sheet">
+          <div className="sheet-head">
+            <h3>{t.atlasConsentTitle}</h3>
+          </div>
+          <p className="atl-consent">{t.atlasConsentBody}</p>
+          <div className="sheet-actions">
+            <button className="btn btn-secondary grow" onClick={() => setConsent(null)}>
+              {t.atlasNotNow}
+            </button>
+            <button
+              className="btn btn-primary grow"
+              onClick={() => {
+                const q = consent;
+                setCoach({ chatConsent: true });
+                setConsent(null);
+                void send(q, true);
+              }}
+            >
+              {t.atlasConsentOk}
+            </button>
+          </div>
+        </Sheet>
+      )}
       {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
     </div>
   );

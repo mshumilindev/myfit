@@ -42,6 +42,8 @@ export interface CoachSettings {
   mutedUntil?: number | null;
   /** "Not now" on the invite — hides Atlas from the Today strip until opened elsewhere. */
   inviteDismissed?: boolean;
+  /** Agreed to send a training summary to Gemini for chat (one-time consent). */
+  chatConsent?: boolean;
   /** Notes newer than this are unread (the ring in the stories strip). */
   readAt: number;
   /** The programme (main-coach role); null until Atlas writes one. */

@@ -38544,3 +38544,68 @@ body {
 .shell-ic-coach {
   background: transparent;
 }
+
+/* Atlas chat: my messages, typing, composer */
+.atl-me {
+  align-self: flex-end;
+  max-width: 260px;
+  padding: 10px 13px;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--color-neutral-800);
+  font-size: 14.5px;
+  line-height: 20px;
+}
+.atl-typing {
+  color: var(--color-neutral-400);
+}
+.atl-thread .atl-feed {
+  padding-bottom: 12px;
+}
+.atl-composer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 0 calc(12px + var(--safe-bottom));
+  background: linear-gradient(0deg, var(--color-bg) 70%, transparent);
+}
+.atl-composer input {
+  flex: 1;
+  min-width: 0;
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 99px;
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 16px;
+}
+.atl-composer button {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border: none;
+  border-radius: 50%;
+  background: var(--atl);
+  color: #140c0d;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.atl-composer button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.atl-consent {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--color-neutral-300);
+}
+.atl-end {
+  scroll-margin-bottom: calc(84px + var(--safe-bottom));
+}

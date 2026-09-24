@@ -11,6 +11,7 @@
  * enabled); only privileged/cross-user work goes through callable functions.
  */
 import { initializeApp } from 'firebase/app';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 import { getAnalytics, isSupported as analyticsIsSupported } from 'firebase/analytics';
 import { browserLocalPersistence, initializeAuth, indexedDBLocalPersistence } from 'firebase/auth';
 import {
@@ -35,6 +36,22 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+
+// App Check (reCAPTCHA Enterprise) — guards the Gemini key used by Atlas's
+// chat (Firebase AI Logic). Tokens ride along on every Firebase request, but
+// only services where App Check is *enforced* in the console reject calls
+// without one. No key configured → skipped (chat falls back to the phrase book).
+const APP_CHECK_KEY = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY as string | undefined;
+if (typeof window !== 'undefined' && APP_CHECK_KEY && !import.meta.env.VITE_USE_EMULATORS) {
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(APP_CHECK_KEY),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (err) {
+    console.warn('app check init failed', err);
+  }
+}
 
 // Persist the session locally so a reload keeps the user signed in.
 export const auth = initializeAuth(app, {
