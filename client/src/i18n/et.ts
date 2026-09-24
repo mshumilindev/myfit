@@ -1783,12 +1783,27 @@ export const et: Strings = {
   atlasTemperLabel: 'Iseloom',
   atlasRoleLabel: 'Roll',
   atlasTurnOff: 'Lülita Atlas välja',
-  atlasSuggestToday: "Mida täna treenida?",
-  atlasSuggestProgress: "Kuidas mul läheb?",
-  atlasSuggestRest: "Kui kaua puhata?",
-  atlasLangOffer: (n: string) => `Kas vahetan rakenduse keeleks „${n}“? Saan aru igas keeles, aga vastan rakenduse keeles.`,
-  atlasLangKeep: "Ei, jäta nii",
-  atlasLangDone: "Valmis — edaspidi eesti keeles.",
+  atlasSuggestToday: 'Mida täna treenida?',
+  atlasSuggestProgress: 'Kuidas mul läheb?',
+  atlasSuggestRest: 'Kui kaua puhata?',
+  atlasLangOffer: (n: string) =>
+    `Kas vahetan rakenduse keeleks „${n}“? Saan aru igas keeles, aga vastan rakenduse keeles.`,
+  atlasLangKeep: 'Ei, jäta nii',
+  atlasLangDone: 'Valmis — edaspidi eesti keeles.',
+  atlasNewNotes: (n: number) => `${n} uut`,
+  atlasDidYouMean: 'Pole kindel, kas sain aru. Kas mõtlesid:',
+  atlasDoIt: 'Tee ära',
+  atlasCancel: 'Tühista',
+  atlasRoleHumanCoach: 'Sul on treener — tema juhib kava, seega saab Atlas olla vaid lisatreener.',
+  atlasClear: 'Tühjenda vestlus',
+  atlasTurnOffAsk: 'Lülitada Atlas välja?',
+  atlasTurnOffBody:
+    'Ta lõpetab kommenteerimise ja kava pole enam tema oma. Päevik, vestlus ja see, mida ta mäletab, jäävad — lülita sisse millal tahes.',
+  atlasClearAsk: 'Tühjendada vestlus?',
+  atlasClearBody:
+    'Kogu vestlus ja tema senised märkmed kaovad. Päevik ja see, mida ta sinust mäletab, jäävad.',
+  atlasRuleHardOnly: 'Ainult Drill ja Merciless',
+  atlasRuleMercilessOnly: 'Ainult Merciless',
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
   atlasQuotaNotice: (time: string) =>

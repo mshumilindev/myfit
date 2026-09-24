@@ -3,10 +3,10 @@
  * the Merciless fine print → role → only the data that's missing → push).
  * After that: his notes as a chat thread, newest at the bottom, plus settings.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet, Switch } from '../ui';
-import { latestWeight, setCoach, updateBodyMetrics, useStore } from '../store';
+import { latestWeight, setCoach, updateBodyMetrics, useSelfTrainerId, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock } from '../atlas/notes';
 import { TEMPER_COLOR, TEMPERS, type CoachRole, type Temper } from '../atlas/types';
@@ -14,9 +14,12 @@ import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
 import { askAtlas } from '../atlas/chat';
-import { answerLocally, type Convo } from '../atlas/intents';
+import { answerLocally, didYouMean, type Convo } from '../atlas/intents';
+import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
+import { runAction } from '../atlas/actions';
+import { ChatChart } from '../components/ChatChart';
 import { buildChatFacts } from '../atlas/chatFacts';
-import { pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
+import { clearChat, pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
 import { useChatAccess } from '../atlas/chatAccess';
 import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
 import { fmtBodyWeightKg } from '../i18n';
@@ -26,9 +29,20 @@ const wallClock = (): number => Date.now();
 
 type Step = 'meet' | 'temper' | 'fine' | 'role' | 'data' | 'push';
 
-export function CoachView({ onClose }: { onClose: () => void }) {
+export function CoachView({
+  onClose,
+  onOpenSession,
+}: {
+  onClose: () => void;
+  /** Open a workout (when Atlas starts one from chat). */
+  onOpenSession?: (workoutId: string) => void;
+}) {
   const store = useStore();
-  return store.coach.enabled ? <CoachThread onClose={onClose} /> : <CoachSetup onClose={onClose} />;
+  return store.coach.enabled ? (
+    <CoachThread onClose={onClose} onOpenSession={onOpenSession} />
+  ) : (
+    <CoachSetup onClose={onClose} />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -39,7 +53,9 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   const store = useStore();
   const [step, setStep] = useState<Step>('meet');
   const [temper, setTemper] = useState<Temper>(store.coach.temper);
-  const [role, setRole] = useState<CoachRole>(store.coach.role);
+  // With a human coach, Atlas can only be the extra coach.
+  const human = !!useSelfTrainerId();
+  const [role, setRole] = useState<CoachRole>(human ? 'extra' : store.coach.role);
   const [yoMama, setYoMama] = useState(store.coach.yoMama);
   const [swearing, setSwearing] = useState(store.coach.swearing);
   const [pushHint, setPushHint] = useState<string | null>(null);
@@ -173,10 +189,17 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
               type="button"
               className={`atl-card${role === r ? ' on' : ''}`}
               aria-pressed={role === r}
+              disabled={human && r === 'main'}
               onClick={() => setRole(r)}
             >
               <b>{r === 'main' ? t.atlasRoleMain : t.atlasRoleExtra}</b>
-              <span>{r === 'main' ? t.atlasRoleMainSub : t.atlasRoleExtraSub}</span>
+              <span>
+                {r === 'main'
+                  ? human
+                    ? t.atlasRoleHumanCoach
+                    : t.atlasRoleMainSub
+                  : t.atlasRoleExtraSub}
+              </span>
             </button>
           ))}
           <button className="btn btn-primary atl-cta" onClick={() => setStep('data')}>
@@ -395,20 +418,69 @@ function dayLabel(at: number, now: number, t: ReturnType<typeof useT>['t'], loca
   }).format(at);
 }
 
-function CoachThread({ onClose }: { onClose: () => void }) {
+function CoachThread({
+  onClose,
+  onOpenSession,
+}: {
+  onClose: () => void;
+  onOpenSession?: (workoutId: string) => void;
+}) {
   const { t, locale } = useT();
   const store = useStore();
   const { notes, temper } = useAtlasNotes();
   const [settings, setSettings] = useState(false);
+  const [portrait, setPortrait] = useState(false);
+  useEffect(() => {
+    if (!portrait) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setPortrait(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [portrait]);
   const endRef = useRef<HTMLDivElement>(null);
   const chosen = store.coach.temper;
   const now = useMinuteClock();
 
-  // Opening the thread reads everything in it.
+  // Notes are read as they scroll into view (like notifications). The read
+  // mark at open time is frozen so a note keeps its highlight while you read.
+  const [readSnap] = useState(() => store.coach.readAt);
+  const feedRef = useRef<HTMLDivElement>(null);
+  const readTo = useRef(store.coach.readAt);
+  const readTimer = useRef<number | null>(null);
   useEffect(() => {
-    const newest = notes.reduce((m, n) => Math.max(m, n.at), 0);
-    if (newest > store.coach.readAt) setCoach({ readAt: newest });
-  }, [notes, store.coach.readAt]);
+    const root = feedRef.current;
+    if (!root) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        let top = readTo.current;
+        for (const e of entries)
+          if (e.isIntersecting)
+            top = Math.max(top, Number((e.target as HTMLElement).dataset.noteAt));
+        if (top <= readTo.current) return;
+        readTo.current = top;
+        // One write per burst of scrolling, not per bubble.
+        if (readTimer.current) window.clearTimeout(readTimer.current);
+        readTimer.current = window.setTimeout(() => setCoach({ readAt: readTo.current }), 500);
+      },
+      { threshold: 0.6 },
+    );
+    root.querySelectorAll<HTMLElement>('[data-note-at]').forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [notes.length]);
+  useEffect(
+    () => () => {
+      if (readTimer.current) {
+        window.clearTimeout(readTimer.current);
+        setCoach({ readAt: readTo.current });
+      }
+    },
+    [],
+  );
+
+  // A human coach owns the programme — Atlas steps back to extra coach.
+  const human = !!useSelfTrainerId();
+  useEffect(() => {
+    if (human && store.coach.role === 'main') setCoach({ role: 'extra' });
+  }, [human, store.coach.role]);
 
   const canChat = useChatAccess();
   const fmt = useAtlasFmt();
@@ -419,7 +491,13 @@ function CoachThread({ onClose }: { onClose: () => void }) {
 
   const convo = useRef<Convo>({});
   /** Reveal a local answer word by word — reads like a live reply, not a lookup. */
-  const typeOut = (id: string, at: number, text: string, chips?: string[]) =>
+  const typeOut = (
+    id: string,
+    at: number,
+    text: string,
+    chips?: string[],
+    extra: Partial<ChatMsg> = {},
+  ) =>
     new Promise<void>((resolve) => {
       const words = text.split(' ');
       pushChat({ id, at, from: 'atlas', text: '…', pending: true });
@@ -428,7 +506,12 @@ function CoachThread({ onClose }: { onClose: () => void }) {
       const tick = () => {
         i = Math.min(words.length, i + step);
         const done = i >= words.length;
-        updateChat(id, { text: words.slice(0, i).join(' '), pending: !done, ...(done && chips?.length ? { chips } : {}) });
+        updateChat(id, {
+          text: words.slice(0, i).join(' '),
+          pending: !done,
+          ...(done && chips?.length ? { chips } : {}),
+          ...(done ? extra : {}),
+        });
         if (done) resolve();
         else window.setTimeout(tick, 35);
       };
@@ -448,7 +531,13 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     const answered = await reply(q, consented);
     if (offer && answered) {
       const at = wallClock();
-      pushChat({ id: `lang-${at}`, at, from: 'atlas', text: t.atlasLangOffer(LOCALES[offer].locale), langOffer: offer });
+      pushChat({
+        id: `lang-${at}`,
+        at,
+        from: 'atlas',
+        text: t.atlasLangOffer(LOCALES[offer].locale),
+        langOffer: offer,
+      });
     }
   };
 
@@ -461,20 +550,39 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     const rid = `at-${at}`;
     // 1) Atlas's own answer base — instant, offline, from your data, and it
     //    follows the thread ("why?", "more", "and squat?").
-    const local = answerLocally(q, { s: store, now: at, locale, temper, fmt }, convo.current);
+    const ctx = {
+      s: store,
+      now: at,
+      locale,
+      temper,
+      fmt,
+      mem: store.coach.memory,
+      said: loadSaid(),
+    };
+    const local = answerLocally(q, ctx, convo.current);
+    // Memory: what you told me now, and what I answered (for consistency).
+    if (local?.learned) setCoach({ memory: mergeMemory(store.coach.memory, local.learned) });
+    if (local?.said) rememberSaid(local.said);
     if (local && !(local.escalate && canChat)) {
       convo.current = local.convo;
-      await typeOut(rid, at + 1, local.text, local.chips);
+      await typeOut(rid, at + 1, local.text, local.chips, {
+        ...(local.chart ? { chart: local.chart } : {}),
+        ...(local.action ? { action: local.action } : {}),
+      });
       return true;
     }
     if (local?.escalate) convo.current = local.convo;
     // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread.
     if (!canChat) {
-      await typeOut(rid, at + 1, t.atlasLocalUnknown, [
-        t.atlasSuggestToday,
-        t.atlasSuggestProgress,
-        t.atlasSuggestRest,
-      ]);
+      const guess = didYouMean(q, ctx);
+      await typeOut(
+        rid,
+        at + 1,
+        guess.length ? t.atlasDidYouMean : t.atlasLocalUnknown,
+        guess.length
+          ? guess.map((g) => g.ask)
+          : [t.atlasSuggestToday, t.atlasSuggestProgress, t.atlasSuggestRest],
+      );
       return true;
     }
     if (!store.coach.chatConsent && !consented) {
@@ -537,6 +645,8 @@ function CoachThread({ onClose }: { onClose: () => void }) {
     notice?: boolean;
     chips?: string[];
     langOffer?: ChatMsg['langOffer'];
+    chart?: ChatMsg['chart'];
+    action?: ChatMsg['action'];
   };
   const items: Item[] = useMemo(
     () =>
@@ -556,22 +666,74 @@ function CoachThread({ onClose }: { onClose: () => void }) {
       chipsId = items[i].id;
       break;
     }
+  const noteIds = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
+  const unreadCount = notes.filter((n) => n.at > readSnap).length;
+  const firstUnreadId = notes.find((n) => n.at > readSnap)?.id ?? null;
+  // Open at the first unread note; after that, follow the newest message.
+  const opened = useRef(false);
   useEffect(() => {
+    if (!opened.current) {
+      opened.current = true;
+      const mark = feedRef.current?.querySelector('.atl-new');
+      if (mark) {
+        mark.scrollIntoView({ block: 'start' });
+        return;
+      }
+    }
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [items.length, lastText]);
 
+  // Older messages load as you scroll up — not all at once.
+  const PAGE = 30;
+  const [limit, setLimit] = useState(() => {
+    const firstUnread = items.findIndex((n) => n.id === firstUnreadId);
+    return Math.max(PAGE, firstUnread >= 0 ? items.length - firstUnread + 5 : 0);
+  });
+  const screenRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const keepFromBottom = useRef<number | null>(null);
+  const hasOlder = items.length > limit;
+  useEffect(() => {
+    const el = topRef.current;
+    const root = screenRef.current;
+    if (!el || !root || !hasOlder) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        keepFromBottom.current = root.scrollHeight - root.scrollTop;
+        setLimit((l) => l + PAGE);
+      },
+      { root, rootMargin: '200px 0px 0px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasOlder, limit]);
+  // Keep the view where it was when older messages appear above.
+  useLayoutEffect(() => {
+    const root = screenRef.current;
+    if (root && keepFromBottom.current != null) {
+      root.scrollTop = root.scrollHeight - keepFromBottom.current;
+      keepFromBottom.current = null;
+    }
+  }, [limit]);
+  const shown = useMemo(
+    () => (hasOlder ? items.slice(items.length - limit) : items),
+    [items, hasOlder, limit],
+  );
+
   const groups = useMemo(() => {
     const out: { label: string; items: Item[] }[] = [];
-    for (const n of items) {
+    for (const n of shown) {
       const label = dayLabel(n.at, now, t, locale);
       if (out.length && out[out.length - 1].label === label) out[out.length - 1].items.push(n);
       else out.push({ label, items: [n] });
     }
     return out;
-  }, [items, now, t, locale]);
+  }, [shown, now, t, locale]);
 
   return (
     <div
+      ref={screenRef}
       className="screen atl-screen atl-thread"
       style={{ ['--atl' as string]: TEMPER_COLOR[temper] }}
     >
@@ -579,7 +741,14 @@ function CoachThread({ onClose }: { onClose: () => void }) {
         <button className="back" onClick={onClose} aria-label={t.backAction}>
           <Icon name="caret-left" />
         </button>
-        <AtlasFace temper={temper} size={38} />
+        <button
+          type="button"
+          className="atl-face-btn"
+          onClick={() => setPortrait(true)}
+          aria-label={t.atlasName}
+        >
+          <AtlasFace temper={temper} size={38} />
+        </button>
         <span className="atl-head-text">
           <b>
             {t.atlasName} <span className="atl-temper-inline">· {t.atlasTemper[temper - 1]}</span>
@@ -598,9 +767,10 @@ function CoachThread({ onClose }: { onClose: () => void }) {
           <Icon name="gear" />
         </button>
       </div>
-      <div className="atl-feed">
+      <div className="atl-feed" ref={feedRef}>
         {store.coach.role === 'main' && <PlanCard temper={temper} now={now} />}
         {notes.length === 0 && <p className="atl-empty">{t.atlasEmpty}</p>}
+        {hasOlder && <div ref={topRef} className="atl-older" aria-hidden />}
         {groups.map((g) => (
           <div key={g.label} className="atl-group">
             <span className="atl-day">{g.label}</span>
@@ -614,40 +784,91 @@ function CoachThread({ onClose }: { onClose: () => void }) {
                   {n.text}
                 </div>
               ) : (
-                <div key={n.id} className="atl-msg">
-                  <Bubble temper={temper}>
-                    <span className={n.pending ? 'atl-typing' : undefined}>{n.text}</span>
-                  </Bubble>
-                  {n.chips && n.id === chipsId && !busy && (
-                    <div className="atl-suggest">
-                      {n.chips.map((ch) => (
-                        <button key={ch} type="button" className="atl-chip" onClick={() => void send(ch, false, false)}>
-                          {ch}
+                <Fragment key={n.id}>
+                  {n.id === firstUnreadId && (
+                    <div className="atl-new" role="status">
+                      <span>{t.atlasNewNotes(unreadCount)}</span>
+                    </div>
+                  )}
+                  <div
+                    className={`atl-msg${noteIds.has(n.id) && n.at > readSnap ? ' unread' : ''}`}
+                    data-note-at={noteIds.has(n.id) ? n.at : undefined}
+                  >
+                    <Bubble temper={temper}>
+                      <span className={n.pending ? 'atl-typing' : undefined}>{n.text}</span>
+                      {n.chart && !n.pending && <ChatChart chart={n.chart} locale={locale} />}
+                    </Bubble>
+                    {n.action && !busy && (
+                      <div className="atl-suggest">
+                        <button
+                          type="button"
+                          className="atl-chip atl-chip-do"
+                          onClick={() => {
+                            const act = n.action!;
+                            updateChat(n.id, { action: undefined });
+                            const L = (en: string, uk: string) => (locale === 'uk' ? uk : en);
+                            const res = runAction(act, store, wallClock(), L, fmt.exercise);
+                            const at = wallClock();
+                            pushChat({ id: `act-${at}`, at, from: 'atlas', text: res.text });
+                            if (res.openWorkoutId) onOpenSession?.(res.openWorkoutId);
+                          }}
+                        >
+                          {t.atlasDoIt}
                         </button>
-                      ))}
-                    </div>
-                  )}
-                  {n.langOffer && !busy && (
-                    <div className="atl-suggest">
-                      <button
-                        type="button"
-                        className="atl-chip"
-                        onClick={() => {
-                          const to = n.langOffer!;
-                          updateChat(n.id, { langOffer: undefined });
-                          setLocale(to);
-                          const at = wallClock();
-                          pushChat({ id: `lang-ok-${at}`, at, from: 'atlas', text: LOCALES[to].atlasLangDone });
-                        }}
-                      >
-                        {FLAGS[n.langOffer]} {LOCALES[n.langOffer].locale}
-                      </button>
-                      <button type="button" className="atl-chip" onClick={() => updateChat(n.id, { langOffer: undefined })}>
-                        {t.atlasLangKeep}
-                      </button>
-                    </div>
-                  )}
-                </div>
+                        <button
+                          type="button"
+                          className="atl-chip"
+                          onClick={() => updateChat(n.id, { action: undefined })}
+                        >
+                          {t.atlasCancel}
+                        </button>
+                      </div>
+                    )}
+                    {n.chips && n.id === chipsId && !busy && (
+                      <div className="atl-suggest">
+                        {n.chips.map((ch) => (
+                          <button
+                            key={ch}
+                            type="button"
+                            className="atl-chip"
+                            onClick={() => void send(ch, false, false)}
+                          >
+                            {ch}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {n.langOffer && !busy && (
+                      <div className="atl-suggest">
+                        <button
+                          type="button"
+                          className="atl-chip"
+                          onClick={() => {
+                            const to = n.langOffer!;
+                            updateChat(n.id, { langOffer: undefined });
+                            setLocale(to);
+                            const at = wallClock();
+                            pushChat({
+                              id: `lang-ok-${at}`,
+                              at,
+                              from: 'atlas',
+                              text: LOCALES[to].atlasLangDone,
+                            });
+                          }}
+                        >
+                          {FLAGS[n.langOffer]} {LOCALES[n.langOffer].locale}
+                        </button>
+                        <button
+                          type="button"
+                          className="atl-chip"
+                          onClick={() => updateChat(n.id, { langOffer: undefined })}
+                        >
+                          {t.atlasLangKeep}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </Fragment>
               ),
             )}
           </div>
@@ -700,6 +921,22 @@ function CoachThread({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         </Sheet>
+      )}
+      {portrait && (
+        <div
+          className="atl-portrait"
+          role="dialog"
+          aria-label={`${t.atlasName} · ${t.atlasTemper[temper - 1]}`}
+          onClick={() => setPortrait(false)}
+        >
+          <img src={`/atlas/atlas-${temper}-full.webp`} alt="" />
+          <span className="atl-portrait-name">
+            {t.atlasName} <span className="atl-temper-inline">· {t.atlasTemper[temper - 1]}</span>
+          </span>
+          <button type="button" className="atl-portrait-close" aria-label={t.backAction}>
+            <Icon name="x" />
+          </button>
+        </div>
       )}
       {settings && <CoachSettingsSheet onClose={() => setSettings(false)} />}
     </div>
@@ -771,6 +1008,57 @@ function PlanCard({ temper, now }: { temper: Temper; now: number }) {
 function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const { coach } = useStore();
+  const human = !!useSelfTrainerId();
+  // A draft: nothing changes (and nothing is rebuilt) until Save.
+  const [draft, setDraft] = useState(() => ({
+    temper: coach.temper,
+    role: human ? ('extra' as CoachRole) : coach.role,
+    yoMama: coach.yoMama,
+    swearing: coach.swearing,
+  }));
+  const dirty =
+    draft.temper !== coach.temper ||
+    draft.role !== coach.role ||
+    draft.yoMama !== coach.yoMama ||
+    draft.swearing !== coach.swearing;
+  const edit = (patch: Partial<typeof draft>) => setDraft((d) => ({ ...d, ...patch }));
+  const [confirm, setConfirm] = useState<'off' | 'clear' | null>(null);
+  const hard = draft.temper >= 4;
+
+  if (confirm)
+    return (
+      <Sheet onClose={() => setConfirm(null)} className="atl-sheet">
+        <div className="sheet-head">
+          <h3>{confirm === 'off' ? t.atlasTurnOffAsk : t.atlasClearAsk}</h3>
+        </div>
+        <p className="atl-confirm-body">
+          {confirm === 'off' ? t.atlasTurnOffBody : t.atlasClearBody}
+        </p>
+        <div className="sheet-actions">
+          <button className="btn btn-secondary grow" onClick={() => setConfirm(null)}>
+            {t.atlasCancel}
+          </button>
+          <button
+            className="btn btn-danger grow"
+            onClick={() => {
+              if (confirm === 'off') setCoach({ enabled: false });
+              else {
+                // The conversation (and what Atlas said, for consistency) —
+                // not your log, not what he remembers about you.
+                clearChat();
+                clearSaid();
+                const now = Date.now();
+                setCoach({ clearedAt: now, readAt: now });
+              }
+              onClose();
+            }}
+          >
+            {confirm === 'off' ? t.atlasTurnOff : t.atlasClear}
+          </button>
+        </div>
+      </Sheet>
+    );
+
   return (
     <Sheet onClose={onClose} className="atl-sheet">
       <div className="sheet-head">
@@ -782,12 +1070,12 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           <button
             key={i}
             type="button"
-            aria-pressed={coach.temper === i}
-            className={coach.temper === i ? 'on' : ''}
+            aria-pressed={draft.temper === i}
+            className={draft.temper === i ? 'on' : ''}
             style={{ ['--tc' as string]: TEMPER_COLOR[i] }}
-            onClick={() => setCoach({ temper: i })}
+            onClick={() => edit({ temper: i })}
           >
-            <AtlasFace temper={i} size={34} />
+            <AtlasFace temper={i} size={52} />
             <span>{t.atlasTemper[i - 1]}</span>
           </button>
         ))}
@@ -798,36 +1086,49 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           <button
             key={r}
             type="button"
-            aria-pressed={coach.role === r}
-            className={coach.role === r ? 'on' : ''}
-            onClick={() => setCoach({ role: r })}
+            aria-pressed={draft.role === r}
+            className={draft.role === r ? 'on' : ''}
+            disabled={human && r === 'main'}
+            onClick={() => edit({ role: r })}
           >
             {r === 'main' ? t.atlasRoleMain : t.atlasRoleExtra}
           </button>
         ))}
       </div>
+      {human && <p className="atl-hint atl-hint-left">{t.atlasRoleHumanCoach}</p>}
       <div className="se-group">
         <RuleRow
           label={t.atlasRuleMom}
-          sub={t.atlasRuleMomSub}
-          on={coach.yoMama}
-          onToggle={() => setCoach({ yoMama: !coach.yoMama })}
+          sub={hard ? t.atlasRuleMomSub : t.atlasRuleHardOnly}
+          on={draft.yoMama}
+          onToggle={() => edit({ yoMama: !draft.yoMama })}
+        />
+        <RuleRow
+          label={t.atlasRuleSwear}
+          sub={draft.temper === 5 ? t.atlasRuleSwearSub : t.atlasRuleMercilessOnly}
+          on={draft.swearing}
+          onToggle={() => edit({ swearing: !draft.swearing })}
         />
         <RuleRow label={t.atlasRuleEffort} sub={t.atlasRuleEffortSub} on locked />
         <RuleRow label={t.atlasRuleSoften} sub={t.atlasRuleSoftenSub} on locked />
       </div>
+      <button type="button" className="atl-clear" onClick={() => setConfirm('clear')}>
+        <Icon name="trash" />
+        {t.atlasClear}
+      </button>
       <div className="sheet-actions">
+        <button className="btn btn-secondary grow" onClick={() => setConfirm('off')}>
+          {t.atlasTurnOff}
+        </button>
         <button
-          className="btn btn-secondary grow"
+          className="btn btn-primary grow"
+          disabled={!dirty}
           onClick={() => {
-            setCoach({ enabled: false });
+            setCoach(draft);
             onClose();
           }}
         >
-          {t.atlasTurnOff}
-        </button>
-        <button className="btn btn-primary grow" onClick={onClose}>
-          {t.done}
+          {t.atlasSave}
         </button>
       </div>
     </Sheet>

@@ -598,21 +598,7 @@ export const INTENTS_MORE: Intent[] = [
   },
   {
     id: 'squat_form',
-    all: [
-      [
-        'depth',
-        'deep',
-        'how deep',
-        'knees',
-        'form',
-        'technique',
-        'глибин*',
-        'глибоко',
-        'коліна',
-        'техні*',
-        'як правильно',
-      ],
-    ],
+    all: [['depth', 'deep', 'how deep', 'knees', 'глибин*', 'глибоко', 'коліна']],
     needs: 'exercise',
     answer: (c, p, L) => {
       const n = p.exercise!.toLowerCase();

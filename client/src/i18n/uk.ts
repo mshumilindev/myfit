@@ -1785,12 +1785,27 @@ export const uk: Strings = {
   atlasTemperLabel: 'Характер',
   atlasRoleLabel: 'Роль',
   atlasTurnOff: 'Вимкнути Atlas',
-  atlasSuggestToday: "Що тренувати сьогодні?",
-  atlasSuggestProgress: "Як мій прогрес?",
-  atlasSuggestRest: "Скільки відпочивати?",
-  atlasLangOffer: (n: string) => `Змінити мову додатку на «${n}»? Я розумію будь-якою, але відповідаю мовою додатку.`,
-  atlasLangKeep: "Ні, залишити",
-  atlasLangDone: "Готово — далі українською.",
+  atlasSuggestToday: 'Що тренувати сьогодні?',
+  atlasSuggestProgress: 'Як мій прогрес?',
+  atlasSuggestRest: 'Скільки відпочивати?',
+  atlasLangOffer: (n: string) =>
+    `Змінити мову додатку на «${n}»? Я розумію будь-якою, але відповідаю мовою додатку.`,
+  atlasLangKeep: 'Ні, залишити',
+  atlasLangDone: 'Готово — далі українською.',
+  atlasNewNotes: (n: number) => `${n} ${n === 1 ? 'нове' : 'нових'}`,
+  atlasDidYouMean: 'Не впевнений, що зрозумів. Ти мав на увазі:',
+  atlasDoIt: 'Так, зроби',
+  atlasCancel: 'Скасувати',
+  atlasRoleHumanCoach: 'У тебе є тренер — програма за ним, тож Atlas може бути лише додатковим.',
+  atlasClear: 'Очистити чат',
+  atlasTurnOffAsk: 'Вимкнути Atlas?',
+  atlasTurnOffBody:
+    'Він перестане коментувати, план більше не його. Журнал, чат і те, що він пам’ятає, лишаються — увімкнути можна будь-коли.',
+  atlasClearAsk: 'Очистити чат?',
+  atlasClearBody:
+    'Уся розмова і його нотатки дотепер зникнуть. Журнал і те, що він про тебе пам’ятає, лишаються.',
+  atlasRuleHardOnly: 'Лише «Муштра» і «Безжальний»',
+  atlasRuleMercilessOnly: 'Лише «Безжальний»',
   atlasLocalUnknown:
     'Цього я поки не знаю. Питай про тренування: що робити сьогодні, відпочинок, наступну вагу, рекорди, відновлення, сон, програму.',
   atlasQuotaNotice: (time: string) =>

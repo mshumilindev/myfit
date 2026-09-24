@@ -38653,3 +38653,210 @@ body {
     padding-inline: 26px 30px;
   }
 }
+/* The thread header sits flush at the top — no gutter above it. */
+.screen.atl-thread {
+  padding-top: 0;
+}
+/* Unread notes: a divider above the first one and a soft tint until seen. */
+.atl-new {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 6px;
+  color: var(--atl);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  scroll-margin-top: 90px;
+}
+.atl-new::before,
+.atl-new::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--atl) 45%, transparent);
+}
+.atl-msg.unread .atl-bubble {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--atl) 35%, transparent);
+}
+/* Unread count on Atlas's bubble in the stories strip. */
+.atl-story .tcs-ring {
+  position: relative;
+}
+.atl-story-count {
+  /* Inside the ring's box (the strip row clips anything above it). */
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--atl);
+  color: #140c0d;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  letter-spacing: -0.02em;
+  box-shadow: 0 0 0 2px var(--color-bg);
+}
+/* Charts inside Atlas's answers. */
+.atl-chart {
+  margin: 10px 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.atl-chart figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-neutral-400);
+}
+.atl-chart figcaption b {
+  color: var(--color-neutral-100);
+  font-weight: 600;
+}
+.atl-chart svg {
+  width: 100%;
+  height: 64px;
+  display: block;
+}
+.atl-chart-line {
+  fill: none;
+  stroke: var(--atl);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+.atl-chart-area {
+  fill: color-mix(in srgb, var(--atl) 16%, transparent);
+}
+.atl-chart-dot {
+  fill: var(--atl);
+}
+.atl-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--color-neutral-500);
+}
+/* "Do it" on Atlas's offers. */
+.atl-chip.atl-chip-do {
+  background: var(--atl);
+  border-color: var(--atl);
+  color: #140c0d;
+}
+/* The composer sits at the bottom even when the thread is short. */
+.atl-thread .atl-feed {
+  flex: 1 0 auto;
+  padding-bottom: 12px;
+}
+.atl-thread .atl-composer {
+  margin-top: auto;
+}
+
+.atl-hint.atl-hint-left {
+  text-align: left;
+  margin: 8px 2px 0;
+}
+.atl-seg button:disabled,
+.atl-card:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.atl-clear {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-divider);
+  background: none;
+  color: var(--color-neutral-300);
+  font: inherit;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+.atl-clear.sure {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+.atl-older {
+  height: 1px;
+}
+.atl-confirm-body {
+  margin: 0 0 16px;
+  color: var(--color-neutral-300);
+  font-size: 14.5px;
+  line-height: 21px;
+}
+.atl-sheet .btn-danger {
+  background: var(--color-danger);
+  border: 1px solid var(--color-danger);
+  color: #fff;
+}
+.atl-sheet .btn-primary:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+/* Atlas's portrait, full screen, uncropped (tap to close). */
+.atl-face-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: zoom-in;
+}
+.atl-portrait {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: calc(24px + var(--safe-top, 0px)) 16px calc(24px + var(--safe-bottom, 0px));
+  background: rgba(8, 9, 11, 0.94);
+  animation: atlPortraitIn 0.18s ease-out;
+  cursor: zoom-out;
+}
+.atl-portrait img {
+  max-width: 100%;
+  max-height: calc(100% - 60px);
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 2px var(--atl),
+    0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.atl-portrait-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-neutral-100);
+}
+.atl-portrait-close {
+  position: absolute;
+  top: calc(12px + var(--safe-top, 0px));
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-neutral-100);
+  display: grid;
+  place-items: center;
+}
+@keyframes atlPortraitIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}

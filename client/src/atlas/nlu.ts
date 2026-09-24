@@ -125,6 +125,8 @@ export function findMuscle(words: string[], phrase: string): MuscleGroup | null 
 /** Everyday lift words (en + uk) → a fragment to look for in exercise names. */
 const LIFT_ALIASES: [string[], string][] = [
   [['bench', 'жим лежа*', 'жиму лежа*', 'лежачи', 'бенч'], 'bench'],
+  // Bare "жим" is the bench in gym talk — unless it's a leg / standing press.
+  [['жим', 'жиму', 'жимі', 'жимом'], 'bench'],
   [['squat*', 'присід*', 'присяд*'], 'squat'],
   [['deadlift*', 'dl', 'станов*', 'мертв*'], 'deadlift'],
   [['row', 'rows', 'тяга в нахил*', 'тягу в нахил*'], 'row'],
@@ -142,6 +144,19 @@ const LIFT_ALIASES: [string[], string][] = [
   [['plank*', 'планк*'], 'plank'],
 ];
 
+const OTHER_PRESS = ['ногами', 'стоячи', 'над', 'сидячи', 'гантел*', 'плеч*'];
+function aliasFrags(words: string[], phrase: string): string[] {
+  const out = LIFT_ALIASES.filter(([kws]) => groupMatches(words, phrase, kws)).map(([, f]) => f);
+  // "жим ногами / стоячи / гантелей" is not the bench.
+  if (
+    out.includes('bench') &&
+    groupMatches(words, phrase, OTHER_PRESS) &&
+    !groupMatches(words, phrase, ['bench', 'лежа*', 'лежачи', 'бенч'])
+  )
+    return out.filter((f) => f !== 'bench');
+  return out;
+}
+
 /**
  * The lift a question is about, resolved against the names you actually log
  * (so "bench" → "Barbell Bench Press - Medium Grip"). Most-logged match wins.
@@ -151,7 +166,7 @@ export function findExercise(
   phrase: string,
   logged: { name: string; count: number }[],
 ): string | null {
-  const frags = LIFT_ALIASES.filter(([kws]) => groupMatches(words, phrase, kws)).map(([, f]) => f);
+  const frags = aliasFrags(words, phrase);
   // Also match words that appear in your own exercise names ("incline", "hammer"…).
   const byName = logged
     .map((ex) => {
@@ -167,7 +182,23 @@ export function findExercise(
 
 // ---- Negation, transliteration, catalog ------------------------------------
 
-const NEGATORS = new Set(['no', 'not', 'never', 'without', 'dont', 'don', 'doesnt', 'isnt', 'не', 'ні', 'без', 'нема', 'немає', 'ніде', 'нічого']);
+const NEGATORS = new Set([
+  'no',
+  'not',
+  'never',
+  'without',
+  'dont',
+  'don',
+  'doesnt',
+  'isnt',
+  'не',
+  'ні',
+  'без',
+  'нема',
+  'немає',
+  'ніде',
+  'нічого',
+]);
 
 /** Is the word matching `keywords` preceded (within 2 words) by a negation? */
 export function negated(words: string[], keywords: string[]): boolean {
@@ -179,19 +210,52 @@ export function negated(words: string[], keywords: string[]): boolean {
 }
 
 const TRANSLIT: [string, string][] = [
-  ['shch', 'щ'], ['zh', 'ж'], ['kh', 'х'], ['ts', 'ц'], ['ch', 'ч'], ['sh', 'ш'],
-  ['yu', 'ю'], ['ya', 'я'], ['ye', 'є'], ['yi', 'ї'], ['ia', 'я'], ['iu', 'ю'], ['ie', 'є'],
-  ['a', 'а'], ['b', 'б'], ['v', 'в'], ['h', 'г'], ['g', 'г'], ['d', 'д'], ['e', 'е'], ['z', 'з'],
-  ['y', 'и'], ['i', 'і'], ['j', 'й'], ['k', 'к'], ['l', 'л'], ['m', 'м'], ['n', 'н'], ['o', 'о'],
-  ['p', 'п'], ['r', 'р'], ['s', 'с'], ['t', 'т'], ['u', 'у'], ['f', 'ф'], ['c', 'ц'], ['w', 'в'],
-  ['x', 'кс'], ['q', 'к'],
+  ['shch', 'щ'],
+  ['zh', 'ж'],
+  ['kh', 'х'],
+  ['ts', 'ц'],
+  ['ch', 'ч'],
+  ['sh', 'ш'],
+  ['yu', 'ю'],
+  ['ya', 'я'],
+  ['ye', 'є'],
+  ['yi', 'ї'],
+  ['ia', 'я'],
+  ['iu', 'ю'],
+  ['ie', 'є'],
+  ['a', 'а'],
+  ['b', 'б'],
+  ['v', 'в'],
+  ['h', 'г'],
+  ['g', 'г'],
+  ['d', 'д'],
+  ['e', 'е'],
+  ['z', 'з'],
+  ['y', 'и'],
+  ['i', 'і'],
+  ['j', 'й'],
+  ['k', 'к'],
+  ['l', 'л'],
+  ['m', 'м'],
+  ['n', 'н'],
+  ['o', 'о'],
+  ['p', 'п'],
+  ['r', 'р'],
+  ['s', 'с'],
+  ['t', 'т'],
+  ['u', 'у'],
+  ['f', 'ф'],
+  ['c', 'ц'],
+  ['w', 'в'],
+  ['x', 'кс'],
+  ['q', 'к'],
 ];
 
 /** Latin-typed Ukrainian ("skilky vidpochyvaty") → Cyrillic, for a second try. */
 export function translitToUk(text: string): string {
   let out = '';
   const t = text.toLowerCase();
-  for (let i = 0; i < t.length; ) {
+  for (let i = 0; i < t.length;) {
     const hit = TRANSLIT.find(([lat]) => t.startsWith(lat, i));
     if (hit) {
       out += hit[1];
@@ -207,17 +271,116 @@ export function translitToUk(text: string): string {
 export const hasCyrillic = (s: string) => /[\u0400-\u04ff]/.test(s);
 
 /** A catalog name for a lift mentioned by alias (for lifts you haven't logged yet). */
-export function findCatalogExercise(words: string[], phrase: string, names: string[]): string | null {
-  const frags = LIFT_ALIASES.filter(([kws]) => groupMatches(words, phrase, kws)).map(([, f]) => f);
+/** Name words that echo ordinary question words ("weight"). */
+const NAME_STOP = new Set(['weighted', 'weight', 'with', 'using']);
+
+/** The everyday version of a lift when only its common name is given. */
+const CANONICAL: Record<string, string> = {
+  bench: 'Barbell Bench Press - Medium Grip',
+  squat: 'Barbell Full Squat',
+  deadlift: 'Barbell Deadlift',
+  row: 'Bent Over Barbell Row',
+  pulldown: 'Wide-Grip Lat Pulldown',
+  pull: 'Pullups',
+  push: 'Pushups',
+  curl: 'Barbell Curl',
+  press: 'Standing Military Press',
+  dip: 'Dips - Triceps Version',
+  lunge: 'Dumbbell Lunges',
+  thrust: 'Barbell Hip Thrust',
+  'leg press': 'Leg Press',
+  calf: 'Standing Calf Raises',
+  raise: 'Side Lateral Raise',
+  plank: 'Plank',
+};
+
+export function findCatalogExercise(
+  words: string[],
+  phrase: string,
+  names: string[],
+): string | null {
+  const frags = aliasFrags(words, phrase);
   // A muscle word alone ("chest") names a muscle, not a lift.
   const plain = words.filter((w) => !MUSCLE_WORDS.some(([, kws]) => groupMatches([w], w, kws)));
-  let best: { name: string; score: number } | null = null;
+  let best: { name: string; score: number; hits: number } | null = null;
   for (const name of names) {
     const lower = name.toLowerCase();
-    const nameWords = tokens(name).filter((w) => w.length >= 4);
+    const nameWords = tokens(name).filter((w) => w.length >= 4 && !NAME_STOP.has(w));
     const hits = nameWords.filter((nw) => plain.some((w) => wordMatches(w, nw))).length;
     const score = hits * 2 + (frags.some((f) => lower.includes(f)) ? 3 : 0) - lower.length / 100;
-    if (score >= 3 && (!best || score > best.score)) best = { name, score };
+    if (score >= 3 && (!best || score > best.score)) best = { name, score, hits };
+  }
+  // Only the common name was given ("lunges") → the everyday version.
+  if (best && best.hits <= 1 && frags.length) {
+    const canon = CANONICAL[frags[frags.length - 1]] ?? CANONICAL[frags[0]];
+    if (canon && names.includes(canon) && canon.toLowerCase().includes(frags[0])) return canon;
   }
   return best?.name ?? null;
+}
+
+const LIFT_SEP = new Set([
+  'vs',
+  'versus',
+  'or',
+  'and',
+  'with',
+  'for',
+  'to',
+  'than',
+  'instead',
+  'into',
+  'чи',
+  'або',
+  'і',
+  'й',
+  'та',
+  'на',
+  'ніж',
+  'проти',
+  'замість',
+  'з',
+  'чем',
+  'или',
+  'lub',
+  'czy',
+  'albo',
+  'ar',
+  'arba',
+  'või',
+  'ja',
+]);
+
+/**
+ * Every lift named in the question, in order ("swap bench for dumbbell
+ * press" → [bench, dumbbell press]). Split at "vs / or / for / на / чи…".
+ */
+export function findExercises(
+  words: string[],
+  logged: { name: string; count: number }[],
+  catalog: string[],
+): string[] {
+  const segs: string[][] = [[]];
+  for (const w of words) {
+    if (LIFT_SEP.has(w)) segs.push([]);
+    else segs[segs.length - 1].push(w);
+  }
+  const out: string[] = [];
+  for (const seg of segs) {
+    if (!seg.length) continue;
+    const ph = seg.join(' ');
+    const cover = (name: string) => {
+      const nw = tokens(name);
+      return seg.filter((w) => w.length >= 4 && nw.some((n) => wordMatches(w, n))).length;
+    };
+    const mine = findExercise(seg, ph, logged);
+    const cat = findCatalogExercise(
+      seg,
+      ph,
+      catalog.filter((n) => !out.includes(n)),
+    );
+    const ex =
+      mine && !out.includes(mine) && (!cat || cover(mine) >= cover(cat)) ? mine : (cat ?? mine);
+    if (ex && !out.includes(ex)) out.push(ex);
+  }
+  return out;
 }

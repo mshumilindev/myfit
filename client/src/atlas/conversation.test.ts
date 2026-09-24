@@ -24,7 +24,10 @@ const session = (daysAgo: number, bench: number): Workout =>
     startedAt: NOW - daysAgo * DAY,
     finishedAt: NOW - daysAgo * DAY + 3_600_000,
     gymId: 'g1',
-    exercises: [lift('Barbell Bench Press - Medium Grip', bench, 8), lift('Barbell Deadlift', 140, 5)],
+    exercises: [
+      lift('Barbell Bench Press - Medium Grip', bench, 8),
+      lift('Barbell Deadlift', 140, 5),
+    ],
   }) as unknown as Workout;
 
 const ctx = (locale: 'en' | 'uk'): AskCtx => ({
@@ -82,7 +85,9 @@ describe('a conversation, not a FAQ', () => {
   });
 
   it('hears “not” — no pain answer when nothing hurts', () => {
-    expect(answerLocally('my back does not hurt, what should I train today', c)?.intent).toBe('today');
+    expect(answerLocally('my back does not hurt, what should I train today', c)?.intent).toBe(
+      'today',
+    );
   });
 
   it('every depth entry points at a real intent', () => {

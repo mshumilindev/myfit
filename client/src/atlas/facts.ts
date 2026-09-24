@@ -183,6 +183,12 @@ export function usualStartHour(finished: Workout[], dow: number): number | null 
 }
 
 /** Facts about today and the recent past (Today strip, pushes). */
+const dayStart = (t: number) => {
+  const d = new Date(t);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+};
+
 export function dayFacts(ctx: DayContext): CoachFact[] {
   const { finished, plays, sleeps, body, now } = ctx;
   const out: CoachFact[] = [];
@@ -195,7 +201,13 @@ export function dayFacts(ctx: DayContext): CoachFact[] {
   const usual = usualStartHour(finished, dow);
   const hourNow = new Date(now).getHours() + new Date(now).getMinutes() / 60;
   if (play && !trainedToday && usual !== null && hourNow >= usual + 2)
-    out.push({ kind: 'skipped', id: `skipped:${today}`, at: now, dayName: play.name });
+    out.push({
+      kind: 'skipped',
+      id: `skipped:${today}`,
+      // A fixed moment (usual start + 2 h), not "now" — so it can be read.
+      at: dayStart(now) + Math.round((usual + 2) * 3_600_000),
+      dayName: play.name,
+    });
 
   // Imbalance over the last week, among muscles you actually train.
   const trainedRecently = weeklyMuscleSets(finished, now, 28);
@@ -211,7 +223,12 @@ export function dayFacts(ctx: DayContext): CoachFact[] {
       out.push({
         kind: 'imbalance',
         id: `imbalance:${Math.floor(now / WEEK)}:${low}:${high}`,
-        at: now,
+        // When it became true (your latest session), not "now" — a note whose
+        // time moves with the clock could never be marked read.
+        at: Math.max(
+          Math.floor(now / WEEK) * WEEK,
+          ...finished.map((w) => w.finishedAt ?? w.startedAt).filter((t) => t <= now),
+        ),
         low,
         high,
         lowSets,
@@ -266,7 +283,7 @@ export function weekFact(finished: Workout[], now: number, planned?: number): Co
   return {
     kind: 'week',
     id: `week:${Math.floor(now / WEEK)}`,
-    at: now,
+    at: dayStart(now),
     sessions,
     planned: planned ?? usualSessionsPerWeek(finished, now - WEEK),
   };

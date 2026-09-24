@@ -1788,12 +1788,28 @@ export const pl: Strings = {
   atlasTemperLabel: 'Temperament',
   atlasRoleLabel: 'Rola',
   atlasTurnOff: 'Wyłącz Atlasa',
-  atlasSuggestToday: "Co dziś trenować?",
-  atlasSuggestProgress: "Jak mi idzie?",
-  atlasSuggestRest: "Ile odpoczywać?",
-  atlasLangOffer: (n: string) => `Zmienić język aplikacji na „${n}”? Rozumiem każdy język, ale odpowiadam w języku aplikacji.`,
-  atlasLangKeep: "Nie, zostaw",
-  atlasLangDone: "Gotowe — od teraz po polsku.",
+  atlasSuggestToday: 'Co dziś trenować?',
+  atlasSuggestProgress: 'Jak mi idzie?',
+  atlasSuggestRest: 'Ile odpoczywać?',
+  atlasLangOffer: (n: string) =>
+    `Zmienić język aplikacji na „${n}”? Rozumiem każdy język, ale odpowiadam w języku aplikacji.`,
+  atlasLangKeep: 'Nie, zostaw',
+  atlasLangDone: 'Gotowe — od teraz po polsku.',
+  atlasNewNotes: (n: number) => `${n} ${n === 1 ? 'nowa' : 'nowe'}`,
+  atlasDidYouMean: 'Nie jestem pewien, czy dobrze rozumiem. Chodziło ci o:',
+  atlasDoIt: 'Zrób to',
+  atlasCancel: 'Anuluj',
+  atlasRoleHumanCoach:
+    'Masz trenera — to on prowadzi plan, więc Atlas może być tylko dodatkowym trenerem.',
+  atlasClear: 'Wyczyść czat',
+  atlasTurnOffAsk: 'Wyłączyć Atlasa?',
+  atlasTurnOffBody:
+    'Przestanie komentować, a plan nie będzie już jego. Dziennik, czat i to, co pamięta, zostają — włączysz go w każdej chwili.',
+  atlasClearAsk: 'Wyczyścić czat?',
+  atlasClearBody:
+    'Cała rozmowa i dotychczasowe notatki znikną. Dziennik i to, co o tobie pamięta, zostają.',
+  atlasRuleHardOnly: 'Tylko Drill i Merciless',
+  atlasRuleMercilessOnly: 'Tylko Merciless',
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
   atlasQuotaNotice: (time: string) =>

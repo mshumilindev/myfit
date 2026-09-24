@@ -14,6 +14,7 @@ import { blockWeek, isDeloadWeek, planDayFor } from './plan';
 import {
   findCatalogExercise,
   findExercise,
+  findExercises,
   findMuscle,
   groupMatches,
   hasCyrillic,
@@ -25,6 +26,25 @@ import {
 } from './nlu';
 import { DEPTH, DEFAULT_NEXT } from './depth';
 import { INTENTS_FOURTH } from './intentsFourth';
+import { CHARTS, INTENTS_FIFTH } from './intentsFifth';
+import { INTENTS_SIXTH, MORES } from './intentsSixth';
+import { emojiReply, INTENTS_SMALL, SMALLTALK_IDS, SMALL_OVERRIDES } from './smalltalk';
+
+const SMALL_NEW = new Set(INTENTS_SMALL.map((i) => i.id));
+import { parseRange, parseWeekdays } from './when';
+import { SORE_CAP } from './memoryPlan';
+import { ASKS } from './asks';
+import { toKnownLanguage } from './lexicon';
+import {
+  consistent,
+  learn,
+  mergeMemory,
+  PART_NAME,
+  saidKey,
+  soreFor,
+  type AtlasMemory,
+  type SaidRec,
+} from './memory';
 import { BUILT_IN_CATALOG } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
 import { usualSessionsPerWeek } from './facts';
@@ -39,6 +59,8 @@ import {
   todayLine,
   wd,
   type AskCtx,
+  type AtlasAction,
+  type Chart,
   type Intent,
   type Parsed,
   type Tr,
@@ -83,12 +105,51 @@ export const PAIN_WORDS = [
 
 /** Body-part specifics for pain (safe, general; the Injury screen does the rest). */
 const BODY_PAIN: [string[], string, string][] = [
-  [['lower back', 'back', 'поперек*', 'спина', 'спині', 'спину'], 'Lower back: skip deadlifts, good mornings and heavy rows for now; walking and gentle movement usually help more than bed rest.', 'Поперек: поки без станової, нахилів і важких тяг у нахилі; ходьба й легкий рух зазвичай допомагають більше, ніж лежання.'],
-  [['knee*', 'коліно', 'коліна', 'колін*'], 'Knee: keep squats shallow and pain-free, try leg press or box squats, avoid deep lunges until it settles.', 'Коліно: присідай неглибоко й без болю, спробуй жим ногами чи присід на лаву, глибокі випади — поки ні.'],
-  [['shoulder*', 'плеч*'], 'Shoulder: no overhead pressing or dips for now; neutral-grip dumbbell presses and cable rows are usually tolerated.', 'Плече: поки без жимів над головою й брусів; жим гантелей нейтральним хватом і тяги на блоці зазвичай переносяться.'],
-  [['elbow*', 'лікоть', 'лікт*'], 'Elbow: ease off heavy curls, skull-crushers and chin-ups; switch to neutral grips and lighter, slower reps.', 'Лікоть: менше важких згинань, французького жиму й підтягувань зворотним хватом; нейтральний хват, легше й повільніше.'],
-  [['wrist*', 'зап’яст*', 'запяст*', 'кист*'], 'Wrist: use wrist wraps, a thumbless or neutral grip, dumbbells instead of a straight bar.', 'Зап’ястя: бинти, нейтральний хват, гантелі замість прямого грифа.'],
-  [['neck', 'шия', 'шиї', 'шию'], 'Neck: no shrugs or heavy overhead work; keep your chin tucked and the head neutral.', 'Шия: без шрагів і важких жимів над головою; підборіддя трохи прибране, голова нейтрально.'],
+  [
+    ['lower back', 'back', 'поперек*', 'спина', 'спині', 'спину'],
+    'Lower back: skip deadlifts, good mornings and heavy rows for now; walking and gentle movement usually help more than bed rest.',
+    'Поперек: поки без станової, нахилів і важких тяг у нахилі; ходьба й легкий рух зазвичай допомагають більше, ніж лежання.',
+  ],
+  [
+    ['knee*', 'коліно', 'коліна', 'колін*'],
+    'Knee: keep squats shallow and pain-free, try leg press or box squats, avoid deep lunges until it settles.',
+    'Коліно: присідай неглибоко й без болю, спробуй жим ногами чи присід на лаву, глибокі випади — поки ні.',
+  ],
+  [
+    ['shoulder*', 'плеч*'],
+    'Shoulder: no overhead pressing or dips for now; neutral-grip dumbbell presses and cable rows are usually tolerated.',
+    'Плече: поки без жимів над головою й брусів; жим гантелей нейтральним хватом і тяги на блоці зазвичай переносяться.',
+  ],
+  [
+    ['elbow*', 'лікоть', 'лікт*'],
+    'Elbow: ease off heavy curls, skull-crushers and chin-ups; switch to neutral grips and lighter, slower reps.',
+    'Лікоть: менше важких згинань, французького жиму й підтягувань зворотним хватом; нейтральний хват, легше й повільніше.',
+  ],
+  [
+    ['wrist*', 'зап’яст*', 'запяст*', 'кист*'],
+    'Wrist: use wrist wraps, a thumbless or neutral grip, dumbbells instead of a straight bar.',
+    'Зап’ястя: бинти, нейтральний хват, гантелі замість прямого грифа.',
+  ],
+  [
+    ['hip', 'hips', 'кульш*', 'стегно'],
+    'Hip: shallower squats and a narrower stance for now; glute bridges and side-lying raises are usually fine.',
+    'Кульшовий: поки мілкіший присід і вужча стійка; сідничний міст і відведення ноги лежачи зазвичай можна.',
+  ],
+  [
+    ['ankle*', 'гомілк*', 'щиколот*', 'голеностоп*'],
+    'Ankle: seated and machine work, no jumps or running until you can walk it off.',
+    'Гомілкостоп: вправи сидячи й на тренажерах, без стрибків і бігу, поки не ходиш вільно.',
+  ],
+  [
+    ['hamstring*', 'задн* поверхн*'],
+    'Hamstring: no sprints or heavy RDLs; light bridges and pain-free holds.',
+    'Задня поверхня: без спринтів і важкої румунської тяги; легкий міст і утримання без болю.',
+  ],
+  [
+    ['neck', 'шия', 'шиї', 'шию'],
+    'Neck: no shrugs or heavy overhead work; keep your chin tucked and the head neutral.',
+    'Шия: без шрагів і важких жимів над головою; підборіддя трохи прибране, голова нейтрально.',
+  ],
 ];
 
 export const INTENTS: Intent[] = [
@@ -765,7 +826,6 @@ export const INTENTS: Intent[] = [
         'eat',
         'eating',
         'food',
-        'calor*',
         'nutrition',
         'білок',
         'білк*',
@@ -773,7 +833,6 @@ export const INTENTS: Intent[] = [
         'дієт*',
         'їжа',
         'їсти',
-        'калор*',
         'харчув*',
       ],
     ],
@@ -885,36 +944,47 @@ export const INTENTS: Intent[] = [
 
 // ---- temper flavour ---------------------------------------------------------
 
+// Openers and closers per temper — rotated with the conversation so replies
+// don't all start alike. Content never changes, only the framing.
 const OPEN: Record<Temper, [string[], string[]]> = {
   1: [
-    ['', 'Great question! '],
-    ['', 'Гарне питання! '],
+    ['', 'Great question! ', 'Love that you asked. ', 'Good one! '],
+    ['', 'Гарне питання! ', 'Клас, що питаєш. ', 'О, слушно! '],
   ],
-  2: [[''], ['']],
-  3: [[''], ['']],
+  2: [
+    ['', 'OK. ', 'Right — ', ''],
+    ['', 'Гаразд. ', 'Отже, ', ''],
+  ],
+  3: [
+    ['', 'Straight: ', '', 'Plainly: '],
+    ['', 'Прямо: ', '', 'Коротко: '],
+  ],
   4: [
-    ['', 'Listen. '],
-    ['', 'Слухай. '],
+    ['', 'Listen. ', 'Eyes up. ', 'Pay attention. '],
+    ['', 'Слухай. ', 'Дивись сюди. ', 'Уважно. '],
   ],
   5: [
-    ['', 'Obviously. ', 'Since you ask. '],
-    ['', 'Очевидно. ', 'Раз уже питаєш. '],
+    ['', 'Obviously. ', 'Since you ask. ', 'Must I? Fine. '],
+    ['', 'Очевидно. ', 'Раз уже питаєш. ', 'Мушу? Гаразд. '],
   ],
 };
 const CLOSE: Record<Temper, [string[], string[]]> = {
   1: [
-    ['', ' You’ve got this!'],
-    ['', ' У тебе вийде!'],
+    ['', ' You’ve got this!', ' Proud of you.', ''],
+    ['', ' У тебе вийде!', ' Пишаюся тобою.', ''],
   ],
   2: [[''], ['']],
-  3: [[''], ['']],
+  3: [
+    ['', '', ' That’s it.'],
+    ['', '', ' От і все.'],
+  ],
   4: [
-    [' Now move.', ' No excuses.'],
-    [' А тепер рухайся.', ' Без відмовок.'],
+    [' Now move.', ' No excuses.', ' Go.'],
+    [' А тепер рухайся.', ' Без відмовок.', ' Вперед.'],
   ],
   5: [
-    ['', ' Try to keep up.', ' Don’t disappoint me. More than usual.'],
-    ['', ' Спробуй встигати.', ' Не розчаруй мене. Більше, ніж зазвичай.'],
+    ['', ' Try to keep up.', ' Don’t disappoint me. More than usual.', ' I’ll be watching.'],
+    ['', ' Спробуй встигати.', ' Не розчаруй мене. Більше, ніж зазвичай.', ' Я стежитиму.'],
   ],
 };
 
@@ -927,6 +997,14 @@ export interface LocalAnswer {
   escalate?: boolean;
   /** Conversation state to carry into the next message. */
   convo: Convo;
+  /** A chart to draw under the text. */
+  chart?: Chart;
+  /** Something to do — shown as Confirm / Cancel. */
+  action?: AtlasAction;
+  /** New facts to remember (merge into coach.memory). */
+  learned?: AtlasMemory;
+  /** The answer to remember for consistency. */
+  said?: SaidRec;
 }
 
 /** What the conversation is about right now (for follow-ups). */
@@ -938,18 +1016,85 @@ export interface Convo {
   depth?: number;
   /** A question waiting for a lift/muscle ("Which lift?"). */
   pending?: boolean;
+  /** How many answers so far (rotates the phrasing). */
+  turn?: number;
+  /** The question that opened this topic ("my knee hurts") — for follow-ups. */
+  q?: string;
 }
 
-const MORE = ['more', 'tell me more', 'go on', 'continue', 'details', 'detail', 'elaborate', 'explain', 'and', 'then', 'what else', 'ще', 'детальніше', 'докладніше', 'розкажи більше', 'поясни', 'продовжуй', 'далі', 'і', 'а далі', 'що ще', 'як саме', 'how exactly', 'how so'];
-const ASK_WHY = ['why', 'how come', 'why so', 'чому', 'чого', 'навіщо', 'з чого', 'звідки', 'чому так'];
-const FOLLOW_LEAD = ['and', 'what about', 'how about', 'same for', 'а', 'і', 'а як', 'а що', 'а для', 'а на', 'а про', 'і на'];
+const MORE = [
+  'more',
+  'tell me more',
+  'go on',
+  'continue',
+  'details',
+  'detail',
+  'elaborate',
+  'explain',
+  'and',
+  'then',
+  'what else',
+  'ще',
+  'детальніше',
+  'докладніше',
+  'розкажи більше',
+  'поясни',
+  'продовжуй',
+  'далі',
+  'і',
+  'а далі',
+  'що ще',
+  'як саме',
+  'how exactly',
+  'how so',
+];
+const ASK_WHY = [
+  'why',
+  'how come',
+  'why so',
+  'чому',
+  'чого',
+  'навіщо',
+  'з чого',
+  'звідки',
+  'чому так',
+];
+const FOLLOW_LEAD = [
+  'and',
+  'what about',
+  'how about',
+  'same for',
+  'а',
+  'і',
+  'а як',
+  'а що',
+  'а для',
+  'а на',
+  'а про',
+  'і на',
+];
 
-const ALL_INTENTS = (): Intent[] => [...INTENTS, ...INTENTS_MORE, ...INTENTS_THIRD, ...INTENTS_FOURTH];
+export const ALL_INTENTS = (): Intent[] => [
+  ...INTENTS,
+  ...INTENTS_MORE,
+  ...INTENTS_THIRD,
+  ...INTENTS_FOURTH,
+  ...INTENTS_FIFTH,
+  ...INTENTS_SIXTH,
+  ...INTENTS_SMALL,
+];
+// Charts and "more" layers for topics from the earlier parts.
+for (const it of ALL_INTENTS()) {
+  if (CHARTS[it.id]) it.chart ??= CHARTS[it.id];
+  if (MORES[it.id]) it.more ??= MORES[it.id];
+  if (SMALL_OVERRIDES[it.id]) it.answer = SMALL_OVERRIDES[it.id].answer;
+}
 const byId = (id: string | undefined) => (id ? ALL_INTENTS().find((i) => i.id === id) : undefined);
 
-function flavour(text: string, c: AskCtx, seedStr: string): string {
+function flavour(text: string, c: AskCtx, seedStr: string, turn = 0): string {
   const i = c.locale === 'uk' ? 1 : 0;
-  const seed = hashId(seedStr);
+  // Rotate with the conversation, so two answers in a row don't open alike.
+  const seed = hashId(seedStr) + turn * 7;
   const o = OPEN[c.temper][i];
   const e = CLOSE[c.temper][i];
   return `${o[seed % o.length]}${text}${e[(seed >>> 3) % e.length]}`;
@@ -965,18 +1110,219 @@ function chipsFor(id: string, L: Tr): string[] {
 function parse(question: string, c: AskCtx): Parsed {
   const words = tokens(question);
   const phrase = normalize(question);
+  const logged = loggedLifts(c);
   return {
     words,
     phrase,
     exercise:
-      findExercise(words, phrase, loggedLifts(c)) ??
-      findCatalogExercise(words, phrase, CATALOG_NAMES()),
+      findExercise(words, phrase, logged) ?? findCatalogExercise(words, phrase, CATALOG_NAMES()),
     muscle: findMuscle(words, phrase),
+    exercises: findExercises(words, logged, CATALOG_NAMES()),
+    range: parseRange(phrase, c.now),
+    weekdays: parseWeekdays(words),
   };
+}
+
+/** Does the question carry what the intent needs? */
+function hasNeeds(it: Intent, p: Parsed): boolean {
+  if (!it.needs) return true;
+  if (it.needs === 'exercise') return !!p.exercise;
+  if (it.needs === 'muscle') return !!p.muscle;
+  if (it.needs === 'range') return !!p.range;
+  return (p.exercises?.length ?? 0) >= 2;
+}
+
+/** The data an answer is built from — changes when you log something. */
+export function stampOf(c: AskCtx): string {
+  const f = finishedOf(c);
+  const w = c.s.bodyMetrics.weights ?? [];
+  return `${f.length}:${f[0]?.id ?? ''}:${w.length}:${c.s.injuries.length}:${c.s.coach.plan?.createdAt ?? 0}`;
+}
+
+const LOAD_INTENTS = new Set([
+  'next_weight',
+  'add_weight',
+  'today',
+  'tomorrow',
+  'next_session',
+  'warmup_lift',
+  'percent_max',
+  'reps_at_weight',
+  'sets_for_lift',
+  'plateau',
+  'failure',
+  'alternatives',
+  'plan',
+  'technique',
+  'why_weight',
+  'why_today',
+  'range_lift',
+]);
+const TIME_INTENTS = new Set([
+  'today',
+  'next_session',
+  'plan',
+  'session_length',
+  'exercises_per_session',
+  'tomorrow',
+]);
+
+/**
+ * What Atlas remembers, woven into the answer — so advice never ignores a
+ * sore knee, a lift you banned, your goal or your time.
+ */
+function memoryLine(id: string, p: Parsed, c: AskCtx, core: string, L: Tr): string | null {
+  const mem = c.mem;
+  if (!mem) return null;
+  const out: string[] = [];
+  if (LOAD_INTENTS.has(id)) {
+    const sore = soreFor(mem, c.now, `${p.exercise ?? ''} ${p.muscle ?? ''} ${core}`);
+    const tg =
+      p.exercise && ['next_weight', 'add_weight', 'why_weight'].includes(id)
+        ? nextTarget(topHistory(finishedOf(c), p.exercise, c.now), {})
+        : null;
+    if (sore.length && tg?.weight) {
+      // Same number the plan uses — never "stay at 100" and "go lighter" at once.
+      const names = sore.map((x) => L(PART_NAME[x][0], PART_NAME[x][1])).join(', ');
+      const w = Math.max(2.5, Math.round((tg.weight * SORE_CAP) / 2.5) * 2.5);
+      out.push(
+        L(
+          `But your ${names} comes first: take ${c.fmt.kg(w)} instead (20% lighter), pain-free, until you tell me it’s fine — your plan uses the same.`,
+          `Але спершу ${names}: бери ${c.fmt.kg(w)} (на 20% легше), без болю, доки не скажеш, що минуло, — у плані так само.`,
+        ),
+      );
+    } else if (sore.length) {
+      const names = sore.map((x) => L(PART_NAME[x][0], PART_NAME[x][1])).join(', ');
+      out.push(
+        L(
+          `Your ${names} is still on my list: keep this pain-free and 20% lighter until you tell me it’s fine.`,
+          `Пам’ятаю про ${names}: без болю й на 20% легше, доки не скажеш, що минуло.`,
+        ),
+      );
+    }
+  }
+  const banned = (mem.avoid ?? []).filter(
+    (x) => core.includes(c.fmt.exercise(x)) || core.includes(x),
+  );
+  if (banned.length) {
+    const b = banned[0];
+    const to = mem.prefer?.find((x) => x.from === b)?.to;
+    out.push(
+      to
+        ? L(
+            `You swapped ${c.fmt.exercise(b)} for ${c.fmt.exercise(to)} — do that instead.`,
+            `Ти замінив ${c.fmt.exercise(b)} на ${c.fmt.exercise(to)} — роби її.`,
+          )
+        : L(
+            `You told me to skip ${c.fmt.exercise(b)} — take another lift for the same muscle.`,
+            `Ти просив без ${c.fmt.exercise(b)} — візьми іншу вправу на той самий м’яз.`,
+          ),
+    );
+  }
+  const g = mem.goal?.v;
+  if (g === 'fat_loss' && ['muscle_gain_rate', 'grow_muscle', 'arms', 'bulk'].includes(id))
+    out.push(
+      L(
+        'You’re cutting, though — expect slow growth; heavy lifting and high protein keep what you have.',
+        'Але ти на схудненні — ріст буде повільним; важкі ваги й білок збережуть м’язи.',
+      ),
+    );
+  if (g === 'muscle' && ['fat_loss', 'cut_deficit', 'cardio'].includes(id))
+    out.push(
+      L(
+        'Your goal is muscle, so keep any deficit small and cardio moderate.',
+        'Твоя мета — м’язи, тож дефіцит мінімальний, кардіо помірне.',
+      ),
+    );
+  if (g === 'strength' && ['reps', 'strength_vs_size'].includes(id))
+    out.push(
+      L(
+        'For your strength goal: the big lifts in 3–6 reps come first.',
+        'Для твоєї мети — сили: базові вправи в 3–6 повторах першими.',
+      ),
+    );
+  if (mem.minutes && TIME_INTENTS.has(id))
+    out.push(
+      L(
+        `You have ~${mem.minutes.v} min: do the first lifts properly, superset the rest.`,
+        `У тебе ~${mem.minutes.v} хв: перші вправи — як слід, решту суперсетами.`,
+      ),
+    );
+  if (
+    mem.level === 'beginner' &&
+    ['next_weight', 'add_weight', 'failure', 'rpe', 'plateau'].includes(id)
+  )
+    out.push(
+      L(
+        'As a beginner you can add weight almost every session while form holds.',
+        'Як новачок, додавай вагу майже кожне тренування, поки техніка тримається.',
+      ),
+    );
+  if (
+    (mem.age ?? 0) >= 50 &&
+    ['warmup', 'recovery', 'deload', 'rest_day', 'overtraining'].includes(id)
+  )
+    out.push(
+      L(
+        `At ${mem.age}, a longer warm-up and an extra rest day pay off.`,
+        `У ${mem.age} довша розминка й зайвий день відпочинку окупаються.`,
+      ),
+    );
+  if (mem.home && ['alternatives', 'swap', 'today'].includes(id))
+    out.push(
+      L(
+        'At home: dumbbells, bands and bodyweight versions work fine.',
+        'Вдома: гантелі, резинки й вправи з власною вагою — цілком.',
+      ),
+    );
+  return out.length ? out.join(' ') : null;
 }
 
 let catalogNames: string[] | null = null;
 const CATALOG_NAMES = () => (catalogNames ??= BUILT_IN_CATALOG.map((e) => e.names[0]));
+
+/** Build a full answer for an intent: flavour, memory, consistency, extras. */
+function build(
+  it: Intent,
+  core: string,
+  c: AskCtx,
+  p: Parsed,
+  question: string,
+  L: Tr,
+  convo: Convo,
+  q = question,
+): LocalAnswer {
+  const turn = (convo.turn ?? 0) + 1;
+  // Small talk speaks for itself: no "As I said", no memory notes, no opener.
+  if (SMALLTALK_IDS.has(it.id))
+    return {
+      intent: it.id,
+      text: core,
+      chips: chipsFor(it.id, L),
+      convo: { intent: it.id, depth: 0, turn, q },
+    };
+  // Consistency: the same topic on the same data gets the same answer.
+  const key = saidKey(it.id, p.exercise, p.muscle, p.range?.from ?? null);
+  const stamp = stampOf(c);
+  const prev = c.said?.find((r) => r.key === key);
+  const kept = consistent(prev, core, stamp, c.now, L);
+  const extra = memoryLine(it.id, p, c, kept.keep, L);
+  const body = extra ? `${kept.text} ${extra}` : kept.text;
+  const action = it.action?.(c, p) ?? undefined;
+  return {
+    intent: it.id,
+    // "As I said…" / "this changed…" already frame the reply — no extra opener.
+    text:
+      it.neutral || action || kept.text !== kept.keep
+        ? body
+        : flavour(body, c, question + it.id, turn),
+    chips: action ? undefined : chipsFor(it.id, L),
+    chart: it.chart?.(c, p, L) ?? undefined,
+    action,
+    said: { key, text: kept.keep, stamp, at: c.now },
+    convo: { intent: it.id, exercise: p.exercise, muscle: p.muscle, depth: 0, turn, q },
+  };
+}
 
 /** One message → one answer (no splitting). */
 function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | null {
@@ -985,42 +1331,73 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   if (!words.length) return null;
   const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
   const short = words.length <= 5;
+  const turn = (convo.turn ?? 0) + 1;
 
   // ---- follow-ups on the current topic ----
   const cur = byId(convo.intent);
   if (cur && short) {
-    // A pending "which lift?" answered with just the lift/muscle.
+    const base = convo.q ? parse(convo.q, c) : p;
+    const topic: Parsed = {
+      ...base,
+      exercise: convo.exercise ?? base.exercise,
+      muscle: convo.muscle ?? base.muscle,
+    };
+    // A pending "which lift?" answered with just the lift/muscle — or
+    // "and deadlift?" carrying the topic (and its time window) over.
     const entityOnly =
       (p.exercise || p.muscle) &&
       (convo.pending || groupMatches(words, phrase, FOLLOW_LEAD) || words.length <= 3);
-    if (entityOnly && (!cur.needs || (cur.needs === 'exercise' ? p.exercise : p.muscle))) {
-      const core = cur.answer(c, p, L);
-      if (core)
-        return {
-          intent: cur.id,
-          text: cur.neutral ? core : flavour(core, c, question + cur.id),
-          chips: chipsFor(cur.id, L),
-          convo: { intent: cur.id, exercise: p.exercise, muscle: p.muscle, depth: 0 },
-        };
+    const carried: Parsed = { ...p, range: p.range ?? base.range };
+    // Only topics about a lift/muscle carry over — and never when the message
+    // is a question of its own ("squat technique", "bench vs squat").
+    const ownQuestion = ALL_INTENTS().some(
+      (it) =>
+        it.id !== cur.id &&
+        it.all.length > 0 &&
+        it.all.every((g) => groupMatches(words, phrase, g)) &&
+        hasNeeds(it, p),
+    );
+    if (entityOnly && cur.needs && (convo.pending || !ownQuestion) && hasNeeds(cur, carried)) {
+      const core = cur.answer(c, carried, L);
+      if (core) return build(cur, core, c, carried, question, L, convo, convo.q ?? question);
     }
     if (words.length <= 3 && groupMatches(words, phrase, ASK_WHY)) {
       const d = DEPTH[cur.id];
-      const cp: Parsed = { ...p, exercise: convo.exercise ?? null, muscle: convo.muscle ?? null };
+      const cp = topic;
       const why = cur.why?.(c, cp, L) ?? (d?.why ? L(d.why[0], d.why[1]) : null);
       if (why)
-        return { intent: cur.id, text: why, chips: chipsFor(cur.id, L), convo: { ...convo } };
-      return { intent: cur.id, text: L('That part is past what I know by heart.', 'Тут я вже за межами того, що знаю напам’ять.'), escalate: true, convo };
+        return { intent: cur.id, text: why, chips: chipsFor(cur.id, L), convo: { ...convo, turn } };
+      return {
+        intent: cur.id,
+        text: L(
+          'That part is past what I know by heart.',
+          'Тут я вже за межами того, що знаю напам’ять.',
+        ),
+        escalate: true,
+        convo: { ...convo, turn },
+      };
     }
-    if (groupMatches(words, phrase, MORE) && !ALL_INTENTS().some((it) => it.id !== cur.id && it.all.every((g) => groupMatches(words, phrase, g)) && it.all.length > 0 && matchedWords(words, it.all) >= 2)) {
+    if (
+      groupMatches(words, phrase, MORE) &&
+      !ALL_INTENTS().some(
+        (it) =>
+          it.id !== cur.id &&
+          it.all.every((g) => groupMatches(words, phrase, g)) &&
+          it.all.length > 0 &&
+          matchedWords(words, it.all) >= 2,
+      )
+    ) {
       const d = DEPTH[cur.id];
       const depth = convo.depth ?? 0;
-      const layer = d?.more[depth];
+      const cp = topic;
+      const own = cur.more?.(c, cp, L, depth) ?? null;
+      const layer = own ?? (d?.more[depth] ? L(d.more[depth][0], d.more[depth][1]) : null);
       if (layer)
         return {
           intent: cur.id,
-          text: L(layer[0], layer[1]),
+          text: layer,
           chips: chipsFor(cur.id, L),
-          convo: { ...convo, depth: depth + 1 },
+          convo: { ...convo, depth: depth + 1, turn },
         };
       return {
         intent: cur.id,
@@ -1030,38 +1407,57 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         ),
         chips: chipsFor(cur.id, L),
         escalate: true,
-        convo: { ...convo, depth: depth + 1 },
+        convo: { ...convo, depth: depth + 1, turn },
       };
     }
   }
 
+  // ---- what you just told me (a sore knee, your goal, a lift you hate…) ----
+  const learned = learn(words, phrase, c.mem, c.now, p.exercise, c.fmt.exercise);
+  const hasLearned = Object.keys(learned.patch).length > 0;
+  const cm: AskCtx = hasLearned ? { ...c, mem: mergeMemory(c.mem, learned.patch) } : c;
+  const withLearned = (a: LocalAnswer | null): LocalAnswer | null => {
+    if (!hasLearned) return a;
+    const note = learned.note ? L(learned.note[0], learned.note[1]) : '';
+    if (!a)
+      return {
+        intent: 'memory_note',
+        text: note,
+        learned: learned.patch,
+        chips: [
+          L('What do you know about me?', 'Що ти про мене знаєш?'),
+          L('What should I train today?', 'Що тренувати сьогодні?'),
+        ],
+        convo: { intent: 'memory_note', depth: 0, turn },
+      };
+    return { ...a, text: note ? `${a.text}\n\n${note}` : a.text, learned: learned.patch };
+  };
+
   // ---- a fresh question ----
   const negatedPain = negated(words, [...PAIN_WORDS, 'sick', 'ill', 'хвор*', 'захвор*']);
   const weight = (it: Intent) =>
-    matchedWords(words, it.all) + (it.needs ? 2 : 0) + (it.priority ? 100 : 0);
+    matchedWords(words, it.all) +
+    (it.needs ? (it.needs === 'range' || it.needs === 'twoLifts' ? 4 : 2) : 0) +
+    (it.action ? 3 : 0) +
+    (it.id.startsWith('why_') ? 3 : 0) +
+    (SMALL_NEW.has(it.id) ? 2 : 0) +
+    (it.priority ? 100 : 0);
   const matchesGroups = (it: Intent) =>
     (!it.maxWords || words.length <= it.maxWords) &&
     !(it.negatable && negatedPain) &&
     it.all.every((g) => groupMatches(words, phrase, g));
   const candidates = ALL_INTENTS().filter(matchesGroups);
-  const ranked = candidates
-    .filter((it) => !it.needs || (it.needs === 'exercise' ? p.exercise : p.muscle))
-    .sort((a, b) => weight(b) - weight(a));
+  const ranked = candidates.filter((it) => hasNeeds(it, p)).sort((a, b) => weight(b) - weight(a));
   for (const it of ranked) {
-    const core = it.answer(c, p, L);
+    const core = it.answer(cm, p, L);
     if (!core) continue;
-    return {
-      intent: it.id,
-      text: it.neutral ? core : flavour(core, c, question + it.id),
-      chips: chipsFor(it.id, L),
-      convo: { intent: it.id, exercise: p.exercise, muscle: p.muscle, depth: 0 },
-    };
+    return withLearned(build(it, core, cm, p, question, L, convo));
   }
   // Knows the topic, misses the lift/muscle → ask, with your lifts as chips.
   const needy = candidates
-    .filter((it) => it.needs)
+    .filter((it) => it.needs === 'exercise' || it.needs === 'muscle')
     .sort((a, b) => weight(b) - weight(a))[0];
-  if (needy) {
+  if (needy && !hasLearned) {
     const chips =
       needy.needs === 'exercise'
         ? loggedLifts(c)
@@ -1071,23 +1467,58 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         : (['chest', 'lats', 'shoulders', 'quads'] as MuscleGroup[]).map((m) => c.fmt.muscle(m));
     return {
       intent: needy.id,
-      text: needy.needs === 'exercise' ? L('Which lift?', 'Яка вправа?') : L('Which muscle?', 'Який м’яз?'),
+      text:
+        needy.needs === 'exercise'
+          ? L('Which lift?', 'Яка вправа?')
+          : L('Which muscle?', 'Який м’яз?'),
       chips,
-      convo: { intent: needy.id, pending: true, depth: 0 },
+      convo: { intent: needy.id, pending: true, depth: 0, turn },
     };
   }
-  return null;
+  return withLearned(null);
 }
 
 const SPLIT_RE = /\?+\s*|\s+(?:and also|also|а ще|і ще|плюс)\s+/i;
 
 /**
+ * "Did you mean…": the closest topics when nothing fits for sure — scored by
+ * how many keyword groups match (partially) and how specific the words are.
+ */
+export function didYouMean(question: string, c: AskCtx): { id: string; ask: string }[] {
+  const words = tokens(question);
+  const phrase = normalize(question);
+  if (!words.length) return [];
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  const scored: { id: string; score: number }[] = [];
+  for (const it of ALL_INTENTS()) {
+    const ask = ASKS[it.id];
+    if (!ask || it.maxWords) continue;
+    const hit = it.all.filter((g) => groupMatches(words, phrase, g)).length;
+    if (!hit) continue;
+    const mw = matchedWords(words, it.all);
+    scored.push({ id: it.id, score: hit / it.all.length + mw * 0.3 });
+  }
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map((x) => ({ id: x.id, ask: L(ASKS[x.id][0], ASKS[x.id][1]) }));
+}
+
+/**
  * Answer from Atlas's own base, following the conversation. Null → nothing
  * fits: hand over to Gemini (or say so). Two questions in one message get two
- * answers; Latin-typed Ukrainian gets a second try in Cyrillic.
+ * answers; Latin-typed Ukrainian gets a second try in Cyrillic; Polish,
+ * Lithuanian, Estonian and Russian are mapped onto known words first.
  */
 export function answerLocally(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer | null {
-  const parts = question.split(SPLIT_RE).map((x) => x.trim()).filter((x) => tokens(x).length >= 2);
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  const emoji = emojiReply(c, question, L);
+  if (emoji)
+    return { intent: 'emoji', text: emoji, convo: { ...convo, turn: (convo.turn ?? 0) + 1 } };
+  const parts = question
+    .split(SPLIT_RE)
+    .map((x) => x.trim())
+    .filter((x) => tokens(x).length >= 2);
   if (parts.length >= 2) {
     let state = convo;
     const got: LocalAnswer[] = [];
@@ -1100,11 +1531,27 @@ export function answerLocally(question: string, c: AskCtx, convo: Convo = {}): L
     }
     if (got.length >= 2) {
       const last = got[got.length - 1];
-      return { ...last, text: got.map((g) => g.text).join('\n\n'), escalate: false };
+      const learned = got.reduce<AtlasMemory | undefined>(
+        (m, g) => (g.learned ? mergeMemory(m, g.learned) : m),
+        undefined,
+      );
+      return {
+        ...last,
+        text: got.map((g) => g.text).join('\n\n'),
+        escalate: false,
+        learned,
+        action: got.find((g) => g.action)?.action,
+        chart: got.find((g) => g.chart)?.chart,
+      };
     }
   }
   const direct = answerOne(question, c, convo);
   if (direct) return direct;
+  const known = toKnownLanguage(question);
+  if (known && known !== question) {
+    const a = answerOne(known, c, convo);
+    if (a) return a;
+  }
   if (!hasCyrillic(question) && /[a-z]/i.test(question)) {
     const uk = answerOne(translitToUk(question), { ...c, locale: c.locale }, convo);
     if (uk) return uk;

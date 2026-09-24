@@ -1799,12 +1799,28 @@ export const lt: Strings = {
   atlasTemperLabel: 'Būdas',
   atlasRoleLabel: 'Vaidmuo',
   atlasTurnOff: 'Išjungti Atlas',
-  atlasSuggestToday: "Ką šiandien treniruoti?",
-  atlasSuggestProgress: "Kaip man sekasi?",
-  atlasSuggestRest: "Kiek ilsėtis?",
-  atlasLangOffer: (n: string) => `Pakeisti programėlės kalbą į „${n}“? Suprantu bet kuria kalba, bet atsakau programėlės kalba.`,
-  atlasLangKeep: "Ne, palikti",
-  atlasLangDone: "Atlikta — toliau lietuviškai.",
+  atlasSuggestToday: 'Ką šiandien treniruoti?',
+  atlasSuggestProgress: 'Kaip man sekasi?',
+  atlasSuggestRest: 'Kiek ilsėtis?',
+  atlasLangOffer: (n: string) =>
+    `Pakeisti programėlės kalbą į „${n}“? Suprantu bet kuria kalba, bet atsakau programėlės kalba.`,
+  atlasLangKeep: 'Ne, palikti',
+  atlasLangDone: 'Atlikta — toliau lietuviškai.',
+  atlasNewNotes: (n: number) => `${n} ${n === 1 ? 'nauja' : 'naujos'}`,
+  atlasDidYouMean: 'Nesu tikras, ar supratau. Ar turėjai omenyje:',
+  atlasDoIt: 'Padaryk',
+  atlasCancel: 'Atšaukti',
+  atlasRoleHumanCoach:
+    'Turi trenerį — jis veda programą, todėl Atlas gali būti tik papildomas treneris.',
+  atlasClear: 'Išvalyti pokalbį',
+  atlasTurnOffAsk: 'Išjungti Atlas?',
+  atlasTurnOffBody:
+    'Jis nustos komentuoti, o planas nebebus jo. Žurnalas, pokalbis ir tai, ką jis prisimena, lieka — įjungsi bet kada.',
+  atlasClearAsk: 'Išvalyti pokalbį?',
+  atlasClearBody:
+    'Visas pokalbis ir jo pastabos išnyks. Žurnalas ir tai, ką jis apie tave prisimena, lieka.',
+  atlasRuleHardOnly: 'Tik Drill ir Merciless',
+  atlasRuleMercilessOnly: 'Tik Merciless',
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
   atlasQuotaNotice: (time: string) =>

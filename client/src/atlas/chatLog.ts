@@ -13,6 +13,10 @@ export interface ChatMsg {
   chips?: string[];
   /** Offer to switch the app to this language (buttons under the message). */
   langOffer?: import('../i18n').LocaleId;
+  /** A small chart drawn under the text. */
+  chart?: import('./intentKit').Chart;
+  /** Something Atlas offers to do — Do it / Cancel under the message. */
+  action?: import('./intentKit').AtlasAction;
 }
 
 const KEY = 'spotter.atlasChat';

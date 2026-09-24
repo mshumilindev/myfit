@@ -75,7 +75,8 @@ export function buildNotes(
   });
   const seen = new Set<string>();
   const notes = facts
-    .filter((f) => f.at >= start)
+    // "Clear chat" hides everything before it.
+    .filter((f) => f.at >= Math.max(start, s.coach.clearedAt ?? 0))
     .filter((f) => (seen.has(f.id) ? false : (seen.add(f.id), true)))
     .sort((a, b) => a.at - b.at)
     .map((fact) => ({

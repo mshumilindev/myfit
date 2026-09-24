@@ -93,7 +93,7 @@ const cases: [string, 'en' | 'uk', string][] = [
   ['are you a bot', 'en', 'are_you_ai'],
   ['motivate me', 'en', 'motivate'],
   ['розкажи жарт', 'uk', 'joke'],
-  ['good night', 'en', 'bye'],
+  ['good night', 'en', 'good_night'],
   ['my knee hurts when I squat', 'en', 'pain'],
 ];
 

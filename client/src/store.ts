@@ -1019,6 +1019,17 @@ let selfProfile: {
   lastName?: string;
   avatarExt?: string | null;
 } = { trainerId: null };
+const trainerListeners = new Set<() => void>();
+/** The athlete's human coach (uid), if they have one — reactive. */
+export function useSelfTrainerId(): string | null {
+  return useSyncExternalStore(
+    (l) => {
+      trainerListeners.add(l);
+      return () => trainerListeners.delete(l);
+    },
+    () => selfProfile.trainerId,
+  );
+}
 const LIVE_HEARTBEAT_MS = 45000;
 let lastLiveBeat = 0;
 
@@ -3493,6 +3504,7 @@ export function startSyncLoop(): () => void {
           lastName: d.lastName as string | undefined,
           avatarExt: (d.avatarExt as string) ?? null,
         };
+        trainerListeners.forEach((l) => l());
       },
       () => undefined,
     ),

@@ -46,6 +46,10 @@ export interface CoachSettings {
   readAt: number;
   /** The programme (main-coach role); null until Atlas writes one. */
   plan?: CoachPlan | null;
+  /** "Clear chat": notes before this are hidden. */
+  clearedAt?: number;
+  /** What you told Atlas in chat (injuries, goal, lifts to avoid…). */
+  memory?: import('./memory').AtlasMemory;
   /** Last local edit (last-write-wins against the synced copy). */
   updatedAt?: number;
 }

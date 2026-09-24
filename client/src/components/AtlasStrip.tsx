@@ -28,6 +28,7 @@ export function AtlasStoryItem({ onOpen }: { onOpen: () => void }) {
       >
         <span className="tcs-ring">
           <AtlasFace temper={temper} size={54} ring={false} />
+          {unread > 0 && <span className="atl-story-count">{unread > 9 ? '9+' : unread}</span>}
         </span>
         <span className="tcs-name">{t.atlasName}</span>
       </button>

@@ -63,7 +63,7 @@ const cases: [string, 'en' | 'uk', string][] = [
   ['what is my goal', 'en', 'my_goal'],
   ['am I gaining weight', 'en', 'bw_trend'],
   ['is my bench strong', 'en', 'strength_ratio'],
-  ['how many workouts this month', 'en', 'month'],
+  ['how many workouts this month', 'en', 'range_count'],
   ['longest workout', 'en', 'longest_session'],
   ['how to grow my chest', 'en', 'grow_muscle'],
   ['як накачати литки', 'uk', 'grow_muscle'],

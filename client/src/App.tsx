@@ -615,33 +615,13 @@ export function App() {
     };
   }, [nightLive]);
   const challenges = useChallenges();
-  // Atlas's notes join the bell (same feed as his thread; tap opens it).
   const atlas = useAtlasNotes();
+  // Atlas's notes live in his own thread (unread count on his bubble in the
+  // stories strip) — not in the bell.
   const rawNotifs = useMemo(
-    () => [
-      ...computeNotifs(store, notifNow, t, challenges),
-      ...(store.coach.enabled
-        ? atlas.notes.map((n) => ({
-            id: `atlas:${n.id}`,
-            kind: 'atlas' as const,
-            ts: n.at,
-            title: t.atlasName,
-            subtitle: n.text,
-            nav: '#/coach',
-          }))
-        : []),
-    ],
+    () => computeNotifs(store, notifNow, t, challenges),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      store.workouts,
-      store.bodyMetrics,
-      store.exerciseLoadTypes,
-      challenges,
-      notifNow,
-      t,
-      store.coach.enabled,
-      atlas.notes,
-    ],
+    [store.workouts, store.bodyMetrics, store.exerciseLoadTypes, challenges, notifNow, t],
   );
   useEffect(() => {
     syncNotifs(rawNotifs);
@@ -1429,7 +1409,12 @@ export function App() {
         <ClientPage clientId={activeOverlay.clientId} shell={shell} onClose={closeOverlay} />
       )}
       {activeOverlay?.screen === 'mastery' && <MasteryView shell={shell} onClose={closeOverlay} />}
-      {activeOverlay?.screen === 'coach' && <CoachView onClose={closeOverlay} />}
+      {activeOverlay?.screen === 'coach' && (
+        <CoachView
+          onClose={closeOverlay}
+          onOpenSession={(workoutId) => shell.openOverlay({ screen: 'session', workoutId })}
+        />
+      )}
       {activeOverlay?.screen === 'injury' && (
         <InjuryView
           injuryId={activeOverlay.injuryId}

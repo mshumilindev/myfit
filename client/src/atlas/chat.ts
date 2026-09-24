@@ -61,6 +61,7 @@ export function systemPrompt(p: {
     p.coach.swearing && p.temper === 5 ? 'Mild swearing is allowed, rarely.' : 'No swearing.',
     'If the user mentions pain or an injury: drop the act, answer calmly, suggest easing off and logging it in the Injury screen. No medical diagnosis.',
     'Off-topic questions (not training, recovery or the app): one line in character, then steer back to training.',
+    'Stay consistent: never contradict FACTS.athleteToldMe or your own earlier replies in this conversation. If the data changed since, say what changed.',
     `FACTS (JSON, computed by the app from the user's own log): ${p.factsJson}`,
   ].join('\n');
 }

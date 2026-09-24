@@ -8,6 +8,7 @@ import { latestWeight, pickSessionGym, useStore } from '../store';
 import { loadCaps, protectedMuscles } from '../injury';
 import { buildPlanDay, planDayFor, type CoachPlanDay } from './plan';
 import type { GeneratedDay } from '../sessionBuilder';
+import { memoryBuildHints } from './memoryPlan';
 
 export interface TodayPlan {
   day: CoachPlanDay;
@@ -31,10 +32,20 @@ export function useTodayPlan(now: number, excludeWorkoutId?: string): TodayPlan 
       now,
       intent: 'muscle',
       protectedMuscles: [...protectedMuscles(s.injuries)],
-      loadCaps: loadCaps(s.injuries),
+      ...memoryBuildHints(s.coach.memory, loadCaps(s.injuries), now),
       bodyKg: latestWeight(s.bodyMetrics)?.weight ?? null,
       sex: s.bodyMetrics.sex,
     });
     return built.main.length ? { day, built } : null;
-  }, [plan, now, s.workouts, s.activities, s.bodyMetrics, s.goals, s.injuries, excludeWorkoutId]);
+  }, [
+    plan,
+    now,
+    s.workouts,
+    s.activities,
+    s.bodyMetrics,
+    s.goals,
+    s.injuries,
+    s.coach.memory,
+    excludeWorkoutId,
+  ]);
 }

@@ -147,6 +147,16 @@ describe('buildDay', () => {
     expect(chestLift).toBeTruthy();
   });
 
+  it('never picks a lift the athlete banned, and puts a requested swap first', () => {
+    const base = buildDay(ctx);
+    const chest = base.main.find((e) => e.primary === 'chest')!.name;
+    const without = buildDay({ ...ctx, avoid: [chest] });
+    expect(without.main.some((e) => e.name === chest)).toBe(false);
+    const wanted = 'Dumbbell Bench Press';
+    const swapped = buildDay({ ...ctx, avoid: [chest], prefer: [wanted] });
+    expect(swapped.main.find((e) => e.primary === 'chest')?.name).toBe(wanted);
+  });
+
   it('auto-picks muscles when none are given', () => {
     const day = buildDay({ ...ctx, targetMuscles: undefined });
     expect(day.targetMuscles.length).toBeGreaterThan(0);

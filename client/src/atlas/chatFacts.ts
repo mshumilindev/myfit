@@ -11,6 +11,7 @@ import { latestWeight } from '../store';
 import { blockWeek, planDayFor } from './plan';
 import type { AtlasNote } from './notes';
 import type { Temper } from './types';
+import { describeMemory } from './memory';
 
 const iso = (ts: number) => {
   const d = new Date(ts);
@@ -50,6 +51,13 @@ export function buildChatFacts(
     today: iso(now),
     weekday: new Date(now).toLocaleDateString('en', { weekday: 'long' }),
     role: s.coach.role,
+    // What the athlete told Atlas before — Gemini must not contradict it.
+    athleteToldMe: describeMemory(
+      s.coach.memory,
+      now,
+      (en) => en,
+      (n) => n,
+    ),
     plan: plan
       ? {
           week: blockWeek(plan, now),

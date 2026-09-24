@@ -257,6 +257,10 @@ export interface BuildContext {
   cooldown?: boolean;
   bodyKg?: number | null;
   sex?: 'male' | 'female';
+  /** Lifts the athlete asked never to get (exact names, any case). */
+  avoid?: string[];
+  /** Lifts the athlete asked for instead of others — picked first when they fit. */
+  prefer?: string[];
 }
 
 /** Auto-pick a coherent day of recovered, volume-hungry, on-goal muscles. */
@@ -523,7 +527,15 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
     const lm = lms.get(m) ?? LANDMARKS[m];
     if (!lm) continue;
     let budget = sessionSetsForMuscle(lm, week.get(m) ?? 0, 2);
-    const ranked = rankExercisesForMuscle(m, ctx.gym);
+    const avoid = new Set((ctx.avoid ?? []).map((x) => x.toLowerCase()));
+    const prefer = new Set((ctx.prefer ?? []).map((x) => x.toLowerCase()));
+    const ranked = rankExercisesForMuscle(m, ctx.gym)
+      .filter((c) => !avoid.has(c.name.toLowerCase()))
+      // A requested swap goes to the front, keeping the rest of the order.
+      .sort(
+        (a, b) =>
+          Number(prefer.has(b.name.toLowerCase())) - Number(prefer.has(a.name.toLowerCase())),
+      );
     if (ranked.length === 0) continue;
 
     // Anchor: a playbook staple for this muscle if there is one, else the top
@@ -531,9 +543,12 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
     const playName = play?.exercises.find(
       (e) => e.primary === m && ranked.some((c) => c.name === e.name),
     )?.name;
-    const anchor = playName
-      ? ranked.find((c) => c.name === playName)!
-      : (ranked.find((c) => c.compound) ?? ranked[0]);
+    const preferred = ranked.find((c) => prefer.has(c.name.toLowerCase()));
+    const anchor =
+      preferred ??
+      (playName
+        ? ranked.find((c) => c.name === playName)!
+        : (ranked.find((c) => c.compound) ?? ranked[0]));
     const anchorSets = clamp(Math.ceil(budget * 0.55), spec.setsMin, spec.setsMax);
     if (!used.has(anchor.name)) {
       used.add(anchor.name);

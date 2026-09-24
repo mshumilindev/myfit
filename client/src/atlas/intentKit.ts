@@ -11,6 +11,7 @@ import { computePlaybook, playForWeekday } from '../playbook';
 import { planDayFor } from './plan';
 import type { Fmt } from './voice';
 import type { Temper } from './types';
+import type { AtlasMemory, SaidRec } from './memory';
 
 export const DAY = 86_400_000;
 export const WEEK = 7 * DAY;
@@ -25,6 +26,19 @@ export interface AskCtx {
   locale: LocaleId;
   temper: Temper;
   fmt: Fmt;
+  /** What you told Atlas before (injuries, goal, lifts you avoid…). */
+  mem?: AtlasMemory;
+  /** What Atlas already answered — so a new answer never contradicts it. */
+  said?: SaidRec[];
+}
+
+/** A time window named in the question ("last 3 months", "з червня"). */
+export interface Range {
+  from: number;
+  to: number;
+  label: [string, string];
+  /** "3 months ago" — a point to compare with now, not a window. */
+  ago?: boolean;
 }
 
 export interface Parsed {
@@ -32,7 +46,31 @@ export interface Parsed {
   phrase: string;
   exercise: string | null;
   muscle: MuscleGroup | null;
+  /** Every lift named (for "bench vs squat"). */
+  exercises?: string[];
+  range?: Range | null;
+  /** Weekdays named, 0 = Sunday (for "move legs to Thursday"). */
+  weekdays?: number[];
 }
+
+/** A tiny line chart shown inside the answer bubble. */
+export interface Chart {
+  title: string;
+  unit: string;
+  points: { at: number; v: number }[];
+}
+
+/** Something Atlas can do for you — always confirmed with a tap first. */
+export type AtlasAction =
+  | { type: 'rest'; exercise: string; sec: number }
+  | { type: 'avoid'; exercise: string }
+  | { type: 'swap'; from: string; to: string }
+  | { type: 'moveDay'; from: number; to: number }
+  | { type: 'start' }
+  | { type: 'temper'; temper: Temper }
+  | { type: 'mute' }
+  | { type: 'bodyweight'; kg: number }
+  | { type: 'forget' };
 
 export type Tr = (en: string, uk: string) => string;
 
@@ -40,8 +78,8 @@ export interface Intent {
   id: string;
   /** Keyword groups — every group must match. */
   all: string[][];
-  /** Needs a lift / a muscle in the question. */
-  needs?: 'exercise' | 'muscle';
+  /** Needs a lift / a muscle / a time window / two lifts in the question. */
+  needs?: 'exercise' | 'muscle' | 'range' | 'twoLifts';
   /** Only for short messages (greetings, "ok"). */
   maxWords?: number;
   /** Spoken plainly in every temper (pain, bodyweight). */
@@ -55,6 +93,14 @@ export interface Intent {
   suggest?: (L: Tr) => string[];
   /** Pain / illness intents: skipped when the words are negated ("no pain"). */
   negatable?: boolean;
+  /** "Tell me more" — layer `depth` (0-based) of this topic, for this question. */
+  more?: (c: AskCtx, p: Parsed, L: Tr, depth: number) => string | null;
+  /** A chart to show under the answer. */
+  chart?: (c: AskCtx, p: Parsed, L: Tr) => Chart | null;
+  /** Something to do (confirmed by a tap). */
+  action?: (c: AskCtx, p: Parsed) => AtlasAction | null;
+  /** The canonical question — for "did you mean…" and "what can I ask". */
+  ask?: [string, string];
 }
 
 // ---- helpers ----------------------------------------------------------------

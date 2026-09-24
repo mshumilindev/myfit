@@ -1831,12 +1831,28 @@ export const en = {
   atlasTemperLabel: 'Temper',
   atlasRoleLabel: 'Role',
   atlasTurnOff: 'Turn Atlas off',
-  atlasSuggestToday: "What should I train today?",
-  atlasSuggestProgress: "How am I doing?",
-  atlasSuggestRest: "How long should I rest?",
-  atlasLangOffer: (n: string) => `Switch the app language to ${n}? I understand you either way — I just answer in the app’s language.`,
-  atlasLangKeep: "No, keep it",
-  atlasLangDone: "Done — English from here on.",
+  atlasSuggestToday: 'What should I train today?',
+  atlasSuggestProgress: 'How am I doing?',
+  atlasSuggestRest: 'How long should I rest?',
+  atlasLangOffer: (n: string) =>
+    `Switch the app language to ${n}? I understand you either way — I just answer in the app’s language.`,
+  atlasLangKeep: 'No, keep it',
+  atlasLangDone: 'Done — English from here on.',
+  atlasNewNotes: (n: number) => `${n} new`,
+  atlasDidYouMean: 'Not sure I got that. Did you mean:',
+  atlasDoIt: 'Do it',
+  atlasCancel: 'Cancel',
+  atlasRoleHumanCoach:
+    'You have a coach — he runs the programme, so Atlas can only be the extra coach.',
+  atlasClear: 'Clear chat',
+  atlasTurnOffAsk: 'Turn Atlas off?',
+  atlasTurnOffBody:
+    'He stops commenting and the plan is no longer his. Your log, chat and what he remembers stay — turn him back on any time.',
+  atlasClearAsk: 'Clear the chat?',
+  atlasClearBody:
+    'The whole conversation and his notes so far disappear. Your log and what he remembers about you stay.',
+  atlasRuleHardOnly: 'Drill and Merciless only',
+  atlasRuleMercilessOnly: 'Merciless only',
   atlasLocalUnknown:
     'That one’s outside what I know yet. Ask me about your training: what to do today, rest, the next weight, records, recovery, sleep, your programme.',
   atlasQuotaNotice: (time: string) =>
