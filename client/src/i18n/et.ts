@@ -1708,6 +1708,8 @@ export const et: Strings = {
   restWhenEnds: 'Kui see lõpeb',
   restVibrate: 'Vibratsioon',
   restVibrateSub: 'Lühike topeltvärin',
+  restVibrateSubIos: "iPhone'is: värin seeria salvestamisel; puhkuse lõpp — heli ja teavitusega",
+  restTestAlert: 'Proovi signaali',
   restSound: 'Heli',
   restSoundSub: 'Vaikne kõll',
   restKeepAwake: 'Hoia ekraan sees',

@@ -1754,6 +1754,9 @@ export const en = {
   restWhenEnds: 'When it ends',
   restVibrate: 'Vibrate',
   restVibrateSub: 'Short double buzz',
+  restVibrateSubIos:
+    'On iPhone: a tick when you log a set; the end of rest comes as sound and a notification',
+  restTestAlert: 'Test the alert',
   restSound: 'Sound',
   restSoundSub: 'Soft chime',
   restKeepAwake: 'Keep screen on',

@@ -1712,6 +1712,9 @@ export const pl: Strings = {
   restWhenEnds: 'Gdy się skończy',
   restVibrate: 'Wibracja',
   restVibrateSub: 'Krótka podwójna',
+  restVibrateSubIos:
+    'Na iPhonie: wibracja przy zapisie serii; koniec przerwy — dźwiękiem i powiadomieniem',
+  restTestAlert: 'Przetestuj sygnał',
   restSound: 'Dźwięk',
   restSoundSub: 'Cichy dzwonek',
   restKeepAwake: 'Nie wygaszaj ekranu',

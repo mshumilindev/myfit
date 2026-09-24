@@ -1724,6 +1724,8 @@ export const lt: Strings = {
   restWhenEnds: 'Kai baigiasi',
   restVibrate: 'Vibracija',
   restVibrateSub: 'Trumpa dviguba',
+  restVibrateSubIos: 'iPhone: vibracija įrašant seriją; poilsio pabaiga — garsu ir pranešimu',
+  restTestAlert: 'Išbandyti signalą',
   restSound: 'Garsas',
   restSoundSub: 'Tylus skambutis',
   restKeepAwake: 'Neišjungti ekrano',

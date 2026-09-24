@@ -9,6 +9,7 @@
  * a locked phone; keeping the screen on is what makes the alert reliable).
  */
 import { useEffect } from 'react';
+import { haptic } from './haptics';
 import type { SetType } from './types';
 
 /** Target rest presets offered in the rest sheet, seconds. */
@@ -207,7 +208,7 @@ function chime(): void {
 /** Fire the "rest is over" alert according to the athlete's prefs. */
 export function restAlert(prefs: RestPrefs, note?: { title: string; body: string }): void {
   try {
-    if (prefs.vibrate && 'vibrate' in navigator) navigator.vibrate([140, 90, 140]);
+    if (prefs.vibrate) haptic('double');
   } catch {
     /* ignore */
   }

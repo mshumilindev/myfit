@@ -54,6 +54,7 @@ import {
   useWakeLock,
   type RestPrefs,
 } from '../restTimer';
+import { haptic, isAppleTouch } from '../haptics';
 import {
   addExercise,
   attachGymToWorkout,
@@ -1018,6 +1019,7 @@ export function SessionView(props: {
     });
     setRecentSetId(id);
     primeRestAudio();
+    if ((store.restPrefs ?? REST_PREFS_DEFAULT).vibrate) haptic('tick');
     const w = vals.weight ?? 0;
     if (type === 'working' && loadTypeFor(ex) === 'weight' && w > 0) {
       const e1 = est1rm(w, vals.reps);
@@ -1046,12 +1048,7 @@ export function SessionView(props: {
             vol: w * vals.reps,
             volPrev,
           });
-          try {
-            if ((store.restPrefs ?? REST_PREFS_DEFAULT).vibrate && 'vibrate' in navigator)
-              navigator.vibrate([60, 50, 60, 50, 160]);
-          } catch {
-            /* ignore */
-          }
+          if ((store.restPrefs ?? REST_PREFS_DEFAULT).vibrate) haptic('success');
         } else if (weightRecord) {
           props.shell.toast({
             kind: 'ok',
@@ -5888,11 +5885,22 @@ function RestSheet(props: {
       )}
       <div className="se-label">{t.restWhenEnds}</div>
       <div className="se-group">
-        {row('vibrate', t.restVibrate, t.restVibrateSub)}
+        {row('vibrate', t.restVibrate, isAppleTouch() ? t.restVibrateSubIos : t.restVibrateSub)}
         {row('sound', t.restSound, t.restSoundSub)}
         {row('keepAwake', t.restKeepAwake, t.restKeepAwakeSub)}
         {row('notify', t.restNotify, t.restNotifySub)}
       </div>
+      <button
+        type="button"
+        className="rest-test"
+        onClick={() => {
+          primeRestAudio();
+          restAlert(prefs);
+        }}
+      >
+        <Icon name="bell-ringing" />
+        {t.restTestAlert}
+      </button>
       <div className="sheet-actions">
         <button className="btn btn-secondary grow" onClick={props.onClose}>
           {t.cancel}

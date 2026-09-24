@@ -1710,6 +1710,8 @@ export const uk: Strings = {
   restWhenEnds: 'Коли закінчується',
   restVibrate: 'Вібрація',
   restVibrateSub: 'Коротке подвійне',
+  restVibrateSubIos: 'На iPhone: відгук при записі сету; кінець відпочинку — звуком і нотифікацією',
+  restTestAlert: 'Перевірити сигнал',
   restSound: 'Звук',
   restSoundSub: 'Тихий дзвіночок',
   restKeepAwake: 'Не гасити екран',

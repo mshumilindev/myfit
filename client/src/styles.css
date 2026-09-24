@@ -37849,3 +37849,22 @@ body {
   color: var(--color-accent);
   box-shadow: inset 0 0 0 1px var(--color-accent-700);
 }
+
+/* Rest sheet: fire the alert once so the athlete feels/hears it right away. */
+.rest-test {
+  margin: 10px 0 2px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-divider);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
