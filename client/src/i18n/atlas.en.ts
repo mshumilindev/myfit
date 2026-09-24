@@ -96,6 +96,19 @@ export const EN: PhraseBook = {
         `${x.mmss(f.targetSec)} means ${x.mmss(f.targetSec)}. Not ${x.mmss(f.restSec)}. Numbers are not suggestions.`,
     ],
   },
+  setDrop: {
+    1: [
+      (f) =>
+        `${f.prevReps} → ${f.reps} reps — totally fine. Take a little more rest before the next one.`,
+    ],
+    2: [(f) => `${f.prevReps} → ${f.reps} reps. Rest longer before the next set.`],
+    3: [(f) => `${f.reps}? Last set was ${f.prevReps}. Rest properly.`],
+    4: [(f) => `${f.reps} REPS? From ${f.prevReps}? Rest, then give me more.`],
+    5: [
+      (f) => `${f.reps}. From ${f.prevReps}. Pathetic.`,
+      (f) => `${f.reps} reps. I’ve seen more effort from the bench itself.`,
+    ],
+  },
   skipped: {
     1: [
       (f) =>
@@ -197,6 +210,7 @@ export const EN: PhraseBook = {
     ],
     restShort: [(f, x) => `${x.mmss(f.restSec)} of rest. Your mom rests longer between texts.`],
     skipped: [() => `Your mom already trained today. Just saying.`],
+    setDrop: [(f) => `${f.reps}? Your mom did ${f.prevReps} with the empty bar.`],
     week: [(f) => `${f.sessions} sessions. Your mom can do better.`],
   },
 };

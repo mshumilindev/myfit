@@ -79,6 +79,25 @@ export function buildNotes(
   return { notes, temper, unread };
 }
 
+/** One fact voiced right now (mid-session jab), or null when Atlas is off/muted. */
+export function voiceNow(
+  fact: CoachFact,
+  s: Pick<StoreState, 'workouts' | 'sleeps' | 'injuries' | 'restPeriods' | 'coach'>,
+  now: number,
+  locale: LocaleId,
+  fmt: Fmt,
+): { text: string; temper: Temper } | null {
+  if (!s.coach.enabled || (s.coach.mutedUntil ?? 0) > now) return null;
+  const temper = effectiveTemper(s.coach, {
+    injuries: s.injuries,
+    restPeriods: s.restPeriods,
+    sleeps: s.sleeps,
+    finished: s.workouts.filter((w) => w.finishedAt !== null),
+    now,
+  });
+  return { temper, text: say(fact, temper, { locale, fmt, yoMama: s.coach.yoMama }) };
+}
+
 /** Formatters for the phrase book in the current locale. */
 export function useAtlasFmt(): Fmt {
   const { t, locale } = useT();

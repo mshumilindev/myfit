@@ -116,9 +116,10 @@ export function sessionFacts(w: Workout, history: Workout[]): CoachFact[] {
     }
 
     // Rest vs the athlete's own plan for this lift (only where a plan existed).
+    // restTargetSec sits on the set that ENDS a rest (the plan for the rest before it).
     const pairs = ex.sets
       .filter((s) => setTypeOf(s) !== 'warmup')
-      .map((s, i, arr) => ({ s, planned: i > 0 ? arr[i - 1].restTargetSec : null }))
+      .map((s) => ({ s, planned: s.restTargetSec ?? null }))
       .filter((p) => p.planned && p.planned > 0)
       .map((p) => ({ rest: restBeforeSetInWorkout(w, p.s), planned: p.planned as number }))
       .filter((p): p is { rest: number; planned: number } => p.rest !== null);
@@ -269,4 +270,40 @@ export function weekFact(finished: Workout[], now: number, planned?: number): Co
     sessions,
     planned: planned ?? usualSessionsPerWeek(finished, now - WEEK),
   };
+}
+
+/**
+ * A comment on the set just logged (mid-session jab): rest cut well short of
+ * the plan, or reps falling off a cliff at the same weight. Null = say nothing.
+ */
+export function setFact(p: {
+  workoutId: string;
+  setId: string;
+  exercise: string;
+  reps: number;
+  weight: number | null;
+  prev: { reps: number; weight: number | null } | null;
+  restSec: number | null;
+  restTargetSec: number | null;
+  at: number;
+}): CoachFact | null {
+  if (p.restSec != null && p.restTargetSec && p.restSec < p.restTargetSec * SHORT_REST_SHARE)
+    return {
+      kind: 'restShort',
+      id: `set-rest:${p.setId}`,
+      at: p.at,
+      exercise: p.exercise,
+      restSec: Math.max(0, Math.round(p.restSec)),
+      targetSec: p.restTargetSec,
+    };
+  if (p.prev && (p.prev.weight ?? 0) === (p.weight ?? 0) && p.reps <= p.prev.reps - 2)
+    return {
+      kind: 'setDrop',
+      id: `set-drop:${p.setId}`,
+      at: p.at,
+      exercise: p.exercise,
+      reps: p.reps,
+      prevReps: p.prev.reps,
+    };
+  return null;
 }

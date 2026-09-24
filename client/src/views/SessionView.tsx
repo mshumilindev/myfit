@@ -58,7 +58,10 @@ import { haptic, isAppleTouch } from '../haptics';
 import { cancelRestPush, enablePush, pushState, scheduleRestPush } from '../push';
 import { useTodayPlan } from '../atlas/useTodayPlan';
 import { AtlasFace } from '../components/AtlasFace';
-import { TEMPER_COLOR } from '../atlas/types';
+import { AtlasDebrief } from '../components/AtlasDebrief';
+import { TEMPER_COLOR, type Temper } from '../atlas/types';
+import { setFact } from '../atlas/facts';
+import { useAtlasFmt, voiceNow } from '../atlas/notes';
 import {
   addExercise,
   attachGymToWorkout,
@@ -139,6 +142,7 @@ import {
   type DisplayUnit,
   type SupersetGroup,
   addGeneratedDayTo,
+  setWorkSeconds,
 } from '../store';
 import { workoutCalories } from '../activities';
 import { kgToLb, lbToKg } from '../plates';
@@ -534,6 +538,15 @@ export function SessionView(props: {
   const [renameVal, setRenameVal] = useState('');
   const [summary, setSummary] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const atlasFmt = useAtlasFmt();
+  const [atlasJab, setAtlasJab] = useState<{ text: string; temper: Temper; key: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    if (!atlasJab) return;
+    const id = window.setTimeout(() => setAtlasJab(null), 6000);
+    return () => window.clearTimeout(id);
+  }, [atlasJab]);
   // Atlas's day, offered on an empty session (main-coach role, a plan weekday).
   const todayPlan = useTodayPlan(
     workout && workout.exercises.length === 0 && !props.past ? workout.startedAt : 0,
@@ -1020,6 +1033,26 @@ export function SessionView(props: {
       }
     }
     const id = uuid();
+    // Atlas's jab on this set (short rest vs plan, reps falling off).
+    if (live && isStrengthExercise(ex) && type === 'working') {
+      const prev = [...ex.sets].reverse().find((x) => setTypeOf(x) === 'working') ?? null;
+      const f = setFact({
+        workoutId: workout!.id,
+        setId: id,
+        exercise: ex.name,
+        reps: vals.reps,
+        weight: vals.weight ?? null,
+        prev: prev ? { reps: prev.reps, weight: prev.weight } : null,
+        restSec:
+          lastLoggedAt > 0
+            ? (wallClock() - lastLoggedAt) / 1000 - setWorkSeconds({ reps: vals.reps })
+            : null,
+        restTargetSec: restTarget,
+        at: wallClock(),
+      });
+      const v = f ? voiceNow(f, store, wallClock(), locale, atlasFmt) : null;
+      if (v) setAtlasJab({ ...v, key: id });
+    }
     upsertSet(workout!.id, ex.id, {
       ...vals,
       ...(restTarget ? { restTargetSec: restTarget } : {}),
@@ -3970,6 +4003,10 @@ export function SessionView(props: {
             {gymName ? ` · ${gymName}` : ''}
           </div>
         </div>
+        <AtlasDebrief
+          workout={workout}
+          onOpen={() => props.shell.openOverlay({ screen: 'coach' })}
+        />
         <div className="stat-grid">
           <div className="cell">
             <div className="v">
@@ -4913,6 +4950,19 @@ export function SessionView(props: {
             </button>
           </div>
         </div>
+      )}
+      {atlasJab && !summary && (
+        <button
+          key={atlasJab.key}
+          type="button"
+          className="atl-jab"
+          style={{ ['--atl' as string]: TEMPER_COLOR[atlasJab.temper] }}
+          onClick={() => setAtlasJab(null)}
+          aria-live="polite"
+        >
+          <AtlasFace temper={atlasJab.temper} size={36} />
+          <span>{atlasJab.text}</span>
+        </button>
       )}
       {shareOpen && !summary && (
         <ShareSheet

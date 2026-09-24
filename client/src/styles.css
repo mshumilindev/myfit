@@ -38481,3 +38481,48 @@ body {
   gap: 6px;
   cursor: pointer;
 }
+
+/* Atlas debrief on the session summary */
+.atl-debrief {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  --atl: var(--color-accent);
+}
+
+/* Atlas's mid-session jab — floats above the dock, tap to dismiss */
+.atl-jab {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(150px + var(--safe-bottom));
+  z-index: 60;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--atl) 55%, transparent);
+  background: color-mix(in srgb, var(--atl) 18%, var(--color-bg));
+  box-shadow: 0 10px 30px #000a;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  animation: atl-jab-in 220ms ease-out;
+}
+@keyframes atl-jab-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atl-jab {
+    animation: none;
+  }
+}

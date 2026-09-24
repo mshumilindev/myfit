@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Exercise, Injury, SleepNight, Workout } from '../types';
-import { dayFacts, sessionFacts, weekFact } from './facts';
+import { dayFacts, sessionFacts, setFact, weekFact } from './facts';
 import { effectiveTemper, lineAllowed, softenReason } from './guard';
 import { say, type Fmt } from './voice';
 import { COACH_DEFAULT, TEMPERS, type CoachFact, type Temper } from './types';
@@ -168,6 +168,7 @@ describe('voice', () => {
     { kind: 'pr', id: 'b', at: 0, exercise: 'Bench', weight: 92.5, reps: 5, prevWeight: 90 },
     { kind: 'stall', id: 'c', at: 0, exercise: 'Squat', weight: 140, sessions: 3 },
     { kind: 'restShort', id: 'd', at: 0, exercise: 'Row', restSec: 70, targetSec: 150 },
+    { kind: 'setDrop', id: 'd2', at: 0, exercise: 'Row', reps: 5, prevReps: 8 },
     { kind: 'skipped', id: 'e', at: 0, dayName: 'Legs' },
     { kind: 'imbalance', id: 'f', at: 0, low: 'quads', high: 'chest', lowSets: 6, highSets: 18 },
     { kind: 'week', id: 'g', at: 0, sessions: 3, planned: 4 },
@@ -194,7 +195,7 @@ describe('voice', () => {
     expect(say(f, 5, { locale: 'en', fmt, yoMama: true })).toBe(
       say(f, 5, { locale: 'en', fmt, yoMama: true }),
     );
-    const bw = facts[10];
+    const bw = facts.find((f) => f.kind === 'bodyweight')!;
     expect(say(bw, 5, { locale: 'en', fmt, yoMama: true })).toBe(
       say(bw, 2, { locale: 'en', fmt, yoMama: true }),
     );
@@ -209,5 +210,35 @@ describe('voice', () => {
       say({ ...facts[2], id: `s${i}` } as CoachFact, 5, { locale: 'en', fmt, yoMama: true }),
     );
     expect(any.some((l) => /mom/i.test(l))).toBe(true);
+  });
+});
+
+describe('setFact', () => {
+  const base = { workoutId: 'w', setId: 's', exercise: 'Bench', reps: 8, weight: 80, at: 0 };
+  it('jabs at rest well under the plan', () => {
+    expect(setFact({ ...base, prev: null, restSec: 60, restTargetSec: 150 })?.kind).toBe(
+      'restShort',
+    );
+  });
+  it('jabs at reps falling off at the same weight', () => {
+    const f = setFact({
+      ...base,
+      reps: 5,
+      prev: { reps: 8, weight: 80 },
+      restSec: 160,
+      restTargetSec: 150,
+    });
+    expect(f).toMatchObject({ kind: 'setDrop', reps: 5, prevReps: 8 });
+  });
+  it('stays quiet on a normal set', () => {
+    expect(
+      setFact({
+        ...base,
+        reps: 7,
+        prev: { reps: 8, weight: 80 },
+        restSec: 150,
+        restTargetSec: 150,
+      }),
+    ).toBeNull();
   });
 });

@@ -1788,6 +1788,8 @@ export const pl: Strings = {
   atlasTemperLabel: 'Temperament',
   atlasRoleLabel: 'Rola',
   atlasTurnOff: 'Wyłącz Atlasa',
+  atlasMuteToday: 'Wycisz na dziś',
+  atlasOpen: 'Otwórz Atlasa',
   atlasPlanOffer: 'Napiszę ci program: twoje dni, twoja długość, lżejszy ostatni tydzień. Gotowy?',
   atlasPlanWrite: 'Napisz program',
   atlasPlanDone: 'BLOK UKOŃCZONY',

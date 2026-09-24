@@ -74,6 +74,7 @@ export type CoachFact = FactBase &
     | { kind: 'pr'; exercise: string; weight: number; reps: number; prevWeight: number }
     | { kind: 'stall'; exercise: string; weight: number; sessions: number }
     | { kind: 'restShort'; exercise: string; restSec: number; targetSec: number }
+    | { kind: 'setDrop'; exercise: string; reps: number; prevReps: number }
     | { kind: 'skipped'; dayName: string | null }
     | {
         kind: 'imbalance';
