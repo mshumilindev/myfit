@@ -2674,8 +2674,9 @@ export function SessionView(props: {
                 const meterStyle =
                   meter !== undefined
                     ? ({
-                        // √ so light sets (warm-ups) still read as a small bar.
-                        '--stim': Math.sqrt(meter).toFixed(2),
+                        // Linear, same scale as the "Muscle gain from this set"
+                        // meter on the set card (warm-ups get a min-height nub).
+                        '--stim': meter.toFixed(2),
                         // Colour = the worse of: how far performance dropped, and how
                         // little this set still built (diminishing returns).
                         '--fat': Math.min(
