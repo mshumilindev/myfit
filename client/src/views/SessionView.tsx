@@ -169,6 +169,7 @@ import {
 import { EQUIPMENT_IDS } from '../data/equipment';
 import { nextTarget, topHistory } from '../progression';
 import { starterPlan } from '../starterPlan';
+import { muscleTintClass, photoTintClass } from '../photoTint';
 import { GymKitCard, GymKitTray, GymKitUndo } from '../components/GymKit';
 import { gymHasNoList, type KitEvidence } from '../gymEvidence';
 import { warmupRamp } from '../sessionBuilder';
@@ -1389,9 +1390,16 @@ export function SessionView(props: {
       <div className="tb-tiles">
         {picks.map((p, i) => (
           <div key={p.name} className={`tb-tile${i === 0 ? ' primary' : ''}`}>
-            <button type="button" className="tb-tile-main" onClick={() => openPick(p)}>
+            <button
+              type="button"
+              className={`tb-tile-main${photoTintClass}${tintOf(p)}`}
+              onClick={() => openPick(p)}
+            >
               {p.img ? (
-                <img src={p.img} alt="" />
+                <span className="tb-img-wrap">
+                  <img src={p.img} alt="" />
+                  <span className="photo-tint-layer" aria-hidden />
+                </span>
               ) : (
                 <span className="tb-noimg">
                   <Icon
@@ -1528,6 +1536,12 @@ export function SessionView(props: {
    *  more ways to start, a circuit shortcut when you use circuits, and one
    *  pinned Add button. Everything here is a suggestion — nothing is added
    *  until you tap. */
+  /** Photo tint class for a suggestion: its lift's main muscle group. */
+  function tintOf(p: { name: string; kind: string }): string {
+    if (p.kind !== 'strength') return '';
+    return muscleTintClass(resolveMuscles({ name: p.name, kind: 'strength' } as Exercise).primary);
+  }
+
   function renderEmptyStart() {
     const at = workout!.startedAt;
     const finished = store.workouts.filter((w) => w.finishedAt !== null && w.id !== workout!.id);
@@ -1644,7 +1658,7 @@ export function SessionView(props: {
       </button>
     );
     return (
-      <div className="es">
+      <div className={`es${photoTintClass}`}>
         <div className="es-scroll">
           <div className="es-ready">
             <div className="es-ready-line">
@@ -1672,8 +1686,9 @@ export function SessionView(props: {
             )}
           </div>
           {hero && (
-            <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}`}>
+            <div className={`es-hero${hero.kind === 'strength' ? '' : ' warm'}${tintOf(hero)}`}>
               {hero.img ? <img src={hero.img} alt="" /> : <span className="es-hero-noimg" />}
+              <span className="photo-tint-layer" aria-hidden />
               <button type="button" className="es-hero-main" onClick={() => openPick(hero!)}>
                 <span className="es-hero-text">
                   <span className="es-kicker">{heroKicker}</span>
@@ -1691,7 +1706,10 @@ export function SessionView(props: {
             <div className="es-more">
               <div className="es-grid">
                 {tiles.map((p) => (
-                  <div key={p.name} className={`es-tile${p.kind === 'strength' ? '' : ' warm'}`}>
+                  <div
+                    key={p.name}
+                    className={`es-tile${p.kind === 'strength' ? '' : ' warm'}${tintOf(p)}`}
+                  >
                     <button type="button" className="es-tile-main" onClick={() => openPick(p)}>
                       {p.img ? (
                         <img src={p.img} alt="" />
@@ -1700,6 +1718,7 @@ export function SessionView(props: {
                           <Icon name={p.kind === 'strength' ? 'barbell' : 'wind'} />
                         </span>
                       )}
+                      <span className="photo-tint-layer" aria-hidden />
                       <span className="es-tile-text">
                         <span className="es-kicker">{p.kicker}</span>
                         <span className="es-tile-name">
@@ -2834,11 +2853,14 @@ export function SessionView(props: {
         )}
         {marker ? (
           <div className="warmup-marker-body">
-            <img
-              className="warmup-marker-photo"
-              src={MARKER_IMAGES[kind === 'cooldown' ? 'cooldown' : 'warmup']}
-              alt=""
-            />
+            <span className={`warmup-marker-photo-wrap`}>
+              <img
+                className="warmup-marker-photo"
+                src={MARKER_IMAGES[kind === 'cooldown' ? 'cooldown' : 'warmup']}
+                alt=""
+              />
+              <span className="photo-tint-layer" aria-hidden />
+            </span>
             <span className="warmup-marker-icon" aria-hidden>
               <Icon name={kind === 'cooldown' ? 'wind' : 'flame'} weight="fill" />
             </span>
