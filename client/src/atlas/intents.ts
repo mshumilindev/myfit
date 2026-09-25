@@ -34,6 +34,8 @@ const SMALL_NEW = new Set(INTENTS_SMALL.map((i) => i.id));
 import { parseRange, parseWeekdays } from './when';
 import { SORE_CAP } from './memoryPlan';
 import { isLiftStatus, resolveCatalogLift, resolveMyLift } from './liftNames';
+import { taughtFor, teach, wrongFor } from './teach';
+import { aboutMyLog, followQuery, parseQuery, queryChips, runQuery, type Query } from './query';
 import { fmtPoint, isBodyweightLift, liftPoints, liftProgress } from './liftStats';
 import { ASKS } from './asks';
 import { KB, type Facet } from './kb';
@@ -1017,6 +1019,10 @@ export interface Convo {
   q?: string;
   /** Sides of the topic already told (why / how / when…). */
   told?: Facet[];
+  /** The last computed question about your log — for "and in July?". */
+  query?: Query;
+  /** "Did you mean…" was offered for this wording — the pick teaches Atlas. */
+  pendingTeach?: { q: string; offered: string[] };
 }
 
 const MORE = [
@@ -1056,6 +1062,10 @@ const ASK_WHY = [
   'звідки',
   'чому так',
 ];
+/** Words that point back at the lift we were talking about. */
+const PRONOUN =
+  /\s(it|that lift|this lift|that exercise|this exercise|that one|this one|the same lift|її|його|неї|нього|цю вправу|цієї вправи|ця вправа|цій вправі|ту вправу|ее|его|нее|него|это упражнение|этого упражнения|этом упражнении)\s/u;
+
 const FOLLOW_LEAD = [
   'and',
   'what about',
@@ -1382,6 +1392,32 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   const short = words.length <= 5;
   const turn = (convo.turn ?? 0) + 1;
 
+  // "It / that lift / її / цю вправу" → the lift we were just talking about.
+  if (!p.exercise && convo.exercise && words.length <= 9 && PRONOUN.test(` ${phrase} `))
+    p.exercise = convo.exercise;
+
+  // ---- follow-ups on a computed question ("and last month?", "а присід?") ----
+  if (convo.query) {
+    const fq = followQuery(convo.query, question, p);
+    const res = fq && runQuery(c, fq, L);
+    if (fq && res)
+      return {
+        intent: 'log_query',
+        text: res.text,
+        chart: res.chart,
+        chips: queryChips(fq, L),
+        convo: {
+          intent: 'log_query',
+          exercise: fq.exercise,
+          muscle: fq.muscle,
+          depth: 0,
+          turn,
+          q: question,
+          query: fq,
+        },
+      };
+  }
+
   // ---- follow-ups on the current topic ----
   const cur = byId(convo.intent);
   if (cur && short) {
@@ -1406,6 +1442,22 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         it.all.every((g) => groupMatches(words, phrase, g)) &&
         hasNeeds(it, p),
     );
+    // "And last month?" — the same topic over a new window. A lift topic
+    // without windows (progress, best) moves to the lift-over-a-window one.
+    if (p.range && !p.exercise && !p.muscle && !ownQuestion && words.length <= 5) {
+      const target =
+        cur.needs === 'range'
+          ? cur
+          : topic.exercise && (cur.id === 'progress_lift' || cur.id === 'best' || cur.id === 'e1rm')
+            ? byId('range_lift')
+            : topic.muscle && cur.needs === 'muscle'
+              ? byId('range_muscle')
+              : undefined;
+      const tp: Parsed = { ...topic, range: p.range };
+      const core = target && hasNeeds(target, tp) ? target.answer(c, tp, L) : null;
+      if (target && core)
+        return build(target, core, c, tp, question, L, convo, convo.q ?? question);
+    }
     if (entityOnly && cur.needs && (convo.pending || !ownQuestion) && hasNeeds(cur, carried)) {
       const core = cur.answer(c, carried, L);
       if (core) return build(cur, core, c, carried, question, L, convo, convo.q ?? question);
@@ -1430,7 +1482,12 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       const cp = topic;
       const why = cur.why?.(c, cp, L) ?? (d?.why ? L(d.why[0], d.why[1]) : null);
       if (why)
-        return { intent: cur.id, text: why, chips: chipsFor(cur.id, L), convo: { ...convo, turn } };
+        return {
+          intent: cur.id,
+          text: why,
+          chips: chipsFor(cur.id, L),
+          convo: { ...convo, turn },
+        };
       return {
         intent: cur.id,
         text: L(
@@ -1507,7 +1564,11 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         ],
         convo: { intent: 'memory_note', depth: 0, turn },
       };
-    return { ...a, text: note ? `${a.text}\n\n${note}` : a.text, learned: learned.patch };
+    return {
+      ...a,
+      text: note ? `${a.text}\n\n${note}` : a.text,
+      learned: learned.patch,
+    };
   };
 
   // ---- a fresh question ----
@@ -1530,15 +1591,21 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   // It leads when keywords found nothing, or only a weak, single-word hit.
   const allowed = (it: Intent) =>
     (!it.maxWords || words.length <= it.maxWords + 3) && !(it.negatable && negatedPain);
+  // What you taught me: your wording → your topic; 👎 topics are out.
+  const wrong = wrongFor(question, c.mem);
+  const taughtId = taughtFor(question, c.mem);
   const hits = retrieve(question).filter((h) => {
     const it = byId(h.id);
-    return it && allowed(it);
+    return it && allowed(it) && !wrong.has(h.id);
   });
+  for (let i = ranked.length - 1; i >= 0; i--) if (wrong.has(ranked[i].id)) ranked.splice(i, 1);
   const top = hits[0];
   const second = hits[1];
   const margin = top ? top.score - (second?.score ?? 0) : 0;
   const confident = !!top && top.score >= RET_MIN && margin >= RET_MARGIN;
-  const byExample = confident ? byId(top.id) : undefined;
+  const taughtIt = taughtId ? byId(taughtId) : undefined;
+  const byExample =
+    taughtIt && hasNeeds(taughtIt, p) ? taughtIt : confident ? byId(top.id) : undefined;
   const kwTop = ranked[0];
   const kwStrong =
     !!kwTop &&
@@ -1560,11 +1627,62 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   const agreed = !!kwTop && hits[1]?.id === kwTop.id && margin < 0.05;
   // "How are my pull-ups?" — your own lift + nothing but how-is-it-going.
   const status =
+    !taughtIt &&
+    !wrong.has('progress_lift') &&
     p.exercise &&
     loggedLifts(c).some((l) => l.name === p.exercise) &&
     isLiftStatus(question, p.exercise)
       ? byId('progress_lift')
       : null;
+  // Free questions about your log ("average reps on bench in August",
+  // "which lift improved most") — computed, not looked up.
+  const lq = parseQuery(question, p);
+  const myLog =
+    !!lq &&
+    aboutMyLog(question, lq, !!p.exercise && loggedLifts(c).some((l) => l.name === p.exercise));
+  const queryAnswer = (): LocalAnswer | null => {
+    const res = lq && runQuery(cm, lq, L);
+    if (!lq || !res) return null;
+    return withLearned({
+      intent: 'log_query',
+      text: res.text,
+      chart: res.chart,
+      chips: queryChips(lq, L),
+      convo: {
+        intent: 'log_query',
+        exercise: p.exercise,
+        muscle: p.muscle,
+        depth: 0,
+        turn,
+        q: question,
+        query: lq,
+      },
+    });
+  };
+  // Examples know the topic for sure → they lead; otherwise a clearly
+  // analytic question is computed before keyword guesses.
+  const specific =
+    !!lq && (lq.signals >= 3 || (!!p.range && !!byExample && byExample.needs !== 'range'));
+  // A lift you never logged may be a misread word — then topics go first.
+  const unknownLift = !!p.exercise && !loggedLifts(c).some((l) => l.name === p.exercise);
+  if (taughtId === 'log_query' && lq && !wrong.has('log_query')) {
+    const a = queryAnswer();
+    if (a) return a;
+  }
+  if (
+    lq?.strong &&
+    myLog &&
+    !unknownLift &&
+    !wrong.has('log_query') &&
+    !taughtIt &&
+    (!byExample || specific) &&
+    !commandReady &&
+    !status &&
+    !whyTopic
+  ) {
+    const a = queryAnswer();
+    if (a) return a;
+  }
   const lead =
     status ??
     (byExample && SPECIALIZE[byExample.id]?.(p) ? byId(SPECIALIZE[byExample.id]!(p)!) : byExample);
@@ -1608,6 +1726,11 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       convo: { intent: needy.id, pending: true, depth: 0, turn },
     };
   }
+  // No topic fits, but it's a question about your numbers → compute it.
+  if (lq?.strong && myLog && !wrong.has('log_query')) {
+    const a = queryAnswer();
+    if (a) return a;
+  }
   // Close, but not sure enough to answer → offer the closest topics.
   if (!hasLearned && top && top.score >= RET_NEAR) {
     const near = hits.filter((h) => h.score >= RET_NEAR * 0.8 && ASKS[h.id]).slice(0, 3);
@@ -1620,7 +1743,11 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         ),
         chips: near.map((h) => L(ASKS[h.id][0], ASKS[h.id][1])),
         escalate: true,
-        convo: { ...convo, turn },
+        convo: {
+          ...convo,
+          turn,
+          pendingTeach: { q: question, offered: near.map((h) => h.id) },
+        },
       };
   }
   return withLearned(null);
@@ -1649,17 +1776,26 @@ const SPLIT_RE = /\?+\s*|\s+(?:and also|also|а ще|і ще|плюс)\s+/i;
  * "Did you mean…": the closest topics when nothing fits for sure — scored by
  * how many keyword groups match (partially) and how specific the words are.
  */
-export function didYouMean(question: string, c: AskCtx): { id: string; ask: string }[] {
+export function didYouMean(
+  question: string,
+  c: AskCtx,
+  exclude: string[] = [],
+): { id: string; ask: string }[] {
+  const out = didYouMeanAll(question, c).filter((x) => !exclude.includes(x.id));
+  return out.slice(0, 3);
+}
+
+function didYouMeanAll(question: string, c: AskCtx): { id: string; ask: string }[] {
   const words = tokens(question);
   const phrase = normalize(question);
   if (!words.length) return [];
   const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
   // Closest by example first; keyword overlap fills in.
-  const near = retrieve(question, 6).filter(
+  const near = retrieve(question, 8).filter(
     (h) => h.score >= 0.2 && ASKS[h.id] && !byId(h.id)?.maxWords,
   );
   if (near.length)
-    return near.slice(0, 3).map((h) => ({ id: h.id, ask: L(ASKS[h.id][0], ASKS[h.id][1]) }));
+    return near.slice(0, 5).map((h) => ({ id: h.id, ask: L(ASKS[h.id][0], ASKS[h.id][1]) }));
   const scored: { id: string; score: number }[] = [];
   for (const it of ALL_INTENTS()) {
     const ask = ASKS[it.id];
@@ -1671,7 +1807,7 @@ export function didYouMean(question: string, c: AskCtx): { id: string; ask: stri
   }
   return scored
     .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
+    .slice(0, 5)
     .map((x) => ({ id: x.id, ask: L(ASKS[x.id][0], ASKS[x.id][1]) }));
 }
 
@@ -1682,10 +1818,33 @@ export function didYouMean(question: string, c: AskCtx): { id: string; ask: stri
  * Lithuanian, Estonian and Russian are mapped onto known words first.
  */
 export function answerLocally(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer | null {
+  const a = answerRaw(question, c, convo);
+  if (!a) return a;
+  // Picked one of the "did you mean…" options → remember that wording.
+  const pt = convo.pendingTeach;
+  let out = a;
+  if (pt && pt.offered.includes(a.intent) && a.intent !== 'did_you_mean') {
+    const base = a.learned ? mergeMemory(c.mem, a.learned) : c.mem;
+    out = { ...a, learned: { ...(a.learned ?? {}), ...teach(base, pt.q, a.intent, c.now) } };
+  }
+  // The offer holds for the very next message only.
+  if (out.intent !== 'did_you_mean' && out.convo.pendingTeach) {
+    const { pendingTeach: _drop, ...rest } = out.convo;
+    void _drop;
+    out = { ...out, convo: rest };
+  }
+  return out;
+}
+
+function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer | null {
   const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
   const emoji = emojiReply(c, question, L);
   if (emoji)
-    return { intent: 'emoji', text: emoji, convo: { ...convo, turn: (convo.turn ?? 0) + 1 } };
+    return {
+      intent: 'emoji',
+      text: emoji,
+      convo: { ...convo, turn: (convo.turn ?? 0) + 1 },
+    };
   const parts = question
     .split(SPLIT_RE)
     .map((x) => x.trim())

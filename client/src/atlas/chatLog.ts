@@ -17,6 +17,11 @@ export interface ChatMsg {
   chart?: import('./intentKit').Chart;
   /** Something Atlas offers to do — Do it / Cancel under the message. */
   action?: import('./intentKit').AtlasAction;
+  /** The topic this answer came from and the question — for 👍 / 👎. */
+  intent?: string;
+  q?: string;
+  /** Your verdict on this answer (hides the buttons). */
+  rated?: 'up' | 'down';
 }
 
 const KEY = 'spotter.atlasChat';

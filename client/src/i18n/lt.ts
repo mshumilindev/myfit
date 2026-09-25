@@ -1804,6 +1804,10 @@ export const lt: Strings = {
   atlasLangDone: 'Atlikta — toliau lietuviškai.',
   atlasNewNotes: (n: number) => `${n} ${n === 1 ? 'nauja' : 'naujos'}`,
   atlasDidYouMean: 'Nesu tikras, ar supratau. Ar turėjai omenyje:',
+  atlasRateUp: 'Naudinga',
+  atlasRateDown: 'Ne to klausiau',
+  atlasWrongPick: 'Supratau — ne tai. Ką turėjai omenyje?',
+  atlasWrongNoted: 'Įsiminiau — taip nebeatsakysiu. Pabandyk paklausti kitaip.',
   atlasDoIt: 'Padaryk',
   atlasCancel: 'Atšaukti',
   atlasRoleHumanCoach:

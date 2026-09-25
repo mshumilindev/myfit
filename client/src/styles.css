@@ -38628,6 +38628,29 @@ body {
   gap: 6px;
   margin-left: 36px;
 }
+/* 👍 / 👎 under Atlas's latest answer — quiet, it's a nudge, not a survey. */
+.atl-rate {
+  display: flex;
+  gap: 2px;
+  margin-left: 36px;
+  margin-top: -4px;
+}
+.atl-rate button {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-neutral-500);
+  cursor: pointer;
+}
+.atl-rate button:hover,
+.atl-rate button:focus-visible {
+  color: var(--color-neutral-200);
+  background: var(--color-surface);
+}
 .atl-suggest .atl-chip {
   min-height: 36px;
   font-size: 13px;

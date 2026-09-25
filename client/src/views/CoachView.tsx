@@ -24,6 +24,7 @@ import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/p
 import { askAtlas } from '../atlas/chat';
 import { answerLocally, didYouMean, type Convo } from '../atlas/intents';
 import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
+import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
 import { ChatChart } from '../components/ChatChart';
 import { buildChatFacts } from '../atlas/chatFacts';
@@ -31,6 +32,9 @@ import { clearChat, pushChat, updateChat, useChatLog, type ChatMsg } from '../at
 import { useChatAccess } from '../atlas/chatAccess';
 import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
 import { fmtBodyWeightKg } from '../i18n';
+
+/** Answers not worth a 👍 / 👎 (small talk, "did you mean…", memory notes). */
+const UNRATED = new Set(['did_you_mean', 'emoji', 'memory_note']);
 
 /** Wall clock for event handlers (kept out of render). */
 const wallClock = (): number => Date.now();
@@ -587,6 +591,7 @@ function CoachThread({
       await typeOut(rid, at + 1, local.text, local.chips, {
         ...(local.chart ? { chart: local.chart } : {}),
         ...(local.action ? { action: local.action } : {}),
+        ...(!local.action && !UNRATED.has(local.intent) ? { intent: local.intent, q } : {}),
       });
       return true;
     }
@@ -594,6 +599,9 @@ function CoachThread({
     // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread.
     if (!canChat) {
       const guess = didYouMean(q, ctx);
+      // Your pick among these teaches Atlas this wording.
+      if (guess.length)
+        convo.current = { ...convo.current, pendingTeach: { q, offered: guess.map((g) => g.id) } };
       await typeOut(
         rid,
         at + 1,
@@ -610,6 +618,32 @@ function CoachThread({
     }
     await sendGemini(q, history);
     return true;
+  };
+
+  /**
+   * 👍 — this wording means this topic; 👎 — it doesn't: Atlas remembers and
+   * offers the closest other topics (your pick teaches it the right one).
+   */
+  const rate = (n: Item, up: boolean) => {
+    if (!n.intent || !n.q) return;
+    const now = wallClock();
+    const mem = store.coach.memory;
+    const patch = up ? teach(mem, n.q, n.intent, now) : unteach(mem, n.q, n.intent, now);
+    setCoach({ memory: mergeMemory(mem, patch) });
+    updateChat(n.id, { rated: up ? 'up' : 'down' });
+    if (up) return;
+    const ctx = { s: store, now, locale, temper, fmt, mem: mergeMemory(mem, patch) };
+    const alts = didYouMean(n.q, ctx, [n.intent]);
+    convo.current = alts.length
+      ? { ...convo.current, pendingTeach: { q: n.q, offered: alts.map((a) => a.id) } }
+      : {};
+    pushChat({
+      id: `fix-${now}`,
+      at: now,
+      from: 'atlas',
+      text: alts.length ? t.atlasWrongPick : t.atlasWrongNoted,
+      ...(alts.length ? { chips: alts.map((a) => a.ask) } : {}),
+    });
   };
 
   /** The Gemini leg of a message (the question is already in the thread). */
@@ -666,6 +700,9 @@ function CoachThread({
     langOffer?: ChatMsg['langOffer'];
     chart?: ChatMsg['chart'];
     action?: ChatMsg['action'];
+    intent?: string;
+    q?: string;
+    rated?: ChatMsg['rated'];
   };
   const items: Item[] = useMemo(
     () =>
@@ -685,6 +722,9 @@ function CoachThread({
       chipsId = items[i].id;
       break;
     }
+  // 👍 / 👎 only on Atlas's newest answer, until you write again.
+  const last = items[items.length - 1];
+  const rateId = last && last.from === 'atlas' && last.intent && !last.rated ? last.id : null;
   const noteIds = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
   const unreadCount = notes.filter((n) => n.at > readSnap).length;
   const firstUnreadId = notes.find((n) => n.at > readSnap)?.id ?? null;
@@ -840,6 +880,26 @@ function CoachThread({
                           onClick={() => updateChat(n.id, { action: undefined })}
                         >
                           {t.atlasCancel}
+                        </button>
+                      </div>
+                    )}
+                    {n.id === rateId && !busy && (
+                      <div className="atl-rate">
+                        <button
+                          type="button"
+                          aria-label={t.atlasRateUp}
+                          title={t.atlasRateUp}
+                          onClick={() => rate(n, true)}
+                        >
+                          <Icon name="thumbs-up" />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={t.atlasRateDown}
+                          title={t.atlasRateDown}
+                          onClick={() => rate(n, false)}
+                        >
+                          <Icon name="thumbs-down" />
                         </button>
                       </div>
                     )}

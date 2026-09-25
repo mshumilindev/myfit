@@ -1836,6 +1836,10 @@ export const en = {
   atlasLangDone: 'Done — English from here on.',
   atlasNewNotes: (n: number) => `${n} new`,
   atlasDidYouMean: 'Not sure I got that. Did you mean:',
+  atlasRateUp: 'Helpful',
+  atlasRateDown: 'Not what I asked',
+  atlasWrongPick: 'Got it — not that. Which one did you mean?',
+  atlasWrongNoted: "Noted — I won't answer that this way again. Try asking in other words.",
   atlasDoIt: 'Do it',
   atlasCancel: 'Cancel',
   atlasRoleHumanCoach:

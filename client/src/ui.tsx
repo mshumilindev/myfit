@@ -44,6 +44,7 @@ import { DotsThreeCircle } from '@phosphor-icons/react/DotsThreeCircle';
 import { HandPalm } from '@phosphor-icons/react/HandPalm';
 import { HandTap } from '@phosphor-icons/react/HandTap';
 import { ThumbsUp } from '@phosphor-icons/react/ThumbsUp';
+import { ThumbsDown } from '@phosphor-icons/react/ThumbsDown';
 import { FirstAidKit } from '@phosphor-icons/react/FirstAidKit';
 import { Virus } from '@phosphor-icons/react/Virus';
 import { ArrowFatUp } from '@phosphor-icons/react/ArrowFatUp';
@@ -296,6 +297,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'hand-palm': HandPalm,
   'hand-tap': HandTap,
   'thumbs-up': ThumbsUp,
+  'thumbs-down': ThumbsDown,
   'first-aid-kit': FirstAidKit,
   virus: Virus,
   'arrow-fat-up': ArrowFatUp,

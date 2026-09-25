@@ -22,7 +22,8 @@ interface NameIndex {
 function indexOf(names: string[]): NameIndex {
   const variants = names.map((n) =>
     exerciseNameVariants(n)
-      .map((v) => new Set(terms(v)))
+      // Pronoun tokens aren't part of a name (Lithuanian "į" reads as "I").
+      .map((v) => new Set(terms(v).filter((t) => t !== '~me' && t !== '~you')))
       .filter((v) => v.size),
   );
   const toks = variants.map((vs) => new Set(vs.flatMap((v) => [...v])));
@@ -42,10 +43,23 @@ let generic: Set<string> | null = null;
 const GENERIC_TEXT =
   'train training workout lift lifting exercise exercises gym session body bodyweight weight ' +
   'chest back legs leg shoulders shoulder arms arm biceps triceps abs core glutes calves lats traps ' +
-  'quads hamstrings forearms neck hips ' +
+  'quads hamstrings forearms neck hips muscle muscles ' +
   'тренування тренувати вправа вправи зал вага тіла груди спина ноги плечі руки біцепс трицепс прес ' +
-  'сідниці литки широчайші трапеції квадрицепс шия ' +
-  'тренировка упражнение вес тела грудь спина ноги плечи руки бицепс трицепс пресс ягодицы';
+  'сідниці литки широчайші трапеції квадрицепс шия мʼяз мязи мяз мʼязи мʼязів мязів ' +
+  'тренировка упражнение вес тела грудь спина ноги плечи руки бицепс трицепс пресс ягодицы мышца мышцы';
+
+const FILLER = new Set([
+  'over',
+  'under',
+  'up',
+  'down',
+  'out',
+  'off',
+  'with',
+  'without',
+  'around',
+  'through',
+]);
 
 let catalogIndex: NameIndex | null = null;
 const catalog = () =>
@@ -59,13 +73,17 @@ let mineIndex: NameIndex | null = null;
  * word, not just "barbell") and to be covered well enough by the question.
  */
 function best(
-  q0: Set<string>,
+  qIn: Set<string>,
   ix: NameIndex,
   weightOf: (i: number) => number,
   strict: boolean,
 ): string | null {
   generic ??= new Set(terms(GENERIC_TEXT));
-  const q = strict ? new Set([...q0].filter((t) => !generic!.has(t))) : q0;
+  const q0 = new Set(qIn);
+  // Numbers ("3 months", "80 kg") never name a library lift ("3/4 Sit-Up").
+  // Little words inside names ("Bent OVER Row") never pick a lift on their own.
+  for (const t of FILLER) q0.delete(t);
+  const q = strict ? new Set([...q0].filter((t) => !generic!.has(t) && !/^\d/.test(t))) : q0;
   if (!q.size) return null;
   let top: { i: number; score: number } | null = null;
   for (let i = 0; i < ix.names.length; i++) {
@@ -78,14 +96,21 @@ function best(
     for (const v of ix.variants[i]) {
       let hit = 0;
       let all = 0;
+      let hits = 0;
       for (const t of v) {
         const w = ix.idf.get(t) ?? 0;
         all += w;
-        if (q.has(t)) hit += w;
+        if (q.has(t)) {
+          hit += w;
+          hits++;
+        }
       }
+      // A library name of several words needs at least two of them
+      // ("what split" is not "Split Clean").
+      if (strict && hits < Math.min(2, v.size)) continue;
       coverage = Math.max(coverage, hit / (all || 1));
     }
-    if (coverage < (strict ? 0.34 : 0.2)) continue;
+    if (coverage < (strict ? 0.6 : 0.2)) continue;
     const score = coverage + 0.02 * weightOf(i);
     if (!top || score > top.score) top = { i, score };
   }

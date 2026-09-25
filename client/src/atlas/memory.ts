@@ -7,6 +7,7 @@
  *    when the data changed he says so instead of silently flipping.
  * Pure helpers here; the chat view persists the results.
  */
+import type { Taught } from './teach';
 import { groupMatches, negated } from './nlu';
 import type { Tr } from './intentKit';
 
@@ -33,6 +34,10 @@ export interface AtlasMemory {
   home?: boolean;
   level?: Level;
   age?: number;
+  /** Your wordings → the topic you meant (from "did you mean…" and 👍). */
+  taught?: Taught[];
+  /** Your wordings → a topic that was wrong for them (👎). */
+  wrong?: Taught[];
 }
 
 export const SORE_DAYS = 14;

@@ -1793,6 +1793,10 @@ export const pl: Strings = {
   atlasLangDone: 'Gotowe — od teraz po polsku.',
   atlasNewNotes: (n: number) => `${n} ${n === 1 ? 'nowa' : 'nowe'}`,
   atlasDidYouMean: 'Nie jestem pewien, czy dobrze rozumiem. Chodziło ci o:',
+  atlasRateUp: 'Pomocne',
+  atlasRateDown: 'Nie o to pytałem',
+  atlasWrongPick: 'Jasne — nie to. O co ci chodziło?',
+  atlasWrongNoted: 'Zapamiętam — tak już nie odpowiem. Spróbuj zapytać inaczej.',
   atlasDoIt: 'Zrób to',
   atlasCancel: 'Anuluj',
   atlasRoleHumanCoach:
