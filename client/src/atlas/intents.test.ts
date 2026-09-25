@@ -97,13 +97,15 @@ describe('answerLocally', () => {
       ['хто виграв чемпіонат світу з футболу', 'uk'],
     ] as const) {
       const a = answerLocally(q, ctx(l));
-      expect(!a || (a.intent === 'did_you_mean' && a.escalate)).toBe(true);
+      expect(!a || ((a.intent === 'did_you_mean' || a.intent === 'off_topic') && a.escalate)).toBe(
+        true,
+      );
     }
   });
 
   it('pain stays calm even for Merciless', () => {
     const a = answerLocally('my back hurts', ctx('en', 5));
-    expect(a?.text).toMatch(/Pain.* is not something to push through/);
+    expect(a?.text).toMatch(/Don't train through it/);
     expect(a?.text).not.toMatch(/keep up|disappoint/);
   });
 });

@@ -111,11 +111,11 @@ function recentPrs(c: AskCtx, since: number): string[] {
   return out;
 }
 
-function tonnage(c: AskCtx, since: number): number {
+function tonnage(c: AskCtx, since: number, until = Infinity, lift?: string | null): number {
   return Math.round(
     finishedOf(c)
-      .filter((w) => w.startedAt >= since)
-      .flatMap((w) => w.exercises.flatMap((e) => e.sets))
+      .filter((w) => w.startedAt >= since && w.startedAt < until)
+      .flatMap((w) => w.exercises.filter((e) => !lift || e.name === lift).flatMap((e) => e.sets))
       .filter((s) => setTypeOf(s) !== 'warmup')
       .reduce((a, s) => a + (s.weight ?? 0) * s.reps, 0),
   );
@@ -226,12 +226,33 @@ export const INTENTS_MORE: Intent[] = [
       ['how much', 'total', 'tonnage', 'скільки', 'загальн*', 'тоннаж*'],
       ['lifted', 'lift', 'moved', 'tonnage', 'kg', 'підняв', 'піднял*', 'підняти', 'тоннаж*', 'кг'],
     ],
-    answer: (c, _p, L) => {
-      const w = tonnage(c, c.now - 7 * DAY);
-      const m = tonnage(c, c.now - 28 * DAY);
-      return L(
-        `Moved ${(w / 1000).toFixed(1)} t in the last 7 days, ${(m / 1000).toFixed(1)} t in 4 weeks.`,
-        `Піднято ${(w / 1000).toFixed(1)} т за 7 днів, ${(m / 1000).toFixed(1)} т за 4 тижні.`,
+    answer: (c, p, L) => {
+      const lift = p.exercise;
+      const t = (kg: number) =>
+        kg >= 10000 ? `${(kg / 1000).toFixed(1)} ${L('t', 'т')}` : c.fmt.kg(kg);
+      // "Bench: moved…" / "Moved…"
+      const say = (en: string, uk: string) => {
+        const x = L(en, uk);
+        return lift ? `${c.fmt.exercise(lift)}: ${x[0].toLowerCase()}${x.slice(1)}` : x;
+      };
+      if (p.range && !p.range.ago) {
+        const v = tonnage(c, p.range.from, p.range.to, lift);
+        return v
+          ? say(`Moved ${t(v)} — ${p.range.label[0]}.`, `Піднято ${t(v)} — ${p.range.label[1]}.`)
+          : say(
+              `Nothing logged — ${p.range.label[0]}.`,
+              `Нічого не записано — ${p.range.label[1]}.`,
+            );
+      }
+      const w = tonnage(c, c.now - 7 * DAY, c.now, lift);
+      const m = tonnage(c, c.now - 28 * DAY, c.now, lift);
+      if (!m)
+        return lift
+          ? say('No working sets in the last 4 weeks.', 'Робочих сетів за 4 тижні немає.')
+          : null;
+      return say(
+        `Moved ${t(w)} in the last 7 days, ${t(m)} in 4 weeks.`,
+        `Піднято ${t(w)} за 7 днів, ${t(m)} за 4 тижні.`,
       );
     },
   },

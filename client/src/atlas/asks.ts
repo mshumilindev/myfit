@@ -3,6 +3,8 @@
  * a question is only half understood, and for "what can I ask you".
  * Chit-chat (greetings, thanks…) is left out on purpose.
  */
+import { NEW_TOPICS } from './kb/topicsNew';
+
 export const ASKS: Record<string, [string, string]> = {
   // part 1
   pain: ['Something hurts — what do I do?', 'Щось болить — що робити?'],
@@ -215,3 +217,6 @@ export const ASKS: Record<string, [string, string]> = {
   electrolytes: ['Do I need electrolytes?', 'Чи потрібні електроліти?'],
   fiber: ['How much fibre?', 'Скільки клітковини?'],
 };
+
+// Topics added later bring their own canonical question.
+for (const t of NEW_TOPICS) ASKS[t.id] ??= t.ask;

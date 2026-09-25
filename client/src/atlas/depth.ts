@@ -5,6 +5,10 @@
  * who have it) with the whole thread as context — so a topic never dead-ends.
  */
 
+import { MORE_R1 } from './kb/depthR1';
+import { MORE_R2 } from './kb/depthR2';
+import { MORE_R3 } from './kb/depthR3';
+
 type Pair = [string, string];
 
 export interface Depth {
@@ -402,3 +406,10 @@ export const DEFAULT_NEXT: Pair[] = [
   ['How am I doing?', 'Як мій прогрес?'],
   ['How long should I rest?', 'Скільки відпочивати?'],
 ];
+
+// Deeper layers written later: appended after the ones above.
+for (const r of [MORE_R1, MORE_R2, MORE_R3])
+  for (const [id, layers] of Object.entries(r)) {
+    const d = (DEPTH[id] ??= { more: [], next: [] });
+    d.more = [...d.more, ...layers];
+  }

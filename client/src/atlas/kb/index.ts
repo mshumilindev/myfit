@@ -13,6 +13,10 @@ import { KB_R1 } from './partR1';
 import { KB_R2 } from './partR2';
 import { KB_R3 } from './partR3';
 import { KB_R4 } from './partR4';
+import { FACETS_R1 } from './depthR1';
+import { FACETS_R2 } from './depthR2';
+import { FACETS_R3 } from './depthR3';
+import { NEW_TOPICS } from './topicsNew';
 import type { Kb } from './types';
 
 const base: Kb = { ...KB_A, ...KB_B, ...KB_C, ...KB_D, ...KB_E };
@@ -30,10 +34,23 @@ for (const r of rounds)
       exUk: [...(more[id]?.exUk ?? []), ...e.exUk],
     };
 
-export const KB: Kb = Object.fromEntries(
-  Object.entries(base).map(([id, e]) => [
-    id,
-    { ...e, ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
-  ]),
-);
+/** More sides of a topic ("why…", "how…") — the first-written answer wins. */
+const facetRounds = [FACETS_R1, FACETS_R2, FACETS_R3];
+
+export const KB: Kb = Object.fromEntries([
+  ...Object.entries(base).map(([id, e]) => {
+    const facets = facetRounds.reduce((f, r) => ({ ...(r[id] ?? {}), ...f }), e.facets ?? {});
+    return [
+      id,
+      {
+        ...e,
+        ex: [...e.ex, ...(more[id]?.ex ?? [])],
+        exUk: [...e.exUk, ...(more[id]?.exUk ?? [])],
+        ...(Object.keys(facets).length ? { facets } : {}),
+      },
+    ];
+  }),
+  // Topics added later — whole (phrasings + sides) in one file.
+  ...NEW_TOPICS.map((t) => [t.id, { ex: t.ex, exUk: t.exUk, facets: t.facets }]),
+]);
 export type { Facet, Kb, KbEntry } from './types';

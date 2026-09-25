@@ -162,3 +162,13 @@ export function isLiftStatus(question: string, lift: string): boolean {
   if (!q.includes('~me') || !q.some((t) => name.has(t))) return false;
   return q.every((t) => t === '~me' || name.has(t) || statusWords!.has(t));
 }
+
+/** How many of the question's meaning-words a lift's names cover (any language). */
+export function nameHits(question: string, lift: string): number {
+  const q = new Set(terms(question).filter((t) => t !== '~me' && t !== '~you' && !FILLER.has(t)));
+  const n = new Set<string>();
+  for (const v of exerciseNameVariants(lift)) for (const t of terms(v)) n.add(t);
+  let k = 0;
+  for (const t of q) if (n.has(t)) k++;
+  return k;
+}

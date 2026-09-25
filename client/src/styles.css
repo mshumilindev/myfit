@@ -38057,6 +38057,7 @@ body {
 .atl-bubble {
   max-width: 290px;
   padding: 10px 13px;
+  white-space: pre-line;
   border-radius: 16px 16px 16px 4px;
   background: var(--color-surface);
   box-shadow: inset 2px 0 0 var(--atl);

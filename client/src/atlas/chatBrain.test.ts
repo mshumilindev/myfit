@@ -186,8 +186,11 @@ describe('depth — technique, injuries, nutrition', () => {
     expect(answerLocally('why?', c, a.convo)!.text).toMatch(/Knees out/);
   });
   it('pain goes deeper by body part', () => {
+    // A pain check-in: the part is known → straight to "when does it hurt?"
     const a = answerLocally('my knee hurts', c)!;
-    expect(answerLocally('tell me more', c, a.convo)!.text).toMatch(/^Knee, this week/);
+    expect(a.intent).toBe('pain');
+    expect(a.text).toMatch(/Don't train through it.*\?$/);
+    expect(a.convo.flow?.kind).toBe('pain');
   });
   it('calories come from your bodyweight and goal', () => {
     const m = { ...c, mem: { goal: { v: 'fat_loss' as const, at: NOW } } };

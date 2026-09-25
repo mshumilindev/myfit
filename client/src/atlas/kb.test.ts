@@ -1,28 +1,46 @@
 import { describe, expect, it } from 'vitest';
 import { answerLocally } from './intents';
 import { KB_TESTS } from './kb/tests';
+import { NEW_TOPICS } from './kb/topicsNew';
 import { richCtx } from './testCtx';
+
+type Set_ = Record<string, { test: string[]; testUk: string[] }>;
+function score(set: Set_) {
+  let ok = 0;
+  let unsure = 0;
+  let total = 0;
+  for (const [id, e] of Object.entries(set))
+    for (const [qs, loc] of [
+      [e.test, 'en'],
+      [e.testUk, 'uk'],
+    ] as const)
+      for (const q of qs) {
+        total++;
+        const a = answerLocally(q, richCtx(loc));
+        if (a?.intent === id) ok++;
+        else if (a?.intent === 'did_you_mean') unsure++;
+      }
+  return { ok: ok / total, known: (ok + unsure) / total };
+}
 
 describe('understanding — held-out phrasings (never used for matching)', () => {
   it('gets most of ~1,350 unseen questions right, en + uk', { timeout: 300_000 }, () => {
-    let ok = 0;
-    let unsure = 0;
-    let total = 0;
-    for (const [id, e] of Object.entries(KB_TESTS))
-      for (const [qs, loc] of [
-        [e.test, 'en'],
-        [e.testUk, 'uk'],
-      ] as const)
-        for (const q of qs) {
-          total++;
-          const a = answerLocally(q, richCtx(loc));
-          if (a?.intent === id) ok++;
-          else if (a?.intent === 'did_you_mean') unsure++;
-        }
+    const r = score(KB_TESTS);
     // Right answer, or an honest "did you mean…" — never below these.
-    expect(ok / total).toBeGreaterThan(0.75);
-    expect((ok + unsure) / total).toBeGreaterThan(0.8);
+    expect(r.ok).toBeGreaterThan(0.75);
+    expect(r.known).toBeGreaterThan(0.8);
   });
+  it(
+    'newer, narrower topics (bench arch, chalk, Smith…) — deliberately tricky wording',
+    { timeout: 120_000 },
+    () => {
+      const r = score(
+        Object.fromEntries(NEW_TOPICS.map((t) => [t.id, { test: t.test, testUk: t.testUk }])),
+      );
+      expect(r.ok).toBeGreaterThan(0.38);
+      expect(r.known).toBeGreaterThan(0.45);
+    },
+  );
 });
 
 describe('question types — why / how / when / how much…', () => {

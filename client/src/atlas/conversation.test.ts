@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Exercise, Workout } from '../types';
-import { answerLocally, INTENTS, type AskCtx } from './intents';
+import { ALL_INTENTS, answerLocally, INTENTS, type AskCtx } from './intents';
 import { INTENTS_MORE } from './intentsMore';
 import { INTENTS_THIRD } from './intentsThird';
 import { INTENTS_FOURTH } from './intentsFourth';
@@ -93,7 +93,9 @@ describe('a conversation, not a FAQ', () => {
   it('every depth entry points at a real intent', () => {
     const all = [...INTENTS, ...INTENTS_MORE, ...INTENTS_THIRD, ...INTENTS_FOURTH].map((i) => i.id);
     expect(new Set(all).size).toBe(all.length);
-    for (const id of Object.keys(DEPTH)) expect(all).toContain(id);
+    const every = ALL_INTENTS().map((i) => i.id);
+    expect(new Set(every).size).toBe(every.length);
+    for (const id of Object.keys(DEPTH)) expect(every).toContain(id);
   });
 });
 
@@ -123,6 +125,6 @@ describe('answer base, part four (calculators, exercise knowledge, time)', () =>
 
   it('football alone is not a lifting question', () => {
     const a = answerLocally('хто виграв чемпіонат світу з футболу', ctx('uk'));
-    expect(!a || a.intent === 'did_you_mean').toBe(true);
+    expect(!a || a.intent === 'did_you_mean' || a.intent === 'off_topic').toBe(true);
   });
 });

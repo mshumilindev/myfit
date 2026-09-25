@@ -28,19 +28,31 @@ import { DEPTH, DEFAULT_NEXT } from './depth';
 import { INTENTS_FOURTH } from './intentsFourth';
 import { CHARTS, INTENTS_FIFTH } from './intentsFifth';
 import { INTENTS_SIXTH, MORES } from './intentsSixth';
+import { INTENTS_NEW } from './intentsNew';
 import { emojiReply, INTENTS_SMALL, SMALLTALK_IDS, SMALL_OVERRIDES } from './smalltalk';
 
 const SMALL_NEW = new Set(INTENTS_SMALL.map((i) => i.id));
 import { parseRange, parseWeekdays } from './when';
 import { SORE_CAP } from './memoryPlan';
-import { isLiftStatus, resolveCatalogLift, resolveMyLift } from './liftNames';
+import { isLiftStatus, nameHits, resolveCatalogLift, resolveMyLift } from './liftNames';
 import { taughtFor, teach, wrongFor } from './teach';
 import { styled, unsureLine } from './style';
+import { aboutSomeoneElse, safetyReply, safetySignal } from './safety';
+import { calcAnswer, offTopic, offTopicLine } from './calc';
+import {
+  continueFlow,
+  findStart,
+  painStart,
+  startFind,
+  startPain,
+  type Flow,
+  type FlowReply,
+} from './flows';
 import { topicalChips } from './chips';
 import { insights, TIP_EVERY } from './insights';
 import { hashId } from './voice';
 import { aboutMyLog, followQuery, parseQuery, queryChips, runQuery, type Query } from './query';
-import { fmtPoint, isBodyweightLift, liftPoints, liftProgress } from './liftStats';
+import { explainLift, fmtPoint, isBodyweightLift, liftPoints, liftProgress } from './liftStats';
 import { ASKS } from './asks';
 import { KB, type Facet } from './kb';
 import { retrieve } from './retrieve';
@@ -171,6 +183,11 @@ export const INTENTS: Intent[] = [
     answer: (c, p, L) => {
       const where = p.muscle ? ` (${c.fmt.muscle(p.muscle)})` : '';
       const part = BODY_PAIN.find(([kws]) => groupMatches(p.words, p.phrase, kws));
+      if (aboutSomeoneElse(p.phrase))
+        return `${part ? `${L(part[1], part[2])} ` : ''}${L(
+          'General rule for them: no training through pain, 1–2 weeks lighter and pain-free, and a doctor or physio if it is sharp, swollen, numb or getting worse.',
+          'Загальне правило для них: не тренуватися через біль, 1–2 тижні легше й без болю, а якщо біль гострий, є набряк, оніміння чи гіршає — до лікаря або фізіотерапевта.',
+        )}`;
       const base = L(
         `Pain${where} is not something to push through. Stop the lift that hurts and log it in Injury — I’ll plan around it and ease you back. Sharp, swelling or getting worse: see a doctor.`,
         `Біль${where} не терплять. Зупини вправу, від якої болить, і запиши це в «Травми» — я сплануюся довкола й поверну тебе поступово. Гострий біль, набряк чи гіршає — до лікаря.`,
@@ -339,6 +356,8 @@ export const INTENTS: Intent[] = [
     needs: 'exercise',
     // Whole history, loaded or bodyweight (pull-ups by reps).
     answer: (c, p, L) => liftProgress(c, p.exercise!, L),
+    // "Why?" — the reasons in your log, not generic tips.
+    why: (c, p, L) => (p.exercise ? explainLift(c, p.exercise, L) : null),
   },
   {
     id: 'volume_muscle',
@@ -1038,6 +1057,10 @@ export interface Convo {
   /** "By the way…" notes already told in this conversation, and when. */
   tips?: string[];
   tipTurn?: number;
+  /** A guided conversation in progress (pain check-in, finding an exercise). */
+  flow?: Flow;
+  /** After a hard moment Atlas stays plain (no jokes, no roasting) until this turn. */
+  softUntil?: number;
   /** The last answer had a joke (never two in a row). */
   joked?: boolean;
   /** "Did you mean…" was offered for this wording — the pick teaches Atlas. */
@@ -1107,6 +1130,7 @@ export const ALL_INTENTS = (): Intent[] => [
   ...INTENTS_FOURTH,
   ...INTENTS_FIFTH,
   ...INTENTS_SIXTH,
+  ...INTENTS_NEW,
   ...INTENTS_SMALL,
 ];
 // Charts and "more" layers for topics from the earlier parts.
@@ -1141,11 +1165,7 @@ function parse(question: string, c: AskCtx): Parsed {
     words,
     phrase,
     // Your own lifts (any name/language), keyword aliases, then the library (aliases, then any language).
-    exercise:
-      resolveMyLift(question, logged) ??
-      findExercise(words, phrase, logged) ??
-      findCatalogExercise(words, phrase, CATALOG_NAMES()) ??
-      resolveCatalogLift(question),
+    exercise: pickLift(question, words, phrase, logged),
     muscle: findMuscle(words, phrase),
     exercises: findExercises(words, logged, CATALOG_NAMES()),
     range: parseRange(phrase, c.now),
@@ -1424,7 +1444,8 @@ function dress(
     yoMama: !!c.s.coach.yoMama,
     swearing: !!c.s.coach.swearing,
     topic,
-    neutral,
+    // Right after a hard moment (safety net) he stays plain for a few answers.
+    neutral: neutral || (convo.softUntil !== undefined && turn <= convo.softUntil),
     seed: `${seed}#${turn}`,
     jokedLast: !!convo.joked,
   });
@@ -1443,8 +1464,105 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   if (!p.exercise && convo.exercise && words.length <= 9 && PRONOUN.test(` ${phrase} `))
     p.exercise = convo.exercise;
 
+  // ---- the safety net: checked before anything else, in every temper ----
+  const danger = safetySignal(question);
+  if (danger) {
+    const r = safetyReply(danger, L);
+    return {
+      intent: `safety_${danger}`,
+      text: r.text,
+      chips: r.chips,
+      action: danger === 'lifecrisis' ? { type: 'pause', days: 7 } : undefined,
+      convo: { turn, softUntil: turn + 3 },
+    };
+  }
+
+  // ---- guided conversations: a pain check-in, finding an exercise ----
+  const flowOut = (r: FlowReply): LocalAnswer => ({
+    intent: r.intent,
+    text: r.text,
+    chips: r.chips,
+    action: r.action,
+    convo: {
+      turn,
+      flow: r.flow ?? undefined,
+      exercise: r.flow?.kind === 'pain' ? (r.flow.lift ?? null) : p.exercise,
+      softUntil: convo.softUntil,
+    },
+  });
+  if (convo.flow) {
+    // Short replies and tapped options belong to the flow; a new long
+    // question on another subject ends it.
+    const belongs =
+      words.length <= 7 ||
+      (convo.flow.kind === 'find' && !painStart(question)) ||
+      (convo.flow.kind === 'pain' && painStart(question));
+    if (belongs) {
+      const r = continueFlow(convo.flow, question, c, p.exercise, L);
+      if (r) return flowOut(r);
+    }
+  }
+  if (findStart(question)) return flowOut(startFind(question, c, L));
+  // A question ABOUT pain topics (logging an injury, coming back, painkillers,
+  // tendons…) is that topic — the check-in is for "it hurts".
+  const painTopic = () => {
+    const [h1, h2] = retrieve(question);
+    return (
+      !!h1 &&
+      PAIN_TOPICS.has(h1.id) &&
+      h1.score >= RET_MIN &&
+      h1.score - (h2?.score ?? 0) >= RET_MARGIN
+    );
+  };
+  if (
+    painStart(question) &&
+    !aboutSomeoneElse(question) &&
+    !negated(words, [...PAIN_WORDS, 'sore']) &&
+    !painTopic()
+  ) {
+    // Remember the sore spot (it shapes later plans) — no note, the flow talks.
+    const sore = learn(words, phrase, c.mem, c.now, p.exercise, c.fmt.exercise).patch;
+    const out = flowOut(startPain(question, c, p.exercise, L));
+    return Object.keys(sore).length ? { ...out, learned: sore } : out;
+  }
+
+  // ---- numbers in the question: answered straight, no "which lift?" ----
+  const calcIn = (text: string) => calcAnswer(text, L, c.fmt.kg);
+  const calc =
+    calcIn(question) ??
+    // "а якщо я важу 100?" right after protein → the same maths with the topic.
+    (convo.q && /\d/.test(question) && words.length <= 6 ? calcIn(`${convo.q} ${question}`) : null);
+  if (calc) return { intent: 'calc', text: calc, convo: { ...convo, turn } };
+
+  // ---- clearly not about training: a line in character, then back ----
+  // (Unless a topic of Atlas's own clearly fits — "a lifting plan for football season".)
+  const offFits = () => {
+    const [h1, h2] = retrieve(question);
+    return (
+      !!h1 &&
+      OFF_FRIENDLY.has(h1.id) &&
+      h1.score >= RET_MIN &&
+      h1.score - (h2?.score ?? 0) >= RET_MARGIN
+    );
+  };
+  if (offTopic(question) && !offFits())
+    return {
+      intent: 'off_topic',
+      text: offTopicLine(c.temper, L),
+      escalate: true,
+      chips: [
+        L('What should I train today?', 'Що тренувати сьогодні?'),
+        L('How am I progressing?', 'Як я прогресую?'),
+      ],
+      convo: { ...convo, turn },
+    };
+
   // ---- follow-ups on a computed question ("and last month?", "а присід?") ----
   if (convo.query) {
+    if (questionType(question) === 'why' && words.length <= 4 && convo.query.exercise) {
+      const ex = explainLift(c, convo.query.exercise, L);
+      if (ex) return { intent: 'log_query', text: ex, convo: { ...convo, turn } };
+    }
     const fq = followQuery(convo.query, question, p);
     const res = fq && runQuery(c, fq, L);
     const d = res && dress(res.text, c, 'log_query', question, turn, convo);
@@ -1481,7 +1599,15 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     const entityOnly =
       (p.exercise || p.muscle) &&
       (convo.pending || groupMatches(words, phrase, FOLLOW_LEAD) || words.length <= 3);
-    const carried: Parsed = { ...p, range: p.range ?? base.range };
+    // Answering "which lift?" keeps the rest of the original question (numbers, window).
+    const carried: Parsed = convo.pending
+      ? {
+          ...base,
+          exercise: p.exercise ?? base.exercise,
+          muscle: p.muscle ?? base.muscle,
+          range: p.range ?? base.range,
+        }
+      : { ...p, range: p.range ?? base.range };
     // Only topics about a lift/muscle carry over — and never when the message
     // is a question of its own ("squat technique", "bench vs squat").
     const ownQuestion = ALL_INTENTS().some(
@@ -1611,7 +1737,10 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   }
 
   // ---- what you just told me (a sore knee, your goal, a lift you hate…) ----
-  const learned = learn(words, phrase, c.mem, c.now, p.exercise, c.fmt.exercise);
+  // Facts about someone else ("my dad is 65") are never filed under you.
+  const learned = aboutSomeoneElse(question)
+    ? { patch: {} as AtlasMemory, note: null }
+    : learn(words, phrase, c.mem, c.now, p.exercise, c.fmt.exercise);
   const hasLearned = Object.keys(learned.patch).length > 0;
   const cm: AskCtx = hasLearned ? { ...c, mem: mergeMemory(c.mem, learned.patch) } : c;
   const withLearned = (a: LocalAnswer | null): LocalAnswer | null => {
@@ -1689,6 +1818,30 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   const whyTopic = qt === 'why' && !!kwTop?.id.startsWith('why_');
   // Near-tie between the two closest topics → the keyword hit breaks it.
   const agreed = !!kwTop && hits[1]?.id === kwTop.id && margin < 0.05;
+  // "Why is my bench stuck?" — the reasons your log shows.
+  if (
+    qt === 'why' &&
+    p.exercise &&
+    loggedLifts(c).some((l) => l.name === p.exercise) &&
+    STALL_RE.test(` ${phrase} `)
+  ) {
+    const ex = explainLift(cm, p.exercise, L);
+    const it = byId('progress_lift');
+    if (ex && it) return withLearned(build(it, ex, cm, p, question, L, convo, question, 'why'));
+  }
+  // "How much did I lift this year / on bench?" — kilos moved, in that window.
+  if (
+    !taughtIt &&
+    !wrong.has('tonnage') &&
+    LIFTED_RE.test(` ${phrase} `) &&
+    !/(heaviest|max|best|record|most|ever|найбільше|колись|volume|tons?|tonnes?|тонн\S*|обʼєм\S*|обєм\S*|найважч\S*|максим\S*|рекорд\S*|найкращ\S*|тяжел\S*)/u.test(
+      phrase,
+    )
+  ) {
+    const it = byId('tonnage');
+    const core = it?.answer(cm, p, L);
+    if (it && core) return withLearned(build(it, core, cm, p, question, L, convo, question));
+  }
   // "How are my pull-ups?" — your own lift + nothing but how-is-it-going.
   const status =
     !taughtIt &&
@@ -1764,7 +1917,24 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   else if (kwStrong || POLICY.mode === 'kw' || (POLICY.mode === 'mix' && !byExample))
     order = ranked;
   else if (byExample) order = ranked;
+  // Actions (swap, move, avoid…) only when asked for — not from a long story.
+  const asking = REQUEST_RE.test(` ${phrase} `) || words.length <= 8;
+  // A command missing its lift ("set rest to 3 min") → ask which lift first.
+  const cmdNeedsLift =
+    REQUEST_RE.test(` ${phrase} `) &&
+    candidates.find((it) => it.action && it.needs === 'exercise' && !hasNeeds(it, p));
+  if (cmdNeedsLift && !hasLearned)
+    return {
+      intent: cmdNeedsLift.id,
+      text: L('For which lift?', 'Для якої вправи?'),
+      chips: loggedLifts(c)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4)
+        .map((x) => c.fmt.exercise(x.name)),
+      convo: { intent: cmdNeedsLift.id, pending: true, depth: 0, turn, q: question },
+    };
   for (const it of order) {
+    if (it.action && !asking) continue;
     const core = it.answer(cm, p, L);
     if (!core) continue;
     const f = SMALLTALK_IDS.has(it.id) ? { text: core } : faceted(it.id, core, question, L);
@@ -1843,6 +2013,41 @@ export function __tune(t: { min?: number; margin?: number; near?: number }) {
   RET_NEAR = t.near ?? RET_NEAR;
 }
 
+/** "Stuck / dropped / not growing" — a lift that isn't moving. */
+/** Topics where films, songs, football or the weather are fair game. */
+const OFF_FRIENDLY = new Set([
+  'other_sport',
+  'travel',
+  'are_you_ai',
+  'joke',
+  'cheat_meal',
+  'app_language',
+  'fun_fact',
+  'rival_ai',
+  'sing_poem',
+  'k_heat',
+  'k_holidays',
+]);
+const PAIN_TOPICS = new Set([
+  'app_injury_log',
+  'return_injury',
+  'pain_types',
+  'injury_status',
+  'tendon',
+  'painkillers',
+  'ice_heat',
+  'doms',
+  'train_sore',
+]);
+const LIFTED_RE =
+  /(how much|скільки|сколько|total|усього|всього).*((^|\s)(did i|have i|i've|i have|i)\s+(lifted|moved|lift)(\s|$)|(^|\s)(я\s+)?(підняв|підняла|підняли|піднято|поднял\S*|перетягав\S*)(\s|$))/u;
+const STALL_RE =
+  /(стоїть|стоять|застря\S*|впа\S*|просі\S*|просід\S*|не росте|не ростуть|не йде|плато|слабш\S*|стоит|упал\S*|не растет|stuck|stall\S*|plateau\S*|drop\S*|went down|not (going|moving|growing|improving)|weaker|regress\S*)/u;
+
+/** Words that ask Atlas to DO something. */
+const REQUEST_RE =
+  /(^|\s)(заміни|поміняй|перенеси|постав|встанови|прибери|додай|видали|почни|запиши|зроби|вимкни|увімкни|давай|замени|поменяй|перенеси|поставь|убери|добавь|начни|запиши|сделай|swap|replace|move|set|remove|add|start|log|make|turn|switch|please|can you|could you|будь ласка|пожалуйста)(\s|$)/u;
+
 const SPLIT_RE = /\?+\s*|\s+(?:and also|also|а ще|і ще|плюс)\s+/i;
 
 /**
@@ -1890,27 +2095,200 @@ function didYouMeanAll(question: string, c: AskCtx): { id: string; ask: string }
  * answers; Latin-typed Ukrainian gets a second try in Cyrillic; Polish,
  * Lithuanian, Estonian and Russian are mapped onto known words first.
  */
-export function answerLocally(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer | null {
-  const a = answerRaw(question, c, convo);
+/** Where to start: from your log if there is one, the basics if not. */
+export function startChips(c: AskCtx, L: Tr): string[] {
+  const lifts = loggedLifts(c).sort((a, b) => b.count - a.count);
+  if (!lifts.length)
+    return [
+      L('Make me a plan', 'Склади мені план'),
+      L('How to squat properly?', 'Як правильно присідати?'),
+      L('Find an exercise', 'Знайди вправу'),
+    ];
+  const top = c.fmt.exercise(lifts[0].name);
+  return [
+    L('What should I train today?', 'Що тренувати сьогодні?'),
+    L(`How is my ${top} going?`, `Як прогресує ${top}?`),
+    L('How was my week?', 'Як мій тиждень?'),
+  ];
+}
+
+const NO_PAIN_CLAUSE =
+  /((в|у) мене |i have |my |у меня )?(нічого|ніщо|ніде|nothing|ничего|нигде)\s+(не\s+)?(болить|болять|болит|hurts?)\s*[,.;—-]?\s*/iu;
+/** "а?", "ну", "і що", "?" — keep talking about the same thing. */
+const CONTINUER_RE =
+  /^\s*(\?+|а\s*\?*|ну\s*\?*|і\s*\?+|і що\s*\?*|і\s*далі\s*\?*|ну і\s*\?*|хм+\s*\?*|м+\s*\?*|та й\s*\?*|и\s*\?+|и что\s*\?*|so\s*\?*|and\s*\?+|and then\s*\?*|hm+\s*\?*|huh\s*\?*|well\s*\?*|\.\.\.)\s*$/iu;
+const NO_RE = /^\s*(ні|нє|неа|no|nope|nah|нет|не треба|не хочу|не потрібно|не надо)\s*[.!)]*\s*$/iu;
+/** "ok", "так", "ясно" — heard; the topic's next steps as chips. */
+const ACK_RE =
+  /^\s*(ok|okay|k|kk|fine|got it|sure|cool|yes|yeah|yep|ок|окей|ага|угу|так|да|добре|гаразд|зрозумів|зрозуміла|ясно|зрозуміло|понял|поняла|ясно|хорошо|ладно|норм|клас|супер)\s*[.!)]*\s*$/iu;
+const ACK_LINE: Record<number, [string[], string[]]> = {
+  1: [
+    ['Cool, bro. Where next?', 'Nice. What else?'],
+    ['Ок, бро. Куди далі?', 'Кайф. Що ще глянемо?'],
+  ],
+  3: [
+    ['Good. Next?', 'Noted. What else?'],
+    ['Добре. Далі?', 'Прийнято. Що ще?'],
+  ],
+  5: [
+    ['Wow, a word. Next question or go lift.', 'Riveting. Next?'],
+    ['Ого, слово. Питай далі або йди тягай.', 'Захопливо. Далі?'],
+  ],
+};
+/** Questions about your own numbers — pointless before the first workout. */
+const DATA_CHIP =
+  /(my progress|my week|my best|my record|мій прогрес|мій тиждень|мій рекорд|мої рекорди|як я прогресую|how am i progressing|how have i progressed)/iu;
+const MY_DATA = new Set([
+  'progress_lift',
+  'best',
+  'e1rm',
+  'log_query',
+  'range_lift',
+  'range_muscle',
+  'range_count',
+  'tonnage',
+  'stall',
+  'week_summary',
+  'compare_lifts',
+]);
+
+export function answerLocally(question0: string, c: AskCtx, convo: Convo = {}): LocalAnswer | null {
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  // "Nothing hurts, what should I train?" — the "nothing hurts" is context, the question is the rest.
+  const np = NO_PAIN_CLAUSE.exec(question0);
+  const rest = np ? question0.replace(np[0], ' ').trim() : '';
+  const question = np && tokens(rest).length >= 2 ? rest : question0;
+  const turn = (convo.turn ?? 0) + 1;
+  if (!convo.flow && CONTINUER_RE.test(question)) {
+    if (convo.intent && convo.intent !== 'did_you_mean')
+      return answerLocally(L('tell me more', 'розкажи більше'), c, convo);
+    return {
+      intent: 'nudge',
+      text: L(
+        'Ask me anything about your training — or tap one of these.',
+        'Питай про тренування — або тапни щось із цього.',
+      ),
+      chips: startChips(c, L),
+      convo: { ...convo, turn },
+    };
+  }
+  // "Ні" / "no" — fine, the door stays open.
+  if (!convo.flow && NO_RE.test(question))
+    return {
+      intent: 'ack',
+      text: L('Fine. Ask when you need me.', 'Гаразд. Треба буде — питай.'),
+      chips:
+        convo.intent && convo.q
+          ? chipsFor(convo.intent, L, { q: convo.q, p: parse(convo.q, c), c })
+          : startChips(c, L),
+      convo: { ...convo, turn },
+    };
+  if (
+    !convo.flow &&
+    !convo.intent &&
+    ACK_RE.test(question) &&
+    !/^(ok|ок|окей|добре|гаразд)/iu.test(question.trim())
+  )
+    return {
+      intent: 'nudge',
+      text: L(
+        'Yes — to what? Ask away, or tap one of these.',
+        'Так — а що саме? Питай, або тапни щось із цього.',
+      ),
+      chips: startChips(c, L),
+      convo: { ...convo, turn },
+    };
+  if (
+    !convo.flow &&
+    convo.intent &&
+    ACK_RE.test(question) &&
+    !convo.pending &&
+    convo.intent !== 'did_you_mean'
+  ) {
+    const lines = ACK_LINE[c.temper]?.[c.locale === 'uk' ? 1 : 0] ?? ACK_LINE[3][1];
+    const topic = convo.q ? parse(convo.q, c) : parse(question, c);
+    if (convo.exercise && !topic.exercise) topic.exercise = convo.exercise;
+    return {
+      intent: 'ack',
+      text: lines[turn % lines.length],
+      chips: chipsFor(convo.intent, L, { q: convo.q ?? question, p: topic, c }),
+      convo: { ...convo, turn },
+    };
+  }
+  const a0 = answerRaw(question, c, convo);
+  // No workouts yet → questions about "my numbers" get a way in, not "Which lift?".
+  const a =
+    a0 &&
+    !finishedOf(c).length &&
+    (MY_DATA.has(a0.intent) ||
+      (a0.convo.pending && !byId(a0.intent)?.action) ||
+      (a0.intent === 'did_you_mean' &&
+        /(^|\s)(my|мій|мої|моя|моє|мого|мене|мой|мои|моя)(\s|$)/iu.test(question)))
+      ? {
+          intent: 'onboarding',
+          text: L(
+            "There's nothing in your log yet — log your first workout and I'll track every lift from it: progress, records, what to change. Until then I can help with technique, a plan, rest and recovery.",
+            'У журналі ще порожньо — запиши перше тренування, і я відстежуватиму кожну вправу: прогрес, рекорди, що змінити. А поки можу допомогти з технікою, планом, відпочинком і відновленням.',
+          ),
+          chips: startChips(c, L),
+          convo: { turn },
+        }
+      : a0;
   if (!a) return a;
+  const empty = !finishedOf(c).length;
+  let a1 = a;
+  // First workout still ahead → "what today?" gets a starter, not "all fresh".
+  if (empty && a1.intent === 'today')
+    a1 = {
+      ...a1,
+      text: L(
+        "First workout? Go full-body: a squat, a press, a row or pull-down, a hip hinge — 3 sets of 8–12 each, light enough that every rep is clean. Log it, and from then on I'll pick what's fresh.",
+        'Перше тренування? Роби все тіло: присід, жим, тяга до себе чи зверху, нахил із прямою спиною — по 3 підходи на 8–12, з вагою, де кожен повтор чистий. Запиши — і далі я підказуватиму, що свіже.',
+      ),
+    };
+  // No log → chips about "my progress / my week" lead nowhere.
+  if (empty && a1.chips?.some((x) => DATA_CHIP.test(x)))
+    a1 = {
+      ...a1,
+      chips: [
+        ...new Set([...a1.chips.filter((x) => !DATA_CHIP.test(x)), ...startChips(c, L)]),
+      ].slice(0, 3),
+    };
+  // "Thanks" / "ok" after a topic → that topic's next steps, not the generic menu.
+  if ((a1.intent === 'thanks' || a1.intent === 'ack') && convo.intent && convo.q && !convo.flow) {
+    const topic = parse(convo.q, c);
+    if (convo.exercise && !topic.exercise) topic.exercise = convo.exercise;
+    a1 = {
+      ...a1,
+      chips: chipsFor(convo.intent, L, { q: convo.q, p: topic, c }),
+      convo: { ...convo, turn },
+    };
+  }
   // Picked one of the "did you mean…" options → remember that wording.
   const pt = convo.pendingTeach;
-  let out = a;
+  let out = a1;
   // Only when the first wording carries what that topic needs (a lift, a
   // window…) — otherwise the same words could never answer it on their own.
-  const picked = byId(a.intent);
+  const picked = byId(a1.intent);
   if (
     pt &&
-    pt.offered.includes(a.intent) &&
-    a.intent !== 'did_you_mean' &&
+    pt.offered.includes(a1.intent) &&
+    a1.intent !== 'did_you_mean' &&
     picked &&
     hasNeeds(picked, parse(pt.q, c))
   ) {
-    const base = a.learned ? mergeMemory(c.mem, a.learned) : c.mem;
-    out = { ...a, learned: { ...(a.learned ?? {}), ...teach(base, pt.q, a.intent, c.now) } };
+    const base = a1.learned ? mergeMemory(c.mem, a1.learned) : c.mem;
+    out = { ...a1, learned: { ...(a1.learned ?? {}), ...teach(base, pt.q, a1.intent, c.now) } };
   }
-  // "By the way…" — something noticed in the log, now and then.
-  out = withInsight(out, question, c, convo);
+  // Ill → offer to log it (plan pauses, streak kept), unless already logged.
+  if (out.intent === 'sick' && !out.action && !activeIllness(c))
+    out = { ...out, action: { type: 'illness' }, chips: undefined };
+  // "By the way…" — something noticed in the log, now and then (not in a soft spell).
+  const softTill = convo.softUntil ?? out.convo.softUntil;
+  const soft = softTill !== undefined && (out.convo.turn ?? 0) <= softTill;
+  if (!soft) out = withInsight(out, question, c, convo);
+  if (soft && out.convo.softUntil === undefined)
+    out = { ...out, convo: { ...out.convo, softUntil: softTill } };
   // The offer holds for the very next message only.
   if (out.intent !== 'did_you_mean' && out.convo.pendingTeach) {
     const { pendingTeach: _drop, ...rest } = out.convo;
@@ -1959,6 +2337,25 @@ function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer 
       };
     }
   }
+  // "How long to rest and what's tomorrow" — two questions joined by "and".
+  if (!convo.flow)
+    for (const [x, y] of andSplits(question)) {
+      const a1 = answerOne(x, c, convo);
+      // The second answer comes plain — one voice flourish per message is enough.
+      const a2 = a1 && answerOne(y, c, { ...a1.convo, softUntil: (a1.convo.turn ?? 0) + 1 });
+      if (a2 && !a2.intent.startsWith('safety'))
+        a2.convo = { ...a2.convo, softUntil: convo.softUntil };
+      if (standalone(a1) && standalone(a2) && a1!.intent !== a2!.intent)
+        return {
+          ...a2!,
+          text: `${a1!.text}\n\n${a2!.text}`,
+          escalate: false,
+          learned:
+            a1!.learned || a2!.learned ? mergeMemory(a1!.learned, a2!.learned ?? {}) : undefined,
+          action: a2!.action ?? a1!.action,
+          chart: a2!.chart ?? a1!.chart,
+        };
+    }
   const direct = answerOne(question, c, convo);
   if (direct) return direct;
   const known = toKnownLanguage(question);
@@ -2003,7 +2400,17 @@ export function answerAs(
 }
 
 /** Answers that never get a "by the way" (pain, small talk, questions back). */
-const NO_TIP = new Set(['did_you_mean', 'emoji', 'memory_note', 'pain', 'injury_status']);
+const NO_TIP = new Set([
+  'did_you_mean',
+  'emoji',
+  'memory_note',
+  'pain',
+  'pain_check',
+  'injury_status',
+  'find_exercise',
+  'flow_cancel',
+  'sick',
+]);
 
 function withInsight(a: LocalAnswer, question: string, c: AskCtx, convo: Convo): LocalAnswer {
   const turn = a.convo.turn ?? 0;
@@ -2043,4 +2450,54 @@ function withInsight(a: LocalAnswer, question: string, c: AskCtx, convo: Convo):
     chips: [pick.chip, ...(a.chips ?? []).filter((x) => x !== pick.chip)].slice(0, 3),
     convo: { ...base.convo, tips: [...told, pick.id], tipTurn: turn },
   };
+}
+
+/** An open illness period covering today. */
+function activeIllness(c: AskCtx): boolean {
+  const today = Math.floor(c.now / 86_400_000);
+  return c.s.restPeriods.some(
+    (r) => r.mode === 'illness' && r.startDay <= today && (r.open || r.endDay >= today),
+  );
+}
+
+/** Places to split "X and Y" into two questions (both halves 2+ words). */
+function andSplits(q: string): [string, string][] {
+  const out: [string, string][] = [];
+  const re = /\s(?:і|та|й|и|and|а також|а ещё|а еще|also)\s/giu;
+  for (const m of q.matchAll(re)) {
+    const x = q.slice(0, m.index).trim();
+    const y = q.slice((m.index ?? 0) + m[0].length).trim();
+    if (tokens(x).length >= 2 && tokens(y).length >= 2) out.push([x, y]);
+    if (out.length >= 2) break;
+  }
+  return out;
+}
+
+/** A confident answer to a question on its own (not "did you mean", small talk, a question back). */
+function standalone(a: LocalAnswer | null | undefined): boolean {
+  return (
+    !!a &&
+    a.intent !== 'did_you_mean' &&
+    a.intent !== 'off_topic' &&
+    !a.intent.startsWith('safety_') &&
+    !SMALLTALK_IDS.has(a.intent) &&
+    !a.convo.pending &&
+    !a.convo.flow
+  );
+}
+
+/**
+ * Which lift the question names. Your own lifts first — unless the library
+ * has a more specific match ("stiff-leg deadlift" is not your "deadlift").
+ */
+function pickLift(
+  question: string,
+  words: string[],
+  phrase: string,
+  logged: { name: string; count: number }[],
+): string | null {
+  const mine = resolveMyLift(question, logged) ?? findExercise(words, phrase, logged);
+  const lib = findCatalogExercise(words, phrase, CATALOG_NAMES()) ?? resolveCatalogLift(question);
+  if (mine && lib && lib !== mine && nameHits(question, lib) > nameHits(question, mine)) return lib;
+  return mine ?? lib;
 }

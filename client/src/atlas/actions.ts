@@ -10,10 +10,13 @@ import {
   setCoach,
   setExerciseRestSec,
   startGeneratedDay,
+  startInjury,
+  startRestPeriod,
+  dayKey,
   startWorkout,
   type StoreState,
 } from '../store';
-import { loadCaps, protectedMuscles } from '../injury';
+import { bodyPart as bodyPartOf, loadCaps, protectedMuscles } from '../injury';
 import { buildPlanDay, planDayFor } from './plan';
 import { clearSaid, mergeMemory } from './memory';
 import { memoryBuildHints } from './memoryPlan';
@@ -133,6 +136,59 @@ export function runAction(
     case 'bodyweight':
       addWeight(a.kg, now);
       return { text: L(`Logged ${a.kg} kg.`, `Записав ${a.kg} кг.`) };
+    case 'pause': {
+      const today = dayKey(now);
+      startRestPeriod({ mode: 'off', startDay: today, endDay: today + a.days - 1, note: 'Atlas' });
+      return {
+        text: L(
+          `Done — plan paused for ${a.days} days, your streak is safe. Come back whenever you're ready.`,
+          `Готово — план на паузі ${a.days} дн., серія збережена. Повертайся, коли будеш готовий.`,
+        ),
+      };
+    }
+    case 'illness': {
+      const today = dayKey(now);
+      startRestPeriod({
+        mode: 'illness',
+        startDay: today,
+        endDay: today,
+        open: true,
+        note: 'Atlas',
+      });
+      return {
+        text: L(
+          "Logged — you're off sick until you say you're better. Plan paused, streak kept. Rest, drink, sleep.",
+          'Записав — ти на лікарняному, доки не скажеш, що одужав. План на паузі, серія збережена. Відпочивай, пий, спи.',
+        ),
+      };
+    }
+    case 'injury': {
+      const part = bodyPartOf(a.bodyPart);
+      const today = dayKey(now);
+      startInjury({
+        reason: 'injury',
+        bodyPart: a.bodyPart,
+        muscles: part?.muscles ?? [],
+        stage: a.stage,
+        fullRestUntil: a.restDays ? today + a.restDays : null,
+        note: a.note ?? 'Atlas',
+        now,
+      });
+      return {
+        text: L(
+          a.restDays
+            ? `Logged in Injuries: ${a.restDays} days of rest for that area, then we bring it back step by step by how it feels.`
+            : a.stage === 'protect'
+              ? 'Logged in Injuries: that area is out of your sessions for now; we bring it back step by step by how it feels.'
+              : 'Logged in Injuries: that area trains light for now; after two pain-free sessions I offer the next step.',
+          a.restDays
+            ? `Записав у «Травми»: ${a.restDays} дн. відпочинку для цієї зони, далі повертаємо поступово, за самопочуттям.`
+            : a.stage === 'protect'
+              ? 'Записав у «Травми»: цю зону поки прибираю з тренувань, повертатимемо поступово, за самопочуттям.'
+              : 'Записав у «Травми»: цю зону поки тренуємо легко; після двох тренувань без болю запропоную наступний крок.',
+        ),
+      };
+    }
     case 'forget':
       setCoach({ memory: {} });
       clearSaid();

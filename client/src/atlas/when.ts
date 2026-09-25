@@ -215,9 +215,11 @@ export function parseRange(phrase: string, now: number): Range | null {
     const u = UNIT.find(([re]) => re.test(words[i]))?.[1];
     if (!u) continue;
     const prev = words[i - 1] ?? '';
+    // "за рік", "за місяць", "over the year" — the last one, rolling.
+    const over = /^(за|over|в течение|in)$/u.test(prev);
     const n = /^\d+$/.test(prev)
       ? Number(prev)
-      : (WORD_NUM[prev] ?? (LAST.test(phrase) || AGO.test(phrase) ? 1 : 0));
+      : (WORD_NUM[prev] ?? (LAST.test(phrase) || AGO.test(phrase) || over ? 1 : 0));
     if (!n || n > 120) continue;
     const ago = AGO.test(phrase);
     const hasLast = LAST.test(phrase);
@@ -226,7 +228,7 @@ export function parseRange(phrase: string, now: number): Range | null {
     if (!hasNumber && !ago) {
       const cal = calendar(phrase, u, now);
       if (cal) return cal;
-      if (!hasLast) continue;
+      if (!hasLast && !over) continue;
     }
     const span = n * unitMs(u);
     const name = unitName(u, n);

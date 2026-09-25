@@ -70,7 +70,19 @@ export type AtlasAction =
   | { type: 'temper'; temper: Temper }
   | { type: 'mute' }
   | { type: 'bodyweight'; kg: number }
-  | { type: 'forget' };
+  | { type: 'forget' }
+  /** Pause the plan: rest days that keep the streak. */
+  | { type: 'pause'; days: number }
+  /** Log an injury (body part) at a rehab stage; `restDays` = full rest first. */
+  | {
+      type: 'injury';
+      bodyPart: string;
+      stage: 'protect' | 'reintroduce' | 'rebuild';
+      restDays?: number;
+      note?: string;
+    }
+  /** Log being ill (open illness period — plan pauses, streak kept). */
+  | { type: 'illness' };
 
 export type Tr = (en: string, uk: string) => string;
 
@@ -152,5 +164,12 @@ export function todayLine(c: AskCtx, L: Tr, at: number): string {
     .slice(0, 3)
     .map((m) => c.fmt.muscle(m))
     .join(', ');
-  return L(`Fresh today: ${fresh}. Train those.`, `Сьогодні свіжі: ${fresh}. Їх і тренуй.`);
+  // Asked about another day ("tomorrow") → say it for that day, not "today".
+  const sameDay = new Date(at).toDateString() === new Date(c.now).toDateString();
+  return sameDay
+    ? L(`Fresh today: ${fresh}. Train those.`, `Сьогодні свіжі: ${fresh}. Їх і тренуй.`)
+    : L(
+        `Fresh by then: ${fresh}. Train those.`,
+        `На той день будуть свіжі: ${fresh}. Їх і тренуй.`,
+      );
 }

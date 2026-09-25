@@ -27,6 +27,7 @@ import { answerAs, answerLocally, didYouMean, topicMenu, type Convo } from '../a
 import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
 import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
+import { welcome } from '../atlas/welcome';
 import { ChatChart } from '../components/ChatChart';
 import { buildChatFacts } from '../atlas/chatFacts';
 import { clearChat, pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
@@ -721,6 +722,15 @@ function CoachThread({
     [notes, chat],
   );
 
+  // An empty chat opens with a hello in the temper's voice (not stored).
+  const noChat = chat.length === 0;
+  const workoutCount = store.workouts.length;
+  const hello = useMemo(
+    () =>
+      noChat ? welcome({ s: store, now, locale, temper, fmt, mem: store.coach.memory }) : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [noChat, temper, locale, workoutCount],
+  );
   const lastText = items[items.length - 1]?.text;
   // Follow-up chips live on the newest answer until you write again
   // (a language offer after it doesn't hide them).
@@ -837,7 +847,6 @@ function CoachThread({
       </div>
       <div className="atl-feed" ref={feedRef}>
         {store.coach.role === 'main' && <PlanCard temper={temper} now={now} />}
-        {notes.length === 0 && <p className="atl-empty">{t.atlasEmpty}</p>}
         {hasOlder && <div ref={topRef} className="atl-older" aria-hidden />}
         {groups.map((g) => (
           <div key={g.label} className="atl-group">
@@ -961,6 +970,27 @@ function CoachThread({
             )}
           </div>
         ))}
+        {hello && (
+          <div className="atl-msg atl-welcome">
+            <Bubble temper={temper}>
+              <span>{hello.text}</span>
+            </Bubble>
+            {!busy && (
+              <div className="atl-suggest">
+                {hello.chips.map((ch) => (
+                  <button
+                    key={ch}
+                    type="button"
+                    className="atl-chip"
+                    onClick={() => void send(ch, false, false)}
+                  >
+                    {ch}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <div ref={endRef} className="atl-end" />
       </div>
       <form

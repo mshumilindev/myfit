@@ -245,6 +245,13 @@ export function parseQuery(question: string, p: Parsed): Query | null {
 
   let metric: Metric =
     metricHit ?? (aggHit === 'change' ? 'e1rm' : group === 'muscle' ? 'sets' : 'sessions');
+  // "how much did I lift this year" — kilos moved, not a count of sessions.
+  if (
+    (!metricHit || metricHit === 'sessions') &&
+    /(^|\s)(lifted|moved|підняв|підняла|підняли|піднято|поднял\S*|перетягав)(\s|$)/u.test(ph) &&
+    /(^|\s)(how much|скільки|сколько|total|усього|всього)(\s|$)/u.test(ph)
+  )
+    metric = 'volume';
   // "most" + a lift breakdown with no measure → how often you do it.
   // "heaviest"/"strongest" say it already; "best lift" → strength.
   if (!metricHit && group === 'lift' && aggHit === 'max' && /best|найкращ|лучш/u.test(ph))

@@ -393,7 +393,10 @@ const TOPIC_JOKES: [RegExp, Pair][] = [
 ];
 
 const NO_JOKE =
-  /pain|injur|hurt|sick|ill|numb|pregnan|period|cycle|bodyweight|weight_loss|fat_loss|eating|mental|stress|sleep_bad|med|doctor|cramp|dizzy|blood|heart/i;
+  /pain|injur|hurt|sick|ill|numb|pregnan|period|cycle|bodyweight|weight_loss|fat_loss|eating|mental|stress|sleep_bad|med|doctor|cramp|dizzy|blood|heart|^app_|^safety|find_exercise|^calc$|off_topic|did_you_mean|memory/i;
+/** Answers that found nothing — no joke on top of "I have no data". */
+const EMPTY_ANSWER =
+  /(nothing logged|no data|not logged|haven.?t logged|no (working )?sets|nothing (yet|found)|not enough|нічого не записано|немає даних|даних (ще )?немає|ще не записав|не знайшов|замало|недостатньо|сетів .*немає|записів нуль|поки (що )?нічого)/iu;
 
 export interface StyleCtx {
   temper: Temper;
@@ -419,6 +422,13 @@ export interface Styled {
 
 /** Good or bad news in this answer? Read from the answer itself. */
 export function moodOf(text: string): 'good' | 'bad' | null {
+  // "didn't grow", "не виріс" — a negated win is not a win.
+  if (
+    /(not|didn.?t|hasn.?t|haven.?t|no|не|ні)\s+(\S+\s+)?(grow|grew|improv\S*|up|виріс|виросла|виросли|зрос\S*|покращ\S*|рекорд\S*|record)/iu.test(
+      text,
+    )
+  )
+    return 'bad';
   if (
     /(\(\+\d|\+\d+ ?%|\+\d+\)|record|рекорд|виросла|виріс|grew|improved|up \(\+|більше \(\+)/iu.test(
       text,
@@ -467,7 +477,7 @@ export function styled(text: string, s: StyleCtx): Styled {
     // No way to address you in this temper → drop the "{a}" and its comma.
     return a ? t.replace(/\{a\}/g, a) : t.replace(/,? ?\{a\}/g, '').replace(/ {2,}/g, ' ');
   };
-  const quiet = NO_JOKE.test(s.topic);
+  const quiet = NO_JOKE.test(s.topic) || EMPTY_ANSWER.test(text);
   const swear = s.swearing && s.temper === 5 && !quiet;
   const mom = s.yoMama && s.temper === 5 && !quiet;
 
@@ -483,7 +493,7 @@ export function styled(text: string, s: StyleCtx): Styled {
 
   const tail: string[] = [];
   const mood = moodOf(text);
-  if (mood && r() < v.rate.mood) tail.push(pick(v[mood][li]));
+  if (mood && !quiet && r() < v.rate.mood) tail.push(pick(v[mood][li]));
 
   let joked = false;
   if (!quiet && (!s.jokedLast || v.jokesInARow) && r() < v.rate.joke) {

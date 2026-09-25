@@ -7,6 +7,17 @@
  */
 import type { MuscleGroup } from '../data/exercises';
 
+/** "жимчик", "становушка", "біцуха" — the lift's own name, for everything that follows. */
+const DIMINUTIVES: [RegExp, string][] = [
+  [/^жим(чик|чику|чика|ок|очок)$/u, 'жим'],
+  [/^станов(ушк|ачк|ух)\p{L}*$/u, 'станова'],
+  [/^(біцух|біцушк|бицух)\p{L}*$/u, 'біцепс'],
+  [/^присідан(ьк|ячк)\p{L}*$/u, 'присідання'],
+  [/^(турнічок|турнічк\p{L}*)$/u, 'турнік'],
+];
+const DIMINUTIVE =
+  /(?<=^|\s)(жим(чик|чику|чика|ок|очок)|станов(ушк|ачк|ух)\p{L}*|(біцух|біцушк|бицух)\p{L}*|присідан(ьк|ячк)\p{L}*|турнічо?к\p{L}*)(?=\s|$)/gu;
+
 /** Lowercase, strip accents/punctuation, unify apostrophes and ё/ї variants. */
 export function normalize(text: string): string {
   return text
@@ -19,7 +30,8 @@ export function normalize(text: string): string {
     .replace(/%/g, ' percent ')
     .replace(/[^\p{L}\p{N}:.]+/gu, ' ')
     .replace(/\s+/g, ' ')
-    .trim();
+    .trim()
+    .replace(DIMINUTIVE, (w) => DIMINUTIVES.find(([re]) => re.test(w))?.[1] ?? w);
 }
 
 export function tokens(text: string): string[] {

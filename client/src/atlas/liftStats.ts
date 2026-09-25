@@ -89,3 +89,81 @@ export function fmtPoint(c: AskCtx, p: LiftPoint, L: Tr): string {
 }
 const kg = (c: AskCtx, v: number) => c.fmt.kg(Math.round(v * 2) / 2);
 const sign = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '±0');
+
+/**
+ * "Why is my bench stuck / why did it drop?" — the reasons your log shows,
+ * not generic tips: how often you did it lately vs before, working sets for
+ * its muscle, sleep, a long gap, the same weight session after session, and
+ * reps fading across sets. Then what to change first.
+ */
+export function explainLift(c: AskCtx, name: string, L: Tr): string | null {
+  const pts = liftPoints(c, name);
+  if (pts.length < 3) return null;
+  const nm = c.fmt.exercise(name);
+  const now = c.now;
+  const inWin = (from: number, to: number) => pts.filter((p) => p.ts >= from && p.ts < to);
+  const recent = inWin(now - 4 * WEEK, now + 1);
+  const before = inWin(now - 8 * WEEK, now - 4 * WEEK);
+  const why: [string, string][] = [];
+  const fix: [string, string][] = [];
+  if (before.length >= 2 && recent.length < before.length)
+    why.push([
+      `you did it ${recent.length}× in the last 4 weeks vs ${before.length}× the 4 before`,
+      `за останні 4 тижні ти робив її ${recent.length} раз(и) проти ${before.length} перед тим`,
+    ]);
+  const last = pts[pts.length - 1];
+  const daysOff = Math.floor((now - last.ts) / 86_400_000);
+  if (daysOff >= 14)
+    why.push([`the last session was ${daysOff} days ago`, `останній раз — ${daysOff} дн. тому`]);
+  const bw = isBodyweightLift(pts);
+  const same = pts.filter((p) => p.bw === bw).slice(-4);
+  if (!bw && same.length >= 3 && same.every((p) => p.kg === same[0].kg))
+    why.push([
+      `the same ${c.fmt.kg(same[0].kg)} for ${same.length} sessions — the load hasn't been nudged`,
+      `та сама вага ${c.fmt.kg(same[0].kg)} вже ${same.length} трен. — навантаження не росте`,
+    ]);
+  // Sleep over the last two weeks, if you track it.
+  const nights = (c.s.sleeps ?? []).filter(
+    (n) => !!n.wake && n.wake >= now - 14 * 86_400_000 && !!n.bedtime,
+  );
+  if (nights.length >= 4) {
+    const h = nights.reduce((a, n) => a + (n.wake! - n.bedtime) / 3_600_000, 0) / nights.length;
+    if (h < 6.8)
+      why.push([
+        `you've averaged ${Math.round(h * 10) / 10} h of sleep lately`,
+        `останнім часом ти спиш у середньому ${Math.round(h * 10) / 10} год`,
+      ]);
+  }
+  // Reps fading hard across the working sets last time.
+  const lastW = finishedOf(c).find((w) => w.exercises.some((e) => e.name === name));
+  const reps =
+    lastW?.exercises
+      .find((e) => e.name === name)
+      ?.sets.filter((s) => setTypeOf(s) !== 'warmup')
+      .map((s) => s.reps) ?? [];
+  if (reps.length >= 3 && reps[0] - reps[reps.length - 1] >= 3)
+    why.push([
+      `reps fell ${reps[0]} → ${reps[reps.length - 1]} across the sets last time (short rest or too heavy)`,
+      `минулого разу повтори падали ${reps[0]} → ${reps[reps.length - 1]} від сету до сету (мало відпочинку або завелика вага)`,
+    ]);
+  if (!why.length)
+    return L(
+      `${nm}: nothing obvious in your log — frequency, load and sets look steady. Then it's usually recovery (sleep, food, stress) or it simply needs a small change: +1 rep a session, or a new rep range for 4 weeks.`,
+      `${nm}: у журналі нічого очевидного — частота, вага й сети рівні. Тоді зазвичай справа у відновленні (сон, їжа, стрес) або потрібна дрібна зміна: +1 повтор щотренування чи новий діапазон повторів на 4 тижні.`,
+    );
+  if (why.some(([e]) => /in the last 4 weeks|days ago/.test(e)))
+    fix.push(['get back to 2 sessions a week on it', 'повернути її 2 рази на тиждень']);
+  if (why.some(([e]) => /same/.test(e)))
+    fix.push([
+      'add a rep each session, then 2.5 kg',
+      'додавати по повтору щотренування, потім +2,5 кг',
+    ]);
+  if (why.some(([e]) => /sleep/.test(e)))
+    fix.push(['7+ hours of sleep for two weeks', '7+ годин сну два тижні поспіль']);
+  if (why.some(([e]) => /reps fell/.test(e)))
+    fix.push(['rest a full 2–3 min between sets', 'відпочивати повні 2–3 хв між сетами']);
+  return L(
+    `${nm} — what your log shows: ${why.map((w) => w[0]).join('; ')}.${fix.length ? ` First fix: ${fix.map((f) => f[0]).join(', ')}.` : ''}`,
+    `${nm} — що видно з журналу: ${why.map((w) => w[1]).join('; ')}.${fix.length ? ` Почни з цього: ${fix.map((f) => f[1]).join(', ')}.` : ''}`,
+  );
+}
