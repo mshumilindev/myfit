@@ -345,7 +345,9 @@ export const INTENTS_SIXTH: Intent[] = [
     id: 'numbness',
     all: [
       [
-        'numb*',
+        'numb',
+        'numbness',
+        'numbed',
         'tingl*',
         'pins and needles',
         'оніміння',

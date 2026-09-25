@@ -91,9 +91,14 @@ describe('answerLocally', () => {
         expect(answerLocally(q, ctx('en', t))?.text).not.toMatch(/undefined/);
   });
 
-  it('hands unknown questions to Gemini (null)', () => {
-    expect(answerLocally('what is the capital of France', ctx('en'))).toBeNull();
-    expect(answerLocally('хто виграв чемпіонат світу з футболу', ctx('uk'))).toBeNull();
+  it('hands unknown questions on (null, or "did you mean" that escalates)', () => {
+    for (const [q, l] of [
+      ['what is the capital of France', 'en'],
+      ['хто виграв чемпіонат світу з футболу', 'uk'],
+    ] as const) {
+      const a = answerLocally(q, ctx(l));
+      expect(!a || (a.intent === 'did_you_mean' && a.escalate)).toBe(true);
+    }
   });
 
   it('pain stays calm even for Merciless', () => {

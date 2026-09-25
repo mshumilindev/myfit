@@ -122,6 +122,7 @@ describe('answer base, part four (calculators, exercise knowledge, time)', () =>
   });
 
   it('football alone is not a lifting question', () => {
-    expect(answerLocally('хто виграв чемпіонат світу з футболу', ctx('uk'))).toBeNull();
+    const a = answerLocally('хто виграв чемпіонат світу з футболу', ctx('uk'));
+    expect(!a || a.intent === 'did_you_mean').toBe(true);
   });
 });

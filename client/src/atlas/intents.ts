@@ -34,6 +34,9 @@ const SMALL_NEW = new Set(INTENTS_SMALL.map((i) => i.id));
 import { parseRange, parseWeekdays } from './when';
 import { SORE_CAP } from './memoryPlan';
 import { ASKS } from './asks';
+import { KB, type Facet } from './kb';
+import { retrieve } from './retrieve';
+import { FACET_CHIP, isPersonal, questionType } from './qtype';
 import { toKnownLanguage } from './lexicon';
 import {
   consistent,
@@ -1020,6 +1023,8 @@ export interface Convo {
   turn?: number;
   /** The question that opened this topic ("my knee hurts") — for follow-ups. */
   q?: string;
+  /** Sides of the topic already told (why / how / when…). */
+  told?: Facet[];
 }
 
 const MORE = [
@@ -1282,6 +1287,40 @@ let catalogNames: string[] | null = null;
 const CATALOG_NAMES = () => (catalogNames ??= BUILT_IN_CATALOG.map((e) => e.names[0]));
 
 /** Build a full answer for an intent: flavour, memory, consistency, extras. */
+/** Other sides of the topic as chips ("Why?", "When?") — first two not yet told. */
+function withFacetChips(id: string, told: Facet[], rest: string[], L: Tr): string[] {
+  const f = KB[id]?.facets ?? {};
+  const order: Facet[] = ['why', 'how', 'when', 'howMuch', 'should', 'what', 'who', 'where'];
+  const sides = order
+    .filter((x) => f[x] && !told.includes(x))
+    .slice(0, 2)
+    .map((x) => L(...FACET_CHIP[x]));
+  return [...sides, ...rest].slice(0, 3);
+}
+
+/**
+ * Answer the side of the topic the question asks for. A general question
+ * ("why rest longer?") gets the facet; a personal one ("why is MY bench
+ * stuck?") keeps your numbers and adds the reason.
+ */
+function faceted(
+  id: string,
+  core: string,
+  question: string,
+  L: Tr,
+): { text: string; facet?: Facet } {
+  const qt = questionType(question);
+  const f = qt ? KB[id]?.facets?.[qt] : undefined;
+  if (!qt || !f) return { text: core };
+  const ft = L(f[0], f[1]);
+  // Numbers in the answer = it was computed for you (your lifts, the plates
+  // for 100 kg…). Keep that; only a "why" adds the reason next to it.
+  const computed = /\d/.test(core);
+  if (computed || isPersonal(question))
+    return qt === 'why' ? { text: `${core} ${ft}`, facet: qt } : { text: core };
+  return { text: ft, facet: qt };
+}
+
 function build(
   it: Intent,
   core: string,
@@ -1291,6 +1330,7 @@ function build(
   L: Tr,
   convo: Convo,
   q = question,
+  facet?: Facet,
 ): LocalAnswer {
   const turn = (convo.turn ?? 0) + 1;
   // Small talk speaks for itself: no "As I said", no memory notes, no opener.
@@ -1302,7 +1342,12 @@ function build(
       convo: { intent: it.id, depth: 0, turn, q },
     };
   // Consistency: the same topic on the same data gets the same answer.
-  const key = saidKey(it.id, p.exercise, p.muscle, p.range?.from ?? null);
+  const key = saidKey(
+    facet ? `${it.id}:${facet}` : it.id,
+    p.exercise,
+    p.muscle,
+    p.range?.from ?? null,
+  );
   const stamp = stampOf(c);
   const prev = c.said?.find((r) => r.key === key);
   const kept = consistent(prev, core, stamp, c.now, L);
@@ -1316,11 +1361,19 @@ function build(
       it.neutral || action || kept.text !== kept.keep
         ? body
         : flavour(body, c, question + it.id, turn),
-    chips: action ? undefined : chipsFor(it.id, L),
+    chips: action ? undefined : withFacetChips(it.id, facet ? [facet] : [], chipsFor(it.id, L), L),
     chart: it.chart?.(c, p, L) ?? undefined,
     action,
     said: { key, text: kept.keep, stamp, at: c.now },
-    convo: { intent: it.id, exercise: p.exercise, muscle: p.muscle, depth: 0, turn, q },
+    convo: {
+      intent: it.id,
+      exercise: p.exercise,
+      muscle: p.muscle,
+      depth: 0,
+      turn,
+      q,
+      told: facet ? [facet] : [],
+    },
   };
 }
 
@@ -1361,6 +1414,21 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       const core = cur.answer(c, carried, L);
       if (core) return build(cur, core, c, carried, question, L, convo, convo.q ?? question);
     }
+    // "Why?" / "How?" / "When?"… on the current topic → that side of it.
+    const fq = questionType(question);
+    // The topic's own "why" (e.g. the lift-specific reason) beats the general one.
+    const ownWhy = fq === 'why' && words.length <= 4 ? cur.why?.(c, topic, L) : null;
+    const side =
+      fq && words.length <= 4 && !ownQuestion && !ownWhy ? KB[cur.id]?.facets?.[fq] : undefined;
+    if (fq && side) {
+      const told = [...(convo.told ?? []), fq];
+      return {
+        intent: cur.id,
+        text: L(side[0], side[1]),
+        chips: withFacetChips(cur.id, told, chipsFor(cur.id, L), L),
+        convo: { ...convo, told, turn },
+      };
+    }
     if (words.length <= 3 && groupMatches(words, phrase, ASK_WHY)) {
       const d = DEPTH[cur.id];
       const cp = topic;
@@ -1396,9 +1464,22 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         return {
           intent: cur.id,
           text: layer,
-          chips: chipsFor(cur.id, L),
+          chips: withFacetChips(cur.id, convo.told ?? [], chipsFor(cur.id, L), L),
           convo: { ...convo, depth: depth + 1, turn },
         };
+      // Out of layers → the sides of the topic not told yet.
+      const order: Facet[] = ['why', 'how', 'when', 'howMuch', 'should', 'what', 'who', 'where'];
+      const next = order.find((x) => KB[cur.id]?.facets?.[x] && !(convo.told ?? []).includes(x));
+      if (next) {
+        const f = KB[cur.id]!.facets![next]!;
+        const told = [...(convo.told ?? []), next];
+        return {
+          intent: cur.id,
+          text: L(f[0], f[1]),
+          chips: withFacetChips(cur.id, told, chipsFor(cur.id, L), L),
+          convo: { ...convo, told, depth: depth + 1, turn },
+        };
+      }
       return {
         intent: cur.id,
         text: L(
@@ -1448,11 +1529,59 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     it.all.every((g) => groupMatches(words, phrase, g));
   const candidates = ALL_INTENTS().filter(matchesGroups);
   const ranked = candidates.filter((it) => hasNeeds(it, p)).sort((a, b) => weight(b) - weight(a));
-  for (const it of ranked) {
+
+  // Understanding by example: the closest topic among ~7,000 real phrasings.
+  // It leads when keywords found nothing, or only a weak, single-word hit.
+  const allowed = (it: Intent) =>
+    (!it.maxWords || words.length <= it.maxWords + 3) && !(it.negatable && negatedPain);
+  const hits = retrieve(question).filter((h) => {
+    const it = byId(h.id);
+    return it && allowed(it);
+  });
+  const top = hits[0];
+  const second = hits[1];
+  const margin = top ? top.score - (second?.score ?? 0) : 0;
+  const confident = !!top && top.score >= RET_MIN && margin >= RET_MARGIN;
+  const byExample = confident ? byId(top.id) : undefined;
+  const kwTop = ranked[0];
+  const kwStrong =
+    !!kwTop &&
+    (!!kwTop.priority ||
+      !!kwTop.action ||
+      kwTop.needs === 'range' ||
+      kwTop.needs === 'twoLifts' ||
+      (POLICY.mode === 'mix' && matchedWords(words, kwTop.all) >= 2));
+  // Understood by example → that topic leads. Unsure → only a strong keyword
+  // hit may answer; otherwise we ask "did you mean…" instead of guessing.
+  let order: Intent[] = [];
+  // A keyword command with all its details ("move legs to thursday") still wins;
+  // so does a "why…" topic for a why-question, and a solid keyword hit that the
+  // examples also rank near the top.
+  const qt = questionType(question);
+  const commandReady = !!kwTop?.action && kwTop !== byExample && !!kwTop.action(cm, p);
+  const whyTopic = qt === 'why' && !!kwTop?.id.startsWith('why_');
+  // Near-tie between the two closest topics → the keyword hit breaks it.
+  const agreed = !!kwTop && hits[1]?.id === kwTop.id && margin < 0.05;
+  const lead =
+    byExample && SPECIALIZE[byExample.id]?.(p) ? byId(SPECIALIZE[byExample.id]!(p)!) : byExample;
+  if (lead && hasNeeds(lead, p) && !commandReady && !whyTopic && !(agreed && kwTop !== lead))
+    order = [lead, ...ranked.filter((x) => x !== lead)];
+  else if (kwStrong || POLICY.mode === 'kw' || (POLICY.mode === 'mix' && !byExample))
+    order = ranked;
+  else if (byExample) order = ranked;
+  for (const it of order) {
     const core = it.answer(cm, p, L);
     if (!core) continue;
-    return withLearned(build(it, core, cm, p, question, L, convo));
+    const f = SMALLTALK_IDS.has(it.id) ? { text: core } : faceted(it.id, core, question, L);
+    return withLearned(build(it, f.text, cm, p, question, L, convo, question, f.facet));
   }
+  // Understood by example but misses the lift/muscle → ask for it.
+  if (
+    byExample &&
+    !hasNeeds(byExample, p) &&
+    (byExample.needs === 'exercise' || byExample.needs === 'muscle')
+  )
+    candidates.unshift(byExample);
   // Knows the topic, misses the lift/muscle → ask, with your lifts as chips.
   const needy = candidates
     .filter((it) => it.needs === 'exercise' || it.needs === 'muscle')
@@ -1475,7 +1604,39 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       convo: { intent: needy.id, pending: true, depth: 0, turn },
     };
   }
+  // Close, but not sure enough to answer → offer the closest topics.
+  if (!hasLearned && top && top.score >= RET_NEAR) {
+    const near = hits.filter((h) => h.score >= RET_NEAR * 0.8 && ASKS[h.id]).slice(0, 3);
+    if (near.length)
+      return {
+        intent: 'did_you_mean',
+        text: L(
+          'Not sure I got that. Did you mean:',
+          'Не впевнений, що зрозумів. Ти мав на увазі:',
+        ),
+        chips: near.map((h) => L(ASKS[h.id][0], ASKS[h.id][1])),
+        escalate: true,
+        convo: { ...convo, turn },
+      };
+  }
   return withLearned(null);
+}
+
+/** A general topic that has a sharper sibling when the question names a lift. */
+const SPECIALIZE: Record<string, (p: Parsed) => string | null> = {
+  technique: (p) => (p.exercise ? 'technique_lift' : null),
+  squat_form: (p) => (p.exercise && !/squat|присід/i.test(p.exercise) ? 'technique_lift' : null),
+};
+
+/** Retrieval thresholds (0..1). */
+let RET_MIN = 0.3;
+let RET_MARGIN = 0.035;
+let RET_NEAR = 0.2;
+export const POLICY: { mode: 'mix' | 'ret' | 'kw' } = { mode: 'mix' };
+export function __tune(t: { min?: number; margin?: number; near?: number }) {
+  RET_MIN = t.min ?? RET_MIN;
+  RET_MARGIN = t.margin ?? RET_MARGIN;
+  RET_NEAR = t.near ?? RET_NEAR;
 }
 
 const SPLIT_RE = /\?+\s*|\s+(?:and also|also|а ще|і ще|плюс)\s+/i;
@@ -1489,6 +1650,12 @@ export function didYouMean(question: string, c: AskCtx): { id: string; ask: stri
   const phrase = normalize(question);
   if (!words.length) return [];
   const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  // Closest by example first; keyword overlap fills in.
+  const near = retrieve(question, 6).filter(
+    (h) => h.score >= 0.2 && ASKS[h.id] && !byId(h.id)?.maxWords,
+  );
+  if (near.length)
+    return near.slice(0, 3).map((h) => ({ id: h.id, ask: L(ASKS[h.id][0], ASKS[h.id][1]) }));
   const scored: { id: string; score: number }[] = [];
   for (const it of ALL_INTENTS()) {
     const ask = ASKS[it.id];

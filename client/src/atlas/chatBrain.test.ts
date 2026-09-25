@@ -212,7 +212,7 @@ describe('other languages and did-you-mean', () => {
     'kiek ilsėtis',
     'kui kaua puhata',
   ])
-    it(`understands “${q}”`, () => expect(answerLocally(q, c)?.intent).toBe('rest'));
+    it(`understands “${q}”`, () => expect(answerLocally(q, c)?.intent).toMatch(/^rest/));
   it('offers close topics when unsure', () => {
     const g = didYouMean('protein shake timing blah', c);
     expect(g.length).toBeGreaterThan(0);

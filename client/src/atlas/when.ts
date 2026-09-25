@@ -194,6 +194,21 @@ const UK_MONTH_LOC = [
 
 /** Find a time window in a normalized phrase, or null. */
 export function parseRange(phrase: string, now: number): Range | null {
+  // Fixed expressions first.
+  if (
+    /(^|\s)(fortnight|two weeks|дві тижні|двох тижнів|два тижні|две недели|двух недель)(\s|$)/u.test(
+      phrase,
+    )
+  )
+    return { from: now - 14 * DAY, to: now, label: ['the last 2 weeks', 'останні 2 тижні'] };
+  if (
+    /(new year|start of (the )?year|beginning of (the )?year|нового року|початку року|нового года|начала года)/u.test(
+      phrase,
+    )
+  ) {
+    const from = new Date(new Date(now).getFullYear(), 0, 1).getTime();
+    return { from, to: now, label: ['since New Year', 'з початку року'] };
+  }
   const words = phrase.split(' ');
   // "N units" (with last / ago).
   for (let i = 0; i < words.length; i++) {
