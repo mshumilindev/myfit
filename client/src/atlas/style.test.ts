@@ -16,7 +16,7 @@ const seeds = Array.from({ length: 200 }, (_, i) => `q${i}`);
 
 describe('voice constructor — the temper changes how, never what', () => {
   it('keeps every number of the answer', () => {
-    for (const t of [1, 2, 3, 4, 5] as Temper[])
+    for (const t of [1, 3, 5] as Temper[])
       for (const s of seeds.slice(0, 40)) {
         const out = styled(ANSWER, base(t, s)).text;
         for (const n of ANSWER.match(/\d+/g)!) expect(out).toContain(n);
@@ -34,8 +34,8 @@ describe('voice constructor — the temper changes how, never what', () => {
     const rate = (t: Temper) =>
       seeds.filter((s) => styled(ANSWER, base(t, s)).joked).length / seeds.length;
     expect(rate(1)).toBeGreaterThan(0.08);
-    expect(rate(5)).toBeGreaterThan(rate(2));
-    expect(seeds.some((s) => styled(ANSWER, base(5, s, { jokedLast: true })).joked)).toBe(false);
+    expect(rate(5)).toBeGreaterThan(rate(3));
+    expect(seeds.some((s) => styled(ANSWER, base(1, s, { jokedLast: true })).joked)).toBe(false);
   });
 
   it('“your mom” only in Drill/Merciless and only when on', () => {
@@ -44,7 +44,7 @@ describe('voice constructor — the temper changes how, never what', () => {
         /Твоя мама|твоєї мами/.test(styled(ANSWER, base(t, s, { yoMama: on })).text),
       );
     expect(mom(5, true)).toBe(true);
-    expect(mom(4, true)).toBe(true);
+    expect(mom(1, true)).toBe(false);
     expect(mom(5, false)).toBe(false);
     expect(mom(3, true)).toBe(false);
   });
@@ -58,7 +58,7 @@ describe('voice constructor — the temper changes how, never what', () => {
       );
     expect(sw(5, true)).toBe(true);
     expect(sw(5, false)).toBe(false);
-    expect(sw(4, true)).toBe(false);
+    expect(sw(3, true)).toBe(false);
   });
 
   it('pain, health and the body stay plain', () => {
@@ -76,7 +76,7 @@ describe('voice constructor — the temper changes how, never what', () => {
   });
 
   it('English works too', () => {
-    const out = styled('Bench: 100 kg → 105 kg (+5%).', base(4, 'x1', { locale: 'en' })).text;
+    const out = styled('Bench: 100 kg → 105 kg (+5%).', base(5, 'x1', { locale: 'en' })).text;
     expect(out).toMatch(/105 kg/);
     expect(out).not.toMatch(/[а-яії]/i);
   });

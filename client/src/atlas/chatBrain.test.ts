@@ -46,7 +46,7 @@ const ctx = (locale: 'en' | 'uk'): AskCtx => ({
   },
   now: NOW,
   locale,
-  temper: 2,
+  temper: 1,
   fmt: { kg: (k) => `${k} kg`, mmss: (s) => `${s}s`, muscle: (m) => m, exercise: (e) => e },
 });
 

@@ -3,13 +3,11 @@
  * the smile fades and the brow drops as the temper heats up, the light takes
  * the temper colour. The ring shows the colour too.
  */
-import { TEMPER_COLOR, type Temper } from '../atlas/types';
+import { TEMPER_COLOR, TEMPERS, type Temper } from '../atlas/types';
 
 const TINT: Record<Temper, string> = {
   1: '#132a20',
-  2: '#15263a',
-  3: '#342713',
-  4: '#3a1c13',
+  3: '#342a13',
   5: '#34121a',
 };
 
@@ -39,14 +37,14 @@ export function AtlasFace({
   );
 }
 
-/** Five bars, lit up to the temper — the harshness meter. */
+/** Three bars — green, yellow, red — lit up to the temper: the harshness meter. */
 export function TemperHeat({ temper }: { temper: Temper }) {
   return (
     <span className="atl-heat" aria-hidden>
-      {([1, 2, 3, 4, 5] as Temper[]).map((i) => (
+      {TEMPERS.map((i, k) => (
         <span
           key={i}
-          style={{ height: 6 + i * 2, background: i <= temper ? TEMPER_COLOR[i] : undefined }}
+          style={{ height: 8 + k * 5, background: i <= temper ? TEMPER_COLOR[i] : undefined }}
         />
       ))}
     </span>

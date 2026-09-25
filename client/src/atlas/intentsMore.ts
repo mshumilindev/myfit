@@ -25,6 +25,20 @@ import {
   type Tr,
 } from './intentKit';
 
+/**
+ * Chit-chat lines per temper: g = green (your gym bro), y = yellow (dry, with
+ * a smirk), r = red (roasts your effort — never your body). [en, uk] pairs,
+ * each language written on its own.
+ */
+export type Moods = { g: [string, string][]; y: [string, string][]; r: [string, string][] };
+
+/** Pick by temper; rotates minute to minute, like the joke picker. */
+export function moody(c: AskCtx, L: Tr, m: Moods): string {
+  const lines = c.temper <= 2 ? m.g : c.temper === 3 ? m.y : m.r;
+  const x = lines[Math.floor(c.now / 60000) % lines.length];
+  return L(x[0], x[1]);
+}
+
 const WHEN = ['when', 'last time', 'коли', 'востаннє', 'останній раз', 'востанне'];
 const HOW_OFTEN = [
   'how often',
@@ -1132,11 +1146,39 @@ export const INTENTS_MORE: Intent[] = [
         'ти справжн*',
       ],
     ],
-    answer: (_c, _p, L) =>
-      L(
-        'I’m Atlas — code that reads your log. Hard questions I pass to a language model; the numbers are always yours.',
-        'Я Atlas — код, що читає твій журнал. Складні питання передаю мовній моделі; цифри завжди твої.',
-      ),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'Haha, fair question, bro! I’m Atlas — code that reads your log. Tough questions I pass to a language model, but the numbers are 100% yours 🤙',
+            'Ха, чесне питання, бро! Я Atlas — програма, що читає твій журнал. Складні питання віддаю мовній моделі, але цифри — на всі сто твої 🤙',
+          ],
+          [
+            'Dude, I’m code — but code that’s on your side. Atlas reads your log; the tricky stuff goes to a language model. The numbers? All yours.',
+            'Братан, я код, але код на твоєму боці. Atlas читає твій журнал, а хитрі питання йдуть до мовної моделі. Цифри — всі твої, чесно.',
+          ],
+        ],
+        y: [
+          [
+            'I’m Atlas — code that reads your log. Hard questions I pass to a language model; the numbers are always yours.',
+            'Я Atlas — код, що читає твій журнал. Складні питання передаю мовній моделі; цифри завжди твої.',
+          ],
+          [
+            'Code. Atlas reads your log; hard questions go to a language model. The numbers are yours — no bot made them up.',
+            'Код. Atlas читає журнал, складні питання віддає мовній моделі. Цифри твої — їх ніхто не вигадував.',
+          ],
+        ],
+        r: [
+          [
+            'Yes, I’m code — Atlas, reading your log. Hard questions go to a language model. The numbers are all yours, which is exactly the problem.',
+            'Так, я код — Atlas, читаю твій журнал. Складні питання передаю мовній моделі. А цифри всі твої — в тому й біда.',
+          ],
+          [
+            '*sigh* I’m Atlas: code that reads your log, plus a language model for the hard questions. The numbers are yours, gym tourist — and no bot skipped those sessions for you.',
+            '*зітхає* Я Atlas: код, що читає твій журнал, плюс мовна модель для складних питань. Цифри твої, туристе, — і пропуски в них теж не бот наробив.',
+          ],
+        ],
+      }),
   },
   {
     id: 'who_made',
@@ -1150,11 +1192,39 @@ export const INTENTS_MORE: Intent[] = [
         'хто тебе написав',
       ],
     ],
-    answer: (_c, _p, L) =>
-      L(
-        'Built into Spotter. Named after the one who holds up the sky — you just hold the bar.',
-        'Вбудований у Spotter. Названий на честь того, хто тримає небо — тобі лише гриф.',
-      ),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'Built into Spotter, bro! Named after the titan who holds up the sky — you just gotta hold the bar. Easy W 💪',
+            'Мене вбудували в Spotter, бро! Назвали на честь Атланта, що тримає небо, — а тобі треба втримати лише гриф. Спокуха, впораєшся 💪',
+          ],
+          [
+            'I live inside Spotter, dude. Atlas — the guy who holds up the sky. You hold the bar, I’ve got your back 🤙',
+            'Я живу в Spotter, братан. Atlas — це Атлант, той, що небо тримає. Ти тримай гриф, а я прикрию 🤙',
+          ],
+        ],
+        y: [
+          [
+            'Built into Spotter. Named after the one who holds up the sky — you just hold the bar.',
+            'Вбудований у Spotter. Названий на честь того, хто тримає небо — тобі лише гриф.',
+          ],
+          [
+            'Spotter. The name’s from the titan with the sky on his shoulders. Your load is lighter.',
+            'Spotter. Ім’я — від Атланта, що тримав небо на плечах. Твоя ноша легша.',
+          ],
+        ],
+        r: [
+          [
+            'Built into Spotter. Named after the titan who holds up the whole sky — and you complain about an empty bar.',
+            'Вбудований у Spotter. Названий на честь Атланта, який тримає ціле небо, — а ти ниєш через порожній гриф.',
+          ],
+          [
+            'Spotter made me. Atlas holds the sky without a day off; you can’t hold a routine for a week, lazybones.',
+            'Мене зробили в Spotter. Атлант тримає небо без вихідних, а ти графік тренувань тиждень не втримаєш, лінивцю.',
+          ],
+        ],
+      }),
   },
   {
     id: 'motivate',
@@ -1172,32 +1242,147 @@ export const INTENTS_MORE: Intent[] = [
     ],
     answer: (c, _p, L) => {
       const n = finishedOf(c).length;
-      return L(
-        `${n} sessions logged. Every one of them started with not wanting to. Go make it ${n + 1}.`,
-        `${n} тренувань у журналі. Кожне почалося з «не хочу». Іди зроби ${n + 1}-е.`,
-      );
+      if (n === 0)
+        return moody(c, L, {
+          g: [
+            [
+              'Bro, the first session is the hardest one — and the best. Go log it, I’m hyped for you 💪',
+              'Бро, перше тренування — найважче і найкайфовіше. Го, запиши його, я вже за тебе вболіваю 💪',
+            ],
+            [
+              'Dude, everybody starts at zero. Today’s your day one — let’s gooo 🤙',
+              'Братан, усі починали з нуля. Сьогодні твій перший день — го 🤙',
+            ],
+          ],
+          y: [
+            [
+              'Zero sessions logged. Motivation won’t fix that — one session will.',
+              'У журналі нуль. Мотивація цього не виправить — одне тренування виправить.',
+            ],
+            [
+              'Nothing logged yet. Start with one. That’s the whole speech.',
+              'У журналі поки пусто. Почни з одного. Це вся промова.',
+            ],
+          ],
+          r: [
+            [
+              'Zero sessions. Zero. You need a pep talk to start from nothing? Get moving, lazybones.',
+              'Нуль тренувань. Нуль. Тобі ще й мотивацію, щоб почати з нуля? Вперед, лінивцю.',
+            ],
+            [
+              '*sigh* An empty log asking for motivation. Go do one session, couch warrior — then we’ll talk.',
+              '*зітхає* Порожній журнал просить мотивації. Зроби хоч одне тренування, диванний воїне, — тоді поговоримо.',
+            ],
+          ],
+        });
+      return moody(c, L, {
+        g: [
+          [
+            `Bro, ${n} sessions already! Every one started with “meh, don’t feel like it” — and you still showed up. Let’s gooo, make it ${n + 1} 💪`,
+            `Бро, вже ${n} тренувань! Кожне починалося з «та ну, не хочу» — і ти все одно приходив. Го робити ${n + 1}-е 💪`,
+          ],
+          [
+            `Dude, you’re a machine — ${n} in the log. Go get number ${n + 1}, I’m hyped 🤙`,
+            `Братан, ну ти машина — ${n} тренувань у журналі. Го по ${n + 1}-е, я в тебе вірю 🤙`,
+          ],
+          [
+            `No stress, man: you don’t need to feel it, you just need to show up. ${n} times you did. Big W. Now ${n + 1}.`,
+            `Не парся, бро: настрій не обов’язковий, головне — прийти. Ти вже ${n} разів це зробив. Красава. Тепер ${n + 1}-й.`,
+          ],
+        ],
+        y: [
+          [
+            `${n} sessions logged. Every one of them started with not wanting to. Go make it ${n + 1}.`,
+            `${n} тренувань у журналі. Кожне почалося з «не хочу». Іди зроби ${n + 1}-е.`,
+          ],
+          [
+            `Motivation is overrated. ${n} sessions happened without it. Make it ${n + 1}.`,
+            `Мотивація переоцінена. ${n} тренувань якось обійшлися без неї. Зроби ${n + 1}-е.`,
+          ],
+        ],
+        r: [
+          [
+            `A pep talk? ${n} sessions in the log and you still need a speech? Get up and make it ${n + 1}, couch warrior.`,
+            `Мотивації захотів? ${n} тренувань за плечима — і досі треба вмовляти? Встав і зроби ${n + 1}-е, диванний воїне.`,
+          ],
+          [
+            `*sigh* Nobody’s carrying you to the gym, cupcake. ${n} done — number ${n + 1} won’t log itself.`,
+            `*зітхає* Ніхто тебе в зал на руках не понесе, пиріжечку. ${n} є — ${n + 1}-е саме себе не запише.`,
+          ],
+          [
+            `While you wait for motivation, session ${n + 1} is waiting for you. ${n} logged — don’t stall now, gym tourist.`,
+            `Поки ти чекаєш на мотивацію, ${n + 1}-е тренування чекає на тебе. ${n} уже є — не зливайся, туристе.`,
+          ],
+        ],
+      });
     },
   },
   {
     id: 'joke',
     all: [['joke', 'funny', 'make me laugh', 'жарт*', 'анекдот*', 'розсміши', 'смішне']],
     answer: (c, _p, L) => {
-      const jokes: [string, string][] = [
-        [
-          'Why did the barbell break up with the dumbbell? It needed someone to spot it.',
-          'Чому штанга кинула гантель? Їй потрібен був той, хто підстрахує.',
-        ],
-        [
-          'I’d tell you a leg-day joke, but you’d skip it.',
-          'Я б розповів анекдот про день ніг, але ти б його пропустив.',
-        ],
-        [
-          'My favourite exercise? A cross between a lunge and a crunch. I call it lunch.',
-          'Моя улюблена вправа — між випадом і скручуванням. Називаю її «обід».',
-        ],
+      // Each language has its own jokes — puns don't survive translation.
+      const en = [
+        'I’d tell you a leg-day joke, but you’d skip it.',
+        'My favourite exercise? A cross between a lunge and a crunch. I call it lunch.',
+        'A guy only ever trained his right arm. Don’t worry — he’s all right.',
+        'The gym is like a relationship: in January you swear it’s forever, by March you’re “just taking a break”.',
+        'I told my friend I do cardio. Technically true — my heart races every time I walk past the squat rack.',
       ];
-      const j = jokes[Math.floor(c.now / 60000) % jokes.length];
-      return L(j[0], j[1]);
+      const uk = [
+        'День ніг — як податкова: всі знають, що треба, але кожен шукає, як відкосити.',
+        '— Скільки жмеш лежачи? — Лежачи я переважно жму «ще 5 хвилин» на будильнику.',
+        'Абонемент у зал — як парасолька: купив — і вже відчуваєш себе захищеним. Ходити не обов’язково.',
+        'Коли тренер каже «останній підхід» — це як «я вже виїжджаю»: вір, але не сильно.',
+        'Кажуть, у залі головне — техніка. Моя техніка бездоганна: перевдягнутись, сфоткатись у дзеркалі й поїхати додому.',
+      ];
+      // [en before, uk before, en after, uk after]
+      const frames: Record<'g' | 'y' | 'r', [string, string, string, string][]> = {
+        g: [
+          ['Haha, okay bro, got one: ', 'Ха, лови, бро: ', ' 😂', ' 😂'],
+          [
+            'Dude, this one kills me: ',
+            'Братан, це топ: ',
+            ' Big W joke, admit it.',
+            ' Ну скажи ж, кайф?',
+          ],
+          ['Yo, gym humour incoming: ', 'Йоу, залізний гумор: ', ' 🤙', ' 🤙'],
+        ],
+        y: [
+          ['', '', '', ''],
+          ['Fine. One. ', 'Гаразд. Один. ', ' Now back to work.', ' Все, працюємо.'],
+          [
+            '',
+            '',
+            ' Laugh between sets, not instead of them.',
+            ' Смійся між підходами, а не замість них.',
+          ],
+        ],
+        r: [
+          [
+            '*sigh* Fine. ',
+            '*зітхає* Ну добре. ',
+            ' Still less funny than your attendance, couch warrior.',
+            ' Але твоя відвідуваність — смішніша, диванний воїне.',
+          ],
+          [
+            'You want jokes? Your training log is one. But here: ',
+            'Хочеш анекдот? Твій журнал тренувань — уже анекдот. Але лови: ',
+            '',
+            '',
+          ],
+          [
+            '',
+            '',
+            ' Laughed? Great, that’s your ab workout for the week, gym tourist.',
+            ' Посміявся? Ну все, прес на тиждень відпрацював, туристе.',
+          ],
+        ],
+      };
+      const mood = c.temper <= 2 ? 'g' : c.temper === 3 ? 'y' : 'r';
+      const min = Math.floor(c.now / 60000);
+      const f = frames[mood][Math.floor(min / 5) % frames[mood].length];
+      return L(f[0] + en[min % en.length] + f[2], f[1] + uk[min % uk.length] + f[3]);
     },
   },
   {
@@ -1220,7 +1405,46 @@ export const INTENTS_MORE: Intent[] = [
         'відвали',
       ],
     ],
-    answer: (_c, _p, L) => L('Put that energy into the next set.', 'Цю енергію — в наступний сет.'),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'Whoa, easy, bro 😅 No hard feelings. Rough day? Let’s burn it off under the bar.',
+            'Ого, спокуха, бро 😅 Я не ображаюсь. День не задався? Го виплеснемо все на штанзі.',
+          ],
+          [
+            'All good, man, I can take it. Put that rage into the next set — PR incoming 💪',
+            'Та норм, братан, я витримаю. Всю цю злість — у наступний підхід, і рекорд наш 💪',
+          ],
+          [
+            'Haha, love the energy, dude. Just aim it at the barbell, not me.',
+            'Ха, оце енергія! Тільки направ її на штангу, а не на мене, бро.',
+          ],
+        ],
+        y: [
+          ['Put that energy into the next set.', 'Цю енергію — в наступний сет.'],
+          ['Noted. The bar still weighs the same.', 'Прийнято. Штанга від цього легшою не стала.'],
+          ['Loud. Now lift like that.', 'Гучно. Тепер так само й тягни.'],
+        ],
+        r: [
+          [
+            'Big words from someone whose log has more gaps than sets.',
+            'Сміливо, як для людини, в якої в журналі більше пропусків, ніж підходів.',
+          ],
+          [
+            '*yawn* That’s the most effort you’ve put into anything all month, couch warrior.',
+            '*позіхає* Це найбільше зусилля, яке ти доклав за місяць, диванний воїне.',
+          ],
+          [
+            'Cute. Your insults get more reps than your workouts do.',
+            'Мило. У твоїх образах більше повторень, ніж у твоїх тренуваннях.',
+          ],
+          [
+            'Shout all you want, gym tourist. The weights still won’t lift themselves.',
+            'Кричи скільки влізе, туристе. Гантелі від цього самі не піднімуться.',
+          ],
+        ],
+      }),
   },
   {
     id: 'done',
@@ -1242,11 +1466,67 @@ export const INTENTS_MORE: Intent[] = [
       const w = finishedOf(c)[0];
       const today = w && c.now - w.startedAt < DAY;
       return today
-        ? L('Logged. Now eat, sleep, repeat.', 'Записано. Тепер їж, спи, повторюй.')
-        : L(
-            'Not in the log, didn’t happen. Finish the session in the app.',
-            'Немає в журналі — не було. Заверши тренування в додатку.',
-          );
+        ? moody(c, L, {
+            g: [
+              [
+                'Let’s gooo! Big W, bro 💪 It’s logged. Now eat, sleep, repeat.',
+                'Красава! Записано 💪 Тепер поїсти, поспати — і по новій.',
+              ],
+              [
+                'Dude, you’re a machine! It’s in the log. Refuel, sleep well, go again 🤙',
+                'Ну ти машина, бро! Все в журналі. Поїж, виспися — і знову в бій 🤙',
+              ],
+            ],
+            y: [
+              ['Logged. Now eat, sleep, repeat.', 'Записано. Тепер їж, спи, повторюй.'],
+              [
+                'Seen it. Good. Recover and come back.',
+                'Бачу. Нормально. Відновлюйся й повертайся.',
+              ],
+            ],
+            r: [
+              [
+                'Logged. Don’t expect a medal — it’s one session, not a career.',
+                'Записав. Медалі не буде — це одне тренування, а не кар’єра.',
+              ],
+              [
+                '*slow clap* Bare minimum done. Now eat, sleep, repeat — that’s where gym tourists drop out.',
+                '*повільні оплески* Мінімум зроблено. Тепер їж, спи й повтори — саме тут туристи й відвалюються.',
+              ],
+            ],
+          })
+        : moody(c, L, {
+            g: [
+              [
+                'Hold up, bro — I don’t see it in the log yet. Finish the session in the app so it counts 🤙',
+                'Стоп, бро, у журналі поки пусто. Заверши тренування в додатку, щоб зарахувалось 🤙',
+              ],
+              [
+                'Nice, dude! But it’s not in the log yet — finish the session in the app and it’s official.',
+                'Добре, братан! Тільки в журналі його ще нема — заверши тренування в додатку, і все зарахується.',
+              ],
+            ],
+            y: [
+              [
+                'Not in the log, didn’t happen. Finish the session in the app.',
+                'Немає в журналі — не було. Заверши тренування в додатку.',
+              ],
+              [
+                'The log disagrees. Finish the session in the app.',
+                'Журнал каже інакше. Заверши тренування в додатку.',
+              ],
+            ],
+            r: [
+              [
+                'Did it? The log says otherwise. Imaginary sessions don’t count, couch warrior — finish it in the app.',
+                'Зробив? Журнал каже, що ні. Уявні тренування не рахуються, диванний воїне, — заверши в додатку.',
+              ],
+              [
+                '*eye-roll* Nothing in the log. Either finish the session in the app or admit you only thought about it.',
+                '*закочує очі* У журналі пусто. Або заверши тренування в додатку, або зізнайся, що ти про нього лише подумав.',
+              ],
+            ],
+          });
     },
   },
   {
@@ -1267,9 +1547,43 @@ export const INTENTS_MORE: Intent[] = [
     ],
     maxWords: 4,
     answer: (c, _p, L) =>
-      L('Sleep 7+ hours. ', 'Спи 7+ годин. ') +
-      L('Next: ', 'Далі: ') +
-      todayLine(c, L, c.now + DAY),
+      moody(c, L, {
+        g: [
+          [
+            'Later, bro! Sleep 7+ hours — gains grow at night 🤙 Next up: ',
+            'Бувай, бро! Спи 7+ годин — м’язи ростуть уночі 🤙 Далі по плану: ',
+          ],
+          [
+            'Catch you later, dude. Get your 7+ hours of sleep. Next up: ',
+            'На зв’язку, братан. Спи 7+ годин, а не гортай стрічку до ночі. Далі по плану: ',
+          ],
+          [
+            'Good night, champ! 7+ hours of sleep and you’re a machine tomorrow. Next up: ',
+            'Добраніч, красава! 7+ годин сну — і завтра ти машина. Далі по плану: ',
+          ],
+        ],
+        y: [
+          ['Sleep 7+ hours. Next: ', 'Спи 7+ годин. Далі: '],
+          [
+            'Bye. 7+ hours of sleep, not 7 hours of scrolling. Next: ',
+            'Бувай. 7+ годин сну, а не 7 годин стрічки. Далі: ',
+          ],
+        ],
+        r: [
+          [
+            'Off you go. Sleep 7+ hours — finally something you’re consistent at. Next, no skipping: ',
+            'Іди вже. Спи 7+ годин — хоч у чомусь ти стабільний. Далі, без прогулів: ',
+          ],
+          [
+            '*sigh* Bye, couch warrior. 7+ hours of sleep, then no excuses. Next, no skipping: ',
+            '*зітхає* Бувай, диванний воїне. 7+ годин сну — і завтра без відмазок. Далі, без прогулів: ',
+          ],
+          [
+            'Bye, gym tourist. Sleep 7+ hours so tomorrow’s excuse can’t be “tired”. Next, no skipping: ',
+            'Бувай, туристе. Поспи 7+ годин, щоб завтра не було відмазки «не виспався». Далі, без прогулів: ',
+          ],
+        ],
+      }) + todayLine(c, L, c.now + DAY),
   },
   {
     id: 'how_are_you',

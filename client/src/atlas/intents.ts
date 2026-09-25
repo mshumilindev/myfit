@@ -74,7 +74,7 @@ import {
   type Parsed,
   type Tr,
 } from './intentKit';
-import { INTENTS_MORE } from './intentsMore';
+import { INTENTS_MORE, moody } from './intentsMore';
 import { INTENTS_THIRD } from './intentsThird';
 
 export type { AskCtx } from './intentKit';
@@ -899,17 +899,71 @@ export const INTENTS: Intent[] = [
         'кто ты',
       ],
     ],
-    answer: (_c, _p, L) =>
-      L(
-        'Atlas. I read every set you log. Ask me: what to train today, rest times, next weight on a lift, your records, recovery, sleep, your programme.',
-        'Atlas. Я читаю кожен твій сет. Питай: що тренувати сьогодні, скільки відпочивати, яку вагу далі, твої рекорди, відновлення, сон, програму.',
-      ),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'Yo bro, I’m Atlas — your gym buddy in your pocket 🤙 I read every set you log. Hit me up about what to train today, rest times, the next weight on a lift, your PRs, recovery, sleep or your programme.',
+            'Йоу, бро, я Atlas — твій кореш по залу 🤙 Бачу кожен твій сет. Питай що завгодно: що качаємо сьогодні, скільки відпочивати, яку вагу ставити далі, твої рекорди, відновлення, сон, програму.',
+          ],
+          [
+            'Dude, Atlas here. I know every set you’ve logged. Ask me what to hit today, how long to rest, the next weight on a lift, your records, recovery, sleep, your programme — I got you.',
+            'Братан, це Atlas. Усі твої сети в мене в голові. Питай: що сьогодні робимо, скільки відпочивати між підходами, скільки вішати далі, рекорди, відновлення, сон, програма — розрулимо.',
+          ],
+        ],
+        y: [
+          [
+            'Atlas. I read every set you log. Ask me: what to train today, rest times, next weight on a lift, your records, recovery, sleep, your programme.',
+            'Atlas. Я читаю кожен твій сет. Питай: що тренувати сьогодні, скільки відпочивати, яку вагу далі, твої рекорди, відновлення, сон, програму.',
+          ],
+          [
+            'Atlas. Your log, but talking. Today’s session, rest times, next weight on a lift, records, recovery, sleep, programme — ask.',
+            'Atlas. Твій журнал, тільки з язиком. Що тренувати сьогодні, скільки відпочивати, яку вагу далі, рекорди, відновлення, сон, програма — питай.',
+          ],
+        ],
+        r: [
+          [
+            '*sigh* Atlas. I read every set you log — takes me about a second. Ask what to train today, rest times, next weight on a lift, your records, recovery, sleep, your programme. Then actually do it.',
+            '*зітхає* Atlas. Читаю кожен твій сет — на це в мене йде секунда. Питай: що тренувати сьогодні, скільки відпочивати, яку вагу далі, рекорди, відновлення, сон, програму. І потім зроби, а не просто спитай.',
+          ],
+          [
+            'Atlas. Your coach, your record-keeper and the witness to every skipped day. Ask: today’s session, rest times, next weight on a lift, records, recovery, sleep, programme. Asking is the easy part, gym tourist.',
+            'Atlas. Тренер, архіваріус і свідок кожного твого прогулу. Питай: що тренувати сьогодні, скільки відпочивати, яку вагу далі, рекорди, відновлення, сон, програма. Питати — то легка частина, туристе.',
+          ],
+        ],
+      }),
   },
   {
     id: 'thanks',
     all: [['thanks', 'thank*', 'thx', 'дякую', 'дяки', 'спасиб*']],
     maxWords: 5,
-    answer: (_c, _p, L) => L('Thank me with a logged session.', 'Подякуй записаним тренуванням.'),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          ['No stress, man! Happy to help 🤙', 'Та нема за що, бро! Звертайся 🤙'],
+          ['Anytime, dude. Now go smash it 💪', 'Завжди радий, братан. Го давити 💪'],
+          ['Let’s gooo! That’s what I’m here for.', 'Та спокуха, я ж для того й є. Красава!'],
+        ],
+        y: [
+          ['Thank me with a logged session.', 'Подякуй записаним тренуванням.'],
+          ['Sure. The log’s still waiting.', 'Будь ласка. Журнал чекає.'],
+          ['Noted. Now go lift.', 'Прийнято. Тепер іди тягати.'],
+        ],
+        r: [
+          [
+            'Thanks don’t count as reps, couch warrior.',
+            'Подяки в повторення не зараховуються, диванний воїне.',
+          ],
+          [
+            '*eye-roll* Save the gratitude for someone who hasn’t seen your log.',
+            '*закочує очі* Прибережи вдячність для того, хто не бачив твого журналу.',
+          ],
+          [
+            'Adorable. Try thanking me with a session for once, cupcake.',
+            'Мило. Спробуй хоч раз подякувати тренуванням, пиріжечку.',
+          ],
+        ],
+      }),
   },
   {
     id: 'greeting',

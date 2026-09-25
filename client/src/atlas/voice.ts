@@ -21,7 +21,7 @@ export type Line<K extends FactKind> = (f: FactOf<K>, x: Fmt) => string;
 export type PhraseBook = {
   [K in FactKind]: Record<Temper, Line<K>[]>;
 } & {
-  /** "Your mom…" variants, mixed in for Drill/Merciless when enabled. */
+  /** "Your mom…" variants, mixed in for red when enabled. */
   mom: { [K in FactKind]?: Line<K>[] };
 };
 
@@ -52,7 +52,7 @@ type AnyLine = (f: CoachFact, x: Fmt) => string;
 function variants(book: PhraseBook, kind: FactKind, temper: Temper, mom: boolean): AnyLine[] {
   const byTemper = book[kind] as unknown as Record<Temper, AnyLine[]>;
   const extra =
-    mom && temper >= 4 ? ((book.mom[kind] as unknown as AnyLine[] | undefined) ?? []) : [];
+    mom && temper === 5 ? ((book.mom[kind] as unknown as AnyLine[] | undefined) ?? []) : [];
   return [...(byTemper[temper] ?? []), ...extra];
 }
 

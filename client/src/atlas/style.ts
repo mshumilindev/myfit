@@ -1,14 +1,15 @@
 /**
  * Atlas's voice constructor. An answer's facts never change with the temper —
- * how they're said does. Every answer is dressed by the temper's own manner:
+ * how they're said does. Every answer is dressed in the temper's manner:
  *
- *   [tic] [opener with a filler and a way of addressing you] ANSWER
- *   [reaction to good / bad news] [joke — topical, or "your mom" in Drill/
- *   Merciless when allowed] [closer, with a mild swear in Merciless when allowed]
+ *   [tic] [opener, with a way of addressing you] ANSWER
+ *   [reaction to good / bad news] [joke — topical, or "your mom" in red when
+ *   allowed] [closer, or a swear in red when allowed]
  *
- * Choices are seeded by the question and the turn: the same question in the
- * same place reads the same (tests, consistency), two answers in a row don't
- * open alike. Pain, injuries and the body stay plain — no jokes there.
+ * Each language is written in its own words — Ukrainian lines are not
+ * translations of English ones and vice versa, so the lists don't line up.
+ * Choices are seeded by the question and the turn. Pain, injuries and the
+ * body stay plain — no jokes there; red mocks effort, never the body.
  */
 import { lineAllowed } from './guard';
 import type { Temper } from './types';
@@ -31,184 +32,114 @@ interface Voice {
   close: Pair;
   /** How often each part shows up (0..1). */
   rate: { open: number; tic: number; mood: number; joke: number; close: number };
+  /** May joke in two answers running. */
+  jokesInARow?: boolean;
 }
 
 const V: Record<Temper, Voice> = {
-  // ---- 1 · Warm: a friend who's genuinely happy you showed up -------------
+  // ---- green: your gym bro ---------------------------------------------------
   1: {
     open: [
       [
-        'Oh, good one! ',
-        'Ooh, I love this question. ',
-        'So, {a}, ',
-        'Okay, {a}! ',
-        'Aw, you asked! ',
-        'Right, {a} — ',
-        'Honestly? Great question. ',
-        "Let's see, {a}… ",
+        'Yo {a}! ',
+        'Dude. ',
+        'Ayy, {a}! ',
+        'Okay {a}, check it: ',
+        'Ooh, good one! ',
+        'Alright {a}, ',
+        'Sup {a}. ',
+        'Bro, listen: ',
       ],
       [
-        'О, класне питання! ',
-        'Ох, люблю такі питання. ',
-        'Так, {a}, дивись. ',
-        'Ну що, {a}! ',
-        'Ой, як добре, що спитав! ',
-        'Дивись, {a} — ',
-        'Слухай, чудове питання. ',
-        'Зараз глянемо, {a}… ',
+        'Йоу, {a}! ',
+        'Хей, {a}! ',
+        'О, {a}, ',
+        'Слухай, {a}, ',
+        'Ооо, кайфове питання! ',
+        'Так-так, {a}, дивись: ',
+        'Ну що, {a}, ',
+        'Братан, лови: ',
       ],
     ],
     addr: [
-      ['friend', 'champ', 'buddy', 'star', 'legend'],
-      ['друже', 'чемпіоне', 'сонце', 'зірко', 'легендо', 'золотце'],
+      ['bro', 'dude', 'man', 'champ', 'my guy', 'beast'],
+      ['бро', 'братан', 'брате', 'чемпіоне', 'друже', 'машино'],
     ],
     tic: [
-      ['Hehe. ', 'Yay! ', 'Mm-hm! '],
-      ['Хе-хе. ', 'Ура! ', 'Ага-ага! '],
+      ['Yo! ', 'Ha! ', 'Sick! ', 'Ooh! '],
+      ['Йоу! ', 'Ха! ', 'Кайф! ', 'О-о-о! '],
     ],
     good: [
       [
-        'Look at you go! 💪',
-        "That's proper progress — I'm grinning.",
-        'You should be proud of this one.',
-        'See? Showing up pays off.',
+        'Big W, bro! 💪',
+        "You're a machine!",
+        "That's straight fire.",
+        'Beast mode, fr.',
+        'Look at you go!',
       ],
-      [
-        'Та ти ж молодчина! 💪',
-        'Оце прогрес — я аж усміхаюся.',
-        'Можеш цим пишатися, серйозно.',
-        'Бачиш? Те, що ти приходиш, працює.',
-      ],
+      ['Ну ти машина! 💪', 'Красава, реально!', 'Оце мощно, бро!', 'Топчик!', 'Бро, я аж пишаюсь!'],
     ],
     bad: [
       [
-        "Hey, it happens — we'll nudge it together.",
-        "Don't sweat it, bodies have slow weeks.",
-        "Small dip, big picture's fine. 🙂",
+        "No stress, bro — we'll get it moving.",
+        "All good, it's just a dip.",
+        'Chill, we got this 🤙',
+        'Happens to the best. We go again.',
       ],
       [
-        'Буває — підтягнемо разом.',
-        'Не переймайся, в тіла бувають повільні тижні.',
-        'Маленький провал, а загалом усе добре. 🙂',
+        'Спокуха, бро, розкачаємо.',
+        'Не парся, це просто просадка.',
+        'Все норм, прорвемось 🤙',
+        "Буває з кожним. Наступного разу доб'ємо.",
       ],
     ],
     joke: [
       [
-        'Fun fact: squats are just sitting down with ambition.',
-        'Rest days are when your muscles do the growing and you do the snacking.',
-        "Your muscles don't know it's Monday. Lucky them.",
-        'Leg day: the only day stairs become a group project.',
-        'Protein shakes: because chewing chicken all day gets old.',
+        'Squats are just sitting down with ambition.',
+        'Leg day: when the stairs become a boss fight.',
+        'Protein shakes are basically coffee for your muscles.',
+        "Muscles grow while you sleep, so naps are technically training. You're welcome.",
+        'Gym rule #1: never trust the guy who "only did cardio today".',
       ],
       [
-        'Цікавий факт: присід — це просто сісти, але з амбіціями.',
-        'У день відпочинку мʼязи ростуть, а ти — перекушуєш. Чесний розподіл.',
-        'Мʼязи не знають, що сьогодні понеділок. Щасливчики.',
-        'День ніг — єдиний день, коли сходи стають командним проєктом.',
-        'Протеїновий шейк — бо жувати курку цілий день набридає.',
+        'Присід — це просто сісти, але з амбіціями.',
+        'День ніг — це коли сходи стають квестом.',
+        'Протеїн — це як кава, тільки для мʼязів.',
+        'Мʼязи ростуть, поки спиш. Тож поспати вдень — теж тренування. Жиза.',
+        'Правило залу номер один: не вір тому, хто «сьогодні тільки кардіо».',
       ],
     ],
     close: [
-      [" You've got this!", ' Proud of you.', ' Keep it up, {a}!', ' One rep at a time. 🙂', ''],
-      [' У тебе все вийде!', ' Пишаюся тобою.', ' Так тримати, {a}!', ' По одному повтору. 🙂', ''],
+      [" Let's go, bro!", ' You got this 🤙', ' Stay strong, man!', ' Catch you at the gym!', ''],
+      [' Го, бро!', ' Ти зможеш 🤙', ' Тримай кулак!', ' На звʼязку!', ''],
     ],
-    rate: { open: 0.8, tic: 0.15, mood: 0.85, joke: 0.3, close: 0.6 },
+    rate: { open: 0.85, tic: 0.2, mood: 0.9, joke: 0.3, close: 0.65 },
   },
-  // ---- 2 · Steady: calm, a little dry, like a good physio ------------------
-  2: {
-    open: [
-      [
-        'So. ',
-        'Right. ',
-        "Okay, here's the thing: ",
-        "Let's look. ",
-        'Well, ',
-        'Short version: ',
-        'Alright. ',
-        'Mm. ',
-      ],
-      [
-        'Отже. ',
-        'Так. ',
-        'Дивись, як є: ',
-        'Глянемо. ',
-        'Ну, ',
-        'Якщо коротко: ',
-        'Гаразд. ',
-        'Мгм. ',
-      ],
-    ],
-    addr: [
-      ['', ''],
-      ['', ''],
-    ],
-    tic: [
-      ['Let me check. ', 'One sec. '],
-      ['Секунду, гляну. ', 'Зараз. '],
-    ],
-    good: [
-      ["That's a good trend.", 'Solid. Keep the same plan.', 'Numbers are moving the right way.'],
-      ['Хороша тенденція.', 'Добре. План не міняємо.', 'Цифри рухаються куди треба.'],
-    ],
-    bad: [
-      [
-        'Not a crisis — adjust one thing and watch it for two weeks.',
-        'Normal plateau territory.',
-        'Worth a small change, nothing dramatic.',
-      ],
-      [
-        'Не криза — поміняй одне й подивись два тижні.',
-        'Звичайне плато.',
-        'Варто змінити дрібницю, без драми.',
-      ],
-    ],
-    joke: [
-      [
-        'As they say: the best program is the one you actually do.',
-        "The barbell doesn't care about your mood. Useful, sometimes.",
-        "Consistency is boring. That's why it works.",
-        'No magic here, just reps. Sorry.',
-      ],
-      [
-        'Як кажуть, найкраща програма — та, яку ти реально робиш.',
-        'Штанзі байдуже на твій настрій. Іноді це навіть корисно.',
-        'Регулярність нудна. Тому й працює.',
-        'Магії нема, тільки повтори. Вибач.',
-      ],
-    ],
-    close: [
-      ['', '', " That's it.", ' Any questions — ask.'],
-      ['', '', ' От і все.', ' Питання — питай.'],
-    ],
-    rate: { open: 0.55, tic: 0.06, mood: 0.6, joke: 0.12, close: 0.3 },
-  },
-  // ---- 3 · Blunt: no fluff, a bit of a smirk -------------------------------
+  // ---- yellow: straight talk -------------------------------------------------
   3: {
     open: [
       [
-        'Straight: ',
+        'Straight up: ',
         'Look. ',
-        'Short answer: ',
-        'No sugar-coating: ',
-        'Right, so. ',
-        'Basically, ',
-        'Plainly: ',
+        'Real talk: ',
+        'Bottom line: ',
+        'Short version: ',
         'Here it is: ',
+        'Okay. ',
       ],
       [
-        'Прямо: ',
-        'Слухай. ',
         'Коротко: ',
-        'Без цукру: ',
-        'Ну, короче. ',
+        'Слухай. ',
+        'Без соплів: ',
+        'По суті: ',
+        'Так, дивись. ',
         'Власне, ',
-        'По ділу: ',
-        'Ось як є: ',
+        'Ну, короче. ',
       ],
     ],
     addr: [
       ['mate', 'pal', 'boss'],
-      ['брате', 'друже', 'шефе'],
+      ['друже', 'шефе', 'брате'],
     ],
     tic: [
       ['Hm. ', 'Yeah. ', 'Pff. '],
@@ -216,248 +147,178 @@ const V: Record<Temper, Voice> = {
     ],
     good: [
       [
-        'Not bad. Genuinely not bad.',
+        'Not bad. Genuinely.',
         "Fine, that's progress. Don't get cocky.",
-        'Good. Now keep doing exactly that.',
+        'Good. Keep doing exactly that.',
       ],
-      [
-        'Непогано. Реально непогано.',
-        'Окей, це прогрес. Тільки не зазнавайся.',
-        'Добре. Тепер роби рівно те саме.',
-      ],
+      ['Непогано. Без жартів.', 'Окей, це прогрес. Не зазнавайся.', 'Добре. Роби рівно те саме.'],
     ],
     bad: [
       [
-        "That's a plateau. They don't fix themselves.",
+        "That's a plateau. It won't fix itself.",
         'Stuck. Change something.',
-        "Numbers don't lie — this isn't moving.",
+        "Numbers don't lie — it's not moving.",
       ],
-      ['Це плато. Само не пройде.', 'Застряг. Міняй щось.', 'Цифри не брешуть — воно стоїть.'],
+      ['Це плато. Саме не мине.', 'Застряг. Міняй щось.', 'Цифри не брешуть — воно стоїть.'],
     ],
     joke: [
       [
         "The weights won't lift themselves. I checked.",
-        'Your excuses have better form than your squat.',
-        "Scrolling between sets isn't cardio.",
-        "'I'll start Monday' — the most popular program in the world.",
-        "Mirror selfies don't count as a set.",
+        'Scrolling between sets is not cardio.',
+        '"I\'ll start Monday" — the most popular program on earth.',
+        "A mirror selfie isn't a set.",
       ],
       [
-        'Гантелі самі не піднімуться. Я перевіряв.',
-        'Твої відмовки мають кращу техніку, ніж твій присід.',
-        'Скролити стрічку між підходами — не кардіо.',
-        '«З понеділка почну» — найпопулярніша програма у світі.',
+        'Гантелі самі себе не піднімуть. Я перевіряв.',
+        'Гортати стрічку між підходами — не кардіо.',
+        '«З понеділка почну» — найпопулярніша програма в країні.',
         'Селфі в дзеркалі — це не підхід.',
       ],
     ],
     close: [
-      ['', " That's it.", ' Done.', ' Next question.'],
-      ['', ' От і все.', ' Крапка.', ' Наступне питання.'],
+      ['', " That's it.", ' Done.', ' Next.'],
+      ['', ' От і все.', ' Крапка.', ' Далі.'],
     ],
-    rate: { open: 0.75, tic: 0.15, mood: 0.8, joke: 0.35, close: 0.4 },
+    rate: { open: 0.7, tic: 0.15, mood: 0.8, joke: 0.3, close: 0.4 },
   },
-  // ---- 4 · Drill: a sergeant with a whistle ---------------------------------
-  4: {
-    open: [
-      [
-        'Listen up, {a}! ',
-        'Eyes on me. ',
-        'Attention! ',
-        "Alright, {a}, here's the order: ",
-        'Stand straight, {a}. ',
-        'Hear this. ',
-        'On my whistle: ',
-        'Report, {a}: ',
-      ],
-      [
-        'Слухай сюди, {a}! ',
-        'Очі на мене. ',
-        'Струнко! ',
-        'Так, {a}, наказ такий: ',
-        'Рівняйсь, {a}. ',
-        'Запамʼятай. ',
-        'За моїм свистком: ',
-        'Доповідаю, {a}: ',
-      ],
-    ],
-    addr: [
-      ['recruit', 'private', 'soldier', 'rookie', 'cadet'],
-      ['рекрут', 'боєць', 'салага', 'курсант', 'солдате'],
-    ],
-    tic: [
-      ['*whistle* ', 'HUP! ', 'One-two! '],
-      ['*свисток* ', 'Раз-два! ', 'ХОП! '],
-    ],
-    good: [
-      [
-        "OUTSTANDING. Don't let it go to your head.",
-        "That's what I like to see. Again!",
-        'Good. Now double down.',
-      ],
-      [
-        'ВІДМІННО. Тільки не розслабляйся.',
-        'Оце я розумію. Ще раз!',
-        'Добре. Тепер удвічі старанніше.',
-      ],
-    ],
-    bad: [
-      [
-        'UNACCEPTABLE. We fix this. Today.',
-        'Stalled? Then you work harder, not whine louder.',
-        "That's a retreat, soldier. We don't retreat.",
-      ],
-      [
-        'НЕПРИЙНЯТНО. Виправляємо. Сьогодні.',
-        'Стоїть? Значить, працюєш більше, а не ниєш голосніше.',
-        'Це відступ, бійцю. Ми не відступаємо.',
-      ],
-    ],
-    joke: [
-      [
-        'Pain is weakness leaving the body. Soreness is it filing a complaint.',
-        'Drop and give me twenty — thoughts about your form.',
-        'In my army, rest days are a rumour.',
-        "The only thing you'll skip is dessert.",
-        "Leg day isn't optional. It's a lifestyle.",
-      ],
-      [
-        'Біль — це слабкість, що виходить із тіла. Крепатура — вона ж пише скаргу.',
-        'Упор лежачи і двадцять… думок про свою техніку.',
-        'У моїй армії день відпочинку — це чутки.',
-        'Єдине, що ти пропустиш, — це десерт.',
-        'День ніг — не опція. Це спосіб життя.',
-      ],
-    ],
-    close: [
-      [' NOW MOVE!', ' No excuses.', ' Dismissed.', ' GO, {a}!', " Understood? I CAN'T HEAR YOU."],
-      [' А ТЕПЕР РУХАЙСЯ!', ' Без відмовок.', ' Вільно.', ' ВПЕРЕД, {a}!', ' Зрозумів? НЕ ЧУЮ.'],
-    ],
-    rate: { open: 0.85, tic: 0.25, mood: 0.85, joke: 0.45, close: 0.75 },
-  },
-  // ---- 5 · Merciless: bored, sardonic, secretly invested --------------------
+  // ---- red: merciless — roasts the effort, never the body ---------------------
   5: {
     open: [
       [
         'Oh. You again. ',
-        'Wow, a question. ',
-        '*sigh* Fine. ',
-        'Since you insist, {a}: ',
-        'Must I? Ugh. ',
-        'Listen, {a}. ',
-        'Look, {a}, ',
-        'Brace yourself. ',
+        "Go on, ask. It's not like I have better things to do. ",
+        '*heavy sigh* ',
+        'Listen up, {a}. ',
+        "I'll say it slowly, just for you: ",
+        "Honestly don't know whether to laugh or cry. ",
+        'Seriously? Fine. ',
+        'Wow, a question. From you. ',
       ],
       [
         'О. Знову ти. ',
-        'Ого, питання. ',
-        '*зітхає* Гаразд. ',
-        'Раз ти наполягаєш, {a}: ',
-        'Мушу? Ех. ',
-        'Слухай, {a}. ',
-        'Дивись, {a}, ',
-        'Тримайся. ',
+        'Ну питай, питай, мені ж нема чим зайнятись. ',
+        '*важко зітхає* ',
+        'Слухай сюди, {a}. ',
+        'Поясню повільно, спеціально для тебе: ',
+        'Навіть не знаю, сміятись чи плакати. ',
+        'Серйозно? Ну добре. ',
+        'Ого, питання. Від тебе. ',
       ],
     ],
     addr: [
-      ['slacker', 'couch champion', 'cupcake', 'rookie', 'sunshine', 'hero'],
-      ['лінивцю', 'чемпіоне дивана', 'булочко', 'новачку', 'сонечко', 'героє'],
+      ['couch warrior', 'gym tourist', 'cupcake', 'buttercup', 'snowflake', 'champ'],
+      ['диванний воїне', 'туристе', 'пиріжечку', 'сонечко', 'лінивцю', 'чемпіоне з лежання'],
     ],
     tic: [
-      ['*eye roll* ', 'Hah. ', 'Tsk. '],
-      ['*закочує очі* ', 'Ха. ', 'Тц. '],
+      ['*eye roll* ', 'Ha. ', 'Tsk. ', '*slow clap* '],
+      ['*закочує очі* ', 'Ха. ', 'Тц. ', '*повільно плескає* '],
     ],
     good: [
       [
-        'Huh. Almost impressive. Almost.',
-        "Look at that, you did a thing. Don't expect applause.",
-        'Progress. From you. Noted with mild surprise.',
+        'Even a broken clock is right twice a day.',
+        "Don't get used to it. It was an accident.",
+        'Finally. Congratulations… to me, for my patience.',
       ],
       [
-        'Хм. Майже вражає. Майже.',
-        'Гляди, щось вийшло. Оплесків не чекай.',
-        'Прогрес. Від тебе. Відзначаю з легким подивом.',
+        'Раз на рік і палка стріляє.',
+        'Не звикай. Це випадковість.',
+        'Нарешті. Вітаю… себе, з витримкою.',
       ],
     ],
     bad: [
       [
-        'Predictable.',
-        'Shocking. Truly nobody saw that coming.',
-        'Stalled. Like your motivation.',
-        "Well, that's tragic. Fix it.",
+        'As expected. From you.',
+        "I'd be surprised, but no.",
+        "Sad. Even for me, and I don't care.",
       ],
       [
-        'Передбачувано.',
-        'Шок. Ніхто такого не очікував. Ніхто.',
-        'Стоїть. Як і твоя мотивація.',
-        'Ну, трагедія. Виправляй.',
+        'Як і очікувалось. Від тебе.',
+        'Я б здивувався, але ні.',
+        'Сумно. Навіть мені, а мені байдуже.',
       ],
     ],
     joke: [
       [
-        'Your warm-up is my working set. On a bad day.',
-        "I've seen more tension in a wet noodle.",
-        "Those aren't 'light weights', that's just your ceiling.",
-        'Your rest times have their own rest times.',
-        'Even your shadow skips leg day.',
+        "If excuses were a lift, you'd hold the world record.",
+        "You don't skip leg day. You skip leg month.",
+        'You rest with the occasional set in between.',
+        'Even your fitness tracker asked for a transfer.',
+        "I've seen more intensity from a screensaver.",
+        'Your warm-up is my cool-down. On a lazy day.',
       ],
       [
-        'Твоя розминка — мій робочий підхід. У поганий день.',
-        'Я бачив більше напруги в розвареній макаронині.',
-        'Це не «легка вага», це твоя стеля.',
-        'У твоїх пауз між підходами є власні паузи.',
-        'Навіть твоя тінь пропускає день ніг.',
+        'Якби відмовки були вправою, ти б тримав світовий рекорд.',
+        'Ти не пропускаєш день ніг. Ти пропускаєш місяць ніг.',
+        'У тебе не відпочинок між підходами, а підходи між відпочинком.',
+        'Навіть твій фітнес-браслет попросив перевести його до когось іншого.',
+        'Я бачив більше запалу в заставки на екрані.',
+        'Твоя розминка — моя заминка. У лінивий день.',
       ],
     ],
     close: [
       [
         '',
-        ' Try to keep up.',
-        " Don't disappoint me. More than usual.",
-        " I'll be watching.",
-        ' Go on, then.',
+        " Now go. You're exhausting.",
+        " Dismissed. Don't embarrass me.",
+        ' And no whining.',
+        " I'm watching. Always.",
       ],
       [
         '',
-        ' Спробуй встигати.',
-        ' Не розчаруй мене. Більше, ніж зазвичай.',
-        ' Я стежитиму.',
-        ' Ну, вперед.',
+        ' Все, іди. Ти мене втомив.',
+        ' Вільний. Не ганьби мене.',
+        ' І не скигли.',
+        ' Я стежу. Завжди.',
       ],
     ],
-    rate: { open: 0.9, tic: 0.25, mood: 0.9, joke: 0.55, close: 0.7 },
+    rate: { open: 0.95, tic: 0.3, mood: 0.95, joke: 0.6, close: 0.8 },
+    jokesInARow: true,
   },
 };
 
-/** "Your mom…" — about effort, never about looks. Drill and Merciless, when on. */
+/** "Your mom…" — about effort, never about looks. Red only, when switched on. */
 const MOM: Pair = [
   [
     'Your mom warms up with that weight.',
     'Your mom rests less between sets. I checked.',
     'Your mom called — she wants her kettlebell back.',
-    "Your mom's deadlift has better lockout. Just saying.",
-    'Your mom does this at 6 a.m. before coffee.',
+    "Your mom's deadlift has a better lockout. Just saying.",
+    'Your mom does this at 6 a.m. before her coffee.',
   ],
   [
     'Твоя мама на цій вазі розминається.',
-    'Твоя мама відпочиває між підходами менше. Я перевіряв.',
+    'Твоя мама між підходами відпочиває менше. Я засікав.',
     'Дзвонила твоя мама — просить повернути її гирю.',
-    'У твоєї мами в становій краще дотискання. Просто кажу.',
-    'Твоя мама робить це о шостій ранку, ще до кави.',
+    'Твоя мама в становій дотискає краще. Просто факт.',
+    'Твоя мама це робить о шостій ранку, ще до кави.',
   ],
 ];
 
-/** Mild swearing — Merciless only, and only when it's switched on. */
+/** Swearing — red only, and only when it's switched on. */
 const SWEAR_OPEN: Pair = [
-  ['Damn. ', 'Hell, ', 'Bloody hell. ', 'Crap. ', 'Oh, for crying out loud. '],
-  ['Блін. ', 'Чорт, ', 'Бляха-муха. ', 'Трясця. ', 'Хрін там. ', 'Ну капець. '],
+  ['Damn. ', 'Oh, hell. ', 'Bloody hell. ', 'Crap. ', 'For crying out loud. ', 'Freaking hell. '],
+  [
+    'Блін. ',
+    'Бляха. ',
+    'Твою ж дивізію. ',
+    'Трясця. ',
+    'Якого біса. ',
+    'Капець. ',
+    'Хай йому грець. ',
+  ],
 ];
 const SWEAR_CLOSE: Pair = [
-  [' Damn it.', ' Now bloody move.', " And don't whine, hell.", ' Crap, just do it.'],
   [
-    ' Чорт забирай.',
-    ' А тепер рухай своїм, блін, задом.',
-    ' І не скигли, трясця.',
-    ' Бляха, просто зроби.',
+    ' Damn it.',
+    ' Now move your lazy ass.',
+    " And quit whining, for hell's sake.",
+    ' Crap, just do it.',
+  ],
+  [
+    ' Дідько.',
+    ' А тепер ворушись, лінива дупо.',
+    ' І не скигли, хай тобі грець.',
+    ' Бляха, просто зроби це.',
   ],
 ];
 
@@ -469,7 +330,7 @@ const TOPIC_JOKES: [RegExp, Pair][] = [
       ['Leg day: the day stairs become your enemy.', "Friends don't let friends skip leg day."],
       [
         'День ніг — день, коли сходи стають ворогами.',
-        'Друзі не дають друзям пропускати день ніг.',
+        'Справжні друзі не дають пропускати день ніг.',
       ],
     ],
   ],
@@ -477,12 +338,12 @@ const TOPIC_JOKES: [RegExp, Pair][] = [
     /cardio|run|steps|кардіо|біг|кроки/iu,
     [
       [
-        'Cardio: the part where you pretend the treadmill is chasing you.',
-        'Running: like lifting, but the barbell is you.',
+        'Cardio: pretending the treadmill is chasing you.',
+        'Running is lifting, except the barbell is you.',
       ],
       [
-        'Кардіо — це коли вдаєш, що доріжка за тобою женеться.',
-        'Біг — як тяга, тільки штанга — це ти.',
+        'Кардіо — це коли тікаєш від доріжки, а вона не відстає.',
+        'Біг — та сама штанга, тільки штанга — це ти.',
       ],
     ],
   ],
@@ -490,29 +351,29 @@ const TOPIC_JOKES: [RegExp, Pair][] = [
     /sleep|rest|recover|сон|відпоч|віднов/iu,
     [
       ['Sleep: the only supplement with zero side effects.', 'Muscles grow on the couch. Legally.'],
-      ['Сон — єдина добавка без побічок.', 'Мʼязи ростуть на дивані. Легально.'],
+      ['Сон — єдина добавка без побічок.', 'Мʼязи ростуть на дивані. Цілком законно.'],
     ],
   ],
   [
     /protein|food|carb|eat|meal|білок|їж|вуглев|харч/iu,
     [
       [
-        'Abs are made in the kitchen. Biceps too, apparently.',
-        'Chicken, rice, repeat. The gym diet haiku.',
+        'Abs are made in the kitchen. Apparently biceps too.',
+        'Chicken, rice, repeat. The gym haiku.',
       ],
-      ['Прес роблять на кухні. Біцепс, схоже, теж.', 'Курка, рис, повтор. Хайку спортзалу.'],
+      ['Прес робиться на кухні. Біцепс, схоже, теж.', 'Курка, рис, і знову курка. Меню чемпіона.'],
     ],
   ],
   [
     /bench|chest|жим|груд/iu,
     [
       [
-        'International bench day is every Monday. Unofficially.',
-        "Ask anyone at the gym: 'how much do you bench' is a greeting.",
+        'International chest day is every Monday. Unofficially.',
+        "At the gym, 'how much do you bench' counts as hello.",
       ],
       [
-        'Міжнародний день жиму — щопонеділка. Неофіційно.',
-        'У залі «скільки жмеш?» — це привітання.',
+        'Всесвітній день грудей — щопонеділка. Неофіційно.',
+        'У залі «скільки жмеш?» — це замість «привіт».',
       ],
     ],
   ],
@@ -520,18 +381,17 @@ const TOPIC_JOKES: [RegExp, Pair][] = [
     /arm|bicep|curl|біцепс|рук/iu,
     [
       [
-        'Curls in the squat rack: a crime in 40 countries.',
-        'Biceps: the gun show needs a ticket office.',
+        'Curls in the squat rack are a crime in 40 countries.',
+        'The gun show needs a ticket office.',
       ],
       [
-        'Згинання в стійці для присідань — злочин у 40 країнах.',
-        'Біцепс: гарматному шоу потрібна каса.',
+        'Біцепс у стійці для присідань — злочин у сорока країнах.',
+        'На такі «гармати» скоро квитки продаватимуть.',
       ],
     ],
   ],
 ];
 
-/** Topics where jokes and swearing never go (pain, health, the body). */
 const NO_JOKE =
   /pain|injur|hurt|sick|ill|numb|pregnan|period|cycle|bodyweight|weight_loss|fat_loss|eating|mental|stress|sleep_bad|med|doctor|cramp|dizzy|blood|heart/i;
 
@@ -548,7 +408,7 @@ export interface StyleCtx {
   neutral?: boolean;
   /** Seed: the question + turn. */
   seed: string;
-  /** Joked in the previous answer — don't do it twice in a row. */
+  /** Joked in the previous answer — most tempers don't do it twice in a row. */
   jokedLast?: boolean;
 }
 
@@ -609,7 +469,7 @@ export function styled(text: string, s: StyleCtx): Styled {
   };
   const quiet = NO_JOKE.test(s.topic);
   const swear = s.swearing && s.temper === 5 && !quiet;
-  const mom = s.yoMama && s.temper >= 4 && !quiet;
+  const mom = s.yoMama && s.temper === 5 && !quiet;
 
   let head = '';
   if (r() < v.rate.tic) head += pick(v.tic[li]);
@@ -626,7 +486,7 @@ export function styled(text: string, s: StyleCtx): Styled {
   if (mood && r() < v.rate.mood) tail.push(pick(v[mood][li]));
 
   let joked = false;
-  if (!quiet && !s.jokedLast && r() < v.rate.joke) {
+  if (!quiet && (!s.jokedLast || v.jokesInARow) && r() < v.rate.joke) {
     const topical = TOPIC_JOKES.find(([re]) => re.test(s.topic) || re.test(text))?.[1];
     const j =
       mom && r() < 0.4
@@ -652,38 +512,23 @@ export function styled(text: string, s: StyleCtx): Styled {
 /** "Not sure what you meant" — in the temper's own words. */
 const UNSURE: Record<Temper, Pair> = {
   1: [
-    [
-      'Hmm, I want to get this right for you — did you mean:',
-      'Ooh, not sure I caught that! Was it one of these?',
-    ],
-    [
-      'Хм, хочу відповісти точно — ти мав на увазі:',
-      'Ой, не впевнений, що зрозумів! Може, щось із цього?',
-    ],
-  ],
-  2: [
-    ['Not sure I got that. Did you mean:', 'Let me check I understood. One of these?'],
-    [
-      'Не впевнений, що зрозумів. Ти мав на увазі:',
-      'Уточню, чи правильно зрозумів. Щось із цього?',
-    ],
+    ["Wait, bro, didn't quite catch that. One of these?", 'Hmm, lost you there, dude. You mean:'],
+    ['Стоп, бро, не допер. Ти про щось із цього?', 'Братан, щось я не вкурив. Ти мав на увазі:'],
   ],
   3: [
     ["Didn't catch that. Pick one:", 'Unclear. Which of these?'],
     ['Не зрозумів. Обирай:', 'Незрозуміло. Що з цього?'],
   ],
-  4: [
-    ['SAY AGAIN, recruit? Pick one:', "Mumbling won't cut it. Which is it:"],
-    ['ПОВТОРИ, бійцю! Обирай:', 'Не мимри. Що з цього:'],
-  ],
   5: [
     [
-      '*sigh* Words, please. In order. Did you mean:',
+      '*sigh* Words. In order. Try it. Did you mean:',
       "I'm a coach, not a mind reader. One of these?",
+      'That was English? Pick one, genius:',
     ],
     [
-      '*зітхає* Слова, будь ласка. По порядку. Ти мав на увазі:',
-      'Я тренер, а не телепат. Щось із цього?',
+      '*зітхає* Слова. По порядку. Спробуй. Ти про це:',
+      'Я тренер, а не екстрасенс. Щось із цього?',
+      'Це була мова? Обирай, генію:',
     ],
   ],
 };

@@ -51,7 +51,7 @@ describe('chat facts', () => {
     const hard = buildChatFacts(store as never, [], 5, Date.now());
     expect(hard).not.toMatch(/1990/);
     expect(JSON.parse(hard).bodyweightKg).toBeUndefined();
-    expect(JSON.parse(buildChatFacts(store as never, [], 2, Date.now())).bodyweightKg).toBe(90);
+    expect(JSON.parse(buildChatFacts(store as never, [], 1, Date.now())).bodyweightKg).toBe(90);
   });
 });
 

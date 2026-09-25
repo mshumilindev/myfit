@@ -29,7 +29,7 @@ const session = (daysAgo: number, bench: number): Workout =>
     ],
   }) as unknown as Workout;
 
-const ctx = (locale: 'en' | 'uk', temper: 1 | 2 | 3 | 4 | 5 = 2): AskCtx => ({
+const ctx = (locale: 'en' | 'uk', temper: 1 | 3 | 5 = 1): AskCtx => ({
   s: {
     workouts: [
       session(21, 80),

@@ -7,7 +7,7 @@
 import { useT } from '../i18n';
 import { useStore } from '../store';
 import { useAtlasNotes } from '../atlas/notes';
-import { TEMPER_COLOR } from '../atlas/types';
+import { TEMPER_COLOR, temperIndex } from '../atlas/types';
 import { AtlasFace } from './AtlasFace';
 import { Icon } from '../ui';
 
@@ -59,7 +59,9 @@ export function AtlasSoloStrip({ onOpen }: { onOpen: () => void }) {
           <span className="atl-solo-text">
             <span className="atl-solo-name">
               {t.atlasName}
-              {on && <span className="atl-temper-inline"> · {t.atlasTemper[temper - 1]}</span>}
+              {on && (
+                <span className="atl-temper-inline"> · {t.atlasTemper[temperIndex(temper)]}</span>
+              )}
             </span>
             <span className="atl-solo-line">
               {on ? (last?.text ?? t.atlasEmpty) : t.atlasInviteLine}

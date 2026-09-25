@@ -52,7 +52,7 @@ const ctx = (locale: 'en' | 'uk'): AskCtx => ({
   },
   now: NOW,
   locale,
-  temper: 2,
+  temper: 1,
   fmt: { kg: (k) => `${k} kg`, mmss: (s) => `${s}s`, muscle: (m) => m, exercise: (e) => e },
 });
 
@@ -110,7 +110,7 @@ describe('lift progress — whole history, bodyweight in reps', () => {
     expect(a?.text).toMatch(/\(\+\d+%\)/);
   });
   it('tells Gemini about every lift over the whole history', () => {
-    const f = JSON.parse(buildChatFacts(ctx('en').s as never, [], 2, NOW));
+    const f = JSON.parse(buildChatFacts(ctx('en').s as never, [], 1, NOW));
     const pu = f.allLifts.find((x: { name: string }) => x.name === 'Pullups');
     expect(pu).toMatchObject({
       measuredIn: 'reps (bodyweight)',

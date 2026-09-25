@@ -11,7 +11,7 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
-import { COACH_DEFAULT, type CoachSettings } from './atlas/types';
+import { COACH_DEFAULT, normalizeTemper, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
   arrayRemove,
@@ -160,6 +160,17 @@ const EMPTY_BODY: BodyMetrics = { weights: [] };
 
 /** Per-exercise weight display unit (Load-entry B). Storage stays canonical kg;
  *  this only changes how the weight is shown/entered for a given lift/machine. */
+
+/**
+ * Stored coach settings → current shape. Old five-step tempers map onto the
+ * three: Steady → green, Drill → red; "your mom"/swearing only stay on in red.
+ */
+function coachFrom(data: Partial<CoachSettings>): CoachSettings {
+  const c = { ...COACH_DEFAULT, ...data };
+  const temper = normalizeTemper(c.temper);
+  return temper === 5 ? { ...c, temper } : { ...c, temper, yoMama: false, swearing: false };
+}
+
 export type DisplayUnit = 'kg' | 'lb';
 
 /** A gym is a shared entity: its equipment inventory is crowdsourced and lives
@@ -272,7 +283,7 @@ let state: StoreState = {
     patternOffer: 'unseen',
   }),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
-  coach: { ...COACH_DEFAULT, ...load<Partial<CoachSettings>>(COACH_KEY, {}) },
+  coach: coachFrom(load<Partial<CoachSettings>>(COACH_KEY, {})),
   queue: [],
   liveTrainees: [],
   syncStatus: 'pending',
@@ -3586,7 +3597,7 @@ export function startSyncLoop(): () => void {
         const data = snap.data() as Partial<CoachSettings>;
         // Last-write-wins: keep a newer local edit over a stale server copy.
         if ((state.coach.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
-        state = { ...state, coach: { ...COACH_DEFAULT, ...data } };
+        state = { ...state, coach: coachFrom(data) };
         persist();
         emit();
       },

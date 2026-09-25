@@ -1,5 +1,5 @@
 /**
- * Atlas — the built-in coach. One coach, five tempers; the temper only changes
+ * Atlas — the built-in coach. One coach, three tempers; the temper only changes
  * how he talks, never what he knows. Everything he says starts as a CoachFact
  * derived from history (facts.ts), goes through the guard (guard.ts) and is
  * voiced from a phrase table (voice.ts).
@@ -7,24 +7,36 @@
 import type { MuscleGroup } from '../data/exercises';
 import type { CoachPlan } from './plan';
 
-/** 1 Warm · 2 Steady · 3 Blunt · 4 Drill · 5 Merciless. */
-export type Temper = 1 | 2 | 3 | 4 | 5;
-export const TEMPERS: Temper[] = [1, 2, 3, 4, 5];
-export const TEMPER_ID: Record<Temper, 'warm' | 'steady' | 'blunt' | 'drill' | 'merciless'> = {
-  1: 'warm',
-  2: 'steady',
-  3: 'blunt',
-  4: 'drill',
-  5: 'merciless',
+/**
+ * Three tempers — green, yellow, red. The values 1 · 3 · 5 are kept from the
+ * old five-step scale (so harshness still compares: 5 is the hardest), and
+ * old picks migrate: Steady (2) → green, Drill (4) → red (see normalizeTemper).
+ *   1 Green  — warm and supportive (also what a bad day falls back to);
+ *   3 Yellow — blunt, no fluff;
+ *   5 Red    — merciless: mocks your effort, never your body.
+ */
+export type Temper = 1 | 3 | 5;
+export const TEMPERS: Temper[] = [1, 3, 5];
+export const TEMPER_ID: Record<Temper, 'green' | 'yellow' | 'red'> = {
+  1: 'green',
+  3: 'yellow',
+  5: 'red',
 };
-/** Colour heats up with harshness (matches the design canvas). */
+/** Green · yellow · red. */
 export const TEMPER_COLOR: Record<Temper, string> = {
   1: '#4cbe8c',
-  2: '#6aa7e8',
-  3: '#d9a24f',
-  4: '#f0714f',
+  3: '#e3b23c',
   5: '#e0344f',
 };
+/** Position on the scale (0..2) — for labels stored as three-item lists. */
+export const temperIndex = (t: Temper): number => Math.max(0, TEMPERS.indexOf(t));
+/** Any stored value (old 1–5 scale included) → one of the three. */
+export function normalizeTemper(v: unknown): Temper {
+  const n = Number(v);
+  if (n <= 2) return 1;
+  if (n >= 4) return 5;
+  return 3;
+}
 
 /** Main coach writes the programme; an extra coach only watches and comments. */
 export type CoachRole = 'main' | 'extra';
@@ -34,9 +46,9 @@ export interface CoachSettings {
   temper: Temper;
   role: CoachRole;
   startedAt: number;
-  /** "Your mom…" lines (Drill/Merciless only). */
+  /** "Your mom…" lines (red only). */
   yoMama: boolean;
-  /** Mild swearing (Merciless only). Off by default. */
+  /** Swearing (red only). */
   swearing: boolean;
   /** Muted for today from a debrief ("Mute for today"): until this ms. */
   mutedUntil?: number | null;
@@ -54,10 +66,10 @@ export interface CoachSettings {
   updatedAt?: number;
 }
 
-/** What each temper may do: "your mom" from Drill up, swearing only Merciless. */
-export const momAllowed = (t: Temper) => t >= 4;
+/** "Your mom" and swearing — red only. */
+export const momAllowed = (t: Temper) => t === 5;
 export const swearAllowed = (t: Temper) => t === 5;
-/** Picking a temper resets the extras to its defaults (all on for Merciless). */
+/** Picking a temper resets the extras to its defaults (all on for red). */
 export const extrasFor = (t: Temper) => ({ yoMama: momAllowed(t), swearing: swearAllowed(t) });
 
 export const COACH_DEFAULT: CoachSettings = {

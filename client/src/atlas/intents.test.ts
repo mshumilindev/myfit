@@ -24,7 +24,7 @@ const session = (daysAgo: number, bench: number): Workout =>
     exercises: [lift('Barbell Bench Press - Medium Grip', bench, 8), lift('Barbell Squat', 100, 5)],
   }) as unknown as Workout;
 
-const ctx = (locale: 'en' | 'uk', temper: 1 | 2 | 3 | 4 | 5 = 2): AskCtx => ({
+const ctx = (locale: 'en' | 'uk', temper: 1 | 3 | 5 = 1): AskCtx => ({
   s: {
     workouts: [session(21, 80), session(14, 82.5), session(7, 85)],
     coach: { ...COACH_DEFAULT, enabled: true, temper },
@@ -86,7 +86,7 @@ describe('answerLocally', () => {
   });
 
   it('never leaks “undefined” into a reply', () => {
-    for (const t of [1, 2, 3, 4, 5] as const)
+    for (const t of [1, 3, 5] as const)
       for (const q of ['how long should I rest', 'what is my best bench', 'how was my week'])
         expect(answerLocally(q, ctx('en', t))?.text).not.toMatch(/undefined/);
   });

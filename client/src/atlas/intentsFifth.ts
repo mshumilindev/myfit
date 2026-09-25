@@ -19,7 +19,7 @@ import { describeMemory, soreFor } from './memory';
 import { isBodyweightLift, liftPoints } from './liftStats';
 import { SORE_CAP } from './memoryPlan';
 import { groupMatches } from './nlu';
-import type { Temper } from './types';
+import { TEMPERS, type Temper } from './types';
 import {
   DAY,
   WEEK,
@@ -129,18 +129,28 @@ const DAY_WORDS: [string, string[]][] = [
 ];
 
 const TEMPER_WORDS: [Temper, string[]][] = [
-  [1, ['warm', 'теплий', 'теплим', 'добрий', 'добрим']],
-  [2, ['steady', 'спокійний', 'спокійним']],
-  [3, ['blunt', 'прямий', 'прямим']],
-  [4, ['drill', 'сержант*', 'муштр*']],
-  [5, ['merciless', 'нещадн*', 'безжальн*']],
+  [
+    1,
+    [
+      'green',
+      'зелен*',
+      'warm',
+      'теплий',
+      'теплим',
+      'добрий',
+      'добрим',
+      'friendly',
+      'дружн*',
+      'бро',
+    ],
+  ],
+  [3, ['yellow', 'жовт*', 'blunt', 'прямий', 'прямим']],
+  [5, ['red', 'червон*', 'merciless', 'нещадн*', 'безжальн*', 'злий', 'злим']],
 ];
 const TEMPER_NAME: Record<Temper, [string, string]> = {
-  1: ['Warm', 'Теплий'],
-  2: ['Steady', 'Спокійний'],
-  3: ['Blunt', 'Прямий'],
-  4: ['Drill', 'Муштра'],
-  5: ['Merciless', 'Безжальний'],
+  1: ['Green', 'Зелений'],
+  3: ['Yellow', 'Жовтий'],
+  5: ['Red', 'Червоний'],
 };
 const SOFTER = [
   'nicer',
@@ -1140,8 +1150,10 @@ function temperOf(c: AskCtx, p: Parsed): Temper | null {
   const named = TEMPER_WORDS.find(([, kws]) => groupMatches(p.words, p.phrase, kws))?.[0];
   if (named) return named;
   const cur = c.s.coach.temper;
-  if (groupMatches(p.words, p.phrase, SOFTER)) return Math.max(1, cur - 1) as Temper;
-  if (groupMatches(p.words, p.phrase, HARDER)) return Math.min(5, cur + 1) as Temper;
+  // One step along green → yellow → red.
+  const i = TEMPERS.indexOf(cur);
+  if (groupMatches(p.words, p.phrase, SOFTER)) return TEMPERS[Math.max(0, i - 1)];
+  if (groupMatches(p.words, p.phrase, HARDER)) return TEMPERS[Math.min(TEMPERS.length - 1, i + 1)];
   return null;
 }
 

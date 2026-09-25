@@ -1,8 +1,8 @@
 /**
  * The lines Atlas never crosses, enforced in code (not only in a prompt):
- *  - a hard temper (Drill, Merciless) is about effort only — never the body;
+ *  - the hard temper (red) is about effort only — never the body;
  *  - on a bad day (injury, illness, a short night, a long break) he speaks as
- *    Steady, whatever temper you picked.
+ *    green, whatever temper you picked.
  */
 import type { Injury, RestPeriod, SleepNight, Workout } from '../types';
 import { activeInjuries } from '../injury';
@@ -14,7 +14,7 @@ import { COMEBACK_DAYS } from './facts';
 /** Nights shorter than this soften him for the day. */
 export const SOFTEN_SLEEP_H = 5;
 /** The temper a bad day falls back to. */
-export const SOFT_TEMPER: Temper = 2;
+export const SOFT_TEMPER: Temper = 1;
 
 export type SoftenReason = 'injury' | 'illness' | 'sleep' | 'comeback';
 

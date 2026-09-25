@@ -148,16 +148,16 @@ describe('guard', () => {
   it('softens to Steady when injured or ill', () => {
     const inj = { id: 'i', stage: 'rebuild', muscles: ['chest'] } as unknown as Injury;
     expect(softenReason({ ...ctx, injuries: [inj] })).toBe('injury');
-    expect(effectiveTemper({ ...COACH_DEFAULT, temper: 5 }, { ...ctx, injuries: [inj] })).toBe(2);
+    expect(effectiveTemper({ ...COACH_DEFAULT, temper: 5 }, { ...ctx, injuries: [inj] })).toBe(1);
     const ill = { id: 'r', mode: 'illness', startDay: 0, endDay: 0, open: true, createdAt: 0 };
     expect(
-      effectiveTemper({ ...COACH_DEFAULT, temper: 4 }, { ...ctx, restPeriods: [ill] as never }),
-    ).toBe(2);
+      effectiveTemper({ ...COACH_DEFAULT, temper: 3 }, { ...ctx, restPeriods: [ill] as never }),
+    ).toBe(1);
   });
   it('never lets a hard temper talk about the body', () => {
     expect(lineAllowed('You look fat', 5)).toBe(false);
-    expect(lineAllowed('Ти товстий', 4)).toBe(false);
-    expect(lineAllowed('You look fat', 2)).toBe(true);
+    expect(lineAllowed('Ти товстий', 5)).toBe(false);
+    expect(lineAllowed('You look fat', 3)).toBe(true);
     expect(lineAllowed('Pathetic. 5 reps.', 5)).toBe(true);
   });
 });
@@ -197,7 +197,7 @@ describe('voice', () => {
     );
     const bw = facts.find((f) => f.kind === 'bodyweight')!;
     expect(say(bw, 5, { locale: 'en', fmt, yoMama: true })).toBe(
-      say(bw, 2, { locale: 'en', fmt, yoMama: true }),
+      say(bw, 1, { locale: 'en', fmt, yoMama: true }),
     );
   });
 

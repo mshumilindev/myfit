@@ -1,4 +1,8 @@
-/** Atlas's phrase book — English. Temper 1 Warm · 2 Steady · 3 Blunt · 4 Drill · 5 Merciless. */
+/**
+ * Atlas's phrase book — English, written as English (not translated).
+ * Three tempers: 1 green — your gym bro · 3 yellow — straight talk ·
+ * 5 red — roasts your effort (never your body).
+ */
 import type { PhraseBook } from '../atlas/voice';
 
 const pct = (n: number) => `${n > 0 ? '+' : '−'}${Math.abs(n)}%`;
@@ -8,241 +12,187 @@ export const EN: PhraseBook = {
     1: [
       (f) =>
         f.sessions
-          ? `Hi! I’m Atlas. I’ve looked through your ${f.sessions} sessions — from now on I’ll cheer every one.`
-          : 'Hi! I’m Atlas. Log your first workout and I’ll cheer every one after it.',
-    ],
-    2: [
-      (f) =>
-        f.sessions
-          ? `Atlas here. I’ve read your ${f.sessions} sessions. From today I’ll note each workout and what to change.`
-          : 'Atlas here. Log your first workout — from then on I note each one and what to change.',
+          ? `Yo, what's up! Atlas here. Went through your ${f.sessions} sessions — I got you on every one from now. Let's gooo!`
+          : "Yo, what's up! Atlas here. Log your first session and I got you on every one after it.",
     ],
     3: [
       (f) =>
         f.sessions
-          ? `Atlas. ${f.sessions} sessions reviewed. I’ll comment on every workout from here. Short and honest.`
-          : 'Atlas. Nothing logged yet. First workout, then we talk.',
-    ],
-    4: [
-      (f) =>
-        f.sessions
-          ? `ATLAS REPORTING. ${f.sessions} sessions on file. Every workout from now on gets inspected. No excuses.`
-          : 'ATLAS REPORTING. Zero sessions on file. Fix that.',
+          ? `Atlas. Read your ${f.sessions} sessions. I'll call it like I see it on every workout from here.`
+          : 'Atlas. Nothing logged. Train first, talk later.',
     ],
     5: [
       (f) =>
         f.sessions
-          ? `I’ve read your ${f.sessions} sessions. Illuminating. From now on I comment on every one — brace yourself.`
-          : 'Zero sessions. A blank page. How very brave. Log something.',
+          ? `I read your ${f.sessions} sessions. Had a good laugh. I'll be here for every workout now — you'll regret that.`
+          : 'Zero sessions. Bold strategy. Log literally anything.',
     ],
   },
   session: {
     1: [
-      (f) => `Session done — ${f.sets} sets in ${f.minutes} min. Proud of you!`,
-      (f) => `${f.sets} sets, ${f.minutes} minutes. That’s how it’s done. Rest up!`,
-    ],
-    2: [
-      (f) => `Logged: ${f.sets} sets, ${f.minutes} min.`,
-      (f) => `${f.sets} sets in ${f.minutes} min. Recover, then next session.`,
+      (f) =>
+        `Let's go! ${f.sets} sets in ${f.minutes} min — that's how it's done, bro. Now eat and chill.`,
+      (f) => `Boom. ${f.sets} sets, ${f.minutes} minutes. Absolute unit.`,
+      (f) => `${f.sets} sets in the bag. Solid work, man!`,
     ],
     3: [
-      (f) => `${f.sets} sets, ${f.minutes} minutes. Fine.`,
-      (f) => `Done. ${f.sets} sets. Nothing more to say.`,
-    ],
-    4: [
-      (f) => `${f.sets} sets. You call that a session? Next time, more.`,
-      (f) => `${f.minutes} minutes. I’ve seen warm-ups last longer.`,
+      (f) => `${f.sets} sets, ${f.minutes} min. Fine.`,
+      (f) => `Done. ${f.sets} sets. Nothing to add.`,
+      (f) => `${f.minutes} minutes, ${f.sets} sets. Counted. That's all.`,
     ],
     5: [
-      (f) => `${f.sets} sets. Adequate. Barely.`,
-      (f) => `${f.minutes} minutes of… something. I’ll be generous and call it training.`,
-      (f) => `${f.sets} sets. Pathetic, but logged. Progress, of a sort.`,
+      (f) => `${f.sets} sets. You call that a workout? I've seen warm-ups with more ambition.`,
+      (f) => `${f.minutes} minutes of… something. I'll log it as training. Out of pity.`,
+      (f) => `${f.sets} sets. The bar probably didn't even notice it was lifted.`,
+      (f) => `Logged. ${f.sets} sets. Let's hope nobody saw.`,
     ],
   },
   pr: {
     1: [
-      (f, x) => `New best on ${x.exercise(f.exercise)}: ${x.kg(f.weight)} × ${f.reps}! Amazing!`,
-      (f, x) => `${x.exercise(f.exercise)} ${x.kg(f.weight)} × ${f.reps} — a personal record!`,
-    ],
-    2: [
       (f, x) =>
-        `${x.exercise(f.exercise)}: ${x.kg(f.weight)} × ${f.reps}, up from ${x.kg(f.prevWeight)}. Keep the same plan.`,
+        `LET'S GOOO! ${x.exercise(f.exercise)} ${x.kg(f.weight)} × ${f.reps} — new PR! You beast!`,
+      (f, x) =>
+        `Bro. ${x.exercise(f.exercise)}, ${x.kg(f.weight)} × ${f.reps}. Personal record. I'm hyped!`,
     ],
     3: [
-      (f, x) => `${x.exercise(f.exercise)} ${x.kg(f.weight)}. New best. Now repeat it.`,
-      (f, x) => `${x.kg(f.weight)} on ${x.exercise(f.exercise)}. Good. Don’t celebrate yet.`,
-    ],
-    4: [
-      (f, x) => `${x.kg(f.weight)} on ${x.exercise(f.exercise)}. FINALLY. Now do it again.`,
-      (f, x) => `New best, ${x.exercise(f.exercise)}. Took you long enough.`,
+      (f, x) =>
+        `${x.exercise(f.exercise)} ${x.kg(f.weight)}. A record. Do it again and I'll believe it.`,
+      (f, x) => `${x.kg(f.weight)} on ${x.exercise(f.exercise)}. Good. Don't celebrate.`,
     ],
     5: [
-      (f, x) => `${x.exercise(f.exercise)}, ${x.kg(f.weight)} × ${f.reps}. Hm. Acceptable.`,
       (f, x) =>
-        `${x.kg(f.weight)}. A record. Don’t let it go to your head — ${x.kg(f.prevWeight)} was hardly a high bar.`,
-      (f, x) => `${x.exercise(f.exercise)} moved. I’m almost surprised. Almost.`,
+        `${x.exercise(f.exercise)}, ${x.kg(f.weight)} × ${f.reps}. A "record". After ${x.kg(f.prevWeight)}, the bar was on the floor.`,
+      (f, x) => `${x.exercise(f.exercise)} finally moved. I'd already started writing the eulogy.`,
+      (f, x) => `${x.kg(f.weight)}. No applause — this should've happened a month ago.`,
     ],
   },
   stall: {
     1: [
       (f, x) =>
-        `${x.exercise(f.exercise)} has been at ${x.kg(f.weight)} for ${f.sessions} sessions — totally normal. Let’s try one more rep next time.`,
-    ],
-    2: [
-      (f, x) =>
-        `${x.exercise(f.exercise)} held at ${x.kg(f.weight)} for ${f.sessions} sessions. Next time: same weight, one more rep.`,
+        `${x.exercise(f.exercise)}'s been sitting at ${x.kg(f.weight)} for ${f.sessions} sessions — all good, bro, it happens. One more rep next time and it'll move.`,
     ],
     3: [
       (f, x) =>
-        `${x.exercise(f.exercise)}: ${x.kg(f.weight)}, ${f.sessions} sessions in a row. You’re stuck. Add a rep.`,
-    ],
-    4: [
-      (f, x) =>
-        `${x.kg(f.weight)} on ${x.exercise(f.exercise)}. AGAIN. ${f.sessions} sessions. Push it or I will.`,
+        `${x.exercise(f.exercise)}: ${x.kg(f.weight)}, ${f.sessions} times in a row. Stuck. Add a rep.`,
     ],
     5: [
       (f, x) =>
-        `${x.exercise(f.exercise)} at ${x.kg(f.weight)}, ${f.sessions} sessions running. The bar is bored. So am I.`,
-      (f, x) => `${x.kg(f.weight)}. Again. Consistency is admirable — in anything else.`,
+        `${x.exercise(f.exercise)} at ${x.kg(f.weight)}, session number ${f.sessions}. The bar knows your face by now. It's bored.`,
+      (f, x) => `${x.kg(f.weight)}. Again. You're not training, you're serving a sentence.`,
+      (f, x) =>
+        `${f.sessions} sessions at the same weight. Consistency is for pensions, not for ${x.exercise(f.exercise)}.`,
     ],
   },
   restShort: {
     1: [
       (f, x) =>
-        `You rested ${x.mmss(f.restSec)} on ${x.exercise(f.exercise)} — try the full ${x.mmss(f.targetSec)}, your last sets will thank you.`,
-    ],
-    2: [
-      (f, x) =>
-        `Rest on ${x.exercise(f.exercise)}: ${x.mmss(f.restSec)} vs ${x.mmss(f.targetSec)} planned. That’s why the last sets dropped.`,
+        `Bro, you only rested ${x.mmss(f.restSec)} on ${x.exercise(f.exercise)}. Take the full ${x.mmss(f.targetSec)} — your last sets will thank you.`,
     ],
     3: [
       (f, x) =>
-        `You rested ${x.mmss(f.restSec)}. I said ${x.mmss(f.targetSec)}. That’s the whole story.`,
-    ],
-    4: [
-      (f, x) => `${x.mmss(f.restSec)} rest? Late for something? ${x.mmss(f.targetSec)}. Every set.`,
+        `You rested ${x.mmss(f.restSec)}. It should've been ${x.mmss(f.targetSec)}. That's the whole story.`,
     ],
     5: [
-      (f, x) => `${x.mmss(f.restSec)} of rest. The barbell isn’t in a hurry — only your ego is.`,
       (f, x) =>
-        `${x.mmss(f.targetSec)} means ${x.mmss(f.targetSec)}. Not ${x.mmss(f.restSec)}. Numbers are not suggestions.`,
+        `${x.mmss(f.restSec)} rest. Late for something? Because your progress sure isn't in a hurry.`,
+      (f, x) =>
+        `${x.mmss(f.targetSec)} means ${x.mmss(f.targetSec)}, not ${x.mmss(f.restSec)}. Can you count? Then what's your excuse on the bar?`,
     ],
   },
   setDrop: {
     1: [
       (f) =>
-        `${f.prevReps} → ${f.reps} reps — totally fine. Take a little more rest before the next one.`,
+        `${f.prevReps} → ${f.reps} reps — no stress, man. Sit a little longer before the next one.`,
     ],
-    2: [(f) => `${f.prevReps} → ${f.reps} reps. Rest longer before the next set.`],
     3: [(f) => `${f.reps}? Last set was ${f.prevReps}. Rest properly.`],
-    4: [(f) => `${f.reps} REPS? From ${f.prevReps}? Rest, then give me more.`],
     5: [
-      (f) => `${f.reps}. From ${f.prevReps}. Pathetic.`,
-      (f) => `${f.reps} reps. I’ve seen more effort from the bench itself.`,
+      (f) => `${f.reps}. After ${f.prevReps}. You deflated faster than a party balloon.`,
+      (f) => `${f.reps} reps. The bench under you is working harder.`,
     ],
   },
   skipped: {
     1: [
       (f) =>
-        `${f.dayName ? `${f.dayName} is` : 'Today is'} usually a training day — even a short session counts!`,
+        `${f.dayName ? `Yo, it's ${f.dayName} day` : "Yo, it's a training day"} — even a quick one counts. You in?`,
     ],
-    2: [(f) => `${f.dayName ?? 'Training'} is usually today. Still time for it.`],
     3: [(f) => `${f.dayName ?? 'Training'}. Today. You know where the gym is.`],
-    4: [
-      (f) => `${f.dayName ?? 'Training'}. TODAY. No excuse I’d accept.`,
-      () => `Still not at the gym? Move.`,
-    ],
     5: [
-      (f) => `${f.dayName ?? 'Training'} day, and you’re… elsewhere. Pathetic.`,
-      () => `Still on the sofa? I’ll move it to tomorrow. Once.`,
+      (f) =>
+        `${f.dayName ?? 'Training'} day, and you're nowhere. The couch must be thrilled. At least someone is.`,
+      () => `Still not at the gym? It's fine, the dumbbells are used to being ghosted.`,
     ],
   },
   imbalance: {
     1: [
       (f, x) =>
-        `${x.muscle(f.low)} got ${f.lowSets} sets this week, ${x.muscle(f.high)} ${f.highSets}. Let’s give ${x.muscle(f.low)} some love!`,
-    ],
-    2: [
-      (f, x) =>
-        `${x.muscle(f.low)} ${f.lowSets} sets vs ${x.muscle(f.high)} ${f.highSets} this week. Add a couple of ${x.muscle(f.low)} sets.`,
+        `Bro, ${x.muscle(f.high)} got ${f.highSets} sets and ${x.muscle(f.low)} only ${f.lowSets}. Let's show ${x.muscle(f.low)} some love next time!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${f.highSets} sets. ${x.muscle(f.low)}: ${f.lowSets}. Fix that.`,
-    ],
-    4: [
-      (f, x) =>
-        `${f.lowSets} sets of ${x.muscle(f.low)}? ${f.lowSets}! ${x.muscle(f.low)} goes first next time. No discussion.`,
+        `${x.muscle(f.high)}: ${f.highSets} sets. ${x.muscle(f.low)}: ${f.lowSets}. Fix it.`,
     ],
     5: [
       (f, x) =>
-        `${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. You’re building a pyramid. Upside down.`,
+        `${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Only training the fun stuff? Very grown-up.`,
     ],
   },
   week: {
     1: [
       (f) =>
         f.sessions >= f.planned
-          ? `${f.sessions} of ${f.planned} sessions this week — perfect week!`
-          : `${f.sessions} of ${f.planned} this week. Every session counts — next week we go again!`,
+          ? `${f.sessions} of ${f.planned} — week absolutely crushed! Legend!`
+          : `${f.sessions} of ${f.planned} this week. No stress, every one counted — we go again next week!`,
     ],
-    2: [(f) => `Week: ${f.sessions} of ${f.planned} sessions.`],
     3: [
       (f) =>
         f.sessions >= f.planned
-          ? `${f.sessions} of ${f.planned}. As planned.`
-          : `${f.sessions} of ${f.planned}. Not the plan.`,
-    ],
-    4: [
-      (f) =>
-        f.sessions >= f.planned
-          ? `${f.sessions} of ${f.planned}. Good. Again next week.`
-          : `${f.sessions} of ${f.planned}?! Next week: all of them.`,
+          ? `${f.sessions} of ${f.planned}. On plan.`
+          : `${f.sessions} of ${f.planned}. Off plan.`,
     ],
     5: [
       (f) =>
         f.sessions >= f.planned
-          ? `${f.sessions} of ${f.planned}. I’m almost surprised.`
-          : `${f.sessions} of ${f.planned}. I expected little, and you delivered.`,
+          ? `${f.sessions} of ${f.planned}. Huh. Who are you and what did you do with my client?`
+          : `${f.sessions} of ${f.planned}. I expected little, and you still managed to underdeliver.`,
     ],
   },
   comeback: {
-    1: [(f) => `Welcome back after ${f.daysOff} days! Easy does it today.`],
-    2: [(f) => `${f.daysOff} days off. Lighter today; back to normal next time.`],
-    3: [(f) => `${f.daysOff} days. You’re back. Start light.`],
-    4: [(f) => `${f.daysOff} days away. We start light — then we catch up.`],
-    5: [(f) => `${f.daysOff} days. Welcome back. Start light; your pride will survive.`],
+    1: [
+      (f) => `Ayy, welcome back, bro! ${f.daysOff} days is nothing. Easy one today, we'll ramp up.`,
+    ],
+    3: [(f) => `${f.daysOff} days off. You're back — start light.`],
+    5: [
+      (f) =>
+        `${f.daysOff} days. I assumed you'd moved to the couch permanently. Start light — your pride will survive, it's used to it.`,
+    ],
   },
   shortSleep: {
-    1: [(f) => `Only ${f.hours} h of sleep — go easy today and sleep early tonight.`],
-    2: [(f) => `${f.hours} h of sleep. Lighter day today.`],
+    1: [(f) => `Only ${f.hours} h of sleep — take it easy today, bro, and hit the sack early.`],
     3: [(f) => `${f.hours} h of sleep. Lighter today.`],
-    4: [(f) => `${f.hours} h of sleep. Lighter today.`],
     5: [(f) => `${f.hours} h of sleep. Lighter today.`],
   },
   streak: {
-    1: [(f) => `${f.days}-day streak! You’re on fire!`],
-    2: [(f) => `${f.days} days in a row.`],
-    3: [(f) => `${f.days} days straight. Keep it.`],
-    4: [(f) => `${f.days} days. Don’t you dare break it.`],
-    5: [(f) => `${f.days} days in a row. Mildly impressive.`],
+    1: [(f) => `${f.days} days in a row! You're on fire, bro!`],
+    3: [(f) => `${f.days} days in a row. Keep it.`],
+    5: [(f) => `${f.days} days in a row. Don't get used to praise — there won't be any.`],
   },
   bodyweight: {
     1: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
-    2: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
     3: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
-    4: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
     5: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
   },
   mom: {
-    session: [(f) => `${f.sets} sets. Your mom does more on a Sunday.`],
+    session: [(f) => `${f.sets} sets. Your mom does more on a Sunday between loads of laundry.`],
     stall: [
-      (f, x) =>
-        `${x.exercise(f.exercise)} at ${x.kg(f.weight)}, again. Your mom warms up with that.`,
+      (f, x) => `${x.exercise(f.exercise)}, ${x.kg(f.weight)}, again. Your mom warms up with that.`,
     ],
-    restShort: [(f, x) => `${x.mmss(f.restSec)} of rest. Your mom rests longer between texts.`],
+    restShort: [
+      (f, x) => `${x.mmss(f.restSec)} rest. Your mom takes longer between two voice notes.`,
+    ],
     skipped: [() => `Your mom already trained today. Just saying.`],
-    setDrop: [(f) => `${f.reps}? Your mom did ${f.prevReps} with the empty bar.`],
-    week: [(f) => `${f.sessions} sessions. Your mom can do better.`],
+    setDrop: [(f) => `${f.reps}? Your mom did ${f.prevReps} with the empty bar and didn't whine.`],
+    week: [
+      (f) => `${f.sessions} sessions. Your mom gets more done in a week. And still feeds you.`,
+    ],
   },
 };

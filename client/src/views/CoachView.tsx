@@ -15,6 +15,7 @@ import {
   swearAllowed,
   TEMPER_COLOR,
   TEMPERS,
+  temperIndex,
   type CoachRole,
   type Temper,
 } from '../atlas/types';
@@ -71,7 +72,7 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
   const [yoMama, setYoMama] = useState(store.coach.yoMama);
   const [swearing, setSwearing] = useState(store.coach.swearing);
   const [pushHint, setPushHint] = useState<string | null>(null);
-  const name = t.atlasTemper[temper - 1];
+  const name = t.atlasTemper[temperIndex(temper)];
   const color = TEMPER_COLOR[temper];
 
   const finish = () => {
@@ -153,11 +154,11 @@ function CoachSetup({ onClose }: { onClose: () => void }) {
                 <AtlasFace temper={i} size={40} />
                 <span className="atl-temper-text">
                   <span className="atl-temper-name">
-                    <b>{t.atlasTemper[i - 1]}</b>
+                    <b>{t.atlasTemper[temperIndex(i)]}</b>
                     <TemperHeat temper={i} />
                   </span>
-                  <span className="atl-temper-tag">{t.atlasTemperTag[i - 1]}</span>
-                  <span className="atl-temper-quote">{t.atlasTemperQuote[i - 1]}</span>
+                  <span className="atl-temper-tag">{t.atlasTemperTag[temperIndex(i)]}</span>
+                  <span className="atl-temper-quote">{t.atlasTemperQuote[temperIndex(i)]}</span>
                 </span>
               </button>
             ))}
@@ -817,7 +818,8 @@ function CoachThread({
         </button>
         <span className="atl-head-text">
           <b>
-            {t.atlasName} <span className="atl-temper-inline">· {t.atlasTemper[temper - 1]}</span>
+            {t.atlasName}{' '}
+            <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
           </b>
           <span>
             {store.coach.role === 'main' ? t.atlasRoleMainShort : t.atlasRoleExtraShort}
@@ -1012,12 +1014,13 @@ function CoachThread({
         <div
           className="atl-portrait"
           role="dialog"
-          aria-label={`${t.atlasName} · ${t.atlasTemper[temper - 1]}`}
+          aria-label={`${t.atlasName} · ${t.atlasTemper[temperIndex(temper)]}`}
           onClick={() => setPortrait(false)}
         >
           <img src={`/atlas/atlas-${temper}-full.webp`} alt="" />
           <span className="atl-portrait-name">
-            {t.atlasName} <span className="atl-temper-inline">· {t.atlasTemper[temper - 1]}</span>
+            {t.atlasName}{' '}
+            <span className="atl-temper-inline">· {t.atlasTemper[temperIndex(temper)]}</span>
           </span>
           <button type="button" className="atl-portrait-close" aria-label={t.backAction}>
             <Icon name="x" />
@@ -1162,7 +1165,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
             onClick={() => edit(i === draft.temper ? {} : { temper: i, ...extrasFor(i) })}
           >
             <AtlasFace temper={i} size={52} />
-            <span>{t.atlasTemper[i - 1]}</span>
+            <span>{t.atlasTemper[temperIndex(i)]}</span>
           </button>
         ))}
       </div>

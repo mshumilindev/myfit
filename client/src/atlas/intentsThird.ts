@@ -24,6 +24,7 @@ import {
   type AskCtx,
   type Intent,
 } from './intentKit';
+import { moody } from './intentsMore';
 
 const WORKOUT = ['workout*', 'session*', 'training', 'gym', 'тренуван*', 'заняття'];
 const GROW = [
@@ -782,8 +783,34 @@ export const INTENTS_THIRD: Intent[] = [
     id: 'do_you_lift',
     all: [['do you lift', 'do you train', 'can you lift', 'ти качаєшся', 'ти тренуєшся', 'а ти']],
     maxWords: 5,
-    answer: (_c, _p, L) =>
-      L('I carry your log. Heavier than it looks.', 'Я ношу твій журнал. Важчий, ніж здається.'),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'Haha, bro, I carry your whole log! Heavier than it looks 💪',
+            'Ха, бро, я тягаю весь твій журнал! Він важчий, ніж здається 💪',
+          ],
+          [
+            'Dude, I lift your stats every single day. We’re a team 🤙',
+            'Братан, я щодня тягаю твою статистику. Ми ж команда 🤙',
+          ],
+        ],
+        y: [
+          ['I carry your log. Heavier than it looks.', 'Я ношу твій журнал. Важчий, ніж здається.'],
+          ['Every set you log. Daily.', 'Кожен твій записаний підхід. Щодня.'],
+        ],
+        r: [
+          [
+            'I carry your log. Honestly? Suspiciously light.',
+            'Я ношу твій журнал. Чесно? Підозріло легкий.',
+          ],
+          ['More often than you, apparently.', 'Частіше за тебе, як бачу.'],
+          [
+            '*sigh* I lift your excuses every day. Heaviest thing in here.',
+            '*зітхає* Щодня тягаю твої відмазки. Найважче, що тут є.',
+          ],
+        ],
+      }),
   },
   {
     id: 'compliment',
@@ -800,13 +827,81 @@ export const INTENTS_THIRD: Intent[] = [
         'крутий',
       ],
     ],
-    answer: (_c, _p, L) =>
-      L('Noted. Now earn it back in the gym.', 'Прийнято. А тепер відпрацюй у залі.'),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'Aww, bro, you’re the best too! 🤙 Now let’s go prove it in the gym.',
+            'Ой, бро, та ти сам красава! 🤙 Го доводити це в залі.',
+          ],
+          [
+            'Big W, dude, appreciate it! Same energy under the bar, deal?',
+            'Дякую, братан, аж приємно! Таку ж енергію — під штангу, домовились?',
+          ],
+          ['Let’s gooo! Team us 💪', 'Кайф! Ми з тобою — команда 💪'],
+        ],
+        y: [
+          ['Noted. Now earn it back in the gym.', 'Прийнято. А тепер відпрацюй у залі.'],
+          ['Flattery won’t add plates to the bar.', 'Лестощами млинці на гриф не почепиш.'],
+          ['I know. Your turn.', 'Знаю. Тепер твоя черга.'],
+        ],
+        r: [
+          [
+            'Flattery. Classic move from someone who skipped their last session.',
+            'Лестощі. Класичний прийом того, хто пропустив останнє тренування.',
+          ],
+          [
+            'Sweet. Now show that enthusiasm in your log, gym tourist.',
+            'Зворушливо. А тепер покажи такий самий ентузіазм у журналі, туристе.',
+          ],
+          [
+            'Nice try. Sucking up to the coach won’t get you out of leg day.',
+            'Гарна спроба. Підлизуванням день ніг не відкосиш.',
+          ],
+        ],
+      }),
   },
   {
     id: 'sorry',
     all: [['sorry', 'my bad', 'apologize', 'вибач*', 'пробач*', 'сорі', 'перепрошую']],
     maxWords: 6,
-    answer: (_c, _p, L) => L('Don’t apologise. Show up.', 'Не вибачайся. Приходь.'),
+    answer: (c, _p, L) =>
+      moody(c, L, {
+        g: [
+          [
+            'No stress, man, all good 🤙 Just show up next time.',
+            'Та не парся, бро, все норм 🤙 Просто приходь наступного разу.',
+          ],
+          [
+            'Bro, nothing to forgive. We go again tomorrow 💪',
+            'Братан, нема за що вибачатись. Завтра надолужимо 💪',
+          ],
+          [
+            'All good, dude. Life happens — the gym’s not going anywhere.',
+            'Спокуха, буває. Зал нікуди не дінеться.',
+          ],
+        ],
+        y: [
+          ['Don’t apologise. Show up.', 'Не вибачайся. Приходь.'],
+          [
+            'Apology accepted. Attendance preferred.',
+            'Вибачення прийняті. Тренування було б краще.',
+          ],
+        ],
+        r: [
+          [
+            '“Sorry” doesn’t lift anything, couch warrior.',
+            '«Вибач» штангу не підніме, диванний воїне.',
+          ],
+          [
+            '*sigh* Save it. I’ve heard more apologies from you than I’ve seen sets.',
+            '*зітхає* Облиш. Вибачень від тебе я чув більше, ніж бачив підходів.',
+          ],
+          [
+            'An apology. How original, gym tourist. Just show up.',
+            'Знову вибачення. Оригінально, туристе. Краще просто прийди.',
+          ],
+        ],
+      }),
   },
 ];

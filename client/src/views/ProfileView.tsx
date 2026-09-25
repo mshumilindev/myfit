@@ -1,4 +1,5 @@
 /** Full user profile page: direct-link safe, data-rich, role-aware. */
+import { temperIndex } from '../atlas/types';
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { deleteObject, ref } from 'firebase/storage';
@@ -597,7 +598,7 @@ export function ProfileView({
                   <Icon name="robot" />
                   <span>
                     {t.atlasName}
-                    {coach.enabled ? ` · ${t.atlasTemper[coach.temper - 1]}` : ''}
+                    {coach.enabled ? ` · ${t.atlasTemper[temperIndex(coach.temper)]}` : ''}
                   </span>
                   <Icon name="arrow-right" className="profile-setting-caret" />
                 </button>
