@@ -1730,11 +1730,11 @@ export const lt: Strings = {
     'Pirmiausia pridėkite Spotter prie pradžios ekrano (Bendrinti → Į pradžios ekraną) — iPhone leidžia pranešimus tik ten.',
   pushDenied: 'Spotter pranešimai užblokuoti. Leiskite juos telefono nustatymuose.',
   atlasName: 'Atlas',
-  atlasTemper: ['Žalias', 'Geltonas', 'Raudonas'],
+  atlasTemper: ['Šiltas', 'Tiesus', 'Negailestingas'],
   atlasTemperTag: [
     'tavo sporto salės bičiulis',
     'tiesiai šviesiai',
-    'negailestingas — tyčiojasi iš kiekvieno tingaus priėjimo',
+    'tyčiojasi iš kiekvieno tingaus priėjimo',
   ],
   atlasTemperQuote: [
     '„Ei, broli, 12 priėjimų per 50 min — žvėris! Dabar eik pavalgyt.“',
@@ -1742,13 +1742,13 @@ export const lt: Strings = {
     '„Aštuoni priėjimai? Mačiau apšilimų su didesnėm ambicijom. Tavo mama tai daro prieš kavą.“',
   ],
   atlasMeetText:
-    'Vienas treneris, kuris skaito kiekvieną tavo priėjimą. Išsirink jo nuotaiką: žalią, geltoną ar raudoną.',
+    'Vienas treneris, kuris skaito kiekvieną tavo setą. Tu renkiesi jo būdą — nuo šilto iki negailestingo.',
   atlasChooseTemper: 'Pasirink būdą',
   atlasTemperTitle: 'Atlas būdas',
   atlasTemperSub: 'Tas pats treneris, tos pačios smegenys — kita burna.',
   atlasFineTitle: 'Jis bus grubus.',
   atlasFineBody:
-    'Raudonas Atlas tyčiojasi iš tingių priėjimų, trumpo poilsio ir praleistų treniruočių — žiauriai, ant patyčių ribos. Tame ir esmė. Tavo kūno jis niekada neliečia, o kai esi traumuotas ar sergi — atsitraukia.',
+    'Negailestingas Atlas tyčiojasi iš tingių priėjimų, trumpo poilsio ir praleistų treniruočių — žiauriai, ant patyčių ribos. Tame ir esmė. Tavo kūno jis niekada neliečia, o kai esi traumuotas ar sergi — atsitraukia.',
   atlasRuleMom: '„Tavo mama“ juokeliai',
   atlasRuleMomSub: 'Klasika',
   atlasRuleSwear: 'Keiksmai',
@@ -1758,6 +1758,7 @@ export const lt: Strings = {
   atlasRoleAsk: 'Ar aš vedu tavo programą — ar lieki su kitu, o aš tik stebiu?',
   atlasRoleMain: 'Pagrindinis treneris',
   atlasRoleMainSub: 'Atlas rašo programą ir perrašo ją kiekvieną sekmadienį.',
+  atlasRoleMainLocked: 'Jau turi trenerį — planą veda jis',
   atlasRoleExtra: 'Papildomas treneris',
   atlasRoleExtraSub: 'Palik savo trenerį ar planą. Atlas tik stebi, vertina ir komentuoja.',
   atlasRoleMainShort: 'pagrindinis treneris',
@@ -1817,8 +1818,8 @@ export const lt: Strings = {
     'Visas pokalbis ir jo pastabos išnyks. Žurnalas ir tai, ką jis apie tave prisimena, lieka.',
   atlasClearSub: 'Pokalbis ir pastabos — žurnalas lieka',
   atlasTurnOffSub: 'Be pastabų ir plano — grąžinsi bet kada',
-  atlasRuleHardOnly: 'Tik raudonas',
-  atlasRuleMercilessOnly: 'Tik raudonas',
+  atlasRuleHardOnly: 'Tik Negailestingas',
+  atlasRuleMercilessOnly: 'Tik Negailestingas',
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
   atlasQuotaNotice: (time: string) =>

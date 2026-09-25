@@ -1714,25 +1714,21 @@ export const et: Strings = {
     'Lisa Spotter esmalt avakuvale (Jaga → Lisa avakuvale) — iPhone lubab teavitusi ainult seal.',
   pushDenied: 'Spotteri teavitused on blokeeritud. Luba need telefoni seadetes.',
   atlasName: 'Atlas',
-  atlasTemper: ['Roheline', 'Kollane', 'Punane'],
-  atlasTemperTag: [
-    'su jõusaalisõber',
-    'otse ja ilustamata',
-    'halastamatu — irvitab iga laisa seeria üle',
-  ],
+  atlasTemper: ['Soe', 'Otsekohene', 'Halastamatu'],
+  atlasTemperTag: ['su jõusaalisõber', 'otse ja ilustamata', 'irvitab iga laisa seeria üle'],
   atlasTemperQuote: [
     '„Tšau, vend, 12 seeriat 50 minutiga — metsloom! Nüüd mine söö.”',
     '„Puhkasid liiga lühikest aega. Selle pärast kukkus kolmas seeria.”',
     '„Kaheksa seeriat? Olen näinud soojendusi, milles on rohkem tahet. Su ema teeb seda enne kohvi.”',
   ],
   atlasMeetText:
-    'Üks treener, kes loeb läbi iga su seeria. Vali tema tuju: roheline, kollane või punane.',
+    'Üks treener, kes loeb iga su seeriat. Sina valid tema iseloomu — soojast halastamatuni.',
   atlasChooseTemper: 'Vali iseloom',
   atlasTemperTitle: 'Atlase iseloom',
   atlasTemperSub: 'Sama treener, sama aju — teine suu.',
   atlasFineTitle: 'Ta on ebaviisakas.',
   atlasFineBody:
-    'Punane Atlas irvitab laiskade seeriate, lühikese puhkuse ja vahele jäetud trennide üle — karmilt, kiusamise piiril. Selles ongi mõte. Sinu keha ta kunagi ei puutu ja taandub, kui oled vigastatud või haige.',
+    'Halastamatu Atlas irvitab laiskade seeriate, lühikese puhkuse ja vahele jäetud trennide üle — karmilt, kiusamise piiril. Selles ongi mõte. Sinu keha ta kunagi ei puutu ja taandub, kui oled vigastatud või haige.',
   atlasRuleMom: '„Su ema“ naljad',
   atlasRuleMomSub: 'Klassika',
   atlasRuleSwear: 'Vandumine',
@@ -1742,6 +1738,7 @@ export const et: Strings = {
   atlasRoleAsk: 'Kas mina juhin su programmi — või jääd kellegi teisega ja mina ainult vaatan?',
   atlasRoleMain: 'Põhitreener',
   atlasRoleMainSub: 'Atlas kirjutab programmi ja uuendab seda igal pühapäeval.',
+  atlasRoleMainLocked: 'Sul on juba treener — kava teeb tema',
   atlasRoleExtra: 'Lisatreener',
   atlasRoleExtraSub: 'Jää oma treeneri või plaaniga. Atlas ainult jälgib, hindab ja kommenteerib.',
   atlasRoleMainShort: 'põhitreener',
@@ -1800,8 +1797,8 @@ export const et: Strings = {
     'Kogu vestlus ja tema senised märkmed kaovad. Päevik ja see, mida ta sinust mäletab, jäävad.',
   atlasClearSub: 'Vestlus ja märkmed — päevik jääb',
   atlasTurnOffSub: 'Ilma märkmete ja kavata — tagasi millal tahes',
-  atlasRuleHardOnly: 'Ainult punane',
-  atlasRuleMercilessOnly: 'Ainult punane',
+  atlasRuleHardOnly: 'Ainult Halastamatu',
+  atlasRuleMercilessOnly: 'Ainult Halastamatu',
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
   atlasQuotaNotice: (time: string) =>

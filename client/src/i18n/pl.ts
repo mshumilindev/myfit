@@ -1719,25 +1719,21 @@ export const pl: Strings = {
     'Najpierw dodaj Spotter do ekranu głównego (Udostępnij → Do ekranu początkowego) — iPhone pozwala na powiadomienia tylko tam.',
   pushDenied: 'Powiadomienia dla Spotter są zablokowane. Zezwól na nie w ustawieniach telefonu.',
   atlasName: 'Atlas',
-  atlasTemper: ['Zielony', 'Żółty', 'Czerwony'],
-  atlasTemperTag: [
-    'kumpel z siłowni',
-    'prosto z mostu',
-    'bezlitosny — jedzie po każdej leniwej serii',
-  ],
+  atlasTemper: ['Ciepły', 'Szczery', 'Bezlitosny'],
+  atlasTemperTag: ['kumpel z siłowni', 'prosto z mostu', 'jedzie po każdej leniwej serii'],
   atlasTemperQuote: [
     '„Siema, stary, 12 serii w 50 minut — petarda! Teraz idź coś zjeść.”',
     '„Za krótko odpoczywałeś. Przez to padła trzecia seria.”',
     '„Osiem serii? Widziałem rozgrzewki z większym zapałem. Twoja mama robi to przed kawą.”',
   ],
   atlasMeetText:
-    'Jeden trener, który czyta każdą twoją serię. Wybierz jego nastrój: zielony, żółty albo czerwony.',
+    'Jeden trener, który czyta każdą twoją serię. Ty wybierasz jego temperament — od ciepłego po bezlitosny.',
   atlasChooseTemper: 'Wybierz temperament',
   atlasTemperTitle: 'Temperament Atlasa',
   atlasTemperSub: 'Ten sam trener, ten sam mózg — inny język.',
   atlasFineTitle: 'Będzie niemiły.',
   atlasFineBody:
-    'Czerwony Atlas jedzie po leniwych seriach, krótkich przerwach i opuszczonych treningach — ostro, na granicy znęcania się. O to chodzi. Nigdy nie komentuje twojego ciała i odpuszcza, gdy jesteś kontuzjowany albo chory.',
+    'Bezlitosny Atlas jedzie po leniwych seriach, krótkich przerwach i opuszczonych treningach — ostro, na granicy znęcania się. O to chodzi. Nigdy nie komentuje twojego ciała i odpuszcza, gdy jesteś kontuzjowany albo chory.',
   atlasRuleMom: 'Żarty „twoja mama”',
   atlasRuleMomSub: 'Klasyka',
   atlasRuleSwear: 'Przekleństwa',
@@ -1747,6 +1743,7 @@ export const pl: Strings = {
   atlasRoleAsk: 'Prowadzę twój program — czy zostajesz z kimś innym, a ja tylko patrzę?',
   atlasRoleMain: 'Główny trener',
   atlasRoleMainSub: 'Atlas pisze program i poprawia go co niedzielę.',
+  atlasRoleMainLocked: 'Masz już trenera — to on prowadzi plan',
   atlasRoleExtra: 'Dodatkowy trener',
   atlasRoleExtraSub: 'Zostaw swojego trenera lub plan. Atlas tylko obserwuje, ocenia i komentuje.',
   atlasRoleMainShort: 'główny trener',
@@ -1806,8 +1803,8 @@ export const pl: Strings = {
     'Cała rozmowa i dotychczasowe notatki znikną. Dziennik i to, co o tobie pamięta, zostają.',
   atlasClearSub: 'Rozmowa i notatki — dziennik zostaje',
   atlasTurnOffSub: 'Bez notatek i planu — wrócisz w każdej chwili',
-  atlasRuleHardOnly: 'Tylko czerwony',
-  atlasRuleMercilessOnly: 'Tylko czerwony',
+  atlasRuleHardOnly: 'Tylko Bezlitosny',
+  atlasRuleMercilessOnly: 'Tylko Bezlitosny',
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
   atlasQuotaNotice: (time: string) =>

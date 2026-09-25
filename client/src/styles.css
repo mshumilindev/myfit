@@ -38206,28 +38206,69 @@ body {
   text-align: center;
   color: var(--color-neutral-400);
 }
+/* Temper picker (settings): full-width rows — face, name + one-line
+   description, a radio on the right. One column reads faster than a row of
+   tiles, fits the description and keeps a big tap target. */
 .atl-temper-pick {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .atl-temper-pick button {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 2px;
+  gap: 14px;
+  width: 100%;
+  min-height: 84px;
+  padding: 10px 14px 10px 10px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-divider);
   background: var(--color-surface);
-  color: var(--color-neutral-300);
+  color: var(--color-text);
   font: inherit;
-  font-size: 11.5px;
+  text-align: left;
   cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 .atl-temper-pick button.on {
   border-color: var(--tc);
+  background: color-mix(in srgb, var(--tc) 10%, var(--color-surface));
+}
+.atl-tp-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.atl-tp-text b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.atl-temper-pick button.on .atl-tp-text b {
   color: var(--tc);
+}
+.atl-tp-text span {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--color-neutral-400);
+}
+.atl-tp-radio {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--color-neutral-600);
+  color: var(--color-neutral-900);
+  font-size: 13px;
+}
+.atl-temper-pick button.on .atl-tp-radio {
+  border-color: var(--tc);
+  background: var(--tc);
 }
 .atl-seg {
   display: grid;
@@ -38910,6 +38951,54 @@ body {
 }
 .atl-act-row.danger .atl-act-ic {
   background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+/* Settings sheet without section labels: the blocks keep their rhythm. */
+.atl-sheet .sheet-head + .atl-temper-pick {
+  margin-top: 12px;
+}
+.atl-sheet .atl-temper-pick + .se-group,
+.atl-sheet .se-group + .atl-act-pair {
+  margin-top: 16px;
+}
+/* Save stands apart from the destructive pair: a hairline and air above it. */
+.atl-sheet .atl-act-pair + .sheet-actions {
+  /* The sheet's own ~11px gap + 9px = 20px above the line, 20px below. */
+  margin-top: 9px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-divider);
+}
+/* Clear chat · Turn Atlas off — one row of two (settings sheet). */
+.atl-act-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  flex-shrink: 0;
+}
+.atl-act-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  color: var(--color-neutral-200);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.atl-act-btn span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.atl-act-btn.danger {
+  color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-divider));
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
 }
 /* The sheet scrolls — its groups must not shrink (rows were being clipped). */
 .atl-sheet .se-group,

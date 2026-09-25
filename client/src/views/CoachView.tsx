@@ -832,7 +832,7 @@ function CoachThread({
           onClick={() => setSettings(true)}
           aria-label={t.atlasSettings}
         >
-          <Icon name="gear" />
+          <Icon name="sliders-horizontal" />
         </button>
       </div>
       <div className="atl-feed" ref={feedRef}>
@@ -1153,39 +1153,37 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
       <div className="sheet-head">
         <h3>{t.atlasSettings}</h3>
       </div>
-      <div className="se-label se-label-first">{t.atlasTemperLabel}</div>
-      <div className="atl-temper-pick">
+      <div className="atl-temper-pick" role="radiogroup" aria-label={t.atlasTemperLabel}>
         {TEMPERS.map((i) => (
           <button
             key={i}
             type="button"
-            aria-pressed={draft.temper === i}
+            role="radio"
+            aria-checked={draft.temper === i}
             className={draft.temper === i ? 'on' : ''}
             style={{ ['--tc' as string]: TEMPER_COLOR[i] }}
             onClick={() => edit(i === draft.temper ? {} : { temper: i, ...extrasFor(i) })}
           >
-            <AtlasFace temper={i} size={52} />
-            <span>{t.atlasTemper[temperIndex(i)]}</span>
+            <AtlasFace temper={i} size={64} />
+            <span className="atl-tp-text">
+              <b>{t.atlasTemper[temperIndex(i)]}</b>
+              <span>{t.atlasTemperTag[temperIndex(i)]}</span>
+            </span>
+            <span className="atl-tp-radio" aria-hidden>
+              {draft.temper === i && <Icon name="check" />}
+            </span>
           </button>
         ))}
       </div>
-      <div className="se-label">{t.atlasRoleLabel}</div>
-      <div className="atl-seg">
-        {(['main', 'extra'] as CoachRole[]).map((r) => (
-          <button
-            key={r}
-            type="button"
-            aria-pressed={draft.role === r}
-            className={draft.role === r ? 'on' : ''}
-            disabled={human && r === 'main'}
-            onClick={() => edit({ role: r })}
-          >
-            {r === 'main' ? t.atlasRoleMain : t.atlasRoleExtra}
-          </button>
-        ))}
-      </div>
-      {human && <p className="atl-hint atl-hint-left">{t.atlasRoleHumanCoach}</p>}
       <div className="se-group">
+        {/* Main coach on/off; locked when a human coach runs the programme. */}
+        <RuleRow
+          label={t.atlasRoleMain}
+          sub={human ? t.atlasRoleMainLocked : t.atlasRoleMainSub}
+          on={!human && draft.role === 'main'}
+          locked={human}
+          onToggle={() => edit({ role: draft.role === 'main' ? 'extra' : 'main' })}
+        />
         {/* Locked off for tempers that don't do it. */}
         <RuleRow
           label={t.atlasRuleMom}
@@ -1202,34 +1200,15 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
           onToggle={() => edit({ swearing: !draft.swearing })}
         />
       </div>
-      <div className="se-group atl-danger-group">
-        <button
-          type="button"
-          className="toggle-row atl-act-row"
-          onClick={() => setConfirm('clear')}
-        >
-          <span className="atl-act-ic">
-            <Icon name="trash" />
-          </span>
-          <span className="rest-pref-text">
-            <span className="lab">{t.atlasClear}</span>
-            <span className="sub">{t.atlasClearSub}</span>
-          </span>
-          <Icon name="caret-right" />
+      {/* Two quiet actions side by side — both ask to confirm first. */}
+      <div className="atl-act-pair">
+        <button type="button" className="atl-act-btn" onClick={() => setConfirm('clear')}>
+          <Icon name="trash" />
+          <span>{t.atlasClear}</span>
         </button>
-        <button
-          type="button"
-          className="toggle-row atl-act-row danger"
-          onClick={() => setConfirm('off')}
-        >
-          <span className="atl-act-ic">
-            <Icon name="sign-out" />
-          </span>
-          <span className="rest-pref-text">
-            <span className="lab">{t.atlasTurnOff}</span>
-            <span className="sub">{t.atlasTurnOffSub}</span>
-          </span>
-          <Icon name="caret-right" />
+        <button type="button" className="atl-act-btn danger" onClick={() => setConfirm('off')}>
+          <Icon name="sign-out" />
+          <span>{t.atlasTurnOff}</span>
         </button>
       </div>
       <div className="sheet-actions">

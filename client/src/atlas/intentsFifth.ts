@@ -148,9 +148,9 @@ const TEMPER_WORDS: [Temper, string[]][] = [
   [5, ['red', 'червон*', 'merciless', 'нещадн*', 'безжальн*', 'злий', 'злим']],
 ];
 const TEMPER_NAME: Record<Temper, [string, string]> = {
-  1: ['Green', 'Зелений'],
-  3: ['Yellow', 'Жовтий'],
-  5: ['Red', 'Червоний'],
+  1: ['Warm', 'Теплий'],
+  3: ['Blunt', 'Прямий'],
+  5: ['Merciless', 'Безжальний'],
 };
 const SOFTER = [
   'nicer',

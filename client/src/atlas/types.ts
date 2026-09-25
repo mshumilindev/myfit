@@ -11,16 +11,16 @@ import type { CoachPlan } from './plan';
  * Three tempers — green, yellow, red. The values 1 · 3 · 5 are kept from the
  * old five-step scale (so harshness still compares: 5 is the hardest), and
  * old picks migrate: Steady (2) → green, Drill (4) → red (see normalizeTemper).
- *   1 Green  — warm and supportive (also what a bad day falls back to);
- *   3 Yellow — blunt, no fluff;
- *   5 Red    — merciless: mocks your effort, never your body.
+ *   1 Warm (green)  — your gym bro (also what a bad day falls back to);
+ *   3 Blunt (yellow) — no fluff;
+ *   5 Merciless (red) — merciless: mocks your effort, never your body.
  */
 export type Temper = 1 | 3 | 5;
 export const TEMPERS: Temper[] = [1, 3, 5];
-export const TEMPER_ID: Record<Temper, 'green' | 'yellow' | 'red'> = {
-  1: 'green',
-  3: 'yellow',
-  5: 'red',
+export const TEMPER_ID: Record<Temper, 'warm' | 'blunt' | 'merciless'> = {
+  1: 'warm',
+  3: 'blunt',
+  5: 'merciless',
 };
 /** Green · yellow · red. */
 export const TEMPER_COLOR: Record<Temper, string> = {
