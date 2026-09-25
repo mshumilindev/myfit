@@ -21,8 +21,8 @@ import {
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
-import { askAtlas } from '../atlas/chat';
-import { answerLocally, didYouMean, type Convo } from '../atlas/intents';
+import { askAtlas, classifyTopic } from '../atlas/chat';
+import { answerAs, answerLocally, didYouMean, topicMenu, type Convo } from '../atlas/intents';
 import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
 import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
@@ -582,7 +582,14 @@ function CoachThread({
       mem: store.coach.memory,
       said: loadSaid(),
     };
-    const local = answerLocally(q, ctx, convo.current);
+    let local = answerLocally(q, ctx, convo.current);
+    // Unsure which topic it is → Gemini only picks the topic (from Atlas's own
+    // list); the answer is still built here, from your data.
+    if (local?.intent === 'did_you_mean' && canChat && store.coach.chatConsent) {
+      const id = await classifyTopic({ question: q, topics: topicMenu(q, ctx), now: at });
+      const routed = id ? answerAs(id, q, ctx, convo.current) : null;
+      if (routed) local = routed;
+    }
     // Memory: what you told me now, and what I answered (for consistency).
     if (local?.learned) setCoach({ memory: mergeMemory(store.coach.memory, local.learned) });
     if (local?.said) rememberSaid(local.said);

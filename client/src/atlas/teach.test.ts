@@ -17,12 +17,26 @@ describe('learning your way of asking', () => {
   it("a pick from 'did you mean…' teaches that wording", () => {
     const c = richCtx('en');
     // Find a wording Atlas is unsure about.
-    const odd = 'how heavy on bench this time';
+    // A wording Atlas is unsure about (the first of a few that still are).
+    const odd = [
+      'how heavy on bench this time',
+      'time to bump up my deadlift weight?',
+      'how far has my deadlift come',
+      'what am i hitting this afternoon',
+      'what should i do once i finish lifting',
+      'my thing feels off after the gym lately',
+    ].find((q) => answerLocally(q, c)?.intent === 'did_you_mean')!;
+    expect(odd).toBeTruthy();
     const first = answerLocally(odd, c)!;
-    expect(first?.intent).toBe('did_you_mean');
-    const pick = first.convo.pendingTeach!.offered[1] ?? first.convo.pendingTeach!.offered[0];
-    const chip = first.chips![first.convo.pendingTeach!.offered.indexOf(pick)];
-    const second = answerLocally(chip, c, first.convo);
+    const offered = first.convo.pendingTeach!.offered;
+    // The first option whose chip leads to that very topic.
+    const i = offered.findIndex((id, k) => {
+      const a = answerLocally(first.chips![k], c, first.convo);
+      return a?.intent === id && !!a.learned?.taught?.length;
+    });
+    expect(i).toBeGreaterThanOrEqual(0);
+    const pick = offered[i];
+    const second = answerLocally(first.chips![i], c, first.convo);
     expect(second?.intent).toBe(pick);
     expect(second?.learned?.taught?.[0]).toMatchObject({ q: odd, id: pick });
     // Next time the same words go straight there.

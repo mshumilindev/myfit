@@ -35,6 +35,10 @@ import { parseRange, parseWeekdays } from './when';
 import { SORE_CAP } from './memoryPlan';
 import { isLiftStatus, resolveCatalogLift, resolveMyLift } from './liftNames';
 import { taughtFor, teach, wrongFor } from './teach';
+import { styled, unsureLine } from './style';
+import { topicalChips } from './chips';
+import { insights, TIP_EVERY } from './insights';
+import { hashId } from './voice';
 import { aboutMyLog, followQuery, parseQuery, queryChips, runQuery, type Query } from './query';
 import { fmtPoint, isBodyweightLift, liftPoints, liftProgress } from './liftStats';
 import { ASKS } from './asks';
@@ -55,8 +59,6 @@ import {
 import { BUILT_IN_CATALOG } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
 import { usualSessionsPerWeek } from './facts';
-import { hashId } from './voice';
-import type { Temper } from './types';
 import {
   DAY,
   WEEK,
@@ -943,48 +945,6 @@ export const INTENTS: Intent[] = [
 
 // Openers and closers per temper — rotated with the conversation so replies
 // don't all start alike. Content never changes, only the framing.
-const OPEN: Record<Temper, [string[], string[]]> = {
-  1: [
-    ['', 'Great question! ', 'Love that you asked. ', 'Good one! '],
-    ['', 'Гарне питання! ', 'Клас, що питаєш. ', 'О, слушно! '],
-  ],
-  2: [
-    ['', 'OK. ', 'Right — ', ''],
-    ['', 'Гаразд. ', 'Отже, ', ''],
-  ],
-  3: [
-    ['', 'Straight: ', '', 'Plainly: '],
-    ['', 'Прямо: ', '', 'Коротко: '],
-  ],
-  4: [
-    ['', 'Listen. ', 'Eyes up. ', 'Pay attention. '],
-    ['', 'Слухай. ', 'Дивись сюди. ', 'Уважно. '],
-  ],
-  5: [
-    ['', 'Obviously. ', 'Since you ask. ', 'Must I? Fine. '],
-    ['', 'Очевидно. ', 'Раз уже питаєш. ', 'Мушу? Гаразд. '],
-  ],
-};
-const CLOSE: Record<Temper, [string[], string[]]> = {
-  1: [
-    ['', ' You’ve got this!', ' Proud of you.', ''],
-    ['', ' У тебе вийде!', ' Пишаюся тобою.', ''],
-  ],
-  2: [[''], ['']],
-  3: [
-    ['', '', ' That’s it.'],
-    ['', '', ' От і все.'],
-  ],
-  4: [
-    [' Now move.', ' No excuses.', ' Go.'],
-    [' А тепер рухайся.', ' Без відмовок.', ' Вперед.'],
-  ],
-  5: [
-    ['', ' Try to keep up.', ' Don’t disappoint me. More than usual.', ' I’ll be watching.'],
-    ['', ' Спробуй встигати.', ' Не розчаруй мене. Більше, ніж зазвичай.', ' Я стежитиму.'],
-  ],
-};
-
 export interface LocalAnswer {
   intent: string;
   text: string;
@@ -1021,6 +981,11 @@ export interface Convo {
   told?: Facet[];
   /** The last computed question about your log — for "and in July?". */
   query?: Query;
+  /** "By the way…" notes already told in this conversation, and when. */
+  tips?: string[];
+  tipTurn?: number;
+  /** The last answer had a joke (never two in a row). */
+  joked?: boolean;
   /** "Did you mean…" was offered for this wording — the pick teaches Atlas. */
   pendingTeach?: { q: string; offered: string[] };
 }
@@ -1098,20 +1063,20 @@ for (const it of ALL_INTENTS()) {
 }
 const byId = (id: string | undefined) => (id ? ALL_INTENTS().find((i) => i.id === id) : undefined);
 
-function flavour(text: string, c: AskCtx, seedStr: string, turn = 0): string {
-  const i = c.locale === 'uk' ? 1 : 0;
-  // Rotate with the conversation, so two answers in a row don't open alike.
-  const seed = hashId(seedStr) + turn * 7;
-  const o = OPEN[c.temper][i];
-  const e = CLOSE[c.temper][i];
-  return `${o[seed % o.length]}${text}${e[(seed >>> 3) % e.length]}`;
-}
-
-function chipsFor(id: string, L: Tr): string[] {
+/**
+ * Follow-up chips. With the question at hand they stay on its subject (the
+ * same lift, muscle, related topics — see chips.ts); the generic list is the
+ * last resort.
+ */
+function chipsFor(id: string, L: Tr, x?: { q: string; p: Parsed; c: AskCtx }): string[] {
   const d = DEPTH[id];
-  const own = byId(id)?.suggest?.(L);
-  if (own?.length) return own.slice(0, 3);
-  return (d?.next ?? DEFAULT_NEXT).map(([en, uk]) => L(en, uk)).slice(0, 3);
+  const own = byId(id)?.suggest?.(L) ?? d?.next?.map(([en, uk]) => L(en, uk)) ?? [];
+  if (x) {
+    const t = topicalChips(id, x.q, x.p, x.c, L, own);
+    if (t.length >= 2) return t;
+  }
+  if (own.length) return own.slice(0, 3);
+  return DEFAULT_NEXT.map(([en, uk]) => L(en, uk)).slice(0, 3);
 }
 
 function parse(question: string, c: AskCtx): Parsed {
@@ -1297,9 +1262,10 @@ const CATALOG_NAMES = () => (catalogNames ??= BUILT_IN_CATALOG.map((e) => e.name
 function withFacetChips(id: string, told: Facet[], rest: string[], L: Tr): string[] {
   const f = KB[id]?.facets ?? {};
   const order: Facet[] = ['why', 'how', 'when', 'howMuch', 'should', 'what', 'who', 'where'];
+  // One "why / how" side when there are subject follow-ups, two otherwise.
   const sides = order
     .filter((x) => f[x] && !told.includes(x))
-    .slice(0, 2)
+    .slice(0, rest.length >= 2 ? 1 : 2)
     .map((x) => L(...FACET_CHIP[x]));
   return [...sides, ...rest].slice(0, 3);
 }
@@ -1360,14 +1326,18 @@ function build(
   const extra = memoryLine(it.id, p, c, kept.keep, L);
   const body = extra ? `${kept.text} ${extra}` : kept.text;
   const action = it.action?.(c, p) ?? undefined;
+  // The temper's manner: opener, reaction, a joke now and then, closer.
+  // "As I said…" / "this changed…" already frame the reply; actions stay crisp.
+  const dressed =
+    it.neutral || action || kept.text !== kept.keep
+      ? { text: body, joked: false }
+      : dress(body, c, it.id, question + it.id, turn, convo);
   return {
     intent: it.id,
-    // "As I said…" / "this changed…" already frame the reply — no extra opener.
-    text:
-      it.neutral || action || kept.text !== kept.keep
-        ? body
-        : flavour(body, c, question + it.id, turn),
-    chips: action ? undefined : withFacetChips(it.id, facet ? [facet] : [], chipsFor(it.id, L), L),
+    text: dressed.text,
+    chips: action
+      ? undefined
+      : withFacetChips(it.id, facet ? [facet] : [], chipsFor(it.id, L, { q: question, p, c }), L),
     chart: it.chart?.(c, p, L) ?? undefined,
     action,
     said: { key, text: kept.keep, stamp, at: c.now },
@@ -1379,8 +1349,31 @@ function build(
       turn,
       q,
       told: facet ? [facet] : [],
+      joked: dressed.joked,
     },
   };
+}
+
+/** Dress an answer in the temper's voice (see style.ts). */
+function dress(
+  text: string,
+  c: AskCtx,
+  topic: string,
+  seed: string,
+  turn: number,
+  convo: Convo,
+  neutral = false,
+) {
+  return styled(text, {
+    temper: c.temper,
+    locale: c.locale,
+    yoMama: !!c.s.coach.yoMama,
+    swearing: !!c.s.coach.swearing,
+    topic,
+    neutral,
+    seed: `${seed}#${turn}`,
+    jokedLast: !!convo.joked,
+  });
 }
 
 /** One message → one answer (no splitting). */
@@ -1400,10 +1393,11 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   if (convo.query) {
     const fq = followQuery(convo.query, question, p);
     const res = fq && runQuery(c, fq, L);
-    if (fq && res)
+    const d = res && dress(res.text, c, 'log_query', question, turn, convo);
+    if (fq && res && d)
       return {
         intent: 'log_query',
-        text: res.text,
+        text: d.text,
         chart: res.chart,
         chips: queryChips(fq, L),
         convo: {
@@ -1414,6 +1408,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
           turn,
           q: question,
           query: fq,
+          joked: d.joked,
         },
       };
   }
@@ -1473,7 +1468,12 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       return {
         intent: cur.id,
         text: L(side[0], side[1]),
-        chips: withFacetChips(cur.id, told, chipsFor(cur.id, L), L),
+        chips: withFacetChips(
+          cur.id,
+          told,
+          chipsFor(cur.id, L, { q: convo.q ?? question, p: topic, c }),
+          L,
+        ),
         convo: { ...convo, told, turn },
       };
     }
@@ -1485,7 +1485,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         return {
           intent: cur.id,
           text: why,
-          chips: chipsFor(cur.id, L),
+          chips: chipsFor(cur.id, L, { q: convo.q ?? question, p: topic, c }),
           convo: { ...convo, turn },
         };
       return {
@@ -1517,7 +1517,12 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         return {
           intent: cur.id,
           text: layer,
-          chips: withFacetChips(cur.id, convo.told ?? [], chipsFor(cur.id, L), L),
+          chips: withFacetChips(
+            cur.id,
+            convo.told ?? [],
+            chipsFor(cur.id, L, { q: convo.q ?? question, p: topic, c }),
+            L,
+          ),
           convo: { ...convo, depth: depth + 1, turn },
         };
       // Out of layers → the sides of the topic not told yet.
@@ -1529,7 +1534,12 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         return {
           intent: cur.id,
           text: L(f[0], f[1]),
-          chips: withFacetChips(cur.id, told, chipsFor(cur.id, L), L),
+          chips: withFacetChips(
+            cur.id,
+            told,
+            chipsFor(cur.id, L, { q: convo.q ?? question, p: topic, c }),
+            L,
+          ),
           convo: { ...convo, told, depth: depth + 1, turn },
         };
       }
@@ -1539,7 +1549,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
           'That’s the core of it. Pick where to go next — or ask me something specific.',
           'Це суть. Обери, куди далі, — або спитай щось конкретне.',
         ),
-        chips: chipsFor(cur.id, L),
+        chips: chipsFor(cur.id, L, { q: convo.q ?? question, p: topic, c }),
         escalate: true,
         convo: { ...convo, depth: depth + 1, turn },
       };
@@ -1643,9 +1653,10 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   const queryAnswer = (): LocalAnswer | null => {
     const res = lq && runQuery(cm, lq, L);
     if (!lq || !res) return null;
+    const d = dress(res.text, cm, 'log_query', question, turn, convo);
     return withLearned({
       intent: 'log_query',
-      text: res.text,
+      text: d.text,
       chart: res.chart,
       chips: queryChips(lq, L),
       convo: {
@@ -1656,6 +1667,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         turn,
         q: question,
         query: lq,
+        joked: d.joked,
       },
     });
   };
@@ -1684,9 +1696,16 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     if (a) return a;
   }
   const lead =
+    (taughtIt && hasNeeds(taughtIt, p) ? taughtIt : null) ??
     status ??
     (byExample && SPECIALIZE[byExample.id]?.(p) ? byId(SPECIALIZE[byExample.id]!(p)!) : byExample);
-  if (lead && hasNeeds(lead, p) && !commandReady && !whyTopic && !(agreed && kwTop !== lead))
+  if (
+    lead &&
+    hasNeeds(lead, p) &&
+    !commandReady &&
+    !whyTopic &&
+    (lead === taughtIt || !(agreed && kwTop !== lead))
+  )
     order = [lead, ...ranked.filter((x) => x !== lead)];
   else if (kwStrong || POLICY.mode === 'kw' || (POLICY.mode === 'mix' && !byExample))
     order = ranked;
@@ -1706,7 +1725,10 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     candidates.unshift(byExample);
   // Knows the topic, misses the lift/muscle → ask, with your lifts as chips.
   const needy = candidates
-    .filter((it) => it.needs === 'exercise' || it.needs === 'muscle')
+    .filter(
+      (it) =>
+        (it.needs === 'exercise' || it.needs === 'muscle') && !hasNeeds(it, p) && !wrong.has(it.id),
+    )
     .sort((a, b) => weight(b) - weight(a))[0];
   if (needy && !hasLearned) {
     const chips =
@@ -1737,10 +1759,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     if (near.length)
       return {
         intent: 'did_you_mean',
-        text: L(
-          'Not sure I got that. Did you mean:',
-          'Не впевнений, що зрозумів. Ти мав на увазі:',
-        ),
+        text: unsureLine(c.temper, c.locale, question),
         chips: near.map((h) => L(ASKS[h.id][0], ASKS[h.id][1])),
         escalate: true,
         convo: {
@@ -1823,10 +1842,21 @@ export function answerLocally(question: string, c: AskCtx, convo: Convo = {}): L
   // Picked one of the "did you mean…" options → remember that wording.
   const pt = convo.pendingTeach;
   let out = a;
-  if (pt && pt.offered.includes(a.intent) && a.intent !== 'did_you_mean') {
+  // Only when the first wording carries what that topic needs (a lift, a
+  // window…) — otherwise the same words could never answer it on their own.
+  const picked = byId(a.intent);
+  if (
+    pt &&
+    pt.offered.includes(a.intent) &&
+    a.intent !== 'did_you_mean' &&
+    picked &&
+    hasNeeds(picked, parse(pt.q, c))
+  ) {
     const base = a.learned ? mergeMemory(c.mem, a.learned) : c.mem;
     out = { ...a, learned: { ...(a.learned ?? {}), ...teach(base, pt.q, a.intent, c.now) } };
   }
+  // "By the way…" — something noticed in the log, now and then.
+  out = withInsight(out, question, c, convo);
   // The offer holds for the very next message only.
   if (out.intent !== 'did_you_mean' && out.convo.pendingTeach) {
     const { pendingTeach: _drop, ...rest } = out.convo;
@@ -1887,4 +1917,76 @@ function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer 
     if (uk) return uk;
   }
   return null;
+}
+
+/** Topics to offer an outside classifier: the closest by meaning first. */
+export function topicMenu(question: string, c: AskCtx): { id: string; ask: string }[] {
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  const near = retrieve(question, 25).map((h) => h.id);
+  const ids = [...new Set([...near, ...Object.keys(ASKS)])].filter((id) => ASKS[id]).slice(0, 60);
+  return ids.map((id) => ({ id, ask: L(ASKS[id][0], ASKS[id][1]) }));
+}
+
+/**
+ * Answer as a given topic (picked by the classifier or elsewhere). Null when
+ * the topic needs a lift/window the question doesn't carry, or has nothing.
+ */
+export function answerAs(
+  id: string,
+  question: string,
+  c: AskCtx,
+  convo: Convo = {},
+): LocalAnswer | null {
+  const it = byId(id);
+  if (!it) return null;
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  const p = parse(question, c);
+  if (!hasNeeds(it, p)) return null;
+  const core = it.answer(c, p, L);
+  if (!core) return null;
+  const f = faceted(it.id, core, question, L);
+  return build(it, f.text, c, p, question, L, convo, question, f.facet);
+}
+
+/** Answers that never get a "by the way" (pain, small talk, questions back). */
+const NO_TIP = new Set(['did_you_mean', 'emoji', 'memory_note', 'pain', 'injury_status']);
+
+function withInsight(a: LocalAnswer, question: string, c: AskCtx, convo: Convo): LocalAnswer {
+  const turn = a.convo.turn ?? 0;
+  const keep = { tips: convo.tips, tipTurn: convo.tipTurn };
+  const base = {
+    ...a,
+    convo: {
+      ...keep,
+      ...a.convo,
+      tips: a.convo.tips ?? convo.tips,
+      tipTurn: a.convo.tipTurn ?? convo.tipTurn,
+    },
+  };
+  const it = byId(a.intent);
+  if (
+    NO_TIP.has(a.intent) ||
+    SMALLTALK_IDS.has(a.intent) ||
+    it?.neutral ||
+    a.action ||
+    a.convo.pending
+  )
+    return base;
+  if (convo.tipTurn !== undefined && turn - convo.tipTurn < TIP_EVERY) return base;
+  const L: Tr = (en, uk) => (c.locale === 'uk' ? uk : en);
+  const told = new Set(convo.tips ?? []);
+  const all = insights(c, L).filter((x) => !told.has(x.id));
+  if (!all.length) return base;
+  const subject = a.convo.exercise ?? a.convo.muscle ?? '';
+  const onSubject = all.find((x) => x.about && x.about === subject);
+  // About what we're discussing → always; otherwise about one answer in three.
+  const pick =
+    onSubject ?? (hashId(question) % 3 === 0 ? all[hashId(question) % all.length] : null);
+  if (!pick) return base;
+  return {
+    ...base,
+    text: `${a.text}\n\n${pick.text}`,
+    chips: [pick.chip, ...(a.chips ?? []).filter((x) => x !== pick.chip)].slice(0, 3),
+    convo: { ...base.convo, tips: [...told, pick.id], tipTurn: turn },
+  };
 }

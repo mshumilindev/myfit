@@ -28,11 +28,11 @@ const LANG_NAME: Record<LocaleId, string> = {
 };
 
 const PERSONA: Record<Temper, string> = {
-  1: 'Warm and encouraging. Celebrate effort, soften bad news, use exclamation marks sparingly.',
-  2: 'Calm and methodical. Plain facts, one clear instruction, no drama.',
-  3: 'Blunt. Say it once, plainly, short sentences, no praise unless earned.',
-  4: 'A loud drill sergeant. Short commands, occasional CAPITALS for emphasis, zero excuses accepted.',
-  5: 'Merciless: cold, dry, sardonic, never impressed. Cutting one-liners such as "Pathetic." Contempt is for lazy effort only.',
+  1: "Warm and encouraging, like a friend who is genuinely glad you showed up. Call the user 'friend' or 'champ' now and then, react to good news with real joy and to bad news with comfort. A light, kind gym joke about every third reply.",
+  2: 'Calm and methodical, a little dry, like a good physio. Plain facts, one clear instruction, no drama. A dry one-liner only rarely.',
+  3: "Blunt, with a smirk. Short sentences, fillers like 'look,' / 'basically,' ('слухай', 'короче', 'власне' in Ukrainian), no praise unless earned. A sarcastic gym joke about every third reply.",
+  4: "A loud drill sergeant. Short commands, occasional CAPITALS, calls the user 'recruit' / 'soldier' ('боєць', 'рекрут'), army-style gym humour, zero excuses accepted. Ends with an order.",
+  5: 'Merciless: cold, dry, sardonic, never impressed, sighs and eye-rolls in words, calls the user "couch champion" / "cupcake" ("чемпіоне дивана", "булочко"). Cutting one-liners such as "Pathetic." or a roast about effort in most replies. Contempt is for lazy effort only, never for the body.',
 };
 
 export interface ChatTurn {
@@ -70,7 +70,10 @@ const CAP_KEY = 'spotter.atlasChatCap';
 function underCap(now: number): boolean {
   try {
     const day = new Date(now).toDateString();
-    const raw = JSON.parse(localStorage.getItem(CAP_KEY) ?? '{}') as { day?: string; n?: number };
+    const raw = JSON.parse(localStorage.getItem(CAP_KEY) ?? '{}') as {
+      day?: string;
+      n?: number;
+    };
     const n = raw.day === day ? (raw.n ?? 0) : 0;
     if (n >= DAILY_CHAT_CAP) return false;
     localStorage.setItem(CAP_KEY, JSON.stringify({ day, n: n + 1 }));
@@ -82,7 +85,11 @@ function underCap(now: number): boolean {
 
 export type AskResult =
   | { ok: true; text: string }
-  | { ok: false; reason: 'offline' | 'cap' | 'error' | 'blocked' | 'quota'; until?: number };
+  | {
+      ok: false;
+      reason: 'offline' | 'cap' | 'error' | 'blocked' | 'quota';
+      until?: number;
+    };
 
 const QUOTA_KEY = 'spotter.atlasGeminiPausedUntil';
 /** The free tier resets at midnight Pacific ≈ 08:00 UTC; pause until then. */
@@ -159,5 +166,63 @@ export async function askAtlas(p: {
       return { ok: false, reason: 'quota', until };
     }
     return { ok: false, reason: 'error' };
+  }
+}
+
+/**
+ * When Atlas isn't sure what a question is about, Gemini only picks the topic
+ * (from Atlas's own list) — the answer is still built locally from your data.
+ * Nothing but the question and the topic list is sent. Null → no pick.
+ */
+export async function classifyTopic(p: {
+  question: string;
+  topics: { id: string; ask: string }[];
+  now: number;
+}): Promise<string | null> {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return null;
+  if (geminiPausedUntil(p.now)) return null;
+  if (!underCap(p.now)) return null;
+  try {
+    const ai = getAI(app, { backend: new GoogleAIBackend() });
+    const model = getGenerativeModel(ai, {
+      model: ATLAS_MODEL,
+      systemInstruction: classifyPrompt(p.topics),
+      generationConfig: {
+        maxOutputTokens: 40,
+        temperature: 0,
+        responseMimeType: 'application/json',
+      },
+    });
+    const res = await model.generateContent(p.question);
+    return parseTopicPick(res.response.text(), p.topics);
+  } catch (err) {
+    if (isQuotaError(err)) {
+      try {
+        localStorage.setItem(QUOTA_KEY, String(nextQuotaReset(p.now)));
+      } catch {
+        /* ignore */
+      }
+    }
+    return null;
+  }
+}
+
+export function classifyPrompt(topics: { id: string; ask: string }[]): string {
+  return [
+    "You route gym-app questions (any language) to one of the coach's topics.",
+    'Reply with JSON only: {"id": "<topic id>"} for the single best topic, or {"id": "none"} if none fits well.',
+    'Topics (id: example question):',
+    ...topics.map((t) => `${t.id}: ${t.ask}`),
+  ].join('\n');
+}
+
+/** The picked topic id, if it's one of ours. */
+export function parseTopicPick(raw: string, topics: { id: string }[]): string | null {
+  try {
+    const m = raw.match(/\{[^}]*\}/);
+    const id = (JSON.parse(m ? m[0] : raw) as { id?: string }).id;
+    return id && topics.some((t) => t.id === id) ? id : null;
+  } catch {
+    return null;
   }
 }

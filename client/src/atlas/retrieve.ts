@@ -125,7 +125,10 @@ const RISKY = new Set([
 ]);
 
 /** Word or its stem → concept id ("~12"); phrases handled first. */
-let concepts: { word: Map<string, string>; phrases: [string, string][] } | null = null;
+let concepts: {
+  word: Map<string, string>;
+  phrases: [string, string][];
+} | null = null;
 function conceptIndex() {
   const word = new Map<string, string>();
   const phrases: [string, string][] = [];
@@ -319,7 +322,18 @@ function build(): Index {
   };
   const grams = [...topicGrams].map(([id, g]) => ({ id, ...vec(g) }));
   const exGrams = exGramsRaw.map(({ id, g }) => ({ id, ...vec(g) }));
-  return { grams, gidf, exGrams, examples, idf, n, topics, tidf, avgLen, vocab: [...tdf.keys()] };
+  return {
+    grams,
+    gidf,
+    exGrams,
+    examples,
+    idf,
+    n,
+    topics,
+    tidf,
+    avgLen,
+    vocab: [...tdf.keys()],
+  };
 }
 
 function gramsOf(text: string): Map<string, number> {
@@ -345,7 +359,20 @@ const K1 = 1.2;
 const B = 0.5;
 
 /** Topics ranked by how close the question is to their examples. */
+/** The last few lookups — one answer asks about the same words several times. */
+const memo = new Map<string, Match[]>();
 export function retrieve(question: string, limit = 5): Match[] {
+  let res = memo.get(question);
+  // Computed once per question at the widest list anyone asks for (25).
+  if (!res || res.length < Math.min(limit, 25)) {
+    res = retrieveRaw(question, Math.max(25, limit));
+    memo.set(question, res);
+    if (memo.size > 32) memo.delete(memo.keys().next().value as string);
+  }
+  return res.slice(0, limit);
+}
+
+function retrieveRaw(question: string, limit: number): Match[] {
   index ??= build();
   const ix = index;
   const q = [...new Set(terms(question))];

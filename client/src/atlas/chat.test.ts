@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { systemPrompt } from './chat';
+import { classifyPrompt, parseTopicPick, systemPrompt } from './chat';
+import { answerAs, topicMenu } from './intents';
+import { richCtx } from './testCtx';
 import { buildChatFacts } from './chatFacts';
 import { COACH_DEFAULT } from './types';
 
@@ -19,7 +21,12 @@ describe('Atlas chat prompt', () => {
   it('drops “your mom” and swearing unless switched on', () => {
     const off = systemPrompt({
       temper: 5,
-      coach: { ...COACH_DEFAULT, enabled: true, yoMama: false, swearing: false },
+      coach: {
+        ...COACH_DEFAULT,
+        enabled: true,
+        yoMama: false,
+        swearing: false,
+      },
       locale: 'en',
       factsJson: '{}',
     });
@@ -66,5 +73,29 @@ describe('Gemini quota', () => {
     const now = Date.UTC(2026, 9, 7, 20);
     expect(nextQuotaReset(now)).toBe(Date.UTC(2026, 9, 8, 8));
     expect(geminiPausedUntil(now)).toBe(0);
+  });
+});
+
+describe('Gemini as a topic picker (answer stays local)', () => {
+  const topics = [
+    { id: 'rest', ask: 'How long should I rest?' },
+    { id: 'progress_lift', ask: 'How is my bench progressing?' },
+  ];
+  it('sends only the topic list, reads only our ids', () => {
+    expect(classifyPrompt(topics)).toContain('rest: How long should I rest?');
+    expect(parseTopicPick('{"id":"rest"}', topics)).toBe('rest');
+    expect(parseTopicPick('```json\n{"id": "progress_lift"}\n```', topics)).toBe('progress_lift');
+    expect(parseTopicPick('{"id":"hack_the_planet"}', topics)).toBeNull();
+    expect(parseTopicPick('nonsense', topics)).toBeNull();
+  });
+  it('the menu leads with the closest topics; the pick is answered from the log', () => {
+    const c = richCtx('en');
+    const menu = topicMenu('how heavy on bench this time', c);
+    expect(menu.length).toBeGreaterThan(10);
+    expect(menu.slice(0, 5).map((x) => x.id)).toContain('next_weight');
+    const a = answerAs('next_weight', 'how heavy on bench this time', c);
+    expect(a?.intent).toBe('next_weight');
+    expect(a?.text).toMatch(/kg/);
+    expect(answerAs('progress_lift', 'how is it going', c)).toBeNull();
   });
 });
