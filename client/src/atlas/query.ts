@@ -304,6 +304,9 @@ const ADVICE = w(
 );
 const BEST_FOR =
   /(^|\s)(best|good|top|найкращ\S*|кращ\S*|добр\S*|лучш\S*|хорош\S*)(\s\S+){0,2}\s(for|to|для|щоб|чтобы)\s/u;
+const GENERAL = w(
+  'how to|how do you|how does|how bad|is it|are|does|do drop|what is|what are|whats|чи|як правильно|як робити|як використ\\S*|як працю\\S*|що таке|навіщо|шкідлив\\S*|вредн\\S*|как правильно|что такое|зачем',
+);
 const ME = w(
   'i|my|me|mine|i ve|ive|did i|do i|have i|am i|я|мій|моя|моє|мої|мого|моїх|мене|мені|мною|мой|мое|мои|моих|меня|мне|мною|у мене|у меня',
 );
@@ -316,11 +319,15 @@ const ME = w(
 export function aboutMyLog(question: string, q: Query, logged: boolean): boolean {
   const ph = ` ${normalize(question)} `;
   if (ADVICE.test(ph) || BEST_FOR.test(ph) || questionType(question) === 'why') return false;
+  const me = ME.test(ph);
+  // General know-how ("how to use drop sets", "does sugar ruin growth", "how bad
+  // are beers") is not a question about your log, even if it names a lift.
+  if (!me && GENERAL.test(ph)) return false;
   return (
-    ME.test(ph) ||
+    me ||
     !!q.range ||
-    logged ||
-    (q.rank && !!q.group && q.agg !== 'sum') ||
+    (logged && (q.rank || !!q.group)) ||
+    (q.rank && (q.group === 'lift' || q.group === 'weekday') && q.agg !== 'sum') ||
     q.group === 'month' ||
     q.group === 'weekday' ||
     q.metric === 'volume'

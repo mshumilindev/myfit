@@ -23,7 +23,14 @@ import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
 import { askAtlas, classifyTopic } from '../atlas/chat';
-import { answerAs, answerLocally, didYouMean, topicMenu, type Convo } from '../atlas/intents';
+import {
+  answerAs,
+  answerLocally,
+  didYouMean,
+  topicMenu,
+  warmUpAtlas,
+  type Convo,
+} from '../atlas/intents';
 import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
 import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
@@ -723,6 +730,11 @@ function CoachThread({
   );
 
   // An empty chat opens with a hello in the temper's voice (not stored).
+  // The first answer needs the understanding index — build it while you read.
+  useEffect(() => {
+    const id = window.setTimeout(warmUpAtlas, 400);
+    return () => window.clearTimeout(id);
+  }, []);
   const noChat = chat.length === 0;
   const workoutCount = store.workouts.length;
   const hello = useMemo(

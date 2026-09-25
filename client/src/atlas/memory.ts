@@ -455,7 +455,15 @@ export function learn(
 
   // Goal.
   if (groupMatches(words, phrase, WANT)) {
-    const g = GOALS.find(([, kws]) => groupMatches(words, phrase, kws))?.[0];
+    // "I don't want to lose weight, I want muscle" — the negated goal is not the goal.
+    const kept = ` ${phrase} `
+      .replace(
+        /(^|\s)(не хочу|не хочеться|не хочется|не треба|не надо|don.?t want( to)?|do not want( to)?|not)\s+\S+/gu,
+        ' ',
+      )
+      .trim();
+    const keptWords = kept.split(/\s+/).filter(Boolean);
+    const g = GOALS.find(([, kws]) => groupMatches(keptWords, kept, kws))?.[0];
     if (g && mem?.goal?.v !== g) {
       patch.goal = { v: g, at: now };
       const name: Record<Goal, [string, string]> = {

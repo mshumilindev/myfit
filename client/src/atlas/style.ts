@@ -422,6 +422,13 @@ export interface Styled {
 
 /** Good or bad news in this answer? Read from the answer itself. */
 export function moodOf(text: string): 'good' | 'bad' | null {
+  // "records: 0", "no new records" — that's not a win.
+  if (
+    /((рекордів|records?|prs?)\s*:\s*0(?!\d)|нових рекордів нема|рекордів нема|no new (records|prs))/iu.test(
+      text,
+    )
+  )
+    return 'bad';
   // "didn't grow", "не виріс" — a negated win is not a win.
   if (
     /(not|didn.?t|hasn.?t|haven.?t|no|не|ні)\s+(\S+\s+)?(grow|grew|improv\S*|up|виріс|виросла|виросли|зрос\S*|покращ\S*|рекорд\S*|record)/iu.test(
@@ -482,8 +489,9 @@ export function styled(text: string, s: StyleCtx): Styled {
   const mom = s.yoMama && s.temper === 5 && !quiet;
 
   let head = '';
-  if (r() < v.rate.tic) head += pick(v.tic[li]);
+  // One opener at most — "Yo! Yo bro!" reads like a stutter.
   if (swear && r() < 0.45) head += pick(SWEAR_OPEN[li]);
+  else if (r() < v.rate.tic) head += pick(v.tic[li]);
   else if (r() < v.rate.open) head += fill(pick(v.open[li]));
   // An opener ending in ", " / ": " flows into the answer — lower its first
   // letter unless it's a name ("Barbell…", "Жим…" stay).
@@ -496,7 +504,13 @@ export function styled(text: string, s: StyleCtx): Styled {
   if (mood && !quiet && r() < v.rate.mood) tail.push(pick(v[mood][li]));
 
   let joked = false;
-  if (!quiet && (!s.jokedLast || v.jokesInARow) && r() < v.rate.joke) {
+  // A reaction ("Not bad. No jokes.") and a joke on top contradict each other — one of them.
+  if (
+    !quiet &&
+    !tail.some((x) => /без жартів|no jokes|not joking|не жартую/iu.test(x)) &&
+    (!s.jokedLast || v.jokesInARow) &&
+    r() < v.rate.joke
+  ) {
     const topical = TOPIC_JOKES.find(([re]) => re.test(s.topic) || re.test(text))?.[1];
     const j =
       mom && r() < 0.4

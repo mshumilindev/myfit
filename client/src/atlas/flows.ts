@@ -587,8 +587,22 @@ type Move =
   | 'crunch'
   | 'raise'
   | 'shrug'
-  | 'pullover';
+  | 'pullover'
+  | 'lateral'
+  | 'legRaise'
+  | 'facePull';
 const MOVE: [Move, RegExp, RegExp][] = [
+  [
+    'lateral',
+    /(в сторони|в сторону|у сторони|через сторони|розводиш руки|lateral|to the sides?|sideways|out to the side\S*)/u,
+    /lateral|side/i,
+  ],
+  [
+    'legRaise',
+    /((підніма\S*|піднімаєш|підйом\S*|raise\S*|lift\S*) (\S+ )?(ноги|ніг|коліна|legs?|knees)|(ноги|коліна|legs|knees) (\S+ )?(вгору|до грудей|up))/u,
+    /leg raise|knee raise|knee tuck/i,
+  ],
+  ['facePull', /(до обличчя|до лиця|to (my|your|the) face|face ?pull|канат\S* до)/u, /face pull/i],
   [
     'pullover',
     /(пуловер\S*|за голову|over (my|your|the) head|behind (the|your) head|pullover)/u,
@@ -703,7 +717,12 @@ function score(f: Feat): { name: string; s: number }[] {
       }
       for (const m of f.move) {
         const re = MOVE.find(([x]) => x === m)![2];
-        s += re.test(c.name) ? 2.5 : 0;
+        // The very specific movements say more than the muscle guess.
+        s += re.test(c.name)
+          ? m === 'lateral' || m === 'legRaise' || m === 'facePull'
+            ? 5
+            : 2.5
+          : 0;
       }
       let hit = 0;
       for (const w of f.words) if (c.words.has(w)) hit++;

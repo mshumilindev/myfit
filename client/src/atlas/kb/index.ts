@@ -13,6 +13,8 @@ import { KB_R1 } from './partR1';
 import { KB_R2 } from './partR2';
 import { KB_R3 } from './partR3';
 import { KB_R4 } from './partR4';
+import { KB_R5 } from './partR5';
+import { KB_R6 } from './partR6';
 import { FACETS_R1 } from './depthR1';
 import { FACETS_R2 } from './depthR2';
 import { FACETS_R3 } from './depthR3';
@@ -25,6 +27,8 @@ type More = Record<string, { ex: string[]; exUk: string[] }>;
 const rounds: More[] = [
   { ...KB_A2, ...KB_B2, ...KB_C2, ...KB_D2, ...KB_E2 },
   { ...KB_R1, ...KB_R2, ...KB_R3, ...KB_R4 },
+  KB_R5,
+  KB_R6,
 ];
 const more: More = {};
 for (const r of rounds)
@@ -51,6 +55,13 @@ export const KB: Kb = Object.fromEntries([
     ];
   }),
   // Topics added later — whole (phrasings + sides) in one file.
-  ...NEW_TOPICS.map((t) => [t.id, { ex: t.ex, exUk: t.exUk, facets: t.facets }]),
+  ...NEW_TOPICS.map((t) => [
+    t.id,
+    {
+      ex: [...t.ex, ...(more[t.id]?.ex ?? [])],
+      exUk: [...t.exUk, ...(more[t.id]?.exUk ?? [])],
+      facets: t.facets,
+    },
+  ]),
 ]);
 export type { Facet, Kb, KbEntry } from './types';

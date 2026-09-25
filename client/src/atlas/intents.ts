@@ -1532,7 +1532,19 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     calcIn(question) ??
     // "а якщо я важу 100?" right after protein → the same maths with the topic.
     (convo.q && /\d/.test(question) && words.length <= 6 ? calcIn(`${convo.q} ${question}`) : null);
-  if (calc) return { intent: 'calc', text: calc, convo: { ...convo, turn } };
+  if (calc) {
+    // Known topics keep their name, so "and on a cut?" follows on from protein.
+    const id = /(білк|белк|protein|протеїн)/iu.test(question)
+      ? 'protein'
+      : /(1\s?пм|1\s?rm|max|максим|на раз)/iu.test(question)
+        ? 'e1rm'
+        : 'calc';
+    return {
+      intent: id,
+      text: calc,
+      convo: { ...convo, intent: id === 'calc' ? convo.intent : id, turn, q: question },
+    };
+  }
 
   // ---- clearly not about training: a line in character, then back ----
   // (Unless a topic of Atlas's own clearly fits — "a lifting plan for football season".)
@@ -1795,8 +1807,19 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   const top = hits[0];
   const second = hits[1];
   const margin = top ? top.score - (second?.score ?? 0) : 0;
-  const confident = !!top && top.score >= RET_MIN && margin >= RET_MARGIN;
+  // Clearly ahead — or far above the bar with any lead at all.
+  const confident =
+    !!top &&
+    top.score >= RET_MIN &&
+    (margin >= RET_MARGIN || (top.score >= RET_HIGH && margin >= RET_HIGH_MARGIN));
   const taughtIt = taughtId ? byId(taughtId) : undefined;
+  // Examples point at a topic of their own (not the log calculator) → it beats a loose log query.
+  const topFits =
+    !!top &&
+    top.score >= RET_MIN &&
+    top.id !== 'log_query' &&
+    !!byId(top.id) &&
+    hasNeeds(byId(top.id)!, p);
   const byExample =
     taughtIt && hasNeeds(taughtIt, p) ? taughtIt : confident ? byId(top.id) : undefined;
   const kwTop = ranked[0];
@@ -1828,6 +1851,20 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     const ex = explainLift(cm, p.exercise, L);
     const it = byId('progress_lift');
     if (ex && it) return withLearned(build(it, ex, cm, p, question, L, convo, question, 'why'));
+  }
+  // "I hate lunges" / "не хочу більше випади" — a lift you want gone (asked to confirm).
+  if (
+    p.exercise &&
+    AVOID_RE.test(` ${phrase} `) &&
+    !/(сьогодні|today|сегодня|зараз|now)/u.test(phrase) &&
+    !wrong.has('act_avoid')
+  ) {
+    const it = byId('act_avoid');
+    const core = it && hasNeeds(it, p) ? it.answer(cm, p, L) : null;
+    if (it && core) {
+      const out = build(it, core, cm, p, question, L, convo, question);
+      return withLearned({ ...out, action: it.action?.(cm, p) ?? out.action });
+    }
   }
   // "How much did I lift this year / on bench?" — kilos moved, in that window.
   if (
@@ -1895,6 +1932,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     !wrong.has('log_query') &&
     !taughtIt &&
     (!byExample || specific) &&
+    (!topFits || specific) &&
     !commandReady &&
     !status &&
     !whyTopic
@@ -1933,6 +1971,30 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         .map((x) => c.fmt.exercise(x.name)),
       convo: { intent: cmdNeedsLift.id, pending: true, depth: 0, turn, q: question },
     };
+  // The examples clearly disagree with the keyword pick → trust the examples.
+  const kwSure =
+    whyTopic ||
+    (order[0] === kwTop && !!kwTop && (!!kwTop.priority || matchedWords(words, kwTop.all) >= 3));
+  if (
+    order.length &&
+    top &&
+    !commandReady &&
+    !status &&
+    !taughtIt &&
+    !kwSure &&
+    order[0].id !== top.id
+  ) {
+    const mine = hits.find((h) => h.id === order[0].id)?.score ?? 0;
+    const alt = byId(top.id);
+    if (
+      alt &&
+      top.score >= RET_VETO &&
+      top.score - mine >= RET_VETO_GAP &&
+      hasNeeds(alt, p) &&
+      !(alt.action && !asking)
+    )
+      order = [alt, ...order.filter((x) => x !== alt)];
+  }
   for (const it of order) {
     if (it.action && !asking) continue;
     const core = it.answer(cm, p, L);
@@ -2004,10 +2066,26 @@ const SPECIALIZE: Record<string, (p: Parsed) => string | null> = {
 
 /** Retrieval thresholds (0..1). */
 let RET_MIN = 0.3;
-let RET_MARGIN = 0.035;
+let RET_VETO = 0.4;
+let RET_VETO_GAP = 0.05;
+let RET_HIGH = 0.45;
+let RET_HIGH_MARGIN = 0.005;
+let RET_MARGIN = 0.025;
 let RET_NEAR = 0.2;
 export const POLICY: { mode: 'mix' | 'ret' | 'kw' } = { mode: 'mix' };
-export function __tune(t: { min?: number; margin?: number; near?: number }) {
+export function __tune(t: {
+  min?: number;
+  margin?: number;
+  near?: number;
+  high?: number;
+  highMargin?: number;
+  veto?: number;
+  vetoGap?: number;
+}) {
+  RET_VETO = t.veto ?? RET_VETO;
+  RET_VETO_GAP = t.vetoGap ?? RET_VETO_GAP;
+  RET_HIGH = t.high ?? RET_HIGH;
+  RET_HIGH_MARGIN = t.highMargin ?? RET_HIGH_MARGIN;
   RET_MIN = t.min ?? RET_MIN;
   RET_MARGIN = t.margin ?? RET_MARGIN;
   RET_NEAR = t.near ?? RET_NEAR;
@@ -2112,8 +2190,17 @@ export function startChips(c: AskCtx, L: Tr): string[] {
   ];
 }
 
+const AVOID_RE =
+  /(^|\s)(не хочу (більше )?(робити )?|ненавиджу|терпіти не можу|бісить|hate|can.?t stand|don.?t want to do|ненавижу|не хочу больше)/u;
+const CONNECTOR_RE = /^\s*((а|і|й|та|ще|також|и|еще|and|also|plus|then)\s+)+/iu;
+/** Words that mark a message as English, not transliterated Ukrainian. */
+const EN_COMMON = new Set(
+  'i my me you the a an to of in on for is are was do does did how what why when which who more go and or it this that with should can will much many long often best'.split(
+    ' ',
+  ),
+);
 const NO_PAIN_CLAUSE =
-  /((в|у) мене |i have |my |у меня )?(нічого|ніщо|ніде|nothing|ничего|нигде)\s+(не\s+)?(болить|болять|болит|hurts?)\s*[,.;—-]?\s*/iu;
+  /(?<=^|\s)((в|у) мене |i have |my |у меня )?((нічого|ніщо|ніде|nothing|ничего|нигде)\s+(не\s+)?(болить|болять|болит|hurts?)|\S+\s+(не болить|не болять|не болит|does not hurt|doesn.?t hurt|is fine now)|(не болить|не болит)\s+\S+)(?=\s|$|[,.;—-])\s*[,.;—-]?\s*/iu;
 /** "а?", "ну", "і що", "?" — keep talking about the same thing. */
 const CONTINUER_RE =
   /^\s*(\?+|а\s*\?*|ну\s*\?*|і\s*\?+|і що\s*\?*|і\s*далі\s*\?*|ну і\s*\?*|хм+\s*\?*|м+\s*\?*|та й\s*\?*|и\s*\?+|и что\s*\?*|so\s*\?*|and\s*\?+|and then\s*\?*|hm+\s*\?*|huh\s*\?*|well\s*\?*|\.\.\.)\s*$/iu;
@@ -2139,6 +2226,7 @@ const ACK_LINE: Record<number, [string[], string[]]> = {
 const DATA_CHIP =
   /(my progress|my week|my best|my record|мій прогрес|мій тиждень|мій рекорд|мої рекорди|як я прогресую|how am i progressing|how have i progressed)/iu;
 const MY_DATA = new Set([
+  'how_am_i_doing',
   'progress_lift',
   'best',
   'e1rm',
@@ -2173,6 +2261,28 @@ export function answerLocally(question0: string, c: AskCtx, convo: Convo = {}): 
     };
   }
   // "Ні" / "no" — fine, the door stays open.
+  // "…and what do I do about it?" right after a lift's progress → that lift's fixes.
+  if (
+    !convo.flow &&
+    convo.exercise &&
+    (convo.intent === 'progress_lift' || convo.intent === 'log_query') &&
+    /^\s*(а |і |и |and |so )?(що|шо|что|what)\s+(мені\s+)?(робити|делать|to do|do i do|should i do|now)/iu.test(
+      question,
+    )
+  ) {
+    const fix = explainLift(c, convo.exercise, L);
+    if (fix)
+      return {
+        intent: 'progress_lift',
+        text: fix,
+        chips: chipsFor('plateau', L, {
+          q: convo.q ?? question,
+          p: { ...parse(question, c), exercise: convo.exercise },
+          c,
+        }),
+        convo: { ...convo, turn },
+      };
+  }
   if (!convo.flow && NO_RE.test(question))
     return {
       intent: 'ack',
@@ -2215,7 +2325,32 @@ export function answerLocally(question0: string, c: AskCtx, convo: Convo = {}): 
       convo: { ...convo, turn },
     };
   }
-  const a0 = answerRaw(question, c, convo);
+  // Two-word questions made only of "small" words ("ти хто") — the retrieval can't see them.
+  const bare = normalize(question);
+  const raw0 =
+    /^(ти хто|хто ти|ти хто такий|хто ти такий|кто ты|ты кто|who are you|who r u)$/u.test(bare)
+      ? answerAs('who', question, c, convo)
+      : answerRaw(question, c, convo);
+  // "How's my progress?" with no lift named → the overall picture, not "Which lift?".
+  const overall =
+    raw0?.intent === 'progress_lift' && raw0.convo.pending && finishedOf(c).length
+      ? answerAs('how_am_i_doing', question, c, convo)
+      : null;
+  const raw = overall ?? raw0;
+  // "ааааа", "asdfgh", "хз" — nothing to hand on; a way back in instead of silence.
+  const a0: LocalAnswer | null =
+    raw ??
+    (tokens(question).length <= 2 && question.trim().length <= 14
+      ? {
+          intent: 'nudge',
+          text: L(
+            "Didn't catch that. Ask me anything about training — or tap one of these.",
+            'Не зовсім зрозумів. Питай про тренування — або тапни щось із цього.',
+          ),
+          chips: startChips(c, L),
+          convo: { ...convo, turn },
+        }
+      : null);
   // No workouts yet → questions about "my numbers" get a way in, not "Which lift?".
   const a =
     a0 &&
@@ -2314,8 +2449,10 @@ function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer 
   if (parts.length >= 2) {
     let state = convo;
     const got: LocalAnswer[] = [];
-    for (const part of parts.slice(0, 3)) {
-      const a = answerOne(part, c, state);
+    for (const [k, part0] of parts.slice(0, 3).entries()) {
+      // "…, а ще скільки спати" — the second question stands on its own.
+      const part = k ? part0.replace(CONNECTOR_RE, '') : part0;
+      const a = answerOne(part, c, k ? { turn: state.turn, softUntil: state.softUntil } : state);
       if (a) {
         got.push(a);
         state = a.convo;
@@ -2342,7 +2479,12 @@ function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer 
     for (const [x, y] of andSplits(question)) {
       const a1 = answerOne(x, c, convo);
       // The second answer comes plain — one voice flourish per message is enough.
-      const a2 = a1 && answerOne(y, c, { ...a1.convo, softUntil: (a1.convo.turn ?? 0) + 1 });
+      const a2 =
+        a1 &&
+        answerOne(y.replace(CONNECTOR_RE, ''), c, {
+          turn: a1.convo.turn,
+          softUntil: (a1.convo.turn ?? 0) + 1,
+        });
       if (a2 && !a2.intent.startsWith('safety'))
         a2.convo = { ...a2.convo, softUntil: convo.softUntil };
       if (standalone(a1) && standalone(a2) && a1!.intent !== a2!.intent)
@@ -2357,6 +2499,20 @@ function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer 
         };
     }
   const direct = answerOne(question, c, convo);
+  // Latin letters may be Ukrainian ("shcho trenuvaty sohodni") — the reading
+  // whose examples fit better wins.
+  if (!hasCyrillic(question) && /[a-z]/i.test(question)) {
+    const tr = translitToUk(question);
+    const uk = tr !== question ? answerOne(tr, c, convo) : null;
+    const fit = (q: string) => retrieve(q)[0]?.score ?? 0;
+    const english = tokens(question).some((t) => EN_COMMON.has(t));
+    if (
+      uk &&
+      uk.intent !== 'did_you_mean' &&
+      (!direct || direct.intent === 'did_you_mean' || (!english && fit(tr) > fit(question) + 0.05))
+    )
+      return uk;
+  }
   if (direct) return direct;
   const known = toKnownLanguage(question);
   if (known && known !== question) {
@@ -2500,4 +2656,9 @@ function pickLift(
   const lib = findCatalogExercise(words, phrase, CATALOG_NAMES()) ?? resolveCatalogLift(question);
   if (mine && lib && lib !== mine && nameHits(question, lib) > nameHits(question, mine)) return lib;
   return mine ?? lib;
+}
+
+/** Build the understanding index ahead of the first question (it takes a moment). */
+export function warmUpAtlas(): void {
+  retrieve('warm up');
 }

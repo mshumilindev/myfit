@@ -25,6 +25,7 @@ describe('learning your way of asking', () => {
       'what am i hitting this afternoon',
       'what should i do once i finish lifting',
       'my thing feels off after the gym lately',
+      'that afternoon thing',
     ].find((q) => answerLocally(q, c)?.intent === 'did_you_mean')!;
     expect(odd).toBeTruthy();
     const first = answerLocally(odd, c)!;

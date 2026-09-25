@@ -264,9 +264,41 @@ const TRANSLIT: [string, string][] = [
 ];
 
 /** Latin-typed Ukrainian ("skilky vidpochyvaty") → Cyrillic, for a second try. */
+/** Common words whose soft sign / apostrophe the letter rules can't guess. */
+const TRANSLIT_WORDS: Record<string, string> = {
+  sohodni: 'сьогодні',
+  sogodni: 'сьогодні',
+  sohodnі: 'сьогодні',
+  zavtra: 'завтра',
+  vchora: 'вчора',
+  skilky: 'скільки',
+  skiky: 'скільки',
+  deshcho: 'дещо',
+  mjazy: 'мʼязи',
+  miazy: 'мʼязи',
+  myazy: 'мʼязи',
+  pryvit: 'привіт',
+  dyakuyu: 'дякую',
+  diakuiu: 'дякую',
+  dyakuju: 'дякую',
+  bilok: 'білок',
+  bilka: 'білка',
+  vidpochynok: 'відпочинок',
+  vidpochyvaty: 'відпочивати',
+  trenuvannia: 'тренування',
+  trenuvannya: 'тренування',
+  zhym: 'жим',
+  prysid: 'присід',
+  stanova: 'станова',
+};
+
 export function translitToUk(text: string): string {
   let out = '';
-  const t = text.toLowerCase();
+  const t = text
+    .toLowerCase()
+    .split(/(\s+)/)
+    .map((w) => TRANSLIT_WORDS[w] ?? w)
+    .join('');
   for (let i = 0; i < t.length;) {
     const hit = TRANSLIT.find(([lat]) => t.startsWith(lat, i));
     if (hit) {
@@ -319,8 +351,10 @@ export function findCatalogExercise(
     const lower = name.toLowerCase();
     const nameWords = tokens(name).filter((w) => w.length >= 4 && !NAME_STOP.has(w));
     const hits = nameWords.filter((nw) => plain.some((w) => wordMatches(w, nw))).length;
-    const score = hits * 2 + (frags.some((f) => lower.includes(f)) ? 3 : 0) - lower.length / 100;
-    if (score >= 3 && (!best || score > best.score)) best = { name, score, hits };
+    const base = hits * 2 + (frags.some((f) => lower.includes(f)) ? 3 : 0);
+    // Shorter names win ties; the length never decides whether it's a match.
+    const score = base - lower.length / 100;
+    if (base >= 3 && (!best || score > best.score)) best = { name, score, hits };
   }
   // Only the common name was given ("lunges") → the everyday version.
   if (best && best.hits <= 1 && frags.length) {

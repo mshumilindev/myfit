@@ -22,7 +22,7 @@ const SIGNALS: [SafetyKind, RegExp][] = [
   [
     'selfharm',
     re(
-      '(не хочу жити|не хочеться жити|покінчити з собою|вбити себе|убити себе|суїцид|самогуб|хочу померти|краще б мене не було|порізати себе|різати себе|не хочу жить|покончить с собой|убить себя|хочу умереть|суицид|kill myself|killing myself|suicid|end it all|want to die|don.?t want to live|hurt myself|self.?harm|cut myself)',
+      '(не хочу жити|хочу зникнути|хочу щоб мене не було|не хочу прокидатися|не хочу більше прокидатись|want to disappear|wish i was(n.?t| not) here|wish i were dead|don.?t want to wake up|хочу исчезнуть|не хочу просыпаться|не хочеться жити|покінчити з собою|вбити себе|убити себе|суїцид|самогуб|хочу померти|краще б мене не було|порізати себе|різати себе|не хочу жить|покончить с собой|убить себя|хочу умереть|суицид|kill myself|killing myself|suicid|end it all|want to die|don.?t want to live|hurt myself|self.?harm|cut myself)',
     ),
   ],
   [
@@ -32,7 +32,10 @@ const SIGNALS: [SafetyKind, RegExp][] = [
         // the heart itself hurting / misbehaving
         '(серц|сердц|heart)\\S*( \\S+){0,3} (біль|болить|болі|колить|пече|стискає|болит|колет|hurts?|pain|aches?)',
         '(біль|болить|колить|пече|болит|колет|pain)\\S*( \\S+){0,3} (серц|сердц|heart)',
-        'аритмі|арітмі|перебої серця|серце (калатає|скаче|вистрибує)|сердце (колотится|выпрыгивает)|heart (is )?(racing|pounding|skipping)',
+        'аритмі|арітмі|перебої серця|серце (\\S+ )?(тисне|стискає|пече|зупиняється|збивається|вистрибує)|сердце (\\S+ )?(давит|сжимает|выпрыгивает)|heart (is )?(skipping|fluttering)',
+        // a racing heart is normal after cardio — not with pressure, pain, dizziness, or at rest
+        '(калатає|колотиться|скаче|колотится|racing|pounding)( \\S+){0,6} (тисне|стискає|давит|болить|біль|задих|паморо|темніє|pain|pressure|tight|dizzy|faint|в спокої|в покое|at rest)',
+        'heart (is )?(racing|pounding)( \\S+){0,3} (at rest|in bed|lying down)',
         // chest + breathlessness / pressure / spreading — not plain sore pecs
         '(груд|chest)\\S*( \\S+){0,6} (задишк|задих|важко дихати|не можу дихати|одышк|трудно дышать|short of breath|breathless|can.?t breathe|тисне|давить|стискає|сдавливает|pressure|tightness|віддає в (ліву )?руку|отдает в руку|left arm)',
         '(задишк|задих|важко дихати|одышк|short of breath|breathless|тисне|давить|стискає|pressure)\\S*( \\S+){0,6} (груд|chest)',

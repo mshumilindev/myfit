@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { answerLocally } from './intents';
 import { KB_TESTS } from './kb/tests';
+import { KB_FRESH } from './kb/fresh';
 import { NEW_TOPICS } from './kb/topicsNew';
 import { richCtx } from './testCtx';
 
@@ -37,10 +38,15 @@ describe('understanding — held-out phrasings (never used for matching)', () =>
       const r = score(
         Object.fromEntries(NEW_TOPICS.map((t) => [t.id, { test: t.test, testUk: t.testUk }])),
       );
-      expect(r.ok).toBeGreaterThan(0.38);
-      expect(r.known).toBeGreaterThan(0.45);
+      expect(r.ok).toBeGreaterThan(0.5);
+      expect(r.known).toBeGreaterThan(0.55);
     },
   );
+  it('a second set written blind, ~1,860 questions over every topic', { timeout: 300_000 }, () => {
+    const r = score(KB_FRESH);
+    expect(r.ok).toBeGreaterThan(0.81);
+    expect(r.known).toBeGreaterThan(0.83);
+  });
 });
 
 describe('question types — why / how / when / how much…', () => {

@@ -9,12 +9,13 @@
  * And the edge of Atlas's world: weather, politics, recipes, films — a line
  * in character and back to training (Gemini may still take it, if on).
  */
-import { est1rm } from '../store';
 import type { Tr } from './intentKit';
 import { normalize } from './nlu';
 
 const NUM = '(\\d+(?:[.,]\\d+)?)';
 const num = (s: string) => Number(s.replace(',', '.'));
+/** Estimated one-rep max (Epley); 1 rep is itself. */
+const epley = (w: number, r: number) => (r <= 1 ? w : w * (1 + r / 30));
 const plate = (kg: number) => Math.round(kg / 2.5) * 2.5;
 
 /** "100 на 5", "100x5", "100 kg for 5", "100 кг × 5 разів". */
@@ -50,7 +51,7 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
     const [a, b] = sets.map((m) => ({
       kg: num(m[1]),
       reps: Number(m[2]),
-      e1: est1rm(num(m[1]), Math.min(12, Number(m[2]))),
+      e1: epley(num(m[1]), Number(m[2])),
     }));
     const target = a.e1 >= b.e1 ? a : b;
     const now = target === a ? b : a;
@@ -66,10 +67,12 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
     const w = num(sets[0][1]);
     const r = Number(sets[0][2]);
     if (w > 0 && r >= 1 && r <= 20) {
-      const e = est1rm(w, Math.min(12, r));
+      // Epley; above 10 reps it's a rough guess — said so.
+      const e = r === 1 ? w : w * (1 + r / 30);
+      const rough = r > 10;
       return L(
-        `${w} × ${r} ≈ ${kg(Math.round(e))} for one rep (estimate — the more reps, the rougher it gets).`,
-        `${w} × ${r} ≈ ${kg(Math.round(e))} на раз (оцінка — що більше повторів, то грубіша).`,
+        `${w} × ${r} ≈ ${kg(Math.round(e))} for one rep (${rough ? 'very rough above 10 reps — a set of 3–5 gives a truer number' : 'an estimate — the more reps, the rougher it gets'}).`,
+        `${w} × ${r} ≈ ${kg(Math.round(e))} на раз (${rough ? 'понад 10 повторів — дуже грубо; сет на 3–5 дасть точніше' : 'оцінка — що більше повторів, то грубіша'}).`,
       );
     }
   }
@@ -83,6 +86,20 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
         `At ${w} kg: about ${Math.round(w * 1.6)}–${Math.round(w * 2.2)} g of protein a day, split over 3–5 meals.`,
         `При ${w} кг: приблизно ${Math.round(w * 1.6)}–${Math.round(w * 2.2)} г білка на день, на 3–5 прийомів.`,
       );
+  }
+
+  // Calories for a bodyweight: "скільки калорій якщо я важу 90"
+  const bwk = /(важу|вага|вешу|weigh|i.?m)\s*(\d{2,3})/u.exec(ph);
+  if (bwk && /(калор|ккал|calorie|kcal)/u.test(ph)) {
+    const w = Number(bwk[2]);
+    if (w >= 35 && w <= 250) {
+      const lo = Math.round((w * 29) / 50) * 50;
+      const hi = Math.round((w * 33) / 50) * 50;
+      return L(
+        `At ${w} kg, maintenance is roughly ${lo}–${hi} kcal a day for someone who lifts 3–4× a week. To gain: +200–300; to lose: −300–500. Check the scale for two weeks and adjust.`,
+        `При ${w} кг підтримка — приблизно ${lo}–${hi} ккал на день, якщо тренуєшся 3–4 рази на тиждень. На масу: +200–300, на сушку: −300–500. Два тижні дивись на ваги й коригуй.`,
+      );
+    }
   }
 
   // Plain arithmetic: "17 помножити на 23", "120 / 4"
