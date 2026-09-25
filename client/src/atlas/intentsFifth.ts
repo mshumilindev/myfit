@@ -16,6 +16,7 @@ import { computePlaybook, playForWeekday } from '../playbook';
 import { usualSessionsPerWeek } from './facts';
 import { isDeloadWeek, planDayFor } from './plan';
 import { describeMemory, soreFor } from './memory';
+import { isBodyweightLift, liftPoints } from './liftStats';
 import { SORE_CAP } from './memoryPlan';
 import { groupMatches } from './nlu';
 import type { Temper } from './types';
@@ -29,6 +30,7 @@ import {
   type Chart,
   type Intent,
   type Parsed,
+  type Tr,
 } from './intentKit';
 
 // ---- shared helpers -----------------------------------------------------------
@@ -63,13 +65,20 @@ function sessionE1(w: Workout, name: string): number {
   return best;
 }
 
-/** e1RM per session for a lift, oldest first, within [from, to). */
+/** Progress per session for a lift (e1RM kg, or reps for bodyweight lifts), oldest first. */
 export function e1Series(c: AskCtx, name: string, from = 0, to = Infinity) {
-  return finishedOf(c)
-    .filter((w) => w.startedAt >= from && w.startedAt < to)
-    .map((w) => ({ at: w.startedAt, v: sessionE1(w, name) }))
-    .filter((x) => x.v > 0)
-    .reverse();
+  const pts = liftPoints(c, name);
+  const bw = isBodyweightLift(pts);
+  return pts
+    .filter((x) => x.bw === bw && x.ts >= from && x.ts < to)
+    .map((x) => ({ at: x.ts, v: x.score }));
+}
+
+/** Chart for one lift: estimated max in kg, or reps for bodyweight lifts. */
+function liftChart(c: AskCtx, name: string, points: { at: number; v: number }[], L: Tr) {
+  return isBodyweightLift(liftPoints(c, name))
+    ? { title: L('Best reps', 'Найбільше повторів'), unit: '', points }
+    : { title: L('Estimated max', 'Розрахунковий максимум'), unit: 'kg', points };
 }
 
 /** Best e1RM of a lift in a window. */
@@ -660,6 +669,11 @@ export const INTENTS_FIFTH: Intent[] = [
       const first = s[0].v;
       const last = s[s.length - 1].v;
       const best = Math.max(...s.map((x) => x.v));
+      if (isBodyweightLift(liftPoints(c, p.exercise)))
+        return L(
+          `${name}, ${r.label[0]}: ${s.length} sessions, ${first} → ${last} reps (${signed(last - first)}), best ${best} reps.`,
+          `${name}, ${r.label[1]}: ${s.length} трен., ${first} → ${last} повт. (${signed(last - first)}), найкраще ${best} повт.`,
+        );
       return L(
         `${name}, ${r.label[0]}: ${s.length} sessions, estimated max ${kgs(c, first)} → ${kgs(c, last)} (${signed(pct(last, first))}%), best ${kgs(c, best)}.`,
         `${name}, ${r.label[1]}: ${s.length} трен., розрахунковий максимум ${kgs(c, first)} → ${kgs(c, last)} (${signed(pct(last, first))}%), найкраще ${kgs(c, best)}.`,
@@ -668,9 +682,7 @@ export const INTENTS_FIFTH: Intent[] = [
     chart: (c, p, L) => {
       if (!p.exercise) return null;
       const s = e1Series(c, p.exercise, p.range!.from, p.range!.to);
-      return s.length >= 2
-        ? { title: L('Estimated max', 'Розрахунковий максимум'), unit: 'kg', points: s }
-        : null;
+      return s.length >= 2 ? liftChart(c, p.exercise, s, L) : null;
     },
   },
   {
@@ -1142,16 +1154,12 @@ export const CHARTS: Record<string, NonNullable<Intent['chart']>> = {
   progress_lift: (c, p, L) => {
     if (!p.exercise) return null;
     const s = e1Series(c, p.exercise).slice(-12);
-    return s.length >= 3
-      ? { title: L('Estimated max', 'Розрахунковий максимум'), unit: 'kg', points: s }
-      : null;
+    return s.length >= 3 ? liftChart(c, p.exercise, s, L) : null;
   },
   e1rm: (c, p, L) => {
     if (!p.exercise) return null;
     const s = e1Series(c, p.exercise).slice(-12);
-    return s.length >= 3
-      ? { title: L('Estimated max', 'Розрахунковий максимум'), unit: 'kg', points: s }
-      : null;
+    return s.length >= 3 ? liftChart(c, p.exercise, s, L) : null;
   },
   bw_trend: (c, _p, L) => {
     const pts = [...(c.s.bodyMetrics.weights ?? [])]

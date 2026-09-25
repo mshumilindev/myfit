@@ -4,7 +4,7 @@
  * built from YOUR data (history, plan, readiness, sleep). Only when nothing
  * here fits does the question go to Gemini. More intents: intentsMore.ts.
  */
-import { consistencyStreak, est1rm, latestWeight, setTopWeight, setTypeOf, topSet } from '../store';
+import { consistencyStreak, est1rm, latestWeight, setTypeOf } from '../store';
 import { muscleReadiness } from '../recovery';
 import { nextTarget, topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
@@ -33,6 +33,8 @@ import { emojiReply, INTENTS_SMALL, SMALLTALK_IDS, SMALL_OVERRIDES } from './sma
 const SMALL_NEW = new Set(INTENTS_SMALL.map((i) => i.id));
 import { parseRange, parseWeekdays } from './when';
 import { SORE_CAP } from './memoryPlan';
+import { isLiftStatus, resolveCatalogLift, resolveMyLift } from './liftNames';
+import { fmtPoint, isBodyweightLift, liftPoints, liftProgress } from './liftStats';
 import { ASKS } from './asks';
 import { KB, type Facet } from './kb';
 import { retrieve } from './retrieve';
@@ -244,8 +246,22 @@ export const INTENTS: Intent[] = [
     needs: 'exercise',
     answer: (c, p, L) => {
       const ex = p.exercise!;
-      const tg = nextTarget(topHistory(finishedOf(c), ex, c.now), {});
       const name = c.fmt.exercise(ex);
+      const pts = liftPoints(c, ex);
+      if (isBodyweightLift(pts)) {
+        // Bodyweight: reps first, then a belt.
+        const last = pts.filter((x) => x.bw).pop()!;
+        return last.reps >= 12
+          ? L(
+              `${name}: last ${last.reps} reps. Time for added weight — start with 2.5–5 kg for 6–8 reps.`,
+              `${name}: минулого разу ${last.reps} повт. Час додати вагу — почни з 2,5–5 кг на 6–8 повторів.`,
+            )
+          : L(
+              `${name}: last ${last.reps} reps. Next: ${last.reps + 1}. At 12 clean reps we add weight.`,
+              `${name}: минулого разу ${last.reps} повт. Далі: ${last.reps + 1}. На 12 чистих повторах додамо вагу.`,
+            );
+      }
+      const tg = nextTarget(topHistory(finishedOf(c), ex, c.now), {});
       if (tg.state === 'first' || tg.weight == null)
         return L(
           `No ${name} logged yet. Start light, ${tg.repLow}–${tg.repHigh} clean reps, and I’ll take it from there.`,
@@ -274,7 +290,6 @@ export const INTENTS: Intent[] = [
       ['best', 'record', 'pr', 'max', 'maximum', '1rm', 'рекорд*', 'максим*', 'найкращ*', 'макс'],
     ],
     answer: (c, p, L) => {
-      const finished = finishedOf(c);
       const names = p.exercise
         ? [p.exercise]
         : loggedLifts(c)
@@ -285,15 +300,13 @@ export const INTENTS: Intent[] = [
         return L('No records yet — nothing logged.', 'Рекордів ще нема — нічого не записано.');
       const parts = names
         .map((n) => {
-          let best: { w: number; r: number } | null = null;
-          for (const w of finished) {
-            const ex = w.exercises.find((e) => e.name === n);
-            const t = ex ? topSet(ex.sets) : undefined;
-            if (t && (!best || setTopWeight(t) > best.w)) best = { w: setTopWeight(t), r: t.reps };
-          }
-          return best
-            ? `${c.fmt.exercise(n)} ${c.fmt.kg(best.w)} × ${best.r} (~${c.fmt.kg(Math.round(est1rm(best.w, best.r)))} 1RM)`
-            : null;
+          const pts = liftPoints(c, n);
+          if (!pts.length) return null;
+          const bw = isBodyweightLift(pts);
+          const best = pts.filter((x) => x.bw === bw).reduce((a, b) => (b.score > a.score ? b : a));
+          return bw
+            ? `${c.fmt.exercise(n)} ${fmtPoint(c, best, L)}`
+            : `${c.fmt.exercise(n)} ${c.fmt.kg(best.kg)} × ${best.reps} (~${c.fmt.kg(Math.round(est1rm(best.kg, Math.min(12, best.reps))))} 1RM)`;
         })
         .filter(Boolean);
       return parts.length
@@ -320,29 +333,8 @@ export const INTENTS: Intent[] = [
       ],
     ],
     needs: 'exercise',
-    answer: (c, p, L) => {
-      const hist = topHistory(finishedOf(c), p.exercise!, c.now).filter((x) => x.weight != null);
-      const name = c.fmt.exercise(p.exercise!);
-      if (hist.length < 2)
-        return L(
-          `Too little ${name} history to judge. Log a few more sessions.`,
-          `Замало історії ${name}, щоб судити. Запиши ще кілька тренувань.`,
-        );
-      const newest = hist[hist.length - 1];
-      const old = hist.find((x) => newest.ts - x.ts <= 8 * WEEK) ?? hist[0];
-      const ow = old.weight ?? 0;
-      const nw = newest.weight ?? 0;
-      const pct = Math.round(((nw - ow) / Math.max(1, ow)) * 100);
-      return pct > 0
-        ? L(
-            `${name}: ${c.fmt.kg(ow)} → ${c.fmt.kg(nw)} (+${pct}%) since ${date(c, old.ts)}.`,
-            `${name}: ${c.fmt.kg(ow)} → ${c.fmt.kg(nw)} (+${pct}%) з ${date(c, old.ts)}.`,
-          )
-        : L(
-            `${name} is flat at ${c.fmt.kg(nw)}. Same weight, one more rep each session until it moves.`,
-            `${name} стоїть на ${c.fmt.kg(nw)}. Та сама вага, +1 повтор щотренування, доки не зрушить.`,
-          );
-    },
+    // Whole history, loaded or bodyweight (pull-ups by reps).
+    answer: (c, p, L) => liftProgress(c, p.exercise!, L),
   },
   {
     id: 'volume_muscle',
@@ -1119,8 +1111,12 @@ function parse(question: string, c: AskCtx): Parsed {
   return {
     words,
     phrase,
+    // Your own lifts (any name/language), keyword aliases, then the library (aliases, then any language).
     exercise:
-      findExercise(words, phrase, logged) ?? findCatalogExercise(words, phrase, CATALOG_NAMES()),
+      resolveMyLift(question, logged) ??
+      findExercise(words, phrase, logged) ??
+      findCatalogExercise(words, phrase, CATALOG_NAMES()) ??
+      resolveCatalogLift(question),
     muscle: findMuscle(words, phrase),
     exercises: findExercises(words, logged, CATALOG_NAMES()),
     range: parseRange(phrase, c.now),
@@ -1562,8 +1558,16 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
   const whyTopic = qt === 'why' && !!kwTop?.id.startsWith('why_');
   // Near-tie between the two closest topics → the keyword hit breaks it.
   const agreed = !!kwTop && hits[1]?.id === kwTop.id && margin < 0.05;
+  // "How are my pull-ups?" — your own lift + nothing but how-is-it-going.
+  const status =
+    p.exercise &&
+    loggedLifts(c).some((l) => l.name === p.exercise) &&
+    isLiftStatus(question, p.exercise)
+      ? byId('progress_lift')
+      : null;
   const lead =
-    byExample && SPECIALIZE[byExample.id]?.(p) ? byId(SPECIALIZE[byExample.id]!(p)!) : byExample;
+    status ??
+    (byExample && SPECIALIZE[byExample.id]?.(p) ? byId(SPECIALIZE[byExample.id]!(p)!) : byExample);
   if (lead && hasNeeds(lead, p) && !commandReady && !whyTopic && !(agreed && kwTop !== lead))
     order = [lead, ...ranked.filter((x) => x !== lead)];
   else if (kwStrong || POLICY.mode === 'kw' || (POLICY.mode === 'mix' && !byExample))

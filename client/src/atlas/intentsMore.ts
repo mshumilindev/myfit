@@ -5,7 +5,8 @@
  * home), the app itself, and small talk. Evidence-based rules of thumb only;
  * anything personal comes from the log.
  */
-import { est1rm, muscleSetsInWorkout, setTopWeight, setTypeOf, topSet } from '../store';
+import { isBodyweightLift, liftPoints } from './liftStats';
+import { muscleSetsInWorkout, setTopWeight, setTypeOf, topSet } from '../store';
 import { activeInjuries } from '../injury';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { topHistory } from '../progression';
@@ -186,13 +187,18 @@ export const INTENTS_MORE: Intent[] = [
     ],
     needs: 'exercise',
     answer: (c, p, L) => {
-      let best = 0;
-      for (const w of finishedOf(c).slice(0, 12)) {
-        const ex = w.exercises.find((e) => e.name === p.exercise);
-        for (const s of ex?.sets ?? [])
-          if (setTypeOf(s) !== 'warmup' && (s.weight ?? 0) > 0 && s.reps <= 12)
-            best = Math.max(best, est1rm(s.weight ?? 0, s.reps));
+      const pts = liftPoints(c, p.exercise!);
+      if (isBodyweightLift(pts)) {
+        const top = Math.max(...pts.filter((x) => x.bw).map((x) => x.reps));
+        return L(
+          `${c.fmt.exercise(p.exercise!)} is bodyweight for you, so there’s no 1RM — your best is ${top} reps. Add weight once you pass 12.`,
+          `${c.fmt.exercise(p.exercise!)} у тебе з власною вагою, тож 1ПМ нема — найкраще ${top} повт. Після 12 додавай вагу.`,
+        );
       }
+      // Recent sets (last ~12 sessions), else your whole history.
+      const loaded = pts.filter((x) => !x.bw);
+      const recent = loaded.slice(-12);
+      const best = Math.max(0, ...(recent.length ? recent : loaded).map((x) => x.score));
       if (!best) return null;
       return L(
         `${c.fmt.exercise(p.exercise!)}: estimated 1RM ~${c.fmt.kg(Math.round(best))} from your recent sets. An estimate — don’t test it without a spotter.`,

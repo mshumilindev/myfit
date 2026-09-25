@@ -6,17 +6,11 @@
  * PEDs, cycle, pregnancy), conditioning (heart-rate zones, HIIT, running,
  * steps), posture, other sports, home equipment, and "what can I ask".
  */
-import {
-  est1rm,
-  muscleSetsInWorkout,
-  resolveMuscles,
-  setTopWeight,
-  setTypeOf,
-  topSet,
-} from '../store';
+import { muscleSetsInWorkout, resolveMuscles, setTopWeight, setTypeOf, topSet } from '../store';
 import { solvePlates } from '../plates';
 import { rankExercisesForMuscle } from '../sessionBuilder';
 import type { Exercise } from '../types';
+import { liftPoints } from './liftStats';
 import { DAY, WEEK, date, finishedOf, wd, type AskCtx, type Intent } from './intentKit';
 
 /** Numbers mentioned in the question ("100 kg", "80%", "5 reps"). */
@@ -24,15 +18,12 @@ function numbers(phrase: string): number[] {
   return (phrase.match(/\d+(?:[.,]\d+)?/g) ?? []).map((x) => Number(x.replace(',', '.')));
 }
 
+/** Best estimated max over your last 12 loaded sessions of this lift (however long ago). */
 function recentBest1rm(c: AskCtx, name: string): number {
-  let best = 0;
-  for (const w of finishedOf(c).slice(0, 12)) {
-    const ex = w.exercises.find((e) => e.name === name);
-    for (const s of ex?.sets ?? [])
-      if (setTypeOf(s) !== 'warmup' && (s.weight ?? 0) > 0 && s.reps <= 12)
-        best = Math.max(best, est1rm(s.weight ?? 0, s.reps));
-  }
-  return best;
+  const pts = liftPoints(c, name)
+    .filter((p) => !p.bw)
+    .slice(-12);
+  return Math.max(0, ...pts.map((p) => p.score));
 }
 
 function lastTop(c: AskCtx, name: string): { kg: number; reps: number } | null {
