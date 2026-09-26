@@ -67,6 +67,8 @@ import { setFact } from '../atlas/facts';
 import { useAtlasFmt, voiceNow } from '../atlas/notes';
 import {
   addExercise,
+  addHomeMoveToWorkout,
+  setExerciseMeasure,
   attachGymToWorkout,
   clearSets,
   deleteExercise,
@@ -230,6 +232,9 @@ import {
 } from '../ui';
 import type { Strings } from '../i18n/en';
 import { getRole } from '../api';
+import { HomeMovePicker } from '../components/HomeMovePicker';
+import { HoldWatchSet, fmtHoldClock } from '../components/HoldWatchSet';
+import { homeTotals, isHomeWorkout, isStopwatchExercise, lastSetsOf } from '../homeSets';
 
 const PICKER_TARGET_MUSCLES = new Set<string>(MUSCLE_IDS);
 
@@ -611,6 +616,8 @@ export function SessionView(props: {
   const startAddConsumed = useRef(false);
 
   const live = !!workout && workout.finishedAt === null && !props.past;
+  // A home set session: home-only moves, stopwatch holds, no gym.
+  const isHome = isHomeWorkout(workout);
   // Keep the screen on through a live workout so the rest alert fires on time.
   useWakeLock(live && (store.restPrefs ?? REST_PREFS_DEFAULT).keepAwake);
   // In focus mode, adding (or duplicating) an exercise jumps the view straight
@@ -862,6 +869,19 @@ export function SessionView(props: {
     holdMin?: number | null;
   } {
     const sets = ex.sets;
+    // Hold / time moves (home sets): a bodyweight hold, logged with a stopwatch.
+    if (isStopwatchExercise(ex)) {
+      const lastHold = sets.length ? sets[sets.length - 1].durationMin : null;
+      const prev = lastHold == null ? lastSetsOf(store.workouts, ex.name) : null;
+      const prevSec =
+        prev && prev.hold && prev.values.length ? prev.values[prev.values.length - 1] : null;
+      return {
+        reps: 1,
+        weight: null,
+        type: 'static-dynamic',
+        holdMin: lastHold ?? (prevSec ? prevSec / 60 : null),
+      };
+    }
     // Continue from the last logged WORKING set.
     for (let i = sets.length - 1; i >= 0; i--) {
       const s = sets[i];
@@ -3322,7 +3342,7 @@ export function SessionView(props: {
           </>
         ) : (
           <>
-            {target && showGhost && !grp && (
+            {target && showGhost && !grp && !isStopwatchExercise(ex) && (
               <div className={`prog-hint st-${target.state}`}>
                 {target.deltaKg > 0 && (
                   <span className="ph-delta up">+{fmtWeightValue(target.deltaKg)}</span>
@@ -3357,7 +3377,7 @@ export function SessionView(props: {
             {!grp && ex.sets.length > 0 && (
               <div className="set-grid header">
                 <span>#</span>
-                <span>{t.repsCol}</span>
+                <span>{isStopwatchExercise(ex) ? t.homeHoldCol : t.repsCol}</span>
                 <span>{loadColHead ?? (isDesktop ? t.weightCol : t.kgCol)}</span>
                 <span>{isDesktop ? t.typeCol : ''}</span>
                 {isDesktop && <span />}
@@ -3578,6 +3598,29 @@ export function SessionView(props: {
                       {props.past ? t.add : t.log}
                     </button>
                   </div>
+                ) : isStopwatchExercise(ex) && live ? (
+                  <HoldWatchSet
+                    key={`${ex.id}:${ex.sets.length}`}
+                    ex={ex}
+                    setNo={ex.sets.length + 1}
+                    last={lastSetsOf(
+                      store.workouts.filter((w) => w.id !== workout!.id),
+                      ex.name,
+                    )}
+                    onLog={(sec) =>
+                      logGhost(ex, { reps: 1, weight: null }, 'static-dynamic', {
+                        weight: null,
+                        holdMin: sec / 60,
+                      })
+                    }
+                    onSettings={() =>
+                      setSheet(
+                        focusView
+                          ? { kind: 'opts', tab: 'set', exId: ex.id, set: null, ghost }
+                          : { kind: 'edit', exId: ex.id, set: null, ghost },
+                      )
+                    }
+                  />
                 ) : (
                   <GhostSetRow
                     key={`${ex.id}:${ex.sets.length}`}
@@ -3727,7 +3770,23 @@ export function SessionView(props: {
           {t.replaceExercise}
         </button>
       )}
-      {tabs && isStrengthExercise(ex) && (
+      {isHome && tabs && !isMarkerExercise(ex) && (
+        <div className="opts-move">
+          <button type="button" disabled={ex.position === 0} onClick={() => moveExercise(ex, -1)}>
+            <Icon name="arrow-up" />
+            {t.homeMoveUp}
+          </button>
+          <button
+            type="button"
+            disabled={ex.position >= workout!.exercises.length - 1}
+            onClick={() => moveExercise(ex, 1)}
+          >
+            <Icon name="arrow-down" />
+            {t.homeMoveDown}
+          </button>
+        </div>
+      )}
+      {tabs && isStrengthExercise(ex) && !isHome && (
         <button className="menu-item" onClick={() => setSheet({ kind: 'equip', exId: ex.id })}>
           <Icon name="barbell" />
           {t.eqEquipment}
@@ -3768,16 +3827,19 @@ export function SessionView(props: {
       {isStrengthExercise(ex) && (
         <>
           {tabs && <div className="opts-group-label">{t.optsGroupLookUp}</div>}
-          <button
-            className="menu-item"
-            onClick={() => {
-              props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
-              setSheet(null);
-            }}
-          >
-            <Icon name="info" />
-            {t.detailsAction}
-          </button>
+          {/* Your own home moves aren't in the exercise base — no details. */}
+          {!!richExerciseByName(ex.name) && (
+            <button
+              className="menu-item"
+              onClick={() => {
+                props.shell.openOverlay({ screen: 'exercise-detail', name: ex.name });
+                setSheet(null);
+              }}
+            >
+              <Icon name="info" />
+              {t.detailsAction}
+            </button>
+          )}
           <button
             className="menu-item"
             onClick={() => {
@@ -3899,13 +3961,15 @@ export function SessionView(props: {
               {t.sessionCoachButton}
             </button>
           )}
-          <button className="menu-item" onClick={() => setSheet({ kind: 'gym' })}>
-            <Icon name="map-pin" />
-            <span className="mi-text">
-              {t.changeGym}
-              {gym ? <span className="mi-sub">{gym.name}</span> : null}
-            </span>
-          </button>
+          {!isHome && (
+            <button className="menu-item" onClick={() => setSheet({ kind: 'gym' })}>
+              <Icon name="map-pin" />
+              <span className="mi-text">
+                {t.changeGym}
+                {gym ? <span className="mi-sub">{gym.name}</span> : null}
+              </span>
+            </button>
+          )}
         </div>
       )}
     </>
@@ -3920,8 +3984,9 @@ export function SessionView(props: {
     const out: Partial<Record<MuscleGroup, string>> = {};
     for (const m of ms) {
       const r = directReadiness([m], m, hist, at);
-      // 'stale' (not trained lately) gets no dot — only a real recovery reading does.
-      if (r.days !== null && r.state !== 'stale') out[m] = READINESS_COLOR[r.state];
+      // Every muscle chip carries its state dot — the same one the picker shows
+      // ('stale' = not trained lately, its own colour).
+      out[m] = READINESS_COLOR[r.state];
     }
     return out;
   };
@@ -4071,6 +4136,21 @@ export function SessionView(props: {
     });
   }
 
+  /** Home sets: move an exercise one slot up / down (the Exercise options). */
+  function moveExercise(ex: Exercise, d: number): void {
+    const list = [...workout!.exercises].sort((a, b) => a.position - b.position);
+    const i = list.findIndex((e) => e.id === ex.id);
+    const j = i + d;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    reorderExercises(
+      workout!.id,
+      list.map((e) => e.id),
+    );
+    const pos = focusSteps.findIndex((st) => st.some((e) => e.id === ex.id));
+    if (pos >= 0) setFocusIdx(Math.max(0, pos + d));
+  }
+
   function removeExercise(ex: Exercise): void {
     const copy: Exercise = { ...ex, sets: [...ex.sets] };
     deleteExercise(workout!.id, ex.id);
@@ -4093,7 +4173,8 @@ export function SessionView(props: {
       (w) => w.id !== workout.id && w.finishedAt !== null && w.startedAt < workout.startedAt,
     );
     const compare: { name: string; v: string; delta: number | null }[] = [];
-    if (prevW) {
+    const homeSum = isHome ? homeTotals(workout) : null;
+    if (prevW && !isHome) {
       for (const e of workout.exercises) {
         if (!isStrengthExercise(e)) continue;
         const vol = exerciseVolumeKg(e);
@@ -4126,7 +4207,7 @@ export function SessionView(props: {
           </h2>
           <div style={{ fontSize: 13, color: 'var(--color-neutral-500)', marginTop: 6 }}>
             {fmtFullDate(workout.startedAt, locale)}
-            {gymName ? ` · ${gymName}` : ''}
+            {isHome ? ` · ${workout.dayName || t.homeSetTitle}` : gymName ? ` · ${gymName}` : ''}
           </div>
         </div>
         <AtlasDebrief
@@ -4144,10 +4225,27 @@ export function SessionView(props: {
             <div className="v">{sets}</div>
             <div className="l">{t.setsStat}</div>
           </div>
-          <div className="cell">
-            <div className="v">{fmtTonnes(volume)}</div>
-            <div className="l">{t.movedStat}</div>
-          </div>
+          {homeSum ? (
+            <>
+              {homeSum.reps > 0 && (
+                <div className="cell">
+                  <div className="v">{homeSum.reps}</div>
+                  <div className="l">{t.homeRepsStat}</div>
+                </div>
+              )}
+              {homeSum.holdSec > 0 && (
+                <div className="cell">
+                  <div className="v">{fmtHoldClock(homeSum.holdSec)}</div>
+                  <div className="l">{t.homeHoldStat}</div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="cell">
+              <div className="v">{fmtTonnes(volume)}</div>
+              <div className="l">{t.movedStat}</div>
+            </div>
+          )}
           {cardioMinutes > 0 && (
             <div className="cell">
               <div className="v">{Math.round(cardioMinutes)}</div>
@@ -4340,12 +4438,16 @@ export function SessionView(props: {
             )}
             {!live && (
               <div className="past-hero-bg" aria-hidden>
-                <GymThumb
-                  name={gym?.name ?? ''}
-                  lat={gym?.lat ?? 0}
-                  lng={gym?.lng ?? 0}
-                  size={320}
-                />
+                {isHome ? (
+                  <img className="home-hero-img" src="/home-hero.webp" alt="" />
+                ) : (
+                  <GymThumb
+                    name={gym?.name ?? ''}
+                    lat={gym?.lat ?? 0}
+                    lng={gym?.lng ?? 0}
+                    size={320}
+                  />
+                )}
                 <span className="past-hero-scrim" />
               </div>
             )}
@@ -4367,11 +4469,18 @@ export function SessionView(props: {
                       })()}
                   </div>
                 )}
-                <button className="past-gym-row" onClick={() => setSheet({ kind: 'gym' })}>
-                  <Icon name="map-pin" />
-                  <span>{gym ? gym.name : t.addGymToSession}</span>
-                  <Icon name="pencil-simple" className="edit" />
-                </button>
+                {isHome ? (
+                  <span className="past-gym-row past-home-row">
+                    <Icon name="house" />
+                    <span>{t.homeSetTitle}</span>
+                  </span>
+                ) : (
+                  <button className="past-gym-row" onClick={() => setSheet({ kind: 'gym' })}>
+                    <Icon name="map-pin" />
+                    <span>{gym ? gym.name : t.addGymToSession}</span>
+                    <Icon name="pencil-simple" className="edit" />
+                  </button>
+                )}
               </div>
             )}
             {live ? null : workout.autoFinished ? (
@@ -5196,7 +5305,23 @@ export function SessionView(props: {
           onClose={() => setPhotoView(null)}
         />
       )}
-      {sheet?.kind === 'add' && (
+      {sheet?.kind === 'add' && isHome && (
+        <HomeMovePicker
+          workout={workout}
+          onPick={(move) => {
+            const created = addHomeMoveToWorkout(workout.id, move);
+            const curEx = workout.exercises.find((e) => e.id === focusedId);
+            if (focusView && curEx && curEx.sets.length > 0) {
+              const pos = focusSteps.length; // appended last
+              setFocusIdx(pos);
+            }
+            void created;
+            setSheet(null);
+          }}
+          onClose={() => setSheet(null)}
+        />
+      )}
+      {sheet?.kind === 'add' && !isHome && (
         <AddExerciseSheet
           workout={workout}
           gym={gym}
@@ -5247,7 +5372,27 @@ export function SessionView(props: {
         />
       )}
 
-      {sheet?.kind === 'replace' && (
+      {sheet?.kind === 'replace' && isHome && (
+        <HomeMovePicker
+          workout={workout}
+          replacing
+          onPick={(move) => {
+            replaceExercise(
+              workout.id,
+              sheet.exId,
+              move.name,
+              'strength',
+              move.custom
+                ? { primaryMuscle: move.muscle, secondaryMuscles: [], equipment: ['body only'] }
+                : undefined,
+            );
+            setExerciseMeasure(workout.id, sheet.exId, move.measure);
+            setSheet(null);
+          }}
+          onClose={() => setSheet(null)}
+        />
+      )}
+      {sheet?.kind === 'replace' && !isHome && (
         <AddExerciseSheet
           workout={workout}
           gym={gym}

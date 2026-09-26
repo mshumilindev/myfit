@@ -326,6 +326,27 @@ export function WorkoutRow({
   const dn = programDayNameFor(w, allWorkouts);
   const readout = workoutDayReadout(w);
   const title = dn ?? (readout ? dayReadoutLabel(readout, t) : fmtWeekday(w.startedAt, locale));
+  if (w.kind === 'home') {
+    // A home set: its own khaki house chip, its name, and sets (no tonnage).
+    return (
+      <button className="hist-item hist-workout hist-home" onClick={() => onOpen(w.id)}>
+        <span className="hist-tm tnum">{fmtClock(w.startedAt)}</span>
+        <span className="hist-ic">
+          <Icon name="house" weight="fill" />
+        </span>
+        <span className="hist-item-body">
+          <span className="hist-item-name">{w.dayName || t.homeSetTitle}</span>
+          <div className="hist-item-stats">
+            {w.finishedAt ? `${fmtDurationHM(w.finishedAt - w.startedAt)} · ` : ''}
+            {workoutSets(w)} {t.sets}
+          </div>
+        </span>
+        <span className="hist-go">
+          <Icon name="caret-right" weight="bold" />
+        </span>
+      </button>
+    );
+  }
   return (
     <button className="hist-item hist-workout" onClick={() => onOpen(w.id)}>
       <span className="hist-tm tnum">{fmtClock(w.startedAt)}</span>

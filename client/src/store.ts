@@ -73,6 +73,15 @@ import {
 import { kitEvidence, type KitEvidence } from './gymEvidence';
 import type { ExerciseSubRegions } from './data/subregions';
 import { EMPTY_GOALS, type FitGoals, type PhysiqueTarget, type BlockFocus } from './goals';
+import {
+  EMPTY_HOME,
+  HOME_IDLE_MS,
+  homeIdleFinishAt,
+  homeMoveById,
+  type HomeMove,
+  type HomeSet,
+  type HomeState,
+} from './homeSets';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
@@ -98,6 +107,7 @@ const SHARED_GYMS_KEY = 'spotter.sharedGyms';
 const REMINDERS_KEY = 'spotter.reminders';
 const BODY_KEY = 'spotter.body';
 const GOALS_KEY = 'spotter.goals';
+const HOME_KEY = 'spotter.home';
 const REST_KEY = 'spotter.restPeriods';
 const INJURY_KEY = 'spotter.injuries';
 const ACTIVITIES_KEY = 'spotter.activities';
@@ -229,6 +239,8 @@ export interface StoreState {
   goals: FitGoals;
   /** Atlas, the built-in coach: on/off, temper, role (synced, last-write-wins). */
   coach: CoachSettings;
+  /** Home sets + own home moves (synced as meta/home, last-write-wins). */
+  home: HomeState;
   /** Retained for compatibility; always empty (Firestore handles queueing). */
   queue: QueuedMutation[];
   /** Coached athletes with a live (or just-finished) session — real-time,
@@ -284,6 +296,7 @@ let state: StoreState = {
   }),
   goals: load<FitGoals>(GOALS_KEY, EMPTY_GOALS),
   coach: coachFrom(load<Partial<CoachSettings>>(COACH_KEY, {})),
+  home: { ...EMPTY_HOME, ...load<Partial<HomeState>>(HOME_KEY, {}) },
   queue: [],
   liveTrainees: [],
   syncStatus: 'pending',
@@ -323,6 +336,7 @@ function persist(): void {
     localStorage.setItem(SLEEP_SCHED_KEY, JSON.stringify(state.sleepSchedule));
     localStorage.setItem(SLEEP_SET_KEY, JSON.stringify(state.sleepSettings));
     localStorage.setItem(GOALS_KEY, JSON.stringify(state.goals));
+    localStorage.setItem(HOME_KEY, JSON.stringify(state.home));
   } catch {
     /* quota / private mode — Firestore cache is the real store */
   }
@@ -926,6 +940,14 @@ function writeGoalsDoc(): void {
   const clean = JSON.parse(JSON.stringify({ ...state.goals, updatedAt: Date.now() }));
   setDoc(doc(db, 'users', uid, 'meta', 'goals'), clean).catch(onWriteError);
 }
+function writeHomeDoc(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  const clean = JSON.parse(
+    JSON.stringify({ ...state.home, updatedAt: state.home.updatedAt ?? Date.now() }),
+  );
+  setDoc(doc(db, 'users', uid, 'meta', 'home'), clean).catch(onWriteError);
+}
 function writeMasteryDoc(): void {
   const uid = currentUid();
   if (!uid) return;
@@ -1037,12 +1059,40 @@ export function applyAutoFinish(): void {
   if (staleDrafts.size)
     setState({ workouts: state.workouts.filter((w) => !staleDrafts.has(w.id)) });
   const workouts = state.workouts.map((w) => {
+    // A home set with no new set for HOME_IDLE_MS finishes itself at its last
+    // set, keeping what was logged (not an "auto-closed" warning — it's expected).
+    if (w.finishedAt === null && w.kind === 'home') {
+      const lastAt = homeIdleFinishAt(w);
+      if (lastAt + HOME_IDLE_MS <= now) {
+        changed.push(w.id);
+        return {
+          ...w,
+          finishedAt: Math.max(lastAt, w.startedAt + 60000),
+          autoFinished: false,
+          exercises: w.exercises.filter((e) => e.sets.length > 0),
+        };
+      }
+      return w;
+    }
     if (w.finishedAt === null && w.startedAt + AUTO_FINISH_MS <= now) {
       changed.push(w.id);
       return { ...w, finishedAt: w.startedAt + AUTO_FINISH_MS, autoFinished: true };
     }
     return w;
   });
+  // An idle home set that never got a set is dropped, never saved empty.
+  const emptyHome = new Set(
+    workouts
+      .filter((w) => changed.includes(w.id) && w.kind === 'home' && w.exercises.length === 0)
+      .map((w) => w.id),
+  );
+  if (emptyHome.size) {
+    setState({ workouts: workouts.filter((w) => !emptyHome.has(w.id)) });
+    finishLiveSession();
+    const rest = changed.filter((id) => !emptyHome.has(id));
+    for (const id of rest) saveWorkout(id);
+    return;
+  }
   if (changed.length) {
     setState({ workouts, syncStatus: bumpPending() });
     for (const id of changed) saveWorkout(id);
@@ -3614,6 +3664,25 @@ export function startSyncLoop(): () => void {
   );
   unsubs.push(
     onSnapshot(
+      doc(db, 'users', uid, 'meta', 'home'),
+      (snap) => {
+        if (!snap.exists()) {
+          // First sync on this account — push home sets made before signing in.
+          if (state.home.sets.length || state.home.moves.length) writeHomeDoc();
+          return;
+        }
+        const data = snap.data() as Partial<HomeState>;
+        // Last-write-wins: a newer local edit (not yet echoed) beats the snapshot.
+        if ((state.home.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
+        state = { ...state, home: { ...EMPTY_HOME, ...data } };
+        persist();
+        emit();
+      },
+      () => undefined,
+    ),
+  );
+  unsubs.push(
+    onSnapshot(
       doc(db, 'users', uid, 'meta', 'mastery'),
       (snap) => {
         if (!snap.exists()) {
@@ -4258,6 +4327,157 @@ export function backfillWorkout(
   return workout;
 }
 
+// --- Home sets --------------------------------------------------------------
+
+function commitHome(next: Omit<HomeState, 'updatedAt'>): void {
+  setState({ home: { ...next, updatedAt: Date.now() }, syncStatus: bumpPending() });
+  writeHomeDoc();
+}
+
+/** Create or update a home set (name + ordered move ids). Returns it. */
+export function saveHomeSet(input: { id?: string; name: string; moves: string[] }): HomeSet {
+  const now = Date.now();
+  const prev = input.id ? state.home.sets.find((x) => x.id === input.id) : undefined;
+  const set: HomeSet = {
+    id: prev?.id ?? uuid(),
+    name: input.name.trim(),
+    moves: [...new Set(input.moves)],
+    createdAt: prev?.createdAt ?? now,
+    updatedAt: now,
+  };
+  const sets = prev
+    ? state.home.sets.map((x) => (x.id === set.id ? set : x))
+    : [...state.home.sets, set];
+  commitHome({ ...state.home, sets });
+  return set;
+}
+
+/** Delete a home set template. Sessions done from it stay in history. */
+export function deleteHomeSet(id: string): void {
+  commitHome({ ...state.home, sets: state.home.sets.filter((x) => x.id !== id) });
+}
+
+/** Create or update an own home move. Returns it. */
+export function saveHomeMove(
+  input: Omit<HomeMove, 'id' | 'custom' | 'updatedAt'> & { id?: string },
+): HomeMove {
+  const prev = input.id ? state.home.moves.find((m) => m.id === input.id) : undefined;
+  const move: HomeMove = {
+    id: prev?.id ?? uuid(),
+    name: input.name.trim(),
+    measure: input.measure,
+    muscle: input.muscle,
+    icon: input.icon,
+    custom: true,
+    updatedAt: Date.now(),
+  };
+  const moves = prev
+    ? state.home.moves.map((m) => (m.id === move.id ? move : m))
+    : [...state.home.moves, move];
+  commitHome({ ...state.home, moves });
+  // Renaming a move renames it in a live / draft session that uses it, so the
+  // stopwatch and icon keep resolving.
+  if (prev && prev.name !== move.name) {
+    for (const w of state.workouts) {
+      if (w.kind !== 'home' || !isLocalOnlyWorkout(w)) continue;
+      const exercises = w.exercises.map((e) =>
+        e.name === prev.name ? { ...e, name: move.name, measure: move.measure } : e,
+      );
+      patchWorkout(w.id, { exercises });
+    }
+  }
+  return move;
+}
+
+/** Delete an own move: it leaves every home set; logged sets stay in history. */
+export function deleteHomeMove(id: string): void {
+  commitHome({
+    sets: state.home.sets.map((x) => ({ ...x, moves: x.moves.filter((m) => m !== id) })),
+    moves: state.home.moves.filter((m) => m.id !== id),
+  });
+}
+
+/** Set how an exercise is logged (home moves: reps vs a stopwatch hold). */
+export function setExerciseMeasure(
+  workoutId: string,
+  exerciseId: string,
+  measure: 'reps' | 'hold' | 'time',
+): void {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (!w) return;
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) =>
+      e.id === exerciseId ? { ...e, measure: measure === 'reps' ? null : measure } : e,
+    ),
+  });
+  saveWorkout(workoutId);
+}
+
+/** Add a home move to a (live or past) home workout as an exercise. */
+export function addHomeMoveToWorkout(workoutId: string, move: HomeMove): Exercise {
+  const ex = addExercise(
+    workoutId,
+    move.name,
+    'strength',
+    move.custom
+      ? { primaryMuscle: move.muscle, secondaryMuscles: [], equipment: ['body only'] }
+      : {},
+  );
+  const w = state.workouts.find((x) => x.id === workoutId);
+  if (w) {
+    const measure = move.measure === 'reps' ? null : move.measure;
+    patchWorkout(workoutId, {
+      exercises: w.exercises.map((e) => (e.id === ex.id ? { ...e, measure } : e)),
+    });
+    saveWorkout(workoutId);
+  }
+  return (
+    state.workouts.find((x) => x.id === workoutId)?.exercises.find((e) => e.id === ex.id) ?? ex
+  );
+}
+
+/**
+ * Start a live home set: a normal session (no gym, kind 'home') with the set's
+ * moves already on it. Returns null when something else is live (a session, an
+ * activity or a sleep) — one live thing at a time.
+ */
+export function startHomeSet(input: {
+  set?: HomeSet | null;
+  name: string;
+  moves: string[];
+}): Workout | null {
+  if (state.workouts.some((w) => w.finishedAt === null && w.exercises.length > 0)) return null;
+  const w = startWorkout(null, { dayName: input.name });
+  if (!w) return null;
+  patchWorkout(w.id, { kind: 'home', homeSetId: input.set?.id ?? null });
+  for (const id of input.moves) {
+    const move = homeMoveById(state.home, id);
+    if (move) addHomeMoveToWorkout(w.id, move);
+  }
+  return state.workouts.find((x) => x.id === w.id) ?? null;
+}
+
+/**
+ * Log a forgotten home set (Log past → Home set): a finished home workout at
+ * the given time with the chosen set's moves on it, opened as a draft to add
+ * sets. Moves without sets are dropped when the editor saves.
+ */
+export function backfillHomeSet(
+  startedAt: number,
+  durationMs: number,
+  set: HomeSet | null,
+): Workout {
+  const w = backfillWorkout(startedAt, durationMs, null);
+  patchWorkout(w.id, { kind: 'home', homeSetId: set?.id ?? null, dayName: set?.name ?? null });
+  if (set) {
+    for (const id of set.moves) {
+      const move = homeMoveById(state.home, id);
+      if (move) addHomeMoveToWorkout(w.id, move);
+    }
+  }
+  return state.workouts.find((x) => x.id === w.id) ?? w;
+}
+
 export function repeatWorkout(sourceId: string): Workout | undefined {
   const src = state.workouts.find((x) => x.id === sourceId);
   if (!src) return undefined;
@@ -4277,6 +4497,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(BODY_KEY);
   localStorage.removeItem(REST_KEY);
   localStorage.removeItem(COACH_KEY);
+  localStorage.removeItem(HOME_KEY);
   localStorage.removeItem(INJURY_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
   localStorage.removeItem(SLEEP_KEY);
@@ -4318,6 +4539,7 @@ export function resetLocalData(): void {
     },
     goals: EMPTY_GOALS,
     coach: { ...COACH_DEFAULT },
+    home: EMPTY_HOME,
     queue: [],
     liveTrainees: [],
     syncStatus: 'pending',

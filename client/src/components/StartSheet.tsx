@@ -9,14 +9,17 @@
 import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import type { Gym } from '../types';
+import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
 import { currentUid } from '../api';
 import {
   activeRestPeriod,
+  backfillHomeSet,
   backfillWorkout,
   dayKey,
   gymAtCurrentPosition,
   liveSleep,
   startRestPeriod,
+  startHomeSet,
   startWorkout,
   useStore,
 } from '../store';
@@ -32,11 +35,13 @@ import {
 import { fmtDayMonth, fmtWeekday, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { ActivitySheet, SleepPanel } from './ActivitySheet';
+import { HomeSetSheet } from './HomeSetSheet';
+import './HomeSet.css';
 import { DateField, TimeField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
 
-type Sub = null | 'gym' | 'activity' | 'health' | 'past';
+type Sub = null | 'gym' | 'activity' | 'health' | 'past' | 'home';
 
 export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
   const { t, locale } = useT();
@@ -49,6 +54,10 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
   const liveAct = store.activities.find((a) => a.finishedAt === null) ?? null;
   const sleepLive = liveSleep(store.sleeps);
   const busy = !!open || !!liveAct || !!sleepLive;
+  // One live thing at a time: while a session (with an exercise), an activity
+  // or a sleep runs, the other starters are locked — only Resume, Health and
+  // Log past (it doesn't start anything) stay open.
+  const locked = (!!open && open.exercises.length > 0) || !!liveAct || !!sleepLive;
   const activeRest = activeRestPeriod(now);
 
   const finished = useMemo(
@@ -131,6 +140,16 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
       <GymPicker gyms={store.gyms} title={t.pickGymTitle} onClose={onClose} onPick={beginScratch} />
     );
   if (sub === 'activity') return <ActivitySheet shell={shell} onClose={onClose} />;
+  if (sub === 'home')
+    return (
+      <HomeSetSheet
+        onClose={onClose}
+        onStart={(input) => {
+          const w = startHomeSet(input);
+          done(w ? w.id : null);
+        }}
+      />
+    );
   if (sub === 'health')
     return <RestSheet shell={shell} onClose={onClose} allowRest={!activeRest} />;
   if (sub === 'past')
@@ -142,6 +161,11 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
           const w = backfillWorkout(startedAt, durationMs, gymId);
           onClose();
           shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: true });
+        }}
+        onCreateHome={(startedAt, durationMs, set) => {
+          const w = backfillHomeSet(startedAt, durationMs, set);
+          onClose();
+          shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: !set });
         }}
       />
     );
@@ -198,22 +222,40 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
         </button>
       )}
       <div className="ss-grid">
-        <button type="button" className="ss-tile" onClick={autoBuild}>
-          <span className="ss-ic tone-gold">
-            <Icon name="robot" weight="regular" />
+        <button
+          type="button"
+          className={`ss-tile${locked ? ' locked' : ''}`}
+          aria-disabled={locked}
+          onClick={locked ? undefined : autoBuild}
+        >
+          <span className="ss-tile-top">
+            <span className="ss-ic tone-gold">
+              <Icon name="robot" weight="regular" />
+            </span>
+            {locked && <Icon name="lock-simple" className="ss-lock" />}
           </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startAutoTitle}</span>
-            <span className="ss-ts">{t.startAutoSub}</span>
+            <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startAutoSub}</span>
           </span>
         </button>
-        <button type="button" className="ss-tile" onClick={openActivity}>
-          <span className="ss-ic tone-green">
-            <Icon name="heartbeat" weight="regular" />
+        <button
+          type="button"
+          className={`ss-tile${locked ? ' locked' : ''}`}
+          aria-disabled={locked}
+          onClick={locked ? undefined : openActivity}
+        >
+          <span className="ss-tile-top">
+            <span className="ss-ic tone-green">
+              <Icon name="heartbeat" weight="regular" />
+            </span>
+            {locked && <Icon name="lock-simple" className="ss-lock" />}
           </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startActivityTitle}</span>
-            <span className="ss-ts">{t.startActivitySub}</span>
+            <span className="ss-ts">
+              {locked ? t.startFinishFirst(liveName) : t.startActivitySub}
+            </span>
           </span>
         </button>
         <button type="button" className="ss-tile" onClick={() => setSub('health')}>
@@ -233,6 +275,21 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
             <span className="ss-tt">{t.startPastTitle}</span>
             <span className="ss-ts">{t.startPastSub}</span>
           </span>
+        </button>
+        <button
+          type="button"
+          className={`ss-tile ss-home${locked ? ' locked' : ''}`}
+          aria-disabled={locked}
+          onClick={locked ? undefined : () => setSub('home')}
+        >
+          <span className="ss-ic tone-home">
+            <Icon name="house" weight="regular" />
+          </span>
+          <span className="ss-tile-text">
+            <span className="ss-tt">{t.startHomeTitle}</span>
+            <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startHomeSub}</span>
+          </span>
+          {locked && <Icon name="lock-simple" className="ss-lock" />}
         </button>
       </div>
     </Sheet>
@@ -417,8 +474,13 @@ export function BackfillSheet(props: {
   gyms: Gym[];
   onClose: () => void;
   onCreate: (startedAt: number, durationMs: number, gymId: string | null) => void;
+  /** Log past → Home set: a finished home set prefilled with the chosen set. */
+  onCreateHome?: (startedAt: number, durationMs: number, set: HomeSet | null) => void;
 }) {
   const { t } = useT();
+  const homeSets = useStore().home.sets;
+  const [kind, setKind] = useState<'gym' | 'home'>('gym');
+  const [homeSetId, setHomeSetId] = useState<string | null>(homeSets[0]?.id ?? null);
   const [gymId, setGymId] = useState<string | null>(null);
   const [gymPicker, setGymPicker] = useState(false);
   const chosenGym = props.gyms.find((g) => g.id === gymId) ?? null;
@@ -450,6 +512,54 @@ export function BackfillSheet(props: {
         <Icon name="arrow-counter-clockwise" />
         <span className="t">{t.logPastSession}</span>
       </div>
+      {props.onCreateHome && (
+        <div className="seg2 backfill-kind" role="tablist">
+          <button
+            type="button"
+            className={kind === 'gym' ? 'active' : ''}
+            onClick={() => {
+              setKind('gym');
+              if (duration === HOME_BACKFILL_MIN) setDuration(60);
+            }}
+          >
+            {t.backfillKindGym}
+          </button>
+          <button
+            type="button"
+            className={kind === 'home' ? 'active' : ''}
+            onClick={() => {
+              setKind('home');
+              if (duration === 60) setDuration(HOME_BACKFILL_MIN);
+            }}
+          >
+            {t.backfillKindHome}
+          </button>
+        </div>
+      )}
+      {kind === 'home' && (
+        <div className="field-block">
+          <span className="field-label">{t.backfillWhichHomeSet}</span>
+          <div className="backfill-sets">
+            {homeSets.map((hs) => (
+              <button
+                key={hs.id}
+                type="button"
+                className={`hs-mchip${homeSetId === hs.id ? ' on' : ''}`}
+                onClick={() => setHomeSetId(hs.id)}
+              >
+                {hs.name}
+              </button>
+            ))}
+            <button
+              type="button"
+              className={`hs-mchip${homeSetId === null ? ' on' : ''}`}
+              onClick={() => setHomeSetId(null)}
+            >
+              {t.backfillHomeEmpty}
+            </button>
+          </div>
+        </div>
+      )}
       <div className="backfill-fields">
         <label className="field-block">
           <span className="field-label">{t.backfillDate}</span>
@@ -466,7 +576,8 @@ export function BackfillSheet(props: {
           </label>
         </div>
       </div>
-      {props.gyms.length > 0 && (
+      {kind === 'home' && <div className="hs-hint">{t.backfillHomeNote}</div>}
+      {kind === 'gym' && props.gyms.length > 0 && (
         <label className="field-block">
           <span className="field-label">{t.backfillGym}</span>
           <button
@@ -518,7 +629,15 @@ export function BackfillSheet(props: {
         <button
           className="btn btn-primary grow"
           disabled={invalid}
-          onClick={() => props.onCreate(startedAt, duration * 60000, gymId)}
+          onClick={() =>
+            kind === 'home' && props.onCreateHome
+              ? props.onCreateHome(
+                  startedAt,
+                  duration * 60000,
+                  homeSets.find((x) => x.id === homeSetId) ?? null,
+                )
+              : props.onCreate(startedAt, duration * 60000, gymId)
+          }
         >
           {t.backfillContinue}
         </button>

@@ -97,6 +97,9 @@ export interface Exercise {
   /** Muscle groups (design MG-1): one primary, any number of secondaries. */
   primaryMuscle?: string | null;
   secondaryMuscles?: string[];
+  /** Home set moves: 'hold' / 'time' are logged with a stopwatch (a
+   *  static-dynamic set, bodyweight, seconds in durationMin). Absent = reps. */
+  measure?: 'reps' | 'hold' | 'time' | null;
   sets: SetEntry[];
 }
 
@@ -111,6 +114,10 @@ export interface Workout {
   dayName?: string | null;
   /** Muscle-only program-day targets that should guide exercise suggestions. */
   targetMuscles?: string[];
+  /** 'home' = a home set session (no gym, home-only moves). Absent = gym. */
+  kind?: 'home' | null;
+  /** The home set template this session was started from (if any). */
+  homeSetId?: string | null;
   exercises: Exercise[];
 }
 

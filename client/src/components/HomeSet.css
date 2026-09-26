@@ -1,0 +1,584 @@
+/* ==========================================================================
+   Home set (design "Spotter — Home set"): the Home set sheet (saved sets,
+   builder, own moves), the home-move picker in a session and the stopwatch.
+   Home moves wear a quiet khaki chip so they read apart from gym sessions
+   (brass) and activities (green / blue).
+   ========================================================================== */
+:root {
+  --home-tint: #2b2a1a;
+  --home-ink: #e8dc9a;
+  --home-line: #4a4526;
+}
+
+.sheet.home-sheet {
+  gap: 0;
+}
+.hs-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hs-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+.hs-head .hs-title {
+  flex: 1;
+}
+.hs-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.hs-title-ic {
+  font-size: 22px;
+  color: var(--home-ink);
+}
+.hs-back {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  margin-left: -8px;
+  border: none;
+  background: none;
+  color: var(--color-neutral-300);
+  font-size: 19px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.hs-link {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: 6px 0;
+}
+.hs-link.muted {
+  color: var(--color-neutral-500);
+}
+.hs-link:disabled {
+  opacity: 0.4;
+}
+.hs-cap {
+  margin: -6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--color-neutral-400);
+}
+.hs-row-sp {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.hs-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--home-ink);
+}
+.hs-wide {
+  width: 100%;
+}
+.hs-spacer {
+  flex: 1;
+  min-height: 4px;
+}
+.hs-hint {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+}
+.hs-hint i {
+  flex: none;
+  margin-top: 1px;
+}
+.hs-foot {
+  margin-top: -6px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.hs-err {
+  font-size: 12px;
+  color: var(--color-danger-text);
+}
+
+/* --- saved home sets -------------------------------------------------------- */
+.hs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hs-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px rgba(233, 234, 236, 0.06);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  transition:
+    transform 0.14s ease,
+    background 0.14s ease;
+}
+.hs-card.pressed {
+  background: #2a2b2e;
+  transform: scale(0.985);
+}
+.hs-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hs-card-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.hs-card-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+.hs-card-last {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.hs-go {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+.hs-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.hs-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--home-tint);
+  color: var(--home-ink);
+  box-shadow: inset 0 0 0 1px var(--home-line);
+}
+
+/* --- builder: selectable move tiles ---------------------------------------- */
+.hs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.hs-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 84px;
+  padding: 12px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--color-neutral-800);
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.hs-tile-ic {
+  font-size: 22px;
+  color: var(--color-neutral-400);
+}
+.hs-tile.on {
+  background: var(--home-tint);
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--home-ink);
+}
+.hs-tile.on .hs-tile-ic {
+  color: var(--home-ink);
+}
+.hs-tile.new {
+  border: 1px dashed #5b4420;
+  background: transparent;
+  color: var(--color-accent);
+}
+.hs-tile.new .hs-tile-ic {
+  color: var(--color-accent);
+}
+.hs-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--home-ink);
+  color: #1e1c0f;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+}
+.hs-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.hs-actions .btn {
+  flex: 1;
+}
+
+/* --- move lists (edit set, add move) ---------------------------------------- */
+.hs-mlist {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--color-surface);
+  padding: 2px 12px;
+}
+.hs-mrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border: none;
+  border-top: 1px solid rgba(233, 234, 236, 0.07);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+.hs-mlist .hs-mrow:first-child {
+  border-top: 0;
+}
+.hs-mrow.tap {
+  cursor: pointer;
+}
+.hs-mrow.on {
+  background: var(--home-tint);
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+  width: calc(100% + 24px);
+}
+.hs-mic {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--home-tint);
+  color: var(--home-ink);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+}
+.hs-mrow.on .hs-mic {
+  background: #3d3a22;
+}
+.hs-mic.ghost {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px #5b4420;
+  color: var(--color-accent);
+}
+.hs-mtext {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.hs-mname {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.hs-msub {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}
+.hs-mbtn {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.hs-mbtn:disabled {
+  opacity: 0.3;
+}
+.hs-add {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  display: grid;
+  place-items: center;
+}
+.hs-mrow.on .hs-add {
+  background: var(--color-accent);
+  box-shadow: none;
+  color: #1e160b;
+}
+.hs-create-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+  text-align: left;
+}
+
+/* --- own move form ----------------------------------------------------------- */
+.hs-seg {
+  flex: none;
+}
+.hs-seg button {
+  padding: 10px 0;
+  font-size: 13px;
+}
+.hs-chips.wrap {
+  gap: 8px;
+}
+.hs-mchip {
+  padding: 6px 11px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: #26282c;
+  color: var(--color-neutral-300);
+  box-shadow: inset 0 0 0 1px rgba(233, 234, 236, 0.08);
+  cursor: pointer;
+}
+.hs-mchip.on {
+  background: var(--home-tint);
+  color: var(--home-ink);
+  box-shadow: inset 0 0 0 1px var(--home-line);
+}
+.hs-icons {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+.hs-icbtn {
+  height: 46px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-neutral-800);
+  color: var(--color-neutral-300);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  cursor: pointer;
+}
+.hs-icbtn.on {
+  background: var(--home-tint);
+  color: var(--home-ink);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+
+/* --- home move picker (Add move in a home session) -------------------------- */
+.home-pick .hs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--home-tint);
+  color: var(--home-ink);
+  box-shadow: inset 0 0 0 1px var(--home-line);
+}
+.home-pick .hs-note {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+}
+
+/* --- live hero on the home image ---------------------------------------------- */
+.live-hero-bg .home-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 60%;
+}
+
+/* --- stopwatch set card (hold / time moves) ---------------------------------- */
+.gset.kind-hold::after {
+  background: color-mix(in srgb, var(--set-sd, #e98bb8) 9%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--set-sd, #e98bb8) 45%, transparent);
+}
+.gset.kind-hold .gset-title {
+  color: var(--set-sd, #e98bb8);
+}
+.hold-watch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 12px;
+}
+.hold-watch .hw-time {
+  font-size: 56px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.hold-watch.idle .hw-time {
+  color: var(--color-neutral-600);
+}
+.hold-watch .hw-sub {
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+  text-align: center;
+}
+.hold-last {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+
+/* --- history row --------------------------------------------------------------- */
+.hist-item.hist-home .hist-ic {
+  background: var(--home-tint);
+  color: var(--home-ink);
+}
+
+/* --- Start sheet: locked tiles while something is live ------------------------ */
+.ss-tile.locked {
+  opacity: 0.42;
+  cursor: default;
+}
+.ss-tile .ss-lock {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--color-neutral-400);
+}
+.ss-tile.ss-home {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.ss-tile.ss-home .ss-tile-text {
+  flex: 1;
+  min-width: 0;
+}
+.ss-ic.tone-home {
+  background: var(--home-tint);
+  color: var(--home-ink);
+}
+
+/* --- Log past: Gym session | Home set ----------------------------------------- */
+.backfill-kind {
+  display: flex;
+}
+.backfill-kind button {
+  padding: 10px 0;
+  font-size: 13px;
+}
+.backfill-sets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ss-tile-top {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Start sheet rhythm: hero → grid spaced like the grid itself, same radius. */
+.start-sheet .ss-hero {
+  border-radius: 20px;
+}
+.start-sheet .ss-hero + .ss-grid {
+  margin-top: -4px;
+}
+
+/* Exercise options (home): move up / down as two buttons in one row. */
+.opts-move {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 6px 0;
+}
+.opts-move button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-neutral-900);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+.opts-move button i {
+  color: var(--color-accent);
+}
+.opts-move button:disabled {
+  opacity: 0.35;
+}
+.past-hero-bg .home-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.past-home-row {
+  cursor: default;
+  color: var(--home-ink);
+}

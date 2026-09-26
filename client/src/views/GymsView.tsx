@@ -55,6 +55,17 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
   const [justAdded, setJustAdded] = useState<string | null>(null);
   const [selectedGymId, setSelectedGymId] = useState<string | null>(null);
   const showDesktopDetail = useDesktopDetail();
+  // Where we are, for the "1.2 km ·" on My gyms (same as the Nearby rows).
+  const [here, setHere] = useState<Coords | null>(null);
+  useEffect(() => {
+    let alive = true;
+    getCurrentPositionOnce()
+      .then((p) => alive && setHere({ lat: p.lat, lng: p.lng }))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   async function locateFor(gymName: string) {
     const n = gymName.trim();
@@ -265,7 +276,10 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                       <span className="n">{g.name}</span>
                     </div>
                     <div className="meta">
-                      <span>{savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}</span>
+                      <span>
+                        {here ? `${fmtDistance(haversineM(here, g))} · ` : ''}
+                        {savedAddrs[g.id] ?? `${g.lat.toFixed(5)}, ${g.lng.toFixed(5)}`}
+                      </span>
                     </div>
                   </div>
                 </div>

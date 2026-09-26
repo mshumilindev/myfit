@@ -51,21 +51,35 @@ export function LiveHero({
   const sets = workoutSets(workout);
   const volume = fmtTonnes(workoutVolumeKg(workout));
   const state = closed ? 'closed' : draft ? 'draft' : offline ? 'offline' : 'live';
-  const label = closed
-    ? t.liveClosedAuto
-    : draft
-      ? t.sessionNotStarted
+  // A home set runs on the home image, says "Home" and has no gym to attach.
+  const home = workout.kind === 'home';
+  const homeName = workout.dayName || t.homeSetTitle;
+  const label = home
+    ? closed
+      ? t.liveClosedAuto
       : mode === 'session'
         ? offline
-          ? `${t.inSession} · ${t.liveOfflineQueued(queued)}`
-          : gym
-            ? t.inSessionAt(gym.name)
-            : t.inSession
+          ? `${t.homeInSession} · ${t.liveOfflineQueued(queued)}`
+          : t.homeInSession
         : offline
           ? `${t.liveLabel} · ${t.liveOfflineQueued(queued)}`
-          : `${t.liveLabel} · ${gym ? gym.name : t.liveNoGym}`;
-  const meta =
-    mode === 'session'
+          : `${t.liveLabel} · ${t.homeSetTitle} · ${homeName}`
+    : closed
+      ? t.liveClosedAuto
+      : draft
+        ? t.sessionNotStarted
+        : mode === 'session'
+          ? offline
+            ? `${t.inSession} · ${t.liveOfflineQueued(queued)}`
+            : gym
+              ? t.inSessionAt(gym.name)
+              : t.inSession
+          : offline
+            ? `${t.liveLabel} · ${t.liveOfflineQueued(queued)}`
+            : `${t.liveLabel} · ${gym ? gym.name : t.liveNoGym}`;
+  const meta = home
+    ? `${sets} ${t.sets} · ${workout.exercises.length} ${t.homeMovesWord}`
+    : mode === 'session'
       ? `${sets} ${t.sets} · ${volume} · ${workout.exercises.length} ${t.exercises}`
       : `${sets} · ${volume}`;
   const interactive = mode !== 'session' && !!onResume;
@@ -85,7 +99,9 @@ export function LiveHero({
   return (
     <div className={`live-hero ${state} ${mode}-live-hero`}>
       <div className="live-hero-bg">
-        {gym ? (
+        {home ? (
+          <img className="home-hero-img" src="/home-hero.webp" alt="" />
+        ) : gym ? (
           <GymThumb name={gym.name} lat={gym.lat} lng={gym.lng} size={320} />
         ) : (
           <GymThumb name="" lat={0} lng={0} size={320} />
@@ -100,7 +116,7 @@ export function LiveHero({
         <div className="live-hero-body">{body}</div>
       )}
       <div className="live-hero-actions">
-        {!closed && mode === 'session' && (
+        {!closed && mode === 'session' && !home && (
           <button
             className="live-attach icon-only"
             onClick={() => setPicker(true)}

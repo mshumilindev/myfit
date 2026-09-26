@@ -35,6 +35,7 @@ import {
   resolveMuscles,
   workoutDayReadout,
   type useStore,
+  backfillHomeSet,
 } from '../store';
 import {
   fmtDayMonth,
@@ -1599,6 +1600,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             const w = backfillWorkout(startedAt, durationMs, gymId);
             setBackfill(false);
             shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: true });
+          }}
+          onCreateHome={(startedAt, durationMs, set) => {
+            const w = backfillHomeSet(startedAt, durationMs, set);
+            setBackfill(false);
+            shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: !set });
           }}
         />
       )}
