@@ -32,8 +32,19 @@ function walkShape(base: unknown, candidate: unknown, path: string[] = []): void
   }
 }
 
-function callEveryFunction(value: unknown): void {
+function callEveryFunction(value: unknown, key = ''): void {
   if (typeof value === 'function') {
+    if (key === 'atlasOffWarn') {
+      for (const temper of [0, 1, 2]) {
+        for (const warning of [1, 2, 3]) {
+          const result = value(warning, temper, '12:30');
+          expect(typeof result).toBe('string');
+          expect(result).toBeTruthy();
+          if (warning === 3) expect(result).toContain('12:30');
+        }
+      }
+      return;
+    }
     try {
       expect(value(2, 'Squat', '31 July', 'reason')).toBeTruthy();
     } catch {
@@ -43,7 +54,7 @@ function callEveryFunction(value: unknown): void {
     return;
   }
   if (!value || typeof value !== 'object') return;
-  for (const nested of Object.values(value)) callEveryFunction(nested);
+  for (const [nestedKey, nested] of Object.entries(value)) callEveryFunction(nested, nestedKey);
 }
 
 describe('F-02 i18n', () => {

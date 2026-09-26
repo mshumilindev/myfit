@@ -1762,14 +1762,7 @@ export const en = {
   pushDenied: 'Notifications are blocked for Spotter. Allow them in the phone’s settings.',
   atlasName: 'Atlas',
   atlasTemper: ['Warm', 'Blunt', 'Merciless'],
-  atlasTemperTag: [
-    'your gym bro',
-    'straight talk, no fluff',
-    'roasts every lazy set',
-    '“Yo bro, 12 sets in 50 min — beast mode! Now go eat.”',
-    '“You rushed your rest. That cost you set three.”',
-    '“Eight sets? I’ve seen warm-ups with more ambition. Your mom does that before coffee.”',
-  ],
+  atlasTemperTag: ['your gym bro', 'straight talk, no fluff', 'roasts every lazy set'],
   atlasTemperQuote: [
     '“Yo bro, 12 sets in 50 min — beast mode! Now go eat.”',
     '“You rushed your rest. That cost you set three.”',
