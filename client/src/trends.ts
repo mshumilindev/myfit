@@ -12,6 +12,7 @@
  *   tip       — icon + headline + nudge (plateau, recovery, rest, neglect…)
  * Each card carries a level: risk (ruby) · info (sapphire) · good (emerald).
  */
+import { weekStartOf as trainingWeekStart } from './weekStart';
 import {
   isStrengthExercise,
   muscleSetsInWorkout,
@@ -174,11 +175,9 @@ function areaSetsFrom(perMuscle: Map<MuscleGroup, number>): AreaSets[] {
 }
 const HZ_LABEL = ['30d', '90d', '180d', '1y'];
 
+/** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekStart(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.getTime();
+  return trainingWeekStart(ts);
 }
 function topWeight(ex: Workout['exercises'][number]): number {
   let w = 0;

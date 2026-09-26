@@ -6,6 +6,7 @@
  * and the Exercises library. Each tile drills into that page, which carries a
  * "‹ Overview" back link.
  */
+import { dateInWeek, useWeekStartDay, weekOrder, weekStartOf } from '../weekStart';
 import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import type { ProgSeg } from '../App';
@@ -33,13 +34,6 @@ import { Icon, useExerciseName } from '../ui';
 
 const DAY_MS = 24 * 3600 * 1000;
 const WEEK_MS = 7 * DAY_MS;
-
-function weekStartOf(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.getTime();
-}
 
 // Older weeks graphite, the recent ones brightening toward the accent.
 const BAR_TONES = ['n', 'n', 'n', 'n', 'a1', 'a2', 'a2', 'a3'];
@@ -239,7 +233,8 @@ function ProgramTile({
   weekdayLong: (ts: number) => string;
 }) {
   const { t } = useT();
-  const monday = weekStartOf(now);
+  const weekStart = useWeekStartDay();
+  const first = weekStartOf(now, weekStart);
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
 
   if (!program) {
@@ -266,7 +261,7 @@ function ProgramTile({
     for (let k = 1; k <= 7; k++) {
       const day = ((todayWeekday - 1 + k) % 7) + 1;
       if (programDayHasPlan(program, day)) {
-        return t.ovProgramRestNext(nameOf(day), weekdayLong(monday + (day - 1) * DAY_MS));
+        return t.ovProgramRestNext(nameOf(day), weekdayLong(dateInWeek(first, day, weekStart)));
       }
     }
     return t.progRestDay;
@@ -279,15 +274,14 @@ function ProgramTile({
         <Icon name="list-checks" />
       </span>
       <span className="ov-week">
-        {Array.from({ length: 7 }, (_, i) => {
-          const day = i + 1;
+        {weekOrder(weekStart).map((day) => {
           const plan = programDayHasPlan(program, day);
           return (
             <span
               key={day}
               className={`ov-day${day === todayWeekday ? ' is-today' : ''}${plan ? '' : ' is-rest'}`}
             >
-              <span className="ov-dl">{weekdayLabel(monday + i * DAY_MS)}</span>
+              <span className="ov-dl">{weekdayLabel(dateInWeek(first, day, weekStart))}</span>
               <span className="ov-dn">{plan ? nameOf(day) : t.progRestShort}</span>
             </span>
           );

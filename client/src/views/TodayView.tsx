@@ -1,4 +1,12 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import {
+  dateInWeek,
+  useWeekStartDay,
+  weekBounds,
+  weekOrder,
+  weekPos,
+  weekStartOf,
+} from '../weekStart';
 import { useEffect, useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import { computeTrends } from '../trends';
@@ -63,13 +71,6 @@ type Store = ReturnType<typeof useStore>;
 
 const DAY_MS = 24 * 3600 * 1000;
 const WEEK_MS = 7 * DAY_MS;
-
-function weekStartOf(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.getTime();
-}
 
 /** minutes-since-midnight → "HH:MM" (pure; tabular clock). */
 function hhmm(min: number): string {
@@ -157,7 +158,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const now = useNowTick(!!open);
   const todayWeekday = ((new Date(now).getDay() + 6) % 7) + 1;
-  const weekMonday = weekStartOf(now);
+  const weekStart = useWeekStartDay();
+  const weekFirst = weekStartOf(now, weekStart);
+  /** Before today in THIS training week (follows the chosen first day). */
+  const beforeToday = (day: number) => weekPos(day, weekStart) < weekPos(todayWeekday, weekStart);
+  const afterToday = (day: number) => weekPos(day, weekStart) > weekPos(todayWeekday, weekStart);
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   const hasHistory = finished.length > 0;
   const historyDayCount = buildHistoryDays(finished, store.activities, store.sleeps).length;
@@ -198,16 +203,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   })();
 
   // Which weekdays (1=Mon…7=Sun) already have a logged session in the CURRENT
-  // Mon–Sun week — drives the "done" marks on the program calendar.
+  // training week (it starts on the day chosen in Profile › Settings) — drives
+  // the "done" marks on the program calendar.
   const weekTrainedDays = (() => {
-    const d = new Date(now);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    const weekStart = d.getTime();
-    const weekEnd = weekStart + 7 * DAY_MS;
+    const [weekFrom, weekEnd] = weekBounds(now, weekStart);
     const set = new Set<number>();
     for (const w of finished) {
-      if (w.startedAt >= weekStart && w.startedAt < weekEnd) {
+      if (w.startedAt >= weekFrom && w.startedAt < weekEnd) {
         set.add(((new Date(w.startedAt).getDay() + 6) % 7) + 1);
       }
     }
@@ -217,14 +219,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // Rest / illness state per weekday of the current week (day 1..7 → mode), so
   // the program calendar can show a sick or rest day instead of a plain "missed".
   const weekRestMode = (() => {
-    const d = new Date(now);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    const weekStart = d.getTime();
     const todayK = dayKey(now);
     const m = new Map<number, 'active' | 'off' | 'illness'>();
     for (let day = 1; day <= 7; day++) {
-      const dk = dayKey(weekStart + (day - 1) * DAY_MS);
+      const dk = dayKey(dateInWeek(weekFirst, day, weekStart));
       const r = store.restPeriods.find(
         (rp) => dk >= rp.startDay && dk <= (rp.open ? todayK : rp.endDay),
       );
@@ -723,11 +721,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // blank (a planned full rest still shows its plane, dimmed). Taps keep their
   // old meaning: today's ▶ starts, past days open the day drawer.
   const todayTrained = weekTrainedDays.has(todayWeekday);
-  const dayStartOf = (day: number) => {
-    const c = new Date(weekMonday);
-    c.setDate(c.getDate() + (day - 1));
-    return c.getTime();
-  };
+  const dayStartOf = (day: number) => dateInWeek(weekFirst, day, weekStart);
   // Anything logged on a day (session, activity or a night's sleep) makes its
   // pill open the day drawer — today included.
   const dayHasItems = (start: number) => {
@@ -795,7 +789,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       const todayMuscles = programDayMuscles(a, todayWeekday);
       const todaySummary =
         todayItems.length === 0 && todayMuscles.length > 0
-          ? todayMuscles.map((m) => t.muscleGroups[m]).join(' · ')
+          ? todayMuscles.includes('fullbody')
+            ? t.muscleGroups.fullbody
+            : todayMuscles.map((m) => t.muscleGroups[m]).join(' · ')
           : todayItems.length === 1
             ? compactProgramDaySummary(todayItems)
             : t.progDayWorkoutSummary(
@@ -809,12 +805,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             ? `${todayName} — ${todaySummary}`
             : null;
 
-      const cells: WeekCell[] = Array.from({ length: 7 }, (_, i) => {
-        const day = i + 1;
+      const cells: WeekCell[] = weekOrder(weekStart).map((day) => {
         const hasPlan = programDayHasPlan(a, day);
         const restMode = weekRestMode.get(day);
         const isToday = day === todayWeekday;
-        const isPast = day < todayWeekday;
+        const isPast = beforeToday(day);
         const done = weekTrainedDays.has(day);
         const missed = hasPlan && !done && isPast && !restMode;
         const canOpenDay =
@@ -823,28 +818,27 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         // (a sick / rest day is not a "start" prompt).
         const canStart = isToday && hasPlan && !trainedToday && !done && !restMode;
         const name = hasPlan ? programDayName(a, day, t.progDay) : t.progRestDay;
-        const state: PillState =
-          day > todayWeekday
-            ? restMode === 'off'
-              ? 'off-next'
-              : hasPlan
-                ? 'next-train'
-                : 'next-rest'
-            : done
-              ? 'done'
-              : restMode === 'illness'
-                ? 'sick'
-                : restMode === 'off'
-                  ? 'off'
-                  : restMode === 'active'
-                    ? 'rest'
-                    : canStart
-                      ? injuryRehab
-                        ? 'injury'
-                        : 'play'
-                      : missed
-                        ? 'missed'
-                        : 'rest';
+        const state: PillState = afterToday(day)
+          ? restMode === 'off'
+            ? 'off-next'
+            : hasPlan
+              ? 'next-train'
+              : 'next-rest'
+          : done
+            ? 'done'
+            : restMode === 'illness'
+              ? 'sick'
+              : restMode === 'off'
+                ? 'off'
+                : restMode === 'active'
+                  ? 'rest'
+                  : canStart
+                    ? injuryRehab
+                      ? 'injury'
+                      : 'play'
+                    : missed
+                      ? 'missed'
+                      : 'rest';
         return {
           day,
           state,
@@ -912,32 +906,30 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // ▶ until something's logged.
   const weekCard = (() => {
     if (assignment && assignedActive) return null;
-    const cells: WeekCell[] = Array.from({ length: 7 }, (_, i) => {
-      const day = i + 1;
+    const cells: WeekCell[] = weekOrder(weekStart).map((day) => {
       const start = dayStartOf(day);
       const dk = dayKey(start);
       const isToday = day === todayWeekday;
-      const isPast = day < todayWeekday;
+      const isPast = beforeToday(day);
       const logged = weekTrainedDays.has(day);
       const rest = logged ? undefined : weekRestMode.get(day);
-      const state: PillState =
-        day > todayWeekday
-          ? rest === 'off'
-            ? 'off-next'
-            : 'blank'
-          : logged
-            ? 'done'
-            : rest === 'illness'
-              ? 'sick'
-              : rest === 'off'
-                ? 'off'
-                : rest === 'active'
-                  ? 'rest'
-                  : isToday
-                    ? injuryRehab
-                      ? 'injury'
-                      : 'play'
-                    : 'rest';
+      const state: PillState = afterToday(day)
+        ? rest === 'off'
+          ? 'off-next'
+          : 'blank'
+        : logged
+          ? 'done'
+          : rest === 'illness'
+            ? 'sick'
+            : rest === 'off'
+              ? 'off'
+              : rest === 'active'
+                ? 'rest'
+                : isToday
+                  ? injuryRehab
+                    ? 'injury'
+                    : 'play'
+                  : 'rest';
       const hasDayItems =
         logged ||
         !!rest ||

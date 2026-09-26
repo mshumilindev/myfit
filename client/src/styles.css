@@ -39058,3 +39058,56 @@ body {
 .atl-sheet .atl-act-ic svg {
   color: inherit;
 }
+
+/* Header actions (mastery · notifications · language): one family of square
+   icon buttons — same size, radius and hairline, icon only. */
+.app-brand-actions {
+  gap: 8px;
+}
+.app-brand-actions .mst-badge,
+.app-brand-actions .app-bell,
+.app-brand-actions .lang-chip {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0;
+  gap: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text);
+}
+.app-brand-actions .mst-badge.calib {
+  background: transparent;
+  box-shadow: none;
+}
+.app-brand-actions .app-bell {
+  font-size: 19px;
+}
+.app-brand-actions .app-bell-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+}
+.app-brand-actions .lang-chip {
+  font-size: 18px;
+}
+
+/* Profile › Settings · "Week starts on" — a quiet native select. */
+.profile-week-start {
+  flex: none;
+  margin-left: auto;
+  height: 34px;
+  padding: 0 28px 0 12px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}

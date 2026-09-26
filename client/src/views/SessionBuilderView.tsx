@@ -4,6 +4,7 @@
  * live and ending on a Review of the full generated day. Start materialises it
  * into a live session; the gym is auto-chosen (nearest, else the usual one).
  */
+import { weekOrder } from '../weekStart';
 import { useMemo, useState, useRef, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { Icon, useExerciseName } from '../ui';
@@ -558,7 +559,7 @@ export function SessionBuilderView({
           />
           <span className="section-title">{t.sbSaveOn}</span>
           <div className="sbw-wdrow">
-            {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+            {weekOrder().map((n) => (
               <button
                 key={n}
                 className={`sbw-wd${n === selWd ? ' on' : ''}${filled.includes(n) ? ' filled' : ''}`}

@@ -668,8 +668,10 @@ button.wk-pill {
   -webkit-tap-highlight-color: transparent;
 }
 .wk-pill-bar {
+  /* Square day cells (same radius), capped so wide layouts stay square too. */
   width: 100%;
-  height: 28px;
+  max-width: 44px;
+  aspect-ratio: 1;
   box-sizing: border-box;
   border-radius: 9px;
   display: grid;

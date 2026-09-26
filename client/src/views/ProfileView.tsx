@@ -1,4 +1,5 @@
 /** Full user profile page: direct-link safe, data-rich, role-aware. */
+import { setWeekStartDay, useWeekStartDay, type IsoDay } from '../weekStart';
 import { temperIndex } from '../atlas/types';
 import { useEffect, useState, type ReactNode } from 'react';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -134,6 +135,7 @@ export function ProfileView({
   const { t, locale } = useT();
   const exName = useExerciseName();
   const { weightUnit, coach } = useStore();
+  const weekStart = useWeekStartDay();
   const [loaded, setLoaded] = useState<{ userId: string; value: Load }>(() => {
     const cached = cachePeek<ProfileData>(`profile.${userId}`);
     return { userId, value: cached ? cached.data : 'loading' };
@@ -591,6 +593,22 @@ export function ProfileView({
                     ))}
                   </div>
                 </div>
+                <label className="profile-setting-row static">
+                  <Icon name="calendar-blank" />
+                  <span>{t.weekStartsOn}</span>
+                  <select
+                    className="profile-week-start"
+                    value={weekStart}
+                    aria-label={t.weekStartsOn}
+                    onChange={(e) => setWeekStartDay(Number(e.target.value) as IsoDay)}
+                  >
+                    {([1, 2, 3, 4, 5, 6, 7] as IsoDay[]).map((d) => (
+                      <option key={d} value={d}>
+                        {t.weekDayNames[d - 1]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <button
                   className="profile-setting-row"
                   onClick={() => shell.openOverlay({ screen: 'coach' })}

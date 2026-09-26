@@ -1,4 +1,5 @@
 /** Muscle history — direct drilldown from muscle chips across the app. */
+import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { useState } from 'react';
 import { exerciseVolumeKg, resolveMuscles, topSet, useStore } from '../store';
 import { fmtDayMonth, fmtKg, fmtTonnes, useT } from '../i18n';
@@ -9,11 +10,9 @@ import type { Shell } from '../App';
 
 const WEEK_MS = 7 * 24 * 3600 * 1000;
 
+/** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekStart(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.getTime();
+  return trainingWeekStart(ts);
 }
 
 export function MuscleHistoryView({

@@ -58,6 +58,15 @@ export interface ExercisePickerProps {
   onCardio: () => void;
   onCreate: (name: string) => void;
   onClose: () => void;
+  /** Program authoring: the same picker without recommendations — no
+   *  suggestions, readiness, "done today", targets or last-session loads. */
+  plain?: boolean;
+  /** Header subtitle override (e.g. "Mon · Upper A"). */
+  subtitle?: string;
+  /** Names already on the day — marked "Added" (a tap still adds; no selected state). */
+  added?: string[];
+  /** Label of the add button in the details sheet / preview. */
+  addLabel?: string;
 }
 
 const PAGE = 24;
@@ -80,8 +89,14 @@ function subLabel(t: Strings, s: SubId): string {
   return isFocusSub(s) ? t.subMuscleNames[s] : t.muscleGroups[s];
 }
 
-function itemMeta(t: Strings, i: PickItem): string {
+function itemMeta(t: Strings, i: PickItem, plain = false): string {
   const eq = i.equipment ? t.equipmentNames[i.equipment] : null;
+  if (plain) {
+    const others = i.secondary.filter((m) => m !== 'cardio').slice(0, 1);
+    return [eq, ...others.map((m) => `+ ${t.muscleGroups[m].toLowerCase()}`)]
+      .filter(Boolean)
+      .join(' · ');
+  }
   if (i.doneToday) return t.pickAgain(fmtSet(i.doneToday.weight, i.doneToday.reps));
   if (!i.available && i.equipment) return t.noItemHere(t.equipmentNames[i.equipment]);
   if (i.last) return [eq, fmtSet(i.last.weight, i.last.reps)].filter(Boolean).join(' · ');
@@ -126,6 +141,16 @@ function InfoButton({ onClick, label }: { onClick: () => void; label: string }) 
     >
       <Icon name="info" />
     </button>
+  );
+}
+
+function AddedBadge({ on, t }: { on: boolean; t: Strings }) {
+  if (!on) return null;
+  return (
+    <span className="xp-badge done">
+      <Icon name="check" />
+      {t.pgAdded}
+    </span>
   );
 }
 
@@ -192,9 +217,17 @@ export function ExercisePicker(props: ExercisePickerProps) {
     () => applyFilter(items, { equipment: equip, onlyGym: gymOnly }),
     [items, equip, gymOnly],
   );
+  const plain = !!props.plain;
   const suggestions = useMemo(
-    () => suggest(eqFiltered, day, finished, readiness, now, { beforeTs: props.workout.startedAt }),
-    [eqFiltered, day, finished, readiness, now, props.workout.startedAt],
+    () =>
+      plain
+        ? []
+        : suggest(eqFiltered, day, finished, readiness, now, { beforeTs: props.workout.startedAt }),
+    [plain, eqFiltered, day, finished, readiness, now, props.workout.startedAt],
+  );
+  const addedKeys = useMemo(
+    () => new Set((props.added ?? []).map((n) => canonicalExerciseName(n).toLowerCase())),
+    [props.added],
   );
   const suggestedKeys = useMemo(() => new Set(suggestions.map((x) => x.item.key)), [suggestions]);
   const doneToday = props.workout.exercises.filter(
@@ -223,7 +256,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const groupEquip = useMemo(() => equipmentCounts(groupItems), [groupItems]);
   const bestInGroup = useMemo(
     () =>
-      fam
+      fam && !plain
         ? (suggest(eqFiltered, day, finished, readiness, now, {
             count: 1,
             family: fam.id,
@@ -231,7 +264,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
             beforeTs: props.workout.startedAt,
           })[0] ?? null)
         : null,
-    [fam, sub, eqFiltered, day, finished, readiness, now, props.workout.startedAt],
+    [plain, fam, sub, eqFiltered, day, finished, readiness, now, props.workout.startedAt],
   );
 
   const needle = q.trim().toLowerCase();
@@ -267,6 +300,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
 
   // Desktop keys: "/" focuses search, Enter adds the previewed exercise.
   const previewItem = preview ?? suggestions[0]?.item ?? groupShown[0] ?? null;
+  const titleSub = plain
+    ? (props.subtitle ?? '')
+    : [dayLabel, doneToday.length ? t.pickNDone(doneToday.length) : ''].filter(Boolean).join(' · ');
   useEffect(() => {
     if (!isDesktop) return;
     const onKey = (e: KeyboardEvent) => {
@@ -298,7 +334,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   // Strength is where you are; the other three act straight away (a marker, or
   // the cardio machine list) — so they're plain buttons, not tabs.
   const kindTabs = (
-    <div className="xp-kinds">
+    <div className="xp-kinds" role="group" aria-label={t.pgItemType}>
       <button type="button" className="on" aria-current="true">
         {t.exerciseKindNames.strength}
       </button>
@@ -365,7 +401,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   );
 
   const doneStrip =
-    doneToday.length > 0 ? (
+    !plain && doneToday.length > 0 ? (
       <div className="xp-done">
         <Icon name="check" />
         <span>{t.pickDoneToday(doneToday.map((e) => exName(e.name)).join(' · '))}</span>
@@ -399,10 +435,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <Img src={i.image} alt="" className="xp-card-img" />
         <span className="xp-card-body">
           <ExerciseName name={i.name} className="xp-card-name" secondary={false} />
-          <span className="xp-card-meta">{itemMeta(t, i)}</span>
+          <span className="xp-card-meta">{itemMeta(t, i, plain)}</span>
         </span>
       </button>
-      <Badge item={i} t={t} />
+      {plain ? <AddedBadge on={addedKeys.has(i.key)} t={t} /> : <Badge item={i} t={t} />}
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
@@ -417,9 +453,11 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <Img src={i.image} alt="" className="xp-row-img" />
         <span className="xp-row-body">
           <ExerciseName name={i.name} className="xp-row-name" secondary={false} />
-          <span className="xp-row-meta">{itemMeta(t, i)}</span>
+          <span className="xp-row-meta">{itemMeta(t, i, plain)}</span>
         </span>
-        {suggestedKeys.has(i.key) && !i.doneToday ? (
+        {plain ? (
+          <AddedBadge on={addedKeys.has(i.key)} t={t} />
+        ) : suggestedKeys.has(i.key) && !i.doneToday ? (
           <span className="xp-badge sug">{t.pickSuggestedTag}</span>
         ) : (
           <Badge item={i} t={t} />
@@ -431,8 +469,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
 
   const familyTile = (f: Family) => {
     const r = famReady.get(f.id)!;
-    const color = readinessColor(r);
-    const today = todayFamilies.has(f.id);
+    const color = plain ? 'var(--color-accent)' : readinessColor(r);
+    const today = !plain && todayFamilies.has(f.id);
     return (
       <button
         key={f.id}
@@ -444,10 +482,12 @@ export function ExercisePicker(props: ExercisePickerProps) {
         <FamilyFigure groups={f.groups} color={color} view={f.view} width={38} height={72} />
         <span className="xp-fam-body">
           <span className="xp-fam-name">{t.pickFamilies[f.id]}</span>
-          <span className="xp-fam-state">
-            <span className="dot" style={{ background: color }} />
-            {readinessLabel(t, r)}
-          </span>
+          {!plain && (
+            <span className="xp-fam-state">
+              <span className="dot" style={{ background: color }} />
+              {readinessLabel(t, r)}
+            </span>
+          )}
           <span className="xp-fam-subs">
             {f.subs.length ? f.subs.map((s) => subLabel(t, s)).join(' · ') : t.muscleGroups.core}
           </span>
@@ -458,7 +498,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
 
   const railItem = (f: Family) => {
     const r = famReady.get(f.id)!;
-    const color = readinessColor(r);
+    const color = plain ? 'var(--color-accent)' : readinessColor(r);
     const open = activeFamily === f.id;
     return (
       <div key={f.id} className="xp-rail-group">
@@ -471,18 +511,26 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <span className="xp-fam-body">
             <span className="xp-fam-name">
               {t.pickFamilies[f.id]}
-              {todayFamilies.has(f.id) && <span className="xp-today">{t.pickToday}</span>}
+              {!plain && todayFamilies.has(f.id) && <span className="xp-today">{t.pickToday}</span>}
             </span>
-            <span className="xp-fam-state">
-              <span className="dot" style={{ background: color }} />
-              {readinessLabel(t, r)}
-            </span>
+            {plain ? (
+              <span className="xp-fam-state">
+                {f.subs.length
+                  ? f.subs.map((s) => subLabel(t, s)).join(' · ')
+                  : t.muscleGroups.core}
+              </span>
+            ) : (
+              <span className="xp-fam-state">
+                <span className="dot" style={{ background: color }} />
+                {readinessLabel(t, r)}
+              </span>
+            )}
           </span>
         </button>
         {open && f.subs.length > 0 && (
           <div className="xp-rail-subs">
             {[null, ...f.subs].map((s) => {
-              const sr = s ? subReadiness(s, readiness) : null;
+              const sr = s && !plain ? subReadiness(s, readiness) : null;
               return (
                 <button
                   key={s ?? 'all'}
@@ -507,7 +555,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const subChips = fam && fam.subs.length > 0 && (
     <div className="xp-chips">
       {[null, ...fam.subs].map((s) => {
-        const sr = s ? subReadiness(s, readiness) : null;
+        const sr = s && !plain ? subReadiness(s, readiness) : null;
         return (
           <button
             key={s ?? 'all'}
@@ -583,12 +631,12 @@ export function ExercisePicker(props: ExercisePickerProps) {
     <div className="xp-results">
       {needle ? (
         <div className="xp-label">{t.pickResults(results.length)}</div>
-      ) : (
+      ) : plain ? null : (
         <div className="xp-label accent">
           {dayLabel ? t.pickSuggestedFor(dayLabel) : t.pickSuggestedYou}
         </div>
       )}
-      {(needle ? results.slice(0, limit) : suggestions.map((x) => x.item)).map(row)}
+      {(needle ? results.slice(0, limit) : plain ? [] : suggestions.map((x) => x.item)).map(row)}
       {results.length > limit && (
         <button type="button" className="xp-more" onClick={() => setLimit((n) => n + PAGE)}>
           {t.pickShowMore(Math.min(PAGE, results.length - limit))}
@@ -704,13 +752,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <header className="xp-mhead">
             <span className="xp-title">
               <b>{props.replacing ? t.replaceExercise : t.addExercise}</b>
-              {(dayLabel || doneToday.length > 0) && (
-                <small>
-                  {[dayLabel, doneToday.length ? t.pickNDone(doneToday.length) : '']
-                    .filter(Boolean)
-                    .join(' · ')}
-                </small>
-              )}
+              {titleSub && <small>{titleSub}</small>}
             </span>
             {searchBar}
             {kindTabs}
@@ -747,13 +789,15 @@ export function ExercisePicker(props: ExercisePickerProps) {
                             </>
                           )}
                         </b>
-                        <span className="xp-fam-state">
-                          <span
-                            className="dot"
-                            style={{ background: readinessColor(famHeaderState) }}
-                          />
-                          {readinessLabel(t, famHeaderState)}
-                        </span>
+                        {!plain && (
+                          <span className="xp-fam-state">
+                            <span
+                              className="dot"
+                              style={{ background: readinessColor(famHeaderState) }}
+                            />
+                            {readinessLabel(t, famHeaderState)}
+                          </span>
+                        )}
                         <span className="grow" />
                         {equipChip}
                       </div>
@@ -774,6 +818,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
                   gym={props.gym}
                   finished={finished}
                   compact
+                  addLabel={props.addLabel}
                   onPick={pick}
                   onSwap={(i) => setPreview(i)}
                 />
@@ -789,7 +834,9 @@ export function ExercisePicker(props: ExercisePickerProps) {
 
   // --- mobile ---
   const doneN = doneToday.length;
-  const headSub = [dayLabel, doneN ? t.pickNDone(doneN) : ''].filter(Boolean).join(' · ');
+  const headSub = plain
+    ? titleSub
+    : [dayLabel, doneN ? t.pickNDone(doneN) : ''].filter(Boolean).join(' · ');
   const weekLine = (g: MuscleGroup) => {
     const w = weekSets(g, finished, now);
     return t.pickSetsWeek(w.done, w.target);
@@ -818,13 +865,17 @@ export function ExercisePicker(props: ExercisePickerProps) {
           </button>
           <span className="xp-ghead-txt">
             <b>{t.pickFamilies[fam.id]}</b>
-            <span className="xp-ghead-sub">
-              <span className="st" style={{ color: readinessColor(st) }}>
-                {readinessLabel(t, st)}
+            {plain ? (
+              props.subtitle && <span className="xp-ghead-sub">{props.subtitle}</span>
+            ) : (
+              <span className="xp-ghead-sub">
+                <span className="st" style={{ color: readinessColor(st) }}>
+                  {readinessLabel(t, st)}
+                </span>
+                {' · '}
+                {weekLine(mainG)}
               </span>
-              {' · '}
-              {weekLine(mainG)}
-            </span>
+            )}
           </span>
           <button
             type="button"
@@ -889,6 +940,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
             items={items}
             gym={props.gym}
             finished={finished}
+            addLabel={props.addLabel}
             onPick={(i) => {
               setInfo(null);
               pick(i);
@@ -932,6 +984,8 @@ export function ExerciseDetail(props: {
   gym: Gym | null;
   finished: Workout[];
   compact?: boolean;
+  /** Add-button label (default: "Add to session"). */
+  addLabel?: string;
   onPick: (i: PickItem) => void;
   onSwap: (i: PickItem) => void;
   onBack?: () => void;
@@ -1060,7 +1114,7 @@ export function ExerciseDetail(props: {
           </button>
         )}
         <button type="button" className="btn btn-primary xp-add" onClick={() => props.onPick(item)}>
-          {t.pickAddToSession}
+          {props.addLabel ?? t.pickAddToSession}
           {props.compact && <kbd>↵</kbd>}
         </button>
       </div>

@@ -4,6 +4,7 @@
  * latest achievement, and the top of the milestone feed. Everything is derived
  * from the same training history — this screen just gathers it in one place.
  */
+import { isoWeekday, weekPos } from '../weekStart';
 import { useMemo } from 'react';
 import { fmtDayMonth, useT } from '../i18n';
 import { Icon } from '../ui';
@@ -100,11 +101,10 @@ export function ApexHome({
     for (const w of finished) activeDays.add(dayKey(w.startedAt));
     const rest = restDayKeys(store.restPeriods);
     const today = dayKey(now);
-    // Monday-start current week.
-    const mondayOffset = (new Date(now).getDay() + 6) % 7;
-    const monday = today - mondayOffset;
+    // Current training week (first day: Profile › Settings).
+    const first = today - weekPos(isoWeekday(now));
     return Array.from({ length: 7 }, (_, i) => {
-      const d = monday + i;
+      const d = first + i;
       if (d > today) return 'future';
       return activeDays.has(d) || rest.has(d) ? 'on' : 'off';
     });

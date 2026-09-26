@@ -4,6 +4,7 @@
  * built from the live store for a period id. Sharing draws a portrait card on a
  * canvas (data/shareCard) and hands it to the native share sheet.
  */
+import { weekOrder } from '../weekStart';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useT, fmtKg, type LocaleId } from '../i18n';
 import { useStore, latestWeight } from '../store';
@@ -590,13 +591,15 @@ export function RecapView({
           </div>
           <div style={{ marginTop: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+              {weekOrder().map((d) => (
                 <div
-                  key={i}
+                  key={d}
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}
                 >
-                  <span className={`rc-dot7${r.weekdayMask[i] ? ' on' : ''}`} />
-                  <span style={{ fontSize: 9, color: 'var(--color-neutral-600)' }}>{d}</span>
+                  <span className={`rc-dot7${r.weekdayMask[d - 1] ? ' on' : ''}`} />
+                  <span style={{ fontSize: 9, color: 'var(--color-neutral-600)' }}>
+                    {(t.weekDayNames[d - 1] ?? '').slice(0, 1)}
+                  </span>
                 </div>
               ))}
             </div>

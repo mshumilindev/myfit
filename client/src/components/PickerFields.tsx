@@ -5,6 +5,7 @@
  * (those ignore the graphite/brass tokens) and no third-party lib (offline PWA,
  * pixel-parity with the boards). Design: docs/DESIGN.md.
  */
+import { isoWeekday, useWeekStartDay, weekOrder, weekPos, type IsoDay } from '../weekStart';
 import {
   useEffect,
   useLayoutEffect,
@@ -171,8 +172,9 @@ export function DateField({
     );
   }, [view, localeTag]);
 
-  const dow = useMemo(() => mondayFirstDow(localeTag), [localeTag]);
-  const cells = useMemo(() => monthGrid(view), [view]);
+  const weekStart = useWeekStartDay();
+  const dow = useMemo(() => mondayFirstDow(localeTag, weekStart), [localeTag, weekStart]);
+  const cells = useMemo(() => monthGrid(view, weekStart), [view, weekStart]);
 
   function commitText(next: string) {
     setText(next);
@@ -277,23 +279,26 @@ function todayIso(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** Weekday initials, Monday-first, localized. */
-function mondayFirstDow(localeTag: string): string[] {
+/** Weekday initials in training-week order (first day: Profile › Settings). */
+function mondayFirstDow(localeTag: string, start: IsoDay): string[] {
   const fmt = new Intl.DateTimeFormat(localeTag, { weekday: 'short' });
-  // 2024-01-01 is a Monday.
-  return Array.from({ length: 7 }, (_, i) =>
+  // 2024-01-01 is a Monday, so ISO day d falls on 2024-01-(d).
+  return weekOrder(start).map((d) =>
     fmt
-      .format(new Date(2024, 0, 1 + i))
+      .format(new Date(2024, 0, d))
       .replace('.', '')
       .slice(0, 2),
   );
 }
 
-/** 6x7 Monday-first grid of the month containing `view` (ISO). */
-function monthGrid(view: string): { iso: string; day: number; muted: boolean }[] {
+/** 6x7 grid of the month containing `view` (ISO), starting on the week's first day. */
+function monthGrid(
+  view: string,
+  weekFirst: IsoDay,
+): { iso: string; day: number; muted: boolean }[] {
   const [y, m] = view.split('-').map(Number);
   const first = new Date(y, m - 1, 1);
-  const offset = (first.getDay() + 6) % 7; // Mon=0 ... Sun=6
+  const offset = weekPos(isoWeekday(first.getTime()), weekFirst);
   const start = new Date(y, m - 1, 1 - offset);
   return Array.from({ length: 42 }, (_, i) => {
     const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);

@@ -14,6 +14,7 @@
  * precision. `MuscleIcon` therefore renders a library figure at figure/row/full
  * sizes and the geometric mark at chip/chipLg sizes — same public API.
  */
+import { weekBounds as trainingWeekBounds } from '../weekStart';
 import { landmarkFor } from '../personalize';
 import {
   createContext,
@@ -1199,14 +1200,9 @@ export function MuscleChip({
 
 type MuscleEntry = { muscle: MuscleGroup; sets: number; primary: boolean };
 
-const WEEK_DAY_MS = 24 * 3600 * 1000;
-/** Mon–Sun calendar week [start, end) containing `ts`. */
+/** The training week [start, end) containing `ts` (first day: Profile › Settings). */
 function weekBounds(ts: number): [number, number] {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  const dow = (d.getDay() + 6) % 7; // Monday = 0
-  const start = d.getTime() - dow * WEEK_DAY_MS;
-  return [start, start + 7 * WEEK_DAY_MS];
+  return trainingWeekBounds(ts);
 }
 
 /**
@@ -1563,4 +1559,62 @@ export function EquipChip({ id, style }: { id: string; style?: CSSProperties }) 
 
 export function isEquipmentId(id: string): id is EquipmentId {
   return (EQUIPMENT_IDS as string[]).includes(id);
+}
+
+/**
+ * Clickable muscle map (Programs · a day defined by muscles): the shared front +
+ * back silhouette; tapping a region toggles the fine group that owns it. The
+ * tile grid beside it is the accessible twin (the SVG itself is decorative for
+ * assistive tech). `locked` paints derived muscles in a dimmer brass and ignores
+ * taps — a day defined by exercises owns its muscles.
+ */
+export function MusclePickerMap({
+  selected,
+  onToggle,
+  locked = false,
+  labels,
+  className,
+}: {
+  selected: MuscleGroup[];
+  onToggle?: (m: MuscleGroup) => void;
+  locked?: boolean;
+  labels?: { front: string; back: string };
+  className?: string;
+}) {
+  const hl = locked ? 'var(--color-accent-700)' : 'var(--color-accent)';
+  const views: BView[] = ['front', 'back'];
+  return (
+    <div className={['muscle-map', locked ? 'locked' : '', className ?? ''].join(' ').trim()}>
+      {views.map((view) => {
+        const lit = idsForGroups(selected, view);
+        return (
+          <figure key={view} className="muscle-map-view">
+            <svg
+              viewBox={VIEWBOX[view].full}
+              aria-hidden
+              style={{ display: 'block', width: '100%', height: 'auto' }}
+            >
+              {VIEW_PATHS[view].map(({ id, path }) => {
+                const g = ID_TO_GROUP[view][id];
+                const on = lit.has(id);
+                const clickable = !locked && !!g && !!onToggle;
+                return (
+                  <path
+                    key={id}
+                    d={path}
+                    fill={on ? hl : DIM}
+                    stroke={on ? 'var(--color-bg)' : DIM_STROKE}
+                    strokeWidth={on ? 0.25 : 0.12}
+                    style={clickable ? { cursor: 'pointer' } : undefined}
+                    onClick={clickable && g ? () => onToggle(g) : undefined}
+                  />
+                );
+              })}
+            </svg>
+            {labels && <figcaption>{labels[view]}</figcaption>}
+          </figure>
+        );
+      })}
+    </div>
+  );
 }

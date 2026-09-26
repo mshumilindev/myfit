@@ -1,4 +1,5 @@
 /** Progress — design S-34…S-36 + MG-3/MG-4 (by muscle, enriched detail). */
+import { weekStartOf as trainingWeekStart } from '../weekStart';
 import { useEffect, useMemo, useState } from 'react';
 import {
   estimatedOneRepMaxSet,
@@ -60,11 +61,9 @@ type Store = ReturnType<typeof useStore>;
 
 const WEEK_MS = 7 * 24 * 3600 * 1000;
 
+/** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekStart(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.getTime();
+  return trainingWeekStart(ts);
 }
 
 export function ProgressView({

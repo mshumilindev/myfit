@@ -8,6 +8,7 @@
  * This is separate from the server-pushed org/role `Notice` strip — those are
  * account notices; these are personal milestones.
  */
+import { weekStartOf as trainingWeekStart } from './weekStart';
 import { useSyncExternalStore } from 'react';
 import {
   useStore,
@@ -45,11 +46,9 @@ const DAY = 24 * 3600 * 1000;
 const STREAK_MILESTONES = [7, 14, 30, 50, 100, 150, 200, 300, 365, 500, 730, 1000];
 
 /** Monday-start week key for the volume-goal event id. */
+/** Start of the training week holding `ts` (first day: Profile › Settings). */
 function weekKey(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-  return d.getTime();
+  return trainingWeekStart(ts);
 }
 
 type Store = ReturnType<typeof useStore>;

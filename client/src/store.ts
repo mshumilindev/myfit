@@ -99,6 +99,14 @@ import {
   duplicateSleepIds,
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
+import {
+  onWeekStartChange,
+  resetWeekStart,
+  setWeekStartDay,
+  weekStartDay,
+  weekStartUpdatedAt,
+  type IsoDay,
+} from './weekStart';
 import type { GeneratedDay } from './sessionBuilder';
 
 const STATE_KEY = 'spotter.state';
@@ -3519,10 +3527,48 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
   setState(patch);
 }
 
+// --- Account prefs: first day of the training week (meta/prefs, LWW) -----------
+let applyingRemotePrefs = false;
+function writePrefsDoc(): void {
+  const uid = currentUid();
+  if (!uid) return;
+  setDoc(doc(db, 'users', uid, 'meta', 'prefs'), {
+    weekStart: weekStartDay(),
+    updatedAt: weekStartUpdatedAt() || Date.now(),
+  }).catch(onWriteError);
+}
+onWeekStartChange(() => {
+  if (!applyingRemotePrefs) writePrefsDoc();
+  // Every week view reads the setting through the store's consumers.
+  emit();
+});
+
 export function startSyncLoop(): () => void {
   const uid = currentUid();
   if (!uid) return () => undefined;
   stopListeners();
+
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'prefs'),
+      (snap) => {
+        if (!snap.exists()) {
+          // First sync: keep a locally chosen start day.
+          if (weekStartUpdatedAt() > 0) writePrefsDoc();
+          return;
+        }
+        const data = snap.data() as { weekStart?: number; updatedAt?: number };
+        if (typeof data.weekStart !== 'number') return;
+        applyingRemotePrefs = true;
+        try {
+          setWeekStartDay(data.weekStart as IsoDay, data.updatedAt ?? 0);
+        } finally {
+          applyingRemotePrefs = false;
+        }
+      },
+      onWriteError,
+    ),
+  );
 
   unsubs.push(
     onSnapshot(
@@ -4504,6 +4550,12 @@ export function resetLocalData(): void {
   localStorage.removeItem(SLEEP_SCHED_KEY);
   localStorage.removeItem(SLEEP_SET_KEY);
   localStorage.removeItem(WEIGHT_UNIT_KEY);
+  applyingRemotePrefs = true;
+  try {
+    resetWeekStart();
+  } finally {
+    applyingRemotePrefs = false;
+  }
   localStorage.removeItem(EX_UNIT_KEY);
   localStorage.removeItem(EX_LOAD_KEY);
   localStorage.removeItem(EX_REST_KEY);

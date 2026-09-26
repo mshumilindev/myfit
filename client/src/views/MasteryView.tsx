@@ -738,16 +738,19 @@ export function MasteryBadge({
             <Seal size={11} dim />
           </span>
         </span>
-        <span className="mst-badge-dots num">···</span>
       </button>
     );
   }
   return (
-    <button className="mst-badge" onClick={onOpen} aria-label={t.masteryTitle}>
+    <button
+      className="mst-badge"
+      onClick={onOpen}
+      aria-label={`${t.masteryTitle} · ${m.rating}`}
+      title={`${t.masteryTitle} · ${m.rating}`}
+    >
       <Ring frac={m.rankProgress} size={26} inner={20}>
         <RankInsignia index={m.rankIndex} size={11} />
       </Ring>
-      <span className="mst-badge-num num">{m.rating}</span>
     </button>
   );
 }
