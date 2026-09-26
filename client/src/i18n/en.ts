@@ -1857,13 +1857,18 @@ export const en = {
   atlasRuleMercilessOnly: 'Merciless only',
   atlasLocalUnknown:
     'That one’s outside what I know yet. Ask me about your training: what to do today, rest, the next weight, records, recovery, sleep, your programme.',
+  atlasPuterOffer:
+    'Gemini is out for today. I can keep talking through Puter — it runs on your own free Puter account, so it costs you nothing and the app nothing. One sign-in.',
+  atlasPuterEnable: 'Use Puter',
+  atlasPuterNo: 'Not now',
+  atlasPuterFail: "Couldn't reach Puter — I'll answer from my own knowledge.",
   atlasQuotaNotice: (time: string) =>
-    `Gemini’s free limit is used up. Until ${time} Atlas answers from his own knowledge.`,
+    `Gemini’s free limit is used up. Until ${time} Atlas answers from his own knowledge — or through Puter, on your own free Puter account.`,
   atlasAsk: 'Ask Atlas about your training…',
   atlasSend: 'Send',
   atlasConsentTitle: 'Chat with Atlas',
   atlasConsentBody:
-    'To answer free-form questions, Atlas sends a short training summary (recent sessions, your plan, sleep hours) to Google Gemini. No name, email, birth date or photos. On the free tier Google may use these requests to improve its models. The notes, debriefs and pushes work without this.',
+    "To answer free-form questions, Atlas sends a short training summary (recent sessions, your plan, sleep hours) to Google Gemini — and, once Gemini's free daily limit is used up, to Puter (puter.com) through your own Puter account. No name, email, birth date or photos. On free tiers these services may use requests to improve their models. The notes, debriefs and pushes work without this.",
   atlasConsentOk: 'Agree and send',
   atlasChatOffline: 'No connection. Train now, talk later.',
   atlasChatCap: 'That’s enough talk for today. The bar is waiting.',

@@ -17,7 +17,7 @@ import { lineAllowed } from './guard';
 export const ATLAS_MODEL =
   (import.meta.env.VITE_ATLAS_MODEL as string | undefined) ?? 'gemini-3.5-flash-lite';
 /** Messages per day before Atlas falls back to his phrase book. */
-export const DAILY_CHAT_CAP = 30;
+export const DAILY_CHAT_CAP = 20;
 
 const LANG_NAME: Record<LocaleId, string> = {
   en: 'English',

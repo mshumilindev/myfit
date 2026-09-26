@@ -1,30 +1,20 @@
 /**
- * Closed testing for Atlas's Gemini chat: only accounts listed in the
- * Firestore doc config/atlas (chatUsers = usernames, chatUids = uids) see the
- * composer. The doc is edited in the console only (rules: read-only here); no
- * doc → nobody. Everything else Atlas does works for everyone.
+ * Atlas's AI chat is open to everyone. The Firestore doc config/atlas can
+ * switch it off for all (chatOff: true) — an emergency brake, edited in the
+ * console only (rules: read-only here). No doc → on. Atlas's own answers
+ * never depend on this; it only decides whether hard questions may go to
+ * Gemini (and Puter after Gemini's daily quota).
  */
 import { useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
-import { currentUid, getUsername } from '../api';
 
 export interface ChatAccessConfig {
-  chatUsers?: string[];
-  chatUids?: string[];
+  chatOff?: boolean;
 }
 
-export function chatAllowed(
-  cfg: ChatAccessConfig | null,
-  uid: string | null,
-  username: string | null,
-): boolean {
-  if (!cfg) return false;
-  const u = username?.trim().toLowerCase();
-  return (
-    (!!uid && (cfg.chatUids ?? []).includes(uid)) ||
-    (!!u && (cfg.chatUsers ?? []).some((x) => x.trim().toLowerCase() === u))
-  );
+export function chatAllowed(cfg: ChatAccessConfig | null): boolean {
+  return !cfg?.chatOff;
 }
 
 export function useChatAccess(): boolean {
@@ -38,5 +28,5 @@ export function useChatAccess(): boolean {
       ),
     [],
   );
-  return chatAllowed(cfg, currentUid(), getUsername());
+  return chatAllowed(cfg);
 }

@@ -7,7 +7,7 @@
  * Pure and offline; the index is built once, lazily.
  */
 import { editDistance, normalize } from './nlu';
-import { KB } from './kb';
+import type { Kb } from './kb/types';
 import { SYNONYMS } from './kb/synonyms';
 
 const STOP = new Set(
@@ -255,15 +255,24 @@ interface Topic {
 /** Cyrillic and Latin phrasings are separate "documents" per topic, so adding
  *  Polish examples doesn't water down a Ukrainian match (and the other way). */
 const scriptOf = (q: string) => (/[\u0400-\u04ff]/.test(q) ? 'c' : 'l');
+/**
+ * Kept compact on purpose — it lives in the chat's memory on a phone: the
+ * per-phrasing parts are typed arrays, not objects (tens of MB instead of
+ * hundreds), and only what a lookup reads is kept.
+ */
 interface Index {
   grams: { id: string; v: Map<string, number>; norm: number }[];
   gidf: Map<string, number>;
-  exGrams: { id: string; v: Map<string, number>; norm: number }[];
-  /** word → examples that have it */
-  post: Map<string, number[]>;
-  /** gram → [example, weight] */
-  gpost: Map<string, [number, number][]>;
-  examples: Example[];
+  /** Per phrasing (character view): its topic and vector length. */
+  gIds: string[];
+  gNorm: Float32Array;
+  /** Per phrasing (word view): its topic and weight. */
+  exIds: string[];
+  exWeight: Float32Array;
+  /** word → phrasings that have it */
+  post: Map<string, Int32Array>;
+  /** gram → phrasings that have it, and its weight there */
+  gpost: Map<string, { e: Int32Array; w: Float32Array }>;
   idf: Map<string, number>;
   n: number;
   topics: Topic[];
@@ -272,10 +281,19 @@ interface Index {
   vocab: string[];
 }
 let index: Index | null = null;
+/** The phrasings to build from when no index was handed over (tests, no-worker fallback). */
+let source: Kb | null = null;
+export function loadKb(kb: Kb): void {
+  source = kb;
+}
+/** Is the index in place (or buildable right now)? */
+export function indexReady(): boolean {
+  return !!index || !!source;
+}
 
 /** Build the index now (a Web Worker does this off the main thread). */
-export function buildIndex(): Index {
-  return build();
+export function buildIndex(kb: Kb): Index {
+  return build(kb);
 }
 /** Take an index built elsewhere (the worker). */
 export function setIndex(ix: Index): void {
@@ -283,7 +301,7 @@ export function setIndex(ix: Index): void {
 }
 export type { Index as RetrievalIndex };
 
-function build(): Index {
+function build(KB: Kb): Index {
   const examples: Example[] = [];
   const topics: Topic[] = [];
   for (const [id, e] of Object.entries(KB)) {
@@ -352,29 +370,37 @@ function build(): Index {
   };
   const grams = [...topicGrams].map(([key, g]) => ({ id: key.split('\u0000')[0], ...vec(g) }));
   const exGrams = exGramsRaw.map(({ id, g }) => ({ id, ...vec(g) }));
-  const post = new Map<string, number[]>();
+  const postL = new Map<string, number[]>();
   examples.forEach((ex, k) => {
     for (const t of ex.terms) {
-      const l = post.get(t);
+      const l = postL.get(t);
       if (l) l.push(k);
-      else post.set(t, [k]);
+      else postL.set(t, [k]);
     }
   });
-  const gpost = new Map<string, [number, number][]>();
+  const gpostL = new Map<string, { e: number[]; w: number[] }>();
   exGrams.forEach((eg, k) => {
     for (const [g, w] of eg.v) {
-      const l = gpost.get(g);
-      if (l) l.push([k, w]);
-      else gpost.set(g, [[k, w]]);
+      const l = gpostL.get(g);
+      if (l) {
+        l.e.push(k);
+        l.w.push(w);
+      } else gpostL.set(g, { e: [k], w: [w] });
     }
   });
+  const post = new Map<string, Int32Array>();
+  for (const [t, l] of postL) post.set(t, Int32Array.from(l));
+  const gpost = new Map<string, { e: Int32Array; w: Float32Array }>();
+  for (const [g, l] of gpostL) gpost.set(g, { e: Int32Array.from(l.e), w: Float32Array.from(l.w) });
   return {
     grams,
     gidf,
-    exGrams,
+    gIds: exGrams.map((x) => x.id),
+    gNorm: Float32Array.from(exGrams.map((x) => x.norm)),
+    exIds: examples.map((x) => x.id),
+    exWeight: Float32Array.from(examples.map((x) => x.weight)),
     post,
     gpost,
-    examples,
     idf,
     n,
     topics,
@@ -410,6 +436,8 @@ const B = 0.5;
 /** The last few lookups — one answer asks about the same words several times. */
 const memo = new Map<string, Match[]>();
 export function retrieve(question: string, limit = 5): Match[] {
+  // Not built yet (the worker is still at it) → nothing, and nothing remembered.
+  if (!index && !source) return [];
   let res = memo.get(question);
   // Computed once per question at the widest list anyone asks for (25).
   if (!res || res.length < Math.min(limit, 25)) {
@@ -421,7 +449,8 @@ export function retrieve(question: string, limit = 5): Match[] {
 }
 
 function retrieveRaw(question: string, limit: number): Match[] {
-  index ??= build();
+  if (!index && !source) return [];
+  index ??= build(source!);
   const ix = index;
   const q = [...new Set(terms(question))];
   if (!q.length) return [];
@@ -454,9 +483,9 @@ function retrieveRaw(question: string, limit: number): Match[] {
     for (const k of hit) dots.set(k, (dots.get(k) ?? 0) + qw[i] * qw[i]);
   }
   for (const [k, dot] of dots) {
-    const ex = ix.examples[k];
-    const sc = dot / (qNorm * (ex.weight || 1));
-    if (sc > (best.get(ex.id) ?? 0)) best.set(ex.id, sc);
+    const id = ix.exIds[k];
+    const sc = dot / (qNorm * (ix.exWeight[k] || 1));
+    if (sc > (best.get(id) ?? 0)) best.set(id, sc);
   }
   // 3) Character-level closeness to the topic and to its closest phrasing.
   const qg = gramsOf(question);
@@ -485,12 +514,16 @@ function retrieveRaw(question: string, limit: number): Match[] {
   const gramEx = new Map<string, number>();
   // Same trick for the character grams: only examples sharing a gram.
   const gdots = new Map<number, number>();
-  for (const [k, w] of qv)
-    for (const [e, x] of ix.gpost.get(k) ?? []) gdots.set(e, (gdots.get(e) ?? 0) + w * x);
+  for (const [k, w] of qv) {
+    const pl = ix.gpost.get(k);
+    if (!pl) continue;
+    for (let j = 0; j < pl.e.length; j++)
+      gdots.set(pl.e[j], (gdots.get(pl.e[j]) ?? 0) + w * pl.w[j]);
+  }
   for (const [e, d] of gdots) {
-    const t = ix.exGrams[e];
-    const c = d / (qn * t.norm);
-    if (c > (gramEx.get(t.id) ?? 0)) gramEx.set(t.id, c);
+    const id = ix.gIds[e];
+    const c = d / (qn * (ix.gNorm[e] || 1));
+    if (c > (gramEx.get(id) ?? 0)) gramEx.set(id, c);
   }
   const ids = new Set([...topic.keys(), ...best.keys(), ...gram.keys()]);
   return [...ids]

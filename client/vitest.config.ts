@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
+    // Atlas's knowledge base, loaded up front (the app builds it in a worker).
+    setupFiles: ['src/atlas/testSetup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

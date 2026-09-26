@@ -1807,13 +1807,18 @@ export const pl: Strings = {
   atlasRuleMercilessOnly: 'Tylko Bezlitosny',
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
+  atlasPuterOffer:
+    'Gemini na dziś skończone. Mogę rozmawiać dalej przez Puter — działa na Twoim własnym darmowym koncie Puter, więc nie kosztuje ani Ciebie, ani aplikacji. Jedno logowanie.',
+  atlasPuterEnable: 'Użyj Puter',
+  atlasPuterNo: 'Nie teraz',
+  atlasPuterFail: 'Nie udało się połączyć z Puter — odpowiem z własnej wiedzy.',
   atlasQuotaNotice: (time: string) =>
-    `Darmowy limit Gemini się wyczerpał. Do ${time} Atlas odpowiada z własnej wiedzy.`,
+    `Darmowy limit Gemini się wyczerpał. Do ${time} Atlas odpowiada z własnej wiedzy — albo przez Puter, na Twoim darmowym koncie Puter.`,
   atlasAsk: 'Zapytaj Atlasa o trening…',
   atlasSend: 'Wyślij',
   atlasConsentTitle: 'Czat z Atlasem',
   atlasConsentBody:
-    'Aby odpowiadać na dowolne pytania, Atlas wysyła krótkie podsumowanie treningów (ostatnie sesje, plan, godziny snu) do Google Gemini. Bez imienia, e-maila, daty urodzenia i zdjęć. W darmowym planie Google może używać tych zapytań do ulepszania modeli. Notatki, podsumowania i powiadomienia działają bez tego.',
+    'Aby odpowiadać na dowolne pytania, Atlas wysyła krótkie podsumowanie treningów (ostatnie sesje, plan, godziny snu) do Google Gemini, a gdy dzienny darmowy limit Gemini się wyczerpie — do Puter (puter.com) przez Twoje własne konto Puter. Bez imienia, e-maila, daty urodzenia i zdjęć. W darmowych planach te usługi mogą używać zapytań do ulepszania modeli. Notatki, podsumowania i powiadomienia działają bez tego.',
   atlasConsentOk: 'Zgadzam się i wyślij',
   atlasChatOffline: 'Brak połączenia. Trenuj teraz, pogadamy później.',
   atlasChatCap: 'Dość gadania na dziś. Sztanga czeka.',

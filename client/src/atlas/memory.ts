@@ -88,7 +88,7 @@ export const PART_WORDS: [BodyPart, string[]][] = [
 ];
 
 /** What loads a sore part — lifts and muscles to be careful with. */
-const PART_LOADS: Record<BodyPart, string[]> = {
+export const PART_LOADS: Record<BodyPart, string[]> = {
   lower_back: ['deadlift', 'good morning', 'bent over', 'row', 'squat', 'lower_back', 'hyperext'],
   knee: ['squat', 'lunge', 'leg press', 'leg extension', 'split', 'step', 'quads', 'jump'],
   shoulder: [

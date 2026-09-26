@@ -22,13 +22,15 @@ import {
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
-import { askAtlas, classifyTopic } from '../atlas/chat';
+import { askAtlas, classifyTopic, systemPrompt } from '../atlas/chat';
+import { askPuter, puterReady, puterSignIn } from '../atlas/puter';
 import {
   answerAs,
   answerLocally,
   didYouMean,
   topicMenu,
   warmUpAtlas,
+  atlasReady,
   type Convo,
 } from '../atlas/intents';
 import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory';
@@ -524,21 +526,34 @@ function CoachThread({
   const busy = chat.some((m) => m.pending);
 
   const convo = useRef<Convo>({});
-  /** Reveal a local answer word by word — reads like a live reply, not a lookup. */
+  /**
+   * Reveal a local answer like a live reply: a short "thinking" pause that
+   * grows with the question and the answer, then the text at a reading pace
+   * (word by word, ~70 characters a second, never longer than ~2.5 s).
+   * Reduced motion → no animation, just the answer.
+   */
   const typeOut = (
     id: string,
     at: number,
     text: string,
     chips?: string[],
     extra: Partial<ChatMsg> = {},
+    asked = '',
   ) =>
     new Promise<void>((resolve) => {
+      const still =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const words = text.split(' ');
       pushChat({ id, at, from: 'atlas', text: '…', pending: true });
+      const think = still ? 120 : 320 + Math.min(700, asked.length * 5 + text.length * 1.2);
+      const total = still ? 0 : Math.min(2500, Math.max(450, (text.length / 70) * 1000));
+      const TICK = 40;
+      const steps = Math.max(1, Math.round(total / TICK));
+      const perStep = Math.max(1, Math.ceil(words.length / steps));
       let i = 0;
-      const step = Math.max(1, Math.round(words.length / 18));
       const tick = () => {
-        i = Math.min(words.length, i + step);
+        i = still ? words.length : Math.min(words.length, i + perStep);
         const done = i >= words.length;
         updateChat(id, {
           text: words.slice(0, i).join(' '),
@@ -547,9 +562,9 @@ function CoachThread({
           ...(done ? extra : {}),
         });
         if (done) resolve();
-        else window.setTimeout(tick, 35);
+        else window.setTimeout(tick, TICK);
       };
-      window.setTimeout(tick, 280);
+      window.setTimeout(tick, think);
     });
 
   /** Typed in another language → answer in the app's language, then offer the switch once. */
@@ -590,6 +605,8 @@ function CoachThread({
     const history = chat.filter((m) => !m.notice);
     pushChat({ id: `me-${at}`, at, from: 'me', text: q });
     const rid = `at-${at}`;
+    // The first seconds after opening the chat the index may still be building.
+    await atlasReady();
     // 1) Atlas's own answer base — instant, offline, from your data, and it
     //    follows the thread ("why?", "more", "and squat?").
     // Polish / Lithuanian / Estonian: built in English with placeholders, then translated.
@@ -630,11 +647,18 @@ function CoachThread({
     if (local?.said) rememberSaid(local.said);
     if (local && !(local.escalate && canChat)) {
       convo.current = local.convo;
-      await typeOut(rid, at + 1, tr(local.text), local.chips?.map(tr), {
-        ...(local.chart ? { chart: local.chart } : {}),
-        ...(local.action ? { action: local.action } : {}),
-        ...(!local.action && !UNRATED.has(local.intent) ? { intent: local.intent, q } : {}),
-      });
+      await typeOut(
+        rid,
+        at + 1,
+        tr(local.text),
+        local.chips?.map(tr),
+        {
+          ...(local.chart ? { chart: local.chart } : {}),
+          ...(local.action ? { action: local.action } : {}),
+          ...(!local.action && !UNRATED.has(local.intent) ? { intent: local.intent, q } : {}),
+        },
+        q,
+      );
       return true;
     }
     if (local?.escalate) convo.current = local.convo;
@@ -707,7 +731,12 @@ function CoachThread({
       onText: (partial) => updateChat(rid, { text: partial }),
     });
     if (!res.ok && res.reason === 'quota') {
-      updateChat(rid, { pending: false, text: t.atlasLocalUnknown });
+      // Gemini is out for the day → Puter, on the person's own free account.
+      if (await puterReady()) {
+        await sendPuter(q, history, rid);
+        return;
+      }
+      updateChat(rid, { pending: false, text: t.atlasPuterOffer, puterFor: q });
       const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
         res.until ?? at,
       );
@@ -734,6 +763,35 @@ function CoachThread({
     });
   };
 
+  /** The Puter leg: same prompt and facts as Gemini, the person's own Puter account. */
+  const sendPuter = async (
+    q: string,
+    history = chat.filter((m) => !m.notice),
+    /** The bubble to answer in (an existing one), else a new one. */
+    into?: string,
+  ) => {
+    const at = wallClock();
+    const rid = into ?? `pt-${at}`;
+    if (into) updateChat(rid, { text: '…', pending: true, puterFor: undefined });
+    else pushChat({ id: rid, at, from: 'atlas', text: '…', pending: true });
+    const r = await askPuter({
+      system: systemPrompt({
+        temper,
+        coach: { ...store.coach, chatConsent: true },
+        locale,
+        factsJson: buildChatFacts(store, notes, temper, at),
+      }),
+      history: history.map((m) => ({ from: m.from, text: m.text })),
+      question: q,
+      temper,
+      onText: (partial) => updateChat(rid, { text: partial }),
+    });
+    updateChat(rid, {
+      pending: false,
+      text: r.ok ? r.text : r.reason === 'blocked' ? t.atlasChatBlocked : t.atlasPuterFail,
+    });
+  };
+
   type Item = {
     id: string;
     at: number;
@@ -748,6 +806,7 @@ function CoachThread({
     intent?: string;
     q?: string;
     rated?: ChatMsg['rated'];
+    puterFor?: string;
   };
   const items: Item[] = useMemo(
     () =>
@@ -935,7 +994,15 @@ function CoachThread({
                     data-note-at={noteIds.has(n.id) ? n.at : undefined}
                   >
                     <Bubble temper={temper}>
-                      <span className={n.pending ? 'atl-typing' : undefined}>{n.text}</span>
+                      {n.pending && n.text === '…' ? (
+                        <span className="atl-dots" role="status" aria-label="…">
+                          <i />
+                          <i />
+                          <i />
+                        </span>
+                      ) : (
+                        <span className={n.pending ? 'atl-caret' : undefined}>{n.text}</span>
+                      )}
                       {n.chart && !n.pending && <ChatChart chart={n.chart} locale={locale} />}
                     </Bubble>
                     {n.action && !busy && (
@@ -1000,6 +1067,34 @@ function CoachThread({
                             {ch}
                           </button>
                         ))}
+                      </div>
+                    )}
+                    {n.puterFor && !busy && (
+                      <div className="atl-suggest">
+                        <button
+                          type="button"
+                          className="atl-chip on"
+                          onClick={() => {
+                            const q = n.puterFor!;
+                            // The sign-in window has to open straight from this tap.
+                            void puterSignIn().then((ok) => {
+                              if (ok) void sendPuter(q, undefined, n.id);
+                              else
+                                updateChat(n.id, { puterFor: undefined, text: t.atlasPuterFail });
+                            });
+                          }}
+                        >
+                          {t.atlasPuterEnable}
+                        </button>
+                        <button
+                          type="button"
+                          className="atl-chip"
+                          onClick={() =>
+                            updateChat(n.id, { puterFor: undefined, text: t.atlasLocalUnknown })
+                          }
+                        >
+                          {t.atlasPuterNo}
+                        </button>
                       </div>
                     )}
                     {n.langOffer && !busy && (

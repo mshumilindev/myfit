@@ -37,7 +37,7 @@ export const SPLIT_SLOTS: Record<SplitDay, MuscleGroup[]> = {
  * rows as traps, so rows lead the traps slot. When the gym lacks the kit, the
  * next staple is used, then the catalog's generic ranking.
  */
-const STAPLES: Partial<Record<MuscleGroup, string[]>> = {
+export const STAPLES: Partial<Record<MuscleGroup, string[]>> = {
   quads: ['Barbell Squat', 'Leg Press', 'Goblet Squat', 'Dumbbell Lunges'],
   chest: [
     'Barbell Bench Press - Medium Grip',

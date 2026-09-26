@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { answerLocally } from './intents';
 import { KB_TESTS } from './kb/tests';
 import { KB_FRESH } from './kb/fresh';
-import { NEW_TOPICS } from './kb/topicsNew';
+import { KB_TESTS_OTHER } from './kb/testsOther';
+import { NEW_TOPICS_TESTS } from './kb/testsNew';
 import { richCtx } from './testCtx';
 
 type Set_ = Record<string, { test: string[]; testUk: string[] }>;
@@ -35,11 +36,9 @@ describe('understanding — held-out phrasings (never used for matching)', () =>
     'newer, narrower topics (bench arch, chalk, Smith…) — deliberately tricky wording',
     { timeout: 120_000 },
     () => {
-      const r = score(
-        Object.fromEntries(NEW_TOPICS.map((t) => [t.id, { test: t.test, testUk: t.testUk }])),
-      );
-      expect(r.ok).toBeGreaterThan(0.5);
-      expect(r.known).toBeGreaterThan(0.55);
+      const r = score(NEW_TOPICS_TESTS);
+      expect(r.ok).toBeGreaterThan(0.7);
+      expect(r.known).toBeGreaterThan(0.72);
     },
   );
   it('a second set written blind, ~1,860 questions over every topic', { timeout: 300_000 }, () => {
@@ -47,6 +46,26 @@ describe('understanding — held-out phrasings (never used for matching)', () =>
     expect(r.ok).toBeGreaterThan(0.81);
     expect(r.known).toBeGreaterThan(0.83);
   });
+});
+
+describe('Polish, Lithuanian, Estonian — held out', () => {
+  it(
+    'each language above 70% right on questions never used for matching',
+    { timeout: 300_000 },
+    () => {
+      for (const l of ['pl', 'lt', 'et'] as const) {
+        let ok = 0;
+        let total = 0;
+        for (const [id, e] of Object.entries(KB_TESTS_OTHER))
+          for (const q of e[l]) {
+            total++;
+            // The chat runs these in English with placeholders, then translates (translate.ts).
+            if (answerLocally(q, richCtx('en'))?.intent === id) ok++;
+          }
+        expect(ok / total).toBeGreaterThan(0.7);
+      }
+    },
+  );
 });
 
 describe('question types — why / how / when / how much…', () => {

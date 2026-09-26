@@ -33,6 +33,8 @@ import { taughtFor, teach, wrongFor } from './teach';
 import { styled, unsureLine } from './style';
 import { aboutSomeoneElse, safetyReply, safetySignal } from './safety';
 import { liveAnswer } from './live';
+import { parseFrame, type Frame } from './frame';
+import { compareAnswer, programAnswer, variantOf, whatIfDays } from './compose';
 import { calcAnswer, offTopic, offTopicLine } from './calc';
 import {
   continueFlow,
@@ -50,8 +52,9 @@ import { hashId } from './voice';
 import { aboutMyLog, followQuery, parseQuery, queryChips, runQuery, type Query } from './query';
 import { explainLift } from './liftStats';
 import { ASKS } from './asks';
-import { KB, type Facet } from './kb';
-import { retrieve, setIndex, type RetrievalIndex } from './retrieve';
+import type { Facet } from './kb/types';
+import { facetsOf, setFacets } from './facetStore';
+import { indexReady, retrieve, setIndex, loadKb, type RetrievalIndex } from './retrieve';
 import { FACET_CHIP, isPersonal, questionType } from './qtype';
 import { toKnownLanguage } from './lexicon';
 import { detectLang } from './langOffer';
@@ -65,7 +68,7 @@ import {
   type AtlasMemory,
   type SaidRec,
 } from './memory';
-import { BUILT_IN_CATALOG } from '../data/exercises';
+import { BUILT_IN_CATALOG, richExerciseByName } from '../data/exercises';
 import type { MuscleGroup } from '../data/exercises';
 import {
   finishedOf,
@@ -153,6 +156,57 @@ export interface Convo {
   joked?: boolean;
   /** "Did you mean…" was offered for this wording — the pick teaches Atlas. */
   pendingTeach?: { q: string; offered: string[] };
+  /** The last plan's pieces — "and 4 days?" changes one of them. */
+  frame?: Frame;
+  /** Two lifts just compared — for "so which one is better for me?". */
+  pair?: [string, string];
+  /** Earlier topics, newest first — "and for squat?" can reach back past a detour. */
+  prev?: { intent: string; exercise?: string | null; muscle?: MuscleGroup | null; q?: string }[];
+}
+
+/** Topics written for one particular pair of lifts. */
+const PAIR_TOPICS = new Set([
+  'squat_vs_press',
+  'incline_flat',
+  'k_sumo_conventional',
+  'compound_isolation',
+  'machines_free',
+]);
+
+/** A retrieval score this high means a topic was written for the very question. */
+const OWN_TOPIC = 0.6;
+/** Topics a comparison of two lifts may beat. */
+const COMPARE_OK = new Set([
+  'compare_lifts',
+  'exercise_muscles',
+  'act_swap',
+  'technique_lift',
+  'technique',
+  'alternatives',
+]);
+
+/** Follow-ups that ask what a lift is good for ("а що це мені дасть?"). */
+const WHAT_FOR_RE =
+  /((що|шо|что) (це|вона|воно|оно|она|ця вправа) (мені )?(да(сть|є|ст|ет)|кача(є|ет))|навіщо (вона|це|її|ця вправа|мені це)|для чого (вона|це|ця вправа)|what.?s (it|that|this) (good )?for|what (does|will) (it|this|that) (do|give|build|work)|why (do|should) (i|we) (do|even do) (it|this|that))/u;
+/** "Something lighter / easier" right after a day's suggestion. */
+const LIGHTER_RE =
+  /(легш\S*|полегш\S*|легк\S*|попрощ\S*|полегче|легче|lighter|easier|something easy|less intense|lżej\S*|lengv\S*|kergem\S*)/u;
+/** Why-questions that open a follow-up: "а чому лікті…", "but why…". */
+const FOLLOW_WHY_RE =
+  /^\s*(а|і|и|але|and|but|so)?\s*(чому|чого|навіщо|почему|зачем|why|how come)\s/iu;
+/** "Build me a plan" follow-ups right after one: "and 4 days?", "at home?", "30 min?". */
+function mergeFrames(a: Frame, b: Frame): Frame {
+  return {
+    ...a,
+    days: b.days ?? a.days,
+    minutes: b.minutes ?? a.minutes,
+    kit: b.kit.length ? b.kit : a.kit,
+    only: b.kit.length ? b.only : a.only,
+    without: [...new Set([...a.without, ...b.without])],
+    sore: b.sore ?? a.sore,
+    goal: b.goal ?? a.goal,
+    bar: a.bar || b.bar,
+  };
 }
 
 const MORE = [
@@ -423,7 +477,7 @@ const CATALOG_NAMES = () => (catalogNames ??= BUILT_IN_CATALOG.map((e) => e.name
 /** Build a full answer for an intent: flavour, memory, consistency, extras. */
 /** Other sides of the topic as chips ("Why?", "When?") — first two not yet told. */
 function withFacetChips(id: string, told: Facet[], rest: string[], L: Tr): string[] {
-  const f = KB[id]?.facets ?? {};
+  const f = facetsOf(id) ?? {};
   const order: Facet[] = ['why', 'how', 'when', 'howMuch', 'should', 'what', 'who', 'where'];
   // One "why / how" side when there are subject follow-ups, two otherwise.
   const sides = order
@@ -445,7 +499,7 @@ function faceted(
   L: Tr,
 ): { text: string; facet?: Facet } {
   const qt = questionType(question);
-  const f = qt ? KB[id]?.facets?.[qt] : undefined;
+  const f = qt ? facetsOf(id)?.[qt] : undefined;
   if (!qt || !f) return { text: core };
   const ft = L(f[0], f[1]);
   // Numbers in the answer = it was computed for you (your lifts, the plates
@@ -537,6 +591,7 @@ function dress(
     neutral: neutral || (convo.softUntil !== undefined && turn <= convo.softUntil),
     seed: `${seed}#${turn}`,
     jokedLast: !!convo.joked,
+    followUp: !!convo.intent && convo.intent === topic,
   });
 }
 
@@ -551,6 +606,16 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
 
   // "It / that lift / її / цю вправу" → the lift we were just talking about.
   if (!p.exercise && convo.exercise && words.length <= 9 && PRONOUN.test(` ${phrase} `))
+    p.exercise = convo.exercise;
+  // "а скільки підходів?" right after a lift → that lift.
+  if (
+    !p.exercise &&
+    !p.muscle &&
+    !p.range &&
+    convo.exercise &&
+    words.length <= 6 &&
+    CONNECTOR_RE.test(question)
+  )
     p.exercise = convo.exercise;
 
   // ---- the safety net: checked before anything else, in every temper ----
@@ -672,6 +737,14 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       convo: { ...convo, turn },
     };
 
+  // ---- put together on the spot: a plan, a comparison, a what-if ----
+  const composed = compose(question, p, c, convo, L, turn);
+  if (composed) return composed;
+
+  // ---- follow-ups that lean on the lift we were talking about ----
+  const around = aroundLift(question, p, c, convo, L, turn);
+  if (around) return around;
+
   // ---- follow-ups on a computed question ("and last month?", "а присід?") ----
   if (convo.query) {
     if (questionType(question) === 'why' && words.length <= 4 && convo.query.exercise) {
@@ -734,7 +807,13 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     );
     // "And last month?" — the same topic over a new window. A lift topic
     // without windows (progress, best) moves to the lift-over-a-window one.
-    if (p.range && !p.exercise && !p.muscle && !ownQuestion && words.length <= 5) {
+    if (
+      p.range &&
+      !p.exercise &&
+      !p.muscle &&
+      (!ownQuestion || CONNECTOR_RE.test(question)) &&
+      words.length <= 5
+    ) {
       const target =
         cur.needs === 'range'
           ? cur
@@ -752,12 +831,32 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
       const core = cur.answer(c, carried, L);
       if (core) return build(cur, core, c, carried, question, L, convo, convo.q ?? question);
     }
+    // "And for squat?" after a detour — the last topic that takes a lift / muscle.
+    if (entityOnly && !cur.needs && !ownQuestion)
+      for (const pr of convo.prev ?? []) {
+        const it = byId(pr.intent);
+        if (!it?.needs || it.needs === 'range' || it.needs === 'twoLifts') continue;
+        const tp: Parsed = { ...p, exercise: p.exercise, muscle: p.muscle };
+        if (!hasNeeds(it, tp)) continue;
+        const core = it.answer(c, tp, L);
+        if (core)
+          return build(
+            it,
+            core,
+            c,
+            tp,
+            question,
+            L,
+            { ...convo, intent: pr.intent },
+            pr.q ?? question,
+          );
+      }
     // "Why?" / "How?" / "When?"… on the current topic → that side of it.
     const fq = questionType(question);
     // The topic's own "why" (e.g. the lift-specific reason) beats the general one.
     const ownWhy = fq === 'why' && words.length <= 4 ? cur.why?.(c, topic, L) : null;
     const side =
-      fq && words.length <= 4 && !ownQuestion && !ownWhy ? KB[cur.id]?.facets?.[fq] : undefined;
+      fq && words.length <= 4 && !ownQuestion && !ownWhy ? facetsOf(cur.id)?.[fq] : undefined;
     if (fq && side) {
       const told = [...(convo.told ?? []), fq];
       return {
@@ -822,9 +921,9 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
         };
       // Out of layers → the sides of the topic not told yet.
       const order: Facet[] = ['why', 'how', 'when', 'howMuch', 'should', 'what', 'who', 'where'];
-      const next = order.find((x) => KB[cur.id]?.facets?.[x] && !(convo.told ?? []).includes(x));
+      const next = order.find((x) => facetsOf(cur.id)?.[x] && !(convo.told ?? []).includes(x));
       if (next) {
-        const f = KB[cur.id]!.facets![next]!;
+        const f = facetsOf(cur.id)![next]!;
         const told = [...(convo.told ?? []), next];
         return {
           intent: cur.id,
@@ -1476,6 +1575,23 @@ export function answerLocally(question0: string, c: AskCtx, convo: Convo = {}): 
     void _drop;
     out = { ...out, convo: rest };
   }
+  // Topic stack: a new topic pushes the last one down (three kept).
+  const was = convo.intent;
+  const topicLike = (id?: string) =>
+    !!id && !!byId(id) && !SMALLTALK_IDS.has(id) && id !== 'did_you_mean';
+  if (topicLike(was) && out.convo.intent !== was && topicLike(out.convo.intent))
+    out = {
+      ...out,
+      convo: {
+        ...out.convo,
+        prev: [
+          { intent: was!, exercise: convo.exercise, muscle: convo.muscle, q: convo.q },
+          ...(convo.prev ?? []),
+        ].slice(0, 3),
+      },
+    };
+  else if (convo.prev && !out.convo.prev)
+    out = { ...out, convo: { ...out.convo, prev: convo.prev } };
   return out;
 }
 
@@ -1488,62 +1604,9 @@ function answerRaw(question: string, c: AskCtx, convo: Convo = {}): LocalAnswer 
       text: emoji,
       convo: { ...convo, turn: (convo.turn ?? 0) + 1 },
     };
-  const parts = question
-    .split(SPLIT_RE)
-    .map((x) => x.trim())
-    .filter((x) => tokens(x).length >= 2);
-  if (parts.length >= 2) {
-    let state = convo;
-    const got: LocalAnswer[] = [];
-    for (const [k, part0] of parts.slice(0, 3).entries()) {
-      // "…, а ще скільки спати" — the second question stands on its own.
-      const part = k ? part0.replace(CONNECTOR_RE, '') : part0;
-      const a = answerOne(part, c, k ? { turn: state.turn, softUntil: state.softUntil } : state);
-      if (a) {
-        got.push(a);
-        state = a.convo;
-      }
-    }
-    if (got.length >= 2) {
-      const last = got[got.length - 1];
-      const learned = got.reduce<AtlasMemory | undefined>(
-        (m, g) => (g.learned ? mergeMemory(m, g.learned) : m),
-        undefined,
-      );
-      return {
-        ...last,
-        text: got.map((g) => g.text).join('\n\n'),
-        escalate: false,
-        learned,
-        action: got.find((g) => g.action)?.action,
-        chart: got.find((g) => g.chart)?.chart,
-      };
-    }
-  }
-  // "How long to rest and what's tomorrow" — two questions joined by "and".
-  if (!convo.flow)
-    for (const [x, y] of andSplits(question)) {
-      const a1 = answerOne(x, c, convo);
-      // The second answer comes plain — one voice flourish per message is enough.
-      const a2 =
-        a1 &&
-        answerOne(y.replace(CONNECTOR_RE, ''), c, {
-          turn: a1.convo.turn,
-          softUntil: (a1.convo.turn ?? 0) + 1,
-        });
-      if (a2 && !a2.intent.startsWith('safety'))
-        a2.convo = { ...a2.convo, softUntil: convo.softUntil };
-      if (standalone(a1) && standalone(a2) && a1!.intent !== a2!.intent)
-        return {
-          ...a2!,
-          text: `${a1!.text}\n\n${a2!.text}`,
-          escalate: false,
-          learned:
-            a1!.learned || a2!.learned ? mergeMemory(a1!.learned, a2!.learned ?? {}) : undefined,
-          action: a2!.action ?? a1!.action,
-          chart: a2!.chart ?? a1!.chart,
-        };
-    }
+  // Several questions in one message — each answered, in order.
+  const multi = !convo.flow && !safetySignal(question) ? answerParts(question, c, convo, L) : null;
+  if (multi) return multi;
   const direct = answerOne(question, c, convo);
   // Latin letters may be Ukrainian ("shcho trenuvaty sohodni") — the reading
   // whose examples fit better wins.
@@ -1668,16 +1731,361 @@ function activeIllness(c: AskCtx): boolean {
 }
 
 /** Places to split "X and Y" into two questions (both halves 2+ words). */
-function andSplits(q: string): [string, string][] {
-  const out: [string, string][] = [];
-  const re = /\s(?:і|та|й|и|and|а також|а ещё|а еще|also)\s/giu;
-  for (const m of q.matchAll(re)) {
-    const x = q.slice(0, m.index).trim();
-    const y = q.slice((m.index ?? 0) + m[0].length).trim();
-    if (tokens(x).length >= 2 && tokens(y).length >= 2) out.push([x, y]);
-    if (out.length >= 2) break;
+/** A plan, two lifts side by side, or "what if…" — built from the pieces of the message. */
+function compose(
+  question: string,
+  p: Parsed,
+  c: AskCtx,
+  convo: Convo,
+  L: Tr,
+  turn: number,
+): LocalAnswer | null {
+  const f = parseFrame(question, c.mem, c.now);
+  const done = (
+    intent: string,
+    r: { text: string; chips?: string[]; action?: AtlasAction },
+    extra: Partial<Convo> = {},
+  ): LocalAnswer => {
+    const learned = learn(p.words, p.phrase, c.mem, c.now, p.exercise, c.fmt.exercise).patch;
+    return {
+      intent,
+      text: r.text,
+      chips: r.chips,
+      action: r.action,
+      ...(Object.keys(learned).length ? { learned } : {}),
+      convo: {
+        ...convo,
+        intent,
+        turn,
+        q: question,
+        exercise: p.exercise,
+        muscle: p.muscle,
+        depth: 0,
+        told: [],
+        ...extra,
+      },
+    };
+  };
+  // "So which one is better for me?" right after a comparison → the verdict alone.
+  if (
+    convo.intent === 'compare_ex' &&
+    convo.pair &&
+    p.words.length <= 8 &&
+    /(better|best|choose|pick|which|what should|краще|кращ|лучше|обрати|вибрати|выбрать|яку|яка|який|какую|какой)/u.test(
+      p.phrase,
+    )
+  ) {
+    const r = compareAnswer(c, convo.pair[0], convo.pair[1], L);
+    if (r?.verdict)
+      return { intent: 'compare_ex', text: r.verdict, chips: r.chips, convo: { ...convo, turn } };
   }
-  return out;
+  // "Make me a 3-day plan without a barbell" — and its follow-ups ("and 4 days?", "at home?").
+  const planFollow =
+    (convo.intent === 'plan_build' || convo.intent === 'plan') &&
+    !!convo.frame &&
+    p.words.length <= 7 &&
+    (f.days !== null ||
+      f.minutes !== null ||
+      f.kit.length > 0 ||
+      f.without.length > 0 ||
+      f.sore !== null);
+  // A plan for today / now is today's workout, not a week.
+  const todayish =
+    /(сьогодн|зараз|на завтра|завтра|today|tonight|right now|tomorrow|сегодня|dzisiaj|šiandien|täna)/u.test(
+      p.phrase,
+    );
+  const specific =
+    f.days !== null ||
+    f.minutes !== null ||
+    f.kit.length > 0 ||
+    f.without.length > 0 ||
+    f.sore !== null ||
+    f.goal !== null ||
+    f.bar;
+  const planTopic = () => {
+    const [h1] = retrieve(question);
+    return !!h1 && (h1.id === 'plan' || h1.id === 'why_plan') && h1.score >= RET_MIN;
+  };
+  if ((f.wantsPlan && !todayish && (specific || planTopic())) || planFollow) {
+    const frame = planFollow ? mergeFrames(convo.frame!, f) : f;
+    const r = programAnswer(c, frame, L);
+    // Nothing specific asked → it's the programme topic, written out for you.
+    return done(specific || planFollow ? 'plan_build' : 'plan', r, {
+      frame,
+      q: planFollow ? (convo.q ?? question) : question,
+    });
+  }
+  // "Bench or push-ups?", "RDL vs good morning" — from the library and your log.
+  // (Progress between two of YOUR lifts stays with compare_lifts.)
+  const two = p.exercises ?? [];
+  const better =
+    /(better|best|choose|pick|краще|кращ|ефективніш|лучше|обрати|вибрати|выбрать|lepsz|geriau|parem)/u.test(
+      p.phrase,
+    );
+  const mine = new Set(loggedLifts(c).map((x) => x.name));
+  // A topic written for this very pair ("squat or leg press") knows it best.
+  // A topic written for this question (a pair, or a narrow one like "swing: squat or hinge?") knows it best.
+  const pairTopic = () => {
+    const [h1] = retrieve(question);
+    return (
+      !!h1 &&
+      ((PAIR_TOPICS.has(h1.id) && h1.score >= RET_MIN) ||
+        (h1.score >= OWN_TOPIC && !COMPARE_OK.has(h1.id)))
+    );
+  };
+  if (
+    f.compares &&
+    two.length >= 2 &&
+    // Two of YOUR lifts, "vs" → how they compare in your log (compare_lifts).
+    // A choice is asked ("which is better", "… for chest"), or two lifts for the same muscle.
+    (better || !!p.muscle || sameMuscle(two[0], two[1])) &&
+    (better || !two.slice(0, 2).every((x) => mine.has(x) || !!resolveMyLift(x, loggedLifts(c)))) &&
+    !/(прогрес|progress|рост|grow|сильніш|stronger|weaker|слабш|ratio|співвідн)/u.test(p.phrase) &&
+    !pairTopic()
+  ) {
+    const r = compareAnswer(c, two[0], two[1], L);
+    if (r) return done('compare_ex', r, { exercise: two[0], pair: [two[0], two[1]] });
+  }
+  // "How do I bench?" — plain "how do I <lift>" is the technique, not the warm-up or the weights.
+  const HOW_DO =
+    /^(how (do|should|would|can) (i|you|we|one) (do |perform )?|how to (do |perform )?|як (правильно |треба )?(робити|виконувати|робиться|роблять|жати|присідати|тягнути|тягти)|как (правильно )?(делать|выполнять))\s*/u;
+  if (
+    p.exercise &&
+    HOW_DO.test(p.phrase) &&
+    tokens(p.phrase.replace(HOW_DO, '')).length <= 3 &&
+    !((h) => !!h && h.score >= OWN_TOPIC && !COMPARE_OK.has(h.id))(retrieve(question)[0]) &&
+    !/(warm|розмин|weight|ваг|вес|sets?\b|підход|сет|reps?\b|повтор|muscle|м.?яз|often|часто|much|скільки|long|довго|heavy|важк|replace|замін|instead|progress|прогрес|breath|дих|grip|хват)/u.test(
+      p.phrase,
+    )
+  ) {
+    const it = byId('technique_lift')!;
+    const core = it.answer(c, p, L);
+    if (core) return build(it, core, c, p, question, L, convo);
+  }
+  // "What if I train 5 times a week?" / "а якщо 3 рази на тиждень?"
+  if (f.whatIf && f.days !== null && !f.wantsPlan) {
+    const r = whatIfDays(c, f.days, p.muscle ?? convo.muscle ?? null, L);
+    return done('what_if_days', r, { muscle: p.muscle ?? convo.muscle ?? null });
+  }
+  return null;
+}
+
+/** Follow-ups on the lift just discussed: other kit, "what's it for", "why…", "something lighter". */
+function aroundLift(
+  question: string,
+  p: Parsed,
+  c: AskCtx,
+  convo: Convo,
+  L: Tr,
+  turn: number,
+): LocalAnswer | null {
+  const cur = byId(convo.intent);
+  const words = p.words;
+  const lift = convo.exercise;
+  const followish =
+    CONNECTOR_RE.test(question) || groupMatches(words, p.phrase, FOLLOW_LEAD) || words.length <= 4;
+  // "а з гантелями?" / "what about with dumbbells" → the same movement with that kit.
+  if (lift && followish && words.length <= 6 && (!p.exercise || p.exercise === lift)) {
+    const f = parseFrame(question, c.mem, c.now);
+    const kit = f.kit.find((k) => k !== 'home');
+    if (kit && !f.wantsPlan) {
+      const alt = variantOf(lift, kit);
+      if (alt && alt !== lift) {
+        const it = cur?.needs === 'exercise' ? cur : byId('technique_lift')!;
+        const tp: Parsed = { ...p, exercise: alt };
+        const core = it.answer(c, tp, L);
+        if (core) {
+          // The answer opens with the lift's name — the lead only says which kit.
+          const lead = L(
+            `With ${kit === 'body' ? 'bodyweight' : kit === 'dumbbell' ? 'dumbbells' : kit} →`,
+            `${kitLead(kit)} →`,
+          );
+          const a = build(it, core, c, tp, question, L, convo, question);
+          return { ...a, text: `${lead} ${a.text}` };
+        }
+      }
+    }
+  }
+  // "а що це мені дасть?" → what the lift works, and why it's in a programme.
+  if (lift && WHAT_FOR_RE.test(p.phrase)) {
+    const it = byId('exercise_muscles')!;
+    const tp: Parsed = { ...p, exercise: lift };
+    const core = it.answer(c, tp, L);
+    const tech = byId('technique_lift')?.why?.(c, tp, L);
+    if (core) {
+      const a = build(it, core, c, tp, question, L, convo, question);
+      return { ...a, text: tech ? `${a.text} ${tech}` : a.text };
+    }
+  }
+  // "а чому лікті не можна розводити?" right after the lift's technique → its own reason.
+  if (
+    lift &&
+    cur?.why &&
+    FOLLOW_WHY_RE.test(question) &&
+    words.length <= 10 &&
+    (!p.exercise || p.exercise === lift)
+  ) {
+    const why = cur.why(c, { ...p, exercise: lift }, L);
+    if (why)
+      return {
+        intent: cur.id,
+        text: why,
+        chips: chipsFor(cur.id, L, { q: convo.q ?? question, p: { ...p, exercise: lift }, c }),
+        convo: { ...convo, turn },
+      };
+  }
+  // "а щось легше?" after today's suggestion → the same day, dialled down.
+  if (
+    (convo.intent === 'today' || convo.intent === 'tomorrow') &&
+    LIGHTER_RE.test(p.phrase) &&
+    words.length <= 6
+  )
+    return {
+      intent: 'today_light',
+      text: L(
+        'Lighter version of the same day: the same lifts, 2 working sets instead of 3–4, about 20% less weight, stop 3–4 reps before failure. Or swap it for 30–40 min of easy cardio and mobility — it still counts.',
+        'Легший варіант того ж дня: ті самі вправи, 2 робочі підходи замість 3–4, вага десь на 20% менша, зупиняйся за 3–4 повтори до відмови. Або заміни на 30–40 хв легкого кардіо й мобільності — це теж зараховується.',
+      ),
+      chips: [
+        L('Am I recovered?', 'Я відновився?'),
+        L('When should I deload?', 'Коли розвантаження?'),
+      ],
+      convo: { ...convo, turn },
+    };
+  return null;
+}
+
+function sameMuscle(a: string, b: string): boolean {
+  const ma = richExerciseByName(a)?.primaryMuscles[0];
+  const mb = richExerciseByName(b)?.primaryMuscles[0];
+  return !!ma && ma === mb;
+}
+
+function kitLead(kit: string): string {
+  return (
+    (
+      {
+        dumbbell: 'З гантелями',
+        barbell: 'Зі штангою',
+        machine: 'У тренажері',
+        cable: 'На блоці',
+        body: 'Без обладнання',
+        kettlebell: 'З гирею',
+        bands: 'З резинкою',
+      } as Record<string, string>
+    )[kit] ?? kit
+  );
+}
+
+/**
+ * A message cut into its questions: at "?", "and also", then at "і / та /
+ * and" (both sides 2+ words) and at commas (both sides 2+ words).
+ */
+function splitParts(q: string): string[] {
+  const out: string[] = [];
+  const cut = (text: string, re: RegExp, min: number): string[] => {
+    const bits = text
+      .split(re)
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const merged: string[] = [];
+    for (const b of bits) {
+      if (
+        merged.length &&
+        (tokens(b).length < min || tokens(merged[merged.length - 1]).length < min)
+      )
+        merged[merged.length - 1] = `${merged[merged.length - 1]} ${b}`;
+      else merged.push(b);
+    }
+    return merged;
+  };
+  for (const chunk of q
+    .split(SPLIT_RE)
+    .map((x) => x.trim())
+    .filter((x) => tokens(x).length >= 1)) {
+    // Commas only between two questions ("скільки спати, коли пити протеїн") —
+    // not "sore quads today, squat or skip", which is one question with context.
+    const commas = cut(chunk, /,\s+/u, 2);
+    const byComma =
+      commas.length >= 2 && commas.every((x) => QUESTION_HEAD.test(normalize(x)))
+        ? commas
+        : [chunk];
+    for (const a of byComma)
+      out.push(...cut(a, /\s(?:і|та|й|и|and|а також|а ещё|а еще|also|plus|плюс)\s/iu, 2));
+  }
+  // A lone word left over belongs to its neighbour.
+  return out.filter((x) => tokens(x).length >= 2).slice(0, 4);
+}
+
+/** How a question starts — "how / what / скільки / чи / дай…" (en, uk, ru, pl, lt, et). */
+const QUESTION_HEAD =
+  /^(\S+\s+)?(скільки|як|коли|що|шо|чи|який|яка|яке|які|де|навіщо|нащо|чому|куди|сколько|как|когда|что|какой|какая|где|зачем|почему|how|what|what.?s|when|which|should|can|could|do|does|is|are|why|where|will|дай|скажи|покажи|порадь|tell|give|show|jak|ile|czy|kiedy|co|kaip|kiek|ar|kada|kas|kuidas|palju|millal|mis)(?=\s|$)/u;
+
+/** Composed answers that already read the whole message (a plan with its constraints…). */
+const WHOLE_MESSAGE = new Set(['plan_build', 'compare_ex', 'what_if_days']);
+
+function answerParts(question: string, c: AskCtx, convo: Convo, L: Tr): LocalAnswer | null {
+  const parts = splitParts(question);
+  if (parts.length < 2) return null;
+  const whole = answerOne(question, c, convo);
+  if (whole && WHOLE_MESSAGE.has(whole.intent)) return whole;
+  const turn = (convo.turn ?? 0) + 1;
+  const got = parts.map((x, k) => ({
+    part: x,
+    // Later answers come plain — one voice flourish per message is enough.
+    a: answerOne(k ? x.replace(CONNECTOR_RE, '') : x, c, k ? { turn, softUntil: turn + 1 } : convo),
+  }));
+  const seen = new Set<string>();
+  const good = got.filter(({ a }) => {
+    if (!standalone(a) || seen.has(a!.intent)) return false;
+    seen.add(a!.intent);
+    return true;
+  });
+  const pain = got.find(({ a }) => a?.convo.flow?.kind === 'pain')?.a;
+  const unsure = got.filter(({ a }) => !a || a.intent === 'did_you_mean' || a.intent === 'nudge');
+  const learned = got.reduce<AtlasMemory | undefined>(
+    (m, g) => (g.a?.learned ? mergeMemory(m, g.a.learned) : m),
+    undefined,
+  );
+  const last = good[good.length - 1]?.a;
+  // "How long to rest, and can I train with a sore shoulder?" → the answer, then the check-in.
+  if (pain && good.length)
+    return {
+      ...pain,
+      text: [...good.map((g) => g.a!.text), pain.text].join('\n\n'),
+      learned: learned ?? pain.learned,
+    };
+  if (good.length >= 2)
+    return {
+      ...last!,
+      text: good.map((g) => g.a!.text).join('\n\n'),
+      escalate: false,
+      learned,
+      action: good.find((g) => g.a!.action)?.a!.action,
+      chart: good.find((g) => g.a!.chart)?.a!.chart,
+      convo: { ...last!.convo, softUntil: convo.softUntil },
+    };
+  // One part is clear, another isn't → answer it, then ask about the other.
+  if (good.length === 1 && unsure.length) {
+    const u = unsure[0].part;
+    const guess = didYouMean(u, c);
+    const ask = guess.length
+      ? L(`And about “${u}” — which of these do you mean?`, `А щодо «${u}» — ти про що саме?`)
+      : L(
+          `And “${u}” — say it another way and I’ll take it.`,
+          `А «${u}» — скажи інакше, і я відповім.`,
+        );
+    return {
+      ...good[0].a!,
+      text: `${good[0].a!.text}\n\n${ask}`,
+      chips: guess.length ? guess.map((g) => g.ask) : good[0].a!.chips,
+      learned,
+      convo: guess.length
+        ? { ...good[0].a!.convo, pendingTeach: { q: u, offered: guess.map((g) => g.id) } }
+        : good[0].a!.convo,
+    };
+  }
+  return null;
 }
 
 /** A confident answer to a question on its own (not "did you mean", small talk, a question back). */
@@ -1715,25 +2123,56 @@ function pickLift(
  * a moment after the chat opens.
  */
 let warming = false;
+let readyWaiters: (() => void)[] = [];
+function markReady(): void {
+  for (const f of readyWaiters) f();
+  readyWaiters = [];
+}
+/** Without a worker: load the base here (its own chunk) and build on the spot. */
+function buildHere(): void {
+  void import('./kb').then(({ KB, facetsTable }) => {
+    loadKb(KB);
+    setFacets(facetsTable(KB));
+    retrieve('warm up');
+    markReady();
+  });
+}
 export function warmUpAtlas(): void {
   if (warming) return;
   warming = true;
-  if (typeof Worker === 'undefined') {
-    retrieve('warm up');
-    return;
-  }
+  if (typeof Worker === 'undefined') return buildHere();
   try {
     const w = new Worker(new URL('./retrieve.worker.ts', import.meta.url), { type: 'module' });
-    w.onmessage = (e: MessageEvent<RetrievalIndex>) => {
-      setIndex(e.data);
+    w.onmessage = (
+      e: MessageEvent<{ index: RetrievalIndex; facets: Parameters<typeof setFacets>[0] }>,
+    ) => {
+      setIndex(e.data.index);
+      setFacets(e.data.facets);
       w.terminate();
+      markReady();
     };
     w.onerror = () => {
       w.terminate();
-      retrieve('warm up');
+      buildHere();
     };
     w.postMessage('build');
   } catch {
-    retrieve('warm up');
+    buildHere();
   }
+}
+/**
+ * Resolves once Atlas understands questions (the index is in), or after `ms`
+ * — so a question typed in the first seconds waits a moment instead of being
+ * answered by keywords alone.
+ */
+export function atlasReady(ms = 6000): Promise<void> {
+  if (indexReady()) return Promise.resolve();
+  warmUpAtlas();
+  return new Promise((resolve) => {
+    const t = setTimeout(resolve, ms);
+    readyWaiters.push(() => {
+      clearTimeout(t);
+      resolve();
+    });
+  });
 }

@@ -83,6 +83,8 @@ export type AtlasAction =
     }
   /** Log being ill (open illness period — plan pauses, streak kept). */
   | { type: 'illness' }
+  /** Write the programme: N days a week, sessions of about this length. */
+  | { type: 'plan'; days: number; lengthMin: number }
   /** Several of the above at once ("drop lunges and deadlifts"). */
   | { type: 'many'; actions: AtlasAction[] };
 

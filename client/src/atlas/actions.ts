@@ -18,7 +18,8 @@ import {
   getStoreState,
 } from '../store';
 import { bodyPart as bodyPartOf, loadCaps, protectedMuscles } from '../injury';
-import { buildPlanDay, planDayFor } from './plan';
+import { buildPlanDay, planDayFor, proposePlan } from './plan';
+import { computePlaybook } from '../playbook';
 import { clearSaid, mergeMemory } from './memory';
 import { memoryBuildHints } from './memoryPlan';
 import type { AtlasAction, Tr } from './intentKit';
@@ -46,6 +47,29 @@ export function runAction(
       return {
         text: done.map((d) => d.text).join(' '),
         openWorkoutId: done.find((d) => d.openWorkoutId)?.openWorkoutId,
+      };
+    }
+    case 'plan': {
+      const finished = s.workouts.filter((w) => w.finishedAt !== null);
+      const plan = proposePlan({
+        finished,
+        plays: computePlaybook(finished, now).plays,
+        now,
+        daysPerWeek: a.days,
+        lengthMin: a.lengthMin,
+      });
+      setCoach({
+        plan,
+        memory: mergeMemory(mem, {
+          days: { v: a.days, at: now },
+          minutes: { v: a.lengthMin, at: now },
+        }),
+      });
+      return {
+        text: L(
+          `Done — ${a.days} days a week, ~${a.lengthMin} min. Each day is built on the day from this, your recovery and what you told me.`,
+          `Готово — ${a.days} дн. на тиждень, ~${a.lengthMin} хв. Кожен день збиратиму в день тренування з цього, твого відновлення і того, що ти мені казав.`,
+        ),
       };
     }
     case 'rest':

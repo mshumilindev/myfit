@@ -1822,13 +1822,18 @@ export const lt: Strings = {
   atlasRuleMercilessOnly: 'Tik Negailestingas',
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
+  atlasPuterOffer:
+    'Gemini šiandien baigėsi. Galiu kalbėti toliau per Puter — jis veikia tavo paties nemokamoje Puter paskyroje, tad nei tau, nei programėlei tai nieko nekainuoja. Vienas prisijungimas.',
+  atlasPuterEnable: 'Naudoti Puter',
+  atlasPuterNo: 'Ne dabar',
+  atlasPuterFail: 'Nepavyko prisijungti prie Puter — atsakysiu iš savo žinių.',
   atlasQuotaNotice: (time: string) =>
-    `Nemokamas Gemini limitas išnaudotas. Iki ${time} Atlas atsako iš savo žinių.`,
+    `Nemokamas Gemini limitas išnaudotas. Iki ${time} Atlas atsako iš savo žinių — arba per Puter, tavo nemokamoje Puter paskyroje.`,
   atlasAsk: 'Paklausk Atlas apie treniruotes…',
   atlasSend: 'Siųsti',
   atlasConsentTitle: 'Pokalbis su Atlas',
   atlasConsentBody:
-    'Kad atsakytų į laisvus klausimus, Atlas siunčia trumpą treniruočių santrauką (paskutinės sesijos, planas, miego valandos) į Google Gemini. Be vardo, el. pašto, gimimo datos ir nuotraukų. Nemokamame plane Google gali naudoti šias užklausas modeliams tobulinti. Pastabos, apžvalgos ir pranešimai veikia ir be to.',
+    'Kad atsakytų į laisvus klausimus, Atlas siunčia trumpą treniruočių santrauką (paskutinės sesijos, planas, miego valandos) į Google Gemini, o kai dienos nemokamas Gemini limitas išnaudotas — į Puter (puter.com) per tavo paties Puter paskyrą. Be vardo, el. pašto, gimimo datos ir nuotraukų. Nemokamuose planuose šios paslaugos gali naudoti užklausas modeliams tobulinti. Pastabos, apžvalgos ir pranešimai veikia ir be to.',
   atlasConsentOk: 'Sutinku ir siųsti',
   atlasChatOffline: 'Nėra ryšio. Treniruokis dabar, pasikalbėsim vėliau.',
   atlasChatCap: 'Šiandien užtenka kalbų. Štanga laukia.',

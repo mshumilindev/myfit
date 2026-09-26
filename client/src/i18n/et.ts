@@ -1801,13 +1801,18 @@ export const et: Strings = {
   atlasRuleMercilessOnly: 'Ainult Halastamatu',
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
+  atlasPuterOffer:
+    'Gemini on tänaseks otsas. Võin jätkata Puteri kaudu — see töötab sinu enda tasuta Puteri kontol, nii et see ei maksa sulle ega rakendusele midagi. Üks sisselogimine.',
+  atlasPuterEnable: 'Kasuta Puterit',
+  atlasPuterNo: 'Mitte praegu',
+  atlasPuterFail: 'Puteriga ei õnnestunud ühendust saada — vastan oma teadmiste põhjal.',
   atlasQuotaNotice: (time: string) =>
-    `Gemini tasuta limiit on otsas. Kuni ${time} vastab Atlas oma teadmiste põhjal.`,
+    `Gemini tasuta limiit on otsas. Kuni ${time} vastab Atlas oma teadmiste põhjal — või Puteri kaudu, sinu tasuta Puteri kontol.`,
   atlasAsk: 'Küsi Atlaselt trenni kohta…',
   atlasSend: 'Saada',
   atlasConsentTitle: 'Vestlus Atlasega',
   atlasConsentBody:
-    'Vabadele küsimustele vastamiseks saadab Atlas Google Geminile lühikese trennikokkuvõtte (viimased trennid, plaan, uneajad). Ilma nime, e-posti, sünnikuupäeva ja fotodeta. Tasuta tasemel võib Google neid päringuid mudelite parandamiseks kasutada. Märkmed, ülevaated ja teavitused töötavad ka ilma selleta.',
+    'Vabadele küsimustele vastamiseks saadab Atlas Google Geminile lühikese trennikokkuvõtte (viimased trennid, plaan, uneajad), ja kui Gemini päevane tasuta limiit on otsas, siis Puterile (puter.com) sinu enda Puteri konto kaudu. Ilma nime, e-posti, sünnikuupäeva ja fotodeta. Tasuta tasemetel võivad need teenused päringuid mudelite parandamiseks kasutada. Märkmed, ülevaated ja teavitused töötavad ka ilma selleta.',
   atlasConsentOk: 'Nõustu ja saada',
   atlasChatOffline: 'Ühendust pole. Treeni praegu, räägime hiljem.',
   atlasChatCap: 'Tänaseks aitab jutust. Kang ootab.',

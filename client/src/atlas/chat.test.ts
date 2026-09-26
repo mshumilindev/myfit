@@ -55,13 +55,12 @@ describe('chat facts', () => {
   });
 });
 
-describe('chat access (closed testing)', () => {
-  it('lets in only listed accounts; no config → nobody', async () => {
+describe('chat access', () => {
+  it('open to everyone; config/atlas chatOff is the emergency brake', async () => {
     const { chatAllowed } = await import('./chatAccess');
-    expect(chatAllowed(null, 'u1', 'mykola')).toBe(false);
-    expect(chatAllowed({ chatUsers: ['Mykola'] }, 'u1', 'mykola ')).toBe(true);
-    expect(chatAllowed({ chatUids: ['u1'] }, 'u1', null)).toBe(true);
-    expect(chatAllowed({ chatUsers: ['mykola'] }, 'u2', 'anna')).toBe(false);
+    expect(chatAllowed(null)).toBe(true);
+    expect(chatAllowed({})).toBe(true);
+    expect(chatAllowed({ chatOff: true })).toBe(false);
   });
 });
 

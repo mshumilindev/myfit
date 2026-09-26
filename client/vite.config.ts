@@ -6,6 +6,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        // Atlas's knowledge base as a main-thread chunk exists only for browsers
+        // without module workers — named so the service worker can skip it.
+        chunkFileNames: (c) =>
+          c.facadeModuleId?.replace(/\\/g, '/').endsWith('/atlas/kb/index.ts')
+            ? 'assets/atlas-kb-[hash].js'
+            : 'assets/[name]-[hash].js',
         manualChunks(id) {
           if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
             return 'vendor-react';
@@ -84,16 +90,30 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Atlas's understanding worker (~2.8 MB, the whole knowledge base) must be
+        // precached or the chat can't understand anything offline.
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         // Sends already-open pages to the new build (public/sw-refresh.js).
         importScripts: ['/sw-refresh.js', '/sw-push.js'],
-        globIgnores: ['sw-refresh.js', 'sw-push.js'],
+        // Not for everyone: the no-worker fallback base, and the pl / lt / et answer
+        // dictionaries (only their users fetch them — then kept, see runtimeCaching).
+        globIgnores: [
+          'sw-refresh.js',
+          'sw-push.js',
+          'assets/atlas-kb-*.js',
+          'assets/atlasDict.*.js',
+        ],
         // App shell is precached; API goes network-only (the app has its own
         // offline queue in localStorage, so we must never serve stale API data).
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,webmanifest}'],
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) => /\/assets\/(atlasDict\.|atlas-kb-)/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'atlas-lazy', expiration: { maxEntries: 6 } },
+          },
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
             handler: 'NetworkOnly',

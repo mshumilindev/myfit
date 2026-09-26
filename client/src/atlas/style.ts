@@ -413,7 +413,17 @@ export interface StyleCtx {
   seed: string;
   /** Joked in the previous answer — most tempers don't do it twice in a row. */
   jokedLast?: boolean;
+  /** The same topic as the last answer — a conversation, not a new greeting. */
+  followUp?: boolean;
 }
+
+/**
+ * How often the flourishes fire, relative to the temper's own rates. A person
+ * doesn't open every reply with "Yo bro" or sign off each one — the manner
+ * shows now and then, and a long, dense answer is left alone.
+ */
+const PACE = { open: 0.55, close: 0.45, joke: 0.6 };
+const LONG_ANSWER = 260;
 
 export interface Styled {
   text: string;
@@ -488,11 +498,14 @@ export function styled(text: string, s: StyleCtx): Styled {
   const swear = s.swearing && s.temper === 5 && !quiet;
   const mom = s.yoMama && s.temper === 5 && !quiet;
 
+  const long = text.length > LONG_ANSWER;
   let head = '';
-  // One opener at most — "Yo! Yo bro!" reads like a stutter.
-  if (swear && r() < 0.45) head += pick(SWEAR_OPEN[li]);
+  // One opener at most — "Yo! Yo bro!" reads like a stutter — and none when
+  // the talk simply goes on about the same thing.
+  if (s.followUp) void r();
+  else if (swear && r() < 0.45) head += pick(SWEAR_OPEN[li]);
   else if (r() < v.rate.tic) head += pick(v.tic[li]);
-  else if (r() < v.rate.open) head += fill(pick(v.open[li]));
+  else if (r() < v.rate.open * PACE.open) head += fill(pick(v.open[li]));
   // An opener ending in ", " / ": " flows into the answer — lower its first
   // letter unless it's a name ("Barbell…", "Жим…" stay).
   let body = text;
@@ -508,8 +521,9 @@ export function styled(text: string, s: StyleCtx): Styled {
   if (
     !quiet &&
     !tail.some((x) => /без жартів|no jokes|not joking|не жартую/iu.test(x)) &&
+    !long &&
     (!s.jokedLast || v.jokesInARow) &&
-    r() < v.rate.joke
+    r() < v.rate.joke * PACE.joke
   ) {
     const topical = TOPIC_JOKES.find(([re]) => re.test(s.topic) || re.test(text))?.[1];
     const j =
@@ -524,7 +538,7 @@ export function styled(text: string, s: StyleCtx): Styled {
 
   let end = '';
   if (swear && r() < 0.35) end = pick(SWEAR_CLOSE[li]);
-  else if (r() < v.rate.close) end = fill(pick(v.close[li]));
+  else if (!long && r() < v.rate.close * PACE.close) end = fill(pick(v.close[li]));
 
   const main = `${head}${body}`.replace(/\s+$/, '');
   const extra = tail.length ? ` ${tail.join(' ')}` : '';

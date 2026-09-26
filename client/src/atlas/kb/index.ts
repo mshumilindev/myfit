@@ -16,11 +16,15 @@ import { KB_R4 } from './partR4';
 import { KB_R5 } from './partR5';
 import { KB_R6 } from './partR6';
 import { KB_R7 } from './partR7';
+import { KB_R8 } from './partR8';
+import { KB_R9 } from './partR9';
+import { KB_R10 } from './partR10';
 import { KB_PLLTET } from './partPlLtEt';
 import { FACETS_R1 } from './depthR1';
 import { FACETS_R2 } from './depthR2';
 import { FACETS_R3 } from './depthR3';
 import { NEW_TOPICS } from './topicsNew';
+import { NEW_TOPICS_EX } from './topicsNewEx';
 import { APP_TOPICS } from '../appTopics';
 import type { Kb } from './types';
 
@@ -33,6 +37,9 @@ const rounds: More[] = [
   KB_R5,
   KB_R6,
   KB_R7,
+  KB_R8,
+  KB_R9,
+  KB_R10,
   // Other languages ride in the English list — the matcher doesn't care.
   Object.fromEntries(Object.entries(KB_PLLTET).map(([id, ex]) => [id, { ex, exUk: [] }])),
 ];
@@ -66,10 +73,17 @@ export const KB: Kb = Object.fromEntries([
   ...NEW_TOPICS.map((t) => [
     t.id,
     {
-      ex: [...t.ex, ...(more[t.id]?.ex ?? [])],
-      exUk: [...t.exUk, ...(more[t.id]?.exUk ?? [])],
+      ex: [...(NEW_TOPICS_EX[t.id]?.ex ?? []), ...(more[t.id]?.ex ?? [])],
+      exUk: [...(NEW_TOPICS_EX[t.id]?.exUk ?? []), ...(more[t.id]?.exUk ?? [])],
       facets: t.facets,
     },
   ]),
 ]);
 export type { Facet, Kb, KbEntry } from './types';
+
+/** Every topic's answer by question type — what the chat needs from the base (the phrasings stay in the worker). */
+export function facetsTable(kb: Kb): Record<string, NonNullable<Kb[string]['facets']>> {
+  return Object.fromEntries(
+    Object.entries(kb).flatMap(([id, e]) => (e.facets ? [[id, e.facets]] : [])),
+  );
+}

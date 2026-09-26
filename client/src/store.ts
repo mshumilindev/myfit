@@ -911,11 +911,38 @@ function writeMasteryDoc(): void {
   );
   setDoc(doc(db, 'users', uid, 'meta', 'mastery'), clean).catch(onWriteError);
 }
-function writeCoachDoc(): void {
+/**
+ * The coach doc is written a few seconds after the last change, not on every
+ * one: a chat message can touch it twice (usage counters, what Atlas learned),
+ * and a conversation dozens of times — one write per burst instead. Flushed
+ * when the page is hidden or closed, so nothing is lost.
+ */
+const COACH_WRITE_DELAY = 4000;
+let coachTimer: ReturnType<typeof setTimeout> | null = null;
+let coachFor: string | null = null;
+function flushCoachDoc(): void {
+  if (coachTimer) clearTimeout(coachTimer);
+  coachTimer = null;
   const uid = currentUid();
-  if (!uid) return;
+  // Signed out or switched account meanwhile → that change belonged to the old one.
+  if (!uid || uid !== coachFor) return;
   const clean = JSON.parse(JSON.stringify(state.coach));
   setDoc(doc(db, 'users', uid, 'meta', 'coach'), clean).catch(onWriteError);
+}
+function writeCoachDoc(): void {
+  coachFor = currentUid();
+  if (!coachFor) return;
+  if (coachTimer) clearTimeout(coachTimer);
+  coachTimer = setTimeout(flushCoachDoc, COACH_WRITE_DELAY);
+}
+if (typeof window !== 'undefined') {
+  const flushIfPending = () => {
+    if (coachTimer) flushCoachDoc();
+  };
+  window.addEventListener('pagehide', flushIfPending);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushIfPending();
+  });
 }
 function deleteGymDoc(id: string): void {
   const uid = currentUid();

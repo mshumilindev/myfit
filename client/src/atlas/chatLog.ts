@@ -22,6 +22,8 @@ export interface ChatMsg {
   q?: string;
   /** Your verdict on this answer (hides the buttons). */
   rated?: 'up' | 'down';
+  /** Gemini is out for the day: the question to ask again through Puter after a sign-in. */
+  puterFor?: string;
 }
 
 const KEY = 'spotter.atlasChat';
