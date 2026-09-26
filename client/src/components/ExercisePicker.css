@@ -1310,3 +1310,21 @@ span.xp-noimg {
   display: grid;
   place-items: center;
 }
+
+/* "Next up" sits right above "Best for … now" in a group view. */
+.xp .xp-best.xp-nextup + .xp-best {
+  margin-top: 8px;
+}
+
+/* Suggestions: the same wide cards as "Next up" / "Best for … now", stacked. */
+.xp-sugs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.xp .xp-sugs-list .xp-best {
+  margin-top: 0;
+}
+.xp-main .xp-sugs-list .xp-best:nth-child(n + 4) {
+  display: none;
+}

@@ -27,6 +27,7 @@ import { LANDMARKS } from './volume';
 import { volumeWeakPoints } from './weakpoints';
 import { nextTarget, topHistory, type Target } from './progression';
 import { isStrengthExercise, resolveMuscles, topSet } from './store';
+import { fatigueSetCount } from './stimulus';
 
 // --- Families & sub-muscles -------------------------------------------------
 
@@ -133,7 +134,7 @@ export function directReadiness(
     for (const e of w.exercises) {
       if (!isStrengthExercise(e) || e.sets.length === 0) continue;
       const p = resolveMuscles(e).primary;
-      if (p && set.has(p)) dose += e.sets.length;
+      if (p && set.has(p)) dose += fatigueSetCount(e.sets);
     }
     if (dose > 0) {
       hit = { days: (now - w.startedAt) / 86400000, dose };

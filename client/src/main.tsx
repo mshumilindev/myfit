@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import './styles.css';
+import './redesign.css';
 import { App } from './App';
 import { getLocale } from './i18n';
 import { startAutoUpdate, markUpdateReady } from './pwaUpdate';

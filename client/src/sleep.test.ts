@@ -14,6 +14,7 @@ import {
   resolvePlan,
   computeUpcomingNights,
   localDayId,
+  nightEndingOn,
 } from './sleep';
 import type { SleepNight, SleepSchedule } from './types';
 
@@ -234,5 +235,45 @@ describe('auto-start queue (computeUpcomingNights)', () => {
   it('returns nothing when there is no plan', () => {
     const empty: SleepSchedule = { sameEveryNight: true, every: null, byDay: {} };
     expect(computeUpcomingNights(empty, [], Date.now(), 5)).toEqual([]);
+  });
+});
+
+describe('auto-fill: the night that ends on a given morning (nightEndingOn)', () => {
+  const sat0 = new Date(2026, 8, 26).getTime(); // Sat Sep 26 2026, local midnight
+  const noon = sat0 + 12 * 3600000;
+  const only = (weekday: number, bedMin: number, wakeMin: number): SleepSchedule => ({
+    sameEveryNight: false,
+    every: null,
+    byDay: { [weekday]: { bedMin, wakeMin } },
+  });
+
+  it('uses the previous evening plan when bedtime is before midnight', () => {
+    const n = nightEndingOn(only(5, 1410, 420), [], sat0, noon); // Fri 23:30 → 07:00
+    expect(n).not.toBeNull();
+    expect(new Date(n!.bedtime).getDay()).toBe(5);
+    expect(n!.wake).toBe(sat0 + 420 * 60000);
+  });
+
+  it('uses the same day plan when bedtime is after midnight', () => {
+    const n = nightEndingOn(only(6, 300, 630), [], sat0, noon); // Sat 05:00 → 10:30
+    expect(n).toEqual({ bedtime: sat0 + 300 * 60000, wake: sat0 + 630 * 60000 });
+  });
+
+  it('never takes a same-day evening plan (that night ends tomorrow)', () => {
+    const hist = [bedNight(3, 1, 0, 480)]; // usual 01:00 → 09:00
+    const n = nightEndingOn(only(6, 1380, 480), hist, sat0, noon);
+    expect(n).toEqual({ bedtime: sat0 + 60 * 60000, wake: sat0 + 540 * 60000 });
+  });
+
+  it('falls back to the usual night when neither weekday has a plan', () => {
+    const empty: SleepSchedule = { sameEveryNight: false, every: null, byDay: {} };
+    const hist = [bedNight(2, 2, 0, 480), bedNight(3, 2, 0, 480)];
+    const n = nightEndingOn(empty, hist, sat0, noon);
+    expect(n).toEqual({ bedtime: sat0 + 120 * 60000, wake: sat0 + 600 * 60000 });
+  });
+
+  it('returns null with no plan and no history', () => {
+    const empty: SleepSchedule = { sameEveryNight: false, every: null, byDay: {} };
+    expect(nightEndingOn(empty, [], sat0, noon)).toBeNull();
   });
 });

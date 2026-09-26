@@ -1,16 +1,23 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
 import { useEffect, useMemo, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
 import type { Shell } from '../App';
-import { db } from '../firebase';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
-import type { ExerciseKind, Gym } from '../types';
-import { callFn, currentUid, getRole } from '../api';
+import { getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
-import { dayReadoutLabel } from '../data/daySuggest';
+import { dayReadoutLabel, type TrainingDay } from '../data/daySuggest';
+import {
+  programDayHasPlan,
+  programDayItems,
+  programDayMuscles,
+  programDayName,
+  programDayType,
+  startProgramDaySession,
+  useProgramMine,
+  type ProgramItem,
+} from '../data/programMine';
 import type { MuscleGroup } from '../data/exercises';
 import {
   activeRestPeriod,
@@ -19,29 +26,27 @@ import {
   dismissAdvance,
   healInjury,
   illnessReturn,
-  addExercise,
   backfillWorkout,
-  consistencyStreak,
   dayKey,
   endRestPeriod,
-  startRestPeriod,
   latestWeight,
   liveSleep,
   logVisitAsWorkout,
   resolveMuscles,
-  startWorkout,
-  topSet,
   workoutDayReadout,
-  workoutVolumeKg,
   type useStore,
-  gymAtCurrentPosition,
 } from '../store';
-import { fmtDayMonth, fmtDurationHuman, fmtWeekdayDayMonth, useT } from '../i18n';
-import { WeekStrip } from '../components/WeekStrip';
+import {
+  fmtDayMonth,
+  fmtDurationHuman,
+  fmtWeekday,
+  fmtWeekdayDayMonth,
+  fmtWeekdayShort,
+  useT,
+} from '../i18n';
 import { DayHistorySheet } from '../components/DayHistorySheet';
-import { SessionLaunchSheet } from '../components/SessionLaunchSheet';
+import { BackfillSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
-import { ActivitySheet, SleepPanel } from '../components/ActivitySheet';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
 import { AtlasSoloStrip, AtlasStoryItem } from '../components/AtlasStrip';
 import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
@@ -52,10 +57,6 @@ import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutom
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
-import { DateField, TimeField, DurationField } from '../components/PickerFields';
-import { GymPicker } from '../components/GymPicker';
-import { GymThumb } from '../components/GymThumb';
-import { EquipmentIcon, type EquipmentId } from '../data/equipment';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -86,56 +87,6 @@ function compactProgramDaySummary(items: ProgramItem[]): string {
   return reps ? `${sets} × ${reps}` : String(sets);
 }
 
-// Older weeks read as graphite; the five most recent brighten smoothly toward
-// the accent, so recency reads as one clean gradient (no repeated shade).
-const BAR_COLORS = [
-  'var(--color-neutral-800)',
-  'var(--color-neutral-800)',
-  'var(--color-neutral-800)',
-  'var(--color-neutral-800)',
-  'var(--color-neutral-800)',
-  'var(--color-accent-800)',
-  'var(--color-accent-700)',
-  'var(--color-accent-600)',
-  'var(--color-accent-500)',
-  'var(--color-accent-400)',
-];
-
-interface ProgramItem {
-  id: string;
-  day: number;
-  position: number;
-  name: string;
-  kind: ExerciseKind;
-  sets: number;
-  reps: number;
-  durationMin: number | null;
-  equipment: EquipmentId[];
-  groupId?: string | null;
-  groupOrder?: number | null;
-  dropLast?: boolean;
-}
-
-interface ProgramAssignment {
-  program: {
-    id: string;
-    authorId?: string;
-    name: string;
-    weeks: number;
-    daysPerWeek: number;
-    dayNames?: Record<string, string>;
-    /** Per-day target muscle groups (muscle-only or mixed days). */
-    targetMuscles?: Record<string, MuscleGroup[]>;
-    items: ProgramItem[];
-  };
-  assignedBy: string | null;
-  week: number;
-  done: number;
-  total: number;
-  expectedSoFar: number;
-  adherence: number | null;
-}
-
 function useNowTick(active: boolean): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -150,39 +101,16 @@ function useNowTick(active: boolean): number {
  *  more than once every 1–2 weeks). Local, device-only — a transient nudge. */
 const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
-// Cache the assigned program so Today paints instantly and only revalidates in
-// the background (no full cold fetch on every visit).
-const PROGRAM_CACHE_KEY = 'spotter.programMine';
-function readProgramCache(): ProgramAssignment | null {
-  try {
-    const raw = localStorage.getItem(PROGRAM_CACHE_KEY);
-    return raw ? (JSON.parse(raw) as ProgramAssignment) : null;
-  } catch {
-    return null;
-  }
-}
-function writeProgramCache(a: ProgramAssignment | null): void {
-  try {
-    if (a) localStorage.setItem(PROGRAM_CACHE_KEY, JSON.stringify(a));
-    else localStorage.removeItem(PROGRAM_CACHE_KEY);
-  } catch {
-    /* ignore */
-  }
-}
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
-  const [startPicker, setStartPicker] = useState(false);
-  const [launch, setLaunch] = useState(false);
   const [backfill, setBackfill] = useState(false);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
   const [progSheetOpen, setProgSheetOpen] = useState(false);
-  const [restSheetOpen, setRestSheetOpen] = useState(false);
   const [illDismissed, setIllDismissed] = useState(false);
-  const [activityOpen, setActivityOpen] = useState(false);
   const [confirmEndRest, setConfirmEndRest] = useState<string | null>(null);
   const [dayDrawer, setDayDrawer] = useState<number | null>(null);
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
@@ -190,11 +118,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     shell.openOverlay({ screen: 'muscle-history', muscle });
   const [progChoice, setProgChoice] = useState<'week' | 'week-lifts'>('week-lifts');
   const [, setProgDismissTick] = useState(0);
-  const [assignment, setAssignment] = useState<ProgramAssignment | null>(() => readProgramCache());
-  // A draft program can be assigned, but shouldn't surface on Today until it's
-  // activated. When we can read the program doc (author/self) we honour its
-  // status; when we can't (member of a trainer's plan) we default to showing.
-  const [assignedActive, setAssignedActive] = useState(true);
+  // The assigned program (cached; a draft program stays hidden until it's
+  // activated — see data/programMine).
+  const { assignment, active: assignedActive } = useProgramMine();
 
   // A live activity is mutually exclusive with a live workout: while one runs,
   // the other can't be started (design feature 6).
@@ -221,37 +147,10 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return false;
   }
 
-  function beginSession(gymId: string | null) {
-    if (resumeLive()) return;
-    setStartPicker(false);
-    const w = startWorkout(gymId);
-    if (!w) return;
-    shell.openOverlay({ screen: 'session', workoutId: w.id });
-  }
-  async function startScratch() {
-    // Standing in one of your gyms → no question, just start there. Otherwise
-    // ask — the picker also finds gyms nearby that aren't saved yet.
-    const here = await gymAtCurrentPosition(store.gyms);
-    if (here) beginSession(here.id);
-    else setStartPicker(true);
-  }
-  function autoBuild() {
-    if (resumeLive()) return;
-    const active = !!assignment && assignedActive;
-    const own = active && assignment!.program.authorId === currentUid();
-    const programMode: 'none' | 'own' | 'other' = !active ? 'none' : own ? 'own' : 'other';
-    const programDays = own
-      ? [...new Set(assignment!.program.items.map((i) => i.day))].sort((a, b) => a - b)
-      : [];
-    shell.openOverlay({ screen: 'builder', programMode, programDays });
-  }
+  /** Every "start" on Today opens the Start sheet (one entry point). */
   function startSession() {
     if (resumeLive()) return;
-    setLaunch(true);
-  }
-  function openActivitySheet() {
-    if (resumeLive()) return;
-    setActivityOpen(true);
+    shell.openStart();
   }
 
   const now = useNowTick(!!open);
@@ -400,9 +299,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
   const reminder = presenceOn ? store.reminders[0] : undefined;
 
-  // --- Aggregates for the stat grid, weekly bars and records (W-04) --------
-  const totalVolKg = finished.reduce((v, w) => v + workoutVolumeKg(w), 0);
-
   // Weekly energy out (design feature 6, KCAL): lifting (session wall-clock) +
   // logged activities, split so non-lifting work reads as a peer to strength.
   const weekAgoTs = now - WEEK_MS;
@@ -433,93 +329,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     passive: Math.round(restKcalWeek),
     total: Math.round(liftKcalWeek + activityKcalWeek + restKcalWeek),
   };
-  const byName = new Map<string, { recW: number; recReps: number; recTs: number }>();
-  for (const w of finished) {
-    for (const e of w.exercises) {
-      const top = topSet(e.sets);
-      if (!top || (top.weight ?? 0) <= 0) continue;
-      const key = e.name.trim();
-      if (!key) continue;
-      const cur = byName.get(key) ?? { recW: 0, recReps: 0, recTs: 0 };
-      if ((top.weight ?? 0) > cur.recW) {
-        cur.recW = top.weight ?? 0;
-        cur.recReps = top.reps;
-        cur.recTs = w.startedAt;
-      }
-      byName.set(key, cur);
-    }
-  }
-  const newPrs = [...byName.values()].filter((r) => now - r.recTs < 14 * DAY_MS).length;
-
-  const thisWeek = weekStartOf(now);
-  const weeks: number[] = [];
-  for (let i = 9; i >= 0; i--) {
-    const s = thisWeek - i * WEEK_MS;
-    weeks.push(
-      finished
-        .filter((w) => weekStartOf(w.startedAt) === s)
-        .reduce((v, w) => v + workoutVolumeKg(w), 0),
-    );
-  }
-  const maxWeek = Math.max(...weeks, 1);
-  const deltaPct = weeks[8] > 0 ? Math.round(((weeks[9] - weeks[8]) / weeks[8]) * 100) : null;
-
-  const streakDays = consistencyStreak(pbNow);
-
-  useEffect(() => {
-    callFn<{ assignment: ProgramAssignment | null }>('programMine')
-      .then((data) => {
-        setAssignment(data.assignment);
-        writeProgramCache(data.assignment);
-      })
-      .catch(() => {
-        /* keep whatever was cached — don't blank the card on a transient error */
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!assignment) {
-      setAssignedActive(true);
-      return;
-    }
-    let alive = true;
-    getDoc(doc(db, 'programs', assignment.program.id))
-      .then((snap) => {
-        if (!alive) return;
-        const status = snap.exists() ? (snap.data() as { status?: string }).status : undefined;
-        // Unknown/unreadable → keep showing; only a readable non-active hides it.
-        setAssignedActive(status === undefined ? true : status === 'active');
-      })
-      .catch(() => alive && setAssignedActive(true));
-    return () => {
-      alive = false;
-    };
-  }, [assignment]);
-
   function startProgramDay(day: number) {
     if (resumeLive()) return;
     if (!assignment) return;
-    const items = assignment.program.items
-      .filter((item) => item.day === day)
-      .sort((a, b) => a.position - b.position);
-    const dayName = assignment.program.dayNames?.[String(day)] || t.progDay(day);
-    const targetMuscles = assignment.program.targetMuscles?.[String(day)] ?? [];
-    const w = startWorkout(null, { dayName, targetMuscles });
-    if (!w) return;
-    if (items.length > 0) {
-      for (const item of items) {
-        addExercise(w.id, item.name, item.kind, {
-          plannedSets: item.kind === 'strength' ? item.sets : 1,
-          plannedReps: item.kind === 'strength' ? item.reps : null,
-          plannedDurationMin: item.kind === 'strength' ? null : (item.durationMin ?? 10),
-          equipment: item.equipment,
-          // A prescribed superset arrives grouped (EQ-2 → SS-1).
-          groupId: item.groupId ?? null,
-          groupOrder: item.groupOrder ?? null,
-        });
-      }
-    }
-    shell.openOverlay({ screen: 'session', workoutId: w.id });
+    const id = startProgramDaySession(assignment, day, programDayName(assignment, day, t.progDay));
+    if (id) shell.openOverlay({ screen: 'session', workoutId: id });
   }
 
   if (showSkeleton) {
@@ -714,19 +528,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     return { dayName, labels, startMin, mealMin };
   })();
 
-  // Today's program-day exercises → the "from my program" launch option.
-  const progItemsToday =
-    assignment && assignedActive && !trainedToday
-      ? assignment.program.items.filter((i) => i.day === todayWeekday)
-      : [];
-  const launchProgramSub =
-    progItemsToday.length > 0
-      ? t.sbFromProgramSub(
-          assignment!.program.dayNames?.[String(todayWeekday)] || t.progDay(todayWeekday),
-          progItemsToday.length,
-        )
-      : null;
-
   // A program rest day: an active plan is assigned but this weekday prescribes
   // no work — and nothing's been logged yet, nor is a rest period already running.
   const programRestDay =
@@ -779,17 +580,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           )}
         </>
       ),
-    });
-  }
-  if (programRestDay) {
-    nudges.push({
-      id: 'restday',
-      tone: 'rest',
-      priority: 100,
-      icon: 'clock-countdown',
-      kicker: t.progRestDay,
-      title: t.restDayTitle,
-      body: t.restDayNote,
     });
   }
   if (weighReminder) {
@@ -924,142 +714,254 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     };
   })();
 
-  const programCard = assignment && assignedActive && (
-    <section className="today-program-card">
-      <div className="program-card-head">
-        <Icon name="list-checks" />
-        <div className="pch-text">
-          <div className="field-label">{t.progTitle}</div>
-          <div className="n">{assignment.program.name}</div>
-          <div className="s">
-            {assignment.program.weeks !== 0 ? `${t.progWeekN(assignment.week)} · ` : ''}
-            {t.progSessions(programWeek.done, programWeek.total)}
-            {assignment.assignedBy ? ` · ${t.progAssignedBy(assignment.assignedBy)}` : ''}
-          </div>
-        </div>
-        <div
-          className={`pch-progress lvl-${
-            programWeek.pct >= 100
+  // --- Week strip (program card / no-program card) --------------------------
+  // One pill per Mon–Sun day, styled like the history milestones: done ✓, missed
+  // ✕, rest (lotus), ill (pulse), full rest (plane), injury (band-aid), and a
+  // brass ▶ on today when there's something to start. Days after today stay
+  // blank (a planned full rest still shows its plane, dimmed). Taps keep their
+  // old meaning: today's ▶ starts, past days open the day drawer.
+  const todayTrained = weekTrainedDays.has(todayWeekday);
+  const dayStartOf = (day: number) => {
+    const c = new Date(weekMonday);
+    c.setDate(c.getDate() + (day - 1));
+    return c.getTime();
+  };
+  // Anything logged on a day (session, activity or a night's sleep) makes its
+  // pill open the day drawer — today included.
+  const dayHasItems = (start: number) => {
+    const dk = dayKey(start);
+    return (
+      finished.some((w) => dayKey(w.startedAt) === dk) ||
+      store.activities.some((x) => x.finishedAt !== null && dayKey(x.startedAt) === dk) ||
+      store.sleeps.some((n) => n.wake !== null && dayKey(n.wake) === dk)
+    );
+  };
+  const todayHasItems = dayHasItems(dayStartOf(todayWeekday));
+  const dayAria = (day: number, extra?: string) =>
+    [fmtWeekday(dayStartOf(day), locale), extra].filter(Boolean).join(' · ');
+  const injuryRehab = !!activeInj && !injFullRest && activeInj.stage !== 'return';
+
+  const programCard =
+    assignment &&
+    assignedActive &&
+    (() => {
+      const a = assignment;
+      const todayPlan = programDayHasPlan(a, todayWeekday);
+      const todayName = programDayName(a, todayWeekday, t.progDay);
+      const todayRest = weekRestMode.get(todayWeekday);
+      const mode: WeekMode =
+        todayRest === 'illness'
+          ? 'illness'
+          : todayRest === 'off' || injFullRest
+            ? 'off'
+            : todayTrained
               ? 'done'
-              : programWeek.pct >= 60
-                ? 'ok'
-                : programWeek.pct > 0
-                  ? 'warn'
-                  : 'none'
-          }`}
-        >
-          <div className="pch-top">
-            <span className="pch-pct num">{programWeek.pct}%</span>
-            <span className="pch-count num">
-              {programWeek.done}/{programWeek.total}
-            </span>
-          </div>
-          <div className="pch-bar">
-            <span className="pch-bar-fill" style={{ width: `${programWeek.pct}%` }} />
-          </div>
-        </div>
-      </div>
-      <div className="program-day-actions">
-        {Array.from({ length: 7 }, (_, i) => i + 1).map((day) => {
-          const items = assignment.program.items
-            .filter((item) => item.day === day)
-            .sort((a, b) => a.position - b.position);
-          const equipment = [
-            ...new Set(items.flatMap((item) => item.equipment ?? [])),
-          ] as EquipmentId[];
-          const dayMuscles = assignment.program.targetMuscles?.[String(day)] ?? [];
-          // A day is a real training day if it prescribes lifts OR names target
-          // muscles (a muscle-only day — we suggest the lifts on the day).
-          const hasPlan = items.length > 0 || dayMuscles.length > 0;
-          const dayName = assignment.program.dayNames?.[day] || t.progDay(day);
-          const setCount = items.reduce(
-            (sum, item) => sum + (item.kind === 'strength' ? item.sets : 1),
-            0,
-          );
-          const summary =
-            items.length === 0 && dayMuscles.length > 0
-              ? dayMuscles.map((m) => t.muscleGroups[m]).join(' · ')
-              : items.length === 1
-                ? compactProgramDaySummary(items)
-                : t.progDayWorkoutSummary(items.length, setCount);
-          const restMode = weekRestMode.get(day);
-          const isToday = day === todayWeekday;
-          const done = weekTrainedDays.has(day);
-          const missed = hasPlan && !done && day < todayWeekday && !restMode;
-          // Past days (logged or missed) open a day-history drawer.
-          const cellStart = (() => {
-            const c = new Date(weekMonday);
-            c.setDate(c.getDate() + (day - 1));
-            return c.getTime();
-          })();
-          const canOpenDay = day < todayWeekday && (done || missed || !!restMode);
-          // Only today is actionable — and only while it hasn't been trained yet
-          // (a sick / rest day is not a "start" prompt).
-          const canStart = isToday && hasPlan && !trainedToday && !done && !restMode;
-          const state = !hasPlan
-            ? 'rest'
+              : injuryRehab && todayPlan
+                ? 'injury'
+                : todayPlan
+                  ? 'train'
+                  : todayRest === 'active'
+                    ? 'active'
+                    : 'rest';
+      const kicker =
+        mode === 'illness'
+          ? t.restCardIllnessKicker
+          : mode === 'off'
+            ? t.histStateVacation
+            : mode === 'active'
+              ? t.restModeActive
+              : mode === 'injury' && activeInj
+                ? t.injBannerTitle(
+                    activeInj.reason === 'injury'
+                      ? (t.injBodyParts[activeInj.bodyPart] ?? activeInj.bodyPart)
+                      : t.injReason[activeInj.reason],
+                  )
+                : mode === 'rest'
+                  ? `${t.progRestDay} · ${fmtWeekday(now, locale)}`
+                  : `${t.today} · ${todayPlan ? todayName : t.progRestDay}`;
+      const headIcon =
+        mode === 'illness'
+          ? 'pulse'
+          : mode === 'off'
+            ? 'airplane-tilt'
+            : mode === 'injury'
+              ? 'bandaids'
+              : mode === 'rest' || mode === 'active'
+                ? 'flower-lotus'
+                : 'list-checks';
+      const todayItems = programDayItems(a, todayWeekday);
+      const todayMuscles = programDayMuscles(a, todayWeekday);
+      const todaySummary =
+        todayItems.length === 0 && todayMuscles.length > 0
+          ? todayMuscles.map((m) => t.muscleGroups[m]).join(' · ')
+          : todayItems.length === 1
+            ? compactProgramDaySummary(todayItems)
+            : t.progDayWorkoutSummary(
+                todayItems.length,
+                todayItems.reduce((n, it) => n + (it.kind === 'strength' ? it.sets : 1), 0),
+              );
+      const status =
+        mode === 'rest' && programRestDay
+          ? t.restDayNote
+          : mode === 'train' || mode === 'injury'
+            ? `${todayName} — ${todaySummary}`
+            : null;
+
+      const cells: WeekCell[] = Array.from({ length: 7 }, (_, i) => {
+        const day = i + 1;
+        const hasPlan = programDayHasPlan(a, day);
+        const restMode = weekRestMode.get(day);
+        const isToday = day === todayWeekday;
+        const isPast = day < todayWeekday;
+        const done = weekTrainedDays.has(day);
+        const missed = hasPlan && !done && isPast && !restMode;
+        const canOpenDay =
+          (isPast || isToday) && (done || missed || !!restMode || dayHasItems(dayStartOf(day)));
+        // Only today is actionable — and only while it hasn't been trained yet
+        // (a sick / rest day is not a "start" prompt).
+        const canStart = isToday && hasPlan && !trainedToday && !done && !restMode;
+        const name = hasPlan ? programDayName(a, day, t.progDay) : t.progRestDay;
+        const state: PillState =
+          day > todayWeekday
+            ? restMode === 'off'
+              ? 'off-next'
+              : hasPlan
+                ? 'next-train'
+                : 'next-rest'
             : done
               ? 'done'
-              : restMode
-                ? restMode === 'illness'
-                  ? 'sick'
-                  : 'off'
-                : isToday
-                  ? 'today'
-                  : missed
-                    ? 'missed'
-                    : 'upcoming';
-          return (
-            <button
-              key={day}
-              className={`program-start-day${hasPlan ? ' planned' : ''}${
-                isToday ? ' is-today' : ''
-              }${done ? ' is-done' : ''}${missed ? ' is-missed' : ''}${
-                canStart ? ' can-start' : ''
-              } state-${state}`}
-              disabled={!canStart && !canOpenDay}
-              aria-disabled={!canStart && !canOpenDay}
-              onClick={() => {
-                if (canStart) startProgramDay(day);
-                else if (canOpenDay) setDayDrawer(cellStart);
-              }}
-            >
-              <span className="program-start-top">
-                <span className="program-start-dow">{t.weekDayLetters[day - 1]}</span>
-                <span className="program-start-mark">
-                  {done ? (
-                    <Icon name="check" className="program-start-glyph" />
-                  ) : canStart ? (
-                    <Icon name="play" weight="fill" className="program-start-glyph" />
-                  ) : restMode === 'illness' ? (
-                    <Icon name="pulse" className="program-start-glyph program-start-sick" />
-                  ) : restMode ? (
-                    <Icon name="moon" className="program-start-glyph program-start-rest" />
-                  ) : missed ? (
-                    <Icon name="x" className="program-start-glyph" />
-                  ) : hasPlan ? (
-                    <Icon name="barbell" className="program-start-glyph program-start-plan" />
-                  ) : (
-                    <Icon name="yoga" className="program-start-glyph program-start-rest" />
-                  )}
-                </span>
+              : restMode === 'illness'
+                ? 'sick'
+                : restMode === 'off'
+                  ? 'off'
+                  : restMode === 'active'
+                    ? 'rest'
+                    : canStart
+                      ? injuryRehab
+                        ? 'injury'
+                        : 'play'
+                      : missed
+                        ? 'missed'
+                        : 'rest';
+        return {
+          day,
+          state,
+          isToday,
+          label: isToday ? t.today : fmtWeekdayShort(dayStartOf(day), locale),
+          aria: dayAria(day, name),
+          dayType: hasPlan ? programDayType(a, day) : null,
+          // Today with something already logged opens its drawer (which still
+          // offers the start); otherwise ▶ starts right away.
+          onClick:
+            canOpenDay && (!canStart || todayHasItems)
+              ? () => setDayDrawer(dayStartOf(day))
+              : canStart
+                ? () => startProgramDay(day)
+                : undefined,
+        };
+      });
+
+      const todayType = mode === 'train' ? programDayType(a, todayWeekday) : null;
+      return (
+        <section
+          className="today-program-card td-week"
+          data-mode={mode}
+          data-day={todayType ?? undefined}
+        >
+          <div className="program-card-head">
+            <Icon name={headIcon} className="pch-icon" />
+            <div className="pch-text">
+              <div className="pch-kicker">{kicker}</div>
+              <div className="n">{a.program.name}</div>
+              <div className="s">
+                {a.program.weeks !== 0 ? `${t.progWeekN(a.week)} · ` : ''}
+                {t.progSessions(programWeek.done, programWeek.total)}
+                {a.assignedBy ? ` · ${t.progAssignedBy(a.assignedBy)}` : ''}
+              </div>
+            </div>
+            <div className="pch-progress">
+              <span className="pch-pct num">{programWeek.pct}%</span>
+              <span className="pch-bar">
+                <span className="pch-bar-fill" style={{ width: `${programWeek.pct}%` }} />
               </span>
-              <strong>{hasPlan ? dayName : t.progRestDay}</strong>
-              {hasPlan && <span className="program-start-summary">{summary}</span>}
-              {equipment.length > 0 && (
-                <span className="program-start-equipment">
-                  {equipment.slice(0, 4).map((id) => (
-                    <EquipmentIcon key={id} equipment={id} />
-                  ))}
-                </span>
-              )}
-              <span className="program-start-bar" aria-hidden />
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
+            </div>
+          </div>
+          {status && <div className="pch-status">{status}</div>}
+          <WeekPills cells={cells} />
+        </section>
+      );
+    })();
+
+  // What today's ▶ does (also offered from today's drawer): the program day,
+  // or the Start sheet without a program. Null once there's nothing to start.
+  const todayStart: (() => void) | null =
+    assignment && assignedActive
+      ? programDayHasPlan(assignment, todayWeekday) &&
+        !trainedToday &&
+        !weekRestMode.get(todayWeekday)
+        ? () => startProgramDay(todayWeekday)
+        : null
+      : !todayTrained && !weekRestMode.get(todayWeekday)
+        ? startSession
+        : null;
+
+  // No program: the same strip, neutral and text-free. Days you didn't train
+  // read as rest after the fact (no red — nothing was prescribed), today is a
+  // ▶ until something's logged.
+  const weekCard = (() => {
+    if (assignment && assignedActive) return null;
+    const cells: WeekCell[] = Array.from({ length: 7 }, (_, i) => {
+      const day = i + 1;
+      const start = dayStartOf(day);
+      const dk = dayKey(start);
+      const isToday = day === todayWeekday;
+      const isPast = day < todayWeekday;
+      const logged = weekTrainedDays.has(day);
+      const rest = logged ? undefined : weekRestMode.get(day);
+      const state: PillState =
+        day > todayWeekday
+          ? rest === 'off'
+            ? 'off-next'
+            : 'blank'
+          : logged
+            ? 'done'
+            : rest === 'illness'
+              ? 'sick'
+              : rest === 'off'
+                ? 'off'
+                : rest === 'active'
+                  ? 'rest'
+                  : isToday
+                    ? injuryRehab
+                      ? 'injury'
+                      : 'play'
+                    : 'rest';
+      const hasDayItems =
+        logged ||
+        !!rest ||
+        store.activities.some((x) => x.finishedAt !== null && dayKey(x.startedAt) === dk) ||
+        store.sleeps.some((n) => n.wake !== null && dayKey(n.wake) === dk);
+      return {
+        day,
+        state,
+        isToday,
+        label: isToday ? t.today : fmtWeekdayShort(start, locale),
+        aria: dayAria(day),
+        dayType: null,
+        onClick:
+          (isPast || isToday) && hasDayItems
+            ? () => setDayDrawer(start)
+            : isToday && !logged && !rest
+              ? startSession
+              : undefined,
+      };
+    });
+    return (
+      <section className="today-program-card td-week" data-mode="none">
+        <WeekPills cells={cells} />
+      </section>
+    );
+  })();
 
   const banners = (
     <>
@@ -1087,20 +989,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       )}
     </>
   );
-
-  // With an assigned program, the page title becomes today's day name (or Rest).
-  const todayHeading = (() => {
-    if (assignment && assignedActive) {
-      const day = todayWeekday;
-      const items = assignment.program.items.filter((i) => i.day === day);
-      const muscles = assignment.program.targetMuscles?.[String(day)] ?? [];
-      if (items.length > 0 || muscles.length > 0) {
-        return assignment.program.dayNames?.[day] || t.progDay(day);
-      }
-      return t.progRestDay;
-    }
-    return t.today;
-  })();
 
   // Learn-progress banner — nudges the user toward the how-to library, in
   // Learn's rubellite/gem colours. When nothing is completed yet it shows as a
@@ -1202,50 +1090,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   }
 
   return (
-    <div className={`screen paned${!liveAct && hasHistory ? ' today-has-pill' : ''}`}>
+    <div className="screen paned today-page">
       <div className="pane-main">
-        {hasHistory ? (
-          <div className="td-topbar">
-            <div>
-              <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
-              <h2>{todayHeading}</h2>
-            </div>
-            <div className="td-topbar-actions">
-              <SyncChip store={store} />
-              <div className="td-header-ctas">
-                {!activeRest && (
-                  <button className="btn btn-secondary" onClick={() => setRestSheetOpen(true)}>
-                    <Icon name="clock-countdown" />
-                    {t.restStartCta}
-                  </button>
-                )}
-                {!liveAct && (
-                  <button className="btn btn-secondary" onClick={openActivitySheet} disabled={busy}>
-                    <Icon name="heartbeat" />
-                    {t.logActivity}
-                  </button>
-                )}
-                <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
-                  <Icon name="arrow-counter-clockwise" />
-                  {t.logPastSession}
-                </button>
-                {!liveAct && (
-                  <button className="btn btn-primary" onClick={startSession} disabled={busy}>
-                    <Icon name="play" />
-                    {t.startSessionLabel}
-                  </button>
-                )}
-              </div>
-            </div>
+        <div className="td-topbar">
+          <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
+          <div className="td-topbar-actions">
+            <SyncChip store={store} />
           </div>
-        ) : (
-          <div className="td-topbar">
-            <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
-            <div className="td-topbar-actions">
-              <SyncChip store={store} />
-            </div>
-          </div>
-        )}
+        </div>
 
         {/* An admin who is also a trainer sees their clients between the day
             heading and the calendar. */}
@@ -1262,23 +1114,21 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         {dayDrawer != null && (
           <DayHistorySheet
             day={dayDrawer}
+            onStart={
+              dayDrawer === dayStartOf(todayWeekday) && todayStart
+                ? () => {
+                    setDayDrawer(null);
+                    todayStart();
+                  }
+                : undefined
+            }
             onClose={() => setDayDrawer(null)}
             onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
             onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
             onOpenSleep={(id) => shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })}
           />
         )}
-        {!(assignment && assignedActive) && hasHistory && (
-          <div className="today-weekstrip-card">
-            <WeekStrip
-              onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
-              onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
-              onOpenSleep={(id) =>
-                shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })
-              }
-            />
-          </div>
-        )}
+        {hasHistory && weekCard}
 
         {banners}
         {liveAct && (
@@ -1676,126 +1526,8 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <SleepAutoFilledCard
           onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
         />
-        {!liveAct && hasHistory && (
-          <div className="td-pill-wrap">
-            <svg className="glass-defs" aria-hidden width="0" height="0">
-              <filter
-                id="liquid-glass"
-                x="-30%"
-                y="-30%"
-                width="160%"
-                height="160%"
-                colorInterpolationFilters="sRGB"
-              >
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.011 0.011"
-                  numOctaves="2"
-                  seed="7"
-                  result="noise"
-                />
-                <feGaussianBlur in="noise" stdDeviation="1.4" result="soft" />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="soft"
-                  scale="52"
-                  xChannelSelector="R"
-                  yChannelSelector="G"
-                />
-              </filter>
-            </svg>
-            <div className="td-pill">
-              {!activeRest && (
-                <button
-                  className="tp-btn"
-                  onClick={() => setRestSheetOpen(true)}
-                  aria-label={t.restStartCta}
-                  title={t.restStartCta}
-                >
-                  <Icon name="clock-countdown" />
-                </button>
-              )}
-              <button
-                className="tp-btn"
-                onClick={openActivitySheet}
-                disabled={busy}
-                aria-label={t.logActivity}
-                title={t.logActivity}
-              >
-                <Icon name="heartbeat" />
-              </button>
-              <button
-                className="tp-btn"
-                onClick={() => setBackfill(true)}
-                aria-label={t.logPastSession}
-                title={t.logPastSession}
-              >
-                <Icon name="arrow-counter-clockwise" />
-              </button>
-              <button className="tp-start" onClick={startSession} disabled={busy}>
-                <Icon name="play" weight="fill" />
-                <span>{t.startSessionLabel}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {hasHistory && playbook.plays.length === 0 && (
-          <button className="td-templates-link" onClick={() => shell.goPlaybook()}>
-            <Icon name="cards" />
-            <span className="tl-body">
-              <span className="tl-title">{t.playbook}</span>
-              <span className="tl-sub">{t.playbookTagline}</span>
-            </span>
-            <Icon name="arrow-right" className="tl-go" />
-          </button>
-        )}
-
         {hasHistory ? (
           <>
-            <div className="td-stats">
-              <div className="td-stat">
-                <div className="v">{finished.length}</div>
-                <div className="l">{t.statSessions}</div>
-              </div>
-              <div className="td-stat">
-                <div className="v">{(totalVolKg / 1000).toFixed(1)} t</div>
-                <div className="l">{t.statVolume}</div>
-              </div>
-              <div className="td-stat">
-                <div className={`v${newPrs > 0 ? ' ok' : ''}`}>{newPrs}</div>
-                <div className="l">{t.statNewPrs}</div>
-              </div>
-              <div className="td-stat">
-                <div className="v">{t.statDays(streakDays)}</div>
-                <div className="l">{t.statStreak}</div>
-              </div>
-            </div>
-
-            <div className="td-weekvol">
-              <div className="td-weekvol-head">
-                <span className="l">{t.weeklyVolume}</span>
-                {deltaPct !== null && (
-                  <span className="td-delta">
-                    {deltaPct >= 0 ? '+' : '−'}
-                    {Math.abs(deltaPct)}%
-                  </span>
-                )}
-              </div>
-              <div className="bars bars-compact">
-                {weeks.map((v, i) => (
-                  <div
-                    key={i}
-                    className="bar"
-                    style={{
-                      height: `${Math.max((v / maxWeek) * 100, 4)}%`,
-                      background: BAR_COLORS[i],
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
             <div className="td-history">
               <div className="section-label section-divide" style={{ marginBottom: 8 }}>
                 {t.tdHistory}
@@ -1859,23 +1591,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         )}
       </div>
 
-      {launch && (
-        <SessionLaunchSheet
-          onClose={() => setLaunch(false)}
-          programSub={launchProgramSub}
-          onProgram={launchProgramSub ? () => startProgramDay(todayWeekday) : undefined}
-          onScratch={startScratch}
-          onAuto={autoBuild}
-        />
-      )}
-      {startPicker && (
-        <GymPicker
-          gyms={store.gyms}
-          title={t.pickGymTitle}
-          onClose={() => setStartPicker(false)}
-          onPick={beginSession}
-        />
-      )}
       {backfill && (
         <BackfillSheet
           gyms={store.gyms}
@@ -1890,8 +1605,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       {addWeightOpen && (
         <WeightSheet state={{ kind: 'add' }} onClose={() => setAddWeightOpen(false)} />
       )}
-      {activityOpen && <ActivitySheet shell={shell} onClose={() => setActivityOpen(false)} />}
-      {restSheetOpen && <RestSheet shell={shell} onClose={() => setRestSheetOpen(false)} />}
       {confirmEndRest && (
         <ConfirmDialog
           title={confirmEndIllness ? t.illnessRecoveredTitle : t.restEndTitle}
@@ -1943,263 +1656,68 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   );
 }
 
-/** Backfill a past session — spec docs/specs/backfill-session.md (AC-1…AC-3). */
-function RestSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
-  const { t } = useT();
-  const [mode, setMode] = useState<'active' | 'off' | 'illness' | 'rehab'>('active');
-  const iso = (d: Date) => {
-    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-    return z.toISOString().slice(0, 10);
-  };
-  const today = new Date();
-  const [from, setFrom] = useState(iso(today));
-  const [to, setTo] = useState(iso(new Date(today.getTime() + 6 * 86400000)));
-  const [dur, setDur] = useState<'today' | 'open' | 'back'>('open');
-  const [backFrom, setBackFrom] = useState(iso(today));
-  const dk = (ymd: string) => {
-    const [y, m, d] = ymd.split('-').map(Number);
-    return dayKey(new Date(y, m - 1, d).getTime());
-  };
-  const days = Math.max(1, dk(to) - dk(from) + 1);
-  const start = () => {
-    if (mode === 'rehab') return;
-    if (mode === 'illness') {
-      const tk = dayKey(Date.now());
-      if (dur === 'today') startRestPeriod({ mode, startDay: tk, endDay: tk });
-      else if (dur === 'open') startRestPeriod({ mode, startDay: tk, endDay: tk, open: true });
-      else startRestPeriod({ mode, startDay: Math.min(dk(backFrom), tk), endDay: tk, open: true });
-    } else {
-      startRestPeriod({ mode, startDay: dk(from), endDay: dk(to) });
-    }
-    onClose();
-  };
-  return (
-    <Sheet onClose={onClose} className="rest-sheet">
-      <div className="ps-title">{t.restRecoveryTitle}</div>
-      <SleepPanel shell={shell} onClose={onClose} compact />
-      <div className="section-label section-divide rest-sub">{t.restStartTitle}</div>
-      <div className="rest-modes">
-        {(['active', 'off', 'illness'] as const).map((m) => (
-          <button
-            key={m}
-            className={`rest-mode${mode === m ? ' active' : ''}${m === 'illness' ? ' illness' : ''}`}
-            onClick={() => setMode(m)}
-          >
-            <span className="rm-name">
-              {m === 'active' ? t.restModeActive : m === 'off' ? t.restModeOff : t.restModeIllness}
-            </span>
-            <span className="rm-desc">
-              {m === 'active'
-                ? t.restModeActiveDesc
-                : m === 'off'
-                  ? t.restModeOffDesc
-                  : t.restModeIllnessDesc}
-            </span>
-          </button>
-        ))}
-        <button
-          className={`rest-mode rehab${mode === 'rehab' ? ' active' : ''}`}
-          onClick={() => setMode('rehab')}
-        >
-          <span className="rmi">
-            <Icon name="bandaids" weight="bold" />
-          </span>
-          <span style={{ flex: 1, textAlign: 'left' }}>
-            <span className="rm-name">{t.injRestEntry}</span>
-            <span className="rm-desc" style={{ display: 'block' }}>
-              {t.injRestEntryDesc}
-            </span>
-          </span>
-        </button>
-      </div>
-      {mode === 'rehab' ? (
-        <div className="rest-rehab-note">
-          <Icon name="path" weight="bold" />
-          <span>{t.injRestReplaceNote}</span>
-        </div>
-      ) : mode === 'illness' ? (
-        <div className="ill-panel">
-          <div className="ill-lbl">{t.illnessDur}</div>
-          <div className="ill-seg">
-            {(['today', 'open', 'back'] as const).map((d) => (
-              <button
-                key={d}
-                className={`ill-seg-b${dur === d ? ' on' : ''}`}
-                onClick={() => setDur(d)}
-              >
-                {d === 'today'
-                  ? t.illnessDurToday
-                  : d === 'open'
-                    ? t.illnessDurOpen
-                    : t.illnessDurBack}
-              </button>
-            ))}
-          </div>
-          {dur === 'back' && (
-            <label className="rest-date ill-date">
-              <span>{t.illnessBackDate}</span>
-              <input
-                type="date"
-                value={backFrom}
-                max={iso(today)}
-                onChange={(e) => setBackFrom(e.target.value)}
-              />
-            </label>
-          )}
-          {dur === 'open' && <div className="ill-note">{t.illnessNoEnd}</div>}
-        </div>
-      ) : (
-        <>
-          <div className="rest-dates">
-            <label className="rest-date">
-              <span>{t.restFrom}</span>
-              <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} />
-            </label>
-            <label className="rest-date">
-              <span>{t.restTo}</span>
-              <input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} />
-            </label>
-          </div>
-          <div className="rest-len">{t.restLength(days)}</div>
-        </>
-      )}
-      <div className="rest-actions">
-        <button className="btn btn-secondary" onClick={onClose}>
-          {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={
-            mode === 'rehab'
-              ? () => {
-                  onClose();
-                  shell.openOverlay({ screen: 'injury' });
-                }
-              : start
-          }
-        >
-          {mode === 'rehab'
-            ? t.injSetupPlan
-            : mode === 'illness'
-              ? t.restStartIllness
-              : t.restStartAction}
-        </button>
-      </div>
-    </Sheet>
-  );
+type WeekMode = 'train' | 'rest' | 'active' | 'done' | 'illness' | 'off' | 'injury' | 'none';
+type PillState =
+  | 'done'
+  | 'missed'
+  | 'rest'
+  | 'sick'
+  | 'off'
+  | 'off-next'
+  | 'next-train'
+  | 'next-rest'
+  | 'injury'
+  | 'play'
+  | 'blank';
+interface WeekCell {
+  day: number;
+  state: PillState;
+  isToday: boolean;
+  label: string;
+  aria: string;
+  dayType: TrainingDay | null;
+  onClick?: () => void;
 }
 
-function BackfillSheet(props: {
-  gyms: Gym[];
-  onClose: () => void;
-  onCreate: (startedAt: number, durationMs: number, gymId: string | null) => void;
-}) {
-  const { t } = useT();
-  const [gymId, setGymId] = useState<string | null>(null);
-  const [gymPicker, setGymPicker] = useState(false);
-  const chosenGym = props.gyms.find((g) => g.id === gymId) ?? null;
-  const [defaults] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` };
-  });
-  const [date, setDate] = useState(defaults.date);
-  const [time, setTime] = useState('18:00');
-  const [duration, setDuration] = useState(60);
-  const [now] = useState(() => Date.now());
+const PILL_ICON: Partial<Record<PillState, string>> = {
+  done: 'check',
+  missed: 'x',
+  rest: 'flower-lotus',
+  sick: 'pulse',
+  off: 'airplane-tilt',
+  'off-next': 'airplane-tilt',
+  'next-train': 'barbell',
+  'next-rest': 'flower-lotus',
+  injury: 'bandaids',
+  play: 'play',
+};
 
-  const [todayIso] = useState(() => {
-    const d = new Date();
-    const p = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-  });
-
-  const startedAt = new Date(`${date}T${time}`).getTime();
-  const inFuture = !Number.isNaN(startedAt) && startedAt > now;
-  const badDuration = duration < 1 || duration > 480;
-  const invalid = Number.isNaN(startedAt) || inFuture || badDuration;
-
+/** Mon–Sun status pills with weekday labels (today reads "Today"). */
+function WeekPills({ cells }: { cells: WeekCell[] }) {
   return (
-    <Sheet onClose={props.onClose} className="backfill-sheet">
-      <div className="sheet-head backfill-head">
-        <Icon name="arrow-counter-clockwise" />
-        <span className="t">{t.logPastSession}</span>
-      </div>
-      <div className="backfill-fields">
-        <label className="field-block">
-          <span className="field-label">{t.backfillDate}</span>
-          <DateField value={date} onChange={setDate} max={todayIso} />
-        </label>
-        <div className="backfill-grid">
-          <label className="field-block">
-            <span className="field-label">{t.backfillStart}</span>
-            <TimeField value={time} onChange={setTime} />
-          </label>
-          <label className="field-block">
-            <span className="field-label">{t.backfillDuration}</span>
-            <DurationField value={duration} onChange={setDuration} />
-          </label>
-        </div>
-      </div>
-      {props.gyms.length > 0 && (
-        <label className="field-block">
-          <span className="field-label">{t.backfillGym}</span>
-          <button
-            type="button"
-            className="input gym-select"
-            onClick={() => setGymPicker((x) => !x)}
-          >
-            {chosenGym ? (
-              <span className="gym-select-chosen">
-                <span className="thumb">
-                  <GymThumb
-                    name={chosenGym.name}
-                    lat={chosenGym.lat}
-                    lng={chosenGym.lng}
-                    size={28}
-                  />
-                </span>
-                {chosenGym.name}
-              </span>
-            ) : (
-              <span className="gym-select-placeholder">{t.backfillGymChoose}</span>
-            )}
-            <Icon name={gymPicker ? 'caret-left' : 'arrow-right'} className="go" />
+    <div className="wk-pills">
+      {cells.map((c) => {
+        const icon = PILL_ICON[c.state];
+        const cls = `wk-pill st-${c.state}${c.isToday ? ' is-today' : ''}`;
+        const inner = (
+          <>
+            <span className="wk-pill-bar" data-day={c.dayType ?? undefined}>
+              {icon && <Icon name={icon} weight={c.state === 'play' ? 'fill' : 'bold'} />}
+            </span>
+            <span className="wk-pill-label">{c.label}</span>
+          </>
+        );
+        return c.onClick ? (
+          <button key={c.day} type="button" className={cls} onClick={c.onClick} aria-label={c.aria}>
+            {inner}
           </button>
-          {gymPicker && (
-            <GymPicker
-              gyms={props.gyms}
-              title={t.pickGymTitle}
-              variant="inline"
-              onClose={() => setGymPicker(false)}
-              onPick={(id) => {
-                setGymId(id);
-                setGymPicker(false);
-              }}
-            />
-          )}
-        </label>
-      )}
-      {inFuture && (
-        <div className="field-error">
-          <Icon name="warning-circle" />
-          {t.backfillFuture}
-        </div>
-      )}
-      <div className="sheet-actions">
-        <button className="btn btn-secondary grow" onClick={props.onClose}>
-          {t.cancel}
-        </button>
-        <button
-          className="btn btn-primary grow"
-          disabled={invalid}
-          onClick={() => props.onCreate(startedAt, duration * 60000, gymId)}
-        >
-          {t.backfillContinue}
-        </button>
-      </div>
-    </Sheet>
+        ) : (
+          <div key={c.day} className={cls} aria-label={c.aria}>
+            {inner}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

@@ -1,42 +1,19 @@
 /**
- * Programs · Playbook · Exercises top switcher (design AC-LIBTAB, extended for
- * Playbook). Three peer tabs that swap the page content in place -- no overlay,
- * no back button. Rendered inside the `programs-top` bar by ProgramsView, the
- * framed Exercises tab, and PlaybookView, so the switcher stays put while the
- * content below it changes. Each tab owns its own URL (#/programs, #/playbook,
- * #/exercises), so a refresh lands back on the same one.
+ * Programs · Goals · Playbook · Exercises are drill-ins of the Overview hub
+ * (design "Spotter — Start Sheet" › Overview): each has its own tile there and
+ * its own URL (#/programs, #/goals, #/playbook, #/exercises). The old in-page
+ * peer switcher became a back link to Overview, rendered inside the
+ * `programs-top` bar of each page.
  */
-import { useT } from '../i18n';
+import { OverviewBack } from './OverviewBack';
 
 export type ProgramsPeer = 'programs' | 'goals' | 'playbook' | 'exercises';
 
-export function ProgramsTabs({
-  active,
-  onSelect,
-}: {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- props kept for callers
+export function ProgramsTabs(_props: {
   active: ProgramsPeer;
+  /** Kept for callers; peers are now reached from the Overview hub. */
   onSelect: (peer: ProgramsPeer) => void;
 }) {
-  const { t } = useT();
-  const tabs: { id: ProgramsPeer; label: string }[] = [
-    { id: 'programs', label: t.programsTabLabel },
-    { id: 'goals', label: t.goalsTab },
-    { id: 'playbook', label: t.playbook },
-    { id: 'exercises', label: t.exercisesTabLabel },
-  ];
-  return (
-    <div className="prog-tabs" role="tablist">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          role="tab"
-          aria-selected={active === tab.id}
-          className={active === tab.id ? 'active' : ''}
-          onClick={() => onSelect(tab.id)}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </div>
-  );
+  return <OverviewBack />;
 }

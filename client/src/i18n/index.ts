@@ -129,6 +129,13 @@ export function fmtWeekday(ts: number, locale: LocaleId = current): string {
   return new Intl.DateTimeFormat(dateLocale[locale], { weekday: 'long' }).format(new Date(ts));
 }
 
+/** "Mon" — short weekday name in the active locale. */
+export function fmtWeekdayShort(ts: number, locale: LocaleId = current): string {
+  return new Intl.DateTimeFormat(dateLocale[locale], { weekday: 'short' })
+    .format(new Date(ts))
+    .replace('.', '');
+}
+
 /** "31 July" */
 export function fmtDayMonth(ts: number, locale: LocaleId = current): string {
   // Abbreviated month (e.g. "1 Sep") in every locale — keeps narrow date

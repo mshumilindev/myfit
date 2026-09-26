@@ -33,7 +33,9 @@ import {
   type Zone,
 } from '../volume';
 import { TrendsView } from '../components/TrendsView';
+import { OverviewBack } from '../components/OverviewBack';
 import { AtlasNotesPanel } from '../components/AtlasNotesPanel';
+import { DateField } from '../components/PickerFields';
 import { FixSheet } from '../components/FixSheet';
 import { ReadinessLens } from '../components/Readiness';
 import {
@@ -69,7 +71,6 @@ export function ProgressView({
   store,
   shell,
   sub,
-  onSub,
   seg,
   onSeg,
   lens,
@@ -78,7 +79,6 @@ export function ProgressView({
   store: Store;
   shell: Shell;
   sub: 'progress' | 'trends';
-  onSub: (s: 'progress' | 'trends') => void;
   seg: 'total' | 'muscle' | 'volume' | 'records';
   onSeg: (s: 'total' | 'muscle' | 'volume' | 'records') => void;
   lens: 'volume' | 'fatigue' | 'readiness';
@@ -92,13 +92,13 @@ export function ProgressView({
   const [selMuscle, setSelMuscle] = useState<MuscleGroup | null>(null);
   const [volGrain, setVolGrain] = useState<'fine' | 'zones'>('fine');
   const setLens = onLens;
-  // Volume read window (days): a rolling week by default, widenable in the sheet.
-  const [rangeDays, setRangeDays] = useState(7);
+  // The period every Progress tab reads (the "This week" button in the top bar).
+  const [range, setRange] = useState<ProgRange>({ key: 'week' });
+  const [rangeSheet, setRangeSheet] = useState(false);
   // Mobile: list<->map choice + the "all controls" sheet, driven by the pill.
   const [mapView, setMapView] = useState(false);
   const [ctrlSheet, setCtrlSheet] = useState(false);
   const ptab = sub;
-  const setPtab = onSub;
   const showDesktopDetail = useDesktopDetail();
   const finished = store.workouts.filter((w) => w.finishedAt !== null);
   // The muscle you're training RIGHT NOW should already show on the fatigue /
@@ -116,6 +116,16 @@ export function ProgressView({
 
   // Weekly volume, current week last, 10 columns.
   const thisWeek = weekStart(nowTs);
+  // Selected period → [start, end). "This week" is the calendar week; the
+  // volume landmarks keep reading it as a rolling 7 days, like before.
+  const firstTs = finished.length ? Math.min(...finished.map((w) => w.startedAt)) : nowTs;
+  const win = rangeWindow(range, nowTs, thisWeek, firstTs);
+  const inRange = (ts: number) => ts >= win.start && ts < win.end;
+  const rangeWorkouts = finished.filter((w) => inRange(w.startedAt));
+  const rangeDays =
+    range.key === 'week' ? 7 : Math.max(7, Math.round((win.end - win.start) / DAY_MS));
+  const volEnd = Math.min(win.end, nowTs);
+  const volFinished = finished.filter((w) => w.startedAt < win.end);
   const weeks: number[] = [];
   for (let i = 9; i >= 0; i--) {
     const start = thisWeek - i * WEEK_MS;
@@ -126,8 +136,30 @@ export function ProgressView({
     );
   }
   const maxWeek = Math.max(...weeks, 1);
-  const cur = weeks[weeks.length - 1];
-  const prev = weeks[weeks.length - 2];
+  const periodVol = (a: number, b: number) =>
+    finished
+      .filter((w) => w.startedAt >= a && w.startedAt < b)
+      .reduce((v, w) => v + workoutVolumeKg(w), 0);
+  const cur = range.key === 'week' ? weeks[weeks.length - 1] : periodVol(win.start, win.end);
+  const prev =
+    range.key === 'week'
+      ? weeks[weeks.length - 2]
+      : range.key === 'all'
+        ? 0
+        : periodVol(win.start - (win.end - win.start), win.start);
+  // Bars across the selected period (weekly, or monthly past ~3 months); the
+  // default week keeps its 10-week context.
+  const rangeBars = range.key === 'week' ? weeks : periodBars(finished, win);
+  const rangeBarColors =
+    range.key === 'week'
+      ? null
+      : rangeBars.map((_, i) =>
+          i === rangeBars.length - 1
+            ? 'var(--color-accent)'
+            : i >= rangeBars.length - 4
+              ? 'var(--color-accent-700)'
+              : 'var(--color-neutral-800)',
+        );
   const deltaPct = prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null;
   const barColors = [
     'var(--color-neutral-800)',
@@ -155,7 +187,10 @@ export function ProgressView({
       primary: MuscleGroup | null;
     }
   >();
-  for (const w of finished) {
+  // Records and the 1RM chart read the chosen period; "This week" keeps the
+  // all-time view they always had.
+  const statWorkouts = range.key === 'week' ? finished : rangeWorkouts;
+  for (const w of statWorkouts) {
     for (const e of w.exercises) {
       const key = e.name.trim();
       if (!key) continue;
@@ -187,7 +222,7 @@ export function ProgressView({
   const ranked = [...byName.entries()].sort((a, b) => b[1].count - a[1].count);
   const lines = ranked.slice(0, 2).map(([name]) => {
     const pts: { ts: number; rm: number }[] = [];
-    for (const w of [...finished].reverse()) {
+    for (const w of [...statWorkouts].reverse()) {
       const e = w.exercises.find((x) => x.name.trim() === name);
       const top = e && estimatedOneRepMaxSet(e.sets);
       if (top) {
@@ -226,7 +261,7 @@ export function ProgressView({
       .filter((g) => g.rows.length > 0);
   })();
   const selectedSessions = selected
-    ? finished
+    ? statWorkouts
         .map((workout) => {
           const exercise = workout.exercises.find((item) => item.name.trim() === selected[0]);
           const top = exercise
@@ -266,11 +301,16 @@ export function ProgressView({
   }
 
   // --- By muscle (MG-3): this week's volume per primary group --------------
-  const weekWorkouts = finished.filter((w) => weekStart(w.startedAt) === thisWeek);
+  const weekWorkouts =
+    range.key === 'week'
+      ? finished.filter((w) => weekStart(w.startedAt) === thisWeek)
+      : rangeWorkouts;
   const recentWorkouts = finished.filter((w) => nowTs - w.startedAt < 4 * 7 * 24 * 3600 * 1000);
   const volThisWeek = muscleVolumeKg(weekWorkouts);
   const volRecent = muscleVolumeKg(recentWorkouts);
-  const muscleRows: Array<{ m: MuscleGroup; v: number }> = [...volRecent.keys()]
+  const muscleRows: Array<{ m: MuscleGroup; v: number }> = [
+    ...new Set([...volRecent.keys(), ...volThisWeek.keys()]),
+  ]
     .map((m) => ({ m, v: volThisWeek.get(m) ?? 0 }))
     .sort((a, b) => b.v - a.v);
   const maxMuscle = Math.max(1, ...muscleRows.map((r) => r.v));
@@ -286,7 +326,7 @@ export function ProgressView({
   // trims them. Layered on top of personalisation; fatigue keeps the raw ranges.
   const effLandmarks = focusAdjustLandmarks(pLandmarks, store.goals);
   // Zone-coloured volume heatmap for the desktop Volume right column.
-  const volHeat = volumeHeatColors(finished, nowTs, volGrain, rangeDays, effLandmarks);
+  const volHeat = volumeHeatColors(volFinished, volEnd, volGrain, rangeDays, effLandmarks);
   // Fatigue lens: trained muscles tinted fresh -> fried; plus a deload nudge.
   const fatMap = muscleFatigue(mapWorkouts, nowTs, pLandmarks);
   const fatColors: Partial<Record<MuscleGroup, string>> = {};
@@ -370,7 +410,7 @@ export function ProgressView({
   );
 
   const segControl = (
-    <div className="seg3 seg4">
+    <div className="seg3 seg4 pv-chips">
       <button className={seg === 'total' ? 'active' : ''} onClick={() => setSeg('total')}>
         {t.totalLabel}
       </button>
@@ -386,31 +426,34 @@ export function ProgressView({
     </div>
   );
 
-  const pTabs = (
-    <div className="prog-tabs progress-subtabs" role="tablist">
-      <button
-        role="tab"
-        aria-selected={ptab === 'progress'}
-        className={ptab === 'progress' ? 'active' : ''}
-        onClick={() => setPtab('progress')}
-      >
-        {t.progress}
-      </button>
-      <button
-        role="tab"
-        aria-selected={ptab === 'trends'}
-        className={ptab === 'trends' ? 'active' : ''}
-        onClick={() => setPtab('trends')}
-      >
-        {store.coach.enabled ? t.atlasName : t.trendsTab}
-      </button>
+  // Drill-in chrome (design "Overview › Progress"): back to Overview, the
+  // range + view-options buttons (they replace the old floating pill), title.
+  const rangeLabel =
+    range.key === 'custom' && range.from != null && range.to != null
+      ? `${fmtDayMonth(range.from, locale)} – ${fmtDayMonth(range.to, locale)}`
+      : rangeName(range.key, t);
+  const topBar = (
+    <div className="pv-top">
+      <OverviewBack />
+      {ptab === 'progress' && finished.length >= 3 && (
+        <button type="button" className="pv-range" onClick={() => setRangeSheet(true)}>
+          <Icon name="calendar-blank" />
+          {rangeLabel}
+        </button>
+      )}
     </div>
+  );
+  const pageTitle = (
+    <h2 className="pv-title">
+      {ptab === 'trends' ? (store.coach.enabled ? t.atlasName : t.trendsTab) : t.progress}
+    </h2>
   );
 
   if (ptab === 'trends') {
     return (
       <div className="screen progress-page progress-alt">
-        <div className="progress-tabbar">{pTabs}</div>
+        {topBar}
+        {pageTitle}
         <div className="progress-alt-body">
           {store.coach.enabled && <AtlasNotesPanel />}
           <TrendsView finished={finished} body={store.bodyMetrics} />
@@ -422,7 +465,8 @@ export function ProgressView({
   if (finished.length < 3) {
     return (
       <div className="screen progress-page progress-locked">
-        <div className="progress-tabbar">{pTabs}</div>
+        {topBar}
+        {pageTitle}
         <div className="progress-locked-body">
           {weeks.some((v) => v > 0) ? (
             <div className="progress-locked-layout">
@@ -458,45 +502,36 @@ export function ProgressView({
 
   return (
     <div className="screen progress-page progress-filled">
-      <h2 className="visually-hidden">{t.progress}</h2>
-      {/* Liquid-glass refraction filter for the mobile control pill. */}
-      <svg className="glass-defs" aria-hidden width="0" height="0">
-        <filter
-          id="liquid-glass"
-          x="-30%"
-          y="-30%"
-          width="160%"
-          height="160%"
-          colorInterpolationFilters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.011 0.011"
-            numOctaves="2"
-            seed="7"
-            result="noise"
-          />
-          <feGaussianBlur in="noise" stdDeviation="1.4" result="soft" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="soft"
-            scale="52"
-            xChannelSelector="R"
-            yChannelSelector="G"
-          />
-        </filter>
-      </svg>
-      <div className="progress-tabbar">{pTabs}</div>
+      {topBar}
+      {pageTitle}
       <section className="progress-summary-pane">
-        <ProgressKpi cur={cur} deltaPct={deltaPct} label={t.volumeThisWeek} />
+        <ProgressKpi
+          cur={cur}
+          deltaPct={deltaPct}
+          label={range.key === 'week' ? t.volumeThisWeek : rangeLabel}
+        />
         {segControl}
+        {seg === 'volume' && (
+          <button type="button" className="vol-view-btn" onClick={() => setCtrlSheet(true)}>
+            <Icon name="sliders-horizontal" />
+            <span className="vvb-text">
+              {lens === 'fatigue'
+                ? t.fatigueTab
+                : lens === 'readiness'
+                  ? t.readinessKicker
+                  : t.volumeTab}{' '}
+              · {mapView ? t.volMap : t.volList} · {volGrain === 'zones' ? t.volZones : t.volFine}
+            </span>
+            <Icon name="caret-down" className="vvb-caret" />
+          </button>
+        )}
         {seg === 'muscle' && renderMuscleRows(showDesktopDetail)}
-        {seg === 'muscle' && muscleNote}
+        {seg === 'muscle' && range.key === 'week' && muscleNote}
         {seg === 'volume' && (
           <VolumePanel
-            finished={finished}
+            finished={volFinished}
             mapWorkouts={mapWorkouts}
-            nowTs={nowTs}
+            nowTs={volEnd}
             t={t}
             grain={volGrain}
             onGrain={setVolGrain}
@@ -512,7 +547,13 @@ export function ProgressView({
             onMapView={setMapView}
           />
         )}
-        {seg === 'total' && <Bars weeks={weeks} maxWeek={maxWeek} colors={barColors} />}
+        {seg === 'total' && (
+          <Bars
+            weeks={rangeBars}
+            maxWeek={Math.max(...rangeBars, 1)}
+            colors={rangeBarColors ?? barColors}
+          />
+        )}
 
         {seg === 'total' && lines.length > 0 && lines[0].pts.length >= 2 && (
           <div>
@@ -823,145 +864,238 @@ export function ProgressView({
         </section>
       )}
 
-      {/* Mobile: all Progress controls live on a floating graphite-glass pill
-          (design "Progress Nav Explorations" V4); the gear opens a sheet with
-          every control. Hidden on desktop, where the inline toggles stay. */}
-      <div className="progress-pill-wrap">
-        <div className="progress-pill">
-          <Icon name="chart-line-up" weight="fill" />
-          <span className="pp-label">
-            {seg === 'volume'
-              ? lens === 'fatigue'
-                ? t.fatigueTab
-                : lens === 'readiness'
-                  ? t.readinessKicker
-                  : t.volumeTab
-              : segLabel(seg, t)}
-          </span>
-          {seg === 'volume' && (
-            <>
-              <span className="pp-sep" aria-hidden />
-              <span className="pp-seg">
+      {rangeSheet && (
+        <RangeSheet
+          range={range}
+          now={nowTs}
+          onPick={(r) => setRange(r)}
+          onClose={() => setRangeSheet(false)}
+        />
+      )}
+      {ctrlSheet && seg === 'volume' && (
+        <Sheet onClose={() => setCtrlSheet(false)} className="prog-ctrl-sheet vol-view-sheet">
+          <div className="vvs-head">
+            <span className="vvs-title">{t.volViewTitle}</span>
+            <button
+              type="button"
+              className="vvs-reset"
+              onClick={() => {
+                setLens('volume');
+                setMapView(false);
+                setVolGrain('fine');
+              }}
+            >
+              {t.viewReset}
+            </button>
+          </div>
+          <div className="vvs-lbl">{t.progLens}</div>
+          <div className="vvs-lenses">
+            {(
+              [
+                ['volume', t.volumeTab, t.lensVolumeSub],
+                ['fatigue', t.fatigueTab, t.lensFatigueSub],
+                ['readiness', t.readinessKicker, t.lensReadinessSub],
+              ] as const
+            ).map(([id, name, sub]) => (
+              <button
+                key={id}
+                type="button"
+                className={`vvs-lens${lens === id ? ' on' : ''}`}
+                onClick={() => setLens(id)}
+              >
+                <span className="vvs-lens-t">{name}</span>
+                <span className="vvs-lens-s">{sub}</span>
+              </button>
+            ))}
+          </div>
+          <div className="vvs-row2">
+            <div className="vvs-group">
+              <div className="vvs-lbl">{t.progShowAs}</div>
+              <div className="vvs-seg">
                 <button className={!mapView ? 'on' : ''} onClick={() => setMapView(false)}>
                   {t.volList}
                 </button>
                 <button className={mapView ? 'on' : ''} onClick={() => setMapView(true)}>
                   {t.volMap}
                 </button>
-              </span>
-            </>
-          )}
-          <button
-            className="pp-gear"
-            onClick={() => setCtrlSheet(true)}
-            aria-label={t.progControls}
-          >
-            <Icon name="funnel-simple" />
-          </button>
-        </div>
-      </div>
-
-      {ctrlSheet && (
-        <Sheet onClose={() => setCtrlSheet(false)} className="prog-ctrl-sheet">
-          <div className="pcs-title">{t.progControls}</div>
-          <div className="pcs-group">
-            <div className="pcs-lbl">{t.progSection}</div>
-            <div className="seg pcs-seg">
-              {(['total', 'muscle', 'volume', 'records'] as const).map((s) => (
-                <button key={s} className={seg === s ? 'on' : ''} onClick={() => setSeg(s)}>
-                  {segLabel(s, t)}
+              </div>
+            </div>
+            <div className="vvs-group">
+              <div className="vvs-lbl">{t.progDetail}</div>
+              <div className="vvs-seg">
+                <button
+                  className={volGrain === 'fine' ? 'on' : ''}
+                  onClick={() => setVolGrain('fine')}
+                >
+                  {t.volFine}
                 </button>
-              ))}
+                <button
+                  className={volGrain === 'zones' ? 'on' : ''}
+                  onClick={() => setVolGrain('zones')}
+                >
+                  {t.volZones}
+                </button>
+              </div>
             </div>
           </div>
-          {seg === 'volume' && (
-            <>
-              <div className="pcs-group">
-                <div className="pcs-lbl">{t.progLens}</div>
-                <div className="seg pcs-seg">
-                  <button
-                    className={lens === 'volume' ? 'on' : ''}
-                    onClick={() => setLens('volume')}
-                  >
-                    {t.volumeTab}
-                  </button>
-                  <button
-                    className={lens === 'fatigue' ? 'on' : ''}
-                    onClick={() => setLens('fatigue')}
-                  >
-                    {t.fatigueTab}
-                  </button>
-                  <button
-                    className={lens === 'readiness' ? 'on' : ''}
-                    onClick={() => setLens('readiness')}
-                  >
-                    {t.readinessKicker}
-                  </button>
-                </div>
-              </div>
-              <div className="pcs-row2">
-                <div className="pcs-group">
-                  <div className="pcs-lbl">{t.progShowAs}</div>
-                  <div className="seg pcs-seg">
-                    <button className={!mapView ? 'on' : ''} onClick={() => setMapView(false)}>
-                      {t.volList}
-                    </button>
-                    <button className={mapView ? 'on' : ''} onClick={() => setMapView(true)}>
-                      {t.volMap}
-                    </button>
-                  </div>
-                </div>
-                <div className="pcs-group">
-                  <div className="pcs-lbl">{t.progDetail}</div>
-                  <div className="seg pcs-seg">
-                    <button
-                      className={volGrain === 'fine' ? 'on' : ''}
-                      onClick={() => setVolGrain('fine')}
-                    >
-                      {t.volFine}
-                    </button>
-                    <button
-                      className={volGrain === 'zones' ? 'on' : ''}
-                      onClick={() => setVolGrain('zones')}
-                    >
-                      {t.volZones}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-          <label className="pcs-range">
-            <Icon name="calendar-blank" />
-            <span>{t.progRange}</span>
-            <span className="pcs-range-sel">
-              <select
-                value={rangeDays}
-                onChange={(e) => setRangeDays(Number(e.target.value))}
-                aria-label={t.progRange}
-              >
-                <option value={7}>{t.volRange7}</option>
-                <option value={14}>{t.volRange14}</option>
-                <option value={28}>{t.volRange28}</option>
-              </select>
-              <Icon name="caret-down" />
-            </span>
-          </label>
         </Sheet>
       )}
     </div>
   );
 }
 
-/** Localised label for a Progress section. */
-function segLabel(s: 'total' | 'muscle' | 'volume' | 'records', t: T): string {
-  return s === 'total'
-    ? t.totalLabel
-    : s === 'muscle'
-      ? t.byMuscle
-      : s === 'volume'
-        ? t.volumeTab
-        : t.records;
+const DAY_MS = 24 * 3600 * 1000;
+
+export type ProgRangeKey = 'week' | 'w4' | 'm3' | 'y1' | 'all' | 'custom';
+export interface ProgRange {
+  key: ProgRangeKey;
+  /** Custom period: local-midnight start of the first and last day. */
+  from?: number;
+  to?: number;
+}
+
+/** The selected period as [start, end) epoch ms. */
+function rangeWindow(
+  r: ProgRange,
+  now: number,
+  thisWeek: number,
+  firstTs: number,
+): { start: number; end: number } {
+  const end = now + 1;
+  switch (r.key) {
+    case 'week':
+      return { start: thisWeek, end: thisWeek + WEEK_MS };
+    case 'w4':
+      return { start: now - 28 * DAY_MS, end };
+    case 'm3':
+      return { start: now - 91 * DAY_MS, end };
+    case 'y1':
+      return { start: now - 365 * DAY_MS, end };
+    case 'all':
+      return { start: Math.min(firstTs, now), end };
+    case 'custom': {
+      const from = r.from ?? now;
+      const to = r.to ?? now;
+      const endDay = new Date(Math.max(from, to));
+      endDay.setDate(endDay.getDate() + 1);
+      return { start: Math.min(from, to), end: endDay.getTime() };
+    }
+  }
+}
+
+/** Volume per bucket across a period: weeks up to ~3 months, months beyond. */
+function periodBars(finished: Workout[], win: { start: number; end: number }): number[] {
+  const span = win.end - win.start;
+  const monthly = span > 100 * DAY_MS;
+  const buckets: { a: number; b: number }[] = [];
+  if (monthly) {
+    const d = new Date(win.start);
+    d.setDate(1);
+    d.setHours(0, 0, 0, 0);
+    while (d.getTime() < win.end) {
+      const a = d.getTime();
+      d.setMonth(d.getMonth() + 1);
+      buckets.push({ a, b: d.getTime() });
+    }
+  } else {
+    for (let a = weekStart(win.start); a < win.end; a += WEEK_MS)
+      buckets.push({ a, b: a + WEEK_MS });
+  }
+  return buckets.map(({ a, b }) =>
+    finished
+      .filter((w) => w.startedAt >= Math.max(a, win.start) && w.startedAt < Math.min(b, win.end))
+      .reduce((v, w) => v + workoutVolumeKg(w), 0),
+  );
+}
+
+function rangeName(k: ProgRangeKey, t: T): string {
+  return k === 'week'
+    ? t.volRange7
+    : k === 'w4'
+      ? t.volRange28
+      : k === 'm3'
+        ? t.rangeM3
+        : k === 'y1'
+          ? t.rangeY1
+          : k === 'all'
+            ? t.rangeAll
+            : t.rangeCustom;
+}
+
+/** "This week" → a period picker for every Progress tab: presets plus a
+ *  custom from–to span on the calendar. */
+function RangeSheet({
+  range,
+  now,
+  onPick,
+  onClose,
+}: {
+  range: ProgRange;
+  now: number;
+  onPick: (r: ProgRange) => void;
+  onClose: () => void;
+}) {
+  const { t } = useT();
+  const iso = (ts: number) => {
+    const d = new Date(ts);
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  };
+  const parse = (v: string) => {
+    const [y, m, d] = v.split('-').map(Number);
+    return new Date(y, m - 1, d).getTime();
+  };
+  const today0 = (() => {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  })();
+  const [from, setFrom] = useState(iso(range.from ?? today0 - 27 * DAY_MS));
+  const [to, setTo] = useState(iso(range.to ?? today0));
+  const presets: ProgRangeKey[] = ['week', 'w4', 'm3', 'y1', 'all'];
+  return (
+    <Sheet onClose={onClose} className="range-sheet">
+      <div className="vvs-head">
+        <span className="vvs-title">{t.progRange}</span>
+      </div>
+      <div className="vvs-range">
+        {presets.map((k) => (
+          <button
+            key={k}
+            type="button"
+            className={`vvs-rc${range.key === k ? ' on' : ''}`}
+            onClick={() => {
+              onPick({ key: k });
+              onClose();
+            }}
+          >
+            {rangeName(k, t)}
+          </button>
+        ))}
+      </div>
+      <div className="vvs-lbl">{t.rangeCustom}</div>
+      <div className="range-custom">
+        <label className="field-block">
+          <span className="field-label">{t.restFrom}</span>
+          <DateField value={from} onChange={setFrom} max={to} />
+        </label>
+        <label className="field-block">
+          <span className="field-label">{t.restTo}</span>
+          <DateField value={to} onChange={setTo} max={iso(today0)} />
+        </label>
+      </div>
+      <button
+        type="button"
+        className={`btn btn-primary${range.key === 'custom' ? ' on' : ''}`}
+        onClick={() => {
+          onPick({ key: 'custom', from: parse(from), to: parse(to) });
+          onClose();
+        }}
+      >
+        {t.rangeApply}
+      </button>
+    </Sheet>
+  );
 }
 
 function ProgressKpi({

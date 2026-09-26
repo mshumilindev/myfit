@@ -285,6 +285,52 @@ export function resolvePlan(
   return null;
 }
 
+/** Your usual night over all logged nights (circular means), for a morning
+ *  whose weekday has no plan of its own yet. */
+export function usualPlan(
+  sleeps: SleepNight[] | null | undefined,
+  now: number = Date.now(),
+): SleepDayPlan | null {
+  const all = finishedNights(sleeps, now);
+  if (all.length === 0) return null;
+  return {
+    bedMin: circularMeanMin(all.map((n) => minutesOfDay(n.bedtime))),
+    wakeMin: circularMeanMin(all.map((n) => minutesOfDay(n.wake as number))),
+  };
+}
+
+/**
+ * The planned night that ENDS on the morning of `wakeDayStart` (local midnight).
+ * Plans are keyed by the calendar day of their bedtime, so that night is either
+ * the previous evening's plan (bedtime before midnight) or this day's own plan
+ * when its bedtime falls after midnight. Falls back to your usual night when
+ * neither weekday has a plan.
+ */
+export function nightEndingOn(
+  schedule: SleepSchedule,
+  sleeps: SleepNight[],
+  wakeDayStart: number,
+  now: number = Date.now(),
+): { bedtime: number; wake: number } | null {
+  const prevStart = (() => {
+    const d = new Date(wakeDayStart);
+    d.setDate(d.getDate() - 1);
+    return d.getTime();
+  })();
+  const fromPlan = (p: SleepDayPlan) => {
+    const wake = wakeDayStart + p.wakeMin * 60000;
+    return { bedtime: wake - planDurationMin(p) * 60000, wake };
+  };
+  const crossesMidnight = (p: SleepDayPlan) => p.bedMin > p.wakeMin;
+  const prev = resolvePlan(schedule, sleeps, new Date(prevStart).getDay(), now);
+  if (prev && crossesMidnight(prev)) return fromPlan(prev);
+  const same = resolvePlan(schedule, sleeps, new Date(wakeDayStart).getDay(), now);
+  if (same && !crossesMidnight(same)) return fromPlan(same);
+  const usual = usualPlan(sleeps, now);
+  if (usual) return fromPlan(usual);
+  return prev ? fromPlan(prev) : same ? fromPlan(same) : null;
+}
+
 /** The next `count` scheduled nights (bedtime + scheduled wake), as epoch ms in
  *  the caller's local timezone. Used to seed the server auto-start queue so the
  *  functions never need timezone math — the client, which knows the zone, lays

@@ -389,25 +389,6 @@ export function ExercisePicker(props: ExercisePickerProps) {
     return t.pickNeverDone;
   };
 
-  const suggestionCard = (s: Suggestion) => (
-    <div
-      key={s.item.key}
-      className="xp-sug"
-      onMouseEnter={isDesktop ? () => setPreview(s.item) : undefined}
-    >
-      <button type="button" className="xp-sug-main" onClick={() => pick(s.item)}>
-        <Img src={s.item.image} alt="" className="xp-sug-img" />
-        <span className="xp-sug-body">
-          <ExerciseName name={s.item.name} className="xp-sug-name" secondary={false} />
-          <span className="xp-sug-why">{reasonWhy(s)}</span>
-          <span className="xp-sug-target">{targetLine(s)}</span>
-        </span>
-      </button>
-      <span className={`xp-tag ${s.reason}`}>{reasonTag(s)}</span>
-      <InfoButton onClick={() => openInfo(s.item)} label={t.detailsAction} />
-    </div>
-  );
-
   const card = (i: PickItem) => (
     <div
       key={i.key}
@@ -642,6 +623,31 @@ export function ExercisePicker(props: ExercisePickerProps) {
     </div>
   );
 
+  // Inside a muscle group the overall next move stays in view too — the same
+  // top pick the picker's home shows (unless it's this group's best anyway).
+  const nextUp =
+    suggestions[0] && suggestions[0].item.key !== bestInGroup?.item.key ? suggestions[0] : null;
+  // "Best for <group> now" and the overall "Next up" share one wide card: kicker,
+  // name, optional why-line and the target.
+  const wideCard = (x: Suggestion, kicker: string, why?: string, extra = '') => (
+    <div
+      key={x.item.key}
+      className={`xp-best${extra}`}
+      onMouseEnter={isDesktop ? () => setPreview(x.item) : undefined}
+    >
+      <button type="button" className="xp-best-main" onClick={() => pick(x.item)}>
+        <Img src={x.item.image} alt="" className="xp-best-img" />
+        <span className="xp-best-body">
+          <span className="xp-label accent">{kicker}</span>
+          <ExerciseName name={x.item.name} className="xp-best-name" secondary={false} />
+          {why && <span className="xp-sug-why">{why}</span>}
+          <span className="xp-sug-target">{targetLine(x)}</span>
+        </span>
+      </button>
+      <InfoButton onClick={() => openInfo(x.item)} label={t.detailsAction} />
+    </div>
+  );
+
   const suggestionsBlock = suggestions.length > 0 && (
     <section className="xp-sugs-wrap">
       <div className="xp-head">
@@ -650,28 +656,22 @@ export function ExercisePicker(props: ExercisePickerProps) {
         </span>
         <span className="xp-hint">{isDesktop ? t.pickClickHint : t.pickTapHint}</span>
       </div>
-      <div className="xp-sugs">{suggestions.map(suggestionCard)}</div>
+      <div className="xp-sugs-list">
+        {suggestions.map((x) => wideCard(x, reasonTag(x), reasonWhy(x)))}
+      </div>
     </section>
   );
 
-  const bestCard = bestInGroup && (
-    <div
-      className="xp-best"
-      onMouseEnter={isDesktop ? () => setPreview(bestInGroup.item) : undefined}
-    >
-      <button type="button" className="xp-best-main" onClick={() => pick(bestInGroup.item)}>
-        <Img src={bestInGroup.item.image} alt="" className="xp-best-img" />
-        <span className="xp-best-body">
-          <span className="xp-label accent">
-            {t.pickBestFor((sub ? subLabel(t, sub) : t.pickFamilies[fam!.id]).toLowerCase())}
-          </span>
-          <ExerciseName name={bestInGroup.item.name} className="xp-best-name" secondary={false} />
-          <span className="xp-sug-target">{targetLine(bestInGroup)}</span>
-        </span>
-      </button>
-      <InfoButton onClick={() => openInfo(bestInGroup.item)} label={t.detailsAction} />
-    </div>
-  );
+  const nextUpBlock =
+    nextUp &&
+    wideCard(nextUp, `${t.nextUpTitle} · ${reasonTag(nextUp)}`, reasonWhy(nextUp), ' xp-nextup');
+
+  const bestCard =
+    bestInGroup &&
+    wideCard(
+      bestInGroup,
+      t.pickBestFor((sub ? subLabel(t, sub) : t.pickFamilies[fam!.id]).toLowerCase()),
+    );
 
   const famHeaderState = fam ? famReady.get(fam.id)! : null;
 
@@ -840,6 +840,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         </div>
         {subChips}
         {equipRow}
+        {nextUpBlock}
         {bestCard}
         <div className="xp-head gh">
           <span className="xp-label">

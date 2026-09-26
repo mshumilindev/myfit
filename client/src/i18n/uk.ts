@@ -1685,6 +1685,7 @@ export const uk: Strings = {
   restTarget: 'Ціль',
   restTargetHint: 'Важкі базові → 2–3 хв, ізоляція → 60–90 с. Запамʼятовується для цієї вправи.',
   restAuto: 'Авто',
+  restLongLabel: (a: string, p: string) => `Відпочинок ${a} з ${p} · задовгий`,
   restShortLabel: (a, p) => `Відпочинок ${a} з ${p} · раніше`,
   restAutoHint: (v) => `Авто радить ${v} після останнього сету:`,
   restWhy: {
@@ -2269,7 +2270,7 @@ export const uk: Strings = {
   clientLiveTitle: 'Тренування триває',
   clientLiveBody: 'Деталі зʼявляться, коли сесія завершиться.',
   histStateRest: 'День відпочинку',
-  histStateVacation: 'Відпустка',
+  histStateVacation: 'Повний відпочинок',
   histStateSick: 'Хворів',
   histStateMissed: 'Пропущено',
   profWhoSees: 'Хто бачить твої тренування',
@@ -3089,4 +3090,86 @@ export const uk: Strings = {
     'Є припис лікаря без навантаження? Додай — тримаємо тренування до дати, потім за відчуттями.',
   injTimeframeAdd: 'Додати',
   injFeelWord: { fine: 'Норм', sore: 'Ниє', pain: 'Біль' } as Record<string, string>,
+  // Навігація: хаб Огляд + лист Старт.
+  overviewTab: 'Огляд',
+  startNew: 'Старт',
+  startSheetTitle: 'Старт',
+  startTodayInProgram: 'Сьогодні за програмою',
+  startUsualDay: (weekday: string) => `Твій звичний день · ${weekday}`,
+  startFromPlaybook: (date: string) => `З плейбука · востаннє ${date}`,
+  startASession: 'Почати тренування',
+  startScratchSub: 'Додавай вправи по ходу',
+  startOrScratch: 'Або почати з нуля',
+  startInProgress: 'Триває',
+  startResume: 'Продовжити',
+  startAutoTitle: 'Авто-тренування',
+  startAutoSub: 'Цілий день під твою ціль і відновлення',
+  startActivityTitle: 'Активність',
+  startActivitySub: 'Біг, велосипед, спорт',
+  startHealthTitle: 'Здоров’я',
+  startHealthSub: 'Сон, відновлення, травма, хвороба',
+  startPastTitle: 'Минуле',
+  startPastSub: 'Тренування, яке забув записати',
+  ovTrendsRisks: (n: number) => {
+    const m10 = n % 10;
+    const m100 = n % 100;
+    const w =
+      m10 === 1 && m100 !== 11
+        ? 'ризик'
+        : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)
+          ? 'ризики'
+          : 'ризиків';
+    return `${n} ${w}`;
+  },
+  ovTrendsClear: 'Усе гаразд',
+  ovTrendsLocked: 'Відкриється після кількох тренувань',
+  ovRecordsTitle: 'Оцінка 1ПМ',
+  ovRecordsEmpty: 'Ще немає підходів',
+  ovProgramKicker: (name: string) => `Програма · ${name}`,
+  ovProgramNone: 'Програми ще немає',
+  ovProgramNoneSub: 'Склади свою або отримай від тренера',
+  ovProgramToday: (day: string) => `Сьогодні: ${day}`,
+  ovProgramRestNext: (day: string, weekday: string) =>
+    `Сьогодні відпочинок · далі: ${day}, ${weekday}`,
+  ovProgramDone: 'Сьогоднішнє тренування виконано',
+  ovGoalsFocus: (n: number) =>
+    `${n} ${n === 1 ? 'м’яз' : n >= 2 && n <= 4 ? 'м’язи' : 'м’язів'} у фокусі`,
+  ovGoalsNone: 'Задай фокус',
+  ovPlaybookPlays: (n: number) =>
+    `${n} ${n === 1 ? 'план' : n >= 2 && n <= 4 ? 'плани' : 'планів'}`,
+  ovPlaybookSub: 'З твоїх тренувань',
+  ovPlaybookEmpty: 'Вчиться з твоїх тренувань',
+  ovExercisesSub: (lib: number, mine: number) => `${lib} у бібліотеці · ${mine} твоїх`,
+  volViewTitle: 'Вигляд об’єму',
+  viewReset: 'Скинути',
+  lensVolumeSub: 'Підходи на м’яз проти цілей',
+  lensFatigueSub: 'Навантаження, що ще тримається',
+  lensReadinessSub: 'Що вже відновилось для тренування',
+  rangeM3: '3 місяці',
+  rangeY1: '1 рік',
+  rangeAll: 'Увесь час',
+  rangeCustom: 'Свій період',
+  rangeApply: 'Показати період',
+  msStateNote: {
+    recovering: 'Нещодавно добре попрацював — нові підходи зараз переважно додають втому.',
+    nearly: 'Майже відновився — годиться для помірної роботи.',
+    ready: 'Відновився — готовий до важких підходів.',
+    stale: 'Давно не тренувався — входь поступово.',
+  } as Record<string, string>,
+  msDotsHint:
+    'Крапка на чіпі мʼяза показує цей стан: червона — відновлюється, латунна — майже, зелена — готовий.',
+  msToday: 'Важких підходів сьогодні',
+  msNextWorth: 'Наступний підхід дасть',
+  msWeek: 'Підходів цього тижня',
+  msWeekTarget: (lo: number, hi: number) => `ціль ${lo}–${hi}`,
+  msFatigue: 'Втома за тиждень',
+  msLast: 'Остання важка робота',
+  msLastDays: (d: number) => (d === 0 ? 'сьогодні' : d === 1 ? 'вчора' : `${d} дн. тому`),
+  msNever: 'давно',
+  msHistory: 'Історія мʼяза',
+  nextUpTitle: 'Що далі',
+  nextUpSub: 'Що зазвичай іде далі — торкнись, щоб додати',
+  sidesPairLabel: 'на руку',
+  sidesUniLabel: 'кожен бік',
+  sidesUniNote: 'Записуй один бік — другий теж рахується.',
 };

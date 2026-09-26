@@ -16,6 +16,8 @@
  */
 import { landmarkFor } from '../personalize';
 import {
+  createContext,
+  useContext,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -1048,6 +1050,10 @@ export function MuscleBodyFigure({
  * big front+back figure so the drawn region is readable, the muscle name, and a
  * button carrying whatever action the label had (e.g. open its history).
  */
+/** Optional live detail under the enlarged muscle figure (e.g. the session's
+ *  "state right now" read) — provided by the surface that owns the chips. */
+export const MuscleDetailContext = createContext<((m: MuscleGroup) => ReactNode) | null>(null);
+
 function MuscleInfoDrawer({
   muscle,
   tone = 'primary',
@@ -1061,13 +1067,16 @@ function MuscleInfoDrawer({
   onAction?: () => void;
   onClose: () => void;
 }) {
+  const detail = useContext(MuscleDetailContext);
   if (muscle === 'cardio') return null;
+  const extra = detail ? detail(muscle) : null;
   return (
     <Sheet onClose={onClose} className="muscle-info">
       <div className="mi-name">{strings().muscleGroups[muscle]}</div>
-      <div className="mi-fig">
+      <div className={`mi-fig${extra ? ' compact' : ''}`}>
         <MuscleFigure primary={[muscle]} view="both" tone={tone} width="100%" />
       </div>
+      {extra}
       {onAction && actionLabel && (
         <button
           className="btn btn-primary mi-action"

@@ -94,12 +94,19 @@ const PAIRED_KETTLEBELL = /\bdouble\b|two[- ]arm|two kettlebells|alternating|see
 const TWO_SIDED = new Set(PER_SIDE.twoSided);
 const ONE_SIDED = new Set(PER_SIDE.oneSided);
 
+// One side at a time (you log one side, the other matches it) and independent-
+// arm machines count both sides, like a pair of dumbbells.
+const UNILATERAL_NAME =
+  /\b(one|single)[- ]?(arm|hand|leg|side)d?\b|\bunilateral\b|\bsplit squat\b|\blunge|\bstep[- ]?ups?\b|\bpistol\b|bulgarian|concentration|одн(ією|у|ой)\s*(рук|ног)/i;
+const ISO_LATERAL = /iso[- ]?lateral|independent arms?/i;
+
 export function perHandFactor(ex: Pick<StoredExercise, 'name' | 'equipment'>): number {
   const name = ex.name ?? '';
   const key = name.trim().toLowerCase();
-  if (ONE_SIDED.has(key)) return 1;
   if (TWO_SIDED.has(key)) return 2;
-  if (ONE_ARM_NAME.test(name)) return 1;
+  if (ONE_SIDED.has(key)) return 1;
+  if (UNILATERAL_NAME.test(name) || ONE_ARM_NAME.test(name)) return 2;
+  if (ISO_LATERAL.test(name)) return 2;
   const eq = equipmentFor(ex);
   if (eq.includes('dumbbell')) return SINGLE_IMPLEMENT.test(key) ? 1 : 2;
   if (eq.includes('kettlebell')) return PAIRED_KETTLEBELL.test(key) ? 2 : 1;

@@ -685,26 +685,48 @@ export async function drawStatCard(
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
 
-  // Header: wordmark left · kicker right
+  // Header: wordmark left · kicker right (never running into the wordmark)
   let y = story ? 172 : 132;
   ctx.fillStyle = C.text;
   ctx.font = `400 ${story ? 60 : 52}px 'Kaushan Script', cursive`;
   ctx.fillText(m.brand, padX, y);
+  const brandW = ctx.measureText(m.brand).width;
   ctx.fillStyle = C.brass;
   ctx.font = `600 24px ${FONT}`;
   ctx.textAlign = 'right';
   ctx.save();
   ctx.letterSpacing = '3px';
-  ctx.fillText(m.kicker.toUpperCase(), padX + innerW, y - (story ? 14 : 12));
+  ctx.fillText(
+    ellipsize(ctx, m.kicker.toUpperCase(), innerW - brandW - 48),
+    padX + innerW,
+    y - (story ? 14 : 12),
+  );
   ctx.restore();
   ctx.textAlign = 'left';
 
-  // Hero number + label
-  y += story ? 200 : 150;
+  // Hero number — shrunk until it fits the card's width (a long "80.0 kg × 7"
+  // used to run off the edge).
+  let heroSize = story ? 180 : 132;
+  ctx.font = `800 ${heroSize}px ${FONT}`;
+  while (heroSize > 64 && ctx.measureText(m.hero.value).width > innerW) {
+    heroSize -= 6;
+    ctx.font = `800 ${heroSize}px ${FONT}`;
+  }
+  const rowHpre = story ? 104 : 88;
+  const footerPre = h - (story ? 96 : 60);
+  if (story) {
+    // Story: sit the hero + rows block in the optical middle of the tall card
+    // instead of hugging the top and leaving the bottom half empty.
+    const rowsFit = Math.min(m.rows.length, 8);
+    const blockH = heroSize + 46 + 60 + 44 + rowsFit * rowHpre;
+    const top = Math.max(y + 90, Math.min((h - blockH) / 2 - 40, footerPre - blockH - 60));
+    y = top + heroSize * 0.78;
+  } else {
+    y += 80 + heroSize * 0.82;
+  }
   ctx.fillStyle = C.brass;
-  ctx.font = `800 ${story ? 180 : 132}px ${FONT}`;
   ctx.fillText(m.hero.value, padX, y);
-  y += story ? 46 : 40;
+  y += story ? 56 : 48;
   ctx.fillStyle = C.muted;
   ctx.font = `500 26px ${FONT}`;
   ctx.save();

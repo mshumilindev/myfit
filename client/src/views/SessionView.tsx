@@ -39,6 +39,9 @@ import {
   type SessionLift,
 } from '../stimulus';
 import { muscleFatigue, stalledMuscles } from '../fatigue';
+import { PhotoSlider } from '../components/PhotoSlider';
+import { SidesChip } from '../components/SidesChip';
+import { MuscleStatePanel } from '../components/MuscleStatePanel';
 import { cachedPersonalLandmarks } from '../personalize';
 import { SPLIT_GROUPS } from '../data/subregions';
 import { lastNight } from '../sleep';
@@ -171,6 +174,7 @@ import {
   MuscleChip,
   MuscleRow,
   MuscleIcon,
+  MuscleDetailContext,
   MuscleSetChip,
   MuscleBreakdownList,
   MUSCLE_IDS,
@@ -502,6 +506,8 @@ export function SessionView(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [sheet, setSheet] = useState<SheetState>(null);
+  // Full-screen exercise photos (start → end frames) from the focus card.
+  const [photoView, setPhotoView] = useState<{ images: string[]; title: string } | null>(null);
   const [circuit, setCircuit] = useState<{ on: boolean; groupId: string | null; rounds: number }>({
     on: false,
     groupId: null,
@@ -1210,11 +1216,27 @@ export function SessionView(props: {
     const stalled = !!primary && stalledMuscles(finished, wallClock()).has(primary);
     return dropTolerance(past, stalled);
   }
-  function rowMeters(ex: Exercise): { stim: Map<string, number>; drop: Map<string, number> } {
+  function rowMeters(ex: Exercise): {
+    stim: Map<string, number>;
+    drop: Map<string, number>;
+    load: Map<string, number>;
+  } {
     const primary = resolveMuscles(ex).primary;
+    const plateau = plateauFor(primary);
+    // How loaded the muscle already was when each set started (0..1 of the
+    // session plateau) — warm-ups included at their small hardness, so a warm-
+    // up bar reads the muscle's real state instead of a fixed "priming" blue.
+    const load = new Map<string, number>();
+    let prior = priorBefore(ex);
+    const ref = workingKg(ex.sets);
+    for (const st of ex.sets) {
+      load.set(st.id, Math.min(1, prior / Math.max(1, plateau)));
+      prior += setHardness(st, ref);
+    }
     return {
-      stim: setStimuli(ex.sets, priorBefore(ex), plateauFor(primary)),
+      stim: setStimuli(ex.sets, priorBefore(ex), plateau),
       drop: performanceDrops(ex.sets),
+      load,
     };
   }
   /** Growth value of one more set of this lift vs the first set (0..1). */
@@ -1963,7 +1985,7 @@ export function SessionView(props: {
    *  today. A suggestion only: collapses to its header, never blocks. */
   function renderTiredBanner(ex: Exercise) {
     const v = tiredFor(ex);
-    if (!v) return null;
+    if (!v) return renderNextBanner(ex);
     const muscleName = (t.muscleGroups as Record<string, string>)[v.muscle] ?? v.muscle;
     const partName = (r: string) => (t.subMuscleNames as Record<string, string>)[r] ?? r;
     const sets = Math.round(v.sets);
@@ -2012,6 +2034,51 @@ export function SessionView(props: {
             {renderPickTiles(picks)}
           </>
         )}
+      </div>
+    );
+  }
+
+  /** Near the end of any lift (its planned sets done, or 3+ working sets with
+   *  no plan) the next move is suggested even when the muscle isn't tired —
+   *  the same picks the tired banner offers. */
+  function renderNextBanner(ex: Exercise) {
+    if (!isStrengthExercise(ex) || isMarkerExercise(ex)) return null;
+    const working = ex.sets.filter((x) => setTypeOf(x) !== 'warmup').length;
+    const planned = Math.max(0, ex.plannedSets ?? 0);
+    const atEnd = planned > 0 ? working >= planned : working >= 3;
+    if (!atEnd) return null;
+    const primary = resolveMuscles(ex).primary;
+    if (!primary) return null;
+    const tally = sessionTally();
+    const collapsed = tiredCollapsed[ex.id] ?? false;
+    const picks = collapsed
+      ? []
+      : tiredPicks(ex, {
+          kind: 'group',
+          muscle: primary,
+          sets: tally.get(primary) ?? 0,
+          drop: 0,
+          tally,
+        });
+    if (!collapsed && picks.length === 0) return null;
+    return (
+      <div className={`tired-banner next-banner${collapsed ? ' collapsed' : ''}`}>
+        <button
+          type="button"
+          className="tb-head"
+          aria-expanded={!collapsed}
+          onClick={() => setTiredCollapsed((m) => ({ ...m, [ex.id]: !collapsed }))}
+        >
+          <span className="tb-ic start">
+            <Icon name="arrow-right" />
+          </span>
+          <span className="tb-text">
+            <span className="tb-title">{t.nextUpTitle}</span>
+            <span className="tb-sub">{t.nextUpSub}</span>
+          </span>
+          <Icon name={collapsed ? 'caret-down' : 'caret-up'} className="tb-chev" />
+        </button>
+        {!collapsed && renderPickTiles(picks)}
       </div>
     );
   }
@@ -3022,34 +3089,78 @@ export function SessionView(props: {
             >
               <Icon name="barbell" />
             </button>
-            {perHandFactor(ex) === 2 && (
-              <span className="x2-chip" title={t.perHandNote}>
-                <Icon name="arrows-out-line-horizontal" />
-                {t.perHandChip}
-              </span>
-            )}
+            <SidesChip
+              ex={ex}
+              onClick={
+                props.past
+                  ? undefined
+                  : () => setSheet({ kind: 'opts', tab: 'set', exId: ex.id, set: null, ghost })
+              }
+            />
             {muscles.primary && (
-              <MuscleRow
-                entries={[
-                  { muscle: muscles.primary, sets: ex.sets.length, primary: true },
-                  ...muscles.secondary.map((m) => ({
-                    muscle: m,
-                    sets: ex.sets.length * 0.5,
-                    primary: false,
-                  })),
-                ]}
-                refTs={workout!.startedAt}
-                onOpen={openMuscleHistory}
-                showWeek={ex.sets.length > 0}
-                dots={
+              <MuscleDetailContext.Provider
+                value={
                   focusView && live
-                    ? readinessDots([muscles.primary, ...muscles.secondary])
-                    : undefined
+                    ? (m: MuscleGroup) => (
+                        <MuscleStatePanel
+                          muscle={m}
+                          workout={workout!}
+                          todaySets={sessionTally().get(m) ?? 0}
+                          plateau={plateauFor(m)}
+                        />
+                      )
+                    : null
                 }
-              />
+              >
+                <MuscleRow
+                  entries={[
+                    { muscle: muscles.primary, sets: ex.sets.length, primary: true },
+                    ...muscles.secondary.map((m) => ({
+                      muscle: m,
+                      sets: ex.sets.length * 0.5,
+                      primary: false,
+                    })),
+                  ]}
+                  refTs={workout!.startedAt}
+                  onOpen={openMuscleHistory}
+                  showWeek={ex.sets.length > 0}
+                  dots={
+                    focusView && live
+                      ? readinessDots([muscles.primary, ...muscles.secondary])
+                      : undefined
+                  }
+                />
+              </MuscleDetailContext.Provider>
             )}
           </div>
         )}
+        {focusView &&
+          !marker &&
+          !timed &&
+          (() => {
+            const photos = (richExerciseByName(ex.name)?.images ?? []).slice(0, 4);
+            if (photos.length === 0) return null;
+            return (
+              <button
+                type="button"
+                className={`ex-photos n${Math.min(photos.length, 2)}`}
+                onClick={() => setPhotoView({ images: photos, title: ex.name })}
+                aria-label={ex.name}
+              >
+                {photos.slice(0, 2).map((src, i) => (
+                  <span className="ex-photo" key={src + i}>
+                    <img src={src} alt="" loading="lazy" draggable={false} />
+                    {photos.length >= 2 && (
+                      <span className="ex-photo-tag">{i === 0 ? t.photoStart : t.photoEnd}</span>
+                    )}
+                  </span>
+                ))}
+                <span className="ex-photos-zoom" aria-hidden>
+                  <Icon name="corners-out" weight="bold" />
+                </span>
+              </button>
+            );
+          })()}
         {marker ? (
           <div className="warmup-marker-body">
             <span className={`warmup-marker-photo-wrap`}>
@@ -3265,9 +3376,10 @@ export function SessionView(props: {
                         '--stim': meter.toFixed(2),
                         // Colour = the worse of: how far performance dropped, and how
                         // little this set still built (diminishing returns).
-                        '--fat': Math.min(
-                          1,
-                          Math.max((meters!.drop.get(s.id) ?? 0) / 0.1, 1 - meter),
+                        // Warm-ups: the muscle's load so far (they barely build).
+                        '--fat': (setTypeOf(s) === 'warmup'
+                          ? (meters!.load.get(s.id) ?? 0)
+                          : Math.min(1, Math.max((meters!.drop.get(s.id) ?? 0) / 0.1, 1 - meter))
                         ).toFixed(2),
                       } as CSSProperties)
                     : undefined;
@@ -3287,15 +3399,29 @@ export function SessionView(props: {
                 const planned = s.restTargetSec ?? null;
                 const cutShort =
                   planned !== null && restSecBefore != null && restSecBefore < planned * 0.8;
+                // A rest that ran long, with slack: only once it's both 50% over
+                // the plan AND a full minute past it — a few seconds late on a
+                // phone check is never flagged. Between exercises it's not a
+                // "rest", so the first set of a card never reads as too long.
+                const ranLong =
+                  !interCard &&
+                  planned !== null &&
+                  restSecBefore != null &&
+                  restSecBefore > planned * 1.5 &&
+                  restSecBefore - planned >= 60;
                 // A rest cut short always shows — even a near-zero one.
                 const restLine =
                   restBefore !== null && (restBefore > 0 || cutShort) ? (
                     <div
-                      className={`set-rest${interCard ? ' inter-card' : ''}${cutShort ? ' short' : ''}`}
+                      className={`set-rest${interCard ? ' inter-card' : ''}${cutShort ? ' short' : ''}${
+                        ranLong ? ' long' : ''
+                      }`}
                     >
                       {cutShort
                         ? t.restShortLabel(mmss(restBefore), mmss(planned * 1000))
-                        : t.restLabel(mmss(restBefore))}
+                        : ranLong
+                          ? t.restLongLabel(mmss(restBefore), mmss(planned * 1000))
+                          : t.restLabel(mmss(restBefore))}
                     </div>
                   ) : null;
                 const delBtn = live ? (
@@ -5063,6 +5189,13 @@ export function SessionView(props: {
         </aside>
       )}
 
+      {photoView && (
+        <PhotoSlider
+          images={photoView.images}
+          title={photoView.title}
+          onClose={() => setPhotoView(null)}
+        />
+      )}
       {sheet?.kind === 'add' && (
         <AddExerciseSheet
           workout={workout}

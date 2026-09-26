@@ -1,0 +1,1518 @@
+/* ==========================================================================
+   Navigation redesign (Claude Design "Spotter — Start Sheet"):
+   notched tab bar with the Start "+", the Start sheet, the Overview hub and
+   its drill-ins, and Today's program week strip + history milestones.
+   Loaded after styles.css, so these rules win on equal specificity.
+   ========================================================================== */
+
+/* --- Tab bar: Today · Overview · (+) · Gyms · Apps ------------------------- */
+.tabbar-wrap {
+  position: relative;
+  flex: none;
+  z-index: 30;
+}
+.tabbar.tabbar-notched {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: #1b1c20;
+  box-shadow: none;
+  border-top: 1px solid var(--color-divider);
+  /* The notch the Start button sits in (centre 18px below the bar's top). */
+  -webkit-mask: radial-gradient(circle at 50% 18px, transparent 38px, #000 38.5px);
+  mask: radial-gradient(circle at 50% 18px, transparent 38px, #000 38.5px);
+}
+.tabbar.tabbar-notched span {
+  font-size: 11px;
+}
+.tabbar-gap {
+  display: block;
+}
+.tabbar-fab {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #1e160b;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  box-shadow: 0 6px 16px rgba(217, 162, 79, 0.2);
+  cursor: pointer;
+  z-index: 31;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar-fab:active {
+  transform: scale(0.96);
+}
+@media (min-width: 720px) {
+  .tabbar-wrap {
+    display: none;
+  }
+}
+
+/* Desktop rail: Start sits under the nav items. */
+.rail-item.rail-start {
+  color: #1e160b;
+  background: var(--color-accent);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  margin: 6px auto 0;
+}
+.rail-item.rail-start .rail-label {
+  display: none;
+}
+
+/* --- Start sheet ------------------------------------------------------------ */
+.sheet.start-sheet {
+  gap: 16px;
+}
+.start-sheet .sheet-close {
+  display: none;
+}
+.ss-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.ss-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 20px;
+  border: none;
+  border-radius: 24px;
+  background: var(--color-accent);
+  color: #1e160b;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.ss-hero-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ss-hero-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.ss-hero-title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ss-hero-sub {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.ss-hero-go {
+  flex: none;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #1e160b;
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+}
+.ss-scratch {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -6px;
+  padding: 4px 8px;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.ss-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ss-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border-radius: 20px;
+  background: #26282c;
+  border: 1px solid rgba(233, 234, 236, 0.06);
+  color: var(--color-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.ss-ic {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+.ss-ic.tone-gold {
+  background: #3a2f1c;
+  color: #e9c07a;
+}
+.ss-ic.tone-green {
+  background: #173a2a;
+  color: #b7e8cf;
+}
+.ss-ic.tone-blue {
+  background: #11324a;
+  color: #93d4f2;
+}
+.ss-ic.tone-neutral {
+  background: #34373c;
+  color: #d0d3d6;
+}
+.ss-tt {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+.ss-ts {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--color-neutral-500);
+}
+
+/* --- Overview hub --------------------------------------------------------- */
+.screen.ov-page {
+  gap: 10px;
+}
+.ov-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.ov-grid.ov-top {
+  grid-template-rows: 112px 112px;
+}
+.ov-tile {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--color-surface);
+  border: 1px solid rgba(233, 234, 236, 0.06);
+  color: var(--color-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.ov-tile > span {
+  min-width: 0;
+}
+.ov-progress {
+  grid-row: span 2;
+}
+.ov-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-neutral-400);
+}
+.ov-hd .ui-icon {
+  flex: none;
+  font-size: 20px;
+}
+.ov-k {
+  min-width: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ov-tt {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.ov-ts {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-neutral-500);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.ov-big {
+  display: block;
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 1;
+}
+.ov-unit {
+  font-size: 16px;
+  color: var(--color-neutral-500);
+}
+.ov-bars {
+  height: 70px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+.ov-bar {
+  flex: 1;
+  border-radius: 3px;
+  background: #3b3f43;
+}
+.ov-bar.tone-a1 {
+  background: #5b4420;
+}
+.ov-bar.tone-a2 {
+  background: #8a642e;
+}
+.ov-bar.tone-a3,
+.ov-bar.cur {
+  background: var(--color-accent);
+}
+.ov-trends.is-risk {
+  background: #2a1c1b;
+  border-color: rgba(224, 104, 90, 0.35);
+}
+.ov-trends.is-risk .ov-k {
+  color: #f0a39a;
+}
+.ov-trends.is-risk .ov-tt {
+  color: #f6c3bc;
+}
+.ov-program {
+  gap: 12px;
+}
+.ov-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.ov-day {
+  min-width: 0;
+  height: 48px;
+  padding: 0 2px;
+  border-radius: 10px;
+  background: #2a2c31;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.ov-dl {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #71767b;
+}
+.ov-dn {
+  max-width: 100%;
+  font-size: 10.5px;
+  color: #d0d3d6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ov-day.is-rest .ov-dn {
+  color: var(--color-neutral-500);
+}
+.ov-day.is-today {
+  background: #3a2f1c;
+  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.5);
+}
+.ov-day.is-today .ov-dl {
+  color: var(--color-accent);
+}
+.ov-day.is-today .ov-dn {
+  color: #e9c07a;
+}
+.ov-program .ov-ts {
+  margin-top: 0;
+}
+.ov-sq {
+  height: 112px;
+}
+.ov-row {
+  height: 72px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+}
+.ov-row-ic {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #2a2c31;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  color: var(--color-neutral-300);
+}
+.ov-row-text {
+  flex: 1;
+  min-width: 0;
+}
+.ov-row-go {
+  flex: none;
+  color: var(--color-neutral-500);
+}
+@media (min-width: 720px) {
+  .screen.ov-page > * {
+    width: 100%;
+    max-width: 760px;
+  }
+}
+
+/* --- Drill-in chrome: "‹ Overview", range + view options, title ----------- */
+.ov-back {
+  flex: none;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+.ov-back .ui-icon {
+  font-size: 18px;
+}
+.pv-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pv-top-acts {
+  display: flex;
+  gap: 8px;
+}
+.pv-range,
+.pv-opts {
+  height: 36px;
+  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1px solid rgba(233, 234, 236, 0.08);
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pv-range {
+  gap: 7px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.pv-range .ui-icon {
+  font-size: 16px;
+}
+.pv-opts {
+  width: 36px;
+  color: #e9c07a;
+  font-size: 18px;
+}
+.pv-title {
+  flex: none;
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.seg3.seg4.pv-chips {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.seg3.seg4.pv-chips::-webkit-scrollbar {
+  display: none;
+}
+.seg3.seg4.pv-chips button {
+  flex: none;
+  height: 38px;
+  padding: 0 15px;
+  border-radius: 19px;
+  background: var(--color-surface);
+  border: 1px solid rgba(233, 234, 236, 0.08);
+  color: #b0b4b8;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.seg3.seg4.pv-chips button.active {
+  background: #3a2f1c;
+  border-color: rgba(217, 162, 79, 0.5);
+  color: #e9c07a;
+}
+@media (min-width: 720px) {
+  .progress-page > .pv-top,
+  .progress-page > .pv-title {
+    grid-column: 1 / -1;
+    padding: 0 28px;
+  }
+  .progress-page > .pv-top {
+    padding-top: 16px;
+  }
+  .progress-filled {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+}
+
+/* Programs / Goals / Playbook / Exercises: the back link heads the top bar,
+   then the page title (the old peer switcher is gone). */
+.programs-top:has(> .ov-back) {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2px;
+}
+.programs-top > .ov-back {
+  order: -1;
+}
+.programs-page .programs-top:has(> .ov-back) > div:first-child {
+  display: block;
+}
+.programs-top:has(> .ov-back) > div:first-child .kicker {
+  display: none;
+}
+.programs-top:has(> .ov-back) > .program-actions {
+  align-self: stretch;
+}
+.programs-page > .programs-top:has(> .ov-back) {
+  box-shadow: none;
+}
+.programs-top:has(> .ov-back) > div:first-child {
+  width: 100%;
+  text-align: left;
+}
+.programs-top:has(> .ov-back) .title-26 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
+}
+/* Exercises: the gallery below already carries its own title. */
+.programs-page.exlib-tab > .programs-top:has(> .ov-back) > div:first-child {
+  display: none;
+}
+
+/* --- Today: program block + week strip ------------------------------------ */
+.today-page .td-topbar {
+  margin-bottom: -4px;
+}
+.today-program-card.td-week {
+  --acc: var(--color-accent);
+  background: color-mix(in srgb, var(--acc) 6%, var(--color-bg));
+  border-top: 1px solid color-mix(in srgb, var(--acc) 35%, transparent);
+  border-bottom: 1px solid rgba(233, 234, 236, 0.06);
+  padding-top: 16px;
+  padding-bottom: 18px;
+  gap: 12px;
+}
+.today-program-card.td-week::before,
+.today-program-card.td-week::after {
+  display: none;
+}
+.td-week[data-mode='train'] {
+  --acc: var(--day, var(--color-accent));
+}
+.td-week[data-mode='rest'],
+.td-week[data-mode='active'] {
+  /* Same rest blue as the lotus pill and the history's rest-day milestone. */
+  --acc: var(--color-rest-300);
+}
+.td-week[data-mode='done'] {
+  --acc: var(--color-ok);
+}
+.td-week[data-mode='illness'] {
+  --acc: #79b4b0;
+}
+.td-week[data-mode='off'] {
+  --acc: #6fb7de;
+}
+.td-week[data-mode='injury'] {
+  --acc: #e0906f;
+}
+.td-week[data-mode='none'] {
+  background: #1a1b1e;
+  border-top-color: rgba(233, 234, 236, 0.1);
+}
+.td-week .program-card-head > .pch-icon {
+  color: var(--acc);
+  font-size: 20px;
+  margin-top: 1px;
+}
+.td-week .pch-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--acc);
+}
+.td-week .program-card-head .n {
+  margin-top: 4px;
+}
+.td-week .program-card-head .pch-progress {
+  --pcl: var(--acc);
+  width: 92px;
+  align-self: flex-start;
+  margin-top: 14px;
+}
+.td-week .program-card-head .pch-pct {
+  font-size: 16px;
+  font-weight: 700;
+}
+.td-week .program-card-head .pch-bar {
+  height: 5px;
+  background: rgba(233, 234, 236, 0.12);
+}
+.pch-status {
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--acc) 12%, transparent);
+  color: #e7e2d8;
+}
+.wk-pills {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 2px;
+}
+.wk-pill {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  --pb: rgba(233, 234, 236, 0.04);
+  --pc: transparent;
+  --ring: rgba(233, 234, 236, 0.45);
+}
+button.wk-pill {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.wk-pill-bar {
+  width: 100%;
+  height: 28px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  background: var(--pb);
+  color: var(--pc);
+}
+.wk-pill.is-today .wk-pill-bar {
+  box-shadow: 0 0 0 1.5px var(--ring);
+}
+.wk-pill-label {
+  max-width: 100%;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6f7479;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wk-pill.is-today .wk-pill-label {
+  color: var(--color-text);
+  font-weight: 700;
+}
+.wk-pill.st-done {
+  --pb: #16291f;
+  --pc: #4cbe8c;
+  --ring: #4cbe8c;
+}
+.wk-pill.st-missed {
+  --pb: #2a1c1b;
+  --pc: #e0685a;
+  --ring: #e0685a;
+}
+.wk-pill.st-rest {
+  --pb: #13222c;
+  --pc: #93d4f2;
+  --ring: #33a8e0;
+}
+.wk-pill.st-rest.is-today {
+  --pb: #11324a;
+}
+.wk-pill.st-sick {
+  --pb: #142524;
+  --pc: #79b4b0;
+  --ring: #79b4b0;
+}
+.wk-pill.st-off {
+  --pb: #122433;
+  --pc: #6fb7de;
+  --ring: #6fb7de;
+}
+.wk-pill.st-off-next {
+  --pb: #122433;
+  --pc: rgba(111, 183, 222, 0.55);
+}
+.wk-pill.st-injury {
+  --pb: #2e1f19;
+  --pc: #e0906f;
+  --ring: #e0906f;
+}
+.wk-pill.st-play {
+  --pb: #2e2416;
+  --pc: #e9c07a;
+  --ring: #d9a24f;
+}
+@media (hover: hover) {
+  button.wk-pill:hover .wk-pill-bar {
+    filter: brightness(1.15);
+  }
+}
+
+/* --- History milestones (Today preview, full history, day drawer) --------- */
+.hist-tl-day:nth-child(even)::before {
+  display: none;
+}
+.hist-tl-day.st-rest {
+  --nc: var(--color-rest-300);
+}
+.hist-tl-day.st-vacation {
+  --nc: #6fb7de;
+}
+.hist-tl-day.st-injury {
+  --nc: #e0906f;
+}
+.hist-tl-day.st-illness {
+  --nc: #79b4b0;
+}
+.hist-tl-node {
+  background: color-mix(in srgb, var(--nc) 14%, var(--color-bg));
+  box-shadow: none;
+}
+.hist-tl-node i {
+  font-size: 14px;
+}
+.hist-tl-day.is-today .hist-tl-node {
+  box-shadow: 0 0 0 1.5px var(--nc);
+}
+.hist-tl-day.is-today .hist-tl-date {
+  color: var(--nc);
+}
+.hist-tl-line {
+  margin: 4px 0;
+  background: #2a2c31;
+}
+.hist-tl-body {
+  gap: 8px;
+  padding-bottom: 18px;
+}
+.hist-tl-date {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--color-neutral-500);
+}
+.hist-day-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1px solid rgba(233, 234, 236, 0.06);
+  overflow: hidden;
+}
+.hist-item {
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+}
+.hist-item + .hist-item {
+  margin-top: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(233, 234, 236, 0.06);
+}
+div.hist-item {
+  cursor: default;
+}
+/* Sleep and activities: one line ("Massage · 120 min") — the row is shorter
+   because it says less, not because its type or icon shrink. */
+.hist-item.is-minor {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.hist-item-inline {
+  font-weight: 400;
+  color: var(--color-neutral-400);
+}
+.hist-tm {
+  font-size: 11.5px;
+}
+.hist-tm {
+  flex: none;
+  width: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-neutral-500);
+}
+.hist-ic {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  background: #3a2f1c;
+  color: #e9c07a;
+}
+.hist-activity .hist-ic {
+  background: #173a2a;
+  color: #b7e8cf;
+}
+.hist-activity.cat-recovery .hist-ic {
+  background: #11324a;
+  color: #93d4f2;
+}
+.hist-item.cat-sleep .hist-ic {
+  background: #1d2330;
+  color: #a9b8e8;
+}
+.hist-item-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+.hist-item-stats {
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+}
+.hist-item-stats .ta-kcal {
+  margin-left: 8px;
+  font-size: 12px;
+  vertical-align: baseline;
+}
+.hist-go {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: #2a2c31;
+  color: #b0b4b8;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+/* --- Progress › Volume view sheet ------------------------------------------ */
+.sheet.vol-view-sheet {
+  gap: 12px;
+}
+.vol-view-sheet .sheet-close {
+  display: none;
+}
+.vvs-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.vvs-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+.vvs-reset {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.vvs-lbl {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-500);
+}
+.vvs-lenses {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.vvs-lens {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 16px;
+  background: #26282c;
+  border: 1px solid rgba(233, 234, 236, 0.06);
+  color: var(--color-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.vvs-lens.on {
+  background: #3a2f1c;
+  border-color: rgba(217, 162, 79, 0.55);
+}
+.vvs-lens-t {
+  font-size: 14px;
+  font-weight: 600;
+}
+.vvs-lens.on .vvs-lens-t {
+  color: #e9c07a;
+}
+.vvs-lens-s {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: var(--color-neutral-500);
+}
+.vvs-row2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.vvs-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vvs-seg {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--color-bg);
+}
+.vvs-seg button {
+  height: 38px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: #b0b4b8;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.vvs-seg button.on {
+  background: #34373c;
+  color: var(--color-text);
+  font-weight: 600;
+}
+.vvs-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.vvs-rc {
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 18px;
+  background: #26282c;
+  color: #b0b4b8;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.vvs-rc.on {
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-weight: 600;
+}
+
+/* Volume's view settings: a visible control right under the tabs. */
+.vol-view-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 19px;
+  background: var(--color-surface);
+  border: 1px solid rgba(217, 162, 79, 0.35);
+  color: #e9c07a;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.vol-view-btn .ui-icon {
+  flex: none;
+  font-size: 16px;
+}
+.vvb-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vol-view-btn .vvb-caret {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Period picker behind the "This week" button. */
+.sheet.range-sheet {
+  gap: 12px;
+}
+.range-sheet .sheet-close {
+  display: none;
+}
+.range-custom {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* --- Today header: date and sync state on one line ------------------------ */
+.today-page .td-topbar {
+  align-items: center;
+}
+.today-page .td-topbar-actions,
+.today-page .td-topbar .sync-chip {
+  margin-top: 0;
+}
+/* A little more air between the program block and the advisory deck below. */
+.today-page .today-program-card.td-week {
+  margin-bottom: 8px;
+}
+
+/* --- Page side gutters: ONE token for every screen -------------------------
+   --page-x is the only place the left/right inset of page content is set.
+   The screen pads by it; inner scroll bodies never add their own inset on top
+   (a flush screen with padding 0 hands the inset to its body instead). */
+:root {
+  --page-x: 20px;
+}
+@media (min-width: 720px) {
+  :root {
+    --page-x: 30px;
+  }
+}
+/* Full-bleed blocks bleed by exactly the gutter. */
+.today-program-card.td-week {
+  margin-inline: calc(-1 * var(--page-x));
+  padding-left: var(--page-x);
+  padding-right: var(--page-x);
+}
+.screen {
+  padding-left: var(--page-x);
+  padding-right: var(--page-x);
+}
+@media (max-width: 719.98px) {
+  .screen.programs-author-page.programs-has-tabs {
+    padding-left: var(--page-x);
+    padding-right: var(--page-x);
+  }
+  .programs-author-page .goals-body,
+  .programs-author-page .exg-tabwrap,
+  .pb-body {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+.programs-page.programs-flush > .programs-top,
+.programs-page.programs-flush > .programs-member-body {
+  padding-left: var(--page-x);
+  padding-right: var(--page-x);
+}
+@media (min-width: 720px) {
+  .programs-author-page .goals-body,
+  .pb-body,
+  .progress-alt-body {
+    padding-left: var(--page-x);
+    padding-right: var(--page-x);
+  }
+}
+
+/* --- Today: crew strip as in the design — a plain row of 52px faces ------- */
+.today-page .tcs {
+  margin-inline: calc(-1 * var(--page-x));
+  margin-bottom: 0;
+  padding: 2px 0 4px;
+}
+.today-page .tcs::before,
+.today-page .atl-story-split {
+  display: none;
+}
+.today-page .tcs-row {
+  gap: 18px;
+  padding: 0 var(--page-x);
+}
+.today-page .tcs-item {
+  width: 56px;
+}
+.today-page .tcs-ring {
+  width: 56px;
+  height: 56px;
+}
+.today-page .tcs-ring > :first-child {
+  width: 50px !important;
+  height: 50px !important;
+}
+.today-page .tcs-name {
+  max-width: 64px;
+  font-size: 11.5px;
+  color: #b0b4b8;
+}
+
+/* --- Set editor sheet --------------------------------------------------------
+   Its blocks must never shrink to fit (an overflow:hidden group squeezed to
+   nothing and hid "More"); the sheet itself scrolls instead. */
+.sheet .se-label,
+.sheet .se-card,
+.sheet .se-group,
+.sheet .se-exset,
+.sheet .steppers,
+.sheet .sheet-head,
+.sheet .sheet-actions {
+  flex-shrink: 0;
+}
+/* Exercise settings: the same grouped row look as "More", not a bare row. */
+.toggle-row.se-exset {
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--color-neutral-900);
+  font-weight: 500;
+}
+.toggle-row.se-exset i {
+  color: var(--color-accent);
+}
+.toggle-row.se-exset i:last-child {
+  margin-left: auto;
+  color: var(--color-neutral-500);
+}
+.toggle-row.se-exset + .sheet-actions {
+  margin-top: 16px;
+}
+
+/* Session: a rest that ran well past the plan (with slack) — amber, not red. */
+.set-rest.long,
+.focus-view .set-rest.long {
+  color: #e8933f;
+}
+.set-rest.long::before,
+.set-rest.long::after {
+  background: color-mix(in srgb, #e8933f 35%, transparent);
+}
+
+/* --- Session: exercise photos (start / end) + full-screen slider ---------- */
+.ex-photos {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+  height: 132px;
+  margin: 2px 0 10px;
+  padding: 0;
+  border: none;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-surface);
+  cursor: zoom-in;
+}
+.ex-photos.n1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ex-photo {
+  position: relative;
+  min-width: 0;
+  height: 100%;
+  background: #f4f4f2;
+}
+.ex-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ex-photo-tag {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(14, 15, 17, 0.72);
+  color: #e9eaec;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ex-photos-zoom {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(14, 15, 17, 0.72);
+  color: #e9eaec;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+.photo-slider {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 9, 10, 0.94);
+  padding: max(12px, var(--safe-top, 0px)) 0 max(16px, var(--safe-bottom, 0px));
+}
+.ps-scrim {
+  position: absolute;
+  inset: 0;
+  border: none;
+  background: none;
+}
+.ps-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px var(--page-x, 20px);
+}
+.ps-title {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ps-close {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(233, 234, 236, 0.1);
+  color: var(--color-text);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+.ps-track {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ps-track::-webkit-scrollbar {
+  display: none;
+}
+.ps-slide {
+  flex: none;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: center;
+  display: grid;
+  place-items: center;
+  padding: 12px var(--page-x, 20px);
+  box-sizing: border-box;
+}
+.ps-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 16px;
+  background: #f4f4f2;
+  object-fit: contain;
+}
+.ps-bottom {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px var(--page-x, 20px) 0;
+}
+.ps-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(233, 234, 236, 0.1);
+  color: var(--color-text);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+.ps-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.ps-steps {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(233, 234, 236, 0.08);
+}
+.ps-step {
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: #b0b4b8;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ps-step.on {
+  background: #3a2f1c;
+  color: #e9c07a;
+  font-weight: 600;
+}
+
+/* --- Session: a muscle's state right now (tap a muscle chip) ------------- */
+.mss {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* With the live read below it, the figure takes less room. */
+.muscle-info .mi-fig.compact {
+  max-height: 210px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+.muscle-info .mi-fig.compact svg,
+.muscle-info .mi-fig.compact > * {
+  max-height: 210px;
+  width: auto;
+}
+.mss-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mss-icon {
+  display: grid;
+  place-items: center;
+}
+.mss-name {
+  font-size: 22px;
+  font-weight: 700;
+}
+.mss-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--rc) 10%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--rc) 30%, transparent);
+}
+.mss-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--rc);
+}
+.mss-state-t {
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--rc);
+}
+.mss-state-s {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-neutral-300);
+}
+.mss-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.mss-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--color-neutral-900);
+}
+.mss-v {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.mss-l {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-neutral-500);
+}
+.mss-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+.mss-rv {
+  font-size: 14px;
+  font-weight: 500;
+}
+.mss-hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-neutral-500);
+}
+.mss-history {
+  align-self: stretch;
+}
+/* Days ahead in a program: what's planned, in quiet greyscale. */
+.wk-pill.st-next-train,
+.wk-pill.st-next-rest {
+  --pc: #6f7479;
+}
+
+/* Session: ×2 sides badge — a solid "×2" tab + what it means. */
+.sides-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 10px 0 3px;
+  gap: 7px;
+  border: 1px solid rgba(217, 162, 79, 0.4);
+  border-radius: 15px;
+  background: #2a2216;
+  color: #e9c07a;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+button.sides-chip {
+  cursor: pointer;
+}
+.sides-chip .sc-x {
+  display: grid;
+  place-items: center;
+  height: 22px;
+  min-width: 30px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--color-accent);
+  color: #1e160b;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+.sides-chip.mode-unilateral {
+  border-color: rgba(111, 168, 201, 0.45);
+  background: #172430;
+  color: #a9d0e8;
+}
+.sides-chip.mode-unilateral .sc-x {
+  background: #6fa8c9;
+  color: #0e1a22;
+}
+
+/* --- Today: the nudge stack sits in an even band ---------------------------
+   Same space above the stack (from the program block) and below it (from the
+   progress rail to the History divider). The pane's flex gap is part of both. */
+.pane-main {
+  --td-stack-band: 24px;
+}
+.pane-main > .today-program-card.td-week:has(+ .nudge-wrap),
+.pane-main > .today-program-card.td-week:has(+ * + .nudge-wrap) {
+  margin-bottom: 0;
+}
+.pane-main > .nudge-wrap {
+  margin-top: calc(var(--td-stack-band) - var(--space-3));
+}
+.pane-main > .nudge-wrap .nudge-rail {
+  margin-bottom: 0;
+}
+.pane-main > .nudge-wrap ~ .td-history > .section-divide {
+  margin-top: calc(var(--td-stack-band) - var(--space-3));
+}

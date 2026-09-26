@@ -10,14 +10,8 @@
 import { useMemo, useState } from 'react';
 import type { Shell } from '../App';
 import type { Workout } from '../types';
-import {
-  addExercise,
-  programDayNameFor,
-  repeatWorkout,
-  startWorkout,
-  useStore,
-  workoutDayReadout,
-} from '../store';
+import { programDayNameFor, repeatWorkout, useStore, workoutDayReadout } from '../store';
+import { startPlaySession } from '../data/programMine';
 import { computePlaybook, type Play, type PlaySuggestion } from '../playbook';
 import { fmtKg, fmtShortDate, fmtWeekday, useT } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
@@ -51,21 +45,8 @@ export function PlaybookView({
     p.name ?? (p.readout ? dayReadoutLabel(p.readout, t) : t.playUntitled);
 
   const startPlay = (p: Play) => {
-    const w = startWorkout(null, {
-      dayName: p.name ?? undefined,
-      targetMuscles: p.coverage.filter((c) => c.primary).map((c) => c.muscle),
-    });
-    if (!w) return;
-    if (p.opensWithWarmup) addExercise(w.id, t.defaultTimedExerciseNames.warmup, 'warmup');
-    for (const ex of p.exercises) {
-      addExercise(w.id, ex.name, 'strength', {
-        plannedSets: ex.sets,
-        plannedReps: ex.repHigh || ex.repLow || null,
-        primaryMuscle: ex.primary ?? undefined,
-        secondaryMuscles: ex.secondary,
-      });
-    }
-    shell.openOverlay({ screen: 'session', workoutId: w.id });
+    const id = startPlaySession(p, t.defaultTimedExerciseNames.warmup);
+    if (id) shell.openOverlay({ screen: 'session', workoutId: id });
   };
 
   const repeat = (id: string) => {

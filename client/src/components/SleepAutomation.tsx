@@ -33,6 +33,7 @@ import {
   finishedNights,
   lastBedtimeAt,
   AUTO_START_WINDOW_MS,
+  nightEndingOn,
 } from '../sleep';
 import { Icon } from '../ui';
 import { MoonGlyph } from './MoonGlyph';
@@ -125,11 +126,17 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
       const id = sleepDayId(wakeDay0);
       if (existing.has(id)) continue;
       if (skipped.has(id)) continue;
-      const p = planFor(store, new Date(wakeDay0).getDay(), tick);
-      if (!p) continue;
-      const wake = wakeDay0 + p.wakeMin * MIN;
-      if (wake > tick) continue; // usual wake time not reached yet
-      const cand = nightFromPlan(wakeDay0, p);
+      // The night that ends THIS morning — plans are keyed by the bedtime's
+      // day, so it's usually the previous evening's plan (not this weekday's).
+      const night = nightEndingOn(store.sleepSchedule, store.sleeps, wakeDay0, tick);
+      if (!night) continue;
+      if (night.wake > tick) continue; // usual wake time not reached yet
+      const cand = {
+        date: sleepDayId(night.wake),
+        bedtime: night.bedtime,
+        wake: night.wake,
+        source: 'auto' as const,
+      };
       // Already have this sleep under another date (e.g. closed by the server
       // before its day was fixed) → don't log it a second time.
       const probe = { ...cand, id: 'probe', kind: 'sleep' as const } as SleepNight;

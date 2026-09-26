@@ -97,6 +97,15 @@ export function workingKg(sets: SetEntry[]): number {
   return Math.max(0, ...sets.filter((s) => typeOf(s) !== 'warmup').map((s) => s.weight ?? 0));
 }
 
+/** How many sets a lift's sets add to a muscle's fatigue / recovery load:
+ *  every working set counts 1, a warm-up only its (small) hardness — a near-
+ *  working-weight warm-up still tires the muscle a little, an empty-bar one
+ *  barely at all. */
+export function fatigueSetCount(sets: SetEntry[]): number {
+  const ref = workingKg(sets);
+  return sets.reduce((n, s) => n + (typeOf(s) === 'warmup' ? setHardness(s, ref) : 1), 0);
+}
+
 /** Marginal growth stimulus of the next hard set given `prior` fractional hard
  *  sets on that muscle today: 1 for the first, ~½ at 6, ~¼ at 10. */
 export function marginalStimulus(prior: number, plateau = SESSION_PLATEAU): number {

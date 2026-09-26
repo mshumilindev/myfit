@@ -9,6 +9,7 @@ import { LANDMARKS, VOLUME_MUSCLES, type Landmark } from './volume';
 import { topHistory } from './progression';
 import { resolveMuscles, isStrengthExercise } from './store';
 import type { Workout } from './types';
+import { fatigueSetCount } from './stimulus';
 import type { MuscleGroup } from './data/exercises';
 
 const DAY = 24 * 3600 * 1000;
@@ -50,8 +51,9 @@ function weeklyFatigueSplit(
     if (w.startedAt < since) continue;
     for (const e of w.exercises) {
       if (!isStrengthExercise(e)) continue;
-      const n = e.sets.length;
-      if (n === 0) continue;
+      if (e.sets.length === 0) continue;
+      // Warm-ups count, but only as much as they actually loaded the muscle.
+      const n = fatigueSetCount(e.sets);
       const { primary, secondary } = resolveMuscles(e);
       if (primary) add(primary, 'primary', n);
       for (const s of secondary) if (s !== primary) add(s, 'secondary', n);

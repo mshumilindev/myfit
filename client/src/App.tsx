@@ -193,11 +193,17 @@ const ProfileView = lazy(() =>
 const ClientPage = lazy(() =>
   import('./views/ClientPage').then((module) => ({ default: module.ClientPage })),
 );
+const OverviewView = lazy(() =>
+  import('./views/OverviewView').then((module) => ({ default: module.OverviewView })),
+);
+const StartSheet = lazy(() =>
+  import('./components/StartSheet').then((module) => ({ default: module.StartSheet })),
+);
 const ProgramsView = lazy(() =>
   import('./views/ProgramsView').then((module) => ({ default: module.ProgramsView })),
 );
 
-export type Tab = 'today' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
+export type Tab = 'today' | 'overview' | 'progress' | 'gyms' | 'programs' | 'people' | 'me';
 
 export type Overlay =
   | { screen: 'session'; workoutId: string }
@@ -238,15 +244,21 @@ export interface Shell {
   replaceOverlay: (o: Overlay) => void;
   goTab: (t: Tab) => void;
   goPlaybook: () => void;
+  /** Open the Start sheet (the notched "+" in the tab bar). */
+  openStart: () => void;
   toast: (t: ToastState) => void;
   snack: (s: SnackState) => void;
   signOut: () => void;
   queueLength: number;
 }
 
-const TABS: Tab[] = ['today', 'progress', 'gyms', 'programs'];
+const TABS: Tab[] = ['today', 'overview', 'progress', 'gyms', 'programs'];
+/** Progress and Programs (with its Goals / Playbook / Exercises peers) are
+ *  drill-ins of the Overview hub: they keep their own URLs but the tab bar
+ *  lights Overview while they're open. */
+const OVERVIEW_TABS: Tab[] = ['overview', 'progress', 'programs'];
 type NavRole = ReturnType<typeof getRole>;
-type NavLabels = Pick<ReturnType<typeof useT>['t'], 'today' | 'progress' | 'gyms' | 'progTitle'>;
+type NavLabels = Pick<ReturnType<typeof useT>['t'], 'today' | 'overviewTab' | 'gyms'>;
 type NavItem = { id: Tab; icon: string; label: string };
 
 /** The People sub-app's label follows the role, matching the old in-Gym menu. */
@@ -282,6 +294,7 @@ const EDGE_BACK_EXCLUDE_SELECTOR = [
   '[role="button"]',
   '[data-no-edge-swipe]',
   '.tabbar',
+  '.tabbar-fab',
   '.rail',
   '.sheet',
   '.scrim',
@@ -296,13 +309,18 @@ function defaultTab(): Tab {
 
 function tabsForRole(_role: NavRole, t: NavLabels): NavItem[] {
   // Clients / users / profile moved into the People sub-app, so the Gym menu is
-  // the same four core tabs for everyone; People is reached via the app switcher.
+  // the same core tabs for everyone; People is reached via the app switcher.
+  // Progress / Programs / Goals / Playbook / Exercises live under Overview.
   return [
     { id: 'today', icon: 'house', label: t.today },
-    { id: 'progress', icon: 'chart-line-up', label: t.progress },
-    { id: 'programs', icon: 'list-checks', label: t.progTitle },
+    { id: 'overview', icon: 'chart-line-up', label: t.overviewTab },
     { id: 'gyms', icon: 'map-pin', label: t.gyms },
   ];
+}
+
+/** Is this nav item the one to light for the current tab? */
+function navActive(item: Tab, tab: Tab): boolean {
+  return item === 'overview' ? OVERVIEW_TABS.includes(tab) : item === tab;
 }
 
 /** Serialize the current screen to a URL hash so a refresh restores it. */
@@ -678,6 +696,8 @@ export function App() {
   // OFF → the Shell shows it as "coming soon" and it cannot be opened.
   const nutritionEnabled = useFlag('nutrition');
   const [shellOpen, setShellOpen] = useState(false);
+  // The Start sheet behind the notched "+" (and the desktop rail's Start).
+  const [startOpen, setStartOpen] = useState(false);
 
   // Deep-link focus: a notification can ask a screen to scroll to a specific
   // card (id) and, when it's interactive (a feat cell), open its existing
@@ -826,6 +846,7 @@ export function App() {
       setProgramsPeer('playbook');
       setTab('programs');
     },
+    openStart: () => setStartOpen(true),
     toast: (tst) => {
       toastSeq.current += 1;
       const id = toastSeq.current;
@@ -864,7 +885,7 @@ export function App() {
   const open = store.workouts.find((w) => w.finishedAt === null);
   const role = getRole();
   const tabs = tabsForRole(role, t);
-  const tabAllowed = tabs.some((x) => x.id === tab);
+  const tabAllowed = TABS.includes(tab);
   const effectiveTab = tabAllowed ? tab : defaultTab();
   // Role guards, applied in render (no setState-in-effect): an overlay the
   // current user may not open is treated as absent, so the tab behind shows
@@ -880,13 +901,18 @@ export function App() {
     authed &&
     !joinToken &&
     !desktopRail &&
-    (activeOverlay !== null || (effectiveTab === 'programs' && programsPeer !== 'programs'));
+    (activeOverlay !== null || effectiveTab === 'progress' || effectiveTab === 'programs');
   const edgeSwipeBack = () => {
     if (activeOverlay !== null) {
       closeOverlay();
       return;
     }
-    if (effectiveTab === 'programs' && programsPeer !== 'programs') setProgramsPeer('programs');
+    // Overview drill-ins (Progress, Trends, Programs & its peers) swipe back to
+    // the Overview hub.
+    if (effectiveTab === 'progress' || effectiveTab === 'programs') {
+      setProgramsPeer('programs');
+      setTab('overview');
+    }
   };
 
   useEdgeSwipeBack({
@@ -1428,12 +1454,27 @@ export function App() {
   const tabContent = (
     <Suspense fallback={<ScreenFallback />}>
       {effectiveTab === 'today' && <TodayView shell={shell} store={store} />}
+      {effectiveTab === 'overview' && (
+        <OverviewView
+          shell={shell}
+          onProgress={(seg) => {
+            setProgressSub('progress');
+            setProgressSeg(seg);
+            setVolumeLens('volume');
+            setTab('progress');
+          }}
+          onTrends={() => {
+            setProgressSub('trends');
+            setTab('progress');
+          }}
+          onPrograms={goProgramsPeer}
+        />
+      )}
       {effectiveTab === 'progress' && (
         <ProgressView
           store={store}
           shell={shell}
           sub={progressSub}
-          onSub={setProgressSub}
           seg={progressSeg}
           onSeg={setProgressSeg}
           lens={volumeLens}
@@ -1469,6 +1510,7 @@ export function App() {
           tab={effectiveTab}
           overlayOpen={activeOverlay !== null}
           goTab={goTab}
+          onStart={() => setStartOpen(true)}
           openWorkoutStartedAt={open?.startedAt}
           syncStatus={store.syncStatus}
           notifUnread={notifUnread}
@@ -1548,23 +1590,46 @@ export function App() {
           )}
         </div>
         {showTabbar && (
-          <nav className="tabbar">
-            {tabs.map((x) => (
-              <button
-                key={x.id}
-                className={effectiveTab === x.id ? 'active' : ''}
-                onClick={() => goTab(x.id)}
-              >
-                <Icon name={x.icon} />
-                <span>{x.label}</span>
+          <div className="tabbar-wrap">
+            <nav className="tabbar tabbar-notched">
+              {tabs.slice(0, 2).map((x) => (
+                <button
+                  key={x.id}
+                  className={navActive(x.id, effectiveTab) ? 'active' : ''}
+                  onClick={() => goTab(x.id)}
+                >
+                  <Icon name={x.icon} />
+                  <span>{x.label}</span>
+                </button>
+              ))}
+              {/* The notch — the Start "+" floats in it (sibling below, so the
+                  notch mask doesn't clip it). */}
+              <span className="tabbar-gap" aria-hidden />
+              {tabs.slice(2).map((x) => (
+                <button
+                  key={x.id}
+                  className={navActive(x.id, effectiveTab) ? 'active' : ''}
+                  onClick={() => goTab(x.id)}
+                >
+                  <Icon name={x.icon} />
+                  <span>{x.label}</span>
+                </button>
+              ))}
+              {/* Apps — open the suite switcher (People / Apex / Nutrition). */}
+              <button onClick={() => setShellOpen(true)} aria-label={t.shellSwitch}>
+                <Icon name="squares-four" />
+                <span>{t.appsTab}</span>
               </button>
-            ))}
-            {/* Apps — open the suite switcher (People / Apex / Nutrition). */}
-            <button onClick={() => setShellOpen(true)} aria-label={t.shellSwitch}>
-              <Icon name="squares-four" />
-              <span>{t.appsTab}</span>
+            </nav>
+            <button
+              type="button"
+              className="tabbar-fab"
+              onClick={() => setStartOpen(true)}
+              aria-label={t.startNew}
+            >
+              <Icon name="plus" weight="bold" />
             </button>
-          </nav>
+          </div>
         )}
         <div className="toast-holder">
           {authed && notices.some((n) => !n.read) && (
@@ -1589,6 +1654,11 @@ export function App() {
           ))}
         </div>
       </div>
+      {startOpen && (
+        <Suspense fallback={null}>
+          <StartSheet shell={shell} onClose={() => setStartOpen(false)} />
+        </Suspense>
+      )}
       {shellOpen && (
         <ShellLauncher
           store={store}
@@ -1856,6 +1926,7 @@ function Rail(props: {
   tab: Tab;
   overlayOpen: boolean;
   goTab: (t: Tab) => void;
+  onStart: () => void;
   openWorkoutStartedAt?: number;
   syncStatus: ReturnType<typeof useStore>['syncStatus'];
   notifUnread: number;
@@ -1893,7 +1964,7 @@ function Rail(props: {
       {nav.map((x) => (
         <button
           key={x.id}
-          className={`rail-item${props.tab === x.id && !props.overlayOpen ? ' active' : ''}`}
+          className={`rail-item${navActive(x.id, props.tab) && !props.overlayOpen ? ' active' : ''}`}
           aria-label={x.label}
           title={x.label}
           onClick={() => props.goTab(x.id)}
@@ -1903,6 +1974,15 @@ function Rail(props: {
           {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
+      <button
+        className="rail-item rail-start"
+        aria-label={t.startNew}
+        title={t.startNew}
+        onClick={props.onStart}
+      >
+        <Icon name="plus" weight="bold" />
+        <span className="rail-label">{t.startNew}</span>
+      </button>
       <div className="rail-foot">
         {/* Notifications — the milestone feed, reachable from every app. */}
         <button

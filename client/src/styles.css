@@ -36592,10 +36592,10 @@ body {
   cursor: pointer;
 }
 
-/* Warm-ups: a small blue bar — they prime, they don't fatigue. */
+/* Warm-ups: a short bar (they build little) coloured by how loaded the muscle
+   already is — the same scale as the working sets. */
 .focus-view .set-row.metered.warm::before {
-  background: #6aa7e8;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 /* Discard session: icon-only, left of Prev. */

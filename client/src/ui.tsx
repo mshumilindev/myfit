@@ -176,6 +176,8 @@ import { HandHeart } from '@phosphor-icons/react/HandHeart';
 import { Snowflake } from '@phosphor-icons/react/Snowflake';
 import { ClockCounterClockwise } from '@phosphor-icons/react/ClockCounterClockwise';
 import { FlowerLotus } from '@phosphor-icons/react/FlowerLotus';
+import { AirplaneTilt } from '@phosphor-icons/react/AirplaneTilt';
+import { CornersOut } from '@phosphor-icons/react/CornersOut';
 import { Stack } from '@phosphor-icons/react/Stack';
 import { FlagBanner } from '@phosphor-icons/react/FlagBanner';
 import { X } from '@phosphor-icons/react/X';
@@ -351,6 +353,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   snowflake: Snowflake,
   'clock-counter-clockwise': ClockCounterClockwise,
   yoga: FlowerLotus,
+  'flower-lotus': FlowerLotus,
+  'airplane-tilt': AirplaneTilt,
+  'corners-out': CornersOut,
   minus: Minus,
   stack: Stack,
   medal: Medal,

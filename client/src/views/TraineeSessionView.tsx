@@ -5,6 +5,7 @@
  * way the athlete sees their own past session — sets, types, rest, drop sets,
  * supersets and circuits — but without any editing affordances.
  */
+import { SidesChip } from '../components/SidesChip';
 import { useEffect, useState } from 'react';
 import type { Shell } from '../App';
 import type { Workout, Exercise, SetEntry, SetType } from '../types';
@@ -117,12 +118,7 @@ function ExerciseCard({
         <span className="name" style={{ cursor: 'default' }}>
           {exName(ex.name)}
         </span>
-        {perHandFactor(ex) === 2 && (
-          <span className="x2-chip">
-            <Icon name="arrows-out-line-horizontal" />
-            {t.perHandChip}
-          </span>
-        )}
+        <SidesChip ex={ex} />
       </div>
       <div className="set-grid header">
         <span>#</span>

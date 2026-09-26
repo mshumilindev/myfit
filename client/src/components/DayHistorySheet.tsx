@@ -24,14 +24,14 @@ type NoteState = 'missed' | 'rest' | 'vacation' | 'illness';
 
 const NOTE_ICON: Record<NoteState, string> = {
   missed: 'x',
-  rest: 'moon',
-  vacation: 'sun-horizon',
+  rest: 'flower-lotus',
+  vacation: 'airplane-tilt',
   illness: 'pulse',
 };
 const NOTE_COLOR: Record<NoteState, string> = {
   missed: 'var(--color-danger)',
   rest: 'var(--color-rest-400)',
-  vacation: '#e8933f',
+  vacation: '#6fb7de',
   illness: 'var(--care)',
 };
 
@@ -41,9 +41,12 @@ export function DayHistorySheet({
   onOpenWorkout,
   onOpenActivity,
   onOpenSleep,
+  onStart,
 }: {
   /** Midnight (local) of the day to show. */
   day: number;
+  /** Today only: start today's session from the drawer. */
+  onStart?: () => void;
   onClose: () => void;
   onOpenWorkout?: (id: string) => void;
   onOpenActivity?: (id: string) => void;
@@ -164,7 +167,13 @@ export function DayHistorySheet({
         </div>
       )}
       {rows.length > 0 && (
-        <div className="hist-timeline day-sheet-items">{rows.map((r) => r.node)}</div>
+        <div className="hist-timeline day-sheet-items hist-day-card">{rows.map((r) => r.node)}</div>
+      )}
+      {onStart && (
+        <button type="button" className="btn btn-primary day-sheet-start" onClick={onStart}>
+          <Icon name="play" weight="fill" />
+          {t.startSessionLabel}
+        </button>
       )}
     </Sheet>
   );
