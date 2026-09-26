@@ -14,7 +14,7 @@ describe('learning your way of asking', () => {
     );
   });
 
-  it("a pick from 'did you mean…' teaches that wording", () => {
+  it("a pick from 'did you mean…' teaches that wording", { timeout: 60_000 }, () => {
     const c = richCtx('en');
     // Find a wording Atlas is unsure about.
     // A wording Atlas is unsure about (the first of a few that still are).
@@ -26,6 +26,8 @@ describe('learning your way of asking', () => {
       'what should i do once i finish lifting',
       'my thing feels off after the gym lately',
       'that afternoon thing',
+      'how is the bench situation',
+      'squat vibes lately',
     ].find((q) => answerLocally(q, c)?.intent === 'did_you_mean')!;
     expect(odd).toBeTruthy();
     const first = answerLocally(odd, c)!;

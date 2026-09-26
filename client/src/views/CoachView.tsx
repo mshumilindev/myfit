@@ -35,6 +35,8 @@ import { clearSaid, loadSaid, mergeMemory, rememberSaid } from '../atlas/memory'
 import { teach, unteach } from '../atlas/teach';
 import { runAction } from '../atlas/actions';
 import { welcome } from '../atlas/welcome';
+import { countEvent, type AtlasEvent } from '../atlas/metrics';
+import { isOther, loadDict, markFmt, translateOut } from '../atlas/translate';
 import { ChatChart } from '../components/ChatChart';
 import { buildChatFacts } from '../atlas/chatFacts';
 import { clearChat, pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
@@ -554,6 +556,7 @@ function CoachThread({
   const send = async (text: string, consented = false, typed = true) => {
     const q = text.trim();
     if (!q || busy) return;
+    fromChip.current = !typed;
     let offer: ReturnType<typeof langOffer>['offer'] = null;
     if (typed) {
       const r = langOffer(q, locale, loadOfferState());
@@ -573,6 +576,13 @@ function CoachThread({
     }
   };
 
+  /** Counters only (metrics.ts) — never the text of a message. */
+  const fromChip = useRef(false);
+  /** Translated chip text → the English it came from (pl / lt / et). */
+  const chipSource = useRef(new Map<string, string>());
+  const track = (e: AtlasEvent) =>
+    setCoach({ stats: countEvent(store.coach.stats, e, wallClock()) });
+
   /** Answer one message; false when it stopped for the Gemini consent sheet. */
   const reply = async (q: string, consented: boolean): Promise<boolean> => {
     setDraft('');
@@ -582,29 +592,45 @@ function CoachThread({
     const rid = `at-${at}`;
     // 1) Atlas's own answer base — instant, offline, from your data, and it
     //    follows the thread ("why?", "more", "and squat?").
+    // Polish / Lithuanian / Estonian: built in English with placeholders, then translated.
+    const other = isOther(locale) ? locale : null;
     const ctx = {
       s: store,
       now: at,
-      locale,
+      locale: other ? ('en' as const) : locale,
       temper,
-      fmt,
+      fmt: other ? markFmt(fmt) : fmt,
       mem: store.coach.memory,
       said: loadSaid(),
     };
-    let local = answerLocally(q, ctx, convo.current);
+    // A tapped chip goes to the engine in the English it was built in.
+    const tr = (x: string) => {
+      if (!other) return x;
+      const shown = translateOut(x, other, fmt);
+      chipSource.current.set(shown, x);
+      return shown;
+    };
+    const qe = chipSource.current.get(q) ?? q;
+    let local = answerLocally(qe, ctx, convo.current);
     // Unsure which topic it is → Gemini only picks the topic (from Atlas's own
     // list); the answer is still built here, from your data.
     if (local?.intent === 'did_you_mean' && canChat && store.coach.chatConsent) {
-      const id = await classifyTopic({ question: q, topics: topicMenu(q, ctx), now: at });
-      const routed = id ? answerAs(id, q, ctx, convo.current) : null;
+      const id = await classifyTopic({ question: q, topics: topicMenu(qe, ctx), now: at });
+      const routed = id ? answerAs(id, qe, ctx, convo.current) : null;
       if (routed) local = routed;
     }
     // Memory: what you told me now, and what I answered (for consistency).
+    track({
+      kind: 'ask',
+      intent: local?.intent ?? null,
+      chip: fromChip.current,
+      escalated: !!local?.escalate,
+    });
     if (local?.learned) setCoach({ memory: mergeMemory(store.coach.memory, local.learned) });
     if (local?.said) rememberSaid(local.said);
     if (local && !(local.escalate && canChat)) {
       convo.current = local.convo;
-      await typeOut(rid, at + 1, local.text, local.chips, {
+      await typeOut(rid, at + 1, tr(local.text), local.chips?.map(tr), {
         ...(local.chart ? { chart: local.chart } : {}),
         ...(local.action ? { action: local.action } : {}),
         ...(!local.action && !UNRATED.has(local.intent) ? { intent: local.intent, q } : {}),
@@ -614,7 +640,7 @@ function CoachThread({
     if (local?.escalate) convo.current = local.convo;
     // 2) Nothing fits → Gemini (closed testing), seamlessly in the same thread.
     if (!canChat) {
-      const guess = didYouMean(q, ctx);
+      const guess = didYouMean(qe, ctx);
       // Your pick among these teaches Atlas this wording.
       if (guess.length)
         convo.current = { ...convo.current, pendingTeach: { q, offered: guess.map((g) => g.id) } };
@@ -623,7 +649,7 @@ function CoachThread({
         at + 1,
         guess.length ? t.atlasDidYouMean : t.atlasLocalUnknown,
         guess.length
-          ? guess.map((g) => g.ask)
+          ? guess.map((g) => tr(g.ask))
           : [t.atlasSuggestToday, t.atlasSuggestProgress, t.atlasSuggestRest],
       );
       return true;
@@ -642,6 +668,7 @@ function CoachThread({
    */
   const rate = (n: Item, up: boolean) => {
     if (!n.intent || !n.q) return;
+    track({ kind: 'rate', intent: n.intent, up });
     const now = wallClock();
     const mem = store.coach.memory;
     const patch = up ? teach(mem, n.q, n.intent, now) : unteach(mem, n.q, n.intent, now);
@@ -658,7 +685,9 @@ function CoachThread({
       at: now,
       from: 'atlas',
       text: alts.length ? t.atlasWrongPick : t.atlasWrongNoted,
-      ...(alts.length ? { chips: alts.map((a) => a.ask) } : {}),
+      ...(alts.length
+        ? { chips: alts.map((a) => (isOther(locale) ? translateOut(a.ask, locale, fmt) : a.ask)) }
+        : {}),
     });
   };
 
@@ -736,12 +765,34 @@ function CoachThread({
     return () => window.clearTimeout(id);
   }, []);
   const noChat = chat.length === 0;
+  // Its dictionary loads with the chat (Polish / Lithuanian / Estonian only).
+  const [dictFor, setDictFor] = useState<string | null>(null);
+  const dictReady = !isOther(locale) || dictFor === locale;
+  useEffect(() => {
+    if (!isOther(locale)) return;
+    void loadDict(locale).then(() => setDictFor(locale));
+  }, [locale]);
+  const helloFor = () => {
+    if (!isOther(locale))
+      return welcome({ s: store, now, locale, temper, fmt, mem: store.coach.memory });
+    const w = welcome({
+      s: store,
+      now,
+      locale: 'en',
+      temper,
+      fmt: markFmt(fmt),
+      mem: store.coach.memory,
+    });
+    return {
+      text: translateOut(w.text, locale, fmt),
+      chips: w.chips.map((x) => translateOut(x, locale, fmt)),
+    };
+  };
   const workoutCount = store.workouts.length;
   const hello = useMemo(
-    () =>
-      noChat ? welcome({ s: store, now, locale, temper, fmt, mem: store.coach.memory }) : null,
+    () => (noChat ? helloFor() : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [noChat, temper, locale, workoutCount],
+    [noChat, temper, locale, workoutCount, dictReady],
   );
   const lastText = items[items.length - 1]?.text;
   // Follow-up chips live on the newest answer until you write again
@@ -895,6 +946,7 @@ function CoachThread({
                           onClick={() => {
                             const act = n.action!;
                             updateChat(n.id, { action: undefined });
+                            track({ kind: 'action', done: true });
                             const L = (en: string, uk: string) => (locale === 'uk' ? uk : en);
                             const res = runAction(act, store, wallClock(), L, fmt.exercise);
                             const at = wallClock();
@@ -907,7 +959,10 @@ function CoachThread({
                         <button
                           type="button"
                           className="atl-chip"
-                          onClick={() => updateChat(n.id, { action: undefined })}
+                          onClick={() => {
+                            updateChat(n.id, { action: undefined });
+                            track({ kind: 'action', done: false });
+                          }}
                         >
                           {t.atlasCancel}
                         </button>

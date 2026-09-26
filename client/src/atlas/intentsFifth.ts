@@ -277,7 +277,8 @@ export const INTENTS_FIFTH: Intent[] = [
     answer: (c, p, L) => {
       const sec = parseSeconds(p.phrase);
       if (!sec || sec < 20 || sec > 600) return null;
-      const name = c.fmt.exercise(p.exercise!);
+      const lifts = liftsOf(p);
+      const name = lifts.map((x) => c.fmt.exercise(x)).join(L(' and ', ' і '));
       return L(
         `Set rest for ${name} to ${mmss(sec)} from now on?`,
         `Ставлю відпочинок для ${name} ${mmss(sec)} — надалі так?`,
@@ -285,7 +286,10 @@ export const INTENTS_FIFTH: Intent[] = [
     },
     action: (_c, p) => {
       const sec = parseSeconds(p.phrase);
-      return sec && p.exercise ? { type: 'rest', exercise: p.exercise, sec } : null;
+      const lifts = liftsOf(p);
+      if (!sec || !lifts.length) return null;
+      const all = lifts.map((exercise) => ({ type: 'rest' as const, exercise, sec }));
+      return all.length === 1 ? all[0] : { type: 'many', actions: all };
     },
   },
   {
@@ -354,12 +358,16 @@ export const INTENTS_FIFTH: Intent[] = [
       ],
     ],
     needs: 'exercise',
-    answer: (c, p, L) =>
-      L(
-        `Drop ${c.fmt.exercise(p.exercise!)} from your plans for good?`,
-        `Прибрати ${c.fmt.exercise(p.exercise!)} з планів назавжди?`,
-      ),
-    action: (_c, p) => (p.exercise ? { type: 'avoid', exercise: p.exercise } : null),
+    answer: (c, p, L) => {
+      const name = liftsOf(p)
+        .map((x) => c.fmt.exercise(x))
+        .join(L(' and ', ' і '));
+      return L(`Drop ${name} from your plans for good?`, `Прибрати ${name} з планів назавжди?`);
+    },
+    action: (_c, p) => {
+      const all = liftsOf(p).map((exercise) => ({ type: 'avoid' as const, exercise }));
+      return !all.length ? null : all.length === 1 ? all[0] : { type: 'many', actions: all };
+    },
   },
   {
     id: 'act_move',
@@ -1102,6 +1110,12 @@ const LEAD_VERBS = new Set([
 ]);
 
 /** Which lift goes out, which comes in. */
+/** Every lift the message names ("випади і станову"), else the one it's about. */
+function liftsOf(p: Parsed): string[] {
+  const many = p.exercises ?? [];
+  return many.length >= 2 ? many.slice(0, 4) : p.exercise ? [p.exercise] : [];
+}
+
 function swapPair(p: Parsed): [string, string] {
   const [a, b] = p.exercises!;
   const kw = p.words.findIndex((w) => INSTEAD.includes(w));

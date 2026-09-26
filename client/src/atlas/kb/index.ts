@@ -15,10 +15,13 @@ import { KB_R3 } from './partR3';
 import { KB_R4 } from './partR4';
 import { KB_R5 } from './partR5';
 import { KB_R6 } from './partR6';
+import { KB_R7 } from './partR7';
+import { KB_PLLTET } from './partPlLtEt';
 import { FACETS_R1 } from './depthR1';
 import { FACETS_R2 } from './depthR2';
 import { FACETS_R3 } from './depthR3';
 import { NEW_TOPICS } from './topicsNew';
+import { APP_TOPICS } from '../appTopics';
 import type { Kb } from './types';
 
 const base: Kb = { ...KB_A, ...KB_B, ...KB_C, ...KB_D, ...KB_E };
@@ -29,6 +32,9 @@ const rounds: More[] = [
   { ...KB_R1, ...KB_R2, ...KB_R3, ...KB_R4 },
   KB_R5,
   KB_R6,
+  KB_R7,
+  // Other languages ride in the English list — the matcher doesn't care.
+  Object.fromEntries(Object.entries(KB_PLLTET).map(([id, ex]) => [id, { ex, exUk: [] }])),
 ];
 const more: More = {};
 for (const r of rounds)
@@ -54,6 +60,8 @@ export const KB: Kb = Object.fromEntries([
       },
     ];
   }),
+  // How the app works — from the app's own screens.
+  ...APP_TOPICS.map((t) => [t.id, { ex: t.ex, exUk: t.exUk }]),
   // Topics added later — whole (phrasings + sides) in one file.
   ...NEW_TOPICS.map((t) => [
     t.id,

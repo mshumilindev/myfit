@@ -428,8 +428,8 @@ export const INTENTS_MORE: Intent[] = [
     all: [['sore', 'doms', 'крепатур*', 'болять м*', 'ниють м*'], SHOULD],
     answer: (_c, _p, L) =>
       L(
-        'Sore is fine — train other muscles, or the same ones lighter. Sharp or one-sided pain is not soreness: stop.',
-        'Крепатура — не причина пропускати: тренуй інші м’язи або ті самі легше. Гострий чи однобічний біль — не крепатура: стоп.',
+        'Sore is fine — train other muscles, or the same ones lighter. Sharp pain or pain in a joint is not soreness: stop. Extreme soreness with swelling, weakness or dark, cola-coloured urine after a brutal session — see a doctor today.',
+        'Крепатура — не причина пропускати: тренуй інші м’язи або ті самі легше. Гострий біль чи біль у суглобі — не крепатура: стоп. Якщо після дуже важкого тренування м’язи надзвичайно болять, набрякли, ослабли або сеча темна, кольору коли, — до лікаря сьогодні.',
       ),
   },
   {
@@ -802,8 +802,8 @@ export const INTENTS_MORE: Intent[] = [
     negatable: true,
     answer: (_c, _p, L) =>
       L(
-        'Fever or symptoms below the neck: rest, no training. A mild head cold: a light session is OK. Log an illness rest period — your streak and plan pause, and I go easy.',
-        'Температура чи симптоми нижче шиї — відпочинок, без тренувань. Легкий нежить — можна легке тренування. Запиши період хвороби — серія й план стануть на паузу, а я буду м’якшим.',
+        "Fever or symptoms below the neck: rest, no training. A mild head cold: a light session is OK. After a fever, flu or COVID, wait until you've been fever-free for a few days, then come back lighter; chest pain, palpitations or unusual breathlessness when you restart — stop and see a doctor. Log an illness rest period — your streak and plan pause, and I go easy.",
+        'Температура чи симптоми нижче шиї — відпочинок, без тренувань. Легкий нежить — можна легке тренування. Після температури, грипу чи ковіду зачекай кілька днів без температури й повертайся з легшого; якщо при поверненні з’являються біль у грудях, перебої серця чи незвична задишка — зупинись і до лікаря. Запиши період хвороби — серія й план стануть на паузу, а я буду м’якшим.',
       ),
   },
   {
@@ -856,8 +856,8 @@ export const INTENTS_MORE: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        'Same bed and wake time daily, dark cool room, no screens or caffeine late, train earlier if evening sessions wire you. Set a schedule in Sleep and let the app remind you.',
-        'Однаковий час відбою й підйому, темна прохолодна кімната, без екранів і кави ввечері, тренуйся раніше, якщо вечірні заводять. Задай розклад у «Сні» — додаток нагадає.',
+        'Same bed and wake time daily, dark cool room, no screens or caffeine late, train earlier if evening sessions wire you. Set a schedule in Sleep and let the app remind you. Loud snoring, gasping at night or heavy daytime sleepiness — tell a doctor; sleep apnea is common and treatable.',
+        'Однаковий час відбою й підйому, темна прохолодна кімната, без екранів і кави ввечері, тренуйся раніше, якщо вечірні заводять. Задай розклад у «Сні» — додаток нагадає. Гучне хропіння, зупинки дихання вночі чи сильна сонливість удень — скажи лікарю: апное сну поширене й лікується.',
       ),
   },
   {
@@ -902,8 +902,8 @@ export const INTENTS_MORE: Intent[] = [
     all: [['caffeine', 'coffee', 'energy drink', 'кава', 'каву', 'кофеїн*', 'енергетик*']],
     answer: (_c, _p, L) =>
       L(
-        '~3 mg/kg of caffeine 30–60 min before training does help. Not within ~8 h of bedtime — you’ll pay for it in sleep.',
-        '~3 мг/кг кофеїну за 30–60 хв до тренування справді допомагає. Не пізніше ніж за ~8 год до сну — розплатишся сном.',
+        "~3 mg/kg of caffeine 30–60 min before training does help. Keep the day under ~400 mg (about 4 coffees, pre-workout included), and less if you're pregnant or have heart-rhythm or blood-pressure problems. Not within ~8 h of bedtime — you'll pay for it in sleep.",
+        '~3 мг/кг кофеїну за 30–60 хв до тренування справді допомагає. За день — не більше ~400 мг (приблизно 4 чашки кави, разом із передтреном), а при вагітності чи проблемах із ритмом серця або тиском — менше. Не пізніше ніж за ~8 год до сну — розплатишся сном.',
       ),
   },
   {
@@ -1079,8 +1079,8 @@ export const INTENTS_MORE: Intent[] = [
     all: [['notification*', 'push', 'remind*', 'нотифікац*', 'сповіщен*', 'пуш*', 'нагадув*']],
     answer: (_c, _p, L) =>
       L(
-        'Turn them on in the rest settings or when I ask. On iPhone, add Spotter to the Home Screen first (Share → Add to Home Screen) — Apple allows notifications only there.',
-        'Увімкни в налаштуваннях відпочинку або коли я запитаю. На iPhone спершу додай Spotter на головний екран (Поділитися → На початковий екран) — Apple дозволяє нотифікації лише там.',
+        "Turn push on when I ask during setup, or in the rest-timer sheet → “Notify in the background”. There's no general on/off switch yet; to stop them, block them in your phone's settings. On iPhone, add Spotter to the Home Screen first (Share → Add to Home Screen) — Apple allows notifications only there. The bell icon keeps your in-app notifications.",
+        'Увімкни пуші, коли я запитаю під час налаштування, або в налаштуваннях таймера відпочинку → «Сповіщення у фоні». Загального вимикача поки немає — щоб зупинити, заблокуй їх у налаштуваннях телефона. На iPhone спершу додай Spotter на головний екран (Поділитися → На початковий екран) — Apple дозволяє нотифікації лише там. Дзвіночок зберігає сповіщення в додатку.',
       ),
   },
   {
@@ -1099,8 +1099,8 @@ export const INTENTS_MORE: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        'Gear icon, top right → Turn Atlas off. I’ll still be in the strip if you change your mind.',
-        'Шестірня вгорі праворуч → «Вимкнути Atlas». Я лишуся в стрічці, якщо передумаєш.',
+        'Sliders icon at the top of our chat → “Turn Atlas off”. Your log and our chat stay, and you can turn me back on any time.',
+        'Іконка повзунків угорі чату → «Вимкнути Atlas». Журнал і наш чат лишаться, увімкнути мене можна будь-коли.',
       ),
   },
   {
@@ -1144,8 +1144,8 @@ export const INTENTS_MORE: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Profile menu → Injury (or from a pain answer here). Pick the area; I protect those muscles and bring them back in stages.',
-        'Меню профілю → «Травми» (або з моєї відповіді про біль). Обери ділянку — я захищу ці м’язи й поверну їх поетапно.',
+        'Today → “Rest / vacation” → “Injury & rehab” → “Set up rehab plan” (or from my pain check-in here). Pick the area; I protect those muscles and bring them back in stages.',
+        'Сьогодні → «Відпочинок / відпустка» → «Травма і реабілітація» → «Налаштувати план» (або з мого розбору болю тут). Обери ділянку — я захищу ці м’язи й поверну їх поетапно.',
       ),
   },
 

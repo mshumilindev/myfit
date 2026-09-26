@@ -189,7 +189,7 @@ describe('depth — technique, injuries, nutrition', () => {
     // A pain check-in: the part is known → straight to "when does it hurt?"
     const a = answerLocally('my knee hurts', c)!;
     expect(a.intent).toBe('pain');
-    expect(a.text).toMatch(/Don't train through it.*\?$/);
+    expect(a.text).toMatch(/Let's not train through it.*\?$/);
     expect(a.convo.flow?.kind).toBe('pain');
   });
   it('calories come from your bodyweight and goal', () => {

@@ -73,5 +73,10 @@ export function welcome(c: AskCtx): Welcome {
           "Something hurts — tell me and we'll sort it out. Forgot an exercise's name — describe it and I'll find it.",
           'Щось болить — скажи, розберемось. Забув назву вправи — опиши, і я знайду.',
         );
-  return { text: `${hello} ${can} ${care}`, chips: startChips(c, L) };
+  // Said once, plainly, in every temper.
+  const notDoctor = L(
+    "I'm not a doctor — on pain, medication or health conditions the final word is your doctor's.",
+    'Я не лікар — щодо болю, ліків чи хвороб останнє слово за лікарем.',
+  );
+  return { text: `${hello} ${can} ${care} ${notDoctor}`, chips: startChips(c, L) };
 }

@@ -719,8 +719,8 @@ export const INTENTS_THIRD: Intent[] = [
     all: [['pounds', 'lbs', 'lb', 'units', 'kilograms', 'фунт*', 'одиниц*', 'кілограм*']],
     answer: (_c, _p, L) =>
       L(
-        'Units: account-wide in settings, or per exercise from its options — a machine in pounds can stay in pounds.',
-        'Одиниці: для всього акаунта в налаштуваннях або для окремої вправи в її опціях — тренажер у фунтах може лишитися у фунтах.',
+        'Profile → Settings → “Units” → kg or lb. It applies everywhere in the app.',
+        'Профіль → Налаштування → «Одиниці» → кг або lb. Діє для всього додатка.',
       ),
   },
   {
@@ -740,8 +740,8 @@ export const INTENTS_THIRD: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        'A set or exercise: the bin icon next to it, with Undo right after. A whole session: open it from History → Edit.',
-        'Сет чи вправу — іконка кошика поруч, одразу є «Скасувати». Тренування повністю — відкрий в Історії → Редагувати.',
+        "In a session: tap a set → “Delete set”; the exercise menu has “Delete exercise”. A whole workout: open it from History → the bin icon at the top → confirm. Deleting a workout can't be undone.",
+        'У тренуванні: тапни підхід → «Видалити підхід»; у меню вправи — «Видалити вправу». Усе тренування: відкрий з Історії → кошик угорі → підтвердь. Видалення тренування не можна скасувати.',
       ),
   },
   {

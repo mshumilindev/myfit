@@ -334,6 +334,11 @@ function setState(patch: Partial<StoreState>): void {
   emit();
 }
 
+/** The current state, outside React (for chained actions). */
+export function getStoreState(): StoreState {
+  return state;
+}
+
 export function useStore(): StoreState {
   return useSyncExternalStore(
     (cb) => {

@@ -562,3 +562,30 @@ export function unsureLine(temper: Temper, locale: string, seed: string): string
   const xs = UNSURE[temper][locale === 'uk' ? 1 : 0];
   return xs[Math.floor(r() * xs.length) % xs.length];
 }
+
+/**
+ * Every English persona line (openers with each way of addressing you, tics,
+ * closers, jokes, reactions) — the translated chat looks these up separately
+ * from the answer they wrap.
+ */
+export function personaLinesEn(): string[] {
+  const out = new Set<string>();
+  const addFill = (t: string, addrs: string[]) => {
+    if (!t.includes('{a}')) return void out.add(t);
+    for (const a of addrs.filter(Boolean)) out.add(t.replace(/\{a\}/g, a));
+    out.add(t.replace(/,? ?\{a\}/g, '').replace(/ {2,}/g, ' '));
+  };
+  for (const v of Object.values(V)) {
+    const addrs = v.addr[0];
+    for (const k of ['open', 'tic', 'close', 'joke', 'good', 'bad'] as const)
+      for (const t of (v[k] as Pair)[0]) addFill(t, addrs);
+  }
+  for (const t of [
+    ...MOM[0],
+    ...SWEAR_OPEN[0],
+    ...SWEAR_CLOSE[0],
+    ...TOPIC_JOKES.flatMap(([, p]) => p[0]),
+  ])
+    out.add(t);
+  return [...out].map((x) => x.trim()).filter(Boolean);
+}

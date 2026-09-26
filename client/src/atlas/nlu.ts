@@ -114,18 +114,57 @@ export function matchedWords(words: string[], groups: string[][]): number {
 
 /** Muscle words (en + uk) → muscle group. */
 export const MUSCLE_WORDS: [MuscleGroup, string[]][] = [
-  ['chest', ['chest', 'pec*', 'груд*']],
-  ['lats', ['back', 'lat', 'lats', 'спин*', 'широчайш*', 'крил*']],
+  ['chest', ['chest', 'pec*', 'груд*', 'klat*', 'krūtin*', 'krutin*', 'rind*']],
+  [
+    'lats',
+    ['back', 'lat', 'lats', 'спин*', 'широчайш*', 'крил*', 'plec*', 'nugar*', 'selg*', 'selja'],
+  ],
   ['traps', ['trap*', 'трапец*']],
-  ['shoulders', ['shoulder*', 'delt*', 'плеч*', 'дельт*']],
+  [
+    'shoulders',
+    ['shoulder*', 'delt*', 'плеч*', 'дельт*', 'bark*', 'pečia*', 'pecia*', 'õla*', 'ola*', 'õlad'],
+  ],
   ['biceps', ['bicep*', 'біцепс*', 'бицепс*']],
   ['triceps', ['tricep*', 'трицепс*']],
   ['forearms', ['forearm*', 'передпліч*', 'предплеч*']],
-  ['quads', ['quad*', 'legs', 'leg', 'thigh*', 'ноги', 'ног', 'квадрицепс*', 'стегн*']],
+  [
+    'quads',
+    [
+      'quad*',
+      'legs',
+      'leg',
+      'thigh*',
+      'ноги',
+      'ног',
+      'квадрицепс*',
+      'стегн*',
+      'nogi',
+      'nóg',
+      'kojos',
+      'kojų',
+      'jalad',
+      'jalgu',
+      'jalgade',
+    ],
+  ],
   ['hamstrings', ['hamstring*', 'hams', 'задня поверхня', 'біцепс стегна']],
-  ['glutes', ['glute*', 'butt', 'сідниц*', 'ягодиц*', 'сраку']],
-  ['calves', ['calf', 'calves', 'литк*', 'икр*']],
-  ['core', ['abs', 'core', 'прес', 'пресс', 'кор']],
+  [
+    'glutes',
+    [
+      'glute*',
+      'butt',
+      'сідниц*',
+      'ягодиц*',
+      'сраку',
+      'pośladk*',
+      'posladk*',
+      'sėdmen*',
+      'sedmen*',
+      'tuhar*',
+    ],
+  ],
+  ['calves', ['calf', 'calves', 'литк*', 'икр*', 'łyd*', 'lyd*', 'blauzd*', 'sääre*']],
+  ['core', ['abs', 'core', 'прес', 'пресс', 'кор', 'brzuch*', 'pilv*', 'kõh*', 'koht']],
   ['lower_back', ['lower back', 'поперек*']],
 ];
 
@@ -136,24 +175,98 @@ export function findMuscle(words: string[], phrase: string): MuscleGroup | null 
 
 /** Everyday lift words (en + uk) → a fragment to look for in exercise names. */
 const LIFT_ALIASES: [string[], string][] = [
-  [['bench', 'жим лежа*', 'жиму лежа*', 'лежачи', 'бенч'], 'bench'],
+  [
+    [
+      'bench',
+      'жим лежа*',
+      'жиму лежа*',
+      'лежачи',
+      'бенч',
+      'wyciskan*',
+      'ławk*',
+      'lawk*',
+      'spaudim*',
+      'rinnalt*',
+      'surumi*',
+    ],
+    'bench',
+  ],
   // Bare "жим" is the bench in gym talk — unless it's a leg / standing press.
   [['жим', 'жиму', 'жимі', 'жимом'], 'bench'],
-  [['squat*', 'присід*', 'присяд*'], 'squat'],
-  [['deadlift*', 'dl', 'станов*', 'мертв*'], 'deadlift'],
-  [['row', 'rows', 'тяга в нахил*', 'тягу в нахил*'], 'row'],
+  [
+    ['squat*', 'присід*', 'присяд*', 'przysiad*', 'pritūpim*', 'pritupim*', 'kükk*', 'kukk*'],
+    'squat',
+  ],
+  [['deadlift*', 'dl', 'станов*', 'мертв*', 'martw*', 'mirties', 'jõutõm*', 'joutom*'], 'deadlift'],
+  [
+    ['row', 'rows', 'тяга в нахил*', 'тягу в нахил*', 'wiosłow*', 'wioslow*', 'irklav*', 'sõudm*'],
+    'row',
+  ],
   [['pulldown*', 'тяга верхн*', 'тягу верхн*', 'верхнього блок*'], 'pulldown'],
-  [['pullup*', 'pull up*', 'chin*', 'підтяг*', 'подтяг*'], 'pull'],
-  [['pushup*', 'push up*', 'віджим*', 'отжим*'], 'push'],
-  [['curl*', 'згинан*', 'на біцепс'], 'curl'],
+  [
+    [
+      'pullup*',
+      'pull up*',
+      'chin*',
+      'підтяг*',
+      'подтяг*',
+      'podciąg*',
+      'podciag*',
+      'prisitrauk*',
+      'lõuatõm*',
+      'louatom*',
+    ],
+    'pull',
+  ],
+  [
+    [
+      'pushup*',
+      'push up*',
+      'віджим*',
+      'отжим*',
+      'pompk*',
+      'atsispaud*',
+      'kätekõver*',
+      'katekover*',
+    ],
+    'push',
+  ],
+  [['curl*', 'згинан*', 'на біцепс', 'uginan*', 'lenkim*'], 'curl'],
   [['ohp', 'overhead', 'military', 'армійськ*', 'жим стоячи', 'жим над голов*'], 'press'],
   [['dip*', 'бруси', 'брусах', 'брусі*'], 'dip'],
-  [['lunge*', 'випад*', 'выпад*'], 'lunge'],
+  [['lunge*', 'випад*', 'выпад*', 'wykrok*', 'įtūpst*', 'ituptst*', 'väljaast*'], 'lunge'],
   [['hip thrust*', 'thrust*', 'ягодичн* міст*', 'сідничн* міст*'], 'thrust'],
   [['leg press', 'жим ногами'], 'leg press'],
   [['calf raise*', 'на литки'], 'calf'],
   [['lateral*', 'raise*', 'махи', 'мах*'], 'raise'],
   [['plank*', 'планк*'], 'plank'],
+];
+
+/** Words in Ukrainian/Russian → the English words exercise names are built from. */
+const NAME_WORDS: [RegExp, string[]][] = [
+  [/^(гантел|гантел)\S*$/u, ['dumbbell']],
+  [/^штанг\S*$/u, ['barbell']],
+  [/^(жим|жиму|жимі|жимом)$/u, ['press', 'bench']],
+  [/^гир\S*$/u, ['kettlebell']],
+  [/^(блок|кросовер|кроссовер|трос)\S*$/u, ['cable']],
+  [/^тренажер\S*$/u, ['machine']],
+  [/^ногами$/u, ['leg']],
+  [/^сидяч?и?\S*$/u, ['seated']],
+  [/^стоячи?\S*$/u, ['standing']],
+  [/^(похил|наклон)\S*$/u, ['incline']],
+  [/^лежач\S*$/u, ['lying']],
+  [/^румунськ\S*$|^румынск\S*$/u, ['romanian']],
+  [/^болгарськ\S*$|^болгарск\S*$/u, ['bulgarian', 'split']],
+  [/^фронтальн\S*$/u, ['front']],
+  [/^сумо$/u, ['sumo']],
+  [/^вузьк\S*$|^узк\S*$/u, ['close']],
+  [/^широк\S*$/u, ['wide']],
+  [/^(тяг|тягу|тяга)$/u, ['row', 'deadlift']],
+  [/^(розведен|розводк)\S*$/u, ['fly']],
+  [/^(згинан)\S*$/u, ['curl']],
+  [/^(розгинан)\S*$/u, ['extension']],
+  [/^(підйом|махи)\S*$/u, ['raise']],
+  [/^(гак|хак|хакк)\S*$/u, ['hack']],
 ];
 
 const OTHER_PRESS = ['ногами', 'стоячи', 'над', 'сидячи', 'гантел*', 'плеч*'];
@@ -345,11 +458,13 @@ export function findCatalogExercise(
 ): string | null {
   const frags = aliasFrags(words, phrase);
   // A muscle word alone ("chest") names a muscle, not a lift.
-  const plain = words.filter((w) => !MUSCLE_WORDS.some(([, kws]) => groupMatches([w], w, kws)));
+  const plain = words
+    .filter((w) => !MUSCLE_WORDS.some(([, kws]) => groupMatches([w], w, kws)))
+    .flatMap((w) => [w, ...(NAME_WORDS.find(([re]) => re.test(w))?.[1] ?? [])]);
   let best: { name: string; score: number; hits: number } | null = null;
   for (const name of names) {
     const lower = name.toLowerCase();
-    const nameWords = tokens(name).filter((w) => w.length >= 4 && !NAME_STOP.has(w));
+    const nameWords = [...new Set(tokens(name).filter((w) => w.length >= 4 && !NAME_STOP.has(w)))];
     const hits = nameWords.filter((nw) => plain.some((w) => wordMatches(w, nw))).length;
     const base = hits * 2 + (frags.some((f) => lower.includes(f)) ? 3 : 0);
     // Shorter names win ties; the length never decides whether it's a match.
@@ -424,8 +539,15 @@ export function findExercises(
       ph,
       catalog.filter((n) => !out.includes(n)),
     );
+    // "leg press" — the name that carries the alias itself beats one that just shares "press".
+    const frags = aliasFrags(seg, ph);
+    const fits = (name: string) => (frags.some((f) => name.toLowerCase().includes(f)) ? 1 : 0);
     const ex =
-      mine && !out.includes(mine) && (!cat || cover(mine) >= cover(cat)) ? mine : (cat ?? mine);
+      mine &&
+      !out.includes(mine) &&
+      (!cat || cover(mine) + fits(mine) * 2 >= cover(cat) + fits(cat) * 2)
+        ? mine
+        : (cat ?? mine);
     if (ex && !out.includes(ex)) out.push(ex);
   }
   return out;

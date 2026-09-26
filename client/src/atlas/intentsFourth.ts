@@ -408,8 +408,8 @@ export const INTENTS_FOURTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'With a medical condition, get your doctor’s OK first and tell them what you do. Lifting usually helps — control breathing (no long breath-holds), build up gradually, stop with chest pain, dizziness or unusual breathlessness.',
-        'З хронічним станом — спершу погодь з лікарем і розкажи, що саме робиш. Силові зазвичай допомагають: контролюй дихання (без довгих затримок), навантаження — поступово, зупиняйся при болю в грудях, запамороченні чи незвичній задишці.',
+        "With a medical condition, get your doctor's OK first and tell them what you do. Lifting usually helps: breathe through reps (no long breath-holds), build up gradually, skip all-out grinders. High blood pressure: don't train on a day it's very high (around 180/110 or more). Diabetes on insulin or tablets that can cause lows: check your sugar before and carry fast carbs. Asthma: inhaler within reach. Stop with chest pain, dizziness or unusual breathlessness.",
+        'З хронічним станом — спершу погодь із лікарем і розкажи, що саме робиш. Силові зазвичай допомагають: дихай під час повторів (без довгих затримок), навантаження — поступово, без граничних «дотискань». Високий тиск: не тренуйся в день, коли він дуже високий (близько 180/110 і вище). Діабет на інсуліні чи таблетках, що можуть давати гіпоглікемію: перевір цукор перед тренуванням і май при собі швидкі вуглеводи. Астма: інгалятор під рукою. Зупиняйся при болю в грудях, запамороченні чи незвичній задишці.',
       ),
   },
   {
@@ -432,18 +432,30 @@ export const INTENTS_FOURTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'I don’t coach drugs. They carry real risks (heart, liver, hormones, fertility) and belong only under a doctor. Everything you need to progress for years is in training, food and sleep.',
-        'Препарати я не веду. Реальні ризики (серце, печінка, гормони, фертильність), і лише під наглядом лікаря. Все, що треба для прогресу роками, — тренування, їжа й сон.',
+        "I don't coach drugs. They carry real risks (heart, liver, hormones, fertility) and belong only under a doctor. If you're already using, don't hide it from a doctor — get your blood pressure and bloodwork checked. Everything you need to progress for years is in training, food and sleep.",
+        'Препарати я не веду. Реальні ризики (серце, печінка, гормони, фертильність), і лише під наглядом лікаря. Якщо вже вживаєш — не приховуй від лікаря, перевір тиск і аналізи крові. Все, що треба для прогресу роками, — тренування, їжа й сон.',
       ),
   },
   {
     id: 'cycle',
-    all: [['period', 'menstrua*', 'cycle', 'pms', 'місячн*', 'менстру*', 'цикл']],
+    all: [
+      [
+        'menstrua*',
+        'pms',
+        'місячн*',
+        'менстру*',
+        'менструальн* цикл',
+        'my period',
+        'on my period',
+        'під час місячних',
+        'месячн*',
+      ],
+    ],
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Train through the cycle and adjust by feel: on heavy-symptom days go lighter or swap in easy cardio. Strength differences between phases are small — consistency matters more.',
-        'Тренуйся протягом усього циклу й орієнтуйся на самопочуття: у дні з сильними симптомами — легше або легке кардіо. Різниця в силі між фазами мала — важливіша регулярність.',
+        'Train through the cycle and adjust by feel: on heavy-symptom days go lighter or swap in easy cardio. Strength differences between phases are small — consistency matters more. If your periods stop or turn irregular while you train hard or eat little, or pain or bleeding is severe — see a doctor; lost periods are often a sign of eating too little for your training.',
+        'Тренуйся протягом усього циклу й орієнтуйся на самопочуття: у дні з сильними симптомами — легше або легке кардіо. Різниця в силі між фазами мала — важливіша регулярність. Якщо місячні зникли чи збилися на тлі важких тренувань або малої кількості їжі, чи біль або кровотеча дуже сильні, — до лікаря: часто це ознака, що їжі замало для твого навантаження.',
       ),
   },
   {
@@ -452,8 +464,8 @@ export const INTENTS_FOURTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Pregnancy and postpartum: training is generally encouraged, but your doctor or midwife sets the limits. Avoid lying flat on your back later on, heavy breath-holding and anything that causes pain or pressure.',
-        'Вагітність і після пологів: тренування зазвичай рекомендують, але межі визначає лікар чи акушерка. Пізніше — без лежання на спині, затримок дихання під вагою й усього, що дає біль чи тиск.',
+        'Pregnancy and postpartum: training is generally encouraged, but your doctor or midwife sets the limits. Later on, avoid long spells lying flat on your back, heavy breath-holding, overheating, fall or contact risks, and anything that causes pain or pressure. Stop and call your doctor with bleeding, leaking fluid, regular painful contractions, dizziness, chest pain, a bad headache or a swollen calf. After birth, get cleared first and rebuild the core and pelvic floor gradually.',
+        'Вагітність і після пологів: тренування зазвичай рекомендують, але межі визначає лікар чи акушерка. На пізніх термінах — без тривалого лежання на спині, затримок дихання під вагою, перегріву, ризику падіння чи ударів і всього, що дає біль чи тиск. Зупинись і зателефонуй лікарю, якщо є кровотеча, підтікання рідини, регулярні болючі перейми, запаморочення, біль у грудях, сильний головний біль чи набрякла литка. Після пологів — спершу дозвіл лікаря, прес і тазове дно відновлюй поступово.',
       ),
   },
 

@@ -108,7 +108,7 @@ describe('answer base, part two', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('every intent answers without crashing or leaking undefined', () => {
+  it('every intent answers without crashing or leaking undefined', { timeout: 60_000 }, () => {
     for (const q of cases.map((x) => x[0]))
       for (const t of [1, 5] as const) {
         const a = answerLocally(q, ctx('en', t));

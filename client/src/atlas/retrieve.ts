@@ -249,11 +249,20 @@ interface Topic {
   id: string;
   tf: Map<string, number>;
   len: number;
+  /** Average length of topics written in the same script. */
+  avg: number;
 }
+/** Cyrillic and Latin phrasings are separate "documents" per topic, so adding
+ *  Polish examples doesn't water down a Ukrainian match (and the other way). */
+const scriptOf = (q: string) => (/[\u0400-\u04ff]/.test(q) ? 'c' : 'l');
 interface Index {
   grams: { id: string; v: Map<string, number>; norm: number }[];
   gidf: Map<string, number>;
   exGrams: { id: string; v: Map<string, number>; norm: number }[];
+  /** word → examples that have it */
+  post: Map<string, number[]>;
+  /** gram → [example, weight] */
+  gpost: Map<string, [number, number][]>;
   examples: Example[];
   idf: Map<string, number>;
   n: number;
@@ -264,20 +273,33 @@ interface Index {
 }
 let index: Index | null = null;
 
+/** Build the index now (a Web Worker does this off the main thread). */
+export function buildIndex(): Index {
+  return build();
+}
+/** Take an index built elsewhere (the worker). */
+export function setIndex(ix: Index): void {
+  index ??= ix;
+}
+export type { Index as RetrievalIndex };
+
 function build(): Index {
   const examples: Example[] = [];
   const topics: Topic[] = [];
   for (const [id, e] of Object.entries(KB)) {
-    const tf = new Map<string, number>();
-    let len = 0;
+    const by = {
+      c: { tf: new Map<string, number>(), len: 0 },
+      l: { tf: new Map<string, number>(), len: 0 },
+    };
     for (const q of [...e.ex, ...e.exUk]) {
       const t = [...new Set(terms(q))];
       if (!t.length) continue;
       examples.push({ id, terms: t, weight: 0 });
-      for (const x of t) tf.set(x, (tf.get(x) ?? 0) + 1);
-      len += t.length;
+      const d = by[scriptOf(q)];
+      for (const x of t) d.tf.set(x, (d.tf.get(x) ?? 0) + 1);
+      d.len += t.length;
     }
-    topics.push({ id, tf, len });
+    for (const d of [by.c, by.l]) if (d.len) topics.push({ id, tf: d.tf, len: d.len, avg: 0 });
   }
   const df = new Map<string, number>();
   for (const ex of examples) for (const t of ex.terms) df.set(t, (df.get(t) ?? 0) + 1);
@@ -292,18 +314,26 @@ function build(): Index {
   const T = topics.length;
   for (const [t, d] of tdf) tidf.set(t, Math.log(1 + (T - d + 0.5) / (d + 0.5)));
   const avgLen = topics.reduce((s, t) => s + t.len, 0) / Math.max(1, T);
+  for (const sc of ['c', 'l'] as const) {
+    const same = topics.filter((t) => [...t.tf.keys()].some((k) => scriptOf(k) === sc));
+    const avg = same.reduce((s, t) => s + t.len, 0) / Math.max(1, same.length);
+    for (const t of same) if (!t.avg) t.avg = avg;
+  }
+  for (const t of topics) if (!t.avg) t.avg = avgLen;
   // Character 4-grams of the meaningful words — sturdy against Ukrainian
   // endings and typos where word stems fall short.
   const topicGrams = new Map<string, Map<string, number>>();
   const exGramsRaw: { id: string; g: Map<string, number> }[] = [];
   for (const [id, e] of Object.entries(KB)) {
-    const acc = new Map<string, number>();
+    const acc = { c: new Map<string, number>(), l: new Map<string, number>() };
     for (const q of [...e.ex, ...e.exUk]) {
       const g = gramsOf(q);
       exGramsRaw.push({ id, g });
-      for (const [k, v] of g) acc.set(k, (acc.get(k) ?? 0) + v);
+      const a = acc[scriptOf(q)];
+      for (const [k, v] of g) a.set(k, (a.get(k) ?? 0) + v);
     }
-    topicGrams.set(id, acc);
+    if (acc.c.size) topicGrams.set(`${id}\u0000c`, acc.c);
+    if (acc.l.size) topicGrams.set(`${id}\u0000l`, acc.l);
   }
   const gdf = new Map<string, number>();
   for (const acc of topicGrams.values())
@@ -320,12 +350,30 @@ function build(): Index {
     }
     return { v, norm: Math.sqrt(norm) || 1 };
   };
-  const grams = [...topicGrams].map(([id, g]) => ({ id, ...vec(g) }));
+  const grams = [...topicGrams].map(([key, g]) => ({ id: key.split('\u0000')[0], ...vec(g) }));
   const exGrams = exGramsRaw.map(({ id, g }) => ({ id, ...vec(g) }));
+  const post = new Map<string, number[]>();
+  examples.forEach((ex, k) => {
+    for (const t of ex.terms) {
+      const l = post.get(t);
+      if (l) l.push(k);
+      else post.set(t, [k]);
+    }
+  });
+  const gpost = new Map<string, [number, number][]>();
+  exGrams.forEach((eg, k) => {
+    for (const [g, w] of eg.v) {
+      const l = gpost.get(g);
+      if (l) l.push([k, w]);
+      else gpost.set(g, [[k, w]]);
+    }
+  });
   return {
     grams,
     gidf,
     exGrams,
+    post,
+    gpost,
     examples,
     idf,
     n,
@@ -390,19 +438,23 @@ function retrieveRaw(question: string, limit: number): Match[] {
       let tf = 0;
       for (const v of near[i]) tf += tp.tf.get(v) ?? 0;
       if (!tf) continue;
-      sc += (qidf[i] * (tf * (K1 + 1))) / (tf + K1 * (1 - B + (B * tp.len) / ix.avgLen));
+      sc += (qidf[i] * (tf * (K1 + 1))) / (tf + K1 * (1 - B + (B * tp.len) / tp.avg));
     }
-    if (sc) topic.set(tp.id, sc / maxPossible);
+    if (sc && sc / maxPossible > (topic.get(tp.id) ?? 0)) topic.set(tp.id, sc / maxPossible);
   }
   // 2) The single closest phrasing (cosine over IDF weights).
   const qw = near.map((vs) => Math.max(0, ...vs.map((v) => ix.idf.get(v) ?? 0)));
   const qNorm = Math.sqrt(qw.reduce((s, w) => s + w * w, 0)) || 1;
   const best = new Map<string, number>();
-  for (const ex of ix.examples) {
-    let dot = 0;
-    for (let i = 0; i < q.length; i++)
-      if (near[i].some((v) => ex.terms.includes(v))) dot += qw[i] * qw[i];
-    if (!dot) continue;
+  // Only the examples that share a word with the question (inverted index).
+  const dots = new Map<number, number>();
+  for (let i = 0; i < q.length; i++) {
+    const hit = new Set<number>();
+    for (const v of near[i]) for (const k of ix.post.get(v) ?? []) hit.add(k);
+    for (const k of hit) dots.set(k, (dots.get(k) ?? 0) + qw[i] * qw[i]);
+  }
+  for (const [k, dot] of dots) {
+    const ex = ix.examples[k];
     const sc = dot / (qNorm * (ex.weight || 1));
     if (sc > (best.get(ex.id) ?? 0)) best.set(ex.id, sc);
   }
@@ -428,11 +480,16 @@ function retrieveRaw(question: string, limit: number): Match[] {
   const gram = new Map<string, number>();
   for (const t of ix.grams) {
     const c = cos(t);
-    if (c > 0) gram.set(t.id, c);
+    if (c > (gram.get(t.id) ?? 0)) gram.set(t.id, c);
   }
   const gramEx = new Map<string, number>();
-  for (const t of ix.exGrams) {
-    const c = cos(t);
+  // Same trick for the character grams: only examples sharing a gram.
+  const gdots = new Map<number, number>();
+  for (const [k, w] of qv)
+    for (const [e, x] of ix.gpost.get(k) ?? []) gdots.set(e, (gdots.get(e) ?? 0) + w * x);
+  for (const [e, d] of gdots) {
+    const t = ix.exGrams[e];
+    const c = d / (qn * t.norm);
     if (c > (gramEx.get(t.id) ?? 0)) gramEx.set(t.id, c);
   }
   const ids = new Set([...topic.keys(), ...best.keys(), ...gram.keys()]);

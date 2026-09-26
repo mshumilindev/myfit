@@ -74,8 +74,8 @@ const PAIN_MORE: Record<BodyPart | 'any', [string, string][]> = {
       'Повернення до нахилів: румунська тяга з легким грифом, потім тяга з трап-грифом, потім станова з 50–60%. Напружуй корпус щоразу.',
     ],
     [
-      'Red flags: pain down the leg below the knee, numbness in the groin, bladder changes — doctor today.',
-      'Тривожні ознаки: біль іде в ногу нижче коліна, оніміння в паху, зміни з сечовипусканням — до лікаря сьогодні.',
+      "Red flags: numbness in the groin or between the legs, new trouble peeing or controlling the bladder/bowel, or a weak, dragging foot — emergency now (112 / 911). Pain running below the knee, fever, or pain that's worse at night — see a doctor within days.",
+      'Тривожні ознаки: оніміння в паху чи між ногами, нові проблеми із сечовипусканням або контролем сечового міхура/кишківника, слабка стопа, що «шльопає», — невідкладно, 103 або 112. Біль, що йде нижче коліна, температура чи біль, сильніший уночі, — до лікаря протягом кількох днів.',
     ],
   ],
   knee: [
@@ -144,8 +144,8 @@ const PAIN_MORE: Record<BodyPart | 'any', [string, string][]> = {
       'Повертайся поступово; важкі тяги — в останню чергу.',
     ],
     [
-      'Red flags: pain or numbness down the arm, headaches with dizziness — doctor.',
-      'Тривожні ознаки: біль чи оніміння в руку, головний біль із запамороченням — до лікаря.',
+      'Red flags: pain, numbness or weakness down the arm — see a doctor. A sudden severe headache, dizziness with vision or speech problems, or neck pain after a fall or a hit — emergency (112 / 911).',
+      'Тривожні ознаки: біль, оніміння чи слабкість, що йдуть у руку, — до лікаря. Раптовий сильний головний біль, запаморочення з порушенням зору чи мови, біль у шиї після падіння чи удару — невідкладно, 103 або 112.',
     ],
   ],
   hip: [
@@ -258,8 +258,8 @@ export const INTENTS_SIXTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Dull, spread-out burn in the muscle that fades in a day or two — normal soreness. Sharp, in a joint, getting worse with load, or with swelling — stop that lift and log it in Injury.',
-        'Тупий розлитий біль у м’язі, що минає за день-два, — звичайна крепатура. Гострий, у суглобі, гіршає з вагою або з набряком — зупини вправу й запиши в «Травми».',
+        'Dull, spread-out ache in the muscle that shows up a day later and fades in 2–4 days — normal soreness. Sharp, in a joint, getting worse with load, or with swelling — stop that lift and log it in Injury. Numbness, pain shooting down a limb, or pain at night — see a doctor.',
+        'Тупий розлитий біль у м’язі, що з’являється наступного дня й минає за 2–4 дні, — звичайна крепатура. Гострий, у суглобі, гіршає з вагою або з набряком — зупини вправу й запиши в «Травми». Оніміння, біль, що стріляє в руку чи ногу, або біль уночі — до лікаря.',
       ),
   },
   {
@@ -282,8 +282,8 @@ export const INTENTS_SIXTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'When everyday movement is pain-free: start at ~50% of the old weight, add 10–20% a week if it’s quiet the next morning. The Injury screen runs this for you stage by stage.',
-        'Коли звичайні рухи без болю: почни з ~50% старої ваги, +10–20% на тиждень, якщо наступного ранку спокійно. Екран «Травми» веде це поетапно.',
+        "When everyday movement is pain-free: start at ~50% of the old weight, add 10–20% a week if it's quiet the next morning. After surgery, a fracture or a concussion, your doctor or physio sets the timeline. The Injury screen runs this for you stage by stage.",
+        'Коли звичайні рухи без болю: почни з ~50% старої ваги, +10–20% на тиждень, якщо наступного ранку спокійно. Після операції, перелому чи струсу мозку терміни визначає лікар або фізіотерапевт. Екран «Травми» веде це поетапно.',
       ),
     more: (_c, p, L, depth) => painMore(p.words, p.phrase, depth + 1, L),
   },
@@ -327,8 +327,8 @@ export const INTENTS_SIXTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Tendons like steady load, not rest: slow, heavy-ish reps or holds that stay under 3/10 pain, 3–4 times a week, for 6–12 weeks.',
-        'Сухожилля люблять рівномірне навантаження, а не спокій: повільні досить важкі повтори чи утримання з болем до 3/10, 3–4 рази на тиждень, 6–12 тижнів.',
+        'Tendons like steady load, not rest: slow, heavy-ish reps or holds, 3–4 times a week, for 6–12 weeks or more. Pain up to 3/10 during is OK if it settles by the next morning. A sudden pop or snap with weakness (Achilles, biceps) is different — see a doctor within days.',
+        'Сухожилля люблять рівномірне навантаження, а не спокій: повільні досить важкі повтори чи утримання, 3–4 рази на тиждень, 6–12 тижнів і довше. Біль під час — до 3/10 нормально, якщо до ранку минає. Раптовий хлопок чи «клацання» зі слабкістю (ахіл, біцепс) — інша історія: до лікаря протягом кількох днів.',
       ),
   },
   {
@@ -337,8 +337,8 @@ export const INTENTS_SIXTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Cramps mid-set: stretch the muscle gently, sip water with a pinch of salt. Usually fatigue — more frequent ones: check sleep, fluids and salt.',
-        'Судома посеред сету: м’яко розтягни м’яз, випий води з дрібкою солі. Зазвичай це втома — якщо часто, перевір сон, воду й сіль.',
+        "Cramps mid-set: stop, stretch the muscle gently until it lets go. They're usually fatigue — if they keep coming, check sleep, fluids and food. See a doctor if cramps are frequent at rest, start with a new medication, or a calf stays painful, swollen or warm afterwards.",
+        'Судома посеред сету: зупинись і м’яко розтягни м’яз, доки не відпустить. Зазвичай це втома — якщо повторюється, перевір сон, воду й харчування. До лікаря — якщо судоми часті в спокої, почалися з новими ліками або литка й після цього болить, набрякла чи гаряча.',
       ),
   },
   {
@@ -362,8 +362,8 @@ export const INTENTS_SIXTH: Intent[] = [
     priority: true,
     answer: (_c, _p, L) =>
       L(
-        'Numbness or tingling is a nerve, not a muscle. Stop the lift that brings it on; if it stays, spreads, or comes with weakness — see a doctor.',
-        'Оніміння чи поколювання — це нерв, а не м’яз. Зупини вправу, яка це викликає; якщо не минає, поширюється чи є слабкість — до лікаря.',
+        'Numbness or tingling usually means a nerve or blood flow is being irritated — not a muscle problem. Stop the lift that brings it on and loosen anything tight (wraps, belt). If it stays, spreads or comes with weakness — see a doctor. Sudden numbness of the face or one side of the body, or numbness in the groin — call 112 / 911 now.',
+        'Оніміння чи поколювання зазвичай означає, що подразнений нерв або порушений кровотік, — це не про м’яз. Зупини вправу, яка це викликає, і послаб усе тісне (бинти, пояс). Якщо не минає, поширюється чи є слабкість — до лікаря. Раптове оніміння обличчя чи половини тіла або оніміння в паху — одразу 103 або 112.',
       ),
   },
 
@@ -385,8 +385,8 @@ export const INTENTS_SIXTH: Intent[] = [
       const tail =
         g === 'fat_loss'
           ? L(
-              ` For your fat-loss goal: ~${lo - 400}–${hi - 400}.`,
-              ` Для твоєї мети — схуднення: ~${lo - 400}–${hi - 400}.`,
+              ` For your fat-loss goal: ~${Math.max(lo - 400, 1200)}–${Math.max(hi - 400, Math.max(lo - 400, 1200) + 200)} — don't go lower without a dietitian.`,
+              ` Для твоєї мети — схуднення: ~${Math.max(lo - 400, 1200)}–${Math.max(hi - 400, Math.max(lo - 400, 1200) + 200)}; нижче — лише з дієтологом.`,
             )
           : g === 'muscle'
             ? L(
@@ -629,8 +629,8 @@ export const INTENTS_SIXTH: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Unless you sweat buckets or train over 90 min in heat, normal food covers it. Heavy sweaters: a pinch of salt in the bottle helps pumps and prevents cramps.',
-        'Якщо не пітнієш відрами й не тренуєшся понад 90 хв у спеку, звичайна їжа все покриває. Кому пітно — дрібка солі в пляшку допомагає і від судом.',
+        "Unless you sweat buckets or train over 90 min in heat, normal food covers it. Heavy sweaters: a pinch of salt in the bottle helps you hold on to fluid. Don't force down lots of plain water in long sessions. High blood pressure or kidney issues: ask your doctor before adding salt.",
+        'Якщо не пітнієш відрами й не тренуєшся понад 90 хв у спеку, звичайна їжа все покриває. Кому пітно — дрібка солі в пляшку допомагає втримати воду. Не заливай у себе багато чистої води на довгих тренуваннях. Високий тиск чи проблеми з нирками — перед тим, як досолювати, спитай лікаря.',
       ),
   },
   {

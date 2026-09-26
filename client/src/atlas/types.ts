@@ -62,6 +62,8 @@ export interface CoachSettings {
   clearedAt?: number;
   /** What you told Atlas in chat (injuries, goal, lifts to avoid…). */
   memory?: import('./memory').AtlasMemory;
+  /** Counters only — how Atlas is doing (see metrics.ts). */
+  stats?: import('./metrics').AtlasStats;
   /** Last local edit (last-write-wins against the synced copy). */
   updatedAt?: number;
 }

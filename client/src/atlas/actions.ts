@@ -15,6 +15,7 @@ import {
   dayKey,
   startWorkout,
   type StoreState,
+  getStoreState,
 } from '../store';
 import { bodyPart as bodyPartOf, loadCaps, protectedMuscles } from '../injury';
 import { buildPlanDay, planDayFor } from './plan';
@@ -39,6 +40,14 @@ export function runAction(
 ): ActionResult {
   const mem = s.coach.memory;
   switch (a.type) {
+    case 'many': {
+      // One after another — each sees the store the previous one left.
+      const done = a.actions.map((x) => runAction(x, getStoreState(), now, L, fmtEx));
+      return {
+        text: done.map((d) => d.text).join(' '),
+        openWorkoutId: done.find((d) => d.openWorkoutId)?.openWorkoutId,
+      };
+    }
     case 'rest':
       setExerciseRestSec(a.exercise, a.sec);
       return {

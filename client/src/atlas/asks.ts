@@ -4,6 +4,7 @@
  * Chit-chat (greetings, thanks…) is left out on purpose.
  */
 import { NEW_TOPICS } from './kb/topicsNew';
+import { APP_TOPICS } from './appTopics';
 
 export const ASKS: Record<string, [string, string]> = {
   // part 1
@@ -220,3 +221,4 @@ export const ASKS: Record<string, [string, string]> = {
 
 // Topics added later bring their own canonical question.
 for (const t of NEW_TOPICS) ASKS[t.id] ??= t.ask;
+for (const t of APP_TOPICS) ASKS[t.id] ??= t.ask;

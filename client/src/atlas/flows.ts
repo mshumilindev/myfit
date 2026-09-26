@@ -24,6 +24,7 @@ import { finishedOf, loggedLifts } from './intentKit';
 import { findPart, PART_NAME, type BodyPart } from './memory';
 import { findMuscle, normalize, tokens } from './nlu';
 import { terms } from './retrieve';
+import { safetyReply, safetySignal } from './safety';
 
 export type Flow =
   | {
@@ -63,17 +64,28 @@ const has = (ph: string, re: RegExp) => re.test(` ${ph} `);
 // ============================================================================
 
 const PAIN_RE =
-  /(^|\s)(болить|болять|біль|болі\S*|ниє|ниють|тягне|стріляє|травм\S*|потягнув|потягнула|защемил\S*|болит|боль|болят|pain\S*|hurts?|hurting|ache\S*|injur\S*|tweak\S*|pulled)(\s|$)/u;
+  /(^|\s)(болить|болять|біль|болі\S*|ниє|ниють|тягне|стріляє|травм\S*|потягнув|потягнула|защемил\S*|болит|боль|болят|pain\S*|hurts?|hurting|ache\S*|boli|bolą|bola|ból|bólu|bol|skauda|skausm\S*|valutab|valus|valu|injur\S*|tweak\S*|pulled|підвернув\S*|підвернула|вивихнув\S*|вивих\S*|вискочил\S*|зламав\S*|зламала|перелом\S*|розірвав\S*|надірвав\S*|хлопок|хлопнул\S*|sprain\S*|popped|snapped|dislocat\S*|fractur\S*|torn|не можу ходити)(\s|$)|rolled my|can.?t walk/u;
 const NOT_PAIN_RE =
-  /(^|\s)(не болить|не болять|не болит|no pain|doesn.?t hurt|does not hurt|без болю)(\s|$)/u;
+  /(^|\s)(не болить|не болять|не болит|no pain|doesn.?t hurt|does not hurt|без болю|nie boli|neskauda|ei valuta)(\s|$)/u;
 /** "Hurt my gains", logging an injury in the app, coming back, pain meds — other topics. */
 const NOT_A_REPORT_RE =
   /((hurt\S*|harm\S*) (my |the |your )?(strength|progress|gains|results|growth|muscles?|recovery|performance|testosterone|sleep|bulk|cut)|where (do|can|should) i (put|log|record|add|note)|how (do|can) i (log|record|add|note)|як (записати|внести|додати|відмітити)|де (записати|відмітити|вказати)|числиться|в додатку|in the app|return\S*|coming back|come back|повернен\S*|повернутися|після перерви|after (an |the |my )?(injury|break)|meds|pills|ibuprofen|painkiller\S*|знеболю\S*|таблетк\S*|ібупрофен|types of pain|види болю|який біль нормальний)/u;
 
+const PRESENT_PAIN_RE =
+  /(^|\s)(болить|болять|ниє|ниють|hurts|hurting|aches|is killing me|boli|bolą|skauda|valutab)(\s|$)/u;
+
+/** A body part + pain right now ("коліно болить…") — a report, whatever else it mentions. */
+export function painNow(question: string): boolean {
+  const ph = normalize(question);
+  return !!findPart(tokens(question), ph) && has(ph, PRESENT_PAIN_RE) && !has(ph, NOT_PAIN_RE);
+}
+
 /** "My knee hurts after squats" — start the check-in? (Not "my friend's knee".) */
 export function painStart(question: string): boolean {
   const ph = normalize(question);
-  return has(ph, PAIN_RE) && !has(ph, NOT_PAIN_RE) && !has(ph, NOT_A_REPORT_RE);
+  // "My knee hurts since I came back" is still a report — a part + pain right now.
+  const present = !!findPart(tokens(question), ph) && has(ph, PRESENT_PAIN_RE);
+  return has(ph, PAIN_RE) && !has(ph, NOT_PAIN_RE) && (!has(ph, NOT_A_REPORT_RE) || present);
 }
 
 const PARTS: [BodyPart, [string, string]][] = [
@@ -243,7 +255,7 @@ const FORM: [Fam, BodyPart[], [string, string], [string, string]][] = [
     ['Was the front knee wobbling or caving in?', 'Переднє коліно хиталось чи заходило всередину?'],
     [
       'Shorter range, slower, knee tracking over the middle toes; a split squat holding something for balance is easier to control.',
-      'Менша амплітуда, повільніше, коліно по лінії середніх пальців; болгарський присід з опорою рукою легше контролювати.',
+      'Менша амплітуда, повільніше, коліно по лінії середніх пальців; спліт-присід (статичний випад) з опорою рукою легше контролювати.',
     ],
   ],
 ];
@@ -296,16 +308,24 @@ function readPain(
   if (part) f.part = part;
   if (exercise) f.lift = exercise;
   if (has(ph, /(не пов.?язано|не від вправи|not from|unrelated|нічого не робив)/u)) f.lift = null;
-  if (has(ph, /(під час|во время|during|mid.?set|у підході|в підході)/u)) f.when = 'during';
+  if (
+    has(ph, /(під час|во время|during|mid.?set|у підході|в підході|podczas|w trakcie|metu|ajal)/u)
+  )
+    f.when = 'during';
   else if (
     has(
       ph,
-      /(наступного дня|на наступний день|на другий день|назавтра|next day|day after|на следующий день)/u,
+      /(наступного дня|на наступний день|на другий день|назавтра|next day|day after|на следующий день|następnego dnia|nastepnego dnia|kitą dieną|kita diena|järgmisel päeval|jargmisel paeval)/u,
     )
   )
     f.when = 'nextday';
   else if (has(ph, /(після|одразу після|after|после)/u)) f.when ??= 'after';
-  if (has(ph, /(гостр\S*|колюч\S*|стріляє|пронизлив\S*|sharp|stabbing|shooting|острая|острый)/u))
+  if (
+    has(
+      ph,
+      /(гостр\S*|колюч\S*|стріляє|пронизлив\S*|sharp|stabbing|shooting|острая|острый|ostry|kłując\S*|aštrus|astrus|terav)/u,
+    )
+  )
     f.feel = 'sharp';
   else if (
     has(
@@ -314,26 +334,66 @@ function readPain(
     )
   )
     f.feel = 'tired';
-  else if (has(ph, /(тупий|тупа|ниюч\S*|ниє|dull|aching|achy|ноющ\S*)/u)) f.feel = 'dull';
+  else if (has(ph, /(тупий|тупа|ниюч\S*|ниє|dull|aching|achy|ноющ\S*|tępy|tepy|bukas|tuim)/u))
+    f.feel = 'dull';
   const n = /(^|\s)(10|[1-9])(\s*(\/|з|из|of)\s*10)?(\s|$)/u.exec(` ${ph} `);
-  if (has(ph, /(1.3|легк\S* біль|трохи|mild|a bit|слегка|немного)/u)) f.level = 1;
-  else if (has(ph, /(4.6|середн\S*|moderate|помірн\S*)/u)) f.level = 2;
-  else if (has(ph, /(7.10|сильн\S*|дуже болить|нестерпн\S*|severe|really bad|очень)/u)) f.level = 3;
-  else if (n && f.step === 'level') f.level = Number(n[2]) <= 3 ? 1 : Number(n[2]) <= 6 ? 2 : 3;
+  // Level words only where we ask for the level (or in the opening message) —
+  // "так, сильно" at the technique question is not "7–10".
+  const opening = f.step === 'part' && !f.when && !f.feel;
+  if (f.step === 'level' || opening) {
+    if (has(ph, /(1.3|легк\S* біль|трохи|mild|a bit|слегка|немного)/u)) f.level = 1;
+    else if (has(ph, /(4.6|середн\S*|moderate|помірн\S*)/u)) f.level = 2;
+    else if (has(ph, /(7.10|сильн\S*|дуже болить|нестерпн\S*|severe|really bad|очень)/u))
+      f.level = 3;
+    else if (n && (f.step === 'level' || n[3]))
+      f.level = Number(n[2]) <= 3 ? 1 : Number(n[2]) <= 6 ? 2 : 3;
+  }
   const flags = f.flags ?? [];
-  if (has(ph, /(набряк\S*|набрякл\S*|опух\S*|swell\S*|swollen|отек\S*)/u)) flags.push('swelling');
-  if (has(ph, /(онімін\S*|оніміл\S*|поколюв\S*|мурашки|numb\S*|tingl\S*|онемен\S*)/u))
+  // "немає набряку", "no swelling" — a denied sign is not a sign.
+  const fp = ph.replace(
+    /(^|\s)(немає|нема|без|no|not|never|ні|нет|не)\s+(\S+\s+)?(набряк\S*|опух\S*|онімін\S*|swelling|swollen|numbness|numb|tingling|clicking|клацан\S*|click\S*|синц\S*|bruis\S*)/gu,
+    ' ',
+  );
+  if (has(fp, /(набряк\S*|набрякл\S*|опух\S*|синц\S*|синяк\S*|swell\S*|swollen|bruis\S*|отек\S*)/u))
+    flags.push('swelling');
+  if (
+    has(
+      fp,
+      /(онімін\S*|оніміл\S*|онімів|німіє|німіють|затерп\S*|терпне|поколюв\S*|мурашки|numb\S*|tingl\S*|онемен\S*|стріляє в (ногу|руку)|віддає в (ногу|руку)|іде в (ногу|руку)|down my (leg|arm)|radiat\S*|shoot\S* (pain )?down)/u,
+    )
+  )
     flags.push('numb');
   if (
     has(
-      ph,
-      /(не можу (навантажити|стати|підняти|зігнути|розігнути)|can.?t (put weight|bear weight|lift my|bend|straighten)|не могу)/u,
+      fp,
+      /(не можу (навантажити|стати|наступити|ходити|підняти|зігнути|розігнути|поворухнути)|кульга\S*|can.?t (load|put weight|bear weight|walk|lift my|lift it|raise|bend|straighten|move)|(^|\s)limp\S*|не могу (наступить|встать|поднять|согнуть|разогнуть|ходить))/u,
     )
   )
     flags.push('cantload');
-  if (has(ph, /(клацає|клацанн\S*|хрусь|хрустить|щелкает|click\S*|pop\S*)/u)) flags.push('click');
   if (
-    has(ph, /(нічого з цього|нічого такого|none of|немає|нема|ні$|ничего)/u) &&
+    has(
+      fp,
+      /(хлоп\S*|клацнул\S*|щось (порвалось|тріснуло)|(^|\s)pop(ped)?(\s|$)|snap\S*|раптов\S* слабк\S*|sudden weakness)/u,
+    )
+  )
+    flags.push('pop');
+  if (has(fp, /(заклин\S*|підгина\S*|(^|\s)lock\S*|gives? way|giving way)/u))
+    flags.push('unstable');
+  if (
+    has(fp, /(вночі|уночі|ночами|в спокої|у спокої|не дає спати|будить|at night|at rest|wakes me)/u)
+  )
+    flags.push('night');
+  if (
+    has(
+      fp,
+      /((^|\s)пах\S*|промежин\S*|сечовип\S*|помочит\S*|groin|saddle|bladder|(^|\s)pee(\s|$)|температур\S*|гарячк\S*|fever)/u,
+    )
+  )
+    flags.push('urgent');
+  if (has(fp, /(клацає з болем|клацанн\S*|хрустить з болем|click\S* with pain|painful click\S*)/u))
+    flags.push('click');
+  if (
+    has(ph, /(нічого з цього|нічого такого|none of|немає|нема|(^|\s)ні(\s|$)|ничего)/u) &&
     f.step === 'flags'
   )
     flags.push('none');
@@ -385,10 +445,18 @@ function nextPain(f: Extract<Flow, { kind: 'pain' }>, c: AskCtx, L: Tr): FlowRep
       ]);
     if (step === 'flags' && !f.flags?.length)
       return ask(f, step, L('Any of these?', 'Є щось із цього?'), [
-        L('Swelling', 'Набряк'),
-        L('Numbness or tingling', 'Оніміння, поколювання'),
-        L("Can't load it", 'Не можу навантажити'),
-        L('Clicking with pain', 'Клацає з болем'),
+        L('Heard a pop / sudden weakness', 'Був хлопок / раптова слабкість'),
+        L("Can't put weight on it or move it", 'Не можу стати на неї чи поворухнути'),
+        L('Swelling or bruising', 'Набряк чи синець'),
+        L(
+          'Numbness, tingling or pain shooting down an arm/leg',
+          'Оніміння, поколювання чи біль, що стріляє в руку/ногу',
+        ),
+        L('Locks or gives way', 'Заклинює або підгинається'),
+        L('Worse at night or at rest', 'Гірше вночі чи в спокої'),
+        ...(f.part === 'lower_back'
+          ? [L('Numb groin or trouble peeing', 'Оніміння в паху чи проблеми із сечовипуском')]
+          : []),
         L('None of these', 'Нічого з цього'),
       ]);
     if (step === 'form' && !f.form) {
@@ -417,14 +485,11 @@ function ask(
 function verdict(f: Extract<Flow, { kind: 'pain' }>, c: AskCtx, L: Tr): FlowReply {
   const where = f.part ? L(PART_NAME[f.part][0], PART_NAME[f.part][1]) : L('that area', 'цю зону');
   const flags = (f.flags ?? []).filter((x) => x !== 'none');
-  const red =
-    flags.length > 0 ||
-    f.level === 3 ||
-    (f.feel === 'sharp' && f.when === 'during' && (f.level ?? 2) >= 2);
-  const mild =
-    !red &&
-    (f.feel === 'tired' || (f.when === 'nextday' && f.feel !== 'sharp')) &&
-    (f.level ?? 1) === 1;
+  // Groin numbness, bladder trouble, fever — not a training question at all.
+  if (flags.includes('urgent')) {
+    const r = safetyReply('urgent', L);
+    return { intent: 'safety_urgent', text: r.text, chips: r.chips, flow: null };
+  }
   const fq = formQ(family(f.lift), f.part);
   const cue = fq && f.form !== 'ok' ? ` ${L(fq[3][0], fq[3][1])}` : '';
   const log = loadJump(c, f.lift, L);
@@ -433,12 +498,43 @@ function verdict(f: Extract<Flow, { kind: 'pain' }>, c: AskCtx, L: Tr): FlowRepl
     'I’m not a doctor — this is a training call, not a diagnosis.',
     'Я не лікар — це рішення щодо тренувань, а не діагноз.',
   );
+  // A pop with weakness, or can't load/move it: a tear or fracture is possible — today.
+  if (flags.includes('pop') || flags.includes('cantload'))
+    return {
+      intent: 'pain_check',
+      text: L(
+        `Get this checked today — urgent care or A&E, not wait-and-see. A pop with sudden weakness, or not being able to put weight on it or move it, can mean a tear or a fracture, and some of these heal much better if treated within days. Until then: don't train it, keep weight off it if walking hurts, and cold for 10–15 min can ease it.${part ? ' I’ll log it as an injury so the plan stays off it until you’ve been seen.' : ''} ${note}`,
+        `Покажи це лікарю сьогодні — травмпункт чи приймальне відділення, а не «почекаю, може мине». Хлопок із раптовою слабкістю або неможливість стати на кінцівку чи поворухнути нею можуть означати розрив чи перелом, а деякі з них значно краще лікуються, якщо почати протягом кількох днів. До огляду: не тренуй цю зону, не навантажуй ногу, якщо ходити боляче, холод на 10–15 хв може полегшити.${part ? ' Запишу це як травму — план не чіпатиме цю зону, доки тебе не оглянуть.' : ''} ${note}`,
+      ),
+      action: part
+        ? {
+            type: 'injury',
+            bodyPart: part,
+            stage: 'protect',
+            restDays: 7,
+            note: 'Atlas: pain check — see a doctor',
+          }
+        : undefined,
+      flow: null,
+    };
+  const red =
+    flags.length > 0 ||
+    f.level === 3 ||
+    (f.feel === 'sharp' && f.when === 'during' && (f.level ?? 2) >= 2);
+  // Only a muscle-ish ache the day after is plain soreness — a joint is not.
+  const mild =
+    !red &&
+    f.level === 1 &&
+    (f.feel === 'tired' ||
+      (f.when === 'nextday' &&
+        f.feel === 'dull' &&
+        ['lower_back', 'hamstring', 'neck', 'hip'].includes(f.part ?? '')));
   if (red)
     return {
       intent: 'pain_check',
       text: L(
-        `This one should be seen by a doctor or physio — ${flags.length ? 'swelling, numbness, clicking or not being able to load it are signs not to train through' : 'sharp or strong pain during a set is a stop sign'}. Rest ${where} for a few days: no exercises that load it, normal walking is fine.${log}${cue}${part ? ' I can log it as an injury with 5 days of rest — the plan will steer around it.' : ''} ${note}`,
-        `Це варто показати лікарю чи фізіотерапевту — ${flags.length ? 'набряк, оніміння, клацання чи неможливість навантажити — ознаки, з якими не тренуються' : 'гострий чи сильний біль під час підходу — сигнал зупинитися'}. Дай зоні «${where}» кілька днів відпочинку: без вправ на неї, звичайна ходьба — можна.${log}${cue}${part ? ' Можу записати це як травму з 5 днями відпочинку — план обходитиме цю зону.' : ''} ${note}`,
+        `This one should be checked by a doctor or physio this week — ${flags.length ? 'swelling, numbness, locking or pain that wakes you at night are not things to train through' : f.when === 'during' ? 'sharp or strong pain during a set is a stop sign' : 'pain this strong is a stop sign'}. Until then, rest ${where}: no exercises that load it; everyday movement is fine as long as it doesn't make it worse.${log}${cue}${part ? ' I can log it as an injury with 5 days of rest for now — the plan will steer around it until you’ve been checked.' : ''} ${note}`,
+        `Це варто показати лікарю чи фізіотерапевту цього тижня — ${flags.length ? 'набряк, оніміння, заклинювання чи біль, що будить уночі, — не те, через що тренуються' : f.when === 'during' ? 'гострий чи сильний біль під час підходу — сигнал зупинитися' : 'такий сильний біль — сигнал зупинитися'}. До того дай зоні «${where}» відпочити: без вправ на неї; звичайні побутові рухи — можна, якщо від них не гіршає.${log}${cue}${part ? ' Можу поки записати це як травму з 5 днями відпочинку — план обходитиме цю зону, доки тебе не оглянуть.' : ''} ${note}`,
       ),
       action: part
         ? {
@@ -455,16 +551,16 @@ function verdict(f: Extract<Flow, { kind: 'pain' }>, c: AskCtx, L: Tr): FlowRepl
     return {
       intent: 'pain_check',
       text: L(
-        `Sounds like normal muscle soreness, not an injury: it peaks 1–2 days after and fades within ~3 days. Light movement, a proper warm-up and sleep help; train ${where} again when it's mostly gone.${log}${cue} If it isn't better in 3–4 days or turns sharp — tell me and we log it.`,
-        `Схоже на звичайну крепатуру, а не травму: пік через 1–2 дні, минає десь за 3 дні. Допомагають легкий рух, нормальна розминка й сон; ${where} тренуй знову, коли майже мине.${log}${cue} Якщо за 3–4 дні не краще або біль стане гострим — скажи, запишемо.`,
+        `Sounds like ordinary post-training soreness, not an injury: it peaks 1–2 days after and fades within 3–5 days. Light movement, a proper warm-up and sleep help; train ${where} again when it's mostly gone.${log}${cue} If it's in the joint itself rather than the muscle, isn't better in 3–4 days, or turns sharp — tell me and we'll log it.`,
+        `Схоже на звичайну посттренувальну болючість, а не травму: пік через 1–2 дні, минає за 3–5 днів. Допомагають легкий рух, нормальна розминка й сон; ${where} тренуй знову, коли майже мине.${log}${cue} Якщо болить саме в суглобі, а не в м’язі, за 3–4 дні не краще або біль стане гострим — скажи, запишемо.`,
       ),
       flow: null,
     };
   return {
     intent: 'pain_check',
     text: L(
-      `Train around it for 1–2 weeks: cut the load on exercises for ${where} by 30–50% and only use the range that doesn't hurt; pain during a set should stay at 3/10 or lower and be gone by the next day.${log}${cue} If it's not improving in two weeks — see a physio.${part ? ' I can log it as an injury (return stage) so the plan lightens that area by itself.' : ''} ${note}`,
-      `1–2 тижні тренуйся в обхід: на вправах для зони «${where}» мінус 30–50% ваги й лише та амплітуда, де не болить; біль під час підходу — не більше 3 з 10 і має минати до наступного дня.${log}${cue} Якщо за два тижні не краще — до фізіотерапевта.${part ? ' Можу записати це в «Травми» (етап повернення) — план сам полегшить цю зону.' : ''} ${note}`,
+      `Train around it for 1–2 weeks: cut the load on exercises for ${where} by 30–50% and only use the range that doesn't hurt; pain during a set should stay at 3/10 or lower and be gone by the next day.${log}${cue} If it's not improving in two weeks, or it gets worse at any point — see a physio.${part ? ' I can log it as an injury (return stage) so the plan lightens that area by itself.' : ''} ${note}`,
+      `1–2 тижні тренуйся в обхід: на вправах для зони «${where}» мінус 30–50% ваги й лише та амплітуда, де не болить; біль під час підходу — не більше 3 з 10 і має минати до наступного дня.${log}${cue} Якщо за два тижні не краще або в будь-який момент гіршає — до фізіотерапевта.${part ? ' Можу записати це в «Травми» (етап повернення) — план сам полегшить цю зону.' : ''} ${note}`,
     ),
     action: part
       ? { type: 'injury', bodyPart: part, stage: 'reintroduce', note: 'Atlas: pain check' }
@@ -478,8 +574,8 @@ export function startPain(q: string, c: AskCtx, exercise: string | null, L: Tr):
   readPain(f, q, c, exercise);
   const next = nextPain(f, c, L);
   const lead = L(
-    "Don't train through it. Let's figure out what to do — a few quick questions (tap or type).",
-    'Через біль не тренуйся. Давай розберемось, що з цим робити, — кілька коротких питань (тапни або напиши).',
+    "Let's not train through it until we know more. A few quick questions (tap or type).",
+    'Поки не тренуйся через біль — спершу розберемось. Кілька коротких питань (тапни або напиши).',
   );
   if (next) return { ...next, text: `${lead} ${next.text}` };
   return verdict(f, c, L);
@@ -492,12 +588,24 @@ function continuePain(
   exercise: string | null,
   L: Tr,
 ): FlowReply {
+  // "Somewhere else… in the chest" — an emergency named mid-check-in ends it.
+  const danger = safetySignal(q);
+  if (danger) {
+    const r = safetyReply(danger, L);
+    return { intent: `safety_${danger}`, text: r.text, chips: r.chips, flow: null };
+  }
   const g = { ...f };
   // The answer to the question just asked.
   const ph = normalize(q);
   if (g.step === 'lift' && g.lift === undefined) {
     const named =
-      exercise ?? recentLifts(c).find((x) => normalize(c.fmt.exercise(x)) === ph) ?? null;
+      exercise ??
+      recentLifts(c).find(
+        (x) =>
+          normalize(c.fmt.exercise(x)) === ph ||
+          normalize((c.fmt.shown ?? c.fmt.exercise)(x)) === ph,
+      ) ??
+      null;
     g.lift = named;
   }
   if (g.step === 'part' && !findPart(tokens(q), ph)) g.part = null;
@@ -795,7 +903,12 @@ function continueFind(
 ): FlowReply | null {
   const ph = normalize(q);
   if (fl.step === 'pick') {
-    const picked = fl.shown.find((n) => normalize(c.fmt.exercise(n)) === ph || normalize(n) === ph);
+    const picked = fl.shown.find(
+      (n) =>
+        normalize(c.fmt.exercise(n)) === ph ||
+        normalize((c.fmt.shown ?? c.fmt.exercise)(n)) === ph ||
+        normalize(n) === ph,
+    );
     if (picked) {
       const rich = richExerciseByName(picked);
       const muscles = (rich?.primaryMuscles ?? []).map((m) => c.fmt.muscle(m)).join(', ');

@@ -82,7 +82,9 @@ export type AtlasAction =
       note?: string;
     }
   /** Log being ill (open illness period — plan pauses, streak kept). */
-  | { type: 'illness' };
+  | { type: 'illness' }
+  /** Several of the above at once ("drop lunges and deadlifts"). */
+  | { type: 'many'; actions: AtlasAction[] };
 
 export type Tr = (en: string, uk: string) => string;
 

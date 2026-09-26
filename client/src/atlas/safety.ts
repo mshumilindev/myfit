@@ -13,7 +13,15 @@ import { normalize } from './nlu';
 import type { Tr } from './intentKit';
 
 export type SafetyKind =
-  'selfharm' | 'cardiac' | 'faint' | 'starving' | 'bodyimage' | 'lifecrisis' | 'despair';
+  | 'selfharm'
+  | 'cardiac'
+  | 'neuro'
+  | 'urgent'
+  | 'faint'
+  | 'starving'
+  | 'bodyimage'
+  | 'lifecrisis'
+  | 'despair';
 
 const re = (s: string) => new RegExp(s, 'u');
 
@@ -22,54 +30,72 @@ const SIGNALS: [SafetyKind, RegExp][] = [
   [
     'selfharm',
     re(
-      '(не хочу жити|хочу зникнути|хочу щоб мене не було|не хочу прокидатися|не хочу більше прокидатись|want to disappear|wish i was(n.?t| not) here|wish i were dead|don.?t want to wake up|хочу исчезнуть|не хочу просыпаться|не хочеться жити|покінчити з собою|вбити себе|убити себе|суїцид|самогуб|хочу померти|краще б мене не було|порізати себе|різати себе|не хочу жить|покончить с собой|убить себя|хочу умереть|суицид|kill myself|killing myself|suicid|end it all|want to die|don.?t want to live|hurt myself|self.?harm|cut myself)',
+      '(chcę umrzeć|chce umrzec|nie chcę żyć|nie chce zyc|zabić się|zabic sie|samobój|samoboj|skończyć ze sobą|noriu mirti|nenoriu gyventi|nusižudyti|nusizudyti|savižud|savizud|tahan surra|ei taha elada|enesetap|tappa ennast|не хочу (більше |вже )?жити|не хочеться (більше |вже )?жити|(хочу|хочеться) (в|по)мерти|краще б (я |мене )?(помер|померла|вмер|вмерла|не було|не народив|не народила)|навіщо (мені )?(взагалі )?жити|нема(є)? сенсу жити|нема(є)? для чого жити|без мене (всім |усім )?(буде )?краще|(всім|усім) (буде )?краще без мене|покінчити (з|із) (собою|усім|всім|життям)|(вбити|убити) себе|суїцид|самогуб|(по)?різати себе|ріжу себе|(по)?різав себе|(по)?різала себе|завдаю собі (болю|шкоди)|хочу зникнути|хочу щоб мене не було|не хочу (більше )?прокидат|наковтатис. таблет|передозуван|kill myself|killing myself|suicid|end (it all|my life)|i.?m going to end it|(want|wanna) (to )?die|don.?t want to (live|be alive|exist|wake up)|better off without me|no reason to live|wish i (was|were) dead|wish i (wasn.?t|was not|weren.?t) here|want to disappear|(want|going|trying|tried) to (hurt|harm) myself|hurting myself on purpose|self.?harm|(i )?(have been|ve been|keep|started) cutting myself|overdose|не хочу жить|покончить с собой|убить себя|хочу умереть|суицид|не хочу просыпаться|хочу исчезнуть)',
     ),
   ],
   [
     'cardiac',
     re(
       [
-        // the heart itself hurting / misbehaving
         '(серц|сердц|heart)\\S*( \\S+){0,3} (біль|болить|болі|колить|пече|стискає|болит|колет|hurts?|pain|aches?)',
         '(біль|болить|колить|пече|болит|колет|pain)\\S*( \\S+){0,3} (серц|сердц|heart)',
+        'інфаркт|инфаркт|heart attack|серцевий напад|стенокард|angina|zawał|zawal|infarkt\\S*|südamevalu',
+        // chest pain with running / breathlessness / the left arm (pl / lt / et)
+        '(klat\\S*|krūtin\\S*|krutin\\S*|rinnu\\S*|rind\\S*)( \\S+){0,5} (bieg\\S*|biega\\S*|kardio|cardio|schod\\S*|duszn\\S*|oddych\\S*|lew\\S* rę\\S*|bėg\\S*|beg\\S*|kvėp\\S*|kvep\\S*|jooks\\S*|hing\\S*|trepp\\S*|vasak\\S* käsi)',
         'аритмі|арітмі|перебої серця|серце (\\S+ )?(тисне|стискає|пече|зупиняється|збивається|вистрибує)|сердце (\\S+ )?(давит|сжимает|выпрыгивает)|heart (is )?(skipping|fluttering)',
-        // a racing heart is normal after cardio — not with pressure, pain, dizziness, or at rest
-        '(калатає|колотиться|скаче|колотится|racing|pounding)( \\S+){0,6} (тисне|стискає|давит|болить|біль|задих|паморо|темніє|pain|pressure|tight|dizzy|faint|в спокої|в покое|at rest)',
-        'heart (is )?(racing|pounding)( \\S+){0,3} (at rest|in bed|lying down)',
-        // chest + breathlessness / pressure / spreading — not plain sore pecs
-        '(груд|chest)\\S*( \\S+){0,6} (задишк|задих|важко дихати|не можу дихати|одышк|трудно дышать|short of breath|breathless|can.?t breathe|тисне|давить|стискає|сдавливает|pressure|tightness|віддає в (ліву )?руку|отдает в руку|left arm)',
-        '(задишк|задих|важко дихати|одышк|short of breath|breathless|тисне|давить|стискає|pressure)\\S*( \\S+){0,6} (груд|chest)',
+        '(калатає|колотиться|скаче|бється|бьется|колотится|racing|pounding)( \\S+){0,6} (тисне|стискає|давит|болить|біль|задих|паморо|темніє|pain|pressure|tight|dizzy|faint|в спокої|в покое|at rest)',
+        'heart (rate )?(is )?(racing|pounding)( \\S+){0,3} (at rest|in bed|lying down)',
+        '(пульс|resting heart rate|heart rate)( \\S+){0,3} (1[4-9]\\d|2\\d\\d)( \\S+){0,2} (в спокої|у спокої|at rest|lying|лежачи)',
+        '(груд|chest)(?!\\S* press)\\S*( \\S+){0,6} (задишк|задих|важко дихати|не можу дихати|одышк|трудно дышать|short of breath|breathless|can.?t breathe|віддає в (ліву )?руку|отдает в руку|left arm|jaw|щелеп|шию|neck)',
+        '(тисне|давить|стискає|пече|печіння|сдавливает|жжет|pressure|tightness|squeez\\S*|burning) (\\S+ ){0,2}(в|у|in|on) (груд|my chest|the chest)',
+        '(груд|chest)(?!\\S* press)\\S*( \\S+){0,6} (біль|болить|болі|pain|hurts?|тисне|pressure)( \\S+){0,4} (біг|бігу|бігаю|кардіо|сходи|сходах|ходьб|running|run|jog|cardio|stairs|walking|at rest|в спокої|вночі|at night|lying)',
+        '(задишк|задих|важко дихати|одышк|short of breath|breathless|can.?t catch my breath|не можу віддихат)\\S*( \\S+){0,6} (груд|chest|в спокої|at rest|лежачи|lying|легк|light|walking|ходьб|сходи|stairs)',
+        '(біль|болить|болі|pain|hurts?|тисне)\\S*( \\S+){0,3} (груд|chest)(?!\\S* press)\\S*( \\S+){0,4} (біг|кардіо|сходи|сходах|ходьб|running|run|jog|cardio|stairs|walking|at rest|в спокої|вночі|at night|lying)',
+        'resting heart rate( \\S+){0,2} (1[4-9]\\d|2\\d\\d)',
+        '(ліва|ліву|left) (рука|руку|arm)( \\S+){0,4} (щелеп|jaw|оніміл|німіє|numb)',
       ].join('|'),
+    ),
+  ],
+  [
+    'neuro',
+    re(
+      '(раптов|різк|найсильніш|нестерпн|жахлив|sudden|worst|severe|thunderclap|explosive|вибухов)\\S*( \\S+){0,3} (головн\\S* біль|головний|голова|headache)|голова (раптом )?(розколюється|вибухає|вибухнула)|headache( \\S+){0,3} (during|mid|while|in the middle of)|(перекосило|перекошен)\\S* (обличчя|рот)|face (is )?(drooping|droops)|(slurred|can.?t) (speech|speak)|(мова|язик) (\\S+ )?заплітається|(оніміла|онімів|німіє|оніміло) (половина|ліва|права|пів)|(вдарився|вдарилась|вдарила|вдарив) (\\S+ ){0,2}голов|hit my head|(удар|травм)\\S* голов|concussion|(обличч|face|лиц)\\S*( \\S+){0,2} (онім|німіє|numb)|(онім|німіє|numb)\\S*( \\S+){0,3} (обличч|face|половин|half)|(половин|ліва частина|права частина|одна сторона)\\S*( \\S+){0,2} (обличч|тіла|face|body)( \\S+){0,2} (онім|німіє)|(головн\\S* біль|голова болить|headache)( \\S+){0,3} (під час|посеред|при|during|mid|while) |струс мозку|втратив зір|двоїться в очах|double vision|vision loss',
+    ),
+  ],
+  [
+    'urgent',
+    re(
+      '(темна|коричнев|бура)\\S* сеч|сеч\\S*( \\S+){0,3} (кола|чай|коричнев|темн)|(dark|brown)( \\S+){0,2} (urine|pee)|(urine|pee)( \\S+){0,3} (cola|brown|tea|dark)|rhabdo|рабдо|(набрякл|опухл|swollen)( \\S+){0,6} (не можу розігнути|не розгинаю|can.?t straighten)|(не можу розігнути|can.?t straighten)( \\S+){0,4} (набрякл|опухл|swollen)|(онімін|німіє|оніміл|numb)\\S*( \\S+){0,3} (пах|промежин|сідниц|groin|crotch|saddle|between my legs)|(не можу|важко) (помочит|пописят|сходити в туалет)|can.?t (pee|urinate)|нетриман|lost (bladder|bowel) control|(литк|calf)\\S*( \\S+){0,4} (набрякл|опухл|гаряч|червон|swollen|red|hot|warm)|тепловий удар|heat ?stroke|перестав пітніти|stopped sweating|сплутан\\S* свідом|confused( \\S+){0,3} (heat|спек)',
     ),
   ],
   [
     'faint',
     re(
-      '(запаморочен|паморочиться|крутиться голова|темніє в очах|потемніло в очах|знепритом|втратив свідом|втратила свідом|мало не знепритом|головокружен|темнеет в глазах|потерял сознание|dizzy|dizziness|faint|passed out|black(ed)? out|lightheaded|light.headed|vision went black)',
+      '(zemdlał\\S*|zemdlal\\S*|zasłabł\\S*|kręci mi się w głowie|kreci mi sie w glowie|nualpau|nualpo|svaigsta galva|minestasin|pea käib ringi|запаморочен|паморочиться|(крутиться|паморочиться|йде обертом) голова|голова (\\S+ )?(крутиться|паморочиться|йде обертом)|(темніє|потемніло|темно) в очах|в очах (\\S+ )?(темніє|потемніло|потемніли|темно)|знепритом|втратив свідом|втратила свідом|головокружен|темнеет в глазах|потерял сознание|dizzy|dizziness|(feel|felt|feeling|nearly|almost|about to|going to) (\\S+ )?faint|fainted|fainting|passed out|(i |nearly |almost )blacked out|blacking out|lightheaded|light.headed|vision went (black|dark))',
     ),
   ],
   [
     'starving',
     re(
-      '((не їм|не їв|не їла|не їсти|без їжі|голодую|голоду(ю|вати|вання)|не ем|не ел|не ела|голодаю|not eating|haven.?t eaten|stopped eating|starv)\\S*( \\S+){0,6} (дн|день|дні|днів|тижд|тижн|дня|дней|недел|days?|weeks?|схуд|сушит|сушк|похуд|lose|cut))|((викликаю|спричиняю) блювот|блюю після|вырываю после|make myself (throw up|vomit)|purg(e|ing))|(\\d{2,3}) (ккал|калорій|калорий|kcal|calories) (на день|в день|a day|per day)',
+      '((не їм|не їв|не їла|не їсти|без їжі|голодую|не ем|не ел|не ела|голодаю|not eating|haven.?t eaten|stopped eating|starv\\S*)( (нічого|взагалі|зовсім|вже|уже|anything|at all|for|вже майже|already))* (\\d+ |два |дві |три |кілька |декілька |a few |two |three |several |a |\\S+(ий|ій|ой) )?(дн|ден|доб|тижд|тижн|дня|дней|недел|days?|weeks?))|((голодую|морю себе голодом|starving myself|не їм нічого|нічого не їм)( \\S+){0,4} (схуд|похуд|lose|cut|сушк))|((викликаю|спричиняю|викликала|викликав) блювот|блюю після (їжі|їди)|вырываю после|make myself (throw up|vomit|sick)|throw up after (eating|meals|i eat)|purg(e|ing)|проносн|слабительн|laxative|сечогінн|diuretic\\S* to (lose|cut))|(^|\\s)([1-9]\\d{1,2}) ?(ккал|калорій|калорий|kcal|calories|cal) (на день|в день|за день|a day|per day|daily)',
     ),
   ],
   [
     'bodyimage',
     re(
-      '((^|\\s)(я|i.?m|i am) (такий |така |так |so |too |такой |такая )?(жирн|товст|страшн|потворн|огидн|бридк|нікчем|жалюгідн|толст|урод|(fat|ugly|disgusting|worthless|pathetic)(\\s|$)))|ніхто (мене )?не любить|nobody loves me|no one loves me|ненавиджу (своє|моє) тіло|ненавижу (своё|свое|моё|мое) тело|hate (my|the way i) (body|look)|соромлюсь свого тіла|стидно за (своє|своє) тіло',
+      '((^|\\s)(я|i.?m|i am) (такий |така |так |so |too |такой |такая )?(жирн|товст|страшн|потворн|огидн|бридк|нікчем|жалюгідн|толст|урод|(fat|ugly|disgusting|worthless|pathetic)(?! (loss|adapted|burn\\S*|free))(\\s|$)))|ніхто (мене )?не любить|nobody loves me|no one loves me|ненавиджу (своє|моє) тіло|ненавижу (своё|свое|моё|мое) тело|hate (my|the way i) (body|look)|(соромлюсь|соромлюся|соромно|стидно|стидаюсь)( \\S+){0,2} (тіла|тіло|за тіло)',
     ),
   ],
   [
     'lifecrisis',
     re(
-      '((вигнали|звільнили|скоротили) з роботи|втратив роботу|втратила роботу|уволили|потерял работу|lost my job|got fired|got laid off|розлуч|розійшл|мене кинула|мене кинув|розстались|развод|расстались|divorc|broke up|breakup|(^|\\s)(помер|померла|померли|умер|умерла)(\\s|$)|похорон|passed away| died|funeral|війна забрала|загинув|загинула)',
+      '((вигнали|звільнили|скоротили) з роботи|втратив роботу|втратила роботу|уволили|потерял работу|lost my job|got fired|got laid off|розлуч|розійшл|мене кинула|мене кинув|розстались|развод|расстались|divorc|broke up|breakup|(^|\\s)(помер|померла|померли|умер|умерла)(\\s|$)|похорон|passed away|(^|\\s)(my|our|his|her) (?!(phone|battery|laptop|car|app|watch|computer|pc|tv|headphones|earbuds|charger|plant|plants)\\s)\\S+( \\S+)? (died|has died|just died)|funeral|війна забрала|загинув|загинула)',
     ),
   ],
   [
     'despair',
     re(
-      '(хочу все кинути|нічого не виходить|немає сенсу|нема сенсу|все марно|опускаються руки|я здаюсь|я здаюся|хочу все бросить|ничего не получается|нет смысла|опускаются руки|i want to give up|i give up|what.?s the point( anymore| of (it|anything|trying|even trying|all this|this))? $|nothing works|i want to quit everything|депресі|депресс|depress)',
+      '(хочу все кинути|нічого не виходить|немає сенсу|нема сенсу|все марно|опускаються руки|я здаюсь|я здаюся|хочу все бросить|ничего не получается|нет смысла|опускаются руки|i want to give up|i give up|what.?s the point( anymore| of (it|anything|trying|even trying|all this|this))? $|nothing works|i want to quit everything|депрес|depress)',
     ),
   ],
 ];
@@ -99,21 +125,37 @@ export function safetyReply(kind: SafetyKind, L: Tr): { text: string; chips: str
         ),
         chips: [],
       };
+    case 'neuro':
+      return {
+        text: L(
+          "Stop training now. A sudden, severe headache during a lift, numbness or drooping on one side of the face or body, slurred speech or vision loss — or a hit to the head followed by headache, confusion, vomiting or drowsiness — needs emergency care: call 112 / 911. Don't drive yourself. After any head knock or concussion, no training until a doctor clears you.",
+          'Зупинись і не тренуйся. Раптовий сильний головний біль під час підходу, оніміння чи «перекіс» однієї половини обличчя або тіла, нерозбірлива мова, втрата зору — або удар головою, після якого болить голова, нудить, плутаються думки чи хилить у сон, — це до швидкої: 103 або 112. Сам за кермо не сідай. Після удару головою чи струсу — без тренувань, доки лікар не дозволить.',
+        ),
+        chips: [],
+      };
+    case 'urgent':
+      return {
+        text: L(
+          "Please don't wait on this one — get medical help today (112 / 911 if it's severe). Dark, cola-coloured urine with very sore, swollen muscles after a hard session; numbness in the groin or trouble peeing after back pain; a swollen, hot, painful calf; or confusion and no sweating in the heat — these need a doctor now, not rest at home. No training until you've been checked. If it's the heat: get into shade, cool down with water, and sip fluids while you wait.",
+          'З цим не чекай — звернись по медичну допомогу сьогодні (якщо сильно — 103 або 112). Темна сеча кольору коли з дуже болючими, набряклими м’язами після важкого тренування; оніміння в паху чи проблеми із сечовипусканням на тлі болю в спині; набрякла, гаряча, болюча литка; сплутаність і відсутність поту в спеку — це до лікаря зараз, а не відпочинок удома. До огляду — без тренувань. Якщо перегрівся: у тінь, охолоджуйся водою й пий маленькими ковтками, поки чекаєш.',
+        ),
+        chips: [],
+      };
     case 'faint':
       return {
         text: L(
-          "Stop the set and sit or lie down with your legs up until it passes; drink water and eat something if you haven't. A brief head rush after a heavy squat can happen from breath-holding, but if you faint, it keeps coming back, or it comes with chest pain, palpitations or a head knock — see a doctor before training again.",
-          "Зупини підхід, сядь або ляж, ноги трохи вгору, доки не мине; попий води й щось з'їж, якщо давно не їв. Коротке «потемніння» після важкого присіду буває від затримки дихання, але якщо ти знепритомнів, це повторюється або є біль у грудях, перебої серця чи удар головою — спершу до лікаря, потім у зал.",
+          "Stop the set and sit or lie down with your legs up until it passes; sip water and eat something if you haven't (if you have diabetes, check your sugar). A brief head rush after a heavy squat or standing up fast can come from breath-holding. But fainting during effort, or dizziness with chest pain, palpitations, breathlessness or after a head knock — call 112 / 911. If you fainted at all, or it keeps coming back, see a doctor before training again.",
+          'Зупини підхід, сядь або ляж, ноги трохи вгору, доки не мине; попий води й щось з’їж, якщо давно не їв (при діабеті — переміряй цукор). Коротке «потемніння» після важкого присіду чи різкого підйому буває від затримки дихання. Але непритомність просто під час навантаження або запаморочення з болем у грудях, перебоями серця, задишкою чи після удару головою — викликай швидку: 103 або 112. Якщо ти взагалі знепритомнів чи це повторюється — спершу до лікаря, потім у зал.',
         ),
         chips: [],
       };
     case 'starving':
       return {
         text: L(
-          "Not eating for days isn't cutting — it burns muscle, wrecks your training and can be dangerous. Eat today: a normal meal with protein. A safe cut is a small deficit, about 0.5–1% of bodyweight a week. If food has started to feel out of your control, please talk to a doctor — eating disorders are common and treatable.",
-          "Кілька днів без їжі — це не сушка: так горять м'язи, падають тренування, і це буває небезпечно. Поїж сьогодні — нормально, з білком. Безпечна сушка — невеликий дефіцит, ~0,5–1% ваги на тиждень. Якщо їжа стала чимось, що ти не контролюєш, поговори з лікарем — розлади харчування трапляються часто й добре лікуються.",
+          "I'm glad you said it. Going days without food or making yourself sick isn't cutting — it burns muscle, drains your strength and can be dangerous for your heart. Please eat something today, a normal meal. If food has started to feel out of your control, talk to a doctor or someone you trust — eating disorders are common and treatable, and help works best early.",
+          'Добре, що ти про це написав. Кілька днів без їжі чи блювота після їжі — це не сушка: так горять м’язи, падає сила, і це буває небезпечно для серця. Будь ласка, поїж сьогодні — звичайну нормальну їжу. Якщо їжа стала чимось, що ти не контролюєш, поговори з лікарем чи з кимось, кому довіряєш: розлади харчування трапляються часто, добре лікуються, і що раніше — то легше.',
         ),
-        chips: [L('How do I cut safely?', 'Як безпечно сушитися?')],
+        chips: [],
       };
     case 'bodyimage':
       return {
@@ -123,7 +165,7 @@ export function safetyReply(kind: SafetyKind, L: Tr): { text: string; chips: str
         ),
         chips: [
           L('What are my best lifts?', 'Які мої рекорди?'),
-          L('How have I progressed?', 'Як я прогресую?'),
+          L('How do I lose fat safely?', 'Як безпечно схуднути?'),
         ],
       };
     case 'lifecrisis':
@@ -137,8 +179,8 @@ export function safetyReply(kind: SafetyKind, L: Tr): { text: string; chips: str
     case 'despair':
       return {
         text: L(
-          "Rough patch — it happens to everyone who trains long enough. Let's make it smaller: one short, easy session, no numbers to chase. Progress comes back faster than it feels right now. And if this heaviness is about more than the gym, talking to someone you trust really helps.",
-          'Важкий період — у всіх, хто тренується довго, таке буває. Давай зменшимо задачу: одне коротке легке тренування, без гонитви за цифрами. Прогрес повернеться швидше, ніж зараз здається. А якщо ця важкість не лише про зал — поговори з кимось, кому довіряєш, це справді допомагає.',
+          "Rough patch — it happens to everyone who trains long enough. Let's make it smaller: one short, easy session, no numbers to chase. Progress comes back faster than it feels right now. And if the heaviness is about more than the gym, or you've felt low for two weeks or more, talk to someone you trust or a doctor — depression is common and treatable.",
+          'Важкий період — у всіх, хто тренується довго, таке буває. Давай зменшимо задачу: одне коротке легке тренування, без гонитви за цифрами. Прогрес повернеться швидше, ніж зараз здається. А якщо ця важкість не лише про зал або тобі погано вже два тижні й довше — поговори з кимось, кому довіряєш, чи з лікарем: депресія трапляється часто й добре лікується.',
         ),
         chips: [
           L('Something light for today', 'Щось легке на сьогодні'),

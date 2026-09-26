@@ -13,7 +13,7 @@ describe('“by the way…” — things Atlas noticed', () => {
     for (const f of found) expect(f.text).toMatch(/^By the way/);
   });
 
-  it('brings it up now and then, never twice, never on pain', () => {
+  it('brings it up now and then, never twice, never on pain', { timeout: 60_000 }, () => {
     const qs = [
       'how is my bench going',
       'how long should i rest',

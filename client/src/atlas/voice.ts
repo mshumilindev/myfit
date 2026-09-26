@@ -9,12 +9,17 @@ import type { CoachFact, FactKind, FactOf, Temper } from './types';
 import { lineAllowed, neutralFact, SOFT_TEMPER } from './guard';
 import { EN } from '../i18n/atlas.en';
 import { UK } from '../i18n/atlas.uk';
+import { PL } from '../i18n/atlas.pl';
+import { LT } from '../i18n/atlas.lt';
+import { ET } from '../i18n/atlas.et';
 
 export interface Fmt {
   kg: (n: number) => string;
   mmss: (sec: number) => string;
   muscle: (m: string) => string;
   exercise: (name: string) => string;
+  /** The name as the person sees it, when `exercise` returns a placeholder (translated chat). */
+  shown?: (name: string) => string;
 }
 
 export type Line<K extends FactKind> = (f: FactOf<K>, x: Fmt) => string;
@@ -25,7 +30,7 @@ export type PhraseBook = {
   mom: { [K in FactKind]?: Line<K>[] };
 };
 
-const BOOKS: Partial<Record<LocaleId, PhraseBook>> = { en: EN, uk: UK };
+const BOOKS: Partial<Record<LocaleId, PhraseBook>> = { en: EN, uk: UK, pl: PL, lt: LT, et: ET };
 
 export function phraseBook(locale: LocaleId): PhraseBook {
   return BOOKS[locale] ?? EN;

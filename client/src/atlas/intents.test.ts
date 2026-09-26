@@ -105,7 +105,7 @@ describe('answerLocally', () => {
 
   it('pain stays calm even for Merciless', () => {
     const a = answerLocally('my back hurts', ctx('en', 5));
-    expect(a?.text).toMatch(/Don't train through it/);
+    expect(a?.text).toMatch(/Let's not train through it/);
     expect(a?.text).not.toMatch(/keep up|disappoint/);
   });
 });
