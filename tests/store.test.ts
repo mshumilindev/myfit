@@ -550,13 +550,13 @@ function ex(patch: Partial<Exercise> = {}): Exercise {
 }
 
 describe('EQ per-hand loading (perHandFactor)', () => {
-  it('doubles dumbbell moves but keeps single-dumbbell and one-arm variants ×1', () => {
+  it('doubles paired and one-arm dumbbell moves but keeps shared single-dumbbell loads ×1', () => {
     expect(perHandFactor({ name: 'Dumbbell Curl', equipment: ['dumbbell'] })).toBe(2);
     expect(perHandFactor({ name: 'Dumbbell Bench Press', equipment: ['dumbbell'] })).toBe(2);
     expect(perHandFactor({ name: 'Goblet Squat', equipment: ['dumbbell'] })).toBe(1);
     expect(perHandFactor({ name: 'Dumbbell Pullover', equipment: ['dumbbell'] })).toBe(1);
-    expect(perHandFactor({ name: 'One-arm Dumbbell Row', equipment: ['dumbbell'] })).toBe(1);
-    expect(perHandFactor({ name: 'Single-arm Dumbbell Press', equipment: ['dumbbell'] })).toBe(1);
+    expect(perHandFactor({ name: 'One-arm Dumbbell Row', equipment: ['dumbbell'] })).toBe(2);
+    expect(perHandFactor({ name: 'Single-arm Dumbbell Press', equipment: ['dumbbell'] })).toBe(2);
     // Catalog name without "dumbbell" in the title — resolve via muscleInfoByName.
     expect(perHandFactor({ name: 'Alternate Hammer Curl', equipment: [] })).toBe(2);
   });
