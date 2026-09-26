@@ -1857,6 +1857,28 @@ export const en = {
   atlasRuleMercilessOnly: 'Merciless only',
   atlasLocalUnknown:
     'That one’s outside what I know yet. Ask me about your training: what to do today, rest, the next weight, records, recovery, sleep, your programme.',
+  /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */
+  atlasOffWarn: (n: number, temper: number, time: string): string =>
+    [
+      [
+        `Bro, I don’t do that — I’m a coach, not a chat buddy for everything. Ask ChatGPT for that one. Once more and I’ll block you for half an hour.`,
+        `Second time, bro: training, recovery and the app only. The rest — ChatGPT. Once more and I go quiet for 30 minutes.`,
+        `That’s it, bro, I warned you. Blocked for 30 minutes — until ${time}. Come back with training.`,
+      ],
+      [
+        `Not talking about that. I’m a coach. ChatGPT is for that. Again — and it’s a 30-minute block.`,
+        `Second warning. Training only. The rest — ChatGPT. Third time — 30-minute block.`,
+        `Third time. Blocked for 30 minutes, until ${time}.`,
+      ],
+      [
+        `I’m not your chat buddy for everything under the sun. Ask about lifting — or go bother ChatGPT. Once more — half an hour of silence.`,
+        `Twice now. People train here, they don’t chit-chat. Chit-chat goes to ChatGPT. Once more — 30-minute block.`,
+        `Done. Blocked for 30 minutes, until ${time}. Spend them on a set, not on chatter.`,
+      ],
+    ][Math.min(2, Math.max(0, temper))][Math.min(3, Math.max(1, n)) - 1],
+  atlasBlockedLine: (time: string) =>
+    `Atlas is quiet until ${time} — three times the talk wasn’t about training. If it’s something serious with your health or something hurts, write — that I always answer.`,
+  atlasBlockedPlaceholder: (time: string) => `Atlas is quiet until ${time}…`,
   atlasPuterOffer:
     'Gemini is out for today. I can keep talking through Puter — it runs on your own free Puter account, so it costs you nothing and the app nothing. One sign-in.',
   atlasPuterEnable: 'Use Puter',

@@ -1822,6 +1822,28 @@ export const lt: Strings = {
   atlasRuleMercilessOnly: 'Tik Negailestingas',
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
+  /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */
+  atlasOffWarn: (n: number, temper: number, time: string): string =>
+    [
+      [
+        `Bro, apie tai nekalbu — esu treneris, o ne pašnekovas apie viską. Su tuo eik į ChatGPT. Dar kartą — ir užblokuosiu tave pusvalandžiui.`,
+        `Antrą kartą, bro: tik treniruotės, atsigavimas ir programėlė. Kita — ChatGPT. Dar kartą — ir tyliu pusvalandį.`,
+        `Viskas, bro, perspėjau. Blokas 30 minučių — iki ${time}. Grįžk su treniruotėmis.`,
+      ],
+      [
+        `Apie tai nekalbu. Esu treneris. Tam yra ChatGPT. Dar kartą — blokas pusvalandžiui.`,
+        `Antras perspėjimas. Tik treniruotės. Kita — ChatGPT. Trečias kartas — blokas 30 minučių.`,
+        `Trečias kartas. Blokas 30 minučių, iki ${time}.`,
+      ],
+      [
+        `Nesu tavo pašnekovas apie viską pasaulyje. Klausk apie geležį — arba eik į ChatGPT. Dar kartą — pusvalandis ignoro.`,
+        `Antrą kartą. Čia treniruojasi, o ne plepa. Plepalai — į ChatGPT. Dar kartą — blokas pusvalandžiui.`,
+        `Viskas. Blokas 30 minučių, iki ${time}. Išnaudok jas priėjimui, o ne plepalams.`,
+      ],
+    ][Math.min(2, Math.max(0, temper))][Math.min(3, Math.max(1, n)) - 1],
+  atlasBlockedLine: (time: string) =>
+    `Atlas tyli iki ${time} — tris kartus pokalbis buvo ne apie treniruotes. Jei rimta bėda su sveikata ar kažkas skauda — rašyk, į tai atsakysiu visada.`,
+  atlasBlockedPlaceholder: (time: string) => `Atlas tyli iki ${time}…`,
   atlasPuterOffer:
     'Gemini šiandien baigėsi. Galiu kalbėti toliau per Puter — jis veikia tavo paties nemokamoje Puter paskyroje, tad nei tau, nei programėlei tai nieko nekainuoja. Vienas prisijungimas.',
   atlasPuterEnable: 'Naudoti Puter',

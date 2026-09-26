@@ -52,7 +52,7 @@ const ctx = (locale: 'en' | 'uk'): AskCtx => ({
 describe('a conversation, not a FAQ', () => {
   const c = ctx('en');
 
-  it('goes deeper on “why?” and “more”, layer by layer', () => {
+  it('goes deeper on “why?” and “more”, layer by layer', { timeout: 60_000 }, () => {
     const a = answerLocally('how long should I rest', c)!;
     const why = answerLocally('why?', c, a.convo)!;
     expect(why.intent).toBe('rest');

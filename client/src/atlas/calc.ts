@@ -133,7 +133,7 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
 
 /** Clearly not about training (and no training words in it). */
 const OFF =
-  /(погод\S*|дощ\S*|сніг\S*|прогноз|weather|rain|forecast|президент\S*|політик\S*|вибор\S*|уряд\S*|election\S*|politic\S*|рецепт\S*|борщ\S*|приготувати|зварити|recipe\S*|cook\S*|фільм\S*|серіал\S*|кіно|movie\S*|film\S*|series|netflix|музик\S*|пісн\S*|song\S*|новин\S*|news|курс (долара|євро)|біткоїн\S*|bitcoin|crypto\S*|футбол\S*|хто виграв|who won|гороскоп\S*|horoscope|столиц\S*|capital of|напиши (код|вірш|есе|твір)|write (code|an essay|a poem))/u;
+  /(погод\S*|дощ\S*|сніг\S*|прогноз|weather|rain|forecast|президент\S*|політик\S*|вибор\S*|уряд\S*|election\S*|politic\S*|рецепт\S*|борщ\S*|приготувати|зварити|recipe\S*|cook\S*|фільм\S*|серіал\S*|кіно|movie\S*|film\S*|series|netflix|музик\S*|пісн\S*|song\S*|новин\S*|news|курс (долара|євро)|біткоїн\S*|bitcoin|crypto\S*|футбол\S*|хто виграв|who won|гороскоп\S*|horoscope|столиц\S*|capital of|напиши (код|вірш|есе|твір)|write (code|an essay|a poem)|космос\S*|планет\S*|галактик\S*|outer space|planets?\b|galax\S*|відеоігр\S*|комп.?ютерн\S* ігр\S*|video ?games?|playstation|xbox|minecraft|fortnite|dota|сенс життя|meaning of life|філософ\S*|philosoph\S*|релігі\S*|religio\S*|домашн\S* завданн\S*|homework|програмуванн\S*|programming|javascript|python\b|інвестиц\S*|invest(ing|ment)\S*|stock market|фондов\S* ринок|акці(ї|й) компан\S*|історі(я|ю|ї) (україни|світу|росії)|world history)/u;
 const FIT =
   /(трен\S*|зал\S*|вправ\S*|білк\S*|біцепс\S*|присід\S*|жим\S*|сет\S*|м.?яз\S*|кардіо|вага|схуд\S*|gym|workout\S*|train\S*|exercise\S*|protein|lift\S*|muscle\S*|squat\S*|bench|cardio|calorie\S*|калор\S*|diet|дієт\S*|спорт\S*|sport\S*)/u;
 

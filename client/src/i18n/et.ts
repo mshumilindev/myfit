@@ -1801,6 +1801,28 @@ export const et: Strings = {
   atlasRuleMercilessOnly: 'Ainult Halastamatu',
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
+  /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */
+  atlasOffWarn: (n: number, temper: number, time: string): string =>
+    [
+      [
+        `Bro, sellest ma ei räägi — olen treener, mitte vestluskaaslane kõiges. Sellega mine ChatGPT juurde. Veel kord — ja blokeerin su pooleks tunniks.`,
+        `Teist korda, bro: ainult trenn, taastumine ja äpp. Muu — ChatGPT. Veel kord — ja olen pool tundi vait.`,
+        `Kõik, bro, ma hoiatasin. Blokk 30 minutit — kuni ${time}. Tule tagasi trenniga.`,
+      ],
+      [
+        `Sellest ma ei räägi. Olen treener. Selleks on ChatGPT. Veel kord — pooletunnine blokk.`,
+        `Teine hoiatus. Ainult trenn. Muu — ChatGPT. Kolmas kord — 30-minutiline blokk.`,
+        `Kolmas kord. Blokk 30 minutit, kuni ${time}.`,
+      ],
+      [
+        `Ma pole sinu vestluskaaslane kõige kohta maailmas. Küsi raua kohta — või mine ChatGPT juurde. Veel kord — pool tundi ignoreerimist.`,
+        `Teist korda. Siin treenitakse, mitte ei lobiseta. Lobisemine — ChatGPT juurde. Veel kord — pooletunnine blokk.`,
+        `Kõik. Blokk 30 minutit, kuni ${time}. Kasuta need seeria peale, mitte jutu peale.`,
+      ],
+    ][Math.min(2, Math.max(0, temper))][Math.min(3, Math.max(1, n)) - 1],
+  atlasBlockedLine: (time: string) =>
+    `Atlas on vait kuni ${time} — kolm korda polnud jutt trennist. Kui on midagi tõsist tervisega või miski valutab, kirjuta — sellele vastan alati.`,
+  atlasBlockedPlaceholder: (time: string) => `Atlas on vait kuni ${time}…`,
   atlasPuterOffer:
     'Gemini on tänaseks otsas. Võin jätkata Puteri kaudu — see töötab sinu enda tasuta Puteri kontol, nii et see ei maksa sulle ega rakendusele midagi. Üks sisselogimine.',
   atlasPuterEnable: 'Kasuta Puterit',

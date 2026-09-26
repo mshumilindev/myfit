@@ -1807,6 +1807,28 @@ export const pl: Strings = {
   atlasRuleMercilessOnly: 'Tylko Bezlitosny',
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
+  /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */
+  atlasOffWarn: (n: number, temper: number, time: string): string =>
+    [
+      [
+        `Bro, o tym nie gadam — jestem trenerem, nie rozmówcą od wszystkiego. Z tym idź do ChatGPT. Jeszcze raz — i blokuję cię na pół godziny.`,
+        `Drugi raz, bro: tylko trening, regeneracja i aplikacja. Reszta — ChatGPT. Jeszcze raz — i milczę pół godziny.`,
+        `Koniec, bro, ostrzegałem. Blokada na 30 minut — do ${time}. Wracaj z treningiem.`,
+      ],
+      [
+        `O tym nie rozmawiam. Jestem trenerem. Od tego jest ChatGPT. Jeszcze raz — blokada na pół godziny.`,
+        `Drugie ostrzeżenie. Tylko trening. Reszta — ChatGPT. Trzeci raz — blokada na 30 minut.`,
+        `Trzeci raz. Blokada na 30 minut, do ${time}.`,
+      ],
+      [
+        `Nie jestem twoim rozmówcą od wszystkiego. Pytaj o żelazo — albo idź do ChatGPT. Jeszcze raz — pół godziny ignoru.`,
+        `Drugi raz. Tu się trenuje, a nie gada. Pogaduszki — do ChatGPT. Jeszcze raz — blokada na pół godziny.`,
+        `Koniec. Blokada na 30 minut, do ${time}. Wykorzystaj je na serię, nie na gadanie.`,
+      ],
+    ][Math.min(2, Math.max(0, temper))][Math.min(3, Math.max(1, n)) - 1],
+  atlasBlockedLine: (time: string) =>
+    `Atlas milczy do ${time} — trzy razy rozmowa nie była o treningu. Jeśli to coś poważnego ze zdrowiem albo coś boli — pisz, na to odpowiem zawsze.`,
+  atlasBlockedPlaceholder: (time: string) => `Atlas milczy do ${time}…`,
   atlasPuterOffer:
     'Gemini na dziś skończone. Mogę rozmawiać dalej przez Puter — działa na Twoim własnym darmowym koncie Puter, więc nie kosztuje ani Ciebie, ani aplikacji. Jedno logowanie.',
   atlasPuterEnable: 'Użyj Puter',

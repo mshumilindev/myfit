@@ -91,13 +91,14 @@ describe('answerLocally', () => {
         expect(answerLocally(q, ctx('en', t))?.text).not.toMatch(/undefined/);
   });
 
-  it('hands unknown questions on (null, or "did you mean" that escalates)', () => {
+  it('declines off-topic, hands unknown questions on', () => {
     for (const [q, l] of [
       ['what is the capital of France', 'en'],
       ['хто виграв чемпіонат світу з футболу', 'uk'],
     ] as const) {
       const a = answerLocally(q, ctx(l));
-      expect(!a || ((a.intent === 'did_you_mean' || a.intent === 'off_topic') && a.escalate)).toBe(
+      // Off-topic is declined here (never sent on — see offTopicGuard.ts); unknown training talk escalates.
+      expect(!a || a.intent === 'off_topic' || (a.intent === 'did_you_mean' && a.escalate)).toBe(
         true,
       );
     }

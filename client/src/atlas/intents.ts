@@ -729,7 +729,7 @@ function answerOne(question: string, c: AskCtx, convo: Convo): LocalAnswer | nul
     return {
       intent: 'off_topic',
       text: offTopicLine(c.temper, L),
-      escalate: true,
+      escalate: false,
       chips: [
         L('What should I train today?', 'Що тренувати сьогодні?'),
         L('How am I progressing?', 'Як я прогресую?'),
@@ -2063,6 +2063,17 @@ function answerParts(question: string, c: AskCtx, convo: Convo, L: Tr): LocalAns
       learned,
       action: good.find((g) => g.a!.action)?.a!.action,
       chart: good.find((g) => g.a!.chart)?.a!.chart,
+      convo: { ...last!.convo, softUntil: convo.softUntil },
+    };
+  // A training question with something off-topic tacked on → answer the training
+  // part, decline the rest in one line (no warning — it wasn't a chat attempt).
+  const off = got.filter(({ a }) => a?.intent === 'off_topic');
+  if (good.length && off.length)
+    return {
+      ...last!,
+      text: `${good.map((g) => g.a!.text).join('\n\n')}\n\n${L('The rest isn’t my area — that’s one for ChatGPT.', 'А решта — не до мене, це до ChatGPT.')}`,
+      escalate: false,
+      learned,
       convo: { ...last!.convo, softUntil: convo.softUntil },
     };
   // One part is clear, another isn't → answer it, then ask about the other.

@@ -24,6 +24,7 @@ import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
 import { askAtlas, classifyTopic, systemPrompt } from '../atlas/chat';
 import { askPuter, puterReady, puterSignIn } from '../atlas/puter';
+import { alwaysAnswered, blockedUntil, loadGuard, saveGuard, strike } from '../atlas/offTopicGuard';
 import {
   answerAs,
   answerLocally,
@@ -523,6 +524,15 @@ function CoachThread({
   const chat = useChatLog();
   const [draft, setDraft] = useState('');
   const [consent, setConsent] = useState<string | null>(null);
+  // Off-topic guard: quiet for 30 min after the third off-topic try (this device only).
+  const [quietTill, setQuietTill] = useState(() => blockedUntil(loadGuard(), Date.now()));
+  useEffect(() => {
+    if (!quietTill) return;
+    const id = window.setTimeout(() => setQuietTill(0), Math.max(0, quietTill - Date.now()) + 50);
+    return () => window.clearTimeout(id);
+  }, [quietTill]);
+  const clock = (ms: number) =>
+    new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(ms);
   const busy = chat.some((m) => m.pending);
 
   const convo = useRef<Convo>({});
@@ -629,6 +639,29 @@ function CoachThread({
     };
     const qe = chipSource.current.get(q) ?? q;
     let local = answerLocally(qe, ctx, convo.current);
+    // Blocked for going off-topic → a short line, except safety and pain (always answered).
+    const guard = loadGuard();
+    const quiet = blockedUntil(guard, at);
+    if (quiet && !alwaysAnswered(local?.intent, local?.convo.flow?.kind)) {
+      track({ kind: 'ask', intent: 'blocked', chip: fromChip.current, escalated: false });
+      await typeOut(rid, at + 1, t.atlasBlockedLine(clock(quiet)));
+      return true;
+    }
+    // Off-topic (weather, films, politics…): warning 1, 2 — the third blocks for 30 min.
+    // Never sent to Gemini: it would only burn the quota.
+    if (local?.intent === 'off_topic') {
+      const r = strike(guard, at);
+      saveGuard(r.state);
+      if (r.state.blockedUntil) setQuietTill(r.state.blockedUntil);
+      track({ kind: 'ask', intent: 'off_topic', chip: fromChip.current, escalated: false });
+      convo.current = local.convo;
+      await typeOut(
+        rid,
+        at + 1,
+        t.atlasOffWarn(r.n, temperIndex(temper), clock(r.state.blockedUntil || at)),
+      );
+      return true;
+    }
     // Unsure which topic it is → Gemini only picks the topic (from Atlas's own
     // list); the answer is still built here, from your data.
     if (local?.intent === 'did_you_mean' && canChat && store.coach.chatConsent) {
@@ -1169,7 +1202,7 @@ function CoachThread({
           id="atl-input"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder={t.atlasAsk}
+          placeholder={quietTill ? t.atlasBlockedPlaceholder(clock(quietTill)) : t.atlasAsk}
           maxLength={400}
           autoComplete="off"
           enterKeyHint="send"
