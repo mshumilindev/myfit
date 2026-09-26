@@ -357,11 +357,6 @@ function BuilderView(props: {
           {!props.canGoBack && <Icon name="house" className="hs-title-ic" />}
           {t.homeNewSet}
         </span>
-        {!props.canGoBack && (
-          <button type="button" className="hs-link muted" onClick={props.onBack}>
-            {t.cancel}
-          </button>
-        )}
       </div>
       <p className="hs-cap">{t.homeBuilderCap}</p>
       <label className="field-block">
