@@ -46,7 +46,7 @@ import {
   useT,
 } from '../i18n';
 import { DayHistorySheet } from '../components/DayHistorySheet';
-import { BackfillSheet } from '../components/StartSheet';
+import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
 import { AtlasSoloStrip, AtlasStoryItem } from '../components/AtlasStrip';
@@ -56,7 +56,7 @@ import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
 import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutomation';
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
-import { ConfirmDialog, Icon, Sheet } from '../ui';
+import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
 
 type Store = ReturnType<typeof useStore>;
@@ -104,6 +104,7 @@ const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
+  const isDesktop = useIsDesktop();
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
@@ -1591,6 +1592,13 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         )}
       </div>
+
+      {/* Desktop: Start stands open on the right instead of the "+" sheet. */}
+      {isDesktop && (
+        <aside className="pane-side today-start-side">
+          <StartSheet shell={shell} onClose={() => undefined} inline />
+        </aside>
+      )}
 
       {backfill && (
         <BackfillSheet

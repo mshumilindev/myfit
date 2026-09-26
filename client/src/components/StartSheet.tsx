@@ -6,7 +6,7 @@
  * Health (sleep, rest, illness, injury) and Log past. The sub-sheets it opens
  * (rest/recovery, backfill) live here too so Today can reuse them.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import type { Gym } from '../types';
 import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
@@ -43,11 +43,24 @@ import { GymThumb } from './GymThumb';
 
 type Sub = null | 'gym' | 'activity' | 'health' | 'past' | 'home';
 
-export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => void }) {
+export function StartSheet({
+  shell,
+  onClose: closeProp,
+  inline = false,
+}: {
+  shell: Shell;
+  onClose: () => void;
+  /** Desktop Today: the same content as a standing side panel, not a sheet —
+   *  its sub-flows (gym, activity, home set, health, log past) still open as
+   *  sheets over the page. */
+  inline?: boolean;
+}) {
   const { t, locale } = useT();
   const store = useStore();
   const { assignment, active: assignedActive } = useProgramMine();
   const [sub, setSub] = useState<Sub>(null);
+  // Inline, "closing" only closes the sub-flow; the panel itself stays.
+  const onClose = inline ? () => setSub(null) : closeProp;
   const [now] = useState(() => Date.now());
 
   const open = store.workouts.find((w) => w.finishedAt === null) ?? null;
@@ -135,13 +148,14 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
     setSub('activity');
   }
 
+  let subEl: ReactNode = null;
   if (sub === 'gym')
-    return (
+    subEl = (
       <GymPicker gyms={store.gyms} title={t.pickGymTitle} onClose={onClose} onPick={beginScratch} />
     );
-  if (sub === 'activity') return <ActivitySheet shell={shell} onClose={onClose} />;
-  if (sub === 'home')
-    return (
+  else if (sub === 'activity') subEl = <ActivitySheet shell={shell} onClose={onClose} />;
+  else if (sub === 'home')
+    subEl = (
       <HomeSetSheet
         onClose={onClose}
         onStart={(input) => {
@@ -150,10 +164,10 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
         }}
       />
     );
-  if (sub === 'health')
-    return <RestSheet shell={shell} onClose={onClose} allowRest={!activeRest} />;
-  if (sub === 'past')
-    return (
+  else if (sub === 'health')
+    subEl = <RestSheet shell={shell} onClose={onClose} allowRest={!activeRest} />;
+  else if (sub === 'past')
+    subEl = (
       <BackfillSheet
         gyms={store.gyms}
         onClose={onClose}
@@ -169,6 +183,8 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
         }}
       />
     );
+
+  if (subEl && !inline) return subEl;
 
   const liveName = open
     ? open.dayName || t.startSessionLabel
@@ -203,7 +219,7 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
   const offerScratch = !busy && (!!programToday || !!usual);
 
   return (
-    <Sheet onClose={onClose} className="start-sheet">
+    <StartFrame inline={inline} onClose={closeProp} sub={subEl}>
       <div className="ss-title">{t.startSheetTitle}</div>
       <button type="button" className="ss-hero" onClick={startHero}>
         <span className="ss-hero-text">
@@ -292,7 +308,28 @@ export function StartSheet({ shell, onClose }: { shell: Shell; onClose: () => vo
           {locked && <Icon name="lock-simple" className="ss-lock" />}
         </button>
       </div>
-    </Sheet>
+    </StartFrame>
+  );
+}
+
+/** The Start content as a sheet (mobile) or a standing side panel (desktop). */
+function StartFrame(props: {
+  inline: boolean;
+  onClose: () => void;
+  sub: ReactNode;
+  children: ReactNode;
+}) {
+  if (!props.inline)
+    return (
+      <Sheet onClose={props.onClose} className="start-sheet">
+        {props.children}
+      </Sheet>
+    );
+  return (
+    <>
+      <div className="start-inline">{props.children}</div>
+      {props.sub}
+    </>
   );
 }
 

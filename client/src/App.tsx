@@ -1956,11 +1956,6 @@ function Rail(props: {
       <div className="rail-brand">
         <SpotterMark size={40} variant="sidebar" />
       </div>
-      <div className="rail-mastery">
-        <Suspense fallback={null}>
-          <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
-        </Suspense>
-      </div>
       {nav.map((x) => (
         <button
           key={x.id}
@@ -1974,16 +1969,14 @@ function Rail(props: {
           {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
         </button>
       ))}
-      <button
-        className="rail-item rail-start"
-        aria-label={t.startNew}
-        title={t.startNew}
-        onClick={props.onStart}
-      >
-        <Icon name="plus" weight="bold" />
-        <span className="rail-label">{t.startNew}</span>
-      </button>
+      {/* Start lives in Today's side panel on desktop — no rail button. */}
       <div className="rail-foot">
+        {/* Mastery sits at the bottom of the rail, above notifications. */}
+        <div className="rail-mastery">
+          <Suspense fallback={null}>
+            <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
+          </Suspense>
+        </div>
         {/* Notifications — the milestone feed, reachable from every app. */}
         <button
           className="rail-item"

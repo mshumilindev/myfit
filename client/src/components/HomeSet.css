@@ -582,3 +582,25 @@
   cursor: default;
   color: var(--home-ink);
 }
+
+/* --- Desktop: Start as a standing panel on Today ----------------------------- */
+.start-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.start-inline .ss-hero {
+  border-radius: 20px;
+}
+.start-inline .ss-hero + .ss-grid {
+  margin-top: -4px;
+}
+.today-start-side {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100%;
+}
+.rail-foot .rail-mastery {
+  padding: 0 0 4px;
+}
