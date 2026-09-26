@@ -1,7 +1,7 @@
 # Brief: interactive 3D muscle map for Spotter (React Three Fiber)
 
 You are a senior front-end engineer working inside an existing production codebase. Your job is to
-add an **interactive 3D muscle body** to the Spotter gym-tracker PWA, as a *hero* visualisation, without
+add an **interactive 3D muscle body** to the Spotter gym-tracker PWA, as a _hero_ visualisation, without
 breaking anything that exists today. Work in small verified slices. Do not invent facts about the
 repo — everything you need is stated below; if something is missing, inspect the code first.
 
@@ -44,7 +44,7 @@ repo — everything you need is stated below; if something is missing, inspect t
   - `SessionMuscleMap.tsx` — per-session variant.
 - Muscle vocabulary (`MuscleGroup` in `client/src/data/exercises.ts`):
   `chest, back, lats, traps, lower_back, shoulders, biceps, triceps, forearms, quads, adductors,
-  hamstrings, glutes, abductors, calves, core, neck, fullbody, cardio`.
+hamstrings, glutes, abductors, calves, core, neck, fullbody, cardio`.
   Notes: `back` is a legacy umbrella (finer groups `lats/traps/lower_back` are what the catalog
   emits now); `fullbody` and `cardio` are not anatomical regions — do not try to paint them.
 - Zone colours (`client/src/volume.ts`): `ZONE_COLOR: Record<Zone, string>` with
@@ -59,7 +59,7 @@ repo — everything you need is stated below; if something is missing, inspect t
 ## 2. What we want
 
 A **real 3D, rotatable, tappable human muscle body** that shows per-muscle colour (the same
-`colors` contract as `MuscleHeatmap`), used only on *hero* surfaces where there is room:
+`colors` contract as `MuscleHeatmap`), used only on _hero_ surfaces where there is room:
 
 1. The volume/fatigue heatmap panel in `ProgressView` (replaces the two flat figures there).
 2. Later: the exercise-detail screen (out of scope for the first delivery — design the component
@@ -71,7 +71,7 @@ Everything small — chips, row icons, session recap marks — **stays 2D** via 
 ### Important reality check
 
 You do not generate 3D meshes natively. **Do not try to synthesise anatomy geometry yourself.**
-Source an existing, properly licensed, *muscle-segmented* human model where each muscle (or
+Source an existing, properly licensed, _muscle-segmented_ human model where each muscle (or
 muscle group) is a separate mesh/node so it can be coloured and hit-tested individually.
 Candidates to evaluate (verify licence and segmentation before choosing):
 
