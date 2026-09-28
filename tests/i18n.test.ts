@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
+import { setOverrideUid } from '../client/src/accountOverrides';
 import {
   LOCALES,
   LOCALE_IDS,
   fmtClock,
   fmtDayMonth,
+  fmtMonthYear,
   fmtBodyWeightKg,
   fmtDurationHM,
   fmtDurationHuman,
@@ -19,6 +22,7 @@ import {
   setLocale,
   getLocale,
   t,
+  useT,
 } from '../client/src/i18n';
 
 function walkShape(base: unknown, candidate: unknown, path: string[] = []): void {
@@ -34,6 +38,13 @@ function walkShape(base: unknown, candidate: unknown, path: string[] = []): void
 
 function callEveryFunction(value: unknown, key = ''): void {
   if (typeof value === 'function') {
+    if (key === 'nuDontSuggestSub') {
+      const result = value(['Run', 'Sauna']);
+      expect(typeof result).toBe('string');
+      expect(result).toContain('Run');
+      expect(result).toContain('Sauna');
+      return;
+    }
     if (key === 'atlasOffWarn') {
       for (const temper of [0, 1, 2]) {
         for (const warning of [1, 2, 3]) {
@@ -58,6 +69,30 @@ function callEveryFunction(value: unknown, key = ''): void {
 }
 
 describe('F-02 i18n', () => {
+  it('reacts to account-specific names without changing shared dictionaries', () => {
+    const { result, unmount } = renderHook(() => useT());
+    try {
+      act(() => setOverrideUid('dec4b283-ecd4-4e56-8f14-0a5da352f1a2'));
+      expect(result.current.t.actType.badminton).toBe('Table badminton');
+      expect(t()).toBe(result.current.t);
+      expect(LOCALES.en.actType.badminton).toBe('Badminton');
+      act(() => setLocale('uk'));
+      expect(result.current.t.actType.badminton).toBe('Настільний бадмінтон');
+      act(() => setOverrideUid(null));
+      expect(result.current.t).toBe(LOCALES.uk);
+    } finally {
+      unmount();
+      setOverrideUid(null);
+    }
+  });
+
+  it('formats calendar month headings in the selected locale', () => {
+    const september = new Date(2026, 8, 15, 12).getTime();
+    expect(fmtMonthYear(september, 'en')).toBe('September 2026');
+    expect(fmtMonthYear(september, 'uk')).toContain('Вересень');
+    expect(fmtMonthYear(september, 'uk')).toContain('2026');
+  });
+
   it('keeps all locales structurally complete and callable', () => {
     for (const id of LOCALE_IDS) {
       walkShape(LOCALES.en, LOCALES[id]);

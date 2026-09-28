@@ -40,6 +40,8 @@ const shell: Shell = {
 function store(patch: Partial<StoreState> = {}): StoreState {
   return {
     workouts: [],
+    activities: [],
+    sleeps: [],
     gyms: [],
     reminders: [],
     queue: [],
