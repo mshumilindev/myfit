@@ -18,6 +18,8 @@ import {
 } from '../sessionBuilder';
 import { isCardioExerciseName } from '../data/exercises';
 import { usualSessionsPerWeek } from './facts';
+import { calendarDays } from './num';
+import { weekStartOf } from '../weekStart';
 
 const DAY = 86_400_000;
 const WEEK = 7 * DAY;
@@ -75,13 +77,6 @@ function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-}
-
-function mondayOf(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  const back = (d.getDay() + 6) % 7;
-  return d.getTime() - back * DAY;
 }
 
 /** Weekdays you actually train, most frequent first (last 8 weeks). */
@@ -163,7 +158,8 @@ export function proposePlan(p: ProposeInput): CoachPlan {
   return {
     intent,
     createdAt: now,
-    blockStart: mondayOf(now),
+    // The first day of this training week (Settings › first day of the week).
+    blockStart: weekStartOf(now),
     weeks: BLOCK_WEEKS,
     days,
     lengthMin: Math.min(120, Math.max(30, lengthMin)),
@@ -174,9 +170,13 @@ export function proposePlan(p: ProposeInput): CoachPlan {
   };
 }
 
-/** 1-based week of the block (> weeks = the block is over). */
+/**
+ * 1-based week of the block (> weeks = the block is over). Counted in calendar
+ * days, so a DST change (a 23- or 25-hour day) never shifts the week boundary
+ * by an hour; before the block starts it's week 1.
+ */
 export function blockWeek(plan: CoachPlan, now: number): number {
-  return Math.floor((now - plan.blockStart) / WEEK) + 1;
+  return Math.max(1, Math.floor(calendarDays(plan.blockStart, now) / 7) + 1);
 }
 
 export function isDeloadWeek(plan: CoachPlan, now: number): boolean {

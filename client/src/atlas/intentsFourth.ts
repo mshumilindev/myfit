@@ -6,12 +6,15 @@
  * PEDs, cycle, pregnancy), conditioning (heart-rate zones, HIIT, running,
  * steps), posture, other sports, home equipment, and "what can I ask".
  */
-import { muscleSetsInWorkout, resolveMuscles, setTopWeight, setTypeOf, topSet } from '../store';
+import * as N from './num';
+import { resolveMuscles, setTopWeight, setTypeOf, topSet } from '../store';
 import { solvePlates } from '../plates';
 import { rankExercisesForMuscle } from '../sessionBuilder';
 import type { Exercise } from '../types';
 import { liftPoints } from './liftStats';
 import { DAY, WEEK, date, finishedOf, wd, type AskCtx, type Intent } from './intentKit';
+import { weekStartOf } from '../weekStart';
+import { wordMatches } from './nlu';
 
 /** Numbers mentioned in the question ("100 kg", "80%", "5 reps"). */
 function numbers(phrase: string): number[] {
@@ -38,13 +41,35 @@ function lastTop(c: AskCtx, name: string): { kg: number; reps: number } | null {
 const round25 = (kg: number) => Math.round(kg / 2.5) * 2.5;
 
 const WEEKDAYS: [number, string[]][] = [
-  [1, ['monday', 'понеділ*']],
-  [2, ['tuesday', 'вівтор*']],
-  [3, ['wednesday', 'серед*']],
-  [4, ['thursday', 'четвер*']],
-  [5, ['friday', 'п’ятниц*', 'пятниц*']],
-  [6, ['saturday', 'субот*']],
-  [0, ['sunday', 'неділ*']],
+  [
+    1,
+    ['monday', 'понеділ*', 'понедельник*', 'poniedział*', 'pirmadien*', 'esmaspäev*', 'esmaspaev*'],
+  ],
+  [2, ['tuesday', 'вівтор*', 'вторник*', 'wtor*', 'antradien*', 'teisipäev*', 'teisipaev*']],
+  [
+    3,
+    ['wednesday', 'серед*', 'сред*', 'środ*', 'srod*', 'trečiadien*', 'treciadien*', 'kolmapäev*'],
+  ],
+  [4, ['thursday', 'четвер*', 'czwart*', 'ketvirtadien*', 'neljapäev*', 'neljapaev*']],
+  [
+    5,
+    [
+      'friday',
+      'п’ятниц*',
+      'пятниц*',
+      'piątk*',
+      'piatk*',
+      'piątek',
+      'piatek',
+      'penktadien*',
+      'reede*',
+    ],
+  ],
+  [
+    6,
+    ['saturday', 'субот*', 'суббот*', 'sobot*', 'šeštadien*', 'sestadien*', 'laupäev*', 'laupaev*'],
+  ],
+  [0, ['sunday', 'неділ*', 'воскресен*', 'niedziel*', 'sekmadien*', 'pühapäev*', 'puhapaev*']],
 ];
 
 export const INTENTS_FOURTH: Intent[] = [
@@ -96,7 +121,8 @@ export const INTENTS_FOURTH: Intent[] = [
       const kg = numbers(p.phrase).find((n) => n >= 5);
       const e1 = recentBest1rm(c, p.exercise!);
       if (!kg || !e1) return null;
-      const reps = Math.max(0, Math.floor(30 * (e1 / kg - 1)));
+      // Epley inverted (e1 = kg × (1 + reps/30)); at or under the max it's at least 1.
+      const reps = kg > e1 ? 0 : Math.max(1, Math.floor(30 * (e1 / kg - 1) + 1e-9));
       const name = c.fmt.exercise(p.exercise!);
       return reps < 1
         ? L(
@@ -104,8 +130,8 @@ export const INTENTS_FOURTH: Intent[] = [
             `${name} з ${c.fmt.kg(kg)}: понад твій розрахунковий максимум (~${c.fmt.kg(Math.round(e1))}). Не сьогодні.`,
           )
         : L(
-            `${name} at ${c.fmt.kg(kg)}: about ${Math.min(reps, 30)} reps to failure, going by your recent sets.`,
-            `${name} з ${c.fmt.kg(kg)}: приблизно ${Math.min(reps, 30)} повторів до відмови, судячи з останніх сетів.`,
+            `${name} at ${c.fmt.kg(kg)}: about ${N.reps('en', Math.min(reps, 30))} to failure, going by your recent sets.`,
+            `${name} з ${c.fmt.kg(kg)}: приблизно ${N.reps('uk', Math.min(reps, 30))} до відмови, судячи з останніх сетів.`,
           );
     },
   },
@@ -259,9 +285,11 @@ export const INTENTS_FOURTH: Intent[] = [
       ],
     ],
     answer: (c, p, L) => {
-      const day = WEEKDAYS.find(([, kws]) =>
-        kws.some((k) => p.words.some((w) => w.startsWith(k.replace('*', '')))),
-      );
+      const day =
+        (p.weekdays?.length ? WEEKDAYS.find(([d]) => d === p.weekdays![0]) : undefined) ??
+        WEEKDAYS.find(([, kws]) =>
+          kws.some((k) => p.words.some((w) => wordMatches(w, k.endsWith('*') ? k : `${k}*`))),
+        );
       if (!day) return null;
       const w = finishedOf(c).find(
         (x) => new Date(x.startedAt).getDay() === day[0] && c.now - x.startedAt < WEEK + DAY,
@@ -276,7 +304,7 @@ export const INTENTS_FOURTH: Intent[] = [
         .map((e) => {
           const t = topSet(e.sets);
           return t
-            ? `${c.fmt.exercise(e.name)} ${c.fmt.kg(setTopWeight(t))}×${t.reps}`
+            ? `${c.fmt.exercise(e.name)} ${N.setText(c, setTopWeight(t), t.reps)}`
             : c.fmt.exercise(e.name);
         })
         .slice(0, 5)
@@ -304,13 +332,23 @@ export const INTENTS_FOURTH: Intent[] = [
       const f = finishedOf(c);
       const count = (from: number, to: number) =>
         f.filter((w) => w.startedAt >= from && w.startedAt < to);
-      const a = count(c.now - WEEK, c.now + 1);
-      const b = count(c.now - 2 * WEEK, c.now - WEEK);
+      // Calendar weeks from your own first weekday (Settings), not rolling
+      // 7-day windows — "this week" is Mon…now for a Monday start.
+      const start = weekStartOf(c.now);
+      const prevStart = weekStartOf(start - DAY);
+      const a = count(start, c.now + 1);
+      const b = count(prevStart, start);
+      // Working sets actually done (the per-muscle tally counts a bench set
+      // for chest, triceps and shoulders alike — tripling the number).
       const sets = (ws: typeof f) =>
-        ws.reduce((n, w) => n + [...muscleSetsInWorkout(w).values()].reduce((x, y) => x + y, 0), 0);
+        ws.reduce(
+          (n, w) =>
+            n + w.exercises.flatMap((e) => e.sets.filter((x) => setTypeOf(x) !== 'warmup')).length,
+          0,
+        );
       return L(
-        `This week: ${a.length} sessions, ${Math.round(sets(a))} sets. Last week: ${b.length} sessions, ${Math.round(sets(b))} sets.`,
-        `Цей тиждень: ${a.length} тренувань, ${Math.round(sets(a))} сетів. Минулий: ${b.length} тренувань, ${Math.round(sets(b))} сетів.`,
+        `This week: ${N.sessions('en', a.length)}, ${N.sets('en', sets(a))}. Last week: ${N.sessions('en', b.length)}, ${N.sets('en', sets(b))}.`,
+        `Цей тиждень: ${N.sessions('uk', a.length)}, ${N.sets('uk', sets(a))}. Минулий: ${N.sessions('uk', b.length)}, ${N.sets('uk', sets(b))}.`,
       );
     },
   },
@@ -337,7 +375,9 @@ export const INTENTS_FOURTH: Intent[] = [
       const m = numbers(p.phrase).find((n) => n >= 10 && n <= 90);
       if (
         !m &&
-        !p.phrase.match(/no time|нема часу|немає часу|мало часу|short on time|quick|швидко/)
+        !p.phrase.match(
+          /no time|нема часу|немає часу|мало часу|short on time|quick|швидко|(don t|dont|do not) have (much )?time|little time|не маю часу|часу обмаль|пів години|півгодини|half an hour|nie mam czasu|malo czasu|mało czasu|pol godziny|pół godziny|neturiu laiko|mazai laiko|mažai laiko|pusvaland|pole aega|vahe aega|vähe aega|pool tundi/,
+        )
       )
         return null;
       return L(
@@ -358,12 +398,18 @@ export const INTENTS_FOURTH: Intent[] = [
         'два дні підряд',
         'кожен день',
         'щодня',
+        'каждый день',
+        'ежедневно',
+        'codziennie',
+        'kasdien',
+        'iga paev',
+        'iga päev',
       ],
     ],
     answer: (_c, _p, L) =>
       L(
-        'Same muscle two days in a row: fine if it’s light or the first day was easy. Hard sessions for the same muscle want ~48 h apart. Different muscles — train daily if you recover.',
-        'Той самий м’яз два дні поспіль — ок, якщо легко або перший день був легким. Важкі тренування одного м’яза — з інтервалом ~48 год. Різні м’язи — можна щодня, якщо відновлюєшся.',
+        'Same muscle two days in a row: fine if it’s light or the first day was easy. Hard sessions for the same muscle want about 2 days apart. Different muscles — train daily if you recover.',
+        'Той самий м’яз два дні поспіль — ок, якщо легко або перший день був легким. Важкі тренування одного м’яза — з інтервалом десь 2 дні. Різні м’язи — можна щодня, якщо відновлюєшся.',
       ),
   },
   {
@@ -491,7 +537,24 @@ export const INTENTS_FOURTH: Intent[] = [
   {
     id: 'running',
     all: [
-      ['run', 'running', 'jog*', '5k', '10k', 'marathon', 'біг*', 'бігат*', 'пробіжк*', 'марафон*'],
+      [
+        'run',
+        'running',
+        'jog*',
+        '5k',
+        '10k',
+        'marathon',
+        'біг*',
+        'бігат*',
+        'пробіжк*',
+        'марафон*',
+        'bieganie',
+        'biegać',
+        'bėgiojim*',
+        'bėgimas',
+        'jooksmi*',
+        'jooksma',
+      ],
     ],
     answer: (_c, _p, L) =>
       L(
@@ -525,6 +588,9 @@ export const INTENTS_FOURTH: Intent[] = [
         'soccer',
         'boxing',
         'bjj',
+        'бжж',
+        'джиу*',
+        'jiu*',
         'mma',
         'tennis',
         'basketball',
@@ -575,6 +641,13 @@ export const INTENTS_FOURTH: Intent[] = [
     all: [
       [
         'what can i ask',
+        'what can you do',
+        'what are you able',
+        'що ти вмієш',
+        'що ти можеш',
+        'що вмієш',
+        'что ты умеешь',
+        'что ты можешь',
         'examples',
         'what to ask',
         'що можна спитати',

@@ -19,13 +19,23 @@ import { KB_R7 } from './partR7';
 import { KB_R8 } from './partR8';
 import { KB_R9 } from './partR9';
 import { KB_R10 } from './partR10';
+import { KB_R11 } from './partR11';
+import { KB_R12 } from './partR12';
 import { KB_PLLTET } from './partPlLtEt';
+import { KB_PLLTET_2A } from './partPlLtEt2a';
+import { KB_PLLTET_2B } from './partPlLtEt2b';
+import { KB_PLLTET_2C } from './partPlLtEt2c';
 import { FACETS_R1 } from './depthR1';
 import { FACETS_R2 } from './depthR2';
 import { FACETS_R3 } from './depthR3';
 import { NEW_TOPICS } from './topicsNew';
 import { NEW_TOPICS_EX } from './topicsNewEx';
 import { APP_TOPICS } from '../appTopics';
+import { MORE_TOPICS_EX } from './topicsMoreEx';
+import { MORE_TOPICS_EX2A } from './topicsMoreEx2';
+import { MORE_TOPICS_EX2B } from './topicsMoreEx3';
+import { MORE_TOPICS_EX3 } from './topicsMoreFix';
+import { APP_MORE_EX, KB_APP_EXTRA } from './appTipsEx';
 import type { Kb } from './types';
 
 const base: Kb = { ...KB_A, ...KB_B, ...KB_C, ...KB_D, ...KB_E };
@@ -40,8 +50,17 @@ const rounds: More[] = [
   KB_R8,
   KB_R9,
   KB_R10,
+  KB_R11,
+  KB_R12,
+  KB_APP_EXTRA,
+  MORE_TOPICS_EX2A,
+  MORE_TOPICS_EX2B,
+  MORE_TOPICS_EX3,
   // Other languages ride in the English list — the matcher doesn't care.
   Object.fromEntries(Object.entries(KB_PLLTET).map(([id, ex]) => [id, { ex, exUk: [] }])),
+  ...[KB_PLLTET_2A, KB_PLLTET_2B, KB_PLLTET_2C].map((r) =>
+    Object.fromEntries(Object.entries(r).map(([id, ex]) => [id, { ex, exUk: [] }])),
+  ),
 ];
 const more: More = {};
 for (const r of rounds)
@@ -68,7 +87,13 @@ export const KB: Kb = Object.fromEntries([
     ];
   }),
   // How the app works — from the app's own screens.
-  ...APP_TOPICS.map((t) => [t.id, { ex: t.ex, exUk: t.exUk }]),
+  ...APP_TOPICS.map((t) => [
+    t.id,
+    {
+      ex: [...t.ex, ...(more[t.id]?.ex ?? [])],
+      exUk: [...t.exUk, ...(more[t.id]?.exUk ?? [])],
+    },
+  ]),
   // Topics added later — whole (phrasings + sides) in one file.
   ...NEW_TOPICS.map((t) => [
     t.id,
@@ -77,6 +102,11 @@ export const KB: Kb = Object.fromEntries([
       exUk: [...(NEW_TOPICS_EX[t.id]?.exUk ?? []), ...(more[t.id]?.exUk ?? [])],
       facets: t.facets,
     },
+  ]),
+  // A hundred more topics and more app help — phrasings only (answers in topicsMore*.ts, appTips.ts).
+  ...Object.entries({ ...MORE_TOPICS_EX, ...APP_MORE_EX }).map(([id, e]) => [
+    id,
+    { ex: [...e.ex, ...(more[id]?.ex ?? [])], exUk: [...e.exUk, ...(more[id]?.exUk ?? [])] },
   ]),
 ]);
 export type { Facet, Kb, KbEntry } from './types';

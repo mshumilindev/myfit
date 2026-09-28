@@ -136,7 +136,9 @@ describe('dayFacts / weekFact', () => {
     for (let w = 1; w <= 8; w++)
       for (let d = 0; d < 3; d++) hist.push(session(T0 - w * 7 * DAY - (d + 1) * DAY, []));
     hist.push(session(T0 - DAY, []));
-    expect(weekFact(hist, T0)).toMatchObject({ sessions: 1, planned: 3 });
+    // Reviewed on the week's last day (Sunday evening for a Monday start): this
+    // calendar week holds the one Sunday session; the Sunday before is last week.
+    expect(weekFact(hist, T0 - DAY + 3 * 3_600_000)).toMatchObject({ sessions: 1, planned: 3 });
   });
 });
 

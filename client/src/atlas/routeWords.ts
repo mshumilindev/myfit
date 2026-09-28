@@ -27,9 +27,9 @@ export const PAIN_TOPICS = new Set([
   'train_sore',
 ]);
 export const LIFTED_RE =
-  /(how much|скільки|сколько|total|усього|всього).*((^|\s)(did i|have i|i've|i have|i)\s+(lifted|moved|lift)(\s|$)|(^|\s)(я\s+)?(підняв|підняла|підняли|піднято|поднял\S*|перетягав\S*)(\s|$))/u;
+  /(how much|скільки|сколько|total|усього|всього).*((^|\s)(did i|have i|i've|i have|i)\s+(lifted|moved|lift)(\s|$)|(^|\s)(я\s+)?(підняв|підняла|підняли|піднято|поднял\S*|перетягав\S*|натягав\S*|натаскав\S*|натягал\S*|натаскал\S*)(\s|$)|(^|\s)(kilos?|kgs?|kg|weight|tons?|tonnes?)\s+(lifted|moved)(\s|$))/u;
 export const STALL_RE =
-  /(стоїть|стоять|застря\S*|впа\S*|просі\S*|просід\S*|не росте|не ростуть|не йде|плато|слабш\S*|стоит|упал\S*|не растет|stuck|stall\S*|plateau\S*|drop\S*|went down|not (going|moving|growing|improving)|weaker|regress\S*)/u;
+  /(ei tõuse|ei touse|ei kasva|nie rośnie|nie rosnie|nie idzie|neauga|nekyla|stovi vietoje|стоїть|стоять|стою на|стою в|стоїмо|stoję|stoje|stoviu|seisab|seisan|seisma|застря\S*|впа\S*|просі\S*|просід\S*|не росте|не ростуть|не йде|плато|слабш\S*|стоит|упал\S*|не растет|stuck|stall\S*|plateau\S*|drop\S*|went down|not (going|moving|growing|improving)|weaker|regress\S*)/u;
 /** Words that ask Atlas to DO something. */
 export const REQUEST_RE =
   /(^|\s)(заміни|поміняй|перенеси|постав|встанови|прибери|додай|видали|почни|запиши|зроби|вимкни|увімкни|давай|замени|поменяй|перенеси|поставь|убери|добавь|начни|запиши|сделай|swap|replace|move|set|remove|add|start|log|make|turn|switch|please|can you|could you|будь ласка|пожалуйста)(\s|$)/u;
@@ -37,22 +37,25 @@ export const SPLIT_RE = /\?+\s*|\s+(?:and also|also|а ще|і ще|плюс)\s+
 export const BUMP_RE =
   /(^|\s)(додай|додам|добав|добавь|накинь|накину|повісь|add|put on|bump|increase by)\s+(\d+(?:[.,]\d+)?)\s*(кг|kg|кіло|kilos?)?(\s|$)/u;
 export const AVOID_RE =
-  /(^|\s)(не хочу (більше )?(робити )?|ненавиджу|терпіти не можу|бісить|hate|can.?t stand|don.?t want to do|ненавижу|не хочу больше)/u;
+  /(^|\s)(не хочу (більше )?(робити )?|ненавиджу|терпіти не можу|бісить|hate|can.?t stand|don.?t want to do|don.?t like|do not like|не люблю|не подобаються|не подобається|ненавижу|не хочу больше|не люблю|nie lubie|nie lubię|nienawidze|nienawidzę|nie znosze|nie znoszę|nemegstu|nemėgstu|nekenciu|nekenčiu|ei meeldi|vihkan|ei salli)/u;
 export const CONNECTOR_RE = /^\s*((а|і|й|та|ще|також|и|еще|and|also|plus|then)\s+)+/iu;
 /** Everyday Polish / Lithuanian / Estonian words (typed without diacritics too). */
 export const OTHER_LATIN = new Set(
-  'jak ile czy moj moje moja mam sie jest dla trening treningu cwiczenie cwiczenia dzisiaj ktory ktore kiedy jaki jaka mnie mi robic zrobic kiek kaip ar mano man yra ka kada kodel treniruote treniruotes pratimas pratimai siandien kui kuidas mis minu mul kas palju trenn trenni harjutus tana miks millal'.split(
+  'tere tsau tervist aitah aitäh treener treeneri labas sveikas aciu ačiū treneri czesc cześć siema dzieki dzięki trenerze jak ile czy moj moje moja mam sie jest dla trening treningu cwiczenie cwiczenia dzisiaj ktory ktore kiedy jaki jaka mnie mi robic zrobic kiek kaip ar mano man yra ka kada kodel treniruote treniruotes pratimas pratimai siandien kui kuidas mis minu mul kas palju trenn trenni harjutus tana miks millal'.split(
     ' ',
   ),
 );
 /** Words that mark a message as English, not transliterated Ukrainian. */
 export const EN_COMMON = new Set(
-  'i my me you the a an to of in on for is are was do does did how what why when which who more go and or it this that with should can will much many long often best'.split(
-    ' ',
-  ),
+  (
+    'i my me you the a an to of in on for is are was do does did how what why when which who more go and or it this that with should can will much many long often best ' +
+    'after before today yesterday tomorrow feeling feel felt sore tired gym workout train training legs arms back chest day week night morning ' +
+    'everywhere every all some any really still just very so too get got have has had been being am im its dont cant not no yes please thanks ' +
+    'squat bench deadlift weight weights reps sets rest sleep eat food better good bad need want like know think make lift lifting'
+  ).split(' '),
 );
 export const NO_PAIN_CLAUSE =
-  /(?<=^|\s)((в|у) мене |i have |my |у меня )?((нічого|ніщо|ніде|nothing|ничего|нигде)\s+(не\s+)?(болить|болять|болит|hurts?)|\S+\s+(не болить|не болять|не болит|does not hurt|doesn.?t hurt|is fine now)|(не болить|не болит)\s+\S+)(?=\s|$|[,.;—-])\s*[,.;—-]?\s*/iu;
+  /(?<=^|\s)((в|у) мене |i have |my |у меня )?((нічого|ніщо|ніде|nothing|ничего|нигде)\s+(не\s+)?(болить|болять|болит|hurts?)|no pain|без болю|болю (нема|немає)|ничего не болит|\S+\s+(не болить|не болять|не болит|does not hurt|doesn.?t hurt|is fine now)|(не болить|не болит)\s+\S+)(?=\s|$|[,.;—-])\s*[,.;—-]?\s*/iu;
 /** "а?", "ну", "і що", "?" — keep talking about the same thing. */
 export const CONTINUER_RE =
   /^\s*(\?+|а\s*\?*|ну\s*\?*|і\s*\?+|і що\s*\?*|і\s*далі\s*\?*|ну і\s*\?*|хм+\s*\?*|м+\s*\?*|та й\s*\?*|и\s*\?+|и что\s*\?*|so\s*\?*|and\s*\?+|and then\s*\?*|hm+\s*\?*|huh\s*\?*|well\s*\?*|\.\.\.)\s*$/iu;

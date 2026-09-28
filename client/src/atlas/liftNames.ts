@@ -147,7 +147,7 @@ const STATUS_TEXT =
   'progress progressing going doing status trend update how is how are ' +
   'прогрес прогресія динаміка йде ідуть іде справи успіхи ' +
   'прогресс динамика идет идут дела успехи postęp idzie ' +
-  'progresas eina edusammud läheb';
+  'progresas eina edusammud läheb idą ida postępy sekasi progresuoja laheb areneb edeneb';
 
 /**
  * "How are my pull-ups?", "як мої підтягування", "прогрес підтягувань" — the

@@ -23,7 +23,9 @@ const STOP = new Set(
     'мабуть скажи розкажи підкажи будь ласка є був була були буде мати маю маєш мене ' +
     'я мне меня мой моя мое мои ты тебе тебя твой мы нам нас он она оно они их им в во на с со к ко по за от для о об ' +
     'при над под между через а и но или что как почему когда где кто какой какая какое какие это тот та то эти ' +
-    'же бы ну вот уже еще тоже также только просто очень немного можно надо нужно скажи подскажи пожалуйста есть был была'
+    'же бы ну вот уже еще тоже также только просто очень немного можно надо нужно скажи подскажи пожалуйста есть был была ' +
+    // Polish / Lithuanian / Estonian particles and links (folded): "is / do / not / and / that".
+    'czy sie jest sa oraz lub albo ze bo ar ir ne arba kad nes kas ei ja voi ning et sest'
   ).split(' '),
 );
 
@@ -102,13 +104,25 @@ const CYR_ENDINGS = [
 const EN_ENDINGS = ['ations', 'ation', 'ings', 'ing', 'ness', 'ies', 'ied', 'ed', 'ly', 's'];
 
 export function stem(w: string): string {
-  if (w.length <= 3) return w;
   const cyr = /[а-яіїєґ]/.test(w);
+  // Short Ukrainian words keep a two-letter stem: «дні / днів / дня» meet.
+  if (cyr && w.length <= 4) {
+    const e = SHORT_CYR.find(
+      (x) => w.length - x.length >= 2 && w.endsWith(x) && (w.length === 4 || /^[ія]$/u.test(x)),
+    );
+    return e ? w.slice(0, w.length - e.length) : w;
+  }
+  if (w.length <= 3) return w;
   const list = cyr ? CYR_ENDINGS : EN_ENDINGS;
   for (const e of list)
-    if (w.length - e.length >= 3 && w.endsWith(e)) return w.slice(0, w.length - e.length);
+    if (w.length - e.length >= 3 && w.endsWith(e)) {
+      const s = w.slice(0, w.length - e.length);
+      // "spotting" → "spot", "running" → "run": the doubled consonant goes too.
+      return !cyr && /(ing|ed)$/.test(e) && /([bdgmnprt])\1$/.test(s) ? s.slice(0, -1) : s;
+    }
   return w;
 }
+const SHORT_CYR = ['ів', 'ям', 'ях', 'ам', 'ах', 'і', 'и', 'я', 'а', 'у', 'ю'];
 
 // Words too common to carry meaning on their own, even if a group lists them.
 const RISKY = new Set([
@@ -148,6 +162,39 @@ function conceptIndex() {
   return { word, phrases };
 }
 
+/** True while the index is built from the base. */
+let building = false;
+/** Concept words by first letter — for a typo of one ("protien", "wamrup"). */
+let byFirst: Map<string, string[]> | null = null;
+const typoMemo = new Map<string, string | null>();
+/** A misspelt concept word (one edit, same first letter, 6+ letters) → its concept. */
+function typoConcept(w: string): string | null {
+  // Only for messages: the base's own words are spelt right.
+  if (building || w.length < 6 || !concepts) return null;
+  const hit = typoMemo.get(w);
+  if (hit !== undefined) return hit;
+  if (!byFirst) {
+    byFirst = new Map();
+    for (const k of concepts.word.keys()) {
+      if (k.length < 6) continue;
+      const l = byFirst.get(k[0]);
+      if (l) l.push(k);
+      else byFirst.set(k[0], [k]);
+    }
+  }
+  let out: string | null = null;
+  for (const k of byFirst.get(w[0]) ?? []) {
+    if (Math.abs(k.length - w.length) > 1) continue;
+    if (editDistance(w, k, 1) <= 1) {
+      out = concepts.word.get(k) ?? null;
+      break;
+    }
+  }
+  typoMemo.set(w, out);
+  if (typoMemo.size > 4096) typoMemo.delete(typoMemo.keys().next().value as string);
+  return out;
+}
+
 const YOU = new Set([
   'you',
   'your',
@@ -185,6 +232,44 @@ const ME = new Set([
   'меня',
   'мне',
 ]);
+/** "you" / "me" in Polish, Lithuanian, Estonian (only read in a phrase of that language). */
+// "my" / "you" in Polish, Lithuanian, Estonian — the same cue as in English.
+for (const w of [
+  'mój',
+  'moj',
+  'moja',
+  'moje',
+  'moich',
+  'mojego',
+  'mojej',
+  'mnie',
+  'mano',
+  'mane',
+  'manęs',
+  'manes',
+  'minu',
+  'mu',
+  'mul',
+  'mulle',
+  'mind',
+])
+  ME.add(w);
+for (const w of [
+  'twój',
+  'twoj',
+  'twoja',
+  'twoje',
+  'ciebie',
+  'tobie',
+  'tavo',
+  'tave',
+  'tau',
+  'sinu',
+  'sul',
+  'sulle',
+  'sind',
+])
+  YOU.add(w);
 const STOP_EXTRA = new Set([
   'im',
   'ive',
@@ -204,7 +289,18 @@ const STOP_EXTRA = new Set([
   'нет',
 ]);
 
+/** The last messages' terms — one answer reads the same words many times. */
+const termsMemo = new Map<string, string[]>();
 export function terms(text: string): string[] {
+  const hit = termsMemo.get(text);
+  if (hit) return hit;
+  const out = termsRaw(text);
+  termsMemo.set(text, out);
+  if (termsMemo.size > 256) termsMemo.delete(termsMemo.keys().next().value as string);
+  return out;
+}
+
+function termsRaw(text: string): string[] {
   concepts ??= conceptIndex();
   let p = ` ${normalize(text)} `;
   // Multi-word concepts ("work out", "жим лежачи") become one token.
@@ -227,7 +323,7 @@ export function terms(text: string): string[] {
     }
     const st = stem(w);
     if (STOP.has(st) || STOP_EXTRA.has(st)) continue;
-    out.push(concepts.word.get(w) ?? concepts.word.get(st) ?? st);
+    out.push(concepts.word.get(w) ?? concepts.word.get(st) ?? typoConcept(w) ?? st);
   }
   return out;
 }
@@ -302,6 +398,15 @@ export function setIndex(ix: Index): void {
 export type { Index as RetrievalIndex };
 
 function build(KB: Kb): Index {
+  building = true;
+  try {
+    return buildRaw(KB);
+  } finally {
+    building = false;
+  }
+}
+
+function buildRaw(KB: Kb): Index {
   const examples: Example[] = [];
   const topics: Topic[] = [];
   for (const [id, e] of Object.entries(KB)) {
@@ -310,7 +415,7 @@ function build(KB: Kb): Index {
       l: { tf: new Map<string, number>(), len: 0 },
     };
     for (const q of [...e.ex, ...e.exUk]) {
-      const t = [...new Set(terms(q))];
+      const t = [...new Set(termsRaw(q))];
       if (!t.length) continue;
       examples.push({ id, terms: t, weight: 0 });
       const d = by[scriptOf(q)];
@@ -427,6 +532,8 @@ function gramsOf(text: string): Map<string, number> {
 export interface Match {
   id: string;
   score: number;
+  /** Closeness to its single nearest phrasing (0..1, words only). */
+  example?: number;
 }
 
 const K1 = 1.2;
@@ -448,6 +555,19 @@ export function retrieve(question: string, limit = 5): Match[] {
   return res.slice(0, limit);
 }
 
+/** A query word → the known words it matches (exact, ending, one typo); remembered. */
+const nearMemo = new Map<string, string[]>();
+function nearWords(ix: Index, t: string): string[] {
+  if (ix.tidf.has(t)) return [t];
+  let v = nearMemo.get(t);
+  if (!v) {
+    v = ix.vocab.filter((w) => same(t, w));
+    nearMemo.set(t, v);
+    if (nearMemo.size > 4096) nearMemo.delete(nearMemo.keys().next().value as string);
+  }
+  return v;
+}
+
 function retrieveRaw(question: string, limit: number): Match[] {
   if (!index && !source) return [];
   index ??= build(source!);
@@ -455,7 +575,7 @@ function retrieveRaw(question: string, limit: number): Match[] {
   const q = [...new Set(terms(question))];
   if (!q.length) return [];
   // Each query word → the known words it matches (exact, ending, one typo).
-  const near = q.map((t) => (ix.tidf.has(t) ? [t] : ix.vocab.filter((v) => same(t, v))));
+  const near = q.map((t) => nearWords(ix, t));
   const qidf = near.map((vs) => Math.max(0, ...vs.map((v) => ix.tidf.get(v) ?? 0)));
   const maxPossible = qidf.reduce((s, w) => s + w * (K1 + 1), 0) || 1;
 
@@ -534,10 +654,39 @@ function retrieveRaw(question: string, limit: number): Match[] {
         MIX.example * (best.get(id) ?? 0) +
         MIX.gram * (gram.get(id) ?? 0) +
         MIX.gramEx * (gramEx.get(id) ?? 0),
+      example: best.get(id) ?? 0,
     }))
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }
+
+/**
+ * How much of the message a topic accounts for (0..1): the share of its
+ * meaningful words — weighted by how rare they are — that the topic's own
+ * phrasings contain. "I danced all night at a wedding" is only a sliver of
+ * the alcohol topic, however close its best example scores; an unknown word
+ * weighs like the rarest known one.
+ */
+export function coverage(text: string, id: string): number {
+  if (!index && !source) return 1;
+  index ??= build(source!);
+  const ix = index;
+  const q = [...new Set(terms(text))].filter((t) => t !== '~you' && t !== '~me');
+  if (!q.length) return 1;
+  const docs = ix.topics.filter((t) => t.id === id);
+  if (!docs.length) return 0;
+  maxIdf ??= Math.max(1, ...ix.tidf.values());
+  let all = 0;
+  let got = 0;
+  for (const t of q) {
+    const near = nearWords(ix, t);
+    const w = near.length ? Math.max(...near.map((v) => ix.tidf.get(v) ?? 0)) : maxIdf;
+    all += w;
+    if (docs.some((d) => near.some((v) => d.tf.has(v)))) got += w;
+  }
+  return all ? got / all : 1;
+}
+let maxIdf: number | null = null;
 
 /** Blend of the four signals — tuned on the held-out set (kb/tests.ts). */
 export const MIX = { topic: 0.4, example: 0.1, gram: 0.3, gramEx: 0.2 };

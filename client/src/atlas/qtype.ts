@@ -42,6 +42,30 @@ export function questionType(text: string): Facet | null {
   return null;
 }
 
+/**
+ * Told, not asked: "I can train 3 days a week", "я тиждень не ходив у зал".
+ * A first-person subject up front, no question mark, no question word.
+ */
+export function isStatement(text: string): boolean {
+  if (/\?/u.test(text) || questionType(text)) return false;
+  const p = normalize(text);
+  if (
+    /(^| )(can|should|do|does|is|are|чи|можна|треба|сколько|можно)( |$)/u.test(p) &&
+    !/^(i|я) /u.test(p)
+  )
+    return false;
+  return (
+    /^(i|im|ive|id|we|я|ми|мені|мне|у мене|в мене|у меня)( |$)/u.test(p) ||
+    // Ukrainian drops the "я": "хочу схуднути", "тиждень не ходив у зал".
+    /^(не )?(хочу|маю|можу|буду|тренуюсь|займаюсь|ходжу|бігаю|працюю|важу|сплю|люблю|ненавиджу|зробив|зробила|пожав|пожала|вижав|ходив|ходила|був|була|потягнув|потягнула|пробіг|пробігла|хочется|могу|работаю|сделал|пожал)( |$)/u.test(
+      p,
+    ) ||
+    /(^| )не (ходив|ходила|був|була|тренувався|тренувалась|займався|займалась|ходил|была|был|тренировался)( |$)/u.test(
+      p,
+    )
+  );
+}
+
 /** "My / мій / мой…" — the question is about YOUR data, not the concept. */
 export function isPersonal(text: string): boolean {
   return /(^|\s)(my|mine|me|i|i m|am i|did i|do i|мій|моя|моє|мої|мого|моїй|мене|мені|я|мой|моя|мое|мои|меня|мне)(\s|$)/.test(

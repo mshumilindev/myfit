@@ -3,7 +3,8 @@
  * loaded and bodyweight lifts alike. Pull-ups without a belt are judged by
  * reps; loaded lifts by estimated max (weight × reps).
  */
-import { est1rm, setTopWeight, setTypeOf } from '../store';
+import * as N from './num';
+import { E1RM_MAX_REPS, est1rm, setTopWeight, setTypeOf } from '../store';
 import { finishedOf, type AskCtx, type Tr } from './intentKit';
 
 export interface LiftPoint {
@@ -15,6 +16,19 @@ export interface LiftPoint {
   bw: boolean;
   /** What progress is measured in: e1RM (kg) or reps. */
   score: number;
+}
+
+/**
+ * Estimated one-rep max for a set (Epley), as Atlas reports it: a single IS
+ * the max (Epley alone would call 100 × 1 "103 kg"), and sets above the
+ * formula's range count as E1RM_MAX_REPS reps — a slight underestimate, never
+ * the 0 est1rm returns there (which used to make the raw weight stand in for
+ * the max and skew every trend).
+ */
+export function e1rm(kg: number, reps: number): number {
+  if (!(kg > 0) || !(reps >= 1)) return 0;
+  if (reps === 1) return kg;
+  return est1rm(kg, Math.min(E1RM_MAX_REPS, reps));
 }
 
 /** Best set per session, oldest → newest, over your whole history. */
@@ -30,10 +44,10 @@ export function liftPoints(c: AskCtx, name: string): LiftPoint[] {
         .map((s) => ({
           kg: setTopWeight(s),
           reps: s.reps,
-          e1: est1rm(setTopWeight(s), Math.min(12, s.reps)),
+          e1: e1rm(setTopWeight(s), s.reps),
         }))
         .sort((a, b2) => b2.e1 - a.e1)[0];
-      out.push({ ts: w.startedAt, kg: b.kg, reps: b.reps, bw: false, score: b.e1 || b.kg });
+      out.push({ ts: w.startedAt, kg: b.kg, reps: b.reps, bw: false, score: b.e1 });
     } else {
       const reps = Math.max(...sets.map((s) => s.reps));
       out.push({ ts: w.startedAt, kg: 0, reps, bw: true, score: reps });
@@ -73,19 +87,19 @@ export function liftProgress(c: AskCtx, name: string, L: Tr): string | null {
   if (bw) {
     const diff = last.reps - first.reps;
     return L(
-      `${nm}: ${first.reps} → ${last.reps} reps (${sign(diff)}) since ${d}, ${win.length} sessions; best ${bestTxt}.${diff <= 0 ? ' Flat — add a rep a session, then a slow negative set.' : ''}`,
+      `${nm}: ${first.reps} → ${last.reps} reps (${sign(diff)}) since ${d}, ${N.sessions('en', win.length)}; best ${bestTxt}.${diff <= 0 ? ' Flat — add a rep a session, then a slow negative set.' : ''}`,
       `${nm}: ${first.reps} → ${last.reps} повт. (${sign(diff)}) з ${d}, ${win.length} трен.; найкраще ${bestTxt}.${diff <= 0 ? ' Стоїть — додавай по повтору, потім сет повільних негативів.' : ''}`,
     );
   }
   const pct = Math.round(((last.score - first.score) / Math.max(1, first.score)) * 100);
   return L(
-    `${nm}: estimated max ${kg(c, first.score)} → ${kg(c, last.score)} (${sign(pct)}%) since ${d}, ${win.length} sessions; best set ${bestTxt}.${pct <= 0 ? ' Flat — same weight, one more rep each session until it moves.' : ''}`,
+    `${nm}: estimated max ${kg(c, first.score)} → ${kg(c, last.score)} (${sign(pct)}%) since ${d}, ${N.sessions('en', win.length)}; best set ${bestTxt}.${pct <= 0 ? ' Flat — same weight, one more rep each session until it moves.' : ''}`,
     `${nm}: розрахунковий максимум ${kg(c, first.score)} → ${kg(c, last.score)} (${sign(pct)}%) з ${d}, ${win.length} трен.; найкращий сет ${bestTxt}.${pct <= 0 ? ' Стоїть — та сама вага, +1 повтор щотренування, доки не зрушить.' : ''}`,
   );
 }
 
 export function fmtPoint(c: AskCtx, p: LiftPoint, L: Tr): string {
-  return p.bw ? L(`${p.reps} reps`, `${p.reps} повт.`) : `${c.fmt.kg(p.kg)} × ${p.reps}`;
+  return p.bw ? L(N.reps('en', p.reps), N.reps('uk', p.reps)) : N.setText(c, p.kg, p.reps);
 }
 const kg = (c: AskCtx, v: number) => c.fmt.kg(Math.round(v * 2) / 2);
 const sign = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${Math.abs(n)}` : '±0');
@@ -112,14 +126,16 @@ export function explainLift(c: AskCtx, name: string, L: Tr): string | null {
       `за останні 4 тижні ти робив її ${recent.length} раз(и) проти ${before.length} перед тим`,
     ]);
   const last = pts[pts.length - 1];
-  const daysOff = Math.floor((now - last.ts) / 86_400_000);
-  if (daysOff >= 14)
-    why.push([`the last session was ${daysOff} days ago`, `останній раз — ${daysOff} дн. тому`]);
+  if (now - last.ts >= 14 * 86_400_000)
+    why.push([
+      `the last session was ${N.agoOf(c, now - last.ts)}`,
+      `останній раз — ${N.agoOf(c, now - last.ts)}`,
+    ]);
   const bw = isBodyweightLift(pts);
   const same = pts.filter((p) => p.bw === bw).slice(-4);
   if (!bw && same.length >= 3 && same.every((p) => p.kg === same[0].kg))
     why.push([
-      `the same ${c.fmt.kg(same[0].kg)} for ${same.length} sessions — the load hasn't been nudged`,
+      `the same ${c.fmt.kg(same[0].kg)} for ${N.sessions('en', same.length)} — the load hasn't been nudged`,
       `та сама вага ${c.fmt.kg(same[0].kg)} вже ${same.length} трен. — навантаження не росте`,
     ]);
   // Sleep over the last two weeks, if you track it.
@@ -151,7 +167,7 @@ export function explainLift(c: AskCtx, name: string, L: Tr): string | null {
       `${nm}: nothing obvious in your log — frequency, load and sets look steady. Then it's usually recovery (sleep, food, stress) or it simply needs a small change: +1 rep a session, or a new rep range for 4 weeks.`,
       `${nm}: у журналі нічого очевидного — частота, вага й сети рівні. Тоді зазвичай справа у відновленні (сон, їжа, стрес) або потрібна дрібна зміна: +1 повтор щотренування чи новий діапазон повторів на 4 тижні.`,
     );
-  if (why.some(([e]) => /in the last 4 weeks|days ago/.test(e)))
+  if (why.some(([e]) => /in the last 4 weeks|last session was/.test(e)))
     fix.push(['get back to 2 sessions a week on it', 'повернути її 2 рази на тиждень']);
   if (why.some(([e]) => /same/.test(e)))
     fix.push([

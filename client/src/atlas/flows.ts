@@ -64,7 +64,13 @@ const has = (ph: string, re: RegExp) => re.test(` ${ph} `);
 // ============================================================================
 
 const PAIN_RE =
-  /(^|\s)(болить|болять|біль|болі\S*|ниє|ниють|тягне|стріляє|травм\S*|потягнув|потягнула|защемил\S*|болит|боль|болят|pain\S*|hurts?|hurting|ache\S*|boli|bolą|bola|ból|bólu|bol|skauda|skausm\S*|valutab|valus|valu|injur\S*|tweak\S*|pulled|підвернув\S*|підвернула|вивихнув\S*|вивих\S*|вискочил\S*|зламав\S*|зламала|перелом\S*|розірвав\S*|надірвав\S*|хлопок|хлопнул\S*|sprain\S*|popped|snapped|dislocat\S*|fractur\S*|torn|не можу ходити)(\s|$)|rolled my|can.?t walk/u;
+  /(^|\s)(болить|болять|біль|болі\S*|ниє|ниють|тягне|стріляє|травм\S*|потягнув|потягнула|защемил\S*|болит|боль|болят|pain\S*|hurts?|hurting|ache\S*|boli|bolą|bola|ból|bólu|bol|skauda|skausm\S*|valutab|valus|valu|injur\S*|tweak\S*|pulled|підвернув\S*|підвернула|вивихнув\S*|вивих\S*|вискочил\S*|зламав\S*|зламала|перелом\S*|розірвав\S*|надірвав\S*|хлопок|хлопнул\S*|twing\S*|ноет|ноют|pobolewa\S*|sprain\S*|popped|snapped|dislocat\S*|fractur\S*|torn|не можу ходити)(\s|$)|rolled my|can.?t walk/u;
+/** Polish / Lithuanian / Estonian "something snapped / I pulled it" (folded). */
+const PAIN_X =
+  /(^|\s)(strzelil\S*|strzeliło|strzyknel\S*|naciagn\S*|naciągn\S*|naderwa\S*|skrecil\S*|skręcił\S*|kluje|truko|trūko|plyšo|plyso|patempiau|patempe\S*|pasitempiau|susizeidziau|susizeidžiau|tombas|tõmbas|venitasin|rebenes|rebenesid|vigastasin|nikastasin)(\s|$)/u;
+/** Something off, not named as pain ("feels weird", "якось дивно"). */
+const ODD_FEEL =
+  /(^|\s)(feels?|feeling|felt) (weird|off|funny|strange|wrong|unstable)(\s|$)|(^|\s)(якось |дуже )?(дивно|дивне відчуття|щось не те)(\s|$)|(^|\s)dziwnie(\s|$)|(^|\s)keistai(\s|$)|(^|\s)imelik\S*(\s|$)/u;
 const NOT_PAIN_RE =
   /(^|\s)(не болить|не болять|не болит|no pain|doesn.?t hurt|does not hurt|без болю|nie boli|neskauda|ei valuta)(\s|$)/u;
 /** "Hurt my gains", logging an injury in the app, coming back, pain meds — other topics. */
@@ -85,7 +91,13 @@ export function painStart(question: string): boolean {
   const ph = normalize(question);
   // "My knee hurts since I came back" is still a report — a part + pain right now.
   const present = !!findPart(tokens(question), ph) && has(ph, PRESENT_PAIN_RE);
-  return has(ph, PAIN_RE) && !has(ph, NOT_PAIN_RE) && (!has(ph, NOT_A_REPORT_RE) || present);
+  // "knees feel weird now" — a body part and something off with it.
+  const odd = !!findPart(tokens(question), ph) && has(ph, ODD_FEEL);
+  return (
+    (has(ph, PAIN_RE) || has(ph, PAIN_X) || odd) &&
+    !has(ph, NOT_PAIN_RE) &&
+    (!has(ph, NOT_A_REPORT_RE) || present)
+  );
 }
 
 const PARTS: [BodyPart, [string, string]][] = [

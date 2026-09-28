@@ -8,7 +8,7 @@
  * Pure helpers here; the chat view persists the results.
  */
 import type { Taught } from './teach';
-import { groupMatches, negated } from './nlu';
+import { groupMatches, normalize } from './nlu';
 import type { Tr } from './intentKit';
 
 export const DAY_MS = 86_400_000;
@@ -232,6 +232,8 @@ const GOALS: [Goal, string[]][] = [
       'bulking',
       'mass',
       'bigger',
+      'get big',
+      'more muscle',
       'масу',
       'набрати',
       'маса',
@@ -417,9 +419,116 @@ export interface Learned {
 const num = (phrase: string) =>
   (phrase.match(/\d+(?:[.,]\d+)?/g) ?? []).map((x) => Number(x.replace(',', '.')));
 
+export interface LearnOpts {
+  /** The message as typed (its "?" tell a question from a statement). */
+  raw?: string;
+  /**
+   * Facts only from statements about the speaker (default). Off for reading
+   * a request's pieces (a plan's goal), where nothing is remembered.
+   */
+  gate?: boolean;
+}
+
+/** One clause of the message and whether it states something about you. */
+interface Clause {
+  words: string[];
+  phrase: string;
+  /** Not a question, not "if…", not about somebody else. */
+  states: boolean;
+  /** Says "I / me / my…" (or a first-person verb form). */
+  me: boolean;
+}
+
+/** Clause openers that make it a question ("how…", "чи…", "можно ли…"). */
+const Q_HEAD = new Set(
+  (
+    'how what whats when which should shall can could is are am do does did will would why where who whom any ' +
+    'скільки як коли чи що шо який яка які яке чому навіщо нащо де куди можна треба варто ' +
+    'сколько как когда что какой какая какие можно нужно стоит почему зачем где'
+  ).split(' '),
+);
+/** Leading words that don't change what a clause is ("and how…", "so what…"). */
+const LEAD = new Set('and so but ok okay well а і и й так ну то та але'.split(' '));
+const IF_RE = /(^| )(if|unless|якщо|якби|коли б|если|бы)( |$)/u;
+const ME_RE =
+  /(^| )(i|im|ive|id|me|my|mine|myself|we|я|мені|мене|мій|моя|моє|мої|собі|у мене|в мене|мне|меня|мой|мои|у меня|можу|маю|хочу|могу|хочу)( |$)|(^| )\S+(юсь|уся|юся|ую|аю|яю|ію|юю)( |$)/u;
+const NEG = new Set([
+  'not',
+  'no',
+  'never',
+  'dont',
+  'isnt',
+  'arent',
+  'aint',
+  'wasnt',
+  'не',
+  'ні',
+  'ни',
+  'нет',
+  'ніколи',
+  'никогда',
+]);
+/** Somebody else's facts ("my dad is 65", "my friend is a beginner"). */
+const OTHER_RE =
+  /(^| )(my|for my|his|her|he|she|мій|моя|мого|моєї|моєму|моїй|мой|моего|моей|для|він|вона|он|она)\s+(friend|dad|father|mom|mum|mother|brother|sister|wife|husband|boyfriend|girlfriend|partner|son|daughter|kid|child|client|coworker|colleague|grandma|grandpa|друг\S*|подруг\S*|батьк\S*|тат\S*|мам\S*|брат\S*|сестр\S*|дружин\S*|чолові\S*|хлоп\S*|дівчин\S*|син\S*|донь\S*|доч\S*|клієнт\S*|колег\S*|бабус\S*|дідус\S*|дитин\S*|жен\S*|муж\S*|отц\S*|отец|is|was|has|є|має|був)( |$)/u;
+
+function clausesOf(raw: string): Clause[] {
+  const out: Clause[] = [];
+  for (const sentence of raw.split(/(?<=[.!?;\n…])/u)) {
+    const asked = /\?\s*$/u.test(sentence);
+    const bits = sentence
+      .split(/,|—|–|\s+-\s+|\s+(?:but|але|однак|проте|and|і|та|и|а|so|тому|бо|because)\s+/iu)
+      .map((x) => x.trim())
+      .filter(Boolean);
+    bits.forEach((b, k) => {
+      const phrase = normalize(b);
+      const words = phrase.split(' ').filter(Boolean);
+      if (!words.length) return;
+      const head = words.find((w) => !LEAD.has(w)) ?? '';
+      const question = Q_HEAD.has(head) || (asked && k === bits.length - 1);
+      out.push({
+        words,
+        phrase,
+        states: !question && !IF_RE.test(phrase) && !OTHER_RE.test(` ${phrase} `),
+        me: ME_RE.test(` ${phrase} `),
+      });
+    });
+  }
+  return out;
+}
+
+/** The first word of a keyword match in the clause, or -1 (exact words / stems only). */
+function matchAt(words: string[], group: string[]): number {
+  for (const kw of group) {
+    const k = normalize(kw.replace(/\*/g, ' ')).trim().split(' ');
+    const stems = kw
+      .split(' ')
+      .map((x) => x.endsWith('*'))
+      .slice(0, k.length);
+    for (let i = 0; i + k.length <= words.length; i++)
+      if (k.every((p, j) => (stems[j] ? words[i + j].startsWith(p) : words[i + j] === p))) return i;
+  }
+  return -1;
+}
+
+/** The keyword is there and not negated ("not a beginner", "не новачок"). */
+function saysIn(cl: Clause, group: string[]): boolean {
+  const i = matchAt(cl.words, group);
+  if (i < 0) return false;
+  for (let j = Math.max(0, i - 2); j < i; j++) if (NEG.has(cl.words[j])) return false;
+  return true;
+}
+const hasIn = (cl: Clause, group: string[]) => matchAt(cl.words, group) >= 0;
+
+/** Level words that are about the speaker on their own ("first time", "just started"). */
+const SELF_EVIDENT = /\s/;
+
 /**
  * Pull facts out of a message. Returns a patch to merge into memory and a
- * short acknowledgement. Never guesses: each fact needs its own clear words.
+ * short acknowledgement. Never guesses: each fact needs its own clear words —
+ * exact words or stems, never a typo-tolerant guess ("danced" ≠ "advanced") —
+ * said as a statement about you: not in a question ("what should a beginner
+ * do?"), not negated ("I'm not a beginner"), not about somebody else.
  */
 export function learn(
   words: string[],
@@ -428,42 +537,53 @@ export function learn(
   now: number,
   exercise: string | null,
   fmtEx: (n: string) => string,
+  opts: LearnOpts = {},
 ): Learned {
   const patch: AtlasMemory = {};
   const notes: [string, string][] = [];
-  const part = findPart(words, phrase);
+  const gate = opts.gate ?? true;
+  const all = clausesOf(opts.raw ?? phrase);
+  if (!all.length) all.push({ words, phrase, states: true, me: true });
+  /** Clauses a fact may come from. */
+  const facts = gate ? all.filter((c) => c.states) : all.map((c) => ({ ...c, me: true }));
+  const says = (group: string[], needMe = false) =>
+    facts.some((c) => (!needMe || c.me) && saysIn(c, group));
 
-  // A sore part — or "it's fine now".
-  if (part) {
-    const pain = groupMatches(words, phrase, PAIN);
-    const fine = groupMatches(words, phrase, FINE) || (pain && negated(words, PAIN));
+  // A sore part — or "it's fine now" (the part and the words in one clause).
+  const partIn = (cl: Clause) => PART_WORDS.find(([, kws]) => hasIn(cl, kws))?.[0] ?? null;
+  for (const cl of all) {
+    const part = partIn(cl);
+    if (!part || IF_RE.test(cl.phrase) || OTHER_RE.test(` ${cl.phrase} `)) continue;
+    const pain = hasIn(cl, PAIN);
+    const fine = hasIn(cl, FINE) || (pain && !saysIn(cl, PAIN));
     if (fine && mem?.sore?.[part]) {
-      patch.sore = { ...(mem.sore ?? {}) };
+      patch.sore = { ...(patch.sore ?? mem.sore ?? {}) };
       delete patch.sore[part];
       notes.push([
         `Good — ${PART_NAME[part][0]} is off my watch list.`,
         `Добре — ${PART_NAME[part][1]} знімаю з уваги.`,
       ]);
     } else if (pain && !fine) {
-      patch.sore = { ...(mem?.sore ?? {}), [part]: now };
+      patch.sore = { ...(patch.sore ?? mem?.sore ?? {}), [part]: now };
       notes.push([
         `Noted: ${PART_NAME[part][0]}. For two weeks I’ll plan those muscles 20% lighter — tell me when it’s fine.`,
         `Запам’ятав: ${PART_NAME[part][1]}. Два тижні ці м’язи в плані на 20% легші — скажи, коли мине.`,
       ]);
     }
+    break;
   }
 
-  // Goal.
-  if (groupMatches(words, phrase, WANT)) {
-    // "I don't want to lose weight, I want muscle" — the negated goal is not the goal.
-    const kept = ` ${phrase} `
+  // Goal: "I want to lose fat" (a negated goal is not the goal).
+  for (const cl of facts) {
+    if (!saysIn(cl, WANT)) continue;
+    const kept = ` ${cl.phrase} `
       .replace(
         /(^|\s)(не хочу|не хочеться|не хочется|не треба|не надо|don.?t want( to)?|do not want( to)?|not)\s+\S+/gu,
         ' ',
       )
       .trim();
-    const keptWords = kept.split(/\s+/).filter(Boolean);
-    const g = GOALS.find(([, kws]) => groupMatches(keptWords, kept, kws))?.[0];
+    const keptCl: Clause = { ...cl, words: kept.split(/\s+/).filter(Boolean), phrase: kept };
+    const g = GOALS.find(([, kws]) => saysIn(keptCl, kws))?.[0];
     if (g && mem?.goal?.v !== g) {
       patch.goal = { v: g, at: now };
       const name: Record<Goal, [string, string]> = {
@@ -474,10 +594,11 @@ export function learn(
       };
       notes.push([`Goal noted: ${name[g][0]}.`, `Мету запам’ятав: ${name[g][1]}.`]);
     }
+    if (g) break;
   }
 
   // A lift you don't want.
-  if (exercise && groupMatches(words, phrase, HATE) && !(mem?.avoid ?? []).includes(exercise)) {
+  if (exercise && says(HATE) && !(mem?.avoid ?? []).includes(exercise)) {
     patch.avoid = [...(mem?.avoid ?? []), exercise];
     notes.push([
       `Noted — no more ${fmtEx(exercise)} from me.`,
@@ -485,50 +606,62 @@ export function learn(
     ]);
   }
 
-  const n = num(phrase);
+  // Numbers come from the clause that states the fact.
+  const numIn = (group: string[], extra: string[][], ok: (x: number) => boolean) => {
+    for (const cl of facts)
+      if (saysIn(cl, group) && extra.every((g) => hasIn(cl, g))) {
+        const x = num(cl.phrase).find(ok);
+        if (x !== undefined) return x;
+      }
+    return undefined;
+  };
   // Time per session.
-  if (groupMatches(words, phrase, MINUTE) && groupMatches(words, phrase, HAVE)) {
-    const m = n.find((x) => x >= 10 && x <= 240);
-    if (m && mem?.minutes?.v !== m) {
-      patch.minutes = { v: m, at: now };
-      notes.push([
-        `Noted: about ${m} min per session.`,
-        `Запам’ятав: близько ${m} хв на тренування.`,
-      ]);
-    }
+  const m = numIn(MINUTE, [HAVE], (x) => x >= 10 && x <= 240);
+  if (m && mem?.minutes?.v !== m) {
+    patch.minutes = { v: m, at: now };
+    notes.push([
+      `Noted: about ${m} min per session.`,
+      `Запам’ятав: близько ${m} хв на тренування.`,
+    ]);
   }
   // Days a week.
-  if (
-    groupMatches(words, phrase, DAYS) &&
-    groupMatches(words, phrase, WEEKLY) &&
-    (groupMatches(words, phrase, CAN) || groupMatches(words, phrase, HAVE))
-  ) {
-    const d = n.find((x) => x >= 1 && x <= 7);
-    if (d && mem?.days?.v !== d) {
-      patch.days = { v: d, at: now };
-      notes.push([`Noted: ${d} days a week.`, `Запам’ятав: ${d} дн. на тиждень.`]);
-    }
+  const d =
+    numIn(DAYS, [WEEKLY, CAN], (x) => x >= 1 && x <= 7) ??
+    numIn(DAYS, [WEEKLY, HAVE], (x) => x >= 1 && x <= 7);
+  if (d && mem?.days?.v !== d) {
+    patch.days = { v: d, at: now };
+    notes.push([`Noted: ${d} days a week.`, `Запам’ятав: ${d} дн. на тиждень.`]);
   }
-  if (groupMatches(words, phrase, HOME) && !mem?.home) {
+  if (says(HOME, true) && !mem?.home) {
     patch.home = true;
     notes.push(['Noted: you train at home.', 'Запам’ятав: тренуєшся вдома.']);
   }
-  if (groupMatches(words, phrase, BEGIN) && mem?.level !== 'beginner') {
+  // Level: a phrase ("just started") speaks for itself; a lone word
+  // ("beginner") only with "I / я" — "beginner program pls" is not about you.
+  const level = (group: string[]) =>
+    says(group.filter((k) => SELF_EVIDENT.test(k))) ||
+    says(
+      group.filter((k) => !SELF_EVIDENT.test(k)),
+      true,
+    );
+  if (level(BEGIN) && mem?.level !== 'beginner') {
     patch.level = 'beginner';
     notes.push([
       'Noted: you’re new to this. I’ll keep it simple.',
       'Запам’ятав: ти новачок. Буду простіше.',
     ]);
-  } else if (groupMatches(words, phrase, ADV) && mem?.level !== 'advanced') {
+  } else if (level(ADV) && mem?.level !== 'advanced') {
     patch.level = 'advanced';
     notes.push(['Noted: experienced lifter.', 'Запам’ятав: досвідчений.']);
   }
-  if (groupMatches(words, phrase, AGE)) {
-    const a = n.find((x) => x >= 13 && x <= 90);
-    if (a && mem?.age !== a && !groupMatches(words, phrase, MINUTE) && !/kg|кг|lb/.test(phrase)) {
+  for (const cl of facts) {
+    if (!cl.me || !saysIn(cl, AGE) || hasIn(cl, MINUTE) || /kg|кг|lb/.test(cl.phrase)) continue;
+    const a = num(cl.phrase).find((x) => x >= 13 && x <= 90);
+    if (a && mem?.age !== a) {
       patch.age = a;
       notes.push([`Noted: ${a}.`, `Запам’ятав: ${a}.`]);
     }
+    if (a) break;
   }
 
   return {

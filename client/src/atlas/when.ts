@@ -5,11 +5,13 @@
  * Works on the normalized phrase (lowercase, no apostrophes).
  */
 import type { Range } from './intentKit';
+import { weekStartOf } from '../weekStart';
+import { foldRe } from './nlu';
 
 const DAY = 86_400_000;
 
 // Month stems → month index (en, uk incl. cases, ru, pl, lt, et).
-const MONTHS: [RegExp, number][] = [
+const MONTHS0: [RegExp, number][] = [
   [
     /(?<!\p{L})(jan|january|січень|січня|січні|январ[ьяе]|styczeń|styczniu|stycznia|sausio|sausį|jaanuar\p{L}*)(?!\p{L})/u,
     0,
@@ -56,10 +58,12 @@ const MONTHS: [RegExp, number][] = [
     11,
   ],
 ];
+// Matched against normalized text: the letters folded (ą→a, ė→e…).
+const MONTHS: [RegExp, number][] = MONTHS0.map(([re, m]) => [foldRe(re), m]);
 // "May" only with a preposition in front (else it's "may I…").
 const MAY_EN = /\b(in|since|from|during)\s+may\b/;
 
-const UNIT: [RegExp, 'day' | 'week' | 'month' | 'year'][] = [
+const UNIT0: [RegExp, 'day' | 'week' | 'month' | 'year'][] = [
   [/^(day|days|дн\p{L}*|день|доб\p{L}*|dni|dzień|dien\p{L}*|päev\p{L}*)$/u, 'day'],
   [
     /^(week|weeks|тижн\p{L}*|тиждень|недел\p{L}*|tygodni\p{L}*|tydzień|savait\p{L}*|nädal\p{L}*)$/u,
@@ -71,6 +75,7 @@ const UNIT: [RegExp, 'day' | 'week' | 'month' | 'year'][] = [
   ],
   [/^(year|years|рік|рок\p{L}*|років|год|года|лет|rok\p{L}*|lat|met\p{L}*|aasta\p{L}*)$/u, 'year'],
 ];
+const UNIT: [RegExp, 'day' | 'week' | 'month' | 'year'][] = UNIT0.map(([re, u]) => [foldRe(re), u]);
 const WORD_NUM: Record<string, number> = {
   one: 1,
   two: 2,
@@ -108,16 +113,12 @@ const WORD_NUM: Record<string, number> = {
   few: 3,
 };
 
-const LAST =
-  /(?<!\p{L})(last|past|previous|останн\p{L}*|последн\p{L}*|ostatni\p{L}*|paskutin\p{L}*|viimas\p{L}*)(?!\p{L})/u;
-const AGO = /(?<!\p{L})(ago|тому|назад|temu|prieš|tagasi)(?!\p{L})/u;
+const LAST = foldRe(
+  /(?<!\p{L})(last|past|previous|останн\p{L}*|последн\p{L}*|ostatni\p{L}*|paskutin\p{L}*|viimas\p{L}*)(?!\p{L})/u,
+);
+const AGO = foldRe(/(?<!\p{L})(ago|тому|назад|temu|prieš|tagasi)(?!\p{L})/u);
 const SINCE = /(?<!\p{L})(since|from|з|із|зі|с|od|nuo|alates)(?!\p{L})/u;
 
-const startOfDay = (t: number) => {
-  const d = new Date(t);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
-};
 const monthStart = (y: number, m: number) => new Date(y, m, 1).getTime();
 const unitMs = (u: 'day' | 'week' | 'month' | 'year') =>
   u === 'day' ? DAY : u === 'week' ? 7 * DAY : u === 'month' ? 30.44 * DAY : 365.25 * DAY;
@@ -275,23 +276,24 @@ export function parseRange(phrase: string, now: number): Range | null {
 
 /** "this/last week|month|year" and their translations. */
 function calendar(phrase: string, u: 'day' | 'week' | 'month' | 'year', now: number): Range | null {
-  const THIS =
-    /(?<!\p{L})(this|current|цього|цей|цю|поточн\p{L}*|этот|этом|этой|этого|w tym|ten|ši|šį|šią|šio|see|sel|selle)(?!\p{L})/u;
-  const PREV =
-    /(?<!\p{L})(last|previous|минул\p{L}*|попередн\p{L}*|прошл\p{L}*|zeszł\p{L}*|poprzedni\p{L}*|praėjus\p{L}*|eelmis\p{L}*|möödunud)(?!\p{L})/u;
-  const UNIT_RE: Record<string, RegExp> = {
+  const THIS = foldRe(
+    /(?<!\p{L})(this|current|цього|цей|цю|поточн\p{L}*|этот|этом|этой|этого|w tym|ten|ši|šį|šią|šio|see|sel|selle)(?!\p{L})/u,
+  );
+  const PREV = foldRe(
+    /(?<!\p{L})(last|previous|минул\p{L}*|попередн\p{L}*|прошл\p{L}*|zeszł\p{L}*|poprzedni\p{L}*|praėjus\p{L}*|eelmis\p{L}*|möödunud)(?!\p{L})/u,
+  );
+  const UNIT_RE0: Record<string, RegExp> = {
     week: /(?<!\p{L})(week|тижн\p{L}*|тиждень|недел\p{L}*|tygodni\p{L}*|tydzień|savait\p{L}*|nädal\p{L}*)(?!\p{L})/u,
     month:
       /(?<!\p{L})(month|місяц\p{L}*|місяць|месяц\p{L}*|miesi\p{L}*|mėnes\p{L}*|mėnuo|kuu|kuus)(?!\p{L})/u,
     year: /(?<!\p{L})(year|рік|року|рок\p{L}*|году|год|roku|rok|metų|metai|aasta\p{L}*)(?!\p{L})/u,
   };
-  if (u === 'day' || !UNIT_RE[u].test(phrase)) return null;
+  if (u === 'day' || !foldRe(UNIT_RE0[u]).test(phrase)) return null;
   const d = new Date(now);
   let from: number;
-  if (u === 'week') {
-    const dow = (d.getDay() + 6) % 7;
-    from = startOfDay(now) - dow * DAY;
-  } else if (u === 'month') from = monthStart(d.getFullYear(), d.getMonth());
+  // The week starts on your own first day (Settings), not always Monday.
+  if (u === 'week') from = weekStartOf(now);
+  else if (u === 'month') from = monthStart(d.getFullYear(), d.getMonth());
   else from = new Date(d.getFullYear(), 0, 1).getTime();
   const names = {
     week: [
@@ -310,7 +312,7 @@ function calendar(phrase: string, u: 'day' | 'week' | 'month' | 'year', now: num
   if (PREV.test(phrase) && !/\d/.test(phrase)) {
     const prevFrom =
       u === 'week'
-        ? from - 7 * DAY
+        ? weekStartOf(from - DAY) // not from − 7×24 h: a DST week is an hour short/long
         : u === 'month'
           ? monthStart(d.getFullYear(), d.getMonth() - 1)
           : new Date(d.getFullYear() - 1, 0, 1).getTime();
@@ -322,27 +324,32 @@ function calendar(phrase: string, u: 'day' | 'week' | 'month' | 'year', now: num
 
 // ---- weekdays -------------------------------------------------------------------
 
-const WEEKDAYS: [RegExp, number][] = [
-  [/^(sun(day)?|неділ\p{L}*|воскресень\p{L}*|niedziel\p{L}*|sekmadien\p{L}*|pühapäev\p{L}*)$/u, 0],
+const WEEKDAYS0: [RegExp, number][] = [
   [
-    /^(mon(day)?|понеділ\p{L}*|понедельник\p{L}*|poniedział\p{L}*|pirmadien\p{L}*|esmaspäev\p{L}*)$/u,
+    /^(sun(days?)?|неділ\p{L}*|воскресень\p{L}*|niedziel\p{L}*|sekmadien\p{L}*|pühapäev\p{L}*)$/u,
+    0,
+  ],
+  [
+    /^(mon(days?)?|понеділ\p{L}*|понедельник\p{L}*|poniedział\p{L}*|pirmadien\p{L}*|esmaspäev\p{L}*)$/u,
     1,
   ],
-  [/^(tue(s(day)?)?|вівтор\p{L}*|вторник\p{L}*|wtor\p{L}*|antradien\p{L}*|teisipäev\p{L}*)$/u, 2],
+  [/^(tue(s(days?)?)?|вівтор\p{L}*|вторник\p{L}*|wtor\p{L}*|antradien\p{L}*|teisipäev\p{L}*)$/u, 2],
   [
-    /^(wed(nesday)?|серед\p{L}*|сред\p{L}*|środ\p{L}*|srod\p{L}*|trečiadien\p{L}*|kolmapäev\p{L}*)$/u,
+    /^(wed(nesdays?)?|серед\p{L}*|сред\p{L}*|środ\p{L}*|srod\p{L}*|trečiadien\p{L}*|kolmapäev\p{L}*)$/u,
     3,
   ],
   [
-    /^(thu(rs(day)?)?|четвер\p{L}*|четверг\p{L}*|czwart\p{L}*|ketvirtadien\p{L}*|neljapäev\p{L}*)$/u,
+    /^(thu(rs(days?)?)?|четвер\p{L}*|четверг\p{L}*|czwart\p{L}*|ketvirtadien\p{L}*|neljapäev\p{L}*)$/u,
     4,
   ],
   [
-    /^(fri(day)?|пятниц\p{L}*|пʼятниц\p{L}*|piąt\p{L}*|piat\p{L}*|penktadien\p{L}*|reede\p{L}*)$/u,
+    /^(fri(days?)?|пятниц\p{L}*|пʼятниц\p{L}*|piąt\p{L}*|piat\p{L}*|penktadien\p{L}*|reede\p{L}*)$/u,
     5,
   ],
-  [/^(sat(urday)?|субот\p{L}*|суббот\p{L}*|sobot\p{L}*|šeštadien\p{L}*|laupäev\p{L}*)$/u, 6],
+  [/^(sat(urdays?)?|субот\p{L}*|суббот\p{L}*|sobot\p{L}*|šeštadien\p{L}*|laupäev\p{L}*)$/u, 6],
 ];
+
+const WEEKDAYS: [RegExp, number][] = WEEKDAYS0.map(([re, d]) => [foldRe(re), d]);
 
 /** Weekdays in the order they are named. */
 export function parseWeekdays(words: string[]): number[] {

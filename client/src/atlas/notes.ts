@@ -11,9 +11,10 @@ import { fmtCountdown } from '../restTimer';
 import { localizedExerciseName } from '../data/exerciseNames';
 import type { StoreState } from '../store';
 import type { LocaleId } from '../i18n';
-import { dayFacts, sessionFacts, weekFact } from './facts';
+import { dayFacts, isWeekEnd, sessionFacts, weekFact } from './facts';
 import { effectiveTemper } from './guard';
 import { say, type Fmt } from './voice';
+import { spanFmt } from './num';
 import type { CoachFact, Temper } from './types';
 
 const DAY = 86_400_000;
@@ -64,7 +65,13 @@ export function buildNotes(
       now,
     }),
   );
-  if (new Date(now).getDay() === 0 && finished.length > 0) facts.push(weekFact(finished, now));
+  if (isWeekEnd(now) && finished.length > 0) {
+    // Measured against the programme when Atlas wrote one, else your usual —
+    // and no "1 of 0" when there's no usual yet.
+    const plan = s.coach.enabled && s.coach.role === 'main' ? s.coach.plan : null;
+    const wf = weekFact(finished, now, plan?.days.length);
+    if (wf.kind === 'week' && wf.planned > 0) facts.push(wf);
+  }
 
   const temper = effectiveTemper(s.coach, {
     injuries: s.injuries,
@@ -118,6 +125,7 @@ export function useAtlasFmt(): Fmt {
       mmss: (sec: number) => fmtCountdown(sec),
       muscle: (m: string) => (t.muscleGroups as Record<string, string>)[m] ?? m,
       exercise: (name: string) => localizedExerciseName(name, locale) ?? name,
+      ...spanFmt(locale),
     }),
     [t, locale],
   );

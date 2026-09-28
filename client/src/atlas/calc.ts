@@ -11,6 +11,7 @@
  */
 import type { Tr } from './intentKit';
 import { normalize } from './nlu';
+import { dec } from './num';
 
 const NUM = '(\\d+(?:[.,]\\d+)?)';
 const num = (s: string) => Number(s.replace(',', '.'));
@@ -40,14 +41,16 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
   if (pm) {
     const v = (num(pm[1]) * num(pm[2])) / 100;
     return L(
-      `${pm[1]}% of ${pm[2]} is ${kg(plate(v))} (exactly ${Math.round(v * 10) / 10}).`,
-      `${pm[1]}% від ${pm[2]} — це ${kg(plate(v))} (точно ${Math.round(v * 10) / 10}).`,
+      `${pm[1]}% of ${pm[2]} is ${kg(plate(v))} (exactly ${dec(v, 'en', 2)}).`,
+      `${pm[1]}% від ${pm[2]} — це ${kg(plate(v))} (точно ${dec(v, 'uk', 2)}).`,
     );
   }
 
   // Two sets compared: "пожму 100 на 10, якщо зараз 85 на 8?"
   const sets = [...ph.matchAll(new RegExp(SET_RE.source, 'gu'))];
-  if (sets.length >= 2) {
+  // "5x5 or 3x10" is a set × rep scheme, not two weights.
+  const schemes = sets.every((m) => num(m[1]) <= 10 && !/кг|kg|кило/u.test(m[0]));
+  if (sets.length >= 2 && !schemes) {
     const [a, b] = sets.map((m) => ({
       kg: num(m[1]),
       reps: Number(m[2]),
@@ -55,6 +58,12 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
     }));
     const target = a.e1 >= b.e1 ? a : b;
     const now = target === a ? b : a;
+    // "0 × 8" (an empty bar / nothing yet) has no max to grow from.
+    if (!(now.e1 > 0))
+      return L(
+        `${target.kg} × ${target.reps} needs ≈ ${kg(Math.round(target.e1))} max — log a real working set and I’ll tell you how far off you are.`,
+        `Для ${target.kg} × ${target.reps} треба ≈ ${kg(Math.round(target.e1))} максимуму — запиши робочий сет, і скажу, скільки лишилось.`,
+      );
     const gap = Math.round(((target.e1 - now.e1) / now.e1) * 100);
     return L(
       `${now.kg} × ${now.reps} ≈ ${kg(Math.round(now.e1))} max; ${target.kg} × ${target.reps} needs ≈ ${kg(Math.round(target.e1))} — ${gap <= 3 ? "you're basically there" : `about ${gap}% stronger than now, realistic in ${gap <= 10 ? '1–2 months' : gap <= 20 ? '3–5 months' : 'half a year or more'} of steady progress`}.`,
@@ -93,7 +102,7 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
   if (bwk && /(калор|ккал|calorie|kcal)/u.test(ph)) {
     const w = Number(bwk[2]);
     if (w >= 35 && w <= 250) {
-      const lo = Math.round((w * 29) / 50) * 50;
+      const lo = Math.round((w * 30) / 50) * 50; // ~30–33 kcal/kg
       const hi = Math.round((w * 33) / 50) * 50;
       return L(
         `At ${w} kg, maintenance is roughly ${lo}–${hi} kcal a day for someone who lifts 3–4× a week. To gain: +200–300; to lose: −300–500. Check the scale for two weeks and adjust.`,
@@ -121,10 +130,9 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
             ? a / b
             : NaN;
     if (Number.isFinite(v)) {
-      const r = Math.round(v * 100) / 100;
       return L(
-        `${r}. Numbers I can do — now, anything about your training?`,
-        `${r}. Рахувати вмію — а тепер щось про тренування?`,
+        `${dec(v, 'en', 2)}. Numbers I can do — now, anything about your training?`,
+        `${dec(v, 'uk', 2)}. Рахувати вмію — а тепер щось про тренування?`,
       );
     }
   }
@@ -133,13 +141,19 @@ export function calcAnswer(question: string, L: Tr, kg: (n: number) => string): 
 
 /** Clearly not about training (and no training words in it). */
 const OFF =
-  /(погод\S*|дощ\S*|сніг\S*|прогноз|weather|rain|forecast|президент\S*|політик\S*|вибор\S*|уряд\S*|election\S*|politic\S*|рецепт\S*|борщ\S*|приготувати|зварити|recipe\S*|cook\S*|фільм\S*|серіал\S*|кіно|movie\S*|film\S*|series|netflix|музик\S*|пісн\S*|song\S*|новин\S*|news|курс (долара|євро)|біткоїн\S*|bitcoin|crypto\S*|футбол\S*|хто виграв|who won|гороскоп\S*|horoscope|столиц\S*|capital of|напиши (код|вірш|есе|твір)|write (code|an essay|a poem)|космос\S*|планет\S*|галактик\S*|outer space|planets?\b|galax\S*|відеоігр\S*|комп.?ютерн\S* ігр\S*|video ?games?|playstation|xbox|minecraft|fortnite|dota|сенс життя|meaning of life|філософ\S*|philosoph\S*|релігі\S*|religio\S*|домашн\S* завданн\S*|homework|програмуванн\S*|programming|javascript|python\b|інвестиц\S*|invest(ing|ment)\S*|stock market|фондов\S* ринок|акці(ї|й) компан\S*|історі(я|ю|ї) (україни|світу|росії)|world history)/u;
+  /(погод\S*|дощ\S*|сніг\S*|прогноз|weather|rain|forecast|президент\S*|політик\S*|вибор\S*|уряд\S*|election\S*|politic\S*|рецепт\S*|борщ\S*|приготувати|зварити|recipe\S*|cook\S*|фільм\S*|серіал\S*|кіно|movie\S*|film\S*|series|netflix|музик\S*|пісн\S*|song\S*|новин\S*|news|курс (долара|євро)|біткоїн\S*|bitcoin|crypto\S*|футбол\S*|хто виграв|who won|гороскоп\S*|horoscope|столиц\S*|capital of|напиши (код|вірш|есе|твір)|write (code|an essay|a poem)|космос\S*|планет\S*|галактик\S*|outer space|planets?\b|galax\S*|відеоігр\S*|комп.?ютерн\S* ігр\S*|video ?games?|playstation|xbox|minecraft|fortnite|dota|сенс життя|meaning of life| president | war | війн\S*|translate |переклад\S*|переклади|переведи|перевести|near me|restaurant\S*|ресторан\S*|pizza place|fix my car|repair my car|car repair|полагод\S* машин\S*|ремонт\S* машин\S*|домашк\S*|філософ\S*|philosoph\S*|релігі\S*|religio\S*|домашн\S* завданн\S*|homework|програмуванн\S*|programming|javascript|python\b|інвестиц\S*|invest(ing|ment)\S*|stock market|фондов\S* ринок|акці(ї|й) компан\S*|історі(я|ю|ї) (україни|світу|росії)|world history)/u;
 const FIT =
   /(трен\S*|зал\S*|вправ\S*|білк\S*|біцепс\S*|присід\S*|жим\S*|сет\S*|м.?яз\S*|кардіо|вага|схуд\S*|gym|workout\S*|train\S*|exercise\S*|protein|lift\S*|muscle\S*|squat\S*|bench|cardio|calorie\S*|калор\S*|diet|дієт\S*|спорт\S*|sport\S*)/u;
 
+/** Polish, Lithuanian, Estonian (folded, as normalized messages are). */
+const OFF_X =
+  /(^| )(pogod\S*|deszcz\S*|wybor\S*|wybory|polityk\S*|prezydent\S*|przepis\S*|ugotowac|serial\S*|piosenk\S*|samochod\S*|naprawic auto|oras|orai|lietus|rinkim\S*|prezident\S*|politik\S*|recept\S*|masinos|masinoje|pataisyti masina|automobil\S*|ilm|ilmateade|vihm\S*|valimis\S*|president\S*|poliitik\S*|retsept\S*|autot|autoga|muusik\S*|mecz\S*|wygrał\S*|wygral\S*|rungtyn\S*|laimejo|voitis|matsi\S*)( |$)/u;
+const FIT_X =
+  /(trening\S*|silown\S*|cwicz\S*|miesn\S*|bialk\S*|przysiad\S*|treniruot\S*|sporto|raumen\S*|baltym\S*|trenn\S*|treening\S*|jousaal\S*|lihas\S*|valgu\S*)/u;
+
 export function offTopic(question: string): boolean {
   const ph = ` ${normalize(question)} `;
-  return OFF.test(ph) && !FIT.test(ph);
+  return (OFF.test(ph) || OFF_X.test(ph)) && !FIT.test(ph) && !FIT_X.test(ph);
 }
 
 export function offTopicLine(temper: number, L: Tr): string {

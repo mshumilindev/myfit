@@ -7,7 +7,7 @@
  */
 import type { EquipmentId } from '../data/equipment';
 import { findPart, learn, type AtlasMemory, type BodyPart, type Goal } from './memory';
-import { normalize, tokens } from './nlu';
+import { foldRe, normalize, tokens } from './nlu';
 
 export type Kit = EquipmentId | 'home';
 
@@ -35,7 +35,7 @@ export interface Frame {
   bar: boolean;
 }
 
-const KIT_WORDS: [EquipmentId | 'home', RegExp][] = [
+const KIT_WORDS0: [EquipmentId | 'home', RegExp][] = [
   [
     'dumbbell',
     /(гантел\S*|гантэл\S*|dumbbells?|dbs?\b|hantl\S*|hantel\S*|hanteli\S*|käsikang\S*)/u,
@@ -51,15 +51,20 @@ const KIT_WORDS: [EquipmentId | 'home', RegExp][] = [
   ],
   ['home', /(вдома|удома|дома\b|at home|home gym|w domu|namuose|kodus)/u],
 ];
+// Messages arrive normalized (ą→a, ė→e, õ→o): the patterns are folded the same way.
+const KIT_WORDS: [EquipmentId | 'home', RegExp][] = KIT_WORDS0.map(([k, re]) => [k, foldRe(re)]);
 const WITHOUT_RE = /(без|without|no|bez|be|ilma)\s+(\S+)/gu;
-const ONLY_RE = /(тільки|лише|только|just|only|tylko|tik|ainult)\s/u;
+const ONLY_RE = foldRe(/(тільки|лише|только|just|only|tylko|tik|ainult)\s/u);
 
-const PLAN_RE =
-  /(склад|напиш|зроб|розпиш|підбер|дай|скинь|сделай|составь|распиши|make|build|write|create|design|give me|put together|need|хочу|ułóż|zrób|napisz|sudaryk|padaryk|koosta)\S*\s+(\S+\s+){0,4}(програм\S*|план\S*|спліт\S*|сплит\S*|розклад\S*|program\S*|plan\b|plans\b|split\b|routine\S*|schedule\b|trenin\S*plan\S*|treniruoč\S*|kava\b)|(склад|напиш|зроб|розпиш|підбер|дай|скинь|сделай|составь|распиши|make|build|write|create|design|give me|put together|need|хочу|ułóż|zrób|napisz|sudaryk|padaryk|koosta)\S*\s+(\S+\s+){0,4}(тренуван\S*|тренировк\S*|workouts?\b|trening\S*|treniruot\S*|trenn\S*)\s+(\S+\s+){0,2}(на|for|per|\d)|\d+\s*-?\s*(денн\S*|day)\s*(програм\S*|план\S*|спліт\S*|сплит\S*|розклад\S*|program\S*|plan\b|plans\b|split\b|routine\S*|schedule\b|trenin\S*plan\S*|treniruoč\S*|kava\b)/u;
-const COMPARE_RE =
-  /(\svs\.?\s|\sversus\s|\sчи\s|\sили\s|\sor\s|\scz?y\s|\sar\s|\svõi\s|що краще|що ефективніше|что лучше|which is better|what.?s better|better for|краще для|lepsze|geriau|parem)/u;
-const WHATIF_RE =
-  /(що буде,? якщо|що станеться,? якщо|а якщо|що якщо|якщо я буду|якщо буду|что будет,? если|а если|what if|what happens if|what would happen|co jeśli|co będzie jeśli|a jeśli|kas bus jei|o jei|mis juhtub kui|aga kui)/u;
+const PLAN_RE = foldRe(
+  /(склад|напиш|зроб|розпиш|підбер|дай|скинь|сделай|составь|распиши|make|build|write|create|design|give me|put together|need|хочу|ułóż|zrób|napisz|sudaryk|padaryk|koosta)\S*\s+(\S+\s+){0,5}(програм\S*|план\S*|спліт\S*|сплит\S*|розклад\S*|program\S*|plan\b|plans\b|split\b|routine\S*|schedule\b|trenin\S*plan\S*|treniruoč\S*|kava\b)|(склад|напиш|зроб|розпиш|підбер|дай|скинь|сделай|составь|распиши|make|build|write|create|design|give me|put together|need|хочу|ułóż|zrób|napisz|sudaryk|padaryk|koosta)\S*\s+(\S+\s+){0,4}(тренуван\S*|тренировк\S*|workouts?\b|trening\S*|treniruot\S*|trenn\S*)\s+(\S+\s+){0,2}(на|for|per|\d)|(програм\S*|план\S*|спліт\S*|сплит\S*|program\S*|plan|split|routine\S*)\s+(на|for|of)\s+\d+\s*(дн\S*|days?|рази|раз|times|trainings?)(\s|$)|\d+\s*-?\s*(денн\S*|day)\s*(програм\S*|план\S*|спліт\S*|сплит\S*|розклад\S*|program\S*|plan\b|plans\b|split\b|routine\S*|schedule\b|trenin\S*plan\S*|treniruoč\S*|kava\b)/u,
+);
+const COMPARE_RE = foldRe(
+  /(\svs\.?\s|\sversus\s|\sчи\s|\sили\s|\sor\s|\scz?y\s|\sar\s|\svõi\s|що краще|що ефективніше|что лучше|which is better|what.?s better|better for|краще для|lepsze|geriau|parem)/u,
+);
+const WHATIF_RE = foldRe(
+  /(що буде,? якщо|що станеться,? якщо|а якщо|що якщо|якщо я буду|якщо буду|что будет,? если|а если|what if|what happens if|what would happen|co jeśli|co będzie jeśli|a jeśli|kas bus jei|o jei|mis juhtub kui|mis siis kui|kas juhtub kui|co jeśli|co jesli|a co jeśli|a co gdyby|co gdyby|o jeigu|kas bus jeigu|jeigu)/u,
+);
 
 const NUM_WORD: Record<string, number> = {
   один: 1,
@@ -105,8 +110,9 @@ const numAt = (s: string): number | null => (/^\d+$/.test(s) ? Number(s) : (NUM_
 
 function daysOf(phrase: string): number | null {
   // "3 дні", "3 рази на тиждень", "3x a week", "3-day", "three days a week"
-  const re =
-    /(^|\s)(\S+?)\s*-?\s*(дн\S*|день|дня|days?|разів|рази|раз|x|х|times|razy|dni|dien\S*|kart\S*|päev\S*|korda)(?=\s|$)/gu;
+  const re = foldRe(
+    /(^|\s)(\S+?)\s*-?\s*(дн\S*|день|дня|days?|разів|рази|раз|x|х|times|razy|dni|dien\S*|kart\S*|päev\S*|paev\S*|korda)(?=\s|$)/gu,
+  );
   for (const m of phrase.matchAll(re)) {
     const n = numAt(m[2]);
     if (n !== null && n >= 1 && n <= 7) return n;
@@ -114,18 +120,26 @@ function daysOf(phrase: string): number | null {
   return null;
 }
 
-const BAR_RE =
-  /(турнік\S*|турник\S*|перекладин\S*|pull.?up bar|chin.?up bar|drąż\S*|skersini\S*|lõuatõmbe\S*)/u;
-const TIMES_RE =
-  /(^|\s)(once|twice|один раз|двічі|двiчi|тричі|дважды|трижды)\s+(a|per|на|в|у)\s+(week|тиждень|неделю)/u;
+const BAR_RE = foldRe(
+  /(турнік\S*|турник\S*|перекладин\S*|pull.?up bar|chin.?up bar|drąż\S*|skersini\S*|lõuatõmbe\S*)/u,
+);
+const TIMES_RE = foldRe(
+  /(^|\s)(once|twice|один раз|двічі|двiчi|тричі|дважды|трижды)\s+(a|per|на|в|у)\s+(week|тиждень|неделю)/u,
+);
 
 function minutesOf(phrase: string): number | null {
-  const m = /(\d{2,3})\s*(хв\S*|мин\S*|min\S*|minut\S*|minuč\S*|min\b)/u.exec(phrase);
+  const m = /(\d{2,3})\s*(хв\S*|мин\S*|min\S*|minut\S*|minuc\S*|min\b)/u.exec(phrase);
   if (m) return Number(m[1]);
-  if (/(година|годину|часу|час\b|an hour|one hour|1 hour|godzin\S*|valand\S*|tund\b)/u.test(phrase))
+  if (
+    /(година|годину|часу|час\b|an hour|one hour|1 hour|godzin\S*|valand\S*|tund\b|tunni)/u.test(
+      phrase,
+    )
+  )
     return 60;
   if (
-    /(півгодини|пів години|полчаса|half an hour|pół godziny|pusvaland\S*|pool tundi)/u.test(phrase)
+    /(півгодини|пів години|полчаса|half an hour|pół godziny|pol godziny|pusvaland\S*|pool tundi)/u.test(
+      phrase,
+    )
   )
     return 30;
   return null;
@@ -152,7 +166,7 @@ export function parseFrame(question: string, mem?: AtlasMemory, now = Date.now()
     if (k !== 'home' && k !== 'body' && without.includes(k)) continue;
     kit.push(k);
   }
-  const learned = learn(words, phrase.trim(), mem, now, null, (x) => x).patch;
+  const learned = learn(words, phrase.trim(), mem, now, null, (x) => x, { gate: false }).patch;
   return {
     wantsPlan: PLAN_RE.test(phrase),
     compares: COMPARE_RE.test(phrase),

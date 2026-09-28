@@ -8,7 +8,8 @@
  *  - charts under answers;
  *  - reasons behind the plan: why today, why this weight, why this split.
  */
-import { est1rm, muscleSetsInWorkout, setTopWeight, setTypeOf } from '../store';
+import * as N from './num';
+import { muscleSetsInWorkout, setTopWeight, setTypeOf } from '../store';
 import type { Workout } from '../types';
 import { nextTarget, topHistory } from '../progression';
 import { muscleReadiness } from '../recovery';
@@ -16,7 +17,7 @@ import { computePlaybook, playForWeekday } from '../playbook';
 import { usualSessionsPerWeek } from './facts';
 import { isDeloadWeek, planDayFor } from './plan';
 import { describeMemory, soreFor } from './memory';
-import { isBodyweightLift, liftPoints } from './liftStats';
+import { e1rm, isBodyweightLift, liftPoints } from './liftStats';
 import { SORE_CAP } from './memoryPlan';
 import { groupMatches } from './nlu';
 import { TEMPERS, type Temper } from './types';
@@ -61,7 +62,7 @@ function sessionE1(w: Workout, name: string): number {
   let best = 0;
   for (const s of ex?.sets ?? [])
     if (setTypeOf(s) !== 'warmup' && (s.weight ?? 0) > 0 && s.reps >= 1 && s.reps <= 12)
-      best = Math.max(best, est1rm(setTopWeight(s), s.reps));
+      best = Math.max(best, e1rm(setTopWeight(s), s.reps));
   return best;
 }
 
@@ -429,6 +430,9 @@ export const INTENTS_FIFTH: Intent[] = [
         'почати',
         'починай',
         'починаємо',
+        'почнемо',
+        'начнем',
+        'начинаем',
         'стартуй',
         'погнали',
         'поїхали',
@@ -568,7 +572,8 @@ export const INTENTS_FIFTH: Intent[] = [
     answer: (c, p, L) => {
       const r = p.range!;
       const ws = finishedOf(c).filter((w) => w.startedAt >= r.from && w.startedAt < r.to);
-      const weeks = Math.max(1, (r.to - r.from) / WEEK);
+      // Only the part of the window that has happened ("this month" ends in the future).
+      const weeks = Math.max(1, (Math.min(r.to, c.now) - r.from) / WEEK);
       const sets = ws.reduce(
         (n, w) =>
           n +
@@ -578,10 +583,10 @@ export const INTENTS_FIFTH: Intent[] = [
           ),
         0,
       );
-      const perWeek = Math.round((ws.length / weeks) * 10) / 10;
+      const perWeek = ws.length / weeks;
       return L(
-        `${r.label[0][0].toUpperCase()}${r.label[0].slice(1)}: ${ws.length} sessions, ${sets} working sets${weeks >= 2 ? ` — ${perWeek} a week` : ''}.`,
-        `${r.label[1][0].toUpperCase()}${r.label[1].slice(1)}: ${ws.length} тренувань, ${sets} робочих сетів${weeks >= 2 ? ` — ${perWeek} на тиждень` : ''}.`,
+        `${r.label[0][0].toUpperCase()}${r.label[0].slice(1)}: ${N.sessions('en', ws.length)}, ${N.workingSets('en', sets)}${weeks >= 2 ? ` — ${N.dec(perWeek, 'en')} a week` : ''}.`,
+        `${r.label[1][0].toUpperCase()}${r.label[1].slice(1)}: ${N.sessions('uk', ws.length)}, ${N.workingSets('uk', sets)}${weeks >= 2 ? ` — ${N.dec(perWeek, 'uk')} на тиждень` : ''}.`,
       );
     },
     chart: (c, p, L) => {
@@ -648,8 +653,8 @@ export const INTENTS_FIFTH: Intent[] = [
         return was > 0 && now > was;
       });
       return L(
-        `${cap(r.label[0])}: ${ws.length} sessions, ${sets} sets. Most done: ${top.join(', ')}.${prs.length ? ` New bests: ${prs.slice(0, 3).map(c.fmt.exercise).join(', ')}.` : ' No new bests.'}`,
-        `${cap(r.label[1])}: ${ws.length} тренувань, ${sets} сетів. Найчастіше: ${top.join(', ')}.${prs.length ? ` Нові рекорди: ${prs.slice(0, 3).map(c.fmt.exercise).join(', ')}.` : ' Нових рекордів нема.'}`,
+        `${cap(r.label[0])}: ${N.sessions('en', ws.length)}, ${N.sets('en', sets)}. Most done: ${top.join(', ')}.${prs.length ? ` New bests: ${prs.slice(0, 3).map(c.fmt.exercise).join(', ')}.` : ' No new bests.'}`,
+        `${cap(r.label[1])}: ${N.sessions('uk', ws.length)}, ${N.sets('uk', sets)}. Найчастіше: ${top.join(', ')}.${prs.length ? ` Нові рекорди: ${prs.slice(0, 3).map(c.fmt.exercise).join(', ')}.` : ' Нових рекордів нема.'}`,
       );
     },
   },
@@ -687,13 +692,24 @@ export const INTENTS_FIFTH: Intent[] = [
       const first = s[0].v;
       const last = s[s.length - 1].v;
       const best = Math.max(...s.map((x) => x.v));
-      if (isBodyweightLift(liftPoints(c, p.exercise)))
+      const bwLift = isBodyweightLift(liftPoints(c, p.exercise));
+      if (s.length === 1)
+        return bwLift
+          ? L(
+              `${name}, ${r.label[0]}: one session, ${N.reps('en', first)}.`,
+              `${name}, ${r.label[1]}: одне тренування, ${N.reps('uk', first)}.`,
+            )
+          : L(
+              `${name}, ${r.label[0]}: one session, estimated max ${kgs(c, first)}.`,
+              `${name}, ${r.label[1]}: одне тренування, розрахунковий максимум ${kgs(c, first)}.`,
+            );
+      if (bwLift)
         return L(
-          `${name}, ${r.label[0]}: ${s.length} sessions, ${first} → ${last} reps (${signed(last - first)}), best ${best} reps.`,
-          `${name}, ${r.label[1]}: ${s.length} трен., ${first} → ${last} повт. (${signed(last - first)}), найкраще ${best} повт.`,
+          `${name}, ${r.label[0]}: ${N.sessions('en', s.length)}, ${first} → ${last} reps (${signed(last - first)}), best ${N.reps('en', best)}.`,
+          `${name}, ${r.label[1]}: ${s.length} трен., ${first} → ${last} повт. (${signed(last - first)}), найкраще ${N.reps('uk', best)}.`,
         );
       return L(
-        `${name}, ${r.label[0]}: ${s.length} sessions, estimated max ${kgs(c, first)} → ${kgs(c, last)} (${signed(pct(last, first))}%), best ${kgs(c, best)}.`,
+        `${name}, ${r.label[0]}: ${N.sessions('en', s.length)}, estimated max ${kgs(c, first)} → ${kgs(c, last)} (${signed(pct(last, first))}%), best ${kgs(c, best)}.`,
         `${name}, ${r.label[1]}: ${s.length} трен., розрахунковий максимум ${kgs(c, first)} → ${kgs(c, last)} (${signed(pct(last, first))}%), найкраще ${kgs(c, best)}.`,
       );
     },
@@ -727,11 +743,11 @@ export const INTENTS_FIFTH: Intent[] = [
       const sets = Math.round(
         ws.reduce((n, w) => n + (muscleSetsInWorkout(w).get(p.muscle!) ?? 0), 0),
       );
-      const weeks = Math.max(1, (r.to - r.from) / WEEK);
+      const weeks = Math.max(1, (Math.min(r.to, c.now) - r.from) / WEEK);
       const m = c.fmt.muscle(p.muscle);
       return L(
-        `${m}, ${r.label[0]}: ${sets} sets${weeks >= 2 ? ` (~${Math.round(sets / weeks)} a week)` : ''}.`,
-        `${m}, ${r.label[1]}: ${sets} сетів${weeks >= 2 ? ` (~${Math.round(sets / weeks)} на тиждень)` : ''}.`,
+        `${m}, ${r.label[0]}: ${N.sets('en', sets)}${weeks >= 2 ? ` (~${Math.round(sets / weeks)} a week)` : ''}.`,
+        `${m}, ${r.label[1]}: ${N.sets('uk', sets)}${weeks >= 2 ? ` (~${Math.round(sets / weeks)} на тиждень)` : ''}.`,
       );
     },
   },
@@ -761,10 +777,10 @@ export const INTENTS_FIFTH: Intent[] = [
         .sort((a, b) => a.at - b.at);
       if (ws.length < 2)
         return L(`Not enough weigh-ins ${r.label[0]}.`, `${r.label[1]} замало зважувань.`);
-      const d = Math.round((ws[ws.length - 1].weight - ws[0].weight) * 10) / 10;
+      const d = ws[ws.length - 1].weight - ws[0].weight;
       return L(
-        `${cap(r.label[0])}: ${c.fmt.kg(ws[0].weight)} → ${c.fmt.kg(ws[ws.length - 1].weight)} (${signed(d)} kg).`,
-        `${cap(r.label[1])}: ${c.fmt.kg(ws[0].weight)} → ${c.fmt.kg(ws[ws.length - 1].weight)} (${signed(d)} кг).`,
+        `${cap(r.label[0])}: ${c.fmt.kg(ws[0].weight)} → ${c.fmt.kg(ws[ws.length - 1].weight)} (${N.signed(d, 'en', 1)} kg).`,
+        `${cap(r.label[1])}: ${c.fmt.kg(ws[0].weight)} → ${c.fmt.kg(ws[ws.length - 1].weight)} (${N.signed(d, 'uk', 1)} кг).`,
       );
     },
     chart: (c, p, L) => {
@@ -810,6 +826,8 @@ export const INTENTS_FIFTH: Intent[] = [
           n,
           a: bestE1(c, n, then - 2 * WEEK, then + 2 * WEEK),
           b: bestE1(c, n, c.now - 4 * WEEK, c.now + 1),
+          // Bodyweight lifts are scored in reps — never print those as kg.
+          bw: isBodyweightLift(liftPoints(c, n)),
         }))
         .filter((x) => x.a > 0 && x.b > 0);
       if (!rows.length)
@@ -820,7 +838,7 @@ export const INTENTS_FIFTH: Intent[] = [
       const txt = rows
         .map(
           (x) =>
-            `${c.fmt.exercise(x.n)} ${kgs(c, x.a)} → ${kgs(c, x.b)} (${signed(pct(x.b, x.a))}%)`,
+            `${c.fmt.exercise(x.n)} ${x.bw ? L(`${x.a} → ${x.b} reps`, `${x.a} → ${x.b} повт.`) : `${kgs(c, x.a)} → ${kgs(c, x.b)}`} (${signed(pct(x.b, x.a))}%)`,
         )
         .join('; ');
       const up = rows.filter((x) => x.b > x.a).length;
@@ -843,6 +861,9 @@ export const INTENTS_FIFTH: Intent[] = [
         'ratio',
         'stronger',
         'weaker',
+        'porówn*',
+        'palygin*',
+        'võrdle*',
         'порівн*',
         'ніж',
         'проти',
@@ -866,7 +887,12 @@ export const INTENTS_FIFTH: Intent[] = [
           `I need both ${na} and ${nb} in the last 8 weeks to compare.`,
           `Щоб порівняти, потрібні і ${na}, і ${nb} за останні 8 тижнів.`,
         );
-      const ratio = Math.round((ea / eb) * 100) / 100;
+      if (isBodyweightLift(liftPoints(c, a)) || isBodyweightLift(liftPoints(c, b)))
+        return L(
+          `${na} vs ${nb}: one of them is bodyweight (counted in reps), so there’s no fair estimated-max ratio. Ask how each is progressing instead.`,
+          `${na} і ${nb}: одна з них з власною вагою (рахується в повторах), тож чесного співвідношення максимумів нема. Спитай, як прогресує кожна.`,
+        );
+      const ratio = N.dec(ea / eb, c.locale, 2);
       const trend = (n: string) => {
         const s = e1Series(c, n, c.now - 8 * WEEK, c.now + 1);
         return s.length >= 2 ? pct(s[s.length - 1].v, s[0].v) : 0;
@@ -890,6 +916,11 @@ export const INTENTS_FIFTH: Intent[] = [
       const finished = finishedOf(c);
       const ready = muscleReadiness(finished, c.now);
       const day = plan ? planDayFor(plan, c.now) : null;
+      if (plan && !day)
+        return L(
+          'Today is a rest day in your plan — recovery is part of it.',
+          'Сьогодні за планом відпочинок — відновлення теж частина плану.',
+        );
       const muscles =
         day?.muscles ??
         playForWeekday(computePlaybook(finished, c.now).plays, new Date(c.now).getDay())
@@ -901,16 +932,36 @@ export const INTENTS_FIFTH: Intent[] = [
           'Nothing is set for today — your fresh muscles decide.',
           'На сьогодні нічого не заплановано — вирішують свіжі м’язи.',
         );
-      const parts = muscles.slice(0, 4).map((m) => {
+      // Split by what the recovery model actually says — a muscle trained ~30 h
+      // ago with a 2.5-day window is NOT recovered yet, whatever the plan says.
+      const fresh: string[] = [];
+      const cooling: string[] = [];
+      for (const m of muscles.slice(0, 4)) {
         const r = ready.get(m);
-        const d = r?.daysSince;
-        return d == null
-          ? L(
-              `${c.fmt.muscle(m)} (not trained lately)`,
-              `${c.fmt.muscle(m)} (давно не тренувались)`,
-            )
-          : L(`${c.fmt.muscle(m)} (${d} d rest)`, `${c.fmt.muscle(m)} (${d} дн. відпочинку)`);
-      });
+        const name = c.fmt.muscle(m);
+        if (!r || r.daysSince == null)
+          fresh.push(L(`${name} (not trained in 2+ weeks)`, `${name} (не тренувались 2+ тижні)`));
+        else if (r.state === 'ready' || r.state === 'stale')
+          fresh.push(
+            L(
+              `${name} (last trained ${N.agoOf(c, r.daysSince * DAY)})`,
+              `${name} (востаннє ${N.agoOf(c, r.daysSince * DAY)})`,
+            ),
+          );
+        else
+          cooling.push(
+            L(
+              `${name} (${N.agoOf(c, r.daysSince * DAY)}, ~${Math.round(r.readiness * 100)}% back)`,
+              `${name} (${N.agoOf(c, r.daysSince * DAY)}, ~${Math.round(r.readiness * 100)}% відновлення)`,
+            ),
+          );
+      }
+      const parts = [
+        fresh.length ? `${L('Recovered:', 'Відновились:')} ${fresh.join(', ')}.` : '',
+        cooling.length
+          ? `${L('Still recovering:', 'Ще відновлюються:')} ${cooling.join(', ')} — ${L('go a bit lighter there', 'там трохи легше')}.`
+          : '',
+      ].filter(Boolean);
       const src = day
         ? L(
             `It’s ${wd(c, day.weekday)} in your plan — ${day.name ?? day.split}.`,
@@ -924,7 +975,7 @@ export const INTENTS_FIFTH: Intent[] = [
         plan && isDeloadWeek(plan, c.now)
           ? L(' Lighter week: fewer sets.', ' Легший тиждень: менше сетів.')
           : '';
-      return `${src} ${L('Recovered:', 'Відновились:')} ${parts.join(', ')}.${deload}`;
+      return `${src} ${parts.join(' ')}${deload}`;
     },
   },
   {
@@ -1036,7 +1087,7 @@ export const INTENTS_FIFTH: Intent[] = [
         conditioning: ['conditioning', 'кондиції'],
       };
       return L(
-        `${plan.days.length} days (${days}) because you’ve averaged ~${usual || plan.days.length} a week and those are your usual days. ${plan.lengthMin} min — your typical session. Reps: ${intent[plan.intent][0]}. Every ${plan.weeks}th week is lighter so you recover.`,
+        `${N.days('en', plan.days.length)} (${days}) because you’ve averaged ~${usual || plan.days.length} a week and those are your usual days. ${plan.lengthMin} min — your typical session. Reps: ${intent[plan.intent][0]}. Every ${plan.weeks}th week is lighter so you recover.`,
         `${plan.days.length} дні (${days}), бо ти в середньому тренуєшся ~${usual || plan.days.length} рази на тиждень і саме в ці дні. ${plan.lengthMin} хв — твоє звичне тренування. Повтори: ${intent[plan.intent][1]}. Кожен ${plan.weeks}-й тиждень легший, щоб відновитися.`,
       );
     },

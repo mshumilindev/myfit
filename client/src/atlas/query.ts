@@ -15,7 +15,7 @@
  * train most", "longest workout", "least trained muscle this month".
  */
 import type { MuscleGroup } from '../data/exercises';
-import { est1rm, exerciseVolumeKg, resolveMuscles, setTopWeight, setTypeOf } from '../store';
+import { exerciseVolumeKg, resolveMuscles, setTopWeight, setTypeOf } from '../store';
 import type { Exercise } from '../types';
 import {
   DAY,
@@ -28,7 +28,9 @@ import {
   type Range,
   type Tr,
 } from './intentKit';
-import { isBodyweightLift, liftPoints } from './liftStats';
+import { e1rm, isBodyweightLift, liftPoints } from './liftStats';
+import * as N from './num';
+import { weekStartOf } from '../weekStart';
 import { normalize } from './nlu';
 import { questionType } from './qtype';
 
@@ -264,6 +266,9 @@ export function parseQuery(question: string, p: Parsed): Query | null {
   if (agg === 'count' && metric === 'sessions') agg = 'sum';
   // "most improved" is a change, even if "most" was found first.
   if (aggHit !== 'change' && AGG[0][1].test(ph)) agg = 'change';
+  // "How often do I train on average?" — your rhythm (a topic of its own), not
+  // an average of a count with nothing to break it down by.
+  if (metric === 'sessions' && agg === 'avg' && !group && !p.range) return null;
 
   const top = Math.min(10, Number(TOP_N.exec(ph)?.[1] ?? 0)) || 3;
   const strong =
@@ -300,7 +305,7 @@ export function parseQuery(question: string, p: Parsed): Query | null {
 }
 
 const ADVICE = w(
-  'reason|reasons|причин\\S*|should|shall|ought|need to|do i need|can i|could i|will i|will my|would|build muscle|builds?|builds more|будує|краще для|лучше для|чи можна|чи зможу|можна|можно ли|смогу|recommend\\S*|ideal|optimal|optimum|best way|good|enough|too much|too many|normal|healthy|safe|for hypertrophy|for strength|for beginners|варто|треба|потрібно|слід|рекоменд\\S*|оптимальн\\S*|ідеальн\\S*|достатньо|забагато|нормально|норма|безпечно|для гіпертрофії|для сили|для новачк\\S*|стоит|нужно|надо|следует|оптимальн\\S*|идеальн\\S*|достаточно|слишком|для роста|для силы|для новичк\\S*',
+  'reason|reasons|причин\\S*|best \\S+ exercises|best exercises|good exercises|exercises for|найкращі вправи|кращі вправи|вправи на|лучшие упражнения|упражнения на|should|shall|ought|need to|do i need|can i|could i|will i|will my|would|build muscle|builds?|builds more|будує|краще для|лучше для|чи можна|чи зможу|можна|можно ли|смогу|recommend\\S*|ideal|optimal|optimum|best way|good|enough|too much|too many|normal|healthy|safe|for hypertrophy|for strength|for beginners|варто|треба|потрібно|слід|рекоменд\\S*|оптимальн\\S*|ідеальн\\S*|достатньо|забагато|нормально|норма|безпечно|для гіпертрофії|для сили|для новачк\\S*|стоит|нужно|надо|следует|оптимальн\\S*|идеальн\\S*|достаточно|слишком|для роста|для силы|для новичк\\S*',
 );
 const BEST_FOR =
   /(^|\s)(best|good|top|найкращ\S*|кращ\S*|добр\S*|лучш\S*|хорош\S*)(\s\S+){0,2}\s(for|to|для|щоб|чтобы)\s/u;
@@ -385,7 +390,7 @@ function rowsOf(c: AskCtx): { sets: SetRow[]; sessions: SessRow[] } {
           muscles: ms,
           kg,
           reps: s.reps,
-          e1: kg > 0 ? est1rm(kg, Math.min(12, s.reps)) : 0,
+          e1: e1rm(kg, s.reps),
           vol: (s.weight ?? 0) * s.reps * factor,
         });
       }
@@ -527,7 +532,7 @@ export function runQuery(c: AskCtx, q: Query, L: Tr): QueryResult | null {
     const buckets = new Map<string, SetRow[]>();
     const key = (s: SetRow): string[] => {
       const d = new Date(s.ts);
-      if (q.group === 'week') return [String(weekStart(s.ts))];
+      if (q.group === 'week') return [String(weekStartOf(s.ts))];
       if (q.group === 'month')
         return [`${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`];
       if (q.group === 'weekday') return [String(d.getDay())];
@@ -582,7 +587,16 @@ export function runQuery(c: AskCtx, q: Query, L: Tr): QueryResult | null {
             : new Date(Number(x.k.slice(0, 4)), Number(x.k.slice(5))).getTime(),
         v: round(x.val.v),
       }));
-      const avg = sum(series.map((x) => x.val.v)) / series.length;
+      // Totals (sessions, sets, volume…) average over every period in the
+      // window, empty ones too; maxima (weight, e1RM) only over periods with data.
+      const additive = q.metric === 'sessions' || mq.agg === 'sum';
+      const first = Math.min(...rows.map((s) => s.ts));
+      const lo = Math.max(r ? r.from : first, first);
+      const hi = Math.min(r ? r.to : c.now, c.now + 1);
+      const periods = additive
+        ? Math.max(series.length, periodsIn(q.group, lo, hi))
+        : series.length;
+      const avg = sum(series.map((x) => x.val.v)) / periods;
       const bestB = series.reduce((a, b) => (b.val.v > a.val.v ? b : a));
       const last = series
         .slice(-4)
@@ -635,7 +649,10 @@ export function runQuery(c: AskCtx, q: Query, L: Tr): QueryResult | null {
   const weeks = r ? Math.max(1, (Math.min(r.to, c.now) - r.from) / WEEK) : 0;
   const rate =
     q.agg === 'sum' && (q.metric === 'sessions' || q.metric === 'sets') && weeks >= 2
-      ? L(` (~${round(val.v / weeks)} a week)`, ` (~${round(val.v / weeks)} на тиждень)`)
+      ? L(
+          ` (~${N.dec(val.v / weeks, 'en')} a week)`,
+          ` (~${N.dec(val.v / weeks, 'uk')} на тиждень)`,
+        )
       : '';
   return {
     text: L(
@@ -732,7 +749,15 @@ function change(
         `${cap(what[1])}${who ? ` (${who})` : ''}, ${r.label[1]}: ${fmtValue(c, per, now, L, tn)} — за попередній такий самий період даних немає, порівнювати нема з чим.`,
       ),
     };
-  const pct = Math.round(((now.v - before.v) / Math.max(1e-9, before.v)) * 100);
+  // Nothing (0) the period before: a percentage from zero means nothing.
+  if (!(before.v > 0))
+    return {
+      text: L(
+        `${cap(what[0])}${who ? ` (${who})` : ''}, ${r.label[0]}: ${fmtValue(c, per, now, L, tn)} — none in the period before.`,
+        `${cap(what[1])}${who ? ` (${who})` : ''}, ${r.label[1]}: ${fmtValue(c, per, now, L, tn)} — за попередній такий самий період нічого.`,
+      ),
+    };
+  const pct = Math.round(((now.v - before.v) / before.v) * 100);
   const verdict =
     pct >= 3
       ? L('up', 'більше')
@@ -741,8 +766,8 @@ function change(
         : L('about the same', 'приблизно так само');
   return {
     text: L(
-      `${cap(what[0])}${who ? ` (${who})` : ''}: ${fmtValue(c, per, now, L, tn)} ${r.label[0]} vs ${fmtValue(c, per, before, L, tn)} the period before — ${verdict} (${pct > 0 ? '+' : ''}${pct}%).`,
-      `${cap(what[1])}${who ? ` (${who})` : ''}: ${fmtValue(c, per, now, L, tn)} ${za(r.label[1])} проти ${fmtValue(c, per, before, L, tn)} за попередній період — ${verdict} (${pct > 0 ? '+' : ''}${pct}%).`,
+      `${cap(what[0])}${who ? ` (${who})` : ''}: ${fmtValue(c, per, now, L, tn)} ${r.label[0]} vs ${fmtValue(c, per, before, L, tn)} the period before — ${verdict} (${N.signed(pct)}%).`,
+      `${cap(what[1])}${who ? ` (${who})` : ''}: ${fmtValue(c, per, now, L, tn)} ${za(r.label[1])} проти ${fmtValue(c, per, before, L, tn)} за попередній період — ${verdict} (${N.signed(pct)}%).`,
     ),
   };
 }
@@ -768,8 +793,8 @@ function rankChange(c: AskCtx, q: Query, all: SetRow[], L: Tr): QueryResult | nu
     }
     return out;
   };
-  let label: [string, string] = q.range?.label ?? ['the last 12 weeks', 'останні 12 тижнів'];
-  let rows = tryWindow(q.range?.from ?? c.now - 12 * WEEK, q.range?.to ?? Infinity);
+  let label: [string, string] = q.range?.label ?? ['the last 3 months', 'останні 3 місяці'];
+  let rows = tryWindow(q.range?.from ?? c.now - 13 * WEEK, q.range?.to ?? Infinity);
   if (!q.range && (rows.length < 2 || rows.every((r) => r.pct <= 0))) {
     rows = tryWindow(-Infinity, Infinity);
     label = ['all time', 'за весь час'];
@@ -785,9 +810,7 @@ function rankChange(c: AskCtx, q: Query, all: SetRow[], L: Tr): QueryResult | nu
   rows.sort((a, b) => (down ? a.pct - b.pct : b.pct - a.pct));
   const list = rows
     .slice(0, q.top)
-    .map(
-      (x, i) => `${i + 1}. ${c.fmt.exercise(x.lift)} ${x.pct > 0 ? '+' : ''}${x.pct}% (${x.txt})`,
-    )
+    .map((x, i) => `${i + 1}. ${c.fmt.exercise(x.lift)} ${N.signed(x.pct)}% (${x.txt})`)
     .join('; ');
   const lead0 = rows[0];
   if (!down && lead0.pct <= 0)
@@ -802,21 +825,21 @@ function rankChange(c: AskCtx, q: Query, all: SetRow[], L: Tr): QueryResult | nu
   if (down && lead.pct >= 0)
     return {
       text: L(
-        `Nothing dropped, ${label[0]} — every lift held or grew. Slowest: ${c.fmt.exercise(lead.lift)} (${lead.pct > 0 ? '+' : ''}${lead.pct}%, ${lead.txt}).`,
-        `${cap(za(label[1]))} нічого не просіло — усе трималось або росло. Найповільніше: ${c.fmt.exercise(lead.lift)} (${lead.pct > 0 ? '+' : ''}${lead.pct}%, ${lead.txt}).`,
+        `Nothing dropped, ${label[0]} — every lift held or grew. Slowest: ${c.fmt.exercise(lead.lift)} (${N.signed(lead.pct)}%, ${lead.txt}).`,
+        `${cap(za(label[1]))} нічого не просіло — усе трималось або росло. Найповільніше: ${c.fmt.exercise(lead.lift)} (${N.signed(lead.pct)}%, ${lead.txt}).`,
       ),
     };
   const tail =
     rows.length > q.top && worst.pct < 0
       ? L(
-          ` Slipping: ${c.fmt.exercise(worst.lift)} ${worst.pct}%.`,
-          ` Просідає: ${c.fmt.exercise(worst.lift)} ${worst.pct}%.`,
+          ` Slipping: ${c.fmt.exercise(worst.lift)} ${N.signed(worst.pct)}%.`,
+          ` Просідає: ${c.fmt.exercise(worst.lift)} ${N.signed(worst.pct)}%.`,
         )
       : '';
   return {
     text: L(
-      `${down ? 'Dropped most' : 'Most improved'}, ${label[0]}: ${c.fmt.exercise(lead.lift)} (${lead.pct > 0 ? '+' : ''}${lead.pct}%). ${list}.${tail}`,
-      `${down ? 'Найбільше просіла' : 'Найбільше виросла'} ${za(label[1])}: ${c.fmt.exercise(lead.lift)} (${lead.pct > 0 ? '+' : ''}${lead.pct}%). ${list}.${tail}`,
+      `${down ? 'Dropped most' : 'Most improved'}, ${label[0]}: ${c.fmt.exercise(lead.lift)} (${N.signed(lead.pct)}%). ${list}.${tail}`,
+      `${down ? 'Найбільше просіла' : 'Найбільше виросла'} ${za(label[1])}: ${c.fmt.exercise(lead.lift)} (${N.signed(lead.pct)}%). ${list}.${tail}`,
     ),
   };
 }
@@ -867,20 +890,21 @@ function fmtValue(c: AskCtx, q: Query, v: Value, L: Tr, tons?: boolean): string 
   const x = v.v;
   switch (q.metric) {
     case 'sessions':
-      return String(Math.round(x));
+      return num(c, x); // totals are whole; an average keeps one decimal (2.6 a week)
     case 'duration':
       return L(`${Math.round(x)} min`, `${Math.round(x)} хв`);
     case 'volume':
       return (tons ?? x >= 10_000)
-        ? L(`${round(x / 1000)} t`, `${round(x / 1000)} т`)
-        : c.fmt.kg(Math.round(x));
+        ? L(`${num(c, x / 1000)} t`, `${num(c, x / 1000)} т`)
+        : L(`${N.thousands(x)} kg`, `${N.thousands(x)} кг`);
     case 'sets':
-      return String(round(x));
     case 'reps':
-      return String(round(x));
+      return num(c, x);
     case 'weight':
     case 'e1rm':
-      return v.reps ? L(`${round(x)} reps`, `${round(x)} повт.`) : c.fmt.kg(Math.round(x * 2) / 2);
+      return v.reps
+        ? L(`${num(c, x)} reps`, `${num(c, x)} повт.`)
+        : c.fmt.kg(Math.round(x * 2) / 2);
   }
 }
 
@@ -891,6 +915,8 @@ function chartUnit(q: Query, bw: boolean): string {
 }
 
 const round = (x: number) => (Math.abs(x) >= 100 ? Math.round(x) : Math.round(x * 10) / 10);
+/** A count/average as text: whole from 100 up, one decimal below; locale decimal mark. */
+const num = (c: AskCtx, x: number) => N.dec(round(x), c.locale);
 /** "за останні 4 тижні", but "у серпні" / "з червня" / "за весь час" stay as they are. */
 const za = (l: string) =>
   /^(за|у|в|з|із|від|до|цього|минулого|останн\S*)\s/u.test(l) && !/^останн/u.test(l)
@@ -906,10 +932,27 @@ const dateOf = (c: AskCtx, ts: number) =>
       ? { year: 'numeric' as const }
       : {}),
   });
-function weekStart(ts: number): number {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime() - ((d.getDay() + 6) % 7) * DAY;
+/**
+ * How many weeks / months the window spans (from its start, or your first
+ * session, to now) — empty ones included, so "3 a week on average" doesn't
+ * silently skip the weeks you didn't train.
+ */
+function periodsIn(group: 'week' | 'month', from: number, to: number): number {
+  if (!(to > from)) return 1;
+  let n = 0;
+  if (group === 'week') {
+    for (let t = weekStartOf(from); t < to; n++) {
+      const d = new Date(t);
+      d.setDate(d.getDate() + 7);
+      t = d.getTime();
+    }
+  } else {
+    const d = new Date(from);
+    const a = d.getFullYear() * 12 + d.getMonth();
+    const e = new Date(to - 1);
+    n = e.getFullYear() * 12 + e.getMonth() - a + 1;
+  }
+  return Math.max(1, n);
 }
 
 /** Next questions worth asking about the same data. */

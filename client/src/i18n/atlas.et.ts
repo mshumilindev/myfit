@@ -7,8 +7,13 @@
  * vormindajast), seepärast on laused ehitatud nii, et nime ei pea käänama.
  */
 import type { PhraseBook } from '../atlas/voice';
+import * as N from '../atlas/num';
 
 const pct = (n: number) => `${n > 0 ? '+' : '−'}${Math.abs(n)}%`;
+
+/** A span as a person says it ("3 weeks"), and the same opening a sentence. */
+const sp = (d: number) => N.spanDays('et', d);
+const Sp = (d: number) => N.cap(sp(d));
 
 export const ET: PhraseBook = {
   intro: {
@@ -165,12 +170,12 @@ export const ET: PhraseBook = {
   comeback: {
     1: [
       (f) =>
-        `Ooo, tere tulemast tagasi, vend! ${f.daysOff} päeva pole midagi. Täna võtame rahulikult, siis kruvime üles.`,
+        `Ooo, tere tulemast tagasi, vend! ${Sp(f.daysOff)} pausi pole midagi. Täna võtame rahulikult, siis kruvime üles.`,
     ],
-    3: [(f) => `${f.daysOff} päeva vahet. Oled tagasi — alusta kergelt.`],
+    3: [(f) => `${Sp(f.daysOff)} vahet. Oled tagasi — alusta kergelt.`],
     5: [
       (f) =>
-        `${f.daysOff} päeva. Arvasin juba, et kolisid alaliselt diivanile. Alusta kergelt — su uhkus elab selle üle, ta on harjunud.`,
+        `${Sp(f.daysOff)} vahet. Arvasin juba, et kolisid alaliselt diivanile. Alusta kergelt — su uhkus elab selle üle, ta on harjunud.`,
     ],
   },
   shortSleep: {
@@ -179,14 +184,14 @@ export const ET: PhraseBook = {
     5: [(f) => `${f.hours} h und. Täna kergemalt.`],
   },
   streak: {
-    1: [(f) => `${f.days} päeva järjest! Oled täiega hoos, vend!`],
-    3: [(f) => `${f.days} päeva järjest. Hoia seda.`],
-    5: [(f) => `${f.days} päeva järjest. Ära kiitusega harju — seda ei tule.`],
+    1: [(f) => `${Sp(f.days)} järjest! Oled täiega hoos, vend!`],
+    3: [(f) => `${Sp(f.days)} järjest. Hoia seda.`],
+    5: [(f) => `${Sp(f.days)} järjest. Ära kiitusega harju — seda ei tule.`],
   },
   bodyweight: {
-    1: [(f, x) => `Kehakaal ${x.kg(f.kg)}, ${f.days} päevaga ${pct(f.deltaPct)}.`],
-    3: [(f, x) => `Kehakaal ${x.kg(f.kg)}, ${f.days} päevaga ${pct(f.deltaPct)}.`],
-    5: [(f, x) => `Kehakaal ${x.kg(f.kg)}, ${f.days} päevaga ${pct(f.deltaPct)}.`],
+    1: [(f, x) => `Kehakaal ${x.kg(f.kg)}, ${pct(f.deltaPct)} (ajavahemik: ${sp(f.days)}).`],
+    3: [(f, x) => `Kehakaal ${x.kg(f.kg)}, ${pct(f.deltaPct)} (ajavahemik: ${sp(f.days)}).`],
+    5: [(f, x) => `Kehakaal ${x.kg(f.kg)}, ${pct(f.deltaPct)} (ajavahemik: ${sp(f.days)}).`],
   },
   mom: {
     session: [(f) => `${f.sets} seeriat. Su ema teeb pühapäeval kahe pesumasinatäie vahel rohkem.`],

@@ -83,6 +83,8 @@ export type AtlasAction =
     }
   /** Log being ill (open illness period — plan pauses, streak kept). */
   | { type: 'illness' }
+  /** Log an activity done outside the gym (a run, dancing, yoga…) — catalog key. */
+  | { type: 'activity'; kind: string; minutes: number; km?: number | null; at: number }
   /** Write the programme: N days a week, sessions of about this length. */
   | { type: 'plan'; days: number; lengthMin: number }
   /** Several of the above at once ("drop lunges and deadlifts"). */

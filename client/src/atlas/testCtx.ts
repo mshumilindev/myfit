@@ -5,6 +5,7 @@
 import type { Exercise, Workout } from '../types';
 import type { AskCtx } from './intents';
 import { COACH_DEFAULT } from './types';
+import { spanFmt } from './num';
 
 const DAY = 86_400_000;
 const NOW = new Date(2026, 8, 23, 18).getTime();
@@ -70,5 +71,6 @@ export const richCtx = (locale: 'en' | 'uk'): AskCtx => ({
     mmss: (s) => `${s}s`,
     muscle: (m) => m,
     exercise: (e) => e,
+    ...spanFmt(locale),
   },
 });

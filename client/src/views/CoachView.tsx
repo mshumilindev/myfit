@@ -22,11 +22,14 @@ import {
 import { enablePush, pushState } from '../push';
 import { computePlaybook } from '../playbook';
 import { blockWeek, isDeloadWeek, proposePlan, type CoachPlan } from '../atlas/plan';
-import { askAtlas, classifyTopic, systemPrompt } from '../atlas/chat';
+import { askAtlas, classifyTopic, geminiPausedUntil, systemPrompt } from '../atlas/chat';
+import { placeNote, seenFor } from '../atlas/noteSeen';
+import { pushReplyNow } from '../atlas/schedule';
 import { askPuter, puterReady, puterSignIn } from '../atlas/puter';
 import { alwaysAnswered, blockedUntil, loadGuard, saveGuard, strike } from '../atlas/offTopicGuard';
 import {
   answerAs,
+  CONFIDENT,
   answerLocally,
   didYouMean,
   topicMenu,
@@ -42,7 +45,14 @@ import { countEvent, type AtlasEvent } from '../atlas/metrics';
 import { isOther, loadDict, markFmt, translateOut } from '../atlas/translate';
 import { ChatChart } from '../components/ChatChart';
 import { buildChatFacts } from '../atlas/chatFacts';
-import { clearChat, pushChat, updateChat, useChatLog, type ChatMsg } from '../atlas/chatLog';
+import {
+  clearChat,
+  pushChat,
+  removeChat,
+  updateChat,
+  useChatLog,
+  type ChatMsg,
+} from '../atlas/chatLog';
 import { useChatAccess } from '../atlas/chatAccess';
 import { langOffer, loadOfferState, saveOfferState } from '../atlas/langOffer';
 import { fmtBodyWeightKg } from '../i18n';
@@ -302,11 +312,23 @@ function RuleRow(props: {
   );
 }
 
-function Bubble({ temper, children }: { temper: Temper; children: React.ReactNode }) {
+function Bubble({
+  temper,
+  time,
+  children,
+}: {
+  temper: Temper;
+  /** When Atlas said it ("14:05"); omitted while still typing. */
+  time?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="atl-say">
       <AtlasFace temper={temper} size={28} />
-      <div className="atl-bubble">{children}</div>
+      <div className="atl-bubble">
+        {children}
+        {time && <time className="atl-time">{time}</time>}
+      </div>
     </div>
   );
 }
@@ -678,6 +700,35 @@ function CoachThread({
     });
     if (local?.learned) setCoach({ memory: mergeMemory(store.coach.memory, local.learned) });
     if (local?.said) rememberSaid(local.said);
+    // Hybrid: an answer Atlas isn't sure it understood goes to Gemini when it
+    // can (consent given, not offline or out of quota). Safety, pain, flows
+    // and proposed actions stay local — they're either critical or confirmed
+    // by a tap anyway. The local answer is the fallback if Gemini fails.
+    const unsure =
+      !!local &&
+      local.confidence < CONFIDENT &&
+      canChat &&
+      store.coach.chatConsent &&
+      !alwaysAnswered(local.intent, local.convo.flow?.kind) &&
+      !local.convo.flow &&
+      !local.action &&
+      local.intent !== 'did_you_mean' &&
+      navigator.onLine !== false &&
+      !geminiPausedUntil(at);
+    if (local && unsure) {
+      convo.current = local.convo;
+      const ok = await sendGemini(q, history, true);
+      if (!ok)
+        await typeOut(
+          rid,
+          wallClock(),
+          tr(local.text),
+          local.chips?.map(tr),
+          local.chart ? { chart: local.chart } : {},
+          q,
+        );
+      return true;
+    }
     if (local && !(local.escalate && canChat)) {
       convo.current = local.convo;
       await typeOut(
@@ -692,6 +743,7 @@ function CoachThread({
         },
         q,
       );
+      pushIfAway(tr(local.text));
       return true;
     }
     if (local?.escalate) convo.current = local.convo;
@@ -748,8 +800,29 @@ function CoachThread({
     });
   };
 
-  /** The Gemini leg of a message (the question is already in the thread). */
-  const sendGemini = async (q: string, history = chat.filter((m) => !m.notice)) => {
+  /**
+   * You left the app while Atlas was still answering → the reply comes as a
+   * push. (iPhone pauses a closed web app quickly, so this works while the
+   * answer can still finish — switching apps, a locked Android or desktop.)
+   */
+  const pushIfAway = (text: string) => {
+    if (document.visibilityState !== 'hidden' || pushState() !== 'on') return;
+    void pushReplyNow(t.atlasName, text, wallClock()).catch((err) =>
+      console.warn('atlas: reply push failed', err),
+    );
+  };
+
+  /**
+   * The Gemini leg of a message (the question is already in the thread).
+   * True when it answered (or handed over to Puter); false on an error, so a
+   * caller with a local answer can show that instead.
+   */
+  const sendGemini = async (
+    q: string,
+    history = chat.filter((m) => !m.notice),
+    /** A local answer is ready to stand in: on an error, return false instead of an error line. */
+    fallbackOk = false,
+  ): Promise<boolean> => {
     const at = wallClock();
     const rid = `at-${at}`;
     pushChat({ id: rid, at, from: 'atlas', text: '…', pending: true });
@@ -767,7 +840,7 @@ function CoachThread({
       // Gemini is out for the day → Puter, on the person's own free account.
       if (await puterReady()) {
         await sendPuter(q, history, rid);
-        return;
+        return true;
       }
       updateChat(rid, { pending: false, text: t.atlasPuterOffer, puterFor: q });
       const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(
@@ -780,7 +853,12 @@ function CoachThread({
         notice: true,
         text: t.atlasQuotaNotice(time),
       });
-      return;
+      return true;
+    }
+    if (!res.ok && fallbackOk) {
+      // The caller answers from Atlas's own base instead of an error line.
+      removeChat(rid);
+      return false;
     }
     updateChat(rid, {
       pending: false,
@@ -794,6 +872,8 @@ function CoachThread({
               ? t.atlasChatBlocked
               : t.atlasChatError,
     });
+    if (res.ok) pushIfAway(res.text);
+    return true;
   };
 
   /** The Puter leg: same prompt and facts as Gemini, the person's own Puter account. */
@@ -823,6 +903,7 @@ function CoachThread({
       pending: false,
       text: r.ok ? r.text : r.reason === 'blocked' ? t.atlasChatBlocked : t.atlasPuterFail,
     });
+    if (r.ok) pushIfAway(r.text);
   };
 
   type Item = {
@@ -841,14 +922,21 @@ function CoachThread({
     rated?: ChatMsg['rated'];
     puterFor?: string;
   };
-  const items: Item[] = useMemo(
-    () =>
-      [
-        ...notes.map((n) => ({ id: n.id, at: n.at, from: 'atlas' as const, text: n.text })),
-        ...chat.map((m: ChatMsg) => m),
-      ].sort((a, b) => a.at - b.at),
-    [notes, chat],
-  );
+  const items: Item[] = useMemo(() => {
+    // A note learned after later messages goes where it appeared, not above them.
+    const chatAts = chat.map((m) => m.at);
+    const latest = chatAts.length ? Math.max(...chatAts) : 0;
+    const seen = seenFor(notes, Math.max(now, latest + 1));
+    return [
+      ...notes.map((n) => ({
+        id: n.id,
+        at: placeNote(n.at, seen[n.id], chatAts),
+        from: 'atlas' as const,
+        text: n.text,
+      })),
+      ...chat.map((m: ChatMsg) => m),
+    ].sort((a, b) => a.at - b.at || (a.from === b.from ? 0 : a.from === 'me' ? -1 : 1));
+  }, [notes, chat, now]);
 
   // An empty chat opens with a hello in the temper's voice (not stored).
   // The first answer needs the understanding index — build it while you read.
@@ -898,7 +986,8 @@ function CoachThread({
   // 👍 / 👎 only on Atlas's newest answer, until you write again.
   const last = items[items.length - 1];
   const rateId = last && last.from === 'atlas' && last.intent && !last.rated ? last.id : null;
-  const noteIds = useMemo(() => new Set(notes.map((n) => n.id)), [notes]);
+  /** Note id → its fact time (the read mark and unread count use fact times). */
+  const noteAt = useMemo(() => new Map(notes.map((n) => [n.id, n.at])), [notes]);
   const unreadCount = notes.filter((n) => n.at > readSnap).length;
   const firstUnreadId = notes.find((n) => n.at > readSnap)?.id ?? null;
   // Open at the first unread note; after that, follow the newest message.
@@ -952,6 +1041,11 @@ function CoachThread({
     () => (hasOlder ? items.slice(items.length - limit) : items),
     [items, hasOlder, limit],
   );
+
+  const hm = useMemo(() => {
+    const f = new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' });
+    return (at: number) => f.format(at);
+  }, [locale]);
 
   const groups = useMemo(() => {
     const out: { label: string; items: Item[] }[] = [];
@@ -1014,6 +1108,7 @@ function CoachThread({
               ) : n.from === 'me' ? (
                 <div key={n.id} className="atl-me">
                   {n.text}
+                  <time className="atl-time">{hm(n.at)}</time>
                 </div>
               ) : (
                 <Fragment key={n.id}>
@@ -1023,10 +1118,10 @@ function CoachThread({
                     </div>
                   )}
                   <div
-                    className={`atl-msg${noteIds.has(n.id) && n.at > readSnap ? ' unread' : ''}`}
-                    data-note-at={noteIds.has(n.id) ? n.at : undefined}
+                    className={`atl-msg${(noteAt.get(n.id) ?? 0) > readSnap ? ' unread' : ''}`}
+                    data-note-at={noteAt.get(n.id)}
                   >
-                    <Bubble temper={temper}>
+                    <Bubble temper={temper} time={n.pending ? undefined : hm(n.at)}>
                       {n.pending && n.text === '…' ? (
                         <span className="atl-dots" role="status" aria-label="…">
                           <i />

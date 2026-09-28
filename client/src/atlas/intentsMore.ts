@@ -5,6 +5,7 @@
  * home), the app itself, and small talk. Evidence-based rules of thumb only;
  * anything personal comes from the log.
  */
+import * as N from './num';
 import { isBodyweightLift, liftPoints } from './liftStats';
 import { muscleSetsInWorkout, setTopWeight, setTypeOf, topSet } from '../store';
 import { activeInjuries } from '../injury';
@@ -72,11 +73,10 @@ function lastMuscleDay(c: AskCtx, m: MuscleGroup): { at: number; sets: number } 
   return null;
 }
 
-function daysAgo(c: AskCtx, at: number, L: Tr): string {
-  const d = Math.floor((c.now - at) / DAY);
-  if (d <= 0) return L('today', 'сьогодні');
-  if (d === 1) return L('yesterday', 'учора');
-  return L(`${d} days ago`, `${d} дн. тому`);
+/** "today" / "yesterday" / "3 days ago" by calendar day, not by 24-hour blocks —
+ *  a session last night at 20:00 is "yesterday" at 18:00 today, not "today". */
+function daysAgo(c: AskCtx, at: number): string {
+  return N.daysAgoOf(c, N.calendarDays(at, c.now));
 }
 
 function stalledLifts(c: AskCtx): string[] {
@@ -141,8 +141,8 @@ export const INTENTS_MORE: Intent[] = [
       const last = lastMuscleDay(c, m);
       return last
         ? L(
-            `${c.fmt.muscle(m)}: ${daysAgo(c, last.at, L)} (${date(c, last.at)}), ${last.sets} sets.`,
-            `${c.fmt.muscle(m)}: ${daysAgo(c, last.at, L)} (${date(c, last.at)}), ${last.sets} сетів.`,
+            `${c.fmt.muscle(m)}: ${daysAgo(c, last.at)} (${date(c, last.at)}), ${N.sets('en', last.sets)}.`,
+            `${c.fmt.muscle(m)}: ${daysAgo(c, last.at)} (${date(c, last.at)}), ${N.sets('uk', last.sets)}.`,
           )
         : L(
             `${c.fmt.muscle(m)}: not in your log. That says enough.`,
@@ -161,8 +161,8 @@ export const INTENTS_MORE: Intent[] = [
         const t = ex ? topSet(ex.sets) : undefined;
         if (t)
           return L(
-            `${c.fmt.exercise(name)}: ${daysAgo(c, w.startedAt, L)}, top set ${c.fmt.kg(setTopWeight(t))} × ${t.reps}.`,
-            `${c.fmt.exercise(name)}: ${daysAgo(c, w.startedAt, L)}, найкращий сет ${c.fmt.kg(setTopWeight(t))} × ${t.reps}.`,
+            `${c.fmt.exercise(name)}: ${daysAgo(c, w.startedAt)}, top set ${N.setText(c, setTopWeight(t), t.reps)}.`,
+            `${c.fmt.exercise(name)}: ${daysAgo(c, w.startedAt)}, найкращий сет ${N.setText(c, setTopWeight(t), t.reps)}.`,
           );
       }
       return null;
@@ -179,8 +179,8 @@ export const INTENTS_MORE: Intent[] = [
         (w) => c.now - w.startedAt < 28 * DAY && w.exercises.some((e) => e.name === p.exercise),
       ).length;
       return L(
-        `${c.fmt.exercise(p.exercise!)}: ${n} sessions in total, ${month} in the last 4 weeks.`,
-        `${c.fmt.exercise(p.exercise!)}: усього ${n} тренувань, ${month} за останні 4 тижні.`,
+        `${c.fmt.exercise(p.exercise!)}: ${N.sessions('en', n)} in total, ${month} in the last 4 weeks.`,
+        `${c.fmt.exercise(p.exercise!)}: усього ${N.sessions('uk', n)}, ${month} за останні 4 тижні.`,
       );
     },
   },
@@ -229,7 +229,9 @@ export const INTENTS_MORE: Intent[] = [
     answer: (c, p, L) => {
       const lift = p.exercise;
       const t = (kg: number) =>
-        kg >= 10000 ? `${(kg / 1000).toFixed(1)} ${L('t', 'т')}` : c.fmt.kg(kg);
+        kg >= 10000
+          ? `${N.dec(kg / 1000, c.locale)} ${L('t', 'т')}`
+          : `${N.thousands(kg)} ${L('kg', 'кг')}`;
       // "Bench: moved…" / "Moved…"
       const say = (en: string, uk: string) => {
         const x = L(en, uk);
@@ -266,8 +268,8 @@ export const INTENTS_MORE: Intent[] = [
         (w) => c.now - w.startedAt < 28 * DAY && (muscleSetsInWorkout(w).get(m) ?? 0) >= 1,
       ).length;
       return L(
-        `${c.fmt.muscle(m)}: ${hits} sessions in 4 weeks (~${(hits / 4).toFixed(1)}/week). Twice a week is the sweet spot for growth.`,
-        `${c.fmt.muscle(m)}: ${hits} тренувань за 4 тижні (~${(hits / 4).toFixed(1)}/тиждень). Двічі на тиждень — оптимум для росту.`,
+        `${c.fmt.muscle(m)}: ${N.sessions('en', hits)} in 4 weeks (~${N.dec(hits / 4, 'en')}/week). Twice a week is the sweet spot for growth.`,
+        `${c.fmt.muscle(m)}: ${N.sessions('uk', hits)} за 4 тижні (~${N.dec(hits / 4, 'uk')}/тиждень). Двічі на тиждень — оптимум для росту.`,
       );
     },
   },
@@ -279,8 +281,8 @@ export const INTENTS_MORE: Intent[] = [
       const perWeek = f.filter((w) => c.now - w.startedAt < 28 * DAY).length / 4;
       const plan = c.s.coach.plan;
       return L(
-        `You average ${perWeek.toFixed(1)} sessions a week${plan ? `; the plan says ${plan.days.length}` : ''}. 3–4 is plenty for almost everyone; consistency beats volume.`,
-        `У середньому ${perWeek.toFixed(1)} тренувань на тиждень${plan ? `; за планом ${plan.days.length}` : ''}. 3–4 вистачає майже всім; регулярність важливіша за обсяг.`,
+        `You average ${N.dec(perWeek, 'en')} sessions a week${plan ? `; the plan says ${plan.days.length}` : ''}. 3–4 is plenty for almost everyone; consistency beats volume.`,
+        `У середньому ${N.dec(perWeek, 'uk')} тренування на тиждень${plan ? `; за планом ${plan.days.length}` : ''}. 3–4 вистачає майже всім; регулярність важливіша за обсяг.`,
       );
     },
   },
@@ -311,8 +313,8 @@ export const INTENTS_MORE: Intent[] = [
       const prs = recentPrs(c, c.now - 28 * DAY);
       const stalls = stalledLifts(c);
       return L(
-        `4 weeks: ${n4} sessions (before: ${prev4}), ${prs.length} records${prs.length ? ` (${prs.slice(0, 2).join(', ')})` : ''}${stalls.length ? `; stuck: ${stalls.map((s) => c.fmt.exercise(s)).join(', ')}` : ''}.`,
-        `4 тижні: ${n4} тренувань (до того: ${prev4}), рекордів: ${prs.length}${prs.length ? ` (${prs.slice(0, 2).join(', ')})` : ''}${stalls.length ? `; застрягли: ${stalls.map((s) => c.fmt.exercise(s)).join(', ')}` : ''}.`,
+        `4 weeks: ${N.sessions('en', n4)} (before: ${prev4}), ${prs.length} records${prs.length ? ` (${prs.slice(0, 2).join(', ')})` : ''}${stalls.length ? `; stuck: ${stalls.map((s) => c.fmt.exercise(s)).join(', ')}` : ''}.`,
+        `4 тижні: ${N.sessions('uk', n4)} (до того: ${prev4}), рекордів: ${prs.length}${prs.length ? ` (${prs.slice(0, 2).join(', ')})` : ''}${stalls.length ? `; застрягли: ${stalls.map((s) => c.fmt.exercise(s)).join(', ')}` : ''}.`,
       );
     },
   },
@@ -580,8 +582,8 @@ export const INTENTS_MORE: Intent[] = [
   {
     id: 'stretch_before',
     all: [
-      ['stretch*', 'розтяж*', 'розтягув*'],
-      ['before', 'перед'],
+      ['stretch*', 'розтяж*', 'розтягув*', 'растяж*', 'rozciag*', 'tempim*', 'tempt*', 'venita*'],
+      ['before', 'перед', 'przed', 'pries', 'prieš', 'enne'],
     ],
     answer: (_c, _p, L) =>
       L(
@@ -725,6 +727,15 @@ export const INTENTS_MORE: Intent[] = [
         'жир',
         'сушк*',
         'сушит*',
+        'похуд*',
+        'schudn*',
+        'odchudz*',
+        'numesti',
+        'numest*',
+        'liekne*',
+        'alla votta',
+        'alla võtta',
+        'kaalu langet*',
       ],
     ],
     neutral: true,
@@ -793,6 +804,12 @@ export const INTENTS_MORE: Intent[] = [
         'хвор*',
         'захвор*',
         'застуд*',
+        'болею',
+        'болеешь',
+        'болеет',
+        'заболел*',
+        'простыл*',
+        'простуд*',
         'температур*',
         'грип',
         'ковід',
@@ -909,8 +926,20 @@ export const INTENTS_MORE: Intent[] = [
   {
     id: 'protein_timing',
     all: [
-      ['protein', 'shake', 'білок', 'протеїн*', 'шейк'],
-      ['when', 'after', 'before', 'timing', 'коли', 'після', 'перед'],
+      [
+        'protein',
+        'shake',
+        'білок',
+        'протеїн*',
+        'шейк',
+        'białk*',
+        'odżywk*',
+        'baltym*',
+        'kokteil*',
+        'valgu*',
+        'proteiin*',
+      ],
+      ['when', 'after', 'before', 'timing', 'коли', 'після', 'перед', 'kiedy', 'kada', 'millal'],
     ],
     answer: (_c, _p, L) =>
       L(
@@ -980,10 +1009,13 @@ export const INTENTS_MORE: Intent[] = [
     ],
     answer: (c, _p, L) => {
       const last = finishedOf(c)[0];
-      const d = last ? Math.floor((c.now - last.startedAt) / DAY) : null;
+      const d = last ? N.calendarDays(last.startedAt, c.now) : null;
+      // Only worth saying when it IS a break (a day or two off is just rest).
+      const gap = d != null && d >= 3;
+      const off = gap ? N.cap(N.spanDaysOf(c, d)) : '';
       return L(
-        `${d != null ? `${d} days since your last session. ` : ''}Start at ~80–90% of your old weights for a week or two; it comes back faster than it took to build.`,
-        `${d != null ? `${d} дн. від останнього тренування. ` : ''}Почни з ~80–90% старих ваг на тиждень-два; повертається швидше, ніж набиралось.`,
+        `${gap ? `${off} since your last session. ` : ''}Start at ~80–90% of your old weights for a week or two; it comes back faster than it took to build.`,
+        `${gap ? `${off} від останнього тренування. ` : ''}Почни з ~80–90% старих ваг на тиждень-два; повертається швидше, ніж набиралось.`,
       );
     },
   },
@@ -1047,8 +1079,8 @@ export const INTENTS_MORE: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        'In the session: set the reps and weight on the card, tap Log. The rest timer starts by itself.',
-        'У тренуванні: вистав повтори й вагу на картці, натисни «Записати». Таймер відпочинку стартує сам.',
+        'In the session: set the reps and weight on the card, tap “Log”. The rest timer starts by itself. Tap a logged set to change it, mark it as a warm-up or dropset, or delete it.',
+        'У тренуванні: вистав повтори й вагу на картці, натисни «Запис». Таймер відпочинку стартує сам. Тапни записаний підхід, щоб змінити його, позначити як розминку чи дроп-сет або видалити.',
       ),
   },
   {
@@ -1144,8 +1176,8 @@ export const INTENTS_MORE: Intent[] = [
     neutral: true,
     answer: (_c, _p, L) =>
       L(
-        'Today → “Rest / vacation” → “Injury & rehab” → “Set up rehab plan” (or from my pain check-in here). Pick the area; I protect those muscles and bring them back in stages.',
-        'Сьогодні → «Відпочинок / відпустка» → «Травма і реабілітація» → «Налаштувати план» (або з мого розбору болю тут). Обери ділянку — я захищу ці м’язи й поверну їх поетапно.',
+        'Tap “+” → “Health” → “Injury & rehab” → “Set up rehab plan” (or from my pain check-in here). Pick the area; I protect those muscles and bring them back in stages.',
+        'Натисни «+» → «Здоров’я» → «Травма і реабілітація» → «Налаштувати план» (або з мого розбору болю тут). Обери ділянку — я захищу ці м’язи й поверну їх поетапно.',
       ),
   },
 
@@ -1299,12 +1331,12 @@ export const INTENTS_MORE: Intent[] = [
       return moody(c, L, {
         g: [
           [
-            `Bro, ${n} sessions already! Every one started with “meh, don’t feel like it” — and you still showed up. Let’s gooo, make it ${n + 1} 💪`,
-            `Бро, вже ${n} тренувань! Кожне починалося з «та ну, не хочу» — і ти все одно приходив. Го робити ${n + 1}-е 💪`,
+            `Bro, ${N.sessions('en', n)} already! Every one started with “meh, don’t feel like it” — and you still showed up. Let’s gooo, make it ${n + 1} 💪`,
+            `Бро, вже ${N.sessions('uk', n)}! Кожне починалося з «та ну, не хочу» — і ти все одно приходив. Го робити ${n + 1}-е 💪`,
           ],
           [
             `Dude, you’re a machine — ${n} in the log. Go get number ${n + 1}, I’m hyped 🤙`,
-            `Братан, ну ти машина — ${n} тренувань у журналі. Го по ${n + 1}-е, я в тебе вірю 🤙`,
+            `Братан, ну ти машина — ${N.sessions('uk', n)} у журналі. Го по ${n + 1}-е, я в тебе вірю 🤙`,
           ],
           [
             `No stress, man: you don’t need to feel it, you just need to show up. ${n} times you did. Big W. Now ${n + 1}.`,
@@ -1313,18 +1345,18 @@ export const INTENTS_MORE: Intent[] = [
         ],
         y: [
           [
-            `${n} sessions logged. Every one of them started with not wanting to. Go make it ${n + 1}.`,
-            `${n} тренувань у журналі. Кожне почалося з «не хочу». Іди зроби ${n + 1}-е.`,
+            `${N.sessions('en', n)} logged. Every one of them started with not wanting to. Go make it ${n + 1}.`,
+            `${N.sessions('uk', n)} у журналі. Кожне почалося з «не хочу». Іди зроби ${n + 1}-е.`,
           ],
           [
-            `Motivation is overrated. ${n} sessions happened without it. Make it ${n + 1}.`,
-            `Мотивація переоцінена. ${n} тренувань якось обійшлися без неї. Зроби ${n + 1}-е.`,
+            `Motivation is overrated. ${N.sessions('en', n)} happened without it. Make it ${n + 1}.`,
+            `Мотивація переоцінена. ${N.sessions('uk', n)} якось обійшлися без неї. Зроби ${n + 1}-е.`,
           ],
         ],
         r: [
           [
-            `A pep talk? ${n} sessions in the log and you still need a speech? Get up and make it ${n + 1}, couch warrior.`,
-            `Мотивації захотів? ${n} тренувань за плечима — і досі треба вмовляти? Встав і зроби ${n + 1}-е, диванний воїне.`,
+            `A pep talk? ${N.sessions('en', n)} in the log and you still need a speech? Get up and make it ${n + 1}, couch warrior.`,
+            `Мотивації захотів? ${N.sessions('uk', n)} за плечима — і досі треба вмовляти? Встав і зроби ${n + 1}-е, диванний воїне.`,
           ],
           [
             `*sigh* Nobody’s carrying you to the gym, cupcake. ${n} done — number ${n + 1} won’t log itself.`,
@@ -1412,6 +1444,8 @@ export const INTENTS_MORE: Intent[] = [
       [
         'fuck*',
         'shit',
+        'відстій',
+        'отстой',
         'idiot',
         'stupid',
         'hate you',
@@ -1424,6 +1458,11 @@ export const INTENTS_MORE: Intent[] = [
         'ненавиджу',
         'заткн*',
         'відвали',
+        'замовкни',
+        'відстій',
+        'отстой',
+        'you suck',
+        'screw you',
       ],
     ],
     answer: (c, _p, L) =>
@@ -1613,8 +1652,8 @@ export const INTENTS_MORE: Intent[] = [
     answer: (c, _p, L) => {
       const n = finishedOf(c).filter((w) => c.now - w.startedAt < WEEK).length;
       return L(
-        `Depends on you. ${n} sessions this week.`,
-        `Залежить від тебе. ${n} тренувань цього тижня.`,
+        `Depends on you. ${N.sessions('en', n)} this week.`,
+        `Залежить від тебе. ${N.sessions('uk', n)} цього тижня.`,
       );
     },
   },

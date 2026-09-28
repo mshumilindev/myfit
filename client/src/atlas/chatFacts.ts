@@ -73,7 +73,8 @@ const iso = (ts: number) => {
 };
 
 export function buildChatFacts(
-  s: Pick<StoreState, 'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics'>,
+  s: Pick<StoreState, 'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics'> &
+    Partial<Pick<StoreState, 'activities'>>,
   notes: AtlasNote[],
   temper: Temper,
   now: number,
@@ -127,6 +128,19 @@ export function buildChatFacts(
         }
       : null,
     sessionsTotal: finished.length,
+    // Non-gym activities (dance, runs, rides, yoga…) — they count as training load too.
+    recentActivities: (s.activities ?? [])
+      .filter((a) => a.finishedAt !== null && now - a.startedAt < 14 * 86_400_000)
+      .sort((a, b) => b.startedAt - a.startedAt)
+      .slice(0, 12)
+      .map((a) => ({
+        date: iso(a.startedAt),
+        type: a.type,
+        category: a.category,
+        minutes: Math.round(a.durationMin),
+        km: a.distanceKm ?? null,
+        effort: a.effort ?? null,
+      })),
     recentSessions: sessions,
     // Whole history per lift — use this for "how is X going" questions.
     allLifts: liftHistory(finished),

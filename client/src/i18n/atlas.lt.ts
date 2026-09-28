@@ -4,8 +4,13 @@
  * 5 Negailestingas — šaiposi iš tinginystės (bet niekada iš kūno).
  */
 import type { PhraseBook } from '../atlas/voice';
+import * as N from '../atlas/num';
 
 const pct = (n: number) => `${n > 0 ? '+' : '−'}${Math.abs(n)}%`;
+
+/** A span as a person says it ("3 weeks"), and the same opening a sentence. */
+const sp = (d: number) => N.spanDays('lt', d);
+const Sp = (d: number) => N.cap(sp(d));
 
 /** Lithuanian count agreement: 1 serija · 2 serijos · 10 serijų. */
 const pl = (n: number, one: string, few: string, many: string) => {
@@ -23,7 +28,6 @@ const pl = (n: number, one: string, few: string, many: string) => {
 const sets = (n: number) => pl(n, 'serija', 'serijos', 'serijų');
 const reps = (n: number) => pl(n, 'pakartojimas', 'pakartojimai', 'pakartojimų');
 const sessions = (n: number) => pl(n, 'treniruotė', 'treniruotės', 'treniruočių');
-const days = (n: number) => pl(n, 'diena', 'dienos', 'dienų');
 
 export const LT: PhraseBook = {
   intro: {
@@ -181,12 +185,12 @@ export const LT: PhraseBook = {
   comeback: {
     1: [
       (f) =>
-        `O, grįžai, broli! ${days(f.daysOff)} — niekis. Šiandien lengvai, paskui įsivažiuosim.`,
+        `O, grįžai, broli! ${Sp(f.daysOff)} be treniruočių — niekis. Šiandien lengvai, paskui įsivažiuosim.`,
     ],
-    3: [(f) => `${days(f.daysOff)} pertraukos. Grįžai — pradėk lengvai.`],
+    3: [(f) => `${Sp(f.daysOff)} be treniruočių. Grįžai — pradėk lengvai.`],
     5: [
       (f) =>
-        `${days(f.daysOff)}. Maniau, jau visam laikui persikraustei ant sofos. Pradėk lengvai — ego išgyvens, jis pratęs.`,
+        `${Sp(f.daysOff)} be treniruočių. Maniau, jau visam laikui persikraustei ant sofos. Pradėk lengvai — ego išgyvens, jis pratęs.`,
     ],
   },
   shortSleep: {
@@ -198,14 +202,14 @@ export const LT: PhraseBook = {
     5: [(f) => `${f.hours} val. miego. Šiandien lengviau.`],
   },
   streak: {
-    1: [(f) => `${days(f.days)} iš eilės! Tu degi, broli!`],
-    3: [(f) => `${days(f.days)} iš eilės. Laikyk.`],
-    5: [(f) => `${days(f.days)} iš eilės. Prie pagyrų nepriprask — jų nebus.`],
+    1: [(f) => `${Sp(f.days)} iš eilės! Tu degi, broli!`],
+    3: [(f) => `${Sp(f.days)} iš eilės. Laikyk.`],
+    5: [(f) => `${Sp(f.days)} iš eilės. Prie pagyrų nepriprask — jų nebus.`],
   },
   bodyweight: {
-    1: [(f, x) => `Kūno svoris ${x.kg(f.kg)}, ${pct(f.deltaPct)} per ${f.days} d.`],
-    3: [(f, x) => `Kūno svoris ${x.kg(f.kg)}, ${pct(f.deltaPct)} per ${f.days} d.`],
-    5: [(f, x) => `Kūno svoris ${x.kg(f.kg)}, ${pct(f.deltaPct)} per ${f.days} d.`],
+    1: [(f, x) => `Kūno svoris ${x.kg(f.kg)}, ${pct(f.deltaPct)} per ${sp(f.days)}.`],
+    3: [(f, x) => `Kūno svoris ${x.kg(f.kg)}, ${pct(f.deltaPct)} per ${sp(f.days)}.`],
+    5: [(f, x) => `Kūno svoris ${x.kg(f.kg)}, ${pct(f.deltaPct)} per ${sp(f.days)}.`],
   },
   mom: {
     session: [

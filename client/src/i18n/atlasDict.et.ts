@@ -172,7 +172,7 @@ export const DICT: Record<string, string> = {
   '*sigh* Fine.': '*ohe* Olgu.',
   '*sigh* Nothing.': '*ohe* Mitte midagi.',
   '*sigh* Words.': '*ohe* Sõnad.',
-  '+{1} kg over {2} days ({3} → {4}).': '+{1} kg {2} päeva jooksul ({3} → {4}).',
+  '+{1} kg over {2} ({3} → {4}).': '+{1} kg, ajavahemik: {2} ({3} → {4}).',
   'A Pendlay-style row (bar returns to the floor each rep) gives the lower back a short break between reps.':
     'Pendlay-stiilis sõudmine (kang läheb iga korduse järel põrandale tagasi) annab alaseljale korduste vahel lühikese puhkuse.',
   'A bar close to the body is a shorter lever — less stress on the spine, more weight moved.':
@@ -630,7 +630,7 @@ export const DICT: Record<string, string> = {
   'By estimated max (all time), most: {1} ({2}).':
     'Hinnangulise maksimumi järgi (kogu aja jooksul) kõige rohkem: {1} ({2}).',
   'By month': 'Kuude kaupa',
-  "By the way, {1} hasn't moved in ~{2} weeks.": 'Muide, {1} pole ~{2} nädalat liikunud.',
+  "By the way, {1} hasn't moved in {2}.": 'Muide, {1} pole liikunud juba {2}.',
   'By week': 'Nädalate kaupa',
   'By workouts (all time), most: Monday ({1}).':
     'Treeningute järgi (kogu aja jooksul) kõige rohkem: esmaspäev ({1}).',
@@ -664,8 +664,8 @@ export const DICT: Record<string, string> = {
     'Süsivesikud on raskete seeriate peamine kütus ja aitavad treenida suurema mahuga.',
   'Carbs fuel hard sets: ~{1}–{2} g/kg a day works for most lifters, more of it around training.':
     'Süsivesikud annavad rasketeks seeriateks kütust: enamikule tõstjatele sobib ~{1}–{2} g/kg päevas, suurem osa treeningu ümber.',
-  'Carbs refill glycogen, which matters most if you train again within {1} h.':
-    'Süsivesikud taastavad glükogeenivarud, mis on kõige olulisem siis, kui treenid uuesti {1} h jooksul.',
+  'Carbs refill glycogen, which matters most if you train again within a day.':
+    'Süsivesikud taastavad glükogeenivarud, mis on kõige olulisem siis, kui treenid uuesti ööpäeva jooksul.',
   'Carbs refill muscle glycogen, which fuels sets of {1}–{2} reps.':
     'Süsivesikud taastavad lihaste glükogeeni, mis annab kütust {1}–{2} kordusega seeriateks.',
   'Cardio after lifting, not before: {1}–{2} min easy on lifting days, longer sessions on separate days.':
@@ -1321,8 +1321,8 @@ export const DICT: Record<string, string> = {
   'Hard questions I pass to a language model; the numbers are always yours.':
     'Keerulised küsimused annan edasi keelemudelile; numbrid on alati sinu omad.',
   'Hard questions go to a language model.': 'Keerulised küsimused lähevad keelemudelile.',
-  'Hard sessions for the same muscle want ~{1} h apart.':
-    'Sama lihase rasked treeningud vajavad vahet ~{1} h.',
+  'Hard sessions for the same muscle want about {1} days apart.':
+    'Sama lihase rasked treeningud vajavad vahet umbes {1} päeva.',
   'Hard sets are the working sets taken reasonably close to failure — the best simple measure of training dose.':
     'Rasked seeriad on tööseeriad, mis tehakse mõistlikult läbikukkumise lähedale — parim lihtne treeningdoosi mõõdik.',
   'Hard sets are what count: a set ending {1}–{2} reps short of failure.':
@@ -1652,8 +1652,8 @@ export const DICT: Record<string, string> = {
     'Kui treenid tühja kõhuga, söö varsti pärast {1}–{2} g valku ja ära mine tühja kõhuga väga pikale treeningule.',
   'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.':
     'Kui treenid mitmes kohas, salvesta iga jõusaal eraldi — kodune varustus ja täisjõusaal vajavad väga erinevaid harjutuste asendusi.',
-  'If you trained the same muscles hard today, give them {1} h — shuffle tomorrow’s session so a fresh group goes first.':
-    'Kui treenisid täna samu lihaseid kõvasti, anna neile {1} h — tõsta homne treening ümber, et värske lihasrühm tuleks esimesena.',
+  'If you trained the same muscles hard today, give them {1} days — shuffle tomorrow’s session so a fresh group goes first.':
+    'Kui treenisid täna samu lihaseid kõvasti, anna neile {1} päeva — tõsta homne treening ümber, et värske lihasrühm tuleks esimesena.',
   "If you want one, check the label for the actual caffeine amount and avoid 'proprietary blends' that hide doses.":
     'Kui tahad seda, vaata sildilt tegelikku kofeiini kogust ja väldi „patenteeritud segusid“, mis doose varjavad.',
   "If you're already using, don't hide it from a doctor — get your blood pressure and bloodwork checked.":
@@ -1867,7 +1867,7 @@ export const DICT: Record<string, string> = {
     'Enim treenitud harjutuste teadmine näitab, mille ümber su rutiin tegelikult ehitatud on — ja mis võib puudu olla.',
   'Last month': 'Eelmine kuu',
   'Last month: {1} sessions, {2} sets.': 'Eelmine kuu: {1} treeningut, {2} seeriat.',
-  'Last session was {1} day ago.': 'Eelmine treening oli {1} päeva tagasi.',
+  'Last session was {1}.': 'Eelmine treening oli {1}.',
   'Last time {1} reps — not the top of the range yet, so same weight, more reps.':
     'Eelmine kord {1} kordust — veel pole vahemiku ülemine piir, nii et sama raskus, rohkem kordusi.',
   'Last week: {1} sessions, {2} sets.': 'Eelmine nädal: {1} treeningut, {2} seeriat.',
@@ -3808,7 +3808,7 @@ export const DICT: Record<string, string> = {
     '{1} raskusega {2}: su hiljutiste seeriate järgi umbes {3} kordust läbikukkumiseni.',
   '{1} chest moves) mostly adds fatigue; {2}–{3} per muscle per session is enough.':
     '{1} rinnaharjutust) lisab peamiselt väsimust; {2}–{3} lihase kohta trennis on piisav.',
-  '{1} days since your last session.': 'Viimasest trennist on möödas {1} päeva.',
+  '{1} since your last session.': 'Viimasest trennist on möödas {1}.',
   '{1} days: upper/lower.': '{1} päeva: üla-/alakeha.',
   '{1} full-body sessions a week, {2}–{3} big lifts, {4}–{5} sets of {6}–{7}, and add a little weight when all sets reach {8}.':
     '{1} täiskehatrenni nädalas, {2}–{3} suurt harjutust, {4}–{5} seeriat {6}–{7} kordusega ja lisa natuke raskust, kui kõik seeriad jõuavad {8}-ni.',
@@ -3877,7 +3877,7 @@ export const DICT: Record<string, string> = {
   '{1}, the last {2} weeks: {3} sets (~{4} a week).':
     '{1}, viimased {2} nädalat: {3} seeriat (~{4} nädalas).',
   '{1}, this month: {2} sets (~{3} a week).': '{1}, sel kuul: {2} seeriat (~{3} nädalas).',
-  '{1}-day streak.': '{1}-päevane seeria.',
+  'Streak: {1}.': 'Seeria: {1}.',
   '{1}/{2}/{3}: {4} sets in {5} min — {6}, {7}, {8}, {9}.':
     '{1}/{2}/{3}: {4} seeriat {5} minutiga – {6}, {7}, {8}, {9}.',
   '{1}: Bar over mid-foot, shins touch it, flat back, pull the slack out, push the floor away, bar stays on the legs, stand tall.':
@@ -3913,8 +3913,8 @@ export const DICT: Record<string, string> = {
   '{1}: technique tips?': '{1}: tehnikanõuanded?',
   '{1}: warm-up sets?': '{1}: soojendusseeriad?',
   '{1}: what weight next time?': '{1}: mis raskusega järgmine kord?',
-  '{1}: {2} days ago ({3}/{4}/{5}), {6} sets.': '{1}: {2} päeva tagasi ({3}/{4}/{5}), {6} seeriat.',
-  '{1}: {2} days ago, top set {3} × {4}.': '{1}: {2} päeva tagasi, tippseeria {3} × {4}.',
+  '{1}: {2} ({3}/{4}/{5}), {6} sets.': '{1}: {2} ({3}/{4}/{5}), {6} seeriat.',
+  '{1}: {2}, top set {3} × {4}.': '{1}: {2}, tippseeria {3} × {4}.',
   '{1}: {2} sessions in total, {3} in the last {4} weeks.':
     '{1}: kokku {2} trenni, viimase {4} nädala jooksul {3}.',
   '{1}: {2} sessions in {3} weeks (~{4}/week).': '{1}: {2} trenni {3} nädalaga (~{4}/nädalas).',
@@ -4270,4 +4270,1269 @@ export const DICT: Record<string, string> = {
   'By the way, this week is about half your usual volume ({1} vs ~{2} sets).':
     'Muide, see nädal on umbes pool sinu tavapärasest mahust ({1} vs ~{2} seeriat).',
   'Sets by week': 'Seeriad nädalate kaupa',
+  // Activities told in chat, complaints (activityReport.ts).
+  'Dancing — that counts.': 'Tantsimine — see läheb arvesse.',
+  'Pilates — that counts.': 'Pilates — see läheb arvesse.',
+  'Yoga — that counts.': 'Jooga — see läheb arvesse.',
+  'Stretching — that counts.': 'Venitamine — see läheb arvesse.',
+  'Massage — that counts.': 'Massaaž — see läheb arvesse.',
+  'Sauna — that counts.': 'Saun — see läheb arvesse.',
+  'Cold exposure — that counts.': 'Külmaravi — see läheb arvesse.',
+  'HIIT — that counts.': 'HIIT — see läheb arvesse.',
+  'Football — that counts.': 'Jalgpall — see läheb arvesse.',
+  'Basketball — that counts.': 'Korvpall — see läheb arvesse.',
+  'Tennis — that counts.': 'Tennis — see läheb arvesse.',
+  'Volleyball — that counts.': 'Võrkpall — see läheb arvesse.',
+  'Combat training — that counts.': 'Võitlussport — see läheb arvesse.',
+  'Climbing — that counts.': 'Ronimine — see läheb arvesse.',
+  'Skiing — that counts.': 'Suusatamine — see läheb arvesse.',
+  'Surfing — that counts.': 'Surfamine — see läheb arvesse.',
+  'Skating — that counts.': 'Uisutamine — see läheb arvesse.',
+  'Swimming — that counts.': 'Ujumine — see läheb arvesse.',
+  'Cycling — that counts.': 'Rattasõit — see läheb arvesse.',
+  'Rowing — that counts.': 'Sõudmine — see läheb arvesse.',
+  'Running — that counts.': 'Jooksmine — see läheb arvesse.',
+  'Walking — that counts.': 'Kõndimine — see läheb arvesse.',
+  'Cardio — that counts.': 'Kardio — see läheb arvesse.',
+  'Fair — you told me and I talked past it.':
+    'Õigus — sa ütlesid mulle ja ma rääkisin sellest mööda.',
+  'Time: {1} min.': 'Aeg: {1} min.',
+  'Time: {1} h.': 'Aeg: {1} h.',
+  'Distance: {1} km.': 'Distants: {1} km.',
+  'Time: {1} min, distance: {2} km.': 'Aeg: {1} min, distants: {2} km.',
+  'Time: {1} h, distance: {2} km.': 'Aeg: {1} h, distants: {2} km.',
+  'That’s recovery work — it eases your load rather than adds to it.':
+    'See on taastumine — see vähendab koormust, mitte ei lisa.',
+  'Good call.': 'Hea valik.',
+  'Mostly back, shoulders and your heart, low impact on the legs — go a bit lighter on heavy pulling today.':
+    'Peamiselt selg, õlad ja süda, jalgadele vähe põrutust — tee täna rasketel tõmmetel veidi kergemalt.',
+  'That’s real conditioning load, mostly legs and your heart.':
+    'See on korralik vastupidavuskoormus, peamiselt jalad ja süda.',
+  'Treat your legs as trained today: no heavy leg work until tomorrow, upper body is fine.':
+    'Arvesta, et jalad on täna treenitud: rasked jalaharjutused alles homme, ülakeha võib teha.',
+  'Light-to-moderate conditioning — it won’t hurt your lifting; just don’t stack heavy legs right on top of it.':
+    'Kerge kuni mõõdukas kardio — jõutreeningut see ei sega; lihtsalt ära tee kohe pärast seda raskeid jalgu.',
+  'I see it in your log — it’s in your weekly load already.':
+    'Näen seda logis — see on juba sinu nädala koormuses.',
+  'Log it under Activities with the time, and I’ll count it in your load and recovery.':
+    'Logi see koos ajaga tegevuste alla ja ma arvestan seda koormuse ja taastumise juures.',
+  'Want me to log it?': 'Kas login selle?',
+  'Then it counts in your weekly load and recovery.':
+    'Siis läheb see nädala koormusse ja taastumisse.',
+  'Logged — it’s in your activities and counts in your load now.':
+    'Logitud — see on tegevustes ja läheb nüüd koormusse arvesse.',
+  // Atlas: 100 more topics + app tips
+  'What is an AMRAP set?': 'Mis on AMRAP-seeria?',
+  'AMRAP means “as many reps as possible” with a set weight — usually stopping with {1}–{2} good reps left, not grinding ugly reps.':
+    'AMRAP tähendab „nii palju kordusi kui suudad“ kindla raskusega — tavaliselt lõpetad, kui varus on {1}–{2} head kordust, ilma koledaid kordusi välja pressimata.',
+  'It’s a handy way to test progress (more reps at the same weight means you got stronger) and to autoregulate: programs like {1}/{2}/{3} use a last AMRAP set to set next week’s weights.':
+    'See on mugav viis progressi kontrollida (rohkem kordusi sama raskusega tähendab, et oled tugevamaks saanud) ja koormust reguleerida: programmid nagu {1}/{2}/{3} määravad viimase AMRAP-seeria järgi järgmise nädala raskused.',
+  'Keep it to one AMRAP set per lift per session, and skip it on days you feel beaten up.':
+    'Tee üks AMRAP-seeria harjutuse kohta treeningus ja jäta see vahele päevadel, kui tunned end läbi olevat.',
+  'On heavy compound lifts stop when the bar slows down a lot or form breaks — that’s your AMRAP, even if you could force one more.':
+    'Rasketes põhiharjutustes lõpeta, kui kang märgatavalt aeglustub või tehnika laguneb — see ongi sinu AMRAP, isegi kui suudaksid veel ühe välja pressida.',
+  'What is EMOM training?': 'Mis on EMOM-treening?',
+  'EMOM means “every minute on the minute”: start a set at the top of each minute and rest for whatever time is left.':
+    'EMOM tähendab „iga minuti alguses“: alustad seeriat iga minuti alguses ja puhkad ülejäänud aja.',
+  'It keeps the pace honest and the session dense — for example {1} minutes of {2} fairly heavy squats, or {3} minutes alternating push-ups and rows.':
+    'Tempo on aus ja treening tihe — näiteks {1} minutit {2} üsna rasket kükki või {3} minutit vaheldumisi kätekõverdusi ja sõudmisi.',
+  'Pick a load you could do for about twice the reps, and if you start missing the minute, cut the reps rather than the rest.':
+    'Vali raskus, millega teeksid umbes kaks korda rohkem kordusi, ja kui minuti sisse enam ei mahu, vähenda kordusi, mitte puhkust.',
+  'EMOMs are great for technique practice with moderate weight, for conditioning finishers and for getting lots of quality work into a short session.':
+    'EMOM sobib suurepäraselt tehnika harjutamiseks mõõduka raskusega, konditsiooni lõpetuseks ja palju kvaliteetse töö mahutamiseks lühikesse treeningusse.',
+  'What are cluster sets?': 'Mis on klastriseeriad?',
+  'A cluster set splits one set into mini-sets with short breaks: for example {1} × {2} reps with {3}–{4} seconds between them instead of {5} reps in a row.':
+    'Klastriseeria jagab ühe seeria lühikeste pausidega miniseeriateks: näiteks {1} × {2} kordust {3}–{4}-sekundiliste pausidega {5} järjestikuse korduse asemel.',
+  'The short pauses let you keep bar speed and form with heavier loads, so you get more quality reps near your top weights.':
+    'Lühikesed pausid aitavad hoida kangi kiirust ja tehnikat suurema raskusega, nii et teed rohkem kvaliteetseid kordusi oma maksimaalsete raskuste lähedal.',
+  'They suit strength and power work; for muscle growth, normal sets taken close to failure work just as well and are simpler.':
+    'Need sobivad jõu- ja võimsustööks; lihaskasvuks töötavad tavalised seeriad läbikukkumise lähedal sama hästi ja on lihtsamad.',
+  'Rack the bar or set the dumbbells down during the pause, and brace again before every mini-set.':
+    'Pausi ajal pane kang pukkidele või hantlid maha ja pinguta enne iga miniseeriat keha uuesti.',
+  'How do rest-pause sets work?': 'Kuidas rest-pause seeriad töötavad?',
+  'Rest-pause: do a set close to failure, rest {1}–{2} seconds, squeeze out a few more reps, and repeat that once or twice.':
+    'Rest-pause: tee seeria läbikukkumise lähedale, puhka {1}–{2} sekundit, pressi välja veel mõni kordus ja korda seda üks-kaks korda.',
+  'It packs a lot of effort into little time, which makes it useful for isolation and machine exercises when you’re short on time.':
+    'See mahutab palju pingutust lühikesse aega, seega on kasulik isoleerivates harjutustes ja masinatel, kui aega on vähe.',
+  'Use it sparingly — on the last set of one or two exercises — and avoid it on heavy barbell squats and deadlifts, where fatigue wrecks form.':
+    'Kasuta säästlikult — ühe-kahe harjutuse viimases seerias — ja väldi seda rasketes kangikükkides ja jõutõmmetes, kus väsimus rikub tehnika.',
+  'A simple version: pick a weight for about {1} reps, do {2}, then mini-sets of {3}–{4} reps with {5} seconds of rest until you can’t get {6}.':
+    'Lihtne variant: raskus umbes {1} korduseks, tee {2}, siis miniseeriad {3}–{4} kordusega ja {5}-sekundilise puhkusega, kuni {6} enam välja ei tule.',
+  'What are myo-reps?': 'Mis on myo-kordused?',
+  'Myo-reps are a rest-pause style: one activation set of about {1}–{2} reps close to failure, then several mini-sets of {3}–{4} reps with only {5}–{6} deep breaths between them.':
+    "Myo-kordused on rest-pause'i vorm: üks aktiveeriv seeria umbes {1}–{2} kordusega läbikukkumise lähedal, seejärel mitu miniseeriat {3}–{4} kordusega ja vahepeal vaid {5}–{6} sügavat hingetõmmet.",
+  'Most of the reps are hard, “effective” reps, so you get growth similar to {1} normal sets in a fraction of the time.':
+    'Enamik kordusi on rasked ja „efektiivsed“, seega on kasv sarnane {1} tavalise seeriaga palju lühema ajaga.',
+  'They work best on isolation and machine lifts — curls, lateral raises, leg extensions, cable work.':
+    'Need töötavad kõige paremini isoleerivates ja masinaharjutustes — kõverdused, külgtõsted, jalasirutused, plokitöö.',
+  'Stop the mini-sets when you can’t hit the target reps anymore; one or two myo-rep sets per exercise is plenty.':
+    'Lõpeta miniseeriad, kui sihtkordusteni enam ei jõua; üks-kaks myo-seeriat harjutuse kohta on täiesti piisav.',
+  'What is double progression?': 'Mis on topeltprogressioon?',
+  'Double progression means you progress reps first, then weight: pick a rep range like {1}–{2}, keep the same weight until you hit {3} on all sets, then add a small jump and start back at {4}.':
+    'Topeltprogressioon tähendab, et kõigepealt kasvavad kordused, siis raskus: vali vahemik, näiteks {1}–{2}, hoia sama raskust, kuni teed kõigis seeriates {3}, siis lisa väike samm ja alusta taas {4}-st.',
+  'It’s the simplest reliable way to keep progressing on dumbbell, machine and isolation exercises, where the weight jumps are big compared with the load.':
+    'See on lihtsaim usaldusväärne viis progresseeruda hantlite, masinate ja isoleerivate harjutustega, kus raskuse sammud on koormusega võrreldes suured.',
+  'Log every set so you know exactly what to beat next time.':
+    'Pane iga seeria kirja, et teaksid täpselt, mida järgmine kord ületada.',
+  'If the new weight drops you below the bottom of the range, use a smaller jump or stay with the old weight for one more session.':
+    'Kui uue raskusega kukud vahemikust allapoole, võta väiksem samm või jää veel üheks treeninguks vana raskuse juurde.',
+  'How do I taper before a meet or a max test?':
+    'Kuidas enne võistlust või maksimumitesti koormust vähendada (taper)?',
+  'A taper cuts fatigue while keeping strength: in the last {1}–{2} weeks drop your volume by roughly {3}–{4}% but keep the intensity — a few heavy singles or doubles at {5}–{6}% — so you stay sharp.':
+    'Taper vähendab väsimust ja säilitab jõu: viimasel {1}–{2} nädalal vähenda mahtu umbes {3}–{4}%, aga hoia intensiivsust — mõned rasked üksik- või kahekordused {5}–{6}% juures — et püsiksid terav.',
+  'The final {1}–{2} days are very light or off.':
+    'Viimased {1}–{2} päeva on väga kerged või vabad.',
+  'Don’t try anything new in that window: same technique, same food, same sleep routine.':
+    'Sel ajal mitte midagi uut: sama tehnika, sama toit, sama unerežiim.',
+  'A common plan: two weeks out a normal heavy week with fewer sets, one week out singles at opener weight, then rest or mobility only for the last two days.':
+    'Tavaline plaan: kaks nädalat enne tavaline raske nädal vähemate seeriatega, nädal enne üksikkordused avakatse raskusega, viimased kaks päeva ainult puhkus või liikuvus.',
+  'What is a top set with back-off sets?': 'Mis on tippseeria ja back-off seeriad?',
+  'You work up to one heavy “top set” — for example {1} × {2} at a hard but clean effort — then drop the weight about {3}–{4}% for {5}–{6} “back-off” sets of the same or slightly more reps.':
+    'Jõuad ühe raske „tippseeriani“ — näiteks {1} × {2} raske, aga puhta pingutusega — seejärel vähendad raskust umbes {3}–{4}% ja teed {5}–{6} „back-off“ seeriat sama või veidi suurema kordustearvuga.',
+  'The top set drives strength and shows your progress; the back-off sets add quality volume without the fatigue of doing every set at the top weight.':
+    'Tippseeria arendab jõudu ja näitab progressi; back-off seeriad lisavad kvaliteetset mahtu ilma väsimuseta, mida tooks iga seeria tippraskusega.',
+  'When the top set gets easier at the same effort, raise it next session.':
+    'Kui tippseeria muutub sama pingutusega kergemaks, tõsta seda järgmises treeningus.',
+  'Rate the top set with RPE: at {1} (two reps left) keep the weight, at {2} hold it next time, at {3} you can add.':
+    'Hinda tippseeriat RPE järgi: {1} juures (kaks kordust varus) jäta raskus samaks, {2} juures ära järgmine kord lisa, {3} juures võid lisada.',
+  'Are paused reps worth doing?': 'Kas pausiga kordused on väärt tegemist?',
+  'Yes — pausing for {1}–{2} seconds at the hardest point (the bottom of a squat, on the chest in a bench, just off the floor in a deadlift) kills the bounce, builds strength where you’re weakest and forces you to stay tight.':
+    'Jah — {1}–{2}-sekundiline paus kõige raskemas punktis (küki põhjas, rinnal lamades surumisel, veidi põranda kohal jõutõmbes) kaotab põrke, arendab jõudu seal, kus oled nõrgim, ja sunnib pinget hoidma.',
+  'Use about {1}–{2}% less weight than for normal reps.':
+    'Kasuta umbes {1}–{2}% väiksemat raskust kui tavaliste korduste puhul.',
+  'They’re great as a secondary variation or as technique practice in the warm-up.':
+    'Need sobivad suurepäraselt abivariandiks või tehnika harjutamiseks soojenduses.',
+  'Stay tight during the pause — don’t relax at the bottom of a squat or sink the bar into your chest; the pause should look like a freeze-frame.':
+    'Hoia pausi ajal pinget — ära lõdvestu küki põhjas ega vajuta kangi rinda; paus peab välja nägema nagu stoppkaader.',
+  'Do negatives (eccentric reps) build muscle?':
+    'Kas negatiivid (ekstsentrilised kordused) kasvatavad lihaseid?',
+  'The lowering (eccentric) part of a rep is a strong growth signal, and you’re about {1}–{2}% stronger lowering a weight than lifting it.':
+    'Langetusfaas (ekstsentriline) on tugev kasvusignaal ja selles oled umbes {1}–{2}% tugevam kui tõstes.',
+  'Controlling the descent for {1}–{2} seconds on normal reps already gets most of the benefit.':
+    'Kontrollitud {1}–{2}-sekundiline langetamine tavalistes kordustes annab juba suurema osa kasust.',
+  'Supramaximal negatives (heavier than you can lift, with a spotter) cause a lot of soreness — use them rarely, for example to build up to your first pull-up or dip.':
+    'Supramaksimaalsed negatiivid (raskem, kui suudad tõsta, julgestajaga) tekitavad tugevat lihasvalu — kasuta neid harva, näiteks esimese lõuatõmbe või rööbaspuudel surumiseni jõudmiseks.',
+  'Eccentric-focused work is also a classic tool in tendon rehab, but then it’s done light and slow under a physio’s plan.':
+    'Ekstsentriline töö on ka kõõluste taastusravi klassikaline vahend, kuid siis tehakse seda kergelt ja aeglaselt füsioterapeudi kava järgi.',
+  'What are MEV and MRV?': 'Mis on MEV ja MRV?',
+  'They’re volume landmarks: MEV (minimum effective volume) is the fewest hard sets per muscle per week that still make it grow, MRV (maximum recoverable volume) is the most you can recover from.':
+    'Need on mahu orientiirid: MEV (minimaalne efektiivne maht) on väikseim raskete seeriate arv lihase kohta nädalas, mis veel kasvatab, MRV (maksimaalne taastuv maht) on suurim, millest jõuad taastuda.',
+  'Most people grow well somewhere around {1}–{2} hard sets per muscle per week, starting nearer the low end and adding sets over a block.':
+    'Enamik inimesi kasvab hästi kuskil {1}–{2} raske seeria juures lihase kohta nädalas, alustades alumise piiri lähedalt ja lisades ploki jooksul seeriaid.',
+  'When performance drops and soreness lingers, you’ve passed your MRV — time to deload.':
+    'Kui tulemused langevad ja lihasvalu ei kao, oled üle MRV — aeg koormust langetada.',
+  'These numbers are individual and shift with sleep, stress and diet — use them as a starting point, then watch your own progress.':
+    'Need numbrid on individuaalsed ja sõltuvad unest, stressist ja toitumisest — kasuta neid lähtepunktina ja jälgi oma progressi.',
+  'Does blood flow restriction training work?': 'Kas verevoolu piiramisega treening töötab?',
+  'BFR (occlusion) training uses a cuff or band high on the arm or thigh to partly slow the blood flowing back from the limb, so very light weights ({1}–{2}% of your max) for high reps (often {3}, {4}, {5}, {6}) still build muscle.':
+    'BFR- (oklusiooni-) treening kasutab mansetti või rihma kõrgel käsivarrel või reiel, mis osaliselt aeglustab vere äravoolu jäsemest, nii et isegi väga kerge raskus ({1}–{2}% maksimumist) paljude kordustega (sageli {3}, {4}, {5}, {6}) kasvatab lihaseid.',
+  'It’s useful when you can’t load heavy — rehab, sore joints, deloads.':
+    'See on kasulik, kui raskelt koormata ei saa — taastusravi, valutavad liigesed, kergemad nädalad.',
+  'Wraps should feel tight but not painful (about {1} out of {2} on the legs, less on the arms), with no numbness or tingling; avoid it with clotting problems, high blood pressure or pregnancy unless a doctor says it’s ok.':
+    'Rihmad peavad olema pingul, aga mitte valusad (umbes {1} {2}-st jalgadel, kätel vähem), ilma tuimuse ja kipitusteta; väldi seda hüübimishäirete, kõrge vererõhu või raseduse korral, kui arst ei luba.',
+  'Rest only {1}–{2} seconds between BFR sets and release the cuff right after the exercise; one or two exercises per session is enough.':
+    'Puhka BFR-seeriate vahel vaid {1}–{2} sekundit ja vabasta mansett kohe pärast harjutust; ühest-kahest harjutusest treeningus piisab.',
+  'Is a {1}×{2} program good?': 'Kas {1}×{2} programm on hea?',
+  'Yes, {1}×{2} programs (like StrongLifts or Madcow-style plans) are a solid start for beginners: a few big lifts, three days a week, a little more weight every session.':
+    'Jah, {1}×{2} programmid (nagu StrongLifts või Madcow-stiilis) on algajale kindel algus: mõned põhiharjutused, kolm päeva nädalas, igas treeningus veidi rohkem raskust.',
+  'Strength climbs fast in the first months.': 'Esimestel kuudel kasvab jõud kiiresti.',
+  'Their limits: little arm, shoulder and upper-back isolation work, and progress stalls once the linear jumps run out — then switch to weekly progression or a more varied program.':
+    'Nende piirangud: vähe isoleerivat tööd kätele, õlgadele ja ülaseljale ning progress peatub, kui lineaarsed sammud otsa saavad — siis mine üle iganädalasele progressioonile või mitmekesisemale programmile.',
+  'Add {1}–{2} sets of pull-ups or rows, curls and lateral raises at the end, and drop the weight by {3}% when you miss the same weight twice.':
+    'Lisa lõppu {1}–{2} seeriat lõuatõmbeid või sõudmist, kõverdusi ja külgtõsteid ning kui sama raskus kaks korda ei tule, vähenda seda {3}%.',
+  'How does {1}/{2}/{3} work?': 'Kuidas {1}/{2}/{3} töötab?',
+  '{1}/{2}/{3} (by Jim Wendler) runs in {4}-week cycles built on a “training max” set at about {5}% of your real max: week one sets of {6}, week two sets of {7}, week three a {8}/{9}/{10} wave, week four a deload.':
+    '{1}/{2}/{3} (Jim Wendler) koosneb {4}-nädalastest tsüklitest, mis põhinevad „treeningmaksimumil“ umbes {5}% tegelikust maksimumist: esimesel nädalal seeriad {6} kordusega, teisel {7} kordusega, kolmandal {8}/{9}/{10} laine, neljandal kergendus.',
+  'The last set each week is an AMRAP, and after each cycle you add about {1} kg to the upper-body and {2} kg to the lower-body training maxes.':
+    'Iga nädala viimane seeria on AMRAP ja pärast iga tsüklit lisad ülakeha treeningmaksimumidele umbes {1} kg ja jalgadele {2} kg.',
+  'It’s slow and steady — built for lifters who can no longer add weight every session.':
+    'Aeglaselt, aga kindlalt — mõeldud neile, kes ei suuda enam igas treeningus raskust lisada.',
+  'Pair the main lift with assistance work — for example “Boring But Big”, {1} × {2} at {3}–{4}% — and keep the training max honest rather than ego-high.':
+    'Ühenda põhiharjutus abitööga — näiteks „Boring But Big“, {1} × {2} {3}–{4}% juures — ja hoia treeningmaksimum aus, mitte egost kõrgeks aetud.',
+  'Is circuit training good?': 'Kas ringtreening on hea?',
+  'Circuits — several exercises back to back with little rest — are great for conditioning, for supporting fat loss and for getting a full-body session done in {1}–{2} minutes.':
+    'Ringid — mitu harjutust järjest vähese puhkusega — sobivad suurepäraselt vastupidavuseks, rasvakaotuse toetamiseks ja kogu keha treeninguks {1}–{2} minutiga.',
+  'They build some muscle for beginners, but with short rests fatigue limits the loads, so for maximum strength and size normal sets with proper rest still win.':
+    'Algajatele annavad need veidi lihaseid, kuid lühikese puhkuse tõttu piirab väsimus raskusi, nii et maksimaalse jõu ja lihasmassi jaoks on korraliku puhkusega tavalised seeriad endiselt paremad.',
+  'A good mix: strength work first, then a {1}-minute circuit as a finisher.':
+    'Hea kombinatsioon: kõigepealt jõutöö, siis {1}-minutiline ring lõpetuseks.',
+  'Alternate body regions (legs, push, pull, core) so one muscle rests while another works, and keep the loads moderate so form stays clean when you’re breathing hard.':
+    'Vaheta kehaosi (jalad, surumine, tõmbamine, kere), et üks lihas puhkaks, kui teine töötab, ja hoia raskused mõõdukad, et tehnika püsiks puhas ka hingeldades.',
+  'Should I do plyometrics like box jumps?': 'Kas teha plüomeetrikat, näiteks kastihüppeid?',
+  'Plyometrics — jumps, bounds, medicine-ball throws — train speed and power and help athletes and anyone who wants to stay springy.':
+    'Plüomeetrika — hüpped, hüplemised, topispalli viskamised — treenib kiirust ja võimsust ning aitab sportlasi ja kõiki, kes tahavad vetruvaks jääda.',
+  'Keep the volume low (around {1}–{2} quality contacts per session), do them fresh at the start of a workout, and land softly with your knees tracking over your toes.':
+    'Hoia maht väike (umbes {1}–{2} kvaliteetset kontakti treeningus), tee seda puhanuna treeningu alguses ja maandu pehmelt, põlved varvaste suunas.',
+  'For box jumps the goal is jump height, not box height — step down instead of jumping down to spare your Achilles and knees.':
+    'Kastihüpetes on eesmärk hüppe kõrgus, mitte kasti kõrgus — astu alla, mitte ära hüppa alla, et säästa Achilleust ja põlvi.',
+  'Start with low hops and jumps onto a low box for a few weeks before depth jumps, and skip them while any tendon in your legs is irritated.':
+    'Alusta mõne nädala jooksul madalatest hüpetest ja hüpetest madalale kastile, enne kui lähed sügavushüpeteni, ja jäta need vahele, kui mõni jala kõõlus on ärritunud.',
+  'How do I front squat properly?': 'Kuidas eeskükki õigesti teha?',
+  'Rest the bar on your front delts, close to your throat, with the elbows high and pointing forward — the hands only balance it (a clean grip with two or three fingers, crossed arms, or straps looped around the bar).':
+    'Aseta kang eesmistele deltadele kaela lähedale, küünarnukid kõrgel ja ettepoole — käed ainult tasakaalustavad seda (rinnalevõtu haare kahe-kolme sõrmega, ristis käed või kangi ümber keeratud rihmad).',
+  'Stay upright, brace hard and sit straight down between your heels; the moment the elbows drop, the bar rolls forward.':
+    'Hoia ülakeha püsti, pinguta tugevalt ja istu otse alla kannade vahele; niipea kui küünarnukid vajuvad, veereb kang ette.',
+  'It’s great for the quads and upper back and easier on the lower back than a back squat, with loads usually around {1}–{2}% of it.':
+    'See on suurepärane nelipealihastele ja ülaseljale ning alaseljale leebem kui seljakükk, raskused tavaliselt umbes {1}–{2}% sellest.',
+  'If your wrists hurt in the clean grip, use straps looped around the bar as handles or the cross-arm grip while you work on wrist and lat mobility.':
+    'Kui rinnalevõtu haardes randmed valutavad, kasuta kangi ümber keeratud rihmu käepidemetena või risthaaret, samal ajal randmete ja laiade seljalihaste liikuvust arendades.',
+  'How do I do hip thrusts correctly?': 'Kuidas puusatõstet (hip thrust) õigesti teha?',
+  'Set your upper back (just below the shoulder blades) on a bench, the bar padded over your hips, feet flat about hip-width apart so your shins are vertical at the top.':
+    'Toeta ülaselg (veidi abaluude all) pingile, kang pehmendusega puusadel, labajalad lamedalt puusalaiuselt, et ülemises asendis oleksid sääred vertikaalsed.',
+  'Tuck your chin and ribs, drive through your heels and finish by squeezing the glutes — not by arching your lower back.':
+    'Lõug ja ribid alla, suru kandadega ja lõpeta liigutus tuharaid pingutades — mitte alaselga kaardudes.',
+  'Pause for a second at the top; if you feel it mostly in the hamstrings, bring your feet closer, and if in the quads, move them further out.':
+    'Peatu üleval sekundiks; kui tunned seda peamiselt reie tagaküljel, too jalad lähemale, kui nelipealihastes — vii kaugemale.',
+  'Hip thrusts are one of the best glute builders because the glutes are loaded hardest at full hip extension; {1}–{2} sets of {3}–{4} twice a week works well.':
+    'Puusatõste on üks parimaid tuharaharjutusi, sest tuharad on kõige rohkem koormatud puusa täielikul sirutusel; {1}–{2} seeriat {3}–{4} kordusega kaks korda nädalas töötab hästi.',
+  'How do I do a Romanian deadlift?': 'Kuidas teha rumeenia jõutõmmet?',
+  'Start standing with the bar and soft knees, then push your hips straight back while the bar slides down your thighs close to your legs.':
+    'Alusta seistes kangiga, põlved kergelt kõverdatud, ja lükka puusad otse taha, kui kang libiseb mööda reisi alla jalgade lähedal.',
+  'Keep your back neutral and lats tight, and go down until you feel a strong hamstring stretch — usually around mid-shin — then drive your hips forward to stand.':
+    'Hoia selg neutraalne ja laiad seljalihased pingul ning mine alla, kuni tunned tugevat reie tagakülje venitust — tavaliselt umbes sääre keskele — siis lükka puusad ette ja tõuse.',
+  'It’s a hip hinge, not a squat: the knee angle barely changes.':
+    'See on puusahing, mitte kükk: põlvenurk peaaegu ei muutu.',
+  'Great for the hamstrings and glutes; use straps if your grip limits you, and keep the reps controlled ({1}–{2}) rather than bouncing out of the bottom.':
+    'Suurepärane reie tagaküljele ja tuharatele; kui haare piirab, kasuta rihmu ja tee kordused kontrollitult ({1}–{2}), mitte põhjast põrgates.',
+  'How do I do Bulgarian split squats?': 'Kuidas teha bulgaaria kükki?',
+  'Put your rear foot laces-down on a bench and step the front foot far enough forward that you can drop straight down with the front heel planted.':
+    'Pane tagumine jalg pöiaga pingile ja astu eesmine jalg nii kaugele, et saaksid laskuda otse alla, eesmine kand põrandal.',
+  'Lower until the back knee nearly touches the floor, then drive up through the whole front foot.':
+    'Lasku alla, kuni tagumine põlv peaaegu puudutab põrandat, ja tõuse kogu eesmise labajalaga surudes.',
+  'A longer stance and a slight forward lean hit the glutes more; a shorter stance and an upright torso hit the quads more.':
+    'Pikem samm ja kerge ettekallutus koormavad rohkem tuharaid; lühem samm ja püstine ülakeha rohkem nelipealihaseid.',
+  'Balance is tough at first — hold a rack or bench with one hand, start with bodyweight or light dumbbells, and do your weaker leg first.':
+    'Alguses on tasakaal raske — hoia ühe käega raamist või pingist kinni, alusta kehakaalu või kergete hantlitega ja tee nõrgem jalg esimesena.',
+  'How do I do lunges without knee pain?': 'Kuidas teha väljaasteid ilma põlvevaluta?',
+  'Take a step long enough that both knees bend to about {1}° at the bottom, and keep the front knee tracking over the middle toes with the whole front foot on the floor.':
+    'Astu nii pikalt, et all painduksid mõlemad põlved umbes {1}° nurka, eesmine põlv liiguks keskmiste varvaste kohal ja kogu eesmine labajalg oleks põrandal.',
+  'Reverse lunges (stepping back) are the easiest on the knees and the best place to start; walking lunges are harder on balance and breathing.':
+    'Tagurpidi väljaasted on põlvedele kõige leebemad ja parim koht alustamiseks; kõndivad väljaasted on tasakaalule ja hingamisele raskemad.',
+  'If a knee aches, shorten the depth, slow down and try reverse lunges or split squats.':
+    'Kui põlv valutab, vähenda sügavust, aeglusta ja proovi tagurpidi väljaasteid või poolkükki.',
+  'Knees going past the toes is fine if it feels fine; pain is the signal to change something, not the angle itself.':
+    'Põlved varvastest ees on korras, kui kõik tundub hästi; muutmise signaal on valu, mitte nurk ise.',
+  'Are dips bad for the shoulders?': 'Kas rööbaspuudel surumised on õlgadele kahjulikud?',
+  'Dips are a great chest and triceps builder and fine for most shoulders if you control the depth.':
+    'Rööbaspuudel surumised arendavad suurepäraselt rinda ja triitsepsit ning sobivad enamikule õlgadele, kui sügavust kontrollid.',
+  'Go down until your upper arms are about parallel to the floor or slightly below, keep the shoulders down and back (no shrugging toward the ears) and don’t bounce at the bottom.':
+    'Lasku alla, kuni õlavarred on umbes põrandaga paralleelsed või veidi madalamal, hoia õlad all ja taga (ära kergita neid kõrvade poole) ja ära põrka all.',
+  'Leaning forward works more chest, staying upright more triceps; if the front of your shoulder hurts, shorten the range or switch to close-grip push-ups or presses.':
+    'Ettekallutus annab rohkem rinda, püstiasend rohkem triitsepsit; kui õla esiosa valutab, lühenda liikumisulatust või vaheta kitsa haardega kätekõverduste või surumiste vastu.',
+  'Can’t do one yet?': 'Ühtegi veel ei tule?',
+  'Start with slow negatives, band-assisted dips or bench dips with bent knees, then add weight on a belt once you can do {1}–{2} clean reps.':
+    'Alusta aeglastest negatiividest, kummiga abistatud surumistest või pingilt tehtud surumistest kõverdatud jalgadega ja kui teed {1}–{2} puhast kordust, lisa vööle raskust.',
+  'How do I do face pulls and why?': "Kuidas teha face pull'i ja miks?",
+  'Face pulls train the rear delts and the muscles that rotate the shoulder outward — good for shoulder health and posture, especially if you press a lot.':
+    'Face pull treenib tagumisi deltalihaseid ja lihaseid, mis pööravad õlga väljapoole — hea õlgade tervisele ja rühile, eriti kui surud palju.',
+  'Set a rope at about forehead height, pull toward your face with the elbows high and finish with your hands beside your ears, thumbs pointing back.':
+    'Sea köis umbes otsaesise kõrgusele, tõmba näo poole küünarnukid kõrgel ja lõpeta käed kõrvade kõrval, pöidlad taha suunatud.',
+  'Go light and controlled: {1}–{2} sets of {3}–{4} reps, {5}–{6} times a week.':
+    'Kergelt ja kontrollitult: {1}–{2} seeriat {3}–{4} kordusega, {5}–{6} korda nädalas.',
+  'No cable?': 'Plokki pole?',
+  'A band anchored at head height or rear-delt flyes with light dumbbells do a similar job.':
+    'Pea kõrgusele kinnitatud kumm või kergete hantlitega tagumiste deltade laiali viimine teevad sarnast tööd.',
+  'How do I do lateral raises properly?': 'Kuidas külgtõsteid õigesti teha?',
+  'Use light dumbbells, a slight forward lean and a small bend in the elbows, and raise your arms out to the side until they’re about shoulder height — lead with the elbows, not the hands.':
+    'Kasuta kergeid hantleid, kerget ettekallutust ja kergelt kõverdatud küünarnukke ning tõsta käed külgedele umbes õlgade kõrguseni — juhivad küünarnukid, mitte käelabad.',
+  'Think “push the dumbbells out to the walls” rather than up, keep the traps relaxed and lower slowly.':
+    'Mõtle „lükka hantlid seinte poole“, mitte üles, hoia trapetslihased lõdvad ja langeta aeglaselt.',
+  'Swinging heavy weights mostly trains momentum and traps; strict sets of {1}–{2} grow the side delts best.':
+    'Raskete hantlite kiigutamine treenib peamiselt hoogu ja trapetslihaseid; ranged seeriad {1}–{2} kordusega kasvatavad keskmisi deltalihaseid kõige paremini.',
+  'Cable or machine lateral raises keep tension at the bottom too — a nice variation; side delts recover fast, so {1}–{2} sessions a week is fine.':
+    'Külgtõsted plokis või masinal hoiavad pinget ka all — tore variant; keskmised deltad taastuvad kiiresti, nii et {1}–{2} treeningut nädalas on korras.',
+  'Chin-ups or pull-ups — what’s the difference?':
+    'Lõuatõmbed alt- või pealthaardega — mis vahe on?',
+  'Chin-ups (palms facing you) bring in more biceps and are usually a bit easier; pull-ups (palms facing away) lean more on the lats and upper back.':
+    'Althaare (peopesad enda poole) kaasab rohkem biitsepsit ja on tavaliselt veidi kergem; pealthaare (peopesad endast eemale) koormab rohkem laiu seljalihaseid ja ülaselga.',
+  'Both are excellent back builders, so pick the one that feels better on your elbows and shoulders, or alternate them.':
+    'Mõlemad arendavad selga suurepäraselt, nii et vali see, mis on küünarnukkidele ja õlgadele meeldivam, või vaheta neid.',
+  'A neutral grip (palms facing each other) is often the most joint-friendly of all.':
+    'Neutraalne haare (peopesad teineteise poole) on sageli liigestele kõige leebem.',
+  'Grip width matters less than full range: start from a dead hang with your shoulders set and pull until your chin clears the bar.':
+    'Haarde laius on vähem oluline kui täisamplituud: alusta täisripakust, õlad paigas, ja tõmba, kuni lõug jõuab üle kangi.',
+  'How wide should my bench press grip be?': 'Kui lai peaks olema haare lamades surumisel?',
+  'A good default is a grip where your forearms are vertical when the bar touches your chest — for most people the index or middle finger around the rings on the bar.':
+    'Hea lähtepunkt on haare, mille korral on käsivarred vertikaalsed, kui kang puudutab rinda — enamikule nimetis- või keskmine sõrm kangi rõngaste juures.',
+  'Wider shortens the range and uses more chest but stresses the shoulders more; narrower uses more triceps.':
+    'Laiem lühendab liikumisulatust ja kaasab rohkem rinda, kuid koormab rohkem õlgu; kitsam kaasab rohkem triitsepsit.',
+  'Tuck the elbows about {1}–{2}° from your body rather than flaring them straight out, and keep the bar over your wrists, not bent back.':
+    'Hoia küünarnukid kehaga umbes {1}–{2}° nurga all, mitte laiali küljele, ja kang randmete kohal, mitte tahapoole painutatult.',
+  'Squeeze the bar hard and think of “bending” it to engage the lats; if your shoulders ache, try a slightly narrower grip and more elbow tuck.':
+    'Pigista kangi tugevalt ja mõtle, et „painutad“ seda, et laiad seljalihased tööle hakkaksid; kui õlad valutavad, proovi veidi kitsamat haaret ja küünarnukid rohkem keha lähedale.',
+  'What is leg drive on the bench press?': 'Mis on jalgade töö lamades surumisel?',
+  'Leg drive is pushing your feet into the floor to create full-body tension and to drive yourself back along the bench toward your head — not lifting your hips.':
+    'Jalgade töö on labajalgade surumine põrandasse, et kogu keha pingule tõmmata ja end pingil justkui pea suunas lükata — mitte puusade tõstmine.',
+  'Plant your feet firmly (flat or on the toes, whichever lets you push hardest), squeeze your glutes and keep them on the bench.':
+    'Aseta jalad kindlalt (lamedalt või varvastele, kuidas saad kõige tugevamalt suruda), pinguta tuharaid ja hoia need pingil.',
+  'Done right, it stabilises your upper back and can add a few kilos to your press.':
+    'Õigesti tehtuna stabiliseerib see ülaselga ja võib surumisele mõne kilo lisada.',
+  'Set your feet before you unrack and push as the bar leaves your chest; if your hips pop up, push more backward than upward.':
+    'Sea jalad enne kangi pukkidelt võtmist ja suru, kui kang rinnalt lahkub; kui puusad tõusevad, suru rohkem taha kui üles.',
+  'High-bar or low-bar squat?': 'Kõrge või madala kangiga kükk?',
+  'High-bar sits on top of the traps: a more upright torso, more knee bend and more quads — a natural fit for most people and for Olympic lifting.':
+    'Kõrge kang on trapetslihastel: püstisem ülakeha, rohkem põlvede painutust ja nelipealihaseid — loomulik enamikule inimestele ja tõstmisele.',
+  'Low-bar sits a few centimetres lower, on the rear delts: more forward lean and hip hinge, more glutes and hamstrings, and usually a bit more weight moved — popular in powerlifting.':
+    'Madal kang on paar sentimeetrit allpool, tagumistel deltadel: rohkem ettekallutust ja puusatööd, rohkem tuharaid ja reie tagakülge ning tavaliselt veidi suurem raskus — populaarne jõutõstmises.',
+  'Both are good; pick the one that feels comfortable on your shoulders and elbows and stick with it for a while.':
+    'Mõlemad on head; vali see, mis on õlgadele ja küünarnukkidele mugav, ja jää selle juurde mõneks ajaks.',
+  'Low-bar needs good shoulder mobility; if your elbows or wrists hurt, widen your grip and keep the wrists straight.':
+    'Madal kang nõuab head õlgade liikuvust; kui küünarnukid või randmed valutavad, laienda haaret ja hoia randmed sirged.',
+  'Are good mornings a good exercise?': 'Kas good morning on hea harjutus?',
+  'Yes — good mornings (bar on your back, hinging forward with soft knees) strengthen the hamstrings, glutes and spinal erectors and carry over well to squats and deadlifts.':
+    'Jah — good morning (kang seljal, ettekallutus kergelt kõverdatud põlvedega) tugevdab reie tagakülge, tuharaid ja selja sirgendajaid ning kandub hästi üle kükkidele ja jõutõmbele.',
+  'Start very light, keep your back neutral and only go as low as you can without rounding, usually until your torso is near parallel to the floor.':
+    'Alusta väga kergelt, hoia selg neutraalne ja mine ainult nii madalale, kui saad ilma selga ümardamata, tavaliselt kuni ülakeha on peaaegu põrandaga paralleelne.',
+  'They’re an accessory: {1} sets of {2}–{3} with moderate weight, not a lift to max out on.':
+    'See on abiharjutus: {1} seeriat {2}–{3} kordusega mõõduka raskusega, mitte maksimumi harjutus.',
+  'If your lower back is sensitive, start with Romanian deadlifts or back extensions instead and add good mornings later.':
+    'Kui alaselg on tundlik, alusta rumeenia jõutõmbe või selja sirutustega ja lisa good morning hiljem.',
+  'Are farmer’s carries worth doing?': 'Kas farmeri kõnd on väärt tegemist?',
+  'Very much — carrying heavy dumbbells, kettlebells or handles over a distance trains your grip, traps, core and conditioning all at once, with low injury risk.':
+    'Väga — raskete hantlite, sangpommide või käepidemete kandmine vahemaa peale treenib korraga haaret, trapetslihaseid, keret ja vastupidavust madala vigastusriskiga.',
+  'Stand tall, shoulders down, short quick steps; {1}–{2} walks of {3}–{4} metres (or {5}–{6} seconds) with a heavy load is plenty.':
+    'Seisa sirgelt, õlad all, lühikesed kiired sammud; {1}–{2} läbimist {3}–{4} meetrit (või {5}–{6} sekundit) raske koormaga on täiesti piisav.',
+  'One-hand suitcase carries add a strong challenge for the core against bending sideways.':
+    'Ühe käega „kohvri“ kandmine koormab keret tugevalt külgkalde vastu.',
+  'Put them at the end of a session — a tired grip before deadlifts or rows is a bad trade.':
+    'Tee neid treeningu lõpus — väsinud haare enne jõutõmmet või sõudmist on halb vahetus.',
+  'My calves won’t grow — what do I do?': 'Mu sääred ei kasva — mida teha?',
+  'Calves respond to the same things as other muscles — they just get ignored or trained with bouncy half reps.':
+    'Säärelihased reageerivad samale mis teisedki lihased — neid lihtsalt unustatakse või treenitakse vetruvate poolkordustega.',
+  'Use the full range: a deep stretch with a {1}–{2} second pause at the bottom, then all the way up onto your toes.':
+    'Kasuta täit liikumisulatust: sügav venitus {1}–{2}-sekundilise pausiga all, siis täiesti varvastele üles.',
+  'Do {1}–{2} hard sets a week split between standing (straight-knee) and seated (bent-knee) raises, {3}–{4} reps, {5}–{6} times a week, and expect slower progress than elsewhere — genetics play a big role.':
+    'Tee {1}–{2} rasket seeriat nädalas, jagatuna seistes (sirged põlved) ja istudes (kõverad põlved) tõstete vahel, {3}–{4} kordust, {5}–{6} korda nädalas, ja oota aeglasemat progressi kui mujal — geneetika mängib suurt rolli.',
+  'The stretched position seems to drive most of the growth for calves, so don’t cut the bottom — even partial reps in the deep stretch work.':
+    'Tundub, et säärte puhul annab venitatud asend suurema osa kasvust, nii et ära lõika alumist osa ära — isegi osakordused sügavas venituses töötavad.',
+  'Is the trap bar deadlift as good as a regular deadlift?':
+    'Kas trap bar jõutõmme on sama hea kui tavaline?',
+  'For most people, yes.': 'Enamikule inimestele — jah.',
+  'The trap (hex) bar keeps the weight in line with your body, so you stay more upright, use more quads and put less stress on your lower back, and most lifters handle a bit more weight on it.':
+    'Trap bar (kuusnurkne kang) hoiab raskust kehaga ühel joonel, nii et oled püstisem, kasutad rohkem nelipealihaseid ja koormad alaselga vähem, ning enamik tõstab sellega veidi rohkem.',
+  'It’s a great main pull for beginners, athletes and anyone with a sensitive back.':
+    'See on suurepärane põhitõmme algajatele, sportlastele ja kõigile tundliku seljaga.',
+  'If you want to compete in powerlifting you’ll need the straight bar eventually; otherwise choose the one you can train hard and consistently.':
+    'Kui tahad jõutõstmises võistelda, läheb sul lõpuks vaja sirget kangi; muidu vali see, millega saad raskelt ja järjepidevalt treenida.',
+  'Use the high handles to shorten the range while you learn; stand in the centre and push the floor away just like in a normal deadlift.':
+    'Õppimise ajal kasuta kõrgeid käepidemeid, et liikumisulatust lühendada; seisa keskel ja lükka põrandat eemale nagu tavalises jõutõmbes.',
+  'Are Nordic hamstring curls worth it?': 'Kas nordic curl on väärt tegemist?',
+  'Yes — Nordic curls are one of the best-researched ways to lower the risk of hamstring strains, especially for sprinters and team-sport players.':
+    'Jah — nordic curl on üks paremini uuritud viise vähendada reie tagakülje rebendite riski, eriti sprinteritele ja võistkonnaspordi mängijatele.',
+  'Anchor your heels, keep a straight line from knees to head and lower yourself as slowly as you can, catching yourself with your hands.':
+    'Kinnita kannad, hoia sirge joon põlvedest peani ja lasku nii aeglaselt kui suudad, püüdes end kätega kinni.',
+  'Start with {1} sets of {2}–{3} reps once or twice a week; they cause a lot of soreness at first, so build up slowly.':
+    'Alusta {1} seeriast {2}–{3} kordusega üks-kaks korda nädalas; alguses tekitavad need tugevat lihasvalu, nii et suurenda järk-järgult.',
+  'A band around your chest anchored behind you, or a shorter range, makes them easier until you can control the whole way down.':
+    'Rinna ümber pandud ja taha kinnitatud kumm või lühem liikumisulatus teeb harjutuse kergemaks, kuni suudad kogu langetust kontrollida.',
+  'How do I learn a pistol squat?': 'Kuidas õppida püstolkükki?',
+  'A pistol squat needs leg strength, balance and ankle mobility.':
+    'Püstolkükk nõuab jalgade jõudu, tasakaalu ja hüppeliigese liikuvust.',
+  'Build up with box pistols (sit down to a bench on one leg and stand back up), lowering the box over time, and hold a door frame or suspension straps for balance.':
+    'Harjuta ühel jalal pingile istumist ja tõusmist, madaldades tuge aja jooksul, ning hoia tasakaalu jaoks uksepiidast või TRX-rihmadest kinni.',
+  'A counterweight helps — holding a light plate out in front makes the bottom easier; practise {1} sets of {2}–{3} per leg a few times a week.':
+    'Vastukaal aitab — ettesirutatud kätes kerge ketas teeb põhja kergemaks; harjuta {1} seeriat {2}–{3} kordusega jala kohta mitu korda nädalas.',
+  'If your heel lifts, put a small plate under it or work on ankle mobility; Bulgarian split squats build the strength part in the meantime.':
+    'Kui kand tõuseb, pane selle alla väike ketas või arenda hüppeliigese liikuvust; jõudu arendavad vahepeal hästi bulgaaria kükid.',
+  'I’m not sore anymore — is my training still working?':
+    'Lihased enam ei valuta — kas treening ikka toimib?',
+  'Yes — soreness is a poor sign of a good workout.':
+    'Jah — lihasvalu on hea treeningu kehv näitaja.',
+  'It mostly shows up with new exercises, more volume or long eccentrics, and it fades as your body adapts, while growth carries on.':
+    'See tekib peamiselt uute harjutuste, suurema mahu või pikkade ekstsentriliste faaside tõttu ja kaob, kui keha kohaneb, kasv aga jätkub.',
+  'Judge your training by progress instead: more reps or weight over the weeks, measurements and photos.':
+    'Hinda treeningut hoopis progressi järgi: nädalatega rohkem kordusi või raskust, mõõdud ja fotod.',
+  'Chasing soreness usually just means more fatigue and slower recovery.':
+    'Lihasvalu jahtimine tähendab tavaliselt lihtsalt rohkem väsimust ja aeglasemat taastumist.',
+  'Some mild soreness after a hard session is normal; soreness lasting more than {1}–{2} days means the dose was too big.':
+    'Kerge lihasvalu pärast rasket treeningut on normaalne; kui see kestab üle {1}–{2} päeva, oli doos liiga suur.',
+  'Are massage guns worth it?': 'Kas massaažipüstolid on seda väärt?',
+  'Massage guns can ease the feeling of tightness and soreness for a while and are a nice warm-up or cool-down tool — much like foam rolling.':
+    'Massaažipüstol võib mõneks ajaks vähendada kanguse- ja valutunnet ning on tore soojenduse või jahutuse vahend — sarnaselt rulliga.',
+  'They don’t speed up real tissue recovery much or “flush out” lactic acid; sleep, food and sensible volume do the heavy lifting.':
+    'Tegelikku kudede taastumist see oluliselt ei kiirenda ega „uhu“ piimhapet välja; põhitöö teevad uni, toit ja mõistlik maht.',
+  'Use {1}–{2} seconds per muscle at a comfortable pressure, and keep them off bones, joints, the front of the neck and any fresh injury or bruise.':
+    'Kasuta {1}–{2} sekundit lihase kohta mugava survega ning hoia eemal luudest, liigestest, kaela esiosast ning värsketest vigastustest ja sinikatest.',
+  'If it helps you feel ready and move better, it’s worth it; if not, a foam roller does the same job for less money.':
+    'Kui see aitab sul end valmis tunda ja paremini liikuda, on see väärt; kui mitte, teeb rull sama töö odavamalt.',
+  'Should I trust my watch’s HRV and recovery score?':
+    'Kas usaldada kella HRV-d ja taastumise hinnangut?',
+  'Use them as trends, not verdicts.': 'Kasuta neid trendidena, mitte otsustena.',
+  'HRV and resting heart rate from a watch or ring are fairly reliable over weeks: HRV trending down and resting heart rate up for several days usually means stress, poor sleep, illness or too much training.':
+    'Kella või sõrmuse HRV ja puhkepulss on nädalate lõikes üsna usaldusväärsed: kui HRV langeb ja puhkepulss tõuseb mitu päeva järjest, tähendab see tavaliselt stressi, halba und, haigust või liiga palju treeningut.',
+  'A single low morning score doesn’t mean you can’t train — warm up and see how the weights move.':
+    'Üks madal hommikune hinnang ei tähenda, et treenida ei tohi — soojenda ja vaata, kuidas raskused liiguvad.',
+  'The calorie-burn numbers are the least accurate part and often overestimate exercise calories.':
+    'Kõige ebatäpsem osa on põletatud kalorid — need on sageli ülehinnatud.',
+  'Measure at the same time each morning, compare with your own baseline, and ignore day-to-day noise of a few points.':
+    'Mõõda iga hommik samal ajal, võrdle oma baastasemega ja ära pööra tähelepanu mõnepunktilisele igapäevasele kõikumisele.',
+  'Is CNS fatigue real?': 'Kas kesknärvisüsteemi väsimus on päris?',
+  'Mostly it’s an overused term.': 'Enamasti on see ülekasutatud termin.',
+  'Heavy lifting does cause short-lived fatigue that clears within hours to a day or two; the idea that a heavy deadlift “fries your nervous system” for a week isn’t well supported.':
+    'Rasked raskused põhjustavad küll lühiajalist väsimust, mis möödub tundide või päeva-kahega; väide, et raske jõutõmme „kõrvetab närvisüsteemi“ nädalaks, pole hästi tõendatud.',
+  'When you feel flat for days, it’s usually built-up muscle and joint fatigue, poor sleep, stress or too little food — so the fix is the same: manage volume, sleep, eat, and deload when performance keeps dropping.':
+    'Kui tunned end mitu päeva „lamedana“, on põhjus tavaliselt kogunenud lihaste ja liigeste väsimus, halb uni, stress või liiga vähe toitu — seega on lahendus sama: halda mahtu, maga, söö ja tee kergem periood, kui tulemused järjest langevad.',
+  'Very heavy singles and max-effort sessions do feel draining, which is why most programs keep them rare and short.':
+    'Väga rasked üksikkordused ja maksimumpingutusega treeningud on tõesti kurnavad, mistõttu enamik programme hoiab need harvad ja lühikesed.',
+  'How fast do I lose muscle if I stop training?':
+    'Kui kiiresti kaotan lihaseid, kui lõpetan treenimise?',
+  'Slower than you think.': 'Aeglasemalt, kui arvad.',
+  'Two or three weeks off cost very little muscle — you may look flatter because of less water and glycogen, but that comes back within days.':
+    'Kaks-kolm nädalat pausi maksab väga vähe lihaseid — võid paista „lamedam“ vähema vee ja glükogeeni tõttu, aga see tuleb mõne päevaga tagasi.',
+  'Strength drops a bit faster than size after about {1}–{2} weeks, and after months off, “muscle memory” helps you regain it much faster than it took to build.':
+    'Jõud langeb umbes {1}–{2} nädala pärast veidi kiiremini kui lihasmass ning kuudepikkuse pausi järel aitab „lihasmälu“ selle taastada palju kiiremini, kui selle ehitamine võttis.',
+  'Even one or two short sessions a week keep most of what you have.':
+    'Isegi üks-kaks lühikest treeningut nädalas hoiavad alles suurema osa sellest, mis sul on.',
+  'Keep protein high and stay active during the break; when you return, start at about {1}–{2}% of your old weights and build back over a few weeks.':
+    'Hoia pausi ajal valku palju ja ole aktiivne; naastes alusta umbes {1}–{2}% oma varasematest raskustest ja ehita paari nädalaga tagasi.',
+  'Do joint supplements like glucosamine or collagen work?':
+    'Kas liigeste toidulisandid nagu glükoosamiin või kollageen töötavad?',
+  'The evidence is weak.': 'Tõendid on nõrgad.',
+  'Glucosamine and chondroitin show small or no effects for most people; collagen ({1}–{2} g with some vitamin C about an hour before training) has some early evidence for tendons, but it isn’t magic.':
+    'Glükoosamiin ja kondroitiin annavad enamikule väikese või mitte mingi mõju; kollageenil ({1}–{2} g koos veidi C-vitamiiniga umbes tund enne treeningut) on kõõluste osas esimesi tõendeid, aga see pole imevahend.',
+  'What reliably helps joints is sensible loading — gradual progression, good technique, strong muscles around the joint — plus sleep and a healthy body weight.':
+    'Liigeseid aitab usaldusväärselt mõistlik koormus — järkjärguline progressioon, hea tehnika, tugevad lihased liigese ümber — lisaks uni ja tervislik kehakaal.',
+  'Joint pain that keeps coming back deserves a check with a doctor or physio rather than a new supplement.':
+    'Korduvat liigesevalu tasub näidata arstile või füsioterapeudile, mitte otsida uut toidulisandit.',
+  'Fish oil may slightly ease joint stiffness for some people; check with a doctor if you take blood thinners.':
+    'Kalaõli võib mõnel veidi leevendada liigeste kangust; pea nõu arstiga, kui võtad verevedeldajaid.',
+  'Does creatine cause hair loss, bloating or kidney problems?':
+    'Kas kreatiin põhjustab juuste väljalangemist, puhitust või neeruprobleeme?',
+  'Creatine monohydrate is one of the most studied supplements and is safe for healthy people at {1}–{2} g a day.':
+    'Kreatiinmonohüdraat on üks enim uuritud toidulisandeid ja tervetele inimestele ohutu annuses {1}–{2} g päevas.',
+  'It adds water inside the muscles (often {1}–{2} kg on the scale), not the puffy bloating under the skin people fear.':
+    'See lisab vett lihaste sisse (sageli {1}–{2} kg kaalule), mitte naha alla paistetust, mida inimesed kardavad.',
+  'The hair-loss worry comes from a single small study that hasn’t been repeated, and it doesn’t harm healthy kidneys — it can raise the creatinine marker in blood tests, so tell your doctor you take it, and if you have kidney disease, ask first.':
+    'Hirm juuste pärast pärineb ühest väikesest uuringust, mida pole korratud, ja tervetele neerudele see ei kahjusta — see võib vereanalüüsis tõsta kreatiniini näitu, nii et ütle arstile, et seda võtad, ja neeruhaiguse korral küsi enne.',
+  'No loading phase needed: {1}–{2} g daily at any time of day fills the muscles in {3}–{4} weeks; loading with {5} g a day for {6}–{7} days just gets there faster.':
+    'Laadimisfaasi pole vaja: {1}–{2} g päevas mis tahes ajal täidab lihased {3}–{4} nädalaga; laadimine {5} g päevas {6}–{7} päeva jooksul jõuab sinna lihtsalt kiiremini.',
+  'Which protein powder should I buy?': 'Millist proteiinipulbrit osta?',
+  'Protein powder is just convenient food — use it if it helps you hit your daily protein.':
+    'Proteiinipulber on lihtsalt mugav toit — kasuta seda, kui see aitab päevase valgukoguse täis saada.',
+  'Whey concentrate is cheap and effective; whey isolate has less lactose if dairy bothers you; for plant-based, choose a pea and rice blend.':
+    'Vadakukontsentraat on odav ja tõhus; isolaadis on vähem laktoosi, kui piimatooted ei sobi; taimsetest vali herne ja riisi segu.',
+  'Pick a brand with third-party testing (like Informed Sport), check that one scoop gives about {1}–{2} g of protein, and choose a flavour you’ll actually drink.':
+    'Vali sõltumatult testitud bränd (nt Informed Sport), kontrolli, et üks portsjon annaks umbes {1}–{2} g valku, ja vali maitse, mida tegelikult jood.',
+  'Casein digests slowly and suits the evening, but your total daily protein matters far more than the type.':
+    'Kaseiin seeditakse aeglaselt ja sobib õhtuks, kuid päevane valgu koguhulk on palju olulisem kui liik.',
+  'How much protein can my body absorb in one meal?':
+    'Kui palju valku keha ühe söögikorraga omastab?',
+  'You absorb practically all of it — the “{1} grams per meal” limit is a myth.':
+    'Omastad praktiliselt kõik — „{1} grammi söögikorra kohta“ piir on müüt.',
+  'Bigger servings simply take longer to digest and are still used for building and repair.':
+    'Suuremad portsjonid lihtsalt seeditakse kauem ja neid kasutatakse ikkagi ehitamiseks ja parandamiseks.',
+  'For convenience and appetite, spreading protein over {1}–{2} meals of roughly {3} g per kg of bodyweight each works well, but hitting your daily total is what counts most.':
+    'Mugavuse ja isu jaoks on hea jaotada valk {1}–{2} söögikorrale umbes {3} g kehakaalu kilogrammi kohta, kuid kõige olulisem on päeva kogus.',
+  'A meal with {1}–{2} g of protein within a few hours of training is a sensible habit, not a strict window.':
+    'Söögikord {1}–{2} g valguga mõne tunni jooksul pärast treeningut on mõistlik harjumus, mitte range aken.',
+  'Should I drink something during my workout?': 'Kas treeningu ajal peaks midagi jooma?',
+  'Water is enough for most sessions under about {1}–{2} minutes.':
+    'Enamikul alla umbes {1}–{2}-minutilistel treeningutel piisab veest.',
+  'For long or very hard sessions, a drink with carbs (about {1}–{2} g per hour) and a bit of sodium can help you keep your performance up, especially if you trained fasted or sweat a lot.':
+    'Pikkade või väga raskete treeningute puhul aitab süsivesikutega jook (umbes {1}–{2} g tunnis) ja veidi naatriumi sooritust hoida, eriti kui treenid tühja kõhuga või higistad palju.',
+  'Intra-workout BCAAs or EAAs add little if you eat enough protein during the day.':
+    'BCAA või EAA treeningu ajal annavad vähe, kui sööd päeva jooksul piisavalt valku.',
+  'Sip regularly rather than chugging, and weigh yourself before and after a long session: each kilo lost is roughly a litre to replace.':
+    'Joo regulaarselt väikeste lonksudena, mitte korraga, ja kaalu end enne ja pärast pikka treeningut: iga kaotatud kilo on umbes liiter, mida asendada.',
+  'Should I take vitamin D?': 'Kas peaksin D-vitamiini võtma?',
+  'If you live far from the equator, spend little time in the sun or it’s winter, there’s a good chance your level is low, and low vitamin D is linked to worse bone health and immunity.':
+    'Kui elad ekvaatorist kaugel, oled vähe päikese käes või on talv, on su tase suure tõenäosusega madal, ja madalat D-vitamiini seostatakse halvema luude tervise ja immuunsusega.',
+  'A common safe dose is {1}–{2} IU a day, but the best move is a blood test so you know your level.':
+    'Tavaline ohutu annus on {1}–{2} RÜ päevas, kuid parim samm on vereanalüüs, et oma taset teada.',
+  'It won’t boost your strength if your level is already fine, and very high doses without testing can do harm.':
+    'See ei suurenda jõudu, kui su tase on juba korras, ja väga suured annused ilma analüüsita võivad kahjustada.',
+  'Take it with a meal that has some fat in it for better absorption.':
+    'Võta seda söögikorraga, milles on veidi rasva — nii imendub paremini.',
+  'Does magnesium help with sleep or cramps?': 'Kas magneesium aitab une või krampide vastu?',
+  'Magnesium helps if you’re actually low — common when you eat few nuts, seeds, greens and whole grains, or sweat heavily.':
+    'Magneesium aitab, kui sul seda tõesti napib — sageli siis, kui sööd vähe pähkleid, seemneid, rohelisi ja täisteratooteid või higistad palju.',
+  'For sleep the evidence is modest, mostly in older adults or people with low intake; for exercise cramps it’s weak.':
+    'Une osas on tõendid mõõdukad, peamiselt vanematel inimestel või madala tarbimisega; treeningkrampide puhul nõrgad.',
+  'If you try it, {1}–{2} mg of glycinate or citrate in the evening is typical; oxide is poorly absorbed and more likely to upset your stomach.':
+    'Kui tahad proovida, on tavaline {1}–{2} mg glütsinaati või tsitraati õhtul; oksiid imendub halvasti ja ärritab sagedamini kõhtu.',
+  'Skip it with kidney disease unless your doctor agrees.':
+    'Neeruhaiguse korral jäta vahele, kui arst ei luba.',
+  'Food first: a handful of pumpkin seeds or almonds, dark chocolate, beans and leafy greens cover a lot of your daily need.':
+    'Kõigepealt toit: peotäis kõrvitsaseemneid või mandleid, tume šokolaad, oad ja lehtköögiviljad katavad suure osa päevasest vajadusest.',
+  'Do testosterone boosters work?': 'Kas testosterooni boosterid töötavad?',
+  'Over-the-counter “test boosters” (tribulus, fenugreek, D-aspartic acid and the like) don’t meaningfully raise testosterone or muscle growth in healthy men.':
+    'Käsimüügi „testosterooni boosterid“ (tribulus, lambalääts, D-asparagiinhape jms) ei tõsta tervetel meestel testosterooni ega lihaskasvu märkimisväärselt.',
+  'Ashwagandha may slightly lower stress and improve sleep, which can help training indirectly.':
+    'Ashwagandha võib veidi vähendada stressi ja parandada und, mis võib treeningut kaudselt aidata.',
+  'The real levers are sleep, enough calories and fat, a healthy body-fat level and lifting; if you have symptoms of low testosterone, get a blood test from a doctor instead of buying pills.':
+    'Päris hoovad on uni, piisavalt kaloreid ja rasva, tervislik rasvaprotsent ja jõutreening; kui sul on madala testosterooni sümptomid, tee arsti juures vereanalüüs, mitte ära osta tablette.',
+  'Some “boosters” turn out to be contaminated with banned substances — another reason to skip them if you compete or get tested.':
+    'Mõned „boosterid“ osutuvad keelatud ainetega saastunuks — veel üks põhjus neist loobuda, kui võistled või sind testitakse.',
+  'Do fat burner pills work?': 'Kas rasvapõletajad töötavad?',
+  'Not in any way that matters.': 'Mitte mingil olulisel määral.',
+  'Most fat burners are mainly caffeine plus extras; at best they add a few dozen burned calories a day and slightly blunt your appetite.':
+    'Enamik rasvapõletajaid on peamiselt kofeiin pluss lisandid; parimal juhul lisavad need päevas paarkümmend põletatud kalorit ja summutavad veidi isu.',
+  'Some have caused liver damage or heart problems, or contained banned stimulants.':
+    'Mõned on põhjustanud maksakahjustusi või südameprobleeme või sisaldanud keelatud stimulante.',
+  'A moderate calorie deficit, plenty of protein, lifting and daily steps do the actual work — spend the money on good food instead.':
+    'Tegeliku töö teevad mõõdukas kaloridefitsiit, palju valku, jõutreening ja igapäevased sammud — kuluta raha pigem heale toidule.',
+  'If you have heart or blood-pressure problems, avoid stimulant products entirely.':
+    'Kui sul on südame- või vererõhuprobleeme, väldi stimulantidega tooteid täielikult.',
+  'What is reverse dieting after a cut?': 'Mis on vastupidine dieet pärast kuivatust?',
+  'Reverse dieting means raising calories gradually after a diet instead of jumping straight back to your old eating.':
+    'Vastupidine dieet tähendab kalorite järkjärgulist tõstmist pärast dieeti, selle asemel et hüpata otse tagasi vana söömise juurde.',
+  'You can add roughly {1}–{2} kcal a week, or go straight to your new maintenance if you’re mentally done with dieting — both work; the slow way mainly helps you control appetite and limit fat regain.':
+    'Võid lisada umbes {1}–{2} kcal nädalas või minna otse uuele säilitustasemele, kui oled vaimselt dieedist väsinud — mõlemad töötavad; aeglane viis aitab peamiselt isu kontrollida ja rasva tagasitulekut piirata.',
+  'Expect {1}–{2} kg back on the scale from food and water in your gut and muscles; that’s not fat.':
+    'Oota kaalule {1}–{2} kg lisa toidust ja veest soolestikus ja lihastes; see pole rasv.',
+  'Your new maintenance is a bit lower than before the diet because you weigh less; find it by watching your weekly average weight for {1}–{2} weeks.':
+    'Uus säilitustase on veidi madalam kui enne dieeti, sest kaalud vähem; leiad selle {1}–{2} nädala jooksul nädala keskmist kaalu jälgides.',
+  'Should I take a diet break or a refeed during a cut?':
+    'Kas teha kuivatuse ajal dieedipausi või refeedi?',
+  'On longer cuts it’s a good idea.': 'Pikemal kuivatusel on see hea mõte.',
+  'A diet break is {1}–{2} weeks of eating at maintenance every {3}–{4} weeks of dieting; a refeed is one or two higher-carb days a week.':
+    'Dieedipaus on {1}–{2} nädalat säilitustasemel söömist iga {3}–{4} dieedinädala järel; refeed on üks-kaks rohkem süsivesikutega päeva nädalas.',
+  'They don’t magically “reset your metabolism”, but they ease hunger, bring back energy for training and make the diet easier to stick with.':
+    'Need ei „taaskäivita ainevahetust“ imeväel, aga vähendavad nälga, toovad treeningutesse energiat tagasi ja teevad dieedist kinnipidamise lihtsamaks.',
+  'The whole cut just takes a bit longer — that’s the trade.':
+    'Kogu kuivatus võtab lihtsalt veidi kauem — selline on hind.',
+  'Keep protein the same on break days and add the extra calories mostly as carbs.':
+    'Pausipäevadel hoia valk samal tasemel ja lisa täiendavad kalorid peamiselt süsivesikutena.',
+  'Why does my weight jump up and down every day?': 'Miks mu kaal iga päev üles-alla hüppab?',
+  'Daily swings of {1}–{2} kg are normal and are mostly water: salt, carbs, a big meal, hard training, stress, poor sleep, the menstrual cycle and what’s still in your gut all shift it.':
+    'Igapäevased {1}–{2} kg kõikumised on normaalsed ja peamiselt vesi: sool, süsivesikud, suur söögikord, raske treening, stress, halb uni, menstruaaltsükkel ja soolestiku sisu nihutavad seda.',
+  'Weigh yourself in the morning after the toilet and before food, and look at the weekly average rather than any single day.':
+    'Kaalu end hommikul pärast tualetti ja enne sööki ning vaata nädala keskmist, mitte üksikut päeva.',
+  'If the weekly average moves the way you want over {1}–{2} weeks, you’re on track.':
+    'Kui nädala keskmine liigub {1}–{2} nädala jooksul soovitud suunas, oled õigel teel.',
+  'After starting a new program or creatine the scale often goes up {1}–{2} kg from water in the muscles — that’s a good sign, not fat.':
+    'Pärast uue programmi või kreatiini alustamist tõuseb kaal sageli {1}–{2} kg lihastesse kogunenud vee tõttu — see on hea märk, mitte rasv.',
+  'Is keto good for lifting?': 'Kas keto sobib jõutreeninguks?',
+  'You can build strength and some muscle on keto, but it’s no advantage for lifting.':
+    'Ketoga saab arendada jõudu ja veidi lihaseid, kuid jõusaalis pole see eelis.',
+  'Carbs fuel hard sets, so most people feel flatter in higher-rep, high-volume work, especially in the first {1}–{2} weeks.':
+    'Süsivesikud on raskete seeriate kütus, nii et enamik tunneb end „lamedana“ suurema korduste arvu ja suure mahuga töös, eriti esimesel {1}–{2} nädalal.',
+  'Keto can work for fat loss if it helps you eat less, but so does any diet you can stick to — keep protein high either way.':
+    'Keto võib rasvakaotuseks toimida, kui see aitab vähem süüa, kuid sama teeb iga dieet, millest suudad kinni pidada — valku hoia igal juhul palju.',
+  'If you try it, add salt and fluids from the start — the “keto flu” is largely lost sodium and water.':
+    'Kui proovid, lisa kohe algusest soola ja vedelikku — „keto-gripp“ on suures osas kaotatud naatrium ja vesi.',
+  'Is intermittent fasting good for building muscle?':
+    'Kas vahelduv paastumine sobib lihaste kasvatamiseks?',
+  'Intermittent fasting (like {1}:{2}) is simply a way to fit your calories into a shorter window.':
+    'Vahelduv paastumine (nt {1}:{2}) on lihtsalt viis mahutada kalorid lühemasse aknasse.',
+  'For fat loss it works as well as other diets when calories and protein are the same.':
+    'Rasvakaotuseks töötab see sama hästi kui teised dieedid, kui kalorid ja valk on samad.',
+  'For building muscle it’s slightly less ideal, because fitting enough protein into {1}–{2} meals is harder — if you use it, have at least two solid protein meals and try to train close to your eating window.':
+    'Lihaste kasvatamiseks on see veidi vähem ideaalne, sest piisava valgu mahutamine {1}–{2} söögikorda on raskem — kui seda kasutad, söö vähemalt kaks korralikku valgurikast toidukorda ja püüa treenida söögiakna lähedal.',
+  'Training fasted in the morning is fine for most people; eat a protein-rich meal soon after.':
+    'Hommikune tühja kõhuga treening sobib enamikule; söö varsti pärast seda midagi valgurikast.',
+  'Should a teenager take protein or creatine?':
+    'Kas teismeline peaks võtma proteiini või kreatiini?',
+  'For teens, food comes first: regular meals with protein (meat, fish, eggs, dairy, beans), enough total calories, fruit, vegetables and sleep drive growth far more than any product.':
+    'Teismelistel on esmatähtis toit: regulaarsed söögikorrad valguga (liha, kala, munad, piimatooted, oad), piisavalt kaloreid, puu- ja köögiviljad ning uni annavad kasvule palju rohkem kui ükski toode.',
+  'Protein powder is just food and is fine for filling gaps.':
+    'Proteiinipulber on lihtsalt toit ja sobib lünkade täitmiseks.',
+  'Creatine looks safe in the studies we have, but most experts suggest under-{1}s use it only with a parent and a doctor involved; avoid pre-workouts, fat burners and “test boosters” completely.':
+    'Kreatiin paistab olemasolevates uuringutes ohutu, kuid enamik eksperte soovitab alla {1}-aastastel kasutada seda ainult vanema ja arsti osalusel; eeltreeningutoodetest, rasvapõletajatest ja „testosterooni boosteritest“ hoia täiesti eemale.',
+  'The biggest gains for a teen come from learning good technique with light-to-moderate weights and training consistently for years.':
+    'Teismelisele annab kõige rohkem hea tehnika õppimine kergete ja mõõdukate raskustega ning aastatepikkune järjepidev treenimine.',
+  'How do I improve my VO{1}max?': 'Kuidas parandada VO{1}maxi?',
+  'VO{1}max is the most oxygen your body can use — one of the strongest predictors of long-term health.':
+    'VO{1}max on suurim hapnikuhulk, mida keha suudab kasutada — üks tugevamaid pikaajalise tervise ennustajaid.',
+  'Build a base of easy zone {1} work ({2}–{3} sessions of {4}–{5} minutes a week), then add one session of hard intervals, like {6} × {7} minutes at about {8}–{9}% of your max heart rate with {10} easy minutes between them.':
+    'Loo kerge {1}. tsooni töö baas ({2}–{3} treeningut {4}–{5} minutit nädalas), siis lisa üks raskete intervallide treening, näiteks {6} × {7} minutit umbes {8}–{9}% juures maksimaalsest pulsist, vahel {10} kerget minutit.',
+  'It improves within weeks in untrained people and keeps improving with consistency.':
+    'Treenimata inimestel paraneb see nädalatega ja jätkab paranemist järjepidevusega.',
+  'Do the hard intervals on a bike, rower or incline treadmill if running beats up your legs before squat day.':
+    'Tee rasked intervallid rattal, sõudeergomeetril või kaldega jooksulindil, kui jooksmine enne kükipäeva jalgu liialt kurnab.',
+  'Is incline treadmill walking good cardio?': 'Kas kaldega jooksulindil kõndimine on hea kardio?',
+  'Yes — walking on an incline (like the popular {1}% incline at {2} km/h for {3} minutes) raises your heart rate into a good zone {4} range with very little impact, so it barely interferes with leg training.':
+    'Jah — kaldega kõndimine (nagu populaarne {1}% kalle {2} km/h juures {3} minutit) tõstab pulsi heasse {4}. tsooni väga väikese põrutusega, nii et see peaaegu ei sega jalatreeningut.',
+  'It’s a great option for supporting fat loss and heart health.':
+    'See on suurepärane valik rasvakaotuse toetamiseks ja südame tervisele.',
+  'Don’t hold the handrails — it cuts the work a lot; lower the incline instead, and build up gradually if your calves or shins get sore.':
+    'Ära hoia käsipuudest kinni — see vähendab tööd palju; vähenda pigem kallet ja suurenda järk-järgult, kui sääred või säärekondid valutavad.',
+  'The stair climber works similarly and is a bit harder; both fit well after a lifting session or on rest days.':
+    'Trepimasin töötab sarnaselt ja on veidi raskem; mõlemad sobivad hästi pärast jõutreeningut või puhkepäevadel.',
+  'How do I use the rowing machine properly?': 'Kuidas sõudeergomeetrit õigesti kasutada?',
+  'The order is legs, back, arms on the drive, and arms, back, legs on the way back.':
+    'Järjekord on tõmbel jalad, selg, käed ja tagasiteel käed, selg, jalad.',
+  'Push hard with your legs first (about {1}% of the power), then lean back slightly and pull the handle to your lower ribs; return by straightening your arms, hinging forward, and only then bending your knees.':
+    'Kõigepealt tõuka jalgadega tugevalt (umbes {1}% jõust), siis kallutu veidi taha ja tõmba käepide alumiste ribide juurde; tagasi tule käsi sirutades, ette kallutudes ja alles siis põlvi kõverdades.',
+  'Keep the damper around {1}–{2} — higher isn’t more useful — and aim for about {3}–{4} strokes per minute for steady work.':
+    'Hoia summutit umbes {1}–{2} peal — kõrgem pole kasulikum — ja ühtlaseks tööks püüa umbes {3}–{4} tõmmet minutis.',
+  'Rowing is a great low-impact, full-body option for intervals, like {1} × {2} m hard with a minute easy between them.':
+    'Sõudmine on suurepärane liigeseid säästev kogu keha variant intervallideks, näiteks {1} × {2} m kõvasti ja minut kergelt vahel.',
+  'Is jumping rope good cardio?': 'Kas hüppenöör on hea kardio?',
+  'Yes — skipping is cheap, portable and great for conditioning, coordination and springy calves and ankles (useful for running and jumping).':
+    'Jah — hüppenöör on odav, alati kaasas ja suurepärane vastupidavuse, koordinatsiooni ning vetruvate säärte ja hüppeliigeste jaoks (kasulik jooksuks ja hüpeteks).',
+  'It’s high-impact, so build up: start with {1}–{2} rounds of {3} seconds on and {4} seconds off, jumping low on the balls of your feet and turning the rope with your wrists.':
+    'See on põrutuskoormus, nii et suurenda järk-järgult: alusta {1}–{2} ringist {3} sekundit tööd ja {4} sekundit puhkust, hüpates madalalt päkkadel ja keerutades nööri randmetega.',
+  'Use a firm surface with a little give and good shoes, and back off if your shins or Achilles get sore.':
+    'Kasuta kõva, veidi vetruvat pinda ja häid jalanõusid ning vähenda koormust, kui säärekondid või Achilleus valutama hakkavad.',
+  'Ten minutes of rope makes a great warm-up or finisher; the length is right when the handles reach your armpits while you stand on the middle.':
+    'Kümme minutit hüppenööriga on suurepärane soojendus või lõpetus; pikkus on õige, kui käepidemed ulatuvad kaenlaalusteni, kui seisad nööri keskel.',
+  'How do I improve upper-back (thoracic) mobility?':
+    'Kuidas parandada ülaselja (rindkere) liikuvust?',
+  'A stiff upper back limits overhead pressing, front squats and posture.':
+    'Kange ülaselg piirab pea kohal surumist, eeskükki ja rühti.',
+  'Two or three simple drills before training work well: extensions over a foam roller (a few spots between the shoulder blades), open-book rotations lying on your side and thread-the-needle rotations on all fours, {1}–{2} slow reps each.':
+    'Enne treeningut töötavad hästi kaks-kolm lihtsat harjutust: sirutused rulli peal (mõned kohad abaluude vahel), „avatud raamatu“ pöörded külili lamades ja „niit nõelasse“ pöörded neljakäpukil, igaühest {1}–{2} aeglast kordust.',
+  'Then use that range under load — strict overhead presses and rows help you keep it.':
+    'Siis kasuta seda liikumisulatust koormusega — ranged pea kohal surumised ja sõudmised aitavad seda hoida.',
+  'If raising your arms overhead pinches the shoulder, check with a physio rather than forcing the range.':
+    'Kui käte tõstmine pea kohale õlas pitsitab, konsulteeri füsioterapeudiga, mitte ära suru liikumisulatust jõuga.',
+  'How do I fix tight hip flexors?': 'Kuidas parandada pingul puusapainutajaid?',
+  'Hip flexors often feel tight from long sitting, but that feeling doesn’t always mean they’re short.':
+    'Puusapainutajad tunduvad pikast istumisest sageli pingul, kuid see tunne ei tähenda alati, et nad on lühikesed.',
+  'A half-kneeling stretch with the back leg’s glute squeezed and the pelvis tucked ({1}–{2} seconds, {3}–{4} times per side) usually helps, and so does strengthening the hip flexors and glutes with lunges and hanging knee raises.':
+    'Tavaliselt aitab põlvitades venitus pingutatud tagumise jala tuharaga ja alla keeratud vaagnaga ({1}–{2} sekundit, {3}–{4} korda kummalegi poolele), samuti puusapainutajate ja tuharate tugevdamine väljaastete ja rippes põlvetõstetega.',
+  'Break up long sitting every {1}–{2} minutes — that matters more than any stretch.':
+    'Katkesta pikka istumist iga {1}–{2} minuti järel — see on olulisem kui ükski venitus.',
+  'If the front of your hip pinches in deep squats, try a slightly wider stance with the toes turned out, and get it checked if it doesn’t ease.':
+    'Kui sügavas kükis pitsitab puusa eesosas, proovi veidi laiemat asendit väljapoole pööratud varvastega ja kui see ei leevendu, lase üle vaadata.',
+  'My hamstrings are tight and I can’t touch my toes — what helps?':
+    'Mu reie tagakülg on pingul ja ma ei ulatu varvasteni — mis aitab?',
+  'Regular stretching works: {1}–{2} sets of {3}–{4} seconds on most days increases your range within weeks, mostly because your nervous system gets used to the stretch.':
+    'Regulaarne venitamine töötab: {1}–{2} seeriat {3}–{4} sekundit enamikul päevadel suurendab liikumisulatust nädalatega, peamiselt seetõttu, et närvisüsteem harjub venitusega.',
+  'Loaded stretching works just as well — Romanian deadlifts and good mornings through a full range build flexibility and strength together.':
+    'Koormusega venitamine töötab sama hästi — rumeenia jõutõmme ja good morning täisulatuses arendavad painduvust ja jõudu koos.',
+  'Tight hamstrings usually aren’t the cause of back pain, and you don’t need to touch your toes to lift well.':
+    'Pingul reie tagakülg ei ole tavaliselt seljavalu põhjus ja hästi treenimiseks ei pea varvasteni ulatuma.',
+  'Stretch after training or in the evening; a few gentle reps in the warm-up are fine, but long holds right before heavy lifting can slightly reduce strength.':
+    'Veni pärast treeningut või õhtul; mõned leebed kordused soojenduses on korras, kuid pikad hoidmised vahetult enne rasket tõstmist võivad jõudu veidi vähendada.',
+  'How should I warm up my shoulders before pressing?': 'Kuidas õlgu enne surumist soojendada?',
+  'Five minutes is enough: arm circles and band pull-aparts ({1} × {2}), band pass-throughs or wall slides ({3} × {4}), external rotations with a light band ({5} × {6} per side), then scapular push-ups ({7} × {8}).':
+    'Viiest minutist piisab: käte ringid ja kummi lahtitõmbed ({1} × {2}), kummi läbiviimised või seinalibistused ({3} × {4}), välisrotatsioonid kerge kummiga ({5} × {6} kummalegi poolele), siis abaluu-kätekõverdused ({7} × {8}).',
+  'After that, do your pressing warm-up sets with the empty bar and gradually heavier loads.':
+    'Seejärel tee surumise soojendusseeriad tühja kangiga ja järk-järgult raskema koormaga.',
+  'The goal is to feel warm and move freely, not to tire out the small muscles.':
+    'Eesmärk on soojaks saada ja vabalt liikuda, mitte väikesi lihaseid väsitada.',
+  'If a shoulder feels cranky, add an extra light set or two of the press itself rather than more stretching.':
+    'Kui õlg on tujukas, lisa pigem üks-kaks kerget surumise enda seeriat kui rohkem venitamist.',
+  'My wrists hurt on bench or front squats — what can I do?':
+    'Randmed valutavad lamades surumisel või eeskükis — mida teha?',
+  'When pressing, keep the bar low in your palm over the forearm bones rather than letting the wrist bend back — squeeze hard and think “knuckles to the ceiling”.':
+    'Surudes hoia kang peopesas madalal küünarvarre luude kohal, mitte ära lase randmel tahapoole painduda — pigista tugevalt ja mõtle „sõrmenukid lae poole“.',
+  'Wrist wraps help on heavy sets.': 'Rasketes seeriates aitavad randmesidemed.',
+  'In front squats it’s usually tight lats and triceps, not the wrists: use a wider grip, fewer fingers on the bar or straps as handles.':
+    'Eeskükis on tavaliselt süüdi pingul laiad seljalihased ja triitseps, mitte randmed: laiem haare, vähem sõrmi kangil või rihmad käepidemetena.',
+  'Daily wrist circles and gentle loaded stretches help; sharp or lasting pain deserves a check.':
+    'Igapäevased randmeringid ja leebed koormusega venitused aitavad; terav või kestev valu vajab kontrolli.',
+  'Push-ups on your fists or on dumbbells keep the wrist straight if the floor position hurts.':
+    'Kätekõverdused rusikatel või hantlitel hoiavad randme sirgena, kui põrandal valutab.',
+  'Is yoga good for lifters?': 'Kas jooga sobib jõutreenijatele?',
+  'Yes — yoga adds mobility, body awareness, breathing control and a calm way to recover, and {1}–{2} classes a week fit easily around lifting.':
+    'Jah — jooga lisab liikuvust, kehataju, hingamise kontrolli ja rahulikku taastumist ning {1}–{2} tundi nädalas on jõutreeningu kõrvale lihtne mahutada.',
+  'Gentle or restorative styles work as active recovery; hot or power yoga is a real training load, so don’t put it right before a heavy leg or pressing day.':
+    'Leebed või taastavad stiilid toimivad aktiivse taastumisena; kuum või jõujooga on päris treeningkoormus, nii et ära pane seda vahetult enne rasket jala- või surumispäeva.',
+  'It won’t replace strength training for building muscle or bone.':
+    'See ei asenda jõutreeningut lihaste ja luude arendamisel.',
+  'If you log yoga as an activity, I count it in your weekly load and recovery.':
+    'Kui logid jooga tegevusena, arvestan selle sinu nädala koormusse ja taastumisse.',
+  'Is Pilates good alongside lifting?': 'Kas pilates sobib jõutreeningu kõrvale?',
+  'Pilates is good for core control, posture, mobility and rehab-style strength, and it pairs well with lifting — {1}–{2} sessions a week make a nice addition.':
+    'Pilates on hea kere kontrolli, rühi, liikuvuse ja taastusravi-stiilis jõu jaoks ning sobib jõutreeninguga hästi kokku — {1}–{2} korda nädalas on tore lisa.',
+  'It usually doesn’t load muscles and bones heavily enough to replace progressive strength training for size, strength or bone density.':
+    'Tavaliselt ei koorma see lihaseid ja luid piisavalt, et asendada progresseeruvat jõutreeningut lihasmassi, jõu või luutiheduse jaoks.',
+  'Reformer classes are harder than mat classes, so treat them as a light-to-moderate training day.':
+    'Reformeritunnid on raskemad kui matitunnid, nii et käsitle neid kerge või mõõduka treeningpäevana.',
+  'After pregnancy or with back problems, a qualified Pilates instructor can be a great bridge back to lifting.':
+    'Pärast rasedust või seljaprobleemide korral võib kvalifitseeritud pilatese juhendaja olla suurepärane sild tagasi jõutreeningu juurde.',
+  'Should I wear gym gloves?': 'Kas peaksin jõusaalis kindaid kandma?',
+  'You don’t need them.': 'Neid pole vaja.',
+  'Gloves make the handle thicker, which can make gripping harder, and they don’t really prevent calluses — holding the bar correctly does.':
+    'Kindad muudavad käepideme paksemaks, mis võib haaret raskendada, ega kaitse tegelikult kallustest — kaitseb õige haare.',
+  'If you like them for comfort or hygiene, that’s fine.':
+    'Kui sulle meeldivad need mugavuse või hügieeni pärast, pole probleemi.',
+  'For heavy pulling, chalk and straps are more useful; for rough hands, file calluses down and moisturise.':
+    'Raskete tõmmete jaoks on kasulikumad magneesium ja rihmad; karedate käte korral viili kallused ja niisuta nahka.',
+  'Hold the bar low in the fingers, near where they join the palm, not in the middle of the palm — the skin folds less and tears less.':
+    'Hoia kangi sõrmedes madalal, peopesaga ühenduskoha lähedal, mitte peopesa keskel — nahk kortsub vähem ja rebeneb harvemini.',
+  'How much does the barbell weigh?': 'Kui palju kang kaalub?',
+  'A standard Olympic barbell weighs {1} kg (about {2} lb) and is {3} m long; the women’s Olympic bar is {4} kg.':
+    'Tavaline olümpiakang kaalub {1} kg (umbes {2} lb) ja on {3} m pikk; naiste olümpiakang kaalub {4} kg.',
+  'Technique bars can be {1}–{2} kg, EZ curl bars usually {3}–{4} kg, and the fixed barbells on racks are marked with their total.':
+    'Tehnikakangid võivad olla {1}–{2} kg, EZ-kangid tavaliselt {3}–{4} kg ning riiulitel olevatel fikseeritud kangidel on kogukaal märgitud.',
+  'Smith machine bars vary a lot — often they’re counterbalanced — so check the label or ask the staff, and count it the same way every time.':
+    'Smithi masina kangid on väga erinevad — sageli on neil vastukaal —, nii et vaata silti või küsi personalilt ja arvesta seda alati ühtemoodi.',
+  'Collars weigh little (spring clips almost nothing, competition collars {1} kg each) — use them on every working set.':
+    'Lukud kaaluvad vähe (vedrulukud peaaegu mitte midagi, võistluslukud {1} kg tükk) — kasuta neid igas tööseerias.',
+  'Is training with a weighted vest worth it?': 'Kas raskusvestiga treenimine on seda väärt?',
+  'A weighted vest is a simple way to progress bodyweight moves — push-ups, pull-ups, dips, lunges, step-ups — and to make walking or hiking more demanding.':
+    'Raskusvest on lihtne viis progresseeruda kehakaaluharjutustes — kätekõverdused, lõuatõmbed, rööbaspuud, väljaasted, pingile astumised — ja muuta kõndimine või matkamine nõudlikumaks.',
+  'Start at about {1}–{2}% of your bodyweight, wear it snug, and add weight in small steps.':
+    'Alusta umbes {1}–{2}% oma kehakaalust, kanna seda liibuvalt ja lisa raskust väikeste sammudega.',
+  'Skip running and jumping in it unless you’re well used to impact, and be careful if you have neck or back problems.':
+    'Ära jookse ega hüppa sellega, kui sa pole põrutustega hästi harjunud, ning ole ettevaatlik kaela- või seljaprobleemide korral.',
+  'For older adults, a vest on walks and stairs is a nice way to load the bones safely.':
+    'Vanematele inimestele on vest jalutuskäikudel ja treppidel tore viis luid ohutult koormata.',
+  'How do I spot someone on the bench press?': 'Kuidas kedagi lamades surumisel julgestada?',
+  'Ask first: how many reps, whether they want a hand-off and when to help (“only if the bar stops”).':
+    'Küsi kõigepealt: mitu kordust, kas ta soovib abi kangi pukkidelt võtmisel ja millal aidata („ainult kui kang seisma jääb“).',
+  'Stand close behind their head with your feet planted and your hands in an alternating grip just under the bar, and follow it down and up without touching.':
+    'Seisa tema pea taga lähedal, jalad kindlalt maas, käed segahaardes kohe kangi all, ja saada kangi alla ja üles seda puudutamata.',
+  'If the bar stalls, help with just enough force to keep it moving and guide it back to the hooks.':
+    'Kui kang seiskub, aita täpselt nii palju, et see edasi liiguks, ja juhi see tagasi pukkidele.',
+  'For squats, stand behind with your arms under their armpits — or better, use the safety pins.':
+    'Kükkides seisa taga, käed tõstja kaenlaaluste all — või veel parem, kasuta turvapiirajaid.',
+  'A spotter shouldn’t touch the bar on a good rep — a helped rep is a failed rep, and that’s the end of the set.':
+    'Julgestaja ei tohiks head kordust puudutada — abiga kordus on ebaõnnestunud kordus ja sellega on seeria läbi.',
+  'The gym is packed and my equipment is taken — what do I do?':
+    'Jõusaal on rahvast täis ja minu varustus on hõivatud — mida teha?',
+  'Ask to work in — alternating sets with someone is normal gym etiquette.':
+    'Küsi, kas saad vaheldumisi kaasa teha — seeriate vaheldamine kellegagi on tavaline jõusaali etikett.',
+  'Otherwise switch to a similar exercise for the same muscle: dumbbells instead of a barbell, a different machine, or change the order and come back later.':
+    'Muidu vaheta sama lihase sarnase harjutuse vastu: hantlid kangi asemel, teine masin või muuda järjekorda ja tule hiljem tagasi.',
+  'Supersets of two exercises next to each other save space and time.':
+    'Kahest kõrvuti harjutusest superseeriad säästavad ruumi ja aega.',
+  'If it’s always busy, try training at quieter hours — early morning, midday or late evening.':
+    'Kui seal on alati palju rahvast, proovi treenida vaiksematel tundidel — varahommikul, keskpäeval või hilisõhtul.',
+  'Ask me for an alternative to the exercise — for example “alternative to leg press” — and I’ll suggest one.':
+    'Küsi minult harjutuse asendust — näiteks „mis asendab jalapressi“ — ja ma pakun midagi.',
+  'What should I bring to the gym?': 'Mida jõusaali kaasa võtta?',
+  'The basics: a water bottle, a small towel, flat-soled or lifting shoes, a lock for the locker, headphones and your phone to log sets.':
+    'Põhiline: veepudel, väike rätik, lameda tallaga või tõstejalanõud, lukk kapile, kõrvaklapid ja telefon seeriate logimiseks.',
+  'Useful extras as you progress: chalk, lifting straps, a belt, wrist wraps or knee sleeves, a resistance band for warm-ups, and a snack or shake for afterwards.':
+    'Hiljem kasulik: magneesium, tõsterihmad, vöö, randmesidemed või põlvevarrukad, kumm soojenduseks ja suupiste või kokteil pärastiseks.',
+  'Keep it simple — a bag you actually pack beats the perfect kit.':
+    'Hoia lihtsana — kott, mille tegelikult kokku paned, on parem kui ideaalne varustus.',
+  'Flip-flops for the shower and a spare shirt make early-morning or after-work sessions much easier.':
+    'Plätud duši jaoks ja varusärk teevad varahommikused või pärast tööd treeningud palju lihtsamaks.',
+  'How do I film myself to check my form?': 'Kuidas ennast tehnika kontrollimiseks filmida?',
+  'Set the phone at about hip height, {1}–{2} metres away.':
+    'Pane telefon umbes puusa kõrgusele, {1}–{2} meetri kaugusele.',
+  'For squats and deadlifts, film from the side at a slight angle so you can see the bar path, back angle and depth; for the bench, from the side near your feet or from behind your head.':
+    'Kükke ja jõutõmbeid filmi küljelt väikese nurga all, et näeksid kangi trajektoori, selja nurka ja sügavust; lamades surumist küljelt jalgade juurest või pea tagant.',
+  'Film a working set, not just the warm-up, and watch it in slow motion.':
+    'Filmi tööseeriat, mitte ainult soojendust, ja vaata aegluubis.',
+  'Ask first if other people will be in the shot.':
+    'Kui kaadrisse jääb teisi inimesi, küsi enne luba.',
+  'Compare the video with a few good reference lifts — fixing one thing at a time is easier than fixing five.':
+    'Võrdle videot mõne hea näitega — ühe asja korraga parandamine on lihtsam kui viie.',
+  'How do I progress with bodyweight exercises?': 'Kuidas kehakaaluharjutustes progresseeruda?',
+  'Make each exercise harder in steps instead of just adding reps forever: push-ups, then feet elevated, then archer push-ups; rows under a table, then feet elevated; squats, then split squats, Bulgarian split squats and pistols.':
+    'Tee iga harjutus astmeliselt raskemaks, selle asemel et lõputult kordusi lisada: kätekõverdused, siis jalad kõrgemal, siis vibulaskja kätekõverdused; sõudmine laua all, siis jalad kõrgemal; kükid, siis poolkükid, bulgaaria kükid ja püstolkükid.',
+  'Work in the {1}–{2} rep range close to failure, slow down the lowering, add pauses, and use a backpack, bands or a vest when a move gets easy.':
+    'Tööta {1}–{2} korduse vahemikus läbikukkumise lähedal, aeglusta langetamist, lisa pause ning kasuta seljakotti, kumme või vesti, kui liigutus kergeks muutub.',
+  'That builds muscle just as well as weights.': 'See kasvatab lihaseid sama hästi kui raskused.',
+  'A pull-up bar in a doorway is the single best investment for training at home — it covers the back and biceps, which are hard to hit otherwise.':
+    'Lõuatõmbekang ukseavas on koduseks treeninguks parim üksik investeering — see katab selja ja biitsepsi, mida on muidu raske koormata.',
+  'How should I train during menopause?': 'Kuidas menopausi ajal treenida?',
+  'Strength training becomes more important, not less: falling oestrogen speeds up the loss of muscle and bone, and lifting is one of the best tools against both.':
+    'Jõutreening muutub olulisemaks, mitte vähem oluliseks: langev östrogeen kiirendab lihaste ja luude kadu ning raskuste tõstmine on mõlema vastu üks parimaid vahendeid.',
+  'Aim for {1}–{2} full-body sessions a week with gradually heavier loads, some impact like brisk walking, stairs or small jumps if your joints tolerate it, and enough protein (around {3}–{4} g per kg).':
+    'Püüa {1}–{2} kogu keha treeningut nädalas järk-järgult raskema koormaga, veidi põrutuskoormust nagu kiire kõnd, trepid või väikesed hüpped, kui liigesed lubavad, ja piisavalt valku (umbes {3}–{4} g kilogrammi kohta).',
+  'Sleep problems and hot flushes can affect recovery — go easier on bad days, and talk to your doctor about symptoms and bone density.':
+    'Uneprobleemid ja kuumahood võivad taastumist mõjutada — halbadel päevadel võta kergemalt ja räägi sümptomitest ning luutihedusest arstiga.',
+  'Pelvic-floor symptoms like leaking during lifts are common and treatable — a pelvic-health physio can help.':
+    'Vaagnapõhja sümptomid, nagu uriinipidamatus harjutuste ajal, on levinud ja ravitavad — aitab vaagnapõhja füsioterapeut.',
+  'When can I lift again after giving birth?': 'Millal saan pärast sünnitust jälle raskusi tõsta?',
+  'Get the go-ahead from your doctor or midwife first — usually around the six-week check, later after a C-section or complications.':
+    'Kõigepealt küsi luba arstilt või ämmaemandalt — tavaliselt umbes kuuenädalase kontrolli ajal, keisrilõike või tüsistuste järel hiljem.',
+  'Start with breathing, pelvic-floor and deep-core work, walking and light bodyweight moves, then build up over several months; a check with a pelvic-health physio is ideal.':
+    'Alusta hingamise, vaagnapõhja ja sügavate kõhulihaste tööga, kõndimise ja kergete kehakaaluharjutustega, siis suurenda mitme kuu jooksul; ideaalne on vaagnapõhja füsioterapeudi kontroll.',
+  'Signs to back off: leaking, heaviness or dragging in the pelvis, doming of the belly, pain or more bleeding.':
+    'Märgid, et tuleb tagasi tõmmata: uriinipidamatus, raskus- või tõmbetunne vaagnas, kõhu „kuppel“, valu või suurenenud veritsus.',
+  'Running and jumping usually come back last — often not before about {1} months, and only once the pelvic floor handles lighter impact well.':
+    'Jooks ja hüpped tulevad tavaliselt tagasi viimasena — sageli mitte enne umbes {1} kuud ja alles siis, kui vaagnapõhi kergemat põrutust hästi talub.',
+  'I leak a little when I lift or jump — is that normal?':
+    'Mul lekib tõstes või hüpates veidi uriini — kas see on normaalne?',
+  'It’s common — especially after pregnancy, in menopause and in heavy lifters — but it isn’t something you just have to live with.':
+    'See on levinud — eriti pärast rasedust, menopausis ja raskeid raskusi tõstjatel —, kuid sellega ei pea leppima.',
+  'A pelvic-health physiotherapist can assess you and give you a plan, and it usually improves a lot.':
+    'Vaagnapõhja füsioterapeut hindab olukorda ja annab kava ning tavaliselt läheb palju paremaks.',
+  'Meanwhile: breathe out on the effort instead of holding your breath hard, go a bit lighter on the moves that trigger it, and empty your bladder before training.':
+    'Seni: hinga pingutuse ajal välja, selle asemel et hinge tugevalt kinni hoida, võta seda põhjustavates harjutustes veidi kergemalt ja tühjenda enne treeningut põis.',
+  'Pelvic-floor training isn’t only squeezing — it’s also learning to relax, and to coordinate with your breathing and bracing.':
+    'Vaagnapõhja treening pole ainult pingutamine — see on ka lõdvestumise õppimine ning koordineerimine hingamise ja kere pingutamisega.',
+  'Is lifting safe with osteoporosis or low bone density?':
+    'Kas raskuste tõstmine on osteoporoosi või madala luutiheduse korral ohutu?',
+  'For most people, yes — and supervised, progressive strength and impact training is one of the few things shown to improve bone density.':
+    'Enamikule jah — ning juhendatud, progresseeruv jõu- ja põrutustreening on üks väheseid asju, mis tõestatult luutihedust parandab.',
+  'Start with guidance from a physio or doctor, focus on good technique in squats, deadlift variations, presses and rows, and increase the loads gradually.':
+    'Alusta füsioterapeudi või arsti juhendamisel, keskendu heale tehnikale kükkides, jõutõmbe variantides, surumistes ja sõudmistes ning suurenda koormust järk-järgult.',
+  'Be careful with loaded forward bending and twisting of the spine (heavy sit-ups, toe touches) and with fall risk; balance work is part of the plan.':
+    'Ole ettevaatlik koormusega ettepainutuste ja lülisamba pööramistega (rasked kõhulihaste tõsted, varvaste puudutamine) ning kukkumisriskiga; tasakaaluharjutused on kava osa.',
+  'Protein, calcium and vitamin D matter too; your doctor may also discuss medication depending on your fracture risk.':
+    'Olulised on ka valk, kaltsium ja D-vitamiin; arst võib murruriskist sõltuvalt arutada ka ravimeid.',
+  'Can I lift weights with arthritis?': 'Kas artriidi või artroosiga võib raskusi tõsta?',
+  'Usually yes, and it tends to help: stronger muscles around a joint reduce pain and improve function in knee and hip osteoarthritis.':
+    'Tavaliselt jah ja see kipub aitama: tugevamad lihased liigese ümber vähendavad valu ja parandavad põlve- ja puusaliigese artroosi korral talitlust.',
+  'Pick ranges and exercises that feel ok — pain up to about {1}–{2} out of {3} that settles within {4} hours is generally acceptable.':
+    'Vali liikumisulatused ja harjutused, mis sobivad — valu kuni umbes {1}–{2} {3}-st, mis {4} tunni jooksul vaibub, on üldiselt vastuvõetav.',
+  'Warm up well, progress slowly and swap exercises that flare the joint; during a flare-up of inflammatory arthritis, ease off and follow your rheumatologist’s advice.':
+    'Soojenda hästi, progresseeru aeglaselt ja vaheta harjutusi, mis liigest ärritavad; põletikulise artriidi ägenemise ajal võta kergemalt ja järgi reumatoloogi nõuandeid.',
+  'Cycling, swimming and water exercise are joint-friendly cardio options alongside lifting.':
+    'Rattasõit, ujumine ja vesivõimlemine on jõutreeningu kõrvale liigesesõbralikud kardiovalikud.',
+  'How do I make the gym a habit?': 'Kuidas muuta jõusaal harjumuseks?',
+  'Make it easy and fixed: pick specific days and times, put them in your calendar and pack your bag the night before.':
+    'Tee see lihtsaks ja kindlaks: vali kindlad päevad ja kellaajad, pane need kalendrisse ja paki kott õhtul valmis.',
+  'Start smaller than you think — two {1}-minute sessions a week that you never miss beat five that you quit after a month.':
+    'Alusta väiksemalt, kui arvad — kaks {1}-minutilist treeningut nädalas, mida kunagi vahele ei jäta, on paremad kui viis, millest kuu pärast loobud.',
+  'Track what you do (every logged session counts), and on low-motivation days commit to just the warm-up; most of the time you’ll finish the session.':
+    'Pane kirja, mida teed (iga logitud treening loeb), ja madala motivatsiooniga päevadel luba endale ainult soojendust; enamasti teed terve treeningu ära.',
+  'Tie it to something you already do — straight from work, or right after the school run — so it doesn’t rely on willpower.':
+    'Seo treening millegagi, mida juba teed — otse töölt või kohe pärast lapsed kooli viimist —, et see ei sõltuks tahtejõust.',
+  'I’m bored of my workouts — should I change everything?':
+    'Mu treeningud on igavaks muutunud — kas muuta kõike?',
+  'Keep the core, change the details.': 'Hoia põhi, muuda detaile.',
+  'Boredom is real and it hurts consistency, but switching everything often resets your progress.':
+    'Igavus on päris ja kahjustab järjepidevust, kuid kõige muutmine nullib sageli progressi.',
+  'Keep your main lifts and swap the variations and accessories every {1}–{2} weeks — a different squat or press variation, new rep ranges, a new challenge like a {3} km time or a pull-up goal.':
+    'Hoia põhiharjutused ja vaheta variante ning abiharjutusi iga {1}–{2} nädala järel — teine kükk- või surumisvariant, uued kordusvahemikud, uus väljakutse nagu {3} km aeg või lõuatõmmete eesmärk.',
+  'Adding a sport or a class once a week can freshen things up too.':
+    'Kord nädalas spordiala või rühmatunni lisamine värskendab samuti.',
+  'Set a small target for the next block — a number to beat keeps training interesting.':
+    'Sea järgmiseks plokiks väike eesmärk — number, mida ületada, hoiab treeningu huvitavana.',
+  'I keep comparing myself to others at the gym and online':
+    'Ma võrdlen end pidevalt teistega jõusaalis ja internetis',
+  'Almost everyone does, and it’s rarely a fair comparison: different genetics, training age, lighting, angles, editing — and sometimes drugs.':
+    'Peaaegu kõik teevad seda ja see on harva aus võrdlus: erinev geneetika, treeningstaaž, valgus, nurgad, töötlus — ja vahel ka keelatud ained.',
+  'The only useful comparison is you now versus you a few months ago: your logged lifts, measurements and photos.':
+    'Ainus kasulik võrdlus on sina praegu versus sina mõni kuu tagasi: logitud raskused, mõõdud ja fotod.',
+  'Mute accounts that make you feel worse, and follow people whose training you can actually learn from.':
+    'Vaigista kontod, mille järel tunned end halvemini, ja jälgi inimesi, kelle treeningust saad tegelikult õppida.',
+  'Ask me “am I stronger than {1} months ago” — your own numbers are the best antidote.':
+    'Küsi minult „kas olen tugevam kui {1} kuud tagasi“ — sinu enda numbrid on parim vastumürk.',
+  'How do I get mentally ready for a heavy lift?':
+    'Kuidas end raskeks tõsteks vaimselt valmis panna?',
+  'Build a short routine and use it on every heavy set: the same setup steps, a big breath and brace, and one simple cue like “chest up” or “push the floor”.':
+    'Loo lühike rituaal ja kasuta seda igas raskes seerias: samad ettevalmistussammud, sügav hingetõmme ja pingutus ning üks lihtne vihje nagu „rind üles“ või „lükka põrandat“.',
+  'Picture the rep going up smoothly a few seconds before you walk to the bar.':
+    'Kujuta mõni sekund enne kangi juurde minekut ette, kuidas kordus sujuvalt üles läheb.',
+  'Getting hyped can help a little on a max attempt, but calm focus works better for most sets — save the adrenaline for rare days.':
+    'Endast välja minek võib maksimumkatsel veidi aidata, kuid enamikus seeriates töötab paremini rahulik keskendumine — hoia adrenaliin harvadeks päevadeks.',
+  'Music, a fixed warm-up order and the same belt and shoe routine all become triggers that tell your body it’s time.':
+    'Muusika, kindel soojenduse järjekord ning sama vöö- ja jalanõurituaal muutuvad signaalideks, mis ütlevad kehale, et on aeg.',
+  'I’m scared of heavy weights — how do I get over it?':
+    'Kardan raskeid raskusi — kuidas sellest üle saada?',
+  'Make failing safe first: set the safety pins or straps in the rack, learn to bail a squat and to lower a bench onto the pins, or use a spotter.':
+    'Tee kõigepealt ebaõnnestumine ohutuks: sea raamis turvapiirajad või rihmad, õpi kükist välja hüppama ja lamades surumisel kangi piirajatele laskma või kasuta julgestajat.',
+  'Then build confidence gradually — heavy walkouts or holds, singles at {1}–{2}%, and small jumps you know you can make.':
+    'Seejärel kasvata enesekindlust järk-järgult — rasked väljaastumised pukkidelt või hoidmised, üksikkordused {1}–{2}% juures ja väikesed sammud, mida kindlasti suudad.',
+  'The fear usually drops quickly once you’ve failed a rep safely and seen that nothing bad happens.':
+    'Hirm kaob tavaliselt kiiresti, kui oled korra ohutult korduse ebaõnnestunud ja näinud, et midagi halba ei juhtu.',
+  'Film it — heavy reps often look much more controlled than they feel.':
+    'Filmi seda — rasked kordused näevad sageli palju kontrollitumad välja, kui tunduvad.',
+  'I dance — how do I combine it with lifting?':
+    'Ma tantsin — kuidas seda jõutreeninguga ühendada?',
+  'Dance and lifting go well together: strength work improves jumps, landings, stability and injury resistance, and dance brings mobility and conditioning.':
+    'Tants ja raskused sobivad hästi kokku: jõutöö parandab hüppeid, maandumisi, stabiilsust ja vigastustele vastupidavust ning tants annab liikuvust ja vastupidavust.',
+  'Two or three strength sessions a week are plenty — focus on legs and hips (squats, lunges, hinges), calves and ankles, core and upper back.':
+    'Kahest-kolmest jõutreeningust nädalas piisab — keskendu jalgadele ja puusadele (kükid, väljaasted, puusahinged), säärtele ja hüppeliigestele, kerele ja ülaseljale.',
+  'Keep heavy leg work away from intense rehearsals or shows, and in busy dance weeks shorten your lifting rather than skipping it.':
+    'Hoia raske jalatöö intensiivsetest proovidest või etendustest eemal ja tiheda tantsunädala ajal lühenda jõutreeningut, selle asemel et see vahele jätta.',
+  'Tell me after a long dance session — I count it in your load so the next leg day fits.':
+    'Räägi mulle pärast pikka tantsutundi — arvestan selle koormusse, et järgmine jalapäev sobiks.',
+  'How do I take good progress photos?': 'Kuidas teha häid progressifotosid?',
+  'Consistency is everything: the same place, the same light, the same time of day (morning, before food), the same distance and camera height, and the same clothes.':
+    'Järjepidevus on kõik: sama koht, sama valgus, sama kellaaeg (hommikul, enne sööki), sama kaugus ja kaamera kõrgus ning samad riided.',
+  'Take front, side and back shots, relaxed and one flexed, every {1}–{2} weeks.':
+    'Tee fotod eest, küljelt ja tagant, lõdvalt ja üks pingutatult, iga {1}–{2} nädala järel.',
+  'Compare them side by side over months — day-to-day photos mostly show changes in water and lighting.':
+    'Võrdle neid kõrvuti kuude lõikes — päevast päeva fotod näitavad peamiselt vee ja valgustuse muutusi.',
+  'Photos plus a few tape measurements tell you more than the scale alone, especially on a recomp.':
+    'Fotod pluss mõned mõõdulindiga mõõtmised ütlevad rohkem kui kaal üksi, eriti rekompositsiooni ajal.',
+  'What body measurements should I track?': 'Milliseid kehamõõte jälgida?',
+  'The useful basics: waist at the navel, hips at the widest point, chest, upper arm (relaxed or flexed, but always the same) and mid-thigh.':
+    'Kasulik miinimum: vöökoht naba kõrgusel, puusad kõige laiemast kohast, rind, õlavars (lõdvalt või pingutatult, aga alati ühtemoodi) ja reie keskkoht.',
+  'Measure in the morning before eating, with the tape snug but not pressing, and take each measurement twice.':
+    'Mõõda hommikul enne sööki, lint tihedalt, aga mitte suruvalt, ja tee iga mõõtmine kaks korda.',
+  'Once every {1}–{2} weeks is enough; the waist is the best simple sign of fat loss, and the arms and thighs of muscle gain.':
+    'Kord {1}–{2} nädala jooksul piisab; vöökoht on parim lihtne rasvakaotuse näitaja ning käed ja reied lihaskasvu omad.',
+  'You can keep them in your profile under Body — I use your weight trend when we talk about progress.':
+    'Võid neid hoida profiilis jaotises Keha — kasutan sinu kaalutrendi, kui räägime progressist.',
+  'How do I measure my body fat percentage?': 'Kuidas mõõta keharasva protsenti?',
+  'Every method is off by a few percent.': 'Iga meetod eksib paar protsenti.',
+  'Home smart scales (bioimpedance) swing with hydration, so only trust their trend; calipers are decent in experienced hands; a DEXA scan is the most detailed but still not perfect.':
+    'Kodused nutikaalud (bioimpedants) kõiguvad vedelikutaseme järgi, nii et usalda ainult nende trendi; nahavoldimõõtja on kogenud kätes korralik; DEXA-uuring on kõige detailsem, kuid samuti mitte täiuslik.',
+  'For most people, the waist measurement, photos and how clothes fit are just as useful, and free.':
+    'Enamikule inimestele on vööümbermõõt, fotod ja see, kuidas riided istuvad, sama kasulikud — ja tasuta.',
+  'As a rough guide, about {1}–{2}% is lean to healthy for men and about {3}–{4}% for women.':
+    'Ligikaudselt on meestele umbes {1}–{2}% sale kuni tervislik ja naistele umbes {3}–{4}%.',
+  'Measure the same way under the same conditions every time — the direction of change matters more than the exact number.':
+    'Mõõda iga kord ühtemoodi ja samadel tingimustel — muutuse suund on olulisem kui täpne number.',
+  'Is BMI accurate for people who lift?': 'Kas KMI on jõutreenijatele täpne?',
+  'BMI (weight divided by height squared) is a quick screening tool for large groups, but it can’t tell muscle from fat — so muscular people often land in the “overweight” range while being lean.':
+    'KMI (kaal jagatud pikkuse ruuduga) on kiire sõeluuringu vahend suurtele rühmadele, kuid see ei erista lihaseid rasvast — seega satuvad lihaselised inimesed sageli „ülekaalu“ vahemikku, olles tegelikult saledad.',
+  'Your waist (under about half your height is a good sign), body-fat estimates and health markers like blood pressure tell you more.':
+    'Vööümbermõõt (alla umbes poole pikkusest on hea märk), rasvaprotsendi hinnangud ja terviseandmed nagu vererõhk ütlevad rohkem.',
+  'For most people who don’t lift, BMI is still a reasonable rough guide.':
+    'Enamikule inimestele, kes raskusi ei tõsta, on KMI siiski mõistlik ligikaudne juhis.',
+  'If your BMI says overweight but your waist is small and you lift, you’re very likely fine.':
+    'Kui KMI näitab ülekaalu, aga vöökoht on väike ja sa treenid, on sinuga suure tõenäosusega kõik korras.',
+  'Can I lose fat and build muscle at the same time?':
+    'Kas saan samal ajal rasva kaotada ja lihaseid kasvatada?',
+  'Yes — that’s body recomposition, and it works best for beginners, people coming back after a break and those with more body fat.':
+    'Jah — see on keha rekompositsioon ja see töötab kõige paremini algajatel, pausilt naasjatel ja neil, kel on rohkem keharasva.',
+  'Eat around maintenance or in a small deficit (about {1}–{2} kcal), keep protein high ({3}–{4} g per kg), lift with progressive overload and sleep well.':
+    'Söö säilitustaseme lähedal või väikese defitsiidiga (umbes {1}–{2} kcal), hoia valk kõrgel ({3}–{4} g kilogrammi kohta), treeni progresseeruva koormusega ja maga hästi.',
+  'The scale may barely move, so track your waist, photos and strength; lean, experienced lifters usually do better with separate bulking and cutting phases.':
+    'Kaal võib vaevu liikuda, seega jälgi vöökohta, fotosid ja jõudu; saledad kogenud tõstjad saavad tavaliselt paremini hakkama eraldi massi- ja kuivatusfaasidega.',
+  'Skinny-fat?': 'Kõhn, aga rasvaga?',
+  'Recomp is usually the right call: lift hard, eat at maintenance with plenty of protein, and give it {1}–{2} months.':
+    'Rekompositsioon on tavaliselt õige valik: treeni raskelt, söö säilitustasemel rohke valguga ja anna sellele {1}–{2} kuud.',
+  'What is a mini-cut?': 'Mis on minikuivatus?',
+  'A mini-cut is a short, aggressive fat-loss phase — usually {1}–{2} weeks at a fairly big deficit (around {3}–{4} kcal, about {5}–{6}% of bodyweight a week) — often used in the middle of a long bulk to trim fat before carrying on.':
+    'Minikuivatus on lühike agressiivne rasvakaotuse faas — tavaliselt {1}–{2} nädalat üsna suure defitsiidiga (umbes {3}–{4} kcal, umbes {5}–{6}% kehakaalust nädalas) — mida tehakse sageli pika massiperioodi keskel, et enne jätkamist rasva vähendada.',
+  'Keep protein high and keep lifting heavy to hold on to muscle; trim some volume if recovery suffers.':
+    'Hoia valk kõrgel ja jätka raskelt treenimist, et lihaseid säilitada; kui taastumine kannatab, vähenda veidi mahtu.',
+  'When it ends, go straight back to maintenance or a small surplus.':
+    'Kui see lõpeb, mine otse tagasi säilitustasemele või väikesele ülejäägile.',
+  'It works because it’s short — hunger and fatigue don’t have time to build up; if you need longer than about {1} weeks, switch to a normal, moderate cut.':
+    'See töötab, sest on lühike — nälg ja väsimus ei jõua koguneda; kui vajad kauem kui umbes {1} nädalat, mine üle tavalisele mõõdukale kuivatusele.',
+  'How do I combine climbing with lifting?': 'Kuidas ronimist jõutreeninguga ühendada?',
+  'They complement each other well.': 'Need täiendavad teineteist hästi.',
+  'Climbing hammers the fingers, forearms and pulling muscles, so in the gym focus on what climbing doesn’t train: legs, pressing (push-ups, overhead press, dips), shoulder external rotation and core — two sessions a week is plenty.':
+    'Ronimine koormab tugevalt sõrmi, käsivarsi ja tõmbelihaseid, nii et jõusaalis keskendu sellele, mida ronimine ei treeni: jalad, surumised (kätekõverdused, pea kohal surumine, rööbaspuud), õla välisrotatsioon ja kere — kaks treeningut nädalas on piisav.',
+  'Keep heavy pulling and grip work away from hard climbing days, because finger tendons recover more slowly than muscles.':
+    'Hoia rasked tõmbed ja haardetöö raskematest ronimispäevadest eemal, sest sõrmede kõõlused taastuvad aeglasemalt kui lihased.',
+  'Work for the opposing muscles, like push-ups and face pulls, helps keep a climber’s shoulders balanced and healthy.':
+    'Vastaslihaste töö, nagu kätekõverdused ja face pull, aitab hoida ronija õlad tasakaalus ja tervena.',
+  'What are fast-twitch and slow-twitch muscle fibres?': 'Mis on kiired ja aeglased lihaskiud?',
+  'Slow-twitch (type I) fibres resist fatigue and do endurance work; fast-twitch (type II) fibres produce more force and speed and grow more easily.':
+    'Aeglased (I tüüpi) kiud on väsimuskindlad ja teevad vastupidavustööd; kiired (II tüüpi) kiud toodavad rohkem jõudu ja kiirust ning kasvavad kergemini.',
+  'Every muscle has a mix, and your genetics set the ratio — sprinters tend to have more fast-twitch, marathoners more slow-twitch.':
+    'Igas lihases on segu ja suhte määrab geneetika — sprinteritel on tavaliselt rohkem kiireid, maratoonaritel aeglaseid.',
+  'In practice you don’t need to train the fibre types separately: sets taken close to failure recruit both, whether the weight is heavy or light.':
+    'Praktikas ei pea kiutüüpe eraldi treenima: läbikukkumise lähedal tehtud seeriad kaasavad mõlemad, olgu raskus suur või väike.',
+  'That’s why a wide rep range (about {1}–{2}) builds muscle as long as the effort is high enough.':
+    'Seepärast kasvatab lai kordusvahemik (umbes {1}–{2}) lihaseid, kui pingutus on piisavalt suur.',
+  'What is the rotator cuff and should I train it?':
+    'Mis on rotaatormansett ja kas seda peaks treenima?',
+  'The rotator cuff is four small muscles around the shoulder blade that keep the ball of the shoulder centred in its socket while the big muscles move the arm.':
+    'Rotaatormansett on neli väikest lihast abaluu ümber, mis hoiavad õlavarreluu pead liigese keskel, samal ajal kui suured lihased kätt liigutavad.',
+  'Heavy pressing and pulling train it somewhat, but {1} sets of {2}–{3} light external rotations (band or cable) and face pulls {4}–{5} times a week are cheap insurance, especially if you bench a lot or play overhead sports.':
+    'Rasked surumised ja tõmbed treenivad seda mingil määral, kuid {1} seeriat {2}–{3} kerget välisrotatsiooni (kummi või plokiga) ja face pull {4}–{5} korda nädalas on odav kindlustus, eriti kui surud palju või teed pea kohal liigutustega spordialasid.',
+  'Pain at night or when raising your arm to the side deserves a check.':
+    'Valu öösel või käe küljele tõstmisel tasub kontrollida.',
+  'Keep these light — the goal is control and endurance, not heavy weights.':
+    'Hoia need kerged — eesmärk on kontroll ja vastupidavus, mitte suured raskused.',
+  'How do I train all three heads of the shoulders?': 'Kuidas treenida õlalihase kõiki kolme osa?',
+  'The front delts get plenty of work from bench and overhead presses — most people don’t need extra front raises.':
+    'Eesmised deltad saavad palju tööd lamades ja pea kohal surumisest — enamik ei vaja lisaks ettetõsteid.',
+  'The side delts give the shoulders width: lateral raises (dumbbell, cable or machine) {1}–{2} times a week.':
+    'Keskmised deltad annavad õlgadele laiuse: külgtõsted (hantlid, plokk või masin) {1}–{2} korda nädalas.',
+  'The rear delts respond to rear-delt flyes, face pulls and wide-grip rows.':
+    "Tagumised deltad reageerivad tagumiste deltade laiali viimisele, face pull'ile ja laia haardega sõudmisele.",
+  'A good weekly target is roughly {1}–{2} sets for the side and rear delts combined, on top of your pressing.':
+    'Hea nädalane eesmärk on umbes {1}–{2} seeriat keskmistele ja tagumistele deltadele kokku, lisaks surumistele.',
+  'Side and rear delts recover quickly and respond well to higher reps ({1}–{2}).':
+    'Keskmised ja tagumised deltad taastuvad kiiresti ja reageerivad hästi suuremale korduste arvule ({1}–{2}).',
+  'What is ego lifting and why is it bad?': 'Mis on ego-tõstmine ja miks see halb on?',
+  'Ego lifting is picking weights to impress rather than to train: half reps, bouncing, heavy swinging, or grinding out reps with broken form.':
+    'Ego-tõstmine on raskuse valimine muljet avaldamiseks, mitte treenimiseks: poolkordused, põrkamine, raske kiigutamine või korduste välja pressimine lagunenud tehnikaga.',
+  'It shifts the work away from the target muscle, stalls your progress and raises injury risk.':
+    'See nihutab töö sihtlihaselt eemale, peatab progressi ja suurendab vigastusriski.',
+  'Choose loads you can control through the full range with {1}–{2} reps left, add weight only when the reps are clean, and let your log — not the plates — show your progress.':
+    'Vali raskused, mida kontrollid kogu liikumisulatuses {1}–{2} kordusega varus, lisa ainult siis, kui kordused on puhtad, ja lase progressi näidata logil, mitte ketastel.',
+  'A quick check: film a set — if the rep looks different from your warm-ups, the weight is too heavy for now.':
+    'Kiire kontroll: filmi seeria — kui kordus näeb välja teistsugune kui soojenduses, on raskus praegu liiga suur.',
+  'Do I really need to train legs?': 'Kas ma pean tõesti jalgu treenima?',
+  'Yes, if you want a balanced, strong, athletic body.':
+    'Jah, kui tahad tasakaalustatud, tugevat ja atleetlikku keha.',
+  'Legs are about half your muscle mass: training them builds overall strength, bone density, work capacity and a physique that doesn’t look top-heavy, and it helps in sport and everyday life.':
+    'Jalad on umbes pool su lihasmassist: nende treenimine arendab üldist jõudu, luutihedust, töövõimet ja figuuri, mis ei näe välja ülaraskena, ning aitab spordis ja igapäevaelus.',
+  'If heavy squats aren’t your thing, the leg press, lunges, split squats, hip thrusts and leg curls still do the job — two sessions a week is plenty.':
+    'Kui rasked kükid pole sinu teema, teevad jalapress, väljaasted, poolkükid, puusatõsted ja jalakõverdused samuti oma töö — kaks treeningut nädalas on piisav.',
+  'Leg training doesn’t “release hormones” that grow your arms — but it does make you stronger and more capable everywhere.':
+    'Jalatreening ei „vabasta hormoone“, mis kasvataksid käsi — aga see teeb sind tugevamaks ja võimekamaks kõikjal.',
+  'Why do I feel sick during hard workouts?': 'Miks mul on rasketel treeningutel iiveldus?',
+  'Common causes: training too soon after a big meal or on a completely empty stomach, too little fluid, going from zero to very hard without a warm-up, or very intense leg or conditioning work with short rests.':
+    'Levinud põhjused: treenimine liiga kiiresti pärast suurt sööki või täiesti tühja kõhuga, liiga vähe vedelikku, nullist kohe väga raskele üleminek ilma soojenduseta või väga intensiivne jala- või konditsioonitöö lühikeste pausidega.',
+  'Eat a light meal {1}–{2} hours before, sip water, build up the intensity and take longer rests on brutal sets.':
+    'Söö kerge eine {1}–{2} tundi enne, joo vett lonksude kaupa, tõsta intensiivsust järk-järgult ja puhka jõhkrate seeriate vahel kauem.',
+  'Stop and get help if the nausea comes with chest pain, shortness of breath, fainting or confusion.':
+    'Lõpeta ja otsi abi, kui iiveldusega kaasneb valu rinnus, õhupuudus, minestamine või segasus.',
+  'Sitting or lying down for a few minutes with your legs up and breathing slowly usually settles it.':
+    'Tavaliselt aitab mõni minut istumist või lamamist tõstetud jalgadega ja aeglane hingamine.',
+  'Why do my muscles shake during a set?': 'Miks mu lihased seeria ajal värisevad?',
+  'Shaking is normal with new exercises, heavy loads or near failure: your nervous system is still learning to coordinate the muscle fibres, and tired fibres drop in and out.':
+    'Värisemine on normaalne uute harjutuste, raskete koormuste või läbikukkumise lähedal: närvisüsteem alles õpib lihaskiude koordineerima ja väsinud kiud lülituvad sisse ja välja.',
+  'It fades as you get stronger and more practised.':
+    'See kaob, kui muutud tugevamaks ja vilunumaks.',
+  'If it’s so strong that you lose control of the weight, go lighter; low blood sugar or too much caffeine can also add to it.':
+    'Kui see on nii tugev, et kaotad raskuse üle kontrolli, võta kergem; seda võivad suurendada ka madal veresuhkur või liigne kofeiin.',
+  'Shaking at rest, or shaking with weakness or numbness, is something to check with a doctor.':
+    'Värisemine puhkeolekus või koos nõrkuse või tuimusega tuleks arstiga üle vaadata.',
+  'My joints click and pop when I lift — is that bad?':
+    'Mu liigesed naksuvad ja krõksuvad treenides — kas see on halb?',
+  'Painless clicking or cracking is very common and usually harmless — gas bubbles in the joint fluid or tendons sliding over bone.':
+    'Valutu naksumine või krõksumine on väga levinud ja tavaliselt kahjutu — gaasimullid liigesevedelikus või üle luu libisevad kõõlused.',
+  'Knee cracking in particular isn’t linked to arthritis.':
+    'Eriti põlvede krõksumine ei ole seotud artroosiga.',
+  'Worry only if it comes with pain, swelling, locking, the joint giving way or a feeling that something catches — then get it checked and adjust the exercise in the meantime.':
+    'Muretse ainult siis, kui sellega kaasneb valu, turse, lukustumine, liigese äraandmine või tunne, et miski jääb kinni — siis lase kontrollida ja muuda vahepeal harjutust.',
+  'A good warm-up often quiets the noises down during the session.':
+    'Hea soojendus vaigistab need helid sageli juba treeningu ajal.',
+  'Will I get stretch marks from bulking?': 'Kas massi kasvatamisest tekivad venitusarmid?',
+  'You might — fast growth of muscle or fat stretches the skin faster than it adapts, often on the shoulders, chest, arms and thighs, and genetics decide a lot.':
+    'Võivad — lihaste või rasva kiire kasv venitab nahka kiiremini, kui see kohaneb, sageli õlgadel, rinnal, kätel ja reitel, ning palju otsustab geneetika.',
+  'Gaining slowly (about {1}–{2} kg a month for most people) lowers the risk.':
+    'Aeglane kaalutõus (umbes {1}–{2} kg kuus enamikul) vähendab riski.',
+  'Creams have little evidence behind them; fresh red marks fade to silvery lines over months, and a dermatologist can help if they bother you.':
+    'Kreemide kohta on tõendeid vähe; värsked punased armid tuhmuvad kuudega hõbedasteks joonteks ja kui need häirivad, aitab dermatoloog.',
+  'For many lifters they’re a normal sign of growth, not a health problem.':
+    'Paljudele tõstjatele on need normaalne kasvumärk, mitte terviseprobleem.',
+  'Any tips for using the app?': 'On sul nõuandeid äpi kasutamiseks?',
+  'How do I use this app?': 'Kuidas seda äppi kasutada?',
+  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile).':
+    'Spotter lühidalt: alumisel ribal on Täna (sinu plaan, ajalugu ja mina), Ülevaade (progress, rekordid, programmid, eesmärgid, playbook, harjutused), „+“ keskel (alusta treeningut, automaatset treeningut, tegevust, und ja tervist või logi möödunud treening), Saalid (sinu saalid ja nende varustus) ja Rakendused (Apex, Toitumine, Õppimine ja sinu profiil).',
+  'Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.':
+    'Logi seeriad treeningu ajal ja ma jälgin nende põhjal iga harjutust — küsi minult ükskõik mida või palu nõuandeid.',
+  'How do I start a session?': 'Kuidas treeningut alustada?',
+  'Tap the “+” in the middle of the bottom bar.': 'Puuduta „+“ alumise riba keskel.',
+  'The big button on top starts the best fit: “Today in program” if you have an active program, your usual day from the Playbook, or a session “From scratch” (“Or start from scratch” is always there too).':
+    'Ülemine suur nupp alustab kõige sobivamat: „Täna kavas“, kui sul on aktiivne programm, sinu tavapärast päeva Playbookist või treeningut „Nullist“ (alati on ka „Või alusta nullist“).',
+  'Pick your gym if asked, then add exercises and log your sets.':
+    'Kui küsitakse, vali saal, siis lisa harjutused ja logi seeriad.',
+  'The tiles below start an “Auto session”, an “Activity”, “Health” (sleep, rest, injury), “Log past” or a “Home set”.':
+    'Allolevad paanid alustavad „Automaatne treening“, „Tegevus“, „Tervis“ (uni, puhkus, vigastus), „Möödunud“ või „Kodune kava“.',
+  'How does the auto session work?': 'Kuidas automaatne treening töötab?',
+  'Tap “+” → “Auto session” and I build a full day from your goal and what’s recovered.':
+    'Puuduta „+“ → „Automaatne treening“ ja ma koostan terve päeva sinu eesmärgi ja taastunud lihaste järgi.',
+  'Go through the steps — goal, what today is for (strength, muscle, endurance and so on), muscles, and the day itself (length, warm-up, cardio, cool-down) — then review it and tap “Start now”, or “Save as a day” to keep it for later.':
+    'Läbi sammud — eesmärk, milleks tänane päev on (jõud, lihased, vastupidavus jne), lihased ja päev ise (pikkus, soojendus, kardio, jahtumine) — siis vaata üle ja puuduta „Alusta“ või „Salvesta päevana“, et see hilisemaks alles jätta.',
+  'How do I finish a workout?': 'Kuidas treeningut lõpetada?',
+  'When you’re done, tap “Finish” (the ✓ button) — you’ll get a summary with your volume and any new records, and “Share workout” if you want an image of it.':
+    'Kui oled valmis, puuduta „Lõpeta“ (✓ nupp) — näed kokkuvõtet mahu ja uute rekorditega ning „Jaga treeningut“ teeb sellest pildi.',
+  'Changed your mind?': 'Mõtlesid ümber?',
+  '“Discard session” (the bin icon next to it) throws the session away.':
+    '„Tühista treening“ (prügikasti ikoon kõrval) viskab treeningu ära.',
+  'A session left open closes by itself after {1} hours and gets a ⚠️ mark.':
+    'Lahti jäänud treening sulgub {1} tunni pärast ise ja saab märgi ⚠️.',
+  'How do I log a workout at home?': 'Kuidas kodust treeningut logida?',
+  'No gym?': 'Jõusaali pole?',
+  'Tap “+” → “Home set” to log pull-ups, push-ups, a vacuum hold and similar moves at home — it counts like any other session.':
+    'Puuduta „+“ → „Kodune kava“, et logida kodus lõuatõmbeid, kätekõverdusi, vaakumit ja sarnaseid harjutusi — see loeb nagu iga teine treening.',
+  'You can also add a past home set from “Log past”.':
+    'Möödunud kodust kava saad lisada ka jaotisest „Möödunud“.',
+  'How do I pause training for a vacation or illness?':
+    'Kuidas treeningud puhkuse või haiguse ajaks pausile panna?',
+  'Tap “+” → “Health”.': 'Puuduta „+“ → „Tervis“.',
+  'Under “Start a rest period” pick “Active recovery” (light training, reduced targets), “Full rest — no gym” (for example a vacation, with dates) or “Unwell” (sick days — nothing counts as missed and your plan waits), then start it.':
+    'Jaotises „Alusta puhkeperioodi“ vali „Aktiivne taastumine“ (kerged treeningud, vähendatud eesmärgid), „Täielik puhkus — ilma saalita“ (näiteks puhkus, kuupäevadega) või „Haige“ (midagi ei loeta vahele jäänuks ja plaan ootab) ning alusta.',
+  'Your streak and plan respect it, and you can end it early from its card on Today.':
+    'Seeria ja plaan arvestavad sellega ning varem saad selle lõpetada Täna vaates oleva kaardi kaudu.',
+  'How do I change which day my week starts on?': 'Kuidas muuta, millisest päevast mu nädal algab?',
+  'Open Apps (bottom bar) → Me → the “Settings” tab → “Week starts on”, and pick the day.':
+    'Ava Rakendused (alumine riba) → Mina → vahekaart „Seaded“ → „Nädal algab“ ja vali päev.',
+  'Weekly stats and the program week follow it.':
+    'Nädala statistika ja programmi nädal järgivad seda.',
+  'Trainers and admins: Apps → Clients or Users → the “Me” tab.':
+    'Treenerid ja administraatorid: Rakendused → Kliendid või Kasutajad → vahekaart „Mina“.',
+  'How do I assign a program to a client?': 'Kuidas kliendile programmi määrata?',
+  'Trainers: open Overview → Programs and tap “Assign” on the program’s tile (or open the program → “Program options” → “Assign to members”).':
+    'Treenerid: ava Ülevaade → Programmid ja puuduta programmi paanil „Määra“ (või ava programm → „Kava toimingud“ → „Määra liikmetele“).',
+  'Pick the clients, choose the “Start week” and confirm.':
+    'Vali kliendid, määra „Alustusnädal“ ja kinnita.',
+  'Assigning replaces the client’s active program; their logged history stays.':
+    'Määramine asendab kliendi aktiivse programmi; tema logitud ajalugu jääb alles.',
+  'You can also start from a client in your Clients list → “Assign a program”.':
+    'Võid alustada ka kliendist nimekirjas Kliendid → „Määra programm“.',
+  'What is Apex?': 'Mis on Apex?',
+  'Apex is the game side of Spotter: open Apps → Apex.':
+    'Apex on Spotteri mänguline pool: ava Rakendused → Apex.',
+  '“Home” gives the overview, in “Challenges” you pick one and tap “Start challenge” (you can “Give up” later), “Ranks” rates your lifts against strength standards and “Awards” lists the achievements you’ve unlocked.':
+    '„Avaleht“ annab ülevaate, „Väljakutsed“ all valid väljakutse ja puudutad „Alusta väljakutset“ (hiljem saad „Anna alla“), „Järgud“ hindab su harjutusi jõunormide järgi ja „Autasud“ näitab avatud saavutusi.',
+  'The bell there opens your milestones feed.': 'Sealne kell avab sinu verstapostide voo.',
+  'How does the Nutrition app work?': 'Kuidas Toitumise äpp töötab?',
+  'Open Apps → Nutrition.': 'Ava Rakendused → Toitumine.',
+  'If the tile says “Coming soon”, it isn’t switched on for your account yet.':
+    'Kui paanil on „Tuleb varsti“, pole see su konto jaoks veel sisse lülitatud.',
+  'Inside, “Today” shows the calories and macros you have left, “History” your past days and “Goal” your targets; tap “Add entry” to log a drink, a snack or a meal — search products and dishes, enter it manually or scan a barcode.':
+    'Sees näitab „Täna“, palju kaloreid ja makrosid on jäänud, „Ajalugu“ möödunud päevi ja „Eesmärk“ sinu norme; puuduta „Lisa kirje“, et logida jook, suupiste või söögikord — otsi tooteid ja roogi, sisesta käsitsi või skanni vöötkood.',
+  'What is the Learn app?': 'Mis on Õppimise äpp?',
+  'Open Apps → Learn.': 'Ava Rakendused → Õppimine.',
+  'It has short how-to lessons for every part of Spotter, grouped by topic — basics, logging, cardio and recovery, programs, progress, gyms, Apex and more.':
+    'Seal on lühikesed õppetunnid Spotteri iga osa kohta, rühmitatud teemade kaupa — põhitõed, logimine, kardio ja taastumine, programmid, progress, saalid, Apex ja muu.',
+  'Use “Topics” and search to find one, and “Saved” to keep it for later; the videos are still being recorded, so some lessons show “Video coming soon”.':
+    'Kasuta „Teemad“ ja otsingut õppetunni leidmiseks ning „Salvestatud“, et hiljem tagasi tulla; videod on alles salvestamisel, seega näitavad mõned õppetunnid „Video tuleb varsti“.',
+  'Where are my profile and settings?': 'Kus on mu profiil ja seaded?',
+  'Your account side is under Apps → Me (trainers see Clients, admins Users, each with a “Me” tab).':
+    'Sinu konto on Rakendused → Mina all (treenerid näevad Kliendid, administraatorid Kasutajad, igaühel on vahekaart „Mina“).',
+  'Your profile has “Overview”, “Body” (weight and measurements) and “Settings” (language, units, week start, Atlas, password, sign out).':
+    'Sinu profiilis on „Ülevaade“, „Keha“ (kaal ja mõõdud) ja „Seaded“ (keel, ühikud, nädala algus, Atlas, parool, väljalogimine).',
+  'Trainers add clients with “Add client” — the client opens the invite link to join — and see their training read-only.':
+    'Treenerid lisavad kliente nupuga „Lisa klient“ — klient avab liitumiseks kutselingi — ja näevad nende treeninguid ainult lugemiseks.',
+  'How do I switch between the apps?': 'Kuidas rakenduste vahel vahetada?',
+  'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
+    'Puuduta „Rakendused“ alumise riba paremas otsas (või „Jõusaal“ ülal Spotteri logo kõrval), et avada „Vaheta rakendust“: Jõusaal (sinu treeningud), Apex (väljakutsed, järgud, autasud), Toitumine, Õppimine ja sinu profiil.',
+  'It’s one account and one training history across all of them.':
+    'Kõigis on üks konto ja üks treeninguajalugu.',
+  'Where do I see my progress and records?': 'Kus näen oma progressi ja rekordeid?',
+  'Everything about progress lives in the Overview tab: tiles for progress, Trends, records, your program, Goals, Playbook and Exercises.':
+    'Kõik progressist on vahekaardil Ülevaade: progressi, Trendide, rekordite, sinu programmi, Eesmärkide, Playbooki ja Harjutuste paanid.',
+  'In progress, switch between “Total”, “By muscle”, “Volume” and “Records” and change the time range; tap an exercise to see its history.':
+    'Progressis vaheta „Kokku“, „Lihaste kaupa“, „Maht“ ja „Rekordid“ ning muuda ajavahemikku; puuduta harjutust, et näha selle ajalugu.',
+  'Or just ask me — “how is my bench going?”.':
+    'Või lihtsalt küsi minult — „kuidas mu lamades surumine edeneb?“.',
+  'What is the lens in Progress?': 'Mis on lääts progressis?',
+  'Open Overview → the progress tile → “Volume”, then tap the view button above the chart to open “Volume view”.':
+    'Ava Ülevaade → progressi paan → „Maht“, siis puuduta graafiku kohal vaate nuppu, et avada „Mahu vaade“.',
+  'Under “Lens” pick “Volume” (sets per muscle vs targets), “Fatigue” (load you’re still carrying) or “Readiness” (what’s recovered to train).':
+    'Jaotises „Lääts“ vali „Maht“ (seeriad lihase kohta vs eesmärgid), „Väsimus“ (koormus, mida veel kannad) või „Valmidus“ (mis on treeninguks taastunud).',
+  'In a session, “Today’s readiness” gives the same read for the day.':
+    'Treeningu ajal annab „Tänane valmisolek“ sama ülevaate selle päeva kohta.',
+  'Tap the “+” in the middle of the bottom bar to start anything: a session, an auto-built day, an activity, sleep or a past workout.':
+    'Puuduta „+“ alumise riba keskel, et alustada ükskõik mida: treeningut, automaatselt koostatud päeva, tegevust, und või möödunud treeningut.',
+  'In a session, set the weight and reps on the card and tap “Log” — the rest timer starts on its own.':
+    'Treeningus sea kaardile raskus ja kordused ning puuduta „Logi“ — puhkeaja taimer käivitub ise.',
+  '“Auto session” builds a whole day from your goal and what’s recovered — review it and tap “Start now”.':
+    '„Automaatne treening“ koostab terve päeva sinu eesmärgi ja taastunud lihaste järgi — vaata üle ja puuduta „Alusta“.',
+  'Ask me things like “what weight next time on bench?” or “am I recovered?” — I answer from your own log.':
+    'Küsi minult näiteks „mis raskus järgmine kord lamades surumisel?“ või „kas olen taastunud?“ — vastan sinu enda logi põhjal.',
+  'Tap the rest ring to change the rest target and the alerts; it’s remembered for each exercise.':
+    'Puuduta puhkeringi, et muuta puhkeaja eesmärki ja märguandeid; see jäetakse iga harjutuse jaoks meelde.',
+  'Tap a set to mark it as a warm-up or a dropset, or flag it “To failure” — warm-ups don’t count as working sets.':
+    'Puuduta seeriat, et märkida see soojenduseks või dropsetiks või lipuga „Läbikukkumiseni“ — soojendusseeriaid tööseeriateks ei loeta.',
+  'Forgot to log a workout?': 'Unustasid treeningu logida?',
+  '“+” → “Log past” adds it with its date and time.':
+    '„+“ → „Möödunud“ lisab selle kuupäeva ja kellaajaga.',
+  'Runs, rides, yoga or dance go under “+” → “Activity” — I count them in your weekly load.':
+    'Jooks, rattasõit, jooga või tants lähevad „+“ → „Tegevus“ alla — arvestan need sinu nädala koormusse.',
+  'The Overview tab keeps your progress, trends, records, program, goals, playbook and exercise library in one place.':
+    'Vahekaart Ülevaade hoiab sinu progressi, trende, rekordeid, programmi, eesmärke, playbooki ja harjutuste kogu ühes kohas.',
+  'In progress → “Volume”, open the view options to switch the lens between Volume, Fatigue and Readiness.':
+    'Progressis → „Maht“ ava vaate valikud, et vahetada läätse Maht, Väsimus ja Valmidus vahel.',
+  'In Overview → Goals choose which muscles to grow, hold or ease — auto-built days give the grow muscles extra work.':
+    'Jaotises Ülevaade → Eesmärgid vali, milliseid lihaseid kasvatada, hoida või vähendada — automaatselt koostatud päevad annavad kasvatatavatele lihastele rohkem tööd.',
+  'Build your own week in Overview → Programs → “New program” and “Activate” it — the “+” button will then offer today’s day.':
+    'Koosta oma nädal jaotises Ülevaade → Programmid → „Uus programm“ ja „Aktiveeri“ see — siis pakub „+“ nupp tänast päeva.',
+  'Log sleep with “+” → “Health” → “Start sleep”, or set a sleep schedule with auto-log in “Sleep details”.':
+    'Logi und „+“ → „Tervis“ → „Alusta und“ kaudu või sea „Une üksikasjad“ all uneajakava automaatse logimisega.',
+  'Going on vacation or feeling ill?': 'Lähed puhkusele või jäid haigeks?',
+  '“+” → “Health” → start a rest period so your streak and plan pause properly.':
+    '„+“ → „Tervis“ → alusta puhkeperioodi, et seeria ja plaan korralikult pausile läheksid.',
+  'Hurt something?': 'Said kuskilt haiget?',
+  '“+” → “Health” → “Injury & rehab” sets up a staged comeback plan.':
+    '„+“ → „Tervis“ → „Vigastus ja taastusravi“ koostab etapiviisilise naasmisplaani.',
+  'No gym today?': 'Täna jõusaali pole?',
+  '“+” → “Home set” logs pull-ups, push-ups or a vacuum at home.':
+    '„+“ → „Kodune kava“ logib kodus lõuatõmbed, kätekõverdused või vaakumi.',
+  'Group two exercises with “Superset with…” in the exercise menu.':
+    'Ühenda kaks harjutust harjutuse menüüs valikuga „Superseeria koos…“.',
+  'The Playbook learns your usual days from your log, so a typical session restarts in one tap.':
+    'Playbook õpib sinu logist tavapärased päevad, nii et tüüpilise treeningu saad alustada ühe puudutusega.',
+  'Add your gym in the Gyms tab and tick its equipment, so I know what kit you have there.':
+    'Lisa oma saal vahekaardil Saalid ja märgi selle varustus, et ma teaksin, mis sul seal olemas on.',
+  'Your week can start on any day: Apps → Me → Settings → “Week starts on”.':
+    'Su nädal võib alata mis tahes päevast: Rakendused → Mina → Seaded → „Nädal algab“.',
+  'Switch between kg and lb in Apps → Me → Settings → “Units”.':
+    'Kilogrammide ja naelte vahel vaheta Rakendused → Mina → Seaded → „Ühikud“.',
+  'The bell at the top collects your records, streaks and recaps; turn on push when I ask, so rest alerts reach you in the background.':
+    'Ülal olev kell kogub sinu rekordid, seeriad ja kokkuvõtted; lülita teavitused sisse, kui ma küsin, et puhkemärguanded jõuaksid sinuni ka taustal.',
+  'After a session, “Share workout” turns it into a Story or Square image.':
+    'Pärast treeningut teeb „Jaga treeningut“ sellest Story- või ruudukujulise pildi.',
+  'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    'Nupp „Rakendused“ all vahetab Jõusaali, Apexi, Toitumise, Õppimise ja sinu profiili vahel.',
+  'Open Apps → Apex for challenges, strength ranks and awards.':
+    'Ava Rakendused → Apex — seal on väljakutsed, jõujärgud ja autasud.',
+  'Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
+    'Rakendused → Õppimine sisaldab õppetunde Spotteri iga osa kohta (videod on tulekul).',
+  'Add Spotter to your home screen — it opens full-screen, works offline and can send notifications.':
+    'Lisa Spotter avaekraanile — see avaneb täisekraanil, töötab võrguühenduseta ja saab saata teavitusi.',
+  'Trainers: add a client with “Add client” (they get an invite link) and assign a program from the program’s tile.':
+    'Treenerid: lisage klient nupuga „Lisa klient“ (ta saab kutselingi) ja määrake programm programmi paanilt.',
+  'A few tips for the app:': 'Mõned nõuanded äpi kohta:',
+  '• Tap the “+” in the middle of the bottom bar to start anything: a session, an auto-built day, an activity, sleep or a past workout.':
+    '• Puuduta „+“ alumise riba keskel, et alustada ükskõik mida: treeningut, automaatselt koostatud päeva, tegevust, und või möödunud treeningut.',
+  '• In a session, set the weight and reps on the card and tap “Log” — the rest timer starts on its own.':
+    '• Treeningus sea kaardile raskus ja kordused ning puuduta „Logi“ — puhkeaja taimer käivitub ise.',
+  '• “Auto session” builds a whole day from your goal and what’s recovered — review it and tap “Start now”.':
+    '• „Automaatne treening“ koostab terve päeva sinu eesmärgi ja taastunud lihaste järgi — vaata üle ja puuduta „Alusta“.',
+  '• Ask me things like “what weight next time on bench?” or “am I recovered?” — I answer from your own log.':
+    '• Küsi minult näiteks „mis raskus järgmine kord lamades surumisel?“ või „kas olen taastunud?“ — vastan sinu enda logi põhjal.',
+  'More tips': 'Veel nõuandeid',
+  'More tips:': 'Veel nõuandeid:',
+  '• Tap the rest ring to change the rest target and the alerts; it’s remembered for each exercise.':
+    '• Puuduta puhkeringi, et muuta puhkeaja eesmärki ja märguandeid; see jäetakse iga harjutuse jaoks meelde.',
+  '• Tap a set to mark it as a warm-up or a dropset, or flag it “To failure” — warm-ups don’t count as working sets.':
+    '• Puuduta seeriat, et märkida see soojenduseks või dropsetiks või lipuga „Läbikukkumiseni“ — soojendusseeriaid tööseeriateks ei loeta.',
+  '• Forgot to log a workout?': '• Unustasid treeningu logida?',
+  '• Runs, rides, yoga or dance go under “+” → “Activity” — I count them in your weekly load.':
+    '• Jooks, rattasõit, jooga või tants lähevad „+“ → „Tegevus“ alla — arvestan need sinu nädala koormusse.',
+  '• The Overview tab keeps your progress, trends, records, program, goals, playbook and exercise library in one place.':
+    '• Vahekaart Ülevaade hoiab sinu progressi, trende, rekordeid, programmi, eesmärke, playbooki ja harjutuste kogu ühes kohas.',
+  '• In progress → “Volume”, open the view options to switch the lens between Volume, Fatigue and Readiness.':
+    '• Progressis → „Maht“ ava vaate valikud, et vahetada läätse Maht, Väsimus ja Valmidus vahel.',
+  '• In Overview → Goals choose which muscles to grow, hold or ease — auto-built days give the grow muscles extra work.':
+    '• Jaotises Ülevaade → Eesmärgid vali, milliseid lihaseid kasvatada, hoida või vähendada — automaatselt koostatud päevad annavad kasvatatavatele lihastele rohkem tööd.',
+  '• Build your own week in Overview → Programs → “New program” and “Activate” it — the “+” button will then offer today’s day.':
+    '• Koosta oma nädal jaotises Ülevaade → Programmid → „Uus programm“ ja „Aktiveeri“ see — siis pakub „+“ nupp tänast päeva.',
+  '• Log sleep with “+” → “Health” → “Start sleep”, or set a sleep schedule with auto-log in “Sleep details”.':
+    '• Logi und „+“ → „Tervis“ → „Alusta und“ kaudu või sea „Une üksikasjad“ all uneajakava automaatse logimisega.',
+  '• Going on vacation or feeling ill?': '• Lähed puhkusele või jäid haigeks?',
+  '• Hurt something?': '• Said kuskilt haiget?',
+  '• No gym today?': '• Täna jõusaali pole?',
+  '• Group two exercises with “Superset with…” in the exercise menu.':
+    '• Ühenda kaks harjutust harjutuse menüüs valikuga „Superseeria koos…“.',
+  '• The Playbook learns your usual days from your log, so a typical session restarts in one tap.':
+    '• Playbook õpib sinu logist tavapärased päevad, nii et tüüpilise treeningu saad alustada ühe puudutusega.',
+  '• Add your gym in the Gyms tab and tick its equipment, so I know what kit you have there.':
+    '• Lisa oma saal vahekaardil Saalid ja märgi selle varustus, et ma teaksin, mis sul seal olemas on.',
+  '• Your week can start on any day: Apps → Me → Settings → “Week starts on”.':
+    '• Su nädal võib alata mis tahes päevast: Rakendused → Mina → Seaded → „Nädal algab“.',
+  '• Switch between kg and lb in Apps → Me → Settings → “Units”.':
+    '• Kilogrammide ja naelte vahel vaheta Rakendused → Mina → Seaded → „Ühikud“.',
+  '• The bell at the top collects your records, streaks and recaps; turn on push when I ask, so rest alerts reach you in the background.':
+    '• Ülal olev kell kogub sinu rekordid, seeriad ja kokkuvõtted; lülita teavitused sisse, kui ma küsin, et puhkemärguanded jõuaksid sinuni ka taustal.',
+  '• After a session, “Share workout” turns it into a Story or Square image.':
+    '• Pärast treeningut teeb „Jaga treeningut“ sellest Story- või ruudukujulise pildi.',
+  '• The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '• Nupp „Rakendused“ all vahetab Jõusaali, Apexi, Toitumise, Õppimise ja sinu profiili vahel.',
+  '• Open Apps → Apex for challenges, strength ranks and awards.':
+    '• Ava Rakendused → Apex — seal on väljakutsed, jõujärgud ja autasud.',
+  '• Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
+    '• Rakendused → Õppimine sisaldab õppetunde Spotteri iga osa kohta (videod on tulekul).',
+  '• Add Spotter to your home screen — it opens full-screen, works offline and can send notifications.':
+    '• Lisa Spotter avaekraanile — see avaneb täisekraanil, töötab võrguühenduseta ja saab saata teavitusi.',
+  '• Trainers: add a client with “Add client” (they get an invite link) and assign a program from the program’s tile.':
+    '• Treenerid: lisage klient nupuga „Lisa klient“ (ta saab kutselingi) ja määrake programm programmi paanilt.',
+  'That’s all of them — ask me about any feature for the details.':
+    'See on kõik — küsi minult ükskõik millise funktsiooni kohta, et detaile teada saada.',
+  'That was every tip I have — here they are again from the top:':
+    'Need olid kõik mu nõuanded — siin on need uuesti algusest:',
+  'Change the password in Apps → Me → “Settings” → “Password”; “Sign out” is there too — your log comes back when you sign in again.':
+    'Parooli muudad Rakendused → Mina → „Seaded“ → „Parool“; seal on ka väljalogimine — su logi tuleb tagasi, kui uuesti sisse logid.',
+  'Overview → Programs → “New program”: name it, “Pick training days”, fill each day with muscles or exercises, then “Activate” (or “Save draft”).':
+    'Ülevaade → Programmid → „Uus programm“: pane nimi, „Vali päevad“, täida iga päev lihaste või harjutustega, siis „Aktiveeri“ (või „Salvesta mustand“).',
+  'Apps → Me → “Body” → “Add weight”.': 'Rakendused → Mina → „Keha“ → „Lisa kaal“.',
+  'Overview → Goals: set a “Physique target” and, under “Focus this block”, which muscles to grow, hold or ease.':
+    'Ülevaade → Eesmärgid: määra „Kehaeesmärk“ ja jaotises „Selle bloki fookus“ — milliseid lihaseid kasvatada, hoida või vähendada.',
+  'A body-weight goal lives in Apps → Me → “Body”.':
+    'Kaalueesmärk on jaotises Rakendused → Mina → „Keha“.',
+  'Outside the gym: tap “+” → “Activity” → pick run, cycling, swim, walk, yoga, dance…':
+    'Väljaspool jõusaali: puuduta „+“ → „Tegevus“ → vali jooks, rattasõit, ujumine, kõnd, jooga, tants…',
+  '→ start it now or save one you already did.': '→ alusta kohe või salvesta juba tehtud tegevus.',
+  'To get a trainer, ask your admin to assign one — who can see your data is listed in Apps → Me → “Settings”.':
+    'Treeneri saamiseks palu administraatoril see määrata — kes sinu andmeid näeb, on kirjas jaotises Rakendused → Mina → „Seaded“.',
+  'In the session: set the reps and weight on the card, tap “Log”.':
+    'Treeningus: sea kaardile kordused ja raskus ning puuduta „Logi“.',
+  'Tap a logged set to change it, mark it as a warm-up or dropset, or delete it.':
+    'Puuduta logitud seeriat, et seda muuta, märkida soojenduseks või dropsetiks või kustutada.',
+  'Tap “+” → “Health” → “Injury & rehab” → “Set up rehab plan” (or from my pain check-in here).':
+    'Puuduta „+“ → „Tervis“ → „Vigastus ja taastusravi“ → „Koosta plaan“ (või alusta siin minu valuvestlusest).',
+  'Tap “+” → “Log past” → set the date, start time and length (and the gym) → add the exercises and sets.':
+    'Puuduta „+“ → „Möödunud“ → määra kuupäev, algusaeg ja kestus (ja saal) → lisa harjutused ja seeriad.',
+  'Apps → Me → “Settings” → “Units” → kg or lb.':
+    'Rakendused → Mina → „Seaded“ → „Ühikud“ → kg või lb.',
+  'Tap “+” → “Health” → “Start sleep” when you go to bed and “I’m awake — stop” in the morning.':
+    'Puuduta „+“ → „Tervis“ → „Alusta und“, kui magama lähed, ja hommikul „Olen ärkvel — stopp“.',
+  'In “Sleep details” you can “Add a past night”, set a “Sleep schedule” and turn on “Auto-log” so nights start and end by themselves; fix any night there too.':
+    'Jaotises „Une üksikasjad“ saad „Lisa möödunud öö“, määrata „Uneajakava“ ja lülitada sisse „Automaatne logimine“, et ööd algaksid ja lõppeksid ise; seal saad parandada ka iga öö.',
+  '−{1} kg over {2} ({3} → {4}).': '−{1} kg, ajavahemik: {2} ({3} → {4}).',
+  '±{1} kg over {2} ({3} → {4}).': '±{1} kg, ajavahemik: {2} ({3} → {4}).',
+  'It’s been {1}, bro — time to get back, yeah?':
+    'Juba {1} ilma jõusaalita, vend — aeg tagasi tulla, mis?',
+  '{1} off — no stress, man.': '{1} vahet — pole hullu, vend.',
+  'We’ll ease back in.': 'Võtame tasapisi tagasi.',
+  'Missed you, dude!': 'Igatsesin sind, vend!',
+  '{1} is plenty of rest.': '{1} puhkust on küllalt.',
+  '{1} off.': '{1} vahet.',
+  'Time to fix that.': 'Aeg see korda teha.',
+  'Today works.': 'Täna sobib.',
+  'I counted.': 'Lugesin.',
+  'Every day of it.': 'Iga päeva.',
+  'Resting from what, exactly?': 'Puhkad millest täpselt?',
+  '*sigh* {1}.': '*ohkab* {1}.',
+  'Your membership is crying.': 'Su kuukaart nutab.',
+  '{1}, gym tourist.': '{1}, jõusaaliturist.',
+  'Visa expired?': 'Viisa aegus?',
 };

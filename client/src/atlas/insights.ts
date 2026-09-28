@@ -6,8 +6,9 @@
  * answers, each thing at most once per conversation, the one about what
  * you're talking about first.
  */
+import * as N from './num';
 import type { MuscleGroup } from '../data/exercises';
-import { muscleSetsInWorkout } from '../store';
+import { muscleSetsInWorkout, setTypeOf } from '../store';
 import { DAY, WEEK, finishedOf, loggedLifts, type AskCtx, type Tr } from './intentKit';
 import { isBodyweightLift, liftPoints } from './liftStats';
 
@@ -68,13 +69,13 @@ function compute(c: AskCtx, L: Tr): Insight[] {
     if (win.length < 4) continue;
     const best = Math.max(...win.slice(0, -1).map((p) => p.score));
     if (win[win.length - 1].score <= win[0].score && win[win.length - 1].score <= best) {
-      const weeks = Math.max(2, Math.round((win[win.length - 1].ts - win[0].ts) / WEEK));
+      const flat = N.spanOf(c, Math.max(2 * WEEK, win[win.length - 1].ts - win[0].ts));
       out.push({
         id: `stall:${name}`,
         about: name,
         text: L(
-          `By the way, ${nm(name)} hasn't moved in ~${weeks} weeks.`,
-          `До речі, ${nm(name)} стоїть на місці вже ~${weeks} тиж.`,
+          `By the way, ${nm(name)} hasn't moved in ${flat}.`,
+          `До речі, ${nm(name)} стоїть на місці вже ${flat}.`,
         ),
         chip: L(`How do I break a plateau?`, `Як пробити плато?`),
       });
@@ -105,20 +106,25 @@ function compute(c: AskCtx, L: Tr): Insight[] {
       }
   }
 
-  // A week much lighter than your usual.
+  // A week much lighter than your usual. Working sets actually done — the
+  // per-muscle tally counts one bench set for chest, triceps and shoulders.
   const setsIn = (from: number, to: number) =>
     ws
       .filter((w) => w.startedAt >= from && w.startedAt < to)
-      .reduce((n, w) => n + [...muscleSetsInWorkout(w).values()].reduce((a, b) => a + b, 0), 0);
+      .reduce(
+        (n, w) =>
+          n + w.exercises.flatMap((e) => e.sets.filter((s) => setTypeOf(s) !== 'warmup')).length,
+        0,
+      );
   const thisWeek = setsIn(c.now - WEEK, c.now + 1);
   const usual = setsIn(c.now - 5 * WEEK, c.now - WEEK) / 4;
-  if (usual >= 20 && thisWeek < usual * 0.5)
+  if (usual >= 12 && thisWeek < usual * 0.5)
     out.push({
       id: 'light_week',
       about: '',
       text: L(
-        `By the way, this week is about half your usual volume (${Math.round(thisWeek)} vs ~${Math.round(usual)} sets).`,
-        `До речі, цей тиждень — десь половина твого звичного обʼєму (${Math.round(thisWeek)} проти ~${Math.round(usual)} сетів).`,
+        `By the way, the last 7 days are about half your usual volume (${thisWeek} vs ~${Math.round(usual)} sets).`,
+        `До речі, за останні 7 днів — десь половина твого звичного обʼєму (${thisWeek} проти ~${N.sets('uk', Math.round(usual))}).`,
       ),
       chip: L('Sets by week', 'Сети по тижнях'),
     });

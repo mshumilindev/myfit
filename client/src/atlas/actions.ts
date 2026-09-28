@@ -2,6 +2,7 @@
  * Doing what Atlas offered in chat — always after the athlete tapped
  * "Do it". Each action returns the line Atlas says afterwards.
  */
+import * as N from './num';
 import {
   addWeight,
   getOpenWorkout,
@@ -16,7 +17,9 @@ import {
   startWorkout,
   type StoreState,
   getStoreState,
+  logActivity,
 } from '../store';
+import { activityType, estimateCalories } from '../activities';
 import { bodyPart as bodyPartOf, loadCaps, protectedMuscles } from '../injury';
 import { buildPlanDay, planDayFor, proposePlan } from './plan';
 import { computePlaybook } from '../playbook';
@@ -67,7 +70,7 @@ export function runAction(
       });
       return {
         text: L(
-          `Done — ${a.days} days a week, ~${a.lengthMin} min. Each day is built on the day from this, your recovery and what you told me.`,
+          `Done — ${N.days('en', a.days)} a week, ~${a.lengthMin} min. Each day is built on the day from this, your recovery and what you told me.`,
           `Готово — ${a.days} дн. на тиждень, ~${a.lengthMin} хв. Кожен день збиратиму в день тренування з цього, твого відновлення і того, що ти мені казав.`,
         ),
       };
@@ -174,8 +177,8 @@ export function runAction(
       startRestPeriod({ mode: 'off', startDay: today, endDay: today + a.days - 1, note: 'Atlas' });
       return {
         text: L(
-          `Done — plan paused for ${a.days} days, your streak is safe. Come back whenever you're ready.`,
-          `Готово — план на паузі ${a.days} дн., серія збережена. Повертайся, коли будеш готовий.`,
+          `Done — plan paused for ${N.days('en', a.days)}, your streak is safe. Come back whenever you're ready.`,
+          `Готово — план на паузі ${N.days('uk', a.days)}, серія збережена. Повертайся, коли будеш готовий.`,
         ),
       };
     }
@@ -210,15 +213,34 @@ export function runAction(
       return {
         text: L(
           a.restDays
-            ? `Logged in Injuries: ${a.restDays} days of rest for that area, then we bring it back step by step by how it feels.`
+            ? `Logged in Injuries: ${N.days('en', a.restDays)} of rest for that area, then we bring it back step by step by how it feels.`
             : a.stage === 'protect'
               ? 'Logged in Injuries: that area is out of your sessions for now; we bring it back step by step by how it feels.'
               : 'Logged in Injuries: that area trains light for now; after two pain-free sessions I offer the next step.',
           a.restDays
-            ? `Записав у «Травми»: ${a.restDays} дн. відпочинку для цієї зони, далі повертаємо поступово, за самопочуттям.`
+            ? `Записав у «Травми»: ${N.days('uk', a.restDays)} відпочинку для цієї зони, далі повертаємо поступово, за самопочуттям.`
             : a.stage === 'protect'
               ? 'Записав у «Травми»: цю зону поки прибираю з тренувань, повертатимемо поступово, за самопочуттям.'
               : 'Записав у «Травми»: цю зону поки тренуємо легко; після двох тренувань без болю запропоную наступний крок.',
+        ),
+      };
+    }
+    case 'activity': {
+      const t = activityType(a.kind);
+      logActivity({
+        type: a.kind,
+        category: t?.category ?? 'conditioning',
+        startedAt: a.at,
+        finishedAt: a.at + a.minutes * 60_000,
+        durationMin: a.minutes,
+        calories: t ? estimateCalories(t, a.minutes, latestWeight(s.bodyMetrics)?.weight) : null,
+        distanceKm: t?.tracksDistance ? (a.km ?? null) : null,
+        note: 'Atlas',
+      });
+      return {
+        text: L(
+          'Logged — it’s in your activities and counts in your load now.',
+          'Записав — це вже в активностях і враховується в навантаженні.',
         ),
       };
     }

@@ -8,6 +8,7 @@
  * streak, a lift to beat).
  * Small talk never goes through the "As I said" consistency layer.
  */
+import * as N from './num';
 import { est1rm, setTopWeight, setTypeOf } from '../store';
 import { hashId } from './voice';
 import {
@@ -159,6 +160,8 @@ const HELLO: Record<'morning' | 'day' | 'evening' | 'night', Toned> = {
 function greet(c: AskCtx, L: Tr): string {
   const hello = say(c, 'hello', HELLO[partOfDay(c)], L);
   const d = daysSinceLast(c);
+  const s = d === null ? '' : N.spanDaysOf(c, d);
+  const S = N.cap(s);
   const hook =
     d === null
       ? L(
@@ -172,34 +175,34 @@ function greet(c: AskCtx, L: Tr): string {
             {
               soft: [
                 [
-                  `It’s been ${d} days, bro — time to get back, yeah?`,
-                  `Бро, вже ${d} дн. без залу. Го назад?`,
+                  `It’s been ${s}, bro — time to get back, yeah?`,
+                  `Бро, вже ${s} без залу. Го назад?`,
                 ],
                 [
-                  `${d} days off — no stress, man. We’ll ease back in.`,
-                  `${d} дн. перерви — спокуха, розгойдаємось потихеньку.`,
+                  `${S} off — no stress, man. We’ll ease back in.`,
+                  `${S} перерви — спокуха, розгойдаємось потихеньку.`,
                 ],
                 [
-                  `Missed you, dude! ${d} days is plenty of rest.`,
-                  `Скучив, братан! ${d} дн. — відпочив уже досить.`,
+                  `Missed you, dude! ${S} is plenty of rest.`,
+                  `Скучив, братан! ${S} — відпочив уже досить.`,
                 ],
               ],
               blunt: [
-                [`${d} days since your last session.`, `${d} дн. без тренувань.`],
-                [`${d} days off. Time to fix that.`, `Перерва — ${d} дн. Пора закінчувати.`],
-                [`${d} days. Today works.`, `${d} дн. простою. Сьогодні — саме час.`],
+                [`${S} since your last session.`, `${S} без тренувань.`],
+                [`${S} off. Time to fix that.`, `Перерва — ${s}. Пора закінчувати.`],
+                [`${S}. Today works.`, `${S} простою. Сьогодні — саме час.`],
               ],
               hard: [
-                [`${d} days. I counted. Every one.`, `${d} дн. Я рахував. Кожен, лінивцю.`],
+                [`${S}. I counted. Every day of it.`, `${S}. Я рахував. Кожен день, лінивцю.`],
                 [
-                  `${d} days off. Resting from what, exactly?`,
-                  `${d} дн. відпочинку. Від чого відпочиваєш, цікаво?`,
+                  `${S} off. Resting from what, exactly?`,
+                  `${S} відпочинку. Від чого відпочиваєш, цікаво?`,
                 ],
                 [
-                  `*sigh* ${d} days. Your membership is crying.`,
-                  `*зітхає* ${d} дн. Твій абонемент уже плаче.`,
+                  `*sigh* ${s}. Your membership is crying.`,
+                  `*зітхає* ${s}. Твій абонемент уже плаче.`,
                 ],
-                [`${d} days, gym tourist. Visa expired?`, `${d} дн., туристе. Віза закінчилась?`],
+                [`${S}, gym tourist. Visa expired?`, `${S}, туристе. Віза закінчилась?`],
               ],
             },
             L,
@@ -393,8 +396,8 @@ export const INTENTS_SMALL: Intent[] = [
                 'Ти сьогодні тренувався — ще розбираю.',
               )
             : L(
-                `Last session was ${d} day${d === 1 ? '' : 's'} ago.`,
-                `Останнє тренування — ${d} дн. тому.`,
+                `Last session was ${N.agoOf(c, d * DAY)}.`,
+                `Останнє тренування — ${N.agoOf(c, d * DAY)}.`,
               );
       return `${say(
         c,
@@ -580,8 +583,8 @@ export const INTENTS_SMALL: Intent[] = [
       const t = liftToBeat(c);
       const dare = t
         ? L(
-            `Beat ${c.fmt.exercise(t.name)}: ${c.fmt.kg(t.kg)} × ${t.reps + 1} next time. One rep more.`,
-            `Побий ${c.fmt.exercise(t.name)}: ${c.fmt.kg(t.kg)} × ${t.reps + 1} наступного разу. Всього один повтор зверху.`,
+            `Beat ${c.fmt.exercise(t.name)}: ${N.setText(c, t.kg, t.reps + 1)} next time. One rep more.`,
+            `Побий ${c.fmt.exercise(t.name)}: ${N.setText(c, t.kg, t.reps + 1)} наступного разу. Всього один повтор зверху.`,
           )
         : L(
             'Log a session and I’ll give you something to beat.',
@@ -634,8 +637,8 @@ export const INTENTS_SMALL: Intent[] = [
       ];
       if (t)
         opts.unshift([
-          `${c.fmt.exercise(t.name)}: ${c.fmt.kg(t.kg)} × ${t.reps + 2} within two weeks.`,
-          `${c.fmt.exercise(t.name)}: ${c.fmt.kg(t.kg)} × ${t.reps + 2} за два тижні.`,
+          `${c.fmt.exercise(t.name)}: ${N.setText(c, t.kg, t.reps + 2)} within two weeks.`,
+          `${c.fmt.exercise(t.name)}: ${N.setText(c, t.kg, t.reps + 2)} за два тижні.`,
         ]);
       return `${say(
         c,

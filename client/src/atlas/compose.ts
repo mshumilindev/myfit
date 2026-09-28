@@ -5,6 +5,7 @@
  * comes from the exercise library, the textbook rules the planner already
  * uses, and your own log — nothing is written per question.
  */
+import * as N from './num';
 import { BUILT_IN_CATALOG, richExerciseByName, type MuscleGroup } from '../data/exercises';
 import type { EquipmentId } from '../data/equipment';
 import { rankExercisesForMuscle } from '../sessionBuilder';
@@ -258,8 +259,8 @@ export function programAnswer(c: AskCtx, f: Frame, L: Tr): Composed {
       const you =
         last && last.kg
           ? L(
-              ` (you: ${c.fmt.kg(last.kg)} × ${last.reps})`,
-              ` (у тебе: ${c.fmt.kg(last.kg)} × ${last.reps})`,
+              ` (you: ${N.setText(c, last.kg, last.reps)})`,
+              ` (у тебе: ${N.setText(c, last.kg, last.reps)})`,
             )
           : '';
       return `${c.fmt.exercise(p.name)} ${scheme(goal, p.compound, L)}${you}`;
@@ -298,8 +299,8 @@ export function programAnswer(c: AskCtx, f: Frame, L: Tr): Composed {
           `Чому так: на ${days} ${days === 1 ? 'день' : 'дні'} краще все тіло — кожен м’яз ${days >= 2 ? `${days} рази` : 'раз'} на тиждень, частота важливіша за обсяг за раз.`,
         )
       : L(
-          `Why this way: ${days} days split so each muscle gets about two sessions a week with 48 h between.`,
-          `Чому так: ${days} дні(в) розбито так, щоб кожен м’яз працював ~2 рази на тиждень з перервою 48 год.`,
+          `Why this way: ${N.days('en', days)} split so each muscle gets about two sessions a week with 2 days between.`,
+          `Чому так: ${N.days('uk', days)} розбито так, щоб кожен м’яз працював ~2 рази на тиждень з перервою 2 дні.`,
         );
   const soreWhy = sore.length
     ? L(
@@ -407,8 +408,8 @@ export function compareAnswer(c: AskCtx, a: string, b: string, L: Tr): Composed 
   const la2 = lastSet(c, a);
   const lb2 = lastSet(c, b);
   const you = [
-    la2 && `${n(a)} ${c.fmt.kg(la2.kg)} × ${la2.reps}`,
-    lb2 && `${n(b)} ${c.fmt.kg(lb2.kg)} × ${lb2.reps}`,
+    la2 && `${n(a)} ${N.setText(c, la2.kg, la2.reps)}`,
+    lb2 && `${n(b)} ${N.setText(c, lb2.kg, lb2.reps)}`,
   ].filter(Boolean);
   if (you.length)
     lines.push(L(`In your log: ${you.join(', ')}.`, `У твоєму журналі: ${you.join(', ')}.`));
@@ -506,7 +507,7 @@ export function whatIfDays(c: AskCtx, days: number, muscle: MuscleGroup | null, 
     const cur = weeklySets(c, muscle);
     const next = Math.round(perMuscle * (days <= 3 ? 3 : 4));
     m = L(
-      ` ${c.fmt.muscle(muscle)}: now ~${cur.toFixed(0)} sets a week; on ${days} days ≈ ${next}–${next + 4} sets over ${perMuscle} sessions.`,
+      ` ${c.fmt.muscle(muscle)}: now ~${cur.toFixed(0)} sets a week; on ${N.days('en', days)} ≈ ${next}–${next + 4} sets over ${N.sessions('en', perMuscle)}.`,
       ` ${c.fmt.muscle(muscle)}: зараз ~${cur.toFixed(0)} сетів на тиждень; на ${days} днях ≈ ${next}–${next + 4} сетів за ${perMuscle} тренування.`,
     );
   }

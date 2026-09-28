@@ -1,7 +1,8 @@
 /**
  * The base set of topics (part 1). The routing lives in intents.ts.
  */
-import { consistencyStreak, est1rm, latestWeight, setTypeOf } from '../store';
+import * as N from './num';
+import { consistencyStreak, latestWeight, setTypeOf } from '../store';
 import { muscleReadiness } from '../recovery';
 import { nextTarget, topHistory } from '../progression';
 import { LANDMARKS, VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
@@ -212,16 +213,16 @@ export const INTENTS: Intent[] = [
           `No ${name} logged yet. Start light, ${tg.repLow}–${tg.repHigh} clean reps, and I’ll take it from there.`,
           `${name} ще не записано. Почни легко, ${tg.repLow}–${tg.repHigh} чистих повторів — далі поведу я.`,
         );
-      const last = tg.prevWeight != null ? `${c.fmt.kg(tg.prevWeight)} × ${tg.prevReps}` : '—';
+      const last = tg.prevWeight != null ? `${N.setText(c, tg.prevWeight, tg.prevReps)}` : '—';
       if (tg.deltaKg < 0)
         return L(
-          `${name}: last ${last}. Stuck there — back off to ${c.fmt.kg(tg.weight)} × ${tg.reps} and build up again.`,
-          `${name}: минулого разу ${last}. Застряг — скинь до ${c.fmt.kg(tg.weight)} × ${tg.reps} і набирай знову.`,
+          `${name}: last ${last}. Stuck there — back off to ${N.setText(c, tg.weight, tg.reps)} and build up again.`,
+          `${name}: минулого разу ${last}. Застряг — скинь до ${N.setText(c, tg.weight, tg.reps)} і набирай знову.`,
         );
       return tg.deltaKg > 0
         ? L(
-            `${name}: last ${last}. Next: ${c.fmt.kg(tg.weight)} × ${tg.reps}.`,
-            `${name}: минулого разу ${last}. Далі: ${c.fmt.kg(tg.weight)} × ${tg.reps}.`,
+            `${name}: last ${last}. Next: ${N.setText(c, tg.weight, tg.reps)}.`,
+            `${name}: минулого разу ${last}. Далі: ${N.setText(c, tg.weight, tg.reps)}.`,
           )
         : L(
             `${name}: last ${last}. Stay at ${c.fmt.kg(tg.weight)} and get ${tg.reps} reps before adding weight.`,
@@ -251,7 +252,7 @@ export const INTENTS: Intent[] = [
           const best = pts.filter((x) => x.bw === bw).reduce((a, b) => (b.score > a.score ? b : a));
           return bw
             ? `${c.fmt.exercise(n)} ${fmtPoint(c, best, L)}`
-            : `${c.fmt.exercise(n)} ${c.fmt.kg(best.kg)} × ${best.reps} (~${c.fmt.kg(Math.round(est1rm(best.kg, Math.min(12, best.reps))))} 1RM)`;
+            : `${c.fmt.exercise(n)} ${N.setText(c, best.kg, best.reps)} (~${c.fmt.kg(Math.round(best.score))} 1RM)`;
         })
         .filter(Boolean);
       return parts.length
@@ -289,7 +290,8 @@ export const INTENTS: Intent[] = [
     needs: 'muscle',
     answer: (c, p, L) => {
       const m = p.muscle!;
-      const n = Math.round((weeklyMuscleSets(finishedOf(c), c.now).get(m) ?? 0) * 10) / 10;
+      // Secondary work counts half, so this can be fractional ("4.5 sets").
+      const n = weeklyMuscleSets(finishedOf(c), c.now).get(m) ?? 0;
       const lm = LANDMARKS[m];
       const tail = lm
         ? L(
@@ -298,8 +300,8 @@ export const INTENTS: Intent[] = [
           )
         : '';
       return L(
-        `${c.fmt.muscle(m)}: ${n} sets in the last 7 days.${tail}`,
-        `${c.fmt.muscle(m)}: ${n} сетів за останні 7 днів.${tail}`,
+        `${c.fmt.muscle(m)}: ${N.setsDec('en', n)} in the last 7 days.${tail}`,
+        `${c.fmt.muscle(m)}: ${N.setsDec('uk', n)} за останні 7 днів.${tail}`,
       );
     },
   },
@@ -372,13 +374,20 @@ export const INTENTS: Intent[] = [
           'Everything you trained is recovered. No excuse there.',
           'Усе, що ти тренував, відновилося. Тут відмовки не буде.',
         );
+      // Asked about one muscle that is ready (≥90% — the model's "ready" line).
+      const one = p.muscle ? ready.get(p.muscle) : undefined;
+      if (one && (one.state === 'ready' || one.state === 'stale'))
+        return L(
+          `${c.fmt.muscle(p.muscle!)}: ${Math.round(one.readiness * 100)}% — recovered, train it.`,
+          `${c.fmt.muscle(p.muscle!)}: ${Math.round(one.readiness * 100)}% — відновились, можна тренувати.`,
+        );
       const parts = list
         .slice(0, 4)
         .map((m) => `${c.fmt.muscle(m)} ${Math.round((ready.get(m)?.readiness ?? 1) * 100)}%`)
         .join(', ');
       return L(
-        `Recovery: ${parts}. Under ~85% — train something else today.`,
-        `Відновлення: ${parts}. Нижче ~85% — сьогодні тренуй інше.`,
+        `Recovery: ${parts}. Under ~90% — train something else today.`,
+        `Відновлення: ${parts}. Нижче ~90% — сьогодні тренуй інше.`,
       );
     },
   },
@@ -445,8 +454,8 @@ export const INTENTS: Intent[] = [
         .map((e) => c.fmt.exercise(e.name))
         .join(', ');
       return L(
-        `${date(c, w.startedAt)}: ${sets} sets in ${mins} min — ${lifts}.`,
-        `${date(c, w.startedAt)}: ${sets} сетів за ${mins} хв — ${lifts}.`,
+        `${date(c, w.startedAt)}: ${N.sets('en', sets)} in ${mins} min — ${lifts}.`,
+        `${date(c, w.startedAt)}: ${N.sets('uk', sets)} за ${mins} хв — ${lifts}.`,
       );
     },
   },
@@ -457,19 +466,33 @@ export const INTENTS: Intent[] = [
       const f = finishedOf(c);
       const n = f.filter((w) => c.now - w.startedAt < WEEK).length;
       const usual = usualSessionsPerWeek(f, c.now - WEEK) || n;
-      const sets = Math.round([...weeklyMuscleSets(f, c.now).values()].reduce((a, b) => a + b, 0));
+      // Working sets actually done — not the per-muscle tally, which counts one
+      // bench set for chest, triceps and shoulders alike.
+      const sets = f
+        .filter((w) => c.now - w.startedAt < WEEK)
+        .reduce(
+          (a, w) =>
+            a + w.exercises.flatMap((e) => e.sets.filter((x) => setTypeOf(x) !== 'warmup')).length,
+          0,
+        );
       return L(
-        `Last 7 days: ${n} sessions (usual ${usual}), ${sets} hard sets.`,
-        `Останні 7 днів: ${n} тренувань (зазвичай ${usual}), ${sets} робочих сетів.`,
+        `Last 7 days: ${N.sessions('en', n)} (usual ${usual}), ${N.workingSets('en', sets)}.`,
+        `Останні 7 днів: ${N.sessions('uk', n)} (зазвичай ${usual}), ${N.workingSets('uk', sets)}.`,
       );
     },
   },
   {
     id: 'streak',
     all: [['streak', 'in a row', 'серія', 'серію', 'поспіль', 'підряд']],
-    answer: (_c, _p, L) => {
-      const d = consistencyStreak();
-      return L(`${d}-day streak.`, `Серія: ${d} днів.`);
+    answer: (c, _p, L) => {
+      const d = consistencyStreak(c.now);
+      if (d <= 0)
+        return L(
+          'No streak yet — log a session today and it starts.',
+          'Серії ще нема — запиши тренування сьогодні, і вона почнеться.',
+        );
+      const run = N.spanDaysOf(c, d);
+      return L(`Streak: ${run}.`, `Серія: ${run}.`);
     },
   },
   {
@@ -482,8 +505,8 @@ export const INTENTS: Intent[] = [
       const f = finishedOf(c);
       const since = f.length ? date(c, f[f.length - 1].startedAt) : '—';
       return L(
-        `${f.length} sessions logged since ${since}.`,
-        `${f.length} тренувань записано з ${since}.`,
+        `${N.sessions('en', f.length)} logged since ${since}.`,
+        `${N.sessions('uk', f.length)} записано з ${since}.`,
       );
     },
   },
@@ -526,14 +549,20 @@ export const INTENTS: Intent[] = [
           'Without a programme I deload you when the numbers drop. Ask me to write one.',
           'Без програми я розвантажую, коли падають цифри. Попроси — напишу програму.',
         );
+      const week = blockWeek(plan, c.now);
+      if (week > plan.weeks)
+        return L(
+          `Your ${plan.weeks}-week block is done — ask me for a new programme and the next lighter week comes at its end.`,
+          `Твій блок на ${N.weeks('uk', plan.weeks)} завершено — попроси нову програму, і легший тиждень буде в її кінці.`,
+        );
       return isDeloadWeek(plan, c.now)
         ? L(
             'This is the lighter week. Fewer sets, same weights. Recover.',
             'Це легший тиждень. Менше сетів, ті самі ваги. Відновлюйся.',
           )
         : L(
-            `Week ${blockWeek(plan, c.now)} of ${plan.weeks}. The lighter week is week ${plan.weeks}.`,
-            `Тиждень ${blockWeek(plan, c.now)} з ${plan.weeks}. Легший — ${plan.weeks}-й.`,
+            `Week ${week} of ${plan.weeks}. The lighter week is week ${plan.weeks}.`,
+            `Тиждень ${week} з ${plan.weeks}. Легший — ${plan.weeks}-й.`,
           );
     },
   },
@@ -560,9 +589,15 @@ export const INTENTS: Intent[] = [
           'Програми ще нема. Натисни «Написати програму» вгорі — зберу її з твоєї історії.',
         );
       const days = plan.days.map((d) => `${wd(c, d.weekday)} — ${d.name ?? d.split}`).join('; ');
+      const week = blockWeek(plan, c.now);
+      if (week > plan.weeks)
+        return L(
+          `Your ${plan.weeks}-week block is done (${days}). Ask me to write the next one.`,
+          `Блок на ${N.weeks('uk', plan.weeks)} завершено (${days}). Попроси — напишу наступний.`,
+        );
       return L(
-        `Week ${blockWeek(plan, c.now)} of ${plan.weeks}: ${days}. ~${plan.lengthMin} min each.`,
-        `Тиждень ${blockWeek(plan, c.now)} з ${plan.weeks}: ${days}. ~${plan.lengthMin} хв кожне.`,
+        `Week ${week} of ${plan.weeks}: ${days}. ~${plan.lengthMin} min each.`,
+        `Тиждень ${week} з ${plan.weeks}: ${days}. ~${plan.lengthMin} хв кожне.`,
       );
     },
   },
@@ -708,9 +743,19 @@ export const INTENTS: Intent[] = [
           )
         : 0;
       const planned = c.s.coach.plan?.lengthMin ?? 60;
+      if (!f.length)
+        return L(
+          `Plan: ~${planned} min. Nothing logged yet to compare.`,
+          `За планом ~${planned} хв. Поки нема з чим порівняти.`,
+        );
+      if (f.length === 1)
+        return L(
+          `Plan: ~${planned} min. Your only session so far took ${avg} min.`,
+          `За планом ~${planned} хв. Твоє єдине тренування тривало ${avg} хв.`,
+        );
       return L(
-        `Plan: ~${planned} min. Your last ${f.length} sessions averaged ${avg} min.`,
-        `За планом ~${planned} хв. Останні ${f.length} тренувань — у середньому ${avg} хв.`,
+        `Plan: ~${planned} min. Your last ${N.sessions('en', f.length)} averaged ${avg} min.`,
+        `За планом ~${planned} хв. Останні ${N.sessions('uk', f.length)} — у середньому ${avg} хв.`,
       );
     },
   },
@@ -819,6 +864,15 @@ export const INTENTS: Intent[] = [
         'грубо',
         'жорстк*',
         'злий',
+        'easier on me',
+        'go easy on me',
+        'stop roasting',
+        'roasting me',
+        'too mean',
+        'mean to me',
+        'гноб*',
+        'знущаєш*',
+        'підколюєш',
       ],
     ],
     answer: (_c, _p, L) =>
@@ -840,6 +894,15 @@ export const INTENTS: Intent[] = [
         'що вмієш',
         'допоможи',
         'кто ты',
+        'что ты умеешь',
+        'что умеешь',
+        'co potrafisz',
+        'co umiesz',
+        'ka moki',
+        'ka gali',
+        'ka tu moki',
+        'mida sa oskad',
+        'mis sa oskad',
       ],
     ],
     answer: (c, _p, L) =>
@@ -923,6 +986,33 @@ export const INTENTS: Intent[] = [
         'добрий ранок',
         'добрий день',
         'добрий вечір',
+        'yo',
+        'yoo',
+        'hiya',
+        'howdy',
+        'good morning',
+        'good evening',
+        'доброго ранку',
+        'доброго дня',
+        'доброго вечора',
+        'салют',
+        'здрастє',
+        'здрасте',
+        'cześć',
+        'siema',
+        'hej',
+        'witam',
+        'dzień dobry',
+        'labas',
+        'labukas',
+        'sveikas',
+        'sveiki',
+        'labas rytas',
+        'tere',
+        'tsau',
+        'tšau',
+        'tervist',
+        'hommikust',
       ],
     ],
     maxWords: 4,

@@ -175,7 +175,7 @@ export const DICT: Record<string, string> = {
   '*sigh* Fine.': '*wzdycha* No dobra.',
   '*sigh* Nothing.': '*wzdycha* Nic.',
   '*sigh* Words.': '*wzdycha* Słowa.',
-  '+{1} kg over {2} days ({3} → {4}).': '+{1} kg w {2} dni ({3} → {4}).',
+  '+{1} kg over {2} ({3} → {4}).': '+{1} kg przez {2} ({3} → {4}).',
   'A Pendlay-style row (bar returns to the floor each rep) gives the lower back a short break between reps.':
     'Wiosłowanie w stylu Pendlaya (sztanga wraca na podłogę przy każdym powtórzeniu) daje dolnemu odcinkowi pleców krótką przerwę między powtórzeniami.',
   'A bar close to the body is a shorter lever — less stress on the spine, more weight moved.':
@@ -633,7 +633,7 @@ export const DICT: Record<string, string> = {
   'By estimated max (all time), most: {1} ({2}).':
     'Według szacowanego maksa (od początku), najwięcej: {1} ({2}).',
   'By month': 'Miesięcznie',
-  "By the way, {1} hasn't moved in ~{2} weeks.": 'Przy okazji, {1} stoi w miejscu od ~{2} tygodni.',
+  "By the way, {1} hasn't moved in {2}.": 'Przy okazji, {1} stoi w miejscu już {2}.',
   'By week': 'Tygodniowo',
   'By workouts (all time), most: Monday ({1}).':
     'Według treningów (od początku), najwięcej: poniedziałek ({1}).',
@@ -667,8 +667,8 @@ export const DICT: Record<string, string> = {
     'Węglowodany to główne paliwo do ciężkich serii i pomagają trenować z większą objętością.',
   'Carbs fuel hard sets: ~{1}–{2} g/kg a day works for most lifters, more of it around training.':
     'Węglowodany napędzają ciężkie serie: ~{1}–{2} g/kg dziennie sprawdza się u większości trenujących, więcej w okolicy treningu.',
-  'Carbs refill glycogen, which matters most if you train again within {1} h.':
-    'Węglowodany uzupełniają glikogen, co ma największe znaczenie, jeśli znów trenujesz w ciągu {1} h.',
+  'Carbs refill glycogen, which matters most if you train again within a day.':
+    'Węglowodany uzupełniają glikogen, co ma największe znaczenie, jeśli znów trenujesz w ciągu doby.',
   'Carbs refill muscle glycogen, which fuels sets of {1}–{2} reps.':
     'Węglowodany uzupełniają glikogen mięśniowy, który napędza serie po {1}–{2} powtórzeń.',
   'Cardio after lifting, not before: {1}–{2} min easy on lifting days, longer sessions on separate days.':
@@ -1329,8 +1329,8 @@ export const DICT: Record<string, string> = {
   'Hard questions I pass to a language model; the numbers are always yours.':
     'Trudne pytania przekazuję modelowi językowemu; liczby zawsze są twoje.',
   'Hard questions go to a language model.': 'Trudne pytania trafiają do modelu językowego.',
-  'Hard sessions for the same muscle want ~{1} h apart.':
-    'Ciężkie treningi tego samego mięśnia najlepiej co ~{1} h.',
+  'Hard sessions for the same muscle want about {1} days apart.':
+    'Ciężkie treningi tego samego mięśnia najlepiej co około {1} dni.',
   'Hard sets are the working sets taken reasonably close to failure — the best simple measure of training dose.':
     'Ciężkie serie to serie robocze wykonane dość blisko upadku — najlepsza prosta miara dawki treningowej.',
   'Hard sets are what count: a set ending {1}–{2} reps short of failure.':
@@ -1660,8 +1660,8 @@ export const DICT: Record<string, string> = {
     'Jeśli trenujesz na czczo, zjedz {1}–{2} g białka niedługo po treningu i nie idź na czczo na bardzo długi trening.',
   'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.':
     'Jeśli trenujesz w więcej niż jednym miejscu, zapisz każdą siłownię osobno — domowy sprzęt i pełna siłownia wymagają zupełnie innych zamienników.',
-  'If you trained the same muscles hard today, give them {1} h — shuffle tomorrow’s session so a fresh group goes first.':
-    'Jeśli dziś mocno trenowałeś te same mięśnie, daj im {1} h — przestaw jutrzejszy trening tak, żeby najpierw szła świeża partia.',
+  'If you trained the same muscles hard today, give them {1} days — shuffle tomorrow’s session so a fresh group goes first.':
+    'Jeśli dziś mocno trenowałeś te same mięśnie, daj im {1} dni — przestaw jutrzejszy trening tak, żeby najpierw szła świeża partia.',
   "If you want one, check the label for the actual caffeine amount and avoid 'proprietary blends' that hide doses.":
     'Jeśli chcesz, sprawdź na etykiecie rzeczywistą ilość kofeiny i unikaj „mieszanek własnych”, które ukrywają dawki.',
   "If you're already using, don't hide it from a doctor — get your blood pressure and bloodwork checked.":
@@ -1878,7 +1878,7 @@ export const DICT: Record<string, string> = {
     'Znajomość najczęściej robionych ćwiczeń pokazuje, wokół czego naprawdę zbudowana jest twoja rutyna — i czego może brakować.',
   'Last month': 'Zeszły miesiąc',
   'Last month: {1} sessions, {2} sets.': 'Zeszły miesiąc: {1} treningów, {2} serii.',
-  'Last session was {1} day ago.': 'Ostatni trening był {1} dni temu.',
+  'Last session was {1}.': 'Ostatni trening: {1}.',
   'Last time {1} reps — not the top of the range yet, so same weight, more reps.':
     'Ostatnio {1} powtórzeń — to jeszcze nie górna granica zakresu, więc ten sam ciężar, więcej powtórzeń.',
   'Last week: {1} sessions, {2} sets.': 'Zeszły tydzień: {1} treningów, {2} serii.',
@@ -3837,7 +3837,7 @@ export const DICT: Record<string, string> = {
     '{1} na {2}: ok. {3} powtórzeń do upadku, sądząc po twoich ostatnich seriach.',
   '{1} chest moves) mostly adds fatigue; {2}–{3} per muscle per session is enough.':
     '{1} ćwiczeń na klatkę) głównie dokłada zmęczenia; {2}–{3} na mięsień na trening wystarczy.',
-  '{1} days since your last session.': 'Dni od ostatniego treningu: {1}.',
+  '{1} since your last session.': '{1} od ostatniego treningu.',
   '{1} days: upper/lower.': '{1} dni: góra/dół.',
   '{1} full-body sessions a week, {2}–{3} big lifts, {4}–{5} sets of {6}–{7}, and add a little weight when all sets reach {8}.':
     '{1} treningi całego ciała w tygodniu, {2}–{3} duże boje, {4}–{5} serie po {6}–{7} i dodaj trochę ciężaru, gdy wszystkie serie dojdą do {8}.',
@@ -3906,7 +3906,7 @@ export const DICT: Record<string, string> = {
   '{1}, the last {2} weeks: {3} sets (~{4} a week).':
     '{1}, ostatnie {2} tyg.: {3} serii (~{4} tygodniowo).',
   '{1}, this month: {2} sets (~{3} a week).': '{1}, w tym miesiącu: {2} serii (~{3} tygodniowo).',
-  '{1}-day streak.': 'Seria: {1} dni.',
+  'Streak: {1}.': 'Seria: {1}.',
   '{1}/{2}/{3}: {4} sets in {5} min — {6}, {7}, {8}, {9}.':
     '{1}.{2}.{3}: {4} serii w {5} min — {6}, {7}, {8}, {9}.',
   '{1}: Bar over mid-foot, shins touch it, flat back, pull the slack out, push the floor away, bar stays on the legs, stand tall.':
@@ -3942,8 +3942,8 @@ export const DICT: Record<string, string> = {
   '{1}: technique tips?': '{1}: wskazówki techniczne?',
   '{1}: warm-up sets?': '{1}: serie rozgrzewkowe?',
   '{1}: what weight next time?': '{1}: jaki ciężar następnym razem?',
-  '{1}: {2} days ago ({3}/{4}/{5}), {6} sets.': '{1}: {2} dni temu ({3}.{4}.{5}), serie: {6}.',
-  '{1}: {2} days ago, top set {3} × {4}.': '{1}: {2} dni temu, seria szczytowa {3} × {4}.',
+  '{1}: {2} ({3}/{4}/{5}), {6} sets.': '{1}: {2} ({3}.{4}.{5}), serie: {6}.',
+  '{1}: {2}, top set {3} × {4}.': '{1}: {2}, seria szczytowa {3} × {4}.',
   '{1}: {2} sessions in total, {3} in the last {4} weeks.':
     '{1}: łącznie {2} treningów, {3} w ostatnich {4} tyg.',
   '{1}: {2} sessions in {3} weeks (~{4}/week).': '{1}: {2} treningów w {3} tyg. (~{4}/tydzień).',
@@ -4300,4 +4300,1270 @@ export const DICT: Record<string, string> = {
   'By the way, this week is about half your usual volume ({1} vs ~{2} sets).':
     'Przy okazji, ten tydzień to mniej więcej połowa twojej zwykłej objętości ({1} vs ~{2} serii).',
   'Sets by week': 'Serie tygodniowo',
+  // Activities told in chat, complaints (activityReport.ts).
+  'Dancing — that counts.': 'Taniec — to się liczy.',
+  'Pilates — that counts.': 'Pilates — to się liczy.',
+  'Yoga — that counts.': 'Joga — to się liczy.',
+  'Stretching — that counts.': 'Rozciąganie — to się liczy.',
+  'Massage — that counts.': 'Masaż — to się liczy.',
+  'Sauna — that counts.': 'Sauna — to się liczy.',
+  'Cold exposure — that counts.': 'Morsowanie — to się liczy.',
+  'HIIT — that counts.': 'HIIT — to się liczy.',
+  'Football — that counts.': 'Piłka nożna — to się liczy.',
+  'Basketball — that counts.': 'Koszykówka — to się liczy.',
+  'Tennis — that counts.': 'Tenis — to się liczy.',
+  'Volleyball — that counts.': 'Siatkówka — to się liczy.',
+  'Combat training — that counts.': 'Sporty walki — to się liczy.',
+  'Climbing — that counts.': 'Wspinaczka — to się liczy.',
+  'Skiing — that counts.': 'Narty — to się liczy.',
+  'Surfing — that counts.': 'Surfing — to się liczy.',
+  'Skating — that counts.': 'Łyżwy — to się liczy.',
+  'Swimming — that counts.': 'Pływanie — to się liczy.',
+  'Cycling — that counts.': 'Rower — to się liczy.',
+  'Rowing — that counts.': 'Wioślarstwo — to się liczy.',
+  'Running — that counts.': 'Bieganie — to się liczy.',
+  'Walking — that counts.': 'Chodzenie — to się liczy.',
+  'Cardio — that counts.': 'Cardio — to się liczy.',
+  'Fair — you told me and I talked past it.': 'Racja — mówiłeś mi, a ja to przegapiłem.',
+  'Time: {1} min.': 'Czas: {1} min.',
+  'Time: {1} h.': 'Czas: {1} h.',
+  'Distance: {1} km.': 'Dystans: {1} km.',
+  'Time: {1} min, distance: {2} km.': 'Czas: {1} min, dystans: {2} km.',
+  'Time: {1} h, distance: {2} km.': 'Czas: {1} h, dystans: {2} km.',
+  'That’s recovery work — it eases your load rather than adds to it.':
+    'To regeneracja — zmniejsza obciążenie, zamiast je zwiększać.',
+  'Good call.': 'Dobra decyzja.',
+  'Mostly back, shoulders and your heart, low impact on the legs — go a bit lighter on heavy pulling today.':
+    'Głównie plecy, barki i serce, nogi prawie nieobciążone — dziś trochę lżej na ciężkich ciągach.',
+  'That’s real conditioning load, mostly legs and your heart.':
+    'To solidne obciążenie kondycyjne, głównie nogi i serce.',
+  'Treat your legs as trained today: no heavy leg work until tomorrow, upper body is fine.':
+    'Traktuj nogi jako dziś wytrenowane: ciężkie nogi dopiero od jutra, górę możesz robić.',
+  'Light-to-moderate conditioning — it won’t hurt your lifting; just don’t stack heavy legs right on top of it.':
+    'Lekkie lub umiarkowane cardio — nie zaszkodzi siłowni; tylko nie rób ciężkich nóg zaraz po nim.',
+  'I see it in your log — it’s in your weekly load already.':
+    'Widzę to w dzienniku — jest już w twoim tygodniowym obciążeniu.',
+  'Log it under Activities with the time, and I’ll count it in your load and recovery.':
+    'Zapisz to w Aktywnościach z czasem, a uwzględnię to w obciążeniu i regeneracji.',
+  'Want me to log it?': 'Zapisać to?',
+  'Then it counts in your weekly load and recovery.':
+    'Wtedy wejdzie do tygodniowego obciążenia i regeneracji.',
+  'Logged — it’s in your activities and counts in your load now.':
+    'Zapisane — jest w aktywnościach i liczy się już do obciążenia.',
+  // Atlas: 100 more topics + app tips
+  'What is an AMRAP set?': 'Co to jest seria AMRAP?',
+  'AMRAP means “as many reps as possible” with a set weight — usually stopping with {1}–{2} good reps left, not grinding ugly reps.':
+    'AMRAP to „tyle powtórzeń, ile dasz radę” z ustalonym ciężarem — zwykle kończysz z {1}–{2} dobrymi powtórzeniami w zapasie, bez wyciskania brzydkich powtórzeń.',
+  'It’s a handy way to test progress (more reps at the same weight means you got stronger) and to autoregulate: programs like {1}/{2}/{3} use a last AMRAP set to set next week’s weights.':
+    'To wygodny sposób, by sprawdzić postęp (więcej powtórzeń z tym samym ciężarem oznacza, że jesteś silniejszy) i regulować obciążenie: programy takie jak {1}/{2}/{3} ustalają ciężary na kolejny tydzień na podstawie ostatniej serii AMRAP.',
+  'Keep it to one AMRAP set per lift per session, and skip it on days you feel beaten up.':
+    'Rób jedną serię AMRAP na ćwiczenie na trening i pomijaj ją w dni, gdy czujesz się rozbity.',
+  'On heavy compound lifts stop when the bar slows down a lot or form breaks — that’s your AMRAP, even if you could force one more.':
+    'W ciężkich ćwiczeniach wielostawowych przerwij, gdy sztanga mocno zwalnia albo psuje się technika — to twój AMRAP, nawet jeśli dałbyś radę wycisnąć jeszcze jedno.',
+  'What is EMOM training?': 'Co to jest trening EMOM?',
+  'EMOM means “every minute on the minute”: start a set at the top of each minute and rest for whatever time is left.':
+    'EMOM to „co minutę, na początku minuty”: zaczynasz serię na starcie każdej minuty i odpoczywasz przez resztę czasu.',
+  'It keeps the pace honest and the session dense — for example {1} minutes of {2} fairly heavy squats, or {3} minutes alternating push-ups and rows.':
+    'Tempo jest uczciwe, a trening gęsty — na przykład {1} minut po {2} dość ciężkie przysiady albo {3} minut naprzemiennie pompek i wiosłowań.',
+  'Pick a load you could do for about twice the reps, and if you start missing the minute, cut the reps rather than the rest.':
+    'Wybierz ciężar, z którym zrobiłbyś mniej więcej dwa razy więcej powtórzeń, a jeśli nie mieścisz się w minucie, zmniejsz powtórzenia, nie odpoczynek.',
+  'EMOMs are great for technique practice with moderate weight, for conditioning finishers and for getting lots of quality work into a short session.':
+    'EMOM świetnie sprawdza się do ćwiczenia techniki z umiarkowanym ciężarem, jako finisher kondycyjny i żeby zmieścić dużo dobrej pracy w krótkim treningu.',
+  'What are cluster sets?': 'Co to są serie klastrowe?',
+  'A cluster set splits one set into mini-sets with short breaks: for example {1} × {2} reps with {3}–{4} seconds between them instead of {5} reps in a row.':
+    'Seria klastrowa dzieli jedną serię na mini-serie z krótkimi przerwami: na przykład {1} × {2} powtórzenia z {3}–{4} sekundami przerwy zamiast {5} powtórzeń z rzędu.',
+  'The short pauses let you keep bar speed and form with heavier loads, so you get more quality reps near your top weights.':
+    'Krótkie pauzy pozwalają utrzymać prędkość sztangi i technikę przy większym ciężarze, więc robisz więcej dobrych powtórzeń blisko swoich maksymalnych ciężarów.',
+  'They suit strength and power work; for muscle growth, normal sets taken close to failure work just as well and are simpler.':
+    'Pasują do treningu siły i mocy; na masę mięśniową zwykłe serie blisko upadku działają równie dobrze i są prostsze.',
+  'Rack the bar or set the dumbbells down during the pause, and brace again before every mini-set.':
+    'W czasie pauzy odłóż sztangę na stojaki albo hantle na ziemię i przed każdą mini-serią znów napnij korpus.',
+  'How do rest-pause sets work?': 'Jak działają serie rest-pause?',
+  'Rest-pause: do a set close to failure, rest {1}–{2} seconds, squeeze out a few more reps, and repeat that once or twice.':
+    'Rest-pause: robisz serię blisko upadku, odpoczywasz {1}–{2} sekund, dociskasz jeszcze kilka powtórzeń i powtarzasz to raz lub dwa razy.',
+  'It packs a lot of effort into little time, which makes it useful for isolation and machine exercises when you’re short on time.':
+    'Mieści dużo wysiłku w krótkim czasie, więc przydaje się w ćwiczeniach izolowanych i na maszynach, gdy brakuje czasu.',
+  'Use it sparingly — on the last set of one or two exercises — and avoid it on heavy barbell squats and deadlifts, where fatigue wrecks form.':
+    'Stosuj oszczędnie — w ostatniej serii jednego-dwóch ćwiczeń — i unikaj go w ciężkich przysiadach i martwych ciągach ze sztangą, gdzie zmęczenie psuje technikę.',
+  'A simple version: pick a weight for about {1} reps, do {2}, then mini-sets of {3}–{4} reps with {5} seconds of rest until you can’t get {6}.':
+    'Prosta wersja: ciężar na około {1} powtórzeń, robisz {2}, potem mini-serie po {3}–{4} powtórzenia z {5} sekundami odpoczynku, aż nie zrobisz {6}.',
+  'What are myo-reps?': 'Co to są myo-reps?',
+  'Myo-reps are a rest-pause style: one activation set of about {1}–{2} reps close to failure, then several mini-sets of {3}–{4} reps with only {5}–{6} deep breaths between them.':
+    'Myo-reps to odmiana rest-pause: jedna seria aktywacyjna na około {1}–{2} powtórzeń blisko upadku, potem kilka mini-serii po {3}–{4} powtórzenia z zaledwie {5}–{6} głębokimi oddechami przerwy.',
+  'Most of the reps are hard, “effective” reps, so you get growth similar to {1} normal sets in a fraction of the time.':
+    'Większość powtórzeń jest ciężka i „efektywna”, więc wzrost jest podobny do {1} zwykłych serii w ułamku czasu.',
+  'They work best on isolation and machine lifts — curls, lateral raises, leg extensions, cable work.':
+    'Najlepiej działają w ćwiczeniach izolowanych i na maszynach — uginania, wznosy bokiem, prostowania nóg, wyciągi.',
+  'Stop the mini-sets when you can’t hit the target reps anymore; one or two myo-rep sets per exercise is plenty.':
+    'Przerwij mini-serie, gdy nie robisz już docelowej liczby powtórzeń; jedna-dwie serie myo-reps na ćwiczenie w zupełności wystarczą.',
+  'What is double progression?': 'Co to jest podwójna progresja?',
+  'Double progression means you progress reps first, then weight: pick a rep range like {1}–{2}, keep the same weight until you hit {3} on all sets, then add a small jump and start back at {4}.':
+    'Podwójna progresja oznacza, że najpierw rosną powtórzenia, potem ciężar: wybierz zakres, np. {1}–{2}, trzymaj ten sam ciężar, aż zrobisz {3} we wszystkich seriach, potem dodaj mały krok i wróć do {4}.',
+  'It’s the simplest reliable way to keep progressing on dumbbell, machine and isolation exercises, where the weight jumps are big compared with the load.':
+    'To najprostszy niezawodny sposób na postęp w hantlach, na maszynach i w ćwiczeniach izolowanych, gdzie skoki ciężaru są duże w stosunku do obciążenia.',
+  'Log every set so you know exactly what to beat next time.':
+    'Zapisuj każdą serię, żeby dokładnie wiedzieć, co pobić następnym razem.',
+  'If the new weight drops you below the bottom of the range, use a smaller jump or stay with the old weight for one more session.':
+    'Jeśli z nowym ciężarem spadasz poniżej zakresu, weź mniejszy krok albo zostań przy starym ciężarze jeszcze jeden trening.',
+  'How do I taper before a meet or a max test?':
+    'Jak zrobić tapering przed zawodami lub testem maksa?',
+  'A taper cuts fatigue while keeping strength: in the last {1}–{2} weeks drop your volume by roughly {3}–{4}% but keep the intensity — a few heavy singles or doubles at {5}–{6}% — so you stay sharp.':
+    'Tapering zmniejsza zmęczenie, zachowując siłę: w ostatnich {1}–{2} tygodniach obetnij objętość o mniej więcej {3}–{4}%, ale zostaw intensywność — kilka ciężkich pojedynczych lub podwójnych powtórzeń na {5}–{6}% — żeby zostać w formie.',
+  'The final {1}–{2} days are very light or off.':
+    'Ostatnie {1}–{2} dni są bardzo lekkie albo wolne.',
+  'Don’t try anything new in that window: same technique, same food, same sleep routine.':
+    'W tym czasie nic nowego: ta sama technika, to samo jedzenie, ten sam rytm snu.',
+  'A common plan: two weeks out a normal heavy week with fewer sets, one week out singles at opener weight, then rest or mobility only for the last two days.':
+    'Typowy plan: dwa tygodnie przed — normalny ciężki tydzień z mniejszą liczbą serii, tydzień przed — pojedyncze powtórzenia na ciężarze pierwszego podejścia, a przez ostatnie dwa dni tylko odpoczynek lub mobilność.',
+  'What is a top set with back-off sets?': 'Co to jest top set i serie back-off?',
+  'You work up to one heavy “top set” — for example {1} × {2} at a hard but clean effort — then drop the weight about {3}–{4}% for {5}–{6} “back-off” sets of the same or slightly more reps.':
+    'Dochodzisz do jednej ciężkiej „serii szczytowej” — na przykład {1} × {2} z trudnym, ale czystym wysiłkiem — potem zmniejszasz ciężar o około {3}–{4}% na {5}–{6} serie „back-off” z tą samą lub nieco większą liczbą powtórzeń.',
+  'The top set drives strength and shows your progress; the back-off sets add quality volume without the fatigue of doing every set at the top weight.':
+    'Seria szczytowa buduje siłę i pokazuje postęp; serie back-off dokładają jakościowej objętości bez zmęczenia robienia każdej serii na maksymalnym ciężarze.',
+  'When the top set gets easier at the same effort, raise it next session.':
+    'Gdy seria szczytowa staje się łatwiejsza przy tym samym wysiłku, podnieś ją na następnym treningu.',
+  'Rate the top set with RPE: at {1} (two reps left) keep the weight, at {2} hold it next time, at {3} you can add.':
+    'Oceniaj serię szczytową w RPE: przy {1} (dwa powtórzenia w zapasie) zostaw ciężar, przy {2} nie dokładaj następnym razem, przy {3} możesz dodać.',
+  'Are paused reps worth doing?': 'Czy warto robić powtórzenia z pauzą?',
+  'Yes — pausing for {1}–{2} seconds at the hardest point (the bottom of a squat, on the chest in a bench, just off the floor in a deadlift) kills the bounce, builds strength where you’re weakest and forces you to stay tight.':
+    'Tak — pauza na {1}–{2} sekundy w najtrudniejszym punkcie (na dole przysiadu, na klatce w wyciskaniu, tuż nad ziemią w martwym ciągu) likwiduje odbicie, buduje siłę tam, gdzie jesteś najsłabszy, i zmusza do trzymania napięcia.',
+  'Use about {1}–{2}% less weight than for normal reps.':
+    'Bierz około {1}–{2}% mniejszy ciężar niż do zwykłych powtórzeń.',
+  'They’re great as a secondary variation or as technique practice in the warm-up.':
+    'Świetnie sprawdzają się jako wariant pomocniczy albo ćwiczenie techniki w rozgrzewce.',
+  'Stay tight during the pause — don’t relax at the bottom of a squat or sink the bar into your chest; the pause should look like a freeze-frame.':
+    'W czasie pauzy trzymaj napięcie — nie rozluźniaj się na dole przysiadu i nie wciskaj sztangi w klatkę; pauza ma wyglądać jak stopklatka.',
+  'Do negatives (eccentric reps) build muscle?':
+    'Czy negatywy (powtórzenia ekscentryczne) budują mięśnie?',
+  'The lowering (eccentric) part of a rep is a strong growth signal, and you’re about {1}–{2}% stronger lowering a weight than lifting it.':
+    'Faza opuszczania (ekscentryczna) to silny sygnał do wzrostu, a w niej jesteś o około {1}–{2}% silniejszy niż przy podnoszeniu.',
+  'Controlling the descent for {1}–{2} seconds on normal reps already gets most of the benefit.':
+    'Kontrolowane opuszczanie przez {1}–{2} sekundy w zwykłych powtórzeniach daje już większość korzyści.',
+  'Supramaximal negatives (heavier than you can lift, with a spotter) cause a lot of soreness — use them rarely, for example to build up to your first pull-up or dip.':
+    'Negatywy ponad maksimum (cięższe, niż podniesiesz, z asekuracją) powodują mocne zakwasy — używaj ich rzadko, na przykład by dojść do pierwszego podciągnięcia albo pompki na poręczach.',
+  'Eccentric-focused work is also a classic tool in tendon rehab, but then it’s done light and slow under a physio’s plan.':
+    'Praca ekscentryczna to też klasyczne narzędzie w rehabilitacji ścięgien, ale wtedy robi się ją lekko i powoli według planu fizjoterapeuty.',
+  'What are MEV and MRV?': 'Co to jest MEV i MRV?',
+  'They’re volume landmarks: MEV (minimum effective volume) is the fewest hard sets per muscle per week that still make it grow, MRV (maximum recoverable volume) is the most you can recover from.':
+    'To punkty odniesienia objętości: MEV (minimalna efektywna objętość) to najmniej ciężkich serii na mięsień tygodniowo, które jeszcze dają wzrost, MRV (maksymalna objętość, z której się regenerujesz) to najwięcej, z czego zdążysz się zregenerować.',
+  'Most people grow well somewhere around {1}–{2} hard sets per muscle per week, starting nearer the low end and adding sets over a block.':
+    'Większość ludzi dobrze rośnie gdzieś przy {1}–{2} ciężkich seriach na mięsień tygodniowo, zaczynając bliżej dolnej granicy i dokładając serie w trakcie bloku.',
+  'When performance drops and soreness lingers, you’ve passed your MRV — time to deload.':
+    'Gdy wyniki spadają, a zakwasy nie mijają, jesteś ponad MRV — czas na deload.',
+  'These numbers are individual and shift with sleep, stress and diet — use them as a starting point, then watch your own progress.':
+    'Te liczby są indywidualne i zależą od snu, stresu i diety — traktuj je jako punkt wyjścia i obserwuj własny postęp.',
+  'Does blood flow restriction training work?':
+    'Czy trening z ograniczeniem przepływu krwi działa?',
+  'BFR (occlusion) training uses a cuff or band high on the arm or thigh to partly slow the blood flowing back from the limb, so very light weights ({1}–{2}% of your max) for high reps (often {3}, {4}, {5}, {6}) still build muscle.':
+    'Trening BFR (okluzyjny) to opaska lub mankiet wysoko na ramieniu albo udzie, które częściowo spowalniają odpływ krwi z kończyny, więc nawet bardzo lekki ciężar ({1}–{2}% maksimum) na dużo powtórzeń (często {3}, {4}, {5}, {6}) buduje mięśnie.',
+  'It’s useful when you can’t load heavy — rehab, sore joints, deloads.':
+    'Przydaje się, gdy nie możesz ćwiczyć ciężko — rehabilitacja, bolące stawy, deloady.',
+  'Wraps should feel tight but not painful (about {1} out of {2} on the legs, less on the arms), with no numbness or tingling; avoid it with clotting problems, high blood pressure or pregnancy unless a doctor says it’s ok.':
+    'Opaski mają być ciasne, ale nie bolesne (około {1} na {2} na nogach, luźniej na rękach), bez drętwienia i mrowienia; unikaj tego przy problemach z krzepliwością, wysokim ciśnieniu lub w ciąży, chyba że lekarz pozwoli.',
+  'Rest only {1}–{2} seconds between BFR sets and release the cuff right after the exercise; one or two exercises per session is enough.':
+    'Odpoczywaj tylko {1}–{2} sekund między seriami BFR i zdejmij mankiet zaraz po ćwiczeniu; jedno-dwa ćwiczenia na trening wystarczą.',
+  'Is a {1}×{2} program good?': 'Czy program {1}×{2} jest dobry?',
+  'Yes, {1}×{2} programs (like StrongLifts or Madcow-style plans) are a solid start for beginners: a few big lifts, three days a week, a little more weight every session.':
+    'Tak, programy {1}×{2} (jak StrongLifts albo w stylu Madcow) to solidny start dla początkujących: kilka dużych ćwiczeń, trzy dni w tygodniu, trochę więcej ciężaru na każdym treningu.',
+  'Strength climbs fast in the first months.': 'Siła rośnie szybko przez pierwsze miesiące.',
+  'Their limits: little arm, shoulder and upper-back isolation work, and progress stalls once the linear jumps run out — then switch to weekly progression or a more varied program.':
+    'Ograniczenia: mało izolacji na ramiona, barki i górę pleców, a postęp staje, gdy kończą się liniowe skoki — wtedy przejdź na progresję tygodniową albo bardziej urozmaicony program.',
+  'Add {1}–{2} sets of pull-ups or rows, curls and lateral raises at the end, and drop the weight by {3}% when you miss the same weight twice.':
+    'Dodaj na końcu {1}–{2} serie podciągań lub wiosłowania, uginań i wznosów bokiem, a gdy dwa razy nie zrobisz tego samego ciężaru, zmniejsz go o {3}%.',
+  'How does {1}/{2}/{3} work?': 'Jak działa {1}/{2}/{3}?',
+  '{1}/{2}/{3} (by Jim Wendler) runs in {4}-week cycles built on a “training max” set at about {5}% of your real max: week one sets of {6}, week two sets of {7}, week three a {8}/{9}/{10} wave, week four a deload.':
+    '{1}/{2}/{3} (Jim Wendler) to {4}-tygodniowe cykle oparte na „maksie treningowym” ustawionym na około {5}% prawdziwego maksa: w pierwszym tygodniu serie po {6}, w drugim po {7}, w trzecim fala {8}/{9}/{10}, w czwartym deload.',
+  'The last set each week is an AMRAP, and after each cycle you add about {1} kg to the upper-body and {2} kg to the lower-body training maxes.':
+    'Ostatnia seria w każdym tygodniu to AMRAP, a po każdym cyklu dodajesz około {1} kg do maksów treningowych na górę ciała i {2} kg na nogi.',
+  'It’s slow and steady — built for lifters who can no longer add weight every session.':
+    'Wolno, ale pewnie — program dla tych, którzy nie mogą już dokładać ciężaru na każdym treningu.',
+  'Pair the main lift with assistance work — for example “Boring But Big”, {1} × {2} at {3}–{4}% — and keep the training max honest rather than ego-high.':
+    'Połącz główne ćwiczenie z pracą pomocniczą — na przykład „Boring But Big”, {1} × {2} na {3}–{4}% — i ustawiaj maks treningowy uczciwie, bez ego.',
+  'Is circuit training good?': 'Czy trening obwodowy jest dobry?',
+  'Circuits — several exercises back to back with little rest — are great for conditioning, for supporting fat loss and for getting a full-body session done in {1}–{2} minutes.':
+    'Obwody — kilka ćwiczeń jedno po drugim z krótkim odpoczynkiem — są świetne na kondycję, wspieranie redukcji i zrobienie całego ciała w {1}–{2} minut.',
+  'They build some muscle for beginners, but with short rests fatigue limits the loads, so for maximum strength and size normal sets with proper rest still win.':
+    'Początkującym dają trochę mięśni, ale przy krótkich przerwach zmęczenie ogranicza ciężary, więc do maksymalnej siły i masy wciąż lepsze są zwykłe serie z pełnym odpoczynkiem.',
+  'A good mix: strength work first, then a {1}-minute circuit as a finisher.':
+    'Dobre połączenie: najpierw praca siłowa, potem {1}-minutowy obwód jako finisher.',
+  'Alternate body regions (legs, push, pull, core) so one muscle rests while another works, and keep the loads moderate so form stays clean when you’re breathing hard.':
+    'Przeplataj partie ciała (nogi, pchanie, przyciąganie, brzuch), żeby jeden mięsień odpoczywał, gdy drugi pracuje, i trzymaj umiarkowane ciężary, żeby technika była czysta nawet przy zadyszce.',
+  'Should I do plyometrics like box jumps?': 'Czy robić plyometrię, np. skoki na skrzynię?',
+  'Plyometrics — jumps, bounds, medicine-ball throws — train speed and power and help athletes and anyone who wants to stay springy.':
+    'Plyometria — skoki, wieloskoki, rzuty piłką lekarską — trenuje szybkość i moc i pomaga sportowcom oraz każdemu, kto chce zachować sprężystość.',
+  'Keep the volume low (around {1}–{2} quality contacts per session), do them fresh at the start of a workout, and land softly with your knees tracking over your toes.':
+    'Trzymaj małą objętość (około {1}–{2} jakościowych kontaktów na trening), rób ją świeży na początku treningu i ląduj miękko, z kolanami nad palcami stóp.',
+  'For box jumps the goal is jump height, not box height — step down instead of jumping down to spare your Achilles and knees.':
+    'W skokach na skrzynię celem jest wysokość skoku, nie skrzyni — schodź krokiem zamiast zeskakiwać, żeby oszczędzać ścięgna Achillesa i kolana.',
+  'Start with low hops and jumps onto a low box for a few weeks before depth jumps, and skip them while any tendon in your legs is irritated.':
+    'Przez kilka tygodni zaczynaj od niskich podskoków i skoków na niską skrzynię, zanim przejdziesz do skoków w głąb, i pomijaj je, gdy jakiekolwiek ścięgno w nogach jest podrażnione.',
+  'How do I front squat properly?': 'Jak poprawnie robić przysiad przedni?',
+  'Rest the bar on your front delts, close to your throat, with the elbows high and pointing forward — the hands only balance it (a clean grip with two or three fingers, crossed arms, or straps looped around the bar).':
+    'Połóż sztangę na przednich aktonach barków, blisko szyi, z łokciami wysoko i do przodu — dłonie tylko ją balansują (chwyt „do zarzutu” dwoma-trzema palcami, skrzyżowane ręce albo paski owinięte wokół sztangi).',
+  'Stay upright, brace hard and sit straight down between your heels; the moment the elbows drop, the bar rolls forward.':
+    'Trzymaj tułów pionowo, mocno się napnij i siadaj prosto w dół między pięty; w chwili, gdy łokcie opadają, sztanga zjeżdża do przodu.',
+  'It’s great for the quads and upper back and easier on the lower back than a back squat, with loads usually around {1}–{2}% of it.':
+    'Świetny na czworogłowe i górę pleców i łagodniejszy dla odcinka lędźwiowego niż przysiad ze sztangą na plecach, a ciężary to zwykle około {1}–{2}% tamtego.',
+  'If your wrists hurt in the clean grip, use straps looped around the bar as handles or the cross-arm grip while you work on wrist and lat mobility.':
+    'Jeśli w chwycie „do zarzutu” bolą nadgarstki, użyj pasków owiniętych wokół sztangi jako uchwytów albo chwytu skrzyżowanego, pracując nad mobilnością nadgarstków i najszerszych.',
+  'How do I do hip thrusts correctly?': 'Jak poprawnie robić hip thrust?',
+  'Set your upper back (just below the shoulder blades) on a bench, the bar padded over your hips, feet flat about hip-width apart so your shins are vertical at the top.':
+    'Oprzyj górę pleców (tuż pod łopatkami) o ławkę, sztanga z nakładką na biodrach, stopy płasko na szerokość bioder, żeby na górze piszczele były pionowe.',
+  'Tuck your chin and ribs, drive through your heels and finish by squeezing the glutes — not by arching your lower back.':
+    'Podbródek i żebra w dół, pchaj piętami i kończ ruch spięciem pośladków — nie wyginaniem odcinka lędźwiowego.',
+  'Pause for a second at the top; if you feel it mostly in the hamstrings, bring your feet closer, and if in the quads, move them further out.':
+    'Zatrzymaj się na sekundę na górze; jeśli czujesz to głównie w dwugłowych, przysuń stopy bliżej, a jeśli w czworogłowych — odsuń je dalej.',
+  'Hip thrusts are one of the best glute builders because the glutes are loaded hardest at full hip extension; {1}–{2} sets of {3}–{4} twice a week works well.':
+    'Hip thrust to jedno z najlepszych ćwiczeń na pośladki, bo najmocniej obciąża je przy pełnym wyproście biodra; {1}–{2} serie po {3}–{4} dwa razy w tygodniu działają dobrze.',
+  'How do I do a Romanian deadlift?': 'Jak robić martwy ciąg rumuński?',
+  'Start standing with the bar and soft knees, then push your hips straight back while the bar slides down your thighs close to your legs.':
+    'Zacznij stojąc ze sztangą, kolana lekko ugięte, i odpychaj biodra prosto do tyłu, a sztanga zsuwa się po udach blisko nóg.',
+  'Keep your back neutral and lats tight, and go down until you feel a strong hamstring stretch — usually around mid-shin — then drive your hips forward to stand.':
+    'Plecy neutralne, najszersze napięte; schodź, aż poczujesz mocne rozciągnięcie dwugłowych — zwykle mniej więcej do połowy piszczeli — potem wypchnij biodra do przodu, żeby wstać.',
+  'It’s a hip hinge, not a squat: the knee angle barely changes.':
+    'To zawias biodrowy, nie przysiad: kąt w kolanach prawie się nie zmienia.',
+  'Great for the hamstrings and glutes; use straps if your grip limits you, and keep the reps controlled ({1}–{2}) rather than bouncing out of the bottom.':
+    'Świetny na dwugłowe i pośladki; jeśli ogranicza cię chwyt, użyj pasków, a powtórzenia rób kontrolowanie ({1}–{2}), bez odbijania się z dołu.',
+  'How do I do Bulgarian split squats?': 'Jak robić przysiad bułgarski?',
+  'Put your rear foot laces-down on a bench and step the front foot far enough forward that you can drop straight down with the front heel planted.':
+    'Połóż tylną stopę grzbietem na ławce i wysuń przednią stopę na tyle daleko, żeby schodzić prosto w dół z przednią piętą na ziemi.',
+  'Lower until the back knee nearly touches the floor, then drive up through the whole front foot.':
+    'Schodź, aż tylne kolano prawie dotknie podłogi, potem wstań, pchając całą przednią stopą.',
+  'A longer stance and a slight forward lean hit the glutes more; a shorter stance and an upright torso hit the quads more.':
+    'Dłuższy krok i lekki pochył do przodu mocniej angażują pośladki; krótszy krok i wyprostowany tułów — czworogłowe.',
+  'Balance is tough at first — hold a rack or bench with one hand, start with bodyweight or light dumbbells, and do your weaker leg first.':
+    'Na początku trudno o równowagę — trzymaj się jedną ręką stojaka lub ławki, zacznij z masą ciała albo lekkimi hantlami i słabszą nogę rób pierwszą.',
+  'How do I do lunges without knee pain?': 'Jak robić wykroki bez bólu kolan?',
+  'Take a step long enough that both knees bend to about {1}° at the bottom, and keep the front knee tracking over the middle toes with the whole front foot on the floor.':
+    'Rób krok na tyle długi, żeby na dole oba kolana zginały się do około {1}°, a przednie kolano szło nad środkowymi palcami, z całą przednią stopą na podłodze.',
+  'Reverse lunges (stepping back) are the easiest on the knees and the best place to start; walking lunges are harder on balance and breathing.':
+    'Wykroki w tył są najłagodniejsze dla kolan i od nich najlepiej zacząć; wykroki w marszu są trudniejsze dla równowagi i oddechu.',
+  'If a knee aches, shorten the depth, slow down and try reverse lunges or split squats.':
+    'Jeśli kolano pobolewa, zmniejsz głębokość, zwolnij i spróbuj wykroków w tył albo przysiadu wykrocznego.',
+  'Knees going past the toes is fine if it feels fine; pain is the signal to change something, not the angle itself.':
+    'Kolana za palcami to nic złego, jeśli nic nie boli; sygnałem do zmiany jest ból, a nie sam kąt.',
+  'Are dips bad for the shoulders?': 'Czy pompki na poręczach szkodzą barkom?',
+  'Dips are a great chest and triceps builder and fine for most shoulders if you control the depth.':
+    'Pompki na poręczach świetnie budują klatkę i tricepsy i są w porządku dla większości barków, jeśli kontrolujesz głębokość.',
+  'Go down until your upper arms are about parallel to the floor or slightly below, keep the shoulders down and back (no shrugging toward the ears) and don’t bounce at the bottom.':
+    'Schodź, aż ramiona będą mniej więcej równoległe do podłogi lub trochę niżej, trzymaj barki w dole i z tyłu (bez podciągania do uszu) i nie odbijaj się na dole.',
+  'Leaning forward works more chest, staying upright more triceps; if the front of your shoulder hurts, shorten the range or switch to close-grip push-ups or presses.':
+    'Pochylenie do przodu to więcej klatki, pion — więcej tricepsów; jeśli boli przód barku, skróć zakres albo zmień na pompki wąsko lub wyciskania.',
+  'Can’t do one yet?': 'Nie zrobisz jeszcze ani jednego?',
+  'Start with slow negatives, band-assisted dips or bench dips with bent knees, then add weight on a belt once you can do {1}–{2} clean reps.':
+    'Zacznij od powolnych negatywów, pompek na poręczach z gumą albo pompek w podporze tyłem ze zgiętymi nogami, a gdy zrobisz {1}–{2} czystych powtórzeń, dodaj ciężar na pasie.',
+  'How do I do face pulls and why?': 'Jak robić face pull i po co?',
+  'Face pulls train the rear delts and the muscles that rotate the shoulder outward — good for shoulder health and posture, especially if you press a lot.':
+    'Face pull trenuje tylne aktony barków i mięśnie rotujące bark na zewnątrz — dobre dla zdrowia barków i postawy, zwłaszcza gdy dużo wyciskasz.',
+  'Set a rope at about forehead height, pull toward your face with the elbows high and finish with your hands beside your ears, thumbs pointing back.':
+    'Ustaw linkę na wysokości czoła, ciągnij do twarzy z wysoko uniesionymi łokciami i kończ z dłońmi przy uszach, kciukami skierowanymi do tyłu.',
+  'Go light and controlled: {1}–{2} sets of {3}–{4} reps, {5}–{6} times a week.':
+    'Lekko i pod kontrolą: {1}–{2} serie po {3}–{4} powtórzeń, {5}–{6} razy w tygodniu.',
+  'No cable?': 'Brak wyciągu?',
+  'A band anchored at head height or rear-delt flyes with light dumbbells do a similar job.':
+    'Guma zaczepiona na wysokości głowy albo odwrotne rozpiętki z lekkimi hantlami dadzą podobny efekt.',
+  'How do I do lateral raises properly?': 'Jak poprawnie robić wznosy bokiem?',
+  'Use light dumbbells, a slight forward lean and a small bend in the elbows, and raise your arms out to the side until they’re about shoulder height — lead with the elbows, not the hands.':
+    'Weź lekkie hantle, pochyl się lekko do przodu i minimalnie ugnij łokcie, a potem unoś ręce w bok mniej więcej do wysokości barków — prowadzą łokcie, nie dłonie.',
+  'Think “push the dumbbells out to the walls” rather than up, keep the traps relaxed and lower slowly.':
+    'Myśl „odepchnij hantle do ścian”, a nie w górę, trzymaj kaptury rozluźnione i opuszczaj powoli.',
+  'Swinging heavy weights mostly trains momentum and traps; strict sets of {1}–{2} grow the side delts best.':
+    'Machanie ciężkimi hantlami trenuje głównie bezwładność i kaptury; ścisłe serie po {1}–{2} powtórzeń najlepiej budują boczne aktony barków.',
+  'Cable or machine lateral raises keep tension at the bottom too — a nice variation; side delts recover fast, so {1}–{2} sessions a week is fine.':
+    'Wznosy bokiem na wyciągu lub maszynie trzymają napięcie także na dole — fajna odmiana; boczne aktony szybko się regenerują, więc {1}–{2} treningi w tygodniu są w porządku.',
+  'Chin-ups or pull-ups — what’s the difference?':
+    'Podciąganie podchwytem czy nachwytem — jaka różnica?',
+  'Chin-ups (palms facing you) bring in more biceps and are usually a bit easier; pull-ups (palms facing away) lean more on the lats and upper back.':
+    'Podciąganie podchwytem (dłonie do siebie) mocniej angażuje bicepsy i zwykle jest trochę łatwiejsze; nachwytem (dłonie od siebie) bardziej obciąża najszersze i górę pleców.',
+  'Both are excellent back builders, so pick the one that feels better on your elbows and shoulders, or alternate them.':
+    'Oba świetnie budują plecy, więc wybierz ten, który lepiej znoszą twoje łokcie i barki, albo stosuj je na zmianę.',
+  'A neutral grip (palms facing each other) is often the most joint-friendly of all.':
+    'Chwyt neutralny (dłonie do siebie nawzajem) jest często najłagodniejszy dla stawów.',
+  'Grip width matters less than full range: start from a dead hang with your shoulders set and pull until your chin clears the bar.':
+    'Szerokość chwytu ma mniejsze znaczenie niż pełny zakres: zaczynaj z pełnego zwisu z ustawionymi barkami i ciągnij, aż broda minie drążek.',
+  'How wide should my bench press grip be?':
+    'Jak szeroki powinien być chwyt przy wyciskaniu na ławce?',
+  'A good default is a grip where your forearms are vertical when the bar touches your chest — for most people the index or middle finger around the rings on the bar.':
+    'Dobry punkt wyjścia to chwyt, przy którym przedramiona są pionowe, gdy sztanga dotyka klatki — dla większości to palec wskazujący lub środkowy przy pierścieniach na gryfie.',
+  'Wider shortens the range and uses more chest but stresses the shoulders more; narrower uses more triceps.':
+    'Szerszy skraca zakres i mocniej angażuje klatkę, ale bardziej obciąża barki; węższy angażuje więcej tricepsów.',
+  'Tuck the elbows about {1}–{2}° from your body rather than flaring them straight out, and keep the bar over your wrists, not bent back.':
+    'Trzymaj łokcie pod kątem około {1}–{2}° do tułowia, zamiast rozkładać je na boki, a sztangę nad nadgarstkami, bez zaginania ich do tyłu.',
+  'Squeeze the bar hard and think of “bending” it to engage the lats; if your shoulders ache, try a slightly narrower grip and more elbow tuck.':
+    'Mocno ściskaj sztangę i myśl o jej „zginaniu”, żeby włączyć najszersze; jeśli bolą barki, spróbuj nieco węższego chwytu i mocniej przyciągnij łokcie.',
+  'What is leg drive on the bench press?': 'Co to jest praca nóg przy wyciskaniu na ławce?',
+  'Leg drive is pushing your feet into the floor to create full-body tension and to drive yourself back along the bench toward your head — not lifting your hips.':
+    'Praca nóg to wciskanie stóp w podłogę, żeby napiąć całe ciało i jakby przesunąć się po ławce w stronę głowy — a nie unoszenie bioder.',
+  'Plant your feet firmly (flat or on the toes, whichever lets you push hardest), squeeze your glutes and keep them on the bench.':
+    'Postaw stopy pewnie (płasko albo na palcach — jak najmocniej ci się pcha), napnij pośladki i trzymaj je na ławce.',
+  'Done right, it stabilises your upper back and can add a few kilos to your press.':
+    'Dobrze wykonana stabilizuje górę pleców i może dodać kilka kilogramów do wyciskania.',
+  'Set your feet before you unrack and push as the bar leaves your chest; if your hips pop up, push more backward than upward.':
+    'Ustaw stopy przed zdjęciem sztangi i pchaj nimi, gdy sztanga odchodzi od klatki; jeśli biodra się odrywają, pchaj bardziej do tyłu niż w górę.',
+  'High-bar or low-bar squat?': 'Przysiad z wysoką czy niską sztangą?',
+  'High-bar sits on top of the traps: a more upright torso, more knee bend and more quads — a natural fit for most people and for Olympic lifting.':
+    'Wysoka sztanga leży na kapturach: bardziej pionowy tułów, większe zgięcie kolan i więcej czworogłowych — naturalna dla większości ludzi i dla podnoszenia ciężarów.',
+  'Low-bar sits a few centimetres lower, on the rear delts: more forward lean and hip hinge, more glutes and hamstrings, and usually a bit more weight moved — popular in powerlifting.':
+    'Niska sztanga leży kilka centymetrów niżej, na tylnych aktonach barków: większy pochył i praca bioder, więcej pośladków i dwugłowych, zwykle trochę większy ciężar — popularna w trójboju.',
+  'Both are good; pick the one that feels comfortable on your shoulders and elbows and stick with it for a while.':
+    'Obie są dobre; wybierz tę, która jest wygodna dla twoich barków i łokci, i trzymaj się jej przez jakiś czas.',
+  'Low-bar needs good shoulder mobility; if your elbows or wrists hurt, widen your grip and keep the wrists straight.':
+    'Niska sztanga wymaga dobrej mobilności barków; jeśli bolą łokcie lub nadgarstki, poszerz chwyt i trzymaj nadgarstki prosto.',
+  'Are good mornings a good exercise?': 'Czy good mornings to dobre ćwiczenie?',
+  'Yes — good mornings (bar on your back, hinging forward with soft knees) strengthen the hamstrings, glutes and spinal erectors and carry over well to squats and deadlifts.':
+    'Tak — good mornings (sztanga na plecach, skłon z lekko ugiętymi kolanami) wzmacniają dwugłowe, pośladki i prostowniki grzbietu i dobrze przenoszą się na przysiad i martwy ciąg.',
+  'Start very light, keep your back neutral and only go as low as you can without rounding, usually until your torso is near parallel to the floor.':
+    'Zacznij bardzo lekko, trzymaj plecy neutralne i schodź tylko tak nisko, jak dasz radę bez zaokrąglenia, zwykle aż tułów będzie prawie równoległy do podłogi.',
+  'They’re an accessory: {1} sets of {2}–{3} with moderate weight, not a lift to max out on.':
+    'To ćwiczenie pomocnicze: {1} serie po {2}–{3} z umiarkowanym ciężarem, a nie ćwiczenie na maksa.',
+  'If your lower back is sensitive, start with Romanian deadlifts or back extensions instead and add good mornings later.':
+    'Jeśli masz wrażliwy odcinek lędźwiowy, zacznij od martwego ciągu rumuńskiego albo wyprostów grzbietu, a good mornings dodaj później.',
+  'Are farmer’s carries worth doing?': 'Czy warto robić spacer farmera?',
+  'Very much — carrying heavy dumbbells, kettlebells or handles over a distance trains your grip, traps, core and conditioning all at once, with low injury risk.':
+    'Zdecydowanie — noszenie ciężkich hantli, kettli lub uchwytów na dystansie trenuje naraz chwyt, kaptury, korpus i kondycję, przy niskim ryzyku kontuzji.',
+  'Stand tall, shoulders down, short quick steps; {1}–{2} walks of {3}–{4} metres (or {5}–{6} seconds) with a heavy load is plenty.':
+    'Stój prosto, barki w dół, krótkie szybkie kroki; {1}–{2} przejścia po {3}–{4} metrów (albo {5}–{6} sekund) z dużym ciężarem w zupełności wystarczą.',
+  'One-hand suitcase carries add a strong challenge for the core against bending sideways.':
+    'Noszenie ciężaru w jednej ręce („walizka”) mocno obciąża korpus przeciw zginaniu się w bok.',
+  'Put them at the end of a session — a tired grip before deadlifts or rows is a bad trade.':
+    'Rób je na końcu treningu — zmęczony chwyt przed martwym ciągiem czy wiosłowaniem to kiepska wymiana.',
+  'My calves won’t grow — what do I do?': 'Łydki nie rosną — co robić?',
+  'Calves respond to the same things as other muscles — they just get ignored or trained with bouncy half reps.':
+    'Łydki reagują na to samo co inne mięśnie — po prostu się je pomija albo trenuje sprężynującymi półpowtórzeniami.',
+  'Use the full range: a deep stretch with a {1}–{2} second pause at the bottom, then all the way up onto your toes.':
+    'Pracuj w pełnym zakresie: głębokie rozciągnięcie z {1}–{2}-sekundową pauzą na dole, potem do samej góry na palcach.',
+  'Do {1}–{2} hard sets a week split between standing (straight-knee) and seated (bent-knee) raises, {3}–{4} reps, {5}–{6} times a week, and expect slower progress than elsewhere — genetics play a big role.':
+    'Rób {1}–{2} ciężkich serii tygodniowo, dzieląc je na wspięcia na stojąco (proste kolana) i siedząc (zgięte kolana), po {3}–{4} powtórzeń, {5}–{6} razy w tygodniu, i nastaw się na wolniejszy postęp niż gdzie indziej — genetyka ma tu duże znaczenie.',
+  'The stretched position seems to drive most of the growth for calves, so don’t cut the bottom — even partial reps in the deep stretch work.':
+    'Wygląda na to, że u łydek to rozciągnięta pozycja daje większość wzrostu, więc nie obcinaj dołu — nawet półpowtórzenia w głębokim rozciągnięciu działają.',
+  'Is the trap bar deadlift as good as a regular deadlift?':
+    'Czy martwy ciąg na trap barze jest tak dobry jak zwykły?',
+  'For most people, yes.': 'Dla większości ludzi — tak.',
+  'The trap (hex) bar keeps the weight in line with your body, so you stay more upright, use more quads and put less stress on your lower back, and most lifters handle a bit more weight on it.':
+    'Trap bar (sześciokątny gryf) trzyma ciężar w linii z ciałem, więc jesteś bardziej wyprostowany, bardziej pracują czworogłowe, mniej obciążasz odcinek lędźwiowy, a większość podnosi na nim trochę więcej.',
+  'It’s a great main pull for beginners, athletes and anyone with a sensitive back.':
+    'To świetne główne ćwiczenie ciągnące dla początkujących, sportowców i każdego z wrażliwymi plecami.',
+  'If you want to compete in powerlifting you’ll need the straight bar eventually; otherwise choose the one you can train hard and consistently.':
+    'Jeśli chcesz startować w trójboju, kiedyś będzie ci potrzebny prosty gryf; w innym razie wybierz ten, na którym możesz trenować ciężko i regularnie.',
+  'Use the high handles to shorten the range while you learn; stand in the centre and push the floor away just like in a normal deadlift.':
+    'Na początku używaj wysokich uchwytów, żeby skrócić zakres; stań na środku i odpychaj podłogę tak jak w zwykłym martwym ciągu.',
+  'Are Nordic hamstring curls worth it?': 'Czy warto robić nordic curls?',
+  'Yes — Nordic curls are one of the best-researched ways to lower the risk of hamstring strains, especially for sprinters and team-sport players.':
+    'Tak — nordic curls to jeden z najlepiej zbadanych sposobów na zmniejszenie ryzyka naderwań dwugłowych, zwłaszcza dla sprinterów i graczy sportów zespołowych.',
+  'Anchor your heels, keep a straight line from knees to head and lower yourself as slowly as you can, catching yourself with your hands.':
+    'Zablokuj pięty, trzymaj prostą linię od kolan do głowy i opuszczaj się jak najwolniej, łapiąc się rękami.',
+  'Start with {1} sets of {2}–{3} reps once or twice a week; they cause a lot of soreness at first, so build up slowly.':
+    'Zacznij od {1} serii po {2}–{3} powtórzenia raz lub dwa razy w tygodniu; na początku dają mocne zakwasy, więc zwiększaj stopniowo.',
+  'A band around your chest anchored behind you, or a shorter range, makes them easier until you can control the whole way down.':
+    'Guma na klatce zaczepiona z tyłu albo krótszy zakres ułatwiają ćwiczenie, dopóki nie opanujesz całego opuszczania.',
+  'How do I learn a pistol squat?': 'Jak nauczyć się przysiadu „pistolet”?',
+  'A pistol squat needs leg strength, balance and ankle mobility.':
+    'Pistolet wymaga siły nóg, równowagi i mobilności stawu skokowego.',
+  'Build up with box pistols (sit down to a bench on one leg and stand back up), lowering the box over time, and hold a door frame or suspension straps for balance.':
+    'Buduj go przysiadami na jednej nodze do ławki (siadasz i wstajesz), z czasem obniżając podwyższenie, i trzymaj się futryny lub taśm TRX dla równowagi.',
+  'A counterweight helps — holding a light plate out in front makes the bottom easier; practise {1} sets of {2}–{3} per leg a few times a week.':
+    'Pomaga przeciwwaga — lekka talerz trzymany przed sobą ułatwia dół; ćwicz {1} serie po {2}–{3} na nogę kilka razy w tygodniu.',
+  'If your heel lifts, put a small plate under it or work on ankle mobility; Bulgarian split squats build the strength part in the meantime.':
+    'Jeśli pięta się odrywa, podłóż pod nią mały talerz albo pracuj nad mobilnością stawu skokowego; w międzyczasie siłę dobrze budują przysiady bułgarskie.',
+  'I’m not sore anymore — is my training still working?':
+    'Nie mam już zakwasów — czy mój trening nadal działa?',
+  'Yes — soreness is a poor sign of a good workout.':
+    'Tak — zakwasy to kiepski wskaźnik dobrego treningu.',
+  'It mostly shows up with new exercises, more volume or long eccentrics, and it fades as your body adapts, while growth carries on.':
+    'Pojawiają się głównie przy nowych ćwiczeniach, większej objętości albo długich fazach ekscentrycznych i znikają, gdy ciało się adaptuje, a wzrost trwa dalej.',
+  'Judge your training by progress instead: more reps or weight over the weeks, measurements and photos.':
+    'Oceniaj trening po postępie: więcej powtórzeń lub ciężaru w kolejnych tygodniach, pomiary i zdjęcia.',
+  'Chasing soreness usually just means more fatigue and slower recovery.':
+    'Pogoń za zakwasami zwykle oznacza tylko więcej zmęczenia i wolniejszą regenerację.',
+  'Some mild soreness after a hard session is normal; soreness lasting more than {1}–{2} days means the dose was too big.':
+    'Lekkie zakwasy po ciężkim treningu są normalne; zakwasy trwające dłużej niż {1}–{2} dni znaczą, że dawka była za duża.',
+  'Are massage guns worth it?': 'Czy pistolety do masażu są warte zakupu?',
+  'Massage guns can ease the feeling of tightness and soreness for a while and are a nice warm-up or cool-down tool — much like foam rolling.':
+    'Pistolety do masażu mogą na jakiś czas zmniejszyć uczucie sztywności i zakwasów i są fajnym narzędziem do rozgrzewki lub schłodzenia — podobnie jak roller.',
+  'They don’t speed up real tissue recovery much or “flush out” lactic acid; sleep, food and sensible volume do the heavy lifting.':
+    'Nie przyspieszają znacząco prawdziwej regeneracji tkanek ani nie „wypłukują” kwasu mlekowego; główną robotę robią sen, jedzenie i rozsądna objętość.',
+  'Use {1}–{2} seconds per muscle at a comfortable pressure, and keep them off bones, joints, the front of the neck and any fresh injury or bruise.':
+    'Masuj {1}–{2} sekund na mięsień z komfortowym naciskiem i omijaj kości, stawy, przód szyi oraz świeże urazy i siniaki.',
+  'If it helps you feel ready and move better, it’s worth it; if not, a foam roller does the same job for less money.':
+    'Jeśli pomaga ci poczuć się gotowym i ruszać się lepiej, jest wart; jeśli nie, roller zrobi to samo taniej.',
+  'Should I trust my watch’s HRV and recovery score?':
+    'Czy ufać HRV i ocenie regeneracji z zegarka?',
+  'Use them as trends, not verdicts.': 'Traktuj je jako trendy, nie wyroki.',
+  'HRV and resting heart rate from a watch or ring are fairly reliable over weeks: HRV trending down and resting heart rate up for several days usually means stress, poor sleep, illness or too much training.':
+    'HRV i tętno spoczynkowe z zegarka lub pierścienia są dość wiarygodne w skali tygodni: jeśli przez kilka dni HRV spada, a tętno spoczynkowe rośnie, zwykle oznacza to stres, słaby sen, chorobę albo za dużo treningu.',
+  'A single low morning score doesn’t mean you can’t train — warm up and see how the weights move.':
+    'Jeden niski poranny wynik nie znaczy, że nie możesz trenować — rozgrzej się i zobacz, jak idą ciężary.',
+  'The calorie-burn numbers are the least accurate part and often overestimate exercise calories.':
+    'Najmniej dokładne są spalone kalorie — często zawyżają kalorie z treningu.',
+  'Measure at the same time each morning, compare with your own baseline, and ignore day-to-day noise of a few points.':
+    'Mierz codziennie rano o tej samej porze, porównuj z własnym poziomem i ignoruj codzienne wahania o kilka punktów.',
+  'Is CNS fatigue real?': 'Czy zmęczenie OUN istnieje?',
+  'Mostly it’s an overused term.': 'Głównie to nadużywane określenie.',
+  'Heavy lifting does cause short-lived fatigue that clears within hours to a day or two; the idea that a heavy deadlift “fries your nervous system” for a week isn’t well supported.':
+    'Ciężkie ciężary rzeczywiście dają krótkotrwałe zmęczenie, które mija w ciągu godzin albo dnia-dwóch; teza, że ciężki martwy ciąg „przepala układ nerwowy” na tydzień, nie ma mocnego potwierdzenia.',
+  'When you feel flat for days, it’s usually built-up muscle and joint fatigue, poor sleep, stress or too little food — so the fix is the same: manage volume, sleep, eat, and deload when performance keeps dropping.':
+    'Gdy przez kilka dni czujesz się „płasko”, zwykle chodzi o nagromadzone zmęczenie mięśni i stawów, słaby sen, stres albo za mało jedzenia — więc rozwiązanie jest to samo: pilnuj objętości, śpij, jedz i rób deload, gdy wyniki ciągle spadają.',
+  'Very heavy singles and max-effort sessions do feel draining, which is why most programs keep them rare and short.':
+    'Bardzo ciężkie pojedyncze powtórzenia i treningi na maksa naprawdę wyczerpują, dlatego większość programów robi je rzadko i krótko.',
+  'How fast do I lose muscle if I stop training?':
+    'Jak szybko tracę mięśnie, jeśli przestanę trenować?',
+  'Slower than you think.': 'Wolniej, niż myślisz.',
+  'Two or three weeks off cost very little muscle — you may look flatter because of less water and glycogen, but that comes back within days.':
+    'Dwa-trzy tygodnie przerwy kosztują bardzo mało mięśni — możesz wyglądać na bardziej „płaskiego” przez mniej wody i glikogenu, ale to wraca w kilka dni.',
+  'Strength drops a bit faster than size after about {1}–{2} weeks, and after months off, “muscle memory” helps you regain it much faster than it took to build.':
+    'Siła spada trochę szybciej niż masa po około {1}–{2} tygodniach, a po miesiącach przerwy „pamięć mięśniowa” pomaga odzyskać ją dużo szybciej, niż ją budowałeś.',
+  'Even one or two short sessions a week keep most of what you have.':
+    'Nawet jeden-dwa krótkie treningi w tygodniu zachowują większość tego, co masz.',
+  'Keep protein high and stay active during the break; when you return, start at about {1}–{2}% of your old weights and build back over a few weeks.':
+    'W przerwie trzymaj wysokie białko i bądź aktywny; po powrocie zacznij od około {1}–{2}% dawnych ciężarów i odbudowuj przez kilka tygodni.',
+  'Do joint supplements like glucosamine or collagen work?':
+    'Czy suplementy na stawy, jak glukozamina czy kolagen, działają?',
+  'The evidence is weak.': 'Dowody są słabe.',
+  'Glucosamine and chondroitin show small or no effects for most people; collagen ({1}–{2} g with some vitamin C about an hour before training) has some early evidence for tendons, but it isn’t magic.':
+    'Glukozamina i chondroityna u większości ludzi dają mały efekt albo żaden; kolagen ({1}–{2} g z odrobiną witaminy C mniej więcej godzinę przed treningiem) ma pierwsze dane dotyczące ścięgien, ale to nie magia.',
+  'What reliably helps joints is sensible loading — gradual progression, good technique, strong muscles around the joint — plus sleep and a healthy body weight.':
+    'Stawom naprawdę pomaga rozsądne obciążanie — stopniowa progresja, dobra technika, silne mięśnie wokół stawu — plus sen i zdrowa masa ciała.',
+  'Joint pain that keeps coming back deserves a check with a doctor or physio rather than a new supplement.':
+    'Ból stawu, który ciągle wraca, warto pokazać lekarzowi lub fizjoterapeucie, zamiast szukać nowego suplementu.',
+  'Fish oil may slightly ease joint stiffness for some people; check with a doctor if you take blood thinners.':
+    'Olej rybi może u niektórych nieco zmniejszyć sztywność stawów; skonsultuj się z lekarzem, jeśli bierzesz leki rozrzedzające krew.',
+  'Does creatine cause hair loss, bloating or kidney problems?':
+    'Czy kreatyna powoduje wypadanie włosów, wzdęcia albo problemy z nerkami?',
+  'Creatine monohydrate is one of the most studied supplements and is safe for healthy people at {1}–{2} g a day.':
+    'Monohydrat kreatyny to jeden z najlepiej zbadanych suplementów i jest bezpieczny dla zdrowych osób w dawce {1}–{2} g dziennie.',
+  'It adds water inside the muscles (often {1}–{2} kg on the scale), not the puffy bloating under the skin people fear.':
+    'Dodaje wody wewnątrz mięśni (często {1}–{2} kg na wadze), a nie opuchlizny pod skórą, której ludzie się boją.',
+  'The hair-loss worry comes from a single small study that hasn’t been repeated, and it doesn’t harm healthy kidneys — it can raise the creatinine marker in blood tests, so tell your doctor you take it, and if you have kidney disease, ask first.':
+    'Obawa o włosy pochodzi z jednego małego badania, którego nie powtórzono, a zdrowym nerkom kreatyna nie szkodzi — może podnosić kreatyninę w badaniach krwi, więc powiedz lekarzowi, że ją bierzesz, a przy chorobie nerek najpierw zapytaj.',
+  'No loading phase needed: {1}–{2} g daily at any time of day fills the muscles in {3}–{4} weeks; loading with {5} g a day for {6}–{7} days just gets there faster.':
+    'Faza nasycania nie jest potrzebna: {1}–{2} g dziennie o dowolnej porze nasyca mięśnie w {3}–{4} tygodnie; nasycanie {5} g dziennie przez {6}–{7} dni tylko przyspiesza ten efekt.',
+  'Which protein powder should I buy?': 'Jakie białko w proszku kupić?',
+  'Protein powder is just convenient food — use it if it helps you hit your daily protein.':
+    'Białko w proszku to po prostu wygodne jedzenie — używaj go, jeśli pomaga ci dobić dzienną normę białka.',
+  'Whey concentrate is cheap and effective; whey isolate has less lactose if dairy bothers you; for plant-based, choose a pea and rice blend.':
+    'Koncentrat serwatki jest tani i skuteczny; izolat ma mniej laktozy, jeśli nabiał ci nie służy; spośród roślinnych wybierz mieszankę grochu i ryżu.',
+  'Pick a brand with third-party testing (like Informed Sport), check that one scoop gives about {1}–{2} g of protein, and choose a flavour you’ll actually drink.':
+    'Wybierz markę z niezależnymi testami (np. Informed Sport), sprawdź, czy jedna porcja daje około {1}–{2} g białka, i wybierz smak, który naprawdę będziesz pić.',
+  'Casein digests slowly and suits the evening, but your total daily protein matters far more than the type.':
+    'Kazeina trawi się wolno i pasuje na wieczór, ale łączne białko w ciągu dnia znaczy dużo więcej niż jego rodzaj.',
+  'How much protein can my body absorb in one meal?':
+    'Ile białka organizm przyswoi z jednego posiłku?',
+  'You absorb practically all of it — the “{1} grams per meal” limit is a myth.':
+    'Przyswajasz praktycznie całe — limit „{1} gramów na posiłek” to mit.',
+  'Bigger servings simply take longer to digest and are still used for building and repair.':
+    'Większe porcje po prostu dłużej się trawią i nadal idą na budowę i naprawę.',
+  'For convenience and appetite, spreading protein over {1}–{2} meals of roughly {3} g per kg of bodyweight each works well, but hitting your daily total is what counts most.':
+    'Dla wygody i apetytu dobrze jest rozłożyć białko na {1}–{2} posiłki po mniej więcej {3} g na kg masy ciała, ale najważniejsza jest suma dzienna.',
+  'A meal with {1}–{2} g of protein within a few hours of training is a sensible habit, not a strict window.':
+    'Posiłek z {1}–{2} g białka w ciągu kilku godzin po treningu to rozsądny nawyk, a nie sztywne okno.',
+  'Should I drink something during my workout?': 'Czy pić coś w trakcie treningu?',
+  'Water is enough for most sessions under about {1}–{2} minutes.':
+    'Na większość treningów krótszych niż około {1}–{2} minut wystarczy woda.',
+  'For long or very hard sessions, a drink with carbs (about {1}–{2} g per hour) and a bit of sodium can help you keep your performance up, especially if you trained fasted or sweat a lot.':
+    'Przy długich lub bardzo ciężkich treningach napój z węglowodanami (około {1}–{2} g na godzinę) i odrobiną sodu pomoże utrzymać wydolność, zwłaszcza jeśli trenujesz na czczo albo mocno się pocisz.',
+  'Intra-workout BCAAs or EAAs add little if you eat enough protein during the day.':
+    'BCAA czy EAA w trakcie treningu niewiele dają, jeśli w ciągu dnia jesz dość białka.',
+  'Sip regularly rather than chugging, and weigh yourself before and after a long session: each kilo lost is roughly a litre to replace.':
+    'Pij regularnie małymi łykami, a nie duszkiem, i zważ się przed i po długim treningu: każdy stracony kilogram to mniej więcej litr do uzupełnienia.',
+  'Should I take vitamin D?': 'Czy brać witaminę D?',
+  'If you live far from the equator, spend little time in the sun or it’s winter, there’s a good chance your level is low, and low vitamin D is linked to worse bone health and immunity.':
+    'Jeśli mieszkasz daleko od równika, mało przebywasz na słońcu albo jest zima, dość prawdopodobne, że masz niski poziom, a niska witamina D wiąże się z gorszym zdrowiem kości i odpornością.',
+  'A common safe dose is {1}–{2} IU a day, but the best move is a blood test so you know your level.':
+    'Typowa bezpieczna dawka to {1}–{2} IU dziennie, ale najlepiej zrobić badanie krwi, żeby znać swój poziom.',
+  'It won’t boost your strength if your level is already fine, and very high doses without testing can do harm.':
+    'Nie zwiększy siły, jeśli twój poziom już jest w porządku, a bardzo duże dawki bez badań mogą zaszkodzić.',
+  'Take it with a meal that has some fat in it for better absorption.':
+    'Bierz ją z posiłkiem zawierającym trochę tłuszczu — lepiej się wchłania.',
+  'Does magnesium help with sleep or cramps?': 'Czy magnez pomaga na sen albo skurcze?',
+  'Magnesium helps if you’re actually low — common when you eat few nuts, seeds, greens and whole grains, or sweat heavily.':
+    'Magnez pomaga, jeśli naprawdę go brakuje — to częste, gdy jesz mało orzechów, pestek, zieleniny i produktów pełnoziarnistych albo mocno się pocisz.',
+  'For sleep the evidence is modest, mostly in older adults or people with low intake; for exercise cramps it’s weak.':
+    'W kwestii snu dowody są umiarkowane, głównie u starszych osób lub przy niskim spożyciu; przy skurczach w trakcie treningu — słabe.',
+  'If you try it, {1}–{2} mg of glycinate or citrate in the evening is typical; oxide is poorly absorbed and more likely to upset your stomach.':
+    'Jeśli chcesz spróbować, typowo to {1}–{2} mg glicynianu lub cytrynianu wieczorem; tlenek słabo się wchłania i częściej podrażnia żołądek.',
+  'Skip it with kidney disease unless your doctor agrees.':
+    'Przy chorobie nerek odpuść, chyba że lekarz się zgodzi.',
+  'Food first: a handful of pumpkin seeds or almonds, dark chocolate, beans and leafy greens cover a lot of your daily need.':
+    'Najpierw jedzenie: garść pestek dyni lub migdałów, gorzka czekolada, strączki i zielone liście pokrywają sporą część dziennego zapotrzebowania.',
+  'Do testosterone boosters work?': 'Czy boostery testosteronu działają?',
+  'Over-the-counter “test boosters” (tribulus, fenugreek, D-aspartic acid and the like) don’t meaningfully raise testosterone or muscle growth in healthy men.':
+    'Dostępne bez recepty „boostery testosteronu” (tribulus, kozieradka, kwas D-asparaginowy i podobne) nie podnoszą w istotny sposób testosteronu ani przyrostu mięśni u zdrowych mężczyzn.',
+  'Ashwagandha may slightly lower stress and improve sleep, which can help training indirectly.':
+    'Ashwagandha może nieco obniżyć stres i poprawić sen, co pośrednio pomaga w treningu.',
+  'The real levers are sleep, enough calories and fat, a healthy body-fat level and lifting; if you have symptoms of low testosterone, get a blood test from a doctor instead of buying pills.':
+    'Prawdziwe dźwignie to sen, dość kalorii i tłuszczu, zdrowy poziom tkanki tłuszczowej i trening siłowy; jeśli masz objawy niskiego testosteronu, zrób badanie krwi u lekarza zamiast kupować tabletki.',
+  'Some “boosters” turn out to be contaminated with banned substances — another reason to skip them if you compete or get tested.':
+    'Niektóre „boostery” okazują się zanieczyszczone zakazanymi substancjami — kolejny powód, by ich unikać, jeśli startujesz albo jesteś testowany.',
+  'Do fat burner pills work?': 'Czy spalacze tłuszczu działają?',
+  'Not in any way that matters.': 'Nie w żaden sposób, który miałby znaczenie.',
+  'Most fat burners are mainly caffeine plus extras; at best they add a few dozen burned calories a day and slightly blunt your appetite.':
+    'Większość spalaczy to głównie kofeina plus dodatki; w najlepszym razie dokładają kilkadziesiąt spalonych kalorii dziennie i lekko tłumią apetyt.',
+  'Some have caused liver damage or heart problems, or contained banned stimulants.':
+    'Niektóre powodowały uszkodzenia wątroby lub problemy z sercem albo zawierały zakazane stymulanty.',
+  'A moderate calorie deficit, plenty of protein, lifting and daily steps do the actual work — spend the money on good food instead.':
+    'Prawdziwą robotę robią umiarkowany deficyt kalorii, dużo białka, trening siłowy i codzienne kroki — lepiej wydaj pieniądze na dobre jedzenie.',
+  'If you have heart or blood-pressure problems, avoid stimulant products entirely.':
+    'Jeśli masz problemy z sercem lub ciśnieniem, całkowicie unikaj produktów ze stymulantami.',
+  'What is reverse dieting after a cut?': 'Co to jest reverse diet po redukcji?',
+  'Reverse dieting means raising calories gradually after a diet instead of jumping straight back to your old eating.':
+    'Reverse diet to stopniowe podnoszenie kalorii po diecie zamiast gwałtownego powrotu do dawnego jedzenia.',
+  'You can add roughly {1}–{2} kcal a week, or go straight to your new maintenance if you’re mentally done with dieting — both work; the slow way mainly helps you control appetite and limit fat regain.':
+    'Możesz dodawać mniej więcej {1}–{2} kcal tygodniowo albo od razu przejść na nowe zero kaloryczne, jeśli psychicznie masz dość diety — oba sposoby działają; wolny głównie pomaga panować nad apetytem i ograniczyć odrost tłuszczu.',
+  'Expect {1}–{2} kg back on the scale from food and water in your gut and muscles; that’s not fat.':
+    'Spodziewaj się {1}–{2} kg więcej na wadze z jedzenia i wody w jelitach i mięśniach; to nie tłuszcz.',
+  'Your new maintenance is a bit lower than before the diet because you weigh less; find it by watching your weekly average weight for {1}–{2} weeks.':
+    'Twoje nowe zero kaloryczne jest trochę niższe niż przed dietą, bo ważysz mniej; znajdziesz je, obserwując średnią tygodniową wagę przez {1}–{2} tygodnie.',
+  'Should I take a diet break or a refeed during a cut?':
+    'Czy robić przerwę od diety albo refeed na redukcji?',
+  'On longer cuts it’s a good idea.': 'Na dłuższej redukcji to dobry pomysł.',
+  'A diet break is {1}–{2} weeks of eating at maintenance every {3}–{4} weeks of dieting; a refeed is one or two higher-carb days a week.':
+    'Przerwa od diety to {1}–{2} tygodnie jedzenia na zero co {3}–{4} tygodni diety; refeed to jeden-dwa dni w tygodniu z większą ilością węglowodanów.',
+  'They don’t magically “reset your metabolism”, but they ease hunger, bring back energy for training and make the diet easier to stick with.':
+    'Nie „resetują metabolizmu” w magiczny sposób, ale zmniejszają głód, przywracają energię na trening i ułatwiają wytrwanie w diecie.',
+  'The whole cut just takes a bit longer — that’s the trade.':
+    'Cała redukcja po prostu trwa trochę dłużej — taka cena.',
+  'Keep protein the same on break days and add the extra calories mostly as carbs.':
+    'W dni przerwy trzymaj to samo białko, a dodatkowe kalorie dodawaj głównie z węglowodanów.',
+  'Why does my weight jump up and down every day?': 'Dlaczego moja waga codziennie skacze?',
+  'Daily swings of {1}–{2} kg are normal and are mostly water: salt, carbs, a big meal, hard training, stress, poor sleep, the menstrual cycle and what’s still in your gut all shift it.':
+    'Codzienne wahania o {1}–{2} kg są normalne i to głównie woda: sól, węglowodany, duży posiłek, ciężki trening, stres, słaby sen, cykl menstruacyjny i zawartość jelit — wszystko to ją przesuwa.',
+  'Weigh yourself in the morning after the toilet and before food, and look at the weekly average rather than any single day.':
+    'Waż się rano po toalecie i przed jedzeniem i patrz na średnią tygodniową, a nie na pojedynczy dzień.',
+  'If the weekly average moves the way you want over {1}–{2} weeks, you’re on track.':
+    'Jeśli średnia tygodniowa przez {1}–{2} tygodnie idzie w pożądaną stronę, wszystko jest na dobrej drodze.',
+  'After starting a new program or creatine the scale often goes up {1}–{2} kg from water in the muscles — that’s a good sign, not fat.':
+    'Po starcie nowego programu albo kreatyny waga często rośnie o {1}–{2} kg przez wodę w mięśniach — to dobry znak, nie tłuszcz.',
+  'Is keto good for lifting?': 'Czy keto jest dobre dla trenujących siłowo?',
+  'You can build strength and some muscle on keto, but it’s no advantage for lifting.':
+    'Na keto można budować siłę i trochę mięśni, ale nie daje to przewagi na siłowni.',
+  'Carbs fuel hard sets, so most people feel flatter in higher-rep, high-volume work, especially in the first {1}–{2} weeks.':
+    'Węglowodany to paliwo do ciężkich serii, więc większość ludzi czuje się „płasko” w pracy na więcej powtórzeń i dużej objętości, zwłaszcza przez pierwsze {1}–{2} tygodnie.',
+  'Keto can work for fat loss if it helps you eat less, but so does any diet you can stick to — keep protein high either way.':
+    'Keto zadziała na redukcję, jeśli pomaga ci jeść mniej, ale tak samo działa każda dieta, której się trzymasz — białko i tak trzymaj wysoko.',
+  'If you try it, add salt and fluids from the start — the “keto flu” is largely lost sodium and water.':
+    'Jeśli próbujesz, od początku dodaj sól i płyny — „grypa keto” to w dużej mierze utrata sodu i wody.',
+  'Is intermittent fasting good for building muscle?':
+    'Czy post przerywany jest dobry do budowy mięśni?',
+  'Intermittent fasting (like {1}:{2}) is simply a way to fit your calories into a shorter window.':
+    'Post przerywany (np. {1}:{2}) to po prostu sposób, by zmieścić kalorie w krótszym oknie.',
+  'For fat loss it works as well as other diets when calories and protein are the same.':
+    'Na redukcji działa tak samo jak inne diety, jeśli kalorie i białko są takie same.',
+  'For building muscle it’s slightly less ideal, because fitting enough protein into {1}–{2} meals is harder — if you use it, have at least two solid protein meals and try to train close to your eating window.':
+    'Do budowy mięśni jest nieco mniej idealny, bo trudniej zmieścić dość białka w {1}–{2} posiłkach — jeśli go stosujesz, zjedz co najmniej dwa porządne posiłki z białkiem i trenuj blisko swojego okna żywieniowego.',
+  'Training fasted in the morning is fine for most people; eat a protein-rich meal soon after.':
+    'Trening na czczo rano jest dla większości w porządku; niedługo po nim zjedz posiłek bogaty w białko.',
+  'Should a teenager take protein or creatine?':
+    'Czy nastolatek powinien brać białko albo kreatynę?',
+  'For teens, food comes first: regular meals with protein (meat, fish, eggs, dairy, beans), enough total calories, fruit, vegetables and sleep drive growth far more than any product.':
+    'U nastolatków najpierw jedzenie: regularne posiłki z białkiem (mięso, ryby, jajka, nabiał, strączki), dość kalorii, owoce, warzywa i sen dają dużo więcej niż jakikolwiek produkt.',
+  'Protein powder is just food and is fine for filling gaps.':
+    'Białko w proszku to po prostu jedzenie i można nim łatać braki.',
+  'Creatine looks safe in the studies we have, but most experts suggest under-{1}s use it only with a parent and a doctor involved; avoid pre-workouts, fat burners and “test boosters” completely.':
+    'Kreatyna w dostępnych badaniach wygląda na bezpieczną, ale większość ekspertów radzi, by osoby poniżej {1} lat brały ją tylko z udziałem rodzica i lekarza; przedtreningówek, spalaczy i „boosterów testosteronu” unikaj całkowicie.',
+  'The biggest gains for a teen come from learning good technique with light-to-moderate weights and training consistently for years.':
+    'Najwięcej daje nastolatkowi nauka dobrej techniki z lekkimi i umiarkowanymi ciężarami i regularny trening przez lata.',
+  'How do I improve my VO{1}max?': 'Jak poprawić VO{1}max?',
+  'VO{1}max is the most oxygen your body can use — one of the strongest predictors of long-term health.':
+    'VO{1}max to maksimum tlenu, jakie twoje ciało potrafi wykorzystać — jeden z najsilniejszych wskaźników długoterminowego zdrowia.',
+  'Build a base of easy zone {1} work ({2}–{3} sessions of {4}–{5} minutes a week), then add one session of hard intervals, like {6} × {7} minutes at about {8}–{9}% of your max heart rate with {10} easy minutes between them.':
+    'Zbuduj bazę lekkiej pracy w strefie {1} ({2}–{3} sesje po {4}–{5} minut tygodniowo), potem dodaj jedną sesję ciężkich interwałów, np. {6} × {7} minuty na około {8}–{9}% tętna maksymalnego z {10} lekkimi minutami przerwy.',
+  'It improves within weeks in untrained people and keeps improving with consistency.':
+    'U osób nietrenujących poprawia się w ciągu kilku tygodni i rośnie dalej przy regularności.',
+  'Do the hard intervals on a bike, rower or incline treadmill if running beats up your legs before squat day.':
+    'Rób ciężkie interwały na rowerze, ergometrze wioślarskim albo bieżni pod górę, jeśli bieganie za mocno obciąża nogi przed dniem przysiadów.',
+  'Is incline treadmill walking good cardio?': 'Czy chodzenie na bieżni pod górę to dobre cardio?',
+  'Yes — walking on an incline (like the popular {1}% incline at {2} km/h for {3} minutes) raises your heart rate into a good zone {4} range with very little impact, so it barely interferes with leg training.':
+    'Tak — chodzenie pod górę (jak popularne {1}% nachylenia przy {2} km/h przez {3} minut) podnosi tętno do dobrej strefy {4} przy bardzo małym obciążeniu stawów, więc prawie nie przeszkadza w treningu nóg.',
+  'It’s a great option for supporting fat loss and heart health.':
+    'To świetna opcja wspierająca redukcję i zdrowie serca.',
+  'Don’t hold the handrails — it cuts the work a lot; lower the incline instead, and build up gradually if your calves or shins get sore.':
+    'Nie trzymaj się poręczy — to mocno zmniejsza pracę; zamiast tego zmniejsz nachylenie i zwiększaj stopniowo, jeśli bolą łydki lub piszczele.',
+  'The stair climber works similarly and is a bit harder; both fit well after a lifting session or on rest days.':
+    'Stepper działa podobnie i jest trochę cięższy; oba dobrze pasują po treningu siłowym albo w dni wolne.',
+  'How do I use the rowing machine properly?':
+    'Jak prawidłowo korzystać z ergometru wioślarskiego?',
+  'The order is legs, back, arms on the drive, and arms, back, legs on the way back.':
+    'Kolejność to nogi, plecy, ręce przy przyciąganiu i ręce, plecy, nogi przy powrocie.',
+  'Push hard with your legs first (about {1}% of the power), then lean back slightly and pull the handle to your lower ribs; return by straightening your arms, hinging forward, and only then bending your knees.':
+    'Najpierw mocno odepchnij się nogami (około {1}% mocy), potem lekko odchyl tułów i przyciągnij rączkę do dolnych żeber; wracaj, prostując ręce, pochylając się do przodu i dopiero wtedy zginając kolana.',
+  'Keep the damper around {1}–{2} — higher isn’t more useful — and aim for about {3}–{4} strokes per minute for steady work.':
+    'Ustaw przepustnicę na około {1}–{2} — wyższa nie jest bardziej przydatna — i przy równym tempie celuj w {3}–{4} pociągnięć na minutę.',
+  'Rowing is a great low-impact, full-body option for intervals, like {1} × {2} m hard with a minute easy between them.':
+    'Wiosłowanie to świetna opcja na całe ciało bez obciążania stawów do interwałów, np. {1} × {2} m mocno z minutą spokojnie pomiędzy.',
+  'Is jumping rope good cardio?': 'Czy skakanka to dobre cardio?',
+  'Yes — skipping is cheap, portable and great for conditioning, coordination and springy calves and ankles (useful for running and jumping).':
+    'Tak — skakanka jest tania, zawsze pod ręką i świetna na kondycję, koordynację i sprężyste łydki oraz kostki (przydaje się w bieganiu i skokach).',
+  'It’s high-impact, so build up: start with {1}–{2} rounds of {3} seconds on and {4} seconds off, jumping low on the balls of your feet and turning the rope with your wrists.':
+    'To obciążenie udarowe, więc zwiększaj stopniowo: zacznij od {1}–{2} rund po {3} sekund pracy i {4} sekund przerwy, skacząc nisko na przodostopiu i kręcąc skakanką nadgarstkami.',
+  'Use a firm surface with a little give and good shoes, and back off if your shins or Achilles get sore.':
+    'Wybierz twarde, lekko amortyzujące podłoże i dobre buty, a jeśli zaczną boleć piszczele lub ścięgno Achillesa — zwolnij.',
+  'Ten minutes of rope makes a great warm-up or finisher; the length is right when the handles reach your armpits while you stand on the middle.':
+    'Dziesięć minut na skakance to świetna rozgrzewka albo finisher; długość jest dobra, gdy rączki sięgają pach, kiedy stoisz na środku skakanki.',
+  'How do I improve upper-back (thoracic) mobility?':
+    'Jak poprawić mobilność górnej części pleców (odcinka piersiowego)?',
+  'A stiff upper back limits overhead pressing, front squats and posture.':
+    'Sztywna góra pleców ogranicza wyciskanie nad głowę, przysiad przedni i postawę.',
+  'Two or three simple drills before training work well: extensions over a foam roller (a few spots between the shoulder blades), open-book rotations lying on your side and thread-the-needle rotations on all fours, {1}–{2} slow reps each.':
+    'Przed treningiem dobrze działają dwa-trzy proste ćwiczenia: wyprosty na rollerze (kilka punktów między łopatkami), „otwarta książka” w leżeniu na boku i rotacje „nitka w igłę” w klęku podpartym, po {1}–{2} powolnych powtórzeń.',
+  'Then use that range under load — strict overhead presses and rows help you keep it.':
+    'Potem wykorzystaj ten zakres pod obciążeniem — ścisłe wyciskania nad głowę i wiosłowania pomagają go utrzymać.',
+  'If raising your arms overhead pinches the shoulder, check with a physio rather than forcing the range.':
+    'Jeśli przy unoszeniu rąk nad głowę coś szczypie w barku, skonsultuj się z fizjoterapeutą, zamiast forsować zakres.',
+  'How do I fix tight hip flexors?': 'Co zrobić ze spiętymi zginaczami bioder?',
+  'Hip flexors often feel tight from long sitting, but that feeling doesn’t always mean they’re short.':
+    'Zginacze bioder często wydają się spięte od długiego siedzenia, ale to uczucie nie zawsze oznacza, że są skrócone.',
+  'A half-kneeling stretch with the back leg’s glute squeezed and the pelvis tucked ({1}–{2} seconds, {3}–{4} times per side) usually helps, and so does strengthening the hip flexors and glutes with lunges and hanging knee raises.':
+    'Zwykle pomaga rozciąganie w półklęku ze spiętym pośladkiem tylnej nogi i podwiniętą miednicą ({1}–{2} sekund, {3}–{4} razy na stronę), a także wzmacnianie zginaczy i pośladków wykrokami i unoszeniem kolan w zwisie.',
+  'Break up long sitting every {1}–{2} minutes — that matters more than any stretch.':
+    'Przerywaj długie siedzenie co {1}–{2} minut — to ważniejsze niż jakiekolwiek rozciąganie.',
+  'If the front of your hip pinches in deep squats, try a slightly wider stance with the toes turned out, and get it checked if it doesn’t ease.':
+    'Jeśli w głębokim przysiadzie szczypie z przodu biodra, spróbuj nieco szerszego rozstawu z palcami na zewnątrz, a jeśli nie mija — daj to sprawdzić.',
+  'My hamstrings are tight and I can’t touch my toes — what helps?':
+    'Mam spięte dwugłowe i nie dotykam palców u stóp — co pomoże?',
+  'Regular stretching works: {1}–{2} sets of {3}–{4} seconds on most days increases your range within weeks, mostly because your nervous system gets used to the stretch.':
+    'Regularne rozciąganie działa: {1}–{2} serie po {3}–{4} sekund w większość dni zwiększają zakres w ciągu kilku tygodni, głównie dlatego, że układ nerwowy przyzwyczaja się do rozciągania.',
+  'Loaded stretching works just as well — Romanian deadlifts and good mornings through a full range build flexibility and strength together.':
+    'Rozciąganie z obciążeniem działa równie dobrze — martwy ciąg rumuński i good mornings w pełnym zakresie budują jednocześnie gibkość i siłę.',
+  'Tight hamstrings usually aren’t the cause of back pain, and you don’t need to touch your toes to lift well.':
+    'Spięte dwugłowe zwykle nie są przyczyną bólu pleców, a żeby dobrze trenować, nie musisz dotykać palców u stóp.',
+  'Stretch after training or in the evening; a few gentle reps in the warm-up are fine, but long holds right before heavy lifting can slightly reduce strength.':
+    'Rozciągaj się po treningu albo wieczorem; kilka łagodnych powtórzeń w rozgrzewce jest ok, ale długie przytrzymania tuż przed ciężkim treningiem mogą lekko obniżyć siłę.',
+  'How should I warm up my shoulders before pressing?': 'Jak rozgrzać barki przed wyciskaniem?',
+  'Five minutes is enough: arm circles and band pull-aparts ({1} × {2}), band pass-throughs or wall slides ({3} × {4}), external rotations with a light band ({5} × {6} per side), then scapular push-ups ({7} × {8}).':
+    'Pięć minut wystarczy: krążenia ramion i rozciąganie gumy przed sobą ({1} × {2}), przekładanie gumy za głowę albo ślizgi po ścianie ({3} × {4}), rotacje zewnętrzne z lekką gumą ({5} × {6} na stronę), potem pompki łopatkowe ({7} × {8}).',
+  'After that, do your pressing warm-up sets with the empty bar and gradually heavier loads.':
+    'Następnie zrób serie rozgrzewkowe wyciskania z pustym gryfem i stopniowo cięższym ciężarem.',
+  'The goal is to feel warm and move freely, not to tire out the small muscles.':
+    'Chodzi o to, by się rozgrzać i swobodnie ruszać, a nie zmęczyć małe mięśnie.',
+  'If a shoulder feels cranky, add an extra light set or two of the press itself rather than more stretching.':
+    'Jeśli bark „marudzi”, dodaj raczej jedną-dwie lekkie serie samego wyciskania niż więcej rozciągania.',
+  'My wrists hurt on bench or front squats — what can I do?':
+    'Bolą mnie nadgarstki przy wyciskaniu albo przysiadzie przednim — co robić?',
+  'When pressing, keep the bar low in your palm over the forearm bones rather than letting the wrist bend back — squeeze hard and think “knuckles to the ceiling”.':
+    'Przy wyciskaniu trzymaj sztangę nisko w dłoni, nad kośćmi przedramienia, zamiast pozwalać nadgarstkowi uciekać do tyłu — ściskaj mocno i myśl „knykcie do sufitu”.',
+  'Wrist wraps help on heavy sets.': 'Na ciężkich seriach pomagają owijki na nadgarstki.',
+  'In front squats it’s usually tight lats and triceps, not the wrists: use a wider grip, fewer fingers on the bar or straps as handles.':
+    'W przysiadzie przednim winne są zwykle spięte najszersze i tricepsy, a nie nadgarstki: szerszy chwyt, mniej palców na gryfie albo paski jako uchwyty.',
+  'Daily wrist circles and gentle loaded stretches help; sharp or lasting pain deserves a check.':
+    'Codzienne krążenia nadgarstków i łagodne rozciąganie z obciążeniem pomagają; ostry lub długotrwały ból warto skonsultować.',
+  'Push-ups on your fists or on dumbbells keep the wrist straight if the floor position hurts.':
+    'Pompki na pięściach albo na hantlach trzymają nadgarstek prosto, jeśli na podłodze boli.',
+  'Is yoga good for lifters?': 'Czy joga jest dobra dla trenujących siłowo?',
+  'Yes — yoga adds mobility, body awareness, breathing control and a calm way to recover, and {1}–{2} classes a week fit easily around lifting.':
+    'Tak — joga dodaje mobilności, czucia ciała, kontroli oddechu i spokojnej regeneracji, a {1}–{2} zajęcia w tygodniu łatwo dopasować do treningu siłowego.',
+  'Gentle or restorative styles work as active recovery; hot or power yoga is a real training load, so don’t put it right before a heavy leg or pressing day.':
+    'Łagodne lub regeneracyjne style działają jak aktywna regeneracja; joga w gorącej sali albo power joga to prawdziwe obciążenie, więc nie rób jej tuż przed ciężkim dniem nóg czy wyciskań.',
+  'It won’t replace strength training for building muscle or bone.':
+    'Nie zastąpi treningu siłowego w budowie mięśni i kości.',
+  'If you log yoga as an activity, I count it in your weekly load and recovery.':
+    'Jeśli zapiszesz jogę jako aktywność, uwzględnię ją w tygodniowym obciążeniu i regeneracji.',
+  'Is Pilates good alongside lifting?': 'Czy pilates jest dobry razem z treningiem siłowym?',
+  'Pilates is good for core control, posture, mobility and rehab-style strength, and it pairs well with lifting — {1}–{2} sessions a week make a nice addition.':
+    'Pilates dobrze rozwija kontrolę korpusu, postawę, mobilność i siłę w stylu rehabilitacyjnym i dobrze łączy się z siłownią — {1}–{2} zajęcia w tygodniu to fajny dodatek.',
+  'It usually doesn’t load muscles and bones heavily enough to replace progressive strength training for size, strength or bone density.':
+    'Zwykle nie obciąża mięśni i kości na tyle, by zastąpić progresywny trening siłowy dla masy, siły czy gęstości kości.',
+  'Reformer classes are harder than mat classes, so treat them as a light-to-moderate training day.':
+    'Zajęcia na reformerze są cięższe niż na macie, więc traktuj je jak lekki lub umiarkowany dzień treningowy.',
+  'After pregnancy or with back problems, a qualified Pilates instructor can be a great bridge back to lifting.':
+    'Po ciąży albo przy problemach z plecami wykwalifikowany instruktor pilatesu może być świetnym pomostem z powrotem do treningu siłowego.',
+  'Should I wear gym gloves?': 'Czy ćwiczyć w rękawiczkach?',
+  'You don’t need them.': 'Nie są potrzebne.',
+  'Gloves make the handle thicker, which can make gripping harder, and they don’t really prevent calluses — holding the bar correctly does.':
+    'Rękawiczki pogrubiają uchwyt, przez co chwyt może być trudniejszy, i tak naprawdę nie chronią przed odciskami — chroni prawidłowy chwyt.',
+  'If you like them for comfort or hygiene, that’s fine.':
+    'Jeśli lubisz je dla wygody lub higieny, nie ma problemu.',
+  'For heavy pulling, chalk and straps are more useful; for rough hands, file calluses down and moisturise.':
+    'Przy ciężkich ciągach bardziej przydają się magnezja i paski; przy szorstkich dłoniach spiłuj odciski i nawilżaj skórę.',
+  'Hold the bar low in the fingers, near where they join the palm, not in the middle of the palm — the skin folds less and tears less.':
+    'Trzymaj gryf nisko w palcach, blisko miejsca, gdzie łączą się z dłonią, a nie na środku dłoni — skóra mniej się fałduje i rzadziej pęka.',
+  'How much does the barbell weigh?': 'Ile waży gryf?',
+  'A standard Olympic barbell weighs {1} kg (about {2} lb) and is {3} m long; the women’s Olympic bar is {4} kg.':
+    'Standardowy gryf olimpijski waży {1} kg (około {2} lb) i ma {3} m długości; damski gryf olimpijski waży {4} kg.',
+  'Technique bars can be {1}–{2} kg, EZ curl bars usually {3}–{4} kg, and the fixed barbells on racks are marked with their total.':
+    'Gryfy techniczne mają {1}–{2} kg, łamane zwykle {3}–{4} kg, a gotowe sztangi na stojakach mają podaną łączną wagę.',
+  'Smith machine bars vary a lot — often they’re counterbalanced — so check the label or ask the staff, and count it the same way every time.':
+    'Gryfy w suwnicy Smitha bardzo się różnią — często mają przeciwwagę — więc sprawdź naklejkę albo zapytaj obsługę i licz ciężar zawsze tak samo.',
+  'Collars weigh little (spring clips almost nothing, competition collars {1} kg each) — use them on every working set.':
+    'Zaciski ważą niewiele (sprężynowe prawie nic, startowe po {1} kg) — zakładaj je na każdą serię roboczą.',
+  'Is training with a weighted vest worth it?': 'Czy warto trenować w kamizelce obciążeniowej?',
+  'A weighted vest is a simple way to progress bodyweight moves — push-ups, pull-ups, dips, lunges, step-ups — and to make walking or hiking more demanding.':
+    'Kamizelka obciążeniowa to prosty sposób na progresję w ćwiczeniach z masą ciała — pompkach, podciąganiu, pompkach na poręczach, wykrokach, wejściach na skrzynię — i na utrudnienie marszu lub wędrówek.',
+  'Start at about {1}–{2}% of your bodyweight, wear it snug, and add weight in small steps.':
+    'Zacznij od około {1}–{2}% masy ciała, zakładaj ją ciasno i dokładaj ciężar małymi krokami.',
+  'Skip running and jumping in it unless you’re well used to impact, and be careful if you have neck or back problems.':
+    'Nie biegaj i nie skacz w niej, jeśli nie jesteś dobrze przyzwyczajony do obciążeń udarowych, i uważaj przy problemach z szyją lub plecami.',
+  'For older adults, a vest on walks and stairs is a nice way to load the bones safely.':
+    'Dla starszych osób kamizelka na spacery i schody to dobry sposób na bezpieczne obciążenie kości.',
+  'How do I spot someone on the bench press?': 'Jak asekurować kogoś przy wyciskaniu na ławce?',
+  'Ask first: how many reps, whether they want a hand-off and when to help (“only if the bar stops”).':
+    'Najpierw ustal: ile powtórzeń, czy pomóc przy zdjęciu sztangi i kiedy pomagać („tylko jeśli sztanga stanie”).',
+  'Stand close behind their head with your feet planted and your hands in an alternating grip just under the bar, and follow it down and up without touching.':
+    'Stań blisko za głową ćwiczącego, stopy pewnie na podłodze, dłonie chwytem mieszanym tuż pod gryfem, i prowadź go w dół i w górę bez dotykania.',
+  'If the bar stalls, help with just enough force to keep it moving and guide it back to the hooks.':
+    'Jeśli sztanga stanie, pomóż z taką siłą, by dalej się ruszała, i doprowadź ją na stojaki.',
+  'For squats, stand behind with your arms under their armpits — or better, use the safety pins.':
+    'Przy przysiadach stań z tyłu z rękami pod pachami ćwiczącego — albo lepiej użyj bezpieczników.',
+  'A spotter shouldn’t touch the bar on a good rep — a helped rep is a failed rep, and that’s the end of the set.':
+    'Asekurujący nie powinien dotykać sztangi przy dobrym powtórzeniu — powtórzenie z pomocą to powtórzenie nieudane i koniec serii.',
+  'The gym is packed and my equipment is taken — what do I do?':
+    'Siłownia jest pełna, a mój sprzęt zajęty — co robić?',
+  'Ask to work in — alternating sets with someone is normal gym etiquette.':
+    'Zapytaj, czy możesz ćwiczyć na zmianę — dzielenie się sprzętem seriami to normalna etykieta na siłowni.',
+  'Otherwise switch to a similar exercise for the same muscle: dumbbells instead of a barbell, a different machine, or change the order and come back later.':
+    'W przeciwnym razie zmień ćwiczenie na podobne na ten sam mięsień: hantle zamiast sztangi, inna maszyna albo zmień kolejność i wróć później.',
+  'Supersets of two exercises next to each other save space and time.':
+    'Superserie z dwóch ćwiczeń obok siebie oszczędzają miejsce i czas.',
+  'If it’s always busy, try training at quieter hours — early morning, midday or late evening.':
+    'Jeśli zawsze jest tłoczno, spróbuj trenować w spokojniejszych godzinach — wcześnie rano, w południe albo późnym wieczorem.',
+  'Ask me for an alternative to the exercise — for example “alternative to leg press” — and I’ll suggest one.':
+    'Zapytaj mnie o zamiennik ćwiczenia — na przykład „czym zastąpić suwnicę” — a coś zaproponuję.',
+  'What should I bring to the gym?': 'Co zabrać na siłownię?',
+  'The basics: a water bottle, a small towel, flat-soled or lifting shoes, a lock for the locker, headphones and your phone to log sets.':
+    'Podstawy: bidon z wodą, mały ręcznik, buty z płaską podeszwą albo do podnoszenia ciężarów, kłódka do szafki, słuchawki i telefon do zapisywania serii.',
+  'Useful extras as you progress: chalk, lifting straps, a belt, wrist wraps or knee sleeves, a resistance band for warm-ups, and a snack or shake for afterwards.':
+    'Przydatne z czasem: magnezja, paski, pas, owijki na nadgarstki lub opaski na kolana, guma do rozgrzewki i przekąska albo szejk na potem.',
+  'Keep it simple — a bag you actually pack beats the perfect kit.':
+    'Nie komplikuj — torba, którą naprawdę pakujesz, jest lepsza niż idealny zestaw.',
+  'Flip-flops for the shower and a spare shirt make early-morning or after-work sessions much easier.':
+    'Klapki pod prysznic i zapasowa koszulka bardzo ułatwiają treningi wcześnie rano albo po pracy.',
+  'How do I film myself to check my form?': 'Jak się nagrywać, żeby sprawdzić technikę?',
+  'Set the phone at about hip height, {1}–{2} metres away.':
+    'Postaw telefon mniej więcej na wysokości bioder, {1}–{2} metry dalej.',
+  'For squats and deadlifts, film from the side at a slight angle so you can see the bar path, back angle and depth; for the bench, from the side near your feet or from behind your head.':
+    'Przysiady i martwe ciągi nagrywaj z boku pod lekkim kątem, żeby widzieć tor sztangi, kąt pleców i głębokość; wyciskanie na ławce — z boku przy stopach albo zza głowy.',
+  'Film a working set, not just the warm-up, and watch it in slow motion.':
+    'Nagraj serię roboczą, nie tylko rozgrzewkę, i obejrzyj ją w zwolnionym tempie.',
+  'Ask first if other people will be in the shot.':
+    'Jeśli w kadrze będą inne osoby, najpierw zapytaj.',
+  'Compare the video with a few good reference lifts — fixing one thing at a time is easier than fixing five.':
+    'Porównaj nagranie z kilkoma dobrymi wzorcami — łatwiej poprawiać jedną rzecz naraz niż pięć.',
+  'How do I progress with bodyweight exercises?': 'Jak robić postępy w ćwiczeniach z masą ciała?',
+  'Make each exercise harder in steps instead of just adding reps forever: push-ups, then feet elevated, then archer push-ups; rows under a table, then feet elevated; squats, then split squats, Bulgarian split squats and pistols.':
+    'Utrudniaj każde ćwiczenie stopniowo, zamiast w nieskończoność dokładać powtórzeń: pompki, potem z nogami na podwyższeniu, potem pompki łucznika; wiosłowanie pod stołem, potem z nogami na podwyższeniu; przysiady, potem przysiady wykroczne, bułgarskie i pistolety.',
+  'Work in the {1}–{2} rep range close to failure, slow down the lowering, add pauses, and use a backpack, bands or a vest when a move gets easy.':
+    'Pracuj w zakresie {1}–{2} powtórzeń blisko upadku, zwalniaj opuszczanie, dodawaj pauzy, a gdy ruch robi się łatwy — plecak, gumy albo kamizelkę.',
+  'That builds muscle just as well as weights.': 'To buduje mięśnie tak samo dobrze jak ciężary.',
+  'A pull-up bar in a doorway is the single best investment for training at home — it covers the back and biceps, which are hard to hit otherwise.':
+    'Drążek w framudze drzwi to najlepsza pojedyncza inwestycja do treningu w domu — ogarnia plecy i bicepsy, które inaczej trudno obciążyć.',
+  'How should I train during menopause?': 'Jak trenować w menopauzie?',
+  'Strength training becomes more important, not less: falling oestrogen speeds up the loss of muscle and bone, and lifting is one of the best tools against both.':
+    'Trening siłowy staje się ważniejszy, nie mniej ważny: spadek estrogenu przyspiesza utratę mięśni i kości, a ciężary to jedno z najlepszych narzędzi przeciw obu.',
+  'Aim for {1}–{2} full-body sessions a week with gradually heavier loads, some impact like brisk walking, stairs or small jumps if your joints tolerate it, and enough protein (around {3}–{4} g per kg).':
+    'Celuj w {1}–{2} treningi całego ciała w tygodniu ze stopniowo większym ciężarem, trochę obciążeń udarowych, jak szybki marsz, schody czy małe podskoki, jeśli stawy pozwalają, i dość białka (około {3}–{4} g na kg).',
+  'Sleep problems and hot flushes can affect recovery — go easier on bad days, and talk to your doctor about symptoms and bone density.':
+    'Problemy ze snem i uderzenia gorąca mogą wpływać na regenerację — w gorsze dni odpuść trochę i porozmawiaj z lekarzem o objawach i gęstości kości.',
+  'Pelvic-floor symptoms like leaking during lifts are common and treatable — a pelvic-health physio can help.':
+    'Objawy dna miednicy, jak popuszczanie przy ćwiczeniach, są częste i dają się leczyć — pomoże fizjoterapeuta uroginekologiczny.',
+  'When can I lift again after giving birth?': 'Kiedy mogę wrócić do ciężarów po porodzie?',
+  'Get the go-ahead from your doctor or midwife first — usually around the six-week check, later after a C-section or complications.':
+    'Najpierw uzyskaj zgodę lekarza lub położnej — zwykle około kontroli po sześciu tygodniach, później po cesarskim cięciu albo powikłaniach.',
+  'Start with breathing, pelvic-floor and deep-core work, walking and light bodyweight moves, then build up over several months; a check with a pelvic-health physio is ideal.':
+    'Zacznij od oddechu, ćwiczeń dna miednicy i głębokich mięśni brzucha, spacerów i lekkich ćwiczeń z masą ciała, potem zwiększaj przez kilka miesięcy; idealnie — wizyta u fizjoterapeuty uroginekologicznego.',
+  'Signs to back off: leaking, heaviness or dragging in the pelvis, doming of the belly, pain or more bleeding.':
+    'Sygnały, żeby zwolnić: popuszczanie, uczucie ciężaru lub ciągnięcia w miednicy, „namiot” na brzuchu, ból albo większe krwawienie.',
+  'Running and jumping usually come back last — often not before about {1} months, and only once the pelvic floor handles lighter impact well.':
+    'Bieganie i skoki wracają zwykle na końcu — często nie wcześniej niż po około {1} miesiącach i dopiero, gdy dno miednicy dobrze znosi lżejsze obciążenia udarowe.',
+  'I leak a little when I lift or jump — is that normal?':
+    'Trochę popuszczam przy ćwiczeniach albo skokach — czy to normalne?',
+  'It’s common — especially after pregnancy, in menopause and in heavy lifters — but it isn’t something you just have to live with.':
+    'To częste — zwłaszcza po ciąży, w menopauzie i u osób dźwigających duże ciężary — ale nie musisz się z tym godzić.',
+  'A pelvic-health physiotherapist can assess you and give you a plan, and it usually improves a lot.':
+    'Fizjoterapeuta uroginekologiczny oceni stan i da ci plan, a zwykle wyraźnie się poprawia.',
+  'Meanwhile: breathe out on the effort instead of holding your breath hard, go a bit lighter on the moves that trigger it, and empty your bladder before training.':
+    'Tymczasem: wydychaj na wysiłku zamiast mocno wstrzymywać oddech, zmniejsz trochę ciężar w ćwiczeniach, które to wywołują, i opróżnij pęcherz przed treningiem.',
+  'Pelvic-floor training isn’t only squeezing — it’s also learning to relax, and to coordinate with your breathing and bracing.':
+    'Trening dna miednicy to nie tylko napinanie — to też nauka rozluźniania i koordynacji z oddechem i napięciem brzucha.',
+  'Is lifting safe with osteoporosis or low bone density?':
+    'Czy ciężary są bezpieczne przy osteoporozie lub niskiej gęstości kości?',
+  'For most people, yes — and supervised, progressive strength and impact training is one of the few things shown to improve bone density.':
+    'Dla większości tak — a nadzorowany, progresywny trening siłowy i udarowy to jedna z niewielu rzeczy, które udowodnione poprawiają gęstość kości.',
+  'Start with guidance from a physio or doctor, focus on good technique in squats, deadlift variations, presses and rows, and increase the loads gradually.':
+    'Zacznij od wskazówek fizjoterapeuty lub lekarza, skup się na dobrej technice przysiadów, odmian martwego ciągu, wyciskań i wiosłowań i zwiększaj ciężar stopniowo.',
+  'Be careful with loaded forward bending and twisting of the spine (heavy sit-ups, toe touches) and with fall risk; balance work is part of the plan.':
+    'Uważaj na skłony do przodu i skręty kręgosłupa pod obciążeniem (ciężkie brzuszki, sięganie do palców) oraz na ryzyko upadku; ćwiczenia równowagi są częścią planu.',
+  'Protein, calcium and vitamin D matter too; your doctor may also discuss medication depending on your fracture risk.':
+    'Ważne są też białko, wapń i witamina D; lekarz może też omówić leki w zależności od ryzyka złamań.',
+  'Can I lift weights with arthritis?':
+    'Czy mogę dźwigać ciężary przy chorobie zwyrodnieniowej stawów?',
+  'Usually yes, and it tends to help: stronger muscles around a joint reduce pain and improve function in knee and hip osteoarthritis.':
+    'Zwykle tak i zwykle to pomaga: silniejsze mięśnie wokół stawu zmniejszają ból i poprawiają funkcję przy zwyrodnieniu kolana i biodra.',
+  'Pick ranges and exercises that feel ok — pain up to about {1}–{2} out of {3} that settles within {4} hours is generally acceptable.':
+    'Wybieraj zakresy i ćwiczenia, które znosisz dobrze — ból do około {1}–{2} na {3}, który mija w ciągu {4} godzin, jest zwykle akceptowalny.',
+  'Warm up well, progress slowly and swap exercises that flare the joint; during a flare-up of inflammatory arthritis, ease off and follow your rheumatologist’s advice.':
+    'Dobrze się rozgrzewaj, zwiększaj powoli i zamieniaj ćwiczenia, które zaostrzają ból; w czasie zaostrzenia zapalenia stawów odpuść i słuchaj reumatologa.',
+  'Cycling, swimming and water exercise are joint-friendly cardio options alongside lifting.':
+    'Rower, pływanie i ćwiczenia w wodzie to przyjazne stawom cardio obok treningu siłowego.',
+  'How do I make the gym a habit?': 'Jak zrobić z siłowni nawyk?',
+  'Make it easy and fixed: pick specific days and times, put them in your calendar and pack your bag the night before.':
+    'Niech to będzie proste i stałe: wybierz konkretne dni i godziny, wpisz je do kalendarza i pakuj torbę wieczorem.',
+  'Start smaller than you think — two {1}-minute sessions a week that you never miss beat five that you quit after a month.':
+    'Zacznij od mniej, niż ci się wydaje — dwa {1}-minutowe treningi w tygodniu, których nigdy nie opuszczasz, są lepsze niż pięć, które rzucisz po miesiącu.',
+  'Track what you do (every logged session counts), and on low-motivation days commit to just the warm-up; most of the time you’ll finish the session.':
+    'Zapisuj, co robisz (każdy zapisany trening się liczy), a w dni bez motywacji obiecaj sobie tylko rozgrzewkę; najczęściej skończysz cały trening.',
+  'Tie it to something you already do — straight from work, or right after the school run — so it doesn’t rely on willpower.':
+    'Przywiąż trening do czegoś, co już robisz — prosto z pracy albo zaraz po odwiezieniu dzieci — żeby nie zależał od siły woli.',
+  'I’m bored of my workouts — should I change everything?':
+    'Nudzą mnie treningi — zmienić wszystko?',
+  'Keep the core, change the details.': 'Zostaw podstawę, zmieniaj szczegóły.',
+  'Boredom is real and it hurts consistency, but switching everything often resets your progress.':
+    'Nuda jest prawdziwa i szkodzi regularności, ale zmiana wszystkiego często zeruje postęp.',
+  'Keep your main lifts and swap the variations and accessories every {1}–{2} weeks — a different squat or press variation, new rep ranges, a new challenge like a {3} km time or a pull-up goal.':
+    'Zostaw główne ćwiczenia, a odmiany i ćwiczenia pomocnicze wymieniaj co {1}–{2} tygodni — inny wariant przysiadu czy wyciskania, nowe zakresy powtórzeń, nowe wyzwanie, jak czas na {3} km albo cel w podciąganiu.',
+  'Adding a sport or a class once a week can freshen things up too.':
+    'Dodanie raz w tygodniu sportu lub zajęć grupowych też odświeża.',
+  'Set a small target for the next block — a number to beat keeps training interesting.':
+    'Postaw sobie mały cel na kolejny blok — liczba do pobicia utrzymuje trening ciekawym.',
+  'I keep comparing myself to others at the gym and online':
+    'Ciągle porównuję się z innymi na siłowni i w sieci',
+  'Almost everyone does, and it’s rarely a fair comparison: different genetics, training age, lighting, angles, editing — and sometimes drugs.':
+    'Robi tak prawie każdy, a to rzadko uczciwe porównanie: inna genetyka, staż, światło, kąty, obróbka — a czasem farmakologia.',
+  'The only useful comparison is you now versus you a few months ago: your logged lifts, measurements and photos.':
+    'Jedyne przydatne porównanie to ty teraz kontra ty kilka miesięcy temu: zapisane ciężary, pomiary i zdjęcia.',
+  'Mute accounts that make you feel worse, and follow people whose training you can actually learn from.':
+    'Wycisz konta, po których czujesz się gorzej, i obserwuj ludzi, od których naprawdę możesz się czegoś nauczyć.',
+  'Ask me “am I stronger than {1} months ago” — your own numbers are the best antidote.':
+    'Zapytaj mnie „czy jestem silniejszy niż {1} miesiące temu” — twoje własne liczby to najlepsze antidotum.',
+  'How do I get mentally ready for a heavy lift?':
+    'Jak przygotować się psychicznie do ciężkiej serii?',
+  'Build a short routine and use it on every heavy set: the same setup steps, a big breath and brace, and one simple cue like “chest up” or “push the floor”.':
+    'Zbuduj krótki rytuał i stosuj go przy każdej ciężkiej serii: te same kroki ustawienia, głęboki wdech i napięcie oraz jedna prosta wskazówka, jak „klatka w górę” albo „odepchnij podłogę”.',
+  'Picture the rep going up smoothly a few seconds before you walk to the bar.':
+    'Kilka sekund przed podejściem do sztangi wyobraź sobie, jak powtórzenie płynnie idzie w górę.',
+  'Getting hyped can help a little on a max attempt, but calm focus works better for most sets — save the adrenaline for rare days.':
+    'Nakręcenie się może trochę pomóc przy próbie maksymalnej, ale w większości serii lepiej działa spokojne skupienie — adrenalinę zostaw na rzadkie dni.',
+  'Music, a fixed warm-up order and the same belt and shoe routine all become triggers that tell your body it’s time.':
+    'Muzyka, stała kolejność rozgrzewki i ten sam rytuał z pasem i butami stają się sygnałami, które mówią ciału, że już czas.',
+  'I’m scared of heavy weights — how do I get over it?':
+    'Boję się dużych ciężarów — jak to przełamać?',
+  'Make failing safe first: set the safety pins or straps in the rack, learn to bail a squat and to lower a bench onto the pins, or use a spotter.':
+    'Najpierw zadbaj o bezpieczną porażkę: ustaw bezpieczniki lub pasy w klatce, naucz się zrzucać przysiad i opuszczać sztangę z ławki na bezpieczniki albo ćwicz z asekuracją.',
+  'Then build confidence gradually — heavy walkouts or holds, singles at {1}–{2}%, and small jumps you know you can make.':
+    'Potem buduj pewność stopniowo — ciężkie wyjścia ze stojaków albo przytrzymania, pojedyncze powtórzenia na {1}–{2}% i małe skoki ciężaru, które na pewno zrobisz.',
+  'The fear usually drops quickly once you’ve failed a rep safely and seen that nothing bad happens.':
+    'Strach zwykle szybko mija, gdy raz bezpiecznie nie dokończysz powtórzenia i zobaczysz, że nic złego się nie dzieje.',
+  'Film it — heavy reps often look much more controlled than they feel.':
+    'Nagraj to — ciężkie powtórzenia często wyglądają na dużo bardziej kontrolowane, niż się czują.',
+  'I dance — how do I combine it with lifting?': 'Tańczę — jak połączyć to z treningiem siłowym?',
+  'Dance and lifting go well together: strength work improves jumps, landings, stability and injury resistance, and dance brings mobility and conditioning.':
+    'Taniec i ciężary dobrze do siebie pasują: trening siłowy poprawia skoki, lądowania, stabilność i odporność na kontuzje, a taniec daje mobilność i kondycję.',
+  'Two or three strength sessions a week are plenty — focus on legs and hips (squats, lunges, hinges), calves and ankles, core and upper back.':
+    'Dwa-trzy treningi siłowe w tygodniu w zupełności wystarczą — skup się na nogach i biodrach (przysiady, wykroki, zawiasy biodrowe), łydkach i kostkach, korpusie i górze pleców.',
+  'Keep heavy leg work away from intense rehearsals or shows, and in busy dance weeks shorten your lifting rather than skipping it.':
+    'Ciężkie nogi planuj z dala od intensywnych prób czy występów, a w napięte tygodnie taneczne skracaj trening siłowy, zamiast go opuszczać.',
+  'Tell me after a long dance session — I count it in your load so the next leg day fits.':
+    'Powiedz mi po długich zajęciach tanecznych — uwzględnię to w obciążeniu, żeby kolejny dzień nóg dobrze się wpasował.',
+  'How do I take good progress photos?': 'Jak robić dobre zdjęcia postępów?',
+  'Consistency is everything: the same place, the same light, the same time of day (morning, before food), the same distance and camera height, and the same clothes.':
+    'Najważniejsza jest powtarzalność: to samo miejsce, to samo światło, ta sama pora dnia (rano, przed jedzeniem), ta sama odległość i wysokość aparatu oraz te same ubrania.',
+  'Take front, side and back shots, relaxed and one flexed, every {1}–{2} weeks.':
+    'Rób zdjęcia z przodu, z boku i z tyłu, na luzie i jedno z napięciem, co {1}–{2} tygodnie.',
+  'Compare them side by side over months — day-to-day photos mostly show changes in water and lighting.':
+    'Porównuj je obok siebie na przestrzeni miesięcy — zdjęcia dzień po dniu pokazują głównie zmiany wody i oświetlenia.',
+  'Photos plus a few tape measurements tell you more than the scale alone, especially on a recomp.':
+    'Zdjęcia plus kilka pomiarów taśmą powiedzą więcej niż sama waga, zwłaszcza przy rekompozycji.',
+  'What body measurements should I track?': 'Jakie pomiary ciała warto śledzić?',
+  'The useful basics: waist at the navel, hips at the widest point, chest, upper arm (relaxed or flexed, but always the same) and mid-thigh.':
+    'Przydatne podstawy: talia na wysokości pępka, biodra w najszerszym miejscu, klatka, ramię (rozluźnione albo napięte, ale zawsze tak samo) i połowa uda.',
+  'Measure in the morning before eating, with the tape snug but not pressing, and take each measurement twice.':
+    'Mierz rano przed jedzeniem, z taśmą przylegającą, ale nie uciskającą, i każdy pomiar rób dwa razy.',
+  'Once every {1}–{2} weeks is enough; the waist is the best simple sign of fat loss, and the arms and thighs of muscle gain.':
+    'Raz na {1}–{2} tygodnie wystarczy; talia to najlepszy prosty wskaźnik utraty tłuszczu, a ramiona i uda — przyrostu mięśni.',
+  'You can keep them in your profile under Body — I use your weight trend when we talk about progress.':
+    'Możesz trzymać je w profilu w sekcji Ciało — trend twojej wagi wykorzystuję, gdy rozmawiamy o postępach.',
+  'How do I measure my body fat percentage?': 'Jak zmierzyć procent tkanki tłuszczowej?',
+  'Every method is off by a few percent.': 'Każda metoda myli się o kilka procent.',
+  'Home smart scales (bioimpedance) swing with hydration, so only trust their trend; calipers are decent in experienced hands; a DEXA scan is the most detailed but still not perfect.':
+    'Domowe inteligentne wagi (bioimpedancja) skaczą w zależności od nawodnienia, więc ufaj tylko ich trendowi; fałdomierz w doświadczonych rękach daje przyzwoity wynik; DEXA jest najdokładniejsza, ale też nie idealna.',
+  'For most people, the waist measurement, photos and how clothes fit are just as useful, and free.':
+    'Dla większości ludzi obwód talii, zdjęcia i to, jak leżą ubrania, są równie przydatne — i za darmo.',
+  'As a rough guide, about {1}–{2}% is lean to healthy for men and about {3}–{4}% for women.':
+    'Orientacyjnie: około {1}–{2}% to szczupło-zdrowo dla mężczyzn i około {3}–{4}% dla kobiet.',
+  'Measure the same way under the same conditions every time — the direction of change matters more than the exact number.':
+    'Mierz za każdym razem tak samo i w tych samych warunkach — kierunek zmian ma większe znaczenie niż dokładna liczba.',
+  'Is BMI accurate for people who lift?': 'Czy BMI jest dokładne dla osób trenujących siłowo?',
+  'BMI (weight divided by height squared) is a quick screening tool for large groups, but it can’t tell muscle from fat — so muscular people often land in the “overweight” range while being lean.':
+    'BMI (waga podzielona przez wzrost do kwadratu) to szybkie narzędzie przesiewowe dla dużych grup, ale nie odróżnia mięśni od tłuszczu — więc umięśnieni ludzie często trafiają do „nadwagi”, będąc szczupłymi.',
+  'Your waist (under about half your height is a good sign), body-fat estimates and health markers like blood pressure tell you more.':
+    'Talia (poniżej mniej więcej połowy wzrostu to dobry znak), szacunki tkanki tłuszczowej i wskaźniki zdrowia, jak ciśnienie, mówią więcej.',
+  'For most people who don’t lift, BMI is still a reasonable rough guide.':
+    'Dla większości osób, które nie trenują siłowo, BMI nadal jest rozsądnym zgrubnym wskaźnikiem.',
+  'If your BMI says overweight but your waist is small and you lift, you’re very likely fine.':
+    'Jeśli BMI pokazuje nadwagę, ale masz wąską talię i trenujesz, najpewniej wszystko jest w porządku.',
+  'Can I lose fat and build muscle at the same time?':
+    'Czy mogę jednocześnie spalać tłuszcz i budować mięśnie?',
+  'Yes — that’s body recomposition, and it works best for beginners, people coming back after a break and those with more body fat.':
+    'Tak — to rekompozycja sylwetki i najlepiej działa u początkujących, osób wracających po przerwie i tych z większą ilością tkanki tłuszczowej.',
+  'Eat around maintenance or in a small deficit (about {1}–{2} kcal), keep protein high ({3}–{4} g per kg), lift with progressive overload and sleep well.':
+    'Jedz w okolicach zera kalorycznego albo z małym deficytem (około {1}–{2} kcal), trzymaj wysokie białko ({3}–{4} g na kg), trenuj z progresją obciążenia i dobrze śpij.',
+  'The scale may barely move, so track your waist, photos and strength; lean, experienced lifters usually do better with separate bulking and cutting phases.':
+    'Waga może prawie się nie ruszać, więc śledź talię, zdjęcia i siłę; szczupli, doświadczeni trenujący zwykle lepiej wychodzą na osobnych fazach masy i redukcji.',
+  'Skinny-fat?': 'Skinny-fat?',
+  'Recomp is usually the right call: lift hard, eat at maintenance with plenty of protein, and give it {1}–{2} months.':
+    'Rekompozycja zwykle jest właściwym wyborem: trenuj ciężko, jedz na zero z dużą ilością białka i daj temu {1}–{2} miesięcy.',
+  'What is a mini-cut?': 'Co to jest mini redukcja?',
+  'A mini-cut is a short, aggressive fat-loss phase — usually {1}–{2} weeks at a fairly big deficit (around {3}–{4} kcal, about {5}–{6}% of bodyweight a week) — often used in the middle of a long bulk to trim fat before carrying on.':
+    'Mini redukcja to krótka, agresywna faza spalania tłuszczu — zwykle {1}–{2} tygodnie na dość dużym deficycie (około {3}–{4} kcal, mniej więcej {5}–{6}% masy ciała tygodniowo) — często w środku długiej masy, by zrzucić tłuszcz przed kontynuacją.',
+  'Keep protein high and keep lifting heavy to hold on to muscle; trim some volume if recovery suffers.':
+    'Trzymaj wysokie białko i dalej trenuj ciężko, żeby zachować mięśnie; jeśli regeneracja cierpi, zmniejsz trochę objętość.',
+  'When it ends, go straight back to maintenance or a small surplus.':
+    'Po zakończeniu wróć od razu na zero kaloryczne albo na małą nadwyżkę.',
+  'It works because it’s short — hunger and fatigue don’t have time to build up; if you need longer than about {1} weeks, switch to a normal, moderate cut.':
+    'Działa, bo jest krótka — głód i zmęczenie nie zdążą się nagromadzić; jeśli potrzebujesz dłużej niż około {1} tygodni, przejdź na zwykłą, umiarkowaną redukcję.',
+  'How do I combine climbing with lifting?': 'Jak łączyć wspinaczkę z treningiem siłowym?',
+  'They complement each other well.': 'Świetnie się uzupełniają.',
+  'Climbing hammers the fingers, forearms and pulling muscles, so in the gym focus on what climbing doesn’t train: legs, pressing (push-ups, overhead press, dips), shoulder external rotation and core — two sessions a week is plenty.':
+    'Wspinaczka mocno obciąża palce, przedramiona i mięśnie przyciągające, więc na siłowni skup się na tym, czego wspinanie nie trenuje: nogi, wyciskania (pompki, wyciskanie nad głowę, pompki na poręczach), rotacja zewnętrzna barku i korpus — dwa treningi w tygodniu wystarczą.',
+  'Keep heavy pulling and grip work away from hard climbing days, because finger tendons recover more slowly than muscles.':
+    'Ciężkie przyciągania i pracę na chwyt planuj z dala od ciężkich dni wspinania, bo ścięgna palców regenerują się wolniej niż mięśnie.',
+  'Work for the opposing muscles, like push-ups and face pulls, helps keep a climber’s shoulders balanced and healthy.':
+    'Praca na mięśnie przeciwstawne, jak pompki i face pull, pomaga utrzymać barki wspinacza w równowadze i zdrowiu.',
+  'What are fast-twitch and slow-twitch muscle fibres?':
+    'Co to są włókna mięśniowe szybko- i wolnokurczliwe?',
+  'Slow-twitch (type I) fibres resist fatigue and do endurance work; fast-twitch (type II) fibres produce more force and speed and grow more easily.':
+    'Włókna wolnokurczliwe (typ I) są odporne na zmęczenie i pracują przy wytrzymałości; szybkokurczliwe (typ II) dają więcej siły i szybkości i łatwiej rosną.',
+  'Every muscle has a mix, and your genetics set the ratio — sprinters tend to have more fast-twitch, marathoners more slow-twitch.':
+    'Każdy mięsień ma mieszankę, a proporcje ustala genetyka — sprinterzy mają zwykle więcej szybkich, maratończycy więcej wolnych.',
+  'In practice you don’t need to train the fibre types separately: sets taken close to failure recruit both, whether the weight is heavy or light.':
+    'W praktyce nie trzeba trenować typów włókien osobno: serie blisko upadku angażują oba, niezależnie od tego, czy ciężar jest duży, czy mały.',
+  'That’s why a wide rep range (about {1}–{2}) builds muscle as long as the effort is high enough.':
+    'Dlatego szeroki zakres powtórzeń (około {1}–{2}) buduje mięśnie, o ile wysiłek jest wystarczająco duży.',
+  'What is the rotator cuff and should I train it?':
+    'Co to jest stożek rotatorów i czy go trenować?',
+  'The rotator cuff is four small muscles around the shoulder blade that keep the ball of the shoulder centred in its socket while the big muscles move the arm.':
+    'Stożek rotatorów to cztery małe mięśnie wokół łopatki, które utrzymują głowę kości ramiennej na środku stawu, gdy duże mięśnie poruszają ręką.',
+  'Heavy pressing and pulling train it somewhat, but {1} sets of {2}–{3} light external rotations (band or cable) and face pulls {4}–{5} times a week are cheap insurance, especially if you bench a lot or play overhead sports.':
+    'Ciężkie wyciskania i przyciągania częściowo go trenują, ale {1} serie po {2}–{3} lekkich rotacji zewnętrznych (z gumą lub na wyciągu) i face pull {4}–{5} razy w tygodniu to tania polisa, zwłaszcza gdy dużo wyciskasz albo uprawiasz sporty z ruchami nad głową.',
+  'Pain at night or when raising your arm to the side deserves a check.':
+    'Ból w nocy albo przy unoszeniu ręki w bok warto skonsultować.',
+  'Keep these light — the goal is control and endurance, not heavy weights.':
+    'Rób to lekko — chodzi o kontrolę i wytrzymałość, nie o duże ciężary.',
+  'How do I train all three heads of the shoulders?': 'Jak trenować wszystkie trzy aktony barków?',
+  'The front delts get plenty of work from bench and overhead presses — most people don’t need extra front raises.':
+    'Przednie aktony dostają dużo pracy z wyciskania na ławce i nad głowę — większość ludzi nie potrzebuje dodatkowych unoszeń przodem.',
+  'The side delts give the shoulders width: lateral raises (dumbbell, cable or machine) {1}–{2} times a week.':
+    'Boczne aktony dają szerokość barków: wznosy bokiem (hantle, wyciąg lub maszyna) {1}–{2} razy w tygodniu.',
+  'The rear delts respond to rear-delt flyes, face pulls and wide-grip rows.':
+    'Tylne aktony reagują na odwrotne rozpiętki, face pull i wiosłowania szerokim chwytem.',
+  'A good weekly target is roughly {1}–{2} sets for the side and rear delts combined, on top of your pressing.':
+    'Dobry cel tygodniowy to mniej więcej {1}–{2} serie na boczne i tylne aktony łącznie, poza wyciskaniami.',
+  'Side and rear delts recover quickly and respond well to higher reps ({1}–{2}).':
+    'Boczne i tylne aktony szybko się regenerują i dobrze reagują na więcej powtórzeń ({1}–{2}).',
+  'What is ego lifting and why is it bad?': 'Co to jest ego lifting i dlaczego jest zły?',
+  'Ego lifting is picking weights to impress rather than to train: half reps, bouncing, heavy swinging, or grinding out reps with broken form.':
+    'Ego lifting to dobieranie ciężaru, żeby zaimponować, a nie trenować: półpowtórzenia, odbijanie, mocne bujanie albo wyciskanie powtórzeń z rozsypaną techniką.',
+  'It shifts the work away from the target muscle, stalls your progress and raises injury risk.':
+    'Przenosi pracę z docelowego mięśnia, hamuje postęp i zwiększa ryzyko kontuzji.',
+  'Choose loads you can control through the full range with {1}–{2} reps left, add weight only when the reps are clean, and let your log — not the plates — show your progress.':
+    'Wybieraj ciężar, który kontrolujesz w pełnym zakresie z {1}–{2} powtórzeniami w zapasie, dokładaj tylko przy czystych powtórzeniach i niech postęp pokazuje dziennik, a nie talerze.',
+  'A quick check: film a set — if the rep looks different from your warm-ups, the weight is too heavy for now.':
+    'Szybki test: nagraj serię — jeśli powtórzenie wygląda inaczej niż na rozgrzewce, ciężar jest na razie za duży.',
+  'Do I really need to train legs?': 'Czy naprawdę muszę trenować nogi?',
+  'Yes, if you want a balanced, strong, athletic body.':
+    'Tak, jeśli chcesz mieć zrównoważone, silne, atletyczne ciało.',
+  'Legs are about half your muscle mass: training them builds overall strength, bone density, work capacity and a physique that doesn’t look top-heavy, and it helps in sport and everyday life.':
+    'Nogi to mniej więcej połowa masy mięśniowej: ich trening buduje ogólną siłę, gęstość kości, wydolność i sylwetkę bez „przewagi góry”, a do tego pomaga w sporcie i codziennym życiu.',
+  'If heavy squats aren’t your thing, the leg press, lunges, split squats, hip thrusts and leg curls still do the job — two sessions a week is plenty.':
+    'Jeśli ciężkie przysiady to nie twoja bajka, suwnica, wykroki, przysiady wykroczne, hip thrust i uginania nóg też dają radę — dwa treningi w tygodniu w zupełności wystarczą.',
+  'Leg training doesn’t “release hormones” that grow your arms — but it does make you stronger and more capable everywhere.':
+    'Trening nóg nie „wyrzuca hormonów”, od których rosną ramiona — ale czyni cię silniejszym i sprawniejszym wszędzie.',
+  'Why do I feel sick during hard workouts?': 'Dlaczego mdli mnie podczas ciężkich treningów?',
+  'Common causes: training too soon after a big meal or on a completely empty stomach, too little fluid, going from zero to very hard without a warm-up, or very intense leg or conditioning work with short rests.':
+    'Częste przyczyny: trening zbyt szybko po dużym posiłku albo na zupełnie pusty żołądek, za mało płynów, start od zera do bardzo mocnego tempa bez rozgrzewki albo bardzo intensywna praca na nogi lub kondycję z krótkimi przerwami.',
+  'Eat a light meal {1}–{2} hours before, sip water, build up the intensity and take longer rests on brutal sets.':
+    'Zjedz lekki posiłek {1}–{2} godziny wcześniej, pij wodę małymi łykami, zwiększaj intensywność stopniowo i dłużej odpoczywaj przy morderczych seriach.',
+  'Stop and get help if the nausea comes with chest pain, shortness of breath, fainting or confusion.':
+    'Przerwij i poszukaj pomocy, jeśli mdłościom towarzyszy ból w klatce piersiowej, duszność, omdlenie lub dezorientacja.',
+  'Sitting or lying down for a few minutes with your legs up and breathing slowly usually settles it.':
+    'Zwykle pomaga kilka minut siedzenia albo leżenia z uniesionymi nogami i spokojne oddychanie.',
+  'Why do my muscles shake during a set?': 'Dlaczego mięśnie drżą podczas serii?',
+  'Shaking is normal with new exercises, heavy loads or near failure: your nervous system is still learning to coordinate the muscle fibres, and tired fibres drop in and out.':
+    'Drżenie jest normalne przy nowych ćwiczeniach, dużych ciężarach albo blisko upadku: układ nerwowy dopiero uczy się koordynować włókna mięśniowe, a zmęczone włókna to się włączają, to wyłączają.',
+  'It fades as you get stronger and more practised.':
+    'Mija, gdy stajesz się silniejszy i bardziej wprawiony.',
+  'If it’s so strong that you lose control of the weight, go lighter; low blood sugar or too much caffeine can also add to it.':
+    'Jeśli jest tak silne, że tracisz kontrolę nad ciężarem, weź lżejszy; nasilić je może też niski cukier we krwi albo za dużo kofeiny.',
+  'Shaking at rest, or shaking with weakness or numbness, is something to check with a doctor.':
+    'Drżenie w spoczynku albo połączone z osłabieniem lub drętwieniem warto sprawdzić u lekarza.',
+  'My joints click and pop when I lift — is that bad?':
+    'Stawy strzelają i klikają przy ćwiczeniach — czy to źle?',
+  'Painless clicking or cracking is very common and usually harmless — gas bubbles in the joint fluid or tendons sliding over bone.':
+    'Bezbolesne klikanie czy strzelanie jest bardzo częste i zwykle nieszkodliwe — to pęcherzyki gazu w płynie stawowym albo ścięgna przesuwające się po kości.',
+  'Knee cracking in particular isn’t linked to arthritis.':
+    'Zwłaszcza trzaski w kolanach nie wiążą się z chorobą zwyrodnieniową.',
+  'Worry only if it comes with pain, swelling, locking, the joint giving way or a feeling that something catches — then get it checked and adjust the exercise in the meantime.':
+    'Martw się tylko wtedy, gdy towarzyszy im ból, obrzęk, blokowanie, uciekanie stawu albo uczucie, że coś zahacza — wtedy daj to sprawdzić, a w międzyczasie zmień ćwiczenie.',
+  'A good warm-up often quiets the noises down during the session.':
+    'Dobra rozgrzewka często wycisza te dźwięki już w trakcie treningu.',
+  'Will I get stretch marks from bulking?': 'Czy od budowania masy będę mieć rozstępy?',
+  'You might — fast growth of muscle or fat stretches the skin faster than it adapts, often on the shoulders, chest, arms and thighs, and genetics decide a lot.':
+    'Możesz — szybki przyrost mięśni lub tłuszczu rozciąga skórę szybciej, niż ona się dostosowuje, często na barkach, klatce, ramionach i udach, a dużo zależy od genetyki.',
+  'Gaining slowly (about {1}–{2} kg a month for most people) lowers the risk.':
+    'Wolny przyrost wagi (około {1}–{2} kg miesięcznie u większości) zmniejsza ryzyko.',
+  'Creams have little evidence behind them; fresh red marks fade to silvery lines over months, and a dermatologist can help if they bother you.':
+    'Kremy mają słabe dowody; świeże czerwone pręgi z miesiącami bledną do srebrzystych linii, a jeśli ci przeszkadzają, pomoże dermatolog.',
+  'For many lifters they’re a normal sign of growth, not a health problem.':
+    'U wielu trenujących to normalny ślad wzrostu, a nie problem zdrowotny.',
+  'Any tips for using the app?': 'Masz wskazówki, jak korzystać z aplikacji?',
+  'How do I use this app?': 'Jak korzystać z tej aplikacji?',
+  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile).':
+    'Spotter w pigułce: na dolnym pasku jest Dziś (twój plan, historia i ja), Przegląd (postępy, rekordy, programy, cele, playbook, ćwiczenia), „+” pośrodku (rozpocznij trening, auto trening, aktywność, sen i zdrowie albo zapisz przeszły trening), Siłownie (twoje siłownie i ich sprzęt) i Aplikacje (Apex, Odżywianie, Nauka i twój profil).',
+  'Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.':
+    'Zapisuj serie w trakcie treningu, a ja będę śledzić każde ćwiczenie — pytaj mnie o cokolwiek albo poproś o wskazówki.',
+  'How do I start a session?': 'Jak rozpocząć trening?',
+  'Tap the “+” in the middle of the bottom bar.': 'Stuknij „+” pośrodku dolnego paska.',
+  'The big button on top starts the best fit: “Today in program” if you have an active program, your usual day from the Playbook, or a session “From scratch” (“Or start from scratch” is always there too).':
+    'Duży przycisk u góry uruchamia najlepszą opcję: „Dziś w programie”, jeśli masz aktywny program, twój zwykły dzień z Playbooka albo trening „Od zera” (zawsze jest też „Albo zacznij od zera”).',
+  'Pick your gym if asked, then add exercises and log your sets.':
+    'Jeśli zapyta, wybierz siłownię, potem dodawaj ćwiczenia i zapisuj serie.',
+  'The tiles below start an “Auto session”, an “Activity”, “Health” (sleep, rest, injury), “Log past” or a “Home set”.':
+    'Kafelki poniżej uruchamiają „Auto trening”, „Aktywność”, „Zdrowie” (sen, odpoczynek, kontuzja), „Przeszły” albo „Zestaw w domu”.',
+  'How does the auto session work?': 'Jak działa auto trening?',
+  'Tap “+” → “Auto session” and I build a full day from your goal and what’s recovered.':
+    'Stuknij „+” → „Auto trening”, a ja ułożę cały dzień pod twój cel i to, co zregenerowane.',
+  'Go through the steps — goal, what today is for (strength, muscle, endurance and so on), muscles, and the day itself (length, warm-up, cardio, cool-down) — then review it and tap “Start now”, or “Save as a day” to keep it for later.':
+    'Przejdź przez kroki — cel, do czego jest dzisiejszy dzień (siła, masa, wytrzymałość i tak dalej), mięśnie i sam dzień (długość, rozgrzewka, cardio, schłodzenie) — potem sprawdź i stuknij „Zacznij” albo „Zapisz jako dzień”, żeby zostawić na później.',
+  'How do I finish a workout?': 'Jak zakończyć trening?',
+  'When you’re done, tap “Finish” (the ✓ button) — you’ll get a summary with your volume and any new records, and “Share workout” if you want an image of it.':
+    'Gdy skończysz, stuknij „Zakończ” (przycisk ✓) — zobaczysz podsumowanie z objętością i nowymi rekordami, a „Udostępnij trening” zrobi z niego obrazek.',
+  'Changed your mind?': 'Zmieniłeś zdanie?',
+  '“Discard session” (the bin icon next to it) throws the session away.':
+    '„Odrzuć trening” (ikona kosza obok) usuwa sesję.',
+  'A session left open closes by itself after {1} hours and gets a ⚠️ mark.':
+    'Niezamknięty trening zamyka się sam po {1} godzinach i dostaje znaczek ⚠️.',
+  'How do I log a workout at home?': 'Jak zapisać trening w domu?',
+  'No gym?': 'Bez siłowni?',
+  'Tap “+” → “Home set” to log pull-ups, push-ups, a vacuum hold and similar moves at home — it counts like any other session.':
+    'Stuknij „+” → „Zestaw w domu”, żeby zapisać podciąganie, pompki, vacuum i podobne ćwiczenia w domu — liczy się jak każdy inny trening.',
+  'You can also add a past home set from “Log past”.':
+    'Przeszły zestaw w domu możesz też dodać przez „Przeszły”.',
+  'How do I pause training for a vacation or illness?':
+    'Jak wstrzymać trening na czas urlopu albo choroby?',
+  'Tap “+” → “Health”.': 'Stuknij „+” → „Zdrowie”.',
+  'Under “Start a rest period” pick “Active recovery” (light training, reduced targets), “Full rest — no gym” (for example a vacation, with dates) or “Unwell” (sick days — nothing counts as missed and your plan waits), then start it.':
+    'W „Rozpocznij okres odpoczynku” wybierz „Aktywna regeneracja” (lekkie treningi, obniżone cele), „Pełny odpoczynek — bez siłowni” (np. urlop, z datami) albo „Choroba” (nic nie liczy się jako opuszczone, a plan czeka) i uruchom.',
+  'Your streak and plan respect it, and you can end it early from its card on Today.':
+    'Seria i plan to uwzględniają, a zakończyć wcześniej możesz z jego karty w Dziś.',
+  'How do I change which day my week starts on?':
+    'Jak zmienić dzień, w którym zaczyna się tydzień?',
+  'Open Apps (bottom bar) → Me → the “Settings” tab → “Week starts on”, and pick the day.':
+    'Otwórz Aplikacje (dolny pasek) → Ja → zakładka „Ustawienia” → „Tydzień zaczyna się w” i wybierz dzień.',
+  'Weekly stats and the program week follow it.':
+    'Statystyki tygodniowe i tydzień programu się do tego dostosują.',
+  'Trainers and admins: Apps → Clients or Users → the “Me” tab.':
+    'Trenerzy i administratorzy: Aplikacje → Klienci albo Użytkownicy → zakładka „Ja”.',
+  'How do I assign a program to a client?': 'Jak przypisać program klientowi?',
+  'Trainers: open Overview → Programs and tap “Assign” on the program’s tile (or open the program → “Program options” → “Assign to members”).':
+    'Trenerzy: otwórz Przegląd → Programy i stuknij „Przypisz” na kafelku programu (albo otwórz program → „Opcje programu” → „Przypisz uczestnikom”).',
+  'Pick the clients, choose the “Start week” and confirm.':
+    'Wybierz klientów, ustaw „Tydzień startu” i potwierdź.',
+  'Assigning replaces the client’s active program; their logged history stays.':
+    'Przypisanie zastępuje aktywny program klienta; jego zapisana historia zostaje.',
+  'You can also start from a client in your Clients list → “Assign a program”.':
+    'Możesz też zacząć od klienta na liście Klienci → „Przypisz program”.',
+  'What is Apex?': 'Co to jest Apex?',
+  'Apex is the game side of Spotter: open Apps → Apex.':
+    'Apex to growa strona Spottera: otwórz Aplikacje → Apex.',
+  '“Home” gives the overview, in “Challenges” you pick one and tap “Start challenge” (you can “Give up” later), “Ranks” rates your lifts against strength standards and “Awards” lists the achievements you’ve unlocked.':
+    '„Start” daje przegląd, w „Wyzwania” wybierasz wyzwanie i stukasz „Rozpocznij wyzwanie” (później możesz „Poddaj się”), „Rangi” oceniają twoje ćwiczenia według norm siłowych, a „Odznaki” pokazują odblokowane osiągnięcia.',
+  'The bell there opens your milestones feed.': 'Dzwonek tam otwiera twój kanał kamieni milowych.',
+  'How does the Nutrition app work?': 'Jak działa aplikacja Odżywianie?',
+  'Open Apps → Nutrition.': 'Otwórz Aplikacje → Odżywianie.',
+  'If the tile says “Coming soon”, it isn’t switched on for your account yet.':
+    'Jeśli na kafelku jest „Wkrótce”, dla twojego konta nie jest jeszcze włączona.',
+  'Inside, “Today” shows the calories and macros you have left, “History” your past days and “Goal” your targets; tap “Add entry” to log a drink, a snack or a meal — search products and dishes, enter it manually or scan a barcode.':
+    'W środku „Dziś” pokazuje, ile kalorii i makro zostało, „Historia” — minione dni, a „Cel” — twoje normy; stuknij „Dodaj wpis”, żeby zapisać napój, przekąskę albo posiłek — wyszukaj produkty i dania, wpisz ręcznie albo zeskanuj kod kreskowy.',
+  'What is the Learn app?': 'Co to jest aplikacja Nauka?',
+  'Open Apps → Learn.': 'Otwórz Aplikacje → Nauka.',
+  'It has short how-to lessons for every part of Spotter, grouped by topic — basics, logging, cardio and recovery, programs, progress, gyms, Apex and more.':
+    'Są tam krótkie lekcje o każdej części Spottera, pogrupowane tematycznie — podstawy, zapisywanie, cardio i regeneracja, programy, postępy, siłownie, Apex i więcej.',
+  'Use “Topics” and search to find one, and “Saved” to keep it for later; the videos are still being recorded, so some lessons show “Video coming soon”.':
+    'Użyj „Tematy” i wyszukiwania, żeby znaleźć lekcję, i „Zapisane”, żeby wrócić później; filmy wciąż są nagrywane, więc przy niektórych lekcjach jest „Wideo wkrótce”.',
+  'Where are my profile and settings?': 'Gdzie jest mój profil i ustawienia?',
+  'Your account side is under Apps → Me (trainers see Clients, admins Users, each with a “Me” tab).':
+    'Twoje konto jest w Aplikacje → Ja (trenerzy widzą Klienci, administratorzy Użytkownicy, każdy z zakładką „Ja”).',
+  'Your profile has “Overview”, “Body” (weight and measurements) and “Settings” (language, units, week start, Atlas, password, sign out).':
+    'Twój profil ma „Przegląd”, „Ciało” (waga i pomiary) i „Ustawienia” (język, jednostki, początek tygodnia, Atlas, hasło, wylogowanie).',
+  'Trainers add clients with “Add client” — the client opens the invite link to join — and see their training read-only.':
+    'Trenerzy dodają klientów przez „Dodaj klienta” — klient otwiera link z zaproszeniem, by dołączyć — i widzą ich treningi tylko do odczytu.',
+  'How do I switch between the apps?': 'Jak przełączać się między aplikacjami?',
+  'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
+    'Stuknij „Aplikacje” na prawym końcu dolnego paska (albo „Siłownia” obok logo Spotter u góry), żeby otworzyć „Zmień aplikację”: Siłownia (twoje treningi), Apex (wyzwania, rangi, odznaki), Odżywianie, Nauka i twój profil.',
+  'It’s one account and one training history across all of them.':
+    'To jedno konto i jedna historia treningów we wszystkich.',
+  'Where do I see my progress and records?': 'Gdzie zobaczę swoje postępy i rekordy?',
+  'Everything about progress lives in the Overview tab: tiles for progress, Trends, records, your program, Goals, Playbook and Exercises.':
+    'Wszystko o postępach jest w zakładce Przegląd: kafelki postępów, Trendy, rekordy, twój program, Cele, Playbook i Ćwiczenia.',
+  'In progress, switch between “Total”, “By muscle”, “Volume” and “Records” and change the time range; tap an exercise to see its history.':
+    'W postępach przełączaj „Razem”, „Wg mięśni”, „Objętość” i „Rekordy” i zmieniaj zakres czasu; stuknij ćwiczenie, żeby zobaczyć jego historię.',
+  'Or just ask me — “how is my bench going?”.':
+    'Albo po prostu zapytaj mnie — „jak idzie moje wyciskanie?”.',
+  'What is the lens in Progress?': 'Co to jest soczewka w postępach?',
+  'Open Overview → the progress tile → “Volume”, then tap the view button above the chart to open “Volume view”.':
+    'Otwórz Przegląd → kafelek postępów → „Objętość”, potem stuknij przycisk widoku nad wykresem, żeby otworzyć „Widok objętości”.',
+  'Under “Lens” pick “Volume” (sets per muscle vs targets), “Fatigue” (load you’re still carrying) or “Readiness” (what’s recovered to train).':
+    'W „Soczewka” wybierz „Objętość” (serie na mięsień vs cele), „Zmęczenie” (obciążenie, które wciąż niesiesz) albo „Gotowość” (co już zregenerowane do treningu).',
+  'In a session, “Today’s readiness” gives the same read for the day.':
+    'W trakcie treningu „Dzisiejsza gotowość” pokazuje to samo dla tego dnia.',
+  'Tap the “+” in the middle of the bottom bar to start anything: a session, an auto-built day, an activity, sleep or a past workout.':
+    'Stuknij „+” pośrodku dolnego paska, żeby zacząć cokolwiek: trening, automatycznie ułożony dzień, aktywność, sen albo przeszły trening.',
+  'In a session, set the weight and reps on the card and tap “Log” — the rest timer starts on its own.':
+    'W treningu ustaw ciężar i powtórzenia na karcie i stuknij „Zapisz” — minutnik odpoczynku startuje sam.',
+  '“Auto session” builds a whole day from your goal and what’s recovered — review it and tap “Start now”.':
+    '„Auto trening” układa cały dzień pod twój cel i to, co zregenerowane — sprawdź i stuknij „Zacznij”.',
+  'Ask me things like “what weight next time on bench?” or “am I recovered?” — I answer from your own log.':
+    'Pytaj mnie np. „jaki ciężar na ławkę następnym razem?” albo „czy jestem zregenerowany?” — odpowiadam z twojego dziennika.',
+  'Tap the rest ring to change the rest target and the alerts; it’s remembered for each exercise.':
+    'Stuknij kółko odpoczynku, żeby zmienić cel odpoczynku i powiadomienia; zapamiętuje się dla każdego ćwiczenia.',
+  'Tap a set to mark it as a warm-up or a dropset, or flag it “To failure” — warm-ups don’t count as working sets.':
+    'Stuknij serię, żeby oznaczyć ją jako rozgrzewkową albo drop set lub zaznaczyć „Do upadku” — serie rozgrzewkowe nie liczą się jako robocze.',
+  'Forgot to log a workout?': 'Zapomniałeś zapisać trening?',
+  '“+” → “Log past” adds it with its date and time.': '„+” → „Przeszły” doda go z datą i godziną.',
+  'Runs, rides, yoga or dance go under “+” → “Activity” — I count them in your weekly load.':
+    'Bieganie, rower, joga czy taniec idą przez „+” → „Aktywność” — uwzględniam je w tygodniowym obciążeniu.',
+  'The Overview tab keeps your progress, trends, records, program, goals, playbook and exercise library in one place.':
+    'Zakładka Przegląd trzyma postępy, trendy, rekordy, program, cele, playbook i bibliotekę ćwiczeń w jednym miejscu.',
+  'In progress → “Volume”, open the view options to switch the lens between Volume, Fatigue and Readiness.':
+    'W postępach → „Objętość” otwórz opcje widoku, żeby przełączać soczewkę między Objętość, Zmęczenie i Gotowość.',
+  'In Overview → Goals choose which muscles to grow, hold or ease — auto-built days give the grow muscles extra work.':
+    'W Przegląd → Cele wybierz, które mięśnie rosną, utrzymujesz lub zmniejszasz — automatycznie układane dni dają mięśniom na wzrost więcej pracy.',
+  'Build your own week in Overview → Programs → “New program” and “Activate” it — the “+” button will then offer today’s day.':
+    'Ułóż własny tydzień w Przegląd → Programy → „Nowy program” i „Aktywuj” go — przycisk „+” będzie wtedy proponował dzisiejszy dzień.',
+  'Log sleep with “+” → “Health” → “Start sleep”, or set a sleep schedule with auto-log in “Sleep details”.':
+    'Zapisuj sen przez „+” → „Zdrowie” → „Rozpocznij sen” albo ustaw harmonogram snu z auto-zapisem w „Szczegóły snu”.',
+  'Going on vacation or feeling ill?': 'Jedziesz na urlop albo się rozchorowałeś?',
+  '“+” → “Health” → start a rest period so your streak and plan pause properly.':
+    '„+” → „Zdrowie” → rozpocznij okres odpoczynku, żeby seria i plan poprawnie się wstrzymały.',
+  'Hurt something?': 'Coś sobie zrobiłeś?',
+  '“+” → “Health” → “Injury & rehab” sets up a staged comeback plan.':
+    '„+” → „Zdrowie” → „Kontuzja i rehabilitacja” ustawia etapowy plan powrotu.',
+  'No gym today?': 'Dziś bez siłowni?',
+  '“+” → “Home set” logs pull-ups, push-ups or a vacuum at home.':
+    '„+” → „Zestaw w domu” zapisze podciąganie, pompki albo vacuum w domu.',
+  'Group two exercises with “Superset with…” in the exercise menu.':
+    'Połącz dwa ćwiczenia przez „Superseria z…” w menu ćwiczenia.',
+  'The Playbook learns your usual days from your log, so a typical session restarts in one tap.':
+    'Playbook uczy się twoich zwykłych dni z dziennika, więc typowy trening uruchamiasz jednym stuknięciem.',
+  'Add your gym in the Gyms tab and tick its equipment, so I know what kit you have there.':
+    'Dodaj swoją siłownię w zakładce Siłownie i zaznacz jej sprzęt, żebym wiedział, co tam masz.',
+  'Your week can start on any day: Apps → Me → Settings → “Week starts on”.':
+    'Twój tydzień może zaczynać się w dowolny dzień: Aplikacje → Ja → Ustawienia → „Tydzień zaczyna się w”.',
+  'Switch between kg and lb in Apps → Me → Settings → “Units”.':
+    'Przełączaj kg i lb w Aplikacje → Ja → Ustawienia → „Jednostki”.',
+  'The bell at the top collects your records, streaks and recaps; turn on push when I ask, so rest alerts reach you in the background.':
+    'Dzwonek u góry zbiera twoje rekordy, serie i podsumowania; włącz powiadomienia push, gdy zapytam, żeby sygnały odpoczynku docierały też w tle.',
+  'After a session, “Share workout” turns it into a Story or Square image.':
+    'Po treningu „Udostępnij trening” zrobi z niego obrazek w formacie Story albo kwadrat.',
+  'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    'Przycisk „Aplikacje” na dole przełącza między Siłownia, Apex, Odżywianie, Nauka i twoim profilem.',
+  'Open Apps → Apex for challenges, strength ranks and awards.':
+    'Otwórz Aplikacje → Apex — tam są wyzwania, rangi siłowe i odznaki.',
+  'Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
+    'Aplikacje → Nauka zawiera lekcje o każdej części Spottera (filmy są w drodze).',
+  'Add Spotter to your home screen — it opens full-screen, works offline and can send notifications.':
+    'Dodaj Spottera do ekranu głównego — otwiera się na pełnym ekranie, działa offline i może wysyłać powiadomienia.',
+  'Trainers: add a client with “Add client” (they get an invite link) and assign a program from the program’s tile.':
+    'Trenerzy: dodajcie klienta przez „Dodaj klienta” (dostanie link z zaproszeniem) i przypiszcie program z kafelka programu.',
+  'A few tips for the app:': 'Kilka wskazówek do aplikacji:',
+  '• Tap the “+” in the middle of the bottom bar to start anything: a session, an auto-built day, an activity, sleep or a past workout.':
+    '• Stuknij „+” pośrodku dolnego paska, żeby zacząć cokolwiek: trening, automatycznie ułożony dzień, aktywność, sen albo przeszły trening.',
+  '• In a session, set the weight and reps on the card and tap “Log” — the rest timer starts on its own.':
+    '• W treningu ustaw ciężar i powtórzenia na karcie i stuknij „Zapisz” — minutnik odpoczynku startuje sam.',
+  '• “Auto session” builds a whole day from your goal and what’s recovered — review it and tap “Start now”.':
+    '• „Auto trening” układa cały dzień pod twój cel i to, co zregenerowane — sprawdź i stuknij „Zacznij”.',
+  '• Ask me things like “what weight next time on bench?” or “am I recovered?” — I answer from your own log.':
+    '• Pytaj mnie np. „jaki ciężar na ławkę następnym razem?” albo „czy jestem zregenerowany?” — odpowiadam z twojego dziennika.',
+  'More tips': 'Więcej wskazówek',
+  'More tips:': 'Więcej wskazówek:',
+  '• Tap the rest ring to change the rest target and the alerts; it’s remembered for each exercise.':
+    '• Stuknij kółko odpoczynku, żeby zmienić cel odpoczynku i powiadomienia; zapamiętuje się dla każdego ćwiczenia.',
+  '• Tap a set to mark it as a warm-up or a dropset, or flag it “To failure” — warm-ups don’t count as working sets.':
+    '• Stuknij serię, żeby oznaczyć ją jako rozgrzewkową albo drop set lub zaznaczyć „Do upadku” — serie rozgrzewkowe nie liczą się jako robocze.',
+  '• Forgot to log a workout?': '• Zapomniałeś zapisać trening?',
+  '• Runs, rides, yoga or dance go under “+” → “Activity” — I count them in your weekly load.':
+    '• Bieganie, rower, joga czy taniec idą przez „+” → „Aktywność” — uwzględniam je w tygodniowym obciążeniu.',
+  '• The Overview tab keeps your progress, trends, records, program, goals, playbook and exercise library in one place.':
+    '• Zakładka Przegląd trzyma postępy, trendy, rekordy, program, cele, playbook i bibliotekę ćwiczeń w jednym miejscu.',
+  '• In progress → “Volume”, open the view options to switch the lens between Volume, Fatigue and Readiness.':
+    '• W postępach → „Objętość” otwórz opcje widoku, żeby przełączać soczewkę między Objętość, Zmęczenie i Gotowość.',
+  '• In Overview → Goals choose which muscles to grow, hold or ease — auto-built days give the grow muscles extra work.':
+    '• W Przegląd → Cele wybierz, które mięśnie rosną, utrzymujesz lub zmniejszasz — automatycznie układane dni dają mięśniom na wzrost więcej pracy.',
+  '• Build your own week in Overview → Programs → “New program” and “Activate” it — the “+” button will then offer today’s day.':
+    '• Ułóż własny tydzień w Przegląd → Programy → „Nowy program” i „Aktywuj” go — przycisk „+” będzie wtedy proponował dzisiejszy dzień.',
+  '• Log sleep with “+” → “Health” → “Start sleep”, or set a sleep schedule with auto-log in “Sleep details”.':
+    '• Zapisuj sen przez „+” → „Zdrowie” → „Rozpocznij sen” albo ustaw harmonogram snu z auto-zapisem w „Szczegóły snu”.',
+  '• Going on vacation or feeling ill?': '• Jedziesz na urlop albo się rozchorowałeś?',
+  '• Hurt something?': '• Coś sobie zrobiłeś?',
+  '• No gym today?': '• Dziś bez siłowni?',
+  '• Group two exercises with “Superset with…” in the exercise menu.':
+    '• Połącz dwa ćwiczenia przez „Superseria z…” w menu ćwiczenia.',
+  '• The Playbook learns your usual days from your log, so a typical session restarts in one tap.':
+    '• Playbook uczy się twoich zwykłych dni z dziennika, więc typowy trening uruchamiasz jednym stuknięciem.',
+  '• Add your gym in the Gyms tab and tick its equipment, so I know what kit you have there.':
+    '• Dodaj swoją siłownię w zakładce Siłownie i zaznacz jej sprzęt, żebym wiedział, co tam masz.',
+  '• Your week can start on any day: Apps → Me → Settings → “Week starts on”.':
+    '• Twój tydzień może zaczynać się w dowolny dzień: Aplikacje → Ja → Ustawienia → „Tydzień zaczyna się w”.',
+  '• Switch between kg and lb in Apps → Me → Settings → “Units”.':
+    '• Przełączaj kg i lb w Aplikacje → Ja → Ustawienia → „Jednostki”.',
+  '• The bell at the top collects your records, streaks and recaps; turn on push when I ask, so rest alerts reach you in the background.':
+    '• Dzwonek u góry zbiera twoje rekordy, serie i podsumowania; włącz powiadomienia push, gdy zapytam, żeby sygnały odpoczynku docierały też w tle.',
+  '• After a session, “Share workout” turns it into a Story or Square image.':
+    '• Po treningu „Udostępnij trening” zrobi z niego obrazek w formacie Story albo kwadrat.',
+  '• The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '• Przycisk „Aplikacje” na dole przełącza między Siłownia, Apex, Odżywianie, Nauka i twoim profilem.',
+  '• Open Apps → Apex for challenges, strength ranks and awards.':
+    '• Otwórz Aplikacje → Apex — tam są wyzwania, rangi siłowe i odznaki.',
+  '• Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
+    '• Aplikacje → Nauka zawiera lekcje o każdej części Spottera (filmy są w drodze).',
+  '• Add Spotter to your home screen — it opens full-screen, works offline and can send notifications.':
+    '• Dodaj Spottera do ekranu głównego — otwiera się na pełnym ekranie, działa offline i może wysyłać powiadomienia.',
+  '• Trainers: add a client with “Add client” (they get an invite link) and assign a program from the program’s tile.':
+    '• Trenerzy: dodajcie klienta przez „Dodaj klienta” (dostanie link z zaproszeniem) i przypiszcie program z kafelka programu.',
+  'That’s all of them — ask me about any feature for the details.':
+    'To już wszystkie — pytaj mnie o dowolną funkcję, żeby poznać szczegóły.',
+  'That was every tip I have — here they are again from the top:':
+    'To były wszystkie moje wskazówki — oto one znowu od początku:',
+  'Change the password in Apps → Me → “Settings” → “Password”; “Sign out” is there too — your log comes back when you sign in again.':
+    'Hasło zmienisz w Aplikacje → Ja → „Ustawienia” → „Hasło”; jest tam też wylogowanie — twój dziennik wróci, gdy znów się zalogujesz.',
+  'Overview → Programs → “New program”: name it, “Pick training days”, fill each day with muscles or exercises, then “Activate” (or “Save draft”).':
+    'Przegląd → Programy → „Nowy program”: nazwij go, „Wybierz dni”, wypełnij każdy dzień mięśniami lub ćwiczeniami, potem „Aktywuj” (albo „Zapisz szkic”).',
+  'Apps → Me → “Body” → “Add weight”.': 'Aplikacje → Ja → „Ciało” → „Dodaj wagę”.',
+  'Overview → Goals: set a “Physique target” and, under “Focus this block”, which muscles to grow, hold or ease.':
+    'Przegląd → Cele: ustaw „Cel sylwetki” i w „Fokus tego bloku” — które mięśnie rosną, utrzymujesz lub zmniejszasz.',
+  'A body-weight goal lives in Apps → Me → “Body”.': 'Cel wagowy jest w Aplikacje → Ja → „Ciało”.',
+  'Outside the gym: tap “+” → “Activity” → pick run, cycling, swim, walk, yoga, dance…':
+    'Poza siłownią: stuknij „+” → „Aktywność” → wybierz bieganie, rower, pływanie, spacer, jogę, taniec…',
+  '→ start it now or save one you already did.': '→ zacznij teraz albo zapisz tę, która już była.',
+  'To get a trainer, ask your admin to assign one — who can see your data is listed in Apps → Me → “Settings”.':
+    'Żeby mieć trenera, poproś administratora o przypisanie — kto widzi twoje dane, zobaczysz w Aplikacje → Ja → „Ustawienia”.',
+  'In the session: set the reps and weight on the card, tap “Log”.':
+    'W treningu: ustaw powtórzenia i ciężar na karcie, stuknij „Zapisz”.',
+  'Tap a logged set to change it, mark it as a warm-up or dropset, or delete it.':
+    'Stuknij zapisaną serię, żeby ją zmienić, oznaczyć jako rozgrzewkową lub drop set albo usunąć.',
+  'Tap “+” → “Health” → “Injury & rehab” → “Set up rehab plan” (or from my pain check-in here).':
+    'Stuknij „+” → „Zdrowie” → „Kontuzja i rehabilitacja” → „Ustaw plan rehabilitacji” (albo z mojej rozmowy o bólu tutaj).',
+  'Tap “+” → “Log past” → set the date, start time and length (and the gym) → add the exercises and sets.':
+    'Stuknij „+” → „Przeszły” → ustaw datę, godzinę rozpoczęcia i czas trwania (i siłownię) → dodaj ćwiczenia i serie.',
+  'Apps → Me → “Settings” → “Units” → kg or lb.':
+    'Aplikacje → Ja → „Ustawienia” → „Jednostki” → kg albo lb.',
+  'Tap “+” → “Health” → “Start sleep” when you go to bed and “I’m awake — stop” in the morning.':
+    'Stuknij „+” → „Zdrowie” → „Rozpocznij sen”, gdy idziesz spać, i „Nie śpię — stop” rano.',
+  'In “Sleep details” you can “Add a past night”, set a “Sleep schedule” and turn on “Auto-log” so nights start and end by themselves; fix any night there too.':
+    'W „Szczegóły snu” możesz „Dodaj minioną noc”, ustawić „Harmonogram snu” i włączyć „Auto-zapis”, żeby noce zaczynały się i kończyły same; tam też poprawisz każdą noc.',
+  '−{1} kg over {2} ({3} → {4}).': '−{1} kg przez {2} ({3} → {4}).',
+  '±{1} kg over {2} ({3} → {4}).': '±{1} kg przez {2} ({3} → {4}).',
+  'It’s been {1}, bro — time to get back, yeah?': 'Już {1} bez siłki, mordo — czas wracać, co?',
+  '{1} off — no stress, man.': '{1} przerwy — spoko, stary.',
+  'We’ll ease back in.': 'Wrócimy spokojnie.',
+  'Missed you, dude!': 'Tęskniłem, ziom!',
+  '{1} is plenty of rest.': '{1} odpoczynku w zupełności wystarczy.',
+  '{1} off.': '{1} przerwy.',
+  'Time to fix that.': 'Czas to naprawić.',
+  'Today works.': 'Dziś pasuje.',
+  'I counted.': 'Liczyłem.',
+  'Every day of it.': 'Każdy dzień.',
+  'Resting from what, exactly?': 'Odpoczynek od czego, konkretnie?',
+  '*sigh* {1}.': '*wzdycha* {1}.',
+  'Your membership is crying.': 'Twój karnet płacze.',
+  '{1}, gym tourist.': '{1}, turysto siłowniany.',
+  'Visa expired?': 'Wiza wygasła?',
 };

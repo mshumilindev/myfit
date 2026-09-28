@@ -379,7 +379,7 @@ export const INTENTS_SIXTH: Intent[] = [
           'Log your bodyweight and I’ll estimate your calories. Rough rule: ~30–33 kcal per kg for an active lifter.',
           'Запиши вагу — порахую калорії. Орієнтир: ~30–33 ккал на кг для людини, що тренується.',
         );
-      const lo = Math.round((bw * 29) / 50) * 50;
+      const lo = Math.round((bw * 30) / 50) * 50; // ~30–33 kcal/kg, as the text says
       const hi = Math.round((bw * 33) / 50) * 50;
       const g = c.mem?.goal?.v;
       const tail =

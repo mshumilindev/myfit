@@ -66,8 +66,8 @@ export const MORE_R3: Record<string, [string, string][]> = {
       "Нюанс: якщо м'язи ще болять і вправа на розминці йде важко — це сигнал сьогодні взяти іншу групу, а не продавлювати.",
     ],
     [
-      'Pro tip: an upper/lower split lets you train on consecutive days without hitting the same muscles hard twice in 48 h.',
-      "Порада: спліт верх/низ дозволяє тренуватися кілька днів поспіль, не навантажуючи ті самі м'язи двічі за 48 годин.",
+      'Pro tip: an upper/lower split lets you train on consecutive days without hitting the same muscles hard twice in 2 days.',
+      "Порада: спліт верх/низ дозволяє тренуватися кілька днів поспіль, не навантажуючи ті самі м'язи двічі за 2 дні.",
     ],
   ],
   two_a_day: [
@@ -600,7 +600,7 @@ export const MORE_R3: Record<string, [string, string][]> = {
   ],
   post_meal: [
     [
-      'Protein after training kicks off muscle repair; ~0.3–0.4 g/kg per meal hits the useful dose. Carbs refill glycogen, which matters most if you train again within 24 h.',
+      'Protein after training kicks off muscle repair; ~0.3–0.4 g/kg per meal hits the useful dose. Carbs refill glycogen, which matters most if you train again within a day.',
       "Білок після тренування запускає відновлення м'язів; ~0,3–0,4 г/кг на прийом — це ефективна доза. Вуглеводи поповнюють глікоген, що важливо передусім, якщо наступне тренування менш ніж через добу.",
     ],
     [

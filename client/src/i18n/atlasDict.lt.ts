@@ -172,7 +172,7 @@ export const DICT: Record<string, string> = {
   '*sigh* Fine.': '*atsidūsta* Na gerai.',
   '*sigh* Nothing.': '*atsidūsta* Nieko.',
   '*sigh* Words.': '*atsidūsta* Žodžiai.',
-  '+{1} kg over {2} days ({3} → {4}).': '+{1} kg per {2} d. ({3} → {4}).',
+  '+{1} kg over {2} ({3} → {4}).': '+{1} kg per {2} ({3} → {4}).',
   'A Pendlay-style row (bar returns to the floor each rep) gives the lower back a short break between reps.':
     'Pendlay stiliaus trauka (štanga kas pakartojimą grįžta ant grindų) duoda apatinei nugarai trumpą atokvėpį tarp pakartojimų.',
   'A bar close to the body is a shorter lever — less stress on the spine, more weight moved.':
@@ -633,7 +633,7 @@ export const DICT: Record<string, string> = {
   'By estimated max (all time), most: {1} ({2}).':
     'Pagal apskaičiuotą maksimumą (per visą laiką), daugiausia: {1} ({2}).',
   'By month': 'Pagal mėnesį',
-  "By the way, {1} hasn't moved in ~{2} weeks.": 'Beje, {1} nejuda jau ~{2} sav.',
+  "By the way, {1} hasn't moved in {2}.": 'Beje, {1} nejuda jau {2}.',
   'By week': 'Pagal savaitę',
   'By workouts (all time), most: Monday ({1}).':
     'Pagal treniruotes (per visą laiką), daugiausia: pirmadienis ({1}).',
@@ -668,8 +668,8 @@ export const DICT: Record<string, string> = {
     'Angliavandeniai – pagrindinis kuras sunkiems priėjimams ir padeda treniruotis su didesne apimtimi.',
   'Carbs fuel hard sets: ~{1}–{2} g/kg a day works for most lifters, more of it around training.':
     'Angliavandeniai maitina sunkius priėjimus: daugumai tinka ~{1}–{2} g/kg per dieną, daugiau jų – aplink treniruotę.',
-  'Carbs refill glycogen, which matters most if you train again within {1} h.':
-    'Angliavandeniai papildo glikogeno atsargas – tai svarbiausia, jei vėl treniruojiesi per {1} val.',
+  'Carbs refill glycogen, which matters most if you train again within a day.':
+    'Angliavandeniai papildo glikogeno atsargas – tai svarbiausia, jei vėl treniruojiesi per parą.',
   'Carbs refill muscle glycogen, which fuels sets of {1}–{2} reps.':
     'Angliavandeniai papildo raumenų glikogeną, kuris maitina priėjimus po {1}–{2} pakartojimus.',
   'Cardio after lifting, not before: {1}–{2} min easy on lifting days, longer sessions on separate days.':
@@ -1328,8 +1328,8 @@ export const DICT: Record<string, string> = {
   'Hard questions I pass to a language model; the numbers are always yours.':
     'Sudėtingus klausimus perduodu kalbos modeliui; skaičiai visada tavo.',
   'Hard questions go to a language model.': 'Sudėtingi klausimai keliauja kalbos modeliui.',
-  'Hard sessions for the same muscle want ~{1} h apart.':
-    'Sunkioms to paties raumens treniruotėms reikia ~{1} val. tarpo.',
+  'Hard sessions for the same muscle want about {1} days apart.':
+    'Sunkioms to paties raumens treniruotėms reikia maždaug {1} dienų tarpo.',
   'Hard sets are the working sets taken reasonably close to failure — the best simple measure of training dose.':
     'Sunkūs priėjimai – tai darbiniai priėjimai, pakankamai arti nesėkmės; geriausias paprastas treniruočių dozės matas.',
   'Hard sets are what count: a set ending {1}–{2} reps short of failure.':
@@ -1659,8 +1659,8 @@ export const DICT: Record<string, string> = {
     'Jei treniruojiesi nevalgęs, netrukus po to suvalgyk {1}–{2} g baltymų ir neik nevalgęs į labai ilgą treniruotę.',
   'If you train in more than one place, save each gym separately — a home setup and a full gym need very different exercise swaps.':
     'Jei treniruojiesi keliose vietose, išsaugok kiekvieną salę atskirai – namų įrangai ir pilnai salei reikia labai skirtingų pratimų pakaitalų.',
-  'If you trained the same muscles hard today, give them {1} h — shuffle tomorrow’s session so a fresh group goes first.':
-    'Jei šiandien sunkiai treniravai tuos pačius raumenis, duok jiems {1} val. – perdėliok rytdienos treniruotę, kad pirma eitų pailsėjusi grupė.',
+  'If you trained the same muscles hard today, give them {1} days — shuffle tomorrow’s session so a fresh group goes first.':
+    'Jei šiandien sunkiai treniravai tuos pačius raumenis, duok jiems {1} dienas – perdėliok rytdienos treniruotę, kad pirma eitų pailsėjusi grupė.',
   "If you want one, check the label for the actual caffeine amount and avoid 'proprietary blends' that hide doses.":
     'Jei jo nori, etiketėje patikrink tikrą kofeino kiekį ir venk „patentuotų mišinių“, slepiančių dozes.',
   "If you're already using, don't hide it from a doctor — get your blood pressure and bloodwork checked.":
@@ -1876,7 +1876,7 @@ export const DICT: Record<string, string> = {
     'Žinodamas dažniausiai daromus pratimus matai, apie ką iš tikrųjų sukasi tavo rutina – ir ko gali trūkti.',
   'Last month': 'Praėjęs mėnuo',
   'Last month: {1} sessions, {2} sets.': 'Praėjusį mėnesį: {1} treniruotės, {2} priėjimai.',
-  'Last session was {1} day ago.': 'Paskutinė treniruotė buvo prieš {1} d.',
+  'Last session was {1}.': 'Paskutinė treniruotė buvo {1}.',
   'Last time {1} reps — not the top of the range yet, so same weight, more reps.':
     'Praėjusį kartą {1} pakartojimai – dar ne diapazono viršus, tad tas pats svoris, daugiau pakartojimų.',
   'Last week: {1} sessions, {2} sets.': 'Praėjusią savaitę: {1} treniruotės, {2} priėjimai.',
@@ -3832,7 +3832,7 @@ export const DICT: Record<string, string> = {
     '{1} su {2}: pagal tavo pastarąsias serijas – apie {3} pakartojimai iki nesėkmės.',
   '{1} chest moves) mostly adds fatigue; {2}–{3} per muscle per session is enough.':
     '{1} krūtinės pratimai) daugiausia prideda nuovargio; {2}–{3} raumeniui per treniruotę pakanka.',
-  '{1} days since your last session.': 'Nuo paskutinės treniruotės praėjo dienų: {1}.',
+  '{1} since your last session.': '{1} be treniruočių.',
   '{1} days: upper/lower.': '{1} d.: viršus/apačia.',
   '{1} full-body sessions a week, {2}–{3} big lifts, {4}–{5} sets of {6}–{7}, and add a little weight when all sets reach {8}.':
     '{1} viso kūno treniruotės per savaitę, {2}–{3} dideli pratimai, {4}–{5} serijos po {6}–{7} ir pridėk šiek tiek svorio, kai visose serijose pasieki {8}.',
@@ -3901,7 +3901,7 @@ export const DICT: Record<string, string> = {
   '{1}, the last {2} weeks: {3} sets (~{4} a week).':
     '{1}, paskutinės {2} sav.: {3} serijos (~{4} per savaitę).',
   '{1}, this month: {2} sets (~{3} a week).': '{1}, šį mėnesį: {2} serijos (~{3} per savaitę).',
-  '{1}-day streak.': 'Serija: {1} d.',
+  'Streak: {1}.': 'Serija tęsiasi jau {1}.',
   '{1}/{2}/{3}: {4} sets in {5} min — {6}, {7}, {8}, {9}.':
     '{1}/{2}/{3}: {4} serijos per {5} min – {6}, {7}, {8}, {9}.',
   '{1}: Bar over mid-foot, shins touch it, flat back, pull the slack out, push the floor away, bar stays on the legs, stand tall.':
@@ -3937,8 +3937,8 @@ export const DICT: Record<string, string> = {
   '{1}: technique tips?': '{1}: technikos patarimai?',
   '{1}: warm-up sets?': '{1}: apšilimo serijos?',
   '{1}: what weight next time?': '{1}: kokį svorį kitą kartą?',
-  '{1}: {2} days ago ({3}/{4}/{5}), {6} sets.': '{1}: prieš {2} d. ({3}/{4}/{5}), {6} serijos.',
-  '{1}: {2} days ago, top set {3} × {4}.': '{1}: prieš {2} d., viršutinė serija {3} × {4}.',
+  '{1}: {2} ({3}/{4}/{5}), {6} sets.': '{1}: {2} ({3}/{4}/{5}), {6} serijos.',
+  '{1}: {2}, top set {3} × {4}.': '{1}: {2}, viršutinė serija {3} × {4}.',
   '{1}: {2} sessions in total, {3} in the last {4} weeks.':
     '{1}: iš viso {2} treniruotės, per paskutines {4} sav. – {3}.',
   '{1}: {2} sessions in {3} weeks (~{4}/week).': '{1}: {2} treniruotės per {3} sav. (~{4}/sav.).',
@@ -4292,4 +4292,1269 @@ export const DICT: Record<string, string> = {
   'By the way, this week is about half your usual volume ({1} vs ~{2} sets).':
     'Beje, ši savaitė — maždaug pusė tavo įprastos apimties ({1} prieš ~{2} priėjimų).',
   'Sets by week': 'Priėjimai per savaitę',
+  // Activities told in chat, complaints (activityReport.ts).
+  'Dancing — that counts.': 'Šokiai — tai skaičiuojasi.',
+  'Pilates — that counts.': 'Pilatesas — tai skaičiuojasi.',
+  'Yoga — that counts.': 'Joga — tai skaičiuojasi.',
+  'Stretching — that counts.': 'Tempimas — tai skaičiuojasi.',
+  'Massage — that counts.': 'Masažas — tai skaičiuojasi.',
+  'Sauna — that counts.': 'Pirtis — tai skaičiuojasi.',
+  'Cold exposure — that counts.': 'Grūdinimasis šalčiu — tai skaičiuojasi.',
+  'HIIT — that counts.': 'HIIT — tai skaičiuojasi.',
+  'Football — that counts.': 'Futbolas — tai skaičiuojasi.',
+  'Basketball — that counts.': 'Krepšinis — tai skaičiuojasi.',
+  'Tennis — that counts.': 'Tenisas — tai skaičiuojasi.',
+  'Volleyball — that counts.': 'Tinklinis — tai skaičiuojasi.',
+  'Combat training — that counts.': 'Kovos menai — tai skaičiuojasi.',
+  'Climbing — that counts.': 'Laipiojimas — tai skaičiuojasi.',
+  'Skiing — that counts.': 'Slidinėjimas — tai skaičiuojasi.',
+  'Surfing — that counts.': 'Banglenčių sportas — tai skaičiuojasi.',
+  'Skating — that counts.': 'Čiuožimas — tai skaičiuojasi.',
+  'Swimming — that counts.': 'Plaukimas — tai skaičiuojasi.',
+  'Cycling — that counts.': 'Dviratis — tai skaičiuojasi.',
+  'Rowing — that counts.': 'Irklavimas — tai skaičiuojasi.',
+  'Running — that counts.': 'Bėgimas — tai skaičiuojasi.',
+  'Walking — that counts.': 'Vaikščiojimas — tai skaičiuojasi.',
+  'Cardio — that counts.': 'Kardio — tai skaičiuojasi.',
+  'Fair — you told me and I talked past it.': 'Teisingai — tu man sakei, o aš tai praleidau.',
+  'Time: {1} min.': 'Laikas: {1} min.',
+  'Time: {1} h.': 'Laikas: {1} val.',
+  'Distance: {1} km.': 'Atstumas: {1} km.',
+  'Time: {1} min, distance: {2} km.': 'Laikas: {1} min, atstumas: {2} km.',
+  'Time: {1} h, distance: {2} km.': 'Laikas: {1} val., atstumas: {2} km.',
+  'That’s recovery work — it eases your load rather than adds to it.':
+    'Tai atsigavimas — jis mažina krūvį, o ne didina.',
+  'Good call.': 'Geras sprendimas.',
+  'Mostly back, shoulders and your heart, low impact on the legs — go a bit lighter on heavy pulling today.':
+    'Daugiausia nugara, pečiai ir širdis, kojoms beveik jokio smūgio — šiandien kiek lengviau su sunkiomis traukomis.',
+  'That’s real conditioning load, mostly legs and your heart.':
+    'Tai tikras ištvermės krūvis, daugiausia kojoms ir širdžiai.',
+  'Treat your legs as trained today: no heavy leg work until tomorrow, upper body is fine.':
+    'Laikyk, kad kojas šiandien jau treniravai: sunkių kojų pratimų iki rytojaus nedaryk, viršutinę kūno dalį galima.',
+  'Light-to-moderate conditioning — it won’t hurt your lifting; just don’t stack heavy legs right on top of it.':
+    'Lengvas ar vidutinis kardio — jėgos treniruotėms nepakenks; tik nedaryk sunkių kojų iš karto po jo.',
+  'I see it in your log — it’s in your weekly load already.':
+    'Matau tai žurnale — jau įskaičiuota į savaitės krūvį.',
+  'Log it under Activities with the time, and I’ll count it in your load and recovery.':
+    'Įrašyk tai į Veiklas su laiku, ir įskaičiuosiu tai į krūvį ir atsigavimą.',
+  'Want me to log it?': 'Įrašyti?',
+  'Then it counts in your weekly load and recovery.':
+    'Tada tai įsiskaičiuos į savaitės krūvį ir atsigavimą.',
+  'Logged — it’s in your activities and counts in your load now.':
+    'Įrašyta — tai jau veiklose ir skaičiuojama į krūvį.',
+  // Atlas: 100 more topics + app tips
+  'What is an AMRAP set?': 'Kas yra AMRAP serija?',
+  'AMRAP means “as many reps as possible” with a set weight — usually stopping with {1}–{2} good reps left, not grinding ugly reps.':
+    'AMRAP reiškia „tiek pakartojimų, kiek gali“ su nustatytu svoriu — dažniausiai sustojant, kai lieka {1}–{2} geri pakartojimai atsargoje, be negražių išspaustų pakartojimų.',
+  'It’s a handy way to test progress (more reps at the same weight means you got stronger) and to autoregulate: programs like {1}/{2}/{3} use a last AMRAP set to set next week’s weights.':
+    'Tai patogus būdas patikrinti progresą (daugiau pakartojimų su tuo pačiu svoriu reiškia, kad sustiprėjai) ir reguliuoti krūvį: tokios programos kaip {1}/{2}/{3} pagal paskutinę AMRAP seriją nustato kitos savaitės svorius.',
+  'Keep it to one AMRAP set per lift per session, and skip it on days you feel beaten up.':
+    'Daryk vieną AMRAP seriją pratimui per treniruotę ir praleisk ją dienomis, kai jautiesi išsekęs.',
+  'On heavy compound lifts stop when the bar slows down a lot or form breaks — that’s your AMRAP, even if you could force one more.':
+    'Sunkiuose baziniuose pratimuose sustok, kai štanga labai sulėtėja arba sugenda technika — tai ir yra tavo AMRAP, net jei dar vieną galėtum išspausti.',
+  'What is EMOM training?': 'Kas yra EMOM treniruotė?',
+  'EMOM means “every minute on the minute”: start a set at the top of each minute and rest for whatever time is left.':
+    'EMOM reiškia „kiekvieną minutę minutės pradžioje“: pradedi seriją kiekvienos minutės pradžioje ir ilsiesi likusį laiką.',
+  'It keeps the pace honest and the session dense — for example {1} minutes of {2} fairly heavy squats, or {3} minutes alternating push-ups and rows.':
+    'Tempas sąžiningas, o treniruotė tanki — pavyzdžiui, {1} minučių po {2} gana sunkius pritūpimus arba {3} minučių pakaitomis atsispaudimai ir traukos.',
+  'Pick a load you could do for about twice the reps, and if you start missing the minute, cut the reps rather than the rest.':
+    'Pasirink svorį, su kuriuo padarytum maždaug dvigubai daugiau pakartojimų, o jei nebespėji per minutę, mažink pakartojimus, ne poilsį.',
+  'EMOMs are great for technique practice with moderate weight, for conditioning finishers and for getting lots of quality work into a short session.':
+    'EMOM puikiai tinka technikai lavinti su vidutiniu svoriu, kondicijos užbaigimams ir norint sutalpinti daug kokybiško darbo į trumpą treniruotę.',
+  'What are cluster sets?': 'Kas yra klasterinės serijos?',
+  'A cluster set splits one set into mini-sets with short breaks: for example {1} × {2} reps with {3}–{4} seconds between them instead of {5} reps in a row.':
+    'Klasterinė serija padalija vieną seriją į mini serijas su trumpomis pertraukomis: pavyzdžiui, {1} × {2} pakartojimai su {3}–{4} sekundžių pertrauka vietoj {5} pakartojimų iš eilės.',
+  'The short pauses let you keep bar speed and form with heavier loads, so you get more quality reps near your top weights.':
+    'Trumpos pauzės leidžia išlaikyti štangos greitį ir techniką su didesniu svoriu, tad padarai daugiau kokybiškų pakartojimų arti savo maksimalių svorių.',
+  'They suit strength and power work; for muscle growth, normal sets taken close to failure work just as well and are simpler.':
+    'Jos tinka jėgai ir galiai; raumenų augimui įprastos serijos arti nesėkmės veikia ne blogiau ir yra paprastesnės.',
+  'Rack the bar or set the dumbbells down during the pause, and brace again before every mini-set.':
+    'Pauzės metu padėk štangą ant stovų arba hantelius ant grindų ir prieš kiekvieną mini seriją vėl įtempk korpusą.',
+  'How do rest-pause sets work?': 'Kaip veikia rest-pause serijos?',
+  'Rest-pause: do a set close to failure, rest {1}–{2} seconds, squeeze out a few more reps, and repeat that once or twice.':
+    'Rest-pause: padarai seriją arti nesėkmės, ilsiesi {1}–{2} sekundžių, išspaudi dar kelis pakartojimus ir tai pakartoji kartą ar du.',
+  'It packs a lot of effort into little time, which makes it useful for isolation and machine exercises when you’re short on time.':
+    'Daug pastangų sutalpinama į mažai laiko, todėl tai naudinga izoliaciniuose pratimuose ir treniruokliuose, kai trūksta laiko.',
+  'Use it sparingly — on the last set of one or two exercises — and avoid it on heavy barbell squats and deadlifts, where fatigue wrecks form.':
+    'Naudok saikingai — paskutinėje vieno ar dviejų pratimų serijoje — ir venk sunkiuose pritūpimuose ir mirties traukose su štanga, kur nuovargis gadina techniką.',
+  'A simple version: pick a weight for about {1} reps, do {2}, then mini-sets of {3}–{4} reps with {5} seconds of rest until you can’t get {6}.':
+    'Paprastas variantas: svoris maždaug {1} pakartojimams, darai {2}, tada mini serijos po {3}–{4} pakartojimus su {5} sekundžių poilsiu, kol nebegali padaryti {6}.',
+  'What are myo-reps?': 'Kas yra myo pakartojimai?',
+  'Myo-reps are a rest-pause style: one activation set of about {1}–{2} reps close to failure, then several mini-sets of {3}–{4} reps with only {5}–{6} deep breaths between them.':
+    'Myo pakartojimai — rest-pause atmaina: viena aktyvavimo serija maždaug {1}–{2} pakartojimų arti nesėkmės, tada kelios mini serijos po {3}–{4} pakartojimus tik su {5}–{6} giliais įkvėpimais tarp jų.',
+  'Most of the reps are hard, “effective” reps, so you get growth similar to {1} normal sets in a fraction of the time.':
+    'Dauguma pakartojimų sunkūs ir „efektyvūs“, todėl augimas panašus į {1} įprastas serijas per daug trumpesnį laiką.',
+  'They work best on isolation and machine lifts — curls, lateral raises, leg extensions, cable work.':
+    'Geriausiai veikia izoliaciniuose pratimuose ir treniruokliuose — lenkimai, šoniniai kėlimai, kojų tiesimai, darbas su blokais.',
+  'Stop the mini-sets when you can’t hit the target reps anymore; one or two myo-rep sets per exercise is plenty.':
+    'Nutrauk mini serijas, kai nebepasieki tikslinio pakartojimų skaičiaus; vienos ar dviejų myo serijų pratimui visiškai pakanka.',
+  'What is double progression?': 'Kas yra dviguba progresija?',
+  'Double progression means you progress reps first, then weight: pick a rep range like {1}–{2}, keep the same weight until you hit {3} on all sets, then add a small jump and start back at {4}.':
+    'Dviguba progresija reiškia, kad pirmiausia auga pakartojimai, paskui svoris: pasirink intervalą, pvz., {1}–{2}, laikyk tą patį svorį, kol visose serijose padarysi {3}, tada pridėk nedidelį žingsnį ir vėl pradėk nuo {4}.',
+  'It’s the simplest reliable way to keep progressing on dumbbell, machine and isolation exercises, where the weight jumps are big compared with the load.':
+    'Tai paprasčiausias patikimas būdas progresuoti su hanteliais, treniruokliais ir izoliaciniais pratimais, kur svorio žingsniai dideli, palyginti su krūviu.',
+  'Log every set so you know exactly what to beat next time.':
+    'Užsirašyk kiekvieną seriją, kad tiksliai žinotum, ką kitą kartą pagerinti.',
+  'If the new weight drops you below the bottom of the range, use a smaller jump or stay with the old weight for one more session.':
+    'Jei su nauju svoriu nukrenti žemiau intervalo, imk mažesnį žingsnį arba dar vieną treniruotę likti prie senojo svorio.',
+  'How do I taper before a meet or a max test?':
+    'Kaip sumažinti krūvį (taper) prieš varžybas ar maksimumo testą?',
+  'A taper cuts fatigue while keeping strength: in the last {1}–{2} weeks drop your volume by roughly {3}–{4}% but keep the intensity — a few heavy singles or doubles at {5}–{6}% — so you stay sharp.':
+    'Taper mažina nuovargį išlaikant jėgą: paskutines {1}–{2} savaites sumažink apimtį maždaug {3}–{4}%, bet palik intensyvumą — kelis sunkius pavienius ar dvigubus pakartojimus ties {5}–{6}% — kad išliktum „aštrus“.',
+  'The final {1}–{2} days are very light or off.':
+    'Paskutinės {1}–{2} dienos labai lengvos arba poilsio.',
+  'Don’t try anything new in that window: same technique, same food, same sleep routine.':
+    'Šiuo laiku nieko naujo: ta pati technika, tas pats maistas, tas pats miego režimas.',
+  'A common plan: two weeks out a normal heavy week with fewer sets, one week out singles at opener weight, then rest or mobility only for the last two days.':
+    'Įprastas planas: likus dviem savaitėms — įprasta sunki savaitė su mažiau serijų, likus savaitei — pavieniai pakartojimai su pirmojo bandymo svoriu, o paskutines dvi dienas tik poilsis arba mankšta.',
+  'What is a top set with back-off sets?': 'Kas yra top set ir back-off serijos?',
+  'You work up to one heavy “top set” — for example {1} × {2} at a hard but clean effort — then drop the weight about {3}–{4}% for {5}–{6} “back-off” sets of the same or slightly more reps.':
+    'Pasieki vieną sunkią „viršūninę seriją“ — pavyzdžiui, {1} × {2} su sunkiomis, bet švariomis pastangomis — tada sumažini svorį maždaug {3}–{4}% ir darai {5}–{6} „back-off“ serijas su tiek pat ar šiek tiek daugiau pakartojimų.',
+  'The top set drives strength and shows your progress; the back-off sets add quality volume without the fatigue of doing every set at the top weight.':
+    'Viršūninė serija ugdo jėgą ir rodo progresą; back-off serijos prideda kokybiškos apimties be nuovargio, kurį sukeltų kiekviena serija su maksimaliu svoriu.',
+  'When the top set gets easier at the same effort, raise it next session.':
+    'Kai viršūninė serija tampa lengvesnė su tomis pačiomis pastangomis, kitą treniruotę pakelk ją.',
+  'Rate the top set with RPE: at {1} (two reps left) keep the weight, at {2} hold it next time, at {3} you can add.':
+    'Vertink viršūninę seriją pagal RPE: ties {1} (lieka du pakartojimai) svorį palik, ties {2} kitą kartą nedidink, ties {3} gali pridėti.',
+  'Are paused reps worth doing?': 'Ar verta daryti pakartojimus su pauze?',
+  'Yes — pausing for {1}–{2} seconds at the hardest point (the bottom of a squat, on the chest in a bench, just off the floor in a deadlift) kills the bounce, builds strength where you’re weakest and forces you to stay tight.':
+    'Taip — {1}–{2} sekundžių pauzė sunkiausiame taške (pritūpimo apačioje, ant krūtinės spaudime, šiek tiek virš grindų mirties traukoje) panaikina atšokimą, ugdo jėgą ten, kur esi silpniausias, ir priverčia išlaikyti įtampą.',
+  'Use about {1}–{2}% less weight than for normal reps.':
+    'Imk maždaug {1}–{2}% mažesnį svorį nei įprastiems pakartojimams.',
+  'They’re great as a secondary variation or as technique practice in the warm-up.':
+    'Jie puikiai tinka kaip pagalbinis variantas arba technikos lavinimas apšilimo metu.',
+  'Stay tight during the pause — don’t relax at the bottom of a squat or sink the bar into your chest; the pause should look like a freeze-frame.':
+    'Pauzės metu išlaikyk įtampą — neatsipalaiduok pritūpimo apačioje ir neįspausk štangos į krūtinę; pauzė turi atrodyti kaip sustabdytas kadras.',
+  'Do negatives (eccentric reps) build muscle?':
+    'Ar negatyvai (ekscentriniai pakartojimai) augina raumenis?',
+  'The lowering (eccentric) part of a rep is a strong growth signal, and you’re about {1}–{2}% stronger lowering a weight than lifting it.':
+    'Nuleidimo (ekscentrinė) fazė yra stiprus signalas augti, o joje esi maždaug {1}–{2}% stipresnis nei keliant.',
+  'Controlling the descent for {1}–{2} seconds on normal reps already gets most of the benefit.':
+    'Kontroliuojamas {1}–{2} sekundžių nuleidimas įprastuose pakartojimuose jau duoda didžiąją dalį naudos.',
+  'Supramaximal negatives (heavier than you can lift, with a spotter) cause a lot of soreness — use them rarely, for example to build up to your first pull-up or dip.':
+    'Viršmaksimalūs negatyvai (sunkiau, nei gali pakelti, su draudžiančiuoju) sukelia stiprų raumenų skausmą — naudok juos retai, pavyzdžiui, siekdamas pirmojo prisitraukimo ar atsispaudimo ant lygiagrečių.',
+  'Eccentric-focused work is also a classic tool in tendon rehab, but then it’s done light and slow under a physio’s plan.':
+    'Ekscentrinis darbas yra ir klasikinė sausgyslių reabilitacijos priemonė, bet tada jis atliekamas lengvai ir lėtai pagal kineziterapeuto planą.',
+  'What are MEV and MRV?': 'Kas yra MEV ir MRV?',
+  'They’re volume landmarks: MEV (minimum effective volume) is the fewest hard sets per muscle per week that still make it grow, MRV (maximum recoverable volume) is the most you can recover from.':
+    'Tai apimties orientyrai: MEV (minimali efektyvi apimtis) — mažiausias sunkių serijų raumeniui per savaitę skaičius, kuris dar augina, MRV (maksimali atsigaunama apimtis) — daugiausia, nuo ko spėji atsigauti.',
+  'Most people grow well somewhere around {1}–{2} hard sets per muscle per week, starting nearer the low end and adding sets over a block.':
+    'Dauguma žmonių gerai auga maždaug ties {1}–{2} sunkiomis serijomis raumeniui per savaitę, pradėdami arčiau apatinės ribos ir bloko metu pridėdami serijų.',
+  'When performance drops and soreness lingers, you’ve passed your MRV — time to deload.':
+    'Kai rezultatai krenta, o raumenų skausmas nepraeina, esi virš MRV — laikas iškrovai.',
+  'These numbers are individual and shift with sleep, stress and diet — use them as a starting point, then watch your own progress.':
+    'Šie skaičiai individualūs ir priklauso nuo miego, streso ir mitybos — laikyk juos atskaitos tašku ir stebėk savo progresą.',
+  'Does blood flow restriction training work?': 'Ar veikia treniruotės ribojant kraujotaką?',
+  'BFR (occlusion) training uses a cuff or band high on the arm or thigh to partly slow the blood flowing back from the limb, so very light weights ({1}–{2}% of your max) for high reps (often {3}, {4}, {5}, {6}) still build muscle.':
+    'BFR (okliuzinė) treniruotė naudoja manžetę ar juostą aukštai ant rankos ar šlaunies, kuri iš dalies sulėtina kraujo nutekėjimą iš galūnės, todėl net labai lengvas svoris ({1}–{2}% maksimumo) daug pakartojimų (dažnai {3}, {4}, {5}, {6}) augina raumenis.',
+  'It’s useful when you can’t load heavy — rehab, sore joints, deloads.':
+    'Tai naudinga, kai negali dirbti sunkiai — reabilitacija, skaudantys sąnariai, iškrovos.',
+  'Wraps should feel tight but not painful (about {1} out of {2} on the legs, less on the arms), with no numbness or tingling; avoid it with clotting problems, high blood pressure or pregnancy unless a doctor says it’s ok.':
+    'Juostos turi būti tvirtos, bet ne skausmingos (maždaug {1} iš {2} ant kojų, silpniau ant rankų), be tirpimo ir dilgčiojimo; venk to esant krešėjimo sutrikimams, aukštam kraujospūdžiui ar nėštumui, nebent gydytojas leidžia.',
+  'Rest only {1}–{2} seconds between BFR sets and release the cuff right after the exercise; one or two exercises per session is enough.':
+    'Tarp BFR serijų ilsėkis tik {1}–{2} sekundžių ir nuimk manžetę iškart po pratimo; vieno ar dviejų pratimų per treniruotę pakanka.',
+  'Is a {1}×{2} program good?': 'Ar {1}×{2} programa gera?',
+  'Yes, {1}×{2} programs (like StrongLifts or Madcow-style plans) are a solid start for beginners: a few big lifts, three days a week, a little more weight every session.':
+    'Taip, {1}×{2} programos (kaip StrongLifts ar Madcow stiliaus) yra tvirta pradžia pradedantiesiems: keli baziniai pratimai, tris dienas per savaitę, kiekvieną treniruotę šiek tiek daugiau svorio.',
+  'Strength climbs fast in the first months.': 'Pirmus mėnesius jėga auga greitai.',
+  'Their limits: little arm, shoulder and upper-back isolation work, and progress stalls once the linear jumps run out — then switch to weekly progression or a more varied program.':
+    'Jų ribos: mažai izoliacinio darbo rankoms, pečiams ir viršutinei nugaros daliai, o progresas sustoja, kai baigiasi linijiniai žingsniai — tada pereik prie savaitinės progresijos ar įvairesnės programos.',
+  'Add {1}–{2} sets of pull-ups or rows, curls and lateral raises at the end, and drop the weight by {3}% when you miss the same weight twice.':
+    'Pabaigoje pridėk {1}–{2} serijas prisitraukimų ar traukų, lenkimų ir šoninių kėlimų, o jei du kartus nepakeli to paties svorio, sumažink jį {3}%.',
+  'How does {1}/{2}/{3} work?': 'Kaip veikia {1}/{2}/{3}?',
+  '{1}/{2}/{3} (by Jim Wendler) runs in {4}-week cycles built on a “training max” set at about {5}% of your real max: week one sets of {6}, week two sets of {7}, week three a {8}/{9}/{10} wave, week four a deload.':
+    '{1}/{2}/{3} (Jim Wendler) — tai {4} savaičių ciklai, paremti „treniruočių maksimumu“, nustatytu maždaug {5}% tikrojo maksimumo: pirmą savaitę serijos po {6}, antrą — po {7}, trečią — {8}/{9}/{10} banga, ketvirtą — iškrova.',
+  'The last set each week is an AMRAP, and after each cycle you add about {1} kg to the upper-body and {2} kg to the lower-body training maxes.':
+    'Paskutinė kiekvienos savaitės serija yra AMRAP, o po kiekvieno ciklo pridedi maždaug {1} kg prie viršutinės kūno dalies ir {2} kg prie kojų treniruočių maksimumų.',
+  'It’s slow and steady — built for lifters who can no longer add weight every session.':
+    'Lėtai, bet užtikrintai — programa tiems, kurie nebegali pridėti svorio kiekvieną treniruotę.',
+  'Pair the main lift with assistance work — for example “Boring But Big”, {1} × {2} at {3}–{4}% — and keep the training max honest rather than ego-high.':
+    'Derink pagrindinį pratimą su pagalbiniu darbu — pavyzdžiui, „Boring But Big“, {1} × {2} ties {3}–{4}% — ir treniruočių maksimumą nustatyk sąžiningai, be ego.',
+  'Is circuit training good?': 'Ar ratinė treniruotė gera?',
+  'Circuits — several exercises back to back with little rest — are great for conditioning, for supporting fat loss and for getting a full-body session done in {1}–{2} minutes.':
+    'Ratai — keli pratimai iš eilės su trumpu poilsiu — puikiai tinka kondicijai, riebalų mažinimui palaikyti ir viso kūno treniruotei per {1}–{2} minučių.',
+  'They build some muscle for beginners, but with short rests fatigue limits the loads, so for maximum strength and size normal sets with proper rest still win.':
+    'Pradedantiesiems jie šiek tiek augina raumenis, bet dėl trumpo poilsio nuovargis riboja svorius, todėl maksimaliai jėgai ir masei vis tiek geresnės įprastos serijos su tinkamu poilsiu.',
+  'A good mix: strength work first, then a {1}-minute circuit as a finisher.':
+    'Geras derinys: pirmiausia jėgos darbas, tada {1} minučių ratas kaip užbaigimas.',
+  'Alternate body regions (legs, push, pull, core) so one muscle rests while another works, and keep the loads moderate so form stays clean when you’re breathing hard.':
+    'Kaitaliok kūno dalis (kojos, stūmimas, traukimas, pilvas), kad vienas raumuo ilsėtųsi, kol dirba kitas, ir laikyk vidutinius svorius, kad technika išliktų švari net uždusus.',
+  'Should I do plyometrics like box jumps?':
+    'Ar daryti pliometriką, pavyzdžiui, šuolius ant dėžės?',
+  'Plyometrics — jumps, bounds, medicine-ball throws — train speed and power and help athletes and anyone who wants to stay springy.':
+    'Pliometrika — šuoliai, daugiašuoliai, medicininio kamuolio metimai — lavina greitį ir galią ir padeda sportininkams bei visiems, kurie nori išlikti spyruokliški.',
+  'Keep the volume low (around {1}–{2} quality contacts per session), do them fresh at the start of a workout, and land softly with your knees tracking over your toes.':
+    'Apimtį laikyk mažą (maždaug {1}–{2} kokybiški kontaktai per treniruotę), daryk ją pailsėjęs treniruotės pradžioje ir nusileisk minkštai, keliams einant virš pirštų.',
+  'For box jumps the goal is jump height, not box height — step down instead of jumping down to spare your Achilles and knees.':
+    'Šuoliuose ant dėžės tikslas — šuolio aukštis, ne dėžės — nulipk žingsniu, o ne nušok, kad saugotum Achilo sausgyslę ir kelius.',
+  'Start with low hops and jumps onto a low box for a few weeks before depth jumps, and skip them while any tendon in your legs is irritated.':
+    'Kelias savaites pradėk nuo žemų pašokimų ir šuolių ant žemos dėžės, prieš pereidamas prie gylio šuolių, ir praleisk juos, kol bet kuri kojų sausgyslė sudirgusi.',
+  'How do I front squat properly?': 'Kaip taisyklingai daryti priekinį pritūpimą?',
+  'Rest the bar on your front delts, close to your throat, with the elbows high and pointing forward — the hands only balance it (a clean grip with two or three fingers, crossed arms, or straps looped around the bar).':
+    'Padėk štangą ant priekinių deltų, arti kaklo, alkūnės aukštai ir į priekį — rankos ją tik prilaiko (sugriebimas „paėmimui“ dviem ar trimis pirštais, sukryžiuotos rankos arba dirželiai, apvynioti aplink štangą).',
+  'Stay upright, brace hard and sit straight down between your heels; the moment the elbows drop, the bar rolls forward.':
+    'Laikyk liemenį stačią, stipriai įsitempk ir sėsk tiesiai žemyn tarp kulnų; vos alkūnės nusileidžia, štanga rieda į priekį.',
+  'It’s great for the quads and upper back and easier on the lower back than a back squat, with loads usually around {1}–{2}% of it.':
+    'Puikiai tinka keturgalviams ir viršutinei nugaros daliai ir švelnesnis juosmeniui nei pritūpimas su štanga ant nugaros, o svoriai paprastai apie {1}–{2}% jo.',
+  'If your wrists hurt in the clean grip, use straps looped around the bar as handles or the cross-arm grip while you work on wrist and lat mobility.':
+    'Jei „paėmimo“ sugriebime skauda riešus, naudok aplink štangą apvyniotus dirželius kaip rankenas arba sukryžiuotas rankas, kol lavini riešų ir plačiųjų raumenų paslankumą.',
+  'How do I do hip thrusts correctly?':
+    'Kaip taisyklingai daryti klubų kėlimą su štanga (hip thrust)?',
+  'Set your upper back (just below the shoulder blades) on a bench, the bar padded over your hips, feet flat about hip-width apart so your shins are vertical at the top.':
+    'Atremk viršutinę nugaros dalį (šiek tiek žemiau mentių) į suolą, štanga su apsauga ant klubų, pėdos plokščiai klubų pločiu, kad viršuje blauzdos būtų vertikalios.',
+  'Tuck your chin and ribs, drive through your heels and finish by squeezing the glutes — not by arching your lower back.':
+    'Smakras ir šonkauliai žemyn, spausk kulnais ir baik judesį sutraukdamas sėdmenis — ne išlenkdamas juosmenį.',
+  'Pause for a second at the top; if you feel it mostly in the hamstrings, bring your feet closer, and if in the quads, move them further out.':
+    'Viršuje sustok sekundei; jei jauti daugiausia šlaunų užpakalinėje dalyje, pastatyk pėdas arčiau, jei keturgalviuose — toliau.',
+  'Hip thrusts are one of the best glute builders because the glutes are loaded hardest at full hip extension; {1}–{2} sets of {3}–{4} twice a week works well.':
+    'Klubų kėlimas yra vienas geriausių sėdmenų pratimų, nes sėdmenys labiausiai apkraunami visiškai ištiesus klubą; {1}–{2} serijos po {3}–{4} du kartus per savaitę veikia gerai.',
+  'How do I do a Romanian deadlift?': 'Kaip daryti rumunišką mirties trauką?',
+  'Start standing with the bar and soft knees, then push your hips straight back while the bar slides down your thighs close to your legs.':
+    'Pradėk stovėdamas su štanga, keliai šiek tiek sulenkti, ir stumk klubus tiesiai atgal, o štanga slysta žemyn šlaunimis arti kojų.',
+  'Keep your back neutral and lats tight, and go down until you feel a strong hamstring stretch — usually around mid-shin — then drive your hips forward to stand.':
+    'Nugara neutrali, platieji įtempti; leiskis, kol pajusi stiprų šlaunų užpakalinės dalies tempimą — dažniausiai maždaug iki blauzdos vidurio — tada stumk klubus į priekį ir atsistok.',
+  'It’s a hip hinge, not a squat: the knee angle barely changes.':
+    'Tai lankstas per klubus, ne pritūpimas: kelių kampas beveik nesikeičia.',
+  'Great for the hamstrings and glutes; use straps if your grip limits you, and keep the reps controlled ({1}–{2}) rather than bouncing out of the bottom.':
+    'Puikiai tinka šlaunų užpakalinei daliai ir sėdmenims; jei riboja sugriebimas, naudok dirželius, o pakartojimus daryk kontroliuojamai ({1}–{2}), neatšokdamas iš apačios.',
+  'How do I do Bulgarian split squats?': 'Kaip daryti bulgariškus pritūpimus?',
+  'Put your rear foot laces-down on a bench and step the front foot far enough forward that you can drop straight down with the front heel planted.':
+    'Padėk galinę pėdą keltu ant suolo, o priekinę pastatyk pakankamai toli, kad leistumeisi tiesiai žemyn, priekiniam kulnui liekant ant grindų.',
+  'Lower until the back knee nearly touches the floor, then drive up through the whole front foot.':
+    'Leiskis, kol galinis kelis beveik palies grindis, tada kilk spausdamas visa priekine pėda.',
+  'A longer stance and a slight forward lean hit the glutes more; a shorter stance and an upright torso hit the quads more.':
+    'Ilgesnis žingsnis ir lengvas pasilenkimas į priekį labiau apkrauna sėdmenis; trumpesnis žingsnis ir tiesus liemuo — keturgalvius.',
+  'Balance is tough at first — hold a rack or bench with one hand, start with bodyweight or light dumbbells, and do your weaker leg first.':
+    'Iš pradžių sunku išlaikyti pusiausvyrą — viena ranka laikykis stovo ar suolo, pradėk su savo svoriu ar lengvais hanteliais ir silpnesnę koją daryk pirmą.',
+  'How do I do lunges without knee pain?': 'Kaip daryti įtūpstus, kad neskaudėtų kelių?',
+  'Take a step long enough that both knees bend to about {1}° at the bottom, and keep the front knee tracking over the middle toes with the whole front foot on the floor.':
+    'Žingsnis turi būti toks ilgas, kad apačioje abu keliai sulinktų maždaug {1}° kampu, o priekinis kelis eitų virš vidurinių pirštų, visai priekinei pėdai liekant ant grindų.',
+  'Reverse lunges (stepping back) are the easiest on the knees and the best place to start; walking lunges are harder on balance and breathing.':
+    'Įtūpstai atgal švelniausi keliams — nuo jų geriausia pradėti; einant daromi įtūpstai sunkesni pusiausvyrai ir kvėpavimui.',
+  'If a knee aches, shorten the depth, slow down and try reverse lunges or split squats.':
+    'Jei kelis maudžia, sumažink gylį, sulėtink ir išbandyk įtūpstus atgal arba skeltą pritūpimą.',
+  'Knees going past the toes is fine if it feels fine; pain is the signal to change something, not the angle itself.':
+    'Keliai už pirštų — nieko blogo, jei nieko neskauda; signalas ką nors keisti yra skausmas, o ne pats kampas.',
+  'Are dips bad for the shoulders?': 'Ar atsispaudimai ant lygiagrečių kenkia pečiams?',
+  'Dips are a great chest and triceps builder and fine for most shoulders if you control the depth.':
+    'Atsispaudimai ant lygiagrečių puikiai augina krūtinę ir tricepsus ir daugumai pečių tinka, jei kontroliuoji gylį.',
+  'Go down until your upper arms are about parallel to the floor or slightly below, keep the shoulders down and back (no shrugging toward the ears) and don’t bounce at the bottom.':
+    'Leiskis, kol žastai bus maždaug lygiagretūs grindims ar šiek tiek žemiau, pečius laikyk žemyn ir atgal (nekelk jų prie ausų) ir neatšok apačioje.',
+  'Leaning forward works more chest, staying upright more triceps; if the front of your shoulder hurts, shorten the range or switch to close-grip push-ups or presses.':
+    'Pasilenkus į priekį daugiau dirba krūtinė, tiesiai — tricepsai; jei skauda priekinę peties dalį, sutrumpink amplitudę arba pakeisk siauru atsispaudimu ar spaudimais.',
+  'Can’t do one yet?': 'Dar nepadarai nė vieno?',
+  'Start with slow negatives, band-assisted dips or bench dips with bent knees, then add weight on a belt once you can do {1}–{2} clean reps.':
+    'Pradėk nuo lėtų negatyvų, atsispaudimų su guma arba atsispaudimų nuo suolo sulenktomis kojomis, o kai padarysi {1}–{2} švarius pakartojimus, pridėk svorio ant diržo.',
+  'How do I do face pulls and why?': 'Kaip daryti face pull ir kam jis reikalingas?',
+  'Face pulls train the rear delts and the muscles that rotate the shoulder outward — good for shoulder health and posture, especially if you press a lot.':
+    'Face pull treniruoja galines deltas ir raumenis, sukančius petį į išorę — naudinga pečių sveikatai ir laikysenai, ypač jei daug spaudi.',
+  'Set a rope at about forehead height, pull toward your face with the elbows high and finish with your hands beside your ears, thumbs pointing back.':
+    'Nustatyk virvę maždaug kaktos aukštyje, trauk link veido aukštai iškeltomis alkūnėmis ir baik su rankomis šalia ausų, nykščiai nukreipti atgal.',
+  'Go light and controlled: {1}–{2} sets of {3}–{4} reps, {5}–{6} times a week.':
+    'Lengvai ir kontroliuojamai: {1}–{2} serijos po {3}–{4} pakartojimus, {5}–{6} kartus per savaitę.',
+  'No cable?': 'Nėra bloko?',
+  'A band anchored at head height or rear-delt flyes with light dumbbells do a similar job.':
+    'Panašų darbą atliks galvos aukštyje pritvirtinta guma arba atgaliniai skėtimai su lengvais hanteliais.',
+  'How do I do lateral raises properly?': 'Kaip taisyklingai daryti šoninius kėlimus?',
+  'Use light dumbbells, a slight forward lean and a small bend in the elbows, and raise your arms out to the side until they’re about shoulder height — lead with the elbows, not the hands.':
+    'Imk lengvus hantelius, šiek tiek pasilenk į priekį ir truputį sulenk alkūnes, kelk rankas į šonus maždaug iki pečių aukščio — veda alkūnės, ne plaštakos.',
+  'Think “push the dumbbells out to the walls” rather than up, keep the traps relaxed and lower slowly.':
+    'Galvok „nustumk hantelius į sienas“, o ne aukštyn, laikyk trapecinius atpalaiduotus ir leisk lėtai.',
+  'Swinging heavy weights mostly trains momentum and traps; strict sets of {1}–{2} grow the side delts best.':
+    'Sunkių svorių mojavimas daugiausia treniruoja inerciją ir trapecinius; griežtos serijos po {1}–{2} pakartojimus geriausiai augina vidurines deltas.',
+  'Cable or machine lateral raises keep tension at the bottom too — a nice variation; side delts recover fast, so {1}–{2} sessions a week is fine.':
+    'Šoniniai kėlimai su bloku ar treniruokliu išlaiko įtampą ir apačioje — geras variantas; vidurinės deltos greitai atsigauna, tad {1}–{2} treniruotės per savaitę — gerai.',
+  'Chin-ups or pull-ups — what’s the difference?':
+    'Prisitraukimai atvirkštiniu ar tiesioginiu suėmimu — koks skirtumas?',
+  'Chin-ups (palms facing you) bring in more biceps and are usually a bit easier; pull-ups (palms facing away) lean more on the lats and upper back.':
+    'Atvirkštinis suėmimas (delnai į save) labiau įtraukia bicepsus ir paprastai šiek tiek lengvesnis; tiesioginis (delnai nuo savęs) labiau apkrauna plačiuosius ir viršutinę nugaros dalį.',
+  'Both are excellent back builders, so pick the one that feels better on your elbows and shoulders, or alternate them.':
+    'Abu puikiai augina nugarą, tad rinkis tą, kuris patogesnis alkūnėms ir pečiams, arba kaitaliok.',
+  'A neutral grip (palms facing each other) is often the most joint-friendly of all.':
+    'Neutralus suėmimas (delnai vienas į kitą) dažnai yra švelniausias sąnariams.',
+  'Grip width matters less than full range: start from a dead hang with your shoulders set and pull until your chin clears the bar.':
+    'Suėmimo plotis svarbus mažiau nei visa amplitudė: pradėk iš visiško kabojimo su sustatytais pečiais ir trauk, kol smakras pakils virš skersinio.',
+  'How wide should my bench press grip be?': 'Koks turi būti suėmimo plotis spaudžiant gulint?',
+  'A good default is a grip where your forearms are vertical when the bar touches your chest — for most people the index or middle finger around the rings on the bar.':
+    'Gera atskaita — suėmimas, kai dilbiai vertikalūs, štangai liečiant krūtinę; daugumai tai smilius ar didysis pirštas ties žiedais ant grifo.',
+  'Wider shortens the range and uses more chest but stresses the shoulders more; narrower uses more triceps.':
+    'Platesnis sutrumpina amplitudę ir labiau įtraukia krūtinę, bet labiau apkrauna pečius; siauresnis — daugiau tricepsų.',
+  'Tuck the elbows about {1}–{2}° from your body rather than flaring them straight out, and keep the bar over your wrists, not bent back.':
+    'Laikyk alkūnes maždaug {1}–{2}° kampu į liemenį, o ne išskėstas į šonus, ir štangą virš riešų, nesulenktų atgal.',
+  'Squeeze the bar hard and think of “bending” it to engage the lats; if your shoulders ache, try a slightly narrower grip and more elbow tuck.':
+    'Stipriai spausk štangą ir galvok, kad ją „lenki“, kad įsijungtų platieji; jei maudžia pečius, pabandyk šiek tiek siauresnį suėmimą ir labiau priglausk alkūnes.',
+  'What is leg drive on the bench press?': 'Kas yra kojų darbas spaudžiant gulint?',
+  'Leg drive is pushing your feet into the floor to create full-body tension and to drive yourself back along the bench toward your head — not lifting your hips.':
+    'Kojų darbas — tai pėdų spaudimas į grindis, kad įsitemptų visas kūnas ir tarsi pasistumtum suolu link galvos, o ne dubens kėlimas.',
+  'Plant your feet firmly (flat or on the toes, whichever lets you push hardest), squeeze your glutes and keep them on the bench.':
+    'Tvirtai pastatyk pėdas (plokščiai ar ant pirštų — kaip stipriausiai spaudi), įtempk sėdmenis ir laikyk juos ant suolo.',
+  'Done right, it stabilises your upper back and can add a few kilos to your press.':
+    'Teisingai atliktas jis stabilizuoja viršutinę nugaros dalį ir gali pridėti kelis kilogramus prie spaudimo.',
+  'Set your feet before you unrack and push as the bar leaves your chest; if your hips pop up, push more backward than upward.':
+    'Pastatyk kojas prieš nuimdamas štangą ir spausk jomis, kai štanga kyla nuo krūtinės; jei dubuo atsikelia, spausk labiau atgal nei aukštyn.',
+  'High-bar or low-bar squat?': 'Pritūpimas su aukšta ar žema štanga?',
+  'High-bar sits on top of the traps: a more upright torso, more knee bend and more quads — a natural fit for most people and for Olympic lifting.':
+    'Aukšta štanga guli ant trapecinių: tiesesnis liemuo, daugiau kelių lenkimo ir keturgalvių — natūralu daugumai žmonių ir sunkiajai atletikai.',
+  'Low-bar sits a few centimetres lower, on the rear delts: more forward lean and hip hinge, more glutes and hamstrings, and usually a bit more weight moved — popular in powerlifting.':
+    'Žema štanga guli keliais centimetrais žemiau, ant galinių deltų: daugiau pasilenkimo į priekį ir darbo klubais, daugiau sėdmenų ir šlaunų užpakalinės dalies, dažniausiai šiek tiek didesnis svoris — populiaru jėgos trikovėje.',
+  'Both are good; pick the one that feels comfortable on your shoulders and elbows and stick with it for a while.':
+    'Abu geri; rinkis tą, kuris patogus pečiams ir alkūnėms, ir kurį laiką jo laikykis.',
+  'Low-bar needs good shoulder mobility; if your elbows or wrists hurt, widen your grip and keep the wrists straight.':
+    'Žemai štangai reikia gero pečių paslankumo; jei skauda alkūnes ar riešus, platink suėmimą ir laikyk riešus tiesius.',
+  'Are good mornings a good exercise?': 'Ar good morning — geras pratimas?',
+  'Yes — good mornings (bar on your back, hinging forward with soft knees) strengthen the hamstrings, glutes and spinal erectors and carry over well to squats and deadlifts.':
+    'Taip — good morning (štanga ant nugaros, lenkimasis į priekį šiek tiek sulenktais keliais) stiprina šlaunų užpakalinę dalį, sėdmenis ir nugaros tiesiamuosius ir gerai perkelia jėgą į pritūpimus bei mirties trauką.',
+  'Start very light, keep your back neutral and only go as low as you can without rounding, usually until your torso is near parallel to the floor.':
+    'Pradėk labai lengvai, laikyk nugarą neutralią ir leiskis tik tiek, kiek gali neapvalindamas, dažniausiai kol liemuo beveik lygiagretus grindims.',
+  'They’re an accessory: {1} sets of {2}–{3} with moderate weight, not a lift to max out on.':
+    'Tai pagalbinis pratimas: {1} serijos po {2}–{3} su vidutiniu svoriu, o ne pratimas maksimumui.',
+  'If your lower back is sensitive, start with Romanian deadlifts or back extensions instead and add good mornings later.':
+    'Jei juosmuo jautrus, pradėk nuo rumuniškos traukos ar nugaros tiesimų, o good morning pridėk vėliau.',
+  'Are farmer’s carries worth doing?': 'Ar verta daryti ūkininko ėjimą?',
+  'Very much — carrying heavy dumbbells, kettlebells or handles over a distance trains your grip, traps, core and conditioning all at once, with low injury risk.':
+    'Labai — sunkių hantelių, svarsčių ar rankenų nešimas atstumu vienu metu treniruoja sugriebimą, trapecinius, korpusą ir ištvermę, esant mažai traumų rizikai.',
+  'Stand tall, shoulders down, short quick steps; {1}–{2} walks of {3}–{4} metres (or {5}–{6} seconds) with a heavy load is plenty.':
+    'Stovėk tiesiai, pečiai žemyn, trumpi greiti žingsniai; {1}–{2} ėjimai po {3}–{4} metrus (arba {5}–{6} sekundes) su sunkiu svoriu visiškai pakanka.',
+  'One-hand suitcase carries add a strong challenge for the core against bending sideways.':
+    'Svorio nešimas viena ranka („lagaminas“) stipriai apkrauna korpusą prieš šoninį palinkimą.',
+  'Put them at the end of a session — a tired grip before deadlifts or rows is a bad trade.':
+    'Daryk juos treniruotės pabaigoje — pavargęs sugriebimas prieš mirties trauką ar traukas yra blogi mainai.',
+  'My calves won’t grow — what do I do?': 'Blauzdos neauga — ką daryti?',
+  'Calves respond to the same things as other muscles — they just get ignored or trained with bouncy half reps.':
+    'Blauzdos reaguoja į tą patį kaip ir kiti raumenys — tiesiog jos ignoruojamos arba treniruojamos spyruokliuojančiais pusiniais pakartojimais.',
+  'Use the full range: a deep stretch with a {1}–{2} second pause at the bottom, then all the way up onto your toes.':
+    'Dirbk visa amplitude: gilus tempimas su {1}–{2} sekundžių pauze apačioje, tada iki galo ant pirštų.',
+  'Do {1}–{2} hard sets a week split between standing (straight-knee) and seated (bent-knee) raises, {3}–{4} reps, {5}–{6} times a week, and expect slower progress than elsewhere — genetics play a big role.':
+    'Daryk {1}–{2} sunkias serijas per savaitę, padalytas tarp kėlimų stovint (tiesūs keliai) ir sėdint (sulenkti keliai), po {3}–{4} pakartojimus, {5}–{6} kartus per savaitę, ir tikėkis lėtesnio progreso nei kitur — genetika čia labai svarbi.',
+  'The stretched position seems to drive most of the growth for calves, so don’t cut the bottom — even partial reps in the deep stretch work.':
+    'Panašu, kad blauzdoms daugiausia augimo duoda ištempta padėtis, tad nenukirpk apačios — net daliniai pakartojimai giliame tempime veikia.',
+  'Is the trap bar deadlift as good as a regular deadlift?':
+    'Ar trap bar mirties trauka tokia pat gera kaip įprasta?',
+  'For most people, yes.': 'Daugumai žmonių — taip.',
+  'The trap (hex) bar keeps the weight in line with your body, so you stay more upright, use more quads and put less stress on your lower back, and most lifters handle a bit more weight on it.':
+    'Trap (šešiakampis) grifas laiko svorį vienoje linijoje su kūnu, todėl stovi tiesiau, daugiau dirba keturgalviai, mažiau apkraunamas juosmuo, ir dauguma su juo pakelia šiek tiek daugiau.',
+  'It’s a great main pull for beginners, athletes and anyone with a sensitive back.':
+    'Tai puiki pagrindinė trauka pradedantiesiems, sportininkams ir visiems, kurių nugara jautri.',
+  'If you want to compete in powerlifting you’ll need the straight bar eventually; otherwise choose the one you can train hard and consistently.':
+    'Jei nori varžytis jėgos trikovėje, kada nors prireiks tiesaus grifo; kitu atveju rinkis tą, su kuriuo gali treniruotis sunkiai ir reguliariai.',
+  'Use the high handles to shorten the range while you learn; stand in the centre and push the floor away just like in a normal deadlift.':
+    'Mokydamasis naudok aukštas rankenas, kad sutrumpintum amplitudę; stovėk centre ir stumk grindis kaip įprastoje mirties traukoje.',
+  'Are Nordic hamstring curls worth it?': 'Ar verta daryti šiaurietiškus lenkimus (Nordic curls)?',
+  'Yes — Nordic curls are one of the best-researched ways to lower the risk of hamstring strains, especially for sprinters and team-sport players.':
+    'Taip — Nordic curls yra vienas geriausiai ištirtų būdų sumažinti šlaunų užpakalinės dalies patempimų riziką, ypač sprinteriams ir komandinių sporto šakų žaidėjams.',
+  'Anchor your heels, keep a straight line from knees to head and lower yourself as slowly as you can, catching yourself with your hands.':
+    'Užfiksuok kulnus, laikyk tiesią liniją nuo kelių iki galvos ir leiskis kuo lėčiau, sugaudamas save rankomis.',
+  'Start with {1} sets of {2}–{3} reps once or twice a week; they cause a lot of soreness at first, so build up slowly.':
+    'Pradėk nuo {1} serijų po {2}–{3} pakartojimus kartą ar du per savaitę; iš pradžių jie sukelia stiprų raumenų skausmą, tad didink palaipsniui.',
+  'A band around your chest anchored behind you, or a shorter range, makes them easier until you can control the whole way down.':
+    'Guma ant krūtinės, pritvirtinta už nugaros, arba trumpesnė amplitudė palengvina pratimą, kol gebėsi kontroliuoti visą nusileidimą.',
+  'How do I learn a pistol squat?': 'Kaip išmokti pistoleto pritūpimą?',
+  'A pistol squat needs leg strength, balance and ankle mobility.':
+    'Pistoletui reikia kojų jėgos, pusiausvyros ir čiurnos paslankumo.',
+  'Build up with box pistols (sit down to a bench on one leg and stand back up), lowering the box over time, and hold a door frame or suspension straps for balance.':
+    'Stiprėk pritūpdamas ant vienos kojos iki suolo (atsisėdi ir atsistoji), laikui bėgant žemindamas atramą, ir laikykis durų staktos ar TRX dirželių pusiausvyrai.',
+  'A counterweight helps — holding a light plate out in front makes the bottom easier; practise {1} sets of {2}–{3} per leg a few times a week.':
+    'Padeda atsvara — lengvas diskas ištiestose rankose palengvina apačią; treniruok {1} serijas po {2}–{3} kiekvienai kojai kelis kartus per savaitę.',
+  'If your heel lifts, put a small plate under it or work on ankle mobility; Bulgarian split squats build the strength part in the meantime.':
+    'Jei kulnas kyla, pasidėk po juo nedidelį diską arba lavink čiurnos paslankumą; jėgą tuo metu gerai ugdo bulgariški pritūpimai.',
+  'I’m not sore anymore — is my training still working?':
+    'Manęs nebeskauda po treniruočių — ar treniruotė vis dar veikia?',
+  'Yes — soreness is a poor sign of a good workout.':
+    'Taip — raumenų skausmas yra prastas geros treniruotės rodiklis.',
+  'It mostly shows up with new exercises, more volume or long eccentrics, and it fades as your body adapts, while growth carries on.':
+    'Jis daugiausia atsiranda po naujų pratimų, didesnės apimties ar ilgų ekscentrinių fazių ir išnyksta kūnui prisitaikius, o augimas tęsiasi.',
+  'Judge your training by progress instead: more reps or weight over the weeks, measurements and photos.':
+    'Vertink treniruotes pagal progresą: daugiau pakartojimų ar svorio per savaites, matmenys ir nuotraukos.',
+  'Chasing soreness usually just means more fatigue and slower recovery.':
+    'Vaikymasis raumenų skausmo dažniausiai reiškia tik daugiau nuovargio ir lėtesnį atsigavimą.',
+  'Some mild soreness after a hard session is normal; soreness lasting more than {1}–{2} days means the dose was too big.':
+    'Lengvas skausmas po sunkios treniruotės yra normalus; jei jis trunka ilgiau nei {1}–{2} dienas, dozė buvo per didelė.',
+  'Are massage guns worth it?': 'Ar masažiniai pistoletai verti savo kainos?',
+  'Massage guns can ease the feeling of tightness and soreness for a while and are a nice warm-up or cool-down tool — much like foam rolling.':
+    'Masažinis pistoletas gali kuriam laikui sumažinti sustingimo ir skausmo pojūtį ir yra maloni apšilimo ar atvėsimo priemonė — panašiai kaip volelis.',
+  'They don’t speed up real tissue recovery much or “flush out” lactic acid; sleep, food and sensible volume do the heavy lifting.':
+    'Tikrojo audinių atsigavimo jis reikšmingai nepagreitina ir pieno rūgšties „neišplauna“; pagrindinį darbą atlieka miegas, maistas ir protinga apimtis.',
+  'Use {1}–{2} seconds per muscle at a comfortable pressure, and keep them off bones, joints, the front of the neck and any fresh injury or bruise.':
+    'Naudok {1}–{2} sekundžių raumeniui patogiu spaudimu ir venk kaulų, sąnarių, priekinės kaklo dalies bei šviežių traumų ar mėlynių.',
+  'If it helps you feel ready and move better, it’s worth it; if not, a foam roller does the same job for less money.':
+    'Jei jis padeda jaustis pasiruošusiam ir judėti geriau — vertas; jei ne, volelis padarys tą patį pigiau.',
+  'Should I trust my watch’s HRV and recovery score?':
+    'Ar pasitikėti laikrodžio HRV ir atsigavimo įvertinimu?',
+  'Use them as trends, not verdicts.': 'Laikyk juos tendencijomis, o ne nuosprendžiais.',
+  'HRV and resting heart rate from a watch or ring are fairly reliable over weeks: HRV trending down and resting heart rate up for several days usually means stress, poor sleep, illness or too much training.':
+    'Laikrodžio ar žiedo HRV ir ramybės pulsas gana patikimi savaičių bėgyje: jei kelias dienas HRV mažėja, o ramybės pulsas didėja, tai dažniausiai stresas, prastas miegas, liga ar per daug treniruočių.',
+  'A single low morning score doesn’t mean you can’t train — warm up and see how the weights move.':
+    'Vienas žemas rytinis įvertinimas nereiškia, kad negali treniruotis — apšilk ir pažiūrėk, kaip eina svoriai.',
+  'The calorie-burn numbers are the least accurate part and often overestimate exercise calories.':
+    'Mažiausiai tikslios yra sudegintos kalorijos — jos dažnai padidinamos.',
+  'Measure at the same time each morning, compare with your own baseline, and ignore day-to-day noise of a few points.':
+    'Matuok kasryt tuo pačiu metu, lygink su savo paties lygiu ir nekreipk dėmesio į kasdienius kelių taškų svyravimus.',
+  'Is CNS fatigue real?': 'Ar CNS nuovargis egzistuoja?',
+  'Mostly it’s an overused term.': 'Dažniausiai tai per daug vartojamas terminas.',
+  'Heavy lifting does cause short-lived fatigue that clears within hours to a day or two; the idea that a heavy deadlift “fries your nervous system” for a week isn’t well supported.':
+    'Sunkūs svoriai iš tiesų sukelia trumpalaikį nuovargį, kuris praeina per kelias valandas ar dieną-dvi; idėja, kad sunki mirties trauka savaitei „sudegina nervų sistemą“, menkai pagrįsta.',
+  'When you feel flat for days, it’s usually built-up muscle and joint fatigue, poor sleep, stress or too little food — so the fix is the same: manage volume, sleep, eat, and deload when performance keeps dropping.':
+    'Kai kelias dienas jautiesi „plokščias“, dažniausiai tai sukauptas raumenų ir sąnarių nuovargis, prastas miegas, stresas ar per mažai maisto — tad ir sprendimas tas pats: valdyk apimtį, miegok, valgyk ir daryk iškrovą, kai rezultatai nuolat krenta.',
+  'Very heavy singles and max-effort sessions do feel draining, which is why most programs keep them rare and short.':
+    'Labai sunkūs pavieniai pakartojimai ir maksimalių pastangų treniruotės iš tiesų išsekina, todėl dauguma programų jas daro retai ir trumpai.',
+  'How fast do I lose muscle if I stop training?':
+    'Kaip greitai prarasiu raumenis, jei nustosiu treniruotis?',
+  'Slower than you think.': 'Lėčiau, nei manai.',
+  'Two or three weeks off cost very little muscle — you may look flatter because of less water and glycogen, but that comes back within days.':
+    'Dvi ar trys savaitės pertraukos kainuoja labai mažai raumenų — gali atrodyti „plokštesnis“ dėl mažesnio vandens ir glikogeno kiekio, bet tai grįžta per kelias dienas.',
+  'Strength drops a bit faster than size after about {1}–{2} weeks, and after months off, “muscle memory” helps you regain it much faster than it took to build.':
+    'Jėga krenta šiek tiek greičiau nei masė maždaug po {1}–{2} savaičių, o po mėnesių pertraukos „raumenų atmintis“ padeda atgauti ją daug greičiau, nei užtruko užauginti.',
+  'Even one or two short sessions a week keep most of what you have.':
+    'Net viena ar dvi trumpos treniruotės per savaitę išsaugo didžiąją dalį to, ką turi.',
+  'Keep protein high and stay active during the break; when you return, start at about {1}–{2}% of your old weights and build back over a few weeks.':
+    'Pertraukos metu valgyk daug baltymų ir išlik aktyvus; grįžęs pradėk nuo maždaug {1}–{2}% ankstesnių svorių ir per kelias savaites atsistatyk.',
+  'Do joint supplements like glucosamine or collagen work?':
+    'Ar veikia papildai sąnariams, kaip gliukozaminas ar kolagenas?',
+  'The evidence is weak.': 'Įrodymai silpni.',
+  'Glucosamine and chondroitin show small or no effects for most people; collagen ({1}–{2} g with some vitamin C about an hour before training) has some early evidence for tendons, but it isn’t magic.':
+    'Gliukozaminas ir chondroitinas daugumai žmonių duoda mažą poveikį arba jokio; kolagenas ({1}–{2} g su trupučiu vitamino C maždaug valandą prieš treniruotę) turi pirmųjų duomenų apie sausgysles, bet tai ne stebuklas.',
+  'What reliably helps joints is sensible loading — gradual progression, good technique, strong muscles around the joint — plus sleep and a healthy body weight.':
+    'Sąnariams patikimai padeda protingas krūvis — laipsniška progresija, gera technika, stiprūs raumenys aplink sąnarį — ir miegas bei sveikas kūno svoris.',
+  'Joint pain that keeps coming back deserves a check with a doctor or physio rather than a new supplement.':
+    'Nuolat grįžtantį sąnarių skausmą verta parodyti gydytojui ar kineziterapeutui, užuot ieškojus naujo papildo.',
+  'Fish oil may slightly ease joint stiffness for some people; check with a doctor if you take blood thinners.':
+    'Žuvų taukai kai kuriems gali šiek tiek sumažinti sąnarių sustingimą; pasitark su gydytoju, jei vartoji kraują skystinančius vaistus.',
+  'Does creatine cause hair loss, bloating or kidney problems?':
+    'Ar kreatinas sukelia plaukų slinkimą, pūtimą ar inkstų problemų?',
+  'Creatine monohydrate is one of the most studied supplements and is safe for healthy people at {1}–{2} g a day.':
+    'Kreatino monohidratas — vienas labiausiai ištirtų papildų ir yra saugus sveikiems žmonėms vartojant {1}–{2} g per dieną.',
+  'It adds water inside the muscles (often {1}–{2} kg on the scale), not the puffy bloating under the skin people fear.':
+    'Jis prideda vandens raumenų viduje (dažnai {1}–{2} kg ant svarstyklių), o ne tinimo po oda, kurio žmonės bijo.',
+  'The hair-loss worry comes from a single small study that hasn’t been repeated, and it doesn’t harm healthy kidneys — it can raise the creatinine marker in blood tests, so tell your doctor you take it, and if you have kidney disease, ask first.':
+    'Nerimas dėl plaukų kyla iš vieno nedidelio tyrimo, kurio niekas nepakartojo, o sveikiems inkstams kreatinas nekenkia — jis gali padidinti kreatinino rodiklį kraujo tyrimuose, tad pasakyk gydytojui, kad jį vartoji, o sergant inkstų liga pirmiausia pasitark.',
+  'No loading phase needed: {1}–{2} g daily at any time of day fills the muscles in {3}–{4} weeks; loading with {5} g a day for {6}–{7} days just gets there faster.':
+    'Įsotinimo fazė nereikalinga: {1}–{2} g kasdien bet kuriuo paros metu įsotina raumenis per {3}–{4} savaites; įsotinimas po {5} g per dieną {6}–{7} dienas tik pagreitina tai.',
+  'Which protein powder should I buy?': 'Kokius baltymų miltelius pirkti?',
+  'Protein powder is just convenient food — use it if it helps you hit your daily protein.':
+    'Baltymų milteliai — tiesiog patogus maistas: vartok juos, jei padeda pasiekti dienos baltymų normą.',
+  'Whey concentrate is cheap and effective; whey isolate has less lactose if dairy bothers you; for plant-based, choose a pea and rice blend.':
+    'Išrūgų koncentratas pigus ir veiksmingas; izoliatas turi mažiau laktozės, jei pieno produktai netinka; iš augalinių rinkis žirnių ir ryžių mišinį.',
+  'Pick a brand with third-party testing (like Informed Sport), check that one scoop gives about {1}–{2} g of protein, and choose a flavour you’ll actually drink.':
+    'Rinkis prekės ženklą su nepriklausomu testavimu (pvz., Informed Sport), patikrink, kad viena porcija duoda apie {1}–{2} g baltymų, ir rinkis skonį, kurį tikrai gersi.',
+  'Casein digests slowly and suits the evening, but your total daily protein matters far more than the type.':
+    'Kazeinas virškinamas lėtai ir tinka vakarui, bet bendras dienos baltymų kiekis svarbesnis nei jų rūšis.',
+  'How much protein can my body absorb in one meal?':
+    'Kiek baltymų kūnas pasisavina per vieną valgį?',
+  'You absorb practically all of it — the “{1} grams per meal” limit is a myth.':
+    'Pasisavini praktiškai visus — „{1} gramų per valgį“ riba yra mitas.',
+  'Bigger servings simply take longer to digest and are still used for building and repair.':
+    'Didesnės porcijos tiesiog ilgiau virškinamos ir vis tiek naudojamos statybai ir atsistatymui.',
+  'For convenience and appetite, spreading protein over {1}–{2} meals of roughly {3} g per kg of bodyweight each works well, but hitting your daily total is what counts most.':
+    'Patogumui ir apetitui gerai paskirstyti baltymus į {1}–{2} valgius po maždaug {3} g kilogramui kūno svorio, bet svarbiausia — dienos suma.',
+  'A meal with {1}–{2} g of protein within a few hours of training is a sensible habit, not a strict window.':
+    'Valgis su {1}–{2} g baltymų per kelias valandas po treniruotės — protingas įprotis, o ne griežtas langas.',
+  'Should I drink something during my workout?': 'Ar ką nors gerti treniruotės metu?',
+  'Water is enough for most sessions under about {1}–{2} minutes.':
+    'Daugumai treniruočių, trumpesnių nei maždaug {1}–{2} minutės, užtenka vandens.',
+  'For long or very hard sessions, a drink with carbs (about {1}–{2} g per hour) and a bit of sodium can help you keep your performance up, especially if you trained fasted or sweat a lot.':
+    'Ilgoms ar labai sunkioms treniruotėms gėrimas su angliavandeniais (maždaug {1}–{2} g per valandą) ir trupučiu natrio padės išlaikyti darbingumą, ypač jei treniruojiesi nevalgęs ar stipriai prakaituoji.',
+  'Intra-workout BCAAs or EAAs add little if you eat enough protein during the day.':
+    'BCAA ar EAA treniruotės metu mažai ką duoda, jei per dieną suvalgai pakankamai baltymų.',
+  'Sip regularly rather than chugging, and weigh yourself before and after a long session: each kilo lost is roughly a litre to replace.':
+    'Gerk reguliariai mažais gurkšniais, o ne vienu ypu, ir pasisverk prieš ilgą treniruotę bei po jos: kiekvienas prarastas kilogramas — maždaug litras, kurį reikia atstatyti.',
+  'Should I take vitamin D?': 'Ar vartoti vitaminą D?',
+  'If you live far from the equator, spend little time in the sun or it’s winter, there’s a good chance your level is low, and low vitamin D is linked to worse bone health and immunity.':
+    'Jei gyveni toli nuo pusiaujo, mažai būni saulėje ar dabar žiema, labai tikėtina, kad jo lygis žemas, o mažas vitamino D kiekis siejamas su prastesne kaulų sveikata ir imunitetu.',
+  'A common safe dose is {1}–{2} IU a day, but the best move is a blood test so you know your level.':
+    'Įprasta saugi dozė — {1}–{2} TV per dieną, bet geriausia pasidaryti kraujo tyrimą ir žinoti savo lygį.',
+  'It won’t boost your strength if your level is already fine, and very high doses without testing can do harm.':
+    'Jis nepadidins jėgos, jei lygis jau normalus, o labai didelės dozės be tyrimų gali pakenkti.',
+  'Take it with a meal that has some fat in it for better absorption.':
+    'Vartok jį valgydamas maistą su trupučiu riebalų — geriau pasisavina.',
+  'Does magnesium help with sleep or cramps?': 'Ar magnis padeda miegui ar nuo mėšlungio?',
+  'Magnesium helps if you’re actually low — common when you eat few nuts, seeds, greens and whole grains, or sweat heavily.':
+    'Magnis padeda, jei jo tikrai trūksta — tai dažna, kai valgai mažai riešutų, sėklų, žalumynų ir viso grūdo produktų arba stipriai prakaituoji.',
+  'For sleep the evidence is modest, mostly in older adults or people with low intake; for exercise cramps it’s weak.':
+    'Miegui įrodymai vidutiniai, daugiausia vyresniems žmonėms ar esant mažam suvartojimui; mėšlungiui treniruotės metu — silpni.',
+  'If you try it, {1}–{2} mg of glycinate or citrate in the evening is typical; oxide is poorly absorbed and more likely to upset your stomach.':
+    'Jei nori išbandyti, įprasta {1}–{2} mg glicinato ar citrato vakare; oksidas prastai pasisavinamas ir dažniau dirgina skrandį.',
+  'Skip it with kidney disease unless your doctor agrees.':
+    'Sergant inkstų liga — tik gydytojui leidus.',
+  'Food first: a handful of pumpkin seeds or almonds, dark chocolate, beans and leafy greens cover a lot of your daily need.':
+    'Pirmiausia maistas: sauja moliūgų sėklų ar migdolų, juodasis šokoladas, ankštiniai ir lapiniai žalumynai padengia didelę dalį dienos poreikio.',
+  'Do testosterone boosters work?': 'Ar veikia testosterono stiprikliai?',
+  'Over-the-counter “test boosters” (tribulus, fenugreek, D-aspartic acid and the like) don’t meaningfully raise testosterone or muscle growth in healthy men.':
+    'Nereceptiniai „testosterono stiprikliai“ (tribulus, ožragė, D-asparto rūgštis ir pan.) reikšmingai nepadidina testosterono ar raumenų augimo sveikiems vyrams.',
+  'Ashwagandha may slightly lower stress and improve sleep, which can help training indirectly.':
+    'Ašvaganda gali šiek tiek sumažinti stresą ir pagerinti miegą, o tai netiesiogiai padeda treniruotėms.',
+  'The real levers are sleep, enough calories and fat, a healthy body-fat level and lifting; if you have symptoms of low testosterone, get a blood test from a doctor instead of buying pills.':
+    'Tikrieji svertai — miegas, pakankamai kalorijų ir riebalų, sveikas riebalų procentas ir jėgos treniruotės; jei turi žemo testosterono simptomų, pasidaryk kraujo tyrimą pas gydytoją, užuot pirkęs tabletes.',
+  'Some “boosters” turn out to be contaminated with banned substances — another reason to skip them if you compete or get tested.':
+    'Kai kurie „stiprikliai“ pasirodo užteršti draudžiamomis medžiagomis — dar viena priežastis jų vengti, jei varžaisi ar esi tikrinamas.',
+  'Do fat burner pills work?': 'Ar riebalų degintojai veikia?',
+  'Not in any way that matters.': 'Ne taip, kad tai turėtų reikšmės.',
+  'Most fat burners are mainly caffeine plus extras; at best they add a few dozen burned calories a day and slightly blunt your appetite.':
+    'Dauguma riebalų degintojų — daugiausia kofeinas ir priedai; geriausiu atveju jie prideda kelias dešimtis sudegintų kalorijų per dieną ir šiek tiek slopina apetitą.',
+  'Some have caused liver damage or heart problems, or contained banned stimulants.':
+    'Kai kurie sukėlė kepenų pažeidimus ar širdies problemų arba turėjo draudžiamų stimuliantų.',
+  'A moderate calorie deficit, plenty of protein, lifting and daily steps do the actual work — spend the money on good food instead.':
+    'Tikrąjį darbą atlieka vidutinis kalorijų deficitas, daug baltymų, jėgos treniruotės ir kasdieniai žingsniai — geriau išleisk pinigus geram maistui.',
+  'If you have heart or blood-pressure problems, avoid stimulant products entirely.':
+    'Jei turi širdies ar kraujospūdžio problemų, visiškai venk produktų su stimuliantais.',
+  'What is reverse dieting after a cut?': 'Kas yra atvirkštinė dieta po džiovinimo?',
+  'Reverse dieting means raising calories gradually after a diet instead of jumping straight back to your old eating.':
+    'Atvirkštinė dieta — tai laipsniškas kalorijų didinimas po dietos, užuot staiga grįžus prie senos mitybos.',
+  'You can add roughly {1}–{2} kcal a week, or go straight to your new maintenance if you’re mentally done with dieting — both work; the slow way mainly helps you control appetite and limit fat regain.':
+    'Gali pridėti maždaug {1}–{2} kcal per savaitę arba iškart pereiti prie naujos palaikymo normos, jei psichologiškai jau pavargai nuo dietos — abu būdai veikia; lėtasis daugiausia padeda valdyti apetitą ir mažiau priaugti riebalų.',
+  'Expect {1}–{2} kg back on the scale from food and water in your gut and muscles; that’s not fat.':
+    'Tikėkis {1}–{2} kg daugiau ant svarstyklių dėl maisto ir vandens žarnyne bei raumenyse; tai ne riebalai.',
+  'Your new maintenance is a bit lower than before the diet because you weigh less; find it by watching your weekly average weight for {1}–{2} weeks.':
+    'Nauja palaikymo norma šiek tiek mažesnė nei prieš dietą, nes sveri mažiau; ją rasi {1}–{2} savaites stebėdamas savaitės vidutinį svorį.',
+  'Should I take a diet break or a refeed during a cut?':
+    'Ar daryti dietos pertrauką ar refeed džiovinimo metu?',
+  'On longer cuts it’s a good idea.': 'Per ilgesnį džiovinimą — gera mintis.',
+  'A diet break is {1}–{2} weeks of eating at maintenance every {3}–{4} weeks of dieting; a refeed is one or two higher-carb days a week.':
+    'Dietos pertrauka — tai {1}–{2} savaitės valgymo pagal palaikymo normą kas {3}–{4} dietos savaites; refeed — viena ar dvi dienos per savaitę su daugiau angliavandenių.',
+  'They don’t magically “reset your metabolism”, but they ease hunger, bring back energy for training and make the diet easier to stick with.':
+    'Jie stebuklingai „neperkrauna medžiagų apykaitos“, bet mažina alkį, grąžina energiją treniruotėms ir padeda ištverti dietą.',
+  'The whole cut just takes a bit longer — that’s the trade.':
+    'Visas džiovinimas tiesiog užtrunka šiek tiek ilgiau — tokia kaina.',
+  'Keep protein the same on break days and add the extra calories mostly as carbs.':
+    'Pertraukos dienomis baltymų palik tiek pat, o papildomas kalorijas pridėk daugiausia angliavandeniais.',
+  'Why does my weight jump up and down every day?': 'Kodėl mano svoris kasdien šokinėja?',
+  'Daily swings of {1}–{2} kg are normal and are mostly water: salt, carbs, a big meal, hard training, stress, poor sleep, the menstrual cycle and what’s still in your gut all shift it.':
+    'Kasdieniai {1}–{2} kg svyravimai yra normalūs ir daugiausia tai vanduo: druska, angliavandeniai, gausus valgis, sunki treniruotė, stresas, prastas miegas, menstruacinis ciklas ir žarnyno turinys — visa tai jį keičia.',
+  'Weigh yourself in the morning after the toilet and before food, and look at the weekly average rather than any single day.':
+    'Svėrkis ryte po tualeto ir prieš valgį ir žiūrėk į savaitės vidurkį, o ne į atskirą dieną.',
+  'If the weekly average moves the way you want over {1}–{2} weeks, you’re on track.':
+    'Jei savaitės vidurkis per {1}–{2} savaites juda norima kryptimi, viskas gerai.',
+  'After starting a new program or creatine the scale often goes up {1}–{2} kg from water in the muscles — that’s a good sign, not fat.':
+    'Pradėjus naują programą ar kreatiną svoris dažnai padidėja {1}–{2} kg dėl vandens raumenyse — tai geras ženklas, ne riebalai.',
+  'Is keto good for lifting?': 'Ar keto tinka jėgos treniruotėms?',
+  'You can build strength and some muscle on keto, but it’s no advantage for lifting.':
+    'Su keto galima ugdyti jėgą ir šiek tiek raumenų, bet sporto salėje tai nėra pranašumas.',
+  'Carbs fuel hard sets, so most people feel flatter in higher-rep, high-volume work, especially in the first {1}–{2} weeks.':
+    'Angliavandeniai — kuras sunkioms serijoms, todėl dauguma jaučiasi „plokšti“ daugelio pakartojimų ir didelės apimties darbe, ypač pirmas {1}–{2} savaites.',
+  'Keto can work for fat loss if it helps you eat less, but so does any diet you can stick to — keep protein high either way.':
+    'Keto gali padėti numesti riebalų, jei padeda valgyti mažiau, bet taip veikia bet kuri dieta, kurios gali laikytis — baltymų bet kuriuo atveju valgyk daug.',
+  'If you try it, add salt and fluids from the start — the “keto flu” is largely lost sodium and water.':
+    'Jei bandai, nuo pat pradžių pridėk druskos ir skysčių — „keto gripas“ daugiausia yra prarastas natris ir vanduo.',
+  'Is intermittent fasting good for building muscle?':
+    'Ar protarpinis badavimas tinka raumenims auginti?',
+  'Intermittent fasting (like {1}:{2}) is simply a way to fit your calories into a shorter window.':
+    'Protarpinis badavimas (pvz., {1}:{2}) — tiesiog būdas sutalpinti kalorijas į trumpesnį langą.',
+  'For fat loss it works as well as other diets when calories and protein are the same.':
+    'Riebalams mesti jis veikia ne prasčiau už kitas dietas, jei kalorijos ir baltymai tie patys.',
+  'For building muscle it’s slightly less ideal, because fitting enough protein into {1}–{2} meals is harder — if you use it, have at least two solid protein meals and try to train close to your eating window.':
+    'Raumenims auginti jis šiek tiek mažiau idealus, nes sutalpinti pakankamai baltymų į {1}–{2} valgius sunkiau — jei jį taikai, turėk bent du geros baltymų porcijos valgius ir stenkis treniruotis arti savo valgymo lango.',
+  'Training fasted in the morning is fine for most people; eat a protein-rich meal soon after.':
+    'Treniruotė nevalgius ryte daugumai tinka; netrukus po jos suvalgyk ką nors baltyminio.',
+  'Should a teenager take protein or creatine?': 'Ar paaugliui vartoti baltymus ar kreatiną?',
+  'For teens, food comes first: regular meals with protein (meat, fish, eggs, dairy, beans), enough total calories, fruit, vegetables and sleep drive growth far more than any product.':
+    'Paaugliams pirmiausia maistas: reguliarūs valgiai su baltymais (mėsa, žuvis, kiaušiniai, pieno produktai, ankštiniai), pakankamai kalorijų, vaisiai, daržovės ir miegas augimui duoda daug daugiau nei bet koks produktas.',
+  'Protein powder is just food and is fine for filling gaps.':
+    'Baltymų milteliai — tiesiog maistas, jais galima užpildyti spragas.',
+  'Creatine looks safe in the studies we have, but most experts suggest under-{1}s use it only with a parent and a doctor involved; avoid pre-workouts, fat burners and “test boosters” completely.':
+    'Turimuose tyrimuose kreatinas atrodo saugus, bet dauguma specialistų pataria jaunesniems nei {1} metų jį vartoti tik dalyvaujant tėvams ir gydytojui; prieštreniruotinių, riebalų degintojų ir „testosterono stipriklių“ visiškai venk.',
+  'The biggest gains for a teen come from learning good technique with light-to-moderate weights and training consistently for years.':
+    'Daugiausia paaugliui duoda geros technikos mokymasis su lengvais ir vidutiniais svoriais bei reguliarios treniruotės metų metus.',
+  'How do I improve my VO{1}max?': 'Kaip pagerinti VO{1}max?',
+  'VO{1}max is the most oxygen your body can use — one of the strongest predictors of long-term health.':
+    'VO{1}max — didžiausias deguonies kiekis, kurį kūnas gali panaudoti, vienas stipriausių ilgalaikės sveikatos rodiklių.',
+  'Build a base of easy zone {1} work ({2}–{3} sessions of {4}–{5} minutes a week), then add one session of hard intervals, like {6} × {7} minutes at about {8}–{9}% of your max heart rate with {10} easy minutes between them.':
+    'Susikurk lengvo darbo {1} zonoje bazę ({2}–{3} treniruotės po {4}–{5} minutes per savaitę), tada pridėk vieną sunkių intervalų treniruotę, pvz., {6} × {7} minutes ties maždaug {8}–{9}% maksimalaus pulso su {10} lengvomis minutėmis tarp jų.',
+  'It improves within weeks in untrained people and keeps improving with consistency.':
+    'Netreniruotiems žmonėms jis pagerėja per kelias savaites ir toliau gerėja esant reguliarumui.',
+  'Do the hard intervals on a bike, rower or incline treadmill if running beats up your legs before squat day.':
+    'Sunkius intervalus daryk dviratiu, irklavimo treniruokliu ar kylančiu bėgimo takeliu, jei bėgimas per daug apkrauna kojas prieš pritūpimų dieną.',
+  'Is incline treadmill walking good cardio?': 'Ar ėjimas bėgimo takeliu į kalną — geras kardio?',
+  'Yes — walking on an incline (like the popular {1}% incline at {2} km/h for {3} minutes) raises your heart rate into a good zone {4} range with very little impact, so it barely interferes with leg training.':
+    'Taip — ėjimas į kalną (kaip populiarus {1}% nuolydis, {2} km/h, {3} minučių) pakelia pulsą į gerą {4} zoną su labai maža smūgine apkrova, todėl beveik netrukdo kojų treniruotėms.',
+  'It’s a great option for supporting fat loss and heart health.':
+    'Tai puikus pasirinkimas riebalų mažinimui palaikyti ir širdies sveikatai.',
+  'Don’t hold the handrails — it cuts the work a lot; lower the incline instead, and build up gradually if your calves or shins get sore.':
+    'Nesilaikyk turėklų — tai labai sumažina darbą; verčiau sumažink nuolydį ir didink palaipsniui, jei skauda blauzdas ar blauzdikaulius.',
+  'The stair climber works similarly and is a bit harder; both fit well after a lifting session or on rest days.':
+    'Laiptų treniruoklis veikia panašiai ir yra šiek tiek sunkesnis; abu gerai tinka po jėgos treniruotės ar poilsio dienomis.',
+  'How do I use the rowing machine properly?': 'Kaip taisyklingai naudotis irklavimo treniruokliu?',
+  'The order is legs, back, arms on the drive, and arms, back, legs on the way back.':
+    'Tvarka: kojos, nugara, rankos traukiant ir rankos, nugara, kojos grįžtant.',
+  'Push hard with your legs first (about {1}% of the power), then lean back slightly and pull the handle to your lower ribs; return by straightening your arms, hinging forward, and only then bending your knees.':
+    'Pirmiausia stipriai atsispirk kojomis (maždaug {1}% galios), tada šiek tiek atsilošk ir trauk rankeną prie apatinių šonkaulių; grįžk ištiesdamas rankas, pasilenkdamas į priekį ir tik tada lenkdamas kelius.',
+  'Keep the damper around {1}–{2} — higher isn’t more useful — and aim for about {3}–{4} strokes per minute for steady work.':
+    'Laikyk sklendę maždaug ties {1}–{2} — didesnė nėra naudingesnė — ir tolygiam darbui siek {3}–{4} yrių per minutę.',
+  'Rowing is a great low-impact, full-body option for intervals, like {1} × {2} m hard with a minute easy between them.':
+    'Irklavimas — puikus, sąnarius tausojantis viso kūno variantas intervalams, pvz., {1} × {2} m intensyviai su minute lengvai tarp jų.',
+  'Is jumping rope good cardio?': 'Ar šokdynė — geras kardio?',
+  'Yes — skipping is cheap, portable and great for conditioning, coordination and springy calves and ankles (useful for running and jumping).':
+    'Taip — šokdynė pigi, visada po ranka ir puikiai lavina ištvermę, koordinaciją bei spyruokliuojančias blauzdas ir čiurnas (naudinga bėgimui ir šuoliams).',
+  'It’s high-impact, so build up: start with {1}–{2} rounds of {3} seconds on and {4} seconds off, jumping low on the balls of your feet and turning the rope with your wrists.':
+    'Tai smūginė apkrova, tad didink palaipsniui: pradėk nuo {1}–{2} raundų po {3} sekundžių darbo ir {4} sekundžių poilsio, šokinėdamas žemai ant priekinės pėdos dalies ir sukdamas šokdynę riešais.',
+  'Use a firm surface with a little give and good shoes, and back off if your shins or Achilles get sore.':
+    'Rinkis tvirtą, šiek tiek amortizuojantį paviršių ir gerus batus, o jei ima skaudėti blauzdikaulius ar Achilo sausgyslę — sumažink krūvį.',
+  'Ten minutes of rope makes a great warm-up or finisher; the length is right when the handles reach your armpits while you stand on the middle.':
+    'Dešimt minučių su šokdyne — puikus apšilimas ar užbaigimas; ilgis tinkamas, kai rankenos siekia pažastis, stovint ant šokdynės vidurio.',
+  'How do I improve upper-back (thoracic) mobility?':
+    'Kaip pagerinti viršutinės nugaros (krūtininės dalies) paslankumą?',
+  'A stiff upper back limits overhead pressing, front squats and posture.':
+    'Sustingusi viršutinė nugara riboja spaudimą virš galvos, priekinius pritūpimus ir laikyseną.',
+  'Two or three simple drills before training work well: extensions over a foam roller (a few spots between the shoulder blades), open-book rotations lying on your side and thread-the-needle rotations on all fours, {1}–{2} slow reps each.':
+    'Prieš treniruotę gerai veikia du trys paprasti pratimai: tiesimasis ant volelio (keli taškai tarp mentių), „atverstos knygos“ sukimai gulint ant šono ir „siūlo į adatą“ sukimai keturpėsčia, po {1}–{2} lėtus pakartojimus.',
+  'Then use that range under load — strict overhead presses and rows help you keep it.':
+    'Tada naudok tą amplitudę su svoriu — griežti spaudimai virš galvos ir traukos padeda ją išlaikyti.',
+  'If raising your arms overhead pinches the shoulder, check with a physio rather than forcing the range.':
+    'Jei keliant rankas virš galvos gnybia petį, pasitark su kineziterapeutu, o ne forsuok amplitudę.',
+  'How do I fix tight hip flexors?': 'Ką daryti su įsitempusiais klubo lenkiamaisiais?',
+  'Hip flexors often feel tight from long sitting, but that feeling doesn’t always mean they’re short.':
+    'Klubo lenkiamieji dažnai jaučiasi įsitempę dėl ilgo sėdėjimo, bet tas jausmas ne visada reiškia, kad jie sutrumpėję.',
+  'A half-kneeling stretch with the back leg’s glute squeezed and the pelvis tucked ({1}–{2} seconds, {3}–{4} times per side) usually helps, and so does strengthening the hip flexors and glutes with lunges and hanging knee raises.':
+    'Dažniausiai padeda tempimas klūpant ant vieno kelio su įtemptu galinės kojos sėdmeniu ir pakreiptu dubeniu ({1}–{2} sekundės, {3}–{4} kartus kiekvienai pusei), taip pat klubo lenkiamųjų ir sėdmenų stiprinimas įtūpstais ir kelių kėlimais kybant.',
+  'Break up long sitting every {1}–{2} minutes — that matters more than any stretch.':
+    'Nutrauk ilgą sėdėjimą kas {1}–{2} minučių — tai svarbiau už bet kokį tempimą.',
+  'If the front of your hip pinches in deep squats, try a slightly wider stance with the toes turned out, and get it checked if it doesn’t ease.':
+    'Jei giliame pritūpime gnybia klubo priekyje, pabandyk šiek tiek platesnę stovėseną su pirštais į išorę, o jei nepraeina — pasitikrink.',
+  'My hamstrings are tight and I can’t touch my toes — what helps?':
+    'Mano šlaunų užpakaliniai raumenys įsitempę ir nepasiekiu kojų pirštų — kas padės?',
+  'Regular stretching works: {1}–{2} sets of {3}–{4} seconds on most days increases your range within weeks, mostly because your nervous system gets used to the stretch.':
+    'Reguliarus tempimas veikia: {1}–{2} serijos po {3}–{4} sekundes daugumą dienų padidina amplitudę per kelias savaites, daugiausia todėl, kad nervų sistema pripranta prie tempimo.',
+  'Loaded stretching works just as well — Romanian deadlifts and good mornings through a full range build flexibility and strength together.':
+    'Tempimas su svoriu veikia ne prasčiau — rumuniška trauka ir good morning visa amplitude kartu ugdo lankstumą ir jėgą.',
+  'Tight hamstrings usually aren’t the cause of back pain, and you don’t need to touch your toes to lift well.':
+    'Įsitempę šlaunų užpakaliniai raumenys paprastai nėra nugaros skausmo priežastis, ir nereikia pasiekti kojų pirštų, kad gerai treniruotumeisi.',
+  'Stretch after training or in the evening; a few gentle reps in the warm-up are fine, but long holds right before heavy lifting can slightly reduce strength.':
+    'Tempkis po treniruotės ar vakare; keli švelnūs pakartojimai apšilimo metu — gerai, bet ilgi išlaikymai prieš pat sunkų darbą gali šiek tiek sumažinti jėgą.',
+  'How should I warm up my shoulders before pressing?': 'Kaip apšildyti pečius prieš spaudimą?',
+  'Five minutes is enough: arm circles and band pull-aparts ({1} × {2}), band pass-throughs or wall slides ({3} × {4}), external rotations with a light band ({5} × {6} per side), then scapular push-ups ({7} × {8}).':
+    'Užtenka penkių minučių: rankų sukimai ir gumos tempimai į šonus ({1} × {2}), gumos perkėlimai per galvą ar slydimai sienomis ({3} × {4}), išorinės rotacijos su lengva guma ({5} × {6} kiekvienai pusei), tada atsispaudimai mentėmis ({7} × {8}).',
+  'After that, do your pressing warm-up sets with the empty bar and gradually heavier loads.':
+    'Po to atlik apšilimo spaudimo serijas su tuščiu grifu ir palaipsniui sunkesniu svoriu.',
+  'The goal is to feel warm and move freely, not to tire out the small muscles.':
+    'Tikslas — sušilti ir laisvai judėti, o ne pavarginti mažuosius raumenis.',
+  'If a shoulder feels cranky, add an extra light set or two of the press itself rather than more stretching.':
+    'Jei petys „kaprizingas“, verčiau pridėk vieną ar dvi lengvas paties spaudimo serijas nei daugiau tempimo.',
+  'My wrists hurt on bench or front squats — what can I do?':
+    'Skauda riešus spaudžiant ar darant priekinius pritūpimus — ką daryti?',
+  'When pressing, keep the bar low in your palm over the forearm bones rather than letting the wrist bend back — squeeze hard and think “knuckles to the ceiling”.':
+    'Spaudžiant laikyk štangą žemai delne virš dilbio kaulų, neleisdamas riešui lenktis atgal — stipriai spausk ir galvok „krumpliai į lubas“.',
+  'Wrist wraps help on heavy sets.': 'Sunkiose serijose padeda riešų tvarsčiai.',
+  'In front squats it’s usually tight lats and triceps, not the wrists: use a wider grip, fewer fingers on the bar or straps as handles.':
+    'Priekiniuose pritūpimuose dažniausiai kalti įsitempę platieji ir tricepsai, o ne riešai: platesnis suėmimas, mažiau pirštų ant grifo arba dirželiai kaip rankenos.',
+  'Daily wrist circles and gentle loaded stretches help; sharp or lasting pain deserves a check.':
+    'Kasdieniai riešų sukimai ir švelnus tempimas su svoriu padeda; aštrų ar ilgai trunkantį skausmą verta patikrinti.',
+  'Push-ups on your fists or on dumbbells keep the wrist straight if the floor position hurts.':
+    'Atsispaudimai ant kumščių ar hantelių laiko riešą tiesų, jei ant grindų skauda.',
+  'Is yoga good for lifters?': 'Ar joga naudinga sportuojantiems su svoriais?',
+  'Yes — yoga adds mobility, body awareness, breathing control and a calm way to recover, and {1}–{2} classes a week fit easily around lifting.':
+    'Taip — joga prideda paslankumo, kūno pojūčio, kvėpavimo kontrolės ir ramaus atsigavimo, o {1}–{2} užsiėmimus per savaitę lengva suderinti su jėgos treniruotėmis.',
+  'Gentle or restorative styles work as active recovery; hot or power yoga is a real training load, so don’t put it right before a heavy leg or pressing day.':
+    'Švelnūs ar atkuriamieji stiliai veikia kaip aktyvus atsigavimas; karštoji ar jėgos joga yra tikras krūvis, tad nedėk jos prieš pat sunkią kojų ar spaudimų dieną.',
+  'It won’t replace strength training for building muscle or bone.':
+    'Ji nepakeis jėgos treniruočių raumenims ir kaulams auginti.',
+  'If you log yoga as an activity, I count it in your weekly load and recovery.':
+    'Jei jogą įrašysi kaip veiklą, įskaičiuosiu ją į savaitės krūvį ir atsigavimą.',
+  'Is Pilates good alongside lifting?': 'Ar pilatesas tinka kartu su jėgos treniruotėmis?',
+  'Pilates is good for core control, posture, mobility and rehab-style strength, and it pairs well with lifting — {1}–{2} sessions a week make a nice addition.':
+    'Pilatesas gerai lavina korpuso kontrolę, laikyseną, paslankumą ir reabilitacinio tipo jėgą bei gerai dera su svoriais — {1}–{2} užsiėmimai per savaitę būtų puikus priedas.',
+  'It usually doesn’t load muscles and bones heavily enough to replace progressive strength training for size, strength or bone density.':
+    'Paprastai jis nepakankamai apkrauna raumenis ir kaulus, kad pakeistų progresyvias jėgos treniruotes masei, jėgai ar kaulų tankiui.',
+  'Reformer classes are harder than mat classes, so treat them as a light-to-moderate training day.':
+    'Užsiėmimai su reformeriu sunkesni nei ant kilimėlio, tad laikyk juos lengva ar vidutine treniruočių diena.',
+  'After pregnancy or with back problems, a qualified Pilates instructor can be a great bridge back to lifting.':
+    'Po nėštumo ar turint nugaros problemų kvalifikuotas pilateso instruktorius gali būti puikus tiltas atgal prie jėgos treniruočių.',
+  'Should I wear gym gloves?': 'Ar sporto salėje mūvėti pirštines?',
+  'You don’t need them.': 'Jų nereikia.',
+  'Gloves make the handle thicker, which can make gripping harder, and they don’t really prevent calluses — holding the bar correctly does.':
+    'Pirštinės storina rankeną, todėl suimti gali būti sunkiau, ir iš tiesų neapsaugo nuo nuospaudų — apsaugo taisyklingas grifo suėmimas.',
+  'If you like them for comfort or hygiene, that’s fine.':
+    'Jei jos tau patinka dėl patogumo ar higienos — prašom.',
+  'For heavy pulling, chalk and straps are more useful; for rough hands, file calluses down and moisturise.':
+    'Sunkioms traukoms naudingesni magnezija ir dirželiai; šiurkščias rankas nudildyk ir drėkink.',
+  'Hold the bar low in the fingers, near where they join the palm, not in the middle of the palm — the skin folds less and tears less.':
+    'Laikyk grifą žemai pirštuose, arti vietos, kur jie jungiasi su delnu, o ne delno viduryje — oda mažiau raukšlėjasi ir rečiau plyšta.',
+  'How much does the barbell weigh?': 'Kiek sveria štangos grifas?',
+  'A standard Olympic barbell weighs {1} kg (about {2} lb) and is {3} m long; the women’s Olympic bar is {4} kg.':
+    'Standartinis olimpinis grifas sveria {1} kg (apie {2} lb) ir yra {3} m ilgio; moteriškas olimpinis grifas — {4} kg.',
+  'Technique bars can be {1}–{2} kg, EZ curl bars usually {3}–{4} kg, and the fixed barbells on racks are marked with their total.':
+    'Techniniai grifai būna {1}–{2} kg, lenkti EZ grifai paprastai {3}–{4} kg, o ant stovų esančių fiksuotų štangų bendras svoris būna nurodytas.',
+  'Smith machine bars vary a lot — often they’re counterbalanced — so check the label or ask the staff, and count it the same way every time.':
+    'Smito treniruoklio grifai labai skiriasi — dažnai jie turi atsvarą — tad pažiūrėk lipduką ar paklausk personalo ir svorį visada skaičiuok vienodai.',
+  'Collars weigh little (spring clips almost nothing, competition collars {1} kg each) — use them on every working set.':
+    'Užraktai sveria nedaug (spyruokliniai beveik nieko, varžybiniai — po {1} kg) — dėk juos kiekvienai darbinei serijai.',
+  'Is training with a weighted vest worth it?': 'Ar verta treniruotis su svorine liemene?',
+  'A weighted vest is a simple way to progress bodyweight moves — push-ups, pull-ups, dips, lunges, step-ups — and to make walking or hiking more demanding.':
+    'Svorinė liemenė — paprastas būdas progresuoti pratimuose su savo svoriu — atsispaudimuose, prisitraukimuose, lygiagretėse, įtūpstuose, užlipimuose — ir apsunkinti vaikščiojimą ar žygius.',
+  'Start at about {1}–{2}% of your bodyweight, wear it snug, and add weight in small steps.':
+    'Pradėk nuo maždaug {1}–{2}% savo kūno svorio, dėvėk ją priglundančią ir pridėk svorio mažais žingsniais.',
+  'Skip running and jumping in it unless you’re well used to impact, and be careful if you have neck or back problems.':
+    'Nebėgiok ir nešokinėk su ja, jei nesi gerai pripratęs prie smūginių apkrovų, ir būk atsargus turėdamas kaklo ar nugaros problemų.',
+  'For older adults, a vest on walks and stairs is a nice way to load the bones safely.':
+    'Vyresniems žmonėms liemenė pasivaikščiojimuose ir laiptais — geras būdas saugiai apkrauti kaulus.',
+  'How do I spot someone on the bench press?': 'Kaip apdrausti ką nors spaudžiant gulint?',
+  'Ask first: how many reps, whether they want a hand-off and when to help (“only if the bar stops”).':
+    'Pirmiausia susitark: kiek pakartojimų, ar padėti nuimti štangą ir kada padėti („tik jei štanga sustos“).',
+  'Stand close behind their head with your feet planted and your hands in an alternating grip just under the bar, and follow it down and up without touching.':
+    'Stovėk arti už galvos, pėdos tvirtai ant grindų, rankos mišriu suėmimu iškart po grifu, ir lydėk jį žemyn ir aukštyn neliesdamas.',
+  'If the bar stalls, help with just enough force to keep it moving and guide it back to the hooks.':
+    'Jei štanga sustoja, padėk tiek, kad ji judėtų toliau, ir nuvesk ją atgal ant stovų.',
+  'For squats, stand behind with your arms under their armpits — or better, use the safety pins.':
+    'Pritūpimuose stovėk už nugaros rankas laikydamas po sportininko pažastimis — o geriau naudok saugos atramas.',
+  'A spotter shouldn’t touch the bar on a good rep — a helped rep is a failed rep, and that’s the end of the set.':
+    'Draudžiantysis neturi liesti grifo per gerą pakartojimą — pakartojimas su pagalba yra nepavykęs, ir tuo serija baigiasi.',
+  'The gym is packed and my equipment is taken — what do I do?':
+    'Salė perpildyta, o mano treniruoklis užimtas — ką daryti?',
+  'Ask to work in — alternating sets with someone is normal gym etiquette.':
+    'Paklausk, ar galima dirbti pakaitomis — serijų kaitaliojimas su kuo nors yra normalus salės etiketas.',
+  'Otherwise switch to a similar exercise for the same muscle: dumbbells instead of a barbell, a different machine, or change the order and come back later.':
+    'Kitu atveju pakeisk pratimą panašiu tam pačiam raumeniui: hanteliai vietoj štangos, kitas treniruoklis arba pakeisk tvarką ir grįžk vėliau.',
+  'Supersets of two exercises next to each other save space and time.':
+    'Supersetai iš dviejų greta esančių pratimų taupo vietą ir laiką.',
+  'If it’s always busy, try training at quieter hours — early morning, midday or late evening.':
+    'Jei visada daug žmonių, pabandyk treniruotis ramesnėmis valandomis — anksti ryte, vidurdienį ar vėlai vakare.',
+  'Ask me for an alternative to the exercise — for example “alternative to leg press” — and I’ll suggest one.':
+    'Paklausk manęs pratimo pakaitalo — pavyzdžiui, „kuo pakeisti kojų spaudimą“ — ir pasiūlysiu.',
+  'What should I bring to the gym?': 'Ką pasiimti į sporto salę?',
+  'The basics: a water bottle, a small towel, flat-soled or lifting shoes, a lock for the locker, headphones and your phone to log sets.':
+    'Pagrindai: vandens gertuvė, nedidelis rankšluostis, batai plokščiu padu ar sunkiosios atletikos batai, spyna spintelei, ausinės ir telefonas serijoms užrašyti.',
+  'Useful extras as you progress: chalk, lifting straps, a belt, wrist wraps or knee sleeves, a resistance band for warm-ups, and a snack or shake for afterwards.':
+    'Naudinga vėliau: magnezija, dirželiai, diržas, riešų tvarsčiai ar kelių movos, guma apšilimui ir užkandis ar kokteilis po treniruotės.',
+  'Keep it simple — a bag you actually pack beats the perfect kit.':
+    'Neapsunkink — krepšys, kurį tikrai susikrauni, geresnis už tobulą rinkinį.',
+  'Flip-flops for the shower and a spare shirt make early-morning or after-work sessions much easier.':
+    'Šlepetės dušui ir atsarginiai marškinėliai labai palengvina ankstyvas rytines ar vakarines treniruotes po darbo.',
+  'How do I film myself to check my form?': 'Kaip nusifilmuoti, kad patikrinčiau techniką?',
+  'Set the phone at about hip height, {1}–{2} metres away.':
+    'Pastatyk telefoną maždaug klubų aukštyje, {1}–{2} metrų atstumu.',
+  'For squats and deadlifts, film from the side at a slight angle so you can see the bar path, back angle and depth; for the bench, from the side near your feet or from behind your head.':
+    'Pritūpimus ir mirties traukas filmuok iš šono nedideliu kampu, kad matytum štangos trajektoriją, nugaros kampą ir gylį; spaudimą gulint — iš šono prie kojų ar iš už galvos.',
+  'Film a working set, not just the warm-up, and watch it in slow motion.':
+    'Filmuok darbinę seriją, ne tik apšilimą, ir žiūrėk sulėtintai.',
+  'Ask first if other people will be in the shot.':
+    'Jei kadre bus kitų žmonių, pirmiausia paklausk.',
+  'Compare the video with a few good reference lifts — fixing one thing at a time is easier than fixing five.':
+    'Palygink vaizdo įrašą su keliais gerais pavyzdžiais — taisyti vieną dalyką vienu metu lengviau nei penkis.',
+  'How do I progress with bodyweight exercises?': 'Kaip progresuoti pratimuose su savo svoriu?',
+  'Make each exercise harder in steps instead of just adding reps forever: push-ups, then feet elevated, then archer push-ups; rows under a table, then feet elevated; squats, then split squats, Bulgarian split squats and pistols.':
+    'Sunkink kiekvieną pratimą laipteliais, užuot be galo pridėjęs pakartojimų: atsispaudimai, tada kojos ant pakylos, tada lankininko atsispaudimai; traukos po stalu, tada kojos ant pakylos; pritūpimai, tada skelti pritūpimai, bulgariški pritūpimai ir pistoletai.',
+  'Work in the {1}–{2} rep range close to failure, slow down the lowering, add pauses, and use a backpack, bands or a vest when a move gets easy.':
+    'Dirbk {1}–{2} pakartojimų intervale arti nesėkmės, lėtink nuleidimą, pridėk pauzių, o kai judesys tampa lengvas — kuprinę, gumas ar liemenę.',
+  'That builds muscle just as well as weights.': 'Tai augina raumenis ne prasčiau nei svoriai.',
+  'A pull-up bar in a doorway is the single best investment for training at home — it covers the back and biceps, which are hard to hit otherwise.':
+    'Skersinis durų angoje — geriausia investicija treniruotėms namuose: jis apima nugarą ir bicepsus, kuriuos kitaip sunku apkrauti.',
+  'How should I train during menopause?': 'Kaip treniruotis menopauzės metu?',
+  'Strength training becomes more important, not less: falling oestrogen speeds up the loss of muscle and bone, and lifting is one of the best tools against both.':
+    'Jėgos treniruotės tampa svarbesnės, o ne mažiau svarbios: mažėjantis estrogenas greitina raumenų ir kaulų nykimą, o svoriai — viena geriausių priemonių prieš abu.',
+  'Aim for {1}–{2} full-body sessions a week with gradually heavier loads, some impact like brisk walking, stairs or small jumps if your joints tolerate it, and enough protein (around {3}–{4} g per kg).':
+    'Siek {1}–{2} viso kūno treniruočių per savaitę su palaipsniui didėjančiu svoriu, šiek tiek smūginės apkrovos, kaip greitas ėjimas, laiptai ar nedideli šuoliukai, jei sąnariai leidžia, ir pakankamai baltymų (maždaug {3}–{4} g kilogramui).',
+  'Sleep problems and hot flushes can affect recovery — go easier on bad days, and talk to your doctor about symptoms and bone density.':
+    'Miego problemos ir karščio bangos gali paveikti atsigavimą — blogomis dienomis sumažink krūvį, o apie simptomus ir kaulų tankį pasikalbėk su gydytoju.',
+  'Pelvic-floor symptoms like leaking during lifts are common and treatable — a pelvic-health physio can help.':
+    'Dubens dugno simptomai, kaip šlapimo nelaikymas pratimų metu, dažni ir gydomi — padės dubens sveikatos kineziterapeutas.',
+  'When can I lift again after giving birth?': 'Kada po gimdymo vėl galiu kilnoti svorius?',
+  'Get the go-ahead from your doctor or midwife first — usually around the six-week check, later after a C-section or complications.':
+    'Pirmiausia gauk gydytojo ar akušerės leidimą — dažniausiai apie šešių savaičių patikrą, po cezario pjūvio ar komplikacijų — vėliau.',
+  'Start with breathing, pelvic-floor and deep-core work, walking and light bodyweight moves, then build up over several months; a check with a pelvic-health physio is ideal.':
+    'Pradėk nuo kvėpavimo, dubens dugno ir giliųjų pilvo raumenų pratimų, vaikščiojimo ir lengvų pratimų su savo svoriu, tada didink per kelis mėnesius; idealu — dubens sveikatos kineziterapeuto patikra.',
+  'Signs to back off: leaking, heaviness or dragging in the pelvis, doming of the belly, pain or more bleeding.':
+    'Ženklai sulėtinti: šlapimo nelaikymas, sunkumo ar tempimo jausmas dubenyje, pilvo „kupolas“, skausmas ar gausesnis kraujavimas.',
+  'Running and jumping usually come back last — often not before about {1} months, and only once the pelvic floor handles lighter impact well.':
+    'Bėgimas ir šuoliai paprastai grįžta paskutiniai — dažnai ne anksčiau kaip po maždaug {1} mėnesių ir tik tada, kai dubens dugnas gerai atlaiko lengvesnes smūgines apkrovas.',
+  'I leak a little when I lift or jump — is that normal?':
+    'Šiek tiek nelaikau šlapimo keldamas ar šokinėdamas — ar tai normalu?',
+  'It’s common — especially after pregnancy, in menopause and in heavy lifters — but it isn’t something you just have to live with.':
+    'Tai dažna — ypač po nėštumo, menopauzės metu ir keliantiems sunkius svorius, — bet su tuo nebūtina taikstytis.',
+  'A pelvic-health physiotherapist can assess you and give you a plan, and it usually improves a lot.':
+    'Dubens sveikatos kineziterapeutas įvertins būklę ir sudarys planą, o dažniausiai gerokai pagerėja.',
+  'Meanwhile: breathe out on the effort instead of holding your breath hard, go a bit lighter on the moves that trigger it, and empty your bladder before training.':
+    'Tuo tarpu: iškvėpk per pastangą, užuot stipriai sulaikęs kvėpavimą, šiek tiek sumažink svorį tuose pratimuose, kurie tai sukelia, ir prieš treniruotę ištuštink šlapimo pūslę.',
+  'Pelvic-floor training isn’t only squeezing — it’s also learning to relax, and to coordinate with your breathing and bracing.':
+    'Dubens dugno treniruotė — ne tik sutraukimas, bet ir mokymasis atsipalaiduoti bei derinti su kvėpavimu ir korpuso įtempimu.',
+  'Is lifting safe with osteoporosis or low bone density?':
+    'Ar saugu kilnoti svorius sergant osteoporoze ar turint mažą kaulų tankį?',
+  'For most people, yes — and supervised, progressive strength and impact training is one of the few things shown to improve bone density.':
+    'Daugumai — taip, o prižiūrimos, progresyvios jėgos ir smūginės treniruotės yra vienos iš nedaugelio priemonių, kurios įrodytai gerina kaulų tankį.',
+  'Start with guidance from a physio or doctor, focus on good technique in squats, deadlift variations, presses and rows, and increase the loads gradually.':
+    'Pradėk nuo kineziterapeuto ar gydytojo patarimų, sutelk dėmesį į gerą pritūpimų, mirties traukos variantų, spaudimų ir traukų techniką ir svorį didink palaipsniui.',
+  'Be careful with loaded forward bending and twisting of the spine (heavy sit-ups, toe touches) and with fall risk; balance work is part of the plan.':
+    'Būk atsargus su pasilenkimais į priekį ir stuburo sukimais su svoriu (sunkūs atsilenkimai, pirštų siekimas) ir su kritimo rizika; pusiausvyros pratimai yra plano dalis.',
+  'Protein, calcium and vitamin D matter too; your doctor may also discuss medication depending on your fracture risk.':
+    'Svarbūs ir baltymai, kalcis bei vitaminas D; gydytojas gali aptarti ir vaistus, priklausomai nuo lūžių rizikos.',
+  'Can I lift weights with arthritis?': 'Ar galiu kilnoti svorius sergant artritu ar artroze?',
+  'Usually yes, and it tends to help: stronger muscles around a joint reduce pain and improve function in knee and hip osteoarthritis.':
+    'Dažniausiai taip, ir tai dažniausiai padeda: stipresni raumenys aplink sąnarį mažina skausmą ir gerina funkciją esant kelio ir klubo artrozei.',
+  'Pick ranges and exercises that feel ok — pain up to about {1}–{2} out of {3} that settles within {4} hours is generally acceptable.':
+    'Rinkis amplitudę ir pratimus, kurie toleruojami — skausmas iki maždaug {1}–{2} iš {3}, praeinantis per {4} valandas, paprastai priimtinas.',
+  'Warm up well, progress slowly and swap exercises that flare the joint; during a flare-up of inflammatory arthritis, ease off and follow your rheumatologist’s advice.':
+    'Gerai apšilk, progresuok lėtai ir keisk pratimus, kurie paūmina sąnarį; paūmėjus uždegiminiam artritui sumažink krūvį ir laikykis reumatologo patarimų.',
+  'Cycling, swimming and water exercise are joint-friendly cardio options alongside lifting.':
+    'Dviratis, plaukimas ir pratimai vandenyje — sąnarius tausojantis kardio šalia jėgos treniruočių.',
+  'How do I make the gym a habit?': 'Kaip sporto salę paversti įpročiu?',
+  'Make it easy and fixed: pick specific days and times, put them in your calendar and pack your bag the night before.':
+    'Padaryk tai paprasta ir pastovu: pasirink konkrečias dienas ir valandas, įrašyk jas į kalendorių ir susikrauk krepšį iš vakaro.',
+  'Start smaller than you think — two {1}-minute sessions a week that you never miss beat five that you quit after a month.':
+    'Pradėk nuo mažiau, nei atrodo — dvi {1} minučių treniruotės per savaitę, kurių niekada nepraleidi, geriau nei penkios, kurias meti po mėnesio.',
+  'Track what you do (every logged session counts), and on low-motivation days commit to just the warm-up; most of the time you’ll finish the session.':
+    'Užsirašyk, ką darai (kiekviena užrašyta treniruotė skaičiuojasi), o dienomis be motyvacijos pažadėk sau tik apšilimą; dažniausiai pabaigsi visą treniruotę.',
+  'Tie it to something you already do — straight from work, or right after the school run — so it doesn’t rely on willpower.':
+    'Susiek treniruotę su tuo, ką jau darai — iškart po darbo ar nuvežęs vaikus į mokyklą, — kad ji nepriklausytų nuo valios.',
+  'I’m bored of my workouts — should I change everything?':
+    'Man nusibodo treniruotės — ar viską keisti?',
+  'Keep the core, change the details.': 'Palik pagrindą, keisk detales.',
+  'Boredom is real and it hurts consistency, but switching everything often resets your progress.':
+    'Nuobodulys tikras ir kenkia reguliarumui, bet viską pakeitus progresas dažnai grįžta į nulį.',
+  'Keep your main lifts and swap the variations and accessories every {1}–{2} weeks — a different squat or press variation, new rep ranges, a new challenge like a {3} km time or a pull-up goal.':
+    'Palik pagrindinius pratimus, o variantus ir pagalbinius pratimus keisk kas {1}–{2} savaites — kitas pritūpimo ar spaudimo variantas, nauji pakartojimų intervalai, naujas iššūkis, kaip {3} km laikas ar prisitraukimų tikslas.',
+  'Adding a sport or a class once a week can freshen things up too.':
+    'Sporto šaka ar grupinis užsiėmimas kartą per savaitę taip pat atgaivina.',
+  'Set a small target for the next block — a number to beat keeps training interesting.':
+    'Išsikelk nedidelį tikslą kitam blokui — skaičius, kurį reikia pagerinti, palaiko susidomėjimą.',
+  'I keep comparing myself to others at the gym and online':
+    'Nuolat lyginu save su kitais sporto salėje ir internete',
+  'Almost everyone does, and it’s rarely a fair comparison: different genetics, training age, lighting, angles, editing — and sometimes drugs.':
+    'Taip daro beveik visi, ir tai retai sąžiningas palyginimas: skirtinga genetika, treniravimosi stažas, apšvietimas, kampai, redagavimas — o kartais ir preparatai.',
+  'The only useful comparison is you now versus you a few months ago: your logged lifts, measurements and photos.':
+    'Vienintelis naudingas palyginimas — tu dabar ir tu prieš kelis mėnesius: užrašyti svoriai, matmenys ir nuotraukos.',
+  'Mute accounts that make you feel worse, and follow people whose training you can actually learn from.':
+    'Nutildyk paskyras, po kurių jautiesi blogiau, ir sek žmones, iš kurių treniruočių iš tiesų gali ko nors išmokti.',
+  'Ask me “am I stronger than {1} months ago” — your own numbers are the best antidote.':
+    'Paklausk manęs „ar esu stipresnis nei prieš {1} mėnesius“ — tavo paties skaičiai geriausias vaistas.',
+  'How do I get mentally ready for a heavy lift?':
+    'Kaip psichologiškai pasiruošti sunkiam kėlimui?',
+  'Build a short routine and use it on every heavy set: the same setup steps, a big breath and brace, and one simple cue like “chest up” or “push the floor”.':
+    'Susikurk trumpą ritualą ir naudok jį kiekvienoje sunkioje serijoje: tie patys pasiruošimo žingsniai, gilus įkvėpimas ir įtampa bei viena paprasta užuomina, kaip „krūtinė aukštyn“ ar „stumk grindis“.',
+  'Picture the rep going up smoothly a few seconds before you walk to the bar.':
+    'Kelias sekundes prieš eidamas prie štangos įsivaizduok, kaip pakartojimas sklandžiai kyla.',
+  'Getting hyped can help a little on a max attempt, but calm focus works better for most sets — save the adrenaline for rare days.':
+    'Įsiaudrinimas gali šiek tiek padėti bandant maksimumą, bet daugumoje serijų geriau veikia ramus susikaupimas — adrenaliną taupyk retoms dienoms.',
+  'Music, a fixed warm-up order and the same belt and shoe routine all become triggers that tell your body it’s time.':
+    'Muzika, pastovi apšilimo tvarka ir tas pats ritualas su diržu ir batais tampa signalais, sakančiais kūnui, kad laikas.',
+  'I’m scared of heavy weights — how do I get over it?': 'Bijau sunkių svorių — kaip tai įveikti?',
+  'Make failing safe first: set the safety pins or straps in the rack, learn to bail a squat and to lower a bench onto the pins, or use a spotter.':
+    'Pirmiausia padaryk nesėkmę saugią: nustatyk saugos atramas ar diržus rėme, išmok numesti pritūpimą ir nuleisti štangą ant atramų spaudžiant, arba treniruokis su draudžiančiuoju.',
+  'Then build confidence gradually — heavy walkouts or holds, singles at {1}–{2}%, and small jumps you know you can make.':
+    'Tada ugdyk pasitikėjimą palaipsniui — sunkūs išėjimai iš stovų ar išlaikymai, pavieniai pakartojimai ties {1}–{2}% ir maži svorio žingsniai, kuriuos tikrai įveiksi.',
+  'The fear usually drops quickly once you’ve failed a rep safely and seen that nothing bad happens.':
+    'Baimė paprastai greitai praeina, kai kartą saugiai nepavyksta pakartojimas ir pamatai, kad nieko blogo neatsitinka.',
+  'Film it — heavy reps often look much more controlled than they feel.':
+    'Nusifilmuok — sunkūs pakartojimai dažnai atrodo daug labiau kontroliuojami, nei jaučiasi.',
+  'I dance — how do I combine it with lifting?':
+    'Šoku — kaip tai suderinti su jėgos treniruotėmis?',
+  'Dance and lifting go well together: strength work improves jumps, landings, stability and injury resistance, and dance brings mobility and conditioning.':
+    'Šokiai ir svoriai gerai dera: jėgos darbas gerina šuolius, nusileidimus, stabilumą ir atsparumą traumoms, o šokiai suteikia paslankumo ir ištvermės.',
+  'Two or three strength sessions a week are plenty — focus on legs and hips (squats, lunges, hinges), calves and ankles, core and upper back.':
+    'Dviejų ar trijų jėgos treniruočių per savaitę visiškai pakanka — daugiausia dėmesio kojoms ir klubams (pritūpimai, įtūpstai, lenkimasis per klubus), blauzdoms ir čiurnoms, korpusui ir viršutinei nugaros daliai.',
+  'Keep heavy leg work away from intense rehearsals or shows, and in busy dance weeks shorten your lifting rather than skipping it.':
+    'Sunkų kojų darbą planuok toliau nuo intensyvių repeticijų ar pasirodymų, o įtemptomis šokių savaitėmis trumpink jėgos treniruotes, užuot jas praleidęs.',
+  'Tell me after a long dance session — I count it in your load so the next leg day fits.':
+    'Pasakyk man po ilgo šokių užsiėmimo — įskaičiuosiu tai į krūvį, kad kita kojų diena tiktų.',
+  'How do I take good progress photos?': 'Kaip padaryti geras progreso nuotraukas?',
+  'Consistency is everything: the same place, the same light, the same time of day (morning, before food), the same distance and camera height, and the same clothes.':
+    'Svarbiausia — vienodumas: ta pati vieta, ta pati šviesa, tas pats paros metas (ryte, prieš valgį), tas pats atstumas ir kameros aukštis bei tie patys drabužiai.',
+  'Take front, side and back shots, relaxed and one flexed, every {1}–{2} weeks.':
+    'Fotografuokis iš priekio, šono ir nugaros, atsipalaidavęs ir vieną kartą įsitempęs, kas {1}–{2} savaites.',
+  'Compare them side by side over months — day-to-day photos mostly show changes in water and lighting.':
+    'Lygink jas greta per mėnesius — kasdienės nuotraukos daugiausia rodo vandens ir apšvietimo pokyčius.',
+  'Photos plus a few tape measurements tell you more than the scale alone, especially on a recomp.':
+    'Nuotraukos ir keli matavimai juostele pasako daugiau nei vien svarstyklės, ypač rekompozicijos metu.',
+  'What body measurements should I track?': 'Kokius kūno matmenis verta sekti?',
+  'The useful basics: waist at the navel, hips at the widest point, chest, upper arm (relaxed or flexed, but always the same) and mid-thigh.':
+    'Naudingas minimumas: juosmuo ties bamba, klubai plačiausioje vietoje, krūtinė, žastas (atpalaiduotas ar įtemptas, bet visada vienodai) ir šlaunies vidurys.',
+  'Measure in the morning before eating, with the tape snug but not pressing, and take each measurement twice.':
+    'Matuok ryte prieš valgį, juostelę laikyk priglustą, bet nespaudžiančią, ir kiekvieną matavimą atlik du kartus.',
+  'Once every {1}–{2} weeks is enough; the waist is the best simple sign of fat loss, and the arms and thighs of muscle gain.':
+    'Kartą per {1}–{2} savaites pakanka; juosmuo — geriausias paprastas riebalų mažėjimo rodiklis, o rankos ir šlaunys — raumenų augimo.',
+  'You can keep them in your profile under Body — I use your weight trend when we talk about progress.':
+    'Gali juos saugoti profilyje skiltyje „Kūnas“ — tavo svorio tendenciją naudoju, kai kalbamės apie progresą.',
+  'How do I measure my body fat percentage?': 'Kaip išmatuoti riebalų procentą?',
+  'Every method is off by a few percent.': 'Kiekvienas metodas klysta keliais procentais.',
+  'Home smart scales (bioimpedance) swing with hydration, so only trust their trend; calipers are decent in experienced hands; a DEXA scan is the most detailed but still not perfect.':
+    'Namų išmaniosios svarstyklės (bioimpedansas) šokinėja priklausomai nuo hidratacijos, tad tikėk tik jų tendencija; kaliperis patyrusiose rankose gana tikslus; DEXA tyrimas išsamiausias, bet irgi ne tobulas.',
+  'For most people, the waist measurement, photos and how clothes fit are just as useful, and free.':
+    'Daugumai žmonių juosmens apimtis, nuotraukos ir tai, kaip tinka drabužiai, yra ne mažiau naudingi — ir nemokami.',
+  'As a rough guide, about {1}–{2}% is lean to healthy for men and about {3}–{4}% for women.':
+    'Orientaciniai skaičiai: maždaug {1}–{2}% vyrams yra liesa ar sveika, moterims — maždaug {3}–{4}%.',
+  'Measure the same way under the same conditions every time — the direction of change matters more than the exact number.':
+    'Matuok kiekvieną kartą vienodai ir tomis pačiomis sąlygomis — pokyčio kryptis svarbesnė už tikslų skaičių.',
+  'Is BMI accurate for people who lift?': 'Ar KMI tikslus sportuojantiems su svoriais?',
+  'BMI (weight divided by height squared) is a quick screening tool for large groups, but it can’t tell muscle from fat — so muscular people often land in the “overweight” range while being lean.':
+    'KMI (svoris, padalytas iš ūgio kvadrato) — greitas atrankos įrankis didelėms grupėms, bet jis neskiria raumenų nuo riebalų, todėl raumeningi žmonės dažnai patenka į „antsvorio“ kategoriją, būdami liesi.',
+  'Your waist (under about half your height is a good sign), body-fat estimates and health markers like blood pressure tell you more.':
+    'Juosmuo (mažiau nei maždaug pusė ūgio — geras ženklas), riebalų įvertinimai ir sveikatos rodikliai, kaip kraujospūdis, pasako daugiau.',
+  'For most people who don’t lift, BMI is still a reasonable rough guide.':
+    'Daugumai žmonių, kurie nekilnoja svorių, KMI vis dar yra protingas apytikris orientyras.',
+  'If your BMI says overweight but your waist is small and you lift, you’re very likely fine.':
+    'Jei KMI rodo antsvorį, bet juosmuo mažas ir sportuoji, greičiausiai viskas gerai.',
+  'Can I lose fat and build muscle at the same time?':
+    'Ar galiu vienu metu mesti riebalus ir auginti raumenis?',
+  'Yes — that’s body recomposition, and it works best for beginners, people coming back after a break and those with more body fat.':
+    'Taip — tai kūno rekompozicija, ir geriausiai ji veikia pradedantiesiems, grįžtantiems po pertraukos ir turintiems daugiau riebalų.',
+  'Eat around maintenance or in a small deficit (about {1}–{2} kcal), keep protein high ({3}–{4} g per kg), lift with progressive overload and sleep well.':
+    'Valgyk apie palaikymo normą arba su nedideliu deficitu (maždaug {1}–{2} kcal), baltymų daug ({3}–{4} g kilogramui), treniruokis su progresyvia apkrova ir gerai miegok.',
+  'The scale may barely move, so track your waist, photos and strength; lean, experienced lifters usually do better with separate bulking and cutting phases.':
+    'Svarstyklės gali beveik nejudėti, tad sek juosmenį, nuotraukas ir jėgą; liesiems, patyrusiems sportininkams paprastai geriau atskiros masės auginimo ir džiovinimo fazės.',
+  'Skinny-fat?': 'Liesas, bet su riebaliukais?',
+  'Recomp is usually the right call: lift hard, eat at maintenance with plenty of protein, and give it {1}–{2} months.':
+    'Rekompozicija paprastai teisingas pasirinkimas: treniruokis sunkiai, valgyk pagal palaikymo normą su daug baltymų ir duok tam {1}–{2} mėnesius.',
+  'What is a mini-cut?': 'Kas yra mini džiovinimas?',
+  'A mini-cut is a short, aggressive fat-loss phase — usually {1}–{2} weeks at a fairly big deficit (around {3}–{4} kcal, about {5}–{6}% of bodyweight a week) — often used in the middle of a long bulk to trim fat before carrying on.':
+    'Mini džiovinimas — trumpa, agresyvi riebalų deginimo fazė, paprastai {1}–{2} savaitės su gana dideliu deficitu (maždaug {3}–{4} kcal, apie {5}–{6}% kūno svorio per savaitę), dažnai daroma ilgo masės auginimo viduryje, kad prieš tęsiant nusimestų riebalų.',
+  'Keep protein high and keep lifting heavy to hold on to muscle; trim some volume if recovery suffers.':
+    'Baltymų valgyk daug ir toliau treniruokis sunkiai, kad išsaugotum raumenis; jei atsigavimas kenčia, šiek tiek sumažink apimtį.',
+  'When it ends, go straight back to maintenance or a small surplus.':
+    'Pasibaigus iškart grįžk prie palaikymo normos ar nedidelio pertekliaus.',
+  'It works because it’s short — hunger and fatigue don’t have time to build up; if you need longer than about {1} weeks, switch to a normal, moderate cut.':
+    'Jis veikia, nes trumpas — alkis ir nuovargis nespėja susikaupti; jei reikia ilgiau nei maždaug {1} savaičių, pereik prie įprasto, vidutinio džiovinimo.',
+  'How do I combine climbing with lifting?': 'Kaip suderinti laipiojimą su jėgos treniruotėmis?',
+  'They complement each other well.': 'Jie gerai papildo vienas kitą.',
+  'Climbing hammers the fingers, forearms and pulling muscles, so in the gym focus on what climbing doesn’t train: legs, pressing (push-ups, overhead press, dips), shoulder external rotation and core — two sessions a week is plenty.':
+    'Laipiojimas stipriai apkrauna pirštus, dilbius ir traukiančius raumenis, tad salėje dėmesį skirk tam, ko laipiojimas netreniruoja: kojoms, spaudimams (atsispaudimai, spaudimas virš galvos, lygiagretės), išorinei peties rotacijai ir korpusui — dviejų treniruočių per savaitę pakanka.',
+  'Keep heavy pulling and grip work away from hard climbing days, because finger tendons recover more slowly than muscles.':
+    'Sunkias traukas ir sugriebimo darbą laikyk toliau nuo sunkių laipiojimo dienų, nes pirštų sausgyslės atsigauna lėčiau nei raumenys.',
+  'Work for the opposing muscles, like push-ups and face pulls, helps keep a climber’s shoulders balanced and healthy.':
+    'Darbas priešingiems raumenims, kaip atsispaudimai ir face pull, padeda išlaikyti laipiotojo pečius subalansuotus ir sveikus.',
+  'What are fast-twitch and slow-twitch muscle fibres?':
+    'Kas yra greitosios ir lėtosios raumenų skaidulos?',
+  'Slow-twitch (type I) fibres resist fatigue and do endurance work; fast-twitch (type II) fibres produce more force and speed and grow more easily.':
+    'Lėtosios (I tipo) skaidulos atsparios nuovargiui ir dirba ištvermės darbą; greitosios (II tipo) skaidulos sukuria daugiau jėgos bei greičio ir lengviau auga.',
+  'Every muscle has a mix, and your genetics set the ratio — sprinters tend to have more fast-twitch, marathoners more slow-twitch.':
+    'Kiekviename raumenyje yra mišinys, o santykį lemia genetika — sprinteriai paprastai turi daugiau greitųjų, maratonininkai — lėtųjų.',
+  'In practice you don’t need to train the fibre types separately: sets taken close to failure recruit both, whether the weight is heavy or light.':
+    'Praktikoje skaidulų tipų atskirai treniruoti nereikia: serijos arti nesėkmės įtraukia abu tipus, nesvarbu, ar svoris sunkus, ar lengvas.',
+  'That’s why a wide rep range (about {1}–{2}) builds muscle as long as the effort is high enough.':
+    'Todėl platus pakartojimų intervalas (maždaug {1}–{2}) augina raumenis, jei pastangos pakankamai didelės.',
+  'What is the rotator cuff and should I train it?':
+    'Kas yra rotatorių manžetė ir ar ją treniruoti?',
+  'The rotator cuff is four small muscles around the shoulder blade that keep the ball of the shoulder centred in its socket while the big muscles move the arm.':
+    'Rotatorių manžetė — tai keturi nedideli raumenys aplink mentę, kurie laiko žastikaulio galvą sąnario centre, kol dideli raumenys judina ranką.',
+  'Heavy pressing and pulling train it somewhat, but {1} sets of {2}–{3} light external rotations (band or cable) and face pulls {4}–{5} times a week are cheap insurance, especially if you bench a lot or play overhead sports.':
+    'Sunkūs spaudimai ir traukos ją iš dalies treniruoja, bet {1} serijos po {2}–{3} lengvas išorines rotacijas (su guma ar bloku) ir face pull {4}–{5} kartus per savaitę — pigus draudimas, ypač jei daug spaudi ar užsiimi sportu su judesiais virš galvos.',
+  'Pain at night or when raising your arm to the side deserves a check.':
+    'Skausmą naktį ar keliant ranką į šoną verta pasitikrinti.',
+  'Keep these light — the goal is control and endurance, not heavy weights.':
+    'Daryk tai lengvai — tikslas yra kontrolė ir ištvermė, o ne dideli svoriai.',
+  'How do I train all three heads of the shoulders?': 'Kaip treniruoti visas tris deltų galvas?',
+  'The front delts get plenty of work from bench and overhead presses — most people don’t need extra front raises.':
+    'Priekinės deltos gauna daug darbo iš spaudimo gulint ir virš galvos — daugumai nereikia papildomų kėlimų prieš save.',
+  'The side delts give the shoulders width: lateral raises (dumbbell, cable or machine) {1}–{2} times a week.':
+    'Vidurinės deltos suteikia pečiams plotį: šoniniai kėlimai (hanteliai, blokas ar treniruoklis) {1}–{2} kartus per savaitę.',
+  'The rear delts respond to rear-delt flyes, face pulls and wide-grip rows.':
+    'Galinės deltos reaguoja į atgalinius skėtimus, face pull ir traukas plačiu suėmimu.',
+  'A good weekly target is roughly {1}–{2} sets for the side and rear delts combined, on top of your pressing.':
+    'Geras savaitės tikslas — maždaug {1}–{2} serijos vidurinėms ir galinėms deltoms kartu, neskaitant spaudimų.',
+  'Side and rear delts recover quickly and respond well to higher reps ({1}–{2}).':
+    'Vidurinės ir galinės deltos greitai atsigauna ir gerai reaguoja į daugiau pakartojimų ({1}–{2}).',
+  'What is ego lifting and why is it bad?': 'Kas yra ego kilnojimas ir kodėl jis blogas?',
+  'Ego lifting is picking weights to impress rather than to train: half reps, bouncing, heavy swinging, or grinding out reps with broken form.':
+    'Ego kilnojimas — tai svorio rinkimasis norint įspūdžio, o ne treniruotis: pusiniai pakartojimai, atšokimai, stiprus siūbavimas ar pakartojimų išspaudimas sugriuvusia technika.',
+  'It shifts the work away from the target muscle, stalls your progress and raises injury risk.':
+    'Jis perkelia darbą nuo tikslinio raumens, stabdo progresą ir didina traumų riziką.',
+  'Choose loads you can control through the full range with {1}–{2} reps left, add weight only when the reps are clean, and let your log — not the plates — show your progress.':
+    'Rinkis svorius, kuriuos kontroliuoji visa amplitude su {1}–{2} pakartojimais atsargoje, didink tik kai pakartojimai švarūs, ir tegul progresą rodo dienynas, o ne diskai.',
+  'A quick check: film a set — if the rep looks different from your warm-ups, the weight is too heavy for now.':
+    'Greitas patikrinimas: nusifilmuok seriją — jei pakartojimas atrodo kitaip nei apšilimo metu, svoris kol kas per didelis.',
+  'Do I really need to train legs?': 'Ar tikrai reikia treniruoti kojas?',
+  'Yes, if you want a balanced, strong, athletic body.':
+    'Taip, jei nori subalansuoto, stipraus, atletiško kūno.',
+  'Legs are about half your muscle mass: training them builds overall strength, bone density, work capacity and a physique that doesn’t look top-heavy, and it helps in sport and everyday life.':
+    'Kojos — apie pusė raumenų masės: jų treniravimas ugdo bendrą jėgą, kaulų tankį, darbingumą ir figūrą be „viršaus perkrovos“, be to, padeda sporte ir kasdieniame gyvenime.',
+  'If heavy squats aren’t your thing, the leg press, lunges, split squats, hip thrusts and leg curls still do the job — two sessions a week is plenty.':
+    'Jei sunkūs pritūpimai ne tau, kojų spaudimas, įtūpstai, skelti pritūpimai, klubų kėlimas ir kojų lenkimai irgi atlieka darbą — dviejų treniruočių per savaitę visiškai pakanka.',
+  'Leg training doesn’t “release hormones” that grow your arms — but it does make you stronger and more capable everywhere.':
+    'Kojų treniruotė „neišskiria hormonų“, kurie augina rankas — bet padaro tave stipresnį ir pajėgesnį visur.',
+  'Why do I feel sick during hard workouts?': 'Kodėl mane pykina per sunkias treniruotes?',
+  'Common causes: training too soon after a big meal or on a completely empty stomach, too little fluid, going from zero to very hard without a warm-up, or very intense leg or conditioning work with short rests.':
+    'Dažnos priežastys: treniruotė per greitai po gausaus valgio arba visai tuščiu skrandžiu, per mažai skysčių, staigus perėjimas nuo nulio prie labai sunkaus be apšilimo arba labai intensyvus kojų ar kondicijos darbas su trumpu poilsiu.',
+  'Eat a light meal {1}–{2} hours before, sip water, build up the intensity and take longer rests on brutal sets.':
+    'Lengvai pavalgyk {1}–{2} valandas prieš, gerk vandenį gurkšneliais, didink intensyvumą palaipsniui ir ilgiau ilsėkis per žiaurias serijas.',
+  'Stop and get help if the nausea comes with chest pain, shortness of breath, fainting or confusion.':
+    'Sustok ir kreipkis pagalbos, jei pykinimą lydi krūtinės skausmas, dusulys, alpimas ar sumišimas.',
+  'Sitting or lying down for a few minutes with your legs up and breathing slowly usually settles it.':
+    'Paprastai padeda kelias minutes pasėdėti ar pagulėti pakeltomis kojomis ir lėtai pakvėpuoti.',
+  'Why do my muscles shake during a set?': 'Kodėl raumenys dreba serijos metu?',
+  'Shaking is normal with new exercises, heavy loads or near failure: your nervous system is still learning to coordinate the muscle fibres, and tired fibres drop in and out.':
+    'Drebulys normalus darant naujus pratimus, su dideliu svoriu ar arti nesėkmės: nervų sistema dar mokosi koordinuoti raumenų skaidulas, o pavargusios skaidulos tai įsijungia, tai išsijungia.',
+  'It fades as you get stronger and more practised.': 'Jis praeina stiprėjant ir įgudus.',
+  'If it’s so strong that you lose control of the weight, go lighter; low blood sugar or too much caffeine can also add to it.':
+    'Jei jis toks stiprus, kad prarandi svorio kontrolę, imk lengvesnį; jį taip pat gali sustiprinti mažas cukraus kiekis kraujyje ar per daug kofeino.',
+  'Shaking at rest, or shaking with weakness or numbness, is something to check with a doctor.':
+    'Drebulį ramybėje arba kartu su silpnumu ar tirpimu verta pasitikrinti pas gydytoją.',
+  'My joints click and pop when I lift — is that bad?':
+    'Sąnariai spragsi ir traška, kai treniruojuosi — ar tai blogai?',
+  'Painless clicking or cracking is very common and usually harmless — gas bubbles in the joint fluid or tendons sliding over bone.':
+    'Neskausmingas spragsėjimas ar traškėjimas labai dažnas ir paprastai nekenksmingas — tai dujų burbuliukai sąnario skystyje ar sausgyslės, slystančios per kaulą.',
+  'Knee cracking in particular isn’t linked to arthritis.':
+    'Ypač kelių traškėjimas nesusijęs su artroze.',
+  'Worry only if it comes with pain, swelling, locking, the joint giving way or a feeling that something catches — then get it checked and adjust the exercise in the meantime.':
+    'Nerimauk tik jei jį lydi skausmas, patinimas, užsiblokavimas, sąnario „išsisukimas“ ar jausmas, kad kažkas kliūva — tada pasitikrink, o pratimą kol kas pakeisk.',
+  'A good warm-up often quiets the noises down during the session.':
+    'Geras apšilimas dažnai nutildo šiuos garsus jau treniruotės metu.',
+  'Will I get stretch marks from bulking?': 'Ar atsiras strijų auginant masę?',
+  'You might — fast growth of muscle or fat stretches the skin faster than it adapts, often on the shoulders, chest, arms and thighs, and genetics decide a lot.':
+    'Gali — greitas raumenų ar riebalų augimas tempia odą greičiau, nei ji prisitaiko, dažnai ant pečių, krūtinės, rankų ir šlaunų, o daug lemia genetika.',
+  'Gaining slowly (about {1}–{2} kg a month for most people) lowers the risk.':
+    'Lėtas svorio didėjimas (maždaug {1}–{2} kg per mėnesį daugumai) mažina riziką.',
+  'Creams have little evidence behind them; fresh red marks fade to silvery lines over months, and a dermatologist can help if they bother you.':
+    'Kremų įrodymai silpni; naujos raudonos strijos per mėnesius išblunka iki sidabrinių linijų, o jei jos trukdo — padės dermatologas.',
+  'For many lifters they’re a normal sign of growth, not a health problem.':
+    'Daugeliui sportuojančių tai normalus augimo ženklas, o ne sveikatos problema.',
+  'Any tips for using the app?': 'Gal turi patarimų, kaip naudotis programėle?',
+  'How do I use this app?': 'Kaip naudotis šia programėle?',
+  'Spotter in a nutshell: the bottom bar has Today (your plan, your history and me), Overview (progress, records, programs, goals, playbook, exercises), the “+” in the middle (start a session, an auto session, an activity, sleep and health, or log a past workout), Gyms (your gyms and their equipment) and Apps (Apex, Nutrition, Learn and your profile).':
+    'Spotter trumpai: apatinėje juostoje yra Šiandien (tavo planas, istorija ir aš), Apžvalga (progresas, rekordai, programos, tikslai, playbook, pratimai), „+“ viduryje (pradėti treniruotę, auto treniruotę, veiklą, miegą ir sveikatą ar įrašyti praeitą treniruotę), Salės (tavo salės ir jų įranga) ir Programos (Apex, Mityba, Mokymasis ir tavo profilis).',
+  'Log your sets as you train and I track every lift from them — ask me anything, or ask me for tips.':
+    'Užrašyk serijas treniruodamasis, o aš seksiu kiekvieną pratimą — klausk manęs ko nori arba paprašyk patarimų.',
+  'How do I start a session?': 'Kaip pradėti treniruotę?',
+  'Tap the “+” in the middle of the bottom bar.': 'Bakstelėk „+“ apatinės juostos viduryje.',
+  'The big button on top starts the best fit: “Today in program” if you have an active program, your usual day from the Playbook, or a session “From scratch” (“Or start from scratch” is always there too).':
+    'Didysis mygtukas viršuje paleidžia tinkamiausią variantą: „Šiandien pagal programą“, jei turi aktyvią programą, tavo įprastą dieną iš Playbook arba treniruotę „Nuo nulio“ (visada yra ir „Arba pradėk nuo nulio“).',
+  'Pick your gym if asked, then add exercises and log your sets.':
+    'Jei paklaus, pasirink salę, tada pridėk pratimus ir užrašyk serijas.',
+  'The tiles below start an “Auto session”, an “Activity”, “Health” (sleep, rest, injury), “Log past” or a “Home set”.':
+    'Plytelės apačioje paleidžia „Auto treniruotė“, „Veikla“, „Sveikata“ (miegas, poilsis, trauma), „Praeitis“ arba „Namų rinkinys“.',
+  'How does the auto session work?': 'Kaip veikia auto treniruotė?',
+  'Tap “+” → “Auto session” and I build a full day from your goal and what’s recovered.':
+    'Bakstelėk „+“ → „Auto treniruotė“, ir aš sudėliosiu visą dieną pagal tavo tikslą ir tai, kas atsigavę.',
+  'Go through the steps — goal, what today is for (strength, muscle, endurance and so on), muscles, and the day itself (length, warm-up, cardio, cool-down) — then review it and tap “Start now”, or “Save as a day” to keep it for later.':
+    'Pereik žingsnius — tikslas, kam skirta šiandiena (jėga, raumenys, ištvermė ir pan.), raumenys ir pati diena (trukmė, apšilimas, kardio, atvėsimas) — tada peržiūrėk ir bakstelėk „Pradėti“ arba „Išsaugoti kaip dieną“, kad liktų vėlesniam laikui.',
+  'How do I finish a workout?': 'Kaip baigti treniruotę?',
+  'When you’re done, tap “Finish” (the ✓ button) — you’ll get a summary with your volume and any new records, and “Share workout” if you want an image of it.':
+    'Kai baigsi, bakstelėk „Baigti“ (mygtukas ✓) — pamatysi suvestinę su apimtimi ir naujais rekordais, o „Dalytis treniruote“ padarys iš jos paveikslėlį.',
+  'Changed your mind?': 'Persigalvojai?',
+  '“Discard session” (the bin icon next to it) throws the session away.':
+    '„Atmesti treniruotę“ (šiukšliadėžės piktograma šalia) ištrina sesiją.',
+  'A session left open closes by itself after {1} hours and gets a ⚠️ mark.':
+    'Neuždaryta treniruotė pati užsidaro po {1} valandų ir gauna ženklą ⚠️.',
+  'How do I log a workout at home?': 'Kaip užrašyti treniruotę namuose?',
+  'No gym?': 'Be salės?',
+  'Tap “+” → “Home set” to log pull-ups, push-ups, a vacuum hold and similar moves at home — it counts like any other session.':
+    'Bakstelėk „+“ → „Namų rinkinys“, kad užrašytum prisitraukimus, atsispaudimus, vakuumą ir panašius pratimus namuose — tai skaičiuojama kaip bet kuri kita treniruotė.',
+  'You can also add a past home set from “Log past”.':
+    'Praeitą namų rinkinį gali pridėti ir per „Praeitis“.',
+  'How do I pause training for a vacation or illness?':
+    'Kaip sustabdyti treniruotes atostogų ar ligos metu?',
+  'Tap “+” → “Health”.': 'Bakstelėk „+“ → „Sveikata“.',
+  'Under “Start a rest period” pick “Active recovery” (light training, reduced targets), “Full rest — no gym” (for example a vacation, with dates) or “Unwell” (sick days — nothing counts as missed and your plan waits), then start it.':
+    'Skiltyje „Pradėti poilsio laikotarpį“ pasirink „Aktyvus atsigavimas“ (lengvos treniruotės, sumažinti tikslai), „Visiškas poilsis — be salės“ (pvz., atostogos, su datomis) arba „Sergu“ (niekas neskaičiuojama kaip praleista, planas laukia) ir paleisk.',
+  'Your streak and plan respect it, and you can end it early from its card on Today.':
+    'Serija ir planas į tai atsižvelgia, o baigti anksčiau gali iš jo kortelės skiltyje Šiandien.',
+  'How do I change which day my week starts on?':
+    'Kaip pakeisti, kuria diena prasideda mano savaitė?',
+  'Open Apps (bottom bar) → Me → the “Settings” tab → “Week starts on”, and pick the day.':
+    'Atidaryk Programos (apatinė juosta) → Aš → skirtukas „Nustatymai“ → „Savaitė prasideda“ ir pasirink dieną.',
+  'Weekly stats and the program week follow it.':
+    'Savaitės statistika ir programos savaitė prisitaikys.',
+  'Trainers and admins: Apps → Clients or Users → the “Me” tab.':
+    'Treneriams ir administratoriams: Programos → Klientai ar Naudotojai → skirtukas „Aš“.',
+  'How do I assign a program to a client?': 'Kaip priskirti programą klientui?',
+  'Trainers: open Overview → Programs and tap “Assign” on the program’s tile (or open the program → “Program options” → “Assign to members”).':
+    'Treneriams: atidaryk Apžvalga → Programos ir bakstelėk „Priskirti“ programos plytelėje (arba atidaryk programą → „Programos veiksmai“ → „Priskirti dalyviams“).',
+  'Pick the clients, choose the “Start week” and confirm.':
+    'Pasirink klientus, nurodyk „Pradžios savaitė“ ir patvirtink.',
+  'Assigning replaces the client’s active program; their logged history stays.':
+    'Priskyrimas pakeičia aktyvią kliento programą; užrašyta jo istorija lieka.',
+  'You can also start from a client in your Clients list → “Assign a program”.':
+    'Gali pradėti ir nuo kliento sąraše Klientai → „Priskirti programą“.',
+  'What is Apex?': 'Kas yra Apex?',
+  'Apex is the game side of Spotter: open Apps → Apex.':
+    'Apex — žaidybinė Spotter dalis: atidaryk Programos → Apex.',
+  '“Home” gives the overview, in “Challenges” you pick one and tap “Start challenge” (you can “Give up” later), “Ranks” rates your lifts against strength standards and “Awards” lists the achievements you’ve unlocked.':
+    '„Pradžia“ rodo apžvalgą, „Iššūkiai“ skiltyje pasirenki iššūkį ir bakstelėji „Pradėti iššūkį“ (vėliau gali „Pasiduoti“), „Rangai“ vertina tavo pratimus pagal jėgos normatyvus, o „Apdovanojimai“ rodo atrakintus pasiekimus.',
+  'The bell there opens your milestones feed.': 'Varpelis ten atidaro tavo etapų srautą.',
+  'How does the Nutrition app work?': 'Kaip veikia programėlė Mityba?',
+  'Open Apps → Nutrition.': 'Atidaryk Programos → Mityba.',
+  'If the tile says “Coming soon”, it isn’t switched on for your account yet.':
+    'Jei plytelėje parašyta „Netrukus“, tavo paskyrai ji dar neįjungta.',
+  'Inside, “Today” shows the calories and macros you have left, “History” your past days and “Goal” your targets; tap “Add entry” to log a drink, a snack or a meal — search products and dishes, enter it manually or scan a barcode.':
+    'Viduje „Šiandien“ rodo, kiek liko kalorijų ir makroelementų, „Istorija“ — praėjusias dienas, o „Tikslas“ — tavo normas; bakstelėk „Pridėti įrašą“, kad užrašytum gėrimą, užkandį ar patiekalą — ieškok produktų ir patiekalų, įvesk rankiniu būdu ar nuskenuok brūkšninį kodą.',
+  'What is the Learn app?': 'Kas yra programėlė Mokymasis?',
+  'Open Apps → Learn.': 'Atidaryk Programos → Mokymasis.',
+  'It has short how-to lessons for every part of Spotter, grouped by topic — basics, logging, cardio and recovery, programs, progress, gyms, Apex and more.':
+    'Ten trumpos pamokos apie kiekvieną Spotter dalį, sugrupuotos pagal temas — pagrindai, užrašymas, kardio ir atsigavimas, programos, progresas, salės, Apex ir kt.',
+  'Use “Topics” and search to find one, and “Saved” to keep it for later; the videos are still being recorded, so some lessons show “Video coming soon”.':
+    'Naudok „Temos“ ir paiešką, kad rastum pamoką, o „Išsaugoti“ — kad grįžtum vėliau; vaizdo įrašai dar filmuojami, todėl kai kuriose pamokose rodoma „Vaizdo įrašas netrukus“.',
+  'Where are my profile and settings?': 'Kur mano profilis ir nustatymai?',
+  'Your account side is under Apps → Me (trainers see Clients, admins Users, each with a “Me” tab).':
+    'Tavo paskyra yra Programos → Aš (treneriai mato Klientai, administratoriai — Naudotojai, kiekvienas su skirtuku „Aš“).',
+  'Your profile has “Overview”, “Body” (weight and measurements) and “Settings” (language, units, week start, Atlas, password, sign out).':
+    'Tavo profilyje yra „Apžvalga“, „Kūnas“ (svoris ir matmenys) ir „Nustatymai“ (kalba, vienetai, savaitės pradžia, Atlas, slaptažodis, atsijungimas).',
+  'Trainers add clients with “Add client” — the client opens the invite link to join — and see their training read-only.':
+    'Treneriai prideda klientus per „Pridėti klientą“ — klientas atidaro kvietimo nuorodą ir prisijungia — ir mato jų treniruotes tik skaitymui.',
+  'How do I switch between the apps?': 'Kaip perjungti programėles?',
+  'Tap “Apps” at the right end of the bottom bar (or “Gym” next to the Spotter logo at the top) to open “Switch app”: Gym (your training), Apex (challenges, ranks, awards), Nutrition, Learn and your profile.':
+    'Bakstelėk „Programos“ dešiniajame apatinės juostos gale (arba „Salė“ šalia Spotter logotipo viršuje), kad atidarytum „Keisti programą“: Salė (tavo treniruotės), Apex (iššūkiai, rangai, apdovanojimai), Mityba, Mokymasis ir tavo profilis.',
+  'It’s one account and one training history across all of them.':
+    'Tai viena paskyra ir viena treniruočių istorija visose.',
+  'Where do I see my progress and records?': 'Kur matyti mano progresą ir rekordus?',
+  'Everything about progress lives in the Overview tab: tiles for progress, Trends, records, your program, Goals, Playbook and Exercises.':
+    'Viskas apie progresą yra skirtuke Apžvalga: progreso, Tendencijų, rekordų, tavo programos, Tikslų, Playbook ir Pratimų plytelės.',
+  'In progress, switch between “Total”, “By muscle”, “Volume” and “Records” and change the time range; tap an exercise to see its history.':
+    'Progrese perjunk „Iš viso“, „Pagal raumenis“, „Apimtis“ ir „Rekordai“ ir keisk laikotarpį; bakstelėk pratimą, kad pamatytum jo istoriją.',
+  'Or just ask me — “how is my bench going?”.':
+    'Arba tiesiog paklausk manęs — „kaip sekasi mano spaudimas gulint?“.',
+  'What is the lens in Progress?': 'Kas yra lęšis progrese?',
+  'Open Overview → the progress tile → “Volume”, then tap the view button above the chart to open “Volume view”.':
+    'Atidaryk Apžvalga → progreso plytelė → „Apimtis“, tada bakstelėk rodinio mygtuką virš grafiko, kad atidarytum „Apimties rodinys“.',
+  'Under “Lens” pick “Volume” (sets per muscle vs targets), “Fatigue” (load you’re still carrying) or “Readiness” (what’s recovered to train).':
+    'Skiltyje „Lęšis“ pasirink „Apimtis“ (serijos raumeniui pagal tikslus), „Nuovargis“ (krūvis, kurį dar neši) arba „Pasirengimas“ (kas atsigavę treniruotei).',
+  'In a session, “Today’s readiness” gives the same read for the day.':
+    'Treniruotės metu „Šiandienos pasirengimas“ rodo tą patį šiai dienai.',
+  'Tap the “+” in the middle of the bottom bar to start anything: a session, an auto-built day, an activity, sleep or a past workout.':
+    'Bakstelėk „+“ apatinės juostos viduryje, kad pradėtum bet ką: treniruotę, automatiškai sudėtą dieną, veiklą, miegą ar praeitą treniruotę.',
+  'In a session, set the weight and reps on the card and tap “Log” — the rest timer starts on its own.':
+    'Treniruotėje nustatyk svorį ir pakartojimus kortelėje ir bakstelėk „Fiksuoti“ — poilsio laikmatis pasileidžia pats.',
+  '“Auto session” builds a whole day from your goal and what’s recovered — review it and tap “Start now”.':
+    '„Auto treniruotė“ sudeda visą dieną pagal tavo tikslą ir tai, kas atsigavę — peržiūrėk ir bakstelėk „Pradėti“.',
+  'Ask me things like “what weight next time on bench?” or “am I recovered?” — I answer from your own log.':
+    'Klausk manęs, pvz., „kokį svorį spaudimui gulint kitą kartą?“ ar „ar esu atsigavęs?“ — atsakau pagal tavo dienyną.',
+  'Tap the rest ring to change the rest target and the alerts; it’s remembered for each exercise.':
+    'Bakstelėk poilsio žiedą, kad pakeistum poilsio tikslą ir signalus; jis įsimenamas kiekvienam pratimui.',
+  'Tap a set to mark it as a warm-up or a dropset, or flag it “To failure” — warm-ups don’t count as working sets.':
+    'Bakstelėk seriją, kad pažymėtum ją kaip apšilimo ar dropsetą, arba pažymėk „Iki nesėkmės“ — apšilimo serijos neskaičiuojamos kaip darbinės.',
+  'Forgot to log a workout?': 'Pamiršai užrašyti treniruotę?',
+  '“+” → “Log past” adds it with its date and time.':
+    '„+“ → „Praeitis“ pridės ją su data ir laiku.',
+  'Runs, rides, yoga or dance go under “+” → “Activity” — I count them in your weekly load.':
+    'Bėgimas, dviratis, joga ar šokiai — per „+“ → „Veikla“, ir aš įskaičiuoju juos į savaitės krūvį.',
+  'The Overview tab keeps your progress, trends, records, program, goals, playbook and exercise library in one place.':
+    'Skirtukas Apžvalga laiko progresą, tendencijas, rekordus, programą, tikslus, playbook ir pratimų biblioteką vienoje vietoje.',
+  'In progress → “Volume”, open the view options to switch the lens between Volume, Fatigue and Readiness.':
+    'Progrese → „Apimtis“ atidaryk rodinio parinktis, kad perjungtum lęšį tarp Apimtis, Nuovargis ir Pasirengimas.',
+  'In Overview → Goals choose which muscles to grow, hold or ease — auto-built days give the grow muscles extra work.':
+    'Skiltyje Apžvalga → Tikslai pasirink, kuriuos raumenis auginti, išlaikyti ar mažinti — automatiškai sudėtos dienos auginamiems raumenims duoda daugiau darbo.',
+  'Build your own week in Overview → Programs → “New program” and “Activate” it — the “+” button will then offer today’s day.':
+    'Susikurk savo savaitę Apžvalga → Programos → „Nauja programa“ ir „Aktyvuok“ ją — tada „+“ mygtukas siūlys šiandienos dieną.',
+  'Log sleep with “+” → “Health” → “Start sleep”, or set a sleep schedule with auto-log in “Sleep details”.':
+    'Miegą užrašyk per „+“ → „Sveikata“ → „Pradėti miegą“ arba nustatyk miego grafiką su automatiniu žymėjimu skiltyje „Miego informacija“.',
+  'Going on vacation or feeling ill?': 'Išvyksti atostogų ar susirgai?',
+  '“+” → “Health” → start a rest period so your streak and plan pause properly.':
+    '„+“ → „Sveikata“ → pradėk poilsio laikotarpį, kad serija ir planas tinkamai sustotų.',
+  'Hurt something?': 'Ką nors susižeidei?',
+  '“+” → “Health” → “Injury & rehab” sets up a staged comeback plan.':
+    '„+“ → „Sveikata“ → „Trauma ir reabilitacija“ sudaro etapinį sugrįžimo planą.',
+  'No gym today?': 'Šiandien be salės?',
+  '“+” → “Home set” logs pull-ups, push-ups or a vacuum at home.':
+    '„+“ → „Namų rinkinys“ užrašys prisitraukimus, atsispaudimus ar vakuumą namuose.',
+  'Group two exercises with “Superset with…” in the exercise menu.':
+    'Sujunk du pratimus per „Supersetas su…“ pratimo meniu.',
+  'The Playbook learns your usual days from your log, so a typical session restarts in one tap.':
+    'Playbook išmoksta tavo įprastas dienas iš dienyno, todėl tipinė treniruotė paleidžiama vienu bakstelėjimu.',
+  'Add your gym in the Gyms tab and tick its equipment, so I know what kit you have there.':
+    'Pridėk savo salę skirtuke Salės ir pažymėk jos įrangą, kad žinočiau, ką ten turi.',
+  'Your week can start on any day: Apps → Me → Settings → “Week starts on”.':
+    'Tavo savaitė gali prasidėti bet kurią dieną: Programos → Aš → Nustatymai → „Savaitė prasideda“.',
+  'Switch between kg and lb in Apps → Me → Settings → “Units”.':
+    'Kilogramus ir svarus perjunk Programos → Aš → Nustatymai → „Vienetai“.',
+  'The bell at the top collects your records, streaks and recaps; turn on push when I ask, so rest alerts reach you in the background.':
+    'Varpelis viršuje renka tavo rekordus, serijas ir suvestines; įjunk pranešimus, kai paklausiu, kad poilsio signalai pasiektų tave ir fone.',
+  'After a session, “Share workout” turns it into a Story or Square image.':
+    'Po treniruotės „Dalytis treniruote“ padarys iš jos Story ar kvadratinį paveikslėlį.',
+  'The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    'Mygtukas „Programos“ apačioje perjungia tarp Salė, Apex, Mityba, Mokymasis ir tavo profilio.',
+  'Open Apps → Apex for challenges, strength ranks and awards.':
+    'Atidaryk Programos → Apex — ten iššūkiai, jėgos rangai ir apdovanojimai.',
+  'Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
+    'Programos → Mokymasis pateikia pamokas apie kiekvieną Spotter dalį (vaizdo įrašai jau pakeliui).',
+  'Add Spotter to your home screen — it opens full-screen, works offline and can send notifications.':
+    'Pridėk Spotter į pradžios ekraną — jis atsidaro per visą ekraną, veikia neprisijungus ir gali siųsti pranešimus.',
+  'Trainers: add a client with “Add client” (they get an invite link) and assign a program from the program’s tile.':
+    'Treneriams: pridėkite klientą per „Pridėti klientą“ (jis gaus kvietimo nuorodą) ir priskirkite programą iš programos plytelės.',
+  'A few tips for the app:': 'Keli patarimai apie programėlę:',
+  '• Tap the “+” in the middle of the bottom bar to start anything: a session, an auto-built day, an activity, sleep or a past workout.':
+    '• Bakstelėk „+“ apatinės juostos viduryje, kad pradėtum bet ką: treniruotę, automatiškai sudėtą dieną, veiklą, miegą ar praeitą treniruotę.',
+  '• In a session, set the weight and reps on the card and tap “Log” — the rest timer starts on its own.':
+    '• Treniruotėje nustatyk svorį ir pakartojimus kortelėje ir bakstelėk „Fiksuoti“ — poilsio laikmatis pasileidžia pats.',
+  '• “Auto session” builds a whole day from your goal and what’s recovered — review it and tap “Start now”.':
+    '• „Auto treniruotė“ sudeda visą dieną pagal tavo tikslą ir tai, kas atsigavę — peržiūrėk ir bakstelėk „Pradėti“.',
+  '• Ask me things like “what weight next time on bench?” or “am I recovered?” — I answer from your own log.':
+    '• Klausk manęs, pvz., „kokį svorį spaudimui gulint kitą kartą?“ ar „ar esu atsigavęs?“ — atsakau pagal tavo dienyną.',
+  'More tips': 'Daugiau patarimų',
+  'More tips:': 'Daugiau patarimų:',
+  '• Tap the rest ring to change the rest target and the alerts; it’s remembered for each exercise.':
+    '• Bakstelėk poilsio žiedą, kad pakeistum poilsio tikslą ir signalus; jis įsimenamas kiekvienam pratimui.',
+  '• Tap a set to mark it as a warm-up or a dropset, or flag it “To failure” — warm-ups don’t count as working sets.':
+    '• Bakstelėk seriją, kad pažymėtum ją kaip apšilimo ar dropsetą, arba pažymėk „Iki nesėkmės“ — apšilimo serijos neskaičiuojamos kaip darbinės.',
+  '• Forgot to log a workout?': '• Pamiršai užrašyti treniruotę?',
+  '• Runs, rides, yoga or dance go under “+” → “Activity” — I count them in your weekly load.':
+    '• Bėgimas, dviratis, joga ar šokiai — per „+“ → „Veikla“, ir aš įskaičiuoju juos į savaitės krūvį.',
+  '• The Overview tab keeps your progress, trends, records, program, goals, playbook and exercise library in one place.':
+    '• Skirtukas Apžvalga laiko progresą, tendencijas, rekordus, programą, tikslus, playbook ir pratimų biblioteką vienoje vietoje.',
+  '• In progress → “Volume”, open the view options to switch the lens between Volume, Fatigue and Readiness.':
+    '• Progrese → „Apimtis“ atidaryk rodinio parinktis, kad perjungtum lęšį tarp Apimtis, Nuovargis ir Pasirengimas.',
+  '• In Overview → Goals choose which muscles to grow, hold or ease — auto-built days give the grow muscles extra work.':
+    '• Skiltyje Apžvalga → Tikslai pasirink, kuriuos raumenis auginti, išlaikyti ar mažinti — automatiškai sudėtos dienos auginamiems raumenims duoda daugiau darbo.',
+  '• Build your own week in Overview → Programs → “New program” and “Activate” it — the “+” button will then offer today’s day.':
+    '• Susikurk savo savaitę Apžvalga → Programos → „Nauja programa“ ir „Aktyvuok“ ją — tada „+“ mygtukas siūlys šiandienos dieną.',
+  '• Log sleep with “+” → “Health” → “Start sleep”, or set a sleep schedule with auto-log in “Sleep details”.':
+    '• Miegą užrašyk per „+“ → „Sveikata“ → „Pradėti miegą“ arba nustatyk miego grafiką su automatiniu žymėjimu skiltyje „Miego informacija“.',
+  '• Going on vacation or feeling ill?': '• Išvyksti atostogų ar susirgai?',
+  '• Hurt something?': '• Ką nors susižeidei?',
+  '• No gym today?': '• Šiandien be salės?',
+  '• Group two exercises with “Superset with…” in the exercise menu.':
+    '• Sujunk du pratimus per „Supersetas su…“ pratimo meniu.',
+  '• The Playbook learns your usual days from your log, so a typical session restarts in one tap.':
+    '• Playbook išmoksta tavo įprastas dienas iš dienyno, todėl tipinė treniruotė paleidžiama vienu bakstelėjimu.',
+  '• Add your gym in the Gyms tab and tick its equipment, so I know what kit you have there.':
+    '• Pridėk savo salę skirtuke Salės ir pažymėk jos įrangą, kad žinočiau, ką ten turi.',
+  '• Your week can start on any day: Apps → Me → Settings → “Week starts on”.':
+    '• Tavo savaitė gali prasidėti bet kurią dieną: Programos → Aš → Nustatymai → „Savaitė prasideda“.',
+  '• Switch between kg and lb in Apps → Me → Settings → “Units”.':
+    '• Kilogramus ir svarus perjunk Programos → Aš → Nustatymai → „Vienetai“.',
+  '• The bell at the top collects your records, streaks and recaps; turn on push when I ask, so rest alerts reach you in the background.':
+    '• Varpelis viršuje renka tavo rekordus, serijas ir suvestines; įjunk pranešimus, kai paklausiu, kad poilsio signalai pasiektų tave ir fone.',
+  '• After a session, “Share workout” turns it into a Story or Square image.':
+    '• Po treniruotės „Dalytis treniruote“ padarys iš jos Story ar kvadratinį paveikslėlį.',
+  '• The “Apps” button at the bottom switches between Gym, Apex, Nutrition, Learn and your profile.':
+    '• Mygtukas „Programos“ apačioje perjungia tarp Salė, Apex, Mityba, Mokymasis ir tavo profilio.',
+  '• Open Apps → Apex for challenges, strength ranks and awards.':
+    '• Atidaryk Programos → Apex — ten iššūkiai, jėgos rangai ir apdovanojimai.',
+  '• Apps → Learn lists how-to lessons for every part of Spotter (the videos are on their way).':
+    '• Programos → Mokymasis pateikia pamokas apie kiekvieną Spotter dalį (vaizdo įrašai jau pakeliui).',
+  '• Add Spotter to your home screen — it opens full-screen, works offline and can send notifications.':
+    '• Pridėk Spotter į pradžios ekraną — jis atsidaro per visą ekraną, veikia neprisijungus ir gali siųsti pranešimus.',
+  '• Trainers: add a client with “Add client” (they get an invite link) and assign a program from the program’s tile.':
+    '• Treneriams: pridėkite klientą per „Pridėti klientą“ (jis gaus kvietimo nuorodą) ir priskirkite programą iš programos plytelės.',
+  'That’s all of them — ask me about any feature for the details.':
+    'Tai visi — klausk manęs apie bet kurią funkciją, kad sužinotum smulkmenas.',
+  'That was every tip I have — here they are again from the top:':
+    'Tai buvo visi mano patarimai — štai jie vėl nuo pradžių:',
+  'Change the password in Apps → Me → “Settings” → “Password”; “Sign out” is there too — your log comes back when you sign in again.':
+    'Slaptažodį pakeisi Programos → Aš → „Nustatymai“ → „Slaptažodis“; ten ir atsijungimas — tavo dienynas sugrįš, kai vėl prisijungsi.',
+  'Overview → Programs → “New program”: name it, “Pick training days”, fill each day with muscles or exercises, then “Activate” (or “Save draft”).':
+    'Apžvalga → Programos → „Nauja programa“: pavadink ją, „Pasirinkti dienas“, užpildyk kiekvieną dieną raumenimis ar pratimais, tada „Aktyvuoti“ (arba „Išsaugoti juodraštį“).',
+  'Apps → Me → “Body” → “Add weight”.': 'Programos → Aš → „Kūnas“ → „Pridėti svorį“.',
+  'Overview → Goals: set a “Physique target” and, under “Focus this block”, which muscles to grow, hold or ease.':
+    'Apžvalga → Tikslai: nustatyk „Kūno tikslas“ ir skiltyje „Šio bloko fokusas“ — kuriuos raumenis auginti, išlaikyti ar mažinti.',
+  'A body-weight goal lives in Apps → Me → “Body”.': 'Svorio tikslas yra Programos → Aš → „Kūnas“.',
+  'Outside the gym: tap “+” → “Activity” → pick run, cycling, swim, walk, yoga, dance…':
+    'Ne salėje: bakstelėk „+“ → „Veikla“ → pasirink bėgimą, dviratį, plaukimą, ėjimą, jogą, šokius…',
+  '→ start it now or save one you already did.':
+    '→ pradėk dabar arba išsaugok tą, kurią jau atlikai.',
+  'To get a trainer, ask your admin to assign one — who can see your data is listed in Apps → Me → “Settings”.':
+    'Norėdamas trenerio, paprašyk administratoriaus jį priskirti — kas mato tavo duomenis, nurodyta Programos → Aš → „Nustatymai“.',
+  'In the session: set the reps and weight on the card, tap “Log”.':
+    'Treniruotėje: nustatyk pakartojimus ir svorį kortelėje, bakstelėk „Fiksuoti“.',
+  'Tap a logged set to change it, mark it as a warm-up or dropset, or delete it.':
+    'Bakstelėk užrašytą seriją, kad ją pakeistum, pažymėtum kaip apšilimo ar dropsetą arba ištrintum.',
+  'Tap “+” → “Health” → “Injury & rehab” → “Set up rehab plan” (or from my pain check-in here).':
+    'Bakstelėk „+“ → „Sveikata“ → „Trauma ir reabilitacija“ → „Sudaryti planą“ (arba iš mano skausmo aptarimo čia).',
+  'Tap “+” → “Log past” → set the date, start time and length (and the gym) → add the exercises and sets.':
+    'Bakstelėk „+“ → „Praeitis“ → nustatyk datą, pradžios laiką ir trukmę (ir salę) → pridėk pratimus ir serijas.',
+  'Apps → Me → “Settings” → “Units” → kg or lb.':
+    'Programos → Aš → „Nustatymai“ → „Vienetai“ → kg arba lb.',
+  'Tap “+” → “Health” → “Start sleep” when you go to bed and “I’m awake — stop” in the morning.':
+    'Bakstelėk „+“ → „Sveikata“ → „Pradėti miegą“, kai eini miegoti, ir „Aš pabudau — stop“ ryte.',
+  'In “Sleep details” you can “Add a past night”, set a “Sleep schedule” and turn on “Auto-log” so nights start and end by themselves; fix any night there too.':
+    'Skiltyje „Miego informacija“ gali „Pridėti praėjusią naktį“, nustatyti „Miego grafikas“ ir įjungti „Automatinis žymėjimas“, kad naktys prasidėtų ir baigtųsi pačios; ten pat pataisysi bet kurią naktį.',
+  '−{1} kg over {2} ({3} → {4}).': '−{1} kg per {2} ({3} → {4}).',
+  '±{1} kg over {2} ({3} → {4}).': '±{1} kg per {2} ({3} → {4}).',
+  'It’s been {1}, bro — time to get back, yeah?':
+    'Jau {1} be sporto salės, broli — laikas grįžti, ką?',
+  '{1} off — no stress, man.': '{1} be treniruočių — ramiai, broli.',
+  'We’ll ease back in.': 'Įsivažiuosim pamažu.',
+  'Missed you, dude!': 'Pasiilgau tavęs, broli!',
+  '{1} is plenty of rest.': 'Ilsėjaisi {1} — gana.',
+  '{1} off.': '{1} be treniruočių.',
+  'Time to fix that.': 'Laikas tai pataisyti.',
+  'Today works.': 'Šiandien tinka.',
+  'I counted.': 'Skaičiavau.',
+  'Every day of it.': 'Kiekvieną dieną.',
+  'Resting from what, exactly?': 'Ilsiesi nuo ko, tiksliai?',
+  '*sigh* {1}.': '*atsidūsta* {1}.',
+  'Your membership is crying.': 'Tavo abonementas verkia.',
+  '{1}, gym tourist.': '{1}, sporto salės turiste.',
+  'Visa expired?': 'Vizos galiojimas baigėsi?',
 };

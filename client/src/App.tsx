@@ -1,6 +1,6 @@
 import { pushState, refreshPush, setAppBadge } from './push';
-import { useAtlasFmt, useAtlasNotes } from './atlas/notes';
-import { planOutbox, syncOutbox } from './atlas/schedule';
+import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
+import { planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
 import { computePlaybook } from './playbook';
 import {
   lazy,
@@ -668,13 +668,21 @@ export function App() {
             fmt: atlasFmt,
             title: t.atlasName,
             reviewBody: t.atlasPushReview,
-          })
+          }).concat(
+            // New notes that will appear while the app is closed → pushes.
+            planNotePushes({
+              coach: store.coach,
+              now,
+              notesAt: (at) => buildNotes(store, at, locale, atlasFmt).notes,
+              title: t.atlasName,
+            }),
+          )
         : [];
       void syncOutbox(msgs).catch((err) => console.warn('atlas: outbox sync failed', err));
     }, 3000);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authed, store.workouts, store.coach, atlas.temper, locale]);
+  }, [authed, store.workouts, store.sleeps, store.bodyMetrics, store.coach, atlas.temper, locale]);
   // Keep this device's push token fresh (FCM rotates it; iOS can drop it).
   useEffect(() => {
     if (authed) void refreshPush(locale);

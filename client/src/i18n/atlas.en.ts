@@ -4,47 +4,53 @@
  * 5 red — roasts your effort (never your body).
  */
 import type { PhraseBook } from '../atlas/voice';
+import * as N from '../atlas/num';
 
-const pct = (n: number) => `${n > 0 ? '+' : '−'}${Math.abs(n)}%`;
+const pct = (n: number) => `${N.signed(n, 'en', 1)}%`;
+
+/** A span as a person says it ("3 weeks"), and the same opening a sentence. */
+const sp = (d: number) => N.spanDays('en', d);
+const Sp = (d: number) => N.cap(sp(d));
 
 export const EN: PhraseBook = {
   intro: {
     1: [
       (f) =>
         f.sessions
-          ? `Yo, what's up! Atlas here. Went through your ${f.sessions} sessions — I got you on every one from now. Let's gooo!`
+          ? `Yo, what's up! Atlas here. Went through your ${N.sessions('en', f.sessions)} — I got you on every one from now. Let's gooo!`
           : "Yo, what's up! Atlas here. Log your first session and I got you on every one after it.",
     ],
     3: [
       (f) =>
         f.sessions
-          ? `Atlas. Read your ${f.sessions} sessions. I'll call it like I see it on every workout from here.`
+          ? `Atlas. Read your ${N.sessions('en', f.sessions)}. I'll call it like I see it on every workout from here.`
           : 'Atlas. Nothing logged. Train first, talk later.',
     ],
     5: [
       (f) =>
         f.sessions
-          ? `I read your ${f.sessions} sessions. Had a good laugh. I'll be here for every workout now — you'll regret that.`
+          ? `I read your ${N.sessions('en', f.sessions)}. Had a good laugh. I'll be here for every workout now — you'll regret that.`
           : 'Zero sessions. Bold strategy. Log literally anything.',
     ],
   },
   session: {
     1: [
       (f) =>
-        `Let's go! ${f.sets} sets in ${f.minutes} min — that's how it's done, bro. Now eat and chill.`,
-      (f) => `Boom. ${f.sets} sets, ${f.minutes} minutes. Absolute unit.`,
-      (f) => `${f.sets} sets in the bag. Solid work, man!`,
+        `Let's go! ${N.sets('en', f.sets)} in ${f.minutes} min — that's how it's done, bro. Now eat and chill.`,
+      (f) => `Boom. ${N.sets('en', f.sets)}, ${f.minutes} minutes. Absolute unit.`,
+      (f) => `${N.sets('en', f.sets)} in the bag. Solid work, man!`,
     ],
     3: [
-      (f) => `${f.sets} sets, ${f.minutes} min. Fine.`,
-      (f) => `Done. ${f.sets} sets. Nothing to add.`,
-      (f) => `${f.minutes} minutes, ${f.sets} sets. Counted. That's all.`,
+      (f) => `${N.sets('en', f.sets)}, ${f.minutes} min. Fine.`,
+      (f) => `Done. ${N.sets('en', f.sets)}. Nothing to add.`,
+      (f) => `${f.minutes} minutes, ${N.sets('en', f.sets)}. Counted. That's all.`,
     ],
     5: [
-      (f) => `${f.sets} sets. You call that a workout? I've seen warm-ups with more ambition.`,
+      (f) =>
+        `${N.sets('en', f.sets)}. You call that a workout? I've seen warm-ups with more ambition.`,
       (f) => `${f.minutes} minutes of… something. I'll log it as training. Out of pity.`,
-      (f) => `${f.sets} sets. The bar probably didn't even notice it was lifted.`,
-      (f) => `Logged. ${f.sets} sets. Let's hope nobody saw.`,
+      (f) => `${N.sets('en', f.sets)}. The bar probably didn't even notice it was lifted.`,
+      (f) => `Logged. ${N.sets('en', f.sets)}. Let's hope nobody saw.`,
     ],
   },
   pr: {
@@ -69,7 +75,7 @@ export const EN: PhraseBook = {
   stall: {
     1: [
       (f, x) =>
-        `${x.exercise(f.exercise)}'s been sitting at ${x.kg(f.weight)} for ${f.sessions} sessions — all good, bro, it happens. One more rep next time and it'll move.`,
+        `${x.exercise(f.exercise)}'s been sitting at ${x.kg(f.weight)} for ${N.sessions('en', f.sessions)} — all good, bro, it happens. One more rep next time and it'll move.`,
     ],
     3: [
       (f, x) =>
@@ -80,7 +86,7 @@ export const EN: PhraseBook = {
         `${x.exercise(f.exercise)} at ${x.kg(f.weight)}, session number ${f.sessions}. The bar knows your face by now. It's bored.`,
       (f, x) => `${x.kg(f.weight)}. Again. You're not training, you're serving a sentence.`,
       (f, x) =>
-        `${f.sessions} sessions at the same weight. Consistency is for pensions, not for ${x.exercise(f.exercise)}.`,
+        `${N.sessions('en', f.sessions)} at the same weight. Consistency is for pensions, not for ${x.exercise(f.exercise)}.`,
     ],
   },
   restShort: {
@@ -125,11 +131,11 @@ export const EN: PhraseBook = {
   imbalance: {
     1: [
       (f, x) =>
-        `Bro, ${x.muscle(f.high)} got ${f.highSets} sets and ${x.muscle(f.low)} only ${f.lowSets}. Let's show ${x.muscle(f.low)} some love next time!`,
+        `Bro, ${x.muscle(f.high)} got ${N.setsDec('en', f.highSets)} and ${x.muscle(f.low)} only ${f.lowSets}. Let's show ${x.muscle(f.low)} some love next time!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${f.highSets} sets. ${x.muscle(f.low)}: ${f.lowSets}. Fix it.`,
+        `${x.muscle(f.high)}: ${N.setsDec('en', f.highSets)}. ${x.muscle(f.low)}: ${f.lowSets}. Fix it.`,
     ],
     5: [
       (f, x) =>
@@ -158,12 +164,13 @@ export const EN: PhraseBook = {
   },
   comeback: {
     1: [
-      (f) => `Ayy, welcome back, bro! ${f.daysOff} days is nothing. Easy one today, we'll ramp up.`,
+      (f) =>
+        `Ayy, welcome back, bro! ${Sp(f.daysOff)} off is nothing. Easy one today, we'll ramp up.`,
     ],
-    3: [(f) => `${f.daysOff} days off. You're back — start light.`],
+    3: [(f) => `${Sp(f.daysOff)} off. You're back — start light.`],
     5: [
       (f) =>
-        `${f.daysOff} days. I assumed you'd moved to the couch permanently. Start light — your pride will survive, it's used to it.`,
+        `${Sp(f.daysOff)} off. I assumed you'd moved to the couch permanently. Start light — your pride will survive, it's used to it.`,
     ],
   },
   shortSleep: {
@@ -172,17 +179,19 @@ export const EN: PhraseBook = {
     5: [(f) => `${f.hours} h of sleep. Lighter today.`],
   },
   streak: {
-    1: [(f) => `${f.days} days in a row! You're on fire, bro!`],
-    3: [(f) => `${f.days} days in a row. Keep it.`],
-    5: [(f) => `${f.days} days in a row. Don't get used to praise — there won't be any.`],
+    1: [(f) => `${Sp(f.days)} in a row! You're on fire, bro!`],
+    3: [(f) => `${Sp(f.days)} in a row. Keep it.`],
+    5: [(f) => `${Sp(f.days)} in a row. Don't get used to praise — there won't be any.`],
   },
   bodyweight: {
-    1: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
-    3: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
-    5: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${f.days} days.`],
+    1: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${sp(f.days)}.`],
+    3: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${sp(f.days)}.`],
+    5: [(f, x) => `Bodyweight ${x.kg(f.kg)}, ${pct(f.deltaPct)} over ${sp(f.days)}.`],
   },
   mom: {
-    session: [(f) => `${f.sets} sets. Your mom does more on a Sunday between loads of laundry.`],
+    session: [
+      (f) => `${N.sets('en', f.sets)}. Your mom does more on a Sunday between loads of laundry.`,
+    ],
     stall: [
       (f, x) => `${x.exercise(f.exercise)}, ${x.kg(f.weight)}, again. Your mom warms up with that.`,
     ],
@@ -192,7 +201,8 @@ export const EN: PhraseBook = {
     skipped: [() => `Your mom already trained today. Just saying.`],
     setDrop: [(f) => `${f.reps}? Your mom did ${f.prevReps} with the empty bar and didn't whine.`],
     week: [
-      (f) => `${f.sessions} sessions. Your mom gets more done in a week. And still feeds you.`,
+      (f) =>
+        `${N.sessions('en', f.sessions)}. Your mom gets more done in a week. And still feeds you.`,
     ],
   },
 };

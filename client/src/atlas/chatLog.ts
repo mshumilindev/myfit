@@ -53,6 +53,9 @@ export function pushChat(m: ChatMsg): void {
 export function updateChat(id: string, patch: Partial<ChatMsg>): void {
   commit(log.map((m) => (m.id === id ? { ...m, ...patch } : m)));
 }
+export function removeChat(id: string): void {
+  commit(log.filter((m) => m.id !== id));
+}
 export function clearChat(): void {
   commit([]);
 }

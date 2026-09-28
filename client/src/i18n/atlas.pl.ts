@@ -4,8 +4,13 @@
  * 5 red — jedzie po twoim wysiłku (nigdy po ciele).
  */
 import type { PhraseBook } from '../atlas/voice';
+import * as N from '../atlas/num';
 
 const pct = (n: number) => `${n > 0 ? '+' : '−'}${Math.abs(n)}%`;
+
+/** A span as a person says it ("3 weeks"), and the same opening a sentence. */
+const sp = (d: number) => N.spanDays('pl', d);
+const Sp = (d: number) => N.cap(sp(d));
 
 export const PL: PhraseBook = {
   intro: {
@@ -155,11 +160,14 @@ export const PL: PhraseBook = {
     ],
   },
   comeback: {
-    1: [(f) => `Ooo, wróciłeś, mordo! ${f.daysOff} dni to nic. Dziś spokojnie, rozkręcimy się.`],
-    3: [(f) => `${f.daysOff} dni przerwy. Wróciłeś — zacznij lekko.`],
+    1: [
+      (f) =>
+        `Ooo, wróciłeś, mordo! ${Sp(f.daysOff)} przerwy to nic. Dziś spokojnie, rozkręcimy się.`,
+    ],
+    3: [(f) => `${Sp(f.daysOff)} przerwy. Wróciłeś — zacznij lekko.`],
     5: [
       (f) =>
-        `${f.daysOff} dni. Myślałem, że zameldowałeś się na kanapie na stałe. Zacznij lekko — duma przeżyje, jest przyzwyczajona.`,
+        `${Sp(f.daysOff)} przerwy. Myślałem, że zameldowałeś się na kanapie na stałe. Zacznij lekko — duma przeżyje, jest przyzwyczajona.`,
     ],
   },
   shortSleep: {
@@ -168,14 +176,14 @@ export const PL: PhraseBook = {
     5: [(f) => `${f.hours} h snu. Dziś lżej.`],
   },
   streak: {
-    1: [(f) => `${f.days} dni z rzędu! Jesteś w gazie, mordo!`],
-    3: [(f) => `${f.days} dni z rzędu. Trzymaj.`],
-    5: [(f) => `${f.days} dni z rzędu. Nie przyzwyczajaj się do pochwał — więcej nie będzie.`],
+    1: [(f) => `${Sp(f.days)} z rzędu! Jesteś w gazie, mordo!`],
+    3: [(f) => `${Sp(f.days)} z rzędu. Trzymaj.`],
+    5: [(f) => `${Sp(f.days)} z rzędu. Nie przyzwyczajaj się do pochwał — więcej nie będzie.`],
   },
   bodyweight: {
-    1: [(f, x) => `Masa ciała ${x.kg(f.kg)}, ${pct(f.deltaPct)} w ${f.days} dni.`],
-    3: [(f, x) => `Masa ciała ${x.kg(f.kg)}, ${pct(f.deltaPct)} w ${f.days} dni.`],
-    5: [(f, x) => `Masa ciała ${x.kg(f.kg)}, ${pct(f.deltaPct)} w ${f.days} dni.`],
+    1: [(f, x) => `Masa ciała ${x.kg(f.kg)}, ${pct(f.deltaPct)} przez ${sp(f.days)}.`],
+    3: [(f, x) => `Masa ciała ${x.kg(f.kg)}, ${pct(f.deltaPct)} przez ${sp(f.days)}.`],
+    5: [(f, x) => `Masa ciała ${x.kg(f.kg)}, ${pct(f.deltaPct)} przez ${sp(f.days)}.`],
   },
   mom: {
     session: [

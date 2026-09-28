@@ -1,0 +1,223 @@
+/**
+ * Second HELD-OUT set: written after all fixes, scored once, never tuned on.
+ * Same format and guidelines as gold.ts.
+ */
+import type { GoldRow } from './gold';
+
+export const HOLDOUT2: GoldRow[] = [
+  ['en', 'just finished a 5k run, felt amazing', 's | main | finish user past - 1 | 5 km |'],
+  ['en', 'Why is my squat getting weaker?', 'q/wh/why | main | get other present - 3 | |'],
+  ['en', 'Can I do cardio on rest days?', 'q/yesno | main | do user present - 1 | |'],
+  [
+    'en',
+    'I think you counted my run twice',
+    's | main,sub:comp | think user present - 1 | 2 time |',
+  ],
+  ['en', "What's a good breakfast before lifting?", 'q/wh/what | main | be other present - 3 | |'],
+  ['en', 'Help me fix my posture', 'c | main | help atlas none - 2 | |'],
+  [
+    'en',
+    "My knees hurt after running and I don't know why",
+    's//why | main,coord,sub:comp | hurt other present - 3 | |',
+  ],
+  [
+    'en',
+    'How much water should I drink during a workout?',
+    'q/wh/how_much | main | drink user present - 1 | |',
+  ],
+  [
+    'en',
+    'Is it fine to lift if I have a cold?',
+    'q/yesno | main,sub:cond | be other present - 3 | |',
+  ],
+  ['en', "I'll be at the gym at 7", 's | main | be user future - 1 | |'],
+  ['en', 'Who can see my data?', 'q/wh/who | main | see other present - 3 | |'],
+  ['en', 'You told me to rest but I trained anyway', 's | main,coord | tell atlas past - 2 | |'],
+  ['en', 'Stop counting my steps', 'c | main | stop atlas none - 2 | |'],
+  [
+    'en',
+    'Did I hit my protein goal yesterday?',
+    'q/yesno | main | hit user past - 1 | | yesterday',
+  ],
+  [
+    'en',
+    'Where should I feel the Romanian deadlift?',
+    'q/wh/where | main | feel user present - 1 | |',
+  ],
+  [
+    'en',
+    "I'm going to try intermittent fasting next month",
+    's | main | try user future - 1 | | next_month',
+  ],
+  [
+    'en',
+    'What happens to my muscles when I sleep?',
+    'q/wh/what | main,sub:temp | happen other present - 3 | |',
+  ],
+  ['en', "I can't feel my chest when I bench", 's | main,sub:temp | feel user present + 1 | |'],
+  [
+    'en',
+    'Is it better to do more reps or more weight?',
+    'q/choice | main | be other present - 3 | |',
+  ],
+  ['en', 'Show me how to do a pull-up', 'c//how | main,sub:comp | show atlas none - 2 | |'],
+  [
+    'en',
+    'My sleep was terrible last night because of the heat',
+    's | main | be other past - 3 | | last_night',
+  ],
+  [
+    'en',
+    'Should I take a break if my wrist hurts?',
+    'q/yesno | main,sub:cond | take user present - 1 | |',
+  ],
+  [
+    'en',
+    'i cycled 30 km and burned 900 calories',
+    's | main | cycle user past - 1 | 30 km, 900 kcal |',
+  ],
+  [
+    'en',
+    'Why does Atlas keep telling me to sleep more?',
+    'q/wh/why | main | keep other present - 3 | |',
+  ],
+  ['en', 'That workout destroyed me!', 'e | main | destroy other past - 3 | |'],
+  ['en', 'When do you update my plan?', 'q/wh/when | main | update atlas present - 2 | |'],
+  ['en', "Although I'm tired, I want to train", 's | sub:conc,main | train user present - 1 | |'],
+  ['en', 'Which days should I rest?', 'q/wh/which | main | rest user present - 1 | |'],
+  ['en', "I weigh 80 kg and I'm 180 cm tall", 's | main,coord | weigh user present - 1 | 80 kg |'],
+  ['en', 'Log 3 sets of bench at 70 kg', 'c | main | log atlas none - 2 | 3 set, 70 kg |'],
+
+  ['uk', 'Щойно закінчив тренування, все супер', 's | main,coord | закінчити user past - 1 | |'],
+  ['uk', 'Чому присід стає важчим?', 'q/wh/why | main | ставати other present - 3 | |'],
+  ['uk', 'Можна робити кардіо в день відпочинку?', 'q/yesno | main | робити none present - 0 | |'],
+  [
+    'uk',
+    'Здається, ти порахував мою пробіжку двічі',
+    's | main,sub:comp | здаватися none present - 0 | 2 time |',
+  ],
+  ['uk', 'Що краще їсти на сніданок перед залом?', 'q/wh/what | main | їсти none present - 0 | |'],
+  ['uk', 'Допоможи виправити поставу', 'c | main | допомогти atlas none - 2 | |'],
+  [
+    'uk',
+    'Після бігу болять коліна, і я не знаю чому',
+    's//why | main,coord,sub:comp | боліти other present - 3 | |',
+  ],
+  [
+    'uk',
+    'Скільки води треба пити під час тренування?',
+    'q/wh/how_much | main | пити none present - 0 | |',
+  ],
+  [
+    'uk',
+    'Чи можна тренуватися, якщо я застудився?',
+    'q/yesno | main,sub:cond | тренуватися none present - 0 | |',
+  ],
+  ['uk', 'Буду в залі о сьомій', 's | main | бути user future - 1 | |'],
+  ['uk', 'Хто бачить мої дані?', 'q/wh/who | main | бачити other present - 3 | |'],
+  [
+    'uk',
+    'Ти казав відпочивати, але я все одно потренувався',
+    's | main,coord | казати atlas past - 2 | |',
+  ],
+  ['uk', 'Перестань рахувати мої кроки', 'c | main | перестати atlas none - 2 | |'],
+  ['uk', 'Я вчора добрав норму білка?', 'q/yesno | main | добрати user past - 1 | | yesterday'],
+  [
+    'uk',
+    'Де має відчуватися румунська тяга?',
+    'q/wh/where | main | відчуватися other present - 3 | |',
+  ],
+  [
+    'uk',
+    'Наступного місяця спробую інтервальне голодування',
+    's | main | спробувати user future - 1 | | next_month',
+  ],
+  [
+    'uk',
+    "Що відбувається з м'язами, коли я сплю?",
+    'q/wh/what | main,sub:temp | відбуватися other present - 3 | |',
+  ],
+  [
+    'uk',
+    'Не відчуваю грудей, коли жму лежачи',
+    's | main,sub:temp | відчувати user present + 1 | |',
+  ],
+  [
+    'uk',
+    'Краще робити більше повторень чи більшу вагу?',
+    'q/choice | main | робити none present - 0 | |',
+  ],
+  ['uk', 'Покажи, як підтягуватися', 'c//how | main,sub:comp | показати atlas none - 2 | |'],
+  ['uk', 'Минулої ночі погано спав через спеку', 's | main | спати user past - 1 | | last_night'],
+  [
+    'uk',
+    "Чи варто зробити перерву, якщо болить зап'ястя?",
+    'q/yesno | main,sub:cond | зробити none present - 0 | |',
+  ],
+  [
+    'uk',
+    'Проїхав 30 км на велосипеді і спалив 900 калорій',
+    's | main | проїхати user past - 1 | 30 km, 900 kcal |',
+  ],
+  ['uk', 'Чому ти постійно радиш більше спати?', 'q/wh/why | main | радити atlas present - 2 | |'],
+  ['uk', 'Це тренування мене вбило!', 'e | main | вбити other past - 3 | |'],
+  ['uk', 'Коли ти оновиш мій план?', 'q/wh/when | main | оновити atlas future - 2 | |'],
+  [
+    'uk',
+    'Хоча я втомився, хочу потренуватися',
+    's | sub:conc,main | потренуватися user present - 1 | |',
+  ],
+  ['uk', 'У які дні мені відпочивати?', 'q/wh/which | main | відпочивати user none - 1 | |'],
+  ['uk', 'Я важу 80 кг і маю зріст 180', 's | main | важити user present - 1 | 80 kg |'],
+  ['uk', 'Запиши 3 підходи жиму по 70 кг', 'c | main | записати atlas none - 2 | 3 set, 70 kg |'],
+
+  ['ru', 'Почему приседания стали тяжелее?', 'q/wh/why | main | стать other past - 3 | |'],
+  ['ru', 'Можно делать кардио в день отдыха?', 'q/yesno | main | делать none present - 0 | |'],
+  ['ru', 'Помоги составить план на неделю', 'c | main | помочь atlas none - 2 | |'],
+  ['ru', 'Сколько воды пить в день?', 'q/wh/how_much | main | пить none none - 0 | |'],
+  ['ru', 'Я вчера пробежал 8 км', 's | main | пробежать user past - 1 | 8 km | yesterday'],
+  ['ru', 'Ты опять не посчитал мою тренировку', 's | main | посчитать atlas past + 2 | |'],
+  ['sz', 'короче сьогодні жим не пішов взагалі', 's | main | піти other past + 3 | | today'],
+  ['sz', 'шо краще, біг чи велік?', 'q/wh/what | main | краще other present - 3 | |'],
+  ['uk-tr', 'yak chasto treba kachaty pres', 'q/wh/how_often | main | качати none present - 0 | |'],
+  ['ru-tr', 'segodnya bolit spina', 's | main | болеть other present - 3 | | today'],
+  ['uk-tr', 'sohodni ne pidu v zal', 's | main | піти user future + 1 | | today'],
+  ['uk-tr', 'pokazhy moyu statystyku', 'c | main | показати atlas none - 2 | |'],
+
+  ['pl', 'Dlaczego przysiad jest coraz cięższy?', 'q/wh/why | main | być other present - 3 | |'],
+  ['pl', 'Pomóż mi ułożyć plan', 'c | main | pomóc atlas none - 2 | |'],
+  ['pl', 'Wczoraj nie trenowałem', 's | main | trenować user past + 1 | | yesterday'],
+  ['pl', 'Ile wody pić dziennie?', 'q/wh/how_much | main | pić none none - 0 | |'],
+  [
+    'pl',
+    'Czy mogę biegać, jeśli boli mnie kolano?',
+    'q/yesno | main,sub:cond | biegać user present - 1 | |',
+  ],
+  ['pl', 'Zrobiłam 4 serie przysiadów', 's | main | zrobić user past - 1 | 4 set |'],
+
+  ['lt', 'Kodėl man skauda pečius?', 'q/wh/why | main | skaudėti user present - 1 | |'],
+  ['lt', 'Padėk man sudaryti planą', 'c | main | padėti atlas none - 2 | |'],
+  ['lt', 'Vakar nesportavau', 's | main | sportuoti user past + 1 | | yesterday'],
+  [
+    'lt',
+    'Kiek kartų per savaitę treniruotis?',
+    'q/wh/how_many | main | treniruotis none none - 0 | |',
+  ],
+  [
+    'lt',
+    'Ar galiu bėgti, jei skauda kelį?',
+    'q/yesno | main,sub:cond | bėgti user present - 1 | |',
+  ],
+  ['lt', 'Padariau 4 serijas pritūpimų', 's | main | padaryti user past - 1 | 4 set |'],
+
+  ['et', 'Miks mul õlad valutavad?', 'q/wh/why | main | valutama other present - 3 | |'],
+  ['et', 'Aita mul plaan koostada', 'c | main | aitama atlas none - 2 | |'],
+  ['et', 'Eile ma ei treeninud', 's | main | treenima user past + 1 | | yesterday'],
+  ['et', 'Kui palju vett päevas juua?', 'q/wh/how_much | main | jooma none none - 0 | |'],
+  [
+    'et',
+    'Kas ma võin joosta, kui põlv valutab?',
+    'q/yesno | main,sub:cond | jooksma user present - 1 | |',
+  ],
+  ['et', 'Tegin 4 seeriat kükke', 's | main | tegema user past - 1 | 4 set |'],
+];

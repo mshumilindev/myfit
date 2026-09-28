@@ -343,8 +343,8 @@ export const APP_TOPICS: {
     id: 'app_account',
     ask: ['How do I sign in or change my password?', 'Як увійти чи змінити пароль?'],
     answer: [
-      'Accounts are by invite: ask your admin or trainer for an invite link, sign in with username and password. Change the password in Profile → Settings → “Password”; “Sign out” is there too — your log comes back when you sign in again.',
-      'Акаунти — за запрошенням: попроси в адміна чи тренера invite-посилання, входь з іменем користувача й паролем. Пароль змінюється в Профіль → Налаштування → «Пароль»; там же «Вийти» — журнал повернеться, коли увійдеш знову.',
+      'Accounts are by invite: ask your admin or trainer for an invite link, sign in with username and password. Change the password in Apps → Me → “Settings” → “Password”; “Sign out” is there too — your log comes back when you sign in again.',
+      'Акаунти — за запрошенням: попроси в адміна чи тренера invite-посилання, входь з іменем користувача й паролем. Пароль змінюється в «Застосунки» → «Я» → «Налаштування» → «Пароль»; там же «Вийти» — журнал повернеться, коли увійдеш знову.',
     ],
     ex: [
       'how do I sign up',
@@ -507,8 +507,8 @@ export const APP_TOPICS: {
     id: 'app_programs',
     ask: ['How do I build my own program?', 'Як створити свою програму?'],
     answer: [
-      'Programs → “Build a program” → add days and exercises → “Activate”. Or ask me — as main coach I can write one from your history. Trainers can also assign programs to clients.',
-      'Програми → «Створити програму» → додай дні й вправи → «Активувати». Або попроси мене — як основний тренер я напишу її з твоєї історії. Тренери ще й можуть призначати програми клієнтам.',
+      'Overview → Programs → “New program”: name it, “Pick training days”, fill each day with muscles or exercises, then “Activate” (or “Save draft”). Or ask me — as main coach I can write one from your history. Trainers can also assign programs to clients.',
+      '«Огляд» → «Програми» → «Нова програма»: дай назву, «Обрати дні», заповни кожен день м’язами чи вправами, потім «Активувати» (або «Зберегти чернетку»). Або попроси мене — як основний тренер я напишу її з твоєї історії. Тренери ще й можуть призначати програми клієнтам.',
     ],
     ex: [
       'how do I create my own program in the app',
@@ -671,8 +671,8 @@ export const APP_TOPICS: {
     id: 'app_bodyweight_log',
     ask: ['Where do I log my body weight?', 'Де записати вагу тіла?'],
     answer: [
-      'Profile → “Body” → “Body metrics” → “Add weight”. Height, body fat, waist and other measurements are there too, plus a weight goal.',
-      'Профіль → «Тіло» → «Показники тіла» → «Додати вагу». Там же зріст, відсоток жиру, талія й інші виміри, а ще ціль по вазі.',
+      'Apps → Me → “Body” → “Add weight”. Height, body fat, waist and other measurements are there too, plus a weight goal.',
+      '«Застосунки» → «Я» → «Тіло» → «Додати вагу». Там же зріст, відсоток жиру, талія й інші виміри, а ще ціль по вазі.',
     ],
     ex: [
       'where do I log my body weight',
@@ -835,8 +835,8 @@ export const APP_TOPICS: {
     id: 'app_goals',
     ask: ['Where do I set goals?', 'Де задати цілі?'],
     answer: [
-      'Programs → “Goals”: set a physique target and which muscles to grow, hold or ease this block. A body-weight goal lives in Profile → Body metrics.',
-      'Програми → «Цілі»: ціль фігури й які мʼязи цього блоку ростити, тримати чи розвантажити. Ціль по вазі — в Профіль → Показники тіла.',
+      'Overview → Goals: set a “Physique target” and, under “Focus this block”, which muscles to grow, hold or ease. A body-weight goal lives in Apps → Me → “Body”.',
+      '«Огляд» → «Цілі»: задай «Ціль фігури» і в «Фокус цього блоку» — які мʼязи ростити, тримати чи розвантажити. Ціль по вазі — в «Застосунки» → «Я» → «Тіло».',
     ],
     ex: [
       'where do I set my goals in the app',
@@ -1245,8 +1245,8 @@ export const APP_TOPICS: {
     id: 'app_activity',
     ask: ['How do I log a run or other cardio?', 'Як записати біг чи інше кардіо?'],
     answer: [
-      'Outside the gym: Today → “Log activity” → pick run, bike, swim, walk, yoga… → start now or log a past one. In a gym session, the Cardio tab in the exercise picker adds a machine.',
-      'Поза залом: Сьогодні → «Активність» → біг, велосипед, плавання, ходьба, йога… → почати зараз або записати минулу. У тренуванні в залі — вкладка «Кардіо» у виборі вправ додає тренажер.',
+      'Outside the gym: tap “+” → “Activity” → pick run, cycling, swim, walk, yoga, dance… → start it now or save one you already did. In a gym session, the Cardio tab in the exercise picker adds a machine.',
+      'Поза залом: натисни «+» → «Активність» → біг, велосипед, плавання, ходьба, йога, танці… → почати зараз або записати ту, що вже була. У тренуванні в залі — вкладка «Кардіо» у виборі вправ додає тренажер.',
     ],
     ex: [
       'how do I log a run in the app',
@@ -1409,8 +1409,8 @@ export const APP_TOPICS: {
     id: 'app_trainer',
     ask: ['How do trainers and clients work here?', 'Як тут працюють тренер і клієнти?'],
     answer: [
-      'A trainer adds clients with an invite link and sees their history live (read-only), assigns programs from the client page. To get a trainer, ask your admin to assign one — who can see your data is listed in Profile → Settings.',
-      'Тренер додає клієнтів через invite-посилання, бачить їхню історію наживо (лише перегляд) і призначає програми зі сторінки клієнта. Щоб мати тренера — попроси адміна призначити; хто бачить твої дані, видно в Профіль → Налаштування.',
+      'A trainer adds clients with an invite link and sees their history live (read-only), assigns programs from the client page. To get a trainer, ask your admin to assign one — who can see your data is listed in Apps → Me → “Settings”.',
+      'Тренер додає клієнтів через invite-посилання, бачить їхню історію наживо (лише перегляд) і призначає програми зі сторінки клієнта. Щоб мати тренера — попроси адміна призначити; хто бачить твої дані, видно в «Застосунки» → «Я» → «Налаштування».',
     ],
     ex: [
       'how do I get a personal trainer in the app',

@@ -62,8 +62,8 @@ export const MORE_R1: Record<string, [string, string][]> = {
       'Пропозиція будується з твоїх звичок: що ти зазвичай тренуєш у цей день тижня і які м’язи вже відпочили та недобрали об’єму.',
     ],
     [
-      'If you trained the same muscles hard today, give them 48 h — shuffle tomorrow’s session so a fresh group goes first.',
-      'Якщо сьогодні ти добре навантажив ті самі м’язи, дай їм 48 годин — переставь завтрашнє тренування так, щоб першою йшла свіжа група.',
+      'If you trained the same muscles hard today, give them 2 days — shuffle tomorrow’s session so a fresh group goes first.',
+      'Якщо сьогодні ти добре навантажив ті самі м’язи, дай їм 2 дні — переставь завтрашнє тренування так, щоб першою йшла свіжа група.',
     ],
     [
       'Plan tomorrow tonight: pick your first lift and target weight so you walk in knowing the first set.',
@@ -924,8 +924,8 @@ export const FACETS_R1: Record<string, Partial<Record<Facet, [string, string]>>>
       'Якщо вправа трапляється рідше ніж раз на тиждень, а вона тобі важлива, — додай її ще в одне тренування.',
     ],
     when: [
-      'Space sessions with the same lift at least 48 h apart, especially heavy squats and deadlifts.',
-      'Між тренуваннями з тією самою вправою лишай щонайменше 48 годин, особливо для важких присідань і станової.',
+      'Space sessions with the same lift at least 2 days apart, especially heavy squats and deadlifts.',
+      'Між тренуваннями з тією самою вправою лишай щонайменше 2 дні, особливо для важких присідань і станової.',
     ],
   },
   e1rm: {
@@ -954,8 +954,8 @@ export const FACETS_R1: Record<string, Partial<Record<Facet, [string, string]>>>
       'Якщо м’яз тренується лише раз на тиждень, розділи його підходи на два дні: об’єм той самий, якість краща.',
     ],
     when: [
-      'Leave about 48 h between hard sessions for the same muscle.',
-      'Між важкими тренуваннями того самого м’яза лишай приблизно 48 годин.',
+      'Leave about 2 days between hard sessions for the same muscle.',
+      'Між важкими тренуваннями того самого м’яза лишай приблизно 2 дні.',
     ],
   },
   days_per_week: {

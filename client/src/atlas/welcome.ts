@@ -3,6 +3,7 @@
  * voice, tells you what it can do (from your own log when there is one), and
  * offers three ways in. Not stored — it's there until you write.
  */
+import * as N from './num';
 import type { AskCtx, Tr } from './intentKit';
 import { finishedOf, loggedLifts } from './intentKit';
 import { startChips } from './intents';
@@ -46,7 +47,7 @@ export function welcome(c: AskCtx): Welcome {
     hello = n
       ? L(
           `Atlas. ${n} workouts in your log — I've read them.`,
-          `Atlas. У журналі ${n} тренувань — я їх бачу.`,
+          `Atlas. У журналі ${N.sessions('uk', n)} — я їх бачу.`,
         )
       : L(
           'Atlas. Your log is empty — start with one workout.',

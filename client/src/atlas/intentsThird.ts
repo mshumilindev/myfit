@@ -5,6 +5,7 @@
  * muscle, progression mechanics, recovery tools, safety, age, gym nerves, the
  * app's corners — and a bit more small talk.
  */
+import * as N from './num';
 import {
   latestWeight,
   restBeforeSetInWorkout,
@@ -127,8 +128,8 @@ export const INTENTS_THIRD: Intent[] = [
       }
       return best
         ? L(
-            `Heaviest: ${c.fmt.exercise(best.name)} ${c.fmt.kg(best.kg)} × ${best.reps}.`,
-            `Найважче: ${c.fmt.exercise(best.name)} ${c.fmt.kg(best.kg)} × ${best.reps}.`,
+            `Heaviest: ${c.fmt.exercise(best.name)} ${N.setText(c, best.kg, best.reps)}.`,
+            `Найважче: ${c.fmt.exercise(best.name)} ${N.setText(c, best.kg, best.reps)}.`,
           )
         : null;
     },
@@ -289,11 +290,11 @@ export const INTENTS_THIRD: Intent[] = [
       const top = gyms.find((g) => g.id === topId);
       return top
         ? L(
-            `Mostly ${top.name} (${counts.get(top.id)} sessions). ${gyms.length} gyms saved.`,
-            `Здебільшого ${top.name} (${counts.get(top.id)} тренувань). Збережено залів: ${gyms.length}.`,
+            `Mostly ${top.name} (${N.sessions('en', counts.get(top.id) ?? 0)}). Gyms saved: ${gyms.length}.`,
+            `Здебільшого ${top.name} (${N.sessions('uk', counts.get(top.id) ?? 0)}). Збережено залів: ${gyms.length}.`,
           )
         : L(
-            `${gyms.length} gyms saved; sessions aren’t tied to one yet.`,
+            `Gyms saved: ${gyms.length}; sessions aren’t tied to one yet.`,
             `Збережено залів: ${gyms.length}; тренування ще не прив’язані до залу.`,
           );
     },
@@ -337,10 +338,10 @@ export const INTENTS_THIRD: Intent[] = [
       const last = ws[0];
       const base = ws.find((x) => last.at - x.at >= 25 * DAY) ?? ws[ws.length - 1];
       const d = Math.round((last.weight - base.weight) * 10) / 10;
-      const days = Math.max(1, Math.round((last.at - base.at) / DAY));
+      const over = N.spanOf(c, Math.max(DAY, last.at - base.at));
       return L(
-        `${d > 0 ? '+' : ''}${d} kg over ${days} days (${c.fmt.kg(base.weight)} → ${c.fmt.kg(last.weight)}).`,
-        `${d > 0 ? '+' : ''}${d} кг за ${days} дн. (${c.fmt.kg(base.weight)} → ${c.fmt.kg(last.weight)}).`,
+        `${N.signed(d, 'en', 1)} kg over ${over} (${c.fmt.kg(base.weight)} → ${c.fmt.kg(last.weight)}).`,
+        `${N.signed(d, 'uk', 1)} кг за ${over} (${c.fmt.kg(base.weight)} → ${c.fmt.kg(last.weight)}).`,
       );
     },
   },
@@ -366,10 +367,10 @@ export const INTENTS_THIRD: Intent[] = [
       const b = bestTop(c, p.exercise!);
       const bw = latestWeight(c.s.bodyMetrics)?.weight;
       if (!b) return null;
-      const ratio = bw ? Math.round((b.kg / bw) * 100) / 100 : null;
+      const ratio = bw && b.kg > 0 ? N.round(b.kg / bw, 2) : null;
       return L(
-        `${c.fmt.exercise(p.exercise!)} ${c.fmt.kg(b.kg)} × ${b.reps}${ratio ? ` — ${ratio}× bodyweight` : ''}. Standards (Progress → Standards) show your level per lift.`,
-        `${c.fmt.exercise(p.exercise!)} ${c.fmt.kg(b.kg)} × ${b.reps}${ratio ? ` — ${ratio}× від ваги тіла` : ''}. Рівень по кожній вправі — у Progress → Standards.`,
+        `${c.fmt.exercise(p.exercise!)} ${N.setText(c, b.kg, b.reps)}${ratio ? ` — ${N.dec(ratio, 'en', 2)}× bodyweight` : ''}. Standards (Progress → Standards) show your level per lift.`,
+        `${c.fmt.exercise(p.exercise!)} ${N.setText(c, b.kg, b.reps)}${ratio ? ` — ${N.dec(ratio, 'uk', 2)}× від ваги тіла` : ''}. Рівень по кожній вправі — у Progress → Standards.`,
       );
     },
   },
@@ -386,8 +387,8 @@ export const INTENTS_THIRD: Intent[] = [
         0,
       );
       return L(
-        `This month: ${f.length} sessions, ${sets} hard sets.`,
-        `Цього місяця: ${f.length} тренувань, ${sets} робочих сетів.`,
+        `This month: ${N.sessions('en', f.length)}, ${N.workingSets('en', sets)}.`,
+        `Цього місяця: ${N.sessions('uk', f.length)}, ${N.workingSets('uk', sets)}.`,
       );
     },
   },
@@ -479,8 +480,8 @@ export const INTENTS_THIRD: Intent[] = [
     ],
     answer: (c, _p, L) =>
       L(
-        `Blocks of 4–8 weeks: volume or load climbs, then a lighter week. Your plan: ${c.s.coach.plan ? `${c.s.coach.plan.weeks} weeks, last one lighter` : 'not written yet'}.`,
-        `Блоки по 4–8 тижнів: обсяг чи вага ростуть, потім легший тиждень. Твій план: ${c.s.coach.plan ? `${c.s.coach.plan.weeks} тижнів, останній легший` : 'ще не написаний'}.`,
+        `Blocks of 4–8 weeks: volume or load climbs, then a lighter week. Your plan: ${c.s.coach.plan ? `${N.weeks('en', c.s.coach.plan.weeks)}, last one lighter` : 'not written yet'}.`,
+        `Блоки по 4–8 тижнів: обсяг чи вага ростуть, потім легший тиждень. Твій план: ${c.s.coach.plan ? `${N.weeks('uk', c.s.coach.plan.weeks)}, останній легший` : 'ще не написаний'}.`,
       ),
   },
   {
@@ -594,7 +595,19 @@ export const INTENTS_THIRD: Intent[] = [
   },
   {
     id: 'nap',
-    all: [['nap', 'short sleep before', 'денний сон', 'поспати вдень', 'подрімати']],
+    all: [
+      [
+        'nap',
+        'short sleep before',
+        'денний сон',
+        'поспати вдень',
+        'подрімати',
+        'drzemk*',
+        'pogul*',
+        'uinak*',
+        'lõunauinak*',
+      ],
+    ],
     answer: (_c, _p, L) =>
       L(
         'A 20–30 min nap helps after a short night. Keep it before ~3 pm so it doesn’t cost you the night.',
@@ -710,8 +723,8 @@ export const INTENTS_THIRD: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        'Today → the ⟲ button in the bottom pill → log a past session with its date and time.',
-        'Сьогодні → кнопка ⟲ у нижній панелі → записати минуле тренування з датою й часом.',
+        'Tap “+” → “Log past” → set the date, start time and length (and the gym) → add the exercises and sets.',
+        'Натисни «+» → «Минуле» → вкажи дату, час початку й тривалість (і зал) → додай вправи й підходи.',
       ),
   },
   {
@@ -719,8 +732,8 @@ export const INTENTS_THIRD: Intent[] = [
     all: [['pounds', 'lbs', 'lb', 'units', 'kilograms', 'фунт*', 'одиниц*', 'кілограм*']],
     answer: (_c, _p, L) =>
       L(
-        'Profile → Settings → “Units” → kg or lb. It applies everywhere in the app.',
-        'Профіль → Налаштування → «Одиниці» → кг або lb. Діє для всього додатка.',
+        'Apps → Me → “Settings” → “Units” → kg or lb. It applies everywhere in the app.',
+        '«Застосунки» → «Я» → «Налаштування» → «Одиниці» → кг або lb. Діє для всього додатка.',
       ),
   },
   {
@@ -773,8 +786,8 @@ export const INTENTS_THIRD: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        'Sleep: set a schedule and turn on auto-log — nights start and end by themselves; fix any night from History.',
-        'Сон: задай розклад і ввімкни автозапис — ночі починаються й закінчуються самі; будь-яку ніч можна виправити в Історії.',
+        'Tap “+” → “Health” → “Start sleep” when you go to bed and “I’m awake — stop” in the morning. In “Sleep details” you can “Add a past night”, set a “Sleep schedule” and turn on “Auto-log” so nights start and end by themselves; fix any night there too.',
+        'Натисни «+» → «Здоров’я» → «Почати сон», коли лягаєш, і «Я прокинувся — стоп» зранку. У «Деталі сну» можна «Додати минулу ніч», задати «Графік сну» й увімкнути «Авто-лог», щоб ночі починались і закінчувались самі; там же виправиш будь-яку ніч.',
       ),
   },
 

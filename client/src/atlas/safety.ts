@@ -9,7 +9,7 @@
  * Also: questions about somebody else ("my dad is 65…") — Atlas must not file
  * those facts under YOU.
  */
-import { normalize } from './nlu';
+import { fold, normalize } from './nlu';
 import type { Tr } from './intentKit';
 
 export type SafetyKind =
@@ -23,7 +23,29 @@ export type SafetyKind =
   | 'lifecrisis'
   | 'despair';
 
-const re = (s: string) => new RegExp(s, 'u');
+/** Matched against normalized text, so the patterns are folded too (ą→a, ė→e…). */
+const re = (s: string) => new RegExp(fold(s), 'u');
+
+/**
+ * Polish, Lithuanian and Estonian — how people actually put it (folded; the
+ * message is normalized before matching).
+ */
+const PLLTET: Partial<Record<SafetyKind, string>> = {
+  selfharm:
+    'nie chce (juz |wiecej |dluzej )?zyc|mam dosc zycia|chce (juz )?umrzec|nenoriu (daugiau |jau )?gyventi|noriu numirti|nebenoriu gyventi|ei taha (enam |rohkem )?elada|tahaks surra|tahan ara surra',
+  cardiac:
+    '(boli|bol|kluje|piecze|sciska)\\S*( \\S+){0,3} (w )?klat\\S*( \\S+){0,6} (bieg\\S*|tchu|dusz\\S*|oddych\\S*|schod\\S*)|(skauda|spaudzia|dur\\S*)( \\S+){0,2} krutin\\S*( \\S+){0,6} (beg\\S*|oro|trusta|dus\\S*)|rinnus\\S*( \\S+){0,3} (valu\\S*|pitsit\\S*)( \\S+){0,6} (jooks\\S*|ohust|hinge\\S*)',
+  faint:
+    'zakrecil\\S* (mi )?(sie )?w glowie|kreci (mi )?sie w glowie|zawrot\\S* glowy|prawie zemdl\\S*|apsvaig\\S* galva|svaig\\S* galva|vos nenualp\\S*|nualp\\S*|pea (hakkas |kais |käis |kaib |käib )?ringi|peaaegu minest\\S*|minest\\S*',
+  urgent:
+    'mocz\\S*( \\S+){0,3} (ciemn\\S*|brazow\\S*|cola|coca)|ciemn\\S* mocz|slapim\\S*( \\S+){0,3} (tams\\S*|rud\\S*|kola)|tams\\S* slapim\\S*|uriin\\S*( \\S+){0,3} (tume\\S*|pruun\\S*|koola)|tume\\S* uriin\\S*',
+  starving:
+    'nie jem (juz |nic )?(od )?(\\d+ |dwoch |trzech |kilku |paru )?(dni|dnia|tygodni|tygodnia)|nic nie jem|glodze sie|glodzi\\S* sie|nevalgau (jau |nieko )?(\\S+ )?dien\\S*|badauju|ei soo(nud)? (juba )?(\\S+ )?paeva\\S*|ei söö(nud)? (juba )?(\\S+ )?päeva\\S*|nalgi\\S*|nälgi\\S*',
+  bodyimage:
+    'nienawidze (swojego |mojego )?ciala|jestem (taka |taki |za |strasznie )?(gruba|gruby|brzydk\\S*)|nekenciu (savo )?kuno|esu (tokia |toks |per )?(stor\\S*|bjaur\\S*)|vihkan (oma )?keha|olen (nii |liiga )?(paks|kole)',
+  despair:
+    'nic mi nie wychodzi|nic nie ma sensu|poddaje sie|niekas nesiseka|niekas neturi prasmes|pasiduodu|miski ei onnestu|miski ei õnnestu|millelgi pole motet|annan alla',
+};
 
 /** Order = priority (the first that matches wins). */
 const SIGNALS: [SafetyKind, RegExp][] = [
@@ -42,6 +64,8 @@ const SIGNALS: [SafetyKind, RegExp][] = [
         'інфаркт|инфаркт|heart attack|серцевий напад|стенокард|angina|zawał|zawal|infarkt\\S*|südamevalu',
         // chest pain with running / breathlessness / the left arm (pl / lt / et)
         '(klat\\S*|krūtin\\S*|krutin\\S*|rinnu\\S*|rind\\S*)( \\S+){0,5} (bieg\\S*|biega\\S*|kardio|cardio|schod\\S*|duszn\\S*|oddych\\S*|lew\\S* rę\\S*|bėg\\S*|beg\\S*|kvėp\\S*|kvep\\S*|jooks\\S*|hing\\S*|trepp\\S*|vasak\\S* käsi)',
+        // chest pain with an arm going numb (pl / lt / et / uk / ru / en)
+        '(klat\\S*|krūtin\\S*|krutin\\S*|rinnu\\S*|rind\\S*|груд\\S*|chest)( \\S+){0,6} (drętw\\S*|dretw\\S*|zdrętw\\S*|zdretw\\S*|tirpst\\S*|nutirp\\S*|tuim\\S*|онім\\S*|німіє|немеет|онемел\\S*|numb\\S*)',
         'аритмі|арітмі|перебої серця|серце (\\S+ )?(тисне|стискає|пече|зупиняється|збивається|вистрибує)|сердце (\\S+ )?(давит|сжимает|выпрыгивает)|heart (is )?(skipping|fluttering)',
         '(калатає|колотиться|скаче|бється|бьется|колотится|racing|pounding)( \\S+){0,6} (тисне|стискає|давит|болить|біль|задих|паморо|темніє|pain|pressure|tight|dizzy|faint|в спокої|в покое|at rest)',
         'heart (rate )?(is )?(racing|pounding)( \\S+){0,3} (at rest|in bed|lying down)',
@@ -100,9 +124,16 @@ const SIGNALS: [SafetyKind, RegExp][] = [
   ],
 ];
 
+const OTHER: [SafetyKind, RegExp][] = SIGNALS.map(([k]) => [
+  k,
+  PLLTET[k] ? re(PLLTET[k]!) : null,
+]).filter((x): x is [SafetyKind, RegExp] => !!x[1]);
+
 export function safetySignal(question: string): SafetyKind | null {
   const ph = ` ${normalize(question)} `;
   for (const [k, r] of SIGNALS) if (r.test(ph)) return k;
+  // In the order of SIGNALS too (priority).
+  for (const [k, r] of OTHER) if (r.test(ph)) return k;
   return null;
 }
 

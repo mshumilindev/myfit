@@ -16,6 +16,7 @@ import {
 import { VOLUME_MUSCLES, weeklyMuscleSets } from '../volume';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { playForWeekday, type Play } from '../playbook';
+import { isoWeekday, weekStartDay, weekStartOf, type IsoDay } from '../weekStart';
 import type { CoachFact } from './types';
 
 const DAY = 86_400_000;
@@ -231,8 +232,9 @@ export function dayFacts(ctx: DayContext): CoachFact[] {
         ),
         low,
         high,
-        lowSets,
-        highSets,
+        // Secondary work counts half — keep it to one decimal ("4.5").
+        lowSets: Math.round(lowSets * 10) / 10,
+        highSets: Math.round(highSets * 10) / 10,
       });
   }
 
@@ -276,17 +278,32 @@ export function usualSessionsPerWeek(finished: Workout[], now: number): number {
   return Math.round(median(counts.filter((c) => c > 0)));
 }
 
-/** The weekly review fact (Sunday). `planned` = the coach plan's days, else your usual. */
-export function weekFact(finished: Workout[], now: number, planned?: number): CoachFact {
-  const since = now - WEEK;
+/**
+ * The weekly review fact, on the last day of your training week (Settings ›
+ * first day of the week). Counts THIS calendar week — from its first day to
+ * now — not a rolling 7 days, which pulled in last week's same weekday.
+ * `planned` = the coach plan's days, else your usual.
+ */
+export function weekFact(
+  finished: Workout[],
+  now: number,
+  planned?: number,
+  start: IsoDay = weekStartDay(),
+): CoachFact {
+  const since = weekStartOf(now, start);
   const sessions = finished.filter((w) => w.startedAt >= since && w.startedAt <= now).length;
   return {
     kind: 'week',
-    id: `week:${Math.floor(now / WEEK)}`,
+    id: `week:${dayKey(since)}`,
     at: dayStart(now),
     sessions,
-    planned: planned ?? usualSessionsPerWeek(finished, now - WEEK),
+    planned: planned ?? usualSessionsPerWeek(finished, since),
   };
+}
+
+/** Is `now` on the last day of the training week (the day for the weekly review)? */
+export function isWeekEnd(now: number, start: IsoDay = weekStartDay()): boolean {
+  return isoWeekday(now) === ((start + 5) % 7) + 1;
 }
 
 /**

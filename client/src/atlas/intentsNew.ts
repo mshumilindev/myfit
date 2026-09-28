@@ -145,7 +145,20 @@ const KEYS: Record<string, string[][]> = {
   ],
   k_women_training: [['woman', 'women', 'female', 'girl', 'girls', 'жінк*', 'дівчат*', 'дівчин*']],
   k_pushup_progression: [
-    ['push-up*', 'pushup*', 'push up', 'push ups', 'віджиман*', 'віджатися', 'віджимат*'],
+    [
+      'push-up*',
+      'pushup*',
+      'push up',
+      'push ups',
+      'віджиман*',
+      'віджатися',
+      'віджимат*',
+      'отжима*',
+      'pompk*',
+      'atsispaud*',
+      'katekoverd*',
+      'kätekõverd*',
+    ],
   ],
   k_etiquette: [
     [

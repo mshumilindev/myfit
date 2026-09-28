@@ -20,6 +20,12 @@ export interface Fmt {
   exercise: (name: string) => string;
   /** The name as the person sees it, when `exercise` returns a placeholder (translated chat). */
   shown?: (name: string) => string;
+  /** A duration as a person says it: "3 weeks", "about 2 months" (num.span). */
+  span?: (ms: number) => string;
+  /** How long ago: "3 days ago", "about 2 weeks ago" (num.ago). */
+  ago?: (ms: number) => string;
+  /** By calendar days: "today", "yesterday", "3 days ago" (num.daysAgo). */
+  daysAgo?: (days: number) => string;
 }
 
 export type Line<K extends FactKind> = (f: FactOf<K>, x: Fmt) => string;
