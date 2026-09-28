@@ -1,0 +1,483 @@
+/* ==========================================================================
+   Health page (design docs/design/health: F01–F10 mobile, W01–W03 web).
+   Built from kit primitives (GroupedList / ListRow, Calendar, PresetChips,
+   Segmented, Switch, Timeline, StickyActionBar — components/ui). This file
+   only lays the page out: page bar, scroll column, web panes, the sheet,
+   swipe actions and the page's tone buttons. Tokens only, 8-pt spacing.
+   Colour families: sleep violet, rest blue, active teal, illness amber,
+   injury warm red; gold only for neutral primary actions.
+   ========================================================================== */
+.hl {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+.screen.hl {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  /* The page never scrolls itself (its columns do): no reserved gutter. */
+  scrollbar-gutter: auto;
+  display: flex;
+  flex-direction: column;
+}
+.hl button,
+.hl input {
+  font-family: inherit;
+}
+.hl h1,
+.hl h2,
+.hl p {
+  margin: 0;
+}
+.hl-i {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* --- page bar / scroll column --------------------------------------------- */
+.hl-pbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-4);
+  flex-shrink: 0;
+}
+.hl-back,
+.hl-ib {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.hl-back:hover,
+.hl-ib:hover {
+  background: var(--color-tile);
+}
+.hl-pt {
+  font-size: 20px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hl-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* Section rhythm: 24px between groups, 16px gutters, room to scroll past the
+   last footer. */
+.hl-cnt {
+  padding: var(--sp-2) var(--sp-4) var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+.hl-cnt > *,
+.hl-wc > * {
+  flex-shrink: 0;
+}
+.hl-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.hl-sec {
+  display: flex;
+  flex-direction: column;
+}
+.hl-note {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  padding: var(--sp-2) var(--sp-4) 0;
+}
+.hl-note.err {
+  color: var(--color-danger);
+}
+.hl-val {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.hl-chev {
+  width: 18px;
+  height: 18px;
+}
+.v-gold {
+  color: var(--color-accent);
+}
+
+/* Name input inside a ListRow; Left / Right / Both segmented in a row. */
+.hl-tin {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: var(--color-text-muted);
+  font: 400 15px var(--font);
+  text-align: right;
+  padding: 0;
+  outline: none;
+}
+.hl-tin::placeholder {
+  color: var(--color-text-faint);
+}
+.hl-tin:focus {
+  color: var(--color-text);
+}
+.hl-side {
+  width: 192px;
+  flex-shrink: 0;
+}
+.hl-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  flex-shrink: 0;
+  background: var(--t-base);
+}
+
+/* --- buttons (tone-filled primaries) ---------------------------------------- */
+.hl-btn {
+  height: 48px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  font: 600 15px var(--font);
+  padding: 0 var(--sp-5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  cursor: pointer;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hl-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.hl-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.p-rest {
+  background: var(--color-rest);
+  border-color: var(--color-rest);
+  color: var(--color-rest-tint);
+}
+.p-act {
+  background: var(--color-active);
+  border-color: var(--color-active);
+  color: var(--color-active-tint);
+}
+.p-ill {
+  background: var(--color-illness);
+  border-color: var(--color-illness);
+  color: var(--color-illness-tint);
+}
+.p-inj {
+  background: var(--color-injury);
+  border-color: var(--color-injury);
+  color: var(--color-injury-tint);
+}
+.p-gold {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-bg);
+}
+.o-dst {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* --- history list swipe ----------------------------------------------------- */
+.hl-swipe {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+}
+.hl-swipe > .uirow {
+  flex: none;
+  width: 100%;
+  transition: margin-left 0.18s ease;
+}
+.hl-swipe.open > .uirow {
+  margin-left: -144px;
+}
+.hl-swb {
+  width: 72px;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  font: 600 12px var(--font);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.hl-swb.edit {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+.hl-swb.del {
+  background: var(--color-danger);
+  color: var(--color-bg);
+}
+
+/* --- bottom sheet (I'm recovered) ----------------------------------------- */
+.hl-dim {
+  position: fixed;
+  inset: 0;
+  background: var(--color-scrim);
+  z-index: 60;
+}
+.hl-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  background: var(--color-surface);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  padding: var(--sp-2) var(--sp-4) calc(var(--sp-6) + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  max-width: 560px;
+  margin: 0 auto;
+}
+.hl-grab {
+  width: 36px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  margin: 0 auto var(--sp-1);
+}
+.hl-sh-t {
+  font-size: 20px;
+  font-weight: 600;
+  padding: 0 var(--sp-1);
+}
+.hl-sh-b {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  padding: 0 var(--sp-1);
+  margin-top: calc(-1 * var(--sp-2));
+}
+.hl-stk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.hl-stk .hl-btn {
+  width: 100%;
+}
+
+/* --- inline destructive confirm -------------------------------------------- */
+.hl-cexp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.hl-cexp p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+.hl-cexp .row2 {
+  display: flex;
+  gap: var(--sp-3);
+}
+.hl-cexp .row2 .hl-btn {
+  flex: 1;
+}
+
+/* --- web (≥720px): W01–W03 -------------------------------------------------- */
+.hl-web {
+  display: flex;
+  flex-direction: column;
+}
+.hl-top {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-6);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+.hl-top .hl-pt {
+  font-size: 22px;
+  flex: none;
+}
+.hl-top .tsub {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hl-top .hl-val {
+  font-size: 13px;
+}
+.hl-wbody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.hl-pane {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.hl-wc {
+  padding: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+.hl-wc.tight {
+  gap: var(--sp-4);
+}
+.hl-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-6);
+  align-items: start;
+}
+.hl-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+.hl-hist {
+  width: 448px;
+  max-width: 45%;
+  flex: none;
+  border-left: 1px solid var(--color-divider);
+}
+.hl-phd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap-min);
+}
+.hl-phd h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+.hl-link {
+  font: 600 14px var(--font);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-accent);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  min-height: var(--tap-min);
+  padding: 0;
+}
+
+/* Form panel (W02/W03): header, two columns (dates | period), action bar. */
+.hl-panel {
+  width: min(880px, 66%);
+  flex: none;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.hl-panel .uigl-rows,
+.hl-panel .uitl {
+  background: var(--color-tile);
+}
+.hl-panel .uigl .uirow.is-selected {
+  background: var(--color-border);
+}
+.hl-panel .uiseg--track {
+  background: var(--color-surface);
+}
+.hl-phead {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-4) 0 var(--sp-6);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+.hl-phead .t {
+  flex: 1;
+  min-width: 0;
+}
+.hl-phead .t b {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+}
+.hl-phead .t span {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hl-pcols {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 256px;
+  gap: var(--sp-6);
+  padding: var(--sp-6);
+  align-items: start;
+}
+.hl-pcol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  min-width: 0;
+}
+@media (max-width: 1180px) {
+  .hl-pcols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hl-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

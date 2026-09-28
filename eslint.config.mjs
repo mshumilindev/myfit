@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/.vite/',
       '**/node_modules/',
       '**/coverage/',
+      '**/storybook-static/',
       '_sync/',
       '**/_to_delete/',
       'functions/lib/',

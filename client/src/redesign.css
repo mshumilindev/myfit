@@ -1556,3 +1556,9 @@ button.sides-chip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Sports activities: their own colour family (cloned from the recovery overrides). */
+.hist-activity.cat-sport .hist-ic {
+  background: #223616;
+  color: #a8dc7c;
+}

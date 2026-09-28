@@ -48,3 +48,7 @@ assets/exercise-images/review/
 assets/exercise-images/.manifest.lock
 assets/exercise-images/**/*.tmp
 assets/exercise-images/*.log
+
+# Storybook static build
+storybook-static/
+client/storybook-static/

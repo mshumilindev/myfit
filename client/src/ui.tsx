@@ -38,6 +38,7 @@ import { Target } from '@phosphor-icons/react/Target';
 import { Heartbeat } from '@phosphor-icons/react/Heartbeat';
 import { Minus } from '@phosphor-icons/react/Minus';
 import { Medal } from '@phosphor-icons/react/Medal';
+import { PushPin } from '@phosphor-icons/react/PushPin';
 import { Bandaids } from '@phosphor-icons/react/Bandaids';
 import { Path } from '@phosphor-icons/react/Path';
 import { DotsThreeCircle } from '@phosphor-icons/react/DotsThreeCircle';
@@ -87,6 +88,7 @@ import { DownloadSimple } from '@phosphor-icons/react/DownloadSimple';
 import { Eraser } from '@phosphor-icons/react/Eraser';
 import { Envelope } from '@phosphor-icons/react/Envelope';
 import { Eye } from '@phosphor-icons/react/Eye';
+import { EyeSlash } from '@phosphor-icons/react/EyeSlash';
 import { Feather } from '@phosphor-icons/react/Feather';
 import { Flame } from '@phosphor-icons/react/Flame';
 import { Gauge } from '@phosphor-icons/react/Gauge';
@@ -147,6 +149,24 @@ import { Compass } from '@phosphor-icons/react/Compass';
 import { DeviceMobile } from '@phosphor-icons/react/DeviceMobile';
 import { Monitor } from '@phosphor-icons/react/Monitor';
 import { DiscoBall } from '@phosphor-icons/react/DiscoBall';
+import { HandGrabbing } from '@phosphor-icons/react/HandGrabbing';
+import { PersonSimpleHike } from '@phosphor-icons/react/PersonSimpleHike';
+import { Stairs } from '@phosphor-icons/react/Stairs';
+import { Infinity as InfinityIcon } from '@phosphor-icons/react/Infinity';
+import { PersonArmsSpread } from '@phosphor-icons/react/PersonArmsSpread';
+import { SoccerBall } from '@phosphor-icons/react/SoccerBall';
+import { Basketball } from '@phosphor-icons/react/Basketball';
+import { Volleyball } from '@phosphor-icons/react/Volleyball';
+import { TennisBall } from '@phosphor-icons/react/TennisBall';
+import { Racquet } from '@phosphor-icons/react/Racquet';
+import { PingPong } from '@phosphor-icons/react/PingPong';
+import { BoxingGlove } from '@phosphor-icons/react/BoxingGlove';
+import { HandFist } from '@phosphor-icons/react/HandFist';
+import { Mountains } from '@phosphor-icons/react/Mountains';
+import { Hockey } from '@phosphor-icons/react/Hockey';
+import { PersonSimpleSki } from '@phosphor-icons/react/PersonSimpleSki';
+import { PersonSimpleSnowboard } from '@phosphor-icons/react/PersonSimpleSnowboard';
+import { Golf } from '@phosphor-icons/react/Golf';
 import { Star } from '@phosphor-icons/react/Star';
 import { Timer } from '@phosphor-icons/react/Timer';
 import { FlagCheckered } from '@phosphor-icons/react/FlagCheckered';
@@ -237,6 +257,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   eraser: Eraser,
   envelope: Envelope,
   eye: Eye,
+  'eye-slash': EyeSlash,
   feather: Feather,
   flame: Flame,
   'skip-forward': SkipForward,
@@ -323,6 +344,24 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'device-mobile': DeviceMobile,
   monitor: Monitor,
   'disco-ball': DiscoBall,
+  'hand-grabbing': HandGrabbing,
+  'person-simple-hike': PersonSimpleHike,
+  stairs: Stairs,
+  infinity: InfinityIcon,
+  'person-arms-spread': PersonArmsSpread,
+  'soccer-ball': SoccerBall,
+  basketball: Basketball,
+  volleyball: Volleyball,
+  'tennis-ball': TennisBall,
+  racquet: Racquet,
+  'ping-pong': PingPong,
+  'boxing-glove': BoxingGlove,
+  'hand-fist': HandFist,
+  mountains: Mountains,
+  hockey: Hockey,
+  'person-simple-ski': PersonSimpleSki,
+  'person-simple-snowboard': PersonSimpleSnowboard,
+  golf: Golf,
   timer: Timer,
   'flag-checkered': FlagCheckered,
   hourglass: Hourglass,
@@ -359,6 +398,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   minus: Minus,
   stack: Stack,
   medal: Medal,
+  'push-pin': PushPin,
   'flag-banner': FlagBanner,
   x: X,
   'x-circle': XCircle,

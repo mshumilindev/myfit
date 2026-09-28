@@ -1,0 +1,65 @@
+.uisw {
+  --sw-w: 51px;
+  --sw-h: 31px;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: var(--sw-w);
+  height: var(--sw-h);
+}
+.uisw--sm {
+  --sw-w: 40px;
+  --sw-h: 24px;
+}
+.uisw-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+.uisw-input:disabled {
+  cursor: default;
+}
+.uisw-track {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  position: relative;
+  transition: background 0.15s;
+}
+.uisw-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(var(--sw-h) - 4px);
+  height: calc(var(--sw-h) - 4px);
+  border-radius: var(--radius-pill);
+  background: var(--color-text);
+  transition: transform 0.15s;
+}
+.uisw-input:checked + .uisw-track {
+  background: var(--t-base);
+}
+.uisw-input:checked + .uisw-track::after {
+  transform: translateX(calc(var(--sw-w) - var(--sw-h)));
+  background: var(--color-bg);
+}
+.uisw-input:disabled + .uisw-track {
+  opacity: 0.4;
+}
+.uisw-input:focus-visible + .uisw-track {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .uisw-track,
+  .uisw-track::after {
+    transition: none;
+  }
+}

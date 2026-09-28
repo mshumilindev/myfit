@@ -7,7 +7,7 @@ this file is the standing reference.
 
 ---
 
-## The three rules
+## The four rules
 
 1. **Features never write raw visual classes or inline styles for anything the kit
    covers.** Compose from the primitives in `client/src/components/ui/` — `<Button
@@ -17,9 +17,17 @@ variant="primary">`, `<Card tone="danger">`, etc. Layout-only inline styles
 2. **Colours, radii and spacing come only from tokens** — never a raw hex in
    `views/` or `components/` (outside `components/ui/`). One place changes a colour
    app-wide: the `:root` block in `client/src/styles.css`.
-3. **Every primitive lives in the gallery** (`#/uikit`) in all its variants and
-   states. The gallery is the acceptance surface — a primitive isn't "done" until
-   it shows there and has been screenshot-verified in the working loop.
+3. **Every primitive has Storybook stories next to it** (`Name.stories.tsx`, CSF3)
+   covering all variants and states — default / hover-able / active / disabled /
+   error, empty and long text, the 5 locales where text matters. Storybook is the
+   primary catalog and the acceptance surface; the in-app gallery (`#/uikit`) stays
+   as a quick on-device token check. `components/ui/kit.test.ts` fails the test run
+   when a primitive has no story file.
+4. **Reusable UI goes to the kit first.** Anything a second screen could use — a
+   row, a picker, a calendar, a bar — is built in `components/ui/` with its stories
+   **before or together with its first use**, never as page-local CSS "for now".
+
+Enforced by `.cursor/rules/ui-kit.mdc` (always applied) and the kit test.
 
 Feature-specific composition (the rehab stage ladder, the session builder wizard)
 still lives in the feature — but it is _built out of_ kit primitives (Card, ListRow,
@@ -55,13 +63,36 @@ a surface, `text` = light readable foreground on that tint, `line` = mid border.
   energy only (matches Spotter Nutrition). Do **not** use for rest — rest is its own
   bluer ramp.
 
+### Health & activity families (each has `base` · `tint` · `text` · `line`)
+
+- **sleep** `--color-sleep*` violet — sleep rows, Start sleep.
+- **illness** `--color-illness*` amber — unwell periods (softer than the gold accent).
+- **injury** `--color-injury*` warm red — injuries / rehab on Health (not the error red).
+- **active** `--color-active*` teal — active recovery (darker than full-rest blue).
+- **rest** `--color-rest*` — the rest ramp as a family: full rest, recovery activities.
+- **sport** `--color-sport*` court green — sports activities.
+- **accent** `--color-accent-tint/-text/-line` — gold as a family: gym, conditioning.
+
+In components, pick a family with the `Tone` type (`components/ui/tones.ts`); the
+`uit--<tone>` class binds `--t-base / --t-tint / --t-text / --t-line / --t-on` for
+the primitive's CSS. A page that groups toned children (Log activity `.la-g/.la-s/.la-r`)
+sets the same `--t-*` vars and passes `tone="inherit"`.
+
 ### Surfaces, radii, spacing, type
 
 - Surfaces: `--color-bg` (app background), `--color-surface` (cards), `--color-text`,
   `--color-divider`. `--color-surface-2` exists in themed scopes; elsewhere use the
   fallback form `var(--color-surface-2, #26282d)`.
 - Radii: `--radius-sm 4` · `--radius-md 8` · `--radius-lg 14` · `--radius-sheet 20`.
-- Spacing: `--space-1 … -8` (2.8px unit scale); gutters `--gutter` / `--gutter-phone`.
+- Text tiers: `--color-text-muted` (secondary), `--color-text-faint` (tertiary),
+  `--color-text-disabled`; `--color-tile` (raised surface), `--color-border`,
+  `--color-scrim` (sheet dim). `--color-surface-2` is now a real `:root` token.
+- **Spacing — the 8-pt scale for the kit and every new/refactored screen:**
+  `--sp-1 4` · `--sp-2 8` · `--sp-3 12` · `--sp-4 16` · `--sp-5 20` · `--sp-6 24` ·
+  `--sp-8 32` · `--sp-10 40`. Page gutters 16 (phone) / 24 (web); 24 between
+  sections; 8 header→group; row padding 8×16; 12 between siblings in a row.
+  The legacy `--space-1 … -8` (2.8px unit) is for untouched legacy screens only.
+- Radii: also `--radius-xl 12` (calendar days, segments) and `--radius-pill`.
 - Type: `--font` (Inter stack). Tap target: `--tap-min 44px`. Safe-area:
   `--safe-top` / `--safe-bottom`.
 - Glass: `--glass-*` (graphite), `--glass-brass-*` (accent), `--glass-rest-*` (rest).
@@ -103,6 +134,22 @@ Our designs arrive as `.dc.html` canvases that use short token names. Translate 
 | `--rest700`             | `--color-rest-700`                |                        |
 | `--r-sm/-md/-lg/-sheet` | `--radius-sm/-md/-lg/-sheet`      |                        |
 
+Health / Log activity canvases (`docs/design/health`, `docs/design/log-activity`)
+use raw hexes. Translate:
+
+| Design hex               | App token                                   |
+| ------------------------ | ------------------------------------------- |
+| `#9d8cf0` / `#211d38`    | `--color-sleep` / `--color-sleep-tint`      |
+| `#f0a35e` / `#33200f`    | `--color-illness` / `--color-illness-tint`  |
+| `#e2786a` / `#351613`    | `--color-injury` / `--color-injury-tint`    |
+| `#5cc8a8` / `#0d2b27`    | `--color-active` / `--color-active-tint`    |
+| `#93d4f2` / `#0e2a3b`    | `--color-rest` / `--color-rest-tint`        |
+| `#a8dc7c` / `#1f2f14`    | `--color-sport` / `--color-sport-tint`      |
+| `#262a2d` / `#3b3f43`    | `--color-tile` / `--color-border`           |
+| `#90959a` / `#71767b`    | `--color-text-muted` / `--color-text-faint` |
+| `#4f5358` (disabled day) | `--color-text-disabled`                     |
+| `#2e2414` (gym tint)     | `--color-accent-tint`                       |
+
 Two `.rx`-local values have no exact app token yet and stay literal: `--dgrrose`
 (#d59a95, a rose danger tint used once) and `--surface2` (#26282c). Promote them to
 `:root` if a second use appears.
@@ -114,8 +161,8 @@ Two `.rx`-local values have no exact app token yet and stay literal: `--dgrrose`
 1. Start from the design's `.dc.html`. Translate every design token through the map
    above — never copy a hex.
 2. Compose from `components/ui/` primitives. If the design needs something the kit
-   doesn't have, that's a **new primitive**: add it to `components/ui/` + the gallery
-   first (its own slice), then use it.
+   doesn't have, that's a **new primitive**: add it to `components/ui/` with its
+   `*.stories.tsx` first (its own slice), then use it.
 3. No raw `.btn*`, `.card*`, `.chip*`, `.pill*` etc. in the view; no visual inline
    styles. Layout-only inline styles are allowed.
 4. Run the working loop (see `UI-REFACTOR-PLAN.md §1`): screenshot before, change,
@@ -123,6 +170,52 @@ Two `.rx`-local values have no exact app token yet and stay literal: `--dgrrose`
    changes code, not pixels.
 
 ---
+
+## Storybook
+
+```bash
+npm run storybook          # dev, http://localhost:6006 (root alias → client workspace)
+npm run build-storybook    # static catalog → client/storybook-static/
+```
+
+- Config: `client/.storybook/` — `main.ts` (reuses `client/vite.config.ts` minus the
+  PWA plugin; every `…/firebase` import resolves to a demo stub, stories never touch
+  the real backend), `preview.tsx` (loads `styles.css` + `redesign.css` + Inter,
+  background = `--color-bg`, viewports **Phone 390×844** and **Web 1280×800**,
+  a **Locale** toolbar en / uk / pl / lt / et driving the app's own i18n).
+- Stories: `Kit/<Primitive>` next to the component; composed page sections under
+  `Pages/…` (`views/health/Health.stories.tsx`, `views/logActivity/LogActivity.stories.tsx`)
+  seed the store through `src/stories/fixtures.ts`. `LocaleMatrix` renders a
+  primitive with each locale's real strings for the long-text check.
+- Screenshot check: open `iframe.html?id=<story-id>` at 390 and 1280 (Playwright)
+  before and after a change, compare.
+
+## Definition of done for UI work
+
+- Reusable pieces live in `components/ui/`, tokens only (no raw hex), 8-pt spacing.
+- Every primitive touched has stories for all variants / states / long text.
+- `kit.test.ts`, tsc, eslint, prettier, vitest green; `npm run build-storybook` builds.
+- Before/after screenshots (Storybook, 390 and 1280) compared — a refactor changes
+  code, not pixels, unless the change is a deliberate design fix.
+
+## Current kit
+
+| Primitive                               | For                                                                                                                        |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `Button` / `IconButton`                 | every button variant / size / state                                                                                        |
+| `Card`, `Banner`, `Chip` + `ChipGroup`  | surfaces, frosted banners, pills                                                                                           |
+| `Calendar` (+ `CalendarLegend`)         | THE calendar: single / range, open end, min / max / disabled, markers, today ring, keyboard grid, presets slot, 1–2 months |
+| `GroupedList` + `ListRow` + `ListPanel` | settings-style groups: icon, label + sub, value, chevron, check, switch, action rows, expansion panel                      |
+| `Segmented`                             | one-of-N: iOS `track` or toned `buttons`                                                                                   |
+| `Switch`                                | role="switch" checkbox, toned                                                                                              |
+| `PresetChips`                           | toggle chips (date presets, body parts, filters), wrap or scroll                                                           |
+| `PinToggle`                             | pin / unpin: icon, boxed, row-with-switch                                                                                  |
+| `IconTile`                              | rounded icon square in a family, 22–56px                                                                                   |
+| `CategoryRow`                           | browse-by-category card (tile, title, count, meta, minis)                                                                  |
+| `Snackbar`                              | confirmation with Undo (presentational; caller owns the timer)                                                             |
+| `StickyActionBar`                       | pinned bottom bar (page, safe-area) or panel foot                                                                          |
+| `Timeline` (+ `TimelineDate`)           | read-only period rail with lanes, Now, gaps, months                                                                        |
+| `ToneText`                              | inline text in a family colour                                                                                             |
 
 ## Primitive backlog & prop shapes
 

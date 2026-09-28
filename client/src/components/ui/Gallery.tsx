@@ -4,7 +4,9 @@
  * #/uikit. This is the acceptance surface for the UI refactor: verify a change
  * here (light + dark, mobile + desktop) instead of hunting through features.
  *
- * Phase 0: token swatches + section scaffold. Primitives get added in Phase 2.
+ * Storybook (`npm run storybook`) is the primary catalog now — every primitive
+ * has its stories next to it. This in-app screen stays as a quick on-device
+ * check of the tokens and the core primitives inside the real app shell.
  */
 import { useState, type ReactNode } from 'react';
 import { useT } from '../../i18n';
@@ -16,7 +18,18 @@ import { Banner, type BannerTone } from './Banner';
 
 const ACCENT = ['100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 const NEUTRAL = ['100', '200', '300', '400', '500', '600', '700', '800', '900'];
-const SEMANTIC = ['ok', 'danger', 'kcal'] as const;
+const SEMANTIC = [
+  'ok',
+  'danger',
+  'kcal',
+  'accent',
+  'rest',
+  'active',
+  'illness',
+  'injury',
+  'sleep',
+  'sport',
+] as const;
 const REST = ['200', '300', '400', '700', '800', '900'];
 const CORE = [
   '--color-bg',
@@ -258,8 +271,9 @@ export function Gallery({ onClose }: { onClose: () => void }) {
 
       <Group title="Primitives (coming next)">
         <p className="uik-note">
-          ListRow, SectionLabel, Field, Segmented, Stepper, ProgressDots, StatTile,
-          TrafficLightOption.
+          Storybook is the primary catalog now: npm run storybook — Calendar, GroupedList,
+          Segmented, Switch, PresetChips, PinToggle, IconTile, CategoryRow, Snackbar,
+          StickyActionBar, Timeline and every variant / state.
         </p>
       </Group>
     </div>

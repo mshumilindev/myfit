@@ -5566,4 +5566,21 @@ export const DICT: Record<string, string> = {
   'Your membership is crying.': 'Twój karnet płacze.',
   '{1}, gym tourist.': '{1}, turysto siłowniany.',
   'Visa expired?': 'Wiza wygasła?',
+  'That hits shoulders, arms and grip more than legs.':
+    'To obciąża barki, ręce i chwyt bardziej niż nogi.',
+  'Go lighter on heavy pressing and pulling today; legs are fine.':
+    'Ciężkie wyciskania i przyciągania dziś lżej; nogi są w porządku.',
+  'Table tennis — that counts.': 'Tenis stołowy — to się liczy.',
+  'Padel — that counts.': 'Padel — to się liczy.',
+  'Badminton — that counts.': 'Badminton — to się liczy.',
+  'Boxing — that counts.': 'Boks — to się liczy.',
+  'Snowboarding — that counts.': 'Snowboard — to się liczy.',
+  'Hockey — that counts.': 'Hokej — to się liczy.',
+  'Golf — that counts.': 'Golf — to się liczy.',
+  'Jump rope — that counts.': 'Skakanka — to się liczy.',
+  'Elliptical — that counts.': 'Orbitrek — to się liczy.',
+  'Stair climbing — that counts.': 'Wchodzenie po schodach — to się liczy.',
+  'Hiking — that counts.': 'Wędrówka — to się liczy.',
+  'Rock climbing — that counts.': 'Wspinaczka skałkowa — to się liczy.',
+  'Climbing gym — that counts.': 'Ścianka wspinaczkowa — to się liczy.',
 };

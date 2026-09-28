@@ -89,7 +89,20 @@ import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t, getLocale, type LocaleId } from './i18n';
 import { localizedEquipName } from './data/equipmentI18n';
-import { applyCheckin, nextStage, activeInjuries as selectActiveInjuries } from './injury';
+import {
+  applyCheckin,
+  nextStage,
+  activeInjuries as selectActiveInjuries,
+  bodyPart as findBodyPart,
+} from './injury';
+import {
+  cutOut,
+  mergeRanges,
+  overlappingPeriods,
+  validateRange,
+  type DayRange,
+  type RangeError,
+} from './health';
 import {
   awakeMsAt,
   SLEEP_IDLE_MS,
@@ -108,6 +121,26 @@ import {
   type IsoDay,
 } from './weekStart';
 import type { GeneratedDay } from './sessionBuilder';
+import {
+  listPrefFromDoc,
+  nextUpOffPref,
+  pinsPref,
+  reconcileListPref,
+  type ListPrefStore,
+} from './activityPrefs';
+// Synced Log-activity prefs (pins + "don't suggest after workouts").
+export {
+  activityPins,
+  isPinned,
+  nextUpOff,
+  placePin,
+  setActivityPins,
+  setNextUpOff,
+  toggleNextUpOff,
+  togglePin,
+  useActivityPins,
+  useNextUpOff,
+} from './activityPrefs';
 
 const STATE_KEY = 'spotter.state';
 const GYMS_KEY = 'spotter.gyms';
@@ -2106,6 +2139,142 @@ export function deleteRestPeriod(id: string): void {
   deleteRestPeriodDoc(id);
 }
 
+/** How a new / edited period resolves an overlap with existing periods:
+ *  'merge' folds them into one (same mode only), 'replace' cuts the new dates
+ *  out of them (a period cut in two keeps both halves). */
+export type RestOverlapChoice = 'merge' | 'replace';
+
+export type RestSaveResult =
+  | { ok: true; period: RestPeriod }
+  | { ok: false; reason: RangeError | 'overlap' | 'merge-mode' | 'not-found' };
+
+/** Input for logging / editing a period from the Health page (F03–F05, F09). */
+export interface RestPeriodInput {
+  mode: RestMode;
+  startDay: number;
+  endDay: number;
+  open?: boolean;
+  name?: string | null;
+  /** Needed when the range overlaps another period; else the save is refused. */
+  overlap?: RestOverlapChoice;
+  /** Workouts inside the range to delete ("Remove the session", F04). */
+  removeWorkoutIds?: string[];
+  /** Scheduling full rest / active recovery (F03) may reach into the future;
+   *  logging the past may not, and illness never does. */
+  allowFuture?: boolean;
+}
+
+type ResolvedOverlap = {
+  list: RestPeriod[];
+  range: DayRange;
+  changed: RestPeriod[];
+  removed: string[];
+};
+
+/** Apply the overlap choice to the other periods; returns the final range and
+ *  the list without the merged-away / replaced periods. */
+function resolveRestOverlap(
+  list: RestPeriod[],
+  range: DayRange,
+  mode: RestMode,
+  selfId: string | null,
+  choice: RestOverlapChoice | undefined,
+): ResolvedOverlap | 'overlap' | 'merge-mode' {
+  const others = overlappingPeriods(range, list, selfId);
+  if (others.length === 0) return { list, range, changed: [], removed: [] };
+  if (!choice) return 'overlap';
+  if (choice === 'merge') {
+    if (others.some((o) => o.mode !== mode)) return 'merge-mode';
+    const ids = new Set(others.map((o) => o.id));
+    return {
+      list: list.filter((p) => !ids.has(p.id)),
+      range: mergeRanges(range, others),
+      changed: [],
+      removed: [...ids],
+    };
+  }
+  const changed: RestPeriod[] = [];
+  const removed: string[] = [];
+  let next = list;
+  for (const o of others) {
+    const pieces = cutOut(o, range);
+    next = next.filter((p) => p.id !== o.id);
+    if (pieces.length === 0) {
+      removed.push(o.id);
+      continue;
+    }
+    pieces.forEach((pc, i) => {
+      const piece: RestPeriod = {
+        ...o,
+        id: i === 0 ? o.id : uuid(),
+        startDay: pc.startDay,
+        endDay: pc.endDay,
+        open: pc.open === true,
+      };
+      changed.push(piece);
+      next = [piece, ...next];
+    });
+  }
+  return { list: next, range, changed, removed };
+}
+
+function normalizeRange(input: { startDay: number; endDay: number; open?: boolean }): DayRange {
+  return input.open
+    ? { startDay: input.startDay, endDay: Math.max(input.startDay, input.endDay), open: true }
+    : { startDay: input.startDay, endDay: input.endDay };
+}
+
+function cleanName(name: string | null | undefined): string | null {
+  const n = (name ?? '').trim();
+  return n ? n.slice(0, 60) : null;
+}
+
+/**
+ * Log a rest / illness period for any range — past (backfill), current or
+ * scheduled — validating the range and resolving overlaps. Ids are client
+ * UUIDs and every write is an upsert, so a replayed queue stays idempotent.
+ */
+export function logRestPeriod(input: RestPeriodInput, now: number = Date.now()): RestSaveResult {
+  return saveRestPeriod(null, input, now);
+}
+
+/** Edit an existing period (F09): same validation and overlap rules. */
+export function updateRestPeriod(
+  id: string,
+  input: RestPeriodInput,
+  now: number = Date.now(),
+): RestSaveResult {
+  return saveRestPeriod(id, input, now);
+}
+
+function saveRestPeriod(id: string | null, input: RestPeriodInput, now: number): RestSaveResult {
+  const today = dayKey(now);
+  const existing = id ? state.restPeriods.find((r) => r.id === id) : null;
+  if (id && !existing) return { ok: false, reason: 'not-found' };
+  const range = normalizeRange(input);
+  // Rest can be planned ahead; illness can't (it's logged on the day or later).
+  const allowFuture = input.allowFuture === true && input.mode !== 'illness';
+  const err = validateRange(range, { today, allowFuture });
+  if (err) return { ok: false, reason: err };
+  const res = resolveRestOverlap(state.restPeriods, range, input.mode, id, input.overlap);
+  if (res === 'overlap' || res === 'merge-mode') return { ok: false, reason: res };
+  const period: RestPeriod = {
+    ...(existing ?? { id: uuid(), createdAt: now, note: null }),
+    mode: input.mode,
+    startDay: res.range.startDay,
+    endDay: res.range.endDay,
+    open: res.range.open === true,
+    name: cleanName(input.name),
+  };
+  const list = [period, ...res.list.filter((r) => r.id !== period.id)];
+  setState({ restPeriods: list, syncStatus: bumpPending() });
+  writeRestPeriodDoc(period);
+  for (const c of res.changed) writeRestPeriodDoc(c);
+  for (const r of res.removed) deleteRestPeriodDoc(r);
+  for (const wid of input.removeWorkoutIds ?? []) deleteWorkout(wid);
+  return { ok: true, period };
+}
+
 /** The rest period covering `now`, if any (most recently created wins). */
 export function activeRestPeriod(now: number = Date.now()): RestPeriod | null {
   const d = dayKey(now);
@@ -2176,6 +2345,8 @@ export function startInjury(input: {
   fullRestUntil?: number | null;
   note?: string | null;
   now?: number;
+  /** The day it happened, when logged later (defaults to today). */
+  startDay?: number;
 }): Injury {
   const now = input.now ?? Date.now();
   const inj: Injury = {
@@ -2185,7 +2356,8 @@ export function startInjury(input: {
     side: input.side,
     muscles: [...input.muscles],
     stage: input.stage,
-    startDay: dayKey(now),
+    // Backfill (Health › I got hurt → Still healing): the day it happened.
+    startDay: Math.min(input.startDay ?? dayKey(now), dayKey(now)),
     createdAt: now,
     checkins: [],
     note: input.note ?? null,
@@ -2275,6 +2447,79 @@ export function deleteInjury(id: string): void {
     syncStatus: bumpPending(),
   });
   deleteInjuryDoc(id);
+}
+
+function bodyPartMuscles(id: string): MuscleGroup[] | null {
+  return findBodyPart(id)?.muscles ?? null;
+}
+
+export type InjurySaveResult =
+  | { ok: true; injury: Injury }
+  | { ok: false; reason: 'future' | 'healed-before-start' | 'not-found' };
+
+function validInjuryDays(
+  startDay: number,
+  healedDay: number | null,
+  today: number,
+): 'future' | 'healed-before-start' | null {
+  if (startDay > today || (healedDay !== null && healedDay > today)) return 'future';
+  if (healedDay !== null && healedDay < startDay) return 'healed-before-start';
+  return null;
+}
+
+/**
+ * Backfill a past injury that has already healed (F06 "Healed on …"): history
+ * only — it never shapes training, so it goes straight to the 'return' stage.
+ */
+export function logPastInjury(
+  input: { bodyPart: string; side: InjurySide; startDay: number; healedDay: number },
+  now: number = Date.now(),
+): InjurySaveResult {
+  const err = validInjuryDays(input.startDay, input.healedDay, dayKey(now));
+  if (err) return { ok: false, reason: err };
+  const inj: Injury = {
+    id: uuid(),
+    reason: 'injury',
+    bodyPart: input.bodyPart,
+    side: input.side,
+    muscles: [...(bodyPartMuscles(input.bodyPart) ?? [])],
+    stage: 'return',
+    startDay: input.startDay,
+    createdAt: now,
+    checkins: [],
+    note: null,
+    fullRestUntil: null,
+    healedDay: input.healedDay,
+  };
+  setState({ injuries: [inj, ...state.injuries], syncStatus: bumpPending() });
+  writeInjuryDoc(inj);
+  return { ok: true, injury: inj };
+}
+
+/** Edit a logged injury's place and dates from the Health history. */
+export function updateInjury(
+  id: string,
+  patch: { bodyPart: string; side: InjurySide; startDay: number; healedDay: number | null },
+  now: number = Date.now(),
+): InjurySaveResult {
+  const inj = state.injuries.find((i) => i.id === id);
+  if (!inj) return { ok: false, reason: 'not-found' };
+  const err = validInjuryDays(patch.startDay, patch.healedDay, dayKey(now));
+  if (err) return { ok: false, reason: err };
+  const muscles =
+    patch.bodyPart !== inj.bodyPart
+      ? (bodyPartMuscles(patch.bodyPart) ?? inj.muscles)
+      : inj.muscles;
+  patchInjury(id, (i) => ({
+    ...i,
+    bodyPart: patch.bodyPart,
+    side: patch.side,
+    muscles: [...muscles],
+    startDay: patch.startDay,
+    healedDay: patch.healedDay,
+  }));
+  const updated = state.injuries.find((i) => i.id === id) ?? inj;
+  return { ok: true, injury: updated };
 }
 
 /** The most recently logged active (not-healed) injury, if any. */
@@ -3527,21 +3772,43 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
   setState(patch);
 }
 
-// --- Account prefs: first day of the training week (meta/prefs, LWW) -----------
+// --- Account prefs (meta/prefs, last-write-wins per field) ---------------------
+// The doc holds independent settings, each with its own stamp:
+//   weekStart + updatedAt                 — first day of the training week
+//   activityPins + activityPinsUpdatedAt  — Log activity › Pinned (ordered)
+//   nextUpOff + nextUpOffUpdatedAt        — types not to suggest after workouts
+// Every write merges only its own fields, so a device with a stale copy of one
+// setting can't clobber a newer value of another.
 let applyingRemotePrefs = false;
-function writePrefsDoc(): void {
+function writePrefsFields(fields: Record<string, unknown>): void {
   const uid = currentUid();
   if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'meta', 'prefs'), {
+  setDoc(doc(db, 'users', uid, 'meta', 'prefs'), fields, { merge: true }).catch(onWriteError);
+}
+function writePrefsDoc(): void {
+  writePrefsFields({
     weekStart: weekStartDay(),
     updatedAt: weekStartUpdatedAt() || Date.now(),
-  }).catch(onWriteError);
+  });
+}
+const LIST_PREFS: Array<[string, ListPrefStore]> = [
+  ['activityPins', pinsPref],
+  ['nextUpOff', nextUpOffPref],
+];
+function writeListPref(name: string, pref: ListPrefStore): void {
+  const cur = pref.snapshot();
+  writePrefsFields({ [name]: cur.list, [`${name}UpdatedAt`]: cur.updatedAt || Date.now() });
 }
 onWeekStartChange(() => {
   if (!applyingRemotePrefs) writePrefsDoc();
   // Every week view reads the setting through the store's consumers.
   emit();
 });
+for (const [name, pref] of LIST_PREFS) {
+  pref.subscribe(() => {
+    if (!applyingRemotePrefs) writeListPref(name, pref);
+  });
+}
 
 export function startSyncLoop(): () => void {
   const uid = currentUid();
@@ -3552,18 +3819,32 @@ export function startSyncLoop(): () => void {
     onSnapshot(
       doc(db, 'users', uid, 'meta', 'prefs'),
       (snap) => {
-        if (!snap.exists()) {
+        const data = (snap.exists() ? snap.data() : {}) as Record<string, unknown>;
+        if (typeof data.weekStart !== 'number') {
           // First sync: keep a locally chosen start day.
           if (weekStartUpdatedAt() > 0) writePrefsDoc();
-          return;
+        } else {
+          applyingRemotePrefs = true;
+          try {
+            setWeekStartDay(
+              data.weekStart as IsoDay,
+              typeof data.updatedAt === 'number' ? data.updatedAt : 0,
+            );
+          } finally {
+            applyingRemotePrefs = false;
+          }
         }
-        const data = snap.data() as { weekStart?: number; updatedAt?: number };
-        if (typeof data.weekStart !== 'number') return;
-        applyingRemotePrefs = true;
-        try {
-          setWeekStartDay(data.weekStart as IsoDay, data.updatedAt ?? 0);
-        } finally {
-          applyingRemotePrefs = false;
+        for (const [name, pref] of LIST_PREFS) {
+          const { apply, push } = reconcileListPref(pref.snapshot(), listPrefFromDoc(data, name));
+          if (apply) {
+            applyingRemotePrefs = true;
+            try {
+              pref.set(apply.list, apply.updatedAt);
+            } finally {
+              applyingRemotePrefs = false;
+            }
+          }
+          if (push) writeListPref(name, pref);
         }
       },
       onWriteError,
@@ -4553,6 +4834,8 @@ export function resetLocalData(): void {
   applyingRemotePrefs = true;
   try {
     resetWeekStart();
+    pinsPref.reset();
+    nextUpOffPref.reset();
   } finally {
     applyingRemotePrefs = false;
   }

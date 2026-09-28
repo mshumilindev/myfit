@@ -111,7 +111,10 @@ const visibleRe = />\s*([^<>{}\n]*[A-Za-zА-Яа-яІіЇїЄєҐґ][^<>{}\n]*)\
 const allowVisible = new Set(['t']);
 const codeLikeVisibleRe =
   /[=()?:.]|&&|\|\||\bPromise\b|\bMath\b|\bGET\b|\bPOST\b|\bPUT\b|\bDELETE\b/;
-const ignoredDirs = new Set(['i18n', 'data']);
+// Storybook stories and their fixtures are a dev-only catalog (never shipped):
+// demo copy there is not UI text. Product components are still checked.
+const ignoredDirs = new Set(['i18n', 'data', 'stories']);
+const ignoredFileRe = /\.stories\.tsx?$/;
 
 function walk(dir) {
   const out = [];
@@ -120,7 +123,8 @@ function walk(dir) {
       if (!ignoredDirs.has(entry.name)) out.push(...walk(path.join(dir, entry.name)));
       continue;
     }
-    if (/\.(tsx|ts)$/.test(entry.name)) out.push(path.join(dir, entry.name));
+    if (/\.(tsx|ts)$/.test(entry.name) && !ignoredFileRe.test(entry.name))
+      out.push(path.join(dir, entry.name));
   }
   return out;
 }

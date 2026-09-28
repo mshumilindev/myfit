@@ -18,6 +18,7 @@ import { dayReadoutLabel } from '../data/daySuggest';
 import { MuscleSetChip, withMuscleBreak } from '../components/Muscle';
 import { ProgramsTabs, type ProgramsPeer } from '../components/ProgramsTabs';
 import { Icon, useExerciseName } from '../ui';
+import { useGymStep } from '../components/useGymStep';
 
 export function PlaybookView({
   shell,
@@ -44,10 +45,12 @@ export function PlaybookView({
   const playName = (p: Play) =>
     p.name ?? (p.readout ? dayReadoutLabel(p.readout, t) : t.playUntitled);
 
-  const startPlay = (p: Play) => {
-    const id = startPlaySession(p, t.defaultTimedExerciseNames.warmup);
-    if (id) shell.openOverlay({ screen: 'session', workoutId: id });
-  };
+  const { withGym, gymPicker } = useGymStep();
+  const startPlay = (p: Play) =>
+    void withGym((gymId) => {
+      const id = startPlaySession(p, t.defaultTimedExerciseNames.warmup, gymId);
+      if (id) shell.openOverlay({ screen: 'session', workoutId: id });
+    });
 
   const repeat = (id: string) => {
     const nw = repeatWorkout(id);
@@ -187,6 +190,7 @@ export function PlaybookView({
         <ProgramsTabs active="playbook" onSelect={(peer) => onProgramsTab?.(peer)} />
       </div>
       {body}
+      {gymPicker}
     </div>
   );
 }

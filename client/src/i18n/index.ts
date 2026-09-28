@@ -4,6 +4,7 @@ import { uk } from './uk';
 import { pl } from './pl';
 import { lt } from './lt';
 import { et } from './et';
+import { accountOverride, onOverrideChange } from '../accountOverrides';
 
 export type LocaleId = 'en' | 'uk' | 'pl' | 'lt' | 'et';
 
@@ -79,20 +80,45 @@ export function getLocale(): LocaleId {
 }
 
 /** Reactive hook: returns the active dictionary + locale id. */
+/**
+ * The strings for a locale with the signed-in account's overrides applied
+ * (renamed activity types — see accountOverrides.ts). Cached, so `t` keeps its
+ * identity between renders.
+ */
+const withOverrides = new Map<LocaleId, { base: Strings; ov: unknown; out: Strings }>();
+function stringsFor(locale: LocaleId): Strings {
+  const base = LOCALES[locale];
+  const ov = accountOverride();
+  if (!ov?.activityNames) return base;
+  const hit = withOverrides.get(locale);
+  if (hit && hit.base === base && hit.ov === ov) return hit.out;
+  const names = { ...base.actType };
+  for (const [key, byLoc] of Object.entries(ov.activityNames)) names[key] = byLoc[locale];
+  const out: Strings = { ...base, actType: names };
+  withOverrides.set(locale, { base, ov, out });
+  return out;
+}
+let overrideTick = 0;
+onOverrideChange(() => {
+  overrideTick++;
+  for (const l of listeners) l();
+});
+
 export function useT(): { t: Strings; locale: LocaleId } {
-  const locale = useSyncExternalStore(
+  const snap = useSyncExternalStore(
     (cb) => {
       listeners.add(cb);
       return () => listeners.delete(cb);
     },
-    () => current,
+    () => `${current}|${overrideTick}`,
   );
-  return { t: LOCALES[locale], locale };
+  const locale = snap.slice(0, snap.indexOf('|')) as LocaleId;
+  return { t: stringsFor(locale), locale };
 }
 
 /** Non-reactive accessor for code outside React (store, formatters). */
 export function t(): Strings {
-  return LOCALES[current];
+  return stringsFor(current);
 }
 
 // --- Locale-aware formatters ----------------------------------------------
@@ -144,6 +170,14 @@ export function fmtDayMonth(ts: number, locale: LocaleId = current): string {
     day: 'numeric',
     month: 'short',
   }).format(new Date(ts));
+}
+
+/** "September 2026" (month calendars) */
+export function fmtMonthYear(ts: number, locale: LocaleId = current): string {
+  const s = new Intl.DateTimeFormat(dateLocale[locale], { month: 'long', year: 'numeric' }).format(
+    new Date(ts),
+  );
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** "29 JUL" (recent-row date badge) */

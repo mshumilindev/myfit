@@ -1,0 +1,671 @@
+/**
+ * Health — the full page behind Start › Health (design docs/design/health,
+ * F01–F10 mobile, W01–W03 web). It replaced the old "Rest & recovery" drawer.
+ *
+ *   Home     Now (active illness / rest / injuries, welcome back), Sleep, Start,
+ *            Log the past, History preview.
+ *   Forms    one grouped-list form for start / backfill / edit (HealthForm).
+ *   History  List (edit, swipe to delete) | Timeline (view-only).
+ *
+ * Sleep details and the injury rehab plan stay their existing screens
+ * (overlays 'sleep' and 'injury'). Web (≥720px): lists left, History (timeline
+ * by default) right; forms and edits open in the right panel.
+ */
+import { useEffect, useState, type ReactNode } from 'react';
+import type { Shell } from '../App';
+import { useT } from '../i18n';
+import { dayKey, endRestPeriod, illnessReturn, liveSleep, startSleep, useStore } from '../store';
+import { activeInjuries, inFullRest } from '../injury';
+import { lastNight, nightDurationMin } from '../sleep';
+import { fmtDurationHuman } from '../i18n';
+import { rangeEnd, type HealthFormSpec, type HealthItem } from '../health';
+import type { RestPeriod } from '../types';
+import { ConfirmDialog, useIsDesktop } from '../ui';
+import { HealthForm, type RehabPrefill } from './health/HealthForm';
+import {
+  HistControls,
+  HistoryList,
+  HistoryTimeline,
+  useHealthItems,
+  type HistFilter,
+} from './health/HealthHistory';
+import { GroupedList, ListRow } from '../components/ui/GroupedList';
+import { StickyActionBar } from '../components/ui/StickyActionBar';
+import { ToneText } from '../components/ui/ToneText';
+import {
+  Ic,
+  KIT_TONE,
+  Svg,
+  STAGE_TOTAL,
+  fmtDay,
+  fmtRange,
+  fmtRangeWd,
+  hhmm,
+  iconOf,
+  injuryLabel,
+  itemLabel,
+  periodLabel,
+  stageNo,
+  itemTone,
+  toneOf,
+  typeName,
+} from './health/parts';
+import './Health.css';
+
+export interface HealthViewProps {
+  shell: Shell;
+  view?: 'history';
+  hist?: 'list' | 'timeline';
+  form?: HealthFormSpec;
+  onClose: () => void;
+}
+
+export function HealthView(props: HealthViewProps) {
+  const { shell } = props;
+  const { t, locale } = useT();
+  const store = useStore();
+  const web = useIsDesktop();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+  const today = dayKey(now);
+  const [filter, setFilter] = useState<HistFilter>('all');
+  const [webHist, setWebHist] = useState<'list' | 'timeline'>('timeline');
+  const [recover, setRecover] = useState<RestPeriod | null>(null);
+  const [endRest, setEndRest] = useState<RestPeriod | null>(null);
+
+  const go = (o: Omit<HealthViewProps, 'shell' | 'onClose'>, replace = false) => {
+    const next = { screen: 'health' as const, ...o };
+    if (replace) shell.replaceOverlay(next);
+    else shell.openOverlay(next);
+  };
+  /** Forms: a new page on mobile; the right panel on web (replaced, not stacked). */
+  const openForm = (form: HealthFormSpec) =>
+    go({ view: props.view, hist: props.hist, form }, web && !!props.form);
+  const closeForm = () => props.onClose();
+  const onRehab = (p: RehabPrefill) => shell.replaceOverlay({ screen: 'injury', prefill: p });
+
+  const openItem = (it: HealthItem) => {
+    if (it.injury && it.ongoing) return shell.openOverlay({ screen: 'injury', injuryId: it.id });
+    if (it.injury) return openForm({ kind: 'edit-injury', injuryId: it.id });
+    openForm({ kind: 'edit', periodId: it.id });
+  };
+
+  // --- current state -----------------------------------------------------------
+  const covering = store.restPeriods
+    .filter((p) => p.startDay <= today && (p.open === true || p.endDay >= today))
+    .sort((a, b) => b.createdAt - a.createdAt);
+  const illness = covering.find((p) => p.mode === 'illness') ?? null;
+  const rest = covering.find((p) => p.mode !== 'illness') ?? null;
+  const upcoming = store.restPeriods
+    .filter((p) => p.startDay > today)
+    .sort((a, b) => a.startDay - b.startDay);
+  const injuries = activeInjuries(store.injuries);
+  const ret = illness ? null : illnessReturn(now);
+  const lastIll = ret
+    ? store.restPeriods
+        .filter((r) => r.mode === 'illness' && !r.open && r.endDay < today)
+        .sort((a, b) => b.endDay - a.endDay)[0]
+    : null;
+  const items = useHealthItems(now);
+  const recent = items.filter((i) => !i.ongoing && !i.future).slice(0, 2);
+
+  const fd = (d: number) => fmtDay(d, locale, today);
+
+  // --- Now ----------------------------------------------------------------------
+  const nowGroups: ReactNode[] = [];
+  if (illness) {
+    const dayN = today - illness.startDay + 1;
+    nowGroups.push(
+      <GroupedList key="ill" header={t.hlNowWhat(t.restModeIllness)} footer={t.hlIllnessFoot}>
+        <ListRow
+          icon={<Ic tone="ill" name="thermo" />}
+          label={periodLabel(illness, t)}
+          sub={
+            illness.open
+              ? t.hlSinceNoEnd(fd(illness.startDay))
+              : fmtRange(illness.startDay, illness.endDay, locale, today)
+          }
+          value={t.hlDayN(dayN)}
+          valueTone="illness"
+          valueStrong
+          chevron
+          onClick={() => openForm({ kind: 'edit', periodId: illness.id })}
+        />
+        <ListRow icon={<Ic tone="neu" name="shield" />} label={t.hlStreakProgram} />
+        <ListRow
+          action
+          tone="illness"
+          label={t.illnessRecovered}
+          onClick={() => setRecover(illness)}
+        />
+      </GroupedList>,
+    );
+  }
+  if (rest) {
+    const total = rest.endDay - rest.startDay + 1;
+    const dayN = today - rest.startDay + 1;
+    const tone = KIT_TONE[toneOf(rest.mode)];
+    nowGroups.push(
+      <GroupedList key="rest" header={t.hlNowWhat(typeName(rest.mode, t))}>
+        <ListRow
+          icon={<Ic tone={toneOf(rest.mode)} name={iconOf(rest.mode)} />}
+          label={periodLabel(rest, t)}
+          sub={
+            rest.open
+              ? t.hlSinceNoEnd(fd(rest.startDay))
+              : fmtRange(rest.startDay, rest.endDay, locale, today)
+          }
+          value={rest.open ? t.hlDayN(dayN) : t.restDayOf(Math.min(dayN, total), total)}
+          valueTone={tone}
+          valueStrong
+          chevron
+          onClick={() => openForm({ kind: 'edit', periodId: rest.id })}
+        />
+        <ListRow
+          icon={<Ic tone="neu" name={rest.mode === 'active' ? 'pulse' : 'shield'} />}
+          label={rest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
+        />
+        <ListRow action tone={tone} label={t.restEndNow} onClick={() => setEndRest(rest)} />
+      </GroupedList>,
+    );
+  }
+  if (ret && lastIll) {
+    nowGroups.push(
+      <GroupedList
+        key="back"
+        header={t.hlNow}
+        footer={t.hlNowInHistory(fmtRange(lastIll.startDay, lastIll.endDay, locale, today))}
+      >
+        <ListRow
+          icon={<Ic tone="gym" name="sun" />}
+          label={t.hlWelcomeBack}
+          sub={t.hlTakeEasy}
+          value={t.today}
+        />
+        <ListRow
+          icon={<Ic tone="neu" name="shield" />}
+          label={t.hlOutDays(ret.daysOut)}
+          sub={t.hlNoStreakLost}
+          value={t.hlStreakKept}
+        />
+        <ListRow
+          icon={<Ic tone="neu" name="pause" />}
+          label={t.hlProgram}
+          sub={t.hlLighterToday}
+          value={t.hlResumed}
+        />
+      </GroupedList>,
+    );
+  }
+  for (const inj of injuries) {
+    const full = inFullRest(inj, today);
+    nowGroups.push(
+      <GroupedList key={inj.id} header={t.hlNowWhat(injuryLabel(inj, t))}>
+        <ListRow
+          icon={<Ic tone="inj" name="bandage" />}
+          label={t.hlRehabPlan}
+          sub={
+            <>
+              {t.hlStageOf(stageNo(inj), STAGE_TOTAL)} ·{' '}
+              <ToneText tone="injury">
+                {full ? t.injStage0 : (t.injStage[inj.stage] ?? inj.stage)}
+              </ToneText>
+            </>
+          }
+          chevron
+          onClick={() => shell.openOverlay({ screen: 'injury', injuryId: inj.id })}
+        />
+        <ListRow
+          icon={<Ic tone="inj" name="clock" />}
+          label={t.hlNextCheckin}
+          sub={t.hlHowFelt}
+          value={
+            full ? t.injStage0Left((inj.fullRestUntil ?? today) - today) : t.hlAfterNextSession
+          }
+        />
+      </GroupedList>,
+    );
+  }
+  if (upcoming.length > 0) {
+    nowGroups.push(
+      <GroupedList key="up" header={t.hlComingUp}>
+        {upcoming.map((p) => (
+          <ListRow
+            key={p.id}
+            icon={<Ic tone={toneOf(p.mode)} name={iconOf(p.mode)} />}
+            label={periodLabel(p, t)}
+            sub={fmtRange(p.startDay, rangeEnd(p, today), locale, today)}
+            value={t.hlStartsIn(p.startDay - today)}
+            chevron
+            onClick={() => openForm({ kind: 'edit', periodId: p.id })}
+          />
+        ))}
+      </GroupedList>,
+    );
+  }
+  if (nowGroups.length === 0) {
+    nowGroups.push(
+      <GroupedList key="clear" header={t.hlNow} footer={t.hlNothingActive}>
+        <ListRow icon={<Ic tone="neu" name="shield" />} label={t.hlStatus} value={t.hlAllClear} />
+      </GroupedList>,
+    );
+  }
+
+  // --- Sleep ----------------------------------------------------------------------
+  const live = liveSleep(store.sleeps);
+  const last = lastNight(store.sleeps);
+  const busy =
+    store.workouts.some((w) => w.finishedAt === null && w.exercises.length > 0) ||
+    store.activities.some((a) => a.finishedAt === null);
+  const sleepGroup = (
+    <GroupedList key="sleep" header={t.sleepTitle}>
+      <ListRow
+        icon={<Ic tone="slp" name="moon" />}
+        label={t.hlLastNight}
+        sub={last && last.wake ? `${hhmm(last.bedtime)}–${hhmm(last.wake)}` : t.sleepNoLastNight}
+        value={last && last.wake ? fmtDurationHuman(nightDurationMin(last) * 60000) : undefined}
+        chevron
+        // Last night's own details (same screen History opens for a night);
+        // no night yet → the sleep page, where one can be logged.
+        onClick={() =>
+          shell.openOverlay(
+            last ? { screen: 'sleep', mode: 'edit', nightId: last.id } : { screen: 'sleep' },
+          )
+        }
+      />
+      <ListRow
+        icon={<Ic tone="slp" name="clock" />}
+        label={
+          <ToneText tone="sleep" strong>
+            {live ? t.sleepAsleepSince(hhmm(live.bedtime)) : t.sleepStart}
+          </ToneText>
+        }
+        disabled={!live && busy}
+        onClick={() => {
+          if (live || startSleep()) shell.openOverlay({ screen: 'sleep' });
+        }}
+      />
+      <ListRow
+        icon={<Ic tone="slp" name="calClock" />}
+        label={t.hlSleepDetails}
+        sub={t.hlSleepDetailsSub}
+        chevron
+        onClick={() => shell.openOverlay({ screen: 'sleep' })}
+      />
+    </GroupedList>
+  );
+
+  // --- Start / Log the past -----------------------------------------------------------
+  const isSel = (f: HealthFormSpec) =>
+    web &&
+    props.form?.kind === 'new' &&
+    f.kind === 'new' &&
+    props.form.ctx === f.ctx &&
+    (props.form.type === f.type ||
+      (f.ctx === 'past' && f.type === 'off' && props.form.type === 'active'));
+  const startRow = (f: HealthFormSpec & { kind: 'new' }, label: string, sub: string) => (
+    <ListRow
+      icon={<Ic tone={toneOf(f.type)} name={iconOf(f.type)} />}
+      label={label}
+      sub={sub || undefined}
+      chevron
+      selected={isSel(f)}
+      aria-current={isSel(f) ? 'true' : undefined}
+      onClick={() => openForm(f)}
+    />
+  );
+  const startGroup = (
+    <GroupedList key="start" header={t.hlStart} footer={t.hlStartFoot}>
+      {startRow({ kind: 'new', ctx: 'start', type: 'off' }, t.hlFullRest, t.hlFullRestSub)}
+      {startRow({ kind: 'new', ctx: 'start', type: 'active' }, t.restModeActive, t.hlActiveSub)}
+      {illness ? (
+        <ListRow
+          dim
+          icon={<Ic tone="ill" name="thermo" />}
+          label={t.restModeIllness}
+          sub={t.hlUnwellSub}
+          value={t.hlActiveTag}
+        />
+      ) : (
+        startRow({ kind: 'new', ctx: 'start', type: 'illness' }, t.restModeIllness, t.hlUnwellSub)
+      )}
+      <ListRow
+        icon={<Ic tone="inj" name="bandage" />}
+        label={t.hlInjuryRehab}
+        sub={t.hlInjuryRehabSub}
+        chevron
+        onClick={() => shell.openOverlay({ screen: 'injury' })}
+      />
+    </GroupedList>
+  );
+  const pastGroup = (
+    <GroupedList key="past" header={t.hlLogPast} footer={t.hlLogPastNote}>
+      {startRow({ kind: 'new', ctx: 'past', type: 'illness' }, t.hlWasUnwell, '')}
+      {startRow({ kind: 'new', ctx: 'past', type: 'off' }, t.hlTookBreak, t.hlTookBreakSub)}
+      {startRow({ kind: 'new', ctx: 'past', type: 'injury' }, t.hlGotHurt, '')}
+    </GroupedList>
+  );
+  const historyGroup = (
+    <GroupedList key="hist" header={t.hlHistory}>
+      {recent.map((it) => (
+        <ListRow
+          key={it.id}
+          icon={
+            <Ic tone={itemTone(it)} name={iconOf(it.kind === 'injury' ? 'injury' : it.mode!)} />
+          }
+          label={itemLabel(it, t)}
+          sub={t.hlTypeDays(
+            it.injury ? t.hlFilter.injury : typeName(it.mode!, t),
+            it.endDay - it.startDay + 1,
+          )}
+          value={fmtRange(it.startDay, it.endDay, locale, today)}
+          chevron
+          onClick={() => openItem(it)}
+        />
+      ))}
+      <ListRow
+        label={
+          <ToneText tone="accent" strong>
+            {t.hlSeeAll}
+          </ToneText>
+        }
+        value={t.hlListTimeline}
+        chevron
+        onClick={() => go({ view: 'history', hist: 'list' })}
+      />
+    </GroupedList>
+  );
+
+  // --- sheets / dialogs ------------------------------------------------------------------
+  const overlays = (
+    <>
+      {recover && (
+        <RecoveredSheet
+          period={recover}
+          today={today}
+          onStill={() => setRecover(null)}
+          onConfirm={() => {
+            endRestPeriod(recover.id, now);
+            setRecover(null);
+          }}
+        />
+      )}
+      {endRest && (
+        <ConfirmDialog
+          title={t.restEndTitle}
+          body={t.restEndBody}
+          confirmLabel={t.restEndNow}
+          cancelLabel={t.cancel}
+          danger
+          onConfirm={() => {
+            endRestPeriod(endRest.id, now);
+            setEndRest(null);
+          }}
+          onCancel={() => setEndRest(null)}
+        />
+      )}
+    </>
+  );
+
+  // A form for a period / injury that no longer exists (deleted elsewhere, or a
+  // stale #/health/edit/<id> link) falls back to the page itself.
+  const formOk =
+    !!props.form &&
+    (props.form.kind === 'new' ||
+      (props.form.kind === 'edit' &&
+        store.restPeriods.some((p) => p.id === (props.form as { periodId: string }).periodId)) ||
+      (props.form.kind === 'edit-injury' &&
+        store.injuries.some((i) => i.id === (props.form as { injuryId: string }).injuryId)));
+  const form =
+    props.form && formOk ? (
+      <HealthForm
+        key={JSON.stringify(props.form)}
+        spec={props.form}
+        now={now}
+        web={web}
+        onCancel={closeForm}
+        onDone={closeForm}
+        onRehab={onRehab}
+      />
+    ) : null;
+
+  // ============================ mobile ============================
+  if (!web) {
+    if (form) return form;
+    if (props.view === 'history') {
+      const mode = props.hist ?? 'list';
+      return (
+        <div className="screen hl">
+          <div className="hl-pbar">
+            <button
+              type="button"
+              className="hl-back"
+              aria-label={t.backAction}
+              onClick={props.onClose}
+            >
+              <Svg name="back" />
+            </button>
+            <h1 className="hl-pt">{t.hlHistory}</h1>
+          </div>
+          <div className="hl-scroll">
+            <div className="hl-cnt">
+              <HistControls
+                mode={mode}
+                filter={filter}
+                onMode={(m) => go({ view: 'history', hist: m }, true)}
+                onFilter={setFilter}
+              />
+              {mode === 'list' ? (
+                <HistoryList now={now} filter={filter} web={false} onOpen={openItem} />
+              ) : (
+                <>
+                  <HistoryTimeline now={now} filter={filter} web={false} />
+                  <GroupedList header={t.hlNotOnTimeline}>
+                    <ListRow
+                      icon={<Ic tone="slp" name="calClock" />}
+                      label={t.hlSleepDetails}
+                      sub={t.hlSleepOwnHistory}
+                      chevron
+                      onClick={() => shell.openOverlay({ screen: 'sleep' })}
+                    />
+                  </GroupedList>
+                </>
+              )}
+            </div>
+          </div>
+          {mode === 'list' && (
+            <StickyActionBar>
+              <button
+                type="button"
+                className="hl-btn p-gold"
+                onClick={() => openForm({ kind: 'new', ctx: 'past', type: 'illness' })}
+              >
+                {t.hlLogPast}
+              </button>
+            </StickyActionBar>
+          )}
+        </div>
+      );
+    }
+    return (
+      <div className="screen hl">
+        <div className="hl-pbar">
+          <button
+            type="button"
+            className="hl-back"
+            aria-label={t.backAction}
+            onClick={props.onClose}
+          >
+            <Svg name="back" />
+          </button>
+          <h1 className="hl-pt">{t.startHealthTitle}</h1>
+        </div>
+        <div className="hl-scroll">
+          <div className="hl-cnt">
+            {nowGroups}
+            {sleepGroup}
+            {startGroup}
+            {pastGroup}
+            {historyGroup}
+          </div>
+        </div>
+        {overlays}
+      </div>
+    );
+  }
+
+  // ============================ web ============================
+  const history = props.view === 'history';
+  const selectedId =
+    props.form?.kind === 'edit'
+      ? props.form.periodId
+      : props.form?.kind === 'edit-injury'
+        ? props.form.injuryId
+        : null;
+  const left = history ? (
+    <section className="hl-pane" aria-label={t.hlHistory}>
+      <div className="hl-wc">
+        <div className="hl-stack">
+          <HistControls
+            mode="list"
+            filter={filter}
+            onMode={(m) => {
+              if (m === 'timeline') {
+                setWebHist('timeline');
+                go({}, true);
+              }
+            }}
+            onFilter={setFilter}
+          />
+        </div>
+        <HistoryList now={now} filter={filter} web selectedId={selectedId} onOpen={openItem} />
+      </div>
+    </section>
+  ) : (
+    <section className="hl-pane" aria-label={t.startHealthTitle}>
+      <div className="hl-wc">
+        {form ? (
+          <>
+            {nowGroups}
+            {sleepGroup}
+            {startGroup}
+            {pastGroup}
+          </>
+        ) : (
+          <div className="hl-cols">
+            <div className="hl-col">
+              {nowGroups}
+              {sleepGroup}
+            </div>
+            <div className="hl-col">
+              {startGroup}
+              {pastGroup}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+  const right = form ? (
+    form
+  ) : history ? null : (
+    <section className="hl-pane hl-hist" aria-labelledby="hl-hist-h">
+      <div className="hl-wc tight">
+        <div className="hl-phd">
+          <h2 id="hl-hist-h">{t.hlHistory}</h2>
+          <button
+            type="button"
+            className="hl-link"
+            onClick={() => go({ view: 'history', hist: 'list' })}
+          >
+            {t.hlOpenHistory}
+            <Svg name="chev" className="hl-chev v-gold" />
+          </button>
+        </div>
+        <HistControls
+          mode={webHist}
+          filter={filter}
+          onMode={(m) => {
+            if (m === 'list') go({ view: 'history', hist: 'list' });
+            else setWebHist(m);
+          }}
+          onFilter={setFilter}
+        />
+        <HistoryTimeline now={now} filter={filter} web />
+      </div>
+    </section>
+  );
+  return (
+    <div className="screen hl hl-web">
+      <header className="hl-top">
+        <button type="button" className="hl-back" aria-label={t.backAction} onClick={props.onClose}>
+          <Svg name="back" />
+        </button>
+        <h1 className="hl-pt">{history ? t.hlHistory : t.startHealthTitle}</h1>
+        <div className="tsub">{history ? t.hlHistorySub : t.hlSub}</div>
+        <span className="hl-val">{t.hlTodayIs(fd(today))}</span>
+      </header>
+      <div className="hl-wbody">
+        {left}
+        {right}
+      </div>
+      {overlays}
+    </div>
+  );
+}
+
+/** F10 — "I'm recovered" confirmation as a bottom sheet over Health. */
+function RecoveredSheet(props: {
+  period: RestPeriod;
+  today: number;
+  onConfirm: () => void;
+  onStill: () => void;
+}) {
+  const { t, locale } = useT();
+  const { period, today } = props;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') props.onStill();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [props]);
+  // Recovering ends the period yesterday (endRestPeriod): today is a normal day.
+  const lastDay = today - 1;
+  const n = lastDay - period.startDay + 1;
+  return (
+    <>
+      <div className="hl-dim" onClick={props.onStill} aria-hidden="true" />
+      <div className="hl-sheet" role="dialog" aria-modal="true" aria-labelledby="hl-sh-t">
+        <div className="hl-grab" />
+        <h2 className="hl-sh-t" id="hl-sh-t">
+          {t.illnessRecoveredTitle}
+        </h2>
+        <p className="hl-sh-b">
+          {n >= 1
+            ? t.hlRecoveredBody(fmtRangeWd(period.startDay, lastDay, locale, today), n)
+            : t.hlRecoveredBodyToday}
+        </p>
+        <GroupedList surface="raised">
+          <ListRow icon={<Ic tone="neu" name="shield" />} label={t.hlStreak} value={t.hlKept} />
+          <ListRow
+            icon={<Ic tone="neu" name="pause" />}
+            label={t.hlProgram}
+            value={t.hlResumesToday}
+          />
+        </GroupedList>
+        <div className="hl-stk">
+          <button type="button" className="hl-btn p-ill" onClick={props.onConfirm}>
+            {t.illnessRecoveredConfirm}
+          </button>
+          <button type="button" className="hl-btn" onClick={props.onStill}>
+            {t.illnessStillUnwell}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}

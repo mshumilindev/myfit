@@ -1,0 +1,90 @@
+.uiseg {
+  display: grid;
+  min-width: 0;
+}
+.uiseg-opt {
+  min-width: 0;
+  height: var(--tap-min);
+  padding: 0 var(--sp-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: 500 14px var(--font);
+  cursor: pointer;
+}
+.uiseg-l {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uiseg .uiseg-opt .ui-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.uiseg-opt:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.uiseg-opt:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.uiseg-opt.is-compact {
+  font-size: 12px;
+}
+.uiseg--sm .uiseg-opt {
+  height: 36px;
+  font-size: 13px;
+}
+
+/* track: one grey trough, the selected segment raised */
+.uiseg--track {
+  background: var(--color-tile);
+  border-radius: var(--radius-xl);
+  padding: 3px;
+  gap: 3px;
+}
+.uiseg--track .uiseg-opt {
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.uiseg--track .uiseg-opt.is-on {
+  background: var(--color-border);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* buttons: separate outlined buttons, the selected one toned */
+.uiseg--buttons {
+  gap: var(--sp-2);
+}
+.uiseg--buttons .uiseg-opt {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-tile);
+  color: var(--color-text);
+}
+.uiseg--buttons.is-dense {
+  gap: 6px;
+}
+.uiseg.is-dense .uiseg-opt {
+  padding: 0 2px;
+}
+.uiseg--buttons .uiseg-opt:hover:not(:disabled):not(.is-on) {
+  border-color: var(--color-text-faint);
+}
+.uiseg--buttons .uiseg-opt.is-on {
+  border-color: var(--t-base);
+  background: var(--t-tint);
+  color: var(--t-base);
+  font-weight: 600;
+}
+@media (min-width: 720px) and (pointer: fine) {
+  .uiseg--buttons .uiseg-opt {
+    height: 40px;
+  }
+}

@@ -1,0 +1,1800 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>W04 · Drag to pin</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kaushan+Script&display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #16171a;
+          }
+          a {
+            color: #d9a24f;
+            text-decoration: none;
+          }
+          a:hover {
+            color: #e8b86a;
+          }
+          .w * {
+            box-sizing: border-box;
+          }
+          .w {
+            font-variant-numeric: tabular-nums;
+          }
+          .w button,
+          .w input {
+            font-family: Inter, sans-serif;
+          }
+          .w button {
+            cursor: pointer;
+          }
+          .w svg.i {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+          }
+          .w svg.sm {
+            width: 16px;
+            height: 16px;
+          }
+          .w svg.xs {
+            width: 14px;
+            height: 14px;
+          }
+          .w svg.lg {
+            width: 30px;
+            height: 30px;
+            stroke-width: 1.6;
+          }
+          .rail {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 64px;
+            background: #16171a;
+            border-right: 1px solid rgba(233, 234, 236, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0 14px;
+            gap: 4px;
+          }
+          .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #d9a24f;
+            color: #1b1409;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Kaushan Script', cursive;
+            font-size: 24px;
+            line-height: 1;
+            margin-bottom: 14px;
+            padding-bottom: 3px;
+          }
+          .rb {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 0;
+            background: transparent;
+            color: #90959a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 0;
+          }
+          .rb.on {
+            background: #262a2d;
+            color: #d9a24f;
+          }
+          .badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            background: #d9a24f;
+            color: #1b1409;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid #16171a;
+            box-sizing: content-box;
+          }
+          .av {
+            width: 34px;
+            height: 34px;
+            border-radius: 17px;
+            background: #342713;
+            color: #d9a24f;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(217, 162, 79, 0.45);
+          }
+          .main {
+            position: absolute;
+            left: 64px;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            background: #16171a;
+          }
+          .pbar {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 28px;
+            border-bottom: 1px solid rgba(233, 234, 236, 0.08);
+          }
+          .ib {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid rgba(233, 234, 236, 0.14);
+            background: transparent;
+            color: #e9eaec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 0;
+          }
+          a.ib:hover {
+            color: #e9eaec;
+            border-color: #55595e;
+          }
+          .cols {
+            display: flex;
+            gap: 24px;
+            padding: 20px 28px;
+            height: 728px;
+            max-width: 1216px;
+          }
+          .left {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+          }
+          .right {
+            width: 360px;
+            flex-shrink: 0;
+          }
+          .panel {
+            height: 688px;
+            background: #1f2125;
+            border: 1px solid rgba(233, 234, 236, 0.1);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          }
+          .lbl {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #90959a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .cnt {
+            font-size: 11px;
+            color: #71767b;
+            letter-spacing: 0;
+            font-weight: 500;
+            text-transform: none;
+          }
+          .sec {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 44px;
+            flex-shrink: 0;
+          }
+          .see {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d9a24f;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+          }
+          .arr {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid #3b3f43;
+            background: transparent;
+            color: #e9eaec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          }
+          .arr[disabled] {
+            color: #55595e;
+            border-color: #2e3135;
+            cursor: default;
+          }
+          .row {
+            display: flex;
+            gap: 10px;
+            overflow: hidden;
+            flex-shrink: 0;
+          }
+          .ico {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .g {
+            color: #d9a24f;
+            background: #342713;
+          }
+          .s {
+            color: #a8dc7c;
+            background: #1f2f14;
+          }
+          .r {
+            color: #93d4f2;
+            background: #0e2a3b;
+          }
+          .card {
+            position: relative;
+            width: 140px;
+            flex-shrink: 0;
+            background: #262a2d;
+            border: 1px solid #3b3f43;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 108px;
+            color: #e9eaec;
+            text-align: left;
+          }
+          a.card:hover,
+          .card:hover {
+            border-color: #55595e;
+            color: #e9eaec;
+          }
+          .card.sel {
+            border-color: #a8dc7c;
+            background: #1f2f14;
+          }
+          .cn {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e9eaec;
+            display: block;
+          }
+          .cm {
+            font-size: 12px;
+            color: #90959a;
+            margin-top: 2px;
+            line-height: 1.35;
+            display: block;
+          }
+          .pk {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #71767b;
+          }
+          .pinc {
+            width: 150px;
+            flex-shrink: 0;
+            height: 56px;
+            background: #262a2d;
+            border: 1px solid #3b3f43;
+            border-radius: 14px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e9eaec;
+            text-align: left;
+          }
+          .pinc .ico {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+          }
+          .ob {
+            height: 44px;
+            border-radius: 22px;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 0 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          }
+          .obg {
+            border: 1px solid #d9a24f;
+            color: #d9a24f;
+          }
+          .obm {
+            border: 1px solid #3b3f43;
+            color: #e9eaec;
+          }
+          .fill {
+            background: #d9a24f;
+            color: #1b1409;
+            border: 1px solid #d9a24f;
+          }
+          .mini {
+            background: #262a2d;
+            border: 1px solid #3b3f43;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+          }
+          .fl {
+            font-size: 12px;
+            font-weight: 600;
+            color: #90959a;
+            margin: 0 0 6px;
+            display: block;
+          }
+          .seg {
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #3b3f43;
+            background: #1f2125;
+            color: #e9eaec;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 0;
+          }
+          .seg.on {
+            font-weight: 600;
+          }
+          .seg.on.sg {
+            border-color: #a8dc7c;
+            background: #1f2f14;
+            color: #a8dc7c;
+          }
+          .seg.on.gg {
+            border-color: #d9a24f;
+            background: #342713;
+            color: #d9a24f;
+          }
+          .fld {
+            height: 44px;
+            border-radius: 10px;
+            border: 1px solid #3b3f43;
+            background: #262a2d;
+            color: #e9eaec;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 0 12px;
+            width: 100%;
+          }
+          .sw {
+            width: 40px;
+            height: 24px;
+            border-radius: 12px;
+            background: #3b3f43;
+            position: relative;
+            flex-shrink: 0;
+          }
+          .sw span {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            background: #90959a;
+          }
+          .sw.on {
+            background: #d9a24f;
+          }
+          .sw.on span {
+            left: 19px;
+            background: #1b1409;
+          }
+          .tg {
+            height: 44px;
+            border: 1px solid #3b3f43;
+            border-radius: 12px;
+            background: transparent;
+            color: #e9eaec;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 12px;
+            font-size: 13px;
+            font-weight: 500;
+            width: 100%;
+          }
+          .tl {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 52px;
+            border-bottom: 1px solid rgba(233, 234, 236, 0.08);
+          }
+          .tl .ico {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+          }
+          .bdg {
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 2px 6px;
+            border: 1px solid;
+          }
+          .tile {
+            position: relative;
+            background: #262a2d;
+            border: 1px solid #3b3f43;
+            border-radius: 14px;
+            padding: 12px;
+            min-height: 112px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #e9eaec;
+          }
+          .tile.on {
+            border-color: #a8dc7c;
+          }
+          .tile .ico {
+            color: #a8dc7c;
+            background: #1f2f14;
+          }
+          .tn {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e9eaec;
+            line-height: 1.25;
+          }
+          .tm {
+            font-size: 12px;
+            color: #90959a;
+            margin-top: 2px;
+          }
+          .pb {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 44px;
+            height: 44px;
+            border: 0;
+            background: transparent;
+            color: #71767b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          }
+          .pb span {
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #3b3f43;
+          }
+          .pb.on span {
+            background: #a8dc7c;
+            border-color: #a8dc7c;
+            color: #16171a;
+          }
+          .chip {
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid #3b3f43;
+            background: transparent;
+            color: #90959a;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0 12px;
+          }
+          .chip.on {
+            border-color: #a8dc7c;
+            color: #a8dc7c;
+            background: #1f2f14;
+          }
+          .cat {
+            display: block;
+            border-radius: 18px;
+            border: 1px solid #3b3f43;
+            background: #262a2d;
+            padding: 14px 14px 12px;
+            color: #e9eaec;
+            text-align: left;
+            width: 100%;
+          }
+          a.cat:hover,
+          .cat:hover {
+            color: #e9eaec;
+            border-color: #55595e;
+          }
+          .ct {
+            font-size: 17px;
+            font-weight: 700;
+          }
+          .cc {
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 28px;
+            height: 24px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 7px;
+          }
+          .mn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(233, 234, 236, 0.08);
+          }
+          .last {
+            font-size: 12px;
+            color: #90959a;
+            white-space: nowrap;
+          }
+          /* category rows (one per row) */
+          .clist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+          }
+          .crow {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #262a2d;
+            border: 1px solid #3b3f43;
+            border-radius: 16px;
+            padding: 10px 14px 10px 12px;
+            color: #e9eaec;
+            text-align: left;
+          }
+          a.crow:hover {
+            color: #e9eaec;
+            border-color: #55595e;
+          }
+          .crow.sel {
+            background: #1f2f14;
+          }
+          .ctile {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .cbody {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+          }
+          .cname {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.2;
+          }
+          .cname span {
+            color: #90959a;
+            font-weight: 500;
+          }
+          .cmn {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+          }
+          .cmn .mn {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+          }
+          /* pinned drop zone (drag & drop) */
+          .pinzone {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px;
+            border: 1px dashed rgba(233, 234, 236, 0.16);
+            border-radius: 18px;
+            flex-shrink: 0;
+            overflow: hidden;
+          }
+          .pinzone .pinc {
+            width: 178px;
+            padding: 0 0 0 4px;
+            gap: 2px;
+            cursor: grab;
+          }
+          .pinzone .pinc:hover {
+            border-color: #55595e;
+          }
+          .grip {
+            width: 16px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #55595e;
+            flex-shrink: 0;
+          }
+          .pinc:hover .grip {
+            color: #90959a;
+          }
+          .pinb {
+            flex: 1;
+            min-width: 0;
+            height: 54px;
+            border: 0;
+            background: transparent;
+            color: #e9eaec;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 0 0 2px;
+            text-align: left;
+          }
+          .pint {
+            width: 36px;
+            height: 44px;
+            border: 0;
+            background: transparent;
+            color: #71767b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+            border-radius: 10px;
+          }
+          .pint:hover {
+            color: #d9a24f;
+          }
+          .pslot {
+            width: 140px;
+            height: 56px;
+            flex-shrink: 0;
+            border: 1px dashed #3b3f43;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: #71767b;
+            font-size: 13px;
+            font-weight: 600;
+          }
+          .bars {
+            width: 216px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            flex-shrink: 0;
+          }
+          .bars .bv {
+            font-size: 11px;
+            font-weight: 600;
+            color: #e9eaec;
+            text-align: center;
+            line-height: 14px;
+          }
+          .bars .bb {
+            height: 28px;
+            display: flex;
+            align-items: flex-end;
+          }
+          .bars .bb span {
+            display: block;
+            width: 100%;
+            border-radius: 4px;
+            background: #342713;
+            border-top: 2px solid #d9a24f;
+          }
+          .bars .bl {
+            font-size: 11px;
+            color: #71767b;
+            text-align: center;
+            white-space: nowrap;
+            margin-top: 4px;
+          }
+          /* w04 drag state */
+          .pinzone.drop {
+            border: 1.5px dashed #d9a24f;
+            background: rgba(217, 162, 79, 0.06);
+          }
+          .ins {
+            width: 4px;
+            height: 52px;
+            border-radius: 2px;
+            background: #d9a24f;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 3px rgba(217, 162, 79, 0.18);
+            margin: 0 4px;
+          }
+          .pinc.nudge {
+            transform: translateX(10px) rotate(1deg);
+            border-color: #55595e;
+          }
+          .cexp {
+            border: 1px solid #3b3f43;
+            border-radius: 16px;
+            background: #262a2d;
+            padding: 4px 10px 10px;
+            flex-shrink: 0;
+          }
+          .tgrid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+          }
+          .tile2 {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1f2125;
+            border: 1px solid #3b3f43;
+            border-radius: 14px;
+            padding: 0 0 0 4px;
+            cursor: grab;
+          }
+          .tile2.origin {
+            border-style: dashed;
+            border-color: #3d5a2a;
+            background: transparent;
+            opacity: 0.45;
+          }
+          .ghost {
+            position: absolute;
+            left: 470px;
+            top: 362px;
+            width: 200px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 6px 0 4px;
+            background: #1f2f14;
+            border: 1px solid #a8dc7c;
+            border-radius: 14px;
+            color: #e9eaec;
+            transform: rotate(-3deg);
+            box-shadow:
+              0 18px 40px rgba(0, 0, 0, 0.55),
+              0 4px 10px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+            pointer-events: none;
+          }
+          .dtip {
+            position: absolute;
+            left: 600px;
+            top: 420px;
+            height: 28px;
+            border-radius: 14px;
+            background: #d9a24f;
+            color: #1b1409;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 10px;
+            z-index: 11;
+            pointer-events: none;
+          }
+          .cur {
+            position: absolute;
+            left: 584px;
+            top: 398px;
+            z-index: 12;
+            pointer-events: none;
+          }
+        </style>
+      </helmet>
+      <div
+        class="w"
+        style="
+          width: 1280px;
+          height: 800px;
+          position: relative;
+          overflow: hidden;
+          box-sizing: border-box;
+          background: #16171a;
+          color: #e9eaec;
+          font-family: Inter, sans-serif;
+        "
+      >
+        <nav class="rail" aria-label="Main">
+          <div class="logo" aria-label="Spotter">s</div>
+          <button class="rb on" aria-label="Home" aria-current="page">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"></path>
+            </svg>
+          </button>
+          <button class="rb" aria-label="Trends">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 19V11M10 19V5M16 19v-6M20 19H3"></path>
+            </svg>
+          </button>
+          <button class="rb" aria-label="Gyms map">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"></path>
+              <circle cx="12" cy="10" r="2.5"></circle>
+            </svg>
+          </button>
+          <span style="flex: 1"></span>
+          <button class="rb" aria-label="Streak: 12 days">
+            <svg viewBox="0 0 36 36" width="34" height="34" aria-hidden="true">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#3b3f43" stroke-width="3"></circle>
+              <circle
+                cx="18"
+                cy="18"
+                r="14"
+                fill="none"
+                stroke="#d9a24f"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-dasharray="62 88"
+                transform="rotate(-90 18 18)"
+              ></circle>
+              <text
+                x="18"
+                y="22"
+                text-anchor="middle"
+                font-size="11"
+                font-weight="700"
+                fill="#e9eaec"
+                font-family="Inter, sans-serif"
+              >
+                12
+              </text>
+            </svg>
+          </button>
+          <button class="rb" aria-label="Notifications, 2 new">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"></path>
+              <path d="M10 20.5a2 2 0 0 0 4 0"></path></svg
+            ><span class="badge">2</span>
+          </button>
+          <button class="rb" aria-label="All sections">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="4" width="6.5" height="6.5" rx="1.5"></rect>
+              <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"></rect>
+              <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"></rect>
+              <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"></rect>
+            </svg>
+          </button>
+          <button class="rb" aria-label="Settings">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"
+              ></path>
+            </svg>
+          </button>
+          <button class="rb" aria-label="Profile" style="margin-top: 6px">
+            <span class="av">NF</span>
+          </button>
+        </nav>
+        <main class="main">
+          <header class="pbar">
+            <button class="ib" aria-label="Back">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 5l-7 7 7 7"></path>
+              </svg>
+            </button>
+            <div style="flex: 1; min-width: 0">
+              <div style="font-size: 22px; font-weight: 700">Log activity</div>
+              <div style="font-size: 13px; color: #90959a; margin-top: 2px">
+                Cardio, sports &amp; recovery count too — so Spotter sees your whole load.
+              </div>
+            </div>
+            <span class="num" style="font-size: 13px; color: #71767b; margin-right: 4px"
+              >Sat 27 Sep · 18:40</span
+            >
+            <label
+              for="w-q"
+              style="
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+              "
+              >Search activities</label
+            >
+            <div
+              style="
+                width: 420px;
+                flex-shrink: 0;
+                height: 48px;
+                border-radius: 12px;
+                border: 1px solid #3b3f43;
+                background: #1f2125;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 12px;
+                color: #90959a;
+              "
+            >
+              <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5"></circle>
+                <path d="M16 16l4 4"></path>
+              </svg>
+              <input
+                id="w-q"
+                type="search"
+                placeholder="Search activities"
+                style="
+                  flex: 1;
+                  min-width: 0;
+                  height: 44px;
+                  border: 0;
+                  background: transparent;
+                  color: #e9eaec;
+                  font-size: 15px;
+                  outline: none;
+                "
+              />
+              <span style="font-size: 12px; color: #71767b; white-space: nowrap">all 33 types</span>
+            </div>
+          </header>
+          <div class="cols">
+            <div class="left">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: minmax(0, 1fr) 280px;
+                  gap: 14px;
+                  flex-shrink: 0;
+                "
+              >
+                <section
+                  aria-label="Likely now"
+                  style="
+                    border: 1px solid rgba(217, 162, 79, 0.4);
+                    background: #262a2d;
+                    border-radius: 18px;
+                    padding: 14px 16px 14px;
+                  "
+                >
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #d9a24f;
+                      "
+                    >
+                      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="8.5"></circle>
+                        <path d="M12 7.5V12l3 2"></path></svg
+                      >Likely now · Saturday evening
+                    </div>
+                    <button
+                      aria-label="Not now, hide this suggestion"
+                      style="
+                        width: 44px;
+                        height: 32px;
+                        margin: -6px -10px -6px 0;
+                        background: none;
+                        border: 0;
+                        color: #71767b;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 16px; margin-top: 10px">
+                    <div class="ico g" style="width: 56px; height: 56px; border-radius: 16px">
+                      <svg class="i lg" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="4" r="2"></circle>
+                        <path d="M12 6v7l-4 7M12 13l4 7M6 10l6-2 5-3"></path>
+                      </svg>
+                    </div>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="font-size: 28px; font-weight: 700; line-height: 1.1">Dance?</div>
+                      <div
+                        style="
+                          font-size: 13px;
+                          color: #90959a;
+                          margin-top: 4px;
+                          white-space: nowrap;
+                        "
+                      >
+                        The last 4 Saturdays, ~2 h
+                      </div>
+                    </div>
+                    <div
+                      class="num bars"
+                      role="img"
+                      aria-label="Last 4 Saturdays: 30 Aug 110 min, 6 Sep 130 min, 13 Sep 115 min, 20 Sep 125 min"
+                    >
+                      <div>
+                        <div class="bv">110</div>
+                        <div class="bb"><span style="height: 23px"></span></div>
+                        <div class="bl">30 Aug</div>
+                      </div>
+                      <div>
+                        <div class="bv">130</div>
+                        <div class="bb"><span style="height: 28px"></span></div>
+                        <div class="bl">6 Sep</div>
+                      </div>
+                      <div>
+                        <div class="bv">115</div>
+                        <div class="bb"><span style="height: 24px"></span></div>
+                        <div class="bl">13 Sep</div>
+                      </div>
+                      <div>
+                        <div class="bv">125</div>
+                        <div class="bb"><span style="height: 27px"></span></div>
+                        <div class="bl">20 Sep</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-top: 14px">
+                    <button class="ob obg" style="width: 132px">
+                      <svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 5l12 7-12 7z"></path></svg
+                      >Start
+                    </button>
+                    <button class="ob fill" style="width: 132px">Log 2 h</button>
+                    <span style="flex: 1; text-align: right; font-size: 12px; color: #71767b"
+                      >From your last 6 Saturdays · usually starts ~18:30</span
+                    >
+                  </div>
+                </section>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div class="lbl" style="height: 18px">Also on your Saturdays</div>
+                  <div class="mini" style="padding: 10px; gap: 10px">
+                    <span class="ico r" style="width: 34px; height: 34px; border-radius: 10px"
+                      ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-6 1 1 2 2 3 2 0-2 0-4 0-6z"
+                        ></path></svg
+                    ></span>
+                    <span style="flex: 1; min-width: 0"
+                      ><span
+                        class="cn"
+                        style="
+                          font-size: 13px;
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                        "
+                        >Sauna · 20 min</span
+                      ><span class="cm">after Dance · 4 of 6</span></span
+                    >
+                    <button
+                      class="ob"
+                      style="
+                        height: 36px;
+                        padding: 0 10px;
+                        font-size: 13px;
+                        flex-shrink: 0;
+                        border: 1px solid rgba(147, 212, 242, 0.6);
+                        color: #93d4f2;
+                      "
+                      aria-label="Log Sauna, 20 minutes"
+                    >
+                      + Log
+                    </button>
+                  </div>
+                  <div class="mini" style="padding: 10px; gap: 10px">
+                    <span class="ico g" style="width: 34px; height: 34px; border-radius: 10px"
+                      ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="13" cy="4" r="2"></circle>
+                        <path d="M10 21l2-6 2 2v4M12 15v-5l3 3h2M12 10l-3 2v3"></path></svg
+                    ></span>
+                    <span style="flex: 1; min-width: 0"
+                      ><span
+                        class="cn"
+                        style="
+                          font-size: 13px;
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                        "
+                        >Walk · 30 min</span
+                      ><span class="cm">morning · 3 of 6</span></span
+                    >
+                    <button
+                      class="ob"
+                      style="
+                        height: 36px;
+                        padding: 0 10px;
+                        font-size: 13px;
+                        flex-shrink: 0;
+                        border: 1px solid rgba(217, 162, 79, 0.6);
+                        color: #d9a24f;
+                      "
+                      aria-label="Log Walk, 30 minutes"
+                    >
+                      + Log
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="sec" style="margin-top: 10px">
+                <div class="lbl">Pinned <span class="cnt">3</span></div>
+                <span
+                  style="
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #d9a24f;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  "
+                  ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 4h6l-1 6 3 3H7l3-3z" fill="currentColor"></path>
+                    <path d="M12 13v7"></path></svg
+                  >Drop to pin · between Dance and Sauna</span
+                >
+              </div>
+              <div class="pinzone drop" role="list" aria-label="Pinned activities, drag to reorder">
+                <div class="pinc" role="listitem">
+                  <span class="grip" title="Drag to reorder"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <circle cx="9" cy="6" r="1.5"></circle>
+                      <circle cx="15" cy="6" r="1.5"></circle>
+                      <circle cx="9" cy="12" r="1.5"></circle>
+                      <circle cx="15" cy="12" r="1.5"></circle>
+                      <circle cx="9" cy="18" r="1.5"></circle>
+                      <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                  ><button class="pinb" aria-label="Run, 5 km Thursday">
+                    <span class="ico g"
+                      ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="14" cy="4" r="2"></circle>
+                        <path d="M8 21l3-6 3 2v4M11 15l1-5 4 3h3M12 10l-4 1-2 3"></path></svg></span
+                    ><span style="flex: 1; min-width: 0"
+                      ><span class="cn" style="font-size: 13px">Run</span
+                      ><span class="cm" style="font-size: 11px; margin: 0">5 km · Thu</span></span
+                    ></button
+                  ><button class="pint" aria-label="Unpin Run" aria-pressed="true">
+                    <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 4h6l-1 6 3 3H7l3-3z" fill="currentColor"></path>
+                      <path d="M12 13v7"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="pinc" role="listitem">
+                  <span class="grip" title="Drag to reorder"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <circle cx="9" cy="6" r="1.5"></circle>
+                      <circle cx="15" cy="6" r="1.5"></circle>
+                      <circle cx="9" cy="12" r="1.5"></circle>
+                      <circle cx="15" cy="12" r="1.5"></circle>
+                      <circle cx="9" cy="18" r="1.5"></circle>
+                      <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                  ><button class="pinb" aria-label="Dance, 125 min Saturday">
+                    <span class="ico g"
+                      ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="4" r="2"></circle>
+                        <path d="M12 6v7l-4 7M12 13l4 7M6 10l6-2 5-3"></path></svg></span
+                    ><span style="flex: 1; min-width: 0"
+                      ><span class="cn" style="font-size: 13px">Dance</span
+                      ><span class="cm" style="font-size: 11px; margin: 0"
+                        >125 min · Sat</span
+                      ></span
+                    ></button
+                  ><button class="pint" aria-label="Unpin Dance" aria-pressed="true">
+                    <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 4h6l-1 6 3 3H7l3-3z" fill="currentColor"></path>
+                      <path d="M12 13v7"></path>
+                    </svg>
+                  </button>
+                </div>
+                <span class="ins" aria-hidden="true"></span>
+                <div class="pinc nudge" role="listitem">
+                  <span class="grip" title="Drag to reorder"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      width="14"
+                      height="14"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <circle cx="9" cy="6" r="1.5"></circle>
+                      <circle cx="15" cy="6" r="1.5"></circle>
+                      <circle cx="9" cy="12" r="1.5"></circle>
+                      <circle cx="15" cy="12" r="1.5"></circle>
+                      <circle cx="9" cy="18" r="1.5"></circle>
+                      <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                  ><button class="pinb" aria-label="Sauna, 20 min Sunday">
+                    <span class="ico r"
+                      ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-6 1 1 2 2 3 2 0-2 0-4 0-6z"
+                        ></path></svg></span
+                    ><span style="flex: 1; min-width: 0"
+                      ><span class="cn" style="font-size: 13px">Sauna</span
+                      ><span class="cm" style="font-size: 11px; margin: 0">20 min · Sun</span></span
+                    ></button
+                  ><button class="pint" aria-label="Unpin Sauna" aria-pressed="true">
+                    <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M9 4h6l-1 6 3 3H7l3-3z" fill="currentColor"></path>
+                      <path d="M12 13v7"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div
+                  class="pslot"
+                  style="border-color: rgba(217, 162, 79, 0.5); color: #d9a24f"
+                  aria-hidden="true"
+                >
+                  Drop to pin
+                </div>
+              </div>
+              <div class="sec" style="margin-top: 10px">
+                <div class="lbl">Or pick a category <span class="cnt">33 types</span></div>
+              </div>
+              <nav class="clist" aria-label="Browse by category">
+                <a
+                  class="crow"
+                  href="w03-see-all.dc.html"
+                  style="border-color: #5a4524"
+                  aria-label="Conditioning, 13 types, last: Dance · Sat"
+                  ><span class="ctile g"
+                    ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 12h4l2.5-6 4 12 2.5-6H21"></path></svg></span
+                  ><span class="cbody"
+                    ><span class="cname" style="color: #d9a24f">Conditioning <span>· 13</span></span
+                    ><span class="last" style="color: #90959a">last: Dance · Sat</span></span
+                  ><span class="cmn"
+                    ><span class="mn g"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="15" cy="4.5" r="2"></circle>
+                        <path
+                          d="M13.5 8.5l-3 3.5 3 3-1.5 5.5M10.5 12l-4.5.5M13.5 8.5l3.5 3 3-.5M10 15.5l-3.5 5"
+                        ></path></svg></span
+                    ><span class="mn g"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="4.5" r="2"></circle>
+                        <path d="M12 8v5l-4 7.5M12 13l4.5 7M6.5 10l5.5-2 5-4"></path></svg></span
+                    ><span class="mn g"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="6" cy="17" r="3.5"></circle>
+                        <circle cx="18" cy="17" r="3.5"></circle>
+                        <path d="M6 17l4-7h5l3 7M10 10L9 7H7M12 17l3-7"></path></svg></span
+                    ><span class="mn g"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="13" cy="4.5" r="2"></circle>
+                        <path
+                          d="M12.5 8.5l-2 6 2 2.5v4M10.5 14.5l-2.5 6.5M12.5 8.5l2.5 3 3 1M11.5 9l-3 2.5v3"
+                        ></path></svg></span></span
+                  ><span style="color: #90959a; display: flex"
+                    ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 6l6 6-6 6"></path></svg></span
+                ></a>
+                <div class="cexp" style="border-color: #3d5a2a">
+                  <a
+                    class="crow open"
+                    href="w03-see-all.dc.html"
+                    style="border-color: transparent; background: transparent; min-height: 60px"
+                    aria-label="Sports, 15 types, last: Tennis · 17 Sep"
+                    ><span class="ctile s"
+                      ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"></path></svg></span
+                    ><span class="cbody"
+                      ><span class="cname" style="color: #a8dc7c">Sports <span>· 15</span></span
+                      ><span class="last" style="color: #90959a">last: Tennis · 17 Sep</span></span
+                    ><span class="cmn"
+                      ><span class="mn s"
+                        ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <ellipse cx="10" cy="9" rx="6" ry="6.5"></ellipse>
+                          <path d="M14.3 13.6L20 20M7 5.5l6 7M4.5 9.5h11"></path>
+                          <circle cx="19" cy="5" r="1.5"></circle></svg></span
+                      ><span class="mn s"
+                        ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="10" cy="9" r="6.5"></circle>
+                          <path d="M14.5 13.5L20 19"></path>
+                          <circle cx="8.5" cy="8" r=".6"></circle>
+                          <circle cx="11.5" cy="8" r=".6"></circle>
+                          <circle cx="10" cy="11" r=".6"></circle></svg></span
+                      ><span class="mn s"
+                        ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="9"></circle>
+                          <path d="M12 8l3.5 2.5-1.3 4h-4.4l-1.3-4z"></path></svg></span
+                      ><span class="mn s"
+                        ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M7 11V7.5A4.5 4.5 0 0 1 11.5 3h2A4.5 4.5 0 0 1 18 7.5V13a3 3 0 0 1-3 3H9M7 11a2 2 0 0 0 0 4h2.5M8 16v4h9v-4"
+                          ></path></svg></span></span
+                    ><span style="color: #90959a; display: flex"
+                      ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 10l6 6 6-6"></path></svg></span
+                  ></a>
+                  <div class="tgrid">
+                    <div class="tile2">
+                      <span class="grip"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="6" r="1.5"></circle>
+                          <circle cx="15" cy="6" r="1.5"></circle>
+                          <circle cx="9" cy="12" r="1.5"></circle>
+                          <circle cx="15" cy="12" r="1.5"></circle>
+                          <circle cx="9" cy="18" r="1.5"></circle>
+                          <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                      ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+                        ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="15" cy="9" r="6"></circle>
+                          <path d="M10.8 13.2L4 20M12 7l6 4M13 4.5l-2.5 7"></path></svg></span
+                      ><span style="flex: 1; min-width: 0"
+                        ><span class="cn" style="font-size: 13px">Padel</span
+                        ><span class="cm" style="font-size: 11px; margin: 0"
+                          >90 min · 3 wk ago</span
+                        ></span
+                      ><button class="pint" aria-label="Pin Padel" aria-pressed="false">
+                        <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 4h6l-1 6 3 3H7l3-3z"></path>
+                          <path d="M12 13v7"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="tile2 origin">
+                      <span class="grip"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="6" r="1.5"></circle>
+                          <circle cx="15" cy="6" r="1.5"></circle>
+                          <circle cx="9" cy="12" r="1.5"></circle>
+                          <circle cx="15" cy="12" r="1.5"></circle>
+                          <circle cx="9" cy="18" r="1.5"></circle>
+                          <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                      ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+                        ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                          <ellipse
+                            cx="14"
+                            cy="9"
+                            rx="5.5"
+                            ry="6"
+                            transform="rotate(35 14 9)"
+                          ></ellipse>
+                          <path d="M10 13.5L4 20"></path>
+                          <circle cx="19" cy="19" r="1.6"></circle></svg></span
+                      ><span style="flex: 1; min-width: 0"
+                        ><span class="cn" style="font-size: 13px">Tennis</span
+                        ><span class="cm" style="font-size: 11px; margin: 0"
+                          >60 min · 17 Sep</span
+                        ></span
+                      ><button class="pint" aria-label="Pin Tennis" aria-pressed="false">
+                        <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 4h6l-1 6 3 3H7l3-3z"></path>
+                          <path d="M12 13v7"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="tile2">
+                      <span class="grip"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="6" r="1.5"></circle>
+                          <circle cx="15" cy="6" r="1.5"></circle>
+                          <circle cx="9" cy="12" r="1.5"></circle>
+                          <circle cx="15" cy="12" r="1.5"></circle>
+                          <circle cx="9" cy="18" r="1.5"></circle>
+                          <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                      ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+                        ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="9"></circle>
+                          <path d="M12 7.5l4 2.8-1.5 4.7h-5L8 10.3z"></path></svg></span
+                      ><span style="flex: 1; min-width: 0"
+                        ><span class="cn" style="font-size: 13px">Football</span
+                        ><span class="cm" style="font-size: 11px; margin: 0"
+                          >60 min · 30 Aug</span
+                        ></span
+                      ><button class="pint" aria-label="Pin Football" aria-pressed="false">
+                        <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 4h6l-1 6 3 3H7l3-3z"></path>
+                          <path d="M12 13v7"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="tile2">
+                      <span class="grip"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="6" r="1.5"></circle>
+                          <circle cx="15" cy="6" r="1.5"></circle>
+                          <circle cx="9" cy="12" r="1.5"></circle>
+                          <circle cx="15" cy="12" r="1.5"></circle>
+                          <circle cx="9" cy="18" r="1.5"></circle>
+                          <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                      ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+                        ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M7 10V7a4 4 0 0 1 4-4h3a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H9"></path>
+                          <path d="M7 10a2 2 0 0 0 0 4h3M9 17v4h8v-4"></path></svg></span
+                      ><span style="flex: 1; min-width: 0"
+                        ><span class="cn" style="font-size: 13px">Boxing</span
+                        ><span class="cm" style="font-size: 11px; margin: 0"
+                          >45 min · 12 Aug</span
+                        ></span
+                      ><button class="pint" aria-label="Pin Boxing" aria-pressed="false">
+                        <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 4h6l-1 6 3 3H7l3-3z"></path>
+                          <path d="M12 13v7"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="tile2">
+                      <span class="grip"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="6" r="1.5"></circle>
+                          <circle cx="15" cy="6" r="1.5"></circle>
+                          <circle cx="9" cy="12" r="1.5"></circle>
+                          <circle cx="15" cy="12" r="1.5"></circle>
+                          <circle cx="9" cy="18" r="1.5"></circle>
+                          <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                      ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+                        ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle cx="12" cy="12" r="9"></circle>
+                          <path
+                            d="M3 12h18M12 3v18M5.6 5.6c3 3 3 9.8 0 12.8M18.4 5.6c-3 3-3 9.8 0 12.8"
+                          ></path></svg></span
+                      ><span style="flex: 1; min-width: 0"
+                        ><span class="cn" style="font-size: 13px">Basketball</span
+                        ><span class="cm" style="font-size: 11px; margin: 0">2 Jun</span></span
+                      ><button class="pint" aria-label="Pin Basketball" aria-pressed="false">
+                        <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 4h6l-1 6 3 3H7l3-3z"></path>
+                          <path d="M12 13v7"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="tile2">
+                      <span class="grip"
+                        ><svg
+                          viewBox="0 0 24 24"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <circle cx="9" cy="6" r="1.5"></circle>
+                          <circle cx="15" cy="6" r="1.5"></circle>
+                          <circle cx="9" cy="12" r="1.5"></circle>
+                          <circle cx="15" cy="12" r="1.5"></circle>
+                          <circle cx="9" cy="18" r="1.5"></circle>
+                          <circle cx="15" cy="18" r="1.5"></circle></svg></span
+                      ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+                        ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M3 20l6-10 4 6 3-4 5 8z"></path></svg></span
+                      ><span style="flex: 1; min-width: 0"
+                        ><span class="cn" style="font-size: 13px">Climbing</span
+                        ><span class="cm" style="font-size: 11px; margin: 0">Not yet</span></span
+                      ><button class="pint" aria-label="Pin Climbing" aria-pressed="false">
+                        <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M9 4h6l-1 6 3 3H7l3-3z"></path>
+                          <path d="M12 13v7"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      padding: 8px 4px 0;
+                      font-size: 12px;
+                      color: #71767b;
+                    "
+                  >
+                    <span>Drag a card up to Pinned, or click it to quick-log</span
+                    ><a
+                      href="w03-see-all.dc.html"
+                      style="font-weight: 600; height: 32px; display: flex; align-items: center"
+                      >All 15 sports ›</a
+                    >
+                  </div>
+                </div>
+                <a
+                  class="crow"
+                  href="w03-see-all.dc.html"
+                  style="border-color: #27495a"
+                  aria-label="Recovery, 5 types, last: Sauna · Sun"
+                  ><span class="ctile r"
+                    ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                      <path
+                        d="M12 19c-3.5 0-7.5-2-8.5-6 3 0 6.5 1.5 8.5 6 2-4.5 5.5-6 8.5-6-1 4-5 6-8.5 6zM12 19c-2-3-2-7.5 0-11 2 3.5 2 8 0 11z"
+                      ></path></svg></span
+                  ><span class="cbody"
+                    ><span class="cname" style="color: #93d4f2">Recovery <span>· 5</span></span
+                    ><span class="last" style="color: #90959a">last: Sauna · Sun</span></span
+                  ><span class="cmn"
+                    ><span class="mn r"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 3c.5 4 5 5.5 5 11a5 5 0 0 1-10 0c0-3 2-4 2-6.5 1.2.8 2 2 2 3.5 1.2-2.5.5-5 1-8z"
+                        ></path></svg></span
+                    ><span class="mn r"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 19c-3.5 0-7.5-2-8.5-6 3 0 6.5 1.5 8.5 6 2-4.5 5.5-6 8.5-6-1 4-5 6-8.5 6zM12 19c-2-3-2-7.5 0-11 2 3.5 2 8 0 11z"
+                        ></path></svg></span
+                    ><span class="mn r"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"></path></svg></span
+                    ><span class="mn r"
+                      ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 12a7 7 0 0 1 12-5M19 12a7 7 0 0 1-12 5"></path>
+                        <path d="M17 3v4h-4M7 21v-4h4"></path></svg></span></span
+                  ><span style="color: #90959a; display: flex"
+                    ><svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 6l6 6-6 6"></path></svg></span
+                ></a>
+              </nav>
+            </div>
+            <div class="right">
+              <aside class="panel" aria-label="Quick log">
+                <div style="display: flex; align-items: baseline; justify-content: space-between">
+                  <div style="font-size: 18px; font-weight: 700">Quick log</div>
+                  <span style="font-size: 12px; color: #71767b">stays open while you browse</span>
+                </div>
+                <div
+                  style="
+                    margin-top: 14px;
+                    border: 1px dashed #3b3f43;
+                    border-radius: 14px;
+                    padding: 26px 20px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    gap: 8px;
+                  "
+                >
+                  <div
+                    class="ico"
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      border-radius: 14px;
+                      background: #262a2d;
+                      color: #90959a;
+                    "
+                  >
+                    <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M6 4l12 7-5.5 1.5L10 18z"></path>
+                    </svg>
+                  </div>
+                  <div style="font-size: 16px; font-weight: 600; margin-top: 4px">
+                    Pick an activity
+                  </div>
+                  <div style="font-size: 13px; color: #90959a; line-height: 1.45; max-width: 250px">
+                    Choose any card on the left — duration, time and effort show up here. Log it in
+                    two clicks.
+                  </div>
+                  <div style="display: flex; gap: 6px; margin-top: 6px">
+                    <span class="bdg" style="color: #d9a24f; border-color: rgba(217, 162, 79, 0.5)"
+                      >Conditioning</span
+                    ><span
+                      class="bdg"
+                      style="color: #a8dc7c; border-color: rgba(168, 220, 124, 0.5)"
+                      >Sports</span
+                    ><span
+                      class="bdg"
+                      style="color: #93d4f2; border-color: rgba(147, 212, 242, 0.5)"
+                      >Recovery</span
+                    >
+                  </div>
+                </div>
+                <div style="margin-top: 18px">
+                  <div class="sec" style="height: 32px">
+                    <span class="lbl">Today <span class="cnt">Sat 27 Sep</span></span
+                    ><span class="num" style="font-size: 12px; color: #90959a"
+                      >78 min · 2 entries</span
+                    >
+                  </div>
+                  <div class="tl">
+                    <span class="ico g" style="color: #e9eaec; background: #262a2d"
+                      ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 8v8M3.5 10v4M18 8v8M20.5 10v4M6 12h12"></path></svg></span
+                    ><span style="flex: 1; min-width: 0"
+                      ><span class="cn" style="font-size: 13px">Upper body · gym</span
+                      ><span class="cm" style="font-size: 12px; margin: 0"
+                        >58 min · 14 sets</span
+                      ></span
+                    ><span class="num" style="font-size: 12px; color: #71767b">11:05</span>
+                  </div>
+                  <div class="tl">
+                    <span class="ico g" style=""
+                      ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="13" cy="4" r="2"></circle>
+                        <path d="M10 21l2-6 2 2v4M12 15v-5l3 3h2M12 10l-3 2v3"></path></svg></span
+                    ><span style="flex: 1; min-width: 0"
+                      ><span class="cn" style="font-size: 13px">Walk</span
+                      ><span class="cm" style="font-size: 12px; margin: 0"
+                        >20 min · 2.1 km</span
+                      ></span
+                    ><span class="num" style="font-size: 12px; color: #71767b">08:40</span>
+                  </div>
+                  <div
+                    style="
+                      margin-top: 12px;
+                      border: 1px solid #3b3f43;
+                      border-radius: 12px;
+                      padding: 10px 12px;
+                    "
+                  >
+                    <div style="display: flex; justify-content: space-between; font-size: 12px">
+                      <span style="color: #90959a">Load today</span
+                      ><span style="font-weight: 600">Moderate</span>
+                    </div>
+                    <div
+                      style="
+                        height: 6px;
+                        border-radius: 3px;
+                        background: #262a2d;
+                        margin-top: 8px;
+                        overflow: hidden;
+                      "
+                    >
+                      <div
+                        style="width: 46%; height: 6px; background: #d9a24f; border-radius: 3px"
+                      ></div>
+                    </div>
+                    <div style="font-size: 11.5px; color: #71767b; margin-top: 6px">
+                      Recovery counts too — a sauna tonight balances it.
+                    </div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </main>
+        <div class="ghost" aria-hidden="true">
+          <span class="grip" style="color: #e9eaec"
+            ><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <circle cx="9" cy="6" r="1.5"></circle>
+              <circle cx="15" cy="6" r="1.5"></circle>
+              <circle cx="9" cy="12" r="1.5"></circle>
+              <circle cx="15" cy="12" r="1.5"></circle>
+              <circle cx="9" cy="18" r="1.5"></circle>
+              <circle cx="15" cy="18" r="1.5"></circle></svg></span
+          ><span class="ico s" style="width: 34px; height: 34px; border-radius: 10px"
+            ><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true">
+              <ellipse cx="14" cy="9" rx="5.5" ry="6" transform="rotate(35 14 9)"></ellipse>
+              <path d="M10 13.5L4 20"></path>
+              <circle cx="19" cy="19" r="1.6"></circle></svg></span
+          ><span style="flex: 1; min-width: 0"
+            ><span class="cn" style="font-size: 13px">Tennis</span
+            ><span class="cm" style="font-size: 11px; margin: 0">60 min · 17 Sep</span></span
+          ><span style="color: #d9a24f; display: flex; width: 28px; justify-content: center"
+            ><svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 4h6l-1 6 3 3H7l3-3z" fill="currentColor"></path>
+              <path d="M12 13v7"></path></svg
+          ></span>
+        </div>
+        <div class="dtip" aria-hidden="true">
+          <svg class="i xs" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M9 4h6l-1 6 3 3H7l3-3z" fill="currentColor"></path>
+            <path d="M12 13v7"></path></svg
+          >Drop to pin
+        </div>
+        <svg class="cur" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+          <path
+            d="M5 3l14 8.5-6.2 1.3 3.6 6.8-2.6 1.4-3.6-6.8L5 18.5z"
+            fill="#ffffff"
+            stroke="#16171a"
+            stroke-width="1.4"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+      class Component extends DCLogic {
+      renderVals() { return {}; }
+      }
+    </script>
+  </body>
+</html>

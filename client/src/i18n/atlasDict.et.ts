@@ -5535,4 +5535,21 @@ export const DICT: Record<string, string> = {
   'Your membership is crying.': 'Su kuukaart nutab.',
   '{1}, gym tourist.': '{1}, jõusaaliturist.',
   'Visa expired?': 'Viisa aegus?',
+  'That hits shoulders, arms and grip more than legs.':
+    'See koormab rohkem õlgu, käsi ja haaret kui jalgu.',
+  'Go lighter on heavy pressing and pulling today; legs are fine.':
+    'Rasked surumised ja tõmbed täna kergemalt; jalad on korras.',
+  'Table tennis — that counts.': 'Lauatennis — see läheb arvesse.',
+  'Padel — that counts.': 'Padel — see läheb arvesse.',
+  'Badminton — that counts.': 'Sulgpall — see läheb arvesse.',
+  'Boxing — that counts.': 'Poks — see läheb arvesse.',
+  'Snowboarding — that counts.': 'Lumelaud — see läheb arvesse.',
+  'Hockey — that counts.': 'Jäähoki — see läheb arvesse.',
+  'Golf — that counts.': 'Golf — see läheb arvesse.',
+  'Jump rope — that counts.': 'Hüpitsahüpped — see läheb arvesse.',
+  'Elliptical — that counts.': 'Ellipsitrenažöör — see läheb arvesse.',
+  'Stair climbing — that counts.': 'Trepikõnd — see läheb arvesse.',
+  'Hiking — that counts.': 'Matkamine — see läheb arvesse.',
+  'Rock climbing — that counts.': 'Kaljuronimine — see läheb arvesse.',
+  'Climbing gym — that counts.': 'Ronimissein — see läheb arvesse.',
 };

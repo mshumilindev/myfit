@@ -1,5 +1,6 @@
 import { pushState, refreshPush, setAppBadge } from './push';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
+import { setOverrideUid } from './accountOverrides';
 import { planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
 import { computePlaybook } from './playbook';
 import {
@@ -68,7 +69,8 @@ import { AuthView } from './views/AuthView';
 import { TraineeSessionView } from './views/TraineeSessionView';
 import { Avatar } from './components/Avatar';
 import { LiveHero } from './components/LiveHero';
-import type { SyncError, Notice } from './types';
+import type { SyncError, Notice, InjurySide } from './types';
+import type { HealthFormSpec } from './health';
 import type { MuscleGroup } from './data/exercises';
 import { useFlag, isFlagOn } from './data/flags';
 import type { ProgramsPeer } from './components/ProgramsTabs';
@@ -96,6 +98,9 @@ const SessionBuilderView = lazy(() =>
 );
 const ActivityView = lazy(() =>
   import('./views/ActivityView').then((module) => ({ default: module.ActivityView })),
+);
+const LogActivityView = lazy(() =>
+  import('./views/LogActivityView').then((module) => ({ default: module.LogActivityView })),
 );
 const ExerciseHistoryView = lazy(() =>
   import('./views/ExerciseHistoryView').then((module) => ({
@@ -162,6 +167,9 @@ const CoachView = lazy(() =>
 const MasteryView = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryView })),
 );
+const HealthView = lazy(() =>
+  import('./views/HealthView').then((module) => ({ default: module.HealthView })),
+);
 const InjuryView = lazy(() =>
   import('./views/InjuryView').then((module) => ({ default: module.InjuryView })),
 );
@@ -208,6 +216,7 @@ export type Tab = 'today' | 'overview' | 'progress' | 'gyms' | 'programs' | 'peo
 export type Overlay =
   | { screen: 'session'; workoutId: string }
   | { screen: 'activity'; newType?: string; editId?: string }
+  | { screen: 'log-activity'; cat?: 'conditioning' | 'sport' | 'recovery' }
   | { screen: 'sleep'; wake?: boolean; mode?: 'backfill' | 'schedule' | 'edit'; nightId?: string }
   | { screen: 'past-workout'; workoutId: string; startAdd?: boolean }
   | { screen: 'exercise-history'; name: string; userId?: string; userName?: string }
@@ -234,7 +243,19 @@ export type Overlay =
   | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
   | { screen: 'mastery' }
   | { screen: 'coach' }
-  | { screen: 'injury'; injuryId?: string; checkin?: boolean }
+  | {
+      screen: 'injury';
+      injuryId?: string;
+      checkin?: boolean;
+      /** Health › I got hurt → Still healing: start setup at "how it feels". */
+      prefill?: { bodyPart: string; side: InjurySide; startDay: number };
+    }
+  | {
+      screen: 'health';
+      view?: 'history';
+      hist?: 'list' | 'timeline';
+      form?: HealthFormSpec;
+    }
   | { screen: 'uikit' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
@@ -348,6 +369,8 @@ function toHash(
   }
   if (overlay?.screen === 'session') return '#/session';
   if (overlay?.screen === 'activity') return '#/activity';
+  if (overlay?.screen === 'log-activity')
+    return overlay.cat ? `#/log-activity/${overlay.cat}` : '#/log-activity';
   if (overlay?.screen === 'sleep') return '#/sleep';
   if (overlay?.screen === 'past-workout') return `#/workout/${overlay.workoutId}`;
   if (overlay?.screen === 'exercise-history')
@@ -372,6 +395,7 @@ function toHash(
   if (overlay?.screen === 'history') return '#/history';
   if (overlay?.screen === 'builder') return '#/builder';
   if (overlay?.screen === 'injury') return '#/injury';
+  if (overlay?.screen === 'health') return healthHash(overlay);
   if (overlay?.screen === 'uikit') return '#/uikit';
   if (overlay?.screen === 'notifications') return '#/notifications';
   if (overlay?.screen === 'coach') return '#/coach';
@@ -382,12 +406,57 @@ function toHash(
   return `#/${tab}`;
 }
 
+/** Health hash: #/health, then optionally /history (+ /timeline), then a form:
+ *  /new/{ctx}/{type}, /edit/{periodId} or /injury/{injuryId}. */
+function healthHash(o: Extract<Overlay, { screen: 'health' }>): string {
+  const parts = ['#/health'];
+  if (o.view === 'history') {
+    parts.push('history');
+    if (o.hist === 'timeline' && !o.form) parts.push('timeline');
+  }
+  const f = o.form;
+  if (f?.kind === 'new') parts.push('new', f.ctx, f.type);
+  else if (f?.kind === 'edit') parts.push('edit', encodeURIComponent(f.periodId));
+  else if (f?.kind === 'edit-injury') parts.push('injury', encodeURIComponent(f.injuryId));
+  return parts.join('/');
+}
+
+function healthFromHash(rest: string[]): Extract<Overlay, { screen: 'health' }> {
+  const o: Extract<Overlay, { screen: 'health' }> = { screen: 'health' };
+  let i = 0;
+  if (rest[i] === 'history') {
+    o.view = 'history';
+    i++;
+    if (rest[i] === 'timeline') {
+      o.hist = 'timeline';
+      i++;
+    }
+  }
+  const [k, a, b] = rest.slice(i);
+  const types = ['off', 'active', 'illness', 'injury'] as const;
+  if (k === 'new' && (a === 'start' || a === 'past') && types.includes(b as (typeof types)[number]))
+    o.form = { kind: 'new', ctx: a, type: b as (typeof types)[number] };
+  else if (k === 'edit' && a) o.form = { kind: 'edit', periodId: decodeURIComponent(a) };
+  else if (k === 'injury' && a) o.form = { kind: 'edit-injury', injuryId: decodeURIComponent(a) };
+  return o;
+}
+
 /** Parse a URL hash back into {tab, overlay}. Unknown → Today. */
 function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   const parts = hash.split('?')[0].replace(/^#\/?/, '').split('/');
   const head = parts[0] ?? '';
   if (head === 'session') return { tab: 'today', overlay: { screen: 'session', workoutId: '' } };
   if (head === 'activity') return { tab: 'today', overlay: { screen: 'activity' } };
+  if (head === 'log-activity') {
+    const cat = parts[1];
+    return {
+      tab: 'today',
+      overlay:
+        cat === 'conditioning' || cat === 'sport' || cat === 'recovery'
+          ? { screen: 'log-activity', cat }
+          : { screen: 'log-activity' },
+    };
+  }
   if (head === 'sleep') return { tab: 'today', overlay: { screen: 'sleep' } };
   if (head === 'workout' && parts[1])
     return { tab: 'today', overlay: { screen: 'past-workout', workoutId: parts[1] } };
@@ -439,6 +508,7 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'mastery') return { tab: 'today', overlay: { screen: 'mastery' } };
   if (head === 'coach') return { tab: 'today', overlay: { screen: 'coach' } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
+  if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
   if (head === 'uikit') return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
@@ -553,7 +623,10 @@ export function App() {
   // role claim fresh.
   useEffect(() => {
     const unsubRole = watchRoleClaim();
-    const unsub = onAuthChange((user) => setAuthed(!!user));
+    const unsub = onAuthChange((user) => {
+      setOverrideUid(user?.uid ?? null);
+      setAuthed(!!user);
+    });
     return () => {
       unsub();
       unsubRole();
@@ -1330,6 +1403,9 @@ export function App() {
           />
         </Suspense>
       )}
+      {activeOverlay?.screen === 'log-activity' && (
+        <LogActivityView shell={shell} cat={activeOverlay.cat} onClose={closeOverlay} />
+      )}
       {activeOverlay?.screen === 'activity' && (
         <ActivityView
           newType={activeOverlay.newType}
@@ -1453,6 +1529,16 @@ export function App() {
         <InjuryView
           injuryId={activeOverlay.injuryId}
           checkin={activeOverlay.checkin}
+          prefill={activeOverlay.prefill}
+          onClose={closeOverlay}
+        />
+      )}
+      {activeOverlay?.screen === 'health' && (
+        <HealthView
+          shell={shell}
+          view={activeOverlay.view}
+          hist={activeOverlay.hist}
+          form={activeOverlay.form}
           onClose={closeOverlay}
         />
       )}

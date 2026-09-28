@@ -47,19 +47,34 @@ const FEEL_ICON: Record<'cant' | 'sore' | 'almost', string> = {
 export function InjuryView({
   injuryId,
   checkin,
+  prefill,
   onClose,
 }: {
   injuryId?: string;
   checkin?: boolean;
+  /** Health › I got hurt → Still healing: body part, side and the day it
+   *  happened are known — setup opens at "How does it feel today?". */
+  prefill?: { bodyPart: string; side: InjurySide; startDay: number };
   onClose: () => void;
 }) {
   const store = useStore();
   const active = activeInjuries(store.injuries);
-  const current = (injuryId && active.find((i) => i.id === injuryId)) || active[0] || null;
-  const [mode, setMode] = useState<'plan' | 'setup'>(current ? 'plan' : 'setup');
+  const [createdId, setCreatedId] = useState<string | null>(null);
+  const wanted = createdId ?? injuryId;
+  const current = (wanted && active.find((i) => i.id === wanted)) || active[0] || null;
+  const [mode, setMode] = useState<'plan' | 'setup'>(current && !prefill ? 'plan' : 'setup');
 
   if (mode === 'setup' || !current) {
-    return <InjurySetup onClose={onClose} onDone={() => setMode('plan')} />;
+    return (
+      <InjurySetup
+        prefill={createdId ? undefined : prefill}
+        onClose={onClose}
+        onDone={(id) => {
+          setCreatedId(id);
+          setMode('plan');
+        }}
+      />
+    );
   }
   return (
     <InjuryPlan
@@ -95,11 +110,19 @@ function SetupStepper({ active }: { active: 1 | 2 | 3 }) {
   );
 }
 
-function InjurySetup({ onClose, onDone }: { onClose: () => void; onDone: () => void }) {
+function InjurySetup({
+  onClose,
+  onDone,
+  prefill,
+}: {
+  onClose: () => void;
+  onDone: (injuryId: string) => void;
+  prefill?: { bodyPart: string; side: InjurySide; startDay: number };
+}) {
   const { t } = useT();
-  const [step, setStep] = useState<Step>('where');
-  const [part, setPart] = useState<string | null>(null);
-  const [side, setSide] = useState<InjurySide>('left');
+  const [step, setStep] = useState<Step>(prefill ? 'feel' : 'where');
+  const [part, setPart] = useState<string | null>(prefill?.bodyPart ?? null);
+  const [side, setSide] = useState<InjurySide>(prefill?.side ?? 'left');
   const [reason, setReason] = useState<RehabReason>('injury');
   const [feel, setFeel] = useState<'cant' | 'sore' | 'almost'>('sore');
   const [hasTimeframe, setHasTimeframe] = useState(false);
@@ -116,15 +139,16 @@ function InjurySetup({ onClose, onDone }: { onClose: () => void; onDone: () => v
       fullRestUntil = today + amount * mult;
     }
     const isGeneral = reason !== 'injury';
-    startInjury({
+    const inj = startInjury({
       reason,
       bodyPart: isGeneral ? '' : (part ?? 'knee'),
       side: isGeneral ? undefined : side,
       muscles: isGeneral ? [] : muscles,
       stage: hasTimeframe ? 'protect' : feelToStage(feel),
       fullRestUntil,
+      startDay: prefill?.startDay,
     });
-    onDone();
+    onDone(inj.id);
   };
 
   const back = () => {

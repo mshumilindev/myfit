@@ -19,6 +19,8 @@ export interface ActivityType {
   met: number;
   /** Whether a distance field is worth offering. */
   tracksDistance?: boolean;
+  /** Shown in its own "Sports" group in the picker (still conditioning load). */
+  sport?: boolean;
 }
 
 /**
@@ -53,6 +55,48 @@ export const ACTIVITY_TYPES: ActivityType[] = [
   { key: 'hiit', category: 'conditioning', icon: 'lightning', met: 8.0 },
   { key: 'dance', category: 'conditioning', icon: 'disco-ball', met: 5.5 },
   { key: 'cardio', category: 'conditioning', icon: 'heartbeat', met: 6.0 },
+  {
+    key: 'hike',
+    category: 'conditioning',
+    icon: 'person-simple-hike',
+    met: 6.0,
+    tracksDistance: true,
+  },
+  { key: 'elliptical', category: 'conditioning', icon: 'sneaker-move', met: 5.0 },
+  { key: 'stairs', category: 'conditioning', icon: 'stairs', met: 9.0 },
+  { key: 'jumprope', category: 'conditioning', icon: 'infinity', met: 11.0 },
+  { key: 'pilates', category: 'conditioning', icon: 'person-arms-spread', met: 3.0 },
+  // Sports — conditioning load like cardio, grouped apart in the picker.
+  { key: 'football', category: 'conditioning', icon: 'soccer-ball', met: 7.0, sport: true },
+  { key: 'basketball', category: 'conditioning', icon: 'basketball', met: 6.5, sport: true },
+  { key: 'volleyball', category: 'conditioning', icon: 'volleyball', met: 4.0, sport: true },
+  { key: 'tennis', category: 'conditioning', icon: 'tennis-ball', met: 7.3, sport: true },
+  { key: 'padel', category: 'conditioning', icon: 'racquet', met: 6.0, sport: true },
+  { key: 'badminton', category: 'conditioning', icon: 'feather', met: 5.5, sport: true },
+  { key: 'tabletennis', category: 'conditioning', icon: 'ping-pong', met: 4.0, sport: true },
+  { key: 'boxing', category: 'conditioning', icon: 'boxing-glove', met: 7.8, sport: true },
+  { key: 'martial', category: 'conditioning', icon: 'hand-fist', met: 7.0, sport: true },
+  // Outdoor rock climbing and an indoor climbing gym are different days out.
+  { key: 'climbing', category: 'conditioning', icon: 'mountains', met: 8.0, sport: true },
+  { key: 'climbgym', category: 'conditioning', icon: 'hand-grabbing', met: 5.8, sport: true },
+  { key: 'hockey', category: 'conditioning', icon: 'hockey', met: 8.0, sport: true },
+  {
+    key: 'ski',
+    category: 'conditioning',
+    icon: 'person-simple-ski',
+    met: 6.0,
+    tracksDistance: true,
+    sport: true,
+  },
+  {
+    key: 'snowboard',
+    category: 'conditioning',
+    icon: 'person-simple-snowboard',
+    met: 5.3,
+    sport: true,
+  },
+  { key: 'golf', category: 'conditioning', icon: 'golf', met: 4.8, sport: true },
+  { key: 'sport', category: 'conditioning', icon: 'trophy', met: 6.0, sport: true },
   { key: 'yoga', category: 'recovery', icon: 'yoga', met: 2.5 },
   { key: 'mobility', category: 'recovery', icon: 'person-simple-tai-chi', met: 2.3 },
   { key: 'massage', category: 'recovery', icon: 'hand-heart', met: 1.3 },
@@ -70,6 +114,14 @@ export function activityType(key: string): ActivityType | null {
 /** The category for an activity, trusting its stored value, then its type. */
 export function activityCategory(a: Activity): ActivityCategory {
   return a.category ?? activityType(a.type)?.category ?? 'conditioning';
+}
+
+/** Colour family for an activity type: sports get their own, else its category. */
+export function activityTone(
+  typeKey: string,
+  category: ActivityCategory,
+): 'sport' | ActivityCategory {
+  return activityType(typeKey)?.sport ? 'sport' : category;
 }
 
 /** Elapsed minutes of an activity (stored duration, else start→finish). */

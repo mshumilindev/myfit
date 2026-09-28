@@ -25,6 +25,7 @@ alwaysApply: true
 | Десктоп | Electron у треї (`desktop/`), сервер запускає як дочірній процес |
 | Тести | `scripts/smoke.mjs` (API-контракт), `scripts/validate-sql.mjs`; юніт-тести — Vitest, коли з'явиться крок у DEV-PLAN |
 | Lint / format | ESLint (flat config, typescript-eslint) + Prettier |
+| UI-кіт | `client/src/components/ui/` + Storybook 10 (`@storybook/react-vite`, dev-only; ADR 001) — див. [ui-kit.mdc](./ui-kit.mdc) |
 
 ## Анти-патерни (рев'ю МАЄ їх ловити в новому/зміненому коді)
 

@@ -29,8 +29,44 @@ export interface ActivityReport {
 
 /** Activity words → catalog key and a name. Checked in order (a sport before "run"). */
 const KINDS: [RegExp, string, [string, string]][] = [
+  // Specific sports first — the broader families below would catch them.
+  [
+    /(^| )(table tennis|ping ?pong|настільн\S* теніс\S*|настольн\S* теннис\S*)( |$)/u,
+    'tabletennis',
+    ['Table tennis', 'Настільний теніс'],
+  ],
+  [/(^| )(padel|падел\S*)( |$)/u, 'padel', ['Padel', 'Падел']],
+  [/(^| )(badminton|бадмінтон\S*|бадминтон\S*)( |$)/u, 'badminton', ['Badminton', 'Бадмінтон']],
+  [
+    /(^| )(boxing|boxed|box|kickbox\S*|бокс\S*|боксув\S*|боксир\S*|кікбокс\S*)( |$)/u,
+    'boxing',
+    ['Boxing', 'Бокс'],
+  ],
+  [/(^| )(snowboard\S*|сноуборд\S*)( |$)/u, 'snowboard', ['Snowboarding', 'Сноуборд']],
+  [/(^| )(hockey|хокей\S*|хоккей\S*)( |$)/u, 'hockey', ['Hockey', 'Хокей']],
+  [/(^| )(golf\S*|гольф\S*)( |$)/u, 'golf', ['Golf', 'Гольф']],
+  [
+    /(^| )(jump ?rope|skipping rope|rope skipping|скакалк\S*|скакалц\S*)( |$)/u,
+    'jumprope',
+    ['Jump rope', 'Скакалка'],
+  ],
+  [
+    /(^| )(elliptical|cross ?trainer|орбітрек\S*|орбитрек\S*|еліпс\S*|эллипс\S*)( |$)/u,
+    'elliptical',
+    ['Elliptical', 'Орбітрек'],
+  ],
+  [
+    /(^| )(stairmaster|stair master|stair climber|stairs|сходах|сходи|ступеньк\S*|лестниц\S*)( |$)/u,
+    'stairs',
+    ['Stair climbing', 'Сходи'],
+  ],
+  [
+    /(^| )(hike|hiked|hiking|trek\S*|похід|поход|походi|в гори|у гори|в горы|по горах)( |$)/u,
+    'hike',
+    ['Hiking', 'Похід'],
+  ],
   [/(^| )(danc\S*|zumba|танц\S*|tantsi\S*|tants\S*)/u, 'dance', ['Dancing', 'Танці']],
-  [/(^| )(pilates|пілатес\S*|пилатес\S*)/u, 'mobility', ['Pilates', 'Пілатес']],
+  [/(^| )(pilates|пілатес\S*|пилатес\S*)/u, 'pilates', ['Pilates', 'Пілатес']],
   [/(^| )(yoga|йог\S*|йоз\S*|joga)/u, 'yoga', ['Yoga', 'Йога']],
   [
     /(^| )(stretch\S*|mobility work|розтяжк\S*|розтягув\S*|растяжк\S*)/u,
@@ -45,29 +81,30 @@ const KINDS: [RegExp, string, [string, string]][] = [
     ['Cold exposure', 'Холод'],
   ],
   [/(^| )(hiit|tabata|табата|crossfit|кросфіт\S*|кроссфит\S*)( |$)/u, 'hiit', ['HIIT', 'HIIT']],
-  [/(^| )(football|soccer|футбол\S*)/u, 'cardio', ['Football', 'Футбол']],
-  [/(^| )(basketball|баскетбол\S*)/u, 'cardio', ['Basketball', 'Баскетбол']],
+  [/(^| )(football|soccer|футбол\S*)/u, 'football', ['Football', 'Футбол']],
+  [/(^| )(basketball|баскетбол\S*)/u, 'basketball', ['Basketball', 'Баскетбол']],
   [
     /(^| )(tennis|padel|squash|badminton|теніс\S*|теннис\S*|бадмінтон\S*)/u,
-    'cardio',
+    'tennis',
     ['Tennis', 'Теніс'],
   ],
-  [/(^| )(volleyball|волейбол\S*)/u, 'cardio', ['Volleyball', 'Волейбол']],
+  [/(^| )(volleyball|волейбол\S*)/u, 'volleyball', ['Volleyball', 'Волейбол']],
   [
     /(^| )(boxing|boxed|box|kickbox\S*|sparr\S*|bjj|jiu jitsu|mma|wrestl\S*|бокс\S*|єдиноборств\S*|спаринг\S*)( |$)/u,
-    'cardio',
+    'martial',
     ['Combat training', 'Єдиноборства'],
   ],
   [
-    /(^| )(climb\S*|boulder\S*|скелелаз\S*|скалолаз\S*|скеледром\S*)/u,
-    'cardio',
-    ['Climbing', 'Скелелазіння'],
+    /(^| )(boulder\S*|climbing gym|climbing wall|indoor climb\S*|скеледром\S*|скалодром\S*|боулдер\S*)/u,
+    'climbgym',
+    ['Climbing gym', 'Скеледром'],
   ],
   [
-    /(^| )(ski|skis|skied|skiing|snowboard\S*|лиж\S*|сноуборд\S*)( |$)/u,
-    'cardio',
-    ['Skiing', 'Лижі'],
+    /(^| )(climb\S*|скелелаз\S*|скалолаз\S*|на скел\S*)/u,
+    'climbing',
+    ['Rock climbing', 'Скелелазіння'],
   ],
+  [/(^| )(ski|skis|skied|skiing|snowboard\S*|лиж\S*|сноуборд\S*)( |$)/u, 'ski', ['Skiing', 'Лижі']],
   [/(^| )(surf\S*|серф\S*)/u, 'cardio', ['Surfing', 'Серфінг']],
   [/(^| )(skat\S*|hockey|ковзан\S*|хокей\S*)/u, 'cardio', ['Skating', 'Ковзани']],
   [
@@ -104,12 +141,37 @@ const KINDS: [RegExp, string, [string, string]][] = [
  */
 const KINDS_X: [RegExp, string, [string, string]][] = [
   [
+    /(^| )(tenis stolow\S*|tenis stołow\S*|stalo teni\S*|lauatennis\S*)( |$)/u,
+    'tabletennis',
+    ['Table tennis', 'Настільний теніс'],
+  ],
+  [/(^| )(badminton\S*|sulgpall\S*)( |$)/u, 'badminton', ['Badminton', 'Бадмінтон']],
+  [/(^| )(boks\S*|poksi\S*|bokso\S*)( |$)/u, 'boxing', ['Boxing', 'Бокс']],
+  [/(^| )(hokej\S*|ledo ritul\S*|jaahoki\S*|jäähoki\S*)( |$)/u, 'hockey', ['Hockey', 'Хокей']],
+  [
+    /(^| )(snowboard\S*|snieglent\S*|lumelaua\S*|lumelaud\S*)( |$)/u,
+    'snowboard',
+    ['Snowboarding', 'Сноуборд'],
+  ],
+  [/(^| )(golf\S*)( |$)/u, 'golf', ['Golf', 'Гольф']],
+  [
+    /(^| )(skakank\S*|sokdyn\S*|šokdyn\S*|hupits\S*|hüpits\S*)( |$)/u,
+    'jumprope',
+    ['Jump rope', 'Скакалка'],
+  ],
+  [/(^| )(orbitrek\S*|elipsin\S*|ellips\S*)( |$)/u, 'elliptical', ['Elliptical', 'Орбітрек']],
+  [
+    /(^| )(wędrówk\S*|wedrowk\S*|w gory|w góry|zygi\S*|žygi\S*|matka\S*|matkasin)( |$)/u,
+    'hike',
+    ['Hiking', 'Похід'],
+  ],
+  [
     /(^| )(tanc\S*|taniec|tańc\S*|sokau|sokiau|sokom\S*|sokiai|tantsisin)( |$)/u,
     'dance',
     ['Dancing', 'Танці'],
   ],
   [/(^| )(jooga\S*|jogi|joge|jogos|jogą|joga)( |$)/u, 'yoga', ['Yoga', 'Йога']],
-  [/(^| )(pilates\S*)( |$)/u, 'mobility', ['Pilates', 'Пілатес']],
+  [/(^| )(pilates\S*)( |$)/u, 'pilates', ['Pilates', 'Пілатес']],
   [
     /(^| )(rozciąg\S*|rozciag\S*|tempim\S*|venitus\S*|venitasin)( |$)/u,
     'mobility',
@@ -117,21 +179,26 @@ const KINDS_X: [RegExp, string, [string, string]][] = [
   ],
   [/(^| )(masaz\S*|masaż\S*|massaaz\S*|massaaž\S*)( |$)/u, 'massage', ['Massage', 'Масаж']],
   [/(^| )(saun\S*|pirt\S*)( |$)/u, 'sauna', ['Sauna', 'Сауна']],
-  [/(^| )(piłk\S*|pilk\S*|futbol\S*|jalgpall\S*)( |$)/u, 'cardio', ['Football', 'Футбол']],
+  [/(^| )(piłk\S*|pilk\S*|futbol\S*|jalgpall\S*)( |$)/u, 'football', ['Football', 'Футбол']],
   [
     /(^| )(koszyk\S*|kosza|krepsin\S*|krepšin\S*|korvpall\S*)( |$)/u,
-    'cardio',
+    'basketball',
     ['Basketball', 'Баскетбол'],
   ],
-  [/(^| )(tenis\S*|tennis\S*|padel\S*)( |$)/u, 'cardio', ['Tennis', 'Теніс']],
-  [/(^| )(siatk\S*|tinklin\S*|vorkpall\S*)( |$)/u, 'cardio', ['Volleyball', 'Волейбол']],
-  [/(^| )(boks\S*|poksi\S*)( |$)/u, 'cardio', ['Combat training', 'Єдиноборства']],
+  [/(^| )(tenis\S*|tennis\S*|padel\S*)( |$)/u, 'tennis', ['Tennis', 'Теніс']],
+  [/(^| )(siatk\S*|tinklin\S*|vorkpall\S*)( |$)/u, 'volleyball', ['Volleyball', 'Волейбол']],
+  [/(^| )(boks\S*|poksi\S*)( |$)/u, 'martial', ['Combat training', 'Єдиноборства']],
+  [
+    /(^| )(scian\S*|ścian\S*|sienel\S*|ronimissein\S*|boulder\S*)( |$)/u,
+    'climbgym',
+    ['Climbing gym', 'Скеледром'],
+  ],
   [
     /(^| )(wspin\S*|laipio\S*|laipiojau|ronisin|ronida\S*)( |$)/u,
-    'cardio',
-    ['Climbing', 'Скелелазіння'],
+    'climbing',
+    ['Rock climbing', 'Скелелазіння'],
   ],
-  [/(^| )(nart\S*|slid\S*|suusata\S*|suusk\S*|suusatasin)( |$)/u, 'cardio', ['Skiing', 'Лижі']],
+  [/(^| )(nart\S*|slid\S*|suusata\S*|suusk\S*|suusatasin)( |$)/u, 'ski', ['Skiing', 'Лижі']],
   [
     /(^| )(pływ\S*|plyw\S*|przepłyn\S*|basen\S*|plauk\S*|baseine|baseinas|baseiną|uju\S*|bassein\S*)( |$)/u,
     'swim',
@@ -395,6 +462,8 @@ function durationText(min: number, uk: boolean): string {
 }
 
 /** Recovery kinds ease the load; the rest add to it. */
+/** Sports that load the upper body and grip more than the legs. */
+const UPPER = new Set(['boxing', 'martial', 'climbing', 'climbgym']);
 const RECOVERY = new Set(['yoga', 'mobility', 'massage', 'sauna', 'cold']);
 
 /** The answer: acknowledged, what it means for lifting, and "log it?". */
@@ -423,6 +492,13 @@ export function activityAnswer(
       L(
         'That’s recovery work — it eases your load rather than adds to it. Good call.',
         'Це відновлення — воно знімає навантаження, а не додає. Правильно.',
+      ),
+    );
+  else if (UPPER.has(r.kind))
+    out.push(
+      L(
+        'That hits shoulders, arms and grip more than legs. Go lighter on heavy pressing and pulling today; legs are fine.',
+        'Це більше плечі, руки й хват, ніж ноги. Важкі жими й тяги сьогодні легше, ноги можна.',
       ),
     );
   else if (r.kind === 'swim')

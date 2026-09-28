@@ -25,7 +25,13 @@ import { ConfirmDialog, Icon } from '../ui';
 import { EffortGauge } from '../components/EffortGauge';
 import { DateField } from '../components/PickerFields';
 import { TimelineRange } from '../components/TimelineRange';
-import { activityType, activityElapsedMs, isActivityPaused, estimateCalories } from '../activities';
+import {
+  activityType,
+  activityElapsedMs,
+  activityTone,
+  isActivityPaused,
+  estimateCalories,
+} from '../activities';
 import type { Activity, ActivityEffort } from '../types';
 
 const EFFORTS: ActivityEffort[] = ['light', 'moderate', 'hard'];
@@ -122,7 +128,7 @@ function NewActivity({ typeKey, onClose }: { typeKey: string; onClose: () => voi
   const pastKcal = estimateCalories(type, duration, bodyKg, effort);
 
   return (
-    <div className={`screen activity-screen cat-${type.category}`}>
+    <div className={`screen activity-screen cat-${activityTone(type.key, type.category)}`}>
       <ActivityHead type={type} isRecovery={isRecovery} onClose={onClose} t={t} />
 
       <div className="seg2 act-mode-seg">
@@ -224,7 +230,7 @@ function EditActivity({ activity, onClose }: { activity: Activity; onClose: () =
   }
 
   return (
-    <div className={`screen activity-screen cat-${activity.category}`}>
+    <div className={`screen activity-screen cat-${activityTone(activity.type, activity.category)}`}>
       <ActivityHead
         type={type}
         isRecovery={isRecovery}
@@ -321,7 +327,7 @@ function RunningActivity({ onClose }: { onClose: () => void }) {
   const kcal = type ? estimateCalories(type, minutes, bodyKg, effort) : null;
 
   return (
-    <div className={`screen activity-screen cat-${activity.category}`}>
+    <div className={`screen activity-screen cat-${activityTone(activity.type, activity.category)}`}>
       <ActivityHead
         type={type}
         isRecovery={isRecovery}
@@ -443,7 +449,9 @@ function ActivityHead({
         <Icon name={type?.icon ?? 'heartbeat'} />
         {type ? (t.actType[type.key] ?? type.key) : (fallbackName ?? '')}
       </span>
-      <span className={`act-cat-badge cat-${isRecovery ? 'recovery' : 'conditioning'}`}>
+      <span
+        className={`act-cat-badge cat-${isRecovery ? 'recovery' : type?.sport ? 'sport' : 'conditioning'}`}
+      >
         <Icon name={isRecovery ? 'wave-sine' : 'lightning'} weight="fill" />
         {isRecovery ? t.actCountsRecovery : t.actAddsConditioning}
       </span>

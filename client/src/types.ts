@@ -297,6 +297,8 @@ export interface RestPeriod {
   mode: RestMode;
   createdAt: number;
   note?: string | null;
+  /** User label from the Health form ("Vacation", "Flu"); null = the mode's name. */
+  name?: string | null;
   /** Open-ended (illness "until I'm better"): no fixed end yet — treated as
    *  running from startDay up to today until closed via endRestPeriod. */
   open?: boolean;

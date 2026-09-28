@@ -5557,4 +5557,21 @@ export const DICT: Record<string, string> = {
   'Your membership is crying.': 'Tavo abonementas verkia.',
   '{1}, gym tourist.': '{1}, sporto salės turiste.',
   'Visa expired?': 'Vizos galiojimas baigėsi?',
+  'That hits shoulders, arms and grip more than legs.':
+    'Tai labiau apkrauna pečius, rankas ir sukibimą nei kojas.',
+  'Go lighter on heavy pressing and pulling today; legs are fine.':
+    'Sunkius spaudimus ir traukimus šiandien lengviau; kojoms viskas gerai.',
+  'Table tennis — that counts.': 'Stalo tenisas — tai skaičiuojasi.',
+  'Padel — that counts.': 'Padelis — tai skaičiuojasi.',
+  'Badminton — that counts.': 'Badmintonas — tai skaičiuojasi.',
+  'Boxing — that counts.': 'Boksas — tai skaičiuojasi.',
+  'Snowboarding — that counts.': 'Snieglentė — tai skaičiuojasi.',
+  'Hockey — that counts.': 'Ledo ritulys — tai skaičiuojasi.',
+  'Golf — that counts.': 'Golfas — tai skaičiuojasi.',
+  'Jump rope — that counts.': 'Šokdynė — tai skaičiuojasi.',
+  'Elliptical — that counts.': 'Elipsinis treniruoklis — tai skaičiuojasi.',
+  'Stair climbing — that counts.': 'Lipimas laiptais — tai skaičiuojasi.',
+  'Hiking — that counts.': 'Žygis — tai skaičiuojasi.',
+  'Rock climbing — that counts.': 'Uolų laipiojimas — tai skaičiuojasi.',
+  'Climbing gym — that counts.': 'Laipiojimo sienelė — tai skaičiuojasi.',
 };

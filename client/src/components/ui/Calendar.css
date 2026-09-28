@@ -1,0 +1,242 @@
+/* Kit Calendar — tokens only. Selection colours come from the tone family
+   (--t-base solid cap, --t-tint band, --t-on ink on the solid cap). */
+.uical {
+  --cal-cell: var(--tap-min);
+  --cal-num: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+@media (min-width: 720px) and (pointer: fine) {
+  .uical {
+    --cal-cell: 40px;
+    --cal-num: 36px;
+  }
+}
+.uical-presets,
+.uical-footer {
+  min-width: 0;
+}
+.uical-months {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-6);
+}
+.uical.is-double .uical-months {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.uical-month {
+  min-width: 0;
+}
+
+/* Month header: [prev] Month Year [next] — equal side slots keep the title
+   centred over its own grid. */
+.uical-head {
+  display: grid;
+  grid-template-columns: var(--tap-min) minmax(0, 1fr) var(--tap-min);
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
+}
+.uical-title {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uical-nav,
+.uical-navsp {
+  width: var(--tap-min);
+  height: var(--tap-min);
+}
+.uical-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 18px;
+  cursor: pointer;
+}
+.uical-nav .ui-icon {
+  display: inline-flex;
+  font-size: 18px;
+}
+.uical-nav:hover:not(:disabled) {
+  background: var(--color-tile);
+}
+.uical-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Grid */
+.uical-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.uical-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.uical-heads {
+  margin-bottom: var(--sp-1);
+}
+.uical-dw {
+  height: var(--sp-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+}
+.uical-cell {
+  position: relative;
+  height: var(--cal-cell);
+  min-width: 0;
+}
+/* Range band halves — drawn behind the day where the range continues. */
+.uical-cell.band-l::before,
+.uical-cell.band-r::after {
+  content: '';
+  position: absolute;
+  top: calc((var(--cal-cell) - var(--cal-num)) / 2);
+  height: var(--cal-num);
+  background: var(--t-tint);
+}
+.uical-cell.band-l::before {
+  left: 0;
+  right: 50%;
+}
+.uical-cell.band-r::after {
+  left: 50%;
+  right: 0;
+}
+.uical-day {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.uical-num {
+  width: min(100%, var(--cal-num));
+  height: var(--cal-num);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+.uical-day:hover:not(:disabled) .uical-num {
+  background: var(--color-tile);
+}
+.uical-day:focus-visible {
+  outline: none;
+}
+.uical-day:focus-visible .uical-num {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* States */
+.uical-cell.is-today .uical-num {
+  box-shadow: inset 0 0 0 1.5px var(--color-text-muted);
+}
+.uical-cell.is-band .uical-num,
+.uical-cell.is-band .uical-day:hover:not(:disabled) .uical-num {
+  background: var(--t-tint);
+  color: var(--t-base);
+}
+.uical-cell.is-solid .uical-num,
+.uical-cell.is-solid .uical-day:hover:not(:disabled) .uical-num {
+  background: var(--t-base);
+  color: var(--t-on);
+  font-weight: 700;
+  box-shadow: none;
+}
+/* Ongoing: the open end is a dashed cap on today. */
+.uical-cell.is-open .uical-num {
+  box-shadow: none;
+  border: 2px dashed var(--t-base);
+  font-weight: 700;
+}
+.uical-cell.is-disabled .uical-day {
+  cursor: default;
+  color: var(--color-text-disabled);
+}
+.uical-cell.is-skipped .uical-num {
+  color: var(--color-text-muted);
+  box-shadow: inset 0 0 0 1px var(--t-line);
+}
+
+/* Markers */
+.uical-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc((var(--cal-cell) - var(--cal-num)) / 2 + 4px);
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+  pointer-events: none;
+}
+.uical-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--t-base);
+}
+.uical-cell.is-solid .uical-dots i {
+  background: var(--t-on);
+}
+.uical-cell.is-disabled .uical-dots i {
+  opacity: 0.5;
+}
+.uical-day:has(.uical-dots) .uical-num {
+  padding-bottom: 6px;
+}
+
+/* Legend */
+.uical-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.uical-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.uical-legend i {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--t-base);
+}

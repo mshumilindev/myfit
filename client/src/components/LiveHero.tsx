@@ -102,7 +102,7 @@ export function LiveHero({
         {home ? (
           <img className="home-hero-img" src="/home-hero.webp" alt="" />
         ) : gym ? (
-          <GymThumb name={gym.name} lat={gym.lat} lng={gym.lng} size={320} />
+          <GymThumb name={gym.name} lat={gym.lat} lng={gym.lng} size={320} eager />
         ) : (
           <GymThumb name="" lat={0} lng={0} size={320} />
         )}

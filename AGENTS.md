@@ -12,6 +12,7 @@
 | `architecture.mdc`   | Shell + сервіс-модулі, API-межа, офлайн-черга, помилки, нейминг |
 | `quality-gate.mdc`   | Lint / format / typecheck / тести перед push                    |
 | `test-integrity.mdc` | Тести — контракти; заборонені шляхи до зеленого                 |
+| `ui-kit.mdc`         | UI-кіт + Storybook: спершу кіт і сторіз, тільки токени, 8-pt    |
 
 ## Швидкі команди
 
@@ -21,6 +22,7 @@ npm run typecheck    # tsc у всіх трьох воркспейсах
 npm run lint         # ESLint по репо
 npm run format:check # Prettier без запису
 npm run build        # server + client + desktop
+npm run storybook    # каталог UI-кіту :6006 (build-storybook — статичний)
 GYM_DATA_DIR=$(mktemp -d) PORT=4499 npm run start -w server &
 BASE=http://localhost:4499 node scripts/smoke.mjs   # API-смоук на тестовій БД
 ```

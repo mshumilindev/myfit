@@ -1,0 +1,79 @@
+/* Colour families → --t-base / --t-tint / --t-text / --t-line (see tones.ts).
+   --t-on is the ink for text on a solid --t-base fill. Tokens only. */
+.uit--neutral {
+  --t-base: var(--color-text);
+  --t-tint: var(--color-tile);
+  --t-text: var(--color-text);
+  --t-line: var(--color-border);
+  --t-on: var(--color-bg);
+}
+.uit--accent {
+  --t-base: var(--color-accent);
+  --t-tint: var(--color-accent-tint);
+  --t-text: var(--color-accent-text);
+  --t-line: var(--color-accent-line);
+  --t-on: var(--color-bg);
+}
+.uit--rest {
+  --t-base: var(--color-rest);
+  --t-tint: var(--color-rest-tint);
+  --t-text: var(--color-rest-text);
+  --t-line: var(--color-rest-line);
+  --t-on: var(--color-rest-tint);
+}
+.uit--active {
+  --t-base: var(--color-active);
+  --t-tint: var(--color-active-tint);
+  --t-text: var(--color-active-text);
+  --t-line: var(--color-active-line);
+  --t-on: var(--color-active-tint);
+}
+.uit--illness {
+  --t-base: var(--color-illness);
+  --t-tint: var(--color-illness-tint);
+  --t-text: var(--color-illness-text);
+  --t-line: var(--color-illness-line);
+  --t-on: var(--color-illness-tint);
+}
+.uit--injury {
+  --t-base: var(--color-injury);
+  --t-tint: var(--color-injury-tint);
+  --t-text: var(--color-injury-text);
+  --t-line: var(--color-injury-line);
+  --t-on: var(--color-injury-tint);
+}
+.uit--sleep {
+  --t-base: var(--color-sleep);
+  --t-tint: var(--color-sleep-tint);
+  --t-text: var(--color-sleep-text);
+  --t-line: var(--color-sleep-line);
+  --t-on: var(--color-sleep-tint);
+}
+.uit--sport {
+  --t-base: var(--color-sport);
+  --t-tint: var(--color-sport-tint);
+  --t-text: var(--color-sport-text);
+  --t-line: var(--color-sport-line);
+  --t-on: var(--color-sport-tint);
+}
+.uit--ok {
+  --t-base: var(--color-ok);
+  --t-tint: var(--color-ok-tint);
+  --t-text: var(--color-ok-text);
+  --t-line: var(--color-ok-line);
+  --t-on: var(--color-ok-tint);
+}
+.uit--danger {
+  --t-base: var(--color-danger);
+  --t-tint: var(--color-danger-tint);
+  --t-text: var(--color-danger-text);
+  --t-line: var(--color-danger-line);
+  --t-on: var(--color-bg);
+}
+.uit--kcal {
+  --t-base: var(--color-kcal);
+  --t-tint: var(--color-kcal-tint);
+  --t-text: var(--color-kcal-text);
+  --t-line: var(--color-kcal-line);
+  --t-on: var(--color-bg);
+}

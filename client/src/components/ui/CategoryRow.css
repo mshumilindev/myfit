@@ -1,0 +1,85 @@
+.uicat {
+  width: 100%;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-3) var(--sp-3) var(--sp-3);
+  border: 1px solid var(--t-line);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.uicat:hover {
+  background: color-mix(in srgb, var(--t-tint) 45%, var(--color-surface));
+}
+.uicat.is-selected {
+  border-color: var(--t-base);
+  background: var(--t-tint);
+}
+.uicat:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.uicat-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.uicat-t {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--t-base);
+}
+.uicat-n {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+.uicat-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.uicat-minis {
+  display: flex;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
+.uicat.is-muted .uicat-minis {
+  opacity: 0.5;
+}
+.uicat-m {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.uicat.is-selected .uicat-m {
+  color: var(--t-base);
+}
+.uicat--inline .uicat-minis {
+  gap: 6px;
+}
+.uicat .uicat-chev {
+  flex-shrink: 0;
+  display: inline-flex;
+  font-size: 16px;
+  color: var(--color-text-faint);
+}
+.uicat-m .ui-icon {
+  display: inline-flex;
+  font-size: 12px;
+}

@@ -58,7 +58,13 @@ import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
 import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
 import { AtlasSoloStrip, AtlasStoryItem } from '../components/AtlasStrip';
-import { activityType, activityCategory, activityWeek, workoutCalories } from '../activities';
+import {
+  activityType,
+  activityCategory,
+  activityTone,
+  activityWeek,
+  workoutCalories,
+} from '../activities';
 import { restingForDay } from '../dayEnergy';
 import { buildReadinessNudge } from '../components/Readiness';
 import { NudgeStack, type Nudge } from '../components/NudgeStack';
@@ -66,6 +72,7 @@ import { SleepForgotBanner, SleepAutoFilledCard } from '../components/SleepAutom
 import { LESSON_COUNT, ALL_LESSONS, isReady } from '../learn/catalog';
 import { ConfirmDialog, Icon, Sheet, useIsDesktop } from '../ui';
 import { REHAB_STAGES, stageIndex, inFullRest, nextStage } from '../injury';
+import { useGymStep } from '../components/useGymStep';
 
 type Store = ReturnType<typeof useStore>;
 
@@ -105,6 +112,7 @@ const SUGGEST_DISMISS_KEY = 'spotter.progSuggest.dismissedAt';
 const SUGGEST_COOLDOWN_MS = 12 * 24 * 60 * 60 * 1000;
 
 export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
+  const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
   const { t, locale } = useT();
   const presenceOn = useFlag('gymPresence');
@@ -332,8 +340,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   function startProgramDay(day: number) {
     if (resumeLive()) return;
     if (!assignment) return;
-    const id = startProgramDaySession(assignment, day, programDayName(assignment, day, t.progDay));
-    if (id) shell.openOverlay({ screen: 'session', workoutId: id });
+    void withGym((gymId) => {
+      const id = startProgramDaySession(
+        assignment,
+        day,
+        programDayName(assignment, day, t.progDay),
+        gymId,
+      );
+      if (id) shell.openOverlay({ screen: 'session', workoutId: id });
+    });
   }
 
   if (showSkeleton) {
@@ -1127,7 +1142,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         {banners}
         {liveAct && (
           <button
-            className={`td-resume-activity cat-${activityCategory(liveAct)}`}
+            className={`td-resume-activity cat-${activityTone(liveAct.type, activityCategory(liveAct))}`}
             onClick={() => shell.openOverlay({ screen: 'activity' })}
           >
             <span className="tra-icon">
@@ -1658,6 +1673,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           </div>
         </Sheet>
       )}
+      {gymPicker}
     </div>
   );
 }

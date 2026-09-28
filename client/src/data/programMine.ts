@@ -189,9 +189,10 @@ export function startProgramDaySession(
   a: ProgramAssignment,
   day: number,
   dayName: string,
+  gymId: string | null = null,
 ): string | null {
   const items = programDayItems(a, day);
-  const w = startWorkout(null, { dayName, targetMuscles: programDayMuscles(a, day) });
+  const w = startWorkout(gymId, { dayName, targetMuscles: programDayMuscles(a, day) });
   if (!w) return null;
   for (const item of items) {
     addExercise(w.id, item.name, item.kind, {
@@ -209,8 +210,12 @@ export function startProgramDaySession(
 
 /** Start a live session from a learned Playbook play (same prescription the
  *  Playbook "Start" button builds). Returns the workout id or null. */
-export function startPlaySession(p: Play, warmupName: string): string | null {
-  const w = startWorkout(null, {
+export function startPlaySession(
+  p: Play,
+  warmupName: string,
+  gymId: string | null = null,
+): string | null {
+  const w = startWorkout(gymId, {
     dayName: p.name ?? undefined,
     targetMuscles: p.coverage.filter((c) => c.primary).map((c) => c.muscle),
   });

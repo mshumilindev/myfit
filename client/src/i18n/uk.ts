@@ -1,5 +1,60 @@
 import type { Strings } from './en';
 
+/** Log activity: ISO weekday (1 = пн) → назва / множина (наз. 2–4, род. 5+, місц.). */
+const UK_DAY = ['', 'понеділок', 'вівторок', 'середа', 'четвер', 'пʼятниця', 'субота', 'неділя'];
+const UK_DAYS_NOM = [
+  '',
+  'понеділки',
+  'вівторки',
+  'середи',
+  'четверги',
+  'пʼятниці',
+  'суботи',
+  'неділі',
+];
+const UK_DAYS_GEN = [
+  '',
+  'понеділків',
+  'вівторків',
+  'серед',
+  'четвергів',
+  'пʼятниць',
+  'субот',
+  'неділь',
+];
+const UK_DAYS_LOC = [
+  '',
+  'понеділках',
+  'вівторках',
+  'середах',
+  'четвергах',
+  'пʼятницях',
+  'суботах',
+  'неділях',
+];
+/** "4 суботи" / "5 субот" / "1 субота". */
+const ukDays = (n: number, d: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return UK_DAY[d];
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return UK_DAYS_NOM[d];
+  return UK_DAYS_GEN[d];
+};
+const ukActs = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'активність';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'активності';
+  return 'активностей';
+};
+const ukMatches = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'збіг';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'збіги';
+  return 'збігів';
+};
+
 /** Ukrainian. Plural helper: 1 зміна / 2 зміни / 5 змін. */
 const zminy = (n: number): string => {
   const m10 = n % 10;
@@ -14,6 +69,38 @@ const pidhody = (n: number): string => {
   if (m10 === 1 && m100 !== 11) return 'підхід';
   if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'підходи';
   return 'підходів';
+};
+
+/** Підсумок · Далі: тип дня в родовому множини («з останніх 5 днів ніг»). */
+const UK_NU_DAYS: Record<string, string> = {
+  push: 'жимових днів',
+  pull: 'тягових днів',
+  legs: 'днів ніг',
+  core: 'днів кора',
+  full: 'днів на все тіло',
+};
+/** «4 тренування» / «8 тренувань». */
+const ukWorkouts = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'тренування';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'тренування';
+  return 'тренувань';
+};
+
+/** Health page: 1 день / 2 дні / 5 днів; 1–4 тренування / 5 тренувань. */
+const ukDni = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'день';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'дні';
+  return 'днів';
+};
+const ukTren = (n: number): string => {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 >= 1 && m10 <= 4 && (m100 < 11 || m100 > 14)) return 'тренування';
+  return 'тренувань';
 };
 
 export const uk: Strings = {
@@ -1512,9 +1599,10 @@ export const uk: Strings = {
   weakAvg: (avg: number, mev: number) => `${avg} проти ${mev} мін`,
   kcalShort: 'ккал',
   logActivity: 'Активність',
-  actPickCap: 'Кардіо й відновлення теж рахуються — щоб Spotter бачив усе навантаження.',
+  actPickCap: 'Кардіо, спорт і відновлення теж рахуються — щоб Spotter бачив усе навантаження.',
   actConditioning: 'Кардіо',
   actRecovery: 'Відновлення',
+  actSports: 'Спорт',
   actType: {
     run: 'Біг',
     cycle: 'Велосипед',
@@ -1529,6 +1617,27 @@ export const uk: Strings = {
     massage: 'Масаж',
     sauna: 'Сауна',
     cold: 'Крижана ванна',
+    hike: 'Похід',
+    elliptical: 'Орбітрек',
+    stairs: 'Сходи',
+    jumprope: 'Скакалка',
+    pilates: 'Пілатес',
+    football: 'Футбол',
+    basketball: 'Баскетбол',
+    volleyball: 'Волейбол',
+    tennis: 'Теніс',
+    padel: 'Падел',
+    badminton: 'Бадмінтон',
+    tabletennis: 'Настільний теніс',
+    boxing: 'Бокс',
+    martial: 'Єдиноборства',
+    climbing: 'Скелелазіння',
+    climbgym: 'Скеледром',
+    hockey: 'Хокей',
+    ski: 'Лижі',
+    snowboard: 'Сноуборд',
+    golf: 'Гольф',
+    sport: 'Інший спорт',
   },
   actAddsConditioning: 'Додає кардіонавантаження',
   actCountsRecovery: 'Рахується як відновлення',
@@ -3333,4 +3442,457 @@ export const uk: Strings = {
   pgAnotherProgram: 'іншій програмі',
   pgNoProgram: 'без програми',
   pgWeekOf: (w: number, n: number) => `тиждень ${w} з ${n}`,
+
+  // Log activity page (docs/design/log-activity)
+  laSearch: 'Пошук активностей',
+  laSearchIn: {
+    conditioning: 'Пошук у кардіо',
+    sport: 'Пошук видів спорту',
+    recovery: 'Пошук у відновленні',
+  },
+  laAllTypes: (n: number) => `усі ${n} видів`,
+  laTypes: (n: number) => `${n} видів`,
+  laClearSearch: 'Очистити пошук',
+  laMatches: (n: number) => `${n} ${ukMatches(n)}`,
+  laForQuery: (q: string) => `за «${q}»`,
+  laPinnedRecentFirst: 'Спершу закріплені й недавні',
+  laResultLast: (s: string) => `востаннє ${s}`,
+  laNotLoggedYet: 'ще не записано',
+  laAlsoCovers: (w: string) => `також «${w.toLowerCase()}»`,
+  laLogAsOther: (q: string) => `Записати «${q}» як інший спорт`,
+  laLogAsOtherSub: 'Немає в списку? Назва збережеться, а навантаження — як спорт',
+  laBand: { morning: 'ранок', afternoon: 'день', evening: 'вечір', night: 'ніч' },
+  laBandPlural: { morning: 'Зранку', afternoon: 'Удень', evening: 'Увечері', night: 'Уночі' },
+  laLikelyNow: (day: number, band: string) => `Ймовірно зараз · ${UK_DAY[day]}, ${band}`,
+  laHeroSubAll: (n: number, day: number, dur: string) => `Останні ${n} ${ukDays(n, day)}, ~${dur}`,
+  laHeroSubSome: (n: number, of: number, day: number, dur: string) =>
+    `${n} з останніх ${of} ${UK_DAYS_GEN[day]}, ~${dur}`,
+  laHeroFoot: (of: number, day: number, time: string) =>
+    `За останні ${of} ${ukDays(of, day)} · зазвичай починаєте ~${time}`,
+  laBarsAria: (items: string) => `Останні заняття: ${items}`,
+  laHide: 'Не зараз, сховати підказку',
+  laLogDur: (dur: string) => `Записати ${dur}`,
+  laLogAria: (name: string, dur: string) => `Записати: ${name}, ${dur}`,
+  laUpNext: (name: string) => `Далі · після: ${name}`,
+  laUpNextQ: (name: string, dur: string) => `${name} ${dur}?`,
+  laUpNextSub: (after: string, name: string) => `Після «${after}» ви зазвичай берете «${name}»`,
+  laUpNextSubRec: (after: string, name: string) =>
+    `Після «${after}» ви зазвичай відновлюєтесь: ${name}`,
+  laUpNextFoot: (count: number, of: number, after: string, name: string) =>
+    `${count} з останніх ${of} днів з «${after}» закінчились «${name}»`,
+  laAlsoOn: (day: number) => `Також по ${UK_DAYS_LOC[day]}`,
+  laAfterX: (name: string, count: number, of: number) => `Після: ${name} · ${count} з ${of}`,
+  laBandCount: (band: string, count: number, of: number) => `${band} · ${count} з ${of}`,
+  laPlusLog: '+ Записати',
+  laDone: 'Готово',
+  laLoggedAt: (time: string) => `Записано о ${time}`,
+  laDoneAria: (name: string) => `${name}, уже записано сьогодні`,
+  laPinned: 'Закріплені',
+  laHoldToPin: 'Утримуйте картку, щоб закріпити',
+  laPinnedAria: (name: string, last: string) =>
+    `${name}, закріплено${last ? `, востаннє ${last}` : ''}`,
+  laDragHint: 'Перетягніть активність сюди, щоб закріпити · тягніть, щоб змінити порядок',
+  laDropFirst: 'Відпустіть, щоб закріпити · першою',
+  laDropBetween: (a: string, b: string) => `Відпустіть, щоб закріпити · між «${a}» і «${b}»`,
+  laDropAfter: (a: string) => `Відпустіть, щоб закріпити · після «${a}»`,
+  laDragHere: 'Перетягніть сюди',
+  laDropToPin: 'Відпустіть, щоб закріпити',
+  laDragToReorder: 'Тягніть, щоб змінити порядок',
+  laPinnedList: 'Закріплені активності, тягніть, щоб змінити порядок',
+  laPin: (name: string) => `Закріпити: ${name}`,
+  laUnpin: (name: string) => `Відкріпити: ${name}`,
+  laPinHintTap: 'Торкніться',
+  laPinHintRest: 'щоб закріпити те, що робите часто, — воно буде тут першим.',
+  laPinIcon: 'значок шпильки',
+  laBrowse: 'За категоріями',
+  laOrPickCat: 'Або оберіть категорію',
+  laLastShort: (s: string) => `востаннє: ${s}`,
+  laLogPastOnly: 'Лише записати минуле',
+  laStartLockedPast: 'Старт заблоковано · запис минулого',
+  laCatAria: (name: string, n: number, meta: string) => `${name}, ${n} видів, ${meta}`,
+  laShowTypes: 'Показати види',
+  laHideTypes: 'Сховати види',
+  laAllCatN: (n: number, cat: string) => `Усі ${n}: ${cat.toLowerCase()}`,
+  laDragOrClick: 'Перетягніть картку вгору до закріплених або клацніть, щоб швидко записати',
+  laOpenInQuick: (name: string) => `${name} — у швидкому записі`,
+  laBackToLog: 'Назад до запису активності',
+  laBackToCats: 'Назад до категорій',
+  laCatKicker: 'Записати активність · категорія',
+  laRecentIn: (cat: string) => `Недавні: ${cat.toLowerCase()}`,
+  laAllCat: { conditioning: 'Усе кардіо', sport: 'Усі види спорту', recovery: 'Усе відновлення' },
+  laPinnedFirstAZ: 'Спершу закріплені, далі А–Я',
+  laTapToPin: 'Торкніться, щоб закріпити',
+  laNotYet: 'Ще ні',
+  laNameIt: 'Назвіть',
+  laYourFirst: {
+    conditioning: 'Спершу ваше кардіо',
+    sport: 'Спершу ваші види спорту',
+    recovery: 'Спершу ваше відновлення',
+  },
+  laPinToKeep: 'Закріпіть, щоб тримати на сторінці запису',
+  laAllAZ: {
+    conditioning: 'Усе кардіо · А–Я',
+    sport: 'Усі види спорту · А–Я',
+    recovery: 'Усе відновлення · А–Я',
+  },
+  laClickToLog: 'Клацніть картку, щоб швидко записати',
+  laPinnedToast: (name: string, pos: number) =>
+    `${name} закріплено — тепер ${pos}-е серед закріплених`,
+  laUnpinnedToast: (name: string) => `${name} відкріплено`,
+  laWeeksAgo: (n: number) => `${n} тиж. тому`,
+  laQuickLog: 'Швидкий запис',
+  laStaysOpen: 'лишається відкритим, поки гортаєте',
+  laPickAnActivity: 'Оберіть активність',
+  laPickHint:
+    'Оберіть будь-яку картку ліворуч — тут зʼявляться тривалість, час і зусилля. Запис у два кліки.',
+  laCloseQuick: 'Закрити швидкий запис',
+  laLastLine: (s: string) => `Востаннє: ${s}`,
+  laDurationMin: 'Тривалість · хв',
+  laCustom: 'Своя',
+  laCustomAria: 'Своя тривалість',
+  laMinutes: 'Хвилини',
+  laWhen: 'Коли',
+  laNow: 'Зараз',
+  laEarlierToday: 'Раніше сьогодні',
+  laPickDay: 'Обрати день',
+  laEndsNow: (range: string) => `Закінчується зараз · ${range}`,
+  laStartLbl: 'Початок',
+  laStartTime: 'Час початку',
+  laEnds: 'Кінець',
+  laTodayLower: 'сьогодні',
+  laYesterday: 'вчора',
+  laDaysAgo: (n: number) => `${n} дн. тому`,
+  laFuture: 'Це пізніше, ніж зараз, — оберіть раніший час.',
+  laDistanceKm: 'Дистанція · км',
+  laPace: 'Темп',
+  laKm: 'км',
+  laDecDist: 'Зменшити дистанцію на 0,5 км',
+  laIncDist: 'Збільшити дистанцію на 0,5 км',
+  laEstimate: 'Оцінка',
+  laMetLine: (met: string, kg: string, h: string) => `MET ${met} × ${kg} кг × ${h} год`,
+  laShowsFirst: 'Показується першою на сторінці запису',
+  laNameShowsFirst: (name: string) => `${name} показується першою на сторінці запису`,
+  laPinToTop: 'Закріпити вгорі сторінки запису',
+  laPinnedToTop: 'Закріплено вгорі сторінки запису',
+  laStartTimer: 'Запустити таймер',
+  laLogIt: (s: string) => `Записати · ${s}`,
+  laTimerNowOnly: 'Таймер — для «зараз»; минулі записуються одразу.',
+  laPastNoTimer: 'Минула активність — таймер не потрібен',
+  laPrevMonth: 'Попередній місяць',
+  laNextMonth: 'Наступний місяць',
+  laPickDayAria: (month: string) => `Обрати день, ${month}`,
+  laDayHas: (day: string, cats: string) => `${day}, є активність: ${cats}`,
+  laDayToday: (day: string) => `${day}, сьогодні`,
+  laAnd: 'і',
+  laTodayCount: (date: string, n: number) => `${date} · ${n} ${ukActs(n)}`,
+  laPlusLifting: (min: number) => `+ зал ${min} хв`,
+  laJustNow: 'Щойно',
+  laEditAria: (s: string) => `${s}. Редагувати`,
+  laEntries: (min: number, n: number) => `${min} хв · ${n} зап.`,
+  laLoggedSum: (n: number, min: number) => `${n} записано · ${min} хв`,
+  laShow: 'Показати',
+  laHideList: 'Сховати',
+  laGymRow: (name: string) => `${name} · зал`,
+  laLoadToday: 'Навантаження сьогодні',
+  laLoadLevel: { light: 'Легке', moderate: 'Помірне', high: 'Високе' },
+  laLoadHintRec: 'Відновлення теж рахується — сауна ввечері його врівноважить.',
+  laLoadHintBalanced: 'Відновлення записано — гарний баланс.',
+  laLoadHintLight: 'Поки легкий день — є запас.',
+  laLoggedToast: (name: string, dur: string) => `${name} · ${dur} записано`,
+  laAddedToLoad: 'Додано до сьогоднішнього навантаження',
+  laAddedToRecovery: 'Зараховано у сьогоднішнє відновлення',
+  laUndoAria: (name: string) => `Скасувати запис: ${name}`,
+  laInProgressSince: (time: string) => `Триває · з ${time}`,
+  laRunning: 'триває',
+  laPausedLower: 'на паузі',
+  laLockNote: 'щоб почати іншу. Минулу все одно можна записати.',
+  laTapLogPast: 'Дотик = запис минулого',
+  laLogPast: 'Записати минуле',
+  laLive: (clock: string) => `Наживо ${clock}`,
+  laAfterUsually: (name: string) => `Після «${name}» зазвичай`,
+  laFromLastDays: (of: number, day: number) => `за останні ${of} ${ukDays(of, day)}`,
+  laQueue: 'У чергу',
+  laQueued: 'У черзі',
+  laOfferedOnFinish: (count: number, of: number) =>
+    `Запропоную, коли натиснете «Завершити» · ${count} з ${of}`,
+  laLockedAria: (name: string, live: string) =>
+    `${name}, записати минуле. Старт заблоковано, доки не завершите: ${live}`,
+  laLiveAria: (name: string, clock: string) => `${name}, триває, ${clock}. Продовжити`,
+  laFinishedToast: (name: string, dur: string) => `${name} · ${dur} збережено`,
+  laWorkoutLive: 'Тренування',
+  laNewHere: 'Ви тут уперше',
+  laFirstTitle: 'Записуйте все, що робите поза залом',
+  laFirstBody: 'Це рахується у відновлення і навантаження — пробіжка, матч, сауна.',
+  laFirstFoot: 'Після кількох записів Spotter підкаже, що ви зазвичай робите в цей день і час.',
+  laPopular: 'Популярне для старту',
+  laTapToLog: 'Торкніться, щоб записати',
+  laStarterSub: {
+    run: 'Дистанція + темп',
+    walk: 'Легко відстежувати',
+    yoga: 'Рахується як відновлення',
+    tennis: 'Спортивне навантаження',
+  },
+  laQuickLogAria: (name: string) => `${name}, швидкий запис`,
+
+  // Підсумок тренування · Далі (дизайн log-activity p01–p05)
+  nuKicker: 'Далі · поки ти розігрітий',
+  nuKickerWeb: 'Поки ти розігрітий',
+  nuTitle: 'Далі',
+  nuFromLast: (n: number) => `з останніх ${n} тренувань`,
+  nuReason: (type: string, name: string, count: number, of: number) =>
+    `${name} — після ${count} з останніх ${of} тренувань`,
+  nuReasonDay: (type: string, name: string, count: number, of: number, day: string) =>
+    `${name} — після ${count} з останніх ${of} ${UK_NU_DAYS[day] ?? 'схожих тренувань'}`,
+  nuStripAria: (name: string, count: number, of: number) =>
+    `${name} після ${count} з останніх ${of} тренувань`,
+  nuSessionsAgo: (n: number) => `${n} ${ukWorkouts(n)} тому`,
+  nuUsually: (range: string) => `зазвичай ${range}`,
+  nuCountsRecovery: 'зараховується у відновлення',
+  nuCountsLoad: 'додається до навантаження',
+  nuStart: (name: string) => `Почати: ${name.toLowerCase()}`,
+  nuLogAria: (name: string, dur: string) => `Записати ${name}, ${dur}, без таймера`,
+  nuAlsoAfter: 'Або, теж після залу',
+  nuChipAria: (name: string, dur: string) => `Почати ${name}, ${dur}`,
+  nuMoreAria: 'Ще дії з цією підказкою',
+  nuSheetSub: 'Підказка після цього тренування',
+  nuNotToday: 'Не сьогодні',
+  nuNotTodaySub: 'Сховати лише для цього тренування',
+  nuChangeTo: 'Змінити на…',
+  nuChangeToSub: 'Обрати іншу активність на сторінці запису',
+  nuDontSuggest: (name: string) => `Не пропонувати «${name}» після тренувань`,
+  nuDontSuggestSub: (names: string[]) => `${names.join(' і ')} й далі можуть зʼявлятися`,
+  nuDontSuggestSubNone: 'Інші активності й далі можуть зʼявлятися',
+  nuNote: (n: number) => `Підказки беруться з твоїх останніх ${n} ${ukWorkouts(n)}.`,
+  nuOffToast: (name: string) => `«${name}» більше не пропонуватимемо після тренувань`,
+  nuRunningRec: (name: string) => `${name} триває — зарахуємо у відновлення`,
+  nuRunningLoad: (name: string) => `${name} триває — додамо до навантаження`,
+  nuRunningSub: 'Таймер іде й після «Готово». Він буде на «Сьогодні».',
+  nuCancelAria: (name: string) => `Скасувати таймер: ${name}`,
+  nuLiveSince: (cat: string, time: string) => `${cat} · з ${time}`,
+  nuOfApprox: (dur: string) => `з ~${dur}`,
+  nuProgressAria: (name: string) => `${name}: прогрес`,
+  nuKeepsTiming: (name: string) => `${name}: таймер іде, навіть якщо вийти`,
+  nuAnything: 'Щось після цього?',
+  nuLogElse: 'Записати щось інше',
+  nuLogActivity: 'Записати активність',
+  // --- Health page (design docs/design/health: F01–F10, W01–W03) ---
+  hlSub: 'Сон, відновлення, травми, хвороба',
+  hlTodayIs: (date: string) => `Сьогодні · ${date}`,
+  hlNow: 'Зараз',
+  hlNowWhat: (what: string) => `Зараз · ${what}`,
+  hlStatus: 'Стан',
+  hlAllClear: 'Усе гаразд',
+  hlNothingActive: 'Нічого не активно. Почни щось нижче або запиши те, що вже було.',
+  hlLastNight: 'Минула ніч',
+  hlSleepDetails: 'Сон: деталі й розклад',
+  hlSleepDetailsSub: 'Ночі, дописати ніч, твій звичний розклад',
+  hlStart: 'Почати',
+  hlFullRest: 'Повний відпочинок',
+  hlFullRestSub: 'Без залу',
+  hlActiveSub: 'Легкі тренування, знижені цілі',
+  hlUnwellSub: 'Лікарняні — план чекає на тебе',
+  hlInjuryRehab: 'Реабілітація травми',
+  hlInjuryRehabSub: 'План з підказками, етап за етапом',
+  hlActiveTag: 'Активно',
+  hlLogPast: 'Записати минуле',
+  hlWasUnwell: 'Я хворів',
+  hlTookBreak: 'Я робив перерву',
+  hlTookBreakSub: 'Повний відпочинок або активне відновлення',
+  hlGotHurt: 'Я травмувався',
+  hlLogPastNote: 'Обери дні в календарі. Якщо між ними були тренування — спитаємо, що залишити.',
+  hlHistory: 'Історія',
+  hlHistorySub: 'Періоди відпочинку, хвороби й травм',
+  hlSeeAll: 'Усе',
+  hlListTimeline: 'Список · Шкала',
+  hlOpenHistory: 'Відкрити історію',
+  hlSinceNoEnd: (date: string) => `З ${date} · без дати кінця`,
+  hlDayN: (n: number) => `День ${n}`,
+  hlStreakProgram: 'Серію збережено · Програму на паузі',
+  hlIllnessFoot: 'Жодних пропущених днів — план чекає, доки не натиснеш «Я одужав».',
+  hlRehabPlan: 'План реабілітації',
+  hlStageOf: (n: number, total: number) => `Етап ${n} з ${total}`,
+  hlNextCheckin: 'Наступна перевірка',
+  hlHowFelt: 'Як відчувалося?',
+  hlAfterNextSession: 'Після наступного тренування',
+  hlInjuryName: (part: string, side: string) =>
+    `${part} · ${side === 'left' ? 'зліва' : side === 'right' ? 'справа' : 'з обох боків'}`,
+  hlComingUp: 'Попереду',
+  hlStartsIn: (n: number) => (n === 1 ? 'Завтра' : `Через ${n} ${ukDni(n)}`),
+  hlWelcomeBack: 'З поверненням',
+  hlTakeEasy: 'Сьогодні без поспіху',
+  hlOutDays: (n: number) => `Тебе не було ${n} ${ukDni(n)}`,
+  hlNoStreakLost: 'Серію не втрачено',
+  hlStreakKept: 'Серію збережено',
+  hlLighterToday: 'Сьогодні легші цілі, завтра — повний план',
+  hlResumed: 'Відновлено',
+  hlNowInHistory: (range: string) => `Хвороба ${range} тепер в історії.`,
+  hlRecoveredBody: (range: string, n: number) =>
+    `Хвороба ${range}, ${n} ${ukDni(n)}. Програма продовжиться сьогодні з легшими цілями.`,
+  hlRecoveredBodyToday: 'Програма продовжиться сьогодні з легшими цілями.',
+  hlKept: 'Збережено',
+  hlResumesToday: 'Відновлюється сьогодні',
+  hlPeriod: 'Період',
+  hlType: 'Тип',
+  hlName: 'Назва',
+  hlNamePhRest: 'напр. Відпустка',
+  hlNamePhIll: 'напр. Грип',
+  hlDates: 'Дати',
+  hlStarts: 'Початок',
+  hlEnds: 'Кінець',
+  hlStarted: 'Почалося',
+  hlEnded: 'Закінчилося',
+  hlStillOngoing: 'Ще триває',
+  hlOngoingSubRest: 'Без дати кінця — заверши, коли повернешся',
+  hlOngoingSubIll: 'Без дати кінця',
+  hlEndsWhenRecovered: 'Коли натиснеш «Я одужав»',
+  hlEndsWhenEnded: 'Коли завершиш',
+  hlPreset: {
+    today: 'Сьогодні',
+    yesterday: 'Вчора',
+    last3: 'Останні 3 дні',
+    thisWeek: 'Цей тиждень',
+    lastWeek: 'Минулий тиждень',
+    nextWeek: 'Наступний тиждень',
+    next7: 'Наступні 7 днів',
+    tenDays: '10 днів',
+    twoWeeks: '2 тижні',
+    twoDaysAgo: '2 дні тому',
+    weekAgo: 'Тиждень тому',
+  } as Record<string, string>,
+  hlPrevMonth: 'Попередній місяць',
+  hlNextMonth: 'Наступний місяць',
+  hlDayWorkoutKept: (date: string) => `${date}, тренування збережено — день пропущено`,
+  hlDayWorkout: (date: string) => `${date}, є тренування`,
+  hlDayOngoing: (date: string) => `${date}, сьогодні — ще триває`,
+  hlLenFuture: (n: number, inDays: number, pick: string) =>
+    `${n} ${ukDni(n)}, почнеться через ${inDays} ${ukDni(inDays)}. План продовжиться ${pick}.`,
+  hlLenCurrent: (n: number, pick: string) =>
+    `${n} ${ukDni(n)}, від сьогодні. План продовжиться ${pick}.`,
+  hlLenRunning: (n: number, day: number, pick: string) =>
+    `${n} ${ukDni(n)}, сьогодні — день ${day}. План продовжиться ${pick}.`,
+  hlLenPast: (n: number) => `${n} ${ukDni(n)}, уже минуло.`,
+  hlGoldDot: 'Золота крапка — записане тренування.',
+  hlLenOngoing: (n: number) => `Поки що день ${n}. Жодних пропущених днів — план чекає.`,
+  hlLenEdit: (n: number) => `${n} ${ukDni(n)}. Торкнися дати, щоб відкрити календар.`,
+  hlWhatItDoes: 'Що це дає',
+  hlStreak: 'Серія',
+  hlProtected: 'Захищена',
+  hlProgram: 'Програма',
+  hlPaused: 'На паузі',
+  hlLighter: 'Легші цілі',
+  hlReminders: 'Нагадування',
+  hlOff: 'Вимкнено',
+  hlOn: 'Увімкнено',
+  hlOverlapN: (n: number) => `Перетин · ${n} ${ukTren(n)}`,
+  hlTrainedOn: (date: string) => `Ти тренувався ${date}`,
+  hlKeepSession: (n: number) => (n === 1 ? 'Залишити це тренування' : 'Залишити ці тренування'),
+  hlSkips: (mode: string, days: string) =>
+    `${mode === 'illness' ? 'Хвороба' : 'Відпочинок'} пропускає ${days}`,
+  hlSkipsThisDay: (mode: string) =>
+    `${mode === 'illness' ? 'Хвороба' : 'Відпочинок'} пропускає цей день`,
+  hlRemoveSession: (n: number) => (n === 1 ? 'Видалити тренування' : 'Видалити тренування (усі)'),
+  hlRemoveSub: (mode: string, days: string) =>
+    `Рахувати ${days} як ${mode === 'illness' ? 'лікарняний' : 'день відпочинку'}`,
+  hlKeepFoot: (label: string, ranges: string) => `${label} ${ranges}. Серія лишається як була.`,
+  hlRemoveFoot: (n: number) =>
+    n === 1
+      ? 'Тренування видалиться, коли збережеш.'
+      : `${n} ${ukTren(n)} видаляться, коли збережеш.`,
+  hlRemovedVal: 'Видалено',
+  hlConflict: (name: string) => `Перетин · ${name}`,
+  hlConflictSub: (range: string) => `Уже записано на ${range}`,
+  hlMerge: 'Обʼєднати в один період',
+  hlMergeSub: (range: string) => `Один період, ${range}`,
+  hlReplace: 'Замінити ці дні',
+  hlReplaceSub: 'Інший період обріжеться навколо цих дат',
+  hlConflictFoot: 'Періоди не можуть перетинатися — обери, як виправити, або зміни дати.',
+  hlSchedule: (mode: string) =>
+    mode === 'active' ? 'Запланувати активне відновлення' : 'Запланувати повний відпочинок',
+  hlStartMode: (mode: string) =>
+    mode === 'active' ? 'Почати активне відновлення' : 'Почати повний відпочинок',
+  hlSaveIllness: 'Зберегти хворобу',
+  hlSaveBreak: 'Зберегти перерву',
+  hlStartFrom: (date: string) => `Почати з ${date}`,
+  hlSaveChanges: 'Зберегти зміни',
+  hlContinueRehab: 'До плану реабілітації',
+  hlSaveInjury: 'Зберегти травму',
+  hlWhere: 'Де',
+  hlBodyPart: 'Частина тіла',
+  hlSide: 'Сторона',
+  hlWhenHappened: 'Коли сталося',
+  hlHappenedOn: 'Сталося',
+  hlHowNow: 'Як зараз',
+  hlHealed: 'Загоїлося',
+  hlHealedSub: 'Запиши й обери день, коли загоїлося',
+  hlHealedOnDots: 'Загоїлося …',
+  hlHealedOn: 'Загоїлося',
+  hlStillHealing: 'Ще загоюється',
+  hlStillHealingSub: 'Перейти до плану реабілітації',
+  hlRehabPlanSub: 'Травма й реабілітація — відчуття, етапи, перевірки',
+  hlInjFootHealing: (name: string, date: string) =>
+    `${name} з ${date}. Далі розкажеш, як воно сьогодні, — план почнеться звідти.`,
+  hlInjFootHealed: (name: string, range: string) =>
+    `${name}, ${range}. Піде в історію — план не потрібен.`,
+  hlEditPeriod: 'Редагувати період',
+  hlEditInjury: 'Редагувати травму',
+  hlPanelSub: {
+    'past-illness': 'Запиши хворобу, яка вже була',
+    'past-rest': 'Запиши перерву, яка вже була',
+    'past-injury': 'Запиши травму, яка вже була',
+    'start-illness': 'Лікарняні — план чекає на тебе',
+    'start-rest': 'Від сьогодні або пізніше',
+  } as Record<string, string>,
+  hlDeletePeriod: 'Видалити період',
+  hlDeleteInjury: 'Видалити травму',
+  hlDeleteBody: (name: string, range: string, n: number) =>
+    `Видалити «${name}» (${range})? Ці ${n} ${ukDni(n)} знову стануть звичайними. Серія лишиться як є.`,
+  hlDeleteBodyKept: (name: string, range: string, n: number, date: string) =>
+    `Видалити «${name}» (${range})? Ці ${n} ${ukDni(n)} знову стануть звичайними. Серія лишиться як є, а тренування ${date} залишиться записаним.`,
+  hlDeleteInjuryBody: (name: string) =>
+    `Видалити «${name}»? Запис зникне з історії й більше не впливатиме на тренування.`,
+  hlKeepIt: 'Залишити',
+  hlListView: 'Список',
+  hlTimelineView: 'Шкала',
+  hlViewAria: 'Вигляд',
+  hlFilterAria: 'Фільтр за типом',
+  hlFilter: { all: 'Усі', rest: 'Відпочинок', illness: 'Хвороба', injury: 'Травма' } as Record<
+    string,
+    string
+  >,
+  hlTypeDays: (type: string, n: number) => `${type} · ${n} ${ukDni(n)}`,
+  hlTypeDayN: (type: string, n: number) => `${type} · день ${n}`,
+  hlRehabStage: (n: number, total: number) => `Реабілітація · етап ${n} з ${total}`,
+  hlRehabStageName: (name: string) => `Реабілітація · ${name}`,
+  hlHealedTag: 'Загоєно',
+  hlRangeNow: (date: string) => `${date} → зараз`,
+  hlListFoot: 'Торкнися періоду, щоб змінити. Проведи вліво, щоб видалити. Сон — у деталях сну.',
+  hlListFootWeb: 'Натисни на період, щоб змінити. Сон — у деталях сну.',
+  hlEditAria: (name: string) => `Змінити: ${name}`,
+  hlDeleteAria: (name: string) => `Видалити: ${name}`,
+  hlNoHistory: 'Поки нічого не записано.',
+  hlLater: 'Пізніше',
+  hlNothingPlanned: 'Нічого не заплановано',
+  hlNActive: (n: number) => `Активних: ${n}`,
+  hlFreeDay: 'Вільний день',
+  hlFreeRange: (range: string) => `${range} · вільно`,
+  hlStartOfLog: (date: string) => `Початок записів · ${date}`,
+  hlDayNoEnd: (n: number) => `День ${n} · без дати кінця`,
+  hlWorkoutKept: (date: string) => `тренування ${date} збережено`,
+  hlTlFoot:
+    'Найновіше вгорі. Дві смуги поруч — дві речі одночасно. Щоб додати чи змінити, відкрий Список.',
+  hlTlFootWeb:
+    'Найновіше вгорі. Дві смуги поруч — дві речі одночасно. Щоб додати чи змінити, відкрий Список. Сон — у деталях сну.',
+  hlNotOnTimeline: 'Не на шкалі',
+  hlSleepOwnHistory: 'У сну своя історія',
+  hlIllNoFuture:
+    'Хворобу не можна запланувати наперед — познач її в день, коли захворів, або пізніше в «Записати минуле».',
+  hlStartFoot:
+    'Повний відпочинок і активне відновлення можна почати сьогодні або пізніше — заплануй відпустку наперед.',
+  hlWorkoutMeta: (name: string, min: number) => `${name} · ${min} хв`,
+  hlErr: {
+    'end-before-start': 'Кінець раніше за початок.',
+    future: 'Це запис минулого — обери дні до сьогодні.',
+    'open-future-start': 'Період, що триває, має початися не пізніше сьогодні.',
+    'healed-before-start': 'Не може загоїтися раніше, ніж сталося.',
+  } as Record<string, string>,
 };

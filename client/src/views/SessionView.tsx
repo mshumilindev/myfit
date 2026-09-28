@@ -62,6 +62,17 @@ import { cancelRestPush, enablePush, pushState, scheduleRestPush } from '../push
 import { useTodayPlan } from '../atlas/useTodayPlan';
 import { AtlasFace } from '../components/AtlasFace';
 import { AtlasDebrief } from '../components/AtlasDebrief';
+import {
+  NextUpCard,
+  NextUpKeepsTiming,
+  NextUpLiveBanner,
+  NextUpPanel,
+  NextUpQuiet,
+  clearSummaryReturn,
+  markSummaryReturn,
+  summaryReturnFor,
+  useNextUp,
+} from './sessionSummary/NextUp';
 import { TEMPER_COLOR, type Temper } from '../atlas/types';
 import { setFact } from '../atlas/facts';
 import { useAtlasFmt, voiceNow } from '../atlas/notes';
@@ -547,7 +558,10 @@ export function SessionView(props: {
   const [renaming, setRenaming] = useState<string | null>(null);
   const dragId = useRef<string | null>(null);
   const [renameVal, setRenameVal] = useState('');
-  const [summary, setSummary] = useState(false);
+  // Back from a screen opened on the summary (Log activity, Atlas, a muscle) →
+  // land on the summary again, not the session editor.
+  const [summary, setSummary] = useState(() => summaryReturnFor(props.workoutId));
+  useEffect(() => clearSummaryReturn(), []);
   const [now, setNow] = useState(() => Date.now());
   const atlasFmt = useAtlasFmt();
   const [atlasJab, setAtlasJab] = useState<{ text: string; temper: Temper; key: string } | null>(
@@ -691,6 +705,9 @@ export function SessionView(props: {
     // the prior sessions arrive — otherwise the all-time best stays stale (often
     // 0) and a sub-PR set is wrongly tagged a record.
   }, [store.workouts, props.workoutId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // "Next up" after the workout (design log-activity p01–p05), summary only.
+  const nextUp = useNextUp(workout, summary && !props.past, props.shell);
 
   if (!workout) return null;
 
@@ -4193,8 +4210,14 @@ export function SessionView(props: {
         delta: prevTotal > 0 ? Math.round(((volume - prevTotal) / prevTotal) * 100) : null,
       });
     }
-    return (
-      <div className="screen" style={{ gap: 'var(--space-6)' }}>
+    const web = isDesktop;
+    const fromSummary = (fn: () => void) => () => {
+      markSummaryReturn(workout.id);
+      fn();
+    };
+    const main = (
+      <>
+        {nextUp && !web && <NextUpLiveBanner m={nextUp} />}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="saved-mark">
             <Icon name="check-circle" weight="fill" />
@@ -4212,8 +4235,9 @@ export function SessionView(props: {
         </div>
         <AtlasDebrief
           workout={workout}
-          onOpen={() => props.shell.openOverlay({ screen: 'coach' })}
+          onOpen={fromSummary(() => props.shell.openOverlay({ screen: 'coach' }))}
         />
+        {nextUp && !web && <NextUpCard m={nextUp} />}
         <div className="stat-grid">
           <div className="cell">
             <div className="v">
@@ -4259,6 +4283,7 @@ export function SessionView(props: {
             </div>
           )}
         </div>
+        {nextUp && !web && <NextUpQuiet m={nextUp} />}
         {sessionKcal != null && <EnergyPlaque kcal={sessionKcal} />}
         {gym &&
           !gymHasNoList(gym) &&
@@ -4287,7 +4312,7 @@ export function SessionView(props: {
                 <MuscleBreakdownList
                   entries={entries}
                   refTs={workout.startedAt}
-                  onOpen={openMuscleHistory}
+                  onOpen={(m) => fromSummary(() => openMuscleHistory(m))()}
                 />
               </div>
             );
@@ -4330,20 +4355,54 @@ export function SessionView(props: {
             </div>
           </div>
         )}
-        <div className="summary-actions" style={{ marginTop: 'auto' }}>
-          <button className="btn btn-primary grow share-cta" onClick={() => setShareOpen(true)}>
-            <Icon name="export" />
-            {t.shareWorkout}
-          </button>
-          <div className="sheet-actions">
-            <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
-              {t.editSession}
-            </button>
-            <button className="btn btn-secondary grow" onClick={props.onClose}>
-              {t.done}
-            </button>
+        {nextUp?.live && !web ? (
+          // p02: the timer runs — Done leads, Share folds to an icon.
+          <div className="summary-actions nu-running" style={{ marginTop: 'auto' }}>
+            <NextUpKeepsTiming m={nextUp} />
+            <div className="nu-bar">
+              <button
+                className="btn btn-secondary share-icon"
+                onClick={() => setShareOpen(true)}
+                aria-label={t.shareWorkout}
+              >
+                <Icon name="export" />
+              </button>
+              <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
+                {t.editSession}
+              </button>
+              <button className="btn btn-primary grow" onClick={props.onClose}>
+                {t.done}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="summary-actions" style={{ marginTop: 'auto' }}>
+            <button className="btn btn-primary grow share-cta" onClick={() => setShareOpen(true)}>
+              <Icon name="export" />
+              {t.shareWorkout}
+            </button>
+            <div className="sheet-actions">
+              <button className="btn btn-secondary grow" onClick={() => setSummary(false)}>
+                {t.editSession}
+              </button>
+              <button className="btn btn-secondary grow" onClick={props.onClose}>
+                {t.done}
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+    return (
+      <div className={`screen${web && nextUp ? ' sum-web' : ''}`} style={{ gap: 'var(--space-6)' }}>
+        {web && nextUp ? (
+          <>
+            <div className="sum-main">{main}</div>
+            <NextUpPanel m={nextUp} />
+          </>
+        ) : (
+          main
+        )}
         {shareOpen && (
           <ShareSheet
             model={buildShareModel()}
@@ -4446,6 +4505,7 @@ export function SessionView(props: {
                     lat={gym?.lat ?? 0}
                     lng={gym?.lng ?? 0}
                     size={320}
+                    eager
                   />
                 )}
                 <span className="past-hero-scrim" />
@@ -5260,7 +5320,7 @@ export function SessionView(props: {
           {gym && (
             <div className="session-gym-card">
               <div className="session-gym-photo">
-                <GymThumb name={gym.name} lat={gym.lat} lng={gym.lng} size={320} />
+                <GymThumb name={gym.name} lat={gym.lat} lng={gym.lng} size={320} eager />
               </div>
               <div className="session-gym-copy">
                 <div className="section-label">{gym.name}</div>

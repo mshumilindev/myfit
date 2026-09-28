@@ -60,6 +60,10 @@
      never reads as "done". */
   --color-rest-200: #d3edfb;
   --color-rest-300: #93d4f2;
+  /* Sports activities — court green, apart from conditioning gold and recovery blue. */
+  --color-sport-300: #a8dc7c;
+  --color-sport-800: #34511f;
+  --color-sport-900: #1f2f14;
   --color-rest-400: #33a8e0;
   --color-rest-700: #1c6f9a;
   --color-rest-800: #134a68;
@@ -91,6 +95,66 @@
   --color-kcal-text: #cbe0f6;
   --color-kcal-tint: #132738;
   --color-kcal-line: #1c3a5a;
+
+  /* Health & activity colour families (Health page, Log activity, Next up).
+     Same base · tint · text · line pattern as ok / danger / kcal. */
+  /* Sleep — violet. */
+  --color-sleep: #9d8cf0;
+  --color-sleep-tint: #211d38;
+  --color-sleep-text: #d6cffa;
+  --color-sleep-line: #45397a;
+  /* Illness — amber (warmer and softer than the gold accent). */
+  --color-illness: #f0a35e;
+  --color-illness-tint: #33200f;
+  --color-illness-text: #f9d7b6;
+  --color-illness-line: #6e4622;
+  /* Injury — warm red, deliberately not the error red (--color-danger). */
+  --color-injury: #e2786a;
+  --color-injury-tint: #351613;
+  --color-injury-text: #f5c9c2;
+  --color-injury-line: #6f3129;
+  /* Active recovery — teal in the rest family, darker than full-rest blue
+     (relative luminance 0.46 vs 0.60), 8.8:1 on --color-bg. */
+  --color-active: #5cc8a8;
+  --color-active-tint: #0d2b27;
+  --color-active-text: #bfeadb;
+  --color-active-line: #245c4e;
+  /* Full rest / recovery activities — the rest ramp as a family. */
+  --color-rest: var(--color-rest-300);
+  --color-rest-tint: var(--color-rest-900);
+  --color-rest-text: var(--color-rest-200);
+  --color-rest-line: var(--color-rest-800);
+  /* Sports activities — court green (ramp above). */
+  --color-sport: var(--color-sport-300);
+  --color-sport-tint: var(--color-sport-900);
+  --color-sport-text: #d7f0c1;
+  --color-sport-line: #3d5a2a;
+  /* Conditioning / gym — the gold accent as a family. */
+  --color-accent-tint: var(--color-accent-900);
+  --color-accent-text: var(--color-accent-300);
+  --color-accent-line: #5a4524;
+
+  /* Surfaces & text tiers used by the kit (grouped lists, calendars). */
+  --color-surface-2: #26282d;
+  --color-tile: var(--color-neutral-900);
+  --color-border: var(--color-neutral-800);
+  --color-text-muted: var(--color-neutral-500);
+  --color-text-faint: var(--color-neutral-600);
+  --color-text-disabled: var(--color-neutral-700);
+  --color-scrim: rgba(10, 11, 12, 0.68);
+
+  /* 8-pt spacing scale (4-pt half steps) for the kit and new screens. The
+     older --space-* (2.8px unit) stays for legacy screens only. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --radius-xl: 12px;
+  --radius-pill: 999px;
 
   --shadow-sm: 0 0 0 1px #3b3f43;
   --shadow-md: 0 0 0 1px #55595e, 0 6px 18px rgba(0, 0, 0, 0.6);
@@ -23504,23 +23568,6 @@ button.badge {
 }
 
 /* --- Log activity (design feature 6: cardio & recovery + calories) -------- */
-.act-head {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-.act-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 18px;
-  letter-spacing: -0.01em;
-}
-.act-title i {
-  color: var(--color-accent);
-  font-size: 20px;
-}
 .act-cap {
   margin: 0;
   font-size: 13px;
@@ -23536,45 +23583,6 @@ button.badge {
   letter-spacing: 0.06em;
   color: var(--color-neutral-500);
   margin-bottom: 9px;
-}
-.act-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-.act-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  padding: 14px 6px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-neutral-800);
-  background: var(--color-neutral-900);
-  color: var(--color-text);
-  font-size: 12px;
-  cursor: pointer;
-  transition:
-    border-color 0.16s ease,
-    background 0.16s ease;
-}
-.act-tile i {
-  font-size: 22px;
-  color: var(--color-accent);
-}
-.act-tile.cat-recovery i {
-  color: var(--color-rest-300);
-}
-.act-tile:hover,
-.act-tile:focus-visible {
-  border-color: var(--color-neutral-600);
-  background: var(--color-neutral-800);
-  outline: none;
-}
-@media (max-width: 719.98px) {
-  .act-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 /* Run / timer screen */
@@ -39135,4 +39143,33 @@ body {
   font: inherit;
   font-size: 14px;
   cursor: pointer;
+}
+
+/* Sports activities: their own colour family (cloned from the recovery overrides). */
+.act-run.cat-sport .act-run-name i {
+  color: var(--color-sport-300);
+}
+.act-cat-badge.cat-sport {
+  background: var(--color-sport-900);
+  color: var(--color-sport-300);
+}
+.ta-row.cat-sport > i {
+  color: var(--color-sport-300);
+}
+.hist-activity.cat-sport .hist-act-icon {
+  color: var(--color-sport-300);
+}
+.td-resume-activity.cat-sport {
+  border-color: var(--color-sport-800, var(--color-neutral-700));
+  background: linear-gradient(135deg, var(--color-sport-900), var(--color-neutral-900));
+}
+.td-resume-activity.cat-sport .tra-icon {
+  background: var(--color-sport-800, rgba(255, 255, 255, 0.08));
+  color: var(--color-sport-300);
+}
+.td-resume-activity.cat-sport .tra-cta {
+  color: var(--color-sport-300);
+}
+.activity-screen.cat-sport .av-head-name i {
+  color: var(--color-sport-300);
 }

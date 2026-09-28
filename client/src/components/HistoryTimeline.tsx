@@ -27,7 +27,12 @@ import {
 } from '../i18n';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { Icon } from '../ui';
-import { activityType, activityCategory, durationMin as activityDurationMin } from '../activities';
+import {
+  activityType,
+  activityCategory,
+  activityTone,
+  durationMin as activityDurationMin,
+} from '../activities';
 import type { MuscleGroup } from '../data/exercises';
 import { nightDurationMin, sleepKindOf } from '../sleep';
 import { useStore } from '../store';
@@ -379,7 +384,7 @@ export function ActivityRow({
   onOpen?: (id: string) => void;
 }) {
   const { t } = useT();
-  const cat = activityCategory(a);
+  const cat = activityTone(a.type, activityCategory(a));
   const min = Math.round(activityDurationMin(a));
   const inner = (
     <>

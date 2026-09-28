@@ -3,8 +3,8 @@
  * (design "Spotter — Start Sheet", variant A). One big context hero on top — the
  * program day, your usual weekday play, or a session from scratch (or Resume
  * while something is live) — and four tiles below: Auto session, Activity,
- * Health (sleep, rest, illness, injury) and Log past. The sub-sheets it opens
- * (rest/recovery, backfill) live here too so Today can reuse them.
+ * Health (sleep, rest, illness, injury — the full Health page) and Log past.
+ * The backfill sub-sheet lives here too so Today can reuse it.
  */
 import { useMemo, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
@@ -18,7 +18,6 @@ import {
   dayKey,
   gymAtCurrentPosition,
   liveSleep,
-  startRestPeriod,
   startHomeSet,
   startWorkout,
   useStore,
@@ -35,14 +34,13 @@ import {
 } from '../data/programMine';
 import { fmtDayMonth, fmtWeekday, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
-import { ActivitySheet, SleepPanel } from './ActivitySheet';
 import { HomeSetSheet } from './HomeSetSheet';
 import './HomeSet.css';
 import { DateField, TimeField, DurationField } from './PickerFields';
 import { GymPicker } from './GymPicker';
 import { GymThumb } from './GymThumb';
 
-type Sub = null | 'gym' | 'activity' | 'health' | 'past' | 'home';
+type Sub = null | 'gym' | 'past' | 'home';
 
 export function StartSheet({
   shell,
@@ -114,9 +112,23 @@ export function StartSheet({
     onClose();
     if (workoutId) shell.openOverlay({ screen: 'session', workoutId });
   }
+  /** Where the picked gym leads: a blank session, or the hero's prefilled one. */
+  const [gymFor, setGymFor] = useState<'scratch' | 'hero'>('scratch');
   function beginScratch(gymId: string | null) {
     const w = startWorkout(gymId);
     done(w ? w.id : null);
+  }
+  /** The hero's session (program day, else usual weekday play) at `gymId`. */
+  function beginHero(gymId: string | null) {
+    if (program && programToday) {
+      done(startProgramDaySession(program, todayWeekday, programToday.name, gymId));
+      return;
+    }
+    if (usual) {
+      done(startPlaySession(usual, t.defaultTimedExerciseNames.warmup, gymId));
+      return;
+    }
+    beginScratch(gymId);
   }
   async function startScratch() {
     if (resumeLive()) return onClose();
@@ -124,19 +136,22 @@ export function StartSheet({
     // ask — the picker also finds gyms nearby that aren't saved yet.
     const here = await gymAtCurrentPosition(store.gyms);
     if (here) beginScratch(here.id);
-    else setSub('gym');
+    else {
+      setGymFor('scratch');
+      setSub('gym');
+    }
   }
-  function startHero() {
+  async function startHero() {
     if (resumeLive()) return onClose();
-    if (program && programToday) {
-      done(startProgramDaySession(program, todayWeekday, programToday.name));
-      return;
+    if (!(program && programToday) && !usual) return void startScratch();
+    // Same gym step as a blank session: in one of your gyms → start there;
+    // anywhere else → pick the gym first (it may be one nearby, not saved yet).
+    const here = await gymAtCurrentPosition(store.gyms);
+    if (here) beginHero(here.id);
+    else {
+      setGymFor('hero');
+      setSub('gym');
     }
-    if (usual) {
-      done(startPlaySession(usual, t.defaultTimedExerciseNames.warmup));
-      return;
-    }
-    void startScratch();
   }
   function autoBuild() {
     if (resumeLive()) return onClose();
@@ -149,16 +164,29 @@ export function StartSheet({
     shell.openOverlay({ screen: 'builder', programMode, programDays });
   }
   function openActivity() {
-    if (resumeLive()) return onClose();
-    setSub('activity');
+    // The Log activity page (design docs/design/log-activity) replaced the picker
+    // drawer. It stays open while something is live: the page has its own live
+    // state (m07 — resume banner, starting locked, past logs still allowed).
+    onClose();
+    shell.openOverlay({ screen: 'log-activity' });
+  }
+  function openHealth() {
+    // The full Health page (design docs/design/health) replaced the old
+    // "Rest & recovery" drawer.
+    onClose();
+    shell.openOverlay({ screen: 'health' });
   }
 
   let subEl: ReactNode = null;
   if (sub === 'gym')
     subEl = (
-      <GymPicker gyms={store.gyms} title={t.pickGymTitle} onClose={onClose} onPick={beginScratch} />
+      <GymPicker
+        gyms={store.gyms}
+        title={t.pickGymTitle}
+        onClose={onClose}
+        onPick={gymFor === 'hero' ? beginHero : beginScratch}
+      />
     );
-  else if (sub === 'activity') subEl = <ActivitySheet shell={shell} onClose={onClose} />;
   else if (sub === 'home')
     subEl = (
       <HomeSetSheet
@@ -169,8 +197,6 @@ export function StartSheet({
         }}
       />
     );
-  else if (sub === 'health')
-    subEl = <RestSheet shell={shell} onClose={onClose} allowRest={!activeRest} />;
   else if (sub === 'past')
     subEl = (
       <BackfillSheet
@@ -227,7 +253,7 @@ export function StartSheet({
   return (
     <StartFrame inline={inline} onClose={closeProp} sub={subEl}>
       <div className="ss-title">{t.startSheetTitle}</div>
-      <button type="button" className="ss-hero" onClick={startHero}>
+      <button type="button" className="ss-hero" onClick={() => void startHero()}>
         <span className="ss-hero-text">
           <span className="ss-hero-kicker">{hero.kicker}</span>
           <span className="ss-hero-title">{hero.title}</span>
@@ -261,26 +287,18 @@ export function StartSheet({
             <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startAutoSub}</span>
           </span>
         </button>
-        <button
-          type="button"
-          className={`ss-tile${locked ? ' locked' : ''}`}
-          aria-disabled={locked}
-          onClick={locked ? undefined : openActivity}
-        >
+        <button type="button" className="ss-tile" onClick={openActivity}>
           <span className="ss-tile-top">
             <span className="ss-ic tone-green">
               <Icon name="heartbeat" weight="regular" />
             </span>
-            {locked && <Icon name="lock-simple" className="ss-lock" />}
           </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startActivityTitle}</span>
-            <span className="ss-ts">
-              {locked ? t.startFinishFirst(liveName) : t.startActivitySub}
-            </span>
+            <span className="ss-ts">{locked ? t.laLogPast : t.startActivitySub}</span>
           </span>
         </button>
-        <button type="button" className="ss-tile" onClick={() => setSub('health')}>
+        <button type="button" className="ss-tile" onClick={openHealth}>
           <span className="ss-ic tone-blue">
             <Icon name="clock-countdown" weight="regular" />
           </span>
@@ -336,179 +354,6 @@ function StartFrame(props: {
       <div className="start-inline">{props.children}</div>
       {props.sub}
     </>
-  );
-}
-
-/** Health — sleep + rest & recovery periods (illness, full rest, rehab). While a
- *  rest period is already running only the sleep panel is offered. */
-export function RestSheet({
-  shell,
-  onClose,
-  allowRest = true,
-}: {
-  shell: Shell;
-  onClose: () => void;
-  allowRest?: boolean;
-}) {
-  const { t } = useT();
-  const [mode, setMode] = useState<'active' | 'off' | 'illness' | 'rehab'>('active');
-  const iso = (d: Date) => {
-    const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-    return z.toISOString().slice(0, 10);
-  };
-  const today = new Date();
-  const [from, setFrom] = useState(iso(today));
-  const [to, setTo] = useState(iso(new Date(today.getTime() + 6 * 86400000)));
-  const [dur, setDur] = useState<'today' | 'open' | 'back'>('open');
-  const [backFrom, setBackFrom] = useState(iso(today));
-  const dk = (ymd: string) => {
-    const [y, m, d] = ymd.split('-').map(Number);
-    return dayKey(new Date(y, m - 1, d).getTime());
-  };
-  const days = Math.max(1, dk(to) - dk(from) + 1);
-  const start = () => {
-    if (mode === 'rehab') return;
-    if (mode === 'illness') {
-      const tk = dayKey(Date.now());
-      if (dur === 'today') startRestPeriod({ mode, startDay: tk, endDay: tk });
-      else if (dur === 'open') startRestPeriod({ mode, startDay: tk, endDay: tk, open: true });
-      else startRestPeriod({ mode, startDay: Math.min(dk(backFrom), tk), endDay: tk, open: true });
-    } else {
-      startRestPeriod({ mode, startDay: dk(from), endDay: dk(to) });
-    }
-    onClose();
-  };
-  return (
-    <Sheet onClose={onClose} className="rest-sheet">
-      <div className="ps-title">{t.restRecoveryTitle}</div>
-      <SleepPanel shell={shell} onClose={onClose} compact />
-      {allowRest && (
-        <>
-          <div className="section-label section-divide rest-sub">{t.restStartTitle}</div>
-          <div className="rest-modes">
-            {(['active', 'off', 'illness'] as const).map((m) => (
-              <button
-                key={m}
-                className={`rest-mode${mode === m ? ' active' : ''}${m === 'illness' ? ' illness' : ''}`}
-                onClick={() => setMode(m)}
-              >
-                <span className="rm-name">
-                  {m === 'active'
-                    ? t.restModeActive
-                    : m === 'off'
-                      ? t.restModeOff
-                      : t.restModeIllness}
-                </span>
-                <span className="rm-desc">
-                  {m === 'active'
-                    ? t.restModeActiveDesc
-                    : m === 'off'
-                      ? t.restModeOffDesc
-                      : t.restModeIllnessDesc}
-                </span>
-              </button>
-            ))}
-            <button
-              className={`rest-mode rehab${mode === 'rehab' ? ' active' : ''}`}
-              onClick={() => setMode('rehab')}
-            >
-              <span className="rmi">
-                <Icon name="bandaids" weight="bold" />
-              </span>
-              <span style={{ flex: 1, textAlign: 'left' }}>
-                <span className="rm-name">{t.injRestEntry}</span>
-                <span className="rm-desc" style={{ display: 'block' }}>
-                  {t.injRestEntryDesc}
-                </span>
-              </span>
-            </button>
-          </div>
-          {mode === 'rehab' ? (
-            <div className="rest-rehab-note">
-              <Icon name="path" weight="bold" />
-              <span>{t.injRestReplaceNote}</span>
-            </div>
-          ) : mode === 'illness' ? (
-            <div className="ill-panel">
-              <div className="ill-lbl">{t.illnessDur}</div>
-              <div className="ill-seg">
-                {(['today', 'open', 'back'] as const).map((d) => (
-                  <button
-                    key={d}
-                    className={`ill-seg-b${dur === d ? ' on' : ''}`}
-                    onClick={() => setDur(d)}
-                  >
-                    {d === 'today'
-                      ? t.illnessDurToday
-                      : d === 'open'
-                        ? t.illnessDurOpen
-                        : t.illnessDurBack}
-                  </button>
-                ))}
-              </div>
-              {dur === 'back' && (
-                <label className="rest-date ill-date">
-                  <span>{t.illnessBackDate}</span>
-                  <input
-                    type="date"
-                    value={backFrom}
-                    max={iso(today)}
-                    onChange={(e) => setBackFrom(e.target.value)}
-                  />
-                </label>
-              )}
-              {dur === 'open' && <div className="ill-note">{t.illnessNoEnd}</div>}
-            </div>
-          ) : (
-            <>
-              <div className="rest-dates">
-                <label className="rest-date">
-                  <span>{t.restFrom}</span>
-                  <input
-                    type="date"
-                    value={from}
-                    max={to}
-                    onChange={(e) => setFrom(e.target.value)}
-                  />
-                </label>
-                <label className="rest-date">
-                  <span>{t.restTo}</span>
-                  <input
-                    type="date"
-                    value={to}
-                    min={from}
-                    onChange={(e) => setTo(e.target.value)}
-                  />
-                </label>
-              </div>
-              <div className="rest-len">{t.restLength(days)}</div>
-            </>
-          )}
-          <div className="rest-actions">
-            <button className="btn btn-secondary" onClick={onClose}>
-              {t.cancel}
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={
-                mode === 'rehab'
-                  ? () => {
-                      onClose();
-                      shell.openOverlay({ screen: 'injury' });
-                    }
-                  : start
-              }
-            >
-              {mode === 'rehab'
-                ? t.injSetupPlan
-                : mode === 'illness'
-                  ? t.restStartIllness
-                  : t.restStartAction}
-            </button>
-          </div>
-        </>
-      )}
-    </Sheet>
   );
 }
 

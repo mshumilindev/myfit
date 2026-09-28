@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>P01 · Summary + Next up (full)</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kaushan+Script&display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #16171a;
+          }
+          a {
+            color: #d9a24f;
+            text-decoration: none;
+          }
+          a:hover {
+            color: #e8b86a;
+          }
+          .sp * {
+            box-sizing: border-box;
+          }
+          .sp {
+            font-variant-numeric: tabular-nums;
+          }
+          .sp button,
+          .sp input {
+            font-family: Inter, sans-serif;
+          }
+          .sp button {
+            cursor: pointer;
+          }
+          .sp h1,
+          .sp h2,
+          .sp h3,
+          .sp p {
+            margin: 0;
+          }
+          .i {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+          }
+          .i16 {
+            width: 16px;
+            height: 16px;
+          }
+          .i20 {
+            width: 20px;
+            height: 20px;
+          }
+          .i28 {
+            width: 28px;
+            height: 28px;
+            stroke-width: 1.6;
+          }
+          .fillc {
+            fill: currentColor;
+          }
+          .cg {
+            color: #d9a24f;
+          }
+          .cs {
+            color: #a8dc7c;
+          }
+          .cr {
+            color: #93d4f2;
+          }
+          .status {
+            height: 40px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 600;
+          }
+          .hdr {
+            height: 56px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px 0 20px;
+          }
+          .wm {
+            font-family: 'Kaushan Script', cursive;
+            font-size: 22px;
+            color: #e9eaec;
+            line-height: 1;
+          }
+          .gym {
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            color: #d9a24f;
+            font-weight: 600;
+            margin-left: 8px;
+          }
+          .hib {
+            width: 40px;
+            height: 40px;
+            border-radius: 14px;
+            border: 1px solid rgba(233, 234, 236, 0.14);
+            background: transparent;
+            color: #e9eaec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+          }
+          .ib {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid rgba(233, 234, 236, 0.14);
+            background: transparent;
+            color: #e9eaec;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+          }
+          a.ib:hover {
+            color: #e9eaec;
+            border-color: rgba(233, 234, 236, 0.28);
+          }
+          .lbl {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #90959a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .ico {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .ico36 {
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+          }
+          .ico32 {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+          }
+          .g {
+            color: #d9a24f;
+            background: #342713;
+          }
+          .s {
+            color: #a8dc7c;
+            background: #1f2f14;
+          }
+          .r {
+            color: #93d4f2;
+            background: #0e2a3b;
+          }
+          .ob {
+            height: 48px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 16px;
+          }
+          .og {
+            background: transparent;
+            border: 1px solid #d9a24f;
+            color: #d9a24f;
+          }
+          .fg {
+            background: #d9a24f;
+            border: 1px solid #d9a24f;
+            color: #1b1409;
+          }
+          a.fg:hover {
+            color: #1b1409;
+          }
+          .orb {
+            background: #0e2a3b;
+            border: 1px solid #93d4f2;
+            color: #93d4f2;
+          }
+          a.orb:hover {
+            color: #bfe6f8;
+          }
+          .on {
+            background: transparent;
+            border: 1px solid #3b3f43;
+            color: #e9eaec;
+          }
+          a.on:hover {
+            color: #e9eaec;
+            border-color: #55595e;
+          }
+          /* summary */
+          .saved {
+            flex-shrink: 0;
+            margin: 6px 16px 0;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #a8dc7c;
+          }
+          .done {
+            flex-shrink: 0;
+            padding: 0 16px;
+            margin-top: 8px;
+          }
+          .done h1 {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+          }
+          .done p {
+            font-size: 14px;
+            color: #90959a;
+            margin-top: 6px;
+          }
+          .atl {
+            flex-shrink: 0;
+            display: flex;
+            gap: 10px;
+            margin: 14px 16px 0;
+            align-items: flex-start;
+          }
+          .av {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            background: #342713;
+            border: 1px solid rgba(217, 162, 79, 0.5);
+            color: #d9a24f;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .bub {
+            flex: 1;
+            min-width: 0;
+            background: #1f2125;
+            border: 1px solid rgba(233, 234, 236, 0.1);
+            border-radius: 6px 16px 16px 16px;
+            padding: 9px 12px 10px;
+            font-size: 14px;
+            line-height: 1.4;
+          }
+          .bub b {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #d9a24f;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+          }
+          /* next up */
+          .nx {
+            flex-shrink: 0;
+            margin: 16px 16px 0;
+            background: #1f2125;
+            border: 1px solid rgba(147, 212, 242, 0.45);
+            border-radius: 18px;
+            padding: 14px;
+          }
+          .nxh {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 20px;
+          }
+          .nxk {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #93d4f2;
+          }
+          .more {
+            width: 44px;
+            height: 44px;
+            margin: -12px -12px -12px 0;
+            background: none;
+            border: 0;
+            color: #90959a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 12px;
+          }
+          a.more:hover {
+            color: #e9eaec;
+          }
+          .dots {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 4px;
+          }
+          .dt {
+            height: 8px;
+            border-radius: 3px;
+            background: #2e3135;
+          }
+          .dt.y {
+            background: #93d4f2;
+          }
+          .alts {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(233, 234, 236, 0.1);
+          }
+          .chips {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+          }
+          .chip {
+            height: 44px;
+            border-radius: 8px;
+            border: 1px solid #3b3f43;
+            background: #262a2d;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px 0 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e9eaec;
+          }
+          .chip .ico {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+          }
+          .chip small {
+            font-size: 12px;
+            color: #90959a;
+            font-weight: 500;
+          }
+          /* stats + blocks */
+          .stats {
+            flex-shrink: 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin: 16px 16px 0;
+          }
+          .st {
+            background: #1f2125;
+            border: 1px solid rgba(233, 234, 236, 0.1);
+            border-radius: 14px;
+            padding: 10px 12px 12px;
+          }
+          .sl {
+            font-size: 11px;
+            color: #90959a;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          }
+          .sv {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 4px;
+            letter-spacing: -0.01em;
+          }
+          .sv small {
+            font-size: 13px;
+            color: #90959a;
+            font-weight: 500;
+            margin-left: 2px;
+          }
+          .blk {
+            flex-shrink: 0;
+            margin: 10px 16px 0;
+            background: #1f2125;
+            border: 1px solid rgba(233, 234, 236, 0.1);
+            border-radius: 16px;
+            padding: 12px 14px;
+          }
+          .bh {
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+          }
+          .mg {
+            display: grid;
+            grid-template-columns: 92px minmax(0, 1fr) 52px;
+            align-items: center;
+            gap: 10px;
+            height: 32px;
+            font-size: 14px;
+          }
+          .trk {
+            height: 6px;
+            border-radius: 3px;
+            background: #262a2d;
+            overflow: hidden;
+          }
+          .trk b {
+            display: block;
+            height: 6px;
+            border-radius: 3px;
+            background: #d9a24f;
+          }
+          .mgn {
+            font-size: 12px;
+            color: #90959a;
+            text-align: right;
+          }
+          .cmp {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 40px;
+            border-top: 1px solid rgba(233, 234, 236, 0.08);
+            font-size: 14px;
+          }
+          .cmp:first-of-type {
+            border-top: 0;
+          }
+          .cv {
+            color: #90959a;
+            font-size: 13px;
+            margin-right: 10px;
+          }
+          .dl {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 58px;
+            justify-content: flex-end;
+          }
+          .up {
+            color: #a8dc7c;
+          }
+          .dn {
+            color: #ee8b7a;
+          }
+          .acts {
+            flex-shrink: 0;
+            margin: 20px 16px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+          .vh {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+          }
+          /* live banner (blue) */
+          .live {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            flex-shrink: 0;
+            margin: 0 16px 4px;
+            background: #1f2125;
+            border: 1px solid rgba(147, 212, 242, 0.6);
+            border-radius: 18px;
+            padding: 12px;
+          }
+          .ldot {
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: #93d4f2;
+            box-shadow: 0 0 0 4px rgba(147, 212, 242, 0.18);
+            flex-shrink: 0;
+          }
+          /* sheet */
+          .scrim {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+          }
+          .sheet {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1f2125;
+            border-radius: 20px 20px 0 0;
+            border-top: 1px solid rgba(233, 234, 236, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 0 16px 24px;
+            overflow: hidden;
+          }
+          .grab {
+            width: 34px;
+            height: 4px;
+            border-radius: 2px;
+            background: #55595e;
+            margin: 10px auto 0;
+            flex-shrink: 0;
+          }
+          .opt {
+            width: 100%;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: #262a2d;
+            border: 1px solid #3b3f43;
+            border-radius: 14px;
+            color: #e9eaec;
+            text-align: left;
+          }
+          a.opt:hover {
+            color: #e9eaec;
+            border-color: #55595e;
+          }
+          .opt .oi {
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: #1f2125;
+            color: #90959a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .ot {
+            flex: 1;
+            min-width: 0;
+            font-size: 15px;
+            font-weight: 600;
+            display: block;
+          }
+          .ot small {
+            display: block;
+            font-size: 12px;
+            color: #90959a;
+            font-weight: 400;
+            margin-top: 2px;
+            line-height: 1.35;
+          }
+          /* quiet row */
+          .quiet {
+            flex-shrink: 0;
+            margin: 14px 16px 0;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid rgba(233, 234, 236, 0.1);
+            border-bottom: 1px solid rgba(233, 234, 236, 0.1);
+            color: #90959a;
+            font-size: 14px;
+          }
+          .quiet a {
+            margin-left: auto;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            font-size: 14px;
+          }
+        </style>
+      </helmet>
+      <div
+        class="sp"
+        style="
+          width: 390px;
+          height: 1300px;
+          position: relative;
+          overflow: hidden;
+          box-sizing: border-box;
+          background: #16171a;
+          color: #e9eaec;
+          font-family: Inter, sans-serif;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <div class="status">19:52</div>
+        <header class="hdr">
+          <div style="display: flex; align-items: baseline">
+            <span class="wm">spotter</span><span class="gym">GYM</span>
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button class="hib" aria-label="Calendar">
+              <svg class="i i20" viewBox="0 0 24 24">
+                <rect x="4" y="5" width="16" height="15" rx="2"></rect>
+                <path d="M4 10h16M9 3v4M15 3v4"></path>
+              </svg>
+            </button>
+            <button class="hib" aria-label="Progress">
+              <svg class="i i20" viewBox="0 0 24 24">
+                <path d="M4 19V11M10 19V5M16 19v-6M20 19H3"></path>
+              </svg>
+            </button>
+            <button class="hib" aria-label="Profile">
+              <svg class="i i20" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21c1-4 4-6 8-6s7 2 8 6"></path>
+              </svg>
+            </button>
+          </div>
+        </header>
+        <p class="saved" role="status">
+          <svg class="i i20" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5"></circle>
+            <path d="M8.5 12.5l2.5 2.5 4.5-5"></path></svg
+          >Session saved
+        </p>
+        <div class="done">
+          <h1>Done.</h1>
+          <p>Saturday, 28 Sep · Gym Sport Life</p>
+        </div>
+        <div class="atl">
+          <span class="av" aria-hidden="true">A</span>
+          <p class="bub">
+            <b>Atlas</b>Chest volume up 8 %. Bench stalled at 80 — tomorrow we fix it.
+          </p>
+        </div>
+        <section class="nx" aria-labelledby="nx-t">
+          <div class="nxh">
+            <p class="nxk">
+              <svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="8.5"></circle>
+                <path d="M12 7.5V12l3 2"></path></svg
+              >Next up · while you're warm
+            </p>
+            <a
+              class="more"
+              href="p03-nextup-options.dc.html"
+              aria-label="More options for this suggestion"
+              ><svg class="i i20" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="6" cy="12" r="1.6" class="fillc" stroke="none"></circle>
+                <circle cx="12" cy="12" r="1.6" class="fillc" stroke="none"></circle>
+                <circle cx="18" cy="12" r="1.6" class="fillc" stroke="none"></circle></svg
+            ></a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; margin-top: 10px">
+            <span class="ico r" style="width: 56px; height: 56px; border-radius: 16px"
+              ><svg class="i i28" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 3c.5 4 5 5.5 5 11a5 5 0 0 1-10 0c0-3 2-4 2-6.5 1.2.8 2 2 2 3.5 1.2-2.5.5-5 1-8z"
+                ></path></svg
+            ></span>
+            <div style="min-width: 0">
+              <h2 id="nx-t" style="font-size: 24px; font-weight: 700; line-height: 1.1">
+                Sauna · 20 min
+              </h2>
+              <p style="font-size: 14px; color: #90959a; margin-top: 4px; line-height: 1.35">
+                You hit the sauna after 6 of your last 8 sessions
+              </p>
+            </div>
+          </div>
+          <div
+            style="margin-top: 12px"
+            role="img"
+            aria-label="Sauna after 6 of the last 8 sessions"
+          >
+            <div class="dots">
+              <span class="dt y"></span><span class="dt y"></span><span class="dt"></span
+              ><span class="dt y"></span><span class="dt y"></span><span class="dt y"></span
+              ><span class="dt"></span><span class="dt y"></span>
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: #71767b;
+                margin-top: 5px;
+              "
+            >
+              <span>8 sessions ago</span><span>usually 18–22 min · counts as recovery</span>
+            </div>
+          </div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 8px;
+              margin-top: 12px;
+            "
+          >
+            <a class="ob orb" href="p02-nextup-started.dc.html"
+              ><svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5.5v13l10-6.5z"></path></svg
+              >Start sauna</a
+            >
+            <button class="ob on" aria-label="Log Sauna, 20 minutes, without a timer">
+              Log 20 min
+            </button>
+          </div>
+          <div class="alts">
+            <p style="font-size: 12px; color: #71767b">Or, also after lifting</p>
+            <div class="chips">
+              <button
+                class="chip"
+                aria-label="Start Stretch, 10 minutes. After 3 of your last 8 heavy days"
+              >
+                <span class="ico r"
+                  ><svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12a7 7 0 0 1 12-5M19 12a7 7 0 0 1-12 5"></path>
+                    <path d="M17 3v4h-4M7 21v-4h4"></path></svg></span
+                >Stretch <small>10 min</small>
+              </button>
+              <button class="chip" aria-label="Start Walk, 20 minutes. After leg days">
+                <span class="ico g"
+                  ><svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="13" cy="4.5" r="2"></circle>
+                    <path
+                      d="M12.5 8.5l-2 6 2 2.5v4M10.5 14.5l-2.5 6.5M12.5 8.5l2.5 3 3 1M11.5 9l-3 2.5v3"
+                    ></path></svg></span
+                >Walk <small>20 min</small>
+              </button>
+            </div>
+          </div>
+        </section>
+        <div class="stats" role="list" aria-label="Session stats">
+          <div class="st" role="listitem">
+            <p class="sl">Duration</p>
+            <p class="sv">1:12</p>
+          </div>
+          <div class="st" role="listitem">
+            <p class="sl">Sets</p>
+            <p class="sv">21</p>
+          </div>
+          <div class="st" role="listitem">
+            <p class="sl">Moved</p>
+            <p class="sv">6.4<small>t</small></p>
+          </div>
+        </div>
+        <div class="blk" style="display: flex; align-items: center; gap: 12px; padding: 10px 14px">
+          <span class="ico ico36 g"
+            ><svg class="i i20" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 3c.5 4 5 5.5 5 11a5 5 0 0 1-10 0c0-3 2-4 2-6.5 1.2.8 2 2 2 3.5 1.2-2.5.5-5 1-8z"
+              ></path></svg
+          ></span>
+          <span style="flex: 1; font-size: 14px; color: #90959a">Energy</span>
+          <span style="font-size: 20px; font-weight: 700"
+            >≈ 540 <span style="font-size: 13px; color: #90959a; font-weight: 500">kcal</span></span
+          >
+        </div>
+        <section class="blk" aria-labelledby="mg-t">
+          <div class="bh"><h2 class="lbl" id="mg-t">Muscle groups worked</h2></div>
+          <div class="mg">
+            <span>Chest</span><span class="trk"><b style="width: 100%"></b></span
+            ><span class="mgn">9 sets</span>
+          </div>
+          <div class="mg">
+            <span>Triceps</span><span class="trk"><b style="width: 67%"></b></span
+            ><span class="mgn">6 sets</span>
+          </div>
+          <div class="mg">
+            <span>Front delts</span><span class="trk"><b style="width: 44%"></b></span
+            ><span class="mgn">4 sets</span>
+          </div>
+        </section>
+        <section
+          class="blk"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-color: rgba(217, 162, 79, 0.4);
+          "
+          aria-labelledby="pr-t"
+        >
+          <span class="ico g"
+            ><svg class="i i20" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 4h8v5a4 4 0 0 1-8 0z"></path>
+              <path
+                d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"
+              ></path></svg
+          ></span>
+          <div style="flex: 1; min-width: 0">
+            <h2 class="lbl" id="pr-t" style="color: #d9a24f">New record</h2>
+            <p style="font-size: 15px; font-weight: 600; margin-top: 3px">
+              Incline Bench · 32.5 kg × 8
+            </p>
+          </div>
+          <span style="font-size: 12px; color: #71767b">was 30 × 8</span>
+        </section>
+        <section class="blk" style="padding-bottom: 4px" aria-labelledby="cp-t">
+          <div class="bh">
+            <h2 class="lbl" id="cp-t">Compared to last session</h2>
+            <span style="font-size: 12px; color: #71767b">Tue 24 Sep</span>
+          </div>
+          <div class="cmp">
+            <span>Volume</span
+            ><span style="display: flex; align-items: center"
+              ><span class="cv">5.9 → 6.4 t</span
+              ><span class="dl up"
+                ><svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 18V6M7 11l5-5 5 5"></path></svg
+                >+8 %</span
+              ></span
+            >
+          </div>
+          <div class="cmp">
+            <span>Sets</span
+            ><span style="display: flex; align-items: center"
+              ><span class="cv">19 → 21</span
+              ><span class="dl up"
+                ><svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 18V6M7 11l5-5 5 5"></path></svg
+                >+11 %</span
+              ></span
+            >
+          </div>
+          <div class="cmp">
+            <span>Bench Press e1RM</span
+            ><span style="display: flex; align-items: center"
+              ><span class="cv">95 → 93 kg</span
+              ><span class="dl dn"
+                ><svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 6v12M7 13l5 5 5-5"></path></svg
+                >−2 %</span
+              ></span
+            >
+          </div>
+        </section>
+        <div class="acts">
+          <button class="ob fg">
+            <svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12M8 7l4-4 4 4M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"></path></svg
+            >Share workout
+          </button>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <button class="ob on">
+              <svg class="i i16" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 20h4L19 9l-4-4L4 16z"></path>
+                <path d="M13.5 6.5l4 4"></path></svg
+              >Edit session
+            </button>
+            <button class="ob on">Done</button>
+          </div>
+        </div>
+        <div style="height: 24px; flex-shrink: 0"></div>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1300}}'>
+      class Component extends DCLogic {
+      renderVals() { return {}; }
+      }
+    </script>
+  </body>
+</html>

@@ -14,7 +14,7 @@
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-  background: var(--color-surface-2, #26282d);
+  background: var(--color-surface-2);
   border: 1px solid var(--color-divider);
   color: var(--color-neutral-300);
 }
