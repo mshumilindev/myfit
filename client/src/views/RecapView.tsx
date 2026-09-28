@@ -1119,6 +1119,7 @@ export function RecapStory({ period, onClose }: { period: string; onClose: () =>
         ))}
       </div>
       <div
+        key={i}
         className="rc-story-panel"
         onClick={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();

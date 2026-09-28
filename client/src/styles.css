@@ -26483,7 +26483,11 @@ button.badge {
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
-  min-height: 100%;
+  min-height: 0;
+  height: 0;
+}
+.rc-view > * {
+  flex-shrink: 0;
 }
 .rc-topbar .back {
   width: 34px;
@@ -26621,9 +26625,16 @@ button.badge {
 }
 .rc-story-panel {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.rc-story-panel > * {
+  flex-shrink: 0;
 }
 .rc-progress {
   display: flex;
@@ -26759,7 +26770,7 @@ button.badge {
   display: flex;
   flex-direction: column;
   padding: 22px 26px calc(28px + env(safe-area-inset-bottom, 0px));
-  min-height: 0;
+  min-height: min-content;
 }
 .rc-story-close {
   position: absolute;
