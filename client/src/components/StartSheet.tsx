@@ -27,6 +27,7 @@ import { computePlaybook, playForWeekday } from '../playbook';
 import { dayReadoutLabel } from '../data/daySuggest';
 import {
   programDayHasPlan,
+  programDayItems,
   programDayName,
   startPlaySession,
   startProgramDaySession,
@@ -85,7 +86,11 @@ export function StartSheet({
   const program = assignment && assignedActive ? assignment : null;
   const programToday =
     program && !trainedToday && !activeRest && programDayHasPlan(program, todayWeekday)
-      ? { name: programDayName(program, todayWeekday, t.progDay) }
+      ? {
+          name: programDayName(program, todayWeekday, t.progDay),
+          // Muscles only, no exercises: the hero already starts an empty session.
+          empty: programDayItems(program, todayWeekday).length === 0,
+        }
       : null;
   const usual = programToday ? null : playForWeekday(plays, new Date(now).getDay());
 
@@ -216,7 +221,8 @@ export function StartSheet({
             sub: t.startScratchSub,
             icon: 'play',
           };
-  const offerScratch = !busy && (!!programToday || !!usual);
+  // "Or start from scratch" only when the hero would start something prefilled.
+  const offerScratch = !busy && (programToday ? !programToday.empty : !!usual);
 
   return (
     <StartFrame inline={inline} onClose={closeProp} sub={subEl}>
