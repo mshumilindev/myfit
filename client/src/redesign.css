@@ -582,7 +582,9 @@
   display: none;
 }
 .td-week[data-mode='train'] {
-  --acc: var(--day, var(--color-accent));
+  /* Brass until the day is trained — green is reserved for "done" (data-mode='done'),
+     so the card never takes the muscle-group colour. */
+  --acc: var(--color-accent);
 }
 .td-week[data-mode='rest'],
 .td-week[data-mode='active'] {

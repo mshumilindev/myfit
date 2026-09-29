@@ -1338,6 +1338,10 @@ export const et: Strings = {
   todayAddWidget: 'Lisa vidin',
   todayEmptySlot: 'Tühi koht',
   todayUntitled: 'Minu jaotis',
+  todaySearchWidgets: 'Otsi vidinaid',
+  todaySearchShortcuts: 'Otsi otseteid',
+  todayNoResults: 'Midagi ei leitud',
+  todayClear: 'Tühjenda',
   todayClientsIn7d: (n: number) => '' + n + ' 7 päevaga',
   todayLayoutOverflow: (n: number) =>
     'Vidinaid, mis ei mahu: ' + n + '. Need eemaldatakse jaotisest.',
@@ -2533,6 +2537,15 @@ export const et: Strings = {
   clientOpenProfile: 'Täisprofiil',
   clientLiveTitle: 'Treening käib',
   clientLiveBody: 'Üksikasjad ilmuvad, kui sessioon lõpeb.',
+  clientRingAlertTitle: (n: number) => 'Trennideta ' + n + ' päeva',
+  clientRingAlertBody: (name: string) =>
+    'Seepärast on kasutajal ' +
+    name +
+    ' Todays punane ring „!“-ga. See kaob pärast järgmist trenni.',
+  clientRingNewTitle: 'Treenis hiljuti',
+  clientRingNewBody: (name: string) =>
+    'Kuldne ring Todays tähendab, et ' + name + ' treenis viimase 2 päeva jooksul.',
+  clientRingLiveHint: 'Roheline täpp Todays tähendab, et klient treenib praegu.',
   histStateRest: 'Puhkepäev',
   histStateVacation: 'Täielik puhkus',
   histStateSick: 'Haige',

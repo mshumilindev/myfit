@@ -165,7 +165,8 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-slot > * {
   pointer-events: none;
-  flex: 1;
+  /* grow if the slot is taller, never shrink below the tile's own height */
+  flex: 1 0 auto;
   width: 100%;
 }
 .tdc-slot.is-selected {
@@ -353,7 +354,8 @@ body.td-editing .today-page .td-topbar {
 .tdc-pick-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  /* rows need air: every tile carries its name underneath */
+  gap: 16px 10px;
 }
 .tdc-pick {
   border: 0;
@@ -450,8 +452,8 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  margin: 0 -18px 4px;
-  padding: 2px 18px 6px;
+  margin: 0 calc(-1 * var(--gutter, 18px)) 4px;
+  padding: 2px var(--gutter, 18px) 6px;
   scrollbar-width: none;
 }
 .tdc-chips > * {
@@ -468,7 +470,7 @@ body.td-editing .today-page .td-topbar {
   border-radius: 18px;
 }
 .tdc-pick-tile > * {
-  flex: 1;
+  flex: 1 0 auto;
   width: 100%;
 }
 .tdc-pick.size-xs .tdc-pick-tile {
@@ -491,13 +493,21 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-pick-foot {
   position: sticky;
-  /* cover the sheet's bottom padding so nothing scrolls visibly under it */
   z-index: 3;
-  bottom: -23px;
-  margin: 18px -18px -23px;
-  padding: 12px 18px calc(23px + env(safe-area-inset-bottom));
+  /* Stick to the very bottom of the sheet and cover its whole bottom padding
+     (which includes the iPhone home-indicator inset), so nothing shows below. */
+  --sheet-pb: calc(var(--space-8) + var(--safe-bottom, 0px));
+  bottom: calc(-1 * var(--sheet-pb));
+  display: flex;
+  gap: 10px;
+  margin: 18px calc(-1 * var(--gutter, 18px)) calc(-1 * var(--sheet-pb));
+  padding: 12px var(--gutter, 18px) calc(12px + var(--safe-bottom, 0px));
   background: var(--color-bg);
   border-top: 1px solid var(--color-divider);
+}
+.tdc-pick-foot > .uibtn--full,
+.tdc-pick-foot > :last-child {
+  flex: 1;
 }
 .tdc-sheet-head {
   display: flex;
@@ -515,7 +525,7 @@ body.td-editing .today-page .td-topbar {
   min-width: 0;
 }
 .tdc-sc > * {
-  flex: 1;
+  flex: 1 0 auto;
   width: 100%;
 }
 .tdc-sc-more {
@@ -1607,4 +1617,17 @@ body.td-editing .today-page .td-topbar {
   margin-inline: calc(-1 * var(--page-x));
   padding: 14px var(--page-x) 0;
   border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+.tdc-search {
+  margin-bottom: 10px;
+}
+.tdc-empty {
+  padding: 28px 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+}
+/* Client page: why this client wears that ring on Today */
+.cp-ring-note {
+  margin: 4px 0 12px;
 }

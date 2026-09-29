@@ -907,7 +907,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         };
       });
 
-      const todayType = mode === 'train' ? programDayType(a, todayWeekday) : null;
       // Program block settings: compact drops the meta and status lines;
       // the exercise list shows names (standard) or names + prescription (detailed).
       const compact = po.style === 'compact';
@@ -932,12 +931,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           )
         ) : null;
       return (
-        <section
-          className="today-program-card td-week"
-          data-mode={mode}
-          data-day={todayType ?? undefined}
-          data-style={po.style}
-        >
+        <section className="today-program-card td-week" data-mode={mode} data-style={po.style}>
           <div className="program-card-head">
             <Icon name={headIcon} className="pch-icon" />
             <div className="pch-text">
@@ -1732,12 +1726,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               s.kind === 'core' ? (
                 <Fragment key={s.id}>{core[s.id]}</Fragment>
               ) : (
-                <CustomSectionView
-                  key={s.id}
-                  section={s}
-                  ctx={widgetCtx}
-                  onCustomize={() => setEditing(true)}
-                />
+                <CustomSectionView key={s.id} section={s} ctx={widgetCtx} />
               ),
             )}
             <button type="button" className="td-customize" onClick={() => setEditing(true)}>

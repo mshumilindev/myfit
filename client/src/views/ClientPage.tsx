@@ -18,6 +18,7 @@ import { useStore } from '../store';
 import { classifyTrainee } from '../trainerLive';
 import { Icon, useExerciseName } from '../ui';
 import { Avatar } from '../components/Avatar';
+import { Banner } from '../components/ui/Banner';
 import { HistoryTimeline } from '../components/HistoryTimeline';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 import type { Shell } from '../App';
@@ -189,10 +190,48 @@ export function ClientPage({
           <span className="cp-live-dot" aria-hidden />
           <div className="cp-live-text">
             <div className="cp-live-title">{t.clientLiveTitle}</div>
-            <div className="cp-live-body">{t.clientLiveBody}</div>
+            <div className="cp-live-body">
+              {t.clientLiveBody} {t.clientRingLiveHint}
+            </div>
           </div>
         </div>
       )}
+      {data &&
+        !isLive &&
+        (() => {
+          // Explain the ring this client wears on the trainer's Today (same rules
+          // as the Atlas & clients block: red "!" = 30+ days / never, gold = ≤ 2 days).
+          const last = data.summary.lastSessionAt;
+          const first = data.person.name.split(' ')[0];
+          const days = last === null ? null : Math.floor((liveNow - last) / 86_400_000);
+          if (last === null) return null;
+          const DAY = 86_400_000;
+          if (liveNow - last > 30 * DAY)
+            return (
+              <div className="cp-ring-note">
+                <Banner
+                  tone="danger"
+                  icon="warning"
+                  sheen={false}
+                  title={t.clientRingAlertTitle(days ?? 30)}
+                  body={t.clientRingAlertBody(first)}
+                />
+              </div>
+            );
+          if (liveNow - last < 2 * DAY)
+            return (
+              <div className="cp-ring-note">
+                <Banner
+                  tone="accent"
+                  icon="check-circle"
+                  sheen={false}
+                  title={t.clientRingNewTitle}
+                  body={t.clientRingNewBody(first)}
+                />
+              </div>
+            );
+          return null;
+        })()}
       {sameDay && (
         <button className="cp-sameday" onClick={() => openSession(sameDay)}>
           <div className="cp-sameday-label">

@@ -20,6 +20,7 @@ import {
 import { createPortal } from 'react-dom';
 import { Button } from '../components/ui/Button';
 import { Chip } from '../components/ui/Chip';
+import { SearchField } from '../components/ui/SearchField';
 import { DragHandle } from '../components/ui/DragHandle';
 import { Segmented } from '../components/ui/Segmented';
 import { WidgetGrid, SECTION_LAYOUTS, type SectionLayout } from '../components/ui/WidgetGrid';
@@ -849,6 +850,8 @@ function AddPanel({
   const tw = useTw();
   const [group, setGroup] = useState<string>('all');
   const [allActs, setAllActs] = useState(false);
+  const [query, setQuery] = useState('');
+  const searching = query.trim() !== '';
   const isDragged = (d: Drag) => JSON.stringify(d) === JSON.stringify(drag);
 
   /** A draggable, clickable tile. */
@@ -888,7 +891,20 @@ function AddPanel({
   const acts = SHORTCUTS.filter((x) => x.group === 'activity').sort(
     (a, b) => (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0),
   );
-  const actsShown = allActs ? acts : acts.slice(0, 9);
+  const actsShown = allActs || searching ? acts : acts.slice(0, 9);
+  const scHit = (sc: (typeof SHORTCUTS)[number]) => matches(query, sc.label(ctx));
+  const wHits = WIDGETS.filter((w) =>
+    matches(query, w.name(tw), tw.groups[w.group], w.id.replace(/-/g, ' ')),
+  );
+  const search = (placeholder: string) => (
+    <SearchField
+      className="tdc-search"
+      value={query}
+      onChange={setQuery}
+      placeholder={placeholder}
+      clearLabel={t.todayClear}
+    />
+  );
   const scTile = (sc: (typeof SHORTCUTS)[number]) =>
     tile(
       sc.id,
@@ -947,32 +963,41 @@ function AddPanel({
       )}
       {tab === 'widgets' && (
         <>
-          <div className="tdc-chips tdc-ap-chips">
-            {['all', ...widgetGroups].map((g) => (
-              <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
-                {g === 'all' ? t.todayAll : tw.groups[g]}
-              </Chip>
-            ))}
-          </div>
+          {search(t.todaySearchWidgets)}
+          {!searching && (
+            <div className="tdc-chips tdc-ap-chips">
+              {['all', ...widgetGroups].map((g) => (
+                <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
+                  {g === 'all' ? t.todayAll : tw.groups[g]}
+                </Chip>
+              ))}
+            </div>
+          )}
+          {wHits.length === 0 && <div className="tdc-empty">{t.todayNoResults}</div>}
           {widgetGroups
-            .filter((g) => group === 'all' || g === group)
+            .filter(
+              (g) =>
+                (searching || group === 'all' || g === group) && wHits.some((w) => w.group === g),
+            )
             .map((g) => (
               <Fragment key={g}>
                 <div className="tdc-pick-group">{tw.groups[g]}</div>
                 <div className="tdc-pick-grid">
-                  {WIDGETS.filter((w) => w.group === g).map((w) =>
-                    tile(
-                      w.id,
-                      { kind: 'widget', widget: w.id },
-                      w.name(tw),
-                      'tdc-pick size-s',
-                      () => onAddWidget(w.id),
-                      <>
-                        <span className="tdc-pick-tile">{w.render('S', ctx)}</span>
-                        <span className="tdc-pick-name">{w.name(tw)}</span>
-                      </>,
-                    ),
-                  )}
+                  {wHits
+                    .filter((w) => w.group === g)
+                    .map((w) =>
+                      tile(
+                        w.id,
+                        { kind: 'widget', widget: w.id },
+                        w.name(tw),
+                        'tdc-pick size-s',
+                        () => onAddWidget(w.id),
+                        <>
+                          <span className="tdc-pick-tile">{w.render('S', ctx)}</span>
+                          <span className="tdc-pick-name">{w.name(tw)}</span>
+                        </>,
+                      ),
+                    )}
                 </div>
               </Fragment>
             ))}
@@ -980,24 +1005,29 @@ function AddPanel({
       )}
       {tab === 'shortcuts' && (
         <>
-          <div className="tdc-pick-group">{tw.groups.train}</div>
-          <div className="tdc-ap-scgrid">
-            {SHORTCUTS.filter((x) => x.group === 'train').map(scTile)}
-          </div>
-          <div className="tdc-pick-group">{tw.groups.activity}</div>
-          <div className="tdc-ap-scgrid">
-            {actsShown.map(scTile)}
-            {!allActs && acts.length > actsShown.length && (
-              <button type="button" className="tdc-sc-more" onClick={() => setAllActs(true)}>
-                <Icon name="magnifying-glass" />
-                <span>{t.todayScAll(acts.length)}</span>
-              </button>
-            )}
-          </div>
-          <div className="tdc-pick-group">{tw.groups.health}</div>
-          <div className="tdc-ap-scgrid">
-            {SHORTCUTS.filter((x) => x.group === 'health').map(scTile)}
-          </div>
+          {search(t.todaySearchShortcuts)}
+          {!SHORTCUTS.some(scHit) && <div className="tdc-empty">{t.todayNoResults}</div>}
+          {(['train', 'activity', 'health'] as const).map((g) => {
+            const list =
+              g === 'activity'
+                ? actsShown.filter(scHit)
+                : SHORTCUTS.filter((x) => x.group === g && scHit(x));
+            if (list.length === 0) return null;
+            return (
+              <Fragment key={g}>
+                <div className="tdc-pick-group">{tw.groups[g]}</div>
+                <div className="tdc-ap-scgrid">
+                  {list.map(scTile)}
+                  {g === 'activity' && !allActs && !searching && acts.length > actsShown.length && (
+                    <button type="button" className="tdc-sc-more" onClick={() => setAllActs(true)}>
+                      <Icon name="magnifying-glass" />
+                      <span>{t.todayScAll(acts.length)}</span>
+                    </button>
+                  )}
+                </div>
+              </Fragment>
+            );
+          })}
         </>
       )}
     </div>
@@ -1088,7 +1118,7 @@ function SectionSheet({
         );
       })()}
       <div className="tdc-sizes-note">{t.todaySizesNote}</div>
-      <div className="tdc-actions">
+      <div className="tdc-actions tdc-pick-foot">
         <Button variant="secondary" onClick={onClose}>
           {t.todayEditCancel}
         </Button>
@@ -1103,6 +1133,17 @@ function SectionSheet({
     </Sheet>
   );
 }
+
+/** Case- and accent-insensitive "contains" for picker search. */
+const fold = (x: string) =>
+  x
+    .toLocaleLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+const matches = (q: string, ...texts: string[]) => {
+  const n = fold(q.trim());
+  return n === '' || texts.some((x) => fold(x).includes(n));
+};
 
 /** Pick a widget (or a shortcut for XS slots), previewed at the slot's size
  *  (design B5): filter by group, tap to choose, confirm with "Put X here". */
@@ -1121,6 +1162,7 @@ function PickerSheet({
   const tw = useTw();
   const [group, setGroup] = useState<string>('all');
   const [chosen, setChosen] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
   const cls = `tdc-pick size-${size.toLowerCase()}`;
 
   type Item = { id: string; group: string; name: string; node: ReactNode };
@@ -1142,27 +1184,44 @@ function PickerSheet({
     size === 'XS'
       ? ['train', 'health', 'activity']
       : WIDGET_GROUPS.filter((g: WidgetGroup) => WIDGETS.some((w) => w.group === g));
-  const shown = groupIds.filter((g) => group === 'all' || g === group);
+  const searching = query.trim() !== '';
+  const groupName = (g: string) => tw.groups[g as keyof typeof tw.groups] ?? g;
+  // While searching, look through every group (the chips don't narrow it).
+  // Name, group and id (the id carries the topic: sleep-debt, bedtime-…, naps).
+  const hits = items.filter((i) =>
+    matches(query, i.name, groupName(i.group), i.id.replace(/^sc:(act:)?/, '').replace(/-/g, ' ')),
+  );
+  const shown = groupIds.filter(
+    (g) => (searching || group === 'all' || g === group) && hits.some((i) => i.group === g),
+  );
   const chosenName = items.find((i) => i.id === chosen)?.name;
 
   return (
     <Sheet onClose={onClose} className="tdc-picker">
       <div className="tdc-sheet-title">{t.todaySlotTitle[size]}</div>
       <div className="tdc-sheet-sub">{t.todayPickHint}</div>
-      <div className="tdc-chips">
-        {['all', ...groupIds].map((g) => (
-          <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
-            {g === 'all' ? t.todayAll : tw.groups[g as keyof typeof tw.groups]}
-          </Chip>
-        ))}
-      </div>
+      <SearchField
+        className="tdc-search"
+        value={query}
+        onChange={setQuery}
+        placeholder={size === 'XS' ? t.todaySearchShortcuts : t.todaySearchWidgets}
+        clearLabel={t.todayClear}
+      />
+      {!searching && (
+        <div className="tdc-chips">
+          {['all', ...groupIds].map((g) => (
+            <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
+              {g === 'all' ? t.todayAll : groupName(g)}
+            </Chip>
+          ))}
+        </div>
+      )}
+      {shown.length === 0 && <div className="tdc-empty">{t.todayNoResults}</div>}
       {shown.map((g) => (
         <Fragment key={g}>
-          {group === 'all' && (
-            <div className="tdc-pick-group">{tw.groups[g as keyof typeof tw.groups]}</div>
-          )}
+          {(searching || group === 'all') && <div className="tdc-pick-group">{groupName(g)}</div>}
           <div className="tdc-pick-grid">
-            {items
+            {hits
               .filter((i) => i.group === g)
               .map((i) => (
                 <button
@@ -1214,6 +1273,9 @@ function ShortcutsSheet({
   const [ids, setIds] = useState<string[]>(initial);
   const [group, setGroup] = useState<'all' | 'train' | 'activity' | 'health'>('all');
   const [allActs, setAllActs] = useState(false);
+  const [query, setQuery] = useState('');
+  const searching = query.trim() !== '';
+  const hit = (sc: (typeof SHORTCUTS)[number]) => matches(query, sc.label(ctx));
 
   const toggle = (id: string) =>
     setIds((cur) =>
@@ -1229,7 +1291,7 @@ function ShortcutsSheet({
     if (sa !== sb) return sb - sa;
     return (freq.get(b.id.slice(7)) ?? 0) - (freq.get(a.id.slice(7)) ?? 0);
   });
-  const collapsed = group === 'all' && !allActs;
+  const collapsed = group === 'all' && !allActs && !searching;
   const actsShown = collapsed ? acts.slice(0, 7) : acts;
 
   const tile = (sc: (typeof SHORTCUTS)[number]) => (
@@ -1250,22 +1312,35 @@ function ShortcutsSheet({
         <span className="tdc-sheet-count">{t.todayScCount(ids.length, max)}</span>
       </div>
       <div className="tdc-sheet-sub">{t.todayScSub}</div>
-      <div className="tdc-chips">
-        {(['all', 'train', 'activity', 'health'] as const).map((g) => (
-          <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
-            {g === 'all' ? t.todayAll : tw.groups[g]}
-          </Chip>
-        ))}
-      </div>
+      {!searching && (
+        <div className="tdc-chips">
+          {(['all', 'train', 'activity', 'health'] as const).map((g) => (
+            <Chip key={g} size="sm" selected={group === g} onClick={() => setGroup(g)}>
+              {g === 'all' ? t.todayAll : tw.groups[g]}
+            </Chip>
+          ))}
+        </div>
+      )}
+      <SearchField
+        className="tdc-search"
+        value={query}
+        onChange={setQuery}
+        placeholder={t.todaySearchShortcuts}
+        clearLabel={t.todayClear}
+      />
+      {groups.every((g) => !SHORTCUTS.some((s) => s.group === g.key && hit(s))) && (
+        <div className="tdc-empty">{t.todayNoResults}</div>
+      )}
       {groups
-        .filter((g) => group === 'all' || group === g.key)
+        .filter((g) => searching || group === 'all' || group === g.key)
+        .filter((g) => SHORTCUTS.some((s) => s.group === g.key && hit(s)))
         .map((g) => (
           <Fragment key={g.key}>
             <div className="tdc-pick-group">{g.title}</div>
             <div className="tdc-pick-grid">
               {g.key === 'activity'
-                ? actsShown.map(tile)
-                : SHORTCUTS.filter((s) => s.group === g.key).map(tile)}
+                ? actsShown.filter(hit).map(tile)
+                : SHORTCUTS.filter((s) => s.group === g.key && hit(s)).map(tile)}
               {g.key === 'activity' && collapsed && acts.length > 7 && (
                 <button type="button" className="tdc-sc-more" onClick={() => setAllActs(true)}>
                   <Icon name="magnifying-glass" />

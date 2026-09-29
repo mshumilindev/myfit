@@ -1330,6 +1330,10 @@ export const en = {
   todayAddWidget: 'Add widget',
   todayEmptySlot: 'Empty slot',
   todayUntitled: 'My section',
+  todaySearchWidgets: 'Search widgets',
+  todaySearchShortcuts: 'Search shortcuts',
+  todayNoResults: 'Nothing found',
+  todayClear: 'Clear',
   todayClientsIn7d: (n: number) => '' + n + ' in 7 days',
   todayLayoutOverflow: (n: number) =>
     'Widgets that won’t fit: ' + n + '. They’ll be removed from the section.',
@@ -2578,6 +2582,15 @@ export const en = {
   clientOpenProfile: 'Full profile',
   clientLiveTitle: 'Training in progress',
   clientLiveBody: 'Details will appear once the session ends.',
+  clientRingAlertTitle: (n: number) => 'No sessions for ' + n + ' days',
+  clientRingAlertBody: (name: string) =>
+    'That’s why ' +
+    name +
+    ' has a red ring with “!” on your Today. It goes away after their next workout.',
+  clientRingNewTitle: 'Trained recently',
+  clientRingNewBody: (name: string) =>
+    'The gold ring on your Today means ' + name + ' trained in the last 2 days.',
+  clientRingLiveHint: 'The green dot on your Today means they’re training right now.',
   histStateRest: 'Rest day',
   histStateVacation: 'Full rest',
   histStateSick: 'Sick day',

@@ -1376,6 +1376,10 @@ export const uk: Strings = {
   todayAddWidget: 'Додати віджет',
   todayEmptySlot: 'Порожній слот',
   todayUntitled: 'Моя секція',
+  todaySearchWidgets: 'Пошук віджетів',
+  todaySearchShortcuts: 'Пошук шорткатів',
+  todayNoResults: 'Нічого не знайдено',
+  todayClear: 'Очистити',
   todayClientsIn7d: (n: number) => '' + n + ' за 7 днів',
   todayLayoutOverflow: (n: number) =>
     'Не вміститься віджетів: ' + n + '. Їх буде прибрано із секції.',
@@ -2573,6 +2577,13 @@ export const uk: Strings = {
   clientOpenProfile: 'Повний профіль',
   clientLiveTitle: 'Тренування триває',
   clientLiveBody: 'Деталі зʼявляться, коли сесія завершиться.',
+  clientRingAlertTitle: (n: number) => 'Без тренувань ' + n + ' днів',
+  clientRingAlertBody: (name: string) =>
+    'Тому в ' + name + ' на Today червоне кільце зі «!». Зникне після наступного тренування.',
+  clientRingNewTitle: 'Нещодавно тренувався',
+  clientRingNewBody: (name: string) =>
+    'Золоте кільце на Today означає, що ' + name + ' тренувався(лась) за останні 2 дні.',
+  clientRingLiveHint: 'Зелена крапка на Today означає, що клієнт тренується просто зараз.',
   histStateRest: 'День відпочинку',
   histStateVacation: 'Повний відпочинок',
   histStateSick: 'Хворів',

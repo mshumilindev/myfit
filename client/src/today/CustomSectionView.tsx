@@ -1,23 +1,12 @@
 import { Fragment } from 'react';
-import { Icon } from '../ui';
-import { useT } from '../i18n';
 import { WidgetSection } from '../components/ui/WidgetGrid';
-import { slotCount, type CustomSection } from './layout';
+import type { CustomSection } from './layout';
 import { widgetById } from './registry';
 import { renderShortcut, shortcutById, type ShortcutCtx } from './shortcuts';
 
-/** A user section on Today (view mode). Empty sections stay hidden. A shortcuts
- *  row with room left ends with a dashed "+ Add" tile that opens Customize (T1). */
-export function CustomSectionView({
-  section,
-  ctx,
-  onCustomize,
-}: {
-  section: CustomSection;
-  ctx: ShortcutCtx;
-  onCustomize?: () => void;
-}) {
-  const { t } = useT();
+/** A user section on Today (view mode). Empty sections stay hidden; adding
+ *  happens only in Customize, so view mode never shows an "+ Add" tile. */
+export function CustomSectionView({ section, ctx }: { section: CustomSection; ctx: ShortcutCtx }) {
   const items = section.items
     .map((it) => {
       if (it.size === 'XS') {
@@ -29,19 +18,9 @@ export function CustomSectionView({
     })
     .filter(Boolean);
   if (items.length === 0) return null;
-  const room =
-    section.layout === 'shortcuts' && onCustomize && items.length < slotCount('shortcuts');
   return (
     <WidgetSection title={section.title} layout={section.layout}>
       {items}
-      {room && (
-        <button type="button" className="td-sc-add uisc" onClick={onCustomize}>
-          <span className="td-sc-add-ic">
-            <Icon name="plus" />
-          </span>
-          <span className="uisc-label">{t.todayAdd}</span>
-        </button>
-      )}
     </WidgetSection>
   );
 }

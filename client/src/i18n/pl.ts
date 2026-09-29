@@ -1344,6 +1344,10 @@ export const pl: Strings = {
   todayAddWidget: 'Dodaj widżet',
   todayEmptySlot: 'Puste miejsce',
   todayUntitled: 'Moja sekcja',
+  todaySearchWidgets: 'Szukaj widżetów',
+  todaySearchShortcuts: 'Szukaj skrótów',
+  todayNoResults: 'Nic nie znaleziono',
+  todayClear: 'Wyczyść',
   todayClientsIn7d: (n: number) => '' + n + ' w 7 dni',
   todayLayoutOverflow: (n: number) =>
     'Widżety, które się nie zmieszczą: ' + n + '. Zostaną usunięte z sekcji.',
@@ -2546,6 +2550,13 @@ export const pl: Strings = {
   clientOpenProfile: 'Pełny profil',
   clientLiveTitle: 'Trening w toku',
   clientLiveBody: 'Szczegóły pojawią się po zakończeniu sesji.',
+  clientRingAlertTitle: (n: number) => 'Bez treningu od ' + n + ' dni',
+  clientRingAlertBody: (name: string) =>
+    'Dlatego ' + name + ' ma na Today czerwony pierścień z „!”. Zniknie po następnym treningu.',
+  clientRingNewTitle: 'Niedawno trenował(a)',
+  clientRingNewBody: (name: string) =>
+    'Złoty pierścień na Today oznacza, że ' + name + ' trenował(a) w ciągu ostatnich 2 dni.',
+  clientRingLiveHint: 'Zielona kropka na Today oznacza, że klient trenuje w tej chwili.',
   histStateRest: 'Dzień odpoczynku',
   histStateVacation: 'Pełny odpoczynek',
   histStateSick: 'Choroba',

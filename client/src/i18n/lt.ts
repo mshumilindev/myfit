@@ -1361,6 +1361,10 @@ export const lt: Strings = {
   todayAddWidget: 'Pridėti valdiklį',
   todayEmptySlot: 'Tuščia vieta',
   todayUntitled: 'Mano sekcija',
+  todaySearchWidgets: 'Ieškoti valdiklių',
+  todaySearchShortcuts: 'Ieškoti nuorodų',
+  todayNoResults: 'Nieko nerasta',
+  todayClear: 'Išvalyti',
   todayClientsIn7d: (n: number) => '' + n + ' per 7 d.',
   todayLayoutOverflow: (n: number) =>
     'Netilps valdiklių: ' + n + '. Jie bus pašalinti iš skilties.',
@@ -2568,6 +2572,13 @@ export const lt: Strings = {
   clientOpenProfile: 'Visas profilis',
   clientLiveTitle: 'Treniruotė vyksta',
   clientLiveBody: 'Detalės pasirodys pasibaigus sesijai.',
+  clientRingAlertTitle: (n: number) => 'Be treniruočių ' + n + ' d.',
+  clientRingAlertBody: (name: string) =>
+    'Todėl ' + name + ' Today turi raudoną žiedą su „!“. Jis dings po kitos treniruotės.',
+  clientRingNewTitle: 'Neseniai treniravosi',
+  clientRingNewBody: (name: string) =>
+    'Auksinis žiedas Today reiškia, kad ' + name + ' treniravosi per paskutines 2 dienas.',
+  clientRingLiveHint: 'Žalias taškas Today reiškia, kad klientas treniruojasi dabar.',
   histStateRest: 'Poilsio diena',
   histStateVacation: 'Visiškas poilsis',
   histStateSick: 'Serga',
