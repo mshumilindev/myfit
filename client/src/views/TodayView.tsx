@@ -7,8 +7,26 @@ import {
   weekPos,
   weekStartOf,
 } from '../weekStart';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  CORE_DEFAULTS,
+  coreOpts,
+  useTodayLayout,
+  type AtlasOpts,
+  type CoreId,
+  type NudgeKind,
+  type ProgramOpts,
+  type TodayLayout,
+} from '../today/layout';
+import { Button } from '../components/ui/Button';
+import { localizedExerciseName } from '../data/exerciseNames';
+import { CustomSectionView } from '../today/CustomSectionView';
+import { TodayCustomize } from '../today/TodayCustomize';
+import { useTw } from '../today/strings';
+import type { ShortcutCtx } from '../today/shortcuts';
+import '../today/today.css';
 import type { Shell } from '../App';
+import type { LiveSession } from '../types';
 import { computeTrends } from '../trends';
 import { computePlaybook, type Play } from '../playbook';
 import { getRole } from '../api';
@@ -44,6 +62,7 @@ import {
   workoutDayReadout,
   type useStore,
   backfillHomeSet,
+  gymAtCurrentPosition,
 } from '../store';
 import {
   fmtDayMonth,
@@ -56,8 +75,8 @@ import {
 import { DayHistorySheet } from '../components/DayHistorySheet';
 import { BackfillSheet, StartSheet } from '../components/StartSheet';
 import { WeightSheet } from '../components/BodyMetrics';
-import { TrainerClientsStrip } from '../components/TrainerClientsStrip';
-import { AtlasSoloStrip, AtlasStoryItem } from '../components/AtlasStrip';
+import { AtlasClientsBlock } from '../today/AtlasClientsBlock';
+import { hasCachedClients } from '../today/clientRoster';
 import {
   activityType,
   activityCategory,
@@ -115,9 +134,16 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   const { withGym, gymPicker } = useGymStep();
   const isDesktop = useIsDesktop();
   const { t, locale } = useT();
+  const tw = useTw();
+  const layout = useTodayLayout();
+  const [editing, setEditing] = useState(false);
+  /** Desktop right panel host for Customize's "Add to Today" (portal target). */
+  const [editSide, setEditSide] = useState<HTMLElement | null>(null);
   const presenceOn = useFlag('gymPresence');
   const suggestOn = true; // muscle readouts are always on (not flagged)
   const [backfill, setBackfill] = useState(false);
+  // "Log for <date>" on the History calendar prefills the past-session date.
+  const [backfillDate, setBackfillDate] = useState<string | undefined>(undefined);
   const [addWeightOpen, setAddWeightOpen] = useState(false);
   // Suggest-a-program banner state (AC · "Suggest Program Banner").
   const [progSheetOpen, setProgSheetOpen] = useState(false);
@@ -337,10 +363,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     passive: Math.round(restKcalWeek),
     total: Math.round(liftKcalWeek + activityKcalWeek + restKcalWeek),
   };
-  function startProgramDay(day: number) {
+  /** `gymStep` off (Program block setting): no gym question — the gym you're
+   *  standing in, else the gym of your last session. */
+  function startProgramDay(day: number, gymStep = coreOpts(layout, 'program').gymStep) {
     if (resumeLive()) return;
     if (!assignment) return;
-    void withGym((gymId) => {
+    const go = (gymId: string | null) => {
       const id = startProgramDaySession(
         assignment,
         day,
@@ -348,7 +376,14 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         gymId,
       );
       if (id) shell.openOverlay({ screen: 'session', workoutId: id });
-    });
+    };
+    if (gymStep) {
+      void withGym(go);
+      return;
+    }
+    const lastGym =
+      [...finished].sort((a, b) => b.startedAt - a.startedAt).find((w) => w.gymId)?.gymId ?? null;
+    void gymAtCurrentPosition(store.gyms).then((g) => go(g?.id ?? lastGym));
   }
 
   if (showSkeleton) {
@@ -752,7 +787,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     [fmtWeekday(dayStartOf(day), locale), extra].filter(Boolean).join(' · ');
   const injuryRehab = !!activeInj && !injFullRest && activeInj.stage !== 'return';
 
-  const programCard =
+  const renderProgramCard = (po: ProgramOpts) =>
     assignment &&
     assignedActive &&
     (() => {
@@ -867,28 +902,54 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             canOpenDay && (!canStart || todayHasItems)
               ? () => setDayDrawer(dayStartOf(day))
               : canStart
-                ? () => startProgramDay(day)
+                ? () => startProgramDay(day, po.gymStep)
                 : undefined,
         };
       });
 
       const todayType = mode === 'train' ? programDayType(a, todayWeekday) : null;
+      // Program block settings: compact drops the meta and status lines;
+      // the exercise list shows names (standard) or names + prescription (detailed).
+      const compact = po.style === 'compact';
+      const detailed = po.style === 'detailed';
+      const exName = (it: ProgramItem) => localizedExerciseName(it.name, locale) ?? it.name;
+      const exList =
+        po.exercises &&
+        !compact &&
+        (mode === 'train' || mode === 'injury') &&
+        todayItems.length > 0 ? (
+          detailed ? (
+            <ul className="pch-ex is-detailed">
+              {todayItems.map((it) => (
+                <li key={it.id}>
+                  <span className="pch-ex-n">{exName(it)}</span>
+                  <span className="pch-ex-v num">{compactProgramDaySummary([it])}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="pch-ex">{todayItems.map(exName).join(' · ')}</div>
+          )
+        ) : null;
       return (
         <section
           className="today-program-card td-week"
           data-mode={mode}
           data-day={todayType ?? undefined}
+          data-style={po.style}
         >
           <div className="program-card-head">
             <Icon name={headIcon} className="pch-icon" />
             <div className="pch-text">
               <div className="pch-kicker">{kicker}</div>
               <div className="n">{a.program.name}</div>
-              <div className="s">
-                {a.program.weeks !== 0 ? `${t.progWeekN(a.week)} · ` : ''}
-                {t.progSessions(programWeek.done, programWeek.total)}
-                {a.assignedBy ? ` · ${t.progAssignedBy(a.assignedBy)}` : ''}
-              </div>
+              {!compact && (
+                <div className="s">
+                  {a.program.weeks !== 0 ? `${t.progWeekN(a.week)} · ` : ''}
+                  {t.progSessions(programWeek.done, programWeek.total)}
+                  {a.assignedBy ? ` · ${t.progAssignedBy(a.assignedBy)}` : ''}
+                </div>
+              )}
             </div>
             <div className="pch-progress">
               <span className="pch-pct num">{programWeek.pct}%</span>
@@ -897,8 +958,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               </span>
             </div>
           </div>
-          {status && <div className="pch-status">{status}</div>}
-          <WeekPills cells={cells} />
+          {status && !compact && <div className="pch-status">{status}</div>}
+          {detailed && todayMuscles.length > 0 && todayItems.length > 0 && (
+            <div className="pch-ex">{todayMuscles.map((m) => t.muscleGroups[m]).join(' · ')}</div>
+          )}
+          {exList}
+          {po.weekPills && <WeekPills cells={cells} />}
         </section>
       );
     })();
@@ -919,8 +984,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   // No program: the same strip, neutral and text-free. Days you didn't train
   // read as rest after the fact (no red — nothing was prescribed), today is a
   // ▶ until something's logged.
-  const weekCard = (() => {
+  const renderWeekCard = (po: ProgramOpts) => {
     if (assignment && assignedActive) return null;
+    if (!po.weekPills) return null;
     const cells: WeekCell[] = weekOrder(weekStart).map((day) => {
       const start = dayStartOf(day);
       const dk = dayKey(start);
@@ -970,7 +1036,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         <WeekPills cells={cells} />
       </section>
     );
-  })();
+  };
 
   const banners = (
     <>
@@ -1076,27 +1142,569 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     });
   }
 
-  // Atlas always lives in the stories strip (his only entry point for now):
-  // first bubble next to clients, or a full-width row of the same height when
-  // he is alone — the invite while he isn't set up yet.
+  // Atlas & clients block (settings A2, designs A1 / T5): Atlas is always
+  // here — alone for members, beside the clients of anyone who coaches.
   const openCoach = () => shell.openOverlay({ screen: 'coach' });
-  const atlasLead = <AtlasStoryItem onOpen={openCoach} />;
-  const atlasSolo = <AtlasSoloStrip onOpen={openCoach} />;
+  const openClient = (id: string) => shell.openOverlay({ screen: 'client-page', clientId: id });
+  const watchClient = (s: LiveSession) =>
+    s.workoutId
+      ? shell.openOverlay({
+          screen: 'trainee-session',
+          athleteId: s.id,
+          workoutId: s.workoutId,
+          athleteName: s.athleteName,
+        })
+      : openClient(s.id);
+  // The Clients area lives in the People app.
+  const allClients = () => {
+    window.location.hash = '#/people/clients';
+  };
+  const renderAtlas = (ao: AtlasOpts): ReactNode => (
+    <AtlasClientsBlock
+      opts={ao}
+      withClients={getRole() !== 'member'}
+      onOpenCoach={openCoach}
+      onOpenClient={openClient}
+      onWatch={watchClient}
+      onAllClients={allClients}
+    />
+  );
 
-  // A trainer's Today is just their clients — nothing else, to avoid clutter.
+  // A trainer's Today is just Atlas and their clients — nothing else, to avoid
+  // clutter (the block with its defaults).
   if (getRole() === 'trainer') {
     return (
-      <div className="screen paned">
-        <div className="pane-main">
-          <TrainerClientsStrip
-            onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
-            lead={atlasLead}
-            solo={atlasSolo}
-          />
-        </div>
+      <div className="screen paned today-page">
+        <div className="pane-main">{renderAtlas(CORE_DEFAULTS.atlas)}</div>
       </div>
     );
   }
+
+  const widgetCtx: ShortcutCtx = {
+    store,
+    now,
+    t,
+    tw,
+    locale,
+    shell,
+    openWeight: () => setAddWeightOpen(true),
+    startToday: todayStart,
+    logPast: () => setBackfill(true),
+  };
+  const coreFor = (l: TodayLayout): Record<CoreId, ReactNode> => {
+    const po = coreOpts(l, 'program');
+    const off = coreOpts(l, 'nudges').off;
+    const shows = (k: NudgeKind) => !off.includes(k);
+    const days = coreOpts(l, 'history').days;
+    return {
+      status: (
+        <>
+          {banners}
+          {liveAct && (
+            <button
+              className={`td-resume-activity cat-${activityTone(liveAct.type, activityCategory(liveAct))}`}
+              onClick={() => shell.openOverlay({ screen: 'activity' })}
+            >
+              <span className="tra-icon">
+                <Icon name={activityType(liveAct.type)?.icon ?? 'heartbeat'} weight="fill" />
+              </span>
+              <span className="tra-main">
+                <span className="tra-kicker">{t.actInProgress}</span>
+                <span className="tra-name">{t.actType[liveAct.type] ?? liveAct.type}</span>
+              </span>
+              <span className="tra-cta">
+                {t.actResume}
+                <Icon name="arrow-right" />
+              </span>
+            </button>
+          )}
+          {activeInj && injFullRest && activeInj.fullRestUntil != null && (
+            <div
+              className="prog-banner analysis-banner gem-rest tr-banner fade-in"
+              style={{
+                background:
+                  'linear-gradient(150deg,var(--color-rest-tint,#0e2a3b),var(--color-surface))',
+                borderColor: 'var(--color-rest-line,#134a68)',
+              }}
+            >
+              <span className="prog-sheen" aria-hidden />
+              <div className="prog-banner-row">
+                <span
+                  className="prog-banner-icon"
+                  style={{
+                    background: 'rgba(51,168,224,.16)',
+                    color: 'var(--color-rest-400,#33a8e0)',
+                  }}
+                >
+                  <Icon name="moon" weight="fill" />
+                </span>
+                <div className="prog-banner-main">
+                  <span
+                    className="prog-banner-kicker"
+                    style={{ color: 'var(--color-rest-300,#93d4f2)' }}
+                  >
+                    {t.injStage0}
+                  </span>
+                  <div
+                    className="prog-banner-title"
+                    style={{ color: 'var(--color-rest-200,#d3edfb)' }}
+                  >
+                    {t.injStage0Left(activeInj.fullRestUntil - injToday)}
+                  </div>
+                  <div className="prog-banner-body">{t.injStage0Note}</div>
+                  <div className="tr-pills">
+                    <span className="tr-pill">
+                      <Icon name="pause" weight="bold" />
+                      {t.illnessProgramPill}
+                    </span>
+                  </div>
+                  <div className="prog-banner-acts">
+                    <button
+                      className="prog-banner-cta"
+                      onClick={() =>
+                        shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })
+                      }
+                    >
+                      <Icon name="list-checks" weight="bold" />
+                      {t.injViewPlan}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeInj && !injFullRest && activeInj.stage === 'return' && (
+            <div
+              className="prog-banner analysis-banner gem-rest tr-banner fade-in"
+              style={{
+                background:
+                  'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
+                borderColor: 'var(--color-ok-line,#2f6f52)',
+                textAlign: 'center',
+              }}
+            >
+              <span className="prog-sheen" aria-hidden />
+              <div style={{ padding: '4px 2px' }}>
+                <div
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: '50%',
+                    margin: '0 auto',
+                    background: 'rgba(76,190,140,.16)',
+                    border: '1px solid var(--color-ok-line,#2f6f52)',
+                    display: 'grid',
+                    placeItems: 'center',
+                    color: 'var(--color-ok)',
+                    fontSize: 26,
+                  }}
+                >
+                  <Icon name="confetti" weight="fill" />
+                </div>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 800,
+                    marginTop: 12,
+                    color: 'var(--color-ok-text,#b7e8cf)',
+                  }}
+                >
+                  {t.injDoneTitle}
+                </div>
+                <div className="prog-banner-body" style={{ marginTop: 6 }}>
+                  {t.injDoneBody}
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 6,
+                    justifyContent: 'center',
+                    margin: '12px 0 4px',
+                  }}
+                >
+                  {REHAB_STAGES.map((sid) => (
+                    <span
+                      key={sid}
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: 'var(--color-ok)',
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="prog-banner-acts" style={{ justifyContent: 'center' }}>
+                  <button className="prog-banner-cta" onClick={() => healInjury(activeInj.id)}>
+                    <Icon name="check-circle" weight="bold" />
+                    {t.injBackToProgram}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeInj &&
+            !injFullRest &&
+            activeInj.stage !== 'return' &&
+            activeInj.pendingAdvance && (
+              <div
+                className="prog-banner analysis-banner gem-rest tr-banner fade-in"
+                style={{
+                  background:
+                    'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
+                  borderColor: 'var(--color-ok-line,#2f6f52)',
+                }}
+              >
+                <span className="prog-sheen" aria-hidden />
+                <div className="prog-banner-row">
+                  <span
+                    className="prog-banner-icon"
+                    style={{ background: 'rgba(76,190,140,.16)', color: 'var(--color-ok)' }}
+                  >
+                    <Icon name="arrow-fat-up" weight="fill" />
+                  </span>
+                  <div className="prog-banner-main">
+                    <span className="prog-banner-kicker" style={{ color: 'var(--color-ok)' }}>
+                      {t.injReadyKicker}
+                    </span>
+                    <div
+                      className="prog-banner-title"
+                      style={{ color: 'var(--color-ok-text,#b7e8cf)' }}
+                    >
+                      {t.injReadyTitle(t.injStage[nextStage(activeInj.stage)])}
+                    </div>
+                    <div className="prog-banner-body">{t.injReadyBody}</div>
+                    <div className="prog-banner-acts">
+                      <button
+                        className="prog-banner-cta ghost"
+                        onClick={() => dismissAdvance(activeInj.id)}
+                      >
+                        {t.injStayLonger}
+                      </button>
+                      <button
+                        className="prog-banner-cta"
+                        style={{ color: 'var(--color-ok)', borderColor: 'var(--color-ok)' }}
+                        onClick={() => advanceInjury(activeInj.id)}
+                      >
+                        {t.injMoveUpShort} <Icon name="arrow-right" weight="bold" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          {activeInj &&
+            !injFullRest &&
+            activeInj.stage !== 'return' &&
+            !activeInj.pendingAdvance && (
+              <div className="prog-banner analysis-banner gem-rest tr-banner illness rehab fade-in">
+                <span className="prog-sheen" aria-hidden />
+                <div className="prog-banner-row">
+                  <span className="prog-banner-icon">
+                    <Icon name="heartbeat" weight="bold" />
+                  </span>
+                  <div className="prog-banner-main">
+                    <span className="prog-banner-kicker">
+                      {t.injBannerStage(
+                        stageIndex(activeInj.stage) + 1,
+                        REHAB_STAGES.length,
+                        t.injStage[activeInj.stage],
+                      )}
+                    </span>
+                    <div className="prog-banner-title">
+                      {t.injBannerTitle(
+                        activeInj.reason === 'injury'
+                          ? (t.injBodyParts[activeInj.bodyPart] ?? activeInj.bodyPart)
+                          : t.injReason[activeInj.reason],
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, margin: '8px 0 2px' }}>
+                      {REHAB_STAGES.map((sid, i) => (
+                        <span
+                          key={sid}
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            background:
+                              i < stageIndex(activeInj.stage)
+                                ? 'var(--color-ok)'
+                                : i === stageIndex(activeInj.stage)
+                                  ? 'var(--color-danger)'
+                                  : 'var(--color-neutral-700)',
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div className="prog-banner-body">{t.injBannerBody}</div>
+                    <div className="tr-pills">
+                      {activeInj.muscles.slice(0, 4).map((m) => (
+                        <span key={m} className="tr-pill">
+                          {t.muscleGroups[m] ?? m}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="prog-banner-acts">
+                      <button
+                        className="prog-banner-cta"
+                        onClick={() =>
+                          shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })
+                        }
+                      >
+                        <Icon name="list-checks" weight="bold" />
+                        {t.injViewPlan}
+                      </button>
+                      {activeInj.stage !== 'protect' && (
+                        <button
+                          className="prog-banner-cta ghost"
+                          onClick={() =>
+                            shell.openOverlay({
+                              screen: 'injury',
+                              injuryId: activeInj.id,
+                              checkin: true,
+                            })
+                          }
+                        >
+                          <Icon name="heartbeat" weight="bold" />
+                          {t.injBannerCheckin}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          {activeRest && (
+            <div
+              className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
+            >
+              <span className="prog-sheen" aria-hidden />
+              <div className="prog-banner-row">
+                <span
+                  className={`prog-banner-icon${activeRest.mode === 'illness' ? ' ill-pulse' : ''}`}
+                >
+                  <Icon
+                    name={activeRest.mode === 'illness' ? 'pulse' : 'clock-countdown'}
+                    weight="bold"
+                  />
+                </span>
+                <div className="prog-banner-main">
+                  {activeRest.mode === 'illness' ? (
+                    <>
+                      <span className="prog-banner-kicker">{t.restCardIllnessKicker}</span>
+                      <div className="prog-banner-title">
+                        {t.restCardIllnessTitle(dayKey(pbNow) - activeRest.startDay + 1)}
+                      </div>
+                      <div className="prog-banner-body">{t.restCardIllnessNote}</div>
+                      <div className="tr-pills">
+                        <span className="tr-pill">
+                          <Icon name="check-circle" weight="bold" />
+                          {t.illnessStreakPill}
+                        </span>
+                        <span className="tr-pill">
+                          <Icon name="pause" weight="bold" />
+                          {t.illnessProgramPill}
+                        </span>
+                      </div>
+                      <div className="prog-banner-acts">
+                        <button
+                          className="prog-banner-cta"
+                          onClick={() => setConfirmEndRest(activeRest.id)}
+                        >
+                          <Icon name="check" weight="bold" />
+                          {t.illnessRecovered}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="tr-top">
+                        <span className="prog-banner-kicker">
+                          {activeRest.mode === 'active' ? t.restModeActive : t.restModeOff}
+                        </span>
+                        <span className="tr-day">
+                          {t.restDayOf(
+                            Math.min(
+                              dayKey(pbNow) - activeRest.startDay + 1,
+                              activeRest.endDay - activeRest.startDay + 1,
+                            ),
+                            activeRest.endDay - activeRest.startDay + 1,
+                          )}
+                        </span>
+                      </div>
+                      <div className="prog-banner-title">
+                        {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
+                      </div>
+                      <div className="tr-bar">
+                        <span
+                          className="tr-fill"
+                          style={{
+                            width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="prog-banner-body">
+                        {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
+                      </div>
+                      <div className="prog-banner-acts">
+                        {activeRest.mode === 'active' ? (
+                          <>
+                            <button
+                              className="prog-banner-cta"
+                              onClick={startSession}
+                              disabled={busy}
+                            >
+                              <Icon name="play" weight="bold" />
+                              {t.restStartLight}
+                            </button>
+                            <button
+                              className="prog-banner-skip"
+                              onClick={() => setConfirmEndRest(activeRest.id)}
+                            >
+                              {t.restEndNow}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className="prog-banner-cta"
+                            onClick={() => setConfirmEndRest(activeRest.id)}
+                          >
+                            {t.restEndNow}
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {illReturn && !illDismissed && (
+            <div className="prog-banner analysis-banner gem-rest tr-banner illness fade-in">
+              <div className="prog-banner-row">
+                <span className="prog-banner-icon">
+                  <Icon name="hand-waving" weight="bold" />
+                </span>
+                <div className="prog-banner-main">
+                  <span className="prog-banner-kicker">{t.illnessReturnKicker}</span>
+                  <div className="prog-banner-title">{t.illnessReturnTitle}</div>
+                  <div className="prog-banner-body">{t.illnessReturnBody(illReturn.daysOut)}</div>
+                  <div className="prog-banner-acts">
+                    <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
+                      <Icon name="play" weight="bold" />
+                      {t.restStartLight}
+                    </button>
+                    <button className="prog-banner-skip" onClick={() => setIllDismissed(true)}>
+                      {t.illnessReturnDismiss}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      ),
+      atlas: renderAtlas(coreOpts(l, 'atlas')),
+      program: (
+        <>
+          {renderProgramCard(po)} {hasHistory && renderWeekCard(po)}
+          {po.logPast &&
+            !(assignment && assignedActive && programDayHasPlan(assignment, todayWeekday)) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon="clock-counter-clockwise"
+                className="td-logpast"
+                onClick={() => setBackfill(true)}
+              >
+                {t.logPastSession}
+              </Button>
+            )}
+        </>
+      ),
+      nudges: (
+        <>
+          {shows('learn') && learnHasVideo && learnProgress.done === 0 && learnBanner}
+          <NudgeStack nudges={nudges.filter((n) => shows(n.id as NudgeKind))} />
+          {shows('sleep') && (
+            <>
+              <SleepForgotBanner
+                onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
+              />
+              <SleepAutoFilledCard
+                onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
+              />
+            </>
+          )}
+        </>
+      ),
+      history: (
+        <>
+          {hasHistory ? (
+            <>
+              <div className="td-history">
+                <div className="section-label section-divide">{t.tdHistory}</div>
+                <>
+                  <HistoryTimeline
+                    workouts={finished}
+                    activities={store.activities}
+                    sleeps={store.sleeps}
+                    allWorkouts={store.workouts}
+                    bodyKg={bodyKg}
+                    maxDays={days}
+                    onOpenWorkout={(id) =>
+                      shell.openOverlay({ screen: 'past-workout', workoutId: id })
+                    }
+                    onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
+                    onOpenSleep={(id) =>
+                      shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })
+                    }
+                    openMuscleHistory={openMuscleHistory}
+                    showMuscles={suggestOn}
+                  />
+                  {historyDayCount > days && (
+                    <button
+                      className="td-history-all"
+                      onClick={() => shell.openOverlay({ screen: 'history' })}
+                    >
+                      {t.seeAllHistory}
+                      <Icon name="arrow-up-right" />
+                    </button>
+                  )}
+                </>
+              </div>
+            </>
+          ) : (
+            <div className="td-empty">
+              <Icon name="barbell" />
+              <div className="td-empty-title">{t.tdEmptyTitle}</div>
+              <div className="td-empty-body">{t.tdEmptyBody}</div>
+              <div className="td-empty-actions">
+                <button className="btn btn-primary" onClick={startSession} disabled={busy}>
+                  <Icon name="play" />
+                  {t.startFirstSession}
+                </button>
+                <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
+                  {t.logPastSession}
+                </button>
+              </div>
+              {store.gyms.length === 0 && (
+                <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
+                  <span className="gym-hint-icon">
+                    <Icon name="map-pin" />
+                  </span>
+                  <span className="gym-hint-copy">{t.addGymHint}</span>
+                  <span className="gym-hint-action">{t.add}</span>
+                </button>
+              )}
+            </div>
+          )}
+        </>
+      ),
+    };
+  };
+
+  const core = coreFor(layout);
 
   return (
     <div className="screen paned today-page">
@@ -1110,16 +1718,34 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
 
         {/* An admin who is also a trainer sees their clients between the day
             heading and the calendar. */}
-        {getRole() === 'admin' ? (
-          <TrainerClientsStrip
-            onOpenClient={(id) => shell.openOverlay({ screen: 'client-page', clientId: id })}
-            lead={atlasLead}
-            solo={atlasSolo}
+        {editing ? (
+          <TodayCustomize
+            coreFor={coreFor}
+            hasClients={getRole() === 'admin' && hasCachedClients()}
+            ctx={widgetCtx}
+            side={isDesktop ? editSide : null}
+            onClose={() => setEditing(false)}
           />
         ) : (
-          atlasSolo
+          <>
+            {layout.sections.map((s) =>
+              s.kind === 'core' ? (
+                <Fragment key={s.id}>{core[s.id]}</Fragment>
+              ) : (
+                <CustomSectionView
+                  key={s.id}
+                  section={s}
+                  ctx={widgetCtx}
+                  onCustomize={() => setEditing(true)}
+                />
+              ),
+            )}
+            <button type="button" className="td-customize" onClick={() => setEditing(true)}>
+              <Icon name="sliders-horizontal" />
+              {t.todayCustomize}
+            </button>
+          </>
         )}
-        {programCard}
         {dayDrawer != null && (
           <DayHistorySheet
             day={dayDrawer}
@@ -1137,462 +1763,6 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             onOpenSleep={(id) => shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })}
           />
         )}
-        {hasHistory && weekCard}
-
-        {banners}
-        {liveAct && (
-          <button
-            className={`td-resume-activity cat-${activityTone(liveAct.type, activityCategory(liveAct))}`}
-            onClick={() => shell.openOverlay({ screen: 'activity' })}
-          >
-            <span className="tra-icon">
-              <Icon name={activityType(liveAct.type)?.icon ?? 'heartbeat'} weight="fill" />
-            </span>
-            <span className="tra-main">
-              <span className="tra-kicker">{t.actInProgress}</span>
-              <span className="tra-name">{t.actType[liveAct.type] ?? liveAct.type}</span>
-            </span>
-            <span className="tra-cta">
-              {t.actResume}
-              <Icon name="arrow-right" />
-            </span>
-          </button>
-        )}
-        {activeInj && injFullRest && activeInj.fullRestUntil != null && (
-          <div
-            className="prog-banner analysis-banner gem-rest tr-banner fade-in"
-            style={{
-              background:
-                'linear-gradient(150deg,var(--color-rest-tint,#0e2a3b),var(--color-surface))',
-              borderColor: 'var(--color-rest-line,#134a68)',
-            }}
-          >
-            <span className="prog-sheen" aria-hidden />
-            <div className="prog-banner-row">
-              <span
-                className="prog-banner-icon"
-                style={{
-                  background: 'rgba(51,168,224,.16)',
-                  color: 'var(--color-rest-400,#33a8e0)',
-                }}
-              >
-                <Icon name="moon" weight="fill" />
-              </span>
-              <div className="prog-banner-main">
-                <span
-                  className="prog-banner-kicker"
-                  style={{ color: 'var(--color-rest-300,#93d4f2)' }}
-                >
-                  {t.injStage0}
-                </span>
-                <div
-                  className="prog-banner-title"
-                  style={{ color: 'var(--color-rest-200,#d3edfb)' }}
-                >
-                  {t.injStage0Left(activeInj.fullRestUntil - injToday)}
-                </div>
-                <div className="prog-banner-body">{t.injStage0Note}</div>
-                <div className="tr-pills">
-                  <span className="tr-pill">
-                    <Icon name="pause" weight="bold" />
-                    {t.illnessProgramPill}
-                  </span>
-                </div>
-                <div className="prog-banner-acts">
-                  <button
-                    className="prog-banner-cta"
-                    onClick={() => shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })}
-                  >
-                    <Icon name="list-checks" weight="bold" />
-                    {t.injViewPlan}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeInj && !injFullRest && activeInj.stage === 'return' && (
-          <div
-            className="prog-banner analysis-banner gem-rest tr-banner fade-in"
-            style={{
-              background:
-                'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
-              borderColor: 'var(--color-ok-line,#2f6f52)',
-              textAlign: 'center',
-            }}
-          >
-            <span className="prog-sheen" aria-hidden />
-            <div style={{ padding: '4px 2px' }}>
-              <div
-                style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: '50%',
-                  margin: '0 auto',
-                  background: 'rgba(76,190,140,.16)',
-                  border: '1px solid var(--color-ok-line,#2f6f52)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  color: 'var(--color-ok)',
-                  fontSize: 26,
-                }}
-              >
-                <Icon name="confetti" weight="fill" />
-              </div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 800,
-                  marginTop: 12,
-                  color: 'var(--color-ok-text,#b7e8cf)',
-                }}
-              >
-                {t.injDoneTitle}
-              </div>
-              <div className="prog-banner-body" style={{ marginTop: 6 }}>
-                {t.injDoneBody}
-              </div>
-              <div
-                style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '12px 0 4px' }}
-              >
-                {REHAB_STAGES.map((sid) => (
-                  <span
-                    key={sid}
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      background: 'var(--color-ok)',
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="prog-banner-acts" style={{ justifyContent: 'center' }}>
-                <button className="prog-banner-cta" onClick={() => healInjury(activeInj.id)}>
-                  <Icon name="check-circle" weight="bold" />
-                  {t.injBackToProgram}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeInj && !injFullRest && activeInj.stage !== 'return' && activeInj.pendingAdvance && (
-          <div
-            className="prog-banner analysis-banner gem-rest tr-banner fade-in"
-            style={{
-              background:
-                'linear-gradient(150deg,var(--color-ok-tint,#16291f),var(--color-surface))',
-              borderColor: 'var(--color-ok-line,#2f6f52)',
-            }}
-          >
-            <span className="prog-sheen" aria-hidden />
-            <div className="prog-banner-row">
-              <span
-                className="prog-banner-icon"
-                style={{ background: 'rgba(76,190,140,.16)', color: 'var(--color-ok)' }}
-              >
-                <Icon name="arrow-fat-up" weight="fill" />
-              </span>
-              <div className="prog-banner-main">
-                <span className="prog-banner-kicker" style={{ color: 'var(--color-ok)' }}>
-                  {t.injReadyKicker}
-                </span>
-                <div
-                  className="prog-banner-title"
-                  style={{ color: 'var(--color-ok-text,#b7e8cf)' }}
-                >
-                  {t.injReadyTitle(t.injStage[nextStage(activeInj.stage)])}
-                </div>
-                <div className="prog-banner-body">{t.injReadyBody}</div>
-                <div className="prog-banner-acts">
-                  <button
-                    className="prog-banner-cta ghost"
-                    onClick={() => dismissAdvance(activeInj.id)}
-                  >
-                    {t.injStayLonger}
-                  </button>
-                  <button
-                    className="prog-banner-cta"
-                    style={{ color: 'var(--color-ok)', borderColor: 'var(--color-ok)' }}
-                    onClick={() => advanceInjury(activeInj.id)}
-                  >
-                    {t.injMoveUpShort} <Icon name="arrow-right" weight="bold" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeInj && !injFullRest && activeInj.stage !== 'return' && !activeInj.pendingAdvance && (
-          <div className="prog-banner analysis-banner gem-rest tr-banner illness rehab fade-in">
-            <span className="prog-sheen" aria-hidden />
-            <div className="prog-banner-row">
-              <span className="prog-banner-icon">
-                <Icon name="heartbeat" weight="bold" />
-              </span>
-              <div className="prog-banner-main">
-                <span className="prog-banner-kicker">
-                  {t.injBannerStage(
-                    stageIndex(activeInj.stage) + 1,
-                    REHAB_STAGES.length,
-                    t.injStage[activeInj.stage],
-                  )}
-                </span>
-                <div className="prog-banner-title">
-                  {t.injBannerTitle(
-                    activeInj.reason === 'injury'
-                      ? (t.injBodyParts[activeInj.bodyPart] ?? activeInj.bodyPart)
-                      : t.injReason[activeInj.reason],
-                  )}
-                </div>
-                <div style={{ display: 'flex', gap: 6, margin: '8px 0 2px' }}>
-                  {REHAB_STAGES.map((sid, i) => (
-                    <span
-                      key={sid}
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background:
-                          i < stageIndex(activeInj.stage)
-                            ? 'var(--color-ok)'
-                            : i === stageIndex(activeInj.stage)
-                              ? 'var(--color-danger)'
-                              : 'var(--color-neutral-700)',
-                      }}
-                    />
-                  ))}
-                </div>
-                <div className="prog-banner-body">{t.injBannerBody}</div>
-                <div className="tr-pills">
-                  {activeInj.muscles.slice(0, 4).map((m) => (
-                    <span key={m} className="tr-pill">
-                      {t.muscleGroups[m] ?? m}
-                    </span>
-                  ))}
-                </div>
-                <div className="prog-banner-acts">
-                  <button
-                    className="prog-banner-cta"
-                    onClick={() => shell.openOverlay({ screen: 'injury', injuryId: activeInj.id })}
-                  >
-                    <Icon name="list-checks" weight="bold" />
-                    {t.injViewPlan}
-                  </button>
-                  {activeInj.stage !== 'protect' && (
-                    <button
-                      className="prog-banner-cta ghost"
-                      onClick={() =>
-                        shell.openOverlay({
-                          screen: 'injury',
-                          injuryId: activeInj.id,
-                          checkin: true,
-                        })
-                      }
-                    >
-                      <Icon name="heartbeat" weight="bold" />
-                      {t.injBannerCheckin}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {activeRest && (
-          <div
-            className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
-          >
-            <span className="prog-sheen" aria-hidden />
-            <div className="prog-banner-row">
-              <span
-                className={`prog-banner-icon${activeRest.mode === 'illness' ? ' ill-pulse' : ''}`}
-              >
-                <Icon
-                  name={activeRest.mode === 'illness' ? 'pulse' : 'clock-countdown'}
-                  weight="bold"
-                />
-              </span>
-              <div className="prog-banner-main">
-                {activeRest.mode === 'illness' ? (
-                  <>
-                    <span className="prog-banner-kicker">{t.restCardIllnessKicker}</span>
-                    <div className="prog-banner-title">
-                      {t.restCardIllnessTitle(dayKey(pbNow) - activeRest.startDay + 1)}
-                    </div>
-                    <div className="prog-banner-body">{t.restCardIllnessNote}</div>
-                    <div className="tr-pills">
-                      <span className="tr-pill">
-                        <Icon name="check-circle" weight="bold" />
-                        {t.illnessStreakPill}
-                      </span>
-                      <span className="tr-pill">
-                        <Icon name="pause" weight="bold" />
-                        {t.illnessProgramPill}
-                      </span>
-                    </div>
-                    <div className="prog-banner-acts">
-                      <button
-                        className="prog-banner-cta"
-                        onClick={() => setConfirmEndRest(activeRest.id)}
-                      >
-                        <Icon name="check" weight="bold" />
-                        {t.illnessRecovered}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="tr-top">
-                      <span className="prog-banner-kicker">
-                        {activeRest.mode === 'active' ? t.restModeActive : t.restModeOff}
-                      </span>
-                      <span className="tr-day">
-                        {t.restDayOf(
-                          Math.min(
-                            dayKey(pbNow) - activeRest.startDay + 1,
-                            activeRest.endDay - activeRest.startDay + 1,
-                          ),
-                          activeRest.endDay - activeRest.startDay + 1,
-                        )}
-                      </span>
-                    </div>
-                    <div className="prog-banner-title">
-                      {activeRest.mode === 'active' ? t.restCardActiveTitle : t.restCardOffTitle}
-                    </div>
-                    <div className="tr-bar">
-                      <span
-                        className="tr-fill"
-                        style={{
-                          width: `${Math.round((Math.min(dayKey(pbNow) - activeRest.startDay + 1, activeRest.endDay - activeRest.startDay + 1) / (activeRest.endDay - activeRest.startDay + 1)) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="prog-banner-body">
-                      {activeRest.mode === 'active' ? t.restCardActiveNote : t.restCardOffNote}
-                    </div>
-                    <div className="prog-banner-acts">
-                      {activeRest.mode === 'active' ? (
-                        <>
-                          <button
-                            className="prog-banner-cta"
-                            onClick={startSession}
-                            disabled={busy}
-                          >
-                            <Icon name="play" weight="bold" />
-                            {t.restStartLight}
-                          </button>
-                          <button
-                            className="prog-banner-skip"
-                            onClick={() => setConfirmEndRest(activeRest.id)}
-                          >
-                            {t.restEndNow}
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          className="prog-banner-cta"
-                          onClick={() => setConfirmEndRest(activeRest.id)}
-                        >
-                          {t.restEndNow}
-                        </button>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-        {illReturn && !illDismissed && (
-          <div className="prog-banner analysis-banner gem-rest tr-banner illness fade-in">
-            <div className="prog-banner-row">
-              <span className="prog-banner-icon">
-                <Icon name="hand-waving" weight="bold" />
-              </span>
-              <div className="prog-banner-main">
-                <span className="prog-banner-kicker">{t.illnessReturnKicker}</span>
-                <div className="prog-banner-title">{t.illnessReturnTitle}</div>
-                <div className="prog-banner-body">{t.illnessReturnBody(illReturn.daysOut)}</div>
-                <div className="prog-banner-acts">
-                  <button className="prog-banner-cta" onClick={startSession} disabled={busy}>
-                    <Icon name="play" weight="bold" />
-                    {t.restStartLight}
-                  </button>
-                  <button className="prog-banner-skip" onClick={() => setIllDismissed(true)}>
-                    {t.illnessReturnDismiss}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {learnHasVideo && learnProgress.done === 0 && learnBanner}
-        <NudgeStack nudges={nudges} />
-        <SleepForgotBanner
-          onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
-        />
-        <SleepAutoFilledCard
-          onOpenBackfill={() => shell.openOverlay({ screen: 'sleep', mode: 'backfill' })}
-        />
-        {hasHistory ? (
-          <>
-            <div className="td-history">
-              <div className="section-label section-divide" style={{ marginBottom: 8 }}>
-                {t.tdHistory}
-              </div>
-              <HistoryTimeline
-                workouts={finished}
-                activities={store.activities}
-                sleeps={store.sleeps}
-                allWorkouts={store.workouts}
-                bodyKg={bodyKg}
-                maxDays={5}
-                onOpenWorkout={(id) => shell.openOverlay({ screen: 'past-workout', workoutId: id })}
-                onOpenActivity={(id) => shell.openOverlay({ screen: 'activity', editId: id })}
-                onOpenSleep={(id) =>
-                  shell.openOverlay({ screen: 'sleep', mode: 'edit', nightId: id })
-                }
-                openMuscleHistory={openMuscleHistory}
-                showMuscles={suggestOn}
-              />
-              {historyDayCount > 5 && (
-                <button
-                  className="td-history-all"
-                  onClick={() => shell.openOverlay({ screen: 'history' })}
-                >
-                  {t.seeAllHistory}
-                  <Icon name="arrow-up-right" />
-                </button>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="td-empty">
-            <Icon name="barbell" />
-            <div className="td-empty-title">{t.tdEmptyTitle}</div>
-            <div className="td-empty-body">{t.tdEmptyBody}</div>
-            <div className="td-empty-actions">
-              <button className="btn btn-primary" onClick={startSession} disabled={busy}>
-                <Icon name="play" />
-                {t.startFirstSession}
-              </button>
-              <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
-                {t.logPastSession}
-              </button>
-            </div>
-            {store.gyms.length === 0 && (
-              <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
-                <span className="gym-hint-icon">
-                  <Icon name="map-pin" />
-                </span>
-                <span className="gym-hint-copy">{t.addGymHint}</span>
-                <span className="gym-hint-action">{t.add}</span>
-              </button>
-            )}
-          </div>
-        )}
-
         {store.syncStatus === 'offline' && (
           <div style={{ fontSize: 11, color: 'var(--color-neutral-600)', padding: '0 2px' }}>
             {t.servedFromCache}
@@ -1600,25 +1770,36 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
         )}
       </div>
 
-      {/* Desktop: Start stands open on the right instead of the "+" sheet. */}
+      {/* Desktop: Start stands open on the right instead of the "+" sheet;
+          while customizing, "Add to Today" takes its place (design D2). */}
       {isDesktop && (
         <aside className="pane-side today-start-side">
-          <StartSheet shell={shell} onClose={() => undefined} inline />
+          {editing ? (
+            <div ref={setEditSide} className="tdc-side-host" />
+          ) : (
+            <StartSheet shell={shell} onClose={() => undefined} inline />
+          )}
         </aside>
       )}
 
       {backfill && (
         <BackfillSheet
           gyms={store.gyms}
-          onClose={() => setBackfill(false)}
+          initialDate={backfillDate}
+          onClose={() => {
+            setBackfill(false);
+            setBackfillDate(undefined);
+          }}
           onCreate={(startedAt, durationMs, gymId) => {
             const w = backfillWorkout(startedAt, durationMs, gymId);
             setBackfill(false);
+            setBackfillDate(undefined);
             shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: true });
           }}
           onCreateHome={(startedAt, durationMs, set) => {
             const w = backfillHomeSet(startedAt, durationMs, set);
             setBackfill(false);
+            setBackfillDate(undefined);
             shell.openOverlay({ screen: 'past-workout', workoutId: w.id, startAdd: !set });
           }}
         />

@@ -364,6 +364,8 @@ export function BackfillSheet(props: {
   onCreate: (startedAt: number, durationMs: number, gymId: string | null) => void;
   /** Log past → Home set: a finished home set prefilled with the chosen set. */
   onCreateHome?: (startedAt: number, durationMs: number, set: HomeSet | null) => void;
+  /** Prefill the date (YYYY-MM-DD) — e.g. "Log for Sep 29" on the History calendar. */
+  initialDate?: string;
 }) {
   const { t } = useT();
   const homeSets = useStore().home.sets;
@@ -378,7 +380,7 @@ export function BackfillSheet(props: {
     const pad = (n: number) => String(n).padStart(2, '0');
     return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` };
   });
-  const [date, setDate] = useState(defaults.date);
+  const [date, setDate] = useState(props.initialDate ?? defaults.date);
   const [time, setTime] = useState('18:00');
   const [duration, setDuration] = useState(60);
   const [now] = useState(() => Date.now());

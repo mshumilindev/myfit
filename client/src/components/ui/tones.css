@@ -77,3 +77,24 @@
   --t-line: var(--color-kcal-line);
   --t-on: var(--color-bg);
 }
+.uit--apex {
+  --t-base: var(--color-apex);
+  --t-tint: var(--color-apex-tint);
+  --t-text: var(--color-apex-text);
+  --t-line: var(--color-apex-line);
+  --t-on: var(--color-apex-tint);
+}
+.uit--learn {
+  --t-base: var(--color-learn);
+  --t-tint: var(--color-learn-tint);
+  --t-text: var(--color-learn-text);
+  --t-line: var(--color-learn-line);
+  --t-on: var(--color-learn-tint);
+}
+.uit--atlas {
+  --t-base: var(--color-atlas);
+  --t-tint: var(--color-atlas-tint);
+  --t-text: var(--color-atlas-text);
+  --t-line: var(--color-atlas-line);
+  --t-on: var(--color-atlas-tint);
+}

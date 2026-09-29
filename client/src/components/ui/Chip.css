@@ -49,6 +49,11 @@ button.uichip {
   border-color: var(--color-ok-line);
   color: var(--color-ok-text);
 }
+.uichip--atlas {
+  background: color-mix(in srgb, var(--color-atlas) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-atlas) 45%, transparent);
+  color: var(--color-atlas-text);
+}
 .uichip--rest {
   background: var(--color-rest-900);
   border-color: var(--color-rest-700);

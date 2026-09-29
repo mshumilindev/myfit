@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>V2 Glass · Consent, settings, smart playlist, recap</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f1012;
+            color: #e9eaec;
+          }
+          * {
+            box-sizing: border-box;
+          }
+          button {
+            font: inherit;
+            color: inherit;
+            background: none;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+          }
+          .lbl {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #b0b4b8;
+          }
+          .num {
+            font-variant-numeric: tabular-nums;
+          }
+          .sec {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #d9a24f;
+          }
+          .ph {
+            width: 390px;
+            height: 760px;
+            border-radius: 28px;
+            overflow: hidden;
+            padding: 20px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background:
+              radial-gradient(90% 40% at 80% 0%, rgba(138, 100, 46, 0.35), transparent 70%),
+              radial-gradient(80% 40% at 0% 100%, rgba(43, 31, 58, 0.65), transparent 70%), #121316;
+          }
+          .glass {
+            background: linear-gradient(180deg, rgba(60, 48, 30, 0.36), rgba(20, 18, 14, 0.56));
+            box-shadow:
+              inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45),
+              inset 0 0 0 1px rgba(217, 162, 79, 0.26);
+            border-radius: 18px;
+          }
+          .soft {
+            background: rgba(10, 10, 12, 0.35);
+            border: 1px solid rgba(233, 234, 236, 0.08);
+            border-radius: 18px;
+          }
+          .meta {
+            font-size: 12px;
+            color: #b0b4b8;
+          }
+          .li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            padding: 0 14px;
+            border-top: 1px solid rgba(233, 234, 236, 0.07);
+            font-size: 14.5px;
+          }
+          .li:first-child {
+            border-top: 0;
+          }
+          .tg {
+            width: 48px;
+            height: 28px;
+            border-radius: 14px;
+            background: rgba(233, 234, 236, 0.12);
+            position: relative;
+            flex: none;
+          }
+          .tg span {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background: #d0d3d6;
+          }
+          .tg.on {
+            background: rgba(217, 162, 79, 0.4);
+            box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.7);
+          }
+          .tg.on span {
+            left: 23px;
+            background: #eed3a5;
+          }
+          .pill {
+            height: 34px;
+            padding: 0 14px;
+            border-radius: 17px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            background: rgba(233, 234, 236, 0.07);
+            color: #d0d3d6;
+          }
+          .pill.on {
+            background: rgba(217, 162, 79, 0.2);
+            box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.6);
+            color: #eed3a5;
+          }
+          .art {
+            background: linear-gradient(135deg, #2b1f3a 0%, #8a642e 55%, #eed3a5 100%);
+          }
+          .art2 {
+            background: linear-gradient(160deg, #0e2a3b 0%, #1c6f9a 60%, #93d4f2 100%);
+          }
+          .art3 {
+            background: linear-gradient(200deg, #2c1614 0%, #7d302b 55%, #e4bb76 100%);
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1760px;
+          height: 844px;
+          background: #0f1012;
+          padding: 24px 40px;
+          display: flex;
+          gap: 40px;
+        "
+      >
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div class="sec">Consent · after connecting</div>
+          <div class="ph" style="padding: 28px 22px">
+            <div style="display: flex; margin-top: 10px">
+              <div class="art" style="width: 64px; height: 64px; border-radius: 32px"></div>
+              <div
+                class="glass"
+                style="
+                  width: 64px;
+                  height: 64px;
+                  border-radius: 32px;
+                  margin-left: -18px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: #eed3a5;
+                "
+              >
+                <svg
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+                </svg>
+              </div>
+            </div>
+            <div
+              style="font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin-top: 8px"
+            >
+              Let your sets remember the music
+            </div>
+            <div style="font-size: 15px; color: #d0d3d6; line-height: 1.45">
+              We note the track on each set while you train. Nothing is saved until you choose.
+            </div>
+            <div class="glass" style="margin-top: 6px">
+              <div class="li">
+                <div style="flex: 1">
+                  <div>Save workout soundtrack</div>
+                  <div class="meta">PR songs and memories</div>
+                </div>
+                <span class="tg on"><span></span></span>
+              </div>
+              <div class="li">
+                <div style="flex: 1">
+                  <div>Analyze music and strength</div>
+                  <div class="meta">Insights on strong sets</div>
+                </div>
+                <span class="tg on"><span></span></span>
+              </div>
+              <div class="li">
+                <div style="flex: 1">
+                  <div>Track in Live Activity</div>
+                  <div class="meta">Lock screen, while training</div>
+                </div>
+                <span class="tg"><span></span></span>
+              </div>
+            </div>
+            <div class="meta" style="line-height: 1.5">
+              Only during active workouts. Never sent to AI models. Delete any time.
+            </div>
+            <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
+              <button
+                style="
+                  height: 50px;
+                  border-radius: 25px;
+                  background: rgba(217, 162, 79, 0.2);
+                  box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.7);
+                  color: #eed3a5;
+                  font-size: 15px;
+                  font-weight: 600;
+                "
+              >
+                Turn on
+              </button>
+              <button style="height: 44px; font-size: 15px; color: #b0b4b8">Not now</button>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div class="sec">Settings · Music</div>
+          <div class="ph">
+            <div style="font-size: 22px; font-weight: 600">Music</div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <div
+                class="glass"
+                style="padding: 12px; display: flex; flex-direction: column; gap: 8px"
+              >
+                <span class="art" style="width: 34px; height: 34px; border-radius: 17px"></span>
+                <div style="font-size: 13px; font-weight: 600">Apple Music</div>
+                <div style="font-size: 11px; color: #4cbe8c">Connected</div>
+              </div>
+              <div
+                class="soft"
+                style="padding: 12px; display: flex; flex-direction: column; gap: 8px"
+              >
+                <span class="art2" style="width: 34px; height: 34px; border-radius: 17px"></span>
+                <div style="font-size: 13px; font-weight: 600">Spotify</div>
+                <div style="font-size: 11px; color: #d9a24f">Beta · 3/5</div>
+              </div>
+              <div
+                class="soft"
+                style="padding: 12px; display: flex; flex-direction: column; gap: 8px"
+              >
+                <span class="art3" style="width: 34px; height: 34px; border-radius: 17px"></span>
+                <div style="font-size: 13px; font-weight: 600">YouTube</div>
+                <div style="font-size: 11px; color: #b0b4b8">Opens app ↗</div>
+              </div>
+            </div>
+            <div class="lbl" style="margin-top: 4px">Soundtrack by workout</div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <div
+                class="soft"
+                style="padding: 10px 12px; display: flex; gap: 10px; align-items: center"
+              >
+                <span class="art" style="width: 30px; height: 30px; border-radius: 15px"></span>
+                <div>
+                  <div class="meta">Push</div>
+                  <div style="font-size: 13px">Chest · Heavy</div>
+                </div>
+              </div>
+              <div
+                class="soft"
+                style="padding: 10px 12px; display: flex; gap: 10px; align-items: center"
+              >
+                <span class="art3" style="width: 30px; height: 30px; border-radius: 15px"></span>
+                <div>
+                  <div class="meta">Pull</div>
+                  <div style="font-size: 13px">Back Attack</div>
+                </div>
+              </div>
+              <div
+                class="soft"
+                style="padding: 10px 12px; display: flex; gap: 10px; align-items: center"
+              >
+                <span class="art2" style="width: 30px; height: 30px; border-radius: 15px"></span>
+                <div>
+                  <div class="meta">Legs</div>
+                  <div style="font-size: 13px">Leg Day · Heavy</div>
+                </div>
+              </div>
+              <div
+                class="soft"
+                style="padding: 10px 12px; display: flex; gap: 10px; align-items: center"
+              >
+                <span
+                  style="width: 30px; height: 30px; border-radius: 15px; background: #262a2d"
+                ></span>
+                <div>
+                  <div class="meta">Cardio</div>
+                  <div style="font-size: 13px">Run 170</div>
+                </div>
+              </div>
+              <div
+                class="soft"
+                style="padding: 10px 12px; display: flex; gap: 10px; align-items: center"
+              >
+                <span
+                  style="width: 30px; height: 30px; border-radius: 15px; border: 1px dashed #55595e"
+                ></span>
+                <div>
+                  <div class="meta">Recovery</div>
+                  <div style="font-size: 13px; color: #b0b4b8">Add</div>
+                </div>
+              </div>
+              <div
+                class="glass"
+                style="padding: 10px 12px; display: flex; gap: 10px; align-items: center"
+              >
+                <span class="art" style="width: 30px; height: 30px; border-radius: 15px"></span>
+                <div>
+                  <div class="meta" style="color: #b7e8cf">PR Mode</div>
+                  <div style="font-size: 13px">Training Season</div>
+                </div>
+              </div>
+            </div>
+            <div class="soft">
+              <div class="li">
+                <span style="flex: 1">Start music with the workout</span
+                ><span class="tg"><span></span></span>
+              </div>
+              <div class="li">
+                <span style="flex: 1">Continue where I stopped</span
+                ><span class="tg on"><span></span></span>
+              </div>
+              <div class="li">
+                <span style="flex: 1">Save workout soundtrack</span
+                ><span class="tg on"><span></span></span>
+              </div>
+            </div>
+            <button style="margin-top: auto; height: 44px; font-size: 14.5px; color: #e2564f">
+              Delete music data
+            </button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div class="sec">Smart playlist · Apple Music</div>
+          <div class="ph">
+            <div
+              style="
+                height: 180px;
+                border-radius: 22px;
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                gap: 0;
+              "
+            >
+              <div class="art" style="flex: 1"></div>
+              <div class="art3" style="flex: 1"></div>
+              <div class="art2" style="flex: 1"></div>
+              <div
+                class="glass"
+                style="
+                  position: absolute;
+                  left: 10px;
+                  right: 10px;
+                  bottom: 10px;
+                  padding: 12px 14px;
+                "
+              >
+                <div class="lbl" style="color: #eed3a5">New · for Chest 2</div>
+                <div style="font-size: 18px; font-weight: 600; margin-top: 2px">
+                  Spotter · Chest
+                </div>
+                <div class="meta">61 min · 17 tracks</div>
+              </div>
+            </div>
+            <div class="meta" style="line-height: 1.45">
+              Picked from your Apple Music recommendations and the tracks on your strongest Chest
+              sets.
+            </div>
+            <div class="lbl">Length</div>
+            <div style="display: flex; gap: 8px">
+              <span class="pill">45 min</span><span class="pill on">60 min</span
+              ><span class="pill">75 min</span>
+            </div>
+            <div class="lbl">Lean towards</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <span class="pill on">Metal</span><span class="pill on">Pop</span
+              ><span class="pill">Hard Rock</span><span class="pill">Hip-Hop</span>
+            </div>
+            <div class="soft" style="padding: 4px 14px">
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  height: 46px;
+                  font-size: 13.5px;
+                "
+              >
+                <span class="art" style="width: 30px; height: 30px; border-radius: 15px"></span
+                ><span style="flex: 1">Training Season · Dua Lipa</span
+                ><span style="font-size: 11px; color: #4cbe8c">PR song</span>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  height: 46px;
+                  font-size: 13.5px;
+                  border-top: 1px solid rgba(233, 234, 236, 0.07);
+                "
+              >
+                <span class="art3" style="width: 30px; height: 30px; border-radius: 15px"></span
+                ><span style="flex: 1">Just Pretend · Bad Omens</span>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  height: 46px;
+                  font-size: 13.5px;
+                  border-top: 1px solid rgba(233, 234, 236, 0.07);
+                "
+              >
+                <span class="art2" style="width: 30px; height: 30px; border-radius: 15px"></span
+                ><span style="flex: 1">From For You</span><span class="meta">+14</span>
+              </div>
+            </div>
+            <button
+              style="
+                margin-top: auto;
+                height: 50px;
+                border-radius: 25px;
+                background: rgba(217, 162, 79, 0.2);
+                box-shadow: inset 0 0 0 1px rgba(217, 162, 79, 0.7);
+                color: #eed3a5;
+                font-size: 15px;
+                font-weight: 600;
+              "
+            >
+              Create in Apple Music
+            </button>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div class="sec">Recap slide · month</div>
+          <div
+            class="ph"
+            style="
+              background:
+                radial-gradient(70% 45% at 50% 30%, rgba(125, 48, 43, 0.7), transparent 70%),
+                radial-gradient(80% 40% at 50% 90%, rgba(43, 31, 58, 0.8), transparent 70%), #0e0d10;
+              text-align: center;
+              align-items: center;
+              padding-top: 34px;
+            "
+          >
+            <div class="lbl" style="color: #eed3a5">October · 7 of 9</div>
+            <div
+              style="font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1"
+            >
+              Your October soundtrack
+            </div>
+            <div
+              class="art3"
+              style="
+                width: 170px;
+                height: 170px;
+                border-radius: 85px;
+                margin-top: 12px;
+                box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+              "
+            ></div>
+            <div>
+              <div class="lbl">Top artist</div>
+              <div style="font-size: 22px; font-weight: 600; margin-top: 4px">Bad Omens</div>
+              <div class="meta">212 sets · 31 h of music</div>
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+                width: 100%;
+                text-align: left;
+                margin-top: 6px;
+              "
+            >
+              <div class="glass" style="padding: 12px">
+                <div class="lbl">Top track</div>
+                <div style="font-size: 14px; font-weight: 600; margin-top: 4px">The Summoning</div>
+                <div class="meta">41 sets</div>
+              </div>
+              <div class="glass" style="padding: 12px">
+                <div class="lbl" style="color: #b7e8cf">PR song</div>
+                <div style="font-size: 14px; font-weight: 600; margin-top: 4px">
+                  Training Season
+                </div>
+                <div class="meta num">Bench 100 × 5</div>
+              </div>
+            </div>
+            <div style="font-size: 14px; color: #d0d3d6">
+              Your strongest sets leaned towards Metal.
+            </div>
+            <button
+              style="
+                margin-top: auto;
+                width: 100%;
+                height: 50px;
+                border-radius: 25px;
+                background: rgba(233, 234, 236, 0.1);
+                font-size: 15px;
+              "
+            >
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1760,"height":844}}'>
+      class Component extends DCLogic {
+      renderVals() { return {}; }
+      }
+    </script>
+  </body>
+</html>

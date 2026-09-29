@@ -1,0 +1,250 @@
+/* Kit MonthGrid — tokens only. Health tints come from the tone family
+   (--t-tint fill, --t-base number); planned days are dashed outlines. */
+.uimg {
+  --mg-gap: var(--sp-1);
+  --mg-h: 56px;
+  --mg-pad: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--mg-gap);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+.uimg--lg {
+  --mg-gap: var(--sp-2);
+  --mg-h: 100px;
+  --mg-pad: 9px 10px 8px;
+}
+.uimg-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--mg-gap);
+}
+.uimg-heads {
+  margin-bottom: 2px;
+}
+.uimg-wd {
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+}
+.uimg-cell {
+  min-width: 0;
+}
+
+/* Day tile */
+.uimg-day {
+  position: relative;
+  width: 100%;
+  height: var(--mg-h);
+  padding: var(--mg-pad);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-divider) 36%, transparent);
+  background: var(--color-surface);
+  color: var(--color-neutral-300);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.uimg-day:hover {
+  border-color: var(--color-border);
+}
+.uimg-day:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.uimg-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.uimg-num {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.uimg--lg .uimg-num {
+  font-size: 13px;
+}
+.uimg-day.is-out .uimg-num {
+  color: var(--color-text-faint);
+}
+.uimg--lg .uimg-day.is-out .uimg-num {
+  color: var(--color-text-muted);
+}
+
+/* States */
+.uimg-day.is-future {
+  background: transparent;
+}
+.uimg-day.is-plan-train {
+  background: transparent;
+  border: 1px dashed var(--color-accent-line);
+}
+.uimg-day.is-plan-rest {
+  background: transparent;
+  border: 1px dashed var(--color-rest-line);
+}
+.uimg-day.is-future .uimg-num,
+.uimg-day.is-plan-train .uimg-num,
+.uimg-day.is-plan-rest .uimg-num {
+  color: var(--color-text-muted);
+}
+.uimg-day.is-tint {
+  background: var(--t-tint);
+}
+.uimg-day.is-tint .uimg-num,
+.uimg-day.is-tint.is-out .uimg-num {
+  color: var(--t-base);
+}
+.uimg-day.is-today {
+  background: var(--color-accent-tint);
+  border-color: transparent;
+  box-shadow: 0 0 0 1.5px var(--color-accent);
+}
+.uimg-day.is-today .uimg-num {
+  color: var(--color-accent-text);
+}
+.uimg-day.is-sel {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--color-text);
+}
+.uimg-todaytag {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+.uimg-meta {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 10px;
+  color: var(--color-sleep);
+  white-space: nowrap;
+}
+
+/* Markers (sm) */
+.uimg-marks {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 3px;
+  min-height: 9px;
+}
+.uimg-mk {
+  display: inline-block;
+  flex: none;
+  font-style: normal;
+}
+.uimg-mk--workout,
+.uimg-mk--planned {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-accent);
+}
+.uimg-mk--planned {
+  height: 4px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.uimg-mk--activity,
+.uimg-mk--sleep,
+.uimg-mk--weight {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ok);
+}
+.uimg-mk--sleep {
+  background: var(--color-sleep);
+}
+.uimg-mk--weight {
+  border-radius: 1px;
+  background: var(--color-neutral-400);
+}
+.uimg-mk--pr {
+  font-size: 9px;
+  line-height: 1;
+  color: var(--color-ok);
+}
+.uimg--lg .uimg-meta .uimg-mk--pr {
+  font-size: 11px;
+}
+
+/* Chips and notes (lg) */
+.uimg-chip {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 3px 5px;
+  border-radius: 6px;
+  background: var(--t-tint);
+  color: var(--t-text);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uimg-chip.is-planned {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--t-line);
+  color: var(--t-base);
+}
+.uimg-note {
+  font-size: 10.5px;
+  color: var(--color-neutral-400);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uimg-note.is-toned {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t-base);
+}
+
+/* Legend */
+.uimg-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 11px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.uimg-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.uimg-sw {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--t-tint);
+  box-shadow: inset 0 0 0 1px var(--t-base);
+}
+.uimg-sw.is-plan {
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed var(--color-accent-line);
+}

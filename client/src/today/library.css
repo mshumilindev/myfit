@@ -1,0 +1,82 @@
+/* Internal widget library screen. Tokens only. */
+.wlib {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-bottom: 60px;
+}
+.wlib-count {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.wlib-group {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.wlib-h {
+  margin: 0;
+  font: 800 24px var(--font);
+  color: var(--color-text);
+}
+.wlib-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.wlib-name {
+  font: 700 15px var(--font);
+  color: var(--color-text);
+}
+.wlib-name small {
+  font-weight: 500;
+  color: var(--color-text-faint);
+  margin-left: 6px;
+}
+.wlib-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+.wlib-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 350px;
+  max-width: 100%;
+}
+.wlib-cell--s {
+  width: 170px;
+}
+.wlib-cell .uiwgrid {
+  grid-template-columns: 1fr;
+}
+.wlib-cell .uiwgrid > * {
+  grid-column: 1 / -1 !important;
+}
+.wlib-size {
+  font: 600 11px var(--font);
+  letter-spacing: 0.1em;
+  color: var(--color-text-faint);
+}
+.wlib-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 10px;
+}
+.wlib-screen {
+  padding: 16px var(--gutter, 20px);
+}
+.wlib-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.wlib-title {
+  font: 700 20px var(--font);
+  color: var(--color-text);
+}

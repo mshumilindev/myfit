@@ -1,0 +1,1610 @@
+/* Today configurator — view entry + Customize mode. Tokens only. */
+.td-customize {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 50px;
+  margin-top: 4px;
+  margin-bottom: 28px;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 600 14px var(--font);
+  cursor: pointer;
+}
+.td-customize:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.tdc {
+  /* the bar starts flush with the top of the screen (sticky can't leave its box) */
+  margin-top: -12px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding-bottom: 40px;
+}
+/* Edit mode owns the screen: app header, Today's date row and the tab bar step aside. */
+body.td-editing .app-brand,
+body.td-editing .tabbar-wrap,
+body.td-editing .today-page .td-topbar {
+  display: none;
+}
+.tdc-top {
+  position: sticky;
+  /* the screen scroller has 12px top padding; stick flush to its very top */
+  top: -12px;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  margin: 0 calc(-1 * var(--page-x, 20px));
+  padding: calc(8px + var(--safe-top, 0px)) var(--page-x, 20px) 8px;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-divider);
+}
+.tdc-top > :first-child {
+  justify-self: start;
+}
+.tdc-top > :last-child {
+  justify-self: end;
+}
+.tdc-top-title {
+  font: 700 16px var(--font);
+  color: var(--color-text);
+}
+.tdc-block {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tdc-block::after {
+  content: '';
+  position: absolute;
+  inset: -8px -10px;
+  border-radius: 18px;
+  border: 1px dashed var(--color-neutral-800);
+  pointer-events: none;
+}
+.tdc-block.is-custom::after {
+  border-color: var(--color-accent-line);
+}
+.tdc-tool {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+.tdc-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 12px var(--font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.tdc-name span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+.tdc-tag {
+  flex: none;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: var(--color-tile);
+  color: var(--color-text-faint);
+}
+.tdc-tag.is-custom {
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+.tdc-ib {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 17px;
+}
+.tdc-ib:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+.tdc-ib.is-danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger-line);
+}
+.tdc-preview {
+  pointer-events: none;
+  border-radius: 14px;
+  opacity: 0.8;
+  max-height: 220px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent);
+  mask-image: linear-gradient(to bottom, black 70%, transparent);
+}
+.tdc-hint {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px dashed var(--color-border);
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+.tdc-slot {
+  position: relative;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 18px;
+}
+.tdc-slot {
+  display: flex;
+  flex-direction: column;
+}
+.tdc-slot > * {
+  pointer-events: none;
+  flex: 1;
+  width: 100%;
+}
+.tdc-slot.is-selected {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.tdc-slot.is-empty {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 6px;
+  border: 1.5px dashed var(--color-neutral-700);
+  color: var(--color-text-muted);
+  font: 600 12.5px var(--font);
+  text-align: center;
+}
+.tdc-slot.is-empty > * {
+  flex: none;
+  width: auto;
+}
+.tdc-slot.is-empty.size-xs {
+  flex-direction: column;
+  font-size: 11.5px;
+}
+.tdc-slot.is-picking {
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+.tdc-slot.is-empty.size-xs {
+  min-height: 86px;
+  border-radius: 14px;
+}
+.tdc-slot.is-empty.size-s,
+.tdc-slot.is-empty.size-l {
+  height: 150px;
+}
+.tdc-slot.is-empty.size-m {
+  height: 64px;
+}
+.tdc-slot.is-empty.size-xl {
+  aspect-ratio: 1 / 1;
+}
+.uiwgrid > .tdc-slot.size-xs {
+  grid-column: span 1;
+}
+.uiwgrid > .tdc-slot.size-s {
+  grid-column: span 2;
+}
+.uiwgrid > .tdc-slot.size-m,
+.uiwgrid > .tdc-slot.size-l,
+.uiwgrid > .tdc-slot.size-xl {
+  grid-column: span 4;
+}
+.tdc-selbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.tdc-selbar-label {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.tdc-foot {
+  display: flex;
+  justify-content: space-between;
+}
+.tdc-link {
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font: 600 13px var(--font);
+  cursor: pointer;
+}
+/* sheets */
+.tdc-sheet-title {
+  font: 700 20px var(--font);
+  color: var(--color-text);
+  margin: 4px 0 4px;
+}
+.tdc-sheet-lab {
+  font: 600 11.5px var(--font);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin: 18px 0 10px;
+}
+.tdc-input {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: 0 14px;
+  font: 500 15px var(--font);
+}
+.tdc-layouts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tdc-lay {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.tdc-lay.is-on {
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-accent-tint);
+}
+.tdc-lay-pv {
+  /* A to-scale miniature of the section on a phone (358px column, 4-col grid,
+     10px gaps): every cell keeps its real tile proportions. */
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  align-content: start;
+}
+.tdc-lay-pv i {
+  border-radius: 4px;
+  background: var(--color-neutral-800);
+}
+.tdc-lay.is-on .tdc-lay-pv i {
+  background: var(--color-accent-700);
+}
+/* XS shortcut 82×86 */
+.tdc-lay-pv i.xs {
+  grid-column: span 1;
+  aspect-ratio: 82 / 86;
+  border-radius: 3px;
+}
+/* S square tile 174×150 */
+.tdc-lay-pv i.s {
+  grid-column: span 2;
+  aspect-ratio: 174 / 150;
+}
+/* M row 358×64 */
+.tdc-lay-pv i.m {
+  grid-column: span 4;
+  aspect-ratio: 358 / 64;
+  border-radius: 3px;
+}
+/* L wide 358×150 */
+.tdc-lay-pv i.l {
+  grid-column: span 4;
+  aspect-ratio: 358 / 150;
+}
+/* XL big square */
+.tdc-lay-pv i.xl {
+  grid-column: span 4;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+}
+.tdc-lay-name {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  font: 600 13px var(--font);
+}
+.tdc-lay-name small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-faint);
+}
+.tdc-pick-group {
+  font: 600 11.5px var(--font);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin: 16px 0 10px;
+}
+.tdc-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.tdc-pick {
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  min-width: 0;
+  text-align: left;
+  border-radius: 18px;
+}
+.tdc-pick > * {
+  pointer-events: none;
+}
+.tdc-pick.size-xs {
+  grid-column: span 1;
+}
+.tdc-pick.size-s {
+  grid-column: span 2;
+}
+.tdc-pick.size-m,
+.tdc-pick.size-l,
+.tdc-pick.size-xl {
+  grid-column: span 4;
+}
+.tdc-pick:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.tdc-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+/* Core previews: full-bleed blocks (program card, Atlas band) sit inside the
+   edit frame instead of running to the screen edges. */
+.tdc-preview .today-program-card,
+.tdc-preview .tac-band,
+.tdc-preview .tac-atlas {
+  margin-inline: 0;
+  border-radius: 14px;
+}
+.tdc-preview .tac-band,
+.tdc-preview .tac-atlas:not(.is-card) {
+  padding-inline: var(--sp-3);
+}
+.tdc-preview .tac-strip {
+  margin-inline: 0;
+  padding-inline: 0;
+}
+.tdc-preview .tac-compact:not(.is-card) {
+  width: 100%;
+}
+.tdc {
+  padding-bottom: 28px;
+}
+
+/* "+ Add section here" between sections */
+.tdc-insert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 28px;
+  margin: -12px 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-faint);
+  font: 600 12px var(--font);
+  cursor: pointer;
+}
+.tdc-insert::before,
+.tdc-insert::after {
+  content: '';
+  flex: 1;
+  border-top: 1px dashed var(--color-neutral-800);
+}
+.tdc-insert span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tdc-insert:hover {
+  color: var(--color-accent);
+}
+/* picker */
+.tdc-sheet-sub {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}
+.tdc-picker > * {
+  flex-shrink: 0;
+}
+.tdc-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 -18px 4px;
+  padding: 2px 18px 6px;
+  scrollbar-width: none;
+}
+.tdc-chips > * {
+  flex: none;
+}
+.tdc-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tdc-pick-tile {
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+}
+.tdc-pick-tile > * {
+  flex: 1;
+  width: 100%;
+}
+.tdc-pick.size-xs .tdc-pick-tile {
+  border-radius: 14px;
+}
+.tdc-pick.is-chosen .tdc-pick-tile {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.tdc-pick-name {
+  padding: 0 4px;
+  font: 600 12px var(--font);
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tdc-pick.is-chosen .tdc-pick-name {
+  color: var(--color-accent);
+}
+.tdc-pick-foot {
+  position: sticky;
+  /* cover the sheet's bottom padding so nothing scrolls visibly under it */
+  z-index: 3;
+  bottom: -23px;
+  margin: 18px -18px -23px;
+  padding: 12px 18px calc(23px + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-divider);
+}
+.tdc-sheet-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tdc-sheet-count {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.tdc-sc {
+  display: flex;
+  min-width: 0;
+}
+.tdc-sc > * {
+  flex: 1;
+  width: 100%;
+}
+.tdc-sc-more {
+  min-height: 86px;
+  border-radius: 14px;
+  border: 1.5px dashed var(--color-neutral-700);
+  background: none;
+  color: var(--color-text-muted);
+  font: 600 11.5px var(--font);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+}
+/* The edit toolbar already names each core block — drop the block's own heading. */
+.tdc-preview .td-history > .section-label {
+  display: none;
+}
+
+/* ---------- core block settings (B6 / A2) — tokens only ---------- */
+.tdc-cfg-lock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tdc-cfg-preview {
+  max-height: 260px;
+  margin-top: var(--sp-1);
+}
+.tdc-cfg-gap {
+  height: var(--sp-3);
+}
+.tdc-cfg-note {
+  margin: var(--sp-2) 0 0;
+}
+.tdc-cfg-order {
+  flex: none;
+  width: 184px;
+}
+.tdc-cfg-foot {
+  display: flex;
+  gap: var(--sp-3);
+}
+.tdc-cfg-foot > :first-child {
+  flex: none;
+}
+/* option-card sketches */
+.tdc-sk {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.tdc-sk.is-col {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+}
+.tdc-sk.is-grow {
+  flex: 1;
+}
+.tdc-sk i {
+  flex: none;
+  display: block;
+}
+.tdc-sk .sk-face {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--color-atlas-tint);
+  border: 2px solid var(--color-atlas-line);
+}
+.tdc-sk .sk-face.is-sm,
+.tdc-sk .sk-ring.is-sm {
+  width: 14px;
+  height: 14px;
+}
+.tdc-sk .sk-ring {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-accent);
+}
+.tdc-sk .sk-ring.is-ok {
+  border-color: var(--color-ok);
+}
+.tdc-sk .sk-ring.is-dim {
+  border-color: var(--color-neutral-700);
+  background: var(--color-neutral-800);
+}
+.tdc-sk .sk-split {
+  width: 1px;
+  height: 18px;
+  background: var(--color-divider);
+}
+.tdc-sk .sk-line {
+  flex: 1;
+  min-width: 24px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-700);
+}
+.tdc-sk .sk-line.is-atlas {
+  background: var(--color-atlas-line);
+}
+.tdc-sk.is-col > .sk-line.is-short {
+  width: 60%;
+  flex: none;
+}
+.tdc-sk .sk-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-atlas);
+}
+.tdc-sk .sk-bubble {
+  height: 10px;
+  width: 70%;
+  border-radius: var(--radius-sm);
+  background: var(--color-atlas-tint);
+  border: 1px solid var(--color-atlas-line);
+}
+.tdc-sk .sk-pill {
+  width: 18px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-atlas-line);
+}
+.tdc-sk.is-under {
+  padding-top: 3px;
+  border-top: 1px solid var(--color-border);
+}
+.tdc-sk.is-top {
+  align-items: flex-start;
+}
+.tdc-sk .sk-line.is-coral {
+  background: var(--color-atlas);
+}
+.tdc-sk .sk-pill.is-md {
+  width: 15px;
+}
+.tdc-sk .sk-pill.is-sm {
+  width: 12px;
+}
+.uiopt-pv > .sk-ghost {
+  flex: 1;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-neutral-700);
+  font-size: 10px;
+  color: var(--color-text-faint);
+}
+
+/* ---------- Atlas & clients block (designs A1 / T5; AtlasClientsBlock.tsx) ---------- */
+/* Full-bleed band: the together strip and Atlas alone. */
+.tac-band {
+  margin-inline: calc(-1 * var(--page-x));
+  padding: 14px var(--page-x);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-text) 3%, transparent),
+    color-mix(in srgb, var(--color-text) 1%, transparent)
+  );
+  border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+/* Only when the band is the last thing on Today does it need its own bottom edge;
+   otherwise the next block's edge would double it. */
+.tac-band:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+.tac-strip {
+  margin-inline: calc(-1 * var(--page-x));
+  padding-inline: var(--page-x);
+}
+.tac-count {
+  flex: none;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-atlas);
+  color: var(--color-atlas-tint);
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-grid;
+  place-items: center;
+}
+.tac-go {
+  flex: none;
+  color: var(--color-text-faint);
+}
+
+/* T5 A: Atlas alone — one full-width row. */
+.tac-solo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tac-solo-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.tac-solo-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+.tac-solo-temper {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+.tac-solo-line {
+  font-size: 13.5px;
+  line-height: 18px;
+  color: var(--color-neutral-300);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Split: Atlas's band, then the clients section (or reversed). */
+.tac-split {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.tac-split.is-wide {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 18px;
+}
+.tac-atlas {
+  --story-gap: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-inline: calc(-1 * var(--page-x));
+  padding: 14px var(--page-x);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-atlas) 10%, transparent),
+    color-mix(in srgb, var(--color-atlas) 3%, transparent)
+  );
+  border-top: 1px solid color-mix(in srgb, var(--color-atlas) 24%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text);
+}
+.tac-atlas.tac-note {
+  padding-block: var(--sp-4);
+}
+.tac-atlas.is-card {
+  flex: none;
+  width: 320px;
+  margin-inline: 0;
+  padding: var(--sp-4);
+  border-radius: var(--radius-sheet);
+  border: 1px solid color-mix(in srgb, var(--color-atlas) 22%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-atlas) 12%, transparent),
+    color-mix(in srgb, var(--color-atlas) 3%, transparent)
+  );
+}
+.tac-atlas.tac-compact.is-card {
+  align-self: flex-start;
+}
+.tac-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.tac-head-who {
+  flex: 1;
+  min-width: 0;
+}
+.tac-head-name {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 14px;
+  font-weight: 700;
+}
+.tac-temper {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-atlas) 16%, transparent);
+  color: color-mix(in srgb, var(--color-atlas) 55%, var(--color-atlas-text));
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tac-head-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.tac-head-sub.is-ok {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--color-ok);
+}
+.tac-online {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ok);
+}
+.tac-kicker {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-atlas) 55%, var(--color-atlas-text));
+}
+.tac-note-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.is-card .tac-note-text {
+  font-size: 15.5px;
+  line-height: 22px;
+}
+.tac-tags {
+  gap: 6px;
+}
+.tac-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.tac-rule {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+.tac-replies {
+  /* quick replies wrap onto a second line, as in D — nothing hides off-screen */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tac-replies::-webkit-scrollbar {
+  display: none;
+}
+.tac-replies.is-wrap {
+  flex-wrap: wrap;
+}
+.tac-replies > * {
+  flex: none;
+}
+.tac-bubble-wrap {
+  align-self: flex-start;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tac-bubble {
+  padding: 10px 12px;
+  border-radius: 4px 16px 16px 16px;
+  background: color-mix(in srgb, var(--color-atlas) 12%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-atlas) 18%, transparent);
+  font-size: 13.5px;
+  line-height: 19px;
+  color: var(--color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tac-bubble-time {
+  padding-left: var(--sp-1);
+  font-size: 10.5px;
+  color: var(--color-text-faint);
+}
+.tac-ask {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 6px 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text-faint);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.is-card .tac-ask {
+  margin-top: auto;
+}
+.tac-ask-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tac-ask-mic,
+.tac-ask-send {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  color: var(--color-neutral-400);
+}
+.tac-ask-send {
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent-400);
+  font-size: 14px;
+}
+.tac-expand {
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-neutral-400);
+}
+.tac-compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding-block: 10px;
+  border-left: 0;
+  border-right: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tac-compact:not(.is-card) {
+  width: calc(100% + 2 * var(--page-x));
+}
+.tac-compact.is-card {
+  padding: 10px var(--sp-3);
+}
+.tac-compact-line {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--color-neutral-300);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tac-compact-line b {
+  font-weight: 700;
+  color: var(--color-text);
+}
+.tac-compact .tac-count {
+  min-width: 20px;
+  height: 20px;
+  font-size: 11px;
+}
+
+/* Clients section */
+.tac-clients {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.tac-sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.tac-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+.tac-sec-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+.tac-sec-stats .is-live {
+  color: var(--color-ok);
+}
+.tac-sec-stats .is-alert {
+  color: var(--color-danger);
+}
+.tac-live {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 10px 12px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-ok) 14%, transparent),
+    color-mix(in srgb, var(--color-ok) 4%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-ok) 28%, transparent);
+}
+.tac-live-main {
+  flex: 1;
+  min-width: 0;
+}
+.tac-live-kick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ok);
+}
+.tac-live-kick i {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ok) 25%, transparent);
+}
+.tac-live-name {
+  margin-top: 3px;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tac-live-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tac-stories {
+  --story-gap: var(--color-bg);
+}
+.tac-row .uistory {
+  --story-gap: var(--color-surface);
+}
+.tac-row.is-live {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-ok) 10%, transparent),
+    transparent 70%
+  );
+}
+
+/* Desktop: clients as a two-column grid of tiles. */
+.tac-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tac-tile {
+  --story-gap: var(--color-surface);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--sp-3);
+  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tac-tile.is-alert {
+  border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+.tac-tile.is-more {
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px dashed color-mix(in srgb, var(--color-text) 16%, transparent);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.tac-tile-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tac-tile-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tac-tile-sub {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Today blocks shaped by their settings ---------- */
+.pch-ex {
+  margin: 0;
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+}
+.pch-ex.is-detailed {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.pch-ex.is-detailed li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.pch-ex-n {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text);
+}
+.pch-ex-v {
+  flex: none;
+}
+.td-logpast {
+  align-self: flex-start;
+}
+.td-sc-add.uisc {
+  border: 1.5px dashed var(--color-neutral-700);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.td-sc-add-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  border: 1px dashed var(--color-neutral-700);
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+.tdc-sheet-sub b {
+  color: var(--color-text);
+  font-weight: 700;
+}
+.tdc-sizes-note {
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.tdc-warn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-danger-line);
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text, var(--color-text));
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.tdc-warn svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--color-danger);
+}
+
+/* ---------- History header + Calendar view (K2 / K3) — layout only, tokens ---------- */
+.td-hist-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.td-hist-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.td-hist-seg {
+  flex: none;
+  width: 216px;
+}
+.tdc-preview .td-hist-head,
+.tdc-preview .td-hcal-settings {
+  display: none;
+}
+.td-hcal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.td-hcal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.td-hcal-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.td-hcal.is-wide .td-hcal-title {
+  flex: none;
+  justify-content: flex-start;
+}
+.td-hcal-titletext {
+  min-width: 0;
+}
+.td-hcal-month {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.td-hcal.is-wide .td-hcal-month {
+  font-size: 22px;
+}
+.td-hcal-sum {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.td-hcal-nav {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.td-hcal-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  margin-top: var(--sp-2);
+}
+.td-hcal.is-split .td-hcal-foot {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--sp-6);
+}
+.td-hcal-day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+/* Under the day card, aligned with it (rail 28 + gap 13). */
+.td-hcal-log {
+  align-self: flex-start;
+  margin-left: 41px;
+}
+.td-hcal.is-split .td-hcal-log {
+  align-self: stretch;
+  margin-left: 0;
+}
+.td-hcal-none {
+  margin: calc(var(--sp-2) * -1) 0 0 41px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.td-hcal-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.td-hcal-stats > button {
+  margin-top: var(--sp-2);
+}
+.td-hcal-lab {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.td-hcal-range {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+.td-hcal-settings {
+  margin-top: var(--sp-2);
+}
+.hist-tl-aside {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+/* ---------- Desktop edit (D2): drag & drop + "Add to Today" panel — tokens only ---------- */
+/* D1: a compact dashed entry at the bottom-left of the main column */
+@media (min-width: 720px) {
+  .pane-main > .td-customize {
+    align-self: flex-start;
+    height: 46px;
+    padding: 0 var(--sp-4);
+    margin-top: 0;
+  }
+}
+.tdc.is-desk {
+  /* the pane scroller has 26px top padding; the bar sticks flush to its top */
+  margin-top: -26px;
+  gap: 30px;
+}
+.tdc-top.is-desk {
+  display: flex;
+  justify-content: space-between;
+  top: -26px;
+  gap: var(--sp-4);
+  min-height: 64px;
+  margin: 0 -30px -4px;
+  padding: var(--sp-3) 30px;
+}
+.tdc-top-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.tdc-top.is-desk .tdc-top-title {
+  font-size: 17px;
+}
+.tdc-top-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.tdc-top-actions {
+  flex: none;
+  display: flex;
+  gap: 10px;
+}
+.tdc.is-desk .tdc-tool {
+  gap: var(--sp-2);
+}
+.tdc.is-desk .tdc-tool .uidrag {
+  margin-left: calc(var(--sp-1) * -1);
+}
+.tdc.is-desk .tdc-ib {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+.tdc-block.is-dragging {
+  opacity: 0.4;
+}
+.tdc-block.is-target::after {
+  border: 1.5px solid var(--color-accent);
+  background: var(--color-accent-tint);
+}
+/* the drop line between sections; its negative margins cancel the extra flex gap */
+.tdc-drop {
+  flex: none;
+  height: 3px;
+  margin: -16.5px 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-tint);
+  pointer-events: none;
+}
+.tdc.is-desk .tdc-slot[draggable='true'] {
+  cursor: grab;
+}
+.tdc-slot:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.tdc-slot.is-dragging {
+  opacity: 0.35;
+}
+.tdc-slot.is-drop {
+  outline: 1.5px dashed var(--color-accent);
+  outline-offset: 3px;
+}
+.tdc-slot.is-empty.is-drop {
+  outline: 0;
+  border-style: dashed;
+  border-color: var(--color-accent);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+}
+@media (min-width: 900px) {
+  /* edit slots span like the widgets they hold (WidgetGrid: S + S halves on desktop) */
+  .uiwgrid--pair > .tdc-slot.size-s,
+  .uiwgrid--wide-pair > .tdc-slot.size-s {
+    grid-column: span 4;
+  }
+}
+
+/* A draggable tile's preview: out of the tab order and the a11y tree (the tile is the button). */
+.tdc-inert {
+  display: contents;
+  pointer-events: none;
+}
+.tdc-slot > .tdc-inert > * {
+  flex: 1;
+  width: 100%;
+}
+
+/* Add to Today panel (right side, replaces Start) */
+.tdc-side-host {
+  display: contents;
+}
+.tdc-ap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.tdc-ap-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-2);
+}
+.tdc-ap-title {
+  font: 700 21px var(--font);
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+.tdc-ap-sub {
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}
+.tdc-ap-picking {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-accent-line);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  font: 600 12.5px var(--font);
+}
+.tdc-ap .tdc-pick-group {
+  margin: var(--sp-2) 0 0;
+}
+.tdc-ap .tdc-pick-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tdc-ap .tdc-pick.size-s {
+  grid-column: span 1;
+}
+.tdc-ap-chips.tdc-chips {
+  flex-wrap: wrap;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+.tdc-ap-layouts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tdc-ap-scgrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.tdc-ap-sc {
+  display: flex;
+  min-width: 0;
+  border-radius: 14px;
+  cursor: grab;
+}
+.tdc-ap-sc > .tdc-inert > * {
+  flex: 1;
+  width: 100%;
+  min-height: 78px;
+  pointer-events: none;
+}
+.tdc-ap [role='button'] {
+  cursor: grab;
+}
+.tdc-ap [role='button'] > * {
+  pointer-events: none;
+}
+.tdc-ap [role='button']:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.tdc-ap .is-added {
+  opacity: 0.35;
+  cursor: default;
+}
+.tdc-ap .is-dragging {
+  opacity: 0.5;
+}
+.tdc-ap .tdc-sc-more {
+  min-height: 78px;
+}
+@media (min-width: 900px) {
+  /* Edit slots follow the same doubled desktop spans as the widgets. */
+  .uiwgrid > .tdc-slot.size-s {
+    grid-column: span 4;
+  }
+  .uiwgrid > .tdc-slot.size-m,
+  .uiwgrid > .tdc-slot.size-l,
+  .uiwgrid > .tdc-slot.size-xl {
+    grid-column: span 8;
+  }
+  .tdc-slot.is-empty.size-xl {
+    aspect-ratio: auto;
+    min-height: 312px;
+  }
+  .tdc-slot .uiw--xl {
+    aspect-ratio: auto;
+    min-height: 312px;
+  }
+}
+/* Settings rows: the label keeps one line; the control gives way instead. */
+.td-hcal-settings .uirow-l {
+  white-space: nowrap;
+}
+/* Clients leading the block (clients first, or Atlas hidden): framed like the band. */
+.tac-split > .tac-clients:first-child {
+  margin-inline: calc(-1 * var(--page-x));
+  padding: 14px var(--page-x) 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}

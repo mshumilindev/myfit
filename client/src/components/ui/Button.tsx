@@ -34,14 +34,17 @@ export function Button({
   disabled,
   children,
   type = 'button',
+  className,
   ...rest
 }: ButtonProps) {
+  // A caller's className adds to the kit classes — it must never replace them.
   const cls = [
     'uibtn',
     `uibtn--${variant}`,
     `uibtn--${size}`,
     fullWidth ? 'uibtn--full' : '',
     loading ? 'is-loading' : '',
+    className ?? '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -80,9 +83,12 @@ export function IconButton({
   size = 'md',
   disabled,
   type = 'button',
+  className,
   ...rest
 }: IconButtonProps) {
-  const cls = ['uibtn', 'uibtn--icon', `uibtn--${variant}`, `uibtn--${size}`].join(' ');
+  const cls = ['uibtn', 'uibtn--icon', `uibtn--${variant}`, `uibtn--${size}`, className ?? '']
+    .filter(Boolean)
+    .join(' ');
   return (
     <button type={type} className={cls} aria-label={label} disabled={disabled} {...rest}>
       <Icon name={icon} />

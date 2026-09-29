@@ -1,0 +1,38 @@
+/* Drag handle (⋮⋮). Tokens only. */
+.uidrag {
+  flex: none;
+  width: 28px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: inline-grid;
+  place-items: center;
+  color: var(--color-text-faint);
+  font-size: 15px;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.uidrag .ui-icon {
+  display: inline-flex;
+}
+.uidrag:hover {
+  color: var(--color-text);
+  background: var(--color-tile);
+}
+.uidrag:active,
+.uidrag.is-dragging {
+  cursor: grabbing;
+  color: var(--color-accent);
+}
+.uidrag:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+.uidrag.is-pinned {
+  cursor: default;
+  color: var(--color-neutral-700);
+  font-size: 13px;
+}
+.uidrag.is-pinned:hover {
+  background: none;
+}

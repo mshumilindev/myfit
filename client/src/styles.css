@@ -129,6 +129,19 @@
   --color-sport-tint: var(--color-sport-900);
   --color-sport-text: #d7f0c1;
   --color-sport-line: #3d5a2a;
+  /* Sub-app families for Today widgets: Apex (violet), Learn (rubellite), Atlas (coral). */
+  --color-apex: #9d6ff0;
+  --color-apex-tint: #221a38;
+  --color-apex-text: #d9c9fb;
+  --color-apex-line: #4a3680;
+  --color-learn: #e5537e;
+  --color-learn-tint: #34151f;
+  --color-learn-text: #f9c4d3;
+  --color-learn-line: #6e2a3e;
+  --color-atlas: #d0584d;
+  --color-atlas-tint: #2e1a18;
+  --color-atlas-text: #f3c1bb;
+  --color-atlas-line: #6b322c;
   /* Conditioning / gym — the gold accent as a family. */
   --color-accent-tint: var(--color-accent-900);
   --color-accent-text: var(--color-accent-300);
@@ -32732,165 +32745,6 @@ body {
   color: var(--color-rest-400);
 }
 
-/* ── Trainer clients strip (Instagram-stories row on Today) ─────────────── */
-.tcs {
-  /* Full-bleed liquid-glass band (not a border) sets the strip apart from the
-     calendar. The .screen wrapper pads 20px on phones, so pull the band out to
-     the true edges; the row restores that inset so avatars align with every
-     other block. */
-  position: relative;
-  isolation: isolate;
-  /* Top padding is the bezel->avatar gap. The band keeps its full height (the
-     tail below the name just fades out), but the next block is pulled up so the
-     name->next-block gap matches that same top gap (12px): pane gap (--space-4)
-     + this negative margin + the 18px tail = 12px measured from the name. */
-  padding: 12px 0 18px;
-  margin-inline: -20px;
-  margin-bottom: calc(-6px - var(--space-4));
-}
-.tcs::before {
-  /* Neutral graphite glass band (our palette, not brass): a translucent grey
-     surface with a soft top sheen and hairline top/bottom borders. */
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.005) 45%, transparent),
-    color-mix(in srgb, var(--color-surface) 55%, transparent);
-  backdrop-filter: blur(9px) saturate(1.05);
-  -webkit-backdrop-filter: blur(9px) saturate(1.05);
-  box-shadow: inset 0 1px 0 var(--color-divider);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%);
-}
-.tcs-row {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
-  padding: 0 20px;
-  scrollbar-width: none;
-}
-@media (min-width: 720px) {
-  /* On desktop the pane pads 30px instead — match it on both sides. */
-  .tcs {
-    margin-inline: -30px;
-  }
-  .tcs-row {
-    padding: 0 30px;
-  }
-}
-.tcs-row::-webkit-scrollbar {
-  display: none;
-}
-.tcs-item {
-  flex: none;
-  width: 64px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-.tcs-ring {
-  position: relative;
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-}
-.tcs-item.fresh .tcs-ring {
-  padding: 2.5px;
-  background: linear-gradient(
-    135deg,
-    var(--color-accent-300),
-    var(--color-accent) 55%,
-    var(--color-accent-600)
-  );
-}
-.tcs-item.fresh .tcs-ring > :first-child {
-  box-shadow: 0 0 0 2px var(--color-bg);
-  border-radius: 50%;
-}
-.tcs-item.quiet .tcs-ring {
-  box-shadow: inset 0 0 0 2px var(--color-neutral-800);
-}
-.tcs-item.dormant .tcs-ring {
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-danger) 60%, transparent);
-}
-.tcs-alert {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--color-danger);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-size: 9px;
-  box-shadow: 0 0 0 2px var(--color-bg);
-}
-/* Training-now: a green ring with a gentle glow pulse (subtle, unobtrusive),
-   plus a small live dot. Overrides the recency ring while live. */
-.tcs-item.live .tcs-ring {
-  padding: 2.5px;
-  background: linear-gradient(135deg, #7fe6b8, var(--color-ok) 55%, #2f8f68);
-  animation: tcsLivePulse 2.4s ease-in-out infinite;
-}
-.tcs-item.live .tcs-ring > :first-child {
-  box-shadow: 0 0 0 2px var(--color-bg);
-  border-radius: 50%;
-}
-@keyframes tcsLivePulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-ok) 50%, transparent);
-  }
-  55% {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-ok) 0%, transparent);
-  }
-}
-.tcs-live {
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--color-ok);
-  box-shadow: 0 0 0 2.5px var(--color-bg);
-}
-.tcs-live::after {
-  content: '';
-  position: absolute;
-  inset: 3.5px;
-  border-radius: 50%;
-  background: #0d1f16;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tcs-item.live .tcs-ring {
-    animation: none;
-  }
-}
-.tcs-name {
-  font-size: 11px;
-  color: var(--color-neutral-300);
-  max-width: 64px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.tcs-item.quiet .tcs-name,
-.tcs-item.dormant .tcs-name {
-  color: var(--color-neutral-400);
-}
-
 /* ── Client page (trainer's history-first view of a client) ─────────────── */
 .client-page {
   display: flex;
@@ -38313,92 +38167,6 @@ body {
   color: var(--color-text);
 }
 
-/* Atlas in the stories strip (components/AtlasStrip.tsx) */
-.atl-story .tcs-ring {
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--atl) 45%, transparent);
-}
-.atl-story.unread .tcs-ring {
-  padding: 2.5px;
-  box-shadow: none;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--atl) 60%, #fff), var(--atl) 60%);
-}
-.atl-story.unread .tcs-ring > :first-child {
-  box-shadow: 0 0 0 2px var(--color-bg);
-}
-.atl-story .tcs-name {
-  color: var(--atl);
-}
-.atl-story-split {
-  flex: none;
-  width: 1px;
-  margin: 8px 0 24px;
-  background: var(--color-divider);
-}
-.atl-solo {
-  flex: 1;
-  min-width: 0;
-  height: 84px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 12px 0 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.atl-solo-ring {
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--atl) 45%, transparent);
-}
-.atl-solo.unread .atl-solo-ring {
-  padding: 2.5px;
-  box-shadow: none;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--atl) 60%, #fff), var(--atl) 60%);
-}
-.atl-solo.unread .atl-solo-ring > :first-child {
-  box-shadow: 0 0 0 2px var(--color-bg);
-}
-.atl-solo-text {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.atl-solo-name {
-  font-size: 15px;
-  font-weight: 700;
-}
-.atl-solo-line {
-  font-size: 13.5px;
-  line-height: 18px;
-  color: var(--color-neutral-300);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.atl-solo-count {
-  flex: none;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 11px;
-  background: var(--atl);
-  color: #140c0d;
-  font-size: 12px;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.atl-solo-go {
-  flex: none;
-  color: var(--color-neutral-500);
-}
-
 /* Atlas programme card (thread) and today's plan on an empty session */
 .atl-plan {
   display: flex;
@@ -38825,28 +38593,6 @@ body {
 }
 .atl-msg.unread .atl-bubble {
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--atl) 35%, transparent);
-}
-/* Unread count on Atlas's bubble in the stories strip. */
-.atl-story .tcs-ring {
-  position: relative;
-}
-.atl-story-count {
-  /* Inside the ring's box (the strip row clips anything above it). */
-  position: absolute;
-  top: 0;
-  right: 0;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  background: var(--atl);
-  color: #140c0d;
-  font-size: 10.5px;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-  letter-spacing: -0.02em;
-  box-shadow: 0 0 0 2px var(--color-bg);
 }
 /* Charts inside Atlas's answers. */
 .atl-chart {

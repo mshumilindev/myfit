@@ -36,6 +36,7 @@ import {
 import type { MuscleGroup } from '../data/exercises';
 import { nightDurationMin, sleepKindOf } from '../sleep';
 import { useStore } from '../store';
+import type { ReactNode } from 'react';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 
 type Item =
@@ -147,9 +148,6 @@ export function HistoryTimeline({
   prescribedDaysOverride?: Set<number>;
   lookbackOverride?: number;
 }) {
-  const { t, locale } = useT();
-  const store = useStore();
-
   const loggedDays = buildHistoryDays(workouts, activities, sleeps);
   const byBucket = new Map<number, Item[]>();
   for (const g of loggedDays) byBucket.set(dayBucket(g.ts), g.items);
@@ -160,21 +158,8 @@ export function HistoryTimeline({
   todayMid.setHours(0, 0, 0, 0);
   const todayK = dayBucket(todayMid.getTime());
   const oldestLogged = loggedDays.length ? dayBucket(loggedDays[loggedDays.length - 1].ts) : todayK;
-  const presc = prescribedDaysOverride ?? prescribedTrainingDays();
-  const lookback = lookbackOverride ?? programLookbackDays();
-  const rests = restPeriodsOverride ?? store.restPeriods;
-  // Injuries are the signed-in user's own (client mode has no injury feed).
-  const injuries = restPeriodsOverride ? [] : (store.injuries ?? []);
-  const coveringInjury = (dk: number): boolean =>
-    injuries.some((j) => dk >= j.startDay && dk <= (j.healedDay ?? todayK));
-
-  const coveringRest = (dk: number): { mode: string; span: number } | null => {
-    for (const r of rests) {
-      const end = r.open ? todayK : r.endDay;
-      if (dk >= r.startDay && dk <= end) return { mode: r.mode, span: end - r.startDay + 1 };
-    }
-    return null;
-  };
+  const sctx = useStateCtx({ restPeriodsOverride, prescribedDaysOverride, lookbackOverride });
+  const lookback = sctx.lookback;
 
   const entries: TlDay[] = [];
   const cur = new Date(todayMid);
@@ -182,28 +167,7 @@ export function HistoryTimeline({
     const ts = cur.getTime();
     const dk = dayBucket(ts);
     const items = byBucket.get(dk) ?? [];
-    const hasWorkout = items.some((it) => it.kind === 'w');
-    const rest = coveringRest(dk);
-    let state: DayState | null = null;
-    if (hasWorkout) state = 'trained';
-    else if (rest?.mode === 'illness') state = 'illness';
-    else if (rest?.mode === 'off') state = 'vacation';
-    else if (rest) state = 'rest';
-    else if (items.length === 0 && dk <= todayK && coveringInjury(dk)) state = 'injury';
-    else if (dk < todayK && lookback > 0 && todayK - dk <= lookback && presc.has(weekdayOf(ts)))
-      state = 'missed';
-    // Program rest days: a non-training weekday inside the program window with
-    // no session logged is a planned rest (a night of sleep or a walk on it is
-    // still a rest day) — surface it the same way missed days are.
-    else if (
-      dk <= todayK &&
-      lookback > 0 &&
-      presc.size > 0 &&
-      todayK - dk <= lookback &&
-      !presc.has(weekdayOf(ts))
-    )
-      state = 'rest';
-    else if (items.length > 0) state = 'logged';
+    const state = dayStateOf(dk, ts, items, sctx);
 
     if (state) {
       const ets = items.length ? Math.max(...items.map((i) => i.ts)) : ts;
@@ -219,6 +183,125 @@ export function HistoryTimeline({
     maxDays != null ? entries.slice(dayOffset, dayOffset + maxDays) : entries.slice(dayOffset);
   if (days.length === 0) return null;
 
+  return (
+    <div className="hist-tl">
+      {days.map((day, i) => (
+        <TimelineDay
+          key={day.bucket}
+          day={day}
+          isLast={i === days.length - 1}
+          isToday={day.bucket === todayK}
+          allWorkouts={allWorkouts}
+          bodyKg={bodyKg}
+          showMuscles={showMuscles}
+          onOpenWorkout={onOpenWorkout}
+          onOpenActivity={onOpenActivity}
+          onOpenSleep={onOpenSleep}
+          openMuscleHistory={openMuscleHistory}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface StateCtx {
+  todayK: number;
+  presc: Set<number>;
+  lookback: number;
+  coveringRest: (dk: number) => { mode: string; span: number } | null;
+  coveringInjury: (dk: number) => boolean;
+}
+
+/** What decides a day's state: rest periods, injuries, the program. */
+function useStateCtx({
+  restPeriodsOverride,
+  prescribedDaysOverride,
+  lookbackOverride,
+}: {
+  restPeriodsOverride?: RestPeriod[];
+  prescribedDaysOverride?: Set<number>;
+  lookbackOverride?: number;
+}): StateCtx {
+  const store = useStore();
+  const todayMid = new Date();
+  todayMid.setHours(0, 0, 0, 0);
+  const todayK = dayBucket(todayMid.getTime());
+  const presc = prescribedDaysOverride ?? prescribedTrainingDays();
+  const lookback = lookbackOverride ?? programLookbackDays();
+  const rests = restPeriodsOverride ?? store.restPeriods;
+  // Injuries are the signed-in user's own (client mode has no injury feed).
+  const injuries = restPeriodsOverride ? [] : (store.injuries ?? []);
+  const coveringInjury = (dk: number): boolean =>
+    injuries.some((j) => dk >= j.startDay && dk <= (j.healedDay ?? todayK));
+  const coveringRest = (dk: number): { mode: string; span: number } | null => {
+    for (const r of rests) {
+      const end = r.open ? todayK : r.endDay;
+      if (dk >= r.startDay && dk <= end) return { mode: r.mode, span: end - r.startDay + 1 };
+    }
+    return null;
+  };
+  return { todayK, presc, lookback, coveringRest, coveringInjury };
+}
+
+/** A day's state from what was logged on it and what covered it. */
+function dayStateOf(dk: number, ts: number, items: Item[], c: StateCtx): DayState | null {
+  const { todayK, presc, lookback } = c;
+  const hasWorkout = items.some((it) => it.kind === 'w');
+  const rest = c.coveringRest(dk);
+  if (hasWorkout) return 'trained';
+  if (rest?.mode === 'illness') return 'illness';
+  if (rest?.mode === 'off') return 'vacation';
+  if (rest) return 'rest';
+  if (items.length === 0 && dk <= todayK && c.coveringInjury(dk)) return 'injury';
+  if (dk < todayK && lookback > 0 && todayK - dk <= lookback && presc.has(weekdayOf(ts)))
+    return 'missed';
+  // Program rest days: a non-training weekday inside the program window with
+  // no session logged is a planned rest (a night of sleep or a walk on it is
+  // still a rest day) — surface it the same way missed days are.
+  if (
+    dk <= todayK &&
+    lookback > 0 &&
+    presc.size > 0 &&
+    todayK - dk <= lookback &&
+    !presc.has(weekdayOf(ts))
+  )
+    return 'rest';
+  if (items.length > 0) return 'logged';
+  return null;
+}
+
+interface DayRowHandlers {
+  allWorkouts: Workout[];
+  bodyKg: number | null;
+  showMuscles?: boolean;
+  onOpenWorkout: (id: string) => void;
+  onOpenActivity?: (id: string) => void;
+  onOpenSleep?: (id: string) => void;
+  openMuscleHistory?: (m: MuscleGroup) => void;
+}
+
+/** One day of the timeline: the state node on the rail, the date line and the
+ *  day card with its sessions, activities and nights. */
+function TimelineDay({
+  day,
+  isLast,
+  isToday,
+  aside,
+  allWorkouts,
+  bodyKg,
+  showMuscles,
+  onOpenWorkout,
+  onOpenActivity,
+  onOpenSleep,
+  openMuscleHistory,
+}: DayRowHandlers & {
+  day: TlDay;
+  isLast: boolean;
+  isToday: boolean;
+  /** Right side of the date line (e.g. "day 3 of 6"). */
+  aside?: ReactNode;
+}) {
+  const { t, locale } = useT();
   const stateLabel: Record<Exclude<DayState, 'trained' | 'logged'>, string> = {
     rest: t.histStateRest,
     vacation: t.histStateVacation,
@@ -226,87 +309,110 @@ export function HistoryTimeline({
     injury: t.injRestEntry,
     missed: t.histStateMissed,
   };
-
+  // "FRI · SEP 25 · MISSED" — the state rides on the date line.
+  const showState = day.state !== 'trained' && day.state !== 'logged';
+  const dateLine = [
+    isToday ? t.today : fmtWeekdayShort(day.ts, locale),
+    fmtDayMonth(day.ts, locale),
+    showState ? stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>] : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const nodeLabel =
+    day.state === 'trained' || day.state === 'logged'
+      ? undefined
+      : stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>];
   return (
-    <div className="hist-tl">
-      {days.map((day, i) => {
-        const isLast = i === days.length - 1;
-        const isToday = day.bucket === todayK;
-        // "FRI · SEP 25 · MISSED" — the state rides on the date line.
-        const showState = day.state !== 'trained' && day.state !== 'logged';
-        const dateLine = [
-          isToday ? t.today : fmtWeekdayShort(day.ts, locale),
-          fmtDayMonth(day.ts, locale),
-          showState ? stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>] : null,
-        ]
-          .filter(Boolean)
-          .join(' · ');
-        return (
-          <div
-            className={`hist-tl-day st-${day.state}${isLast ? ' is-last' : ''}${
-              isToday ? ' is-today' : ''
-            }`}
-            key={day.bucket}
-          >
-            <div className="hist-tl-rail">
-              {day.state === 'logged' ? (
-                <span className="hist-tl-dot" />
-              ) : (
-                <span
-                  className="hist-tl-node"
-                  title={
-                    day.state === 'trained'
-                      ? undefined
-                      : stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>]
-                  }
-                  aria-label={
-                    day.state === 'trained'
-                      ? undefined
-                      : stateLabel[day.state as Exclude<DayState, 'trained' | 'logged'>]
-                  }
-                >
-                  <Icon name={STATE_GLYPH[day.state as Exclude<DayState, 'logged'>]} />
-                </span>
-              )}
-              <span className="hist-tl-line" />
-            </div>
-            <div className="hist-tl-body">
-              {/* Date + state share one line, centred on the node. */}
-              <div className="hist-tl-head">
-                <span className="hist-tl-date">{dateLine}</span>
-              </div>
-              {day.items.length > 0 && (
-                <div className="hist-day-card">
-                  {day.items.map((it) => {
-                    if (it.kind === 's')
-                      return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
-                    if (it.kind === 'a')
-                      return (
-                        <ActivityRow
-                          key={it.a.id}
-                          a={it.a}
-                          bodyKg={bodyKg}
-                          onOpen={onOpenActivity}
-                        />
-                      );
-                    return (
-                      <WorkoutRow
-                        key={it.w.id}
-                        w={it.w}
-                        allWorkouts={allWorkouts}
-                        bodyKg={bodyKg}
-                        showMuscles={showMuscles}
-                        onOpen={onOpenWorkout}
-                        openMuscleHistory={openMuscleHistory}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+    <div
+      className={`hist-tl-day st-${day.state}${isLast ? ' is-last' : ''}${
+        isToday ? ' is-today' : ''
+      }`}
+    >
+      <div className="hist-tl-rail">
+        {day.state === 'logged' ? (
+          <span className="hist-tl-dot" />
+        ) : (
+          <span className="hist-tl-node" title={nodeLabel} aria-label={nodeLabel}>
+            <Icon name={STATE_GLYPH[day.state as Exclude<DayState, 'logged'>]} />
+          </span>
+        )}
+        <span className="hist-tl-line" />
+      </div>
+      <div className="hist-tl-body">
+        {/* Date + state share one line, centred on the node. */}
+        <div className="hist-tl-head">
+          <span className="hist-tl-date">{dateLine}</span>
+          {aside != null && <span className="hist-tl-aside">{aside}</span>}
+        </div>
+        {day.items.length > 0 && (
+          <div className="hist-day-card">
+            {day.items.map((it) => {
+              if (it.kind === 's') return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
+              if (it.kind === 'a')
+                return (
+                  <ActivityRow key={it.a.id} a={it.a} bodyKg={bodyKg} onOpen={onOpenActivity} />
+                );
+              return (
+                <WorkoutRow
+                  key={it.w.id}
+                  w={it.w}
+                  allWorkouts={allWorkouts}
+                  bodyKg={bodyKg}
+                  showMuscles={showMuscles}
+                  onOpen={onOpenWorkout}
+                  openMuscleHistory={openMuscleHistory}
+                />
+              );
+            })}
           </div>
-        );
-      })}
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * One calendar day rendered exactly like a History timeline day (the History
+ * calendar's selected day). `day` is any timestamp on that local date.
+ */
+export function HistoryDay({
+  day,
+  workouts,
+  activities,
+  sleeps = [],
+  aside,
+  children,
+  ...rest
+}: DayRowHandlers & {
+  day: number;
+  workouts: Workout[];
+  activities: Activity[];
+  sleeps?: SleepNight[];
+  aside?: ReactNode;
+  /** Shown under the date line when the day has nothing logged. */
+  children?: ReactNode;
+}) {
+  const sctx = useStateCtx({});
+  const dk = dayBucket(day);
+  const logged = buildHistoryDays(
+    workouts.filter((w) => w.finishedAt !== null && dayBucket(w.startedAt) === dk),
+    activities.filter((a) => a.finishedAt !== null && dayBucket(a.startedAt) === dk),
+    sleeps.filter((n) => n.wake !== null && dayBucket(n.wake) === dk),
+  );
+  const items = logged[0]?.items ?? [];
+  const mid = new Date(day);
+  mid.setHours(12, 0, 0, 0);
+  const state = dayStateOf(dk, mid.getTime(), items, sctx) ?? 'logged';
+  return (
+    <div className="hist-tl hist-tl-single">
+      <TimelineDay
+        day={{ bucket: dk, ts: mid.getTime(), items, state }}
+        isLast
+        isToday={dk === sctx.todayK}
+        aside={aside}
+        {...rest}
+      />
+      {items.length === 0 && children}
     </div>
   );
 }

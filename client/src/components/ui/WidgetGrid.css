@@ -1,0 +1,61 @@
+/* Today Bento grid: 4 columns on phones, 8 on desktop. Tokens only. */
+.uiwgrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.uiwgrid > .uisc {
+  grid-column: span 1;
+}
+.uiwgrid > .uiw--s {
+  grid-column: span 2;
+}
+.uiwgrid > .uiw--m,
+.uiwgrid > .uiw--l,
+.uiwgrid > .uiw--xl {
+  grid-column: span 4;
+}
+@media (min-width: 900px) {
+  .uiwgrid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 12px;
+  }
+  /* Same composition as on phones, every span doubled (T0: "just wider"). */
+  .uiwgrid > .uiw--s {
+    grid-column: span 4;
+  }
+  .uiwgrid > .uiw--m,
+  .uiwgrid > .uiw--l,
+  .uiwgrid > .uiw--xl {
+    grid-column: span 8;
+  }
+  /* A full-width square would be ~900px tall: XL keeps the height of two L tiles. */
+  .uiwgrid > .uiw--xl {
+    aspect-ratio: auto;
+    min-height: 312px;
+  }
+}
+.uiwsec {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-divider);
+}
+.uiwsec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.uiwsec-title {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+.uiwsec-aside {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}

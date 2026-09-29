@@ -15,6 +15,9 @@ import { Button, IconButton, type ButtonVariant } from './Button';
 import { Card, type CardTone } from './Card';
 import { Chip, ChipGroup, type ChipTone } from './Chip';
 import { Banner, type BannerTone } from './Banner';
+import { Widget, WidgetBar, WidgetList, WidgetRing, WidgetSpark, WidgetDelta } from './Widget';
+import { WidgetSection } from './WidgetGrid';
+import { ShortcutTile } from './ShortcutTile';
 
 const ACCENT = ['100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 const NEUTRAL = ['100', '200', '300', '400', '500', '600', '700', '800', '900'];
@@ -85,6 +88,87 @@ export function Gallery({ onClose }: { onClose: () => void }) {
         Design tokens and primitives, all states. Verify refactor slices here (light/dark,
         mobile/desktop) — appearance must not change unless a slice is a deliberate design change.
       </p>
+
+      <Group title="Today widgets — S · M · L · XL (new)">
+        <div style={{ maxWidth: 390, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <WidgetSection title="Shortcuts" layout="shortcuts">
+            <ShortcutTile label="Chest 1" icon="play" primary />
+            <ShortcutTile label="Dance" icon="disco-ball" tone="active" />
+            <ShortcutTile
+              label="Run"
+              icon="person-simple-run"
+              tone="active"
+              state="live"
+              meta="24:10"
+            />
+            <ShortcutTile label="Home set" icon="house" tone="accent" state="done" />
+          </WidgetSection>
+          <WidgetSection title="Body · pair" layout="pair">
+            <Widget size="S" tone="ok" kicker="Readiness" value="82" unit="%" sub="Legs recovering">
+              <WidgetBar value={0.82} />
+            </Widget>
+            <Widget
+              size="S"
+              tone="sleep"
+              kicker="Last night"
+              value="8"
+              unit="h 30m"
+              sub="02:00 → 10:30 · auto"
+            />
+          </WidgetSection>
+          <WidgetSection title="Rows · M" layout="rows">
+            <Widget
+              size="M"
+              tone="apex"
+              icon="trophy"
+              title="Consistency 30"
+              sub="18 of 30 days"
+              onClick={() => undefined}
+            />
+            <Widget
+              size="M"
+              tone="ok"
+              icon="heartbeat"
+              title="Readiness 82%"
+              sub="Upper fresh · legs recovering"
+              onClick={() => undefined}
+            />
+          </WidgetSection>
+          <WidgetSection title="Wide · L" layout="wide">
+            <Widget
+              size="L"
+              tone="ok"
+              kicker="Bench e1RM"
+              value="102"
+              unit="kg"
+              sub={<WidgetDelta>+2.5 · 4 wks</WidgetDelta>}
+              bodyLast
+            >
+              <WidgetSpark
+                points={[90, 91, 90.5, 93, 92.5, 95, 96, 98, 99, 100, 102]}
+                height={44}
+                area
+              />
+            </Widget>
+          </WidgetSection>
+          <WidgetSection title="Big · XL" layout="big">
+            <Widget size="XL" tone="ok" kicker="Muscle readiness" badge="82%">
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <WidgetRing value={0.82} size={110}>
+                  82
+                </WidgetRing>
+              </div>
+              <WidgetList
+                rows={[
+                  { label: 'Chest', value: '100' },
+                  { label: 'Back', value: '92' },
+                  { label: 'Legs', value: '61' },
+                ]}
+              />
+            </Widget>
+          </WidgetSection>
+        </div>
+      </Group>
 
       <Group title="Accent ramp">
         <div className="uik-row">

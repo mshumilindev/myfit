@@ -4,7 +4,7 @@ import { Icon } from '../../ui';
 
 import './Chip.css';
 
-export type ChipTone = 'neutral' | 'accent' | 'danger' | 'ok' | 'rest';
+export type ChipTone = 'neutral' | 'accent' | 'danger' | 'ok' | 'rest' | 'atlas';
 export type ChipSize = 'sm' | 'md';
 
 export interface ChipProps extends HTMLAttributes<HTMLElement> {

@@ -200,22 +200,25 @@ npm run build-storybook    # static catalog → client/storybook-static/
 
 ## Current kit
 
-| Primitive                               | For                                                                                                                        |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `Button` / `IconButton`                 | every button variant / size / state                                                                                        |
-| `Card`, `Banner`, `Chip` + `ChipGroup`  | surfaces, frosted banners, pills                                                                                           |
-| `Calendar` (+ `CalendarLegend`)         | THE calendar: single / range, open end, min / max / disabled, markers, today ring, keyboard grid, presets slot, 1–2 months |
-| `GroupedList` + `ListRow` + `ListPanel` | settings-style groups: icon, label + sub, value, chevron, check, switch, action rows, expansion panel                      |
-| `Segmented`                             | one-of-N: iOS `track` or toned `buttons`                                                                                   |
-| `Switch`                                | role="switch" checkbox, toned                                                                                              |
-| `PresetChips`                           | toggle chips (date presets, body parts, filters), wrap or scroll                                                           |
-| `PinToggle`                             | pin / unpin: icon, boxed, row-with-switch                                                                                  |
-| `IconTile`                              | rounded icon square in a family, 22–56px                                                                                   |
-| `CategoryRow`                           | browse-by-category card (tile, title, count, meta, minis)                                                                  |
-| `Snackbar`                              | confirmation with Undo (presentational; caller owns the timer)                                                             |
-| `StickyActionBar`                       | pinned bottom bar (page, safe-area) or panel foot                                                                          |
-| `Timeline` (+ `TimelineDate`)           | read-only period rail with lanes, Now, gaps, months                                                                        |
-| `ToneText`                              | inline text in a family colour                                                                                             |
+| Primitive                                    | For                                                                                                                                                |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button` / `IconButton`                      | every button variant / size / state                                                                                                                |
+| `Card`, `Banner`, `Chip` + `ChipGroup`       | surfaces, frosted banners, pills                                                                                                                   |
+| `Calendar` (+ `CalendarLegend`)              | THE calendar: single / range, open end, min / max / disabled, markers, today ring, keyboard grid, presets slot, 1–2 months                         |
+| `GroupedList` + `ListRow` + `ListPanel`      | settings-style groups: icon, label + sub, value, chevron, check, switch, action rows, expansion panel                                              |
+| `Segmented`                                  | one-of-N: iOS `track` or toned `buttons`                                                                                                           |
+| `Switch`                                     | role="switch" checkbox, toned                                                                                                                      |
+| `PresetChips`                                | toggle chips (date presets, body parts, filters), wrap or scroll                                                                                   |
+| `PinToggle`                                  | pin / unpin: icon, boxed, row-with-switch                                                                                                          |
+| `IconTile`                                   | rounded icon square in a family, 22–56px                                                                                                           |
+| `CategoryRow`                                | browse-by-category card (tile, title, count, meta, minis)                                                                                          |
+| `Snackbar`                                   | confirmation with Undo (presentational; caller owns the timer)                                                                                     |
+| `StickyActionBar`                            | pinned bottom bar (page, safe-area) or panel foot                                                                                                  |
+| `Timeline` (+ `TimelineDate`)                | read-only period rail with lanes, Now, gaps, months                                                                                                |
+| `ToneText`                                   | inline text in a family colour                                                                                                                     |
+| `MonthGrid` (+ `MonthGridLegend`)            | browse a month of day tiles: markers (phone) or named chips (desktop), health tints, planned dashes, today ring, selection                         |
+| `StatStrip`                                  | a row of numbers in one card (value + unit + label per cell, toned values)                                                                         |
+| `StoryBubble` (+ `StoryRow`, `StoryDivider`) | stories bubble: face/initial in a state ring (default · new · live · alert · atlas), count or "!" badge, name, "+N more"; scrolling row + hairline |
 
 ## Primitive backlog & prop shapes
 

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>V2 Glass · Now Playing sheet</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f1012;
+            color: #e9eaec;
+          }
+          * {
+            box-sizing: border-box;
+          }
+          button {
+            font: inherit;
+            color: inherit;
+            background: none;
+            border: 0;
+            padding: 0;
+            cursor: pointer;
+          }
+          .lbl {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #b0b4b8;
+          }
+          .num {
+            font-variant-numeric: tabular-nums;
+          }
+          .glass {
+            background: linear-gradient(180deg, rgba(60, 48, 30, 0.34), rgba(20, 18, 14, 0.5));
+            box-shadow:
+              inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45),
+              inset 0 0 0 1px rgba(217, 162, 79, 0.26);
+          }
+          .soft {
+            background: rgba(10, 10, 12, 0.32);
+            border: 1px solid rgba(233, 234, 236, 0.08);
+          }
+          .cb {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e9eaec;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 390px;
+          height: 844px;
+          position: relative;
+          overflow: hidden;
+          background:
+            radial-gradient(80% 50% at 25% 20%, rgba(43, 31, 58, 0.95), transparent 70%),
+            radial-gradient(90% 60% at 85% 35%, rgba(138, 100, 46, 0.85), transparent 70%),
+            radial-gradient(90% 50% at 50% 90%, rgba(52, 39, 19, 0.9), transparent 70%), #121316;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            inset: 0;
+            padding: 14px 22px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+          "
+        >
+          <div
+            style="
+              width: 38px;
+              height: 5px;
+              border-radius: 3px;
+              background: rgba(233, 234, 236, 0.35);
+              align-self: center;
+            "
+          ></div>
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <span class="lbl">Chest 2 · 42:18</span
+            ><span class="lbl" style="color: #eed3a5">Apple Music</span>
+          </div>
+          <div
+            style="
+              width: 250px;
+              height: 250px;
+              border-radius: 22px;
+              align-self: center;
+              background: linear-gradient(135deg, #2b1f3a 0%, #8a642e 55%, #eed3a5 100%);
+              box-shadow:
+                0 24px 60px rgba(0, 0, 0, 0.45),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            "
+          ></div>
+          <div style="text-align: center">
+            <div style="font-size: 24px; font-weight: 600">Houdini</div>
+            <div style="font-size: 15px; color: #d0d3d6; margin-top: 2px">Dua Lipa</div>
+          </div>
+          <div>
+            <div style="height: 5px; border-radius: 3px; background: rgba(233, 234, 236, 0.18)">
+              <div style="width: 55%; height: 100%; border-radius: 3px; background: #eed3a5"></div>
+            </div>
+            <div
+              class="num"
+              style="
+                display: flex;
+                justify-content: space-between;
+                font-size: 12px;
+                color: #d0d3d6;
+                margin-top: 6px;
+              "
+            >
+              <span>1:42</span><span>−1:23</span>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: center; gap: 22px">
+            <button class="cb soft" aria-label="Previous track">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18 5v14l-9-7zM5.5 5H8v14H5.5z"></path>
+              </svg>
+            </button>
+            <button
+              class="cb glass"
+              aria-label="Pause"
+              style="width: 72px; height: 72px; border-radius: 36px; color: #eed3a5"
+            >
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"></path>
+              </svg>
+            </button>
+            <button class="cb soft" aria-label="Next track">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 5v14l9-7zM16 5h2.5v14H16z"></path>
+              </svg>
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <div class="glass" style="border-radius: 16px; padding: 12px 14px">
+              <div class="lbl" style="color: #eed3a5">For Chest 2</div>
+              <div style="font-size: 14px; font-weight: 600; margin-top: 4px">Chest · Heavy</div>
+              <div style="font-size: 12px; color: #d0d3d6">Change</div>
+            </div>
+            <div class="glass" style="border-radius: 16px; padding: 12px 14px">
+              <div class="lbl" style="color: #b7e8cf">PR track</div>
+              <div style="font-size: 14px; font-weight: 600; margin-top: 4px">Training Season</div>
+              <div style="font-size: 12px; color: #d0d3d6">Play before top set</div>
+            </div>
+          </div>
+          <div
+            class="soft"
+            style="
+              border-radius: 16px;
+              padding: 12px 14px;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+            "
+          >
+            <div class="lbl">Up next</div>
+            <div style="font-size: 14px">
+              Just Pretend <span style="color: #b0b4b8">· Bad Omens</span>
+            </div>
+            <div style="font-size: 14px">
+              The Summoning <span style="color: #b0b4b8">· Sleep Token</span>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: center; gap: 8px; margin-top: auto">
+            <span
+              class="glass"
+              style="
+                height: 32px;
+                padding: 0 12px;
+                border-radius: 16px;
+                font-size: 13px;
+                display: inline-flex;
+                align-items: center;
+                color: #eed3a5;
+              "
+              >Apple Music</span
+            >
+            <span
+              class="soft"
+              style="
+                height: 32px;
+                padding: 0 12px;
+                border-radius: 16px;
+                font-size: 13px;
+                display: inline-flex;
+                align-items: center;
+                color: #d0d3d6;
+              "
+              >Spotify · beta</span
+            >
+            <span
+              class="soft"
+              style="
+                height: 32px;
+                padding: 0 12px;
+                border-radius: 16px;
+                font-size: 13px;
+                display: inline-flex;
+                align-items: center;
+                color: #d0d3d6;
+              "
+              >YouTube ↗</span
+            >
+          </div>
+        </div>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+      class Component extends DCLogic {
+      renderVals() { return {}; }
+      }
+    </script>
+  </body>
+</html>

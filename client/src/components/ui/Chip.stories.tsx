@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Chip, ChipGroup, type ChipTone } from './Chip';
 
-const TONES: ChipTone[] = ['neutral', 'accent', 'danger', 'ok', 'rest'];
+const TONES: ChipTone[] = ['neutral', 'accent', 'danger', 'ok', 'rest', 'atlas'];
 
 const meta = {
   title: 'Kit/Chip',

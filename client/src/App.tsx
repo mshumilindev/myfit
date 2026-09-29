@@ -173,9 +173,17 @@ const HealthView = lazy(() =>
 const InjuryView = lazy(() =>
   import('./views/InjuryView').then((module) => ({ default: module.InjuryView })),
 );
-const Gallery = lazy(() =>
-  import('./components/ui/Gallery').then((module) => ({ default: module.Gallery })),
-);
+// Dev-only: the UI kit gallery is an internal tool. In production builds this
+// branch is dead code (import.meta.env.DEV === false), so the chunk isn't
+// emitted and #/uikit falls back to Today.
+const Gallery = import.meta.env.DEV
+  ? lazy(() => import('./components/ui/Gallery').then((module) => ({ default: module.Gallery })))
+  : null;
+const WidgetLibraryScreen = import.meta.env.DEV
+  ? lazy(() =>
+      import('./today/WidgetLibraryScreen').then((m) => ({ default: m.WidgetLibraryScreen })),
+    )
+  : null;
 const MasteryBadge = lazy(() =>
   import('./views/MasteryView').then((module) => ({ default: module.MasteryBadge })),
 );
@@ -257,6 +265,7 @@ export type Overlay =
       form?: HealthFormSpec;
     }
   | { screen: 'uikit' }
+  | { screen: 'widget-library' }
   | { screen: 'library'; libTab?: 'mine' }
   | null;
 
@@ -397,6 +406,7 @@ function toHash(
   if (overlay?.screen === 'injury') return '#/injury';
   if (overlay?.screen === 'health') return healthHash(overlay);
   if (overlay?.screen === 'uikit') return '#/uikit';
+  if (overlay?.screen === 'widget-library') return '#/widgets';
   if (overlay?.screen === 'notifications') return '#/notifications';
   if (overlay?.screen === 'coach') return '#/coach';
   if (overlay?.screen === 'recap') return `#/recap/${encodeURIComponent(overlay.period)}`;
@@ -509,7 +519,10 @@ function fromHash(hash: string): { tab: Tab; overlay: Overlay } {
   if (head === 'coach') return { tab: 'today', overlay: { screen: 'coach' } };
   if (head === 'injury') return { tab: 'today', overlay: { screen: 'injury' } };
   if (head === 'health') return { tab: 'today', overlay: healthFromHash(parts.slice(1)) };
-  if (head === 'uikit') return { tab: 'today', overlay: { screen: 'uikit' } };
+  if (head === 'widgets' && import.meta.env.DEV)
+    return { tab: 'today', overlay: { screen: 'widget-library' } };
+  if (head === 'uikit' && import.meta.env.DEV)
+    return { tab: 'today', overlay: { screen: 'uikit' } };
   if (head === 'history') return { tab: 'today', overlay: { screen: 'history' } };
   if (head === 'builder') return { tab: 'today', overlay: { screen: 'builder' } };
   if (head === 'notifications') return { tab: 'today', overlay: { screen: 'notifications' } };
@@ -1542,7 +1555,10 @@ export function App() {
           onClose={closeOverlay}
         />
       )}
-      {activeOverlay?.screen === 'uikit' && <Gallery onClose={closeOverlay} />}
+      {Gallery && activeOverlay?.screen === 'uikit' && <Gallery onClose={closeOverlay} />}
+      {WidgetLibraryScreen && activeOverlay?.screen === 'widget-library' && (
+        <WidgetLibraryScreen shell={shell} onClose={closeOverlay} />
+      )}
     </Suspense>
   ) : null;
   const tabContent = (

@@ -1,0 +1,207 @@
+/* StoryBubble — Spotter UI kit primitive (design A1 / T5 stories strip).
+   Tokens only. --story-gap is the surface behind the bubble (the hairline
+   between ring and face and around badges); set it on a tinted band. */
+
+.uistory {
+  --story-gap: var(--color-bg);
+  flex: none;
+  width: max(var(--story-d), 62px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+button.uistory {
+  cursor: pointer;
+}
+button.uistory:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-lg);
+}
+.uistory--lg {
+  --story-d: 62px;
+}
+.uistory--md {
+  --story-d: 50px;
+}
+.uistory--sm {
+  --story-d: 40px;
+}
+.uistory--xs {
+  --story-d: 34px;
+}
+/* Just the face (no name): as wide as the ring. */
+.uistory--bare {
+  width: var(--story-d);
+}
+
+.uistory-ring {
+  position: relative;
+  width: var(--story-d);
+  height: var(--story-d);
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  flex: none;
+  box-shadow: inset 0 0 0 2px var(--color-neutral-800);
+}
+.uistory-face {
+  position: relative;
+  z-index: 1;
+  width: calc(var(--story-d) - 8px);
+  height: calc(var(--story-d) - 8px);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--color-surface-2);
+  color: var(--color-neutral-300);
+  font-size: calc(var(--story-d) * 0.29);
+  font-weight: 700;
+  line-height: 1;
+}
+.uistory-face > * {
+  flex: none;
+}
+
+/* Gradient rings: the gradient fills the ring, a disc in the surface colour
+   leaves a 2.5px band and a thin gap around the face. */
+.uistory--new .uistory-ring,
+.uistory--live .uistory-ring,
+.uistory--atlas .uistory-ring {
+  box-shadow: none;
+}
+.uistory--new .uistory-ring::before,
+.uistory--live .uistory-ring::before,
+.uistory--atlas .uistory-ring::before {
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  border-radius: var(--radius-pill);
+  background: var(--story-gap);
+}
+.uistory--new .uistory-ring {
+  background: linear-gradient(
+    135deg,
+    var(--color-accent-300),
+    var(--color-accent) 55%,
+    var(--color-accent-600)
+  );
+}
+.uistory--live .uistory-ring {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-ok) 55%, var(--color-ok-text)),
+    var(--color-ok) 60%
+  );
+}
+.uistory--atlas .uistory-ring {
+  background: linear-gradient(135deg, var(--color-atlas-text), var(--color-atlas) 60%);
+}
+.uistory--alert .uistory-ring {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-danger) 60%, transparent);
+}
+.uistory--more .uistory-ring {
+  box-shadow: none;
+  border: 1px dashed var(--color-neutral-700);
+}
+.uistory-face--more {
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Training now: green dot bottom-right. */
+.uistory-live {
+  position: absolute;
+  z-index: 2;
+  right: -1px;
+  bottom: -1px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ok);
+  box-shadow: 0 0 0 2.5px var(--story-gap);
+}
+.uistory--md .uistory-live,
+.uistory--sm .uistory-live,
+.uistory--xs .uistory-live {
+  width: 11px;
+  height: 11px;
+}
+
+/* Count (Atlas coral, else red) or "!" (red). Inside the ring box so a
+   scrolling row never clips it. */
+.uistory-badge {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+  color: var(--color-danger-tint);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--story-gap);
+}
+.uistory--atlas .uistory-badge {
+  background: var(--color-atlas);
+  color: var(--color-atlas-tint);
+}
+.uistory-badge--alert {
+  min-width: 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  font-size: 9px;
+  line-height: 16px;
+  color: var(--color-neutral-100);
+}
+
+.uistory-label {
+  max-width: 100%;
+  font-size: 11px;
+  color: var(--color-neutral-300);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uistory--atlas .uistory-label {
+  color: color-mix(in srgb, var(--color-atlas) 55%, var(--color-atlas-text));
+}
+.uistory--alert .uistory-label {
+  color: var(--color-neutral-400);
+}
+.uistory--more .uistory-label {
+  color: var(--color-text-faint);
+}
+
+/* Row + divider */
+.uistory-row {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.uistory-row::-webkit-scrollbar {
+  display: none;
+}
+.uistory-divider {
+  flex: none;
+  width: 1px;
+  margin: 8px 0 24px;
+  background: var(--color-divider);
+}

@@ -12,6 +12,7 @@
  *   sleep    violet
  *   sport    court green — sports activities
  *   ok / danger / kcal — status families
+ *   apex / learn / atlas — sub-app families (Today widgets)
  *   neutral  greys
  */
 import './tones.css';
@@ -27,7 +28,10 @@ export type Tone =
   | 'sport'
   | 'ok'
   | 'danger'
-  | 'kcal';
+  | 'kcal'
+  | 'apex'
+  | 'learn'
+  | 'atlas';
 
 export const TONES: Tone[] = [
   'neutral',
@@ -41,6 +45,9 @@ export const TONES: Tone[] = [
   'ok',
   'danger',
   'kcal',
+  'apex',
+  'learn',
+  'atlas',
 ];
 
 /** The class that binds --t-* to a family. */

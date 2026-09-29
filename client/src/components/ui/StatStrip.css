@@ -1,0 +1,51 @@
+/* Kit StatStrip — tokens only. */
+.uiss {
+  container-type: inline-size;
+  display: flex;
+  min-width: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-divider) 43%, transparent);
+  overflow: hidden;
+}
+.uiss-cell {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-3) var(--sp-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  text-align: center;
+}
+.uiss-cell + .uiss-cell {
+  border-left: 1px solid color-mix(in srgb, var(--color-divider) 43%, transparent);
+}
+.uiss-val {
+  /* shrinks with the strip so 5 values never clip in a narrow column */
+  font-size: clamp(14px, 5cqi, 18px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+.uiss-val.is-toned {
+  color: var(--t-base);
+}
+.uiss-unit {
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+}
+.uiss-lab {
+  max-width: 100%;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

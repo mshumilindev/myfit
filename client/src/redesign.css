@@ -1112,37 +1112,6 @@ div.hist-item {
   }
 }
 
-/* --- Today: crew strip as in the design — a plain row of 52px faces ------- */
-.today-page .tcs {
-  margin-inline: calc(-1 * var(--page-x));
-  margin-bottom: 0;
-  padding: 2px 0 4px;
-}
-.today-page .tcs::before,
-.today-page .atl-story-split {
-  display: none;
-}
-.today-page .tcs-row {
-  gap: 18px;
-  padding: 0 var(--page-x);
-}
-.today-page .tcs-item {
-  width: 56px;
-}
-.today-page .tcs-ring {
-  width: 56px;
-  height: 56px;
-}
-.today-page .tcs-ring > :first-child {
-  width: 50px !important;
-  height: 50px !important;
-}
-.today-page .tcs-name {
-  max-width: 64px;
-  font-size: 11.5px;
-  color: #b0b4b8;
-}
-
 /* --- Set editor sheet --------------------------------------------------------
    Its blocks must never shrink to fit (an overflow:hidden group squeezed to
    nothing and hid "More"); the sheet itself scrolls instead. */

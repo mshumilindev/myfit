@@ -128,6 +128,8 @@ import {
   reconcileListPref,
   type ListPrefStore,
 } from './activityPrefs';
+import { resetTodayLayout } from './today/layout';
+import { pushTodayLayoutEdits, syncTodayLayoutFromDoc } from './today/layoutSync';
 // Synced Log-activity prefs (pins + "don't suggest after workouts").
 export {
   activityPins,
@@ -3777,6 +3779,7 @@ function markSynced(fromCache: boolean, hasPending: boolean): void {
 //   weekStart + updatedAt                 — first day of the training week
 //   activityPins + activityPinsUpdatedAt  — Log activity › Pinned (ordered)
 //   nextUpOff + nextUpOffUpdatedAt        — types not to suggest after workouts
+//   todayLayout + todayLayoutUpdatedAt    — the Today layout (today/layoutSync.ts)
 // Every write merges only its own fields, so a device with a stale copy of one
 // setting can't clobber a newer value of another.
 let applyingRemotePrefs = false;
@@ -3809,6 +3812,8 @@ for (const [name, pref] of LIST_PREFS) {
     if (!applyingRemotePrefs) writeListPref(name, pref);
   });
 }
+// Local Today-layout edits only; synced values never fire this (no echo).
+pushTodayLayoutEdits(writePrefsFields);
 
 export function startSyncLoop(): () => void {
   const uid = currentUid();
@@ -3846,6 +3851,7 @@ export function startSyncLoop(): () => void {
           }
           if (push) writeListPref(name, pref);
         }
+        syncTodayLayoutFromDoc(data, writePrefsFields);
       },
       onWriteError,
     ),
@@ -4836,6 +4842,7 @@ export function resetLocalData(): void {
     resetWeekStart();
     pinsPref.reset();
     nextUpOffPref.reset();
+    resetTodayLayout();
   } finally {
     applyingRemotePrefs = false;
   }
