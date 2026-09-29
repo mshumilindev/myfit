@@ -1195,7 +1195,7 @@ describe('F-03 session UI', () => {
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
     const card = container.querySelector('.gset.kind-static-dynamic')!;
     expect(card).toBeTruthy();
-    const steppers = card.querySelectorAll('.stepper');
+    const steppers = within(card as HTMLElement).getAllByRole('group');
     expect(steppers).toHaveLength(2);
     expect(steppers[1].textContent).toMatch(/Hold/);
     const plus = steppers[1].querySelectorAll('button');
@@ -1235,7 +1235,9 @@ describe('F-03 session UI', () => {
   it('a set that falls 2+ reps short of the card is marked failure automatically', async () => {
     __replaceStateForTests(sampleStore());
     const { container } = render(<SessionView workoutId="open" shell={shell} onClose={vi.fn()} />);
-    const reps = container.querySelector('.gset .stepper') as HTMLElement;
+    const reps = within(container.querySelector('.gset') as HTMLElement).getByRole('group', {
+      name: 'Reps',
+    });
     const minus = reps.querySelector('button') as HTMLElement;
     for (let i = 0; i < 3; i++) await userEvent.click(minus);
     await userEvent.click(screen.getByRole('button', { name: 'Log' }));
