@@ -8,6 +8,10 @@ import {
   useRef,
   useState,
 } from 'react';
+import { NumberStepper } from '../components/ui/NumberStepper';
+import { Button, IconButton } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Ring } from '../components/ui/Ring';
 import type { Shell } from '../App';
 import type {
   DropEntry,
@@ -2656,8 +2660,6 @@ export function SessionView(props: {
         focusGroup && focusGroup.exercises.some((e) => e.id === ex.id) && ex.id !== lastEx.id
           ? t.restGoTo(exName(ex.name))
           : t.restNext(`${t.setNumber(ex.sets.length + 1)} · ${fmtSet(g.weight, g.reps)}`);
-      const R = 50;
-      const C = 2 * Math.PI * R;
       const frac = done || goal === 0 ? 1 : Math.max(0, Math.min(1, left / goal));
       const nudge = (d: number) =>
         setRestAdj({ at: lastLoggedAt, delta: adj.delta + d, skip: false });
@@ -2686,7 +2688,11 @@ export function SessionView(props: {
       return (
         <>
           {failNote}
-          <div className={`rst-card${done ? ' done' : ''}`}>
+          <Card
+            emphasis="glass"
+            tone={done ? 'ok' : 'rest'}
+            className={`rst-card${done ? ' done' : ''}`}
+          >
             <RestAlarm
               setId={lastChrono!.s.id}
               dueAt={lastLoggedAt + goal * 1000}
@@ -2701,29 +2707,27 @@ export function SessionView(props: {
               aria-label={t.restSettingsAria}
               onClick={() => setSheet({ kind: 'rest', exName: lastEx.name })}
             >
-              <svg viewBox="0 0 112 112" aria-hidden>
-                <circle className="rst-track" cx="56" cy="56" r={R} />
-                <circle
-                  className="rst-arc"
-                  cx="56"
-                  cy="56"
-                  r={R}
-                  strokeDasharray={`${(C * frac).toFixed(1)} ${C.toFixed(1)}`}
-                />
-              </svg>
-              <span className="rst-center">
-                {done ? (
-                  <>
-                    <span className="rst-go">{t.restGo}</span>
-                    <span className="rst-time">+{fmtCountdown(-left)}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="rst-time">{fmtCountdown(left)}</span>
-                    <span className="rst-of">{t.restOf(fmtCountdown(goal))}</span>
-                  </>
-                )}
-              </span>
+              <Ring
+                value={Math.round(frac * 100)}
+                size={104}
+                width={7}
+                tone={done ? 'ok' : 'rest'}
+                label={t.restHeaderLabel}
+              >
+                <span className="rst-center">
+                  {done ? (
+                    <>
+                      <span className="rst-go">{t.restGo}</span>
+                      <span className="rst-time">+{fmtCountdown(-left)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="rst-time">{fmtCountdown(left)}</span>
+                      <span className="rst-of">{t.restOf(fmtCountdown(goal))}</span>
+                    </>
+                  )}
+                </span>
+              </Ring>
             </button>
             <div className="rst-body">
               <div className="rst-lbl">
@@ -2738,16 +2742,26 @@ export function SessionView(props: {
                 <div className="rst-note">{t.restOverNote}</div>
               ) : (
                 <div className="rst-btns">
-                  <button type="button" aria-label={t.restMinus15} onClick={() => nudge(-15)}>
+                  <Button
+                    variant="rest"
+                    size="sm"
+                    aria-label={t.restMinus15}
+                    onClick={() => nudge(-15)}
+                  >
                     −15
-                  </button>
-                  <button type="button" aria-label={t.restPlus15} onClick={() => nudge(15)}>
+                  </Button>
+                  <Button
+                    variant="rest"
+                    size="sm"
+                    aria-label={t.restPlus15}
+                    onClick={() => nudge(15)}
+                  >
                     +15
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </>
       );
     }
@@ -6454,7 +6468,9 @@ function GhostSetRow(props: {
       : null;
   const pr = props.prHint && !fail ? props.prHint : null;
   return (
-    <div
+    <Card
+      emphasis="hero"
+      pad="md"
       className={`gset kind-${props.kind ?? 'working'}${fail ? ' fail-on' : ''}${pr ? ' pr' : ''}`}
     >
       {(pr || props.title) && (
@@ -6469,8 +6485,8 @@ function GhostSetRow(props: {
           <div className="gset-part">
             <div className="gset-part-lab">{t.startLabel}</div>
             <div className="gset-steppers">
-              <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
-              <Stepper
+              <NumberStepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
+              <NumberStepper
                 label={unit === 'lb' ? t.weightLb : t.weightKg}
                 value={toDisp(weightKg ?? 0)}
                 step={unit === 'lb' ? 5 : 2.5}
@@ -6486,14 +6502,14 @@ function GhostSetRow(props: {
             <div className="gset-part" key={i}>
               <div className="gset-part-lab">{t.dropRowN(i + 1)}</div>
               <div className="gset-steppers">
-                <Stepper
+                <NumberStepper
                   label={t.reps}
                   value={d.reps}
                   step={1}
                   min={0}
                   onChange={(n) => patchDrop(i, { reps: n })}
                 />
-                <Stepper
+                <NumberStepper
                   label={unit === 'lb' ? t.weightLb : t.weightKg}
                   value={toDisp(d.weight ?? 0)}
                   step={unit === 'lb' ? 5 : 2.5}
@@ -6509,8 +6525,10 @@ function GhostSetRow(props: {
         </div>
       ) : (
         <div className="gset-steppers">
-          {!isSd && <Stepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />}
-          <Stepper
+          {!isSd && (
+            <NumberStepper label={t.reps} value={reps} step={1} min={0} onChange={setReps} />
+          )}
+          <NumberStepper
             label={unit === 'lb' ? t.weightLb : t.weightKg}
             value={toDisp(weightKg ?? 0)}
             step={unit === 'lb' ? 5 : 2.5}
@@ -6521,7 +6539,7 @@ function GhostSetRow(props: {
             onChange={(x) => setWeightKg(fromDisp(x))}
           />
           {isSd && (
-            <Stepper
+            <NumberStepper
               label={t.holdSecLabel}
               value={holdSec}
               step={5}
@@ -6564,28 +6582,28 @@ function GhostSetRow(props: {
         </div>
       )}
       <div className="gset-actions">
-        <button
+        <IconButton
+          variant="secondary"
           className="gset-cfg"
-          aria-label={t.setOptions}
+          label={t.setOptions}
           title={t.setOptions}
+          icon="sliders-horizontal"
           onClick={props.onSettings}
-        >
-          <Icon name="sliders-horizontal" />
-        </button>
+        />
         {canFail && (
-          <button
-            type="button"
+          <IconButton
+            variant={fail ? 'danger' : 'secondary'}
             className={`gset-fail${fail ? ' on' : ''}`}
             aria-pressed={fail}
-            aria-label={t.failToggle}
+            label={t.failToggle}
             title={t.failToggle}
+            icon="flame"
             onClick={() => setFail((x) => !x)}
-          >
-            <Icon name="flame" weight={fail ? 'fill' : 'bold'} />
-          </button>
+          />
         )}
-        <button
-          className="btn btn-primary gset-log"
+        <Button
+          variant="fill"
+          className="gset-log"
           disabled={blocked}
           onClick={() =>
             props.onLog(
@@ -6598,116 +6616,13 @@ function GhostSetRow(props: {
           }
         >
           {props.isPast ? t.add : t.log}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 
-function Stepper(props: {
-  label: string;
-  value: number;
-  step: number;
-  min?: number;
-  max?: number;
-  focused?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
-  decimals?: number;
-  onFocus?: () => void;
-  onChange: (n: number) => void;
-}) {
-  const [draft, setDraft] = useState<string | null>(null);
-  const min = props.min ?? 0;
-  const max = props.max ?? Number.POSITIVE_INFINITY;
-  const decimals = props.decimals ?? 0;
-
-  function format(n: number): string {
-    if (decimals <= 0) return String(n);
-    const fixed = n.toFixed(decimals);
-    return fixed.replace(/\.?0+$/, '') || '0';
-  }
-
-  const shown = draft !== null ? draft : format(props.value);
-
-  function clamp(n: number): number {
-    const rounded = decimals > 0 ? Number(n.toFixed(decimals)) : Math.round(n);
-    return Math.min(max, Math.max(min, rounded));
-  }
-
-  function bump(dir: -1 | 1): void {
-    const fromDraft =
-      draft !== null && draft.trim() !== '' && Number.isFinite(Number(draft))
-        ? Number(draft)
-        : props.value;
-    setDraft(null);
-    props.onChange(clamp(fromDraft + dir * props.step));
-  }
-
-  function commit(raw: string): void {
-    setDraft(null);
-    if (raw.trim() === '') return; // keep previous — empty is allowed while editing
-    const n = Number(raw.replace(',', '.'));
-    if (!Number.isFinite(n)) return;
-    props.onChange(clamp(n));
-  }
-
-  return (
-    <div
-      className={`stepper${props.focused ? ' focused' : ''}${props.disabled ? ' disabled' : ''}`}
-      onClick={() => !props.disabled && props.onFocus?.()}
-    >
-      <div className="lab">{props.label}</div>
-      <div className="row">
-        {props.disabled && props.placeholder ? (
-          <span className="val">{props.placeholder}</span>
-        ) : (
-          <>
-            <button
-              type="button"
-              aria-label="−"
-              disabled={props.disabled}
-              onClick={(e) => {
-                e.stopPropagation();
-                bump(-1);
-              }}
-            >
-              −
-            </button>
-            <input
-              className="val"
-              inputMode={decimals > 0 ? 'decimal' : 'numeric'}
-              disabled={props.disabled}
-              value={shown}
-              onFocus={() => {
-                props.onFocus?.();
-                setDraft(format(props.value));
-              }}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={() => commit(draft ?? '')}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.currentTarget.blur();
-                }
-              }}
-            />
-            <button
-              type="button"
-              aria-label="+"
-              disabled={props.disabled}
-              onClick={(e) => {
-                e.stopPropagation();
-                bump(1);
-              }}
-            >
-              +
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
+/* Stepper → kit NumberStepper (components/ui/NumberStepper). */
 
 /** The set editor either owns its sheet or lives inside the focus options sheet. */
 function SetEditorFrame(props: { embedded: boolean; onClose: () => void; children: ReactNode }) {
@@ -6941,7 +6856,7 @@ function SetEditorSheet(props: {
   ) {
     return (
       <div className="steppers">
-        <Stepper
+        <NumberStepper
           label={t.reps}
           value={partReps}
           step={1}
@@ -6950,7 +6865,7 @@ function SetEditorSheet(props: {
           onFocus={() => setFocused('reps')}
           onChange={onReps}
         />
-        <Stepper
+        <NumberStepper
           label={unit === 'lb' ? t.weightLb : t.weightKg}
           value={toDisp(partWeight ?? 0)}
           step={unit === 'lb' ? 5 : 2.5}
@@ -7054,7 +6969,7 @@ function SetEditorSheet(props: {
       {timed ? (
         <>
           <div className="steppers">
-            <Stepper
+            <NumberStepper
               label={t.durationMinutes}
               value={durationMin}
               step={1}
@@ -7065,7 +6980,7 @@ function SetEditorSheet(props: {
               onChange={setDurationMin}
             />
             {cardioFields.includes('distance') && (
-              <Stepper
+              <NumberStepper
                 label={t.distanceKm}
                 value={distanceKm}
                 step={0.1}
@@ -7080,7 +6995,7 @@ function SetEditorSheet(props: {
           {cardioFields.some((f) => f !== 'distance') && (
             <div className="steppers secondary-steppers">
               {cardioFields.includes('speed') && (
-                <Stepper
+                <NumberStepper
                   label={t.speedKmh}
                   value={speedKmh}
                   step={0.5}
@@ -7091,7 +7006,7 @@ function SetEditorSheet(props: {
                 />
               )}
               {cardioFields.includes('incline') && (
-                <Stepper
+                <NumberStepper
                   label={t.inclinePct}
                   value={inclinePct}
                   step={0.5}
@@ -7102,19 +7017,31 @@ function SetEditorSheet(props: {
                 />
               )}
               {cardioFields.includes('watts') && (
-                <Stepper label={t.watts} value={watts} step={5} min={0} onChange={setWatts} />
+                <NumberStepper label={t.watts} value={watts} step={5} min={0} onChange={setWatts} />
               )}
               {cardioFields.includes('level') && (
-                <Stepper label={t.level} value={level} step={1} min={0} onChange={setLevel} />
+                <NumberStepper label={t.level} value={level} step={1} min={0} onChange={setLevel} />
               )}
               {cardioFields.includes('floors') && (
-                <Stepper label={t.floors} value={floors} step={1} min={0} onChange={setFloors} />
+                <NumberStepper
+                  label={t.floors}
+                  value={floors}
+                  step={1}
+                  min={0}
+                  onChange={setFloors}
+                />
               )}
             </div>
           )}
           <div className="steppers secondary-steppers">
-            <Stepper label={t.calories} value={calories} step={10} min={0} onChange={setCalories} />
-            <Stepper
+            <NumberStepper
+              label={t.calories}
+              value={calories}
+              step={10}
+              min={0}
+              onChange={setCalories}
+            />
+            <NumberStepper
               label={t.rpe}
               value={rpe}
               step={0.5}
@@ -7145,7 +7072,7 @@ function SetEditorSheet(props: {
             </div>
             {isSD ? (
               <div className="steppers">
-                <Stepper
+                <NumberStepper
                   label={unit === 'lb' ? t.weightLb : t.weightKg}
                   value={toDisp(weight)}
                   step={unit === 'lb' ? 5 : 2.5}
@@ -7157,7 +7084,7 @@ function SetEditorSheet(props: {
                   onFocus={() => setFocused('weight')}
                   onChange={(v) => setWeight(fromDisp(v))}
                 />
-                <Stepper
+                <NumberStepper
                   label={t.holdSecLabel}
                   value={holdSec}
                   step={5}
@@ -7216,7 +7143,7 @@ function SetEditorSheet(props: {
             ) : isAssist ? (
               <>
                 <div className="steppers">
-                  <Stepper
+                  <NumberStepper
                     label={t.reps}
                     value={reps}
                     step={1}
@@ -7225,7 +7152,7 @@ function SetEditorSheet(props: {
                     onFocus={() => setFocused('reps')}
                     onChange={setReps}
                   />
-                  <Stepper
+                  <NumberStepper
                     label={t.assistLabel}
                     value={Math.abs(weight)}
                     step={5}
@@ -7252,7 +7179,7 @@ function SetEditorSheet(props: {
             ) : isBand ? (
               <>
                 <div className="steppers">
-                  <Stepper
+                  <NumberStepper
                     label={t.reps}
                     value={reps}
                     step={1}
@@ -7391,7 +7318,7 @@ function SetEditorSheet(props: {
             {failOn && (
               <div className="se-partials">
                 <span className="lab">{t.partialsLabel}</span>
-                <Stepper
+                <NumberStepper
                   label=""
                   value={partials}
                   step={1}

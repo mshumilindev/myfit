@@ -1499,6 +1499,10 @@ export const et: Strings = {
     'Tuvasta jõusaali külastusi asukoha järgi ja paku seansi salvestamist. Vaikimisi väljas.',
   flagNutrition: 'Nutrition rakendus',
   flagNutritionDesc: 'Ava Nutrition rakendus (KBRÜ jälgija) rakenduste vahetajas.',
+  flagBrassGlass: 'Brass Glass teema',
+  flagBrassGlassDesc:
+    'Lülita kogu rakendus, kõigi kasutajate jaoks, Brass Glass kujundusele. Väljas = praegune grafiitne ilme.',
+  flagScopeGlobal: 'Kõigile kasutajatele',
   settingsTitle: 'Seaded',
   settingsSub: 'Selle seadme funktsioonilipud',
   settingsFeaturesLabel: 'Funktsioonid',

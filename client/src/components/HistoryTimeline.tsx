@@ -16,6 +16,11 @@ import {
   workoutSets,
   workoutVolumeKg,
 } from '../store';
+import { Card } from './ui/Card';
+import { ListRow } from './ui/GroupedList';
+import { IconTile } from './ui/IconTile';
+import { Tag } from './ui/Tag';
+import type { Tone } from './ui/tones';
 import {
   fmtClock,
   fmtDayMonth,
@@ -345,7 +350,7 @@ function TimelineDay({
           {aside != null && <span className="hist-tl-aside">{aside}</span>}
         </div>
         {day.items.length > 0 && (
-          <div className="hist-day-card">
+          <Card pad="sm" className="hist-day-card">
             {day.items.map((it) => {
               if (it.kind === 's') return <SleepRow key={it.n.id} n={it.n} onOpen={onOpenSleep} />;
               if (it.kind === 'a')
@@ -364,7 +369,7 @@ function TimelineDay({
                 />
               );
             })}
-          </div>
+          </Card>
         )}
       </div>
     </div>
@@ -440,41 +445,27 @@ export function WorkoutRow({
   if (w.kind === 'home') {
     // A home set: its own khaki house chip, its name, and sets (no tonnage).
     return (
-      <button className="hist-item hist-workout hist-home" onClick={() => onOpen(w.id)}>
-        <span className="hist-tm tnum">{fmtClock(w.startedAt)}</span>
-        <span className="hist-ic">
-          <Icon name="house" weight="fill" />
-        </span>
-        <span className="hist-item-body">
-          <span className="hist-item-name">{w.dayName || t.homeSetTitle}</span>
-          <div className="hist-item-stats">
-            {w.finishedAt ? `${fmtDurationHM(w.finishedAt - w.startedAt)} · ` : ''}
-            {workoutSets(w)} {t.sets}
-          </div>
-        </span>
-        <span className="hist-go">
-          <Icon name="caret-right" weight="bold" />
-        </span>
-      </button>
+      <ListRow
+        className="hist-item hist-workout hist-home"
+        time={fmtClock(w.startedAt)}
+        icon={<IconTile tone="accent" size={36} icon="house" />}
+        label={w.dayName || t.homeSetTitle}
+        sub={`${w.finishedAt ? `${fmtDurationHM(w.finishedAt - w.startedAt)} · ` : ''}${workoutSets(w)} ${t.sets}`}
+        chevron
+        onClick={() => onOpen(w.id)}
+      />
     );
   }
   return (
-    <button className="hist-item hist-workout" onClick={() => onOpen(w.id)}>
-      <span className="hist-tm tnum">{fmtClock(w.startedAt)}</span>
-      <span className="hist-ic">
-        <Icon name="barbell" weight="fill" />
-      </span>
-      <span className="hist-item-body">
-        <span className="hist-item-name">{title}</span>
-        <div className="hist-item-stats">
-          {w.finishedAt ? `${fmtDurationHM(w.finishedAt - w.startedAt)} · ` : ''}
-          {workoutSets(w)} {t.sets} · {fmtKg(workoutVolumeKg(w))}
-        </div>
-      </span>
-      <span className="hist-go">
-        <Icon name="caret-right" weight="bold" />
-      </span>
-    </button>
+    <ListRow
+      className="hist-item hist-workout"
+      time={fmtClock(w.startedAt)}
+      icon={<IconTile tone="accent" size={36} icon="barbell" />}
+      label={title}
+      sub={`${w.finishedAt ? `${fmtDurationHM(w.finishedAt - w.startedAt)} · ` : ''}${workoutSets(w)} ${t.sets} · ${fmtKg(workoutVolumeKg(w))}`}
+      chevron
+      onClick={() => onOpen(w.id)}
+    />
   );
 }
 
@@ -492,38 +483,25 @@ export function ActivityRow({
   const { t } = useT();
   const cat = activityTone(a.type, activityCategory(a));
   const min = Math.round(activityDurationMin(a));
-  const inner = (
-    <>
-      <span className="hist-tm tnum">{fmtClock(a.startedAt)}</span>
-      <span className="hist-ic">
-        <Icon name={activityType(a.type)?.icon ?? 'heartbeat'} weight="fill" />
-      </span>
-      <span className="hist-item-body">
-        <span className="hist-item-name">
+  const tone: Tone = cat === 'sport' ? 'sport' : cat === 'recovery' ? 'rest' : 'accent';
+  return (
+    <ListRow
+      className={`hist-item hist-activity is-minor cat-${cat}`}
+      time={fmtClock(a.startedAt)}
+      icon={<IconTile tone={tone} size={36} icon={activityType(a.type)?.icon ?? 'heartbeat'} />}
+      label={
+        <>
           {t.actType[a.type] ?? a.type}
           <span className="hist-item-inline">
             {' · '}
             {min} {t.minShort}
           </span>
-        </span>
-      </span>
-      {onOpen && (
-        <span className="hist-go">
-          <Icon name="caret-right" weight="bold" />
-        </span>
-      )}
-    </>
-  );
-  return onOpen ? (
-    <button
-      className={`hist-item hist-activity is-minor cat-${cat}`}
-      onClick={() => onOpen(a.id)}
+        </>
+      }
+      chevron={!!onOpen}
+      onClick={onOpen ? () => onOpen(a.id) : undefined}
       aria-label={t.actType[a.type] ?? a.type}
-    >
-      {inner}
-    </button>
-  ) : (
-    <div className={`hist-item hist-activity is-minor cat-${cat}`}>{inner}</div>
+    />
   );
 }
 
@@ -538,38 +516,28 @@ export function SleepRow({ n, onOpen }: { n: SleepNight; onOpen?: (id: string) =
     const d = new Date(ms);
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
-  const inner = (
-    <>
-      <span className="hist-tm tnum">{clk(n.bedtime)}</span>
-      <span className="hist-ic">
-        <Icon name={nap ? 'sun-horizon' : 'moon-stars'} weight="fill" />
-      </span>
-      <span className="hist-item-body">
-        <span className="hist-item-name">
+  return (
+    <ListRow
+      className="hist-item hist-activity is-minor cat-sleep"
+      time={clk(n.bedtime)}
+      icon={<IconTile tone="sleep" size={36} icon={nap ? 'sun-horizon' : 'moon-stars'} />}
+      label={
+        <>
           {nap ? t.sleepKindNap : t.sleepTitle}
           <span className="hist-item-inline">
             {' · '}
             {fmtDurationHM(mins * 60000)}
           </span>
-          {n.source === 'auto' && <span className="hist-sleep-auto">{t.sleepAutoBadge}</span>}
-        </span>
-      </span>
-      {onOpen && (
-        <span className="hist-go">
-          <Icon name="caret-right" weight="bold" />
-        </span>
-      )}
-    </>
-  );
-  return onOpen ? (
-    <button
-      className="hist-item hist-activity is-minor cat-sleep"
-      onClick={() => onOpen(n.id)}
+          {n.source === 'auto' && (
+            <Tag tone="accent" className="hist-sleep-auto">
+              {t.sleepAutoBadge}
+            </Tag>
+          )}
+        </>
+      }
+      chevron={!!onOpen}
+      onClick={onOpen ? () => onOpen(n.id) : undefined}
       aria-label={t.sleepTitle}
-    >
-      {inner}
-    </button>
-  ) : (
-    <div className="hist-item hist-activity is-minor cat-sleep">{inner}</div>
+    />
   );
 }

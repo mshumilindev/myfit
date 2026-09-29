@@ -1529,6 +1529,10 @@ export const lt: Strings = {
     'Nustatyti apsilankymus salėje pagal vietą ir siūlyti įrašyti treniruotę. Numatytai išjungta.',
   flagNutrition: 'Nutrition programa',
   flagNutritionDesc: 'Atrakinti Nutrition programą (KBRA sekiklį) programų perjungiklyje.',
+  flagBrassGlass: 'Brass Glass tema',
+  flagBrassGlassDesc:
+    'Perjungti visą programą, visiems naudotojams, į Brass Glass dizainą. Išjungta = dabartinė grafito išvaizda.',
+  flagScopeGlobal: 'Visiems naudotojams',
   settingsTitle: 'Nustatymai',
   settingsSub: 'Šio įrenginio funkcijų vėliavėlės',
   settingsFeaturesLabel: 'Funkcijos',

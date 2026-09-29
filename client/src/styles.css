@@ -213,6 +213,10 @@
   --radius-md: 8px;
   --radius-lg: 14px;
   --radius-sheet: 20px;
+  /* Shell: the phone tab bar plate (TabBar.css). */
+  --color-tabbar: #1b1c20;
+  /* The one focal card of a screen (Card emphasis="hero"). */
+  --radius-hero: 20px;
 
   --tap-min: 44px;
   --gutter-phone: 18px;
@@ -1448,45 +1452,7 @@ i > svg {
 
 /* --- Tab bar -------------------------------------------------------------- */
 
-.tabbar {
-  flex: none;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA the
-     full safe-area under the labels reads as a dead band, so trim it (keeping a
-     small floor for home-indicator clearance) — never 22px + safe-area. */
-  padding: 8px 12px max(8px, calc(var(--safe-bottom) - 16px));
-  background: var(--color-bg);
-  box-shadow: 0 -1px 0 var(--color-divider);
-  z-index: 30;
-}
-
-.tabbar button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  padding: 6px 0;
-  background: none;
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--color-neutral-600);
-  cursor: pointer;
-}
-
-.tabbar button.active {
-  color: var(--color-accent);
-}
-
-.tabbar i {
-  font-size: 20px;
-}
-
-.tabbar span {
-  font-size: 10px;
-}
+/* .tabbar — moved to components/ui/TabBar.css (kit). */
 
 /* --- Auth ----------------------------------------------------------------- */
 
@@ -2953,20 +2919,26 @@ i > svg {
   outline: none;
 }
 
+/* Program card = kit <Card emphasis="hero"> (TodayView). Layout here; the
+   graphite full-bleed look is scoped to html:not(.theme-glass) so the Brass
+   Glass theme gets the plain kit hero card. */
 .today-program-card {
   position: relative;
   isolation: isolate;
-  border: none;
-  border-radius: 0;
-  margin-inline: -20px;
-  background: transparent;
-  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+html:not(.theme-glass) .today-program-card {
+  border: none;
+  border-radius: 0;
+  margin-inline: -20px;
+  background: transparent;
+  box-shadow: none;
+  padding: 16px 20px;
+}
 @media (min-width: 720px) {
-  .today-program-card {
+  html:not(.theme-glass) .today-program-card {
     margin-inline: -30px;
     padding-left: 30px;
     padding-right: 30px;
@@ -2974,7 +2946,7 @@ i > svg {
 }
 /* Graphite liquid glass on Today cards — two layers behind the content, so the
    card's own border-radius is preserved (see --glass-* tokens). */
-.today-program-card::before,
+html:not(.theme-glass) .today-program-card::before,
 .td-stat::before,
 .td-weekvol::before,
 .today-weekstrip-card::before {
@@ -2999,7 +2971,7 @@ i > svg {
 }
 /* Program card + calendar: full-bleed brass glass. No side borders (it runs to
    the screen edges) — just a lit top bezel and a soft bottom hairline. */
-.today-program-card::after,
+html:not(.theme-glass) .today-program-card::after,
 .today-weekstrip-card::after {
   content: '';
   position: absolute;
@@ -10148,6 +10120,15 @@ i > svg {
   margin: 5px 0 0;
   font-weight: 500;
 }
+/* Today's date = kit <SectionLabel>; graphite keeps the .kicker metrics. */
+.td-topbar-date {
+  margin: 0;
+}
+html:not(.theme-glass) .td-topbar-date .uisec-l {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
 .td-topbar-actions {
   display: flex;
   align-items: center;
@@ -15456,14 +15437,14 @@ button.exd-media {
 }
 
 /* Full-history link under the Today preview + the history list page */
+/* "See all history" = kit <Button variant="secondary" fullWidth>; graphite keeps
+   its frosted look, the theme gets the kit pill. */
 .td-history-all {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
   margin-top: 16px;
   margin-bottom: 16px;
+}
+html:not(.theme-glass) .td-history-all {
+  gap: 8px;
   min-height: 46px;
   padding: 0 16px;
   border: 1px solid var(--color-divider);
@@ -15474,12 +15455,11 @@ button.exd-media {
   color: var(--color-text);
   font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
 }
-.td-history-all:active {
+html:not(.theme-glass) .td-history-all:active {
   background: var(--color-neutral-900);
 }
-.td-history-all .ui-icon {
+html:not(.theme-glass) .td-history-all .ui-icon {
   font-size: 15px;
   color: var(--color-accent);
 }
@@ -23213,6 +23193,14 @@ button.badge {
   flex-direction: column;
   gap: 10px;
   margin-top: 12px;
+}
+/* Outside the focus view (past-session editing) graphite keeps it chromeless. */
+html:not(.theme-glass) .gset {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .gset-steppers {
   display: grid;
@@ -32321,18 +32309,23 @@ body {
   font-size: 15px;
 }
 /* primary set-entry panel (gold) */
+/* The set editor = kit <Card emphasis="hero"> (SetEntry). Graphite keeps the
+   refracting liquid-glass layers below; the theme gets the kit hero card. */
 .focus-view .gset {
   position: relative;
   isolation: isolate;
   margin-top: 18px;
   padding: 16px;
+}
+html:not(.theme-glass) .focus-view .gset {
+  border: 0;
   border-radius: var(--radius-lg);
   background: transparent;
   box-shadow: var(--glass-float);
 }
 /* Full brass liquid glass — same #liquid-glass refraction as the pill/cards,
    with a warm tint (see --glass-brass-* tokens); keeps its own border-radius. */
-.focus-view .gset::before {
+html:not(.theme-glass) .focus-view .gset::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -32342,7 +32335,7 @@ body {
   backdrop-filter: var(--glass-backdrop);
   filter: url(#liquid-glass);
 }
-.focus-view .gset::after {
+html:not(.theme-glass) .focus-view .gset::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -35184,6 +35177,7 @@ body {
   margin: 0;
 }
 .se-card .stepper,
+.se-card .uistep,
 .se-card .band-readout,
 .se-card .se-rpe button {
   background: var(--color-bg);
@@ -35505,11 +35499,13 @@ body {
   text-transform: uppercase;
   color: color-mix(in srgb, var(--gk, var(--color-accent)) 75%, var(--color-neutral-400));
 }
-.gset-part + .gset-part .stepper {
+.gset-part + .gset-part .stepper,
+.gset-part + .gset-part .uistep {
   padding-top: 6px;
   padding-bottom: 6px;
 }
-.gset-part + .gset-part .stepper .row .val {
+.gset-part + .gset-part .stepper .row .val,
+.gset-part + .gset-part .uistep .uistep-v {
   font-size: 20px;
 }
 .gset-drops + .gset-actions {
@@ -35565,6 +35561,8 @@ body {
 :root {
   --set-fail: #ff7a45;
 }
+/* Rest card = kit <Card emphasis="glass" tone="rest" | "ok"> + <Ring>. Graphite
+   keeps its own rest glass; the theme gets the kit family glass. */
 .rst-card {
   --rc: var(--color-rest-400);
   display: flex;
@@ -35572,12 +35570,17 @@ body {
   gap: 16px;
   margin: 12px 0 0;
   padding: 14px;
+}
+html:not(.theme-glass) .rst-card {
+  border: 0;
   border-radius: 18px;
   background: var(--glass-rest-tint);
   box-shadow: var(--glass-rest-specular);
 }
 .rst-card.done {
   --rc: var(--color-success, #4cc38a);
+}
+html:not(.theme-glass) .rst-card.done {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--rc) 16%, transparent),
@@ -35596,26 +35599,8 @@ body {
   color: var(--color-text);
   cursor: pointer;
 }
-.rst-ring svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-.rst-track {
-  fill: none;
-  stroke: color-mix(in srgb, var(--rc) 20%, transparent);
-  stroke-width: 7;
-}
-.rst-arc {
-  fill: none;
-  stroke: var(--rc);
-  stroke-width: 7;
-  stroke-linecap: round;
-  transition: stroke-dasharray 0.9s linear;
-}
+/* The ring itself is kit <Ring>; only its centre text is styled here. */
 .rst-center {
-  position: absolute;
-  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35682,20 +35667,9 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
-.rst-btns button {
-  height: 40px;
-  border: none;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--rc) 16%, transparent);
-  color: var(--color-text);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
+/* ±15 are kit <Button variant="rest" size="sm">. */
+.rst-btns .uibtn {
   font-variant-numeric: tabular-nums;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
 }
 
 /* Rest sheet */
@@ -36024,11 +35998,13 @@ body {
   font-size: 13px;
   color: var(--color-neutral-300);
 }
-.se-partials .stepper {
+.se-partials .stepper,
+.se-partials .uistep {
   flex: 0 0 150px;
   padding: 4px 8px;
 }
-.se-partials .stepper .lab:empty {
+.se-partials .stepper .lab:empty,
+.se-partials .uistep .uistep-l:empty {
   display: none;
 }
 

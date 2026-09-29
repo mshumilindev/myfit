@@ -1,0 +1,27 @@
+/* Ring — Spotter UI kit primitive. Tokens only. */
+.uiring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.uiring svg {
+  position: absolute;
+  inset: 0;
+}
+.uiring-track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+.uiring-fill {
+  fill: none;
+  stroke: var(--t-base);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 320ms ease;
+}
+.uiring-c {
+  position: relative;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}

@@ -1,0 +1,65 @@
+/* StatTile — Spotter UI kit primitive. Tokens only. */
+.uistat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.uistat-l {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-neutral-400);
+}
+.uit--neutral.uistat .uistat-l {
+  color: var(--color-neutral-400);
+}
+.uistat:not(.uit--neutral) .uistat-l {
+  color: var(--t-text);
+}
+.uistat-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.uistat-v {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+.uistat--big .uistat-v {
+  font-size: 44px;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.uistat-u {
+  font-size: 13px;
+  color: var(--color-neutral-400);
+}
+.uistat-d {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--t-base);
+}
+.uistat-bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  overflow: hidden;
+}
+.uistat-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--t-base);
+}
+.uistat-s {
+  font-size: 12px;
+  color: var(--color-neutral-500);
+}

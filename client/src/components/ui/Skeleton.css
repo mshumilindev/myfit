@@ -1,0 +1,35 @@
+/* Skeleton — Spotter UI kit primitive. Tokens only (the old .sk). */
+.uisk {
+  background: var(--color-neutral-900);
+  border-radius: var(--radius-sm);
+  animation: uisk-shimmer 1.6s ease-in-out infinite;
+}
+.uisk--round {
+  border-radius: 11px;
+}
+.uisk-rows {
+  display: flex;
+  flex-direction: column;
+}
+.uisk-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 0;
+}
+.uisk-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+@keyframes uisk-shimmer {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}

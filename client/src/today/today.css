@@ -1,20 +1,20 @@
 /* Today configurator — view entry + Customize mode. Tokens only. */
+/* "Customize Today" = kit <Button variant="ghost" fullWidth>; graphite keeps
+   its muted text look. */
 .td-customize {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  height: 50px;
   margin-top: 4px;
   margin-bottom: 28px;
+}
+html:not(.theme-glass) .td-customize {
+  gap: 10px;
+  height: 50px;
   border-radius: 12px;
   border: 0;
   background: transparent;
   color: var(--color-text-muted);
   font: 600 14px var(--font);
-  cursor: pointer;
 }
-.td-customize:hover {
+html:not(.theme-glass) .td-customize:hover {
   color: var(--color-text);
   background: var(--color-surface);
 }

@@ -9,6 +9,19 @@
   border-radius: var(--radius-lg);
   padding: 16px;
 }
+/* A tappable card (<Card as="button">): button resets, text stays left. */
+button.uicard {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button.uicard:disabled,
+button.uicard[aria-disabled='true'] {
+  cursor: default;
+}
 
 /* Padding scale */
 .uicard--pad-sm {
@@ -37,6 +50,46 @@
 .uicard--accent {
   background: color-mix(in srgb, var(--color-accent) 8%, transparent);
   border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+}
+/* Every other family (active, illness, injury, sleep, sport, kcal, apex, learn,
+   atlas) — the tone class binds --t-tint / --t-line (tones.css). */
+.uicard--active,
+.uicard--illness,
+.uicard--injury,
+.uicard--sleep,
+.uicard--sport,
+.uicard--kcal,
+.uicard--apex,
+.uicard--learn,
+.uicard--atlas {
+  background: var(--t-tint);
+  border-color: var(--t-line);
+}
+
+/* Emphasis (design rule 0b). Graphite keeps its current looks: hero = the
+   accent liquid glass the set editor already uses, glass = accent tint, quiet
+   = no chrome. The Brass Glass theme restyles these in glass.css. */
+.uicard--e-hero {
+  border-color: transparent;
+  border-radius: var(--radius-hero, var(--radius-lg));
+  background: var(--glass-brass-tint);
+  box-shadow: var(--glass-brass-specular), var(--glass-float);
+}
+.uicard--e-glass {
+  background: var(--glass-tint);
+  border-color: transparent;
+  box-shadow: var(--glass-specular);
+}
+.uicard--e-quiet {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.uicard--e-quiet.uicard--pad-sm,
+.uicard--e-quiet.uicard--pad-md,
+.uicard--e-quiet.uicard--pad-lg {
+  padding: 4px 2px;
 }
 
 .uicard-header {

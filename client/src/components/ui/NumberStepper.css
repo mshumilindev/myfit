@@ -1,0 +1,89 @@
+/* NumberStepper — Spotter UI kit primitive. Tokens only. */
+.uistep {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 6px 8px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+}
+.uistep:focus-within,
+.uistep.is-focused {
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.uistep-ph {
+  display: block;
+  padding: 8px 0;
+  color: var(--color-neutral-400);
+}
+.uistep.is-disabled {
+  opacity: 0.5;
+}
+.uistep-l {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-neutral-600);
+}
+.uistep-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.uistep-b {
+  width: 34px;
+  height: 44px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--color-neutral-400);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.uistep-b:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.uistep-v {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  text-align: center;
+  font: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  margin: 0;
+  -moz-appearance: textfield;
+}
+.uistep-v::-webkit-outer-spin-button,
+.uistep-v::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.uistep-u {
+  flex: none;
+  font-size: 12px;
+  color: var(--color-neutral-500);
+  margin-right: 4px;
+}
+.uistep--big .uistep-v {
+  font-size: 32px;
+  letter-spacing: -0.03em;
+}

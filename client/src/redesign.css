@@ -5,56 +5,8 @@
    Loaded after styles.css, so these rules win on equal specificity.
    ========================================================================== */
 
-/* --- Tab bar: Today · Overview · (+) · Gyms · Apps ------------------------- */
-.tabbar-wrap {
-  position: relative;
-  flex: none;
-  z-index: 30;
-}
-.tabbar.tabbar-notched {
-  grid-auto-flow: row;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  background: #1b1c20;
-  box-shadow: none;
-  border-top: 1px solid var(--color-divider);
-  /* The notch the Start button sits in (centre 18px below the bar's top). */
-  -webkit-mask: radial-gradient(circle at 50% 18px, transparent 38px, #000 38.5px);
-  mask: radial-gradient(circle at 50% 18px, transparent 38px, #000 38.5px);
-}
-.tabbar.tabbar-notched span {
-  font-size: 11px;
-}
-.tabbar-gap {
-  display: block;
-}
-.tabbar-fab {
-  position: absolute;
-  left: 50%;
-  top: -14px;
-  width: 64px;
-  height: 64px;
-  margin-left: -32px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-accent);
-  color: #1e160b;
-  display: grid;
-  place-items: center;
-  font-size: 26px;
-  box-shadow: 0 6px 16px rgba(217, 162, 79, 0.2);
-  cursor: pointer;
-  z-index: 31;
-  -webkit-tap-highlight-color: transparent;
-}
-.tabbar-fab:active {
-  transform: scale(0.96);
-}
-@media (min-width: 720px) {
-  .tabbar-wrap {
-    display: none;
-  }
-}
-
+/* --- Tab bar: Today · Overview · (+) · Gyms · Apps ---------------------------
+   Moved to components/ui/TabBar.css (kit). */
 /* Desktop rail: Start sits under the nav items. */
 .rail-item.rail-start {
   color: #1e160b;
@@ -80,19 +32,21 @@
   font-weight: 700;
   color: var(--color-text);
 }
+/* Start hero = kit <Card as="button" emphasis="hero">; graphite keeps the solid
+   brass plate, the theme gets the glass hero. */
 .ss-hero {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
   padding: 20px;
+}
+html:not(.theme-glass) .ss-hero {
   border: none;
   border-radius: 24px;
   background: var(--color-accent);
   color: #1e160b;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
+  box-shadow: none;
 }
 .ss-hero-text {
   flex: 1;
@@ -125,11 +79,18 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #1e160b;
-  color: var(--color-accent);
   display: grid;
   place-items: center;
   font-size: 26px;
+  /* theme: a brass glass disc */
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 62%, transparent);
+  color: var(--color-accent-300);
+}
+html:not(.theme-glass) .ss-hero-go {
+  background: #1e160b;
+  color: var(--color-accent);
+  box-shadow: none;
 }
 .ss-scratch {
   align-self: center;
@@ -151,6 +112,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
+/* Start tiles = kit <Card as="button"> + <IconTile>. */
 .ss-tile {
   display: flex;
   flex-direction: column;
@@ -158,38 +120,13 @@
   gap: 12px;
   min-width: 0;
   padding: 16px;
+}
+html:not(.theme-glass) .ss-tile {
   border-radius: 20px;
   background: #26282c;
   border: 1px solid rgba(233, 234, 236, 0.06);
-  color: var(--color-text);
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
 }
-.ss-ic {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-}
-.ss-ic.tone-gold {
-  background: #3a2f1c;
-  color: #e9c07a;
-}
-.ss-ic.tone-green {
-  background: #173a2a;
-  color: #b7e8cf;
-}
-.ss-ic.tone-blue {
-  background: #11324a;
-  color: #93d4f2;
-}
-.ss-ic.tone-neutral {
-  background: #34373c;
-  color: #d0d3d6;
-}
+/* .ss-ic is now a kit <IconTile> (family tones). */
 .ss-tt {
   display: block;
   font-size: 16px;
@@ -570,12 +507,14 @@
 }
 .today-program-card.td-week {
   --acc: var(--color-accent);
+  gap: 12px;
+}
+html:not(.theme-glass) .today-program-card.td-week {
   background: color-mix(in srgb, var(--acc) 6%, var(--color-bg));
   border-top: 1px solid color-mix(in srgb, var(--acc) 35%, transparent);
   border-bottom: 1px solid rgba(233, 234, 236, 0.06);
   padding-top: 16px;
   padding-bottom: 18px;
-  gap: 12px;
 }
 .today-program-card.td-week::before,
 .today-program-card.td-week::after {
@@ -595,15 +534,16 @@
   --acc: var(--color-ok);
 }
 .td-week[data-mode='illness'] {
-  --acc: #79b4b0;
+  /* Illness is amber app-wide (tones.ts); the teal was a leftover. */
+  --acc: var(--color-illness);
 }
 .td-week[data-mode='off'] {
   --acc: #6fb7de;
 }
 .td-week[data-mode='injury'] {
-  --acc: #e0906f;
+  --acc: var(--color-injury);
 }
-.td-week[data-mode='none'] {
+html:not(.theme-glass) .td-week[data-mode='none'] {
   background: #1a1b1e;
   border-top-color: rgba(233, 234, 236, 0.1);
 }
@@ -757,10 +697,10 @@ button.wk-pill {
   --nc: #6fb7de;
 }
 .hist-tl-day.st-injury {
-  --nc: #e0906f;
+  --nc: var(--color-injury);
 }
 .hist-tl-day.st-illness {
-  --nc: #79b4b0;
+  --nc: var(--color-illness);
 }
 .hist-tl-node {
   background: color-mix(in srgb, var(--nc) 14%, var(--color-bg));

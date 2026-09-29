@@ -1,0 +1,78 @@
+/* TabBar — Spotter UI kit shell primitive (phone). Tokens only.
+   The notched bar with the Start "+" floating in the notch. Hidden ≥720px
+   (the desktop rail takes over). Hover rules live with the shared list in
+   styles.css. */
+.tabbar-wrap {
+  position: relative;
+  flex: none;
+  z-index: 30;
+}
+.tabbar {
+  flex: none;
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA the
+     full safe-area under the labels reads as a dead band, so trim it (keeping a
+     small floor for home-indicator clearance) — never 22px + safe-area. */
+  padding: 8px 12px max(8px, calc(var(--safe-bottom) - 16px));
+  background: var(--color-tabbar);
+  border-top: 1px solid var(--color-divider);
+  z-index: 30;
+  /* The notch the Start button sits in (centre 18px below the bar's top). */
+  -webkit-mask: radial-gradient(circle at 50% 18px, transparent 38px, var(--color-bg) 38.5px);
+  mask: radial-gradient(circle at 50% 18px, transparent 38px, var(--color-bg) 38.5px);
+}
+.tabbar button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-neutral-600);
+  cursor: pointer;
+}
+.tabbar button.active {
+  color: var(--color-accent);
+}
+.tabbar i {
+  font-size: 20px;
+}
+.tabbar span {
+  font-size: 11px;
+}
+.tabbar-gap {
+  display: block;
+}
+.tabbar-fab {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-accent-950);
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--color-accent) 20%, transparent);
+  cursor: pointer;
+  z-index: 31;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar-fab:active {
+  transform: scale(0.96);
+}
+@media (min-width: 720px) {
+  .tabbar-wrap,
+  .tabbar {
+    display: none;
+  }
+}

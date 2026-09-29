@@ -7,6 +7,8 @@
  * The backfill sub-sheet lives here too so Today can reuse it.
  */
 import { useMemo, useState, type ReactNode } from 'react';
+import { Card } from './ui/Card';
+import { IconTile } from './ui/IconTile';
 import type { Shell } from '../App';
 import type { Gym } from '../types';
 import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
@@ -253,7 +255,7 @@ export function StartSheet({
   return (
     <StartFrame inline={inline} onClose={closeProp} sub={subEl}>
       <div className="ss-title">{t.startSheetTitle}</div>
-      <button type="button" className="ss-hero" onClick={() => void startHero()}>
+      <Card as="button" emphasis="hero" className="ss-hero" onClick={() => void startHero()}>
         <span className="ss-hero-text">
           <span className="ss-hero-kicker">{hero.kicker}</span>
           <span className="ss-hero-title">{hero.title}</span>
@@ -262,7 +264,7 @@ export function StartSheet({
         <span className="ss-hero-go" aria-hidden>
           <Icon name={hero.icon} weight="fill" />
         </span>
-      </button>
+      </Card>
       {offerScratch && (
         <button type="button" className="ss-scratch" onClick={() => void startScratch()}>
           <Icon name="plus" />
@@ -270,67 +272,57 @@ export function StartSheet({
         </button>
       )}
       <div className="ss-grid">
-        <button
-          type="button"
+        <Card
+          as="button"
           className={`ss-tile${locked ? ' locked' : ''}`}
           aria-disabled={locked}
           onClick={locked ? undefined : autoBuild}
         >
           <span className="ss-tile-top">
-            <span className="ss-ic tone-gold">
-              <Icon name="robot" weight="regular" />
-            </span>
+            <IconTile tone="accent" size={40} icon="robot" className="ss-ic" />
             {locked && <Icon name="lock-simple" className="ss-lock" />}
           </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startAutoTitle}</span>
             <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startAutoSub}</span>
           </span>
-        </button>
-        <button type="button" className="ss-tile" onClick={openActivity}>
+        </Card>
+        <Card as="button" className="ss-tile" onClick={openActivity}>
           <span className="ss-tile-top">
-            <span className="ss-ic tone-green">
-              <Icon name="heartbeat" weight="regular" />
-            </span>
+            <IconTile tone="ok" size={40} icon="heartbeat" className="ss-ic" />
           </span>
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startActivityTitle}</span>
             <span className="ss-ts">{locked ? t.laLogPast : t.startActivitySub}</span>
           </span>
-        </button>
-        <button type="button" className="ss-tile" onClick={openHealth}>
-          <span className="ss-ic tone-blue">
-            <Icon name="clock-countdown" weight="regular" />
-          </span>
+        </Card>
+        <Card as="button" className="ss-tile" onClick={openHealth}>
+          <IconTile tone="rest" size={40} icon="clock-countdown" className="ss-ic" />
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startHealthTitle}</span>
             <span className="ss-ts">{t.startHealthSub}</span>
           </span>
-        </button>
-        <button type="button" className="ss-tile" onClick={() => setSub('past')}>
-          <span className="ss-ic tone-neutral">
-            <Icon name="arrow-counter-clockwise" weight="regular" />
-          </span>
+        </Card>
+        <Card as="button" className="ss-tile" onClick={() => setSub('past')}>
+          <IconTile tone="neutral" size={40} icon="arrow-counter-clockwise" className="ss-ic" />
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startPastTitle}</span>
             <span className="ss-ts">{t.startPastSub}</span>
           </span>
-        </button>
-        <button
-          type="button"
+        </Card>
+        <Card
+          as="button"
           className={`ss-tile ss-home${locked ? ' locked' : ''}`}
           aria-disabled={locked}
           onClick={locked ? undefined : () => setSub('home')}
         >
-          <span className="ss-ic tone-home">
-            <Icon name="house" weight="regular" />
-          </span>
+          <IconTile tone="accent" size={40} icon="house" className="ss-ic" />
           <span className="ss-tile-text">
             <span className="ss-tt">{t.startHomeTitle}</span>
             <span className="ss-ts">{locked ? t.startFinishFirst(liveName) : t.startHomeSub}</span>
           </span>
           {locked && <Icon name="lock-simple" className="ss-lock" />}
-        </button>
+        </Card>
       </div>
     </StartFrame>
   );

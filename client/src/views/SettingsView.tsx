@@ -13,6 +13,7 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
   const meta: Record<string, { label: string; desc: string }> = {
     gymPresence: { label: t.flagGymPresence, desc: t.flagGymPresenceDesc },
     nutrition: { label: t.flagNutrition, desc: t.flagNutritionDesc },
+    brassGlass: { label: t.flagBrassGlass, desc: t.flagBrassGlassDesc },
   };
 
   return (
@@ -36,7 +37,10 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
             <div className="settings-row" key={f.id}>
               <div className="settings-row-text">
                 <div className="settings-row-name">{m.label}</div>
-                <div className="settings-row-desc">{m.desc}</div>
+                <div className="settings-row-desc">
+                  {m.desc}
+                  {f.scope === 'global' ? ` · ${t.flagScopeGlobal}` : ''}
+                </div>
               </div>
               <button
                 type="button"

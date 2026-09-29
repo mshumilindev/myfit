@@ -72,7 +72,8 @@ import { LiveHero } from './components/LiveHero';
 import type { SyncError, Notice, InjurySide } from './types';
 import type { HealthFormSpec } from './health';
 import type { MuscleGroup } from './data/exercises';
-import { useFlag, isFlagOn } from './data/flags';
+import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
+import { TabBar } from './components/ui/TabBar';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 
 const OnboardingView = lazy(() =>
@@ -1093,6 +1094,22 @@ export function App() {
     return () => window.removeEventListener('hashchange', onPop);
   }, [authed, open, joinToken]);
 
+  // Global feature flags live in config/flags (rules need a signed-in user).
+  useEffect(() => {
+    if (!authed) return;
+    return startGlobalFlags();
+  }, [authed]);
+
+  // Brass Glass theme (global flag, admin-toggled in Settings): one root class,
+  // glass.css does the rest. Sub-app skins and night mode layer on top.
+  const brassGlass = useFlag('brassGlass');
+  useEffect(() => {
+    const el = document.documentElement;
+    if (brassGlass) el.classList.add('theme-glass');
+    else el.classList.remove('theme-glass');
+    return () => el.classList.remove('theme-glass');
+  }, [brassGlass]);
+
   // While Apex is open, put the amethyst accent on the document root too, so
   // sheets that portal to <body> (the challenge start/filter sheets) re-skin
   // along with the rest of the app.
@@ -1700,46 +1717,12 @@ export function App() {
           )}
         </div>
         {showTabbar && (
-          <div className="tabbar-wrap">
-            <nav className="tabbar tabbar-notched">
-              {tabs.slice(0, 2).map((x) => (
-                <button
-                  key={x.id}
-                  className={navActive(x.id, effectiveTab) ? 'active' : ''}
-                  onClick={() => goTab(x.id)}
-                >
-                  <Icon name={x.icon} />
-                  <span>{x.label}</span>
-                </button>
-              ))}
-              {/* The notch — the Start "+" floats in it (sibling below, so the
-                  notch mask doesn't clip it). */}
-              <span className="tabbar-gap" aria-hidden />
-              {tabs.slice(2).map((x) => (
-                <button
-                  key={x.id}
-                  className={navActive(x.id, effectiveTab) ? 'active' : ''}
-                  onClick={() => goTab(x.id)}
-                >
-                  <Icon name={x.icon} />
-                  <span>{x.label}</span>
-                </button>
-              ))}
-              {/* Apps — open the suite switcher (People / Apex / Nutrition). */}
-              <button onClick={() => setShellOpen(true)} aria-label={t.shellSwitch}>
-                <Icon name="squares-four" />
-                <span>{t.appsTab}</span>
-              </button>
-            </nav>
-            <button
-              type="button"
-              className="tabbar-fab"
-              onClick={() => setStartOpen(true)}
-              aria-label={t.startNew}
-            >
-              <Icon name="plus" weight="bold" />
-            </button>
-          </div>
+          <TabBar
+            items={tabs.map((x) => ({ ...x, active: navActive(x.id, effectiveTab) }))}
+            onSelect={goTab}
+            apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: () => setShellOpen(true) }}
+            fab={{ ariaLabel: t.startNew, onClick: () => setStartOpen(true) }}
+          />
         )}
         <div className="toast-holder">
           {authed && notices.some((n) => !n.read) && (

@@ -1497,6 +1497,10 @@ export const en = {
     'Use location to detect gym visits and suggest logging a session. Off by default.',
   flagNutrition: 'Nutrition app',
   flagNutritionDesc: 'Unlock the Nutrition app (КБЖУ tracker) in the app switcher.',
+  flagBrassGlass: 'Brass Glass theme',
+  flagBrassGlassDesc:
+    'Switch the whole app, for every user, to the Brass Glass design. Off = the current graphite look.',
+  flagScopeGlobal: 'For every user',
   settingsTitle: 'Settings',
   settingsSub: 'Feature flags for this device',
   settingsFeaturesLabel: 'Features',

@@ -1,0 +1,24 @@
+/* SectionLabel — Spotter UI kit primitive. Tokens only. */
+.uisec {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
+  margin: 0 0 var(--space-3);
+}
+.uisec-l {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.uisec--toned .uisec-l {
+  color: var(--t-base);
+}
+.uisec-a {
+  flex: none;
+  font-size: 13px;
+  color: var(--color-accent);
+}

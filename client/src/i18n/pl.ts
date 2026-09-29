@@ -1511,6 +1511,10 @@ export const pl: Strings = {
     'Wykrywaj wizyty na siłowni po lokalizacji i proponuj zapis sesji. Domyślnie wyłączone.',
   flagNutrition: 'Aplikacja Nutrition',
   flagNutritionDesc: 'Odblokuj aplikację Nutrition (licznik KBŻU) w przełączniku aplikacji.',
+  flagBrassGlass: 'Motyw Brass Glass',
+  flagBrassGlassDesc:
+    'Przełącz całą aplikację, dla wszystkich użytkowników, na projekt Brass Glass. Wyłączone = obecny grafitowy wygląd.',
+  flagScopeGlobal: 'Dla wszystkich użytkowników',
   settingsTitle: 'Ustawienia',
   settingsSub: 'Flagi funkcji na tym urządzeniu',
   settingsFeaturesLabel: 'Funkcje',

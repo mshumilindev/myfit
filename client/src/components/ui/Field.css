@@ -1,0 +1,68 @@
+/* Field — Spotter UI kit primitive. Tokens only. */
+.uifield {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.uifield-l {
+  font-size: 12.5px;
+  color: var(--color-neutral-400);
+}
+.uifield-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  transition: box-shadow 120ms;
+}
+.uifield-box:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--color-accent),
+    0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+.uifield--err .uifield-box,
+.uifield--err .uifield-box:focus-within {
+  box-shadow:
+    inset 0 0 0 1px var(--color-danger),
+    0 0 0 3px color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+.uifield-in {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+}
+.uifield-in::placeholder {
+  color: var(--color-neutral-500);
+}
+.uifield-in:disabled {
+  opacity: 0.5;
+}
+.uifield-lead,
+.uifield-trail {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--color-neutral-400);
+  font-size: 14px;
+}
+.uifield-hint {
+  font-size: 12.5px;
+  color: var(--color-neutral-500);
+}
+.uifield-err {
+  font-size: 12.5px;
+  color: var(--color-danger-text);
+}

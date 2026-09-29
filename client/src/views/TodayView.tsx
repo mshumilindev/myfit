@@ -19,6 +19,10 @@ import {
   type TodayLayout,
 } from '../today/layout';
 import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { SectionLabel } from '../components/ui/SectionLabel';
+import { Notice } from '../components/ui/Notice';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { localizedExerciseName } from '../data/exerciseNames';
 import { CustomSectionView } from '../today/CustomSectionView';
 import { TodayCustomize } from '../today/TodayCustomize';
@@ -931,7 +935,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           )
         ) : null;
       return (
-        <section className="today-program-card td-week" data-mode={mode} data-style={po.style}>
+        <Card
+          emphasis="hero"
+          className="today-program-card td-week"
+          data-mode={mode}
+          data-style={po.style}
+        >
           <div className="program-card-head">
             <Icon name={headIcon} className="pch-icon" />
             <div className="pch-text">
@@ -958,7 +967,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           )}
           {exList}
           {po.weekPills && <WeekPills cells={cells} />}
-        </section>
+        </Card>
       );
     })();
 
@@ -1026,35 +1035,28 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
       };
     });
     return (
-      <section className="today-program-card td-week" data-mode="none">
+      <Card emphasis="card" className="today-program-card td-week" data-mode="none">
         <WeekPills cells={cells} />
-      </section>
+      </Card>
     );
   };
 
   const banners = (
     <>
       {store.syncStatus === 'offline' && store.queue.length > 0 && (
-        <div className="banner offline">
-          <Icon name="cloud-slash" />
-          <span>{t.offlineQueued(store.queue.length)}</span>
-        </div>
+        <Notice tone="danger" icon="cloud-slash">
+          {t.offlineQueued(store.queue.length)}
+        </Notice>
       )}
       {store.syncStatus === 'syncing' && store.queue.length > 0 && (
-        <div className="sync-card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Icon name="arrows-clockwise" className="num" />
-            <span style={{ fontSize: 12, color: 'var(--color-neutral-300)', flex: 1 }}>
-              {t.sendingQueued}
-            </span>
-            <span className="num" style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>
-              {store.queue.length}
-            </span>
-          </div>
-          <div className="progress-track" style={{ marginTop: 10 }}>
-            <div className="progress-fill" style={{ width: '66%' }} />
-          </div>
-        </div>
+        <Notice
+          tone="neutral"
+          icon="arrows-clockwise"
+          trail={store.queue.length}
+          below={<ProgressBar value={66} height={4} />}
+        >
+          {t.sendingQueued}
+        </Notice>
       )}
     </>
   );
@@ -1637,7 +1639,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
           {hasHistory ? (
             <>
               <div className="td-history">
-                <div className="section-label section-divide">{t.tdHistory}</div>
+                <SectionLabel className="section-divide">{t.tdHistory}</SectionLabel>
                 <>
                   <HistoryTimeline
                     workouts={finished}
@@ -1657,13 +1659,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                     showMuscles={suggestOn}
                   />
                   {historyDayCount > days && (
-                    <button
+                    <Button
+                      variant="secondary"
+                      fullWidth
+                      iconTrailing="arrow-up-right"
                       className="td-history-all"
                       onClick={() => shell.openOverlay({ screen: 'history' })}
                     >
                       {t.seeAllHistory}
-                      <Icon name="arrow-up-right" />
-                    </button>
+                    </Button>
                   )}
                 </>
               </div>
@@ -1674,13 +1678,12 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
               <div className="td-empty-title">{t.tdEmptyTitle}</div>
               <div className="td-empty-body">{t.tdEmptyBody}</div>
               <div className="td-empty-actions">
-                <button className="btn btn-primary" onClick={startSession} disabled={busy}>
-                  <Icon name="play" />
+                <Button variant="primary" icon="play" onClick={startSession} disabled={busy}>
                   {t.startFirstSession}
-                </button>
-                <button className="btn btn-secondary" onClick={() => setBackfill(true)}>
+                </Button>
+                <Button variant="secondary" onClick={() => setBackfill(true)}>
                   {t.logPastSession}
-                </button>
+                </Button>
               </div>
               {store.gyms.length === 0 && (
                 <button className="gym-hint" onClick={() => shell.goTab('gyms')}>
@@ -1704,7 +1707,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     <div className="screen paned today-page">
       <div className="pane-main">
         <div className="td-topbar">
-          <div className="kicker">{fmtWeekdayDayMonth(now, locale)}</div>
+          <SectionLabel className="td-topbar-date">{fmtWeekdayDayMonth(now, locale)}</SectionLabel>
           <div className="td-topbar-actions">
             <SyncChip store={store} />
           </div>
@@ -1729,10 +1732,15 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <CustomSectionView key={s.id} section={s} ctx={widgetCtx} />
               ),
             )}
-            <button type="button" className="td-customize" onClick={() => setEditing(true)}>
-              <Icon name="sliders-horizontal" />
+            <Button
+              variant="ghost"
+              fullWidth
+              icon="sliders-horizontal"
+              className="td-customize"
+              onClick={() => setEditing(true)}
+            >
               {t.todayCustomize}
-            </button>
+            </Button>
           </>
         )}
         {dayDrawer != null && (

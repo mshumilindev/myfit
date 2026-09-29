@@ -1,0 +1,325 @@
+/* ==========================================================================
+   Brass Glass theme — Spotter's second skin, behind the global `brassGlass`
+   flag (config/flags → html.theme-glass, see data/flags.ts and App.tsx).
+
+   Rules (docs/design/brass-glass/PLAN.md):
+   1. Only tokens (`html.theme-glass { --… }`), kit primitives (components/ui/,
+      `.ui*` classes) and the shell (.app-brand, .tabbar*, .rail*, .sheet,
+      .dialog, .snackbar) may appear here. A page-prefixed selector is a lint
+      error — pages get the theme by rendering kit primitives.
+   2. Source of the values: docs/design/brass-glass/src/kit.py (tokens, CSS)
+      and the P00 Foundations boards.
+   3. Graphite stays the default: with the flag off nothing in this file
+      applies.
+   Loaded after styles.css and redesign.css, so equal specificity wins.
+   ========================================================================== */
+
+/* --- Tokens ---------------------------------------------------------------- */
+html.theme-glass {
+  /* surfaces */
+  --color-bg: #121316;
+  /* Opaque: legacy screens stack surfaces (nudge deck, sheets over cards) and
+     must not show through. Kit cards use the translucent --glass-surface. */
+  --color-surface: #1c1e22;
+  --glass-surface: rgba(31, 33, 37, 0.72);
+  --color-divider: rgba(233, 234, 236, 0.07);
+
+  /* brass ramp is unchanged (kit.py T.brass = #d9a24f, brass3 = #eed3a5) */
+
+  /* liquid glass — neutral (kit .card) and brass (kit .card.glass) */
+  --glass-backdrop: none;
+  --glass-tint: linear-gradient(180deg, rgba(60, 48, 30, 0.38), rgba(20, 18, 14, 0.58));
+  --glass-specular:
+    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45), inset 0 0 0 1px rgba(217, 162, 79, 0.26);
+  --glass-float: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  --glass-brass-tint: linear-gradient(180deg, rgba(60, 48, 30, 0.38), rgba(20, 18, 14, 0.58));
+  --glass-brass-specular:
+    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45), inset 0 0 0 1px rgba(217, 162, 79, 0.26);
+  --glass-rest-tint: linear-gradient(180deg, rgba(28, 70, 100, 0.36), rgba(10, 26, 38, 0.58));
+  --glass-rest-specular:
+    inset 0 1.2px 0.5px rgba(147, 212, 242, 0.42), inset 0 0 0 1px rgba(51, 168, 224, 0.3);
+
+  /* hero (kit .card.hero) — the one focal block of a screen */
+  --glass-hero-tint:
+    radial-gradient(120% 90% at 20% 0%, rgba(217, 162, 79, 0.2), transparent 60%),
+    linear-gradient(180deg, rgba(66, 52, 30, 0.62), rgba(22, 19, 14, 0.78));
+  --glass-hero-specular:
+    inset 0 1.4px 0.5px rgba(238, 211, 165, 0.62), inset 0 0 0 1px rgba(217, 162, 79, 0.5),
+    0 22px 60px -22px rgba(217, 162, 79, 0.55), 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+
+  /* wells (kit .well) — recessed inputs and steppers */
+  --glass-well: rgba(6, 6, 8, 0.5);
+  --glass-well-ring: rgba(233, 234, 236, 0.06);
+  --glass-field: rgba(10, 10, 12, 0.45);
+  --glass-field-ring: rgba(233, 234, 236, 0.1);
+
+  /* screen moods (kit .m-*) — the background glow behind a screen */
+  --mood-art:
+    radial-gradient(80% 42% at 22% 14%, rgba(43, 31, 58, 0.95), transparent 70%),
+    radial-gradient(90% 55% at 88% 34%, rgba(138, 100, 46, 0.8), transparent 70%),
+    radial-gradient(90% 45% at 50% 96%, rgba(52, 39, 19, 0.9), transparent 70%), #121316;
+  --mood-rest:
+    radial-gradient(90% 42% at 80% 100%, rgba(28, 111, 154, 0.45), transparent 70%),
+    radial-gradient(70% 32% at 8% 96%, rgba(43, 31, 58, 0.7), transparent 70%),
+    radial-gradient(80% 30% at 92% 0%, rgba(51, 168, 224, 0.18), transparent 70%), #111417;
+  --mood-sleep:
+    radial-gradient(90% 45% at 75% 0%, rgba(90, 70, 170, 0.5), transparent 70%),
+    radial-gradient(80% 40% at 10% 100%, rgba(43, 31, 58, 0.85), transparent 70%), #0f0f16;
+  --mood-ok:
+    radial-gradient(90% 50% at 50% 28%, rgba(76, 190, 140, 0.26), transparent 70%),
+    radial-gradient(80% 50% at 60% 40%, rgba(138, 100, 46, 0.45), transparent 70%),
+    radial-gradient(70% 30% at 8% 96%, rgba(43, 31, 58, 0.7), transparent 70%), #0f1311;
+  --mood-bad:
+    radial-gradient(90% 40% at 80% 100%, rgba(125, 48, 43, 0.45), transparent 70%),
+    radial-gradient(70% 32% at 8% 96%, rgba(43, 31, 58, 0.7), transparent 70%), #131112;
+  --mood-night: radial-gradient(120% 70% at 30% 10%, #2a2f36 0%, #111214 60%, #0a0a0b 100%);
+
+  /* radii (kit: card 18, hero 24, sheet 26, pills 999) */
+  --radius-lg: 18px;
+  --radius-hero: 24px;
+  --radius-sheet: 26px;
+
+  /* type scale from P00-Type (kit .t-*) */
+  --type-d1: 600 34px/1.08 var(--font);
+  --type-h1: 600 26px/1.15 var(--font);
+  --type-h2: 600 20px/1.2 var(--font);
+  --type-h3: 600 16px/1.3 var(--font);
+  --type-b: 400 15px/1.45 var(--font);
+  --type-s: 400 13px/1.4 var(--font);
+  --type-m: 400 12px/1.35 var(--font);
+  --type-l: 600 10.5px/1.2 var(--font);
+  --type-num: 600 28px/1.05 var(--font);
+  --type-hero: 600 56px/1 var(--font);
+}
+
+/* --- Screen background: the art mood glow by default ------------------------ */
+html.theme-glass body {
+  background: var(--mood-art);
+  background-attachment: fixed;
+}
+html.theme-glass .app {
+  background: transparent;
+}
+html.theme-glass .screen[data-mood='rest'] {
+  background: var(--mood-rest);
+}
+html.theme-glass .screen[data-mood='sleep'] {
+  background: var(--mood-sleep);
+}
+html.theme-glass .screen[data-mood='ok'] {
+  background: var(--mood-ok);
+}
+html.theme-glass .screen[data-mood='bad'] {
+  background: var(--mood-bad);
+}
+html.theme-glass .screen[data-mood='night'] {
+  background: var(--mood-night);
+}
+
+/* --- Shell: tab bar with the glass FAB ----------------------------------- */
+html.theme-glass .tabbar.tabbar-notched {
+  background: linear-gradient(180deg, rgba(18, 19, 22, 0.55), rgba(14, 15, 17, 0.94) 40%);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid var(--color-divider);
+}
+html.theme-glass .tabbar-fab {
+  color: var(--color-accent-300);
+  background: linear-gradient(180deg, rgba(60, 48, 30, 0.6), rgba(20, 18, 14, 0.8));
+  box-shadow:
+    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.5),
+    inset 0 0 0 1px rgba(217, 162, 79, 0.55),
+    0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+/* --- Shell: desktop rail --------------------------------------------------- */
+@media (min-width: 720px) {
+  html.theme-glass .rail {
+    background: rgba(16, 17, 19, 0.92);
+    box-shadow: 1px 0 0 var(--color-divider);
+  }
+  html.theme-glass .rail-item.active {
+    color: var(--color-accent-300);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent);
+    border-radius: 16px;
+  }
+}
+
+/* --- Shell: sheets, dialogs, snackbar (brass glass) ------------------------- */
+html.theme-glass .sheet {
+  background: linear-gradient(180deg, rgba(40, 34, 26, 0.94), rgba(18, 17, 16, 0.98));
+  backdrop-filter: blur(24px) saturate(1.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+  box-shadow:
+    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45),
+    inset 0 0 0 1px rgba(217, 162, 79, 0.22);
+}
+html.theme-glass .dialog {
+  background: linear-gradient(180deg, rgba(40, 34, 26, 0.96), rgba(18, 17, 16, 0.98));
+  border-radius: var(--radius-hero);
+  box-shadow:
+    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45),
+    inset 0 0 0 1px rgba(217, 162, 79, 0.22);
+}
+html.theme-glass .dialog-scrim {
+  background: rgba(6, 6, 8, 0.62);
+}
+html.theme-glass .snackbar {
+  background: linear-gradient(180deg, rgba(50, 42, 30, 0.95), rgba(24, 22, 18, 0.97));
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1.2px 0.5px rgba(238, 211, 165, 0.45),
+    inset 0 0 0 1px rgba(217, 162, 79, 0.26);
+}
+
+/* --- Kit primitives: surfaces --------------------------------------------- */
+html.theme-glass .uicard {
+  background: var(--glass-surface);
+  border-color: var(--color-divider);
+}
+/* Family cards: kit .card.<tone> — a vertical glass wash in the family colour
+   with a specular rim, no border. */
+html.theme-glass .uicard--danger,
+html.theme-glass .uicard--ok,
+html.theme-glass .uicard--rest,
+html.theme-glass .uicard--active,
+html.theme-glass .uicard--illness,
+html.theme-glass .uicard--injury,
+html.theme-glass .uicard--sleep,
+html.theme-glass .uicard--sport,
+html.theme-glass .uicard--kcal,
+html.theme-glass .uicard--apex,
+html.theme-glass .uicard--learn,
+html.theme-glass .uicard--atlas {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--t-base) 22%, rgba(20, 18, 14, 0.4)),
+    color-mix(in srgb, var(--t-base) 6%, rgba(16, 15, 13, 0.6))
+  );
+  border-color: transparent;
+  box-shadow:
+    inset 0 1.2px 0.5px color-mix(in srgb, var(--t-text) 40%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--t-base) 32%, transparent);
+}
+html.theme-glass .uicard--e-hero {
+  background: var(--glass-hero-tint);
+  box-shadow: var(--glass-hero-specular);
+  border-radius: var(--radius-hero);
+}
+html.theme-glass .uicard--e-glass {
+  background: var(--glass-tint);
+  box-shadow: var(--glass-specular);
+}
+html.theme-glass .uicard--e-quiet {
+  background: transparent;
+  box-shadow: none;
+}
+html.theme-glass .uicard--accent {
+  background: var(--glass-brass-tint);
+  border-color: transparent;
+  box-shadow: var(--glass-brass-specular);
+}
+html.theme-glass .uicard--rest {
+  background: var(--glass-rest-tint);
+  border-color: transparent;
+  box-shadow: var(--glass-rest-specular);
+}
+
+/* --- Kit primitives: buttons — the brass glass pill ------------------------- */
+html.theme-glass .uibtn {
+  border-radius: 999px;
+}
+html.theme-glass .uibtn--primary,
+html.theme-glass .uibtn--fill {
+  color: var(--color-accent-300);
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  border-color: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 62%, transparent);
+}
+html.theme-glass .uibtn--primary:not(:disabled):active,
+html.theme-glass .uibtn--fill:not(:disabled):active {
+  background: color-mix(in srgb, var(--color-accent) 26%, transparent);
+}
+html.theme-glass .uibtn--secondary {
+  background: rgba(233, 234, 236, 0.08);
+  border-color: transparent;
+  font-weight: 500;
+}
+
+/* --- Kit primitives: chips, segmented ------------------------------------- */
+html.theme-glass .uichip {
+  border-radius: 999px;
+  background: rgba(233, 234, 236, 0.07);
+  border-color: transparent;
+}
+html.theme-glass .uichip--accent {
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  color: var(--color-accent-300);
+}
+html.theme-glass .uiseg--track {
+  background: var(--glass-field);
+  box-shadow: inset 0 0 0 1px var(--glass-field-ring);
+  border-radius: 14px;
+  padding: 3px;
+}
+html.theme-glass .uiseg--track .uiseg-opt.is-on {
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 55%, transparent);
+  color: var(--color-accent-300);
+  font-weight: 600;
+  border-radius: 11px;
+}
+
+/* --- Kit primitives: labels, tags, checks ---------------------------------- */
+html.theme-glass .uisec-l {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--color-neutral-400);
+}
+html.theme-glass .uisec-a {
+  color: var(--color-accent-400);
+  font-weight: 600;
+}
+html.theme-glass .uitag {
+  background: color-mix(in srgb, var(--t-base) 16%, transparent);
+  box-shadow: none;
+}
+html.theme-glass .uicheck-in:checked + .uicheck-box {
+  background: color-mix(in srgb, var(--t-base) 25%, transparent);
+  color: var(--t-text);
+}
+
+/* --- Kit primitives: fields, steppers, stats ------------------------------- */
+html.theme-glass .uifield-box {
+  background: var(--glass-field);
+  box-shadow: inset 0 0 0 1px var(--glass-field-ring);
+  border-radius: 14px;
+}
+html.theme-glass .uistep {
+  background: var(--glass-well);
+  box-shadow:
+    inset 0 1px 0 rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px var(--glass-well-ring);
+  border-radius: 16px;
+}
+html.theme-glass .uistep:focus-within {
+  box-shadow:
+    inset 0 1px 0 rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+html.theme-glass .uicard--e-hero .uistep--big .uistep-v {
+  font-size: 36px;
+}
+
+/* --- Kit primitives: notices ------------------------------------------------ */
+html.theme-glass .uinotice {
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--t-base) 12%, rgba(16, 15, 13, 0.55));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--t-base) 30%, transparent);
+}
+html.theme-glass .uit--neutral.uinotice {
+  background: rgba(10, 10, 12, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(233, 234, 236, 0.08);
+}

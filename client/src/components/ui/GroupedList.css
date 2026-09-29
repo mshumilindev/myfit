@@ -98,6 +98,14 @@ label.uirow {
 .uirow-lb.is-fixed {
   flex: none;
 }
+.uirow-time {
+  flex: none;
+  width: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-neutral-500);
+}
 .uirow-l {
   display: block;
 }

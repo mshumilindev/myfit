@@ -1,0 +1,50 @@
+/* Radio — Spotter UI kit primitive. Tokens only. */
+.uiradio {
+  position: relative;
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+.uiradio-in {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.uiradio-in:disabled {
+  cursor: default;
+}
+.uiradio-ring {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-neutral-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 120ms;
+}
+.uiradio-ring::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--t-base);
+  transform: scale(0);
+  transition: transform 120ms;
+}
+.uiradio-in:checked + .uiradio-ring {
+  border-color: var(--t-base);
+}
+.uiradio-in:checked + .uiradio-ring::after {
+  transform: scale(1);
+}
+.uiradio-in:focus-visible + .uiradio-ring {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.uiradio-in:disabled + .uiradio-ring {
+  opacity: 0.4;
+}

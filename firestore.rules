@@ -172,9 +172,11 @@ service cloud.firestore {
     // App-wide switches edited by the owner in the console (read-only here).
     // config/atlas: { chatUsers: [username…], chatUids: [uid…] } — who may
     // use Atlas's free-form Gemini chat while it is in closed testing.
+    // config/flags: global feature flags (e.g. brassGlass) — every signed-in
+    // user reads them, only admins flip them from app Settings.
     match /config/{docId} {
       allow read: if isSignedIn();
-      allow write: if false;
+      allow write: if docId == 'flags' && isAdmin();
     }
     match /exerciseCatalog/{entryId} {
       allow read: if isSignedIn();

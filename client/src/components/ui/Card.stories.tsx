@@ -1,14 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Card, type CardTone } from './Card';
+import { Card, type CardEmphasis, type CardTone } from './Card';
 import { Stack } from '../../stories/LocaleMatrix';
 
-const TONES: CardTone[] = ['neutral', 'danger', 'ok', 'rest', 'accent'];
+const TONES: CardTone[] = [
+  'neutral',
+  'danger',
+  'ok',
+  'rest',
+  'accent',
+  'active',
+  'illness',
+  'injury',
+  'sleep',
+  'sport',
+  'kcal',
+  'apex',
+  'learn',
+  'atlas',
+];
+const EMPHASIS: CardEmphasis[] = ['hero', 'glass', 'card', 'quiet'];
 
 const meta = {
   title: 'Kit/Card',
   component: Card,
   args: { tone: 'neutral', pad: 'md', header: 'Card header', children: 'Body text on the card.' },
-  argTypes: { tone: { control: 'select', options: TONES } },
+  argTypes: {
+    tone: { control: 'select', options: TONES },
+    emphasis: { control: 'select', options: EMPHASIS },
+  },
   decorators: [
     (Story) => (
       <div style={{ width: 358 }}>
@@ -29,6 +48,23 @@ export const Tones: Story = {
       {TONES.map((tone) => (
         <Card key={tone} tone={tone} header={tone}>
           Body text on the {tone} tone.
+        </Card>
+      ))}
+    </Stack>
+  ),
+};
+
+/** Emphasis levels: one hero per screen, a glass or two, ordinary cards, quiet rows. */
+export const Emphasis: Story = {
+  render: () => (
+    <Stack>
+      {EMPHASIS.map((e) => (
+        <Card key={e} emphasis={e} header={e}>
+          {e === 'hero'
+            ? 'The focal block: big numbers, the primary action.'
+            : e === 'quiet'
+              ? 'No chrome — secondary info the app keeps compact.'
+              : 'Body text.'}
         </Card>
       ))}
     </Stack>

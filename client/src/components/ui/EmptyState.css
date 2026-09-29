@@ -1,0 +1,29 @@
+/* EmptyState — Spotter UI kit primitive. Tokens only (sizes = the old .empty). */
+.uiempty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-8) 0;
+}
+.uiempty--center {
+  align-items: center;
+  text-align: center;
+}
+.uiempty-i {
+  font-size: 26px;
+  color: var(--color-neutral-700);
+}
+.uiempty-t {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.uiempty-s {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-neutral-500);
+  line-height: 1.55;
+  max-width: 34ch;
+}

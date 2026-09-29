@@ -1,0 +1,22 @@
+/* Avatar — Spotter UI kit primitive. Tokens only. */
+.uiav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-accent-300);
+  background: linear-gradient(135deg, var(--color-accent-900), var(--color-accent-700));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-300) 35%, transparent);
+  user-select: none;
+}
+.uiav-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

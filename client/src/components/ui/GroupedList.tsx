@@ -69,6 +69,8 @@ type RowAria = Pick<
 export interface ListRowProps extends RowAria {
   /** Leading glyph — usually an <IconTile>. */
   icon?: ReactNode;
+  /** A fixed-width time / clock column before the icon ("02:00"). */
+  time?: ReactNode;
   label: ReactNode;
   sub?: ReactNode;
   /** Right-aligned value text. */
@@ -103,6 +105,7 @@ export interface ListRowProps extends RowAria {
 export function ListRow(props: ListRowProps) {
   const {
     icon,
+    time,
     label,
     sub,
     value,
@@ -140,6 +143,7 @@ export function ListRow(props: ListRowProps) {
     <span className="uirow-action">{label}</span>
   ) : (
     <>
+      {time != null && <span className="uirow-time">{time}</span>}
       {icon}
       <span className={`uirow-lb${labelFixed ? ' is-fixed' : ''}`}>
         <span className="uirow-l">{label}</span>
