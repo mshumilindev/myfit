@@ -2254,7 +2254,7 @@ export function SessionView(props: {
   /** One-line reading of a finished exercise (SS-3): «3 × 8 · 75 kg». */
   function pastSummary(ex: Exercise): string {
     if (isMarkerExercise(ex))
-      return exerciseKind(ex) === 'cooldown' ? t.exerciseKindNames.cooldown : t.warmupMarkerTitle;
+      return ex.plannedDurationMin ? `~${ex.plannedDurationMin} ${t.minShort}` : '';
     if (isTimedExercise(ex)) {
       const min = ex.sets.reduce((n, s) => n + (s.durationMin ?? 0), 0);
       return `${Math.round(min)} ${t.minShort}`;
@@ -5149,7 +5149,8 @@ export function SessionView(props: {
                     const singleIsCurrent = !props.past && single.id === activeExerciseId;
                     if (
                       props.past
-                        ? single.sets.length > 0 && !expandedPast.includes(single.id)
+                        ? (single.sets.length > 0 || isMarkerExercise(single)) &&
+                          !expandedPast.includes(single.id)
                         : live &&
                           focusedId !== single.id &&
                           (single.sets.length > 0 || singleIsCurrent)
@@ -5175,9 +5176,10 @@ export function SessionView(props: {
                               </Tag>
                             )}
                             <span className="n">{exName(single.name)}</span>
-                            {single.sets.length > 0 && (
-                              <span className="v">{pastSummary(single)}</span>
-                            )}
+                            {(single.sets.length > 0 || isMarkerExercise(single)) &&
+                              pastSummary(single) && (
+                                <span className="v">{pastSummary(single)}</span>
+                              )}
                             {cardCfg(single.id)}
                           </span>
                         </div>
