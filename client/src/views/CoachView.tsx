@@ -10,12 +10,13 @@ import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 
 import { Switch as KitSwitch } from '../components/ui/Switch';
 import { ListRow } from '../components/ui/GroupedList';
 import { Button, IconButton } from '../components/ui/Button';
+import { Notice } from '../components/ui/Notice';
 import { Card } from '../components/ui/Card';
 import { FLAGS, LOCALES, setLocale, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { latestWeight, setCoach, updateBodyMetrics, useSelfTrainerId, useStore } from '../store';
 import { AtlasFace, TemperHeat } from '../components/AtlasFace';
-import { useAtlasFmt, useAtlasNotes, useMinuteClock } from '../atlas/notes';
+import { useAtlasFmt, useAtlasNotes, useMinuteClock, useSoftenReason } from '../atlas/notes';
 import {
   extrasFor,
   momAllowed,
@@ -501,6 +502,7 @@ function CoachThread({
   const { t, locale } = useT();
   const store = useStore();
   const { notes, temper } = useAtlasNotes();
+  const soft = useSoftenReason();
   const [settings, setSettings] = useState(false);
   const [portrait, setPortrait] = useState(false);
   useEffect(() => {
@@ -1095,7 +1097,9 @@ function CoachThread({
           </b>
           <span>
             {store.coach.role === 'main' ? t.atlasRoleMainShort : t.atlasRoleExtraShort}
-            {temper < chosen ? ` · ${t.atlasSoftened}` : ''}
+            {temper < chosen
+              ? ` · ${t.atlasSoftened}${soft ? `: ${t.atlasSoftReason[soft]}` : ''}`
+              : ''}
           </span>
         </span>
         <TemperHeat temper={temper} />
@@ -1413,6 +1417,7 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
   const { t } = useT();
   const { coach } = useStore();
   const human = !!useSelfTrainerId();
+  const soft = useSoftenReason();
   // A draft: nothing changes (and nothing is rebuilt) until Save.
   const [draft, setDraft] = useState(() => ({
     temper: coach.temper,
@@ -1469,6 +1474,11 @@ function CoachSettingsSheet({ onClose }: { onClose: () => void }) {
       <div className="sheet-head">
         <h3>{t.atlasSettings}</h3>
       </div>
+      {soft && coach.temper > 1 && (
+        <Notice tone="rest" icon="info">
+          {t.atlasSoftNote(t.atlasSoftReason[soft])}
+        </Notice>
+      )}
       <div className="atl-temper-pick" role="radiogroup" aria-label={t.atlasTemperLabel}>
         {TEMPERS.map((i) => (
           <Card

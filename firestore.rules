@@ -94,6 +94,11 @@ service cloud.firestore {
       match /pings/{pingId} {
         allow read, write: if isSelf(userId);
       }
+      // Vault grants: the athlete's data key, encrypted for one coach (ciphertext only).
+      // The coach receives it through a function; the server never holds a readable key.
+      match /grants/{coachId} {
+        allow read, write: if isSelf(userId);
+      }
       // Web push: this user's device tokens and the messages their client
       // planned (Cloud Functions deliver both with the admin SDK).
       match /push/{deviceId} {
@@ -155,6 +160,18 @@ service cloud.firestore {
     // read/write; the function reads/updates it with the Admin SDK.
     match /sleepSchedules/{userId} {
       allow read, write: if isSelf(userId);
+    }
+
+    // Coach PUBLIC keys for the vault key exchange. Anyone signed in may read one (an
+    // athlete needs it to create a grant); only its owner writes it, and only a public JWK.
+    match /coachKeys/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSelf(userId)
+        && request.resource.data.keys().hasOnly(['pub', 'updatedAt'])
+        && request.resource.data.pub is map
+        && request.resource.data.pub.keys().hasOnly(['kty', 'crv', 'x', 'y', 'ext', 'key_ops'])
+        && request.resource.data.updatedAt is int;
+      allow delete: if false;
     }
 
     // --- Credentials & uniqueness indexes: functions only -------------------

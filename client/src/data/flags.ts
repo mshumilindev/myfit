@@ -22,6 +22,7 @@ export type FlagScope = 'device' | 'global';
 const FLAG_DEFS = [
   { id: 'gymPresence', scope: 'device' },
   { id: 'nutrition', scope: 'device' },
+  { id: 'conditions', scope: 'device' },
 ] as const satisfies readonly { id: string; scope: FlagScope }[];
 export type FlagId = (typeof FLAG_DEFS)[number]['id'];
 /** Widened so the `global` scope keeps type-checking while no global flag is live. */

@@ -15,6 +15,7 @@ export function SettingsView({ onClose }: { onClose: () => void }) {
   const meta: Record<string, { label: string; desc: string }> = {
     gymPresence: { label: t.flagGymPresence, desc: t.flagGymPresenceDesc },
     nutrition: { label: t.flagNutrition, desc: t.flagNutritionDesc },
+    conditions: { label: t.flagConditions, desc: t.flagConditionsDesc },
   };
 
   return (

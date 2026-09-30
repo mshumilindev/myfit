@@ -494,3 +494,15 @@ describe('sleep log stays one night per sleep', () => {
     expect(duplicateSleepIds([a, b, nap, next] as never, bed + 40 * H)).toEqual(['a']);
   });
 });
+
+describe('setCoach', () => {
+  it('keeps the chosen temper and always stamps a newer updatedAt', async () => {
+    const { setCoach, __getStateForTests: getState } = await import('./store');
+    setCoach({ temper: 1 });
+    const a = getState().coach.updatedAt ?? 0;
+    setCoach({ temper: 5 });
+    const c = getState().coach;
+    expect(c.temper).toBe(5);
+    expect(c.updatedAt ?? 0).toBeGreaterThan(a);
+  });
+});

@@ -459,3 +459,21 @@ export interface SyncError {
 }
 
 export const AUTO_FINISH_MS = 8 * 60 * 60 * 1000;
+
+/** Per-condition sharing with the coach: 'inherit' follows the general default. */
+export type ConditionShare = 'inherit' | 'off' | 'effects' | 'full';
+
+/** A permanent, private long-term health condition (see docs/specs/chronic-conditions-plan.md). */
+export interface ChronicCondition {
+  id: string;
+  key: string;
+  severity: 1 | 2 | 3;
+  share: ConditionShare;
+  /** Private note: never leaves the device/DB envelope, never shared. */
+  note?: string;
+  createdAt: number;
+  /** Temporary conditions (pregnancy, recovery after surgery): when it began (ms). */
+  startedAt?: number;
+  /** Expected end (ms). Auto-filled from the condition's typical length; user-editable. */
+  endsAt?: number;
+}

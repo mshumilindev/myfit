@@ -24,6 +24,9 @@ import {
   setUsername,
   trackMutation,
 } from '../api';
+import { fetchProfile } from '../profileFetch';
+import { PrivacyVault } from '../components/PrivacyVault';
+import { isFlagOn } from '../data/flags';
 import { db, storage } from '../firebase';
 import { fmtDayMonth, fmtDurationHM, fmtTonnes, useT } from '../i18n';
 import { ConfirmDialog, Icon, LanguageSelector, Sheet, useExerciseName } from '../ui';
@@ -202,7 +205,7 @@ export function ProfileView({
       }
       return;
     }
-    callFn<ProfileData>('profileUser', { id: userId })
+    fetchProfile<ProfileData>(userId)
       .then((data) => {
         cacheSet(cacheKey, data);
         if (alive) setLoaded({ userId, value: data });
@@ -233,7 +236,7 @@ export function ProfileView({
 
   async function refreshProfile() {
     if (typeof load !== 'object') return;
-    const fresh = await callFn<ProfileData>('profileUser', { id: load.person.id });
+    const fresh = await fetchProfile<ProfileData>(load.person.id);
     commitProfile(fresh);
   }
 
@@ -272,7 +275,7 @@ export function ProfileView({
           lastName: editLastName,
           username: editUsername,
         });
-        next = await callFn<ProfileData>('profileUser', { id: load.person.id });
+        next = await fetchProfile<ProfileData>(load.person.id);
       }
       setEditFirstName(next.person.firstName);
       setEditLastName(next.person.lastName ?? '');
@@ -292,7 +295,7 @@ export function ProfileView({
     const next = load.person.role === 'trainer' ? 'member' : 'trainer';
     try {
       await callFn('adminChangeRole', { id: load.person.id, role: next });
-      const fresh = await callFn<ProfileData>('profileUser', { id: load.person.id });
+      const fresh = await fetchProfile<ProfileData>(load.person.id);
       commitProfile(fresh);
       shell.toast({ kind: 'ok', icon: 'check-circle', text: t.profileSaved });
     } catch (e) {
@@ -576,6 +579,7 @@ export function ProfileView({
               <div className="profile-lang">
                 <LanguageSelector />
               </div>
+              {isFlagOn('conditions') && <PrivacyVault />}
               <section className="profile-mobile-settings">
                 <div className="profile-setting-row static">
                   <Icon name="scales" />

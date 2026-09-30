@@ -9,6 +9,7 @@
  *   active   teal — active recovery
  *   illness  amber
  *   injury   warm red (not the error red)
+ *   chronic  steel blue — long-term health conditions (private)
  *   sleep    violet
  *   sport    court green — sports activities
  *   ok / danger / kcal — status families
@@ -27,6 +28,7 @@ export type Tone =
   | 'active'
   | 'illness'
   | 'injury'
+  | 'chronic'
   | 'sleep'
   | 'sport'
   | 'ok'
@@ -43,6 +45,7 @@ export const TONES: Tone[] = [
   'active',
   'illness',
   'injury',
+  'chronic',
   'sleep',
   'sport',
   'ok',

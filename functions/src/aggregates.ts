@@ -38,6 +38,8 @@ export interface StoredWorkout {
   /** Program day name this session came from (e.g. "Push day"); null if none. */
   dayName?: string | null;
   exercises?: StoredExercise[];
+  /** Readable totals kept beside an encrypted body (vault). Used when `exercises` is sealed. */
+  stats?: { volumeKg?: number; sets?: number };
 }
 
 function isStrength(e: StoredExercise): boolean {
@@ -121,6 +123,8 @@ export function exerciseVolumeKg(ex: StoredExercise): number {
 
 /** { strength set count, strength volume with per-hand / drops / no warm-ups }. */
 export function workoutStrengthStats(w: StoredWorkout): { sets: number; volumeKg: number } {
+  // Sealed workout: the exercises are ciphertext, the totals travel in the open.
+  if (!w.exercises && w.stats) return { sets: w.stats.sets ?? 0, volumeKg: w.stats.volumeKg ?? 0 };
   let sets = 0;
   let volumeKg = 0;
   for (const e of w.exercises ?? []) {

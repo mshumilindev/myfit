@@ -12,7 +12,7 @@ import { localizedExerciseName } from '../data/exerciseNames';
 import type { StoreState } from '../store';
 import type { LocaleId } from '../i18n';
 import { dayFacts, isWeekEnd, sessionFacts, weekFact } from './facts';
-import { effectiveTemper } from './guard';
+import { effectiveTemper, softenReason, type SoftenReason } from './guard';
 import { say, type Fmt } from './voice';
 import { spanFmt } from './num';
 import type { CoachFact, Temper } from './types';
@@ -150,5 +150,22 @@ export function useAtlasNotes(): NotesResult {
     () => buildNotes(s, now, locale, fmt),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [s.workouts, s.sleeps, s.bodyMetrics, s.injuries, s.restPeriods, s.coach, locale, fmt, now],
+  );
+}
+
+/** Why Atlas is gentler than the picked temper right now (null = he speaks as chosen). */
+export function useSoftenReason(): SoftenReason | null {
+  const s = useStore();
+  const now = useMinuteClock();
+  return useMemo(
+    () =>
+      softenReason({
+        injuries: s.injuries,
+        restPeriods: s.restPeriods,
+        sleeps: s.sleeps,
+        finished: s.workouts.filter((w) => w.finishedAt !== null),
+        now,
+      }),
+    [s.injuries, s.restPeriods, s.sleeps, s.workouts, now],
   );
 }

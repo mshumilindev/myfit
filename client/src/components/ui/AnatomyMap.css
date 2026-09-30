@@ -1,0 +1,39 @@
+/* AnatomyMap — layered anatomy projections (base bones, organs, tone-tinted region masks).
+   The crop is a window over the 640×1400 canvas set by --am-x0/--am-y0/--am-w/--am-h. */
+.uianat {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: calc(var(--am-w) * 640) / calc(var(--am-h) * 1400);
+}
+.uianat-in {
+  position: absolute;
+  width: calc(100% / var(--am-w));
+  aspect-ratio: 640 / 1400;
+  left: calc(-100% * var(--am-x0) / var(--am-w));
+  top: calc(-100% * var(--am-y0) / var(--am-h));
+}
+.uianat-layer {
+  position: absolute;
+  inset: 0;
+  background: var(--am-url) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.uianat-bones {
+  opacity: 0.42;
+}
+.uianat-muscles {
+  opacity: 0.6;
+}
+.uianat-muscles ~ .uianat-bones {
+  opacity: 0.22;
+}
+.uianat-organ {
+  opacity: 0.85;
+}
+.uianat-mark {
+  background: var(--t-base);
+  -webkit-mask: var(--am-url) center / 100% 100% no-repeat;
+  mask: var(--am-url) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 0 var(--s-6) color-mix(in srgb, var(--t-base) 55%, transparent));
+}

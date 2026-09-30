@@ -113,6 +113,7 @@ import {
   duplicateSleepIds,
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
+import { initVault, mirrorCollection, prepareWrite, runKeyExchange } from './vaultIO';
 import {
   onWeekStartChange,
   resetWeekStart,
@@ -924,12 +925,28 @@ function onWriteError(err: unknown): void {
   // Transient errors: Firestore retries automatically; nothing to do.
 }
 
+/** Readable totals stored beside a sealed workout: server aggregates (leaderboards, coach summaries) use them. */
+export function workoutStats(
+  w: Pick<Workout, 'exercises'> & Parameters<typeof workoutVolumeKg>[0],
+): {
+  volumeKg: number;
+  sets: number;
+} {
+  return {
+    volumeKg: workoutVolumeKg(w),
+    sets: w.exercises.reduce(
+      (n, e) => n + ((e.kind ?? 'strength') === 'strength' ? e.sets.length : 0),
+      0,
+    ),
+  };
+}
+
 function writeWorkoutDoc(w: Workout): void {
   const uid = currentUid();
   if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'workouts', w.id), { ...w, updatedAt: Date.now() }).catch(
-    onWriteError,
-  );
+  prepareWrite('workouts', { ...w, stats: workoutStats(w), updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'workouts', w.id), d))
+    .catch(onWriteError);
 }
 
 /**
@@ -968,14 +985,18 @@ function deleteWorkoutDoc(id: string): void {
 function writeGymDoc(g: Gym): void {
   const uid = currentUid();
   if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'gyms', g.id), { ...g, updatedAt: Date.now() }).catch(onWriteError);
+  prepareWrite('gyms', { ...g, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'gyms', g.id), d))
+    .catch(onWriteError);
 }
 function writeBodyDoc(): void {
   const uid = currentUid();
   if (!uid) return;
   // JSON round-trip drops `undefined` (Firestore rejects it).
   const clean = JSON.parse(JSON.stringify({ ...state.bodyMetrics, updatedAt: Date.now() }));
-  setDoc(doc(db, 'users', uid, 'meta', 'body'), clean).catch(onWriteError);
+  prepareWrite('body', clean)
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'body'), d))
+    .catch(onWriteError);
 }
 
 function writeGoalsDoc(): void {
@@ -1009,14 +1030,24 @@ function writeMasteryDoc(): void {
 const COACH_WRITE_DELAY = 4000;
 let coachTimer: ReturnType<typeof setTimeout> | null = null;
 let coachFor: string | null = null;
+/** Fields changed here and not yet written: only these go to the server, so a stale
+ *  device touching a counter can never put an old temper back. */
+const coachDirty = new Set<string>();
+/** Newest `updatedAt` seen on the server copy; local edits always stamp above it, so a
+ *  clock that runs behind (or a device in the future) cannot make an edit lose. */
+let coachServerAt = 0;
 function flushCoachDoc(): void {
   if (coachTimer) clearTimeout(coachTimer);
   coachTimer = null;
   const uid = currentUid();
   // Signed out or switched account meanwhile → that change belonged to the old one.
   if (!uid || uid !== coachFor) return;
-  const clean = JSON.parse(JSON.stringify(state.coach));
-  setDoc(doc(db, 'users', uid, 'meta', 'coach'), clean).catch(onWriteError);
+  const full = JSON.parse(JSON.stringify(state.coach)) as Record<string, unknown>;
+  const keys = [...coachDirty];
+  coachDirty.clear();
+  const clean: Record<string, unknown> = { updatedAt: full.updatedAt };
+  for (const k of keys) if (k in full) clean[k] = full[k];
+  setDoc(doc(db, 'users', uid, 'meta', 'coach'), clean, { merge: true }).catch(onWriteError);
 }
 function writeCoachDoc(): void {
   coachFor = currentUid();
@@ -2107,9 +2138,9 @@ export const dayKey = (ts: number): number => {
 function writeRestPeriodDoc(r: RestPeriod): void {
   const uid = currentUid();
   if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'restPeriods', r.id), { ...r, updatedAt: Date.now() }).catch(
-    onWriteError,
-  );
+  prepareWrite('restPeriods', { ...r, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'restPeriods', r.id), d))
+    .catch(onWriteError);
 }
 function deleteRestPeriodDoc(id: string): void {
   const uid = currentUid();
@@ -2338,9 +2369,9 @@ export function restDayKeys(
 function writeInjuryDoc(i: Injury): void {
   const uid = currentUid();
   if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'injuries', i.id), { ...i, updatedAt: Date.now() }).catch(
-    onWriteError,
-  );
+  prepareWrite('injuries', { ...i, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'injuries', i.id), d))
+    .catch(onWriteError);
 }
 function deleteInjuryDoc(id: string): void {
   const uid = currentUid();
@@ -2549,9 +2580,9 @@ export function activeInjuryList(): Injury[] {
 function writeActivityDoc(a: Activity): void {
   const uid = currentUid();
   if (!uid) return;
-  setDoc(doc(db, 'users', uid, 'activities', a.id), { ...a, updatedAt: Date.now() }).catch(
-    onWriteError,
-  );
+  prepareWrite('activities', { ...a, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'activities', a.id), d))
+    .catch(onWriteError);
 }
 function deleteActivityDoc(id: string): void {
   const uid = currentUid();
@@ -2818,7 +2849,9 @@ export function setMasterySeenRating(rating: number): void {
 
 /** Atlas settings (temper, role, read mark…); synced to users/{uid}/meta/coach. */
 export function setCoach(patch: Partial<CoachSettings>): void {
-  setState({ coach: { ...state.coach, ...patch, updatedAt: Date.now() } });
+  const updatedAt = Math.max(Date.now(), coachServerAt + 1, (state.coach.updatedAt ?? 0) + 1);
+  setState({ coach: { ...state.coach, ...patch, updatedAt } });
+  for (const k of Object.keys(patch)) coachDirty.add(k);
   writeCoachDoc();
 }
 
@@ -2848,9 +2881,9 @@ function writeSleepDoc(n: SleepNight): void {
   const { awakeSince: _a, lastSeen: _l, ...durable } = n;
   void _a;
   void _l;
-  setDoc(doc(db, 'users', uid, 'sleeps', n.id), { ...durable, updatedAt: Date.now() }).catch(
-    onWriteError,
-  );
+  prepareWrite('sleeps', { ...durable, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'sleeps', n.id), d))
+    .catch(onWriteError);
 }
 function deleteSleepDoc(id: string): void {
   pendingSleepDeletes.add(id);
@@ -3830,6 +3863,7 @@ export function startSyncLoop(): () => void {
   const uid = currentUid();
   if (!uid) return () => undefined;
   stopListeners();
+  void initVault(uid);
 
   unsubs.push(
     onSnapshot(
@@ -3868,85 +3902,105 @@ export function startSyncLoop(): () => void {
     ),
   );
 
+  const workoutsMirror = mirrorCollection<
+    Workout & Record<string, unknown>,
+    { fromCache: boolean; pending: boolean }
+  >((serverWorkouts, { meta }) => {
+    state = {
+      ...state,
+      workouts: mergeServerWorkoutsWithLocalDrafts(serverWorkouts, state.workouts),
+    };
+    recomputeReminders();
+    markSynced(meta.fromCache, meta.pending);
+    applyAutoFinish();
+    clearStoredRest();
+    backfillSleepKind();
+  });
+  unsubs.push(workoutsMirror.dispose);
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'workouts'),
-      (snap) => {
-        const serverWorkouts = snap.docs.map((d) => d.data() as Workout);
-        state = {
-          ...state,
-          workouts: mergeServerWorkoutsWithLocalDrafts(serverWorkouts, state.workouts),
-        };
-        recomputeReminders();
-        markSynced(snap.metadata.fromCache, snap.metadata.hasPendingWrites);
-        applyAutoFinish();
-        clearStoredRest();
-        backfillSleepKind();
-      },
+      (snap) =>
+        workoutsMirror.push(
+          snap.docs.map((d) => d.data()),
+          { fromCache: snap.metadata.fromCache, pending: snap.metadata.hasPendingWrites },
+        ),
       onWriteError,
     ),
   );
+  const gymsMirror = mirrorCollection<Gym & Record<string, unknown>>((items) => {
+    const gyms = items.map((g) => applyShared(g));
+    state = { ...state, gyms };
+    // Subscribe to the shared entity for every gym that has a stable id.
+    gyms.forEach((g) => g.externalId && watchSharedGym(g.externalId));
+    recomputeReminders();
+    emit();
+  });
+  unsubs.push(gymsMirror.dispose);
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'gyms'),
-      (snap) => {
-        const gyms = snap.docs.map((d) => applyShared(d.data() as Gym));
-        state = { ...state, gyms };
-        // Subscribe to the shared entity for every gym that has a stable id.
-        gyms.forEach((g) => g.externalId && watchSharedGym(g.externalId));
-        recomputeReminders();
-        emit();
-      },
+      (snap) => gymsMirror.push(snap.docs.map((d) => d.data())),
       onWriteError,
     ),
   );
+  const restMirror = mirrorCollection<RestPeriod & Record<string, unknown>>((items) => {
+    state = { ...state, restPeriods: items };
+    persist();
+    emit();
+  });
+  unsubs.push(restMirror.dispose);
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'restPeriods'),
-      (snap) => {
-        state = { ...state, restPeriods: snap.docs.map((d) => d.data() as RestPeriod) };
-        persist();
-        emit();
-      },
+      (snap) => restMirror.push(snap.docs.map((d) => d.data())),
       // Soft: if the restPeriods rule isn't deployed yet, don't block all sync.
       () => undefined,
     ),
   );
+  const injuriesMirror = mirrorCollection<Injury & Record<string, unknown>>((items) => {
+    state = { ...state, injuries: items };
+    persist();
+    emit();
+  });
+  unsubs.push(injuriesMirror.dispose);
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'injuries'),
-      (snap) => {
-        state = { ...state, injuries: snap.docs.map((d) => d.data() as Injury) };
-        persist();
-        emit();
-      },
+      (snap) => injuriesMirror.push(snap.docs.map((d) => d.data())),
       // Soft: if the injuries rule isn't deployed yet, don't block all sync.
       () => undefined,
     ),
   );
+  const activitiesMirror = mirrorCollection<Activity & Record<string, unknown>>((items) => {
+    state = {
+      ...state,
+      activities: mergeServerActivitiesWithLocalLive(items, state.activities),
+    };
+    persist();
+    emit();
+  });
+  unsubs.push(activitiesMirror.dispose);
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'activities'),
-      (snap) => {
-        const serverActivities = snap.docs.map((d) => d.data() as Activity);
-        state = {
-          ...state,
-          activities: mergeServerActivitiesWithLocalLive(serverActivities, state.activities),
-        };
-        persist();
-        emit();
-      },
+      (snap) => activitiesMirror.push(snap.docs.map((d) => d.data())),
       // Soft: if the activities rule isn't deployed yet, don't block all sync.
       () => undefined,
     ),
   );
+  const sleepsMirror = mirrorCollection<SleepNight & Record<string, unknown>, boolean>(
+    (items, { meta }) => applySleepSnapshot(items, meta),
+  );
+  unsubs.push(sleepsMirror.dispose);
   unsubs.push(
     onSnapshot(
       collection(db, 'users', uid, 'sleeps'),
-      (snap) => {
-        const serverSleeps = snap.docs.map((d) => d.data() as SleepNight);
-        applySleepSnapshot(serverSleeps, snap.metadata.fromCache);
-      },
+      (snap) =>
+        sleepsMirror.push(
+          snap.docs.map((d) => d.data()),
+          snap.metadata.fromCache,
+        ),
       // Soft: if the sleeps rule isn't deployed yet, don't block all sync.
       () => undefined,
     ),
@@ -3965,6 +4019,8 @@ export function startSyncLoop(): () => void {
           avatarExt: (d.avatarExt as string) ?? null,
         };
         trainerListeners.forEach((l) => l());
+        // Key exchange is automatic: a coach publishes a key, an athlete grants theirs.
+        void runKeyExchange(selfProfile.trainerId, getRole() !== 'member');
       },
       () => undefined,
     ),
@@ -3981,15 +4037,19 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
+  const bodyMirror = mirrorCollection<BodyMetrics & Record<string, unknown>>((items, info) => {
+    // Locked and sealed: keep what is on screen rather than flashing an empty profile.
+    if (!items.length && info.locked) return;
+    const data = items[0] ?? EMPTY_BODY;
+    state = { ...state, bodyMetrics: { ...data, weights: data.weights ?? [] } };
+    persist();
+    emit();
+  });
+  unsubs.push(bodyMirror.dispose);
   unsubs.push(
     onSnapshot(
       doc(db, 'users', uid, 'meta', 'body'),
-      (snap) => {
-        const data = snap.exists() ? (snap.data() as BodyMetrics) : EMPTY_BODY;
-        state = { ...state, bodyMetrics: { ...data, weights: data.weights ?? [] } };
-        persist();
-        emit();
-      },
+      (snap) => bodyMirror.push(snap.exists() ? [snap.data()] : []),
       onWriteError,
     ),
   );
@@ -4059,12 +4119,17 @@ export function startSyncLoop(): () => void {
       doc(db, 'users', uid, 'meta', 'coach'),
       (snap) => {
         if (!snap.exists()) {
-          if (state.coach.enabled) writeCoachDoc();
+          if (state.coach.enabled) {
+            for (const k of Object.keys(state.coach)) coachDirty.add(k);
+            writeCoachDoc();
+          }
           return;
         }
         const data = snap.data() as Partial<CoachSettings>;
         // Last-write-wins: keep a newer local edit over a stale server copy.
-        if ((state.coach.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
+        coachServerAt = Math.max(coachServerAt, data.updatedAt ?? 0);
+        // An edit still waiting to be written is never overwritten by an older copy.
+        if (coachDirty.size || (state.coach.updatedAt ?? 0) > (data.updatedAt ?? 0)) return;
         state = { ...state, coach: coachFrom(data) };
         persist();
         emit();

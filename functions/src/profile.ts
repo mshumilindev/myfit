@@ -182,7 +182,9 @@ function recentSessions(workouts: StoredWorkout[], gyms: Map<string, GymDoc>) {
 }
 
 function gymStats(workouts: StoredWorkout[], gyms: GymDoc[]) {
+  // Sealed gyms (vault) carry no readable name here; the viewer's device rebuilds them.
   return gyms
+    .filter((g) => typeof g.name === 'string')
     .map((g) => {
       const mine = workouts.filter((w) => w.gymId === g.id);
       return {
@@ -301,7 +303,7 @@ async function fullProfilePayload(
   const workouts = await listUserWorkouts(target.id);
   const gymsSnap = await db.collection('users').doc(target.id).collection('gyms').get();
   const gyms = gymsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<GymDoc, 'id'>) }));
-  const gymMap = new Map(gyms.map((g) => [g.id, g]));
+  const gymMap = new Map(gyms.filter((g) => typeof g.name === 'string').map((g) => [g.id, g]));
   // Body metrics (§6a.4): the target's own doc, read via Admin SDK so an
   // authorized admin/trainer can view it read-only despite client rules.
   const bodySnap = await db.collection('users').doc(target.id).collection('meta').doc('body').get();
@@ -328,13 +330,23 @@ async function fullProfilePayload(
     sleeps: sleepsSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
     restPeriods: restSnap.docs.map((d) => ({ id: d.id, ...(d.data() as Record<string, unknown>) })),
   };
+  // Vault grant: the athlete's data key encrypted for THIS viewer (ciphertext only). The
+  // viewer's device decrypts the sealed documents above; the server holds no readable key.
+  const grantSnap =
+    relation === 'self'
+      ? null
+      : await db.collection('users').doc(target.id).collection('grants').doc(viewer.id).get();
+  const grant = grantSnap?.exists ? (grantSnap.data() as Record<string, unknown>) : null;
   return {
     viewer: { id: viewer.id, relation, role: viewer.role },
+    grant,
     person: await personJson(target),
     access: await accessList(target),
     summary: trainingSummary(workouts),
     sessions: recentSessions(workouts, gymMap),
     gyms: gymStats(workouts, gyms),
+    // Ciphertext of vault-sealed gyms, for the viewer's device to open with the grant.
+    sealedGyms: gyms.filter((g) => (g as { enc?: unknown }).enc),
     topExercises: topExercises(workouts),
     history,
     notes: await notesFor(target.id),

@@ -42,6 +42,13 @@
   --t-line: var(--color-injury-line);
   --t-on: var(--color-injury-tint);
 }
+.uit--chronic {
+  --t-base: var(--color-chronic);
+  --t-tint: var(--color-chronic-tint);
+  --t-text: var(--color-chronic-text);
+  --t-line: var(--color-chronic-line);
+  --t-on: var(--color-chronic-tint);
+}
 .uit--sleep {
   --t-base: var(--color-sleep);
   --t-tint: var(--color-sleep-tint);

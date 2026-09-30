@@ -150,6 +150,10 @@
   --color-injury-tint: #351613;
   --color-injury-text: #f5c9c2;
   --color-injury-line: #6f3129;
+  --color-chronic: #8fa6d8;
+  --color-chronic-tint: #182033;
+  --color-chronic-text: #d3ddf3;
+  --color-chronic-line: #3a4a72;
   /* Active recovery — teal in the rest family, darker than full-rest blue
      (relative luminance 0.46 vs 0.60), 8.8:1 on --color-bg. */
   --color-active: #5cc8a8;

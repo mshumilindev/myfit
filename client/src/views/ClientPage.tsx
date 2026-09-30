@@ -13,7 +13,8 @@ import { BackButton } from '../components/ui/BackButton';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { useCallback, useEffect, useState } from 'react';
-import { cacheFresh, cachePeek, cacheSet, callFn } from '../api';
+import { cacheFresh, cachePeek, cacheSet } from '../api';
+import { fetchProfile } from '../profileFetch';
 import { fmtDayMonth, fmtTonnes, fmtWeekday, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { muscleInfoByName } from '../data/exercises';
@@ -134,7 +135,7 @@ export function ClientPage({
 
   const refresh = useCallback(() => {
     if (cacheFresh(cachePeek<ClientData>(cacheKey), PROFILE_TTL_MS)) return;
-    callFn<ClientData>('profileUser', { id: clientId })
+    fetchProfile<ClientData>(clientId)
       .then((d) => {
         const prev = cachePeek<ClientData>(cacheKey)?.data;
         cacheSet(cacheKey, d);

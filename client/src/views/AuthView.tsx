@@ -118,6 +118,7 @@ export function AuthView({ onLoggedIn }: { onLoggedIn: () => void }) {
         ) : null}
 
         <Button
+          type="submit"
           variant="primary"
           className="fx-fs-15 ug-10 umt-8"
           style={{ minHeight: 48 }}
