@@ -19,6 +19,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { useStore } from '../store';
+import { downgradeMotion, useMotionTier } from '../motion';
 
 const BAND_HUES = ['#ffffff', '#f2f6ff', '#fff4e6', '#dbe6ff', '#ffe6cc', '#cdd8ff'];
 const BRIGHT_HUES = ['#ffffff', '#eaf0ff', '#fff3e2', '#d6e2ff'];
@@ -61,6 +62,9 @@ export function SpotterSky() {
     return Math.max(0.55, Math.min(1, 0.55 + Math.log10(1 + total) * 0.22));
   })();
   const ref = useRef<HTMLCanvasElement | null>(null);
+  // Twinkling only once the device proved it can animate (motion.ts); until then
+  // — and on a slow phone / reduced motion — the galaxy is drawn once, static.
+  const tier = useMotionTier();
 
   useEffect(() => {
     const canvas = ref.current;
@@ -68,7 +72,8 @@ export function SpotterSky() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const reduced =
-      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      tier !== 'full' ||
+      (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches);
     const dpr = Math.min(2, window.devicePixelRatio || 1);
 
     let W = 0;
@@ -79,6 +84,9 @@ export function SpotterSky() {
     let nextShoot = 1400 + Math.random() * 4200;
     let raf = 0;
     let last = 0;
+    let n = 0;
+    let cost = 0;
+    let gaps = 0;
 
     const gauss = (r: () => number, n = 4) => {
       let g = 0;
@@ -308,8 +316,23 @@ export function SpotterSky() {
       raf = requestAnimationFrame(frame);
       if (document.hidden) return;
       if (now - last < 33) return; // ~30fps
+      const gap = last ? now - last : 0;
       last = now;
+      const t0 = performance.now();
       paintFrame(now);
+      // Self-check: if drawing the sky is itself too heavy or the frame rate has
+      // collapsed, give up on animation (the static galaxy stays on screen).
+      cost += performance.now() - t0;
+      gaps += gap;
+      if (++n >= 90) {
+        if (cost / n > 12 || gaps / n > 70) {
+          downgradeMotion();
+          return;
+        }
+        n = 0;
+        cost = 0;
+        gaps = 0;
+      }
     }
 
     resize();
@@ -331,7 +354,7 @@ export function SpotterSky() {
       document.removeEventListener('visibilitychange', onVis);
       window.clearTimeout(rz);
     };
-  }, [richness]);
+  }, [richness, tier]);
 
   return <canvas ref={ref} className="spotter-sky" aria-hidden="true" />;
 }

@@ -121,10 +121,37 @@ html.theme-glass .apex-app {
     0 10px 30px -12px rgba(0, 0, 0, 0.7);
 }
 
-/* --- Screen background: the art mood glow by default ------------------------ */
+/* --- Screen background: the art mood glow, drifting like a lava lamp --------- */
+/* Three glows (LavaBackground) sit exactly where the old static gradient's spots
+   were — a soft purple top-left, the app's gem on the right, a dark shade at the
+   bottom — so with animation off the look is unchanged. They only move once the
+   device has proven it can (motion.ts sets html[data-motion]). Sub-apps swap
+   the colours, not the mechanism. */
+html.theme-glass {
+  --lava-1: rgba(43, 31, 58, 0.95);
+  --lava-2: rgba(138, 100, 46, 0.8);
+  --lava-3: rgba(52, 39, 19, 0.9);
+}
+html.theme-glass.theme-apex {
+  --lava-2: rgba(74, 52, 128, 0.7);
+  --lava-3: rgba(36, 26, 58, 0.9);
+}
+html.theme-glass.theme-learn {
+  --lava-2: rgba(110, 42, 62, 0.7);
+  --lava-3: rgba(58, 20, 32, 0.9);
+}
+html.theme-glass.theme-roster {
+  --lava-1: rgba(43, 31, 58, 0.8);
+  --lava-2: rgba(74, 77, 83, 0.7);
+  --lava-3: rgba(38, 40, 44, 0.9);
+}
+html.theme-glass.theme-nutrition {
+  --lava-1: rgba(43, 31, 58, 0.8);
+  --lava-2: rgba(36, 72, 107, 0.7);
+  --lava-3: rgba(20, 34, 47, 0.9);
+}
 html.theme-glass body {
-  background: var(--mood-art);
-  background-attachment: fixed;
+  background: var(--color-bg);
 }
 html.theme-glass .app,
 html.theme-glass .apex-app,
@@ -133,30 +160,98 @@ html.theme-glass .app-roster,
 html.theme-glass .app-nutrition {
   background: transparent;
 }
-/* Sub-app skins: the same glow in the app's gem (kit.py reskin). */
-html.theme-glass.theme-apex body {
-  background:
-    radial-gradient(80% 42% at 22% 14%, rgba(43, 31, 58, 0.95), transparent 70%),
-    radial-gradient(90% 55% at 88% 34%, rgba(74, 52, 128, 0.7), transparent 70%),
-    radial-gradient(90% 45% at 50% 96%, rgba(36, 26, 58, 0.9), transparent 70%), #121316;
+.lava {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
 }
-html.theme-glass.theme-learn body {
-  background:
-    radial-gradient(80% 42% at 22% 14%, rgba(43, 31, 58, 0.95), transparent 70%),
-    radial-gradient(90% 55% at 88% 34%, rgba(110, 42, 62, 0.7), transparent 70%),
-    radial-gradient(90% 45% at 50% 96%, rgba(58, 20, 32, 0.9), transparent 70%), #121316;
+.lava-blob {
+  position: absolute;
+  display: block;
+  /* box = the visible ellipse (gradient reaches transparent at the box edge) */
+  background: radial-gradient(closest-side, var(--lava-c), transparent);
+  will-change: transform;
 }
-html.theme-glass.theme-roster body {
-  background:
-    radial-gradient(80% 42% at 22% 14%, rgba(43, 31, 58, 0.8), transparent 70%),
-    radial-gradient(90% 55% at 88% 34%, rgba(74, 77, 83, 0.7), transparent 70%),
-    radial-gradient(90% 45% at 50% 96%, rgba(38, 40, 44, 0.9), transparent 70%), #121316;
+.lava-a {
+  --lava-c: var(--lava-1);
+  left: -34vw;
+  top: -15.4vh;
+  width: 112vw;
+  height: 58.8vh;
 }
-html.theme-glass.theme-nutrition body {
-  background:
-    radial-gradient(80% 42% at 22% 14%, rgba(43, 31, 58, 0.8), transparent 70%),
-    radial-gradient(90% 55% at 88% 34%, rgba(36, 72, 107, 0.7), transparent 70%),
-    radial-gradient(90% 45% at 50% 96%, rgba(20, 34, 47, 0.9), transparent 70%), #121316;
+.lava-b {
+  --lava-c: var(--lava-2);
+  left: 25vw;
+  top: -4.5vh;
+  width: 126vw;
+  height: 77vh;
+}
+.lava-c {
+  --lava-c: var(--lava-3);
+  left: -13vw;
+  top: 64.5vh;
+  width: 126vw;
+  height: 63vh;
+}
+@keyframes lava-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(14vw, 16vh, 0) scale(1.12);
+  }
+  66% {
+    transform: translate3d(-8vw, 8vh, 0) scale(0.94);
+  }
+}
+@keyframes lava-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  30% {
+    transform: translate3d(-18vw, 14vh, 0) scale(1.1);
+  }
+  65% {
+    transform: translate3d(-6vw, -12vh, 0) scale(0.92);
+  }
+}
+@keyframes lava-drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  35% {
+    transform: translate3d(20vw, -14vh, 0) scale(1.08);
+  }
+  70% {
+    transform: translate3d(-14vw, -6vh, 0) scale(1.14);
+  }
+}
+/* Animate only on a device that proved it can (probe = measuring, full = passed). */
+html[data-motion='probe'] .lava-a,
+html[data-motion='full'] .lava-a {
+  animation: lava-drift-a 58s ease-in-out infinite;
+}
+html[data-motion='probe'] .lava-b,
+html[data-motion='full'] .lava-b {
+  animation: lava-drift-b 71s ease-in-out infinite;
+}
+html[data-motion='probe'] .lava-c,
+html[data-motion='full'] .lava-c {
+  animation: lava-drift-c 83s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lava-blob {
+    animation: none !important;
+  }
+}
+/* The night sky paints its own full-screen sky: stop drawing the glows under it. */
+html[data-sleep='night'] .lava {
+  display: none;
 }
 html.theme-glass .screen[data-mood='rest'] {
   background: var(--mood-rest);

@@ -10,9 +10,12 @@ import { getLocale } from './i18n';
 import { startAutoUpdate, markUpdateReady } from './pwaUpdate';
 import { lockShellHeight } from './viewportFit';
 import { ServerBusyOverlay } from './ui';
+import { LavaBackground } from './components/LavaBackground';
+import { initMotion } from './motion';
 
 document.documentElement.lang = getLocale();
 lockShellHeight();
+initMotion();
 
 if ('serviceWorker' in navigator) {
   void startAutoUpdate({
@@ -25,6 +28,7 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <LavaBackground />
     <App />
     <ServerBusyOverlay />
   </StrictMode>,
