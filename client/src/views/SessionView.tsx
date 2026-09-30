@@ -3125,11 +3125,15 @@ export function SessionView(props: {
                 onDragEnd={() => {
                   dragId.current = null;
                 }}
+                // History details: an opened exercise folds back on a tap of its
+                // name; everywhere else the name opens the lift's history.
                 onClick={() =>
-                  props.shell.openOverlay({
-                    screen: 'exercise-history',
-                    name: ex.name,
-                  })
+                  props.past && ex.sets.length > 0
+                    ? collapsePast(ex, !!grp)
+                    : props.shell.openOverlay({
+                        screen: 'exercise-history',
+                        name: ex.name,
+                      })
                 }
               >
                 <ExerciseName name={ex.name} />
@@ -3169,14 +3173,7 @@ export function SessionView(props: {
                     size="sm"
                     className="ex-collapse"
                     label={t.navCollapse}
-                    onClick={() => {
-                      const ids = grp
-                        ? workout!.exercises
-                            .filter((e) => e.groupId === ex.groupId)
-                            .map((e) => e.id)
-                        : [ex.id];
-                      setExpandedPast((x) => x.filter((id) => !ids.includes(id)));
-                    }}
+                    onClick={() => collapsePast(ex, !!grp)}
                   />
                 )}
                 {!grp && !focusView && (
@@ -4291,6 +4288,13 @@ export function SessionView(props: {
   }
 
   /** Home sets: move an exercise one slot up / down (the Exercise options). */
+  /** Fold an opened exercise (or its whole superset) back into its row. */
+  function collapsePast(ex: Exercise, grouped: boolean): void {
+    const ids = grouped
+      ? workout!.exercises.filter((e) => e.groupId === ex.groupId).map((e) => e.id)
+      : [ex.id];
+    setExpandedPast((x) => x.filter((id) => !ids.includes(id)));
+  }
   /** Index of an exercise in session order. */
   function orderIndex(ex: Exercise): number {
     return [...workout!.exercises]
