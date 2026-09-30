@@ -1,11 +1,29 @@
 import request from 'supertest';
+import { createServer } from 'node:http';
 import jwt from 'jsonwebtoken';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../server/src/index';
 import { db } from '../server/src/db';
 import { auditRead, requireRole } from '../server/src/auth';
 
 const app = createApp();
+// Keep one listener for the suite instead of opening and closing a port for
+// every request. Each test still resets its database through beforeEach.
+const server = createServer(app);
+beforeAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      server.off('error', reject);
+      resolve();
+    });
+  });
+});
+afterAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+  });
+});
 
 async function req<T>(
   method: string,
@@ -13,7 +31,7 @@ async function req<T>(
   body?: unknown,
   token?: string,
 ): Promise<{ status: number; data: T }> {
-  let call = request(app)[method.toLowerCase() as 'get' | 'post' | 'put' | 'delete'](path);
+  let call = request(server)[method.toLowerCase() as 'get' | 'post' | 'put' | 'delete'](path);
   if (token) call = call.set('Authorization', `Bearer ${token}`);
   if (body !== undefined) call = call.send(body);
   const res = await call;
