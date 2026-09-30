@@ -60,21 +60,31 @@ export function validateRange(
 }
 
 /** Does [a] share at least one day with [b]? Open ranges extend without end. */
-export function rangesOverlap(a: DayRange, b: DayRange): boolean {
-  const aEnd = a.open ? Infinity : a.endDay;
-  const bEnd = b.open ? Infinity : b.endDay;
+export function rangesOverlap(a: DayRange, b: DayRange, today?: number): boolean {
+  // An ongoing period runs up to today (it can't reach into the future).
+  const openEnd = (r: DayRange): number =>
+    today === undefined ? Infinity : Math.max(today, r.startDay);
+  const aEnd = a.open ? openEnd(a) : a.endDay;
+  const bEnd = b.open ? openEnd(b) : b.endDay;
   return a.startDay <= bEnd && b.startDay <= aEnd;
 }
 
-/** Other rest periods that overlap `r` (excluding `excludeId`, e.g. the one
- *  being edited). Newest-created first. */
+/** Other periods that overlap `r` (excluding `excludeId`, e.g. the one being
+ *  edited). Different modes never conflict — rest, active recovery and illness
+ *  can run side by side — so pass `mode` to compare like with like. */
 export function overlappingPeriods(
   r: DayRange,
   periods: RestPeriod[],
   excludeId?: string | null,
+  opts: { mode?: RestMode; today?: number } = {},
 ): RestPeriod[] {
   return periods
-    .filter((p) => p.id !== excludeId && rangesOverlap(r, p))
+    .filter(
+      (p) =>
+        p.id !== excludeId &&
+        (opts.mode === undefined || p.mode === opts.mode) &&
+        rangesOverlap(r, p, opts.today),
+    )
     .sort((a, b) => a.startDay - b.startDay);
 }
 

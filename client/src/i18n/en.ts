@@ -386,9 +386,6 @@ export const en = {
   illnessRecoveredConfirm: "Yes, I'm recovered",
   illnessStillUnwell: 'Still unwell',
   illnessReturnKicker: 'Welcome back',
-  illnessReturnTitle: 'Take it easy today',
-  illnessReturnBody: (days: number) =>
-    `You were out ${days}${days === 1 ? ' day' : ' days'} \u2014 no streak lost. Ease back in: go lighter on your first session.`,
   illnessReturnDismiss: 'Got it',
 
   sleepTitle: 'Sleep',
@@ -3930,6 +3927,34 @@ export const en = {
   hlName: 'Name',
   hlNamePhRest: 'e.g. Vacation',
   hlNamePhIll: 'e.g. Flu',
+  illKindHeader: 'What is it',
+  illKindCold: 'Cold',
+  illKindVirus: 'Virus',
+  illKindStomach: 'Stomach',
+  illKindMental: 'Mental',
+  illHintCold:
+    'Symptoms only above the neck? A light session is usually fine. Below it (fever, chest cough, aches) — rest first.',
+  illHintVirus:
+    'Wait about 72 h symptom-free before training, then build back up over a week or more.',
+  illHintStomach:
+    'Back when you’re eating and drinking normally — about 48 h after the last symptom.',
+  illMentalLead: 'No need to rest up.',
+  illMentalBody:
+    'Low mood, burnout, anxiety: go by feel, small sessions count. If it’s heavy, talk to someone you trust or a professional.',
+  illKindFoot: 'Your return plan is worked out from the type and how long it lasts.',
+  illDurOpenShort: 'Until better',
+  illDurEarlier: 'Earlier day',
+  illKindOther: 'Other',
+  illRetTitle: (step: number, steps: number) => `Easing back in · ${step} of ${steps}`,
+  illRetBody: (pct: number, rpe: number) =>
+    `About ${pct}% of your usual volume, effort up to RPE ${rpe}.`,
+  illRetBodyFree: (pct: number) => `About ${pct}% of your usual volume — go by feel.`,
+  illMentalNote: 'No pressure. Train only if it helps; a walk or a light session counts.',
+  illDoctor: 'Out for weeks? Worth checking in with a doctor.',
+  illStartWarn: (pct: number) =>
+    `You're marked unwell — keep it light, about ${pct}% of your usual volume.`,
+  illStartWarnMental: 'Take it easy — a light session or a walk is plenty today.',
+  illDayNote: (kind: string, n: number) => `${kind} · day ${n}`,
   hlDates: 'Dates',
   hlStarts: 'Starts',
   hlEnds: 'Ends',

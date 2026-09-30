@@ -89,6 +89,18 @@
   }
 }
 
+/* stacked: icon above a short label (a row of small tiles) */
+.uiseg.uiseg--stack .uiseg-opt {
+  height: auto;
+  flex-direction: column;
+  gap: var(--s-6);
+  padding: var(--s-12) var(--s-2);
+  font-size: var(--fs-11);
+}
+.uiseg.uiseg--stack .uiseg-opt .ui-icon {
+  font-size: var(--fs-22);
+}
+
 /* hug: chip-like row — each option is as wide as its label plus even padding. */
 .uiseg--hug {
   grid-auto-flow: column;

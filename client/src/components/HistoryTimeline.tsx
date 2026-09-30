@@ -41,7 +41,12 @@ import {
 import type { MuscleGroup } from '../data/exercises';
 import { nightDurationMin, sleepKindOf } from '../sleep';
 import { useStore } from '../store';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import type { HealthFormSpec } from '../health';
+import { PeriodEditSheet } from './PeriodEditSheet';
+import { fmtRange, illnessKindName, injuryLabel, periodLabel } from '../views/health/parts';
+import type { LocaleId } from '../i18n';
+import type { Strings } from '../i18n/en';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 
 type Item =
@@ -58,8 +63,8 @@ type DayState = 'trained' | 'illness' | 'injury' | 'vacation' | 'rest' | 'missed
 const STATE_TONE: Record<DayState, Tone> = {
   trained: 'ok',
   rest: 'rest',
-  vacation: 'illness',
-  illness: 'active',
+  vacation: 'rest',
+  illness: 'illness',
   injury: 'injury',
   missed: 'danger',
   logged: 'neutral',
@@ -214,6 +219,7 @@ export function HistoryTimeline({
           onOpenActivity={onOpenActivity}
           onOpenSleep={onOpenSleep}
           openMuscleHistory={openMuscleHistory}
+          editable={!restPeriodsOverride}
         />
       ))}
     </div>
@@ -286,6 +292,55 @@ function dayStateOf(dk: number, ts: number, items: Item[], c: StateCtx): DayStat
   return null;
 }
 
+interface PeriodRow {
+  spec: HealthFormSpec;
+  label: string;
+  sub: string;
+  tone: Tone;
+  icon: string;
+}
+
+/** Every logged period / injury covering a day — one row each that opens its
+ *  edit form (states can run side by side). Program rest days have no period. */
+function periodRowsFor(
+  bucket: number,
+  store: ReturnType<typeof useStore>,
+  t: Strings,
+  locale: LocaleId,
+): PeriodRow[] {
+  const today = dayBucket(Date.now());
+  const rows: PeriodRow[] = [];
+  for (const r of store.restPeriods) {
+    const end = r.open ? today : r.endDay;
+    if (bucket < r.startDay || bucket > end) continue;
+    const label = periodLabel(r, t);
+    const kindName =
+      r.mode === 'illness' && r.illnessKind && r.illnessKind !== 'other'
+        ? illnessKindName(r.illnessKind, t)
+        : '';
+    // The kind rides in the sub-line unless it already is the row's name.
+    const kindNote = kindName && kindName !== label ? `${kindName} · ` : '';
+    rows.push({
+      spec: { kind: 'edit', periodId: r.id },
+      label,
+      sub: `${kindNote}${fmtRange(r.startDay, end, locale, today)}`,
+      tone: r.mode === 'illness' ? 'illness' : r.mode === 'active' ? 'active' : 'rest',
+      icon: r.mode === 'illness' ? 'pulse' : r.mode === 'active' ? 'heartbeat' : 'flower-lotus',
+    });
+  }
+  for (const inj of store.injuries ?? []) {
+    if (bucket < inj.startDay || bucket > (inj.healedDay ?? today)) continue;
+    rows.push({
+      spec: { kind: 'edit-injury', injuryId: inj.id },
+      label: injuryLabel(inj, t),
+      sub: fmtRange(inj.startDay, inj.healedDay ?? today, locale, today),
+      tone: 'injury',
+      icon: 'bandaids',
+    });
+  }
+  return rows;
+}
+
 interface DayRowHandlers {
   allWorkouts: Workout[];
   bodyKg: number | null;
@@ -310,7 +365,10 @@ function TimelineDay({
   onOpenActivity,
   onOpenSleep,
   openMuscleHistory,
+  editable = true,
 }: DayRowHandlers & {
+  /** Rows of logged periods open the edit drawer (off in client mode). */
+  editable?: boolean;
   day: TlDay;
   isLast: boolean;
   isToday: boolean;
@@ -318,6 +376,8 @@ function TimelineDay({
   aside?: ReactNode;
 }) {
   const { t, locale } = useT();
+  const store = useStore();
+  const [editSpec, setEditSpec] = useState<HealthFormSpec | null>(null);
   const stateLabel: Record<Exclude<DayState, 'trained' | 'logged'>, string> = {
     rest: t.histStateRest,
     vacation: t.histStateVacation,
@@ -334,6 +394,7 @@ function TimelineDay({
   ]
     .filter(Boolean)
     .join(' · ');
+  const periodRows = editable ? periodRowsFor(day.bucket, store, t, locale) : [];
   const nodeLabel =
     day.state === 'trained' || day.state === 'logged'
       ? undefined
@@ -349,6 +410,27 @@ function TimelineDay({
       isLast={isLast}
       isToday={isToday}
     >
+      {periodRows.length > 0 && (
+        <Card pad="none" emphasis={isToday ? 'glass' : 'card'} className="hist-day-card">
+          {periodRows.map((pr) => (
+            <ListRow
+              key={
+                pr.spec.kind === 'edit'
+                  ? pr.spec.periodId
+                  : pr.spec.kind === 'edit-injury'
+                    ? pr.spec.injuryId
+                    : ''
+              }
+              icon={<IconTile tone={pr.tone} size={30} icon={pr.icon} />}
+              label={pr.label}
+              sub={pr.sub}
+              chevron
+              onClick={() => setEditSpec(pr.spec)}
+            />
+          ))}
+        </Card>
+      )}
+      {editSpec && <PeriodEditSheet spec={editSpec} onClose={() => setEditSpec(null)} />}
       {day.items.length > 0 && (
         <Card pad="none" emphasis={isToday ? 'glass' : 'card'} className="hist-day-card">
           {day.items.map((it) => {

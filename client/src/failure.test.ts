@@ -72,7 +72,7 @@ describe('estimateRpe', () => {
   const ctx: RpeContext = {
     refE1: 100,
     daysSinceLift: 3,
-    illnessDaysAgo: null,
+    illnessCut: 0,
     muscleFatigue: 0,
     sleepShortH: 0,
     priorSets: 0,
@@ -84,7 +84,7 @@ describe('estimateRpe', () => {
     expect(estimateRpe(75, 2, ctx)).toBe(6);
   });
   it('a worse day makes the same set harder', () => {
-    const sick = { ...ctx, illnessDaysAgo: 0, sleepShortH: 2, priorSets: 3 };
+    const sick = { ...ctx, illnessCut: 0.06, sleepShortH: 2, priorSets: 3 };
     expect(readinessFactor(sick).factor).toBeLessThan(0.9);
     expect(estimateRpe(75, 3, sick)!).toBeGreaterThan(estimateRpe(75, 3, ctx)!);
   });

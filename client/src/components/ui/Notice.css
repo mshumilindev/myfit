@@ -15,7 +15,7 @@
 }
 .uinotice-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--s-10);
 }
 .uinotice-i {

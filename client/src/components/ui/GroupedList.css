@@ -20,6 +20,15 @@
 .uigl--raised .uigl-rows {
   background: var(--color-tile);
 }
+.uigl--flat .uigl-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
 .uigl-rows > * {
   position: relative;
 }
@@ -156,5 +165,5 @@ label.uirow {
   color: var(--t-base);
 }
 .uirow-panel {
-  padding: var(--sp-1) var(--sp-4) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
 }

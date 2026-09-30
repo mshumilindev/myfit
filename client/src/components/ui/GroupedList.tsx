@@ -17,8 +17,9 @@ export interface GroupedListProps {
   footerError?: boolean;
   /** Extra footer lines (each its own paragraph). */
   notes?: ReactNode[];
-  /** Surface of the rows: `surface` on the page, `raised` inside a panel / sheet. */
-  surface?: 'surface' | 'raised';
+  /** Surface of the rows: `surface` on the page, `raised` inside a panel / sheet,
+   *  `flat` none — for a control (segmented tiles) that draws its own edge. */
+  surface?: 'surface' | 'raised' | 'flat';
   children: ReactNode;
   className?: string;
   /** Accessible name for the group (defaults to nothing — the header is visual). */
@@ -37,7 +38,12 @@ export function GroupedList({
 }: GroupedListProps) {
   return (
     <section
-      className={['uigl', surface === 'raised' ? 'uigl--raised' : '', className]
+      className={[
+        'uigl',
+        surface === 'raised' ? 'uigl--raised' : '',
+        surface === 'flat' ? 'uigl--flat' : '',
+        className,
+      ]
         .filter(Boolean)
         .join(' ')}
       aria-label={label}

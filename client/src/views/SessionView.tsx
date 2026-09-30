@@ -42,6 +42,7 @@ import { inferFailure, isFailure, suggestFailure, suggestionPresets } from '../f
 import { StatShareSheet } from '../components/StatShareSheet';
 import type { StatShareModel } from '../data/shareCard';
 import { estimateRpe, readinessFactor, type RpeContext } from '../rpe';
+import { illnessState } from '../illness';
 import {
   SESSION_PLATEAU,
   dropTolerance,
@@ -136,7 +137,6 @@ import {
   setRestPrefs,
   setBestE1rm,
   liftReference,
-  dayKey,
   renameExercise,
   replaceExercise,
   setCardioMachine,
@@ -1219,13 +1219,7 @@ export function SessionView(props: {
     // Today's own sets count too: a stronger day raises the reference, so the
     // next sets aren't all read as maximal.
     ref.refE1 = Math.max(ref.refE1, ...ex.sets.map(setBestE1rm));
-    const today = dayKey(at);
-    let illnessDaysAgo: number | null = null;
-    for (const r of store.restPeriods ?? []) {
-      if (r.mode !== 'illness' || r.startDay > today) continue;
-      const ago = r.open || r.endDay >= today ? 0 : today - r.endDay;
-      if (ago < 14 && (illnessDaysAgo === null || ago < illnessDaysAgo)) illnessDaysAgo = ago;
-    }
+    const ill = illnessState(store.restPeriods ?? [], store.workouts, at);
     const primary = resolveMuscles(ex).primary;
     const fat = primary
       ? (muscleFatigue(
@@ -1242,7 +1236,7 @@ export function SessionView(props: {
     return {
       refE1: ref.refE1,
       daysSinceLift: ref.daysSinceLift,
-      illnessDaysAgo,
+      illnessCut: ill.rpeCut,
       muscleFatigue: fat,
       sleepShortH: slept !== null ? Math.max(0, 7 - slept) : 0,
       priorSets,
@@ -2622,7 +2616,7 @@ export function SessionView(props: {
       failure: isFailure(s),
       rpe: s.rpe ?? s.rpeAuto ?? null,
       muscleFatigue: ctx.muscleFatigue,
-      illness: ctx.illnessDaysAgo !== null && ctx.illnessDaysAgo < 7,
+      illness: ctx.illnessCut > 0,
       shortSleep: ctx.sleepShortH >= 1.5,
       midRound,
     });

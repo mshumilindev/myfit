@@ -21,8 +21,8 @@ export interface RpeContext {
   refE1: number;
   /** Days since the lift was last trained (null = unknown). */
   daysSinceLift: number | null;
-  /** 0 = ill right now, n = an illness ended n days ago, null = none recent. */
-  illnessDaysAgo: number | null;
+  /** Fraction taken off e1RM while sick / easing back in (illness.ts; 0 = none). */
+  illnessCut: number;
   /** 0..1 fatigue score of the lift's main muscle (fatigue.ts). */
   muscleFatigue: number;
   /** Hours short of 7 h last night (0 when slept enough / unknown). */
@@ -45,11 +45,7 @@ export function readinessFactor(ctx: RpeContext): { factor: number; parts: Readi
   const d = ctx.daysSinceLift;
   if (d != null && d > 14)
     parts.push({ key: 'detraining', cut: Math.min(0.12, ((d - 14) / 7) * 0.015) });
-  const ill = ctx.illnessDaysAgo;
-  if (ill != null) {
-    const cut = ill <= 0 ? 0.06 : ill < 7 ? ((7 - ill) / 7) * 0.05 : 0;
-    if (cut > 0) parts.push({ key: 'illness', cut });
-  }
+  if (ctx.illnessCut > 0) parts.push({ key: 'illness', cut: ctx.illnessCut });
   if (ctx.muscleFatigue > 0)
     parts.push({ key: 'fatigue', cut: 0.05 * clamp(ctx.muscleFatigue, 0, 1) });
   if (ctx.sleepShortH > 0)

@@ -287,6 +287,11 @@ export interface Reminder {
  *  days (rest up — streak protected, program paused, ease back in on return). */
 export type RestMode = 'active' | 'off' | 'illness';
 
+/** What kind of "unwell" an illness period is (illness.ts turns it — with how
+ *  long it lasted — into the return-to-training plan). `mental` (low mood,
+ *  burnout, anxiety) has no rest-up or ramp: it goes by feel. */
+export type IllnessKind = 'cold' | 'virus' | 'stomach' | 'mental' | 'other';
+
 /** A planned rest / recovery / vacation window. Its days count as rest days in
  *  statistics (not missed) and keep the consistency streak alive. */
 export interface RestPeriod {
@@ -299,6 +304,8 @@ export interface RestPeriod {
   note?: string | null;
   /** User label from the Health form ("Vacation", "Flu"); null = the mode's name. */
   name?: string | null;
+  /** Illness periods only: the kind of unwell. Missing (older records) = 'other'. */
+  illnessKind?: IllnessKind;
   /** Open-ended (illness "until I'm better"): no fixed end yet — treated as
    *  running from startDay up to today until closed via endRestPeriod. */
   open?: boolean;

@@ -41,6 +41,7 @@ import {
   type QueuedMutation,
   type Reminder,
   type RestMode,
+  type IllnessKind,
   type RestPeriod,
   type Injury,
   type RehabStageId,
@@ -2123,6 +2124,7 @@ export function startRestPeriod(input: {
   endDay: number;
   note?: string | null;
   open?: boolean;
+  illnessKind?: IllnessKind;
 }): RestPeriod {
   const period: RestPeriod = {
     id: uuid(),
@@ -2132,6 +2134,7 @@ export function startRestPeriod(input: {
     createdAt: Date.now(),
     note: input.note ?? null,
     ...(input.open ? { open: true } : {}),
+    ...(input.mode === 'illness' && input.illnessKind ? { illnessKind: input.illnessKind } : {}),
   };
   setState({ restPeriods: [period, ...state.restPeriods], syncStatus: bumpPending() });
   writeRestPeriodDoc(period);
@@ -2181,6 +2184,8 @@ export interface RestPeriodInput {
   endDay: number;
   open?: boolean;
   name?: string | null;
+  /** What kind of illness (only meaningful for mode 'illness'). */
+  illnessKind?: IllnessKind;
   /** Needed when the range overlaps another period; else the save is refused. */
   overlap?: RestOverlapChoice;
   /** Workouts inside the range to delete ("Remove the session", F04). */
@@ -2205,8 +2210,9 @@ function resolveRestOverlap(
   mode: RestMode,
   selfId: string | null,
   choice: RestOverlapChoice | undefined,
+  today: number,
 ): ResolvedOverlap | 'overlap' | 'merge-mode' {
-  const others = overlappingPeriods(range, list, selfId);
+  const others = overlappingPeriods(range, list, selfId, { mode, today });
   if (others.length === 0) return { list, range, changed: [], removed: [] };
   if (!choice) return 'overlap';
   if (choice === 'merge') {
@@ -2282,7 +2288,7 @@ function saveRestPeriod(id: string | null, input: RestPeriodInput, now: number):
   const allowFuture = input.allowFuture === true && input.mode !== 'illness';
   const err = validateRange(range, { today, allowFuture });
   if (err) return { ok: false, reason: err };
-  const res = resolveRestOverlap(state.restPeriods, range, input.mode, id, input.overlap);
+  const res = resolveRestOverlap(state.restPeriods, range, input.mode, id, input.overlap, today);
   if (res === 'overlap' || res === 'merge-mode') return { ok: false, reason: res };
   const period: RestPeriod = {
     ...(existing ?? { id: uuid(), createdAt: now, note: null }),
@@ -2292,6 +2298,8 @@ function saveRestPeriod(id: string | null, input: RestPeriodInput, now: number):
     open: res.range.open === true,
     name: cleanName(input.name),
   };
+  if (input.mode === 'illness' && input.illnessKind) period.illnessKind = input.illnessKind;
+  else delete period.illnessKind;
   const list = [period, ...res.list.filter((r) => r.id !== period.id)];
   setState({ restPeriods: list, syncStatus: bumpPending() });
   writeRestPeriodDoc(period);
@@ -2312,27 +2320,6 @@ export function activeRestPeriod(now: number = Date.now()): RestPeriod | null {
 }
 
 /** Every day key covered by any rest period. */
-/** Just came back from illness: the most recent finished illness period ended
- *  within the last 2 days and no workout has been logged since. Drives the soft
- *  "ease back in" return card. */
-export function illnessReturn(now: number = Date.now()): { daysOut: number } | null {
-  const today = dayKey(now);
-  const last = state.restPeriods
-    .filter((r) => r.mode === 'illness' && !r.open && r.endDay < today)
-    .sort((a, b) => b.endDay - a.endDay)[0];
-  if (!last) return null;
-  if (today - last.endDay > 2) return null;
-  // A single sick day (e.g. "just today") needs no easing-back ritual — once
-  // it's past, it should leave nothing behind. Only ease back after 2+ days out.
-  const daysOut = last.endDay - last.startDay + 1;
-  if (daysOut < 2) return null;
-  const trainedSince = state.workouts.some(
-    (w) => w.finishedAt !== null && dayKey(w.startedAt) > last.endDay,
-  );
-  if (trainedSince) return null;
-  return { daysOut };
-}
-
 export function restDayKeys(
   periods: RestPeriod[] = state.restPeriods,
   now: number = Date.now(),

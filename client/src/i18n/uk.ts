@@ -441,9 +441,6 @@ export const uk: Strings = {
   illnessRecoveredConfirm: 'Так, я одужав',
   illnessStillUnwell: 'Ще хворію',
   illnessReturnKicker: 'З поверненням',
-  illnessReturnTitle: 'Сьогодні легше',
-  illnessReturnBody: (days: number) =>
-    `Тебе не було ${days} дн. — стрік не втрачено. Повертайся плавно: перша сесія легша.`,
   illnessReturnDismiss: 'Зрозуміло',
 
   sleepTitle: 'Сон',
@@ -3946,6 +3943,35 @@ export const uk: Strings = {
   hlName: 'Назва',
   hlNamePhRest: 'напр. Відпустка',
   hlNamePhIll: 'напр. Грип',
+  illKindHeader: 'Що саме',
+  illKindCold: 'Застуда',
+  illKindVirus: 'Вірус',
+  illKindStomach: 'Шлунок',
+  illKindMental: 'Ментальне',
+  illHintCold:
+    'Симптоми лише вище шиї? Легке тренування зазвичай ок. Нижче (температура, кашель у грудях, ломота) — спершу відпочинь.',
+  illHintVirus:
+    'Зачекай близько 72 год без симптомів, потім нарощуй навантаження тиждень чи довше.',
+  illHintStomach:
+    'Повертайся, коли нормально їси й п’єш — приблизно через 48 год після останнього симптому.',
+  illMentalLead: 'Відпочивати не обов’язково.',
+  illMentalBody:
+    'Поганий настрій, вигорання, тривога: орієнтуйся на самопочуття, маленькі сесії теж зараховуються. Якщо важко — поговори з близькою людиною чи фахівцем.',
+  illKindFoot: 'План повернення розраховується з типу та тривалості.',
+  illDurOpenShort: 'Поки не краще',
+  illDurEarlier: 'Раніше',
+  illKindOther: 'Інше',
+  illRetTitle: (step: number, steps: number) => `Повертаємось · ${step} з ${steps}`,
+  illRetBody: (pct: number, rpe: number) =>
+    `Близько ${pct}% звичного об’єму, зусилля до RPE ${rpe}.`,
+  illRetBodyFree: (pct: number) => `Близько ${pct}% звичного об’єму — за самопочуттям.`,
+  illMentalNote:
+    'Без тиску. Тренуйся, лише якщо це допомагає; прогулянка чи легка сесія — теж зараховується.',
+  illDoctor: 'Хворієш тижнями? Варто звернутись до лікаря.',
+  illStartWarn: (pct: number) =>
+    `Ти позначений(а) як хворий(а) — тримай легко, близько ${pct}% звичного об’єму.`,
+  illStartWarnMental: 'Не поспішай — легкого тренування чи прогулянки сьогодні досить.',
+  illDayNote: (kind: string, n: number) => `${kind} · день ${n}`,
   hlDates: 'Дати',
   hlStarts: 'Початок',
   hlEnds: 'Кінець',

@@ -35,6 +35,8 @@ export interface SegmentedProps<V extends string | number> {
   size?: 'sm' | 'md';
   /** Options size to their label (chip-like row) instead of equal columns. */
   hug?: boolean;
+  /** Icon above the label (a row of small tiles, e.g. an illness kind). */
+  stacked?: boolean;
   className?: string;
 }
 
@@ -50,6 +52,7 @@ export function Segmented<V extends string | number>({
   size = 'md',
   tabs,
   hug = false,
+  stacked = false,
   className,
 }: SegmentedProps<V>) {
   return (
@@ -60,6 +63,7 @@ export function Segmented<V extends string | number>({
         `uiseg--${size}`,
         options.length >= 5 ? 'is-dense' : '',
         hug ? 'uiseg--hug' : '',
+        stacked ? 'uiseg--stack' : '',
         toneClass(tone),
         className,
       ]
@@ -84,7 +88,7 @@ export function Segmented<V extends string | number>({
             disabled={o.disabled}
             onClick={() => onChange(o.value)}
           >
-            {o.icon && <Icon name={o.icon} />}
+            {o.icon && <Icon name={o.icon} weight={stacked ? 'regular' : undefined} />}
             <span className="uiseg-l">{o.label}</span>
           </button>
         );

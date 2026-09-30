@@ -6,6 +6,8 @@
  * Health (sleep, rest, illness, injury — the full Health page) and Log past.
  * The backfill sub-sheet lives here too so Today can reuse it.
  */
+import { illnessState } from '../illness';
+import { Notice } from './ui/Notice';
 import { Chip } from '../components/ui/Chip';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Button } from './ui/Button';
@@ -83,6 +85,7 @@ export function StartSheet({
   // Log past (it doesn't start anything) stay open.
   const locked = (!!open && open.exercises.length > 0) || !!liveAct || !!sleepLive;
   const activeRest = activeRestPeriod(now);
+  const illSt = illnessState(store.restPeriods, store.workouts, now);
 
   const finished = useMemo(
     () => store.workouts.filter((w) => w.finishedAt !== null),
@@ -273,6 +276,13 @@ export function StartSheet({
   return (
     <StartFrame inline={inline} onClose={closeProp} sub={subEl} tone={doneToday ? 'ok' : undefined}>
       <div className="ss-title">{t.startSheetTitle}</div>
+      {illSt.phase === 'sick' || illSt.phase === 'returning' || illSt.phase === 'mental' ? (
+        <Notice tone="illness" icon="thermometer-simple">
+          {illSt.phase === 'mental'
+            ? t.illStartWarnMental
+            : t.illStartWarn(Math.round(illSt.caps.volume * 100))}
+        </Notice>
+      ) : null}
       {lastToday ? (
         <>
           <Card

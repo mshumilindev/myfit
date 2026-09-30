@@ -29,12 +29,12 @@ export function StickyActionBar({
 }: StickyActionBarProps) {
   return (
     <div
-      className={['uibar', `uibar--${variant}`, `uibar--on-${surface}`, className]
+      className={['uiab', `uiab--${variant}`, `uiab--on-${surface}`, className]
         .filter(Boolean)
         .join(' ')}
     >
-      {note != null && <div className="uibar-note">{note}</div>}
-      <div className="uibar-acts">{children}</div>
+      {note != null && <div className="uiab-note">{note}</div>}
+      <div className="uiab-acts">{children}</div>
     </div>
   );
 }

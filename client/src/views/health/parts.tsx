@@ -6,7 +6,7 @@
 import type { ReactNode } from 'react';
 import type { LocaleId } from '../../i18n';
 import type { Strings } from '../../i18n/en';
-import type { Injury, RestMode, RestPeriod } from '../../types';
+import type { IllnessKind, Injury, RestMode, RestPeriod } from '../../types';
 import { dayToTs, type HealthItem, type HealthKind } from '../../health';
 import { REHAB_STAGES, stageIndex } from '../../injury';
 import { IconTile } from '../../components/ui/IconTile';
@@ -147,8 +147,30 @@ export function typeName(type: HealthType, t: Strings): string {
   return t.hlFilter.injury;
 }
 
+export function illnessKindName(k: IllnessKind, t: Strings): string {
+  if (k === 'cold') return t.illKindCold;
+  if (k === 'virus') return t.illKindVirus;
+  if (k === 'stomach') return t.illKindStomach;
+  if (k === 'mental') return t.illKindMental;
+  return t.illKindOther;
+}
+
+export const ILLNESS_KIND_ICON: Record<IllnessKind, string> = {
+  cold: 'snowflake',
+  virus: 'virus',
+  stomach: 'drop',
+  mental: 'brain',
+  other: 'question',
+};
+
+/** The name shown for a period: the one the user typed, else (for illness) the
+ *  kind picked under "What is it", else the plain type name. */
 export function periodLabel(p: RestPeriod, t: Strings): string {
-  return p.name?.trim() || typeName(p.mode, t);
+  const typed = p.name?.trim();
+  if (typed) return typed;
+  if (p.mode === 'illness' && p.illnessKind && p.illnessKind !== 'other')
+    return illnessKindName(p.illnessKind, t);
+  return typeName(p.mode, t);
 }
 
 export function injuryLabel(i: Injury, t: Strings): string {

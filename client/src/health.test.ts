@@ -239,19 +239,36 @@ describe('store: logRestPeriod', () => {
     });
   });
 
-  it('refuses an unresolved overlap', () => {
+  it('refuses an unresolved overlap of the same mode', () => {
     seed([period({ id: 'vac', startDay: D(8, 1), endDay: D(8, 10) })]);
-    expect(logRestPeriod({ mode: 'illness', startDay: D(8, 5), endDay: D(8, 6) }, NOW)).toEqual({
+    expect(logRestPeriod({ mode: 'off', startDay: D(8, 5), endDay: D(8, 6) }, NOW)).toEqual({
       ok: false,
       reason: 'overlap',
     });
     expect(__getStateForTests().restPeriods).toHaveLength(1);
   });
 
-  it('replace cuts the new days out of the other period (split in two)', () => {
+  it('lets different modes (rest, active, illness) run side by side', () => {
+    seed([period({ id: 'vac', startDay: D(8, 1), endDay: D(8, 10) })]);
+    expect(logRestPeriod({ mode: 'illness', startDay: D(8, 5), endDay: D(8, 6) }, NOW).ok).toBe(
+      true,
+    );
+    const list = __getStateForTests().restPeriods;
+    expect(list).toHaveLength(2);
+    expect(list.find((p) => p.id === 'vac')).toMatchObject({ startDay: D(8, 1), endDay: D(8, 10) });
+  });
+
+  it('an ongoing illness does not overlap a period that starts after today', () => {
+    seed([period({ id: 'trip', startDay: D(10, 3), endDay: D(10, 6) })]);
+    expect(
+      logRestPeriod({ mode: 'off', startDay: D(9, 20), endDay: D(9, 20), open: true }, NOW).ok,
+    ).toBe(true);
+  });
+
+  it('replace cuts the new days out of the other same-mode period (split in two)', () => {
     seed([period({ id: 'vac', startDay: D(8, 1), endDay: D(8, 10) })]);
     const res = logRestPeriod(
-      { mode: 'illness', startDay: D(8, 4), endDay: D(8, 6), overlap: 'replace' },
+      { mode: 'off', startDay: D(8, 4), endDay: D(8, 6), overlap: 'replace' },
       NOW,
     );
     expect(res.ok).toBe(true);
@@ -260,19 +277,13 @@ describe('store: logRestPeriod', () => {
       .sort((a, b) => (a[1] as number) - (b[1] as number));
     expect(list).toEqual([
       ['off', D(8, 1), D(8, 3)],
-      ['illness', D(8, 4), D(8, 6)],
+      ['off', D(8, 4), D(8, 6)],
       ['off', D(8, 7), D(8, 10)],
     ]);
   });
 
-  it('merge folds same-mode periods into one and refuses mixed modes', () => {
+  it('merge folds same-mode periods into one', () => {
     seed([period({ id: 'vac', startDay: D(8, 1), endDay: D(8, 10) })]);
-    expect(
-      logRestPeriod(
-        { mode: 'illness', startDay: D(8, 8), endDay: D(8, 14), overlap: 'merge' },
-        NOW,
-      ),
-    ).toEqual({ ok: false, reason: 'merge-mode' });
     const res = logRestPeriod(
       { mode: 'off', startDay: D(8, 8), endDay: D(8, 14), overlap: 'merge' },
       NOW,

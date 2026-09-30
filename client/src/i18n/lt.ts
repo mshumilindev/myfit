@@ -417,9 +417,6 @@ export const lt: Strings = {
   illnessRecoveredConfirm: 'Taip, pasveikau',
   illnessStillUnwell: 'Vis dar sergu',
   illnessReturnKicker: 'Sveikas sugrįžęs',
-  illnessReturnTitle: 'Šiandien lengviau',
-  illnessReturnBody: (days: number) =>
-    `Nebuvai ${days} d. — serija išlikusi. Grįžk palaipsniui: pirma treniruotė lengvesnė.`,
   illnessReturnDismiss: 'Supratau',
 
   sleepTitle: 'Miegas',
@@ -3943,6 +3940,32 @@ export const lt: Strings = {
   hlName: 'Pavadinimas',
   hlNamePhRest: 'pvz. Atostogos',
   hlNamePhIll: 'pvz. Gripas',
+  illKindHeader: 'Kas tai',
+  illKindCold: 'Peršalimas',
+  illKindVirus: 'Virusas',
+  illKindStomach: 'Skrandis',
+  illKindMental: 'Psichika',
+  illHintCold:
+    'Simptomai tik virš kaklo? Lengva treniruotė paprastai tinka. Žemiau (karščiavimas, kosulys krūtinėje, maudimas) — pirmiausia pailsėk.',
+  illHintVirus: 'Palauk apie 72 val. be simptomų, tada grįžk į formą per savaitę ar ilgiau.',
+  illHintStomach: 'Grįžk, kai įprastai valgai ir geri — apie 48 val. po paskutinio simptomo.',
+  illMentalLead: 'Nebūtina ilsėtis.',
+  illMentalBody:
+    'Prasta nuotaika, perdegimas, nerimas: sek savijautą, mažos treniruotės irgi skaičiuojasi. Jei sunku, pasikalbėk su artimu žmogumi ar specialistu.',
+  illKindFoot: 'Sugrįžimo planas apskaičiuojamas pagal tipą ir trukmę.',
+  illDurOpenShort: 'Kol pagerės',
+  illDurEarlier: 'Anksčiau',
+  illKindOther: 'Kita',
+  illRetTitle: (step: number, steps: number) => `Grįžtama · ${step} iš ${steps}`,
+  illRetBody: (pct: number, rpe: number) =>
+    `Apie ${pct}% įprasto apimties, pastangos iki RPE ${rpe}.`,
+  illRetBodyFree: (pct: number) => `Apie ${pct}% įprasto apimties — pagal savijautą.`,
+  illMentalNote:
+    'Be spaudimo. Sportuok tik jei padeda; pasivaikščiojimas ar lengva treniruotė irgi skaičiuojasi.',
+  illDoctor: 'Serga savaitėmis? Verta pasitarti su gydytoju.',
+  illStartWarn: (pct: number) => `Pažymėta, kad sergi — lengvai, apie ${pct}% įprasto apimties.`,
+  illStartWarnMental: 'Nesiskubink — šiandien pakanka lengvos treniruotės ar pasivaikščiojimo.',
+  illDayNote: (kind: string, n: number) => `${kind} · ${n} diena`,
   hlDates: 'Datos',
   hlStarts: 'Pradžia',
   hlEnds: 'Pabaiga',

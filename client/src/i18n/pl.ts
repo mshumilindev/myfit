@@ -408,9 +408,6 @@ export const pl: Strings = {
   illnessRecoveredConfirm: 'Tak, wyzdrowiałem',
   illnessStillUnwell: 'Wciąż choruję',
   illnessReturnKicker: 'Witaj z powrotem',
-  illnessReturnTitle: 'Weź dziś na spokojnie',
-  illnessReturnBody: (days: number) =>
-    `Nie było Cię ${days} dni — passa cała. Wracaj łagodnie: pierwsza sesja lżejsza.`,
   illnessReturnDismiss: 'Rozumiem',
 
   sleepTitle: 'Sen',
@@ -3922,6 +3919,33 @@ export const pl: Strings = {
   hlName: 'Nazwa',
   hlNamePhRest: 'np. Urlop',
   hlNamePhIll: 'np. Grypa',
+  illKindHeader: 'Co to jest',
+  illKindCold: 'Przeziębienie',
+  illKindVirus: 'Wirus',
+  illKindStomach: 'Żołądek',
+  illKindMental: 'Psychika',
+  illHintCold:
+    'Objawy tylko powyżej szyi? Lekki trening zwykle jest ok. Poniżej (gorączka, kaszel w klatce, bóle) — najpierw odpocznij.',
+  illHintVirus: 'Poczekaj ok. 72 h bez objawów, potem wracaj do formy przez tydzień lub dłużej.',
+  illHintStomach: 'Wróć, gdy normalnie jesz i pijesz — ok. 48 h po ostatnim objawie.',
+  illMentalLead: 'Nie musisz odpoczywać.',
+  illMentalBody:
+    'Obniżony nastrój, wypalenie, lęk: kieruj się samopoczuciem, małe sesje się liczą. Jeśli jest ciężko, porozmawiaj z kimś zaufanym lub specjalistą.',
+  illKindFoot: 'Plan powrotu wynika z rodzaju i czasu trwania.',
+  illDurOpenShort: 'Do poprawy',
+  illDurEarlier: 'Wcześniej',
+  illKindOther: 'Inne',
+  illRetTitle: (step: number, steps: number) => `Powrót · ${step} z ${steps}`,
+  illRetBody: (pct: number, rpe: number) =>
+    `Około ${pct}% zwykłej objętości, wysiłek do RPE ${rpe}.`,
+  illRetBodyFree: (pct: number) => `Około ${pct}% zwykłej objętości — według samopoczucia.`,
+  illMentalNote:
+    'Bez presji. Trenuj tylko, jeśli to pomaga; spacer lub lekki trening też się liczy.',
+  illDoctor: 'Choroba trwa tygodniami? Warto skonsultować się z lekarzem.',
+  illStartWarn: (pct: number) =>
+    `Jesteś oznaczony(a) jako chory(a) — lekko, około ${pct}% zwykłej objętości.`,
+  illStartWarnMental: 'Spokojnie — lekki trening lub spacer wystarczy.',
+  illDayNote: (kind: string, n: number) => `${kind} · dzień ${n}`,
   hlDates: 'Daty',
   hlStarts: 'Początek',
   hlEnds: 'Koniec',

@@ -6,6 +6,7 @@
  * pinned Cancel / primary bar. Injuries swap the dates for body part + side,
  * the day it happened and "Healed on …" / "Still healing → rehab plan".
  */
+import '../Health.css';
 import { BackButton } from '../../components/ui/BackButton';
 import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import { useT } from '../../i18n';
@@ -34,13 +35,16 @@ import {
 } from '../../health';
 import { BODY_PARTS, bodyPart as findBodyPart } from '../../injury';
 import { useWeekStartDay } from '../../weekStart';
-import type { InjurySide, RestMode } from '../../types';
+import type { IllnessKind, InjurySide, RestMode } from '../../types';
+import { ILLNESS_KINDS } from '../../illness';
+import { Sheet } from '../../ui';
 import { Button, IconButton } from '../../components/ui/Button';
 import { Calendar } from '../../components/ui/Calendar';
 import { Field } from '../../components/ui/Field';
 import { GroupedList, ListPanel, ListRow } from '../../components/ui/GroupedList';
 import { PresetChips } from '../../components/ui/PresetChips';
 import { Segmented } from '../../components/ui/Segmented';
+import { Notice } from '../../components/ui/Notice';
 import { StickyActionBar } from '../../components/ui/StickyActionBar';
 import { Switch } from '../../components/ui/Switch';
 import type { Tone as KitTone } from '../../components/ui/tones';
@@ -54,6 +58,8 @@ import {
   iconOf,
   injuryLabel,
   periodLabel,
+  illnessKindName,
+  ILLNESS_KIND_ICON,
   toneOf,
   typeName,
   type HealthType,
@@ -96,6 +102,8 @@ export function HealthForm(props: {
   onDone: () => void;
   /** "Still healing → Continue to rehab plan": the existing Injury & Rehab flow. */
   onRehab: (p: RehabPrefill) => void;
+  /** `sheet`: the edit form hosted in a drawer (History rows); default is the page. */
+  presentation?: 'page' | 'sheet';
 }) {
   const { t, locale } = useT();
   const store = useStore();
@@ -112,6 +120,11 @@ export function HealthForm(props: {
   const [init] = useState(() => initialState(spec, editing ?? null, editingInj ?? null, today));
   const [type, setType] = useState<HealthType>(init.type);
   const [name, setName] = useState(init.name);
+  const [kind, setKind] = useState<IllnessKind>(init.kind);
+  // "How long" (illness): the calendar only opens for "Earlier day".
+  const [dur, setDur] = useState<'today' | 'open' | 'earlier'>(() =>
+    init.start < today ? 'earlier' : init.open ? 'open' : 'today',
+  );
   const [start, setStart] = useState(init.start);
   const [end, setEnd] = useState(init.end);
   const [open, setOpen] = useState(init.open);
@@ -149,7 +162,9 @@ export function HealthForm(props: {
   const keptDays = new Set(
     inRange.filter((w) => !removeIds.has(w.id)).map((w) => dayOfTs(w.startedAt)),
   );
-  const others = isInjury ? [] : overlappingPeriods(range, store.restPeriods, editing?.id ?? null);
+  const others = isInjury
+    ? []
+    : overlappingPeriods(range, store.restPeriods, editing?.id ?? null, { mode, today });
   const canMerge = others.length > 0 && others.every((o) => o.mode === mode);
   const effChoice = choice === 'merge' && !canMerge ? null : choice;
 
@@ -161,6 +176,20 @@ export function HealthForm(props: {
   } else {
     err = validateRange(range, { today, allowFuture });
   }
+  // Editing: "Save changes" waits until something actually changed.
+  const dirty =
+    type !== init.type ||
+    name.trim() !== init.name.trim() ||
+    (type === 'illness' && kind !== init.kind) ||
+    start !== init.start ||
+    open !== init.open ||
+    (!open && end !== init.end) ||
+    part !== init.part ||
+    side !== init.side ||
+    healed !== init.healed ||
+    (healed && healedDay !== init.healedDay) ||
+    removeIds.size > 0 ||
+    choice !== null;
   const blocked = !!err || (isInjury && !part) || (others.length > 0 && !effChoice);
 
   // --- type options -----------------------------------------------------------
@@ -292,6 +321,7 @@ export function HealthForm(props: {
       endDay: open ? Math.max(start, today) : end,
       open,
       name,
+      illnessKind: type === 'illness' ? kind : undefined,
       overlap: effChoice ?? undefined,
       removeWorkoutIds: inRange.filter((w) => removeIds.has(w.id)).map((w) => w.id),
       allowFuture,
@@ -331,19 +361,29 @@ export function HealthForm(props: {
       }
     />
   );
+  // The type dropdown is a drawer: the options are choices of their own, never
+  // more rows of the form.
   const typeChoices =
-    expand === 'type'
-      ? typeOptions.map((o) => (
-          <ListRow
-            key={o}
-            label={typeName(o, t)}
-            aria-pressed={o === type}
-            check={o === type}
-            checkTone={KIT_TONE[toneOf(o)]}
-            onClick={() => pickType(o)}
-          />
-        ))
-      : null;
+    expand === 'type' ? (
+      <Sheet onClose={() => setExpand(null)}>
+        <div className="hl hl-drawer">
+          <h1 className="hl-pt">{t.hlType}</h1>
+          <GroupedList surface="raised" label={t.hlType}>
+            {typeOptions.map((o) => (
+              <ListRow
+                key={o}
+                icon={<Ic tone={toneOf(o)} name={iconOf(o)} />}
+                label={typeName(o, t)}
+                aria-pressed={o === type}
+                check={o === type}
+                checkTone={KIT_TONE[toneOf(o)]}
+                onClick={() => pickType(o)}
+              />
+            ))}
+          </GroupedList>
+        </div>
+      </Sheet>
+    ) : null;
 
   const periodGroup = (
     <GroupedList header={t.hlPeriod}>
@@ -356,12 +396,54 @@ export function HealthForm(props: {
           type="text"
           value={name}
           maxLength={60}
-          placeholder={type === 'illness' ? t.hlNamePhIll : t.hlNamePhRest}
+          placeholder={
+            type === 'illness'
+              ? kind === 'other'
+                ? t.hlNamePhIll
+                : illnessKindName(kind, t)
+              : t.hlNamePhRest
+          }
           onChange={(e) => setName(e.target.value)}
         />
       </ListRow>
     </GroupedList>
   );
+
+  // "What is it": the illness kind. Leaving the name empty falls back to it, and
+  // a name the user typed is never touched when the kind changes.
+  const kindGroup =
+    type === 'illness' ? (
+      <GroupedList surface="flat" header={t.illKindHeader}>
+        <Segmented
+          variant="buttons"
+          stacked
+          tone="illness"
+          label={t.illKindHeader}
+          value={kind}
+          onChange={setKind}
+          options={ILLNESS_KINDS.map((k) => ({
+            value: k,
+            label: illnessKindName(k, t),
+            icon: ILLNESS_KIND_ICON[k],
+          }))}
+        />
+        <Notice tone="illness" icon={kind === 'mental' ? 'brain' : 'thermometer-simple'}>
+          {kind === 'mental' ? (
+            <>
+              <b>{t.illMentalLead}</b> {t.illMentalBody}
+            </>
+          ) : kind === 'cold' ? (
+            t.illHintCold
+          ) : kind === 'virus' ? (
+            t.illHintVirus
+          ) : kind === 'stomach' ? (
+            t.illHintStomach
+          ) : (
+            t.illKindFoot
+          )}
+        </Notice>
+      </GroupedList>
+    ) : null;
 
   /** Accessible day label: "Sat 12 Sep", + ongoing / workout notes. */
   const dayLabel = (d: number) => {
@@ -401,12 +483,66 @@ export function HealthForm(props: {
     </ListPanel>
   );
 
-  const datesGroup = (
+  const pickDur = (next: 'today' | 'open' | 'earlier') => {
+    setDur(next);
+    setChoice(null);
+    if (next === 'today') {
+      setStart(today);
+      setEnd(today);
+      setOpen(false);
+      setExpand(null);
+    } else if (next === 'open') {
+      setStart(today);
+      setEnd(today);
+      setOpen(true);
+      setExpand(null);
+    } else {
+      if (start >= today) {
+        setStart(today - 1);
+        if (!open) setEnd(today - 1);
+      }
+      setExpand('start');
+    }
+  };
+  const byDuration = type === 'illness';
+  const showDateRows = !byDuration || dur === 'earlier';
+
+  const datesFoot = err
+    ? err === 'future' && type === 'illness'
+      ? t.hlIllNoFuture
+      : t.hlErr[err]
+    : byDuration && dur === 'open'
+      ? t.illnessNoEnd
+      : lenNote;
+  // Illness: "How long" is its own block (tabs), the date rows a second one that
+  // only appears for "Earlier day".
+  const durGroup = byDuration ? (
+    <GroupedList
+      surface="flat"
+      header={t.illnessDur}
+      footer={showDateRows ? undefined : datesFoot}
+      footerError={!showDateRows && !!err}
+      notes={ctx === 'start' && !err && !showDateRows ? [t.hlIllNoFuture] : undefined}
+    >
+      <Segmented
+        variant="track"
+        tone="illness"
+        label={t.illnessDur}
+        value={dur}
+        onChange={pickDur}
+        options={[
+          { value: 'today', label: t.illnessDurToday },
+          { value: 'open', label: t.illDurOpenShort },
+          { value: 'earlier', label: t.illDurEarlier },
+        ]}
+      />
+    </GroupedList>
+  ) : null;
+
+  const datesGroup = !showDateRows ? null : (
     <GroupedList
       header={t.hlDates}
-      footer={
-        err ? (err === 'future' && type === 'illness' ? t.hlIllNoFuture : t.hlErr[err]) : lenNote
-      }
+      footer={datesFoot}
       footerError={!!err}
       notes={type === 'illness' && ctx === 'start' && !err ? [t.hlIllNoFuture] : undefined}
     >
@@ -830,21 +966,31 @@ export function HealthForm(props: {
   ) : null;
 
   const bar = (
-    <StickyActionBar variant={props.web ? 'panel' : 'page'} surface={props.web ? 'surface' : 'bg'}>
+    <StickyActionBar
+      variant={props.web ? 'panel' : 'page'}
+      surface={props.web || props.presentation === 'sheet' ? 'surface' : 'bg'}
+    >
       <Button variant="secondary" fullWidth onClick={props.onCancel}>
         {t.cancel}
       </Button>
-      <Button variant="primary" fullWidth disabled={blocked} onClick={save}>
+      <Button
+        variant="primary"
+        fullWidth
+        disabled={blocked || (ctx === 'edit' && !dirty)}
+        onClick={save}
+      >
         {primary}
       </Button>
     </StickyActionBar>
   );
 
   // Mobile order follows F03–F06/F09; web splits into dates | period + overlap.
-  const left: ReactNode[] = isInjury ? [whereGroup, whenGroup] : [datesGroup];
+  const left: ReactNode[] = isInjury
+    ? [whereGroup, whenGroup]
+    : [periodGroup, kindGroup, durGroup, datesGroup];
   const right: ReactNode[] = isInjury
     ? [howGroup, deleteGroup, saveError]
-    : [periodGroup, doesGroup, overlapGroup, conflictGroup, deleteGroup, saveError];
+    : [doesGroup, overlapGroup, conflictGroup, deleteGroup, saveError];
 
   if (props.web) {
     const sub =
@@ -877,7 +1023,30 @@ export function HealthForm(props: {
   }
   const mobileOrder: ReactNode[] = isInjury
     ? [whereGroup, whenGroup, howGroup, deleteGroup, saveError]
-    : [periodGroup, datesGroup, doesGroup, overlapGroup, conflictGroup, deleteGroup, saveError];
+    : [
+        periodGroup,
+        kindGroup,
+        durGroup,
+        datesGroup,
+        doesGroup,
+        overlapGroup,
+        conflictGroup,
+        deleteGroup,
+        saveError,
+      ];
+  if (props.presentation === 'sheet') {
+    return (
+      <Sheet onClose={props.onCancel} tone={kt}>
+        <div className="hl hl-drawer">
+          <h1 className="hl-pt">{title}</h1>
+          <div className="hl-scroll">
+            <div className="hl-cnt">{withKeys(mobileOrder)}</div>
+          </div>
+          {bar}
+        </div>
+      </Sheet>
+    );
+  }
   return (
     <div className="screen hl">
       <div className="hl-pbar">
@@ -909,6 +1078,7 @@ interface Init {
   side: InjurySide;
   healed: boolean;
   healedDay: number;
+  kind: IllnessKind;
 }
 
 function initialState(
@@ -928,12 +1098,14 @@ function initialState(
     side: 'left',
     healed: false,
     healedDay: today,
+    kind: 'cold',
   };
   if (spec.kind === 'edit' && period) {
     return {
       ...base,
       type: period.mode,
       name: period.name ?? '',
+      kind: period.illnessKind ?? 'other',
       start: period.startDay,
       end: period.open ? Math.max(today, period.startDay) : period.endDay,
       open: period.open === true,
@@ -953,7 +1125,7 @@ function initialState(
   if (spec.kind !== 'new') return base;
   if (spec.type === 'injury') return { ...base, type: 'injury' };
   if (spec.ctx === 'start') {
-    if (spec.type === 'illness') return { ...base, type: 'illness', open: true, expand: 'start' };
+    if (spec.type === 'illness') return { ...base, type: 'illness', expand: null };
     return { ...base, type: spec.type, end: today + 6, expand: 'end' };
   }
   return { ...base, type: spec.type, start: today - 1, end: today - 1, expand: 'start' };

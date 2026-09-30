@@ -396,9 +396,6 @@ export const et: Strings = {
   illnessRecoveredConfirm: 'Jah, olen terve',
   illnessStillUnwell: 'Endiselt haige',
   illnessReturnKicker: 'Tere tulemast tagasi',
-  illnessReturnTitle: 'Võta täna rahulikult',
-  illnessReturnBody: (days: number) =>
-    `Olid eemal ${days} päeva — seeria alles. Naase tasa: esimene trenn kergem.`,
   illnessReturnDismiss: 'Selge',
 
   sleepTitle: 'Uni',
@@ -3899,6 +3896,32 @@ export const et: Strings = {
   hlName: 'Nimi',
   hlNamePhRest: 'nt Puhkus',
   hlNamePhIll: 'nt Gripp',
+  illKindHeader: 'Mis see on',
+  illKindCold: 'Külmetus',
+  illKindVirus: 'Viirus',
+  illKindStomach: 'Kõht',
+  illKindMental: 'Vaimne',
+  illHintCold:
+    'Sümptomid ainult kaelast kõrgemal? Kerge trenn on tavaliselt okei. Allpool (palavik, köha rinnus, valud) — puhka enne.',
+  illHintVirus: 'Oota umbes 72 h sümptomiteta, siis ehita vorm üles nädala või kauem.',
+  illHintStomach:
+    'Tule tagasi, kui sööd ja jood normaalselt — umbes 48 h pärast viimast sümptomit.',
+  illMentalLead: 'Puhkama ei pea.',
+  illMentalBody:
+    'Madal meeleolu, läbipõlemine, ärevus: lähtu enesetundest, väikesed trennid loevad. Kui on raske, räägi lähedase või spetsialistiga.',
+  illKindFoot: 'Naasmisplaan tuleneb tüübist ja kestusest.',
+  illDurOpenShort: 'Kuni paraneb',
+  illDurEarlier: 'Varasem päev',
+  illKindOther: 'Muu',
+  illRetTitle: (step: number, steps: number) => `Tagasi tulemas · ${step} / ${steps}`,
+  illRetBody: (pct: number, rpe: number) => `Umbes ${pct}% tavamahust, pingutus kuni RPE ${rpe}.`,
+  illRetBodyFree: (pct: number) => `Umbes ${pct}% tavamahust — tunde järgi.`,
+  illMentalNote:
+    'Ilma surveta. Treeni vaid siis, kui see aitab; jalutuskäik või kerge trenn loeb samuti.',
+  illDoctor: 'Haigus kestab nädalaid? Tasub arstiga nõu pidada.',
+  illStartWarn: (pct: number) => `Oled märgitud haigeks — hoia kergelt, umbes ${pct}% tavamahust.`,
+  illStartWarnMental: 'Võta rahulikult — täna piisab kergest trennist või jalutuskäigust.',
+  illDayNote: (kind: string, n: number) => `${kind} · ${n}. päev`,
   hlDates: 'Kuupäevad',
   hlStarts: 'Algus',
   hlEnds: 'Lõpp',

@@ -64,6 +64,31 @@
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+/* The edit form hosted in a drawer (History rows): title, a scrolling body and
+   the pinned action bar. The drawer's own gutter replaces the page gutter. */
+.hl-drawer {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.hl-drawer .hl-pt {
+  flex: none;
+  padding-bottom: var(--sp-2);
+}
+.hl-drawer .hl-scroll {
+  flex: 0 1 auto;
+}
+.hl-drawer .hl-cnt {
+  padding-inline: 0;
+}
+.hl-drawer .uiab {
+  flex: none;
+  background: transparent;
+  border-top: 0;
+  padding-inline: 0;
+  padding-bottom: 0;
+}
 /* Section rhythm: 24px between groups, 16px gutters, room to scroll past the
    last footer. */
 .hl-cnt {

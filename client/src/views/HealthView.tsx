@@ -15,7 +15,8 @@ import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { useT } from '../i18n';
-import { dayKey, endRestPeriod, illnessReturn, liveSleep, startSleep, useStore } from '../store';
+import { illnessState } from '../illness';
+import { dayKey, endRestPeriod, liveSleep, startSleep, useStore } from '../store';
 import { activeInjuries, inFullRest } from '../injury';
 import { lastNight, nightDurationMin } from '../sleep';
 import { fmtDurationHuman } from '../i18n';
@@ -106,12 +107,9 @@ export function HealthView(props: HealthViewProps) {
     .filter((p) => p.startDay > today)
     .sort((a, b) => a.startDay - b.startDay);
   const injuries = activeInjuries(store.injuries);
-  const ret = illness ? null : illnessReturn(now);
-  const lastIll = ret
-    ? store.restPeriods
-        .filter((r) => r.mode === 'illness' && !r.open && r.endDay < today)
-        .sort((a, b) => b.endDay - a.endDay)[0]
-    : null;
+  const ill = illnessState(store.restPeriods, store.workouts, now);
+  const ret = illness || ill.phase !== 'returning' ? null : ill;
+  const lastIll = ret ? (store.restPeriods.find((r) => r.id === ret.periodId) ?? null) : null;
   const items = useHealthItems(now);
   const recent = items.filter((i) => !i.ongoing && !i.future).slice(0, 2);
 
@@ -185,12 +183,12 @@ export function HealthView(props: HealthViewProps) {
         <ListRow
           icon={<Ic tone="gym" name="sun" />}
           label={t.hlWelcomeBack}
-          sub={t.hlTakeEasy}
+          sub={ret.steps > 0 ? t.illRetTitle(ret.step, ret.steps) : t.hlTakeEasy}
           value={t.today}
         />
         <ListRow
           icon={<Ic tone="neu" name="shield" />}
-          label={t.hlOutDays(ret.daysOut)}
+          label={t.hlOutDays(ret.days)}
           sub={t.hlNoStreakLost}
           value={t.hlStreakKept}
         />

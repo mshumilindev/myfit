@@ -60,6 +60,9 @@ import { ThumbsUp } from '@phosphor-icons/react/ThumbsUp';
 import { ThumbsDown } from '@phosphor-icons/react/ThumbsDown';
 import { FirstAidKit } from '@phosphor-icons/react/FirstAidKit';
 import { Virus } from '@phosphor-icons/react/Virus';
+import { Brain } from '@phosphor-icons/react/Brain';
+import { Drop } from '@phosphor-icons/react/Drop';
+import { Question } from '@phosphor-icons/react/Question';
 import { ArrowFatUp } from '@phosphor-icons/react/ArrowFatUp';
 import { ArrowFatDown } from '@phosphor-icons/react/ArrowFatDown';
 import { ArrowsDownUp } from '@phosphor-icons/react/ArrowsDownUp';
@@ -337,6 +340,9 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   'thumbs-down': ThumbsDown,
   'first-aid-kit': FirstAidKit,
   virus: Virus,
+  brain: Brain,
+  drop: Drop,
+  question: Question,
   'arrow-fat-up': ArrowFatUp,
   'arrow-fat-down': ArrowFatDown,
   'arrows-down-up': ArrowsDownUp,

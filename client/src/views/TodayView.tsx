@@ -1,4 +1,6 @@
 /** Today — design W-03…W-05 (desktop 3-column) / S-10…S-16 (mobile). */
+import { illnessState } from '../illness';
+import { illnessKindName } from './health/parts';
 import { Skeleton } from '../components/ui/Skeleton';
 import {
   dateInWeek,
@@ -58,7 +60,6 @@ import {
   advanceInjury,
   dismissAdvance,
   healInjury,
-  illnessReturn,
   backfillWorkout,
   dayKey,
   endRestPeriod,
@@ -238,7 +239,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
     ? store.restPeriods.find((r) => r.id === confirmEndRest)
     : null;
   const confirmEndIllness = confirmRestPeriod?.mode === 'illness';
-  const illReturn = activeRest ? null : illnessReturn(pbNow);
+  const illSt = illnessState(store.restPeriods, store.workouts, pbNow);
+  const illReturn = activeRest || illSt.phase !== 'returning' ? null : illSt;
+  const illMental = !!activeRest && activeRest.mode === 'illness' && illSt.phase === 'mental';
   const playName = (pl: Play) =>
     pl.name ?? (pl.readout ? dayReadoutLabel(pl.readout, t) : t.playUntitled);
   const programReadiness = useMemo(() => programSuggestionReadiness(finished), [finished]);
@@ -1441,11 +1444,18 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 <div className="prog-banner-main">
                   {activeRest.mode === 'illness' ? (
                     <>
-                      <span className="prog-banner-kicker">{t.restCardIllnessKicker}</span>
+                      <span className="prog-banner-kicker">
+                        {illSt.kind === 'other'
+                          ? t.restCardIllnessKicker
+                          : `${t.restCardIllnessKicker} · ${illnessKindName(illSt.kind, t)}`}
+                      </span>
                       <div className="prog-banner-title">
                         {t.restCardIllnessTitle(dayKey(pbNow) - activeRest.startDay + 1)}
                       </div>
-                      <div className="prog-banner-body">{t.restCardIllnessNote}</div>
+                      <div className="prog-banner-body">
+                        {illMental ? t.illMentalNote : t.restCardIllnessNote}
+                        {illSt.needsDoctor ? ` ${t.illDoctor}` : ''}
+                      </div>
                       <div className="tr-pills">
                         <Tag tone="illness" icon={<Icon name="check-circle" weight="bold" />}>
                           {t.illnessStreakPill}
@@ -1533,9 +1543,17 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                   <Icon name="hand-waving" weight="bold" />
                 </span>
                 <div className="prog-banner-main">
-                  <span className="prog-banner-kicker">{t.illnessReturnKicker}</span>
-                  <div className="prog-banner-title">{t.illnessReturnTitle}</div>
-                  <div className="prog-banner-body">{t.illnessReturnBody(illReturn.daysOut)}</div>
+                  <span className="prog-banner-kicker">
+                    {t.illnessReturnKicker} · {illnessKindName(illReturn.kind, t)}
+                  </span>
+                  <div className="prog-banner-title">
+                    {t.illRetTitle(illReturn.step, illReturn.steps)}
+                  </div>
+                  <div className="prog-banner-body">
+                    {illReturn.caps.rpeMax != null
+                      ? t.illRetBody(Math.round(illReturn.caps.volume * 100), illReturn.caps.rpeMax)
+                      : t.illRetBodyFree(Math.round(illReturn.caps.volume * 100))}
+                  </div>
                   <div className="prog-banner-acts">
                     <Button variant="fill" size="sm" onClick={startSession} disabled={busy}>
                       <Icon name="play" weight="bold" />
