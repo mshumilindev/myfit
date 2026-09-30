@@ -1269,7 +1269,11 @@ describe('F-03 session UI', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Warm-up' }));
 
     expect(screen.getByText('Ready when you are')).toBeTruthy();
-    expect(screen.getByText(/Just a marker/)).toBeTruthy();
+    expect(
+      screen.getByText('Log it as one block, or split it into the moves you did.'),
+    ).toBeTruthy();
+    expect(screen.getByText('One warm-up')).toBeTruthy();
+    expect(screen.getByText('By exercises')).toBeTruthy();
     const warmup = __getStateForTests()
       .workouts.find((w) => w.id === 'open')!
       .exercises.find((e) => e.kind === 'warmup')!;
