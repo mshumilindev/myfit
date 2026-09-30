@@ -1,5 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { setLocale } from '../i18n';
 
 type Status = 'unknown' | 'unset' | 'ready';
 const h = vi.hoisted(() => ({ st: 'ready' as Status }));
@@ -9,6 +10,7 @@ vi.mock('../vaultIO', () => ({
 
 import { PrivacyVault } from './PrivacyVault';
 
+beforeEach(() => setLocale('en'));
 afterEach(cleanup);
 
 describe('PrivacyVault', () => {

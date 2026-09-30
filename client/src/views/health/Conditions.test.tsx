@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import {
   ConditionPage,
@@ -10,6 +10,9 @@ import {
 import { setFlag } from '../../data/flags';
 import { __getStateForTests, addCondition, setConditionsShare } from '../../store';
 
+import { setLocale } from '../../i18n';
+
+beforeEach(() => setLocale('en'));
 afterEach(cleanup);
 
 function Flow() {
