@@ -72,6 +72,7 @@ a surface, `text` = light readable foreground on that tint, `line` = mid border.
 - **rest** `--color-rest*` — the rest ramp as a family: full rest, recovery activities.
 - **sport** `--color-sport*` court green — sports activities.
 - **accent** `--color-accent-tint/-text/-line` — gold as a family: gym, conditioning.
+- **gym / people** `--color-gym*` / `--color-people*` — fixed identity of the Gym (gold) and People (silver) apps. Use these (not `accent`) where a row must keep its own app colour whatever app is active (app switcher): per-app themes re-skin `--color-accent`.
 
 In components, pick a family with the `Tone` type (`components/ui/tones.ts`); the
 `uit--<tone>` class binds `--t-base / --t-tint / --t-text / --t-line / --t-on` for
@@ -323,6 +324,7 @@ Where it is used, always through the kit and never with feature CSS:
 
 - `ListRow` — the `IconTile` takes `tone="chronic"`.
 - `Notice` — `tone="chronic"` for shields and hints about condition limits.
+- `Notice aligned` — standing among ListRows (empty states): icon in the 30px `IconTile` column, text at the row-title x.
 - `Button` — a filled button inherits the tone of its context (chip/row/notice) instead of a per-button colour.
 - `AnatomyMap` — condition marks on the body map (Bones / Muscles / Organs / Other layers).
 

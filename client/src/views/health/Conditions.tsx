@@ -1,9 +1,9 @@
 /**
  * Long-term conditions inside Health: the list, the add / edit sheet (search or browse
- * the catalogue, severity, coach sharing, dates for temporary ones, a private note) and
+ * the catalogue, severity, coach sharing, dates for temporary ones) and
  * delete with confirmation. Kit primitives only. Shown while the `conditions` flag is on.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { effectText } from '../../conditionText';
 import type { CoachView } from '../../conditions';
 import { BackButton } from '../../components/ui/BackButton';
@@ -13,9 +13,9 @@ import { SearchField } from '../../components/ui/SearchField';
 import { Segmented } from '../../components/ui/Segmented';
 import { Field } from '../../components/ui/Field';
 import { BodyMapPicker } from './BodyMapPicker';
-import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
 import { Notice } from '../../components/ui/Notice';
+import { StickyActionBar } from '../../components/ui/StickyActionBar';
 import { Tag } from '../../components/ui/Tag';
 import { useFlag } from '../../data/flags';
 import { ConfirmDialog } from '../../components/ui/Overlays';
@@ -60,10 +60,15 @@ function Form({
   cat,
   existing,
   onDone,
+  frame,
+  web,
 }: {
+  web: boolean;
   cat: CatalogCondition;
   existing?: ChronicCondition;
   onDone: () => void;
+  /** Places the fields and the pinned action bar (the bar never scrolls with the fields). */
+  frame: (content: ReactNode, bar: ReactNode) => ReactNode;
 }) {
   const { t } = useT();
   const { conditionsShare } = useStore();
@@ -71,7 +76,6 @@ function Form({
   const auto = temporaryAuto(cat.key);
   const [severity, setSeverity] = useState<1 | 2 | 3>(existing?.severity ?? 2);
   const [share, setShare] = useState<ConditionShare>(existing?.share ?? 'inherit');
-  const [note, setNote] = useState(existing?.note ?? '');
   const [start, setStart] = useState(() => ymd(existing?.startedAt ?? Date.now()));
   const [end, setEnd] = useState(() => {
     const e = existing?.endsAt ?? suggestedEnd(cat.key, existing?.startedAt ?? Date.now());
@@ -85,7 +89,6 @@ function Form({
     const base = {
       severity,
       share,
-      note: note.trim() || undefined,
       startedAt,
       endsAt,
     };
@@ -102,7 +105,7 @@ function Form({
     full: t.cndShareHintFull,
   }[share];
 
-  return (
+  const content = (
     <div className="ul-flex ul-col ug-12">
       <Segmented
         label={t.cndSeverity}
@@ -159,18 +162,6 @@ function Form({
         />
         <span className="ut-sm ut-muted">{hint}</span>
       </div>
-      <Textarea
-        label={t.cndNote}
-        placeholder={t.cndNotePh}
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        rows={2}
-      />
-      <div className={toneClass('chronic')}>
-        <Button variant="fill" fullWidth onClick={save}>
-          {existing ? t.cndSave : t.cndAddBtn}
-        </Button>
-      </div>
       {existing && (
         <Button variant="danger" fullWidth onClick={() => setConfirm(true)}>
           {t.cndDelete}
@@ -192,6 +183,18 @@ function Form({
       )}
     </div>
   );
+  const bar = (
+    <StickyActionBar
+      variant={web ? 'panel' : 'page'}
+      surface={web ? 'surface' : 'bg'}
+      className={toneClass('chronic')}
+    >
+      <Button variant="fill" fullWidth onClick={save}>
+        {existing ? t.cndSave : t.cndAddBtn}
+      </Button>
+    </StickyActionBar>
+  );
+  return <>{frame(content, bar)}</>;
 }
 
 function Picker({ onPick }: { onPick: (c: CatalogCondition) => void }) {
@@ -339,7 +342,7 @@ export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }
         </div>
       )}
       {conditions.length === 0 && (
-        <Notice tone="chronic" icon="shield-check">
+        <Notice tone="chronic" icon="shield-check" aligned>
           {t.cndEmpty}
         </Notice>
       )}
@@ -367,34 +370,44 @@ export function ConditionPage(props: {
     : props.condKey
       ? catalogCondition(props.condKey)
       : null;
-  const body = cat ? (
-    <Form key={existing?.id ?? cat.key} cat={cat} existing={existing} onDone={props.onBack} />
-  ) : props.cond === 'new' ? (
-    <Picker onPick={(c) => props.onPickKey(c.key)} />
-  ) : null;
   const title = cat ? condName(cat) : t.cndAdd;
-  if (props.web)
-    return (
-      <section className="hl-pane">
-        <div className="hl-wc tight">
-          <div className="hl-phd">
-            <h2>{title}</h2>
-          </div>
-          {body}
+  const webFrame = (content: ReactNode, bar?: ReactNode) => (
+    <section className="hl-pane">
+      <div className="hl-wc tight">
+        <div className="hl-phd">
+          <h2>{title}</h2>
         </div>
-      </section>
-    );
-  return (
+        {content}
+      </div>
+      {bar}
+    </section>
+  );
+  const pageFrame = (content: ReactNode, bar?: ReactNode) => (
     <div className="screen hl">
       <div className="hl-pbar">
         <BackButton label={t.backAction} onClick={props.onBack} />
         <h1 className="hl-pt">{title}</h1>
       </div>
       <div className="hl-scroll">
-        <div className="hl-cnt">{body}</div>
+        <div className="hl-cnt">{content}</div>
       </div>
+      {bar}
     </div>
   );
+  const frame = props.web ? webFrame : pageFrame;
+  if (cat)
+    return (
+      <Form
+        key={existing?.id ?? cat.key}
+        cat={cat}
+        existing={existing}
+        web={props.web}
+        onDone={props.onBack}
+        frame={frame}
+      />
+    );
+  if (props.cond === 'new') return frame(<Picker onPick={(c) => props.onPickKey(c.key)} />);
+  return frame(null);
 }
 
 /** Today: one quiet row saying plans are adapted; opens Health. Hidden with no active conditions. */

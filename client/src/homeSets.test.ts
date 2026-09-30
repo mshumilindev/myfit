@@ -22,6 +22,8 @@ import {
   saveHomeSet,
   startActivity,
   startHomeSet,
+  startSleep,
+  sleepStartBlock,
   upsertSet,
 } from './store';
 import type { SetEntry, Workout } from './types';
@@ -118,6 +120,15 @@ describe('home sets in the store', () => {
     deleteHomeMove(own.id);
     expect(__getStateForTests().home.moves).toHaveLength(0);
     expect(__getStateForTests().home.sets[0].moves).toEqual(['Stomach Vacuum']);
+  });
+
+  it('refuses to start a sleep while a home set is live', () => {
+    reset();
+    expect(sleepStartBlock()).toBeNull();
+    startHomeSet({ set: null, name: 'Quick', moves: ['Pullups'] });
+    expect(sleepStartBlock()).toBe('homeSet');
+    expect(startSleep()).toBeNull();
+    expect(__getStateForTests().sleeps).toHaveLength(0);
   });
 
   it('starts a home session with its moves, holds marked for the stopwatch', () => {

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Notice } from './Notice';
 import { ProgressBar } from './ProgressBar';
+import { GroupedList, ListRow } from './GroupedList';
+import { IconTile } from './IconTile';
 import { Stack } from '../../stories/LocaleMatrix';
 
 const meta = {
@@ -19,6 +21,24 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
+
+/** Standing in a list of rows: icon tile and text line up with the ListRows around it. */
+export const AlignedWithRows: Story = {
+  render: () => (
+    <Stack>
+      <GroupedList>
+        <ListRow
+          icon={<IconTile tone="chronic" size={30} icon="plus" />}
+          label="Add a condition"
+          chevron
+        />
+      </GroupedList>
+      <Notice tone="chronic" icon="shield-check" aligned>
+        No long-term conditions yet. Add one, and your plans and suggestions adapt to it.
+      </Notice>
+    </Stack>
+  ),
+};
 
 /** Offline, syncing with a bar, neutral hint, ok. */
 export const Variants: Story = {

@@ -252,6 +252,7 @@ export type Overlay =
       lng?: number;
       address?: string;
       externalId?: string;
+      amenities?: string[];
     }
   | { screen: 'equipment'; itemId: string; gymId?: string }
   | { screen: 'builder'; programMode?: 'none' | 'own' | 'other'; programDays?: number[] }
@@ -1550,6 +1551,7 @@ export function App() {
           candLng={activeOverlay.lng}
           candAddress={activeOverlay.address}
           candExternalId={activeOverlay.externalId}
+          candAmenities={activeOverlay.amenities}
           shell={shell}
           onClose={closeOverlay}
         />

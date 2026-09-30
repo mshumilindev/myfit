@@ -1,11 +1,18 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 import { Icon } from '../../ui';
+import { IconTile } from './IconTile';
 import { toneClass, type Tone } from './tones';
 import './Notice.css';
 
 export interface NoticeProps extends HTMLAttributes<HTMLDivElement> {
   tone?: Tone;
   icon?: string;
+  /**
+   * Line the notice up with the ListRows above / below it: the icon sits in the same 30px
+   * IconTile column and the text starts at the row-title x. Use where a notice stands in a
+   * list of rows (an empty state); leave off for a free-standing strip.
+   */
+  aligned?: boolean;
   children: ReactNode;
   /** A small trailing action (a text Button) or value. */
   trail?: ReactNode;
@@ -21,17 +28,25 @@ export interface NoticeProps extends HTMLAttributes<HTMLDivElement> {
 export function Notice({
   tone = 'neutral',
   icon,
+  aligned = false,
   children,
   trail,
   below,
   className,
   ...rest
 }: NoticeProps) {
-  const cls = ['uinotice', toneClass(tone), className].filter(Boolean).join(' ');
+  const cls = ['uinotice', aligned ? 'uinotice--row' : '', toneClass(tone), className]
+    .filter(Boolean)
+    .join(' ');
   return (
     <div className={cls} role={tone === 'danger' ? 'alert' : 'status'} {...rest}>
       <div className="uinotice-row">
-        {icon && <Icon name={icon} className="uinotice-i" />}
+        {icon &&
+          (aligned ? (
+            <IconTile tone="inherit" size={30} icon={icon} />
+          ) : (
+            <Icon name={icon} className="uinotice-i" />
+          ))}
         <span className="uinotice-t">{children}</span>
         {trail != null && <span className="uinotice-tr">{trail}</span>}
       </div>

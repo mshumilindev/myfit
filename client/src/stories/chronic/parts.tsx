@@ -190,8 +190,8 @@ export const shareOptions = [
 export const shareHint: Record<Share, string> = {
   inherit: 'Follows your default: coach sees nothing until you change it.',
   off: 'Your coach sees nothing about this condition.',
-  effects: 'Coach sees only: “avoid heavy axial loading, ”. No name, area or notes.',
-  full: 'Coach sees the name, area and severity. Notes always stay private.',
+  effects: 'Coach sees only: “avoid heavy axial loading, ”. No name or area.',
+  full: 'Coach sees the name, area and severity.',
 };
 export function ShareControl({ value }: { value: Share }) {
   return (

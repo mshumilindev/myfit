@@ -263,6 +263,11 @@ export interface Gym {
   /** Band library (Load-entry C-5): colour → estimated resistance in kg, set
    *  once per gym. Absent = use BAND_DEFAULTS. */
   bandLibrary?: BandRung[];
+  /** Venue facilities the athlete confirmed here (gymAmenities ids: pool, sauna, …). When set it
+   *  wins over `amenitiesAuto`; absent = not reviewed yet, fall back to the detected ones. */
+  amenities?: string[];
+  /** Facilities detected from the venue data (place tags / name) when the gym was saved. */
+  amenitiesAuto?: string[];
 }
 
 /** Default geofence for a newly saved gym (AC-GYM-05). */
@@ -469,8 +474,6 @@ export interface ChronicCondition {
   key: string;
   severity: 1 | 2 | 3;
   share: ConditionShare;
-  /** Private note: never leaves the device/DB envelope, never shared. */
-  note?: string;
   createdAt: number;
   /** Temporary conditions (pregnancy, recovery after surgery): when it began (ms). */
   startedAt?: number;

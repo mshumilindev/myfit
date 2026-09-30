@@ -4,7 +4,7 @@
  *
  * Privacy: `deidentifiedEffects` is the ONLY shape that may leave the device toward
  * Atlas/LLM payloads, and `coachView` the only one toward a coach. Both are built
- * from effects, never from names or notes (unless the user chose Full for a coach).
+ * from effects, never from names (unless the user chose Full for a coach).
  */
 import {
   catalogCondition,
@@ -25,6 +25,19 @@ import type { ChronicCondition, ConditionShare } from './types';
 const has = (n: string, ...words: string[]) => words.some((w) => n.includes(w));
 
 /** Movement-risk tags for an exercise. Conservative: only clear signals. */
+/**
+ * Older builds stored a free-text `note` on a condition; it no longer exists. Drop it on
+ * read so it never resurfaces, and so the next write to the store omits it.
+ */
+export function stripLegacyCondition<T extends object>(c: T): T {
+  if (!('note' in c)) return c;
+  const rest: Record<string, unknown> = { ...c };
+  delete rest.note;
+  return rest as T;
+}
+export const stripLegacyConditions = <T extends object>(list: readonly T[]): T[] =>
+  list.map(stripLegacyCondition);
+
 export function exerciseRisk(
   name: string,
   rich: RichExercise | null = richExerciseByName(name),
@@ -340,7 +353,7 @@ export function resolveShare(c: ChronicCondition, general: GeneralShare): Genera
   return c.share === 'inherit' ? general : (c.share as Exclude<ConditionShare, 'inherit'>);
 }
 
-/** A de-identified line: no condition name, no note. Stable ids so the UI can localise them. */
+/** A de-identified line: no condition name. Stable ids so the UI can localise them. */
 export interface EffectLine {
   id:
     | 'avoid'
@@ -388,7 +401,7 @@ export interface CoachConditionView {
 }
 
 export interface CoachView {
-  /** Conditions shared as Full (name + severity + effects). Notes are never included. */
+  /** Conditions shared as Full (name + severity + effects). */
   full: CoachConditionView[];
   /** Merged de-identified effects of everything shared as Effects-only. */
   effects: EffectLine[];
@@ -396,7 +409,7 @@ export interface CoachView {
 
 /**
  * What a coach may see. Off → nothing. Effects → merged, nameless lines. Full → key +
- * severity + its own effects. The note field never leaves.
+ * severity + its own effects.
  */
 export function coachView(
   conditions: readonly ChronicCondition[],

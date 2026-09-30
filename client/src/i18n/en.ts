@@ -1573,17 +1573,15 @@ export const en = {
   cndShareEffects: 'Effects',
   cndShareFull: 'Full',
   cndShareHintOff: 'Your coach sees nothing about it.',
-  cndShareHintEffects: 'Your coach sees only what changes in training. No name, area or note.',
-  cndShareHintFull: 'Your coach sees the condition and its severity. Notes stay private.',
-  cndNote: 'Private note',
-  cndNotePh: 'Only you see this. Never shared.',
+  cndShareHintEffects: 'Your coach sees only what changes in training. No name or area.',
+  cndShareHintFull: 'Your coach sees the condition and its severity.',
   cndStarted: 'Started',
   cndEnds: 'Expected end',
   cndTodayTitle: (n: number) => `Plans adapted to ${n} ${n === 1 ? 'condition' : 'conditions'}`,
   cndTodaySub: 'Private. Tap to review.',
   cndCoachTitle: 'Health notes from the athlete',
   cndCoachEffects: 'Training adjustments',
-  cndCoachFoot: 'Shared by the athlete. Private notes are never shown.',
+  cndCoachFoot: 'Shared by the athlete.',
   cndProfileRow: 'Long-term conditions',
   cndOnbPrompt: 'Any long-term health conditions?',
   cndOnbHint: 'Optional. Private and encrypted — you can also add them later in Health.',
@@ -1593,6 +1591,90 @@ export const en = {
   cndRotateHint: 'Drag to rotate',
   cndShareDefault: 'Share with my coach by default',
   cndShareHintInheritNow: (l: string) => `Uses your general setting: ${l}.`,
+  amenTitle: 'Amenities',
+  amenHint: 'What this gym has besides the floor. Tap to correct.',
+  amenAuto: 'auto',
+  amenReset: 'Reset to detected',
+  amen_pool: 'Pool',
+  amen_sauna: 'Sauna',
+  amen_steam: 'Steam room',
+  amen_jacuzzi: 'Jacuzzi',
+  amen_coldPlunge: 'Cold plunge',
+  amen_juiceBar: 'Juice bar',
+  amen_cafe: 'Café',
+  amen_massage: 'Massage',
+  amen_stretchArea: 'Stretch area',
+  fuelTitle: 'Recovery fuel',
+  fuelNote: 'General wellness ideas, not medical advice.',
+  fuelAtGym: 'You can get it at the gym',
+  fuelConsultTitle: 'Food after training',
+  fuelConsult:
+    'What to eat and drink after training depends on your health. Check with your doctor or dietitian for what suits you.',
+  fuelName: (kind: string): string =>
+    (
+      ({
+        proteinShake: 'Protein shake',
+        smoothie: 'Smoothie',
+        hydrate: 'Water with electrolytes',
+        carbMeal: 'Carb + protein meal',
+        snack: 'Light snack',
+      }) as Record<string, string>
+    )[kind] ?? kind,
+  fuelFacts: (
+    sets: number,
+    dayType: string | null,
+    rpe: number | null,
+    minutes: number,
+    cardioMin: number,
+  ): string => {
+    const days: Record<string, string> = {
+      push: 'push',
+      pull: 'pull',
+      legs: 'legs',
+      core: 'core',
+      full: 'full body',
+    };
+    const parts: string[] = [];
+    if (sets > 0) {
+      const n = sets;
+      const day = dayType ? (days[dayType] ?? '') : '';
+      parts.push(`${n} working set${n === 1 ? '' : 's'}${day ? ` on ${day}` : ''}`);
+    }
+    if (rpe) {
+      const n = rpe;
+      parts.push(`RPE ${n}`);
+    }
+    if (cardioMin > 0) {
+      const n = Math.round(cardioMin);
+      parts.push(`${n} min cardio`);
+    }
+    if (minutes > 0) {
+      const n = minutes;
+      parts.push(`${n} min`);
+    }
+    return parts.join(', ');
+  },
+  fuelReason: (kind: string, facts: string): string => {
+    const tail =
+      (
+        {
+          proteinShake: 'easy protein to support recovery',
+          smoothie: 'light and easy to drink',
+          hydrate: 'top up fluids and salts',
+          carbMeal: 'carbs and protein to refuel',
+          snack: 'something small if a full meal is not on the cards',
+        } as Record<string, string>
+      )[kind] ?? '';
+    return facts ? `${facts} — ${tail}` : tail[0].toUpperCase() + tail.slice(1);
+  },
+  windReason: (amenity: string, level: string): string =>
+    `Your gym has ${({ pool: 'a pool', sauna: 'a sauna', steam: 'a steam room', jacuzzi: 'a jacuzzi', coldPlunge: 'a cold plunge', massage: 'massage', stretchArea: 'a stretch area' } as Record<string, string>)[amenity] ?? amenity} — ${({ hard: 'a good way to wind down after a hard session', moderate: 'an easy way to cool down and unwind', light: 'an easy add-on after a lighter session' } as Record<string, string>)[level] ?? ''}`,
+  windNote: 'Suggested from your gym’s facilities and how this session went.',
+  slpBlockWorkout: 'Finish your workout before starting sleep.',
+  slpBlockActivity: 'Finish your activity before starting sleep.',
+  slpBlockHomeSet: 'Finish your home set before starting sleep.',
+  atlChatOpen: 'Open chat with Atlas',
+  atlChatAsk: 'Ask Atlas…',
   cndRpeHint: (n: number) => `Keep this set at RPE ${n} or easier.`,
   cndDayOf: (d: number, n: number) => `Day ${d} of ${n}`,
   cndSave: 'Save',

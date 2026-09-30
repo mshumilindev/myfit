@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useT } from '../i18n';
 import { Card } from './ui/Card';
+import { IconTile } from './ui/IconTile';
 import { ConfirmDialog, Icon, Sheet } from '../ui';
 import { consistencyStreak, type StoreState } from '../store';
 
@@ -65,9 +66,7 @@ export function ShellLauncher({
           onClick={onGym}
           disabled={current === 'gym'}
         >
-          <span className="shell-ic shell-ic-gym">
-            <Icon name="barbell" weight="fill" />
-          </span>
+          <IconTile tone="gym" size={48} icon="barbell" />
           <div className="shell-tile-main">
             <div className="shell-tile-name">{t.shellGym}</div>
             <div className="shell-tile-sub">
@@ -90,9 +89,7 @@ export function ShellLauncher({
           onClick={onApex}
           disabled={current === 'apex'}
         >
-          <span className="shell-ic shell-ic-apex">
-            <Icon name="trophy" weight="fill" />
-          </span>
+          <IconTile tone="apex" size={48} icon="trophy" />
           <div className="shell-tile-main">
             <div className="shell-tile-name">
               {t.apexName}
@@ -120,9 +117,7 @@ export function ShellLauncher({
           onClick={nutritionEnabled ? onNutrition : undefined}
           disabled={!nutritionEnabled || current === 'nutrition'}
         >
-          <span className="shell-ic shell-ic-nut">
-            <Icon name="fork-knife" weight="fill" />
-          </span>
+          <IconTile tone="kcal" size={48} icon="fork-knife" />
           <div className="shell-tile-main">
             <div className="shell-tile-name">{t.shellNutrition}</div>
             {nutritionEnabled ? (
@@ -151,9 +146,7 @@ export function ShellLauncher({
           onClick={onRoster}
           disabled={current === 'roster'}
         >
-          <span className="shell-ic shell-ic-people">
-            <Icon name="user-focus" weight="fill" />
-          </span>
+          <IconTile tone="people" size={48} icon="user-focus" />
           <div className="shell-tile-main">
             <div className="shell-tile-name">{peopleLabel}</div>
             <div className="shell-tile-sub">{peopleDesc}</div>
@@ -174,9 +167,7 @@ export function ShellLauncher({
           onClick={onLearn}
           disabled={current === 'learn'}
         >
-          <span className="shell-ic shell-ic-learn">
-            <Icon name="graduation-cap" weight="fill" />
-          </span>
+          <IconTile tone="learn" size={48} icon="graduation-cap" />
           <div className="shell-tile-main">
             <div className="shell-tile-name">{t.shellLearn}</div>
             <div className="shell-tile-sub">{t.shellLearnDesc}</div>

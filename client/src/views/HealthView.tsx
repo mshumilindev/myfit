@@ -16,6 +16,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import type { Shell } from '../App';
 import { useT } from '../i18n';
 import { illnessState } from '../illness';
+import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
 import { dayKey, endRestPeriod, liveSleep, startSleep, useStore } from '../store';
 import { activeInjuries, inFullRest } from '../injury';
 import { lastNight, nightDurationMin } from '../sleep';
@@ -262,9 +263,7 @@ export function HealthView(props: HealthViewProps) {
   // --- Sleep ----------------------------------------------------------------------
   const live = liveSleep(store.sleeps);
   const last = lastNight(store.sleeps);
-  const busy =
-    store.workouts.some((w) => w.finishedAt === null && w.exercises.length > 0) ||
-    store.activities.some((a) => a.finishedAt === null);
+  const sleepBlock = sleepBlockedBy(store);
   const sleepGroup = (
     <GroupedList key="sleep" header={t.sleepTitle}>
       <ListRow
@@ -288,7 +287,8 @@ export function HealthView(props: HealthViewProps) {
             {live ? t.sleepAsleepSince(hhmm(live.bedtime)) : t.sleepStart}
           </ToneText>
         }
-        disabled={!live && busy}
+        sub={!live && sleepBlock ? t[SLEEP_BLOCK_KEY[sleepBlock]] : undefined}
+        disabled={!live && !!sleepBlock}
         onClick={() => {
           if (live || startSleep()) shell.openOverlay({ screen: 'sleep' });
         }}

@@ -1620,18 +1620,15 @@ export const uk: Strings = {
   cndShareEffects: 'Ефекти',
   cndShareFull: 'Повністю',
   cndShareHintOff: 'Тренер нічого про це не бачить.',
-  cndShareHintEffects:
-    'Тренер бачить лише, що змінюється в тренуваннях. Без назви, ділянки та нотатки.',
-  cndShareHintFull: 'Тренер бачить стан і його вираженість. Нотатки лишаються приватними.',
-  cndNote: 'Приватна нотатка',
-  cndNotePh: 'Бачите лише ви. Ніколи не передається.',
+  cndShareHintEffects: 'Тренер бачить лише, що змінюється в тренуваннях. Без назви та ділянки.',
+  cndShareHintFull: 'Тренер бачить стан і його вираженість.',
   cndStarted: 'Початок',
   cndEnds: 'Очікуваний кінець',
   cndTodayTitle: (n: number) => `Плани враховують станів: ${n}`,
   cndTodaySub: 'Приватно. Натисніть, щоб переглянути.',
   cndCoachTitle: 'Стан здоров’я від атлета',
   cndCoachEffects: 'Обмеження в тренуваннях',
-  cndCoachFoot: 'Поділено атлетом. Приватні нотатки ніколи не показуються.',
+  cndCoachFoot: 'Поділено атлетом.',
   cndProfileRow: 'Тривалі стани',
   cndOnbPrompt: "Є тривалі проблеми зі здоров'ям?",
   cndOnbHint: "Необов'язково. Приватно й зашифровано — їх можна додати пізніше в розділі Здоров'я.",
@@ -1641,6 +1638,90 @@ export const uk: Strings = {
   cndRotateHint: 'Потягніть, щоб повернути',
   cndShareDefault: 'Ділитися з тренером за замовчуванням',
   cndShareHintInheritNow: (l: string) => `Діє ваше загальне налаштування: ${l}.`,
+  amenTitle: 'Зручності',
+  amenHint: 'Що є в цьому залі крім тренувальної зони. Торкніться, щоб виправити.',
+  amenAuto: 'авто',
+  amenReset: 'Скинути до виявленого',
+  amen_pool: 'Басейн',
+  amen_sauna: 'Сауна',
+  amen_steam: 'Парна',
+  amen_jacuzzi: 'Джакузі',
+  amen_coldPlunge: 'Холодна купіль',
+  amen_juiceBar: 'Фреш-бар',
+  amen_cafe: 'Кафе',
+  amen_massage: 'Масаж',
+  amen_stretchArea: 'Зона розтяжки',
+  fuelTitle: 'Паливо для відновлення',
+  fuelNote: 'Загальні поради про самопочуття, не медична рекомендація.',
+  fuelAtGym: 'Можна взяти в залі',
+  fuelConsultTitle: 'Їжа після тренування',
+  fuelConsult:
+    'Що їсти й пити після тренування, залежить від твого здоров’я. Запитай лікаря або дієтолога, що підійде саме тобі.',
+  fuelName: (kind: string): string =>
+    (
+      ({
+        proteinShake: 'Протеїновий коктейль',
+        smoothie: 'Смузі',
+        hydrate: 'Вода з електролітами',
+        carbMeal: 'Їжа з вуглеводами й білком',
+        snack: 'Легкий перекус',
+      }) as Record<string, string>
+    )[kind] ?? kind,
+  fuelFacts: (
+    sets: number,
+    dayType: string | null,
+    rpe: number | null,
+    minutes: number,
+    cardioMin: number,
+  ): string => {
+    const days: Record<string, string> = {
+      push: 'жим',
+      pull: 'тяга',
+      legs: 'ноги',
+      core: 'кор',
+      full: 'все тіло',
+    };
+    const parts: string[] = [];
+    if (sets > 0) {
+      const n = sets;
+      const day = dayType ? (days[dayType] ?? '') : '';
+      parts.push(`Робочих підходів: ${n}${day ? ` (${day})` : ''}`);
+    }
+    if (rpe) {
+      const n = rpe;
+      parts.push(`RPE ${n}`);
+    }
+    if (cardioMin > 0) {
+      const n = Math.round(cardioMin);
+      parts.push(`кардіо ${n} хв`);
+    }
+    if (minutes > 0) {
+      const n = minutes;
+      parts.push(`${n} хв`);
+    }
+    return parts.join(', ');
+  },
+  fuelReason: (kind: string, facts: string): string => {
+    const tail =
+      (
+        {
+          proteinShake: 'легкий білок для відновлення',
+          smoothie: 'легко пити і не важко',
+          hydrate: 'поповнити рідину й солі',
+          carbMeal: 'вуглеводи й білок, щоб відновити сили',
+          snack: 'щось невелике, якщо повноцінна їжа не планується',
+        } as Record<string, string>
+      )[kind] ?? '';
+    return facts ? `${facts} — ${tail}` : tail[0].toUpperCase() + tail.slice(1);
+  },
+  windReason: (amenity: string, level: string): string =>
+    `У твоєму залі є ${({ pool: 'басейн', sauna: 'сауна', steam: 'парна', jacuzzi: 'джакузі', coldPlunge: 'холодна купіль', massage: 'масаж', stretchArea: 'зона розтяжки' } as Record<string, string>)[amenity] ?? amenity} — ${({ hard: 'добрий спосіб видихнути після важкого тренування', moderate: 'легкий спосіб охолонути й розслабитися', light: 'легке доповнення після спокійнішого тренування' } as Record<string, string>)[level] ?? ''}`,
+  windNote: 'Пропозиція базується на тому, що є у твоєму залі, і на тому, як минуло це тренування.',
+  slpBlockWorkout: 'Заверши тренування, перш ніж почати сон.',
+  slpBlockActivity: 'Заверши активність, перш ніж почати сон.',
+  slpBlockHomeSet: 'Заверши домашній сет, перш ніж почати сон.',
+  atlChatOpen: 'Відкрити чат з Atlas',
+  atlChatAsk: 'Спитай Atlas…',
   cndRpeHint: (n: number) => `Тримайте цей підхід на RPE ${n} або легше.`,
   cndDayOf: (d: number, n: number) => `День ${d} з ${n}`,
   cndSave: 'Зберегти',

@@ -303,6 +303,7 @@ export function GymsView({ shell, store }: { shell: Shell; store: Store }) {
                   lng: r.lng,
                   address: r.address,
                   externalId: r.externalId,
+                  amenities: r.amenities,
                 });
               }}
               onManualHere={(n) => locateFor(n)}

@@ -1574,18 +1574,15 @@ export const et: Strings = {
   cndShareEffects: 'Mõjud',
   cndShareFull: 'Täielik',
   cndShareHintOff: 'Treener ei näe sellest midagi.',
-  cndShareHintEffects:
-    'Treener näeb ainult seda, mis treeningus muutub. Ilma nime, piirkonna ja märkmeta.',
-  cndShareHintFull: 'Treener näeb seisundit ja selle raskust. Märkmed jäävad privaatseks.',
-  cndNote: 'Privaatne märge',
-  cndNotePh: 'Näed ainult sina. Seda ei jagata kunagi.',
+  cndShareHintEffects: 'Treener näeb ainult seda, mis treeningus muutub. Ilma nime ja piirkonnata.',
+  cndShareHintFull: 'Treener näeb seisundit ja selle raskust.',
   cndStarted: 'Algus',
   cndEnds: 'Oodatav lõpp',
   cndTodayTitle: (n: number) => `Plaanid arvestavad seisundeid: ${n}`,
   cndTodaySub: 'Privaatne. Puuduta ülevaatamiseks.',
   cndCoachTitle: 'Sportlase terviseandmed',
   cndCoachEffects: 'Treeningupiirangud',
-  cndCoachFoot: 'Jagas sportlane. Privaatseid märkmeid ei näidata kunagi.',
+  cndCoachFoot: 'Jagas sportlane.',
   cndProfileRow: 'Pikaajalised seisundid',
   cndOnbPrompt: 'Kas sul on pikaajalisi terviseseisundeid?',
   cndOnbHint: 'Valikuline. Privaatne ja krüpteeritud — lisada saab ka hiljem jaotises Tervis.',
@@ -1595,6 +1592,90 @@ export const et: Strings = {
   cndRotateHint: 'Lohista pööramiseks',
   cndShareDefault: 'Jaga treeneriga vaikimisi',
   cndShareHintInheritNow: (l: string) => `Kehtib sinu üldine seadistus: ${l}.`,
+  amenTitle: 'Mugavused',
+  amenHint: 'Mis on selles jõusaalis lisaks treeningalale. Puuduta, et parandada.',
+  amenAuto: 'auto',
+  amenReset: 'Lähtesta tuvastatud',
+  amen_pool: 'Bassein',
+  amen_sauna: 'Saun',
+  amen_steam: 'Aurusaun',
+  amen_jacuzzi: 'Jacuzzi',
+  amen_coldPlunge: 'Külmavann',
+  amen_juiceBar: 'Mahlabaar',
+  amen_cafe: 'Kohvik',
+  amen_massage: 'Massaaž',
+  amen_stretchArea: 'Venitusala',
+  fuelTitle: 'Kütus taastumiseks',
+  fuelNote: 'Üldised heaolunipid, mitte meditsiiniline nõuanne.',
+  fuelAtGym: 'Saad selle jõusaalist',
+  fuelConsultTitle: 'Toit pärast treeningut',
+  fuelConsult:
+    'Mida pärast treeningut süüa ja juua, sõltub sinu tervisest. Küsi arstilt või dietoloogilt, mis sulle sobib.',
+  fuelName: (kind: string): string =>
+    (
+      ({
+        proteinShake: 'Valgukokteil',
+        smoothie: 'Smuuti',
+        hydrate: 'Vesi elektrolüütidega',
+        carbMeal: 'Süsivesikute ja valguga eine',
+        snack: 'Kerge suupiste',
+      }) as Record<string, string>
+    )[kind] ?? kind,
+  fuelFacts: (
+    sets: number,
+    dayType: string | null,
+    rpe: number | null,
+    minutes: number,
+    cardioMin: number,
+  ): string => {
+    const days: Record<string, string> = {
+      push: 'tõuked',
+      pull: 'tõmbed',
+      legs: 'jalad',
+      core: 'keskkeha',
+      full: 'kogu keha',
+    };
+    const parts: string[] = [];
+    if (sets > 0) {
+      const n = sets;
+      const day = dayType ? (days[dayType] ?? '') : '';
+      parts.push(`Töösarju: ${n}${day ? ` (${day})` : ''}`);
+    }
+    if (rpe) {
+      const n = rpe;
+      parts.push(`RPE ${n}`);
+    }
+    if (cardioMin > 0) {
+      const n = Math.round(cardioMin);
+      parts.push(`kardio ${n} min`);
+    }
+    if (minutes > 0) {
+      const n = minutes;
+      parts.push(`${n} min`);
+    }
+    return parts.join(', ');
+  },
+  fuelReason: (kind: string, facts: string): string => {
+    const tail =
+      (
+        {
+          proteinShake: 'lihtne valk taastumise toetuseks',
+          smoothie: 'kerge ja lihtne juua',
+          hydrate: 'täienda vedelikku ja sooli',
+          carbMeal: 'süsivesikud ja valk jõudude taastamiseks',
+          snack: 'midagi väikest, kui täisväärtuslikku einet pole plaanis',
+        } as Record<string, string>
+      )[kind] ?? '';
+    return facts ? `${facts} — ${tail}` : tail[0].toUpperCase() + tail.slice(1);
+  },
+  windReason: (amenity: string, level: string): string =>
+    `Sinu jõusaalis on ${({ pool: 'bassein', sauna: 'saun', steam: 'aurusaun', jacuzzi: 'jacuzzi', coldPlunge: 'külmavann', massage: 'massaaž', stretchArea: 'venitusala' } as Record<string, string>)[amenity] ?? amenity} — ${({ hard: 'hea viis pärast rasket treeningut lõdvestuda', moderate: 'lihtne viis pärast treeningut maha rahuneda', light: 'kerge lisa pärast kergemat treeningut' } as Record<string, string>)[level] ?? ''}`,
+  windNote: 'Soovitus põhineb sinu jõusaali võimalustel ja sellel, kuidas see treening läks.',
+  slpBlockWorkout: 'Lõpeta treening enne une alustamist.',
+  slpBlockActivity: 'Lõpeta tegevus enne une alustamist.',
+  slpBlockHomeSet: 'Lõpeta kodune komplekt enne une alustamist.',
+  atlChatOpen: 'Ava vestlus Atlasega',
+  atlChatAsk: 'Küsi Atlaselt…',
   cndRpeHint: (n: number) => `Hoia see seeria RPE ${n} või kergem.`,
   cndDayOf: (d: number, n: number) => `${d}. päev ${n}-st`,
   cndSave: 'Salvesta',

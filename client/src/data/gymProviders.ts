@@ -8,6 +8,7 @@
  * Foursquare. Providers run in PARALLEL, stream results as each answers, and
  * identical venues merge into one row that lists every contributing source.
  */
+import { detectAmenities, unionAmenities } from './gymAmenities';
 import type { Gym } from '../types';
 
 /** Google Places key from Vite env — enables Google photos/hours everywhere. */
@@ -31,6 +32,8 @@ export interface PlaceResult {
   wikimediaCommons?: string;
   /** OSM `brand:wikidata` QID — brand-logo fallback when no venue photo. */
   brandWikidata?: string;
+  /** Detected facilities (gymAmenities ids) from place tags + name. */
+  amenities?: string[];
   sources: ProviderId[];
 }
 
@@ -114,6 +117,7 @@ function mergeInto(a: PlaceResult, b: PlaceResult): void {
   if (!a.externalId && b.externalId) a.externalId = b.externalId;
   if (!a.wikimediaCommons && b.wikimediaCommons) a.wikimediaCommons = b.wikimediaCommons;
   if (!a.brandWikidata && b.brandWikidata) a.brandWikidata = b.brandWikidata;
+  if (a.amenities || b.amenities) a.amenities = unionAmenities(a.amenities, b.amenities);
 }
 
 /**
@@ -303,6 +307,7 @@ async function overpassNearbyGyms(
         externalId: `osm:${el.type}${el.id}`,
         wikimediaCommons: el.tags?.wikimedia_commons,
         brandWikidata: el.tags?.['brand:wikidata'],
+        amenities: detectAmenities({ tags: el.tags, name }),
         sources: ['overpass'] as ProviderId[],
       };
     })
@@ -383,6 +388,7 @@ async function photonOnce(
         lng: c[0],
         address: addr || undefined,
         externalId: pr.osm_id ? `osm:${pr.osm_type ?? ''}${pr.osm_id}` : undefined,
+        amenities: detectAmenities({ name: pr.name }),
         sources: ['osm'] as ProviderId[],
       };
     });

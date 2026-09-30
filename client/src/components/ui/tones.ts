@@ -14,6 +14,8 @@
  *   sport    court green — sports activities
  *   ok / danger / kcal — status families
  *   apex / learn / atlas — sub-app families (Today widgets)
+ *   gym / people — fixed identity of the Gym and People apps (app switcher); unlike
+ *   `accent` they do not follow the active app's accent re-skin
  *   neutral  greys
  */
 import './tones.css';
@@ -36,7 +38,9 @@ export type Tone =
   | 'kcal'
   | 'apex'
   | 'learn'
-  | 'atlas';
+  | 'atlas'
+  | 'gym'
+  | 'people';
 
 export const TONES: Tone[] = [
   'neutral',
@@ -54,6 +58,8 @@ export const TONES: Tone[] = [
   'apex',
   'learn',
   'atlas',
+  'gym',
+  'people',
 ];
 
 /** The class that binds --t-* to a family. */

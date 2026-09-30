@@ -37,15 +37,24 @@
  *  9. `top` = the best qualifying type (null if none). `alternatives` = up to 2
  *     more: remaining qualifying types first, then recovery-category types that
  *     followed ≥ 2 lookback workouts (as `after_workouts`), in the same order.
- *     No top → no alternatives (the card is not shown at all).
+ *     No top → no alternatives from history (the card is shown only if the
+ *     gym's facilities supply a suggestion — see the facility rule below).
+ * 10. Facility rule (`amenity`): with `gym` given, its effective amenities map to
+ *     the closest existing types — pool→swim, sauna/steam/jacuzzi→sauna,
+ *     coldPlunge→cold, massage→massage, stretchArea→mobility — ordered by how hard
+ *     the session was (sessionProfile: hard → sauna/cold/stretch, light → swim;
+ *     hard legs → cold first). Needs no history; off / already-logged types and
+ *     types already suggested are skipped. No qualifying habit → the first is the
+ *     top and up to 2 more are alternatives; with a habit they only fill free
+ *     alternative slots. count/of are 0 for these.
  *
  * Cost: one pass to filter/sort workouts, one sort of activities, then a binary
  * search per lookback workout — well under 2 ms for 500 workouts.
  */
-import type { Activity, Workout } from './types';
-import type { MuscleGroup } from './data/exercises';
+import type { Activity, Gym, Workout } from './types';
 import { activityType, durationMin } from './activities';
-import { dayFromCounts } from './data/daySuggest';
+import { sessionProfile, workoutDayType, type SessionLevel } from './sessionProfile';
+import { effectiveAmenities } from './data/gymAmenities';
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
@@ -66,7 +75,9 @@ export const NEXT_UP_MIN_RATIO = 0.4;
 export const NEXT_UP_RECOVERY_MIN_COUNT = 2;
 const MAX_ALTERNATIVES = 2;
 
-export type NextUpReason = 'after_workouts' | 'after_day_type';
+export { workoutDayType };
+
+export type NextUpReason = 'after_workouts' | 'after_day_type' | 'amenity';
 
 export interface NextUp {
   /** Activity catalog key (see ACTIVITY_TYPES). */
@@ -80,6 +91,10 @@ export interface NextUp {
   reason: NextUpReason;
   /** The day type (e.g. 'legs') when reason is 'after_day_type'. */
   dayType?: string;
+  /** reason 'amenity': the gym facility it comes from (gymAmenities id). */
+  amenity?: string;
+  /** reason 'amenity': how the session went (drives the wording). */
+  intensity?: SessionLevel;
 }
 
 export interface NextUpInput {
@@ -91,6 +106,8 @@ export interface NextUpInput {
   off?: string[];
   /** Day-type classifier; defaults to `workoutDayType` (stored muscles). */
   dayTypeOf?: (w: Workout) => string | null;
+  /** The gym the workout was at: its facilities can suggest an activity without history. */
+  gym?: Gym | null;
 }
 
 export interface NextUpResult {
@@ -100,23 +117,6 @@ export interface NextUpResult {
 
 interface Candidate extends NextUp {
   lastAt: number;
-}
-
-/**
- * The workout's dominant training day by working-set count per primary muscle
- * (strength exercises only; warm-up sets ignored). Null for an empty session.
- */
-export function workoutDayType(w: Workout): string | null {
-  const counts = new Map<MuscleGroup, number>();
-  for (const e of w.exercises) {
-    if ((e.kind ?? 'strength') !== 'strength' || !e.primaryMuscle) continue;
-    const working = e.sets.filter(
-      (s) => (s.type ?? (s.isWarmup ? 'warmup' : 'working')) !== 'warmup',
-    );
-    const m = e.primaryMuscle as MuscleGroup;
-    counts.set(m, (counts.get(m) ?? 0) + Math.max(1, working.length));
-  }
-  return dayFromCounts(counts);
 }
 
 /** Round minutes to the nearest 5, never below 5. */
@@ -279,6 +279,7 @@ export interface NextUpStrip {
  */
 export function nextUpStrip(input: NextUpInput, suggestion: NextUp): NextUpStrip {
   const empty: NextUpStrip = { hits: [], minMin: 0, maxMin: 0 };
+  if (suggestion.reason === 'amenity') return empty;
   const current = input.workouts.find((w) => w.id === input.finishedWorkoutId);
   if (!current) return empty;
   const eligible = eligibleHistory(input.workouts, current, input.now);
@@ -310,8 +311,92 @@ export function nextUpStrip(input: NextUpInput, suggestion: NextUp): NextUpStrip
   };
 }
 
-/** The post-workout "Next up" suggestion — see the rules in the file header. */
+/** Gym facility → the closest existing activity type (first listed wins per type). */
+const AMENITY_ACTIVITY: [amenity: string, type: string][] = [
+  ['pool', 'swim'],
+  ['sauna', 'sauna'],
+  ['steam', 'sauna'],
+  ['jacuzzi', 'sauna'],
+  ['coldPlunge', 'cold'],
+  ['massage', 'massage'],
+  ['stretchArea', 'mobility'],
+];
+/** Typical minutes per facility activity. */
+const AMENITY_MINUTES: Record<string, number> = {
+  swim: 20,
+  sauna: 15,
+  cold: 5,
+  massage: 20,
+  mobility: 10,
+};
+/** Preference order by how the session went (hard → warm/cold + stretch; light → swim). */
+const AMENITY_ORDER: Record<SessionLevel, string[]> = {
+  hard: ['sauna', 'cold', 'mobility', 'massage', 'swim'],
+  moderate: ['sauna', 'swim', 'mobility', 'cold', 'massage'],
+  light: ['swim', 'sauna', 'mobility', 'massage', 'cold'],
+};
+const AMENITY_ORDER_LEGS: string[] = ['cold', 'sauna', 'mobility', 'massage', 'swim'];
+
+/**
+ * Suggestions from what the workout's gym offers, ordered by how hard the session
+ * was. Pure and history-free; `exclude` = types off / already logged.
+ */
+function amenitySuggestions(current: Workout, gym: Gym, exclude: Set<string>): NextUp[] {
+  const have = new Set(effectiveAmenities(gym));
+  const byType = new Map<string, string>();
+  for (const [amenity, type] of AMENITY_ACTIVITY) {
+    if (have.has(amenity) && !byType.has(type) && !exclude.has(type) && activityType(type)) {
+      byType.set(type, amenity);
+    }
+  }
+  if (byType.size === 0) return [];
+  const profile = sessionProfile(current);
+  const order =
+    profile.level === 'hard' && profile.dayType === 'legs'
+      ? AMENITY_ORDER_LEGS
+      : AMENITY_ORDER[profile.level];
+  return [...byType.keys()]
+    .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+    .map((type) => ({
+      type,
+      minutes: AMENITY_MINUTES[type] ?? 15,
+      count: 0,
+      of: 0,
+      reason: 'amenity' as const,
+      amenity: byType.get(type) as string,
+      intensity: profile.level,
+    }));
+}
+
+/**
+ * The post-workout "Next up" suggestion — see the rules in the file header.
+ * Facility rule (no history needed): when the workout's gym has a pool / sauna /
+ * steam / jacuzzi / cold plunge / massage / stretch area, the closest activity is
+ * suggested with reason `amenity` — as the top when no habit qualifies, otherwise
+ * it fills the free alternative slots after the habit-based ones.
+ */
 export function nextUpSuggestions(input: NextUpInput): NextUpResult {
+  const base = historySuggestions(input);
+  const gym = input.gym;
+  const current = input.workouts.find((w) => w.id === input.finishedWorkoutId);
+  if (!gym || !current) return base;
+  const exclude = new Set(input.off ?? []);
+  for (const a of input.activities)
+    if (a.startedAt >= refTime(current, input.now)) exclude.add(a.type);
+  if (base.top) exclude.add(base.top.type);
+  for (const a of base.alternatives) exclude.add(a.type);
+  const extra = amenitySuggestions(current, gym, exclude);
+  if (extra.length === 0) return base;
+  if (!base.top) {
+    return { top: extra[0], alternatives: extra.slice(1, 1 + MAX_ALTERNATIVES) };
+  }
+  return {
+    top: base.top,
+    alternatives: [...base.alternatives, ...extra].slice(0, MAX_ALTERNATIVES),
+  };
+}
+
+function historySuggestions(input: NextUpInput): NextUpResult {
   const none: NextUpResult = { top: null, alternatives: [] };
   const { workouts, activities, finishedWorkoutId, now } = input;
   const current = workouts.find((w) => w.id === finishedWorkoutId);

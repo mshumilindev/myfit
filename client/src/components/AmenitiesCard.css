@@ -1,0 +1,14 @@
+.amen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2, 8px);
+  margin: var(--sp-2, 8px) 0;
+}
+.amen-hint {
+  font-size: var(--fs-12);
+}
+.amen-auto {
+  margin-inline-start: var(--sp-1, 4px);
+  font-size: var(--fs-10);
+  opacity: 0.7;
+}

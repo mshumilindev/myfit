@@ -457,6 +457,13 @@ export function ProgressView({
           {rangeLabel}
         </Button>
       )}
+      {ptab === 'trends' && store.coach.enabled && (
+        <IconButton
+          icon="sparkle"
+          label={t.atlChatOpen}
+          onClick={() => shell.openOverlay({ screen: 'coach' })}
+        />
+      )}
     </div>
   );
 
@@ -466,6 +473,16 @@ export function ProgressView({
         {topBar}
         <div className="progress-alt-body">
           {store.coach.enabled && <AtlasNotesPanel />}
+          {store.coach.enabled && (
+            <Button
+              variant="secondary"
+              icon="sparkle"
+              fullWidth
+              onClick={() => shell.openOverlay({ screen: 'coach' })}
+            >
+              {t.atlChatAsk}
+            </Button>
+          )}
           <TrendsView finished={finished} body={store.bodyMetrics} />
         </div>
       </div>

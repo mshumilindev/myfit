@@ -280,6 +280,12 @@
   flex-direction: column;
   flex: 1;
 }
+/* Web: the pinned action bar rides the bottom of the scrolling pane. */
+.hl-pane > .uiab {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+}
 .hl-wc {
   padding: var(--sp-6);
   display: flex;

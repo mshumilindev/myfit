@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react';
 import { Button, IconButton } from './ui/Button';
 import { useT, fmtDurationHuman } from '../i18n';
+import { sleepBlockedBy, SLEEP_BLOCK_KEY } from '../sleepGuard';
 import {
   useStore,
   liveSleep,
@@ -96,6 +97,7 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
   const store = useStore();
   const [now] = useState(() => Date.now());
   const live = liveSleep(store.sleeps);
+  const sleepBlock = sleepBlockedBy(store);
   const s = store.sleepSettings;
 
   // Local, session-only interaction state (no re-nag within a session).
@@ -168,8 +170,8 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
     if (s.lastAutoNight === bedDayKey) return;
     const autoWakeAt = bedTs + planDurationMin(plan) * MIN;
     queueMicrotask(() => {
-      startSleep(bedTs, 'auto', autoWakeAt);
-      setSleepSettings({ lastAutoNight: bedDayKey });
+      // Blocked by a workout / activity / home set → try again next tick.
+      if (startSleep(bedTs, 'auto', autoWakeAt)) setSleepSettings({ lastAutoNight: bedDayKey });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.autoLog, s.lastAutoNight, live, tick]);
@@ -225,6 +227,7 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
   if (showDim && plan) {
     const moon = moonInfo(new Date(tick));
     const startNow = () => {
+      if (sleepBlock) return;
       setSleepSettings({ lastDimDay: todayId });
       queueMicrotask(() => startSleep());
     };
@@ -248,7 +251,7 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
             <div className="sad-body">{t.sleepBedtimeBody(clock(plan.bedMin))}</div>
           </div>
           <div className="sad-actions">
-            <Button variant="sleep-fill" onClick={startNow}>
+            <Button variant="sleep-fill" onClick={startNow} disabled={!!sleepBlock}>
               <Icon name="moon-stars" weight="fill" />
               {t.sleepStart}
             </Button>
@@ -261,7 +264,9 @@ export function SleepAutomation({ onOpenSchedule }: { onOpenSchedule: () => void
               </Button>
             </div>
           </div>
-          <div className="sad-foot">{t.sleepAutoDimFoot}</div>
+          <div className="sad-foot">
+            {sleepBlock ? t[SLEEP_BLOCK_KEY[sleepBlock]] : t.sleepAutoDimFoot}
+          </div>
         </div>
       </div>
     );

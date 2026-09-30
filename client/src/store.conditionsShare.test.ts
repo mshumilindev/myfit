@@ -101,7 +101,6 @@ describe('coachShare publishing', () => {
       key: KEY,
       severity: 2,
       share: 'full',
-      note: 'my private note',
     });
     await echoConditions();
     store.updateCondition(a.id, { severity: 3 });
@@ -110,7 +109,6 @@ describe('coachShare publishing', () => {
     expect(v1).toEqual(coachView(items(), general()));
     expect(v1.full[0]).toMatchObject({ key: KEY, severity: 3 });
     expect(JSON.stringify(shareWrites().at(-1)!.data)).not.toContain(KEY);
-    expect(JSON.stringify(v1)).not.toContain('my private note');
 
     // Delete: the mirror reports no documents -> empty view.
     store.deleteCondition(a.id);
@@ -119,7 +117,7 @@ describe('coachShare publishing', () => {
   });
 
   it('Off / Effects / Full general default republish the matching view', async () => {
-    store.addCondition({ key: KEY, severity: 2, share: 'inherit', note: 'N-1' });
+    store.addCondition({ key: KEY, severity: 2, share: 'inherit' });
     await echoConditions();
 
     store.setConditionsShare('off');

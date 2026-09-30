@@ -94,6 +94,7 @@ import {
   summaryReturnFor,
   useNextUp,
 } from './sessionSummary/NextUp';
+import { FuelCard } from './sessionSummary/FuelCard';
 import { TEMPER_COLOR, type Temper } from '../atlas/types';
 import { setFact } from '../atlas/facts';
 import { useAtlasFmt, voiceNow } from '../atlas/notes';
@@ -4402,6 +4403,7 @@ export function SessionView(props: {
           onOpen={fromSummary(() => props.shell.openOverlay({ screen: 'coach' }))}
         />
         {nextUp && !web && <NextUpCard m={nextUp} />}
+        {!props.past && !(web && nextUp) && <FuelCard workout={workout} />}
         <div className="stat-grid">
           <div className="cell">
             <div className="v">

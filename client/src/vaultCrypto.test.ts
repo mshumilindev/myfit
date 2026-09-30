@@ -7,7 +7,7 @@ const newSalt = () => rnd(16);
 const newKey = (extractable = true) => importRawKey(rnd(32), extractable);
 
 describe('encrypt / decrypt', () => {
-  const data = { conditions: [{ key: 'back_lumbar_disc', note: 'secret' }] };
+  const data = { conditions: [{ key: 'back_lumbar_disc', severity: 3 }] };
 
   it('round-trips with the same key', async () => {
     const key = await newKey();
@@ -20,7 +20,6 @@ describe('encrypt / decrypt', () => {
   it('never leaks plaintext into the envelope', async () => {
     const salt = newSalt();
     const env = await encryptJson(await newKey(), salt, data);
-    expect(JSON.stringify(env)).not.toContain('secret');
     expect(JSON.stringify(env)).not.toContain('back_lumbar_disc');
   });
 

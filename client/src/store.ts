@@ -11,7 +11,12 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
-import { coachView, type GeneralShare } from './conditions';
+import {
+  coachView,
+  stripLegacyCondition,
+  stripLegacyConditions,
+  type GeneralShare,
+} from './conditions';
 import { COACH_DEFAULT, normalizeTemper, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
@@ -85,6 +90,7 @@ import {
   type HomeSet,
   type HomeState,
 } from './homeSets';
+import { sleepBlockedBy, type SleepBlock } from './sleepGuard';
 import PER_SIDE from './data/per-side.json';
 import { deriveLoadType, BAND_DEFAULTS, type LoadType, type BandRung } from './loads';
 import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
@@ -340,7 +346,7 @@ let state: StoreState = {
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   injuries: load<Injury[]>(INJURY_KEY, []),
-  conditions: load<ChronicCondition[]>(CONDITIONS_KEY, []),
+  conditions: stripLegacyConditions(load<ChronicCondition[]>(CONDITIONS_KEY, [])),
   conditionsShare: loadShare(),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
@@ -397,7 +403,11 @@ function hydrateConditions(): void {
     .hydrate({ conditions: state.conditions, share: state.conditionsShare })
     .then((next) => {
       if (!next) return;
-      state = { ...state, conditions: next.conditions, conditionsShare: next.share };
+      state = {
+        ...state,
+        conditions: stripLegacyConditions(next.conditions),
+        conditionsShare: next.share,
+      };
       emit();
     })
     .catch(() => undefined);
@@ -2446,14 +2456,14 @@ export function setConditionsShare(v: GeneralShare): void {
 function writeConditionDoc(c: ChronicCondition): void {
   const uid = currentUid();
   if (!uid) return;
-  prepareWrite('conditions', { ...c, updatedAt: Date.now() })
+  prepareWrite('conditions', { ...stripLegacyCondition(c), updatedAt: Date.now() })
     .then((d) => setDoc(doc(db, 'users', uid, 'conditions', c.id), d))
     .catch(onWriteError);
 }
 
 export function addCondition(
   input: Pick<ChronicCondition, 'key' | 'severity' | 'share'> &
-    Partial<Pick<ChronicCondition, 'note' | 'startedAt' | 'endsAt'>>,
+    Partial<Pick<ChronicCondition, 'startedAt' | 'endsAt'>>,
 ): ChronicCondition {
   const c: ChronicCondition = { ...input, id: uuid(), createdAt: Date.now() };
   setState({ conditions: [c, ...state.conditions], syncStatus: bumpPending() });
@@ -3158,6 +3168,11 @@ export function normalizeSleeps(now: number = Date.now()): void {
   for (const id of drop) deleteSleepDoc(id);
 }
 
+/** Why a sleep can't be started right now (null = free). */
+export function sleepStartBlock(): SleepBlock | null {
+  return sleepBlockedBy(state);
+}
+
 /** Begin a live night (idempotent — returns the existing one if already asleep).
  *  `source` marks how it began ('live' by hand, 'auto' when the app starts it
  *  at your scheduled bedtime). */
@@ -3168,10 +3183,9 @@ export function startSleep(
 ): SleepNight | null {
   const existing = liveSleep(state.sleeps);
   if (existing) return existing;
-  // One live mode at a time — never start a sleep while a workout or an
-  // activity is running.
-  if ((state.workouts ?? []).some((w) => w.finishedAt === null)) return null;
-  if ((state.activities ?? []).some((a) => a.finishedAt === null)) return null;
+  // One live mode at a time — never start a sleep while a workout, an
+  // activity or a home set is running (a quiet no-op; callers show the reason).
+  if (sleepBlockedBy(state)) return null;
   const night: SleepNight = {
     id: uuid(),
     // A night's identity is the morning it ends — set it from the start, so a
@@ -4087,7 +4101,7 @@ export function startSyncLoop(): () => void {
   );
   const conditionsMirror = mirrorCollection<ChronicCondition & Record<string, unknown>>((items) => {
     conditionsCache.markRemote('conditions');
-    state = { ...state, conditions: items };
+    state = { ...state, conditions: stripLegacyConditions(items) };
     persist();
     emit();
     publishCoachShare(uid, items);

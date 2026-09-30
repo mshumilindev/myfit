@@ -46,7 +46,6 @@ export interface ChronicCondition {
   region?: BodyRegion; // для spine/joint/postop/pain: де саме
   side?: 'left' | 'right' | 'both';
   severity: 1 | 2 | 3; // 1 обережно, 2 помітно обмежує, 3 сильно обмежує
-  note?: string; // приватна нотатка (лише локально/власнику)
   createdAt: number;
   archivedAt?: number; // «більше не актуально» — не видаляємо, а архівуємо
 }
@@ -151,7 +150,7 @@ exerciseFlags(name, limits): { level: 'ok'|'info'|'caution'|'avoid'; reasons: st
 - **Тренери/адміни:** не додавати колекцію в `functions/src/profile.ts` (`fullProfilePayload`), `trainer.ts`, `admin.ts`; тест-охоронець, що payload ніколи не читає `conditions`. Не класти в `meta/body` чи в профільний документ.
 - **Клієнт-режим:** як і для injuries — у клієнтських переглядах умови ігноруються (той же патерн, що `restPeriodsOverride`).
 - **Виключені поверхні:** `StatShareSheet`/`shareCard`, `notifications.ts` (тексти без назв станів), пуш-outbox, `challenges/feats/leaderboards/apex` (`aggregates.ts`), `trainerLive`, експорти. Показуємо _ефекти_ («обережно з осьовим»), не діагноз, у всьому, що може бачити інша людина.
-- **Atlas / LLM:** Gemini (Firebase AI Logic) і fallback Puter отримують `factsJson` + історію чату **за межі пристрою**. Політика: у `factsJson` — **тільки знеособлений об'єкт обмежень** (`{avoidLoading:[…], intensityCap, noMaxEffort, noBreathHold}`), без назв діагнозів, нотаток чи областей-міток; історію чату перед відправкою санітизувати; окремий явний перемикач «Дозволити Atlas AI знати про це» (за замовчуванням вимкнено). Детерміновані інтенти (без LLM) можуть використовувати повну деталь на пристрої. Системний промпт: «respect FACTS.constraints».
+- **Atlas / LLM:** Gemini (Firebase AI Logic) і fallback Puter отримують `factsJson` + історію чату **за межі пристрою**. Політика: у `factsJson` — **тільки знеособлений об'єкт обмежень** (`{avoidLoading:[…], intensityCap, noMaxEffort, noBreathHold}`), без назв діагнозів чи областей-міток; історію чату перед відправкою санітизувати; окремий явний перемикач «Дозволити Atlas AI знати про це» (за замовчуванням вимкнено). Детерміновані інтенти (без LLM) можуть використовувати повну деталь на пристрої. Системний промпт: «respect FACTS.constraints».
 - **Пристрій:** plaintext у localStorage — ризик спільного пристрою; шифрування (WebCrypto) — за межами цього плану, зафіксовано як відкрите питання.
 - **Документація й код:** особисті медичні приклади користувача **не** потрапляють у репозиторій, доки, тести, фікстури, сторібуки — лише вигадані узагальнені.
 
@@ -184,7 +183,7 @@ exerciseFlags(name, limits): { level: 'ok'|'info'|'caution'|'avoid'; reasons: st
 5. Mastery/standards не карають за обмежені ліфти.
 6. **Каталог великий і повний**; ручного створення стану немає. «Хронічний біль без діагнозу» — записи каталогу по областях.
 7. **Шифрування** на пристрої і в БД (E2E, автоматичний ключ з сервера; recovery key прибрано, див. §14). Сервер не читає стани; Atlas і генерація працюють на пристрої; у LLM лише знеособлені ефекти.
-8. **Ділення з тренером:** загальний дефолт для всіх («Нічого» за замовчуванням / «Лише ефекти» / «Повністю») і окреме налаштування кожного стану («Default / Off / Effects / Full»). «Лише ефекти» = без назви й нотаток. Нотатки не діляться ніколи.
+8. **Ділення з тренером:** загальний дефолт для всіх («Нічого» за замовчуванням / «Лише ефекти» / «Повністю») і окреме налаштування кожного стану («Default / Off / Effects / Full»). «Лише ефекти» = без назви.
 9. **Дизайн зведений (без варіантів)**, усе з реального uikit і реальних екранів (полотно «Chronic conditions: one flow»):
    - Health: блок «Long-term conditions» **перед History**.
    - Додавання: за замовчуванням **List** (пошук + категорії), альтернатива **Body map** з шарами Bones / Muscles / Organs (BodyParts3D, CC BY 4.0, рендер у `public/anatomy`).
@@ -243,7 +242,7 @@ Implemented (behind the `conditions` flag):
 - Body map (Bones / Muscles / Organs layers) and the Other tab.
 - Generation, exercise picker and swaps, progression (step scale, no auto-increase), failure suggestions, RPE hint in the session, rest (`planRest` via `restScale`, shown as a rest reason).
 - Today row for active conditions.
-- Coach snapshot: de-identified effects sealed into `users/{uid}/meta/coachShare` and forwarded by the profile function; no names or notes leave the account.
+- Coach snapshot: de-identified effects sealed into `users/{uid}/meta/coachShare` and forwarded by the profile function; no names leave the account.
 - Program editor and playbook shields.
 - Atlas receives de-identified effects only.
 - Entry points in Profile and onboarding.

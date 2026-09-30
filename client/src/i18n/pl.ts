@@ -1586,18 +1586,15 @@ export const pl: Strings = {
   cndShareEffects: 'Skutki',
   cndShareFull: 'Pełny',
   cndShareHintOff: 'Trener nic o tym nie widzi.',
-  cndShareHintEffects:
-    'Trener widzi tylko, co zmienia się w treningu. Bez nazwy, okolicy i notatki.',
-  cndShareHintFull: 'Trener widzi schorzenie i jego nasilenie. Notatki pozostają prywatne.',
-  cndNote: 'Prywatna notatka',
-  cndNotePh: 'Widzisz tylko Ty. Nigdy nie jest udostępniana.',
+  cndShareHintEffects: 'Trener widzi tylko, co zmienia się w treningu. Bez nazwy i okolicy.',
+  cndShareHintFull: 'Trener widzi schorzenie i jego nasilenie.',
   cndStarted: 'Początek',
   cndEnds: 'Oczekiwany koniec',
   cndTodayTitle: (n: number) => `Plany uwzględniają stany: ${n}`,
   cndTodaySub: 'Prywatne. Dotknij, aby zobaczyć.',
   cndCoachTitle: 'Stan zdrowia od sportowca',
   cndCoachEffects: 'Ograniczenia w treningu',
-  cndCoachFoot: 'Udostępnione przez sportowca. Prywatne notatki nigdy nie są widoczne.',
+  cndCoachFoot: 'Udostępnione przez sportowca.',
   cndProfileRow: 'Schorzenia długoterminowe',
   cndOnbPrompt: 'Masz jakieś schorzenia długoterminowe?',
   cndOnbHint: 'Opcjonalnie. Prywatne i szyfrowane — możesz je dodać później w Zdrowiu.',
@@ -1607,6 +1604,90 @@ export const pl: Strings = {
   cndRotateHint: 'Przeciągnij, aby obrócić',
   cndShareDefault: 'Domyślnie udostępniaj trenerowi',
   cndShareHintInheritNow: (l: string) => `Obowiązuje Twoje ogólne ustawienie: ${l}.`,
+  amenTitle: 'Udogodnienia',
+  amenHint: 'Co ta siłownia oferuje poza salą. Dotknij, aby poprawić.',
+  amenAuto: 'auto',
+  amenReset: 'Przywróć wykryte',
+  amen_pool: 'Basen',
+  amen_sauna: 'Sauna',
+  amen_steam: 'Łaźnia parowa',
+  amen_jacuzzi: 'Jacuzzi',
+  amen_coldPlunge: 'Zimna kąpiel',
+  amen_juiceBar: 'Bar z sokami',
+  amen_cafe: 'Kawiarnia',
+  amen_massage: 'Masaż',
+  amen_stretchArea: 'Strefa rozciągania',
+  fuelTitle: 'Paliwo na regenerację',
+  fuelNote: 'Ogólne wskazówki dotyczące samopoczucia, nie porada medyczna.',
+  fuelAtGym: 'Dostaniesz to na siłowni',
+  fuelConsultTitle: 'Jedzenie po treningu',
+  fuelConsult:
+    'Co jeść i pić po treningu, zależy od Twojego zdrowia. Zapytaj lekarza lub dietetyka, co będzie dla Ciebie odpowiednie.',
+  fuelName: (kind: string): string =>
+    (
+      ({
+        proteinShake: 'Shake proteinowy',
+        smoothie: 'Smoothie',
+        hydrate: 'Woda z elektrolitami',
+        carbMeal: 'Posiłek z węglowodanami i białkiem',
+        snack: 'Lekka przekąska',
+      }) as Record<string, string>
+    )[kind] ?? kind,
+  fuelFacts: (
+    sets: number,
+    dayType: string | null,
+    rpe: number | null,
+    minutes: number,
+    cardioMin: number,
+  ): string => {
+    const days: Record<string, string> = {
+      push: 'push',
+      pull: 'pull',
+      legs: 'nogi',
+      core: 'brzuch',
+      full: 'całe ciało',
+    };
+    const parts: string[] = [];
+    if (sets > 0) {
+      const n = sets;
+      const day = dayType ? (days[dayType] ?? '') : '';
+      parts.push(`Serie robocze: ${n}${day ? ` (${day})` : ''}`);
+    }
+    if (rpe) {
+      const n = rpe;
+      parts.push(`RPE ${n}`);
+    }
+    if (cardioMin > 0) {
+      const n = Math.round(cardioMin);
+      parts.push(`cardio ${n} min`);
+    }
+    if (minutes > 0) {
+      const n = minutes;
+      parts.push(`${n} min`);
+    }
+    return parts.join(', ');
+  },
+  fuelReason: (kind: string, facts: string): string => {
+    const tail =
+      (
+        {
+          proteinShake: 'łatwe białko wspierające regenerację',
+          smoothie: 'lekkie i łatwe do wypicia',
+          hydrate: 'uzupełnij płyny i sole',
+          carbMeal: 'węglowodany i białko na odbudowę sił',
+          snack: 'coś małego, gdy pełny posiłek nie wchodzi w grę',
+        } as Record<string, string>
+      )[kind] ?? '';
+    return facts ? `${facts} — ${tail}` : tail[0].toUpperCase() + tail.slice(1);
+  },
+  windReason: (amenity: string, level: string): string =>
+    `Twoja siłownia ma ${({ pool: 'basen', sauna: 'saunę', steam: 'łaźnię parową', jacuzzi: 'jacuzzi', coldPlunge: 'zimną kąpiel', massage: 'masaż', stretchArea: 'strefę rozciągania' } as Record<string, string>)[amenity] ?? amenity} — ${({ hard: 'dobry sposób na wyciszenie po ciężkim treningu', moderate: 'łatwy sposób na ostudzenie i relaks po treningu', light: 'lekki dodatek po lżejszym treningu' } as Record<string, string>)[level] ?? ''}`,
+  windNote: 'Propozycja wynika z tego, co ma Twoja siłownia, i z przebiegu tego treningu.',
+  slpBlockWorkout: 'Zakończ trening, zanim zaczniesz sen.',
+  slpBlockActivity: 'Zakończ aktywność, zanim zaczniesz sen.',
+  slpBlockHomeSet: 'Zakończ zestaw domowy, zanim zaczniesz sen.',
+  atlChatOpen: 'Otwórz czat z Atlasem',
+  atlChatAsk: 'Zapytaj Atlasa…',
   cndRpeHint: (n: number) => `Utrzymaj tę serię na RPE ${n} lub lżej.`,
   cndDayOf: (d: number, n: number) => `Dzień ${d} z ${n}`,
   cndSave: 'Zapisz',

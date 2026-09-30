@@ -1,0 +1,35 @@
+/* Session summary · Recovery fuel. Kit Card + IconTile; only layout lives here. */
+.fuel-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.fuel-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fuel-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+.fuel-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.fuel-body p {
+  margin: 0;
+}
+.fuel-gym {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: var(--color-ok);
+}

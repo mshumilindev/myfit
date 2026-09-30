@@ -7,7 +7,7 @@ import {
   workoutDayType,
   type NextUpInput,
 } from './nextUp';
-import type { Activity, Exercise, Workout } from './types';
+import type { Activity, Exercise, Gym, Workout } from './types';
 
 const MIN = 60 * 1000;
 const DAY = 24 * 60 * MIN;
@@ -474,5 +474,100 @@ describe('nextUpStrip / nextUpLookbackCount — the evidence under the card', ()
     expect(
       nextUpStrip(input, { type: 'sauna', minutes: 20, count: 3, of: 4, reason: 'after_workouts' }),
     ).toEqual({ hits: [], minMin: 0, maxMin: 0 });
+  });
+});
+
+describe('nextUpSuggestions — gym facilities (no history needed)', () => {
+  const gymWith = (amenities: string[]): Gym => ({
+    id: 'g1',
+    name: 'Club',
+    lat: 0,
+    lng: 0,
+    radiusM: 100,
+    amenities,
+  });
+  const hard = (muscle = 'quads'): Workout => ({ ...current(muscle), exercises: [ex(muscle, 16)] });
+  const light = (): Workout => ({ ...current('chest'), exercises: [ex('chest', 4)] });
+
+  it('no history, no gym → nothing (unchanged)', () => {
+    expect(run({ workouts: [current()], activities: [] })).toEqual({ top: null, alternatives: [] });
+  });
+
+  it('a gym without facilities adds nothing', () => {
+    const r = run({ workouts: [current()], activities: [], gym: gymWith(['cafe']) });
+    expect(r.top).toBeNull();
+  });
+
+  it('hard legs day: cold first, then sauna, then stretch — reason amenity', () => {
+    const r = run({
+      workouts: [hard()],
+      activities: [],
+      gym: gymWith(['pool', 'sauna', 'coldPlunge', 'stretchArea']),
+    });
+    expect(r.top).toMatchObject({
+      type: 'cold',
+      reason: 'amenity',
+      amenity: 'coldPlunge',
+      intensity: 'hard',
+      count: 0,
+      of: 0,
+    });
+    expect(r.alternatives.map((a) => a.type)).toEqual(['sauna', 'mobility']);
+  });
+
+  it('light session prefers the pool; steam and sauna collapse into one sauna', () => {
+    const r = run({
+      workouts: [light()],
+      activities: [],
+      gym: gymWith(['sauna', 'steam', 'pool']),
+    });
+    expect(r.top).toMatchObject({ type: 'swim', amenity: 'pool', intensity: 'light' });
+    expect(r.alternatives).toHaveLength(1);
+    expect(r.alternatives[0]).toMatchObject({ type: 'sauna', amenity: 'sauna' });
+  });
+
+  it('respects off types and anything already logged after the workout', () => {
+    const w = hard('chest');
+    const logged = after(w, 'sauna', 15);
+    const r = run({
+      workouts: [w],
+      activities: [logged],
+      off: ['cold'],
+      gym: gymWith(['sauna', 'coldPlunge', 'pool']),
+    });
+    expect(r.top?.type).toBe('swim');
+    expect(r.alternatives).toEqual([]);
+  });
+
+  it('with a qualifying habit the habit stays on top and facilities fill the chips', () => {
+    const ws = history(8);
+    const sauna = [18, 20, 22, 20, 19, 25].map((m, k) => after(ws[k], 'sauna', m));
+    const r = run({
+      workouts: [...ws, current()],
+      activities: sauna,
+      gym: gymWith(['sauna', 'pool', 'coldPlunge']),
+    });
+    expect(r.top).toMatchObject({ type: 'sauna', reason: 'after_workouts' });
+    const types = r.alternatives.map((a) => a.type);
+    expect(types).not.toContain('sauna');
+    expect(types).toEqual(expect.arrayContaining(['swim', 'cold']));
+    expect(r.alternatives.every((a) => a.reason === 'amenity')).toBe(true);
+  });
+
+  it('is deterministic and has no evidence strip', () => {
+    const input = {
+      workouts: [hard()],
+      activities: [],
+      gym: gymWith(['pool', 'sauna']),
+      finishedWorkoutId: 'now',
+      now: T + 75 * MIN,
+    };
+    const a = nextUpSuggestions(input);
+    expect(nextUpSuggestions(input)).toEqual(a);
+    expect(nextUpStrip(input, a.top as NonNullable<typeof a.top>)).toEqual({
+      hits: [],
+      minMin: 0,
+      maxMin: 0,
+    });
   });
 });

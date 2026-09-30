@@ -411,7 +411,7 @@ export const aDetail = () => (
         variant="track"
         tone="chronic"
       />
-      <span className="ut-sm ut-muted">Coach sees only the effects. No name, area or notes.</span>
+      <span className="ut-sm ut-muted">Coach sees only the effects. No name or area.</span>
     </Sec>
     <Button variant="danger" fullWidth onClick={noop}>
       Delete condition
@@ -436,9 +436,7 @@ export const aSharing = () => (
         variant="track"
         tone="chronic"
       />
-      <span className="ut-sm ut-muted">
-        Nothing is shared until you change this. Notes are never shared.
-      </span>
+      <span className="ut-sm ut-muted">Nothing is shared until you change this.</span>
     </Sec>
     <GroupedList header="Per condition">
       {MY.map((c) => (
@@ -463,7 +461,7 @@ export const aSharing = () => (
     <Sec label="What your coach sees">
       <Card pad="md">
         <span className="ut-md">
-          Avoid heavy axial loading. Effort cap 8. No condition names, areas or notes.
+          Avoid heavy axial loading. Effort cap 8. No condition names or areas.
         </span>
       </Card>
     </Sec>
@@ -627,7 +625,7 @@ export const aAssign = () => (
         <div className="ul-flex ul-col ug-8">
           <Tag tone="chronic">Effects only</Tag>
           <span className="ut-md">Avoid heavy axial loading. Effort cap 8.</span>
-          <span className="ut-sm ut-muted">No condition names, areas or notes.</span>
+          <span className="ut-sm ut-muted">No condition names or areas.</span>
         </div>
       </Card>
     </Sec>

@@ -23,6 +23,7 @@ import {
   TEMPORARY,
   isOtherTab,
   resolveShare,
+  stripLegacyCondition,
 } from './conditions';
 import type { ChronicCondition } from './types';
 
@@ -35,8 +36,17 @@ const mk = (
   key,
   severity,
   share,
-  note: 'PRIVATE NOTE',
   createdAt: 0,
+});
+
+describe('legacy note field', () => {
+  it('is dropped on read and never comes back', () => {
+    const legacy = { ...mk('asthma'), note: 'old private text' };
+    const clean = stripLegacyCondition(legacy);
+    expect('note' in clean).toBe(false);
+    expect(clean).toEqual(mk('asthma'));
+    expect(stripLegacyCondition(mk('asthma'))).toEqual(mk('asthma'));
+  });
 });
 
 describe('catalog integrity', () => {
@@ -154,17 +164,14 @@ describe('sharing', () => {
     expect(v.full).toEqual([]);
     expect(v.effects).toEqual([]);
   });
-  it('never leaks notes, names or off conditions', () => {
+  it('never leaks names or off conditions', () => {
     const v = coachView(list, 'off');
-    const json = JSON.stringify(v);
-    expect(json).not.toContain('PRIVATE NOTE');
     expect(v.full.map((x) => x.key)).toEqual([CONDITION_CATALOG[1].key]);
     for (const c of CONDITION_CATALOG.slice(0, 4))
       expect(JSON.stringify(v.effects)).not.toContain(c.name);
   });
-  it('de-identified effects carry no keys or notes', () => {
+  it('de-identified effects carry no keys', () => {
     const json = JSON.stringify(deidentifiedEffects(list));
-    expect(json).not.toContain('PRIVATE NOTE');
     for (const c of list) expect(json).not.toContain(c.key);
   });
 });

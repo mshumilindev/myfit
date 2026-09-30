@@ -32,6 +32,7 @@ import { EquipmentBoard } from '../components/EquipmentBoard';
 import { GymKitCard } from '../components/GymKit';
 import { gymHasNoList } from '../gymEvidence';
 import { BandLibraryCard } from '../components/BandLibraryCard';
+import { AmenitiesCard } from '../components/AmenitiesCard';
 import { Tag } from '../components/ui/Tag';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -47,6 +48,7 @@ export function GymDetailView({
   candLng,
   candAddress,
   candExternalId,
+  candAmenities,
   shell,
   onClose,
 }: {
@@ -56,6 +58,7 @@ export function GymDetailView({
   candLng?: number;
   candAddress?: string;
   candExternalId?: string;
+  candAmenities?: string[];
   shell: Shell;
   onClose: () => void;
 }) {
@@ -159,6 +162,7 @@ export function GymDetailView({
       lng,
       radiusM: DEFAULT_GYM_RADIUS_M,
       ...(candExternalId ? { externalId: candExternalId } : {}),
+      ...(candAmenities ? { amenitiesAuto: candAmenities } : {}),
     });
 
   const sessions = gym
@@ -339,6 +343,8 @@ export function GymDetailView({
               />
             );
           })()}
+
+        {isSaved && gym && <AmenitiesCard gym={gym} />}
 
         {isSaved && gym && <BandLibraryCard gym={gym} />}
 

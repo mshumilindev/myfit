@@ -142,6 +142,7 @@ export function GymPicker({
       lng: r.lng,
       radiusM: DEFAULT_GYM_RADIUS_M,
       ...(r.externalId ? { externalId: r.externalId } : {}),
+      ...(r.amenities ? { amenitiesAuto: r.amenities } : {}),
     });
     onPick(g.id);
   };

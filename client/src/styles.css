@@ -172,7 +172,17 @@
   --color-sport-tint: var(--color-sport-900);
   --color-sport-text: #d7f0c1;
   --color-sport-line: #3d5a2a;
-  /* Sub-app families for Today widgets: Apex (violet), Learn (rubellite), Atlas (coral). */
+  /* Sub-app families for Today widgets and the app switcher: Gym (gold), People (silver),
+     Apex (violet), Learn (rubellite), Atlas (coral). Fixed values: the per-app themes
+     re-skin --color-accent, so a family that must not follow the active app cannot use it. */
+  --color-gym: #d9a24f;
+  --color-gym-tint: #342713;
+  --color-gym-text: #eed3a5;
+  --color-gym-line: #5a4524;
+  --color-people: #c8ccd4;
+  --color-people-tint: #26282c;
+  --color-people-text: #d7dae0;
+  --color-people-line: #4a4d53;
   --color-apex: #9d6ff0;
   --color-apex-tint: #221a38;
   --color-apex-text: #d9c9fb;
@@ -17002,42 +17012,6 @@ html.theme-glass .apx-streak-n {
   background: color-mix(in srgb, var(--color-bg) 50%, transparent);
   box-shadow: inset 0 0 0 1px var(--color-neutral-900);
   opacity: 0.6;
-}
-.shell-ic {
-  width: 48px;
-  height: 48px;
-  flex: none;
-  border-radius: var(--r-14);
-  display: grid;
-  place-items: center;
-  font-size: var(--fs-24);
-}
-.shell-ic-gym {
-  background: color-mix(in srgb, var(--color-accent) 13%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 28%, transparent);
-  color: var(--color-accent-400);
-}
-.shell-ic-apex {
-  background: color-mix(in srgb, var(--color-apex) 15%, transparent);
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--color-apex) 34%, transparent),
-    0 0 20px -6px color-mix(in srgb, var(--color-apex) 50%, transparent);
-  color: var(--color-accent-200);
-}
-.shell-ic-people {
-  background: color-mix(in srgb, var(--c-c8ccd4) 12%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-c8ccd4) 28%, transparent);
-  color: var(--color-accent-200);
-}
-.shell-ic-nut {
-  background: color-mix(in srgb, var(--color-kcal) 14%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-kcal) 30%, transparent);
-  color: var(--c-7fb4e6);
-}
-.shell-ic-learn {
-  background: color-mix(in srgb, var(--color-learn) 14%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-learn) 30%, transparent);
-  color: var(--color-accent-300);
 }
 .shell-tile-main {
   flex: 1;

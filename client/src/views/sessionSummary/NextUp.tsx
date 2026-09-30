@@ -59,6 +59,7 @@ import { ListRow } from '../../components/ui/GroupedList';
 import { IconTile } from '../../components/ui/IconTile';
 import type { Activity, Workout } from '../../types';
 import { clock, fmtApprox, hhmm, nowMs, typeIcon, typeName, useNow } from '../logActivity/shared';
+import { FuelCard } from './FuelCard';
 import './NextUp.css';
 
 const MIN = 60_000;
@@ -143,6 +144,7 @@ export function useNextUp(
   const liveAny = store.activities.find((a) => a.finishedAt === null) ?? null;
   const now = useNow(active && !!liveAny);
   const end = workout?.finishedAt ?? null;
+  const gym = workout?.gymId ? (store.gyms.find((g) => g.id === workout.gymId) ?? null) : null;
   const bodyKg = latestWeight(store.bodyMetrics)?.weight ?? null;
 
   const input = useMemo<NextUpInput | null>(
@@ -154,9 +156,10 @@ export function useNextUp(
             finishedWorkoutId: workout.id,
             now: end,
             off,
+            gym,
           }
         : null,
-    [workout, end, store.workouts, store.activities, off],
+    [workout, end, store.workouts, store.activities, off, gym],
   );
   const result = useMemo(() => (input ? nextUpSuggestions(input) : null), [input]);
   const lookback = useMemo(() => (input ? nextUpLookbackCount(input) : 0), [input]);
@@ -387,9 +390,11 @@ export function NextUpCard({ m, web = false }: { m: NextUpModel; web?: boolean }
   const dur = fmtApprox(top.minutes, t);
   const strip = nextUpStrip(m.input, top);
   const reason =
-    top.reason === 'after_day_type' && top.dayType
-      ? t.nuReasonDay(top.type, name, top.count, top.of, top.dayType)
-      : t.nuReason(top.type, name, top.count, top.of);
+    top.reason === 'amenity'
+      ? t.windReason(top.amenity ?? '', top.intensity ?? 'moderate')
+      : top.reason === 'after_day_type' && top.dayType
+        ? t.nuReasonDay(top.type, name, top.count, top.of, top.dayType)
+        : t.nuReason(top.type, name, top.count, top.of);
   const range =
     strip.minMin > 0
       ? strip.minMin === strip.maxMin
@@ -533,7 +538,7 @@ function NextUpOptions({ m, top }: { m: NextUpModel; top: NextUp }) {
       </div>
       <p className="nu-note">
         <Icon name="info" />
-        <span>{t.nuNote(m.lookback)}</span>
+        <span>{top.reason === 'amenity' ? t.windNote : t.nuNote(m.lookback)}</span>
       </p>
     </Sheet>
   );
@@ -601,11 +606,14 @@ export function NextUpPanel({ m }: { m: NextUpModel }) {
     <aside className="nu-panel" aria-label={t.nuTitle}>
       <div className="nu-panel-h">
         <h2>{t.nuTitle}</h2>
-        {m.top && m.lookback > 0 && <span>{t.nuFromLast(m.lookback)}</span>}
+        {m.top && m.top.reason !== 'amenity' && m.lookback > 0 && (
+          <span>{t.nuFromLast(m.lookback)}</span>
+        )}
       </div>
       <NextUpLiveBanner m={m} />
       <NextUpCard m={m} web />
       <NextUpQuiet m={m} />
+      <FuelCard workout={m.workout} />
       {rows.length > 0 && (
         <div className="nu-today">
           <p className="nu-today-h">{t.today}</p>

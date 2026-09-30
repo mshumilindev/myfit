@@ -1604,18 +1604,15 @@ export const lt: Strings = {
   cndShareEffects: 'Poveikis',
   cndShareFull: 'Visa',
   cndShareHintOff: 'Treneris apie tai nieko nmato.',
-  cndShareHintEffects:
-    'Treneris mato tik tai, kas keičiasi treniruotėse. Be pavadinimo, vietos ir pastabos.',
-  cndShareHintFull: 'Treneris mato būklę ir jos sunkumą. Pastabos lieka privačios.',
-  cndNote: 'Privati pastaba',
-  cndNotePh: 'Mato tik jūs. Niekada nesidalijama.',
+  cndShareHintEffects: 'Treneris mato tik tai, kas keičiasi treniruotėse. Be pavadinimo ir vietos.',
+  cndShareHintFull: 'Treneris mato būklę ir jos sunkumą.',
   cndStarted: 'Pradžia',
   cndEnds: 'Numatoma pabaiga',
   cndTodayTitle: (n: number) => `Planai pritaikyti būklėms: ${n}`,
   cndTodaySub: 'Privatu. Palieskite, kad peržiūrėtumėte.',
   cndCoachTitle: 'Sportininko sveikatos pastabos',
   cndCoachEffects: 'Treniruočių apribojimai',
-  cndCoachFoot: 'Pasidalijo sportininkas. Privačios pastabos niekada nerodomos.',
+  cndCoachFoot: 'Pasidalijo sportininkas.',
   cndProfileRow: 'Ilgalaikės būklės',
   cndOnbPrompt: 'Turite ilgalaikių sveikatos būklių?',
   cndOnbHint: 'Neprivaloma. Privatu ir užšifruota — galite pridėti vėliau skiltyje Sveikata.',
@@ -1625,6 +1622,91 @@ export const lt: Strings = {
   cndRotateHint: 'Patraukite, kad pasuktumėte',
   cndShareDefault: 'Pagal numatymą dalintis su treneriu',
   cndShareHintInheritNow: (l: string) => `Galioja bendras nustatymas: ${l}.`,
+  amenTitle: 'Patogumai',
+  amenHint: 'Ką ši sporto salė turi be treniruočių zonos. Bakstelėkite, kad pataisytumėte.',
+  amenAuto: 'auto',
+  amenReset: 'Grąžinti aptiktus',
+  amen_pool: 'Baseinas',
+  amen_sauna: 'Sauna',
+  amen_steam: 'Garinė',
+  amen_jacuzzi: 'Džakuzi',
+  amen_coldPlunge: 'Šalto vandens kubilas',
+  amen_juiceBar: 'Sulčių baras',
+  amen_cafe: 'Kavinė',
+  amen_massage: 'Masažas',
+  amen_stretchArea: 'Tempimo zona',
+  fuelTitle: 'Kuras atsistatymui',
+  fuelNote: 'Bendri savijautos patarimai, ne medicininė rekomendacija.',
+  fuelAtGym: 'Galite nusipirkti sporto salėje',
+  fuelConsultTitle: 'Maistas po treniruotės',
+  fuelConsult:
+    'Ką valgyti ir gerti po treniruotės, priklauso nuo jūsų sveikatos. Pasitarkite su gydytoju ar dietologu, kas jums tinka.',
+  fuelName: (kind: string): string =>
+    (
+      ({
+        proteinShake: 'Baltymų kokteilis',
+        smoothie: 'Glotnutis',
+        hydrate: 'Vanduo su elektrolitais',
+        carbMeal: 'Angliavandenių ir baltymų patiekalas',
+        snack: 'Lengvas užkandis',
+      }) as Record<string, string>
+    )[kind] ?? kind,
+  fuelFacts: (
+    sets: number,
+    dayType: string | null,
+    rpe: number | null,
+    minutes: number,
+    cardioMin: number,
+  ): string => {
+    const days: Record<string, string> = {
+      push: 'stūmimas',
+      pull: 'traukimas',
+      legs: 'kojos',
+      core: 'korpusas',
+      full: 'visas kūnas',
+    };
+    const parts: string[] = [];
+    if (sets > 0) {
+      const n = sets;
+      const day = dayType ? (days[dayType] ?? '') : '';
+      parts.push(`Darbinių serijų: ${n}${day ? ` (${day})` : ''}`);
+    }
+    if (rpe) {
+      const n = rpe;
+      parts.push(`RPE ${n}`);
+    }
+    if (cardioMin > 0) {
+      const n = Math.round(cardioMin);
+      parts.push(`kardio ${n} min.`);
+    }
+    if (minutes > 0) {
+      const n = minutes;
+      parts.push(`${n} min.`);
+    }
+    return parts.join(', ');
+  },
+  fuelReason: (kind: string, facts: string): string => {
+    const tail =
+      (
+        {
+          proteinShake: 'lengvi baltymai atsistatymui',
+          smoothie: 'lengvas ir lengvai geriamas',
+          hydrate: 'papildykite skysčius ir druskas',
+          carbMeal: 'angliavandeniai ir baltymai jėgoms atkurti',
+          snack: 'kažkas nedidelio, jei pilnas valgis nenumatytas',
+        } as Record<string, string>
+      )[kind] ?? '';
+    return facts ? `${facts} — ${tail}` : tail[0].toUpperCase() + tail.slice(1);
+  },
+  windReason: (amenity: string, level: string): string =>
+    `Jūsų sporto salėje yra ${({ pool: 'baseinas', sauna: 'sauna', steam: 'garų pirtis', jacuzzi: 'džakuzi', coldPlunge: 'šalto vandens vonia', massage: 'masažas', stretchArea: 'tempimo zona' } as Record<string, string>)[amenity] ?? amenity} — ${({ hard: 'gera proga atsipalaiduoti po sunkios treniruotės', moderate: 'lengvas būdas atvėsti ir atsipalaiduoti po treniruotės', light: 'lengvas priedas po lengvesnės treniruotės' } as Record<string, string>)[level] ?? ''}`,
+  windNote:
+    'Pasiūlymas paremtas tuo, ką turi jūsų sporto salė, ir tuo, kaip sekėsi šioje treniruotėje.',
+  slpBlockWorkout: 'Baik treniruotę prieš pradėdamas miegą.',
+  slpBlockActivity: 'Baik veiklą prieš pradėdamas miegą.',
+  slpBlockHomeSet: 'Baik namų serijas prieš pradėdamas miegą.',
+  atlChatOpen: 'Atidaryti pokalbį su Atlas',
+  atlChatAsk: 'Paklausk Atlas…',
   cndRpeHint: (n: number) => `Šią seriją laikykite RPE ${n} arba lengviau.`,
   cndDayOf: (d: number, n: number) => `${d} diena iš ${n}`,
   cndSave: 'Išsaugoti',

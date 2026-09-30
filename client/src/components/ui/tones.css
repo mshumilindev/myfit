@@ -105,3 +105,19 @@
   --t-line: var(--color-atlas-line);
   --t-on: var(--color-atlas-tint);
 }
+
+/* Sub-app identity families — fixed, never follow the active app's accent re-skin. */
+.uit--gym {
+  --t-base: var(--color-gym);
+  --t-tint: var(--color-gym-tint);
+  --t-text: var(--color-gym-text);
+  --t-line: var(--color-gym-line);
+  --t-on: var(--color-bg);
+}
+.uit--people {
+  --t-base: var(--color-people);
+  --t-tint: var(--color-people-tint);
+  --t-text: var(--color-people-text);
+  --t-line: var(--color-people-line);
+  --t-on: var(--color-bg);
+}
