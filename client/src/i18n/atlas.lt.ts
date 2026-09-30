@@ -151,15 +151,15 @@ export const LT: PhraseBook = {
   imbalance: {
     1: [
       (f, x) =>
-        `Broli, ${x.muscle(f.high)}: ${sets(f.highSets)}, o ${x.muscle(f.low)}: tik ${f.lowSets}. Kitą kartą parodyk daugiau meilės ir šitiems!`,
+        `Broli, per savaitę ${x.muscle(f.high)}: ${sets(f.highSets)}, o ${x.muscle(f.low)}: tik ${f.lowSets}. Kitą kartą parodyk daugiau meilės ir šitiems!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${sets(f.highSets)}. ${x.muscle(f.low)}: ${f.lowSets}. Sutvarkyk.`,
+        `Paskutinės 7 dienos — ${x.muscle(f.high)}: ${sets(f.highSets)}. ${x.muscle(f.low)}: ${f.lowSets}. Sutvarkyk.`,
     ],
     5: [
       (f, x) =>
-        `${x.muscle(f.high)} — ${f.highSets}, ${x.muscle(f.low)} — ${f.lowSets}. Treniruoji tik tai, kas smagu? Labai suaugusiai.`,
+        `Paskutinės 7 dienos: ${x.muscle(f.high)} — ${f.highSets}, ${x.muscle(f.low)} — ${f.lowSets}. Treniruoji tik tai, kas smagu? Labai suaugusiai.`,
     ],
   },
   week: {

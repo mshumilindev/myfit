@@ -42,8 +42,9 @@ function median(xs: number[]): number {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-function workingSets(w: Workout) {
-  return w.exercises.flatMap((e) => e.sets.filter((s) => setTypeOf(s) !== 'warmup'));
+/** Every logged set — what the session header counts (warm-ups included). */
+function loggedSets(w: Workout) {
+  return w.exercises.flatMap((e) => e.sets);
 }
 
 /** Top working weight of an exercise per earlier session, newest first. */
@@ -61,7 +62,7 @@ function priorTops(name: string, history: Workout[], before: number): number[] {
 /** Facts about one finished session, measured against everything before it. */
 export function sessionFacts(w: Workout, history: Workout[]): CoachFact[] {
   const at = w.finishedAt ?? w.startedAt;
-  const sets = workingSets(w);
+  const sets = loggedSets(w);
   const out: CoachFact[] = [
     {
       kind: 'session',

@@ -128,15 +128,15 @@ export const PL: PhraseBook = {
   imbalance: {
     1: [
       (f, x) =>
-        `Stary, ${x.muscle(f.high)} dostało ${f.highSets} serii, a ${x.muscle(f.low)} tylko ${f.lowSets}. Następnym razem trochę miłości dla ${x.muscle(f.low)}!`,
+        `Stary, w tym tygodniu ${x.muscle(f.high)} dostało ${f.highSets} serii, a ${x.muscle(f.low)} tylko ${f.lowSets}. Następnym razem trochę miłości dla ${x.muscle(f.low)}!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${f.highSets} serii. ${x.muscle(f.low)}: ${f.lowSets}. Popraw to.`,
+        `Ostatnie 7 dni — ${x.muscle(f.high)}: ${f.highSets} serii. ${x.muscle(f.low)}: ${f.lowSets}. Popraw to.`,
     ],
     5: [
       (f, x) =>
-        `${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Robisz tylko to, co przyjemne? Bardzo dojrzale.`,
+        `Ostatnie 7 dni: ${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Robisz tylko to, co przyjemne? Bardzo dojrzale.`,
     ],
   },
   week: {

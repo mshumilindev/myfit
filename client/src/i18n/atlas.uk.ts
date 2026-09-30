@@ -127,15 +127,15 @@ export const UK: PhraseBook = {
   imbalance: {
     1: [
       (f, x) =>
-        `Бро, ${x.muscle(f.high)} — ${N.setsDec('uk', f.highSets)}, а ${x.muscle(f.low)} — лише ${N.dec(f.lowSets, 'uk')}. Давай наступного разу підкачаємо ${x.muscle(f.low)}!`,
+        `Бро, за тиждень ${x.muscle(f.high)} — ${N.setsDec('uk', f.highSets)}, а ${x.muscle(f.low)} — лише ${N.dec(f.lowSets, 'uk')}. Давай наступного разу підкачаємо ${x.muscle(f.low)}!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${N.setsDec('uk', f.highSets)}. ${x.muscle(f.low)}: ${N.dec(f.lowSets, 'uk')}. Виправ.`,
+        `Останні 7 днів — ${x.muscle(f.high)}: ${N.setsDec('uk', f.highSets)}. ${x.muscle(f.low)}: ${N.dec(f.lowSets, 'uk')}. Виправ.`,
     ],
     5: [
       (f, x) =>
-        `${x.muscle(f.high)} ${N.dec(f.highSets, 'uk')}, ${x.muscle(f.low)} ${N.dec(f.lowSets, 'uk')}. Качаєш тільки те, що подобається? Дуже по-дорослому.`,
+        `Останні 7 днів: ${x.muscle(f.high)} ${N.dec(f.highSets, 'uk')}, ${x.muscle(f.low)} ${N.dec(f.lowSets, 'uk')}. Качаєш тільки те, що подобається? Дуже по-дорослому.`,
     ],
   },
   week: {

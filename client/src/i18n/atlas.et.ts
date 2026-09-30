@@ -136,15 +136,15 @@ export const ET: PhraseBook = {
   imbalance: {
     1: [
       (f, x) =>
-        `Vend, ${x.muscle(f.high)}: ${f.highSets} seeriat, aga ${x.muscle(f.low)}: ainult ${f.lowSets}. Järgmine kord teeme ka sellele natuke armastust!`,
+        `Vend, sel nädalal ${x.muscle(f.high)}: ${f.highSets} seeriat, aga ${x.muscle(f.low)}: ainult ${f.lowSets}. Järgmine kord teeme ka sellele natuke armastust!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${f.highSets} seeriat. ${x.muscle(f.low)}: ${f.lowSets}. Paranda ära.`,
+        `Viimased 7 päeva — ${x.muscle(f.high)}: ${f.highSets} seeriat. ${x.muscle(f.low)}: ${f.lowSets}. Paranda ära.`,
     ],
     5: [
       (f, x) =>
-        `${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Teed ainult seda, mis lõbus on? Väga täiskasvanulik.`,
+        `Viimased 7 päeva: ${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Teed ainult seda, mis lõbus on? Väga täiskasvanulik.`,
     ],
   },
   week: {

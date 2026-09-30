@@ -131,15 +131,15 @@ export const EN: PhraseBook = {
   imbalance: {
     1: [
       (f, x) =>
-        `Bro, ${x.muscle(f.high)} got ${N.setsDec('en', f.highSets)} and ${x.muscle(f.low)} only ${f.lowSets}. Let's show ${x.muscle(f.low)} some love next time!`,
+        `Bro, this week ${x.muscle(f.high)} got ${N.setsDec('en', f.highSets)} and ${x.muscle(f.low)} only ${f.lowSets}. Let's show ${x.muscle(f.low)} some love next time!`,
     ],
     3: [
       (f, x) =>
-        `${x.muscle(f.high)}: ${N.setsDec('en', f.highSets)}. ${x.muscle(f.low)}: ${f.lowSets}. Fix it.`,
+        `Last 7 days — ${x.muscle(f.high)}: ${N.setsDec('en', f.highSets)}. ${x.muscle(f.low)}: ${f.lowSets}. Fix it.`,
     ],
     5: [
       (f, x) =>
-        `${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Only training the fun stuff? Very grown-up.`,
+        `Last 7 days: ${x.muscle(f.high)} ${f.highSets}, ${x.muscle(f.low)} ${f.lowSets}. Only training the fun stuff? Very grown-up.`,
     ],
   },
   week: {
