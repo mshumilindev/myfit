@@ -1412,13 +1412,6 @@ html.theme-glass .wlib-top .wlib-title {
   font-size: var(--fs-16);
 }
 
-/* Phone drawers: no close × anywhere (grabber / swipe / scrim close them). */
-@media (max-width: 719.98px) {
-  .nudge-sheet-head {
-    display: none;
-  }
-}
-
 /* Effort row (RPE): equal cells filling the card, labels centred. */
 .se-rpe .uichip {
   width: 100%;
