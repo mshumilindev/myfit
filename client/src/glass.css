@@ -220,14 +220,43 @@ html.theme-glass .tabbar-wrap {
   --glass-brass-line: color-mix(in srgb, var(--color-accent) 45%, rgb(18, 19, 22));
 }
 html.theme-glass .tabbar {
-  /* No backdrop blur: it is not clipped by the notch mask and left a dim disc
-     around the Start button. The notch must be a true cut-out. */
-  /* graphite glass, deliberately more opaque than the brass lens in the notch */
+  /* Frosted glass like the sheets. The notch is cut with clip-path (not mask):
+     a mask isolates the backdrop (no blur at all) and Safari ignores it for
+     backdrop-filter, while clip-path clips the blur cleanly. */
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 55%),
-    linear-gradient(180deg, rgba(17, 18, 20, 0.94), rgba(11, 12, 13, 0.96));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 55%),
+    linear-gradient(180deg, rgba(17, 18, 20, 0.62), rgba(11, 12, 13, 0.72));
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
   /* brass hairline along the top edge, like the glass plates */
   border-top: 1px solid var(--glass-brass-line);
+}
+html.theme-glass .tabbar-notched {
+  -webkit-mask: none;
+  mask: none;
+  clip-path: polygon(
+    0 0,
+    calc(50% - 34px) 0,
+    calc(50% + -34px) 36px,
+    calc(50% + -29.2px) 43.1px,
+    calc(50% + -24.3px) 47.9px,
+    calc(50% + -19.4px) 51.2px,
+    calc(50% + -14.6px) 53.6px,
+    calc(50% + -9.7px) 55.3px,
+    calc(50% + -4.9px) 56.2px,
+    calc(50% + 0px) 56.5px,
+    calc(50% + 4.9px) 56.2px,
+    calc(50% + 9.7px) 55.3px,
+    calc(50% + 14.6px) 53.6px,
+    calc(50% + 19.4px) 51.2px,
+    calc(50% + 24.3px) 47.9px,
+    calc(50% + 29.2px) 43.1px,
+    calc(50% + 34px) 36px,
+    calc(50% + 34px) 0,
+    100% 0,
+    100% 100%,
+    0 100%
+  );
 }
 /* The notch is a true cut-out: page content runs underneath the bar, so the ring
    around the Start button shows what is behind it instead of the page glow. */
