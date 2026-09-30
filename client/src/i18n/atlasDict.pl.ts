@@ -3067,8 +3067,8 @@ export const DICT: Record<string, string> = {
     'Z potem tracisz sód; uzupełnianie go pomaga w pompie, wynikach i zapobiega skurczom.',
   'Swelling or bruising': 'Obrzęk lub siniak',
   'Swings are excellent conditioning: e.g.': 'Swingi to świetny trening kondycyjny: np.',
-  'Switch me to Merciless?': 'Przełączyć mnie na „Bezlitosny”?',
-  'Switch me to Warm?': 'Przełączyć mnie na „Ciepły”?',
+  'Switch me to Savage?': 'Przełączyć mnie na „Brutalny”?',
+  'Switch me to Bro?': 'Przełączyć mnie na „Ziomek”?',
   'Switch me to extra coach in settings if someone else runs your plan.':
     'Przełącz mnie na dodatkowego trenera w ustawieniach, jeśli twój plan prowadzi ktoś inny.',
   'Symptoms, not the phase, should steer the session: cramps, fatigue and poor sleep matter more than which week it is.':
@@ -3085,8 +3085,8 @@ export const DICT: Record<string, string> = {
   'Tap the rest ring during a session → rest target and alerts: vibrate, sound, keep screen on, notify.':
     'Stuknij pierścień przerwy podczas treningu → docelowa przerwa i alerty: wibracje, dźwięk, ekran włączony, powiadomienie.',
   'Tap the set → “Set type” → “Warm-up”.': 'Stuknij serię → „Typ serii” → „Rozgrzewka”.',
-  'Tap the sliders icon at the top of our chat → pick Warm, Blunt or Merciless.':
-    'Stuknij ikonę suwaków u góry czatu → wybierz „Ciepły”, „Bezpośredni” lub „Bezlitosny”.',
+  'Tap the sliders icon at the top of our chat → pick Bro, Neutral or Savage.':
+    'Stuknij ikonę suwaków u góry czatu → wybierz „Ziomek”, „Neutralny” lub „Brutalny”.',
   'Tap “Write my programme” above and I’ll build it from your history.':
     'Stuknij „Napisz mój program” powyżej, a zbuduję go na podstawie twojej historii.',
   'Tasty 🤙': 'Smacznego 🤙',

@@ -877,8 +877,8 @@ export const INTENTS: Intent[] = [
     ],
     answer: (_c, _p, L) =>
       L(
-        "Don't like my tone? Tap the sliders icon at the top of our chat → pick Warm, Blunt or Merciless. Or just ask me to be softer. I won't take it personally. Much.",
-        'Не подобається тон? Іконка повзунків угорі чату → обери «Теплий», «Прямий» чи «Безжальний». Або просто попроси бути мʼякшим. Я не ображуся. Сильно.',
+        "Don't like my tone? Tap the sliders icon at the top of our chat → pick Bro, Neutral or Savage. Or just ask me to be softer. I won't take it personally. Much.",
+        'Не подобається тон? Іконка повзунків угорі чату → обери «Бро», «Нейтральний» чи «Жорсткий». Або просто попроси бути мʼякшим. Я не ображуся. Сильно.',
       ),
   },
   {

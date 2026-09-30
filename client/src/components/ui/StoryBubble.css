@@ -119,6 +119,26 @@ button.uistory:focus-visible {
   font-weight: 600;
 }
 
+/* Toned (an active state): the family colours the ring, badge and name. */
+.uistory.uistory--toned .uistory-ring {
+  box-shadow: none;
+  background: linear-gradient(135deg, var(--t-text), var(--t-base) 60%);
+}
+.uistory.uistory--toned .uistory-ring::before {
+  content: '';
+  position: absolute;
+  inset: 2.5px;
+  border-radius: var(--radius-pill);
+  background: var(--story-gap);
+}
+.uistory.uistory--toned .uistory-badge {
+  background: var(--t-base);
+  color: var(--t-tint);
+}
+.uistory.uistory--toned .uistory-label {
+  color: var(--t-text);
+}
+
 /* Training now: green dot bottom-right. */
 .uistory-live {
   position: absolute;

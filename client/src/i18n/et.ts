@@ -1982,7 +1982,7 @@ export const et: Strings = {
     'Lisa Spotter esmalt avakuvale (Jaga → Lisa avakuvale) — iPhone lubab teavitusi ainult seal.',
   pushDenied: 'Spotteri teavitused on blokeeritud. Luba need telefoni seadetes.',
   atlasName: 'Atlas',
-  atlasTemper: ['Soe', 'Otsekohene', 'Halastamatu'],
+  atlasTemper: ['Semu', 'Neutraalne', 'Julm'],
   atlasTemperTag: ['su jõusaalisõber', 'otse ja ilustamata', 'irvitab iga laisa seeria üle'],
   atlasTemperQuote: [
     '„Tšau, vend, 12 seeriat 50 minutiga — metsloom! Nüüd mine söö.”',
@@ -1996,7 +1996,7 @@ export const et: Strings = {
   atlasTemperSub: 'Sama treener, sama aju — teine suu.',
   atlasFineTitle: 'Ta on ebaviisakas.',
   atlasFineBody:
-    'Halastamatu Atlas irvitab laiskade seeriate, lühikese puhkuse ja vahele jäetud trennide üle — karmilt, kiusamise piiril. Selles ongi mõte. Sinu keha ta kunagi ei puutu ja taandub, kui oled vigastatud või haige.',
+    'Julm Atlas irvitab laiskade seeriate, lühikese puhkuse ja vahele jäetud trennide üle — karmilt, kiusamise piiril. Selles ongi mõte. Sinu keha ta kunagi ei puutu ja taandub, kui oled vigastatud või haige.',
   atlasRuleMom: '„Su ema“ naljad',
   atlasRuleMomSub: 'Klassika',
   atlasRuleSwear: 'Vandumine',
@@ -2065,8 +2065,8 @@ export const et: Strings = {
     'Kogu vestlus ja tema senised märkmed kaovad. Päevik ja see, mida ta sinust mäletab, jäävad.',
   atlasClearSub: 'Vestlus ja märkmed — päevik jääb',
   atlasTurnOffSub: 'Ilma märkmete ja kavata — tagasi millal tahes',
-  atlasRuleHardOnly: 'Ainult Halastamatu',
-  atlasRuleMercilessOnly: 'Ainult Halastamatu',
+  atlasRuleHardOnly: 'Ainult Julm',
+  atlasRuleMercilessOnly: 'Ainult Julm',
   atlasLocalUnknown:
     'Seda ma veel ei tea. Küsi trenni kohta: mida täna teha, puhkus, järgmine raskus, rekordid, taastumine, uni, programm.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */

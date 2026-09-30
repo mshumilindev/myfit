@@ -166,11 +166,30 @@
     transform: translateY(0);
   }
 }
+@keyframes sheetInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
 @media (min-width: 720px) {
-  /* Desktop panels aren't bottom drawers — don't slide or drag them. */
+  /* Desktop: not a bottom drawer but a panel that slides in from the right edge,
+     full screen height, square on the right. useFixedPanelPosition sets the
+     --overlay-* vars (left = viewport − width, top = 0). */
   .sheet {
-    animation: none;
+    animation: sheetInRight 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
     transition: none;
+    top: var(--overlay-top, 0px);
+    left: var(--overlay-left, auto);
+    right: auto;
+    bottom: 0;
+    width: var(--overlay-width, min(430px, calc(100vw - 36px)));
+    height: var(--overlay-max-height, 100dvh);
+    max-height: none;
+    border-radius: var(--radius-sheet) 0 0 var(--radius-sheet);
+    padding: var(--s-16) var(--s-20) var(--s-24);
   }
 }
 

@@ -581,47 +581,24 @@ button.wk-pill {
   color: var(--color-text);
   font-weight: 700;
 }
-.wk-pill.st-done {
-  --pb: #16291f;
-  --pc: #4cbe8c;
-  --ring: #4cbe8c;
-}
-.wk-pill.st-missed {
-  --pb: #2a1c1b;
-  --pc: #e0685a;
-  --ring: #e0685a;
-}
-.wk-pill.st-rest {
-  --pb: #13222c;
-  --pc: #93d4f2;
-  --ring: #33a8e0;
+.wk-pill.st-done,
+.wk-pill.st-missed,
+.wk-pill.st-rest,
+.wk-pill.st-sick,
+.wk-pill.st-off,
+.wk-pill.st-injury,
+.wk-pill.st-play {
+  /* Colour family comes from the kit tone class (uit--*), see PILL_TONE. */
+  --pb: var(--t-tint);
+  --pc: var(--t-text);
+  --ring: var(--t-base);
 }
 .wk-pill.st-rest.is-today {
-  --pb: #11324a;
-}
-.wk-pill.st-sick {
-  --pb: #142524;
-  --pc: #79b4b0;
-  --ring: #79b4b0;
-}
-.wk-pill.st-off {
-  --pb: #122433;
-  --pc: #6fb7de;
-  --ring: #6fb7de;
+  --pb: color-mix(in srgb, var(--t-base) 22%, var(--t-tint));
 }
 .wk-pill.st-off-next {
-  --pb: #122433;
-  --pc: rgba(111, 183, 222, 0.55);
-}
-.wk-pill.st-injury {
-  --pb: #2e1f19;
-  --pc: #e0906f;
-  --ring: #e0906f;
-}
-.wk-pill.st-play {
-  --pb: #2e2416;
-  --pc: #e9c07a;
-  --ring: #d9a24f;
+  --pb: var(--t-tint);
+  --pc: color-mix(in srgb, var(--t-text) 55%, transparent);
 }
 @media (hover: hover) {
   button.wk-pill:hover .wk-pill-bar {

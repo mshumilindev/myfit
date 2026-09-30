@@ -3046,8 +3046,8 @@ export const DICT: Record<string, string> = {
     'Higiga kaob naatriumi; selle asendamine aitab pumpa, sooritust ja hoiab krampe ära.',
   'Swelling or bruising': 'Turse või sinikas',
   'Swings are excellent conditioning: e.g.': 'Kiigutused on suurepärane vormitrenn: nt',
-  'Switch me to Merciless?': 'Kas lülitan end režiimile „Halastamatu“?',
-  'Switch me to Warm?': 'Kas lülitan end režiimile „Soe“?',
+  'Switch me to Savage?': 'Kas lülitan end režiimile „Julm“?',
+  'Switch me to Bro?': 'Kas lülitan end režiimile „Semu“?',
   'Switch me to extra coach in settings if someone else runs your plan.':
     'Kui su plaani juhib keegi teine, lülita mind seadetes lisatreeneriks.',
   'Symptoms, not the phase, should steer the session: cramps, fatigue and poor sleep matter more than which week it is.':
@@ -3064,8 +3064,8 @@ export const DICT: Record<string, string> = {
   'Tap the rest ring during a session → rest target and alerts: vibrate, sound, keep screen on, notify.':
     'Vajuta trenni ajal puhkeringile → puhkeaja eesmärk ja märguanded: vibratsioon, heli, ekraan sisse, teavitus.',
   'Tap the set → “Set type” → “Warm-up”.': 'Vajuta seeriale → „Seeria tüüp“ → „Soojendus“.',
-  'Tap the sliders icon at the top of our chat → pick Warm, Blunt or Merciless.':
-    'Vajuta vestluse ülaosas liugurite ikooni → vali „Soe“, „Otsekohene“ või „Halastamatu“.',
+  'Tap the sliders icon at the top of our chat → pick Bro, Neutral or Savage.':
+    'Vajuta vestluse ülaosas liugurite ikooni → vali „Semu“, „Neutraalne“ või „Julm“.',
   'Tap “Write my programme” above and I’ll build it from your history.':
     'Vajuta ülal „Kirjuta mu kava“ ja ma koostan selle su ajaloo põhjal.',
   'Tasty 🤙': 'Maitsev 🤙',

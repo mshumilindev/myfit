@@ -25,6 +25,7 @@ import {
   type RefObject,
 } from 'react';
 import { setCoach, useStore } from '../store';
+import type { Tone } from '../components/ui/tones';
 import { fmtClock, useT } from '../i18n';
 import type { Strings } from '../i18n/en';
 import { useAtlasFmt, useAtlasNotes, useMinuteClock, type AtlasNote } from '../atlas/notes';
@@ -94,7 +95,12 @@ interface AtlasToday {
   note: AtlasNote | null;
   /** The newest unread note, else the newest one. */
   latest: AtlasNote | null;
+  /** Colour family of the temper (Bro / Neutral / Savage) while Atlas is on. */
+  tone?: Tone;
 }
+
+/** Atlas's temper is his colour code: Bro green, Neutral yellow, Savage red. */
+const TEMPER_TONE: Record<Temper, Tone> = { 1: 'ok', 3: 'accent', 5: 'danger' };
 
 function useAtlasToday(): AtlasToday {
   const { coach } = useStore();
@@ -110,6 +116,7 @@ function useAtlasToday(): AtlasToday {
       unread: coach.enabled ? unread : 0,
       note: topNote(fresh) ?? last(fresh) ?? topNote(today),
       latest: last(fresh) ?? last(notes),
+      tone: coach.enabled ? TEMPER_TONE[temper] : undefined,
     };
   }, [notes, temper, unread, coach.enabled, coach.readAt, now]);
 }
@@ -179,6 +186,7 @@ function AtlasSolo({ a, onOpen }: { a: AtlasToday; onOpen: () => void }) {
         <StoryBubble
           size="lg"
           ring={a.on && a.unread ? 'atlas' : 'default'}
+          tone={a.tone}
           media={face(a.temper, 'lg')}
         />
         <span className="tac-solo-text">
@@ -227,7 +235,7 @@ function AtlasCompact({ a, onOpen, cls }: { a: AtlasToday; onOpen: () => void; c
   const { t } = useT();
   return (
     <Card as="button" pad="none" emphasis="quiet" className={`${cls} tac-compact`} onClick={onOpen}>
-      <StoryBubble size="xs" ring="atlas" media={face(a.temper, 'xs')} />
+      <StoryBubble size="xs" ring="atlas" tone={a.tone} media={face(a.temper, 'xs')} />
       <span className="tac-compact-line">
         <b>{t.atlasName}</b>
         {' · '}
@@ -261,6 +269,7 @@ function AtlasHead({
       <StoryBubble
         size={size}
         ring="atlas"
+        tone={a.tone}
         media={face(a.temper, size)}
         onClick={onOpen}
         aria-label={t.todayAtlasOpenChat}
@@ -557,6 +566,7 @@ function Together(p: AtlasClientsProps & { roster: RosterClient[] }) {
         <StoryBubble
           size="lg"
           ring={a.on ? 'atlas' : 'default'}
+          tone={a.tone}
           media={face(a.temper, 'lg')}
           badge={a.unread}
           label={t.atlasName}

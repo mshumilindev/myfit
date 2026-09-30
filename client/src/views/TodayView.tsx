@@ -24,7 +24,7 @@ import {
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ListRow } from '../components/ui/GroupedList';
-import type { Tone } from '../components/ui/tones';
+import { toneClass, type Tone } from '../components/ui/tones';
 import { SectionLabel } from '../components/ui/SectionLabel';
 import { Notice } from '../components/ui/Notice';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -1429,7 +1429,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
             )}
           {activeRest && (
             <div
-              className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} fade-in`}
+              className={`prog-banner analysis-banner gem-rest tr-banner ${activeRest.mode} ${toneClass(activeRest.mode === 'illness' ? 'illness' : activeRest.mode === 'active' ? 'active' : 'rest')} fade-in`}
             >
               <span className="prog-sheen" aria-hidden />
               <div className="prog-banner-row">
@@ -1460,9 +1460,11 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                         <Tag tone="illness" icon={<Icon name="check-circle" weight="bold" />}>
                           {t.illnessStreakPill}
                         </Tag>
-                        <Tag tone="illness" icon={<Icon name="pause" weight="bold" />}>
-                          {t.illnessProgramPill}
-                        </Tag>
+                        {!illMental && (
+                          <Tag tone="illness" icon={<Icon name="pause" weight="bold" />}>
+                            {t.illnessProgramPill}
+                          </Tag>
+                        )}
                       </div>
                       <div className="prog-banner-acts">
                         <Button
@@ -1863,13 +1865,26 @@ const PILL_ICON: Partial<Record<PillState, string>> = {
   play: 'play',
 };
 
+/** Day state → colour family, the same one History, Health and the day sheet use. */
+const PILL_TONE: Partial<Record<PillState, Tone>> = {
+  done: 'ok',
+  missed: 'danger',
+  rest: 'rest',
+  sick: 'illness',
+  off: 'rest',
+  'off-next': 'rest',
+  injury: 'injury',
+  play: 'accent',
+};
+
 /** Mon–Sun status pills with weekday labels (today reads "Today"). */
 function WeekPills({ cells }: { cells: WeekCell[] }) {
   return (
     <div className="wk-pills">
       {cells.map((c) => {
         const icon = PILL_ICON[c.state];
-        const cls = `wk-pill st-${c.state}${c.isToday ? ' is-today' : ''}`;
+        const tone = PILL_TONE[c.state];
+        const cls = `wk-pill st-${c.state}${tone ? ` ${toneClass(tone)}` : ''}${c.isToday ? ' is-today' : ''}`;
         const inner = (
           <>
             <span className="wk-pill-bar" data-day={c.dayType ?? undefined}>

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { toneClass, type Tone } from './tones';
+
 import './StoryBubble.css';
 
 /** Ring = what the face has to say: nothing, something new (brass), training
@@ -17,6 +19,8 @@ export interface StoryBubbleProps {
   label?: string;
   size?: StorySize;
   ring?: StoryRing;
+  /** Colour family for the ring, badge and name (an active state); overrides `ring`'s colours. */
+  tone?: Tone;
   /** Avatar image / portrait, sized to `STORY_FACE_PX[size]`. */
   media?: ReactNode;
   /** Fallback when there is no media: the first letter is shown. */
@@ -39,6 +43,7 @@ export function StoryBubble({
   label,
   size = 'lg',
   ring = 'default',
+  tone,
   media,
   initial,
   badge,
@@ -53,6 +58,7 @@ export function StoryBubble({
     `uistory--${size}`,
     `uistory--${isMore ? 'more' : ring}`,
     label == null ? 'uistory--bare' : '',
+    tone && !isMore ? `uistory--toned ${toneClass(tone)}` : '',
     className ?? '',
   ]
     .filter(Boolean)

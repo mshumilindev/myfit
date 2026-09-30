@@ -2012,7 +2012,7 @@ export const lt: Strings = {
     'Pirmiausia pridėkite Spotter prie pradžios ekrano (Bendrinti → Į pradžios ekraną) — iPhone leidžia pranešimus tik ten.',
   pushDenied: 'Spotter pranešimai užblokuoti. Leiskite juos telefono nustatymuose.',
   atlasName: 'Atlas',
-  atlasTemper: ['Šiltas', 'Tiesus', 'Negailestingas'],
+  atlasTemper: ['Brolis', 'Neutralus', 'Žiaurus'],
   atlasTemperTag: [
     'tavo sporto salės bičiulis',
     'tiesiai šviesiai',
@@ -2030,7 +2030,7 @@ export const lt: Strings = {
   atlasTemperSub: 'Tas pats treneris, tos pačios smegenys — kita burna.',
   atlasFineTitle: 'Jis bus grubus.',
   atlasFineBody:
-    'Negailestingas Atlas tyčiojasi iš tingių priėjimų, trumpo poilsio ir praleistų treniruočių — žiauriai, ant patyčių ribos. Tame ir esmė. Tavo kūno jis niekada neliečia, o kai esi traumuotas ar sergi — atsitraukia.',
+    'Žiaurus Atlas tyčiojasi iš tingių priėjimų, trumpo poilsio ir praleistų treniruočių — žiauriai, ant patyčių ribos. Tame ir esmė. Tavo kūno jis niekada neliečia, o kai esi traumuotas ar sergi — atsitraukia.',
   atlasRuleMom: '„Tavo mama“ juokeliai',
   atlasRuleMomSub: 'Klasika',
   atlasRuleSwear: 'Keiksmai',
@@ -2100,8 +2100,8 @@ export const lt: Strings = {
     'Visas pokalbis ir jo pastabos išnyks. Žurnalas ir tai, ką jis apie tave prisimena, lieka.',
   atlasClearSub: 'Pokalbis ir pastabos — žurnalas lieka',
   atlasTurnOffSub: 'Be pastabų ir plano — grąžinsi bet kada',
-  atlasRuleHardOnly: 'Tik Negailestingas',
-  atlasRuleMercilessOnly: 'Tik Negailestingas',
+  atlasRuleHardOnly: 'Tik Žiaurus',
+  atlasRuleMercilessOnly: 'Tik Žiaurus',
   atlasLocalUnknown:
     'To dar nežinau. Klausk apie treniruotes: ką daryti šiandien, poilsį, kitą svorį, rekordus, atsigavimą, miegą, programą.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */

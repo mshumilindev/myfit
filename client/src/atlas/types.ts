@@ -11,9 +11,9 @@ import type { CoachPlan } from './plan';
  * Three tempers — green, yellow, red. The values 1 · 3 · 5 are kept from the
  * old five-step scale (so harshness still compares: 5 is the hardest), and
  * old picks migrate: Steady (2) → green, Drill (4) → red (see normalizeTemper).
- *   1 Warm (green)  — your gym bro (also what a bad day falls back to);
- *   3 Blunt (yellow) — no fluff;
- *   5 Merciless (red) — merciless: mocks your effort, never your body.
+ *   1 Bro (green)  — your gym bro (also what a bad day falls back to);
+ *   3 Neutral (yellow) — no fluff;
+ *   5 Savage (red) — savage: mocks your effort, never your body.
  */
 export type Temper = 1 | 3 | 5;
 export const TEMPERS: Temper[] = [1, 3, 5];

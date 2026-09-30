@@ -3063,8 +3063,8 @@ export const DICT: Record<string, string> = {
     'Su prakaitu netenkama natrio; jį papildžius geresnis „pampas“, rezultatai ir mažiau mėšlungių.',
   'Swelling or bruising': 'Patinimas ar mėlynė',
   'Swings are excellent conditioning: e.g.': 'Mojai – puiki ištvermės treniruotė: pvz.',
-  'Switch me to Merciless?': 'Perjungti mane į „Negailestingą“?',
-  'Switch me to Warm?': 'Perjungti mane į „Šiltą“?',
+  'Switch me to Savage?': 'Perjungti mane į „Žiaurų“?',
+  'Switch me to Bro?': 'Perjungti mane į „Brolį“?',
   'Switch me to extra coach in settings if someone else runs your plan.':
     'Jei tavo planą veda kažkas kitas, nustatymuose perjunk mane į papildomą trenerį.',
   'Symptoms, not the phase, should steer the session: cramps, fatigue and poor sleep matter more than which week it is.':
@@ -3081,8 +3081,8 @@ export const DICT: Record<string, string> = {
   'Tap the rest ring during a session → rest target and alerts: vibrate, sound, keep screen on, notify.':
     'Treniruotės metu bakstelėk poilsio žiedą → poilsio tikslas ir įspėjimai: vibracija, garsas, neišjungti ekrano, pranešimas.',
   'Tap the set → “Set type” → “Warm-up”.': 'Bakstelėk seriją → „Serijos tipas“ → „Apšilimas“.',
-  'Tap the sliders icon at the top of our chat → pick Warm, Blunt or Merciless.':
-    'Bakstelėk slankiklių piktogramą mūsų pokalbio viršuje → pasirink „Šiltas“, „Tiesus“ arba „Negailestingas“.',
+  'Tap the sliders icon at the top of our chat → pick Bro, Neutral or Savage.':
+    'Bakstelėk slankiklių piktogramą mūsų pokalbio viršuje → pasirink „Brolis“, „Neutralus“ arba „Žiaurus“.',
   'Tap “Write my programme” above and I’ll build it from your history.':
     'Bakstelėk „Parašyk mano programą“ viršuje, ir sudarysiu ją pagal tavo istoriją.',
   'Tasty 🤙': 'Skanu 🤙',

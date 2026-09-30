@@ -143,15 +143,17 @@ const TEMPER_WORDS: [Temper, string[]][] = [
       'friendly',
       'дружн*',
       'бро',
+      'bro',
+      'buddy',
     ],
   ],
-  [3, ['yellow', 'жовт*', 'blunt', 'прямий', 'прямим']],
-  [5, ['red', 'червон*', 'merciless', 'нещадн*', 'безжальн*', 'злий', 'злим']],
+  [3, ['yellow', 'жовт*', 'blunt', 'neutral', 'нейтральн*', 'прямий', 'прямим']],
+  [5, ['red', 'червон*', 'merciless', 'savage', 'жорстк*', 'нещадн*', 'безжальн*', 'злий', 'злим']],
 ];
 const TEMPER_NAME: Record<Temper, [string, string]> = {
-  1: ['Warm', 'Теплий'],
-  3: ['Blunt', 'Прямий'],
-  5: ['Merciless', 'Безжальний'],
+  1: ['Bro', 'Бро'],
+  3: ['Neutral', 'Нейтральний'],
+  5: ['Savage', 'Жорсткий'],
 };
 const SOFTER = [
   'nicer',

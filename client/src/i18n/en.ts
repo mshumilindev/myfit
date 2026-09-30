@@ -2020,7 +2020,7 @@ export const en = {
     'Add Spotter to your Home Screen first (Share → Add to Home Screen) — iPhone only allows notifications there.',
   pushDenied: 'Notifications are blocked for Spotter. Allow them in the phone’s settings.',
   atlasName: 'Atlas',
-  atlasTemper: ['Warm', 'Blunt', 'Merciless'],
+  atlasTemper: ['Bro', 'Neutral', 'Savage'],
   atlasTemperTag: ['your gym bro', 'straight talk, no fluff', 'roasts every lazy set'],
   atlasTemperQuote: [
     '“Yo bro, 12 sets in 50 min — beast mode! Now go eat.”',
@@ -2034,7 +2034,7 @@ export const en = {
   atlasTemperSub: 'Same coach, same brain — different mouth.',
   atlasFineTitle: 'He will be rude.',
   atlasFineBody:
-    'Merciless Atlas roasts lazy sets, short rest and skipped days — hard, on the edge of bullying. That’s the point. He never touches your body, and backs off when you’re hurt or ill.',
+    'Savage Atlas roasts lazy sets, short rest and skipped days — hard, on the edge of bullying. That’s the point. He never touches your body, and backs off when you’re hurt or ill.',
   atlasRuleMom: '“Your mom” jokes',
   atlasRuleMomSub: 'The classics',
   atlasRuleSwear: 'Swearing',
@@ -2105,8 +2105,8 @@ export const en = {
     'The whole conversation and his notes so far disappear. Your log and what he remembers about you stay.',
   atlasClearSub: 'Conversation and notes — your log stays',
   atlasTurnOffSub: 'Stops notes and the plan — back any time',
-  atlasRuleHardOnly: 'Merciless only',
-  atlasRuleMercilessOnly: 'Merciless only',
+  atlasRuleHardOnly: 'Savage only',
+  atlasRuleMercilessOnly: 'Savage only',
   atlasLocalUnknown:
     'That one’s outside what I know yet. Ask me about your training: what to do today, rest, the next weight, records, recovery, sleep, your programme.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */

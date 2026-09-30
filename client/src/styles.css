@@ -4125,18 +4125,6 @@ html.theme-glass .gym-card .head .n {
     width: 400px;
   }
 
-  .sheet {
-    top: var(--overlay-top, 18px);
-    left: var(--overlay-left, 18px);
-    right: auto;
-    bottom: 0;
-    width: var(--overlay-width, min(430px, calc(100vw - 36px)));
-    height: var(--overlay-max-height, 100dvh);
-    max-height: none;
-    border-radius: var(--r-18) 0 0 var(--r-18);
-    padding: var(--s-16) var(--s-20) var(--s-24);
-  }
-
   .sheet.backfill-sheet {
     left: var(--overlay-left, 18px);
     right: auto;
@@ -21822,16 +21810,23 @@ body {
   --care-800: #2c5754;
   --care-900: #17302e;
 }
-/* Illness banner: care-teal gem + a calm teal ground (distinct from brass rest) */
-.tr-banner.illness {
-  --gem: var(--care);
+/* Rest-period banner: the state's kit tone (uit--illness / rest / active) drives
+   the gem, ground and edge, so it matches the week pill, History and the sheets. */
+.tr-banner.illness,
+.tr-banner.off,
+.tr-banner.active {
+  --gem: var(--t-base);
+  background: linear-gradient(150deg, var(--t-tint), var(--color-surface));
+  border-color: var(--t-line);
+}
+.tr-banner.illness .prog-banner-icon.ill-pulse svg {
+  color: var(--t-base);
 }
 .tr-banner.illness .prog-sheen {
   display: none;
 }
 /* Pulse icon beats softly while unwell (cardiology-style ECG mark). */
 .tr-banner.illness .prog-banner-icon.ill-pulse svg {
-  color: var(--care);
   animation: illBeat 2.4s ease-in-out infinite;
 }
 @keyframes illBeat {

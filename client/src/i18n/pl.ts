@@ -1993,7 +1993,7 @@ export const pl: Strings = {
     'Najpierw dodaj Spotter do ekranu głównego (Udostępnij → Do ekranu początkowego) — iPhone pozwala na powiadomienia tylko tam.',
   pushDenied: 'Powiadomienia dla Spotter są zablokowane. Zezwól na nie w ustawieniach telefonu.',
   atlasName: 'Atlas',
-  atlasTemper: ['Ciepły', 'Szczery', 'Bezlitosny'],
+  atlasTemper: ['Ziomek', 'Neutralny', 'Brutalny'],
   atlasTemperTag: ['kumpel z siłowni', 'prosto z mostu', 'jedzie po każdej leniwej serii'],
   atlasTemperQuote: [
     '„Siema, stary, 12 serii w 50 minut — petarda! Teraz idź coś zjeść.”',
@@ -2007,7 +2007,7 @@ export const pl: Strings = {
   atlasTemperSub: 'Ten sam trener, ten sam mózg — inny język.',
   atlasFineTitle: 'Będzie niemiły.',
   atlasFineBody:
-    'Bezlitosny Atlas jedzie po leniwych seriach, krótkich przerwach i opuszczonych treningach — ostro, na granicy znęcania się. O to chodzi. Nigdy nie komentuje twojego ciała i odpuszcza, gdy jesteś kontuzjowany albo chory.',
+    'Brutalny Atlas jedzie po leniwych seriach, krótkich przerwach i opuszczonych treningach — ostro, na granicy znęcania się. O to chodzi. Nigdy nie komentuje twojego ciała i odpuszcza, gdy jesteś kontuzjowany albo chory.',
   atlasRuleMom: 'Żarty „twoja mama”',
   atlasRuleMomSub: 'Klasyka',
   atlasRuleSwear: 'Przekleństwa',
@@ -2077,8 +2077,8 @@ export const pl: Strings = {
     'Cała rozmowa i dotychczasowe notatki znikną. Dziennik i to, co o tobie pamięta, zostają.',
   atlasClearSub: 'Rozmowa i notatki — dziennik zostaje',
   atlasTurnOffSub: 'Bez notatek i planu — wrócisz w każdej chwili',
-  atlasRuleHardOnly: 'Tylko Bezlitosny',
-  atlasRuleMercilessOnly: 'Tylko Bezlitosny',
+  atlasRuleHardOnly: 'Tylko Brutalny',
+  atlasRuleMercilessOnly: 'Tylko Brutalny',
   atlasLocalUnknown:
     'Tego jeszcze nie wiem. Pytaj o trening: co dziś robić, przerwy, następny ciężar, rekordy, regenerację, sen, program.',
   /** Off-topic warnings by temper (green / white / red) and try (1…3); the third starts a 30-minute block. */
