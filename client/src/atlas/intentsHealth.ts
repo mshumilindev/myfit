@@ -4,9 +4,10 @@
  * ("your limits say ..."); the limits themselves come from conditions.ts on this device.
  */
 import { conditionLimits, exerciseFlag, NO_LIMITS, type Limits } from '../conditions';
-import { searchCatalog, type MuscleGroup } from '../data/exercises';
+import { muscleInfoByName, searchCatalog, type MuscleGroup } from '../data/exercises';
 import type { RiskTag } from '../data/conditionCatalog';
-import { swapCandidates } from '../swaps';
+import { isSupported, swapCandidates } from '../swaps';
+import { exerciseNeeds } from '../store';
 import type { AskCtx, Intent, Tr } from './intentKit';
 
 const TAG_WORDS: Record<string, [string, string]> = {
@@ -45,11 +46,26 @@ function saferLifts(c: AskCtx, name: string, limits: Limits): string[] {
 }
 
 function saferForMuscle(c: AskCtx, m: MuscleGroup, limits: Limits): string[] {
-  return searchCatalog('', 40, undefined, m)
+  const ok = searchCatalog('', 400, undefined, m)
     .map((e) => e.names[0])
-    .filter((n) => exerciseFlag(n, limits).level === 'ok')
+    .filter((n) => muscleInfoByName(n)?.primary === m && exerciseFlag(n, limits).level === 'ok');
+  const rank = (n: string) => (isSupported(n, exerciseNeeds(n)) ? 0 : 1);
+  return [...ok]
+    .sort((x, y) => rank(x) - rank(y))
     .slice(0, 3)
     .map((n) => c.fmt.exercise(n));
+}
+
+/** Tags that rule out (avoid) at least one main lift of the muscle. */
+function avoidedTags(m: MuscleGroup, limits: Limits): RiskTag[] {
+  const tags = new Set<RiskTag>();
+  for (const e of searchCatalog('', 400, undefined, m)) {
+    const n = e.names[0];
+    if (muscleInfoByName(n)?.primary !== m) continue;
+    const f = exerciseFlag(n, limits);
+    if (f.level === 'avoid') f.tags.forEach((t) => tags.add(t));
+  }
+  return [...tags];
 }
 
 /**
@@ -94,9 +110,22 @@ export function limitNoteForLift(c: AskCtx, exercise: string, L: Tr): string | n
 export function limitNoteForMuscle(c: AskCtx, m: MuscleGroup, L: Tr): string | null {
   const limits = limitsOf(c);
   const cap = limits.effects.muscleCaps?.[m];
-  if (cap == null || cap >= 1) return null;
   const name = c.fmt.muscle(m);
   const alt = saferForMuscle(c, m, limits);
+  if (cap == null || cap >= 1) {
+    // No load cap, but some lifts of this muscle may still be ruled out by movement limits.
+    const why = tagText(avoidedTags(m, limits), L);
+    if (!limits.keys.length || !why) return null;
+    return (
+      L(
+        `${name}: yes, train it, but skip the lifts with ${why}, your limits advise against them.`,
+        `${name}: так, тренуй, але без вправ із таким: ${why}, твої обмеження це не радять.`,
+      ) +
+      (alt.length
+        ? L(` Better picks: ${alt.join(', ')}.`, ` Краще обрати: ${alt.join(', ')}.`)
+        : '')
+    );
+  }
   const tail = alt.length ? L(` Options: ${alt.join(', ')}.`, ` Варіанти: ${alt.join(', ')}.`) : '';
   return cap <= 0
     ? L(

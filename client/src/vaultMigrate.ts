@@ -5,7 +5,7 @@
  * plaintext originals are returned as a backup the user can download first.
  */
 import { isSealed, sealDoc, unsealDoc, type SealedCollection } from './encryptedDoc';
-import type { Vault } from './vault';
+import type { Vault } from './autoVault';
 
 export const MIGRATION_ORDER: SealedCollection[] = [
   'workouts',

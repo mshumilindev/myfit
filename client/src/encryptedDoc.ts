@@ -30,6 +30,8 @@ export const OPEN_FIELDS = {
   // users/{uid}/meta/coachShare — what the athlete lets the coach see (coachView); the server
   // only forwards the ciphertext to the coach, whose grant opens it.
   coachShare: ['updatedAt'],
+  // users/{uid}/meta/conditionPrefs — the general conditions sharing default (off|effects|full).
+  conditionPrefs: ['updatedAt'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type SealedCollection = keyof typeof OPEN_FIELDS;

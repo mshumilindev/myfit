@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import {
   ConditionPage,
   ConditionsOnboardingRow,
@@ -8,7 +8,7 @@ import {
   ConditionsSection,
 } from './Conditions';
 import { setFlag } from '../../data/flags';
-import { __getStateForTests } from '../../store';
+import { __getStateForTests, addCondition, setConditionsShare } from '../../store';
 
 afterEach(cleanup);
 
@@ -26,6 +26,21 @@ function Flow() {
 }
 
 describe('conditions pages', () => {
+  it('general share default: hidden with no conditions, sets the store when present', () => {
+    const empty = render(<ConditionsSection onOpen={() => undefined} />);
+    expect(
+      screen.queryByText(/^(Share with my coach by default|Ділитися з тренером за замовчуванням)$/),
+    ).toBeNull();
+    empty.unmount();
+    addCondition({ key: 'asthma', severity: 2, share: 'inherit' });
+    render(<ConditionsSection onOpen={() => undefined} />);
+    expect(screen.getByText('Share with my coach by default')).toBeTruthy();
+    const group = screen.getByLabelText('Share with my coach by default');
+    fireEvent.click(within(group).getByText('Full'));
+    expect(__getStateForTests().conditionsShare).toBe('full');
+    setConditionsShare('effects');
+  });
+
   it('opens Add from the list', () => {
     let opened = '';
     render(<ConditionsSection onOpen={(c) => (opened = c)} />);

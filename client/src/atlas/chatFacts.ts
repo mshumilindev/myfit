@@ -75,7 +75,7 @@ const iso = (ts: number) => {
 
 export function buildChatFacts(
   s: Pick<StoreState, 'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics'> &
-    Partial<Pick<StoreState, 'activities' | 'conditions'>>,
+    Partial<Pick<StoreState, 'activities' | 'conditions' | 'conditionsShare'>>,
   notes: AtlasNote[],
   temper: Temper,
   now: number,
@@ -152,8 +152,15 @@ export function buildChatFacts(
     trainingLimits: deidentifiedEffects(
       (s.conditions ?? [])
         .filter((c) => isActive(c, now))
-        // The coach sharing choice does not apply to Atlas: it only ever sees effects.
-        .map((c) => ({ ...c, share: 'effects' as const })),
+        // Atlas only ever sees effects; it honours Off (per condition or the general default).
+        .map((c) => ({
+          ...c,
+          share:
+            c.share === 'off' ||
+            (c.share === 'inherit' && (s.conditionsShare ?? 'effects') === 'off')
+              ? ('off' as const)
+              : ('effects' as const),
+        })),
     ),
     lastNightSleepH: night ? Math.round((nightDurationMin(night, now) / 60) * 10) / 10 : null,
     bodyweightKg: temper < 4 ? (latestWeight(s.bodyMetrics)?.weight ?? null) : undefined,

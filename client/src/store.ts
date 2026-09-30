@@ -11,7 +11,7 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
-import { coachView } from './conditions';
+import { coachView, type GeneralShare } from './conditions';
 import { COACH_DEFAULT, normalizeTemper, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
@@ -115,7 +115,9 @@ import {
   duplicateSleepIds,
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
+import { CONDITIONS_KEY, CONDITIONS_SHARE_KEY, createConditionsCache } from './conditionsCache';
 import {
+  vault,
   initVault,
   mirrorCollection,
   prepareWrite,
@@ -163,7 +165,20 @@ const GOALS_KEY = 'spotter.goals';
 const HOME_KEY = 'spotter.home';
 const REST_KEY = 'spotter.restPeriods';
 const INJURY_KEY = 'spotter.injuries';
-const CONDITIONS_KEY = 'spotter.conditions';
+const isGeneralShare = (v: unknown): v is GeneralShare =>
+  v === 'off' || v === 'effects' || v === 'full';
+const conditionsCache = createConditionsCache<ChronicCondition, GeneralShare>({
+  vault,
+  isShare: isGeneralShare,
+});
+function loadShare(): GeneralShare {
+  try {
+    const v = localStorage.getItem(CONDITIONS_SHARE_KEY);
+    return isGeneralShare(v) ? v : 'effects';
+  } catch {
+    return 'effects';
+  }
+}
 const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
@@ -259,6 +274,8 @@ export interface StoreState {
   injuries: Injury[];
   /** Permanent private health conditions (sealed in the vault; see conditions.ts). */
   conditions: ChronicCondition[];
+  /** General default for sharing conditions (per-condition 'inherit' follows it). */
+  conditionsShare: GeneralShare;
   /** Logged non-lifting activities (cardio & recovery). */
   activities: Activity[];
   /** Account-wide weight unit (Load-entry B): the default everything is shown
@@ -324,6 +341,7 @@ let state: StoreState = {
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   injuries: load<Injury[]>(INJURY_KEY, []),
   conditions: load<ChronicCondition[]>(CONDITIONS_KEY, []),
+  conditionsShare: loadShare(),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
@@ -371,6 +389,22 @@ function emit(): void {
   listeners.forEach((l) => l());
 }
 
+conditionsCache.boot({ conditions: state.conditions, share: state.conditionsShare });
+
+/** When the vault key becomes available: read the sealed on-device copy and migrate legacy plaintext. */
+function hydrateConditions(): void {
+  void conditionsCache
+    .hydrate({ conditions: state.conditions, share: state.conditionsShare })
+    .then((next) => {
+      if (!next) return;
+      state = { ...state, conditions: next.conditions, conditionsShare: next.share };
+      emit();
+    })
+    .catch(() => undefined);
+}
+vault.subscribe(hydrateConditions);
+if (vault.materialOrNull()) hydrateConditions();
+
 function persist(): void {
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state.workouts));
@@ -380,7 +414,8 @@ function persist(): void {
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
-    localStorage.setItem(CONDITIONS_KEY, JSON.stringify(state.conditions));
+    // Sealed on device once the vault key is here; plaintext only as the no-key fallback.
+    conditionsCache.persist({ conditions: state.conditions, share: state.conditionsShare });
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
@@ -2385,7 +2420,7 @@ let lastCoachShare = '';
 
 /** What the coach may see of the conditions (per-condition share), sealed like everything else. */
 function publishCoachShare(uid: string, items: readonly ChronicCondition[]): void {
-  const view = coachView(items, 'effects');
+  const view = coachView(items, state.conditionsShare);
   const json = JSON.stringify(view);
   if (json === lastCoachShare) return;
   lastCoachShare = json;
@@ -2394,6 +2429,18 @@ function publishCoachShare(uid: string, items: readonly ChronicCondition[]): voi
     .catch(() => {
       lastCoachShare = ''; // retried with the next change
     });
+}
+
+/** Sets the general default and republishes what the coach sees. */
+export function setConditionsShare(v: GeneralShare): void {
+  if (!isGeneralShare(v) || v === state.conditionsShare) return;
+  setState({ conditionsShare: v, syncStatus: bumpPending() });
+  const uid = currentUid();
+  if (!uid) return;
+  prepareWrite('conditionPrefs', { conditionsShare: v, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'conditionPrefs'), d))
+    .catch(onWriteError);
+  publishCoachShare(uid, state.conditions);
 }
 
 function writeConditionDoc(c: ChronicCondition): void {
@@ -4039,6 +4086,7 @@ export function startSyncLoop(): () => void {
     ),
   );
   const conditionsMirror = mirrorCollection<ChronicCondition & Record<string, unknown>>((items) => {
+    conditionsCache.markRemote('conditions');
     state = { ...state, conditions: items };
     persist();
     emit();
@@ -4115,6 +4163,27 @@ export function startSyncLoop(): () => void {
         setState({ liveTrainees: snap.docs.map((d) => d.data() as LiveSession) });
       },
       // Soft: if the liveSessions rule/index isn't deployed yet, don't block sync.
+      () => undefined,
+    ),
+  );
+  const prefsMirror = mirrorCollection<{ conditionsShare?: unknown } & Record<string, unknown>>(
+    (items) => {
+      const v = items[0]?.conditionsShare;
+      if (!isGeneralShare(v)) return;
+      conditionsCache.markRemote('share');
+      if (v === state.conditionsShare) return;
+      state = { ...state, conditionsShare: v };
+      persist();
+      emit();
+      publishCoachShare(uid, state.conditions);
+    },
+  );
+  unsubs.push(prefsMirror.dispose);
+  unsubs.push(
+    onSnapshot(
+      doc(db, 'users', uid, 'meta', 'conditionPrefs'),
+      (snap) => prefsMirror.push(snap.exists() ? [snap.data()] : []),
+      // Soft: a missing rule must not block the rest of the sync.
       () => undefined,
     ),
   );
@@ -4990,7 +5059,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(COACH_KEY);
   localStorage.removeItem(HOME_KEY);
   localStorage.removeItem(INJURY_KEY);
-  localStorage.removeItem(CONDITIONS_KEY);
+  conditionsCache.clear();
   localStorage.removeItem(ACTIVITIES_KEY);
   localStorage.removeItem(SLEEP_KEY);
   localStorage.removeItem(SLEEP_SCHED_KEY);
@@ -5020,6 +5089,7 @@ export function resetLocalData(): void {
     restPeriods: [],
     injuries: [],
     conditions: [],
+    conditionsShare: 'effects',
     activities: [],
     weightUnit: 'kg',
     exerciseUnits: {},

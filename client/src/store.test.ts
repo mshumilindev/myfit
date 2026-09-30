@@ -517,4 +517,15 @@ describe('conditions store', () => {
     s.deleteCondition(c.id);
     expect(s.__getStateForTests().conditions.some((x) => x.id === c.id)).toBe(false);
   });
+
+  it('general sharing default: persisted, defaults to effects, validated', async () => {
+    const s = await import('./store');
+    expect(s.__getStateForTests().conditionsShare).toBe('effects');
+    s.setConditionsShare('off');
+    expect(s.__getStateForTests().conditionsShare).toBe('off');
+    expect(localStorage.getItem('spotter.conditionsShare')).toBe('off');
+    s.setConditionsShare('bogus' as never);
+    expect(s.__getStateForTests().conditionsShare).toBe('off');
+    s.setConditionsShare('effects');
+  });
 });

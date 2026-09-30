@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { createVault, type VaultHeader } from './vault';
+import { readyVault, unsetVault } from './testVault';
 import { isSealed, type SealedCollection } from './encryptedDoc';
 import {
   migrateAll,
@@ -8,22 +8,6 @@ import {
   rollbackCollection,
   type MigratePorts,
 } from './vaultMigrate';
-
-async function readyVault() {
-  let h: VaultHeader | null = null;
-  let c: { key: CryptoKey; salt: string } | null = null;
-  const v = createVault({
-    remote: { load: async () => h, save: async (x) => void (h = x) },
-    cache: {
-      get: async () => c,
-      set: async (x) => void (c = x),
-      clear: async () => void (c = null),
-    },
-  });
-  await v.init();
-  await v.create();
-  return v;
-}
 
 function store(seed: Partial<Record<SealedCollection, Record<string, Record<string, unknown>>>>) {
   const data = new Map<string, Record<string, unknown>>();
@@ -69,11 +53,7 @@ describe('migration', () => {
   });
 
   it('refuses while the vault is locked', async () => {
-    const v = createVault({
-      remote: { load: async () => null, save: async () => undefined },
-      cache: { get: async () => null, set: async () => undefined, clear: async () => undefined },
-    });
-    await v.init();
+    const v = await unsetVault();
     await expect(migrateCollection('gyms', v, store({}).ports)).rejects.toThrow('vault-locked');
   });
 

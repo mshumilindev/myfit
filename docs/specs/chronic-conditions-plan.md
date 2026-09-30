@@ -183,7 +183,7 @@ exerciseFlags(name, limits): { level: 'ok'|'info'|'caution'|'avoid'; reasons: st
 4. Без пульсу (ЧСС-зон немає): RPE-стеля, «без відмови», затримка дихання. **Налаштувань Rest у проєкті немає, тому відпочинок як ефект не робимо** (прибрано `rest` з моделі та екранів).
 5. Mastery/standards не карають за обмежені ліфти.
 6. **Каталог великий і повний**; ручного створення стану немає. «Хронічний біль без діагнозу» — записи каталогу по областях.
-7. **Шифрування** на пристрої і в БД (E2E, recovery key). Сервер не читає стани; Atlas і генерація працюють на пристрої; у LLM лише знеособлені ефекти.
+7. **Шифрування** на пристрої і в БД (E2E, автоматичний ключ з сервера; recovery key прибрано, див. §14). Сервер не читає стани; Atlas і генерація працюють на пристрої; у LLM лише знеособлені ефекти.
 8. **Ділення з тренером:** загальний дефолт для всіх («Нічого» за замовчуванням / «Лише ефекти» / «Повністю») і окреме налаштування кожного стану («Default / Off / Effects / Full»). «Лише ефекти» = без назви й нотаток. Нотатки не діляться ніколи.
 9. **Дизайн зведений (без варіантів)**, усе з реального uikit і реальних екранів (полотно «Chronic conditions: one flow»):
    - Health: блок «Long-term conditions» **перед History**.
@@ -195,7 +195,7 @@ exerciseFlags(name, limits): { level: 'ok'|'info'|'caution'|'avoid'; reasons: st
 
 ## 10. Відкриті питання
 
-1. Втрата ключа: що робимо, якщо recovery key втрачено (очистка станів і повторне введення)?
+1. ~~Втрата ключа~~ — знято: ключ видає сервер (§14), recovery key більше немає.
 2. `Banner` не має тону `chronic` (зараз `rest`): додати тон чи не використовувати банер.
 3. Джерело каталогу (класифікатори, локалізація на 5 мов, рецензія фахівця).
 4. Hit-testing на мапі (тап по тілу) — окремий етап після списку областей.
@@ -206,7 +206,7 @@ exerciseFlags(name, limits): { level: 'ok'|'info'|'caution'|'avoid'; reasons: st
 Кожен етап: `tsc`, `eslint`, `prettier`, тести, флаг `conditions` (вимкнено), лише вигадані тестові стани.
 
 1. **Модель і ядро (без UI):** типи, `conditionCatalog.ts` (великий каталог), `conditions.ts` (`conditionLimits`, `exerciseFlags`), `exerciseRisk`, табличні тести; правила Firestore, `resetLocalData`, тест-охоронець тренерського payload.
-2. **Шифрування і зберігання:** WebCrypto, recovery key, `localStorage` + Firestore, listener.
+2. **Шифрування і зберігання:** WebCrypto, ключ з сервера (§14), `localStorage` + Firestore, listener.
 3. **Health і додавання:** блок на Health перед History, List, деталь, видалення через confirm, coach sharing; потім Body map.
 4. **Генерація:** `healthBuildCtx`, builder, progression, rpe, failure, fatigue.
 5. **Вибір вправ:** picker, swaps, playbook; прапори в сесії, програмі, історії.
@@ -230,7 +230,7 @@ Decision: nothing for the user to save, type or pass around. Encryption is again
 - **Coach.** Unchanged: ECDH grants are created and revoked automatically when the coach assignment changes.
 - **Interception.** TLS plus Firebase Auth ID token; the key is never written to logs or storage on the server. Recommended: enable App Check on the callable.
 - **Ops.** `firebase functions:secrets:set VAULT_MASTER` (32+ random bytes, base64), deploy `functions` and `firestore.rules`. Rotating the master makes existing sealed data unreadable, so it needs a re-key job first.
-- **UI.** Profile → Settings shows a status row only ("Encrypted" / "getting ready"). The recovery-key screens and strings were removed; `vault.ts` (recovery-key vault) is now unused.
+- **UI.** Profile → Settings shows a status row only ("Encrypted" / "getting ready"). The recovery-key screens and strings were removed; the old `vault.ts` (recovery-key vault) is deleted; `Vault` types and `idbKeyCache` live in `autoVault.ts`.
 - **Limit.** Anyone with access to both the Secret Manager secret and the database can decrypt; that is the accepted trade-off of a zero-friction model.
 
 ## Status
@@ -255,3 +255,19 @@ Deployment needed before users can rely on it:
 - Set the `VAULT_MASTER` secret (`firebase functions:secrets:set VAULT_MASTER`, 32+ random bytes, base64) before deploying.
 - Deploy `firestore.rules` (conditions and `meta/coachShare` paths).
 - Recommended: enable App Check on the callable; turn the `conditions` flag on last.
+
+### App Check (vaultKey) — not enforced yet
+
+`firebase-functions` supports `enforceAppCheck` on callables, but it is deliberately **off** for `vaultKey`:
+the client only calls `initializeAppCheck` when `VITE_RECAPTCHA_ENTERPRISE_KEY` is set and emulators are off
+(`client/src/firebase.ts`), so any build without the key (or a failed reCAPTCHA init) would get `failed-precondition`
+from the function, the vault would stay `unset` and new data would be written as plaintext.
+
+To enable it:
+
+1. Register the web app for App Check (reCAPTCHA Enterprise) in the Firebase console and ship
+   `VITE_RECAPTCHA_ENTERPRISE_KEY` in every production build; verify tokens arrive (App Check metrics, "Verified requests" > 0).
+2. Only then set `onCall({ secrets: [VAULT_MASTER], enforceAppCheck: true }, …)` in `functions/src/vault.ts`
+   (optionally `consumeAppCheckToken: true` for replay protection) and redeploy `vaultKey`.
+3. Keep the emulator/dev path working: use `enforceAppCheck: !process.env.FUNCTIONS_EMULATOR`.
+4. Roll back = remove the option and redeploy; the client already degrades to `unset` if the call is rejected.

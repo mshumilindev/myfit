@@ -1,0 +1,42 @@
+/* AnatomyTurntable — one canvas, frames composed ahead of time (no flicker). */
+.uiturn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+.uiturn-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  border-radius: var(--s-12);
+}
+.uiturn-stage.rot {
+  cursor: grab;
+}
+.uiturn-stage.rot:active {
+  cursor: grabbing;
+}
+.uiturn-stage:focus-visible {
+  outline: 2px solid var(--color-chronic-line);
+  outline-offset: 2px;
+}
+.uiturn-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.uiturn-hint {
+  font-size: var(--fs-12);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.uiturn-caption {
+  font-size: var(--fs-13, var(--fs-12));
+  font-weight: 600;
+  text-align: center;
+}

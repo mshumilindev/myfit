@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   CONDITION_CATALOG,
   catalogCondition,
+  conditionName,
   effectsAt,
   searchConditions,
 } from './data/conditionCatalog';
+import { loadConditionNames } from './data/conditionNames';
 import {
   coachView,
   conditionLimits,
@@ -272,5 +274,32 @@ describe('restScale', () => {
     const c = CONDITION_CATALOG.find((x) => x.effects.restScale);
     expect(c).toBeTruthy();
     expect(effectLines(effectsAt(c!.effects, 2)).some((l) => l.id === 'restScale')).toBe(true);
+  });
+});
+
+describe('body map highlights', () => {
+  it('every body area highlights something', async () => {
+    const { AREAS } = await import('./views/health/BodyMapPicker');
+    const empty = Object.values(AREAS).flatMap((l) =>
+      l.filter((a) => a.marks.length === 0 && !a.organs?.length),
+    );
+    expect(empty.map((a) => a.id)).toEqual([]);
+  });
+});
+
+describe('condition name localisation', () => {
+  it.each(['uk', 'pl', 'lt', 'et'] as const)('%s has exactly the catalogue keys', async (loc) => {
+    const { default: table } = await import(`./data/conditionNames/${loc}.ts`);
+    const keys = CONDITION_CATALOG.map((c) => c.key).sort();
+    expect(Object.keys(table).sort()).toEqual(keys);
+    for (const k of keys) expect(table[k].name.trim().length).toBeGreaterThan(1);
+  });
+
+  it('falls back to English and searches localised names once loaded', async () => {
+    expect(conditionName('knee_pain', 'uk')).toBe('Chronic knee pain');
+    await loadConditionNames('uk');
+    expect(conditionName('knee_pain', 'uk')).toBe('Хронічний біль у коліні');
+    expect(searchConditions('ішіас', 'uk').map((c) => c.key)).toContain('back_sciatica');
+    expect(searchConditions('sciatica', 'uk').map((c) => c.key)).toContain('back_sciatica');
   });
 });

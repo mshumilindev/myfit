@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { createVault, type VaultHeader } from './vault';
+import { readyVault, unsetVault } from './testVault';
 import {
   ensureCoachKey,
   ensureGrant,
@@ -10,30 +10,6 @@ import {
 } from './vaultGrants';
 import type { CoachKeyRecord } from './vaultShare';
 import { sealDoc, unsealDoc } from './encryptedDoc';
-
-async function readyVault() {
-  let header: VaultHeader | null = null;
-  let cached: { key: CryptoKey; salt: string } | null = null;
-  const v = createVault({
-    remote: { load: async () => header, save: async (h) => void (header = h) },
-    cache: {
-      get: async () => cached,
-      set: async (x) => void (cached = x),
-      clear: async () => void (cached = null),
-    },
-  });
-  await v.init();
-  await v.create();
-  return v;
-}
-async function lockedVault() {
-  const v = createVault({
-    remote: { load: async () => null, save: async () => undefined },
-    cache: { get: async () => null, set: async () => undefined, clear: async () => undefined },
-  });
-  await v.init();
-  return v;
-}
 
 /** One shared "server" with per-user views. */
 function world() {
@@ -67,7 +43,7 @@ describe('automatic key exchange', () => {
 
   it('does nothing while a vault is locked', async () => {
     const w = world();
-    const locked = await lockedVault();
+    const locked = await unsetVault();
     expect(await ensureCoachKey(locked, w.portsFor('c1'))).toBe('locked');
     expect(await ensureGrant(locked, 'c1', w.portsFor('a1'))).toBe('locked');
   });

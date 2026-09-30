@@ -100,8 +100,10 @@ afterEach(() => {
 
 describe('Health home (mobile)', () => {
   it('f01: nothing active — status, sleep, start, log the past, history', () => {
+    // An illness that ended within RETURN_WINDOW_DAYS (21) shows the "Easing back in"
+    // return plan instead of "All clear" (Unwell 2.0), so this one is well past it.
     seed([
-      period({ id: 'flu', mode: 'illness', startDay: D(9, 12), endDay: D(9, 18), name: 'Flu' }),
+      period({ id: 'flu', mode: 'illness', startDay: D(8, 12), endDay: D(8, 18), name: 'Flu' }),
     ]);
     const { shell } = view();
     expect(screen.getByText('All clear')).toBeTruthy();
@@ -113,7 +115,7 @@ describe('Health home (mobile)', () => {
     expect(screen.getByText('I took a break')).toBeTruthy();
     expect(screen.getByText('I got hurt')).toBeTruthy();
     expect(screen.getByText('Flu')).toBeTruthy();
-    expect(screen.getByText('12–18 Sep')).toBeTruthy();
+    expect(screen.getByText('12–18 Aug')).toBeTruthy();
     fireEvent.click(screen.getByText('Sleep details & schedule'));
     expect(shell.openOverlay).toHaveBeenCalledWith({ screen: 'sleep' });
     fireEvent.click(screen.getByText('Injury rehab'));
@@ -244,12 +246,17 @@ describe('Health forms (mobile)', () => {
   it('f05: unwell since an earlier day, still ongoing', () => {
     seed([]);
     view({ form: { kind: 'new', ctx: 'start', type: 'illness' } });
+    // Unwell 2.0: "How long" tabs first; the date rows (and the ongoing switch) only
+    // appear under "Earlier day".
+    expect(screen.queryByRole('switch')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Earlier day' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Last 3 days' }));
     const sw = screen.getByRole('switch') as HTMLInputElement;
+    expect(sw.checked).toBe(false);
+    expect(screen.getByText(/3 days, today is day 3/)).toBeTruthy();
+    fireEvent.click(sw);
     expect(sw.checked).toBe(true);
     expect(screen.getByText('When you tap “I’m recovered”')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Last 3 days' }));
-    expect(screen.getByText('Day 3 so far. No missed days — your plan waits.')).toBeTruthy();
-    expect(screen.getByLabelText('Sat 26 Sep, today — still ongoing')).toBeTruthy();
     fireEvent.click(screen.getByText('Start from Thu 24 Sep'));
     expect(__getStateForTests().restPeriods[0]).toMatchObject({
       mode: 'illness',
@@ -431,7 +438,7 @@ describe('Health (web)', () => {
     expect(document.querySelector('[aria-current="true"]')).toBeTruthy();
   });
 
-  it('w03: history list left, edit panel right', () => {
+  it('w03: overview stays left, edit panel right (the history list yields to the form)', () => {
     seed([
       period({ id: 'flu', mode: 'illness', startDay: D(9, 12), endDay: D(9, 18), name: 'Flu' }),
     ]);
@@ -439,7 +446,11 @@ describe('Health (web)', () => {
     const panel = screen.getByRole('dialog');
     expect(within(panel).getByText('Edit period')).toBeTruthy();
     expect(within(panel).getByText('Flu · Unwell · 12–18 Sep')).toBeTruthy();
-    expect(document.querySelector('[aria-current="true"]')?.textContent).toContain('Flu');
+    // Since 5f20e490 the left column is always the overview; the history list
+    // (and its selected-row marker) only lives in the right pane when no form is open.
+    expect(document.getElementById('hl-hist-h')).toBeNull();
+    expect(screen.getByRole('region', { name: 'Health' })).toBeTruthy();
+    expect(screen.getByText('Log the past')).toBeTruthy();
   });
 });
 
@@ -484,7 +495,7 @@ describe('Health: planning ahead', () => {
     expect(document.querySelector('.uitile.uit--active')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Next 7 days' }));
     const primary = screen.getByText('Schedule active recovery');
-    expect(primary.className).toContain('p-act');
+    expect(primary.closest('button')?.className).toContain('uibtn--primary');
     fireEvent.click(primary);
     expect(__getStateForTests().restPeriods[0]).toMatchObject({
       mode: 'active',
@@ -513,6 +524,8 @@ describe('Health: planning ahead', () => {
   it('illness cannot be planned ahead (and says why)', () => {
     seed([]);
     view({ form: { kind: 'new', ctx: 'start', type: 'illness' } });
+    // Dates only exist under "Earlier day"; tomorrow is disabled there.
+    fireEvent.click(screen.getByRole('button', { name: 'Earlier day' }));
     expect((screen.getByLabelText('Sun 27 Sep') as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/Illness can’t be planned ahead/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Next week' })).toBeNull();

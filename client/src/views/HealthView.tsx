@@ -527,12 +527,6 @@ export function HealthView(props: HealthViewProps) {
   // ============================ web ============================
   // The overview stays on the left in both history modes; the right pane
   // switches between the list and the timeline (no separate full-width page).
-  const selectedId =
-    props.form?.kind === 'edit'
-      ? props.form.periodId
-      : props.form?.kind === 'edit-injury'
-        ? props.form.injuryId
-        : null;
   const left = (
     <section className="hl-pane" aria-label={t.startHealthTitle}>
       <div className="hl-wc">
@@ -572,7 +566,7 @@ export function HealthView(props: HealthViewProps) {
         </div>
         <HistControls mode={webHist} filter={filter} onMode={setWebHist} onFilter={setFilter} />
         {webHist === 'list' ? (
-          <HistoryList now={now} filter={filter} web selectedId={selectedId} onOpen={openItem} />
+          <HistoryList now={now} filter={filter} web onOpen={openItem} />
         ) : (
           <HistoryTimeline now={now} filter={filter} web />
         )}

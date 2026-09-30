@@ -72,4 +72,30 @@ describe('automatic vault', () => {
     expect(v.materialOrNull()).toBeNull();
     expect(await cache.get()).toBeNull();
   });
+
+  it('data sealed on one device opens on another (same server key), even via the cached copy', async () => {
+    const a = createAutoVault({
+      fetchKey: async () => ({ key: rawKey, salt: 'c2FsdA==' }),
+      cache: mem(),
+    });
+    await a.init();
+    const { key, salt } = a.material();
+    const doc = { id: 'i1', updatedAt: 5, name: 'Knee', note: 'x' };
+    const sealed = await sealDoc('injuries', doc, key, salt);
+    const cache = mem();
+    const b = createAutoVault({
+      fetchKey: async () => ({ key: rawKey, salt: 'c2FsdA==' }),
+      cache,
+    });
+    await b.init();
+    expect(await unsealDoc(sealed, b.material().key)).toEqual(doc);
+    const offline = createAutoVault({
+      fetchKey: async () => {
+        throw new Error('offline');
+      },
+      cache,
+    });
+    await offline.init();
+    expect(await unsealDoc(sealed, offline.material().key)).toEqual(doc);
+  });
 });

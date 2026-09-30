@@ -30,6 +30,10 @@ export type AnatomyLayer =
   | 'lungs_shape'
   | 'brain_mask'
   | 'spinalcord_mask'
+  | 'liver'
+  | 'kidneys'
+  | 'stomach'
+  | 'intestines'
   | 'm_chest'
   | 'm_shoulder'
   | 'm_arm'
@@ -73,7 +77,8 @@ export type AnatomyFocus = keyof typeof ANATOMY_FOCUS;
 export type AnatomyBase = 'bones' | 'muscles';
 
 export interface AnatomyMapProps {
-  view?: AnatomyView;
+  /** A fixed side, or a turntable angle in degrees (multiples of TURN_STEP). */
+  view?: AnatomyView | number;
   /** Which layer is the body underneath: the skeleton (default) or the muscles. */
   base?: AnatomyBase;
   focus?: AnatomyFocus;
@@ -89,8 +94,12 @@ export interface AnatomyMapProps {
 const BASE = `${import.meta.env.BASE_URL ?? '/'}anatomy/`;
 // CSS custom-property URLs otherwise resolve against the stylesheet's assets/
 // directory when the build uses a relative base (for example, Storybook).
-const url = (layer: string, view: AnatomyView) =>
-  `url("${new URL(`${BASE}${layer}.${view}.webp`, document.baseURI).href}")`;
+export const TURN_STEP = 5;
+export const TURN_FRAMES = 360 / TURN_STEP;
+export const file = (layer: string, view: AnatomyView | number) =>
+  typeof view === 'number' ? `${BASE}turn/${layer}/${view}.webp` : `${BASE}${layer}.${view}.webp`;
+const url = (layer: string, view: AnatomyView | number) =>
+  `url("${new URL(file(layer, view), document.baseURI).href}")`;
 
 /**
  * Anatomical map: the skeleton with optional organs and highlighted regions,
@@ -134,30 +143,6 @@ export function AnatomyMap({
             style={img(m.layer)}
           />
         ))}
-      </div>
-    </div>
-  );
-}
-
-/**
- * The same map on a turntable: `side` picks which face points at the viewer, and changing it
- * spins the figure half a turn (pure CSS; reduced motion swaps instantly). Both faces stay
- * mounted so the highlighted region is visible from whichever side it lies on.
- */
-export function AnatomyTurntable({
-  side = 'front',
-  label,
-  ...rest
-}: Omit<AnatomyMapProps, 'view'> & { side?: AnatomyView }) {
-  return (
-    <div className="uianat-turn" data-side={side}>
-      <div className="uianat-turn-in">
-        <div className="uianat-face" aria-hidden={side !== 'front'}>
-          <AnatomyMap {...rest} label={label} view="front" />
-        </div>
-        <div className="uianat-face uianat-face-back" aria-hidden={side !== 'back'}>
-          <AnatomyMap {...rest} label={label} view="back" />
-        </div>
       </div>
     </div>
   );

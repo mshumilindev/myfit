@@ -1,18 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { createCoachKey, createGrant, isGrant, openGrant } from './vaultShare';
-import {
-  decryptJson,
-  deriveVaultKey,
-  encryptJson,
-  generateRecoveryKey,
-  newSalt,
-} from './vaultCrypto';
+import { b64, decryptJson, encryptJson, importRawKey } from './vaultCrypto';
 import { sealDoc, unsealDoc } from './encryptedDoc';
 
 async function person() {
-  const salt = newSalt();
-  return { salt, key: await deriveVaultKey(generateRecoveryKey(), salt) };
+  const rnd = (n: number) => b64(globalThis.crypto.getRandomValues(new Uint8Array(n)));
+  return { salt: rnd(16), key: await importRawKey(rnd(32), true) };
 }
 
 describe('coach grants', () => {

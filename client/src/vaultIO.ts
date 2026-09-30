@@ -10,8 +10,7 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import type { MigratePorts } from './vaultMigrate';
 import { db } from './firebase';
-import { createAutoVault } from './autoVault';
-import { idbKeyCache, type Vault } from './vault';
+import { createAutoVault, idbKeyCache, type Vault } from './autoVault';
 import { callFn } from './api';
 import { isFlagOn } from './data/flags';
 import { migrateAll } from './vaultMigrate';
@@ -99,7 +98,6 @@ export async function prepareWrite<T extends Record<string, unknown>>(
   v: Vault = vault,
 ): Promise<Record<string, unknown>> {
   const st = v.status();
-  if (st === 'locked') throw new Error('vault-locked');
   if (st !== 'ready') return data;
   const { key, salt } = v.material();
   return sealDoc(collection, data, key, salt);
@@ -107,7 +105,7 @@ export async function prepareWrite<T extends Record<string, unknown>>(
 
 /**
  * Turns raw snapshot documents into plain objects. While the vault is locked, sealed
- * documents are skipped (the UI asks for the recovery key) and plaintext ones still show.
+ * documents are skipped and plaintext ones still show.
  */
 export async function readDocs<T extends Record<string, unknown>>(
   raws: Record<string, unknown>[],
@@ -228,7 +226,7 @@ export function migratePorts(
   };
   return {
     async list(c) {
-      if (c === 'body' || c === 'coachShare') {
+      if (c === 'body' || c === 'coachShare' || c === 'conditionPrefs') {
         const s = await getDoc(doc(db, 'users', uid(), 'meta', c));
         return s.exists() ? [{ id: c, data: s.data() }] : [];
       }
@@ -237,7 +235,7 @@ export function migratePorts(
     },
     async write(c, id, data) {
       const ref =
-        c === 'body' || c === 'coachShare'
+        c === 'body' || c === 'coachShare' || c === 'conditionPrefs'
           ? doc(db, 'users', uid(), 'meta', c)
           : doc(db, 'users', uid(), c, id);
       await setDoc(ref, data);

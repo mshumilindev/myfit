@@ -163,4 +163,20 @@ describe('answers respect long-term limits (privacy-first)', () => {
     expect(a?.text).toMatch(/your limits/i);
     expect(a?.text).not.toMatch(/disc|herniation|lumbar/i);
   });
+  describe('muscle questions under limits', () => {
+    const cases: [string, 'en' | 'uk'][] = [
+      ['Can I train legs?', 'en'],
+      ['can I do chest today', 'en'],
+      ['можна ноги?', 'uk'],
+      ['можна тренувати груди сьогодні?', 'uk'],
+    ];
+    it.each(cases)('routes "%s" to the muscle path', (q, loc) => {
+      const a = answerLocally(
+        q,
+        withConditions([cond('back_lumbar_disc', 3), cond('shoulder_impingement', 3)], loc),
+      );
+      expect(a?.intent).toBe('ok_with_limits');
+      expect(a?.text).not.toMatch(/disc|herniation|lumbar|impingement|back_/i);
+    });
+  });
 });

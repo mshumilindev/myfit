@@ -36,7 +36,14 @@ import {
 } from '../../conditions';
 import { toneClass } from '../../components/ui/tones';
 import { useT } from '../../i18n';
-import { addCondition, deleteCondition, updateCondition, useStore } from '../../store';
+import { useConditionName, useConditionSearch } from '../../useConditionName';
+import {
+  addCondition,
+  deleteCondition,
+  setConditionsShare,
+  updateCondition,
+  useStore,
+} from '../../store';
 import type { ChronicCondition, ConditionShare } from '../../types';
 
 const ymd = (ms: number): string => {
@@ -59,6 +66,7 @@ function Form({
   onDone: () => void;
 }) {
   const { t } = useT();
+  const { conditionsShare } = useStore();
   const temp = isTemporary(cat.key);
   const auto = temporaryAuto(cat.key);
   const [severity, setSeverity] = useState<1 | 2 | 3>(existing?.severity ?? 2);
@@ -86,7 +94,9 @@ function Form({
     onDone();
   };
   const hint = {
-    inherit: t.cndShareHintInherit,
+    inherit: t.cndShareHintInheritNow(
+      { off: t.cndShareOff, effects: t.cndShareEffects, full: t.cndShareFull }[conditionsShare],
+    ),
     off: t.cndShareHintOff,
     effects: t.cndShareHintEffects,
     full: t.cndShareHintFull,
@@ -186,6 +196,8 @@ function Form({
 
 function Picker({ onPick }: { onPick: (c: CatalogCondition) => void }) {
   const { t } = useT();
+  const condName = useConditionName();
+  const search = useConditionSearch();
   const [mode, setMode] = useState<'list' | 'body'>('list');
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<ConditionCategory | null>(null);
@@ -195,8 +207,8 @@ function Picker({ onPick }: { onPick: (c: CatalogCondition) => void }) {
     return n;
   }, []);
   const results = useMemo(
-    () => (q || cat ? searchConditions(q).filter((c) => !cat || c.category === cat) : []),
-    [q, cat],
+    () => (q || cat ? search(q).filter((c) => !cat || c.category === cat) : []),
+    [q, cat, search],
   );
   return (
     <div className="ul-flex ul-col ug-12">
@@ -249,7 +261,7 @@ function Picker({ onPick }: { onPick: (c: CatalogCondition) => void }) {
                     <ListRow
                       key={c.key}
                       icon={<IconTile tone="chronic" size={30} icon={c.icon} />}
-                      label={c.name}
+                      label={condName(c)}
                       chevron
                       onClick={() => onPick(c)}
                     />
@@ -276,7 +288,8 @@ function dayText(
 /** The list inside Health: each row / "Add" opens a full page (see ConditionPage). */
 export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }) {
   const { t } = useT();
-  const { conditions } = useStore();
+  const condName = useConditionName();
+  const { conditions, conditionsShare } = useStore();
   const [now] = useState(() => Date.now());
   return (
     <div className="ul-flex ul-col ug-8">
@@ -288,7 +301,7 @@ export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }
             <ListRow
               key={c.id}
               icon={<IconTile tone="chronic" size={30} icon={cat.icon} />}
-              label={cat.name}
+              label={condName(cat)}
               sub={[
                 t.cndSev[c.severity],
                 isEnded(c, now) ? t.cndEnded : dayText(c, now, t.cndDayOf),
@@ -308,6 +321,23 @@ export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }
           onClick={() => onOpen('new')}
         />
       </GroupedList>
+      {conditions.length > 0 && (
+        <div className="ul-flex ul-col ug-6">
+          <span className="ut-sm ut-w6">{t.cndShareDefault}</span>
+          <Segmented
+            label={t.cndShareDefault}
+            variant="track"
+            tone="chronic"
+            value={conditionsShare}
+            onChange={setConditionsShare}
+            options={[
+              { value: 'off', label: t.cndShareOff },
+              { value: 'effects', label: t.cndShareEffects },
+              { value: 'full', label: t.cndShareFull },
+            ]}
+          />
+        </div>
+      )}
       {conditions.length === 0 && (
         <Notice tone="chronic" icon="shield-check">
           {t.cndEmpty}
@@ -329,6 +359,7 @@ export function ConditionPage(props: {
   onPickKey: (key: string) => void;
 }) {
   const { t } = useT();
+  const condName = useConditionName();
   const { conditions } = useStore();
   const existing = props.cond === 'new' ? undefined : conditions.find((c) => c.id === props.cond);
   const cat = existing
@@ -341,7 +372,7 @@ export function ConditionPage(props: {
   ) : props.cond === 'new' ? (
     <Picker onPick={(c) => props.onPickKey(c.key)} />
   ) : null;
-  const title = cat ? cat.name : t.cndAdd;
+  const title = cat ? condName(cat) : t.cndAdd;
   if (props.web)
     return (
       <section className="hl-pane">
@@ -425,6 +456,7 @@ export function ConditionsOnboardingRow({ onOpen }: { onOpen: () => void }) {
 /** Coach's read-only card: only what the athlete shared (Full: names; Effects: nameless lines). */
 export function CoachConditions({ view }: { view: CoachView }) {
   const { t } = useT();
+  const condName = useConditionName();
   if (view.full.length === 0 && view.effects.length === 0) return null;
   return (
     <div className="ul-flex ul-col ug-8">
@@ -432,10 +464,10 @@ export function CoachConditions({ view }: { view: CoachView }) {
         const cat = c.key ? catalogCondition(c.key) : undefined;
         if (!cat) return null;
         return (
-          <GroupedList key={c.key} header={cat.name} footer={t.cndCoachFoot}>
+          <GroupedList key={c.key} header={condName(cat)} footer={t.cndCoachFoot}>
             <ListRow
               icon={<IconTile tone="chronic" size={30} icon={cat.icon} />}
-              label={c.severity ? t.cndSev[c.severity] : cat.name}
+              label={c.severity ? t.cndSev[c.severity] : condName(cat)}
               sub={c.effects.map((l) => effectText(l, t)).join(' · ')}
             />
           </GroupedList>

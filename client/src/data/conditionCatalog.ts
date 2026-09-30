@@ -9,6 +9,8 @@
  * through i18n keys `cond.<key>`.
  */
 import type { MuscleGroup } from './exercises';
+import type { LocaleId } from '../i18n';
+import { localizedCondition } from './conditionNames';
 
 export type ConditionCategory =
   | 'spine'
@@ -1558,12 +1560,22 @@ export const CONDITION_CATEGORIES: { id: ConditionCategory; icon: string }[] = [
   { id: 'other', icon: 'first-aid-kit' },
 ];
 
-/** Text search over name, synonyms and key (case-insensitive, every word must match). */
-export function searchConditions(q: string): CatalogCondition[] {
+/** Display name for a catalogue key in a locale; English when missing or not loaded yet. */
+export function conditionName(key: string, locale: LocaleId = 'en'): string {
+  return localizedCondition(key, locale)?.name ?? BY_KEY.get(key)?.name ?? key;
+}
+
+/**
+ * Text search over name, synonyms and key (case-insensitive, every word must match).
+ * With a non-English locale the localised name and synonyms are searched too.
+ */
+export function searchConditions(q: string, locale: LocaleId = 'en'): CatalogCondition[] {
   const words = q.toLowerCase().split(/\s+/).filter(Boolean);
   if (!words.length) return [...CONDITION_CATALOG];
   return CONDITION_CATALOG.filter((c) => {
-    const hay = `${c.name} ${c.aka.join(' ')} ${c.key.replace(/_/g, ' ')}`.toLowerCase();
+    const loc = localizedCondition(c.key, locale);
+    const hay =
+      `${c.name} ${c.aka.join(' ')} ${c.key.replace(/_/g, ' ')} ${loc?.name ?? ''} ${(loc?.aka ?? []).join(' ')}`.toLowerCase();
     return words.every((w) => hay.includes(w));
   });
 }

@@ -5,10 +5,10 @@
  *  - an athlete whose vault is unlocked and who has a coach gets a grant created for that
  *    coach on its own (and stale grants for former coaches removed).
  *
- * Creating the vault, the recovery key and unlocking stay explicit user actions.
+ * The vault key comes from the server automatically (autoVault.ts); nothing here needs a user action.
  * All I/O goes through ports so this is testable without Firebase.
  */
-import type { Vault } from './vault';
+import type { Vault } from './autoVault';
 import {
   createCoachKey,
   createGrant,

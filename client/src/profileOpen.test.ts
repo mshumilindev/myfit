@@ -2,7 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 vi.mock('./firebase', () => ({ db: {} }));
 vi.mock('firebase/firestore', () => ({ doc: vi.fn(), getDoc: vi.fn(), setDoc: vi.fn() }));
-import { createVault, type VaultHeader } from './vault';
+import { readyVault } from './testVault';
 import { ensureCoachKey, ensureGrant, type GrantPorts, type StoredGrant } from './vaultGrants';
 import type { CoachKeyRecord } from './vaultShare';
 import { sealDoc } from './encryptedDoc';
@@ -14,6 +14,7 @@ import {
   type DeriveDeps,
 } from './profileOpen';
 import type { Exercise, Gym, Workout } from './types';
+import type { CoachView } from './conditions';
 
 const deps: DeriveDeps = {
   exerciseVolumeKg: (e) => e.sets.reduce((v, s) => v + (s.weight ?? 0) * (s.reps ?? 0), 0),
@@ -32,21 +33,7 @@ const wk = (id: string, startedAt: number, exercises: Exercise[], extra = {}) =>
 const gym = (id: string, name: string) =>
   ({ id, name, lat: 1, lng: 2, radiusM: 50, favorite: false }) as unknown as Gym;
 
-async function vaultOf() {
-  let h: VaultHeader | null = null;
-  let c: { key: CryptoKey; salt: string } | null = null;
-  const v = createVault({
-    remote: { load: async () => h, save: async (x) => void (h = x) },
-    cache: {
-      get: async () => c,
-      set: async (x) => void (c = x),
-      clear: async () => void (c = null),
-    },
-  });
-  await v.init();
-  await v.create();
-  return v;
-}
+const vaultOf = readyVault;
 
 describe('derive', () => {
   const ws = [
@@ -160,5 +147,77 @@ describe('openProfile', () => {
     expect(await openProfile(p, coach, { loadOwnCoachKey: async () => null }, deps)).toBe(p);
     const q = { grant: { v: 1 }, history: { workouts: [{ id: 'x' }] } };
     expect(await openProfile(q, coach, { loadOwnCoachKey: async () => null }, deps)).toBe(q);
+  });
+});
+
+describe('openProfile: conditionsShare', () => {
+  // Literal views (conditions.ts pulls in DOM-only modules; its coachView is tested in the store test).
+  const FULL: CoachView = {
+    full: [{ key: 'asthma', severity: 2, effects: [{ id: 'caution', mods: [] } as never] }],
+    effects: [],
+  };
+  const MIXED: CoachView = {
+    full: FULL.full,
+    effects: [{ id: 'avoid', mods: [] } as never],
+  };
+
+  async function setup() {
+    const athlete = await vaultOf();
+    const coach = await vaultOf();
+    const own = new Map<string, CoachKeyRecord>();
+    const pubs = new Map<string, JsonWebKey>();
+    const grants = new Map<string, StoredGrant>();
+    const ports = (me: string): GrantPorts => ({
+      loadOwnCoachKey: async () => own.get(me) ?? null,
+      saveOwnCoachKey: async (r) => void own.set(me, r),
+      publishCoachPub: async (p) => void pubs.set(me, p),
+      loadCoachPub: async (id) => pubs.get(id) ?? null,
+      loadGrant: async (id) => grants.get(id) ?? null,
+      saveGrant: async (id, g) => void grants.set(id, g),
+      listGrantIds: async () => [...grants.keys()],
+      deleteGrant: async (id) => void grants.delete(id),
+    });
+    await ensureCoachKey(coach, ports('c'));
+    await ensureGrant(athlete, 'c', ports('a'));
+    return { athlete, coach, grant: grants.get('c'), cports: ports('c') };
+  }
+
+  it('opens the coachShare sealed by the athlete key into the published view', async () => {
+    const { athlete, coach, grant, cports } = await setup();
+    const { key, salt } = athlete.material();
+    const view = MIXED;
+    const coachShare = await sealDoc('coachShare', { view, updatedAt: 5 }, key, salt);
+    expect(JSON.stringify(coachShare)).not.toContain('asthma');
+    const out = (await openProfile(
+      { grant, history: {}, sealedGyms: [], summary: {}, coachShare },
+      coach,
+      cports,
+      deps,
+    )) as unknown as { conditionsShare: unknown };
+    expect(out.conditionsShare).toEqual(view);
+  });
+
+  it('is null when the coachShare was sealed with another key', async () => {
+    const { coach, grant, cports } = await setup();
+    const stranger = await vaultOf();
+    const { key, salt } = stranger.material();
+    const coachShare = await sealDoc('coachShare', { view: FULL, updatedAt: 5 }, key, salt);
+    const out = (await openProfile(
+      { grant, history: {}, sealedGyms: [], summary: {}, coachShare },
+      coach,
+      cports,
+      deps,
+    )) as unknown as { conditionsShare: unknown };
+    expect(out.conditionsShare).toBeNull();
+  });
+
+  it('without a usable grant the profile is returned unchanged (no view leaks)', async () => {
+    const { athlete, coach, cports } = await setup();
+    const { key, salt } = athlete.material();
+    const coachShare = await sealDoc('coachShare', { view: FULL, updatedAt: 5 }, key, salt);
+    const p = { history: {}, coachShare };
+    const out = (await openProfile(p, coach, cports, deps)) as unknown as Record<string, unknown>;
+    expect(out).toBe(p);
+    expect(out.conditionsShare).toBeUndefined();
   });
 });

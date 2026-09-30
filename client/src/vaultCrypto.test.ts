@@ -1,59 +1,32 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import {
-  decryptJson,
-  deriveVaultKey,
-  encryptJson,
-  formatRecoveryKey,
-  generateRecoveryKey,
-  isEnvelope,
-  newSalt,
-  parseRecoveryKey,
-} from './vaultCrypto';
+import { b64, decryptJson, encryptJson, importRawKey, isEnvelope } from './vaultCrypto';
 
-describe('recovery key', () => {
-  it('is 32 Crockford chars and round-trips through display formatting', () => {
-    const rk = generateRecoveryKey();
-    expect(rk).toMatch(/^[0-9A-HJKMNP-TV-Z]{32}$/);
-    const shown = formatRecoveryKey(rk);
-    expect(shown).toMatch(/^([0-9A-Z]{4}-){7}[0-9A-Z]{4}$/);
-    expect(parseRecoveryKey(shown)).toBe(rk);
-    expect(parseRecoveryKey(shown.toLowerCase().replace(/-/g, ' '))).toBe(rk);
-  });
-  it('rejects wrong length and bad characters', () => {
-    expect(parseRecoveryKey('')).toBeNull();
-    expect(parseRecoveryKey('ABCD-EFGH')).toBeNull();
-    expect(parseRecoveryKey('U'.repeat(32))).toBeNull(); // U is not in the alphabet
-  });
-  it('keys are unique', () => {
-    expect(generateRecoveryKey()).not.toBe(generateRecoveryKey());
-  });
-});
+const rnd = (n: number) => b64(globalThis.crypto.getRandomValues(new Uint8Array(n)));
+const newSalt = () => rnd(16);
+const newKey = (extractable = true) => importRawKey(rnd(32), extractable);
 
 describe('encrypt / decrypt', () => {
   const data = { conditions: [{ key: 'back_lumbar_disc', note: 'secret' }] };
 
-  it('round-trips with the same recovery key', async () => {
-    const rk = generateRecoveryKey();
+  it('round-trips with the same key', async () => {
+    const key = await newKey();
     const salt = newSalt();
-    const env = await encryptJson(await deriveVaultKey(rk, salt), salt, data);
+    const env = await encryptJson(key, salt, data);
     expect(isEnvelope(env)).toBe(true);
-    // A second device derives the key from the RK + the envelope's salt.
-    const other = await deriveVaultKey(rk, env.salt);
-    expect(await decryptJson(other, env)).toEqual(data);
+    expect(await decryptJson(key, env)).toEqual(data);
   });
 
   it('never leaks plaintext into the envelope', async () => {
-    const rk = generateRecoveryKey();
     const salt = newSalt();
-    const env = await encryptJson(await deriveVaultKey(rk, salt), salt, data);
+    const env = await encryptJson(await newKey(), salt, data);
     expect(JSON.stringify(env)).not.toContain('secret');
     expect(JSON.stringify(env)).not.toContain('back_lumbar_disc');
   });
 
   it('uses a fresh IV on every write', async () => {
     const salt = newSalt();
-    const key = await deriveVaultKey(generateRecoveryKey(), salt);
+    const key = await newKey();
     const a = await encryptJson(key, salt, data);
     const b = await encryptJson(key, salt, data);
     expect(a.iv).not.toBe(b.iv);
@@ -62,27 +35,27 @@ describe('encrypt / decrypt', () => {
 
   it('fails with a wrong key', async () => {
     const salt = newSalt();
-    const env = await encryptJson(await deriveVaultKey(generateRecoveryKey(), salt), salt, data);
-    const wrong = await deriveVaultKey(generateRecoveryKey(), salt);
-    await expect(decryptJson(wrong, env)).rejects.toThrow();
+    const env = await encryptJson(await newKey(), salt, data);
+    await expect(decryptJson(await newKey(), env)).rejects.toThrow();
   });
 
   it('fails when the ciphertext is tampered with', async () => {
-    const rk = generateRecoveryKey();
     const salt = newSalt();
-    const key = await deriveVaultKey(rk, salt);
+    const key = await newKey();
     const env = await encryptJson(key, salt, data);
     const flipped = { ...env, ct: (env.ct[0] === 'A' ? 'B' : 'A') + env.ct.slice(1) };
     await expect(decryptJson(key, flipped)).rejects.toThrow();
   });
 
   it('extractable flag is honoured', async () => {
-    const rk = generateRecoveryKey();
-    const salt = newSalt();
-    expect((await deriveVaultKey(rk, salt)).extractable).toBe(true);
-    const locked = await deriveVaultKey(rk, salt, false);
+    expect((await newKey(true)).extractable).toBe(true);
+    const locked = await newKey(false);
     expect(locked.extractable).toBe(false);
     await expect(globalThis.crypto.subtle.exportKey('raw', locked)).rejects.toThrow();
+  });
+
+  it('importRawKey rejects a key of the wrong length', async () => {
+    await expect(importRawKey(rnd(16), true)).rejects.toThrow('bad-key');
   });
 
   it('isEnvelope rejects junk', () => {

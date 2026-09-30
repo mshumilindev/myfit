@@ -6,7 +6,7 @@
  * primary=1 / secondary=0.5 weighting) and rank the gym-available ones first.
  * Pure over the catalog + gym inventory.
  */
-import { isAutoExcluded, type Limits } from './conditions';
+import { exerciseFlag, type Limits } from './conditions';
 import { exerciseNeeds, missingAtGym } from './store';
 import { searchCatalog, muscleInfoByName, richExerciseByName } from './data/exercises';
 import type { MuscleGroup } from './data/exercises';
@@ -50,9 +50,42 @@ function isBodyweight(equipment: string[]): boolean {
   return equipment.length === 0 || equipment.every((e) => e === 'body');
 }
 
+export type MovementPattern =
+  'squat' | 'hinge' | 'press' | 'pull' | 'row' | 'curl' | 'extend' | 'raise';
+
+const PATTERN_WORDS: [MovementPattern, string[]][] = [
+  [
+    'hinge',
+    ['deadlift', 'good morning', 'hip thrust', 'bridge', 'pull through', 'hyperextension', 'swing'],
+  ],
+  ['squat', ['squat', 'leg press', 'lunge', 'step up', 'step-up']],
+  ['row', [' row']],
+  ['pull', ['pull-up', 'pullup', 'pulldown', 'pull down', 'chin']],
+  ['curl', ['curl']],
+  ['extend', ['extension', 'pushdown', 'kickback', 'skull']],
+  ['raise', ['raise', 'shrug', 'fly', 'flye']],
+  ['press', ['press', 'push-up', 'push up', 'dip']],
+];
+
+/** Coarse movement pattern from the exercise name (null when unclear). */
+export function movementPattern(name: string): MovementPattern | null {
+  const n = ` ${name.toLowerCase()}`;
+  for (const [p, words] of PATTERN_WORDS) if (words.some((w) => n.includes(w))) return p;
+  return null;
+}
+
+/** Machine / cable / supported variants: steadier and kinder when the limits are strict. */
+export const isSupported = (name: string, equipment: string[]): boolean =>
+  equipment.some((e) => e === 'machine' || e === 'cable') ||
+  /\b(machine|smith|supported|seated)\b/i.test(name);
+
+/** Junk for a swap: drags, carries, jumps and other non-lifts. */
+const ODD = /\b(drag|crawl|carry|jump|toss|throw|slam|sled|sprint)\b/i;
+
 /**
- * Up to `count` alternatives for `name`, ranked by profile match, then by
- * whether the gym can equip them, then by the simplest kit. Stretches are
+ * Up to `count` alternatives for `name`, of the same movement pattern and primary muscle, ranked
+ * by pattern, gym availability, (when limits flag anything) supported variants, profile match, simplest kit.
+ * Lifts the limits avoid or flag as caution are dropped. Stretches are
  * excluded and the exercise itself never appears.
  */
 export function swapCandidates(
@@ -64,7 +97,7 @@ export function swapCandidates(
   const info = muscleInfoByName(name);
   if (!info || info.primary === 'cardio') return [];
   const cur = vec(info.primary, info.secondary);
-  const pool = searchCatalog('', 60, undefined, info.primary);
+  const pool = searchCatalog('', 2000, undefined, info.primary);
   const seen = new Set<string>([name.trim().toLowerCase()]);
   const cands: SwapCandidate[] = [];
   for (const ex of pool) {
@@ -76,7 +109,12 @@ export function swapCandidates(
     const primary = (ci?.primary ?? ex.muscle) as MuscleGroup;
     if (primary === 'cardio') continue;
     if (richExerciseByName(nm)?.category === 'stretching') continue;
-    if (limits && isAutoExcluded(nm, limits)) continue; // never suggest a lift the conditions rule out
+    if (primary !== info.primary || ODD.test(nm)) continue;
+    // never suggest a lift the conditions rule out or flag
+    if (limits) {
+      const lvl = exerciseFlag(nm, limits).level;
+      if (lvl === 'avoid' || lvl === 'caution') continue;
+    }
     const secondary = ci?.secondary ?? [];
     const equipment = exerciseNeeds(nm);
     const missing = gym ? missingAtGym(gym, equipment) : [];
@@ -91,11 +129,18 @@ export function swapCandidates(
       match: cosine(cur, vec(primary, secondary)),
     });
   }
-  cands.sort(
+  const pat = movementPattern(name);
+  const strict =
+    !!limits && (limits.effects.avoid?.length ?? 0) + (limits.effects.caution?.length ?? 0) > 0;
+  const samePattern = pat ? cands.filter((x) => movementPattern(x.name) === pat) : [];
+  const pool2 = samePattern.length >= Math.min(count, 2) ? samePattern : cands;
+  const support = (x: SwapCandidate) => (strict && isSupported(x.name, x.equipment) ? 1 : 0);
+  pool2.sort(
     (a, b) =>
-      b.match - a.match ||
       Number(b.available) - Number(a.available) ||
+      support(b) - support(a) ||
+      b.match - a.match ||
       a.equipment.length - b.equipment.length,
   );
-  return cands.slice(0, count);
+  return pool2.slice(0, count);
 }

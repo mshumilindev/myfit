@@ -7,7 +7,7 @@
  * A payload without a grant (or one the coach cannot open) passes through unchanged.
  */
 import { unsealDoc } from './encryptedDoc';
-import type { Vault } from './vault';
+import type { Vault } from './autoVault';
 import { openAthleteKey } from './vaultGrants';
 import type { CoachKeyRecord } from './vaultShare';
 import type { Exercise, Gym, Workout } from './types';

@@ -1,0 +1,12 @@
+/* Body map in the Add-a-condition flow: a square map on top, the areas in two columns under it,
+   so map + areas always fit one mobile screen; the matching conditions scroll below. */
+.bm-map {
+  width: min(100%, 210px);
+  align-self: center;
+}
+.bm-areas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-8);
+  align-items: start;
+}

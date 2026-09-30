@@ -116,7 +116,6 @@ export function HistoryList(props: {
   now: number;
   filter: HistFilter;
   web: boolean;
-  selectedId?: string | null;
   onOpen: (it: HealthItem) => void;
 }) {
   const { t, locale } = useT();
@@ -145,7 +144,6 @@ export function HistoryList(props: {
     const val = it.ongoing
       ? t.hlRangeNow(fmtDM(it.startDay, locale, today))
       : fmtRange(it.startDay, it.endDay, locale, today);
-    const sel = props.selectedId === it.id;
     const btn = (
       <ListRow
         icon={<Ic tone={tone} name={iconOf(it.kind === 'injury' ? 'injury' : it.mode!)} />}
@@ -153,8 +151,6 @@ export function HistoryList(props: {
         sub={<ToneText tone={KIT_TONE[tone]}>{itemSub(it, today, t)}</ToneText>}
         value={val}
         chevron
-        selected={sel}
-        aria-current={sel ? 'true' : undefined}
         onClick={() => (swiped === it.id ? setSwiped(null) : props.onOpen(it))}
       />
     );
