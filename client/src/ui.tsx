@@ -34,6 +34,7 @@ import { Confetti } from '@phosphor-icons/react/Confetti';
 import { Pause } from '@phosphor-icons/react/Pause';
 import { Stop } from '@phosphor-icons/react/Stop';
 import { Bell } from '@phosphor-icons/react/Bell';
+import { ArrowDown } from '@phosphor-icons/react/ArrowDown';
 import { ArrowUp } from '@phosphor-icons/react/ArrowUp';
 import { Microphone } from '@phosphor-icons/react/Microphone';
 import { Lock } from '@phosphor-icons/react/Lock';
@@ -241,6 +242,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   archive: Archive,
   barbell: Barbell,
   bell: Bell,
+  'arrow-down': ArrowDown,
   'arrow-up': ArrowUp,
   microphone: Microphone,
   lock: Lock,

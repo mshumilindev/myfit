@@ -33,6 +33,8 @@ export interface SegmentedProps<V extends string | number> {
   /** Tab semantics (tablist / tab / aria-selected) for pickers that switch a panel. */
   tabs?: boolean;
   size?: 'sm' | 'md';
+  /** Options size to their label (chip-like row) instead of equal columns. */
+  hug?: boolean;
   className?: string;
 }
 
@@ -47,6 +49,7 @@ export function Segmented<V extends string | number>({
   tone = 'accent',
   size = 'md',
   tabs,
+  hug = false,
   className,
 }: SegmentedProps<V>) {
   return (
@@ -56,6 +59,7 @@ export function Segmented<V extends string | number>({
         `uiseg--${variant}`,
         `uiseg--${size}`,
         options.length >= 5 ? 'is-dense' : '',
+        hug ? 'uiseg--hug' : '',
         toneClass(tone),
         className,
       ]
@@ -64,7 +68,7 @@ export function Segmented<V extends string | number>({
       role={tabs ? 'tablist' : 'group'}
       aria-label={label}
       aria-labelledby={labelledBy}
-      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+      style={hug ? undefined : { gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((o) => {
         const on = o.value === value;

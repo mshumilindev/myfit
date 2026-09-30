@@ -4,6 +4,7 @@ import { SwitchIndicator } from '../components/ui/Switch';
 import { BackButton } from '../components/ui/BackButton';
 import {
   type CSSProperties,
+  type DragEvent,
   type KeyboardEvent,
   Fragment,
   type ReactNode,
@@ -143,6 +144,7 @@ import {
   reopenWorkout,
   beginPastEdit,
   savePastWorkout,
+  isPastDirty,
   deletePastWorkout,
   resolveMuscles,
   restoreExercise,
@@ -581,6 +583,8 @@ export function SessionView(props: {
   const [dialog, setDialog] = useState<DialogState>(null);
   const [renaming, setRenaming] = useState<string | null>(null);
   const dragId = useRef<string | null>(null);
+  /** Row the dragged exercise would land on (drop highlight). */
+  const [dragOver, setDragOver] = useState<string | null>(null);
   const [renameVal, setRenameVal] = useState('');
   // Back from a screen opened on the summary (Log activity, Atlas, a muscle) →
   // land on the summary again, not the session editor.
@@ -2290,6 +2294,36 @@ export function SessionView(props: {
     return `${ex.sets.length} × ${top.reps} · ${w}`;
   }
 
+  /** Drag-and-drop reordering (desktop): drop the dragged exercise onto another. */
+  function dropExercise(targetId: string): void {
+    const from = dragId.current;
+    dragId.current = null;
+    setDragOver(null);
+    if (!from || from === targetId) return;
+    const ids = [...workout!.exercises].sort((a, b) => a.position - b.position).map((x) => x.id);
+    const fi = ids.indexOf(from);
+    const ti = ids.indexOf(targetId);
+    if (fi < 0 || ti < 0) return;
+    ids.splice(ti, 0, ids.splice(fi, 1)[0]);
+    reorderExercises(workout!.id, ids);
+  }
+  function dropProps(id: string) {
+    return {
+      onDragOver: (e: DragEvent<HTMLElement>) => {
+        if (!dragId.current || dragId.current === id) return;
+        e.preventDefault();
+        if (dragOver !== id) setDragOver(id);
+      },
+      onDragLeave: () => {
+        if (dragOver === id) setDragOver(null);
+      },
+      onDrop: (e: DragEvent<HTMLElement>) => {
+        e.preventDefault();
+        dropExercise(id);
+      },
+    };
+  }
+
   interface GroupCtx {
     letter: string;
     index: number;
@@ -3030,27 +3064,10 @@ export function SessionView(props: {
         pad="sm"
         className={`exercise-card${completed ? ' completed' : ''}${
           !grp && focusedId === ex.id ? ' active' : ''
-        }${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
+        }${dragOver === ex.id ? ' drop-over' : ''}${grp ? ' ss-card' : ''}${grp?.active ? ' ss-active' : ''}${timed ? ' timed-card' : ''}${
           marker ? ` warmup-marker${kind === 'cooldown' ? ' cooldown-marker' : ''}` : ''
         }`}
-        onDragOver={(e) => {
-          if (!grp && dragId.current && dragId.current !== ex.id) e.preventDefault();
-        }}
-        onDrop={(e) => {
-          if (grp) return;
-          e.preventDefault();
-          const from = dragId.current;
-          dragId.current = null;
-          if (!from || from === ex.id) return;
-          const ids = [...workout!.exercises]
-            .sort((a, b) => a.position - b.position)
-            .map((x) => x.id);
-          const fi = ids.indexOf(from);
-          const ti = ids.indexOf(ex.id);
-          if (fi < 0 || ti < 0) return;
-          ids.splice(ti, 0, ids.splice(fi, 1)[0]);
-          reorderExercises(workout!.id, ids);
-        }}
+        {...(grp ? {} : dropProps(ex.id))}
       >
         <div className="head">
           {renaming === ex.id ? (
@@ -3144,27 +3161,46 @@ export function SessionView(props: {
                   no set editor to reach them from, so this is how they're removed. */}
               {/* In focus mode strength sets reach options via the sliders next to
                   Log; markers and cardio have no set row, so they keep a door here. */}
-              {!grp && !focusView && (
-                <IconButton
-                  icon={focusView ? 'sliders-horizontal' : 'gear'}
-                  size="sm"
-                  className="dots ex-settings"
-                  onClick={() =>
-                    setSheet(
-                      focusView
-                        ? {
-                            kind: 'opts',
-                            tab: 'exercise',
-                            exId: ex.id,
-                            set: null,
-                            ghost: timed ? timedSheetGhost : null,
-                          }
-                        : { kind: 'menu', exId: ex.id },
-                    )
-                  }
-                  label={t.menuAction}
-                />
-              )}
+              <span className="ex-head-actions">
+                {props.past && ex.sets.length > 0 && (
+                  // Past session: fold an opened exercise back into its one-line row.
+                  <IconButton
+                    icon="caret-up"
+                    size="sm"
+                    className="ex-collapse"
+                    label={t.navCollapse}
+                    onClick={() => {
+                      const ids = grp
+                        ? workout!.exercises
+                            .filter((e) => e.groupId === ex.groupId)
+                            .map((e) => e.id)
+                        : [ex.id];
+                      setExpandedPast((x) => x.filter((id) => !ids.includes(id)));
+                    }}
+                  />
+                )}
+                {!grp && !focusView && (
+                  <IconButton
+                    icon={focusView ? 'sliders-horizontal' : 'gear'}
+                    size="sm"
+                    className="dots ex-settings"
+                    onClick={() =>
+                      setSheet(
+                        focusView
+                          ? {
+                              kind: 'opts',
+                              tab: 'exercise',
+                              exId: ex.id,
+                              set: null,
+                              ghost: timed ? timedSheetGhost : null,
+                            }
+                          : { kind: 'menu', exId: ex.id },
+                      )
+                    }
+                    label={t.menuAction}
+                  />
+                )}
+              </span>
             </>
           )}
         </div>
@@ -3873,23 +3909,16 @@ export function SessionView(props: {
             </div>
           );
         })()}
-      {/* Warm-up / cool-down markers only need removing; cardio keeps the
-          set tools but has no catalog details or lift history. */}
-      {isStrengthExercise(ex) && (
-        <ListRow
-          icon={<IconTile icon="swap" />}
-          label={t.replaceExercise}
-          onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
-        />
-      )}
-      {isHome && tabs && !isMarkerExercise(ex) && (
+      {/* Reordering: home sets (focus sheet) and history details on a phone —
+          the desktop history reorders by drag and drop instead. */}
+      {((isHome && tabs && !isMarkerExercise(ex)) || (props.past && !isDesktop)) && (
         <div className="opts-move">
           <Button
             variant="secondary"
             size="sm"
             icon="arrow-up"
             fullWidth
-            disabled={ex.position === 0}
+            disabled={orderIndex(ex) <= 0}
             onClick={() => moveExercise(ex, -1)}
           >
             {t.homeMoveUp}
@@ -3899,12 +3928,21 @@ export function SessionView(props: {
             size="sm"
             icon="arrow-down"
             fullWidth
-            disabled={ex.position >= workout!.exercises.length - 1}
+            disabled={orderIndex(ex) >= workout!.exercises.length - 1}
             onClick={() => moveExercise(ex, 1)}
           >
             {t.homeMoveDown}
           </Button>
         </div>
+      )}
+      {/* Warm-up / cool-down markers only need removing; cardio keeps the
+          set tools but has no catalog details or lift history. */}
+      {isStrengthExercise(ex) && (
+        <ListRow
+          icon={<IconTile icon="swap" />}
+          label={t.replaceExercise}
+          onClick={() => setSheet({ kind: 'replace', exId: ex.id })}
+        />
       )}
       {tabs && isStrengthExercise(ex) && !isHome && (
         <ListRow
@@ -4253,6 +4291,12 @@ export function SessionView(props: {
   }
 
   /** Home sets: move an exercise one slot up / down (the Exercise options). */
+  /** Index of an exercise in session order. */
+  function orderIndex(ex: Exercise): number {
+    return [...workout!.exercises]
+      .sort((a, b) => a.position - b.position)
+      .findIndex((e) => e.id === ex.id);
+  }
   function moveExercise(ex: Exercise, d: number): void {
     const list = [...workout!.exercises].sort((a, b) => a.position - b.position);
     const i = list.findIndex((e) => e.id === ex.id);
@@ -4673,6 +4717,8 @@ export function SessionView(props: {
                   <Button
                     variant="primary"
                     className="past-save"
+                    // Nothing changed since the editor opened → nothing to save.
+                    disabled={!isPastDirty(workout.id)}
                     onClick={() => {
                       savePastWorkout(workout.id);
                       props.onClose();
@@ -5191,7 +5237,24 @@ export function SessionView(props: {
                           data-exid={single.id}
                           className={`past-ex-card${singleIsCurrent ? ' is-current' : ''}${
                             isMarkerExercise(single) ? ' is-static' : ''
+                          }${dragOver === single.id ? ' drop-over' : ''}${
+                            isDesktop && !live ? ' is-draggable' : ''
                           }`}
+                          {...dropProps(single.id)}
+                          {...(isDesktop && !live
+                            ? {
+                                draggable: true,
+                                title: t.reorder,
+                                onDragStart: (e: DragEvent<HTMLElement>) => {
+                                  dragId.current = single.id;
+                                  e.dataTransfer.effectAllowed = 'move';
+                                },
+                                onDragEnd: () => {
+                                  dragId.current = null;
+                                  setDragOver(null);
+                                },
+                              }
+                            : {})}
                           // Warm-up / cool-down markers have nothing to open: only their cog acts.
                           {...(isMarkerExercise(single)
                             ? {}

@@ -88,3 +88,13 @@
     height: 40px;
   }
 }
+
+/* hug: chip-like row — each option is as wide as its label plus even padding. */
+.uiseg--hug {
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  justify-content: start;
+}
+.uiseg--hug .uiseg-opt {
+  padding: 0 var(--s-16);
+}

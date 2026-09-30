@@ -1565,6 +1565,30 @@ export function beginPastEdit(id: string): void {
   draftWorkouts.add(id);
 }
 
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const ka = Object.keys(a as object);
+  const kb = Object.keys(b as object);
+  if (ka.length !== kb.length) return false;
+  return ka.every((k) =>
+    deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]),
+  );
+}
+
+/**
+ * Does a past-session draft differ from what it was when its editor opened?
+ * Drives the Save button (nothing to save → disabled). A fresh backfill has no
+ * snapshot to compare with, so it counts as changed.
+ */
+export function isPastDirty(id: string): boolean {
+  const snap = pastSnapshots.get(id);
+  if (!snap) return true;
+  const cur = state.workouts.find((w) => w.id === id);
+  return !cur || !deepEqual(snap, cur);
+}
+
 /** Save a past-session draft to history (commit the edits / the new backfill). */
 export function savePastWorkout(id: string): void {
   pastSnapshots.delete(id);

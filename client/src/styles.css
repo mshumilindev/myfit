@@ -8365,6 +8365,17 @@ h6 {
 .past-ex-card.is-static {
   cursor: default;
 }
+.past-ex-card.is-draggable {
+  cursor: grab;
+}
+.past-ex-card.is-draggable:active {
+  cursor: grabbing;
+}
+/* Where the dragged exercise would land. */
+.past-ex-card.drop-over,
+.exercise-card.drop-over {
+  box-shadow: 0 -2px 0 0 var(--color-accent);
+}
 
 .past-ex-row {
   display: flex;
@@ -27420,4 +27431,18 @@ html.theme-glass .apx-recent {
   display: flex;
   justify-content: center;
   padding: var(--space-4) 0 var(--space-6);
+}
+
+/* Card head actions (collapse ▲ + ⚙) sit as one tight pair. */
+.exercise-card .head .ex-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  flex: none;
+}
+/* Screen headers keep their height in a flex column — the muscle chips under an
+   exercise title must not be squeezed onto the stat tiles below. */
+.hist-head,
+.stat-grid {
+  flex-shrink: 0;
 }

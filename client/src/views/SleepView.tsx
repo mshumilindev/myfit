@@ -214,6 +214,7 @@ export function SleepView({
             <div className="sleep-q-row">
               <Segmented<SleepQuality>
                 variant="buttons"
+                hug
                 tone="sleep"
                 value={night.quality ?? null}
                 onChange={(q) => setSleepQuality(night.id, night.quality === q ? null : q)}
@@ -445,6 +446,7 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
       <div className="sleep-q-row">
         <Segmented
           variant="buttons"
+          hug
           tone="sleep"
           value={kind}
           onChange={pickKind}
@@ -491,6 +493,7 @@ function SleepBackfill({ onDone, onBack }: { onDone: () => void; onBack: () => v
         <div className="sleep-q-row">
           <Segmented<SleepQuality>
             variant="buttons"
+            hug
             tone="sleep"
             value={quality}
             onChange={(q) => setQuality(quality === q ? null : q)}
@@ -728,6 +731,7 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
         <div className="sleep-q-row">
           <Segmented
             variant="buttons"
+            hug
             tone="sleep"
             value={kind}
             onChange={setKind}
@@ -768,6 +772,7 @@ function SleepEditNight({ nightId, onClose }: { nightId: string; onClose: () => 
         <div className="sleep-q-row">
           <Segmented<SleepQuality>
             variant="buttons"
+            hug
             tone="sleep"
             value={quality}
             onChange={(q) => setQuality(quality === q ? null : q)}

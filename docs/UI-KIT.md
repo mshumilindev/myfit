@@ -303,3 +303,10 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 - Set editor: type chips, load/type/effort cards take the same hue (`se-kind-*` → `--kc`).
 - Options sheet footer: Delete exercise on This set / Exercise tabs, Discard session on Session tab; the Exercise tab no longer repeats the delete row.
 - Effort (RPE) chips: equal cells, centred labels.
+
+## Правило: правки UI — тільки через кіт (2026-09-30)
+
+Візуальні зміни — властивість/варіант примітива в `components/ui/`. Якщо не
+виходить — оверрайд у `glass.css`/`redesign.css` під конкретним фіче-класом, з
+коментарем «чому не кіт», без візуальних властивостей на `.ui*` і без
+дублікатів (повторюється — піднімаємо в кіт). Деталі: `.cursor/rules/ui-kit.mdc`.
