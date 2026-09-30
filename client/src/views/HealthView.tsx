@@ -36,7 +36,6 @@ import { ToneText } from '../components/ui/ToneText';
 import {
   Ic,
   KIT_TONE,
-  Svg,
   STAGE_TOTAL,
   fmtDay,
   fmtRange,
@@ -74,7 +73,9 @@ export function HealthView(props: HealthViewProps) {
   }, []);
   const today = dayKey(now);
   const [filter, setFilter] = useState<HistFilter>('all');
-  const [webHist, setWebHist] = useState<'list' | 'timeline'>('timeline');
+  const [webHist, setWebHist] = useState<'list' | 'timeline'>(
+    props.view === 'history' ? 'list' : 'timeline',
+  );
   const [recover, setRecover] = useState<RestPeriod | null>(null);
   const [endRest, setEndRest] = useState<RestPeriod | null>(null);
 
@@ -507,33 +508,15 @@ export function HealthView(props: HealthViewProps) {
   }
 
   // ============================ web ============================
-  const history = props.view === 'history';
+  // The overview stays on the left in both history modes; the right pane
+  // switches between the list and the timeline (no separate full-width page).
   const selectedId =
     props.form?.kind === 'edit'
       ? props.form.periodId
       : props.form?.kind === 'edit-injury'
         ? props.form.injuryId
         : null;
-  const left = history ? (
-    <section className="hl-pane" aria-label={t.hlHistory}>
-      <div className="hl-wc">
-        <div className="hl-stack">
-          <HistControls
-            mode="list"
-            filter={filter}
-            onMode={(m) => {
-              if (m === 'timeline') {
-                setWebHist('timeline');
-                go({}, true);
-              }
-            }}
-            onFilter={setFilter}
-          />
-        </div>
-        <HistoryList now={now} filter={filter} web selectedId={selectedId} onOpen={openItem} />
-      </div>
-    </section>
-  ) : (
+  const left = (
     <section className="hl-pane" aria-label={t.startHealthTitle}>
       <div className="hl-wc">
         {form ? (
@@ -560,30 +543,18 @@ export function HealthView(props: HealthViewProps) {
   );
   const right = form ? (
     form
-  ) : history ? null : (
+  ) : (
     <section className="hl-pane hl-hist" aria-labelledby="hl-hist-h">
       <div className="hl-wc tight">
         <div className="hl-phd">
           <h2 id="hl-hist-h">{t.hlHistory}</h2>
-          <Button
-            variant="link"
-
-            onClick={() => go({ view: 'history', hist: 'list' })}
-          >
-            {t.hlOpenHistory}
-            <Svg name="chev" className="hl-chev v-gold" />
-          </Button>
         </div>
-        <HistControls
-          mode={webHist}
-          filter={filter}
-          onMode={(m) => {
-            if (m === 'list') go({ view: 'history', hist: 'list' });
-            else setWebHist(m);
-          }}
-          onFilter={setFilter}
-        />
-        <HistoryTimeline now={now} filter={filter} web />
+        <HistControls mode={webHist} filter={filter} onMode={setWebHist} onFilter={setFilter} />
+        {webHist === 'list' ? (
+          <HistoryList now={now} filter={filter} web selectedId={selectedId} onOpen={openItem} />
+        ) : (
+          <HistoryTimeline now={now} filter={filter} web />
+        )}
       </div>
     </section>
   );
@@ -591,8 +562,8 @@ export function HealthView(props: HealthViewProps) {
     <div className="screen hl hl-web">
       <header className="hl-top">
         <BackButton label={t.backAction} onClick={props.onClose} />
-        <h1 className="hl-pt">{history ? t.hlHistory : t.startHealthTitle}</h1>
-        <div className="tsub">{history ? t.hlHistorySub : t.hlSub}</div>
+        <h1 className="hl-pt">{t.startHealthTitle}</h1>
+        <div className="tsub">{t.hlSub}</div>
         <span className="hl-val">{t.hlTodayIs(fd(today))}</span>
       </header>
       <div className="hl-wbody">

@@ -76,11 +76,6 @@
 .hl-wc > * {
   flex-shrink: 0;
 }
-.hl-stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
 .hl-sec {
   display: flex;
   flex-direction: column;
@@ -101,9 +96,6 @@
 .hl-chev {
   width: 18px;
   height: 18px;
-}
-.v-gold {
-  color: var(--color-accent);
 }
 
 /* Name input inside a ListRow; Left / Right / Both segmented in a row. */
