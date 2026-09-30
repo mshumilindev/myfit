@@ -7,6 +7,7 @@
  */
 import { useState, type ReactNode } from 'react';
 import { Button } from './ui/Button';
+import type { Tone } from './ui/tones';
 import { Icon, Sheet } from '../ui';
 import {
   dayKey,
@@ -29,11 +30,13 @@ const NOTE_ICON: Record<NoteState, string> = {
   vacation: 'airplane-tilt',
   illness: 'pulse',
 };
-const NOTE_COLOR: Record<NoteState, string> = {
-  missed: 'var(--color-danger)',
-  rest: 'var(--color-rest-400)',
-  vacation: '#6fb7de',
-  illness: 'var(--care)',
+/** Drawer colour family per day state (kit <Sheet tone>); a day with a
+ *  finished session and no note is `ok` (done). */
+const NOTE_TONE: Record<NoteState, Tone> = {
+  missed: 'danger',
+  rest: 'rest',
+  vacation: 'active',
+  illness: 'illness',
 };
 
 export function DayHistorySheet({
@@ -123,6 +126,11 @@ export function DayHistorySheet({
   if (rest) note = rest.mode === 'illness' ? 'illness' : restSpan >= 4 ? 'vacation' : 'rest';
   else if (rows.length === 0 && prescribedTrainingDays().has(weekdayOf(day))) note = 'missed';
 
+  const doneDay = store.workouts.some(
+    (w) => w.finishedAt !== null && w.startedAt >= day && w.startedAt < end,
+  );
+  const sheetTone: Tone | undefined = note ? NOTE_TONE[note] : doneDay ? 'ok' : undefined;
+
   const missedName = programDayNameForWeekday(weekdayOf(day));
   const noteText: Record<NoteState, { title: string; body: string }> = {
     missed: {
@@ -135,12 +143,12 @@ export function DayHistorySheet({
   };
 
   return (
-    <Sheet onClose={onClose}>
+    <Sheet onClose={onClose} tone={sheetTone}>
       <div className="day-sheet-head">
         <span className="t">{fmtWeekdayDayMonth(day, locale)}</span>
       </div>
       {note && (
-        <div className="day-sheet-note" style={{ ['--nc' as string]: NOTE_COLOR[note] }}>
+        <div className="day-sheet-note" style={{ ['--nc' as string]: 'var(--t-base)' }}>
           <span className="dsm-ic">
             <Icon name={NOTE_ICON[note]} />
           </span>

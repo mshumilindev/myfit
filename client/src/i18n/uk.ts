@@ -3416,6 +3416,8 @@ export const uk: Strings = {
   startFromPlaybook: (date: string) => `З плейбука · востаннє ${date}`,
   startASession: 'Почати тренування',
   startScratchSub: 'Додавай вправи по ходу',
+  startDoneKicker: 'Сьогодні зроблено',
+  startAnotherTitle: 'Ще одне тренування',
   startOrScratch: 'Або почати з нуля',
   startInProgress: 'Триває',
   startResume: 'Продовжити',

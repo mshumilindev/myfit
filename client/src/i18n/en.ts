@@ -3396,6 +3396,8 @@ export const en = {
   startFromPlaybook: (date: string) => `From your playbook · last ${date}`,
   startASession: 'Start a session',
   startScratchSub: 'Add exercises as you go',
+  startDoneKicker: 'Trained today',
+  startAnotherTitle: 'Another workout',
   startOrScratch: 'Or start from scratch',
   startInProgress: 'In progress',
   startResume: 'Resume',

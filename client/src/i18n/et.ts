@@ -3377,6 +3377,8 @@ export const et: Strings = {
   startFromPlaybook: (date: string) => `Sinu playbookist · viimati ${date}`,
   startASession: 'Alusta treeningut',
   startScratchSub: 'Lisa harjutusi jooksvalt',
+  startDoneKicker: 'Täna tehtud',
+  startAnotherTitle: 'Veel üks treening',
   startOrScratch: 'Või alusta nullist',
   startInProgress: 'Käimas',
   startResume: 'Jätka',

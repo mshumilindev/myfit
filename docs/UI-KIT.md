@@ -310,3 +310,7 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 виходить — оверрайд у `glass.css`/`redesign.css` під конкретним фіче-класом, з
 коментарем «чому не кіт», без візуальних властивостей на `.ui*` і без
 дублікатів (повторюється — піднімаємо в кіт). Деталі: `.cursor/rules/ui-kit.mdc`.
+
+## Sheet `tone` (кольорове кодування шторок)
+
+`<Sheet tone="ok|rest|active|illness|danger">` фарбує всю шторку (фон, край, грабер, заголовок `.ss-title` / `.day-sheet-head .t`) через `--t-*` сім'ї; стилі — `glass.css` (`.sheet--toned`). Використання: Start (зелена, коли вже тренувався сьогодні), DayHistorySheet (done=ok, missed=danger, rest=rest, vacation=active, illness=illness).

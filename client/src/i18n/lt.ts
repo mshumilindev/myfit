@@ -3410,6 +3410,8 @@ export const lt: Strings = {
   startFromPlaybook: (date: string) => `Iš tavo playbook · paskutinį kartą ${date}`,
   startASession: 'Pradėti treniruotę',
   startScratchSub: 'Pridėk pratimus eigoje',
+  startDoneKicker: 'Šiandien atlikta',
+  startAnotherTitle: 'Dar viena treniruotė',
   startOrScratch: 'Arba pradėk nuo nulio',
   startInProgress: 'Vyksta',
   startResume: 'Tęsti',

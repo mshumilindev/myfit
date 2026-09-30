@@ -12,9 +12,11 @@ import { Button } from './ui/Button';
 import { ListRow } from './ui/GroupedList';
 import { Segmented } from './ui/Segmented';
 import { Card } from './ui/Card';
+import { Ring } from './ui/Ring';
 import { IconTile } from './ui/IconTile';
 import type { Shell } from '../App';
 import type { Gym } from '../types';
+import type { Tone } from './ui/tones';
 import { HOME_BACKFILL_MIN, type HomeSet } from '../homeSets';
 import { currentUid } from '../api';
 import {
@@ -24,6 +26,10 @@ import {
   dayKey,
   gymAtCurrentPosition,
   liveSleep,
+  programDayNameFor,
+  workoutDayReadout,
+  workoutSets,
+  workoutVolumeKg,
   startHomeSet,
   startWorkout,
   useStore,
@@ -38,7 +44,7 @@ import {
   startProgramDaySession,
   useProgramMine,
 } from '../data/programMine';
-import { fmtDayMonth, fmtWeekday, useT } from '../i18n';
+import { fmtDayMonth, fmtDurationHM, fmtKg, fmtWeekday, useT } from '../i18n';
 import { Icon, Sheet } from '../ui';
 import { HomeSetSheet } from './HomeSetSheet';
 import './HomeSet.css';
@@ -96,7 +102,15 @@ export function StartSheet({
           empty: programDayItems(program, todayWeekday).length === 0,
         }
       : null;
-  const usual = programToday ? null : playForWeekday(plays, new Date(now).getDay());
+  // Trained today (and nothing live): the hero reports the day as done, and the
+  // next session is an empty one — never "your usual day" again.
+  const doneToday = trainedToday && !busy;
+  const lastToday = doneToday
+    ? (finished
+        .filter((w) => dayKey(w.startedAt) === dayKey(now))
+        .sort((a, b) => b.startedAt - a.startedAt)[0] ?? null)
+    : null;
+  const usual = programToday || doneToday ? null : playForWeekday(plays, new Date(now).getDay());
 
   /** Tap on anything while a session / activity / sleep is live → resume it. */
   function resumeLive(): boolean {
@@ -257,18 +271,62 @@ export function StartSheet({
   const offerScratch = !busy && (programToday ? !programToday.empty : !!usual);
 
   return (
-    <StartFrame inline={inline} onClose={closeProp} sub={subEl}>
+    <StartFrame inline={inline} onClose={closeProp} sub={subEl} tone={doneToday ? 'ok' : undefined}>
       <div className="ss-title">{t.startSheetTitle}</div>
-      <Card as="button" emphasis="hero" className="ss-hero" onClick={() => void startHero()}>
-        <span className="ss-hero-text">
-          <span className="ss-hero-kicker">{hero.kicker}</span>
-          <span className="ss-hero-title">{hero.title}</span>
-          <span className="ss-hero-sub">{hero.sub}</span>
-        </span>
-        <span className="ss-hero-go" aria-hidden>
-          <Icon name={hero.icon} weight="fill" />
-        </span>
-      </Card>
+      {lastToday ? (
+        <>
+          <Card
+            as="button"
+            emphasis="hero"
+            tone="ok"
+            className="ss-hero"
+            onClick={() => {
+              onClose();
+              shell.openOverlay({ screen: 'past-workout', workoutId: lastToday.id });
+            }}
+          >
+            <span className="ss-hero-text">
+              <span className="ss-hero-kicker">{t.startDoneKicker}</span>
+              <span className="ss-hero-title">
+                {programDayNameFor(lastToday, finished) ??
+                  (workoutDayReadout(lastToday)
+                    ? dayReadoutLabel(workoutDayReadout(lastToday)!, t)
+                    : fmtWeekday(lastToday.startedAt, locale))}
+              </span>
+              <span className="ss-hero-sub">
+                {`${fmtDurationHM((lastToday.finishedAt ?? lastToday.startedAt) - lastToday.startedAt)} · ${workoutSets(lastToday)} ${t.sets} · ${fmtKg(workoutVolumeKg(lastToday))}`}
+              </span>
+            </span>
+            <Ring value={100} size={60} width={4} tone="ok">
+              <Icon name="check" />
+            </Ring>
+          </Card>
+          <Card
+            as="button"
+            tone="accent"
+            className="ss-another"
+            onClick={() => void startScratch()}
+          >
+            <IconTile tone="accent" size={40} icon="plus" />
+            <span className="ss-tile-text">
+              <span className="ss-tt">{t.startAnotherTitle}</span>
+              <span className="ss-ts">{t.startScratchSub}</span>
+            </span>
+            <Icon name="caret-right" />
+          </Card>
+        </>
+      ) : (
+        <Card as="button" emphasis="hero" className="ss-hero" onClick={() => void startHero()}>
+          <span className="ss-hero-text">
+            <span className="ss-hero-kicker">{hero.kicker}</span>
+            <span className="ss-hero-title">{hero.title}</span>
+            <span className="ss-hero-sub">{hero.sub}</span>
+          </span>
+          <span className="ss-hero-go" aria-hidden>
+            <Icon name={hero.icon} weight="fill" />
+          </span>
+        </Card>
+      )}
       {offerScratch && (
         <Button
           variant="link"
@@ -339,13 +397,14 @@ export function StartSheet({
 /** The Start content as a sheet (mobile) or a standing side panel (desktop). */
 function StartFrame(props: {
   inline: boolean;
+  tone?: Tone;
   onClose: () => void;
   sub: ReactNode;
   children: ReactNode;
 }) {
   if (!props.inline)
     return (
-      <Sheet onClose={props.onClose} className="start-sheet">
+      <Sheet onClose={props.onClose} className="start-sheet" tone={props.tone}>
         {props.children}
       </Sheet>
     );

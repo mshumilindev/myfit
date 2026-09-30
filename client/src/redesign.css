@@ -66,6 +66,18 @@
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 62%, transparent);
   color: var(--color-accent-300);
 }
+/* "Another workout" row under the done hero — kit Card (accent) + IconTile. */
+.ss-another {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  width: 100%;
+  text-align: left;
+}
+.ss-another .ss-tile-text {
+  flex: 1;
+  min-width: 0;
+}
 .ss-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

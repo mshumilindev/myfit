@@ -241,6 +241,9 @@ export function Sheet(props: {
   onClose: () => void;
   padded?: boolean;
   className?: string;
+  /** Colour family for the whole drawer (background, grabber, border, title) —
+   *  e.g. the day-state colour in the calendar drawers. */
+  tone?: Tone;
 }) {
   const { t } = useT();
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -354,6 +357,7 @@ export function Sheet(props: {
     mode === 'full' ? 'sheet-full' : '',
     dragging ? 'sheet-dragging' : '',
     closing ? 'sheet-closing' : '',
+    props.tone ? `sheet--toned ${toneClass(props.tone)}` : '',
     props.className,
   ]
     .filter(Boolean)
