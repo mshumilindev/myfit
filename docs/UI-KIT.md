@@ -314,3 +314,16 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 ## Sheet `tone` (кольорове кодування шторок)
 
 `<Sheet tone="ok|rest|active|illness|danger">` фарбує всю шторку (фон, край, грабер, заголовок `.ss-title` / `.day-sheet-head .t`) через `--t-*` сім'ї; стилі — `glass.css` (`.sheet--toned`). Використання: Start (зелена, коли вже тренувався сьогодні), DayHistorySheet (done=ok, missed=danger, rest=rest, vacation=active, illness=illness).
+
+## The `chronic` tone (long-term health conditions)
+
+A semantic family for long-term health conditions, separate from injury/illness colours. Tokens (defined in `styles.css` :root, themed in `glass.css`): `--color-chronic`, `--color-chronic-tint`, `--color-chronic-text`, `--color-chronic-line`, `--color-chronic-deep`.
+
+Where it is used, always through the kit and never with feature CSS:
+
+- `ListRow` — the `IconTile` takes `tone="chronic"`.
+- `Notice` — `tone="chronic"` for shields and hints about condition limits.
+- `Button` — a filled button inherits the tone of its context (chip/row/notice) instead of a per-button colour.
+- `AnatomyMap` — condition marks on the body map (Bones / Muscles / Organs / Other layers).
+
+Use the tone only for things that come from the person's conditions, so the colour keeps its meaning.

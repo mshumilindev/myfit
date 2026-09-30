@@ -41,6 +41,7 @@ import { computePlaybook, type Play } from '../playbook';
 import { getRole } from '../api';
 import { buildProgramSeed, programSuggestionReadiness, setProgramSeed } from '../data/programSeed';
 import { useFlag } from '../data/flags';
+import { ConditionsToday } from './health/Conditions';
 import { HistoryTimeline, buildHistoryDays } from '../components/HistoryTimeline';
 import { dayReadoutLabel, type TrainingDay } from '../data/daySuggest';
 import {
@@ -162,6 +163,7 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
   /** Desktop right panel host for Customize's "Add to Today" (portal target). */
   const [editSide, setEditSide] = useState<HTMLElement | null>(null);
   const presenceOn = useFlag('gymPresence');
+  const conditionsOn = useFlag('conditions');
   const suggestOn = true; // muscle readouts are always on (not flagged)
   const [backfill, setBackfill] = useState(false);
   // "Log for <date>" on the History calendar prefills the past-session date.
@@ -1537,6 +1539,9 @@ export function TodayView({ shell, store }: { shell: Shell; store: Store }) {
                 </div>
               </div>
             </div>
+          )}
+          {conditionsOn && (
+            <ConditionsToday onOpen={() => shell.openOverlay({ screen: 'health' })} />
           )}
           {illReturn && !illDismissed && (
             <div className="prog-banner analysis-banner gem-rest tr-banner illness fade-in">

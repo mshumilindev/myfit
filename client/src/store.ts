@@ -11,6 +11,7 @@
  * All the pure/derived helpers (volume, per-hand, supersets, muscles, records)
  * are unchanged — they operate on the in-memory workouts array.
  */
+import { coachView } from './conditions';
 import { COACH_DEFAULT, normalizeTemper, type CoachSettings } from './atlas/types';
 import { useSyncExternalStore } from 'react';
 import {
@@ -2380,6 +2381,21 @@ export function restDayKeys(
 }
 
 // --- Chronic conditions -----------------------------------------------------
+let lastCoachShare = '';
+
+/** What the coach may see of the conditions (per-condition share), sealed like everything else. */
+function publishCoachShare(uid: string, items: readonly ChronicCondition[]): void {
+  const view = coachView(items, 'effects');
+  const json = JSON.stringify(view);
+  if (json === lastCoachShare) return;
+  lastCoachShare = json;
+  prepareWrite('coachShare', { view, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'meta', 'coachShare'), d))
+    .catch(() => {
+      lastCoachShare = ''; // retried with the next change
+    });
+}
+
 function writeConditionDoc(c: ChronicCondition): void {
   const uid = currentUid();
   if (!uid) return;
@@ -4026,6 +4042,7 @@ export function startSyncLoop(): () => void {
     state = { ...state, conditions: items };
     persist();
     emit();
+    publishCoachShare(uid, items);
   });
   unsubs.push(conditionsMirror.dispose);
   unsubs.push(

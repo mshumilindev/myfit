@@ -29,6 +29,7 @@ import { INTENTS_SIXTH, MORES } from './intentsSixth';
 import { INTENTS_NEW } from './intentsNew';
 import { INTENTS_APP } from './appTopics';
 import { INTENTS_EXTRA } from './intentsExtra';
+import { asksIfOk, INTENTS_HEALTH, limitsOf } from './intentsHealth';
 import { appChipsFor, INTENTS_APP_MORE, withAppTips } from './appTips';
 import { emojiReply, INTENTS_SMALL, SMALLTALK_IDS, SMALL_OVERRIDES } from './smalltalk';
 import { parseRange, parseWeekdays } from './when';
@@ -387,6 +388,7 @@ export const ALL_INTENTS = (): Intent[] => [
   ...INTENTS_APP,
   ...INTENTS_APP_MORE,
   ...INTENTS_SMALL,
+  ...INTENTS_HEALTH,
 ];
 // Charts and "more" layers for topics from the earlier parts.
 for (const it of ALL_INTENTS()) {
@@ -834,6 +836,12 @@ function answerOne(
     }).patch;
     const out = flowOut(startPain(question, c, p.exercise, L), 'pain');
     return Object.keys(sore).length ? { ...out, learned: sore } : out;
+  }
+
+  // ---- "can I squat today?" with long-term limits: they decide, before any generic topic ----
+  if (asksIfOk(phrase) && (p.exercise || p.muscle) && limitsOf(c).keys.length) {
+    const a = answerAsDraft('ok_with_limits', question, c, convo);
+    if (a) return { ...a, route: 'rule' };
   }
 
   // ---- told, not asked: "I danced for 2 hours today", "пробіг 5 км зранку" ----

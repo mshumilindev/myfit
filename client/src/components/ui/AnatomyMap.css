@@ -37,3 +37,38 @@
   mask: var(--am-url) center / 100% 100% no-repeat;
   filter: drop-shadow(0 0 var(--s-6) color-mix(in srgb, var(--t-base) 55%, transparent));
 }
+
+/* Condition highlights on the body: deep midnight blue, no pale glow. */
+.uianat-mark.uit--chronic {
+  background: var(--color-chronic-deep);
+  filter: drop-shadow(
+    0 0 var(--s-6) color-mix(in srgb, var(--color-chronic-deep) 70%, transparent)
+  );
+}
+
+/* Turntable: a half turn about the vertical axis when the side changes. */
+.uianat-turn {
+  perspective: 900px;
+}
+.uianat-turn-in {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.uianat-turn[data-side='back'] .uianat-turn-in {
+  transform: rotateY(180deg);
+}
+.uianat-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.uianat-face-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .uianat-turn-in {
+    transition: none;
+  }
+}

@@ -6,7 +6,7 @@
  */
 import { useState } from 'react';
 import {
-  AnatomyMap,
+  AnatomyTurntable,
   type AnatomyLayer,
   type AnatomyOrgan,
   type AnatomyView,
@@ -143,8 +143,8 @@ export function BodyMapPicker({ onPick }: { onPick: (c: CatalogCondition) => voi
           <>
             <div className="ul-flex ug-12">
               <div style={{ width: 150, flex: 'none' }}>
-                <AnatomyMap
-                  view={area.view ?? 'front'}
+                <AnatomyTurntable
+                  side={area.view ?? 'front'}
                   base={layer === 'muscles' ? 'muscles' : 'bones'}
                   organs={layer === 'organs' ? ORGANS : []}
                   marks={area.marks.map((m) => ({ layer: m, tone: 'chronic' as const }))}

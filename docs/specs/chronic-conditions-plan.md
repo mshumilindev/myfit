@@ -232,3 +232,26 @@ Decision: nothing for the user to save, type or pass around. Encryption is again
 - **Ops.** `firebase functions:secrets:set VAULT_MASTER` (32+ random bytes, base64), deploy `functions` and `firestore.rules`. Rotating the master makes existing sealed data unreadable, so it needs a re-key job first.
 - **UI.** Profile → Settings shows a status row only ("Encrypted" / "getting ready"). The recovery-key screens and strings were removed; `vault.ts` (recovery-key vault) is now unused.
 - **Limit.** Anyone with access to both the Secret Manager secret and the database can decrypt; that is the accepted trade-off of a zero-friction model.
+
+## Status
+
+Implemented (behind the `conditions` flag):
+
+- Catalogue (`data/conditionCatalog.ts`) with severity scaling (`effectsAt`) and stacking (`mergeEffects`); effects include muscle caps, avoid/caution tags, RPE ceiling, no failure / max effort / breath-holding, volume and step scale, no auto-increase, cardio cap and a rest multiplier (`restScale`).
+- Automatic encrypted storage (no recovery key; key from the `vaultKey` callable), sealed migration of existing data.
+- Add / edit pages, temporary conditions (start, expected end, pregnancy trimester from the start date).
+- Body map (Bones / Muscles / Organs layers) and the Other tab.
+- Generation, exercise picker and swaps, progression (step scale, no auto-increase), failure suggestions, RPE hint in the session, rest (`planRest` via `restScale`, shown as a rest reason).
+- Today row for active conditions.
+- Coach snapshot: de-identified effects sealed into `users/{uid}/meta/coachShare` and forwarded by the profile function; no names or notes leave the account.
+- Program editor and playbook shields.
+- Atlas receives de-identified effects only.
+- Entry points in Profile and onboarding.
+- UI kit: the `chronic` tone (see `UI-KIT.md`).
+
+Deployment needed before users can rely on it:
+
+- Deploy `functions` (at least `profileUser`, and `vaultKey`).
+- Set the `VAULT_MASTER` secret (`firebase functions:secrets:set VAULT_MASTER`, 32+ random bytes, base64) before deploying.
+- Deploy `firestore.rules` (conditions and `meta/coachShare` paths).
+- Recommended: enable App Check on the callable; turn the `conditions` flag on last.

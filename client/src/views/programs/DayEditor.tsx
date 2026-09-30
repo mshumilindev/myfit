@@ -16,6 +16,9 @@ import { CardioMachineList } from '../../components/CardioMachineList';
 import { ExercisePicker } from '../../components/ExercisePicker';
 import { EQUIPMENT_IDS, type EquipmentId } from '../../data/equipment';
 import { useT } from '../../i18n';
+import { getRole } from '../../api';
+import { useConditionLimits } from '../../healthBuild';
+import { exerciseFlag } from '../../conditions';
 import { useWeekStartDay, weekOrder } from '../../weekStart';
 import type { Shell } from '../../App';
 import type { ExerciseKind, Workout } from '../../types';
@@ -341,6 +344,10 @@ function ItemList({
 }) {
   const { t } = useT();
   const exName = useExerciseName();
+  const limits = useConditionLimits();
+  // Only for the person training it: a coach building a client's plan has their own limits.
+  const flagOf = (name: string) =>
+    limits.keys.length && getRole() === 'member' ? exerciseFlag(name, limits).level : 'ok';
   const [open, setOpen] = useState<string | null>(null);
   const [editing, setEditing] = useState<ProgramItem | null>(null);
   const [equipFor, setEquipFor] = useState<ProgramItem | null>(null);
@@ -375,6 +382,14 @@ function ItemList({
             <div key={it.id} className="pg-row cardio">
               <Icon name="pulse" />
               <span className="n">{exName(it.name)}</span>
+              {flagOf(it.name) !== 'ok' && (
+                <span
+                  className="pg-care"
+                  title={flagOf(it.name) === 'avoid' ? t.pickNotAdvised : t.pickCareful}
+                >
+                  <Icon name="shield-check" />
+                </span>
+              )}
               <Button
                 variant="secondary"
                 size="sm"

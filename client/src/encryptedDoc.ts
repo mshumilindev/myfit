@@ -27,6 +27,9 @@ export const OPEN_FIELDS = {
   injuries: ['id', 'updatedAt'],
   conditions: ['id', 'updatedAt'],
   body: ['updatedAt'],
+  // users/{uid}/meta/coachShare — what the athlete lets the coach see (coachView); the server
+  // only forwards the ciphertext to the coach, whose grant opens it.
+  coachShare: ['updatedAt'],
 } as const satisfies Record<string, readonly string[]>;
 
 export type SealedCollection = keyof typeof OPEN_FIELDS;

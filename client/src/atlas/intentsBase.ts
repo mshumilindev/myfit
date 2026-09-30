@@ -15,6 +15,7 @@ import { explainLift, fmtPoint, isBodyweightLift, liftPoints, liftProgress } fro
 import { usualSessionsPerWeek } from './facts';
 import { DAY, WEEK, date, finishedOf, loggedLifts, todayLine, wd, type Intent } from './intentKit';
 import { moody } from './intentsMore';
+import { limitNoteForLift } from './intentsHealth';
 
 // ---- the base ---------------------------------------------------------------
 
@@ -1027,6 +1028,17 @@ export const INTENTS: Intent[] = [
     answer: (_c, _p, L) => L('Good. Now go.', 'Добре. Тепер іди.'),
   },
 ];
+
+// "What weight next" also respects the person's long-term limits (effect-level wording only).
+for (const it of INTENTS) {
+  if (it.id !== 'next_weight') continue;
+  const plain = it.answer;
+  it.answer = (c, p, L) => {
+    const base = plain(c, p, L);
+    const lim = base && p.exercise ? limitNoteForLift(c, p.exercise, L) : null;
+    return lim ? `${base} ${lim}` : base;
+  };
+}
 
 // ---- temper flavour ---------------------------------------------------------
 

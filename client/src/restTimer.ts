@@ -57,6 +57,8 @@ export interface RestInputs {
   shortSleep: boolean;
   /** Superset / circuit hand-off to the next member (no rest). */
   midRound: boolean;
+  /** Long-term condition rest multiplier (>=1), from the stacked condition effects. */
+  restScale?: number;
 }
 
 export type RestReason =
@@ -75,6 +77,7 @@ export type RestReason =
   | 'technique'
   | 'fatigue'
   | 'illness'
+  | 'condition'
   | 'sleep'
   | 'warmup'
   | 'superset';
@@ -152,6 +155,8 @@ export function planRest(i: RestInputs): {
     sec += add('fatigue', Math.round((30 * Math.min(1, i.muscleFatigue)) / 5) * 5);
   if (i.illness) sec += add('illness', 20);
   if (i.shortSleep) sec += add('sleep', 15);
+  if (i.restScale != null && i.restScale > 1)
+    sec += add('condition', Math.round(sec * (Math.min(2, i.restScale) - 1)));
   const out = Math.min(300, Math.max(30, Math.round(sec / 15) * 15));
   return { sec: out, reasons };
 }

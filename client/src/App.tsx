@@ -1,4 +1,6 @@
 import { pushState, refreshPush, setAppBadge } from './push';
+import { useConditionLimits } from './healthBuild';
+import { setProgressionEffects } from './progression';
 import { ScreenSkeleton } from './components/ui/Skeletons';
 import { Button, IconButton } from './components/ui/Button';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
@@ -644,6 +646,8 @@ function isLearnHash(hash: string): boolean {
 export function App() {
   const { t, locale } = useT();
   const store = useStore();
+  const conditionLimits = useConditionLimits();
+  useEffect(() => setProgressionEffects(conditionLimits.effects), [conditionLimits]);
   const [authed, setAuthed] = useState<boolean>(() => !!currentUid());
   const [notices, setNotices] = useState<Notice[]>([]);
 

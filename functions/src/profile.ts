@@ -337,7 +337,14 @@ async function fullProfilePayload(
       ? null
       : await db.collection('users').doc(target.id).collection('grants').doc(viewer.id).get();
   const grant = grantSnap?.exists ? (grantSnap.data() as Record<string, unknown>) : null;
+  // Condition share: ciphertext the athlete prepared for coaches (only what they allowed).
+  const shareSnap =
+    relation === 'self'
+      ? null
+      : await db.collection('users').doc(target.id).collection('meta').doc('coachShare').get();
+  const coachShare = shareSnap?.exists ? (shareSnap.data() as Record<string, unknown>) : null;
   return {
+    coachShare,
     viewer: { id: viewer.id, relation, role: viewer.role },
     grant,
     person: await personJson(target),

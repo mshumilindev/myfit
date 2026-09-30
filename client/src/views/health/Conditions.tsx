@@ -4,6 +4,8 @@
  * delete with confirmation. Kit primitives only. Shown while the `conditions` flag is on.
  */
 import { useMemo, useState } from 'react';
+import { effectText } from '../../conditionText';
+import type { CoachView } from '../../conditions';
 import { BackButton } from '../../components/ui/BackButton';
 import { GroupedList, ListRow } from '../../components/ui/GroupedList';
 import { IconTile } from '../../components/ui/IconTile';
@@ -15,6 +17,7 @@ import { Textarea } from '../../components/ui/Textarea';
 import { Button } from '../../components/ui/Button';
 import { Notice } from '../../components/ui/Notice';
 import { Tag } from '../../components/ui/Tag';
+import { useFlag } from '../../data/flags';
 import { ConfirmDialog } from '../../components/ui/Overlays';
 import {
   CONDITION_CATEGORIES,
@@ -23,7 +26,14 @@ import {
   type CatalogCondition,
   type ConditionCategory,
 } from '../../data/conditionCatalog';
-import { isEnded, isTemporary, suggestedEnd, temporaryAuto } from '../../conditions';
+import {
+  isActive,
+  isEnded,
+  isTemporary,
+  suggestedEnd,
+  temporaryAuto,
+  temporaryProgress,
+} from '../../conditions';
 import { toneClass } from '../../components/ui/tones';
 import { useT } from '../../i18n';
 import { addCondition, deleteCondition, updateCondition, useStore } from '../../store';
@@ -254,6 +264,15 @@ function Picker({ onPick }: { onPick: (c: CatalogCondition) => void }) {
   );
 }
 
+function dayText(
+  c: ChronicCondition,
+  now: number,
+  fmt: (d: number, n: number) => string,
+): string | null {
+  const p = temporaryProgress(c, now);
+  return p ? fmt(p.day, p.total) : null;
+}
+
 /** The list inside Health: each row / "Add" opens a full page (see ConditionPage). */
 export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }) {
   const { t } = useT();
@@ -270,7 +289,10 @@ export function ConditionsSection({ onOpen }: { onOpen: (cond: string) => void }
               key={c.id}
               icon={<IconTile tone="chronic" size={30} icon={cat.icon} />}
               label={cat.name}
-              sub={[t.cndSev[c.severity], isEnded(c, now) ? t.cndEnded : null]
+              sub={[
+                t.cndSev[c.severity],
+                isEnded(c, now) ? t.cndEnded : dayText(c, now, t.cndDayOf),
+              ]
                 .filter(Boolean)
                 .join(' · ')}
               trailing={c.share === 'off' ? <Tag tone="neutral">{t.cndShareOff}</Tag> : undefined}
@@ -340,6 +362,96 @@ export function ConditionPage(props: {
       <div className="hl-scroll">
         <div className="hl-cnt">{body}</div>
       </div>
+    </div>
+  );
+}
+
+/** Today: one quiet row saying plans are adapted; opens Health. Hidden with no active conditions. */
+export function ConditionsToday({ onOpen }: { onOpen: () => void }) {
+  const { t } = useT();
+  const { conditions } = useStore();
+  const [now] = useState(() => Date.now());
+  const n = conditions.filter((c) => isActive(c, now)).length;
+  if (n === 0) return null;
+  return (
+    <GroupedList>
+      <ListRow
+        icon={<IconTile tone="chronic" size={30} icon="shield-check" />}
+        label={t.cndTodayTitle(n)}
+        sub={t.cndTodaySub}
+        chevron
+        onClick={onOpen}
+      />
+    </GroupedList>
+  );
+}
+
+/** Profile: one row with the active count; opens Health on the conditions. Needs the `conditions` flag. */
+export function ConditionsProfileRow({ onOpen }: { onOpen: () => void }) {
+  const { t } = useT();
+  const on = useFlag('conditions');
+  const { conditions } = useStore();
+  const [now] = useState(() => Date.now());
+  if (!on) return null;
+  const n = conditions.filter((c) => isActive(c, now)).length;
+  return (
+    <ListRow
+      icon={<IconTile tone="chronic" size={30} icon="shield-check" />}
+      label={t.cndProfileRow}
+      value={String(n)}
+      chevron
+      onClick={onOpen}
+    />
+  );
+}
+
+/** Onboarding: an optional, skippable prompt that opens the add flow. Needs the `conditions` flag. */
+export function ConditionsOnboardingRow({ onOpen }: { onOpen: () => void }) {
+  const { t } = useT();
+  const on = useFlag('conditions');
+  if (!on) return null;
+  return (
+    <GroupedList footer={t.cndOnbHint}>
+      <ListRow
+        icon={<IconTile tone="chronic" size={30} icon="shield-check" />}
+        label={t.cndOnbPrompt}
+        chevron
+        onClick={onOpen}
+      />
+    </GroupedList>
+  );
+}
+
+/** Coach's read-only card: only what the athlete shared (Full: names; Effects: nameless lines). */
+export function CoachConditions({ view }: { view: CoachView }) {
+  const { t } = useT();
+  if (view.full.length === 0 && view.effects.length === 0) return null;
+  return (
+    <div className="ul-flex ul-col ug-8">
+      {view.full.map((c) => {
+        const cat = c.key ? catalogCondition(c.key) : undefined;
+        if (!cat) return null;
+        return (
+          <GroupedList key={c.key} header={cat.name} footer={t.cndCoachFoot}>
+            <ListRow
+              icon={<IconTile tone="chronic" size={30} icon={cat.icon} />}
+              label={c.severity ? t.cndSev[c.severity] : cat.name}
+              sub={c.effects.map((l) => effectText(l, t)).join(' · ')}
+            />
+          </GroupedList>
+        );
+      })}
+      {view.effects.length > 0 && (
+        <GroupedList header={t.cndCoachEffects} footer={t.cndCoachFoot}>
+          {view.effects.map((l, i) => (
+            <ListRow
+              key={`${l.id}${i}`}
+              icon={<IconTile tone="chronic" size={30} icon="shield-check" />}
+              label={effectText(l, t)}
+            />
+          ))}
+        </GroupedList>
+      )}
     </div>
   );
 }

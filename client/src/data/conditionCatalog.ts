@@ -74,6 +74,8 @@ export interface ConditionEffects {
   stepScale?: number;
   noAutoIncrease?: boolean;
   cardioMax?: CardioCap;
+  /** >=1 multiplier on rest between sets (slower recovery). */
+  restScale?: number;
 }
 
 export interface CatalogCondition {
@@ -188,6 +190,8 @@ const T = {
     noBreathHold: true,
     stepScale: 0.6,
     cardioMax: 'moderate',
+
+    restScale: 1.25,
   },
   rhythm: {
     avoid: ['valsalva', 'high_cardio', 'inversion'],
@@ -198,6 +202,8 @@ const T = {
     noBreathHold: true,
     stepScale: 0.5,
     cardioMax: 'moderate',
+
+    restScale: 1.25,
   },
   structural: {
     avoid: ['valsalva', 'high_cardio', 'impact', 'inversion'],
@@ -209,6 +215,8 @@ const T = {
     volumeScale: 0.85,
     stepScale: 0.4,
     cardioMax: 'light',
+
+    restScale: 1.5,
   },
   implant: {
     avoid: ['valsalva', 'impact'],
@@ -228,6 +236,8 @@ const T = {
     noBreathHold: true,
     stepScale: 0.7,
     cardioMax: 'moderate',
+
+    restScale: 1.25,
   },
   balance: {
     avoid: ['inversion'],
@@ -265,6 +275,8 @@ const T = {
     volumeScale: 0.85,
     stepScale: 0.5,
     cardioMax: 'moderate',
+
+    restScale: 1.25,
   },
   postpartum: {
     avoid: ['impact', 'valsalva'],
@@ -1451,6 +1463,8 @@ function uniq<X>(a: readonly X[] | undefined, b: readonly X[] | undefined): X[] 
   return all.length ? [...new Set(all)] : undefined;
 }
 
+const maxDef = (x?: number, y?: number) => (x == null ? y : y == null ? x : Math.max(x, y));
+
 const minDef = (x?: number, y?: number) => (x == null ? y : y == null ? x : Math.min(x, y));
 
 /** Union of tag lists; the stricter number wins. Used for templates and for stacking conditions. */
@@ -1472,6 +1486,7 @@ export function mergeEffects(a: ConditionEffects, b?: ConditionEffects): Conditi
     stepScale: minDef(a.stepScale, b?.stepScale),
     noAutoIncrease: a.noAutoIncrease || b?.noAutoIncrease || undefined,
     cardioMax: minCardio(a.cardioMax, b?.cardioMax),
+    restScale: maxDef(a.restScale, b?.restScale),
   };
 }
 
@@ -1523,6 +1538,10 @@ export function effectsAt(e: ConditionEffects, severity: 1 | 2 | 3): ConditionEf
     stepScale: scale(e.stepScale),
     noAutoIncrease: mild ? undefined : e.noAutoIncrease,
     cardioMax: step(e.cardioMax),
+    restScale:
+      e.restScale == null
+        ? e.restScale
+        : Math.min(2, Math.max(1, e.restScale + (e.restScale - 1) * (mild ? -0.5 : 0.5))),
   };
 }
 

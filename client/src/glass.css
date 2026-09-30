@@ -915,3 +915,10 @@ html.theme-glass .uit--chronic.uinotice {
   background: color-mix(in srgb, var(--color-chronic-tint) 88%, rgba(16, 15, 13, 0.4));
   box-shadow: inset 0 0 0 1px var(--color-chronic-line);
 }
+
+/* Flagged by a long-term condition: midnight-blue shield, never red. */
+.pg-care {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-chronic-text);
+}

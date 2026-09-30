@@ -120,7 +120,10 @@ export function suggestFailure(p: {
   plannedSets: number;
   /** Recent past sessions of the lift, newest first. */
   past: PastExerciseSets[];
+  /** A long-term condition forbids training to failure: never suggest it. */
+  noFailure?: boolean;
 }): FailureSuggestWhy | null {
+  if (p.noFailure) return null;
   if (p.type === 'warmup' || p.type === 'static-dynamic') return null;
   if (p.type === 'drop' || p.type === 'reverse-drop') return 'drop';
   const working = p.current.filter((s) => typeOf(s) === 'working');

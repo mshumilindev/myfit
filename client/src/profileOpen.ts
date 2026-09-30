@@ -12,6 +12,7 @@ import { openAthleteKey } from './vaultGrants';
 import type { CoachKeyRecord } from './vaultShare';
 import type { Exercise, Gym, Workout } from './types';
 
+import type { CoachView } from './conditions';
 type Raw = Record<string, unknown>;
 
 interface Payload {
@@ -24,6 +25,8 @@ interface Payload {
     restPeriods?: Raw[];
   };
   sealedGyms?: Raw[];
+  coachShare?: Raw | null;
+  conditionsShare?: CoachView | null;
   bodyMetrics?: Raw | null;
   sessions?: unknown;
   topExercises?: unknown;
@@ -187,8 +190,12 @@ export async function openProfile<T extends Payload>(
     ? await unsealDoc<Raw>(data.bodyMetrics, athlete.key).catch(() => data.bodyMetrics)
     : data.bodyMetrics;
   const sorted = [...workouts].sort((a, b) => b.startedAt - a.startedAt);
+  const share = data.coachShare
+    ? await unsealDoc<{ view?: CoachView }>(data.coachShare, athlete.key).catch(() => null)
+    : null;
   return {
     ...data,
+    conditionsShare: share?.view ?? null,
     history: { ...h, workouts: sorted, activities, sleeps, restPeriods },
     bodyMetrics: body,
     sessions: deriveSessions(sorted, gyms, deps),

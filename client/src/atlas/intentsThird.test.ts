@@ -3,6 +3,7 @@ import type { Exercise, Workout } from '../types';
 import { answerLocally, INTENTS, type AskCtx } from './intents';
 import { INTENTS_MORE } from './intentsMore';
 import { INTENTS_THIRD } from './intentsThird';
+import type { ChronicCondition } from '../types';
 import { COACH_DEFAULT } from './types';
 
 const DAY = 86_400_000;
@@ -113,5 +114,53 @@ describe('answer base, part three', () => {
     expect(answerLocally('am I gaining weight', ctx('en'))?.text).toMatch(/\+1\.5 kg/);
     for (const [q, loc] of cases)
       expect(answerLocally(q, ctx(loc))?.text ?? '').not.toMatch(/undefined|NaN/);
+  });
+});
+
+describe('answers respect long-term limits (privacy-first)', () => {
+  const cond = (key: string, severity: 1 | 2 | 3): ChronicCondition => ({
+    id: 'c1',
+    key,
+    severity,
+    share: 'effects',
+    createdAt: NOW - 30 * DAY,
+  });
+  const withConditions = (list: ChronicCondition[], loc: 'en' | 'uk' = 'en'): AskCtx => {
+    const c = ctx(loc);
+    return { ...c, s: { ...c.s, conditions: list } };
+  };
+
+  it('says nothing special without conditions', () => {
+    const a = answerLocally('can i do barbell squat today', ctx('en'));
+    expect(a?.intent).not.toBe('ok_with_limits');
+  });
+
+  it('advises against an avoided lift, offers swaps, never names the condition', () => {
+    const a = answerLocally(
+      'can i do barbell squat today',
+      withConditions([cond('back_lumbar_disc', 3)]),
+    );
+    expect(a?.intent).toBe('ok_with_limits');
+    expect(a?.text).toMatch(/not advised/i);
+    expect(a?.text).toMatch(/Safer for the same muscle/);
+    expect(a?.text).not.toMatch(/disc|herniation|lumbar|back_/i);
+  });
+
+  it('answers in Ukrainian too, without the condition name', () => {
+    const a = answerLocally(
+      'чи можна присідати зі штангою',
+      withConditions([cond('back_lumbar_disc', 3)], 'uk'),
+    );
+    if (a?.intent === 'ok_with_limits') expect(a.text).not.toMatch(/disc|грижа|lumbar/i);
+  });
+
+  it('adds a limits note to the next-weight answer, only at effect level', () => {
+    const a = answerLocally(
+      'what weight next for barbell deadlift',
+      withConditions([cond('back_lumbar_disc', 3)]),
+    );
+    expect(a?.intent).toBe('next_weight');
+    expect(a?.text).toMatch(/your limits/i);
+    expect(a?.text).not.toMatch(/disc|herniation|lumbar/i);
   });
 });

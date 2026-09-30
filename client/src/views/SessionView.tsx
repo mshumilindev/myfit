@@ -1,4 +1,5 @@
 /** Live session + past workout editing — design S-17…S-31 + SS/DS/MG/EQ. */
+import { useConditionLimits } from '../healthBuild';
 import { EmptyState } from '../components/ui/EmptyState';
 import { SwitchIndicator } from '../components/ui/Switch';
 import { BackButton } from '../components/ui/BackButton';
@@ -538,6 +539,7 @@ export function SessionView(props: {
   const { t, locale } = useT();
   const exName = useExerciseName();
   const store = useStore();
+  const conditionLimits = useConditionLimits();
   // Day-aware suggestions & muscle readouts are always on (not flagged).
   const suggestOn = true;
   const workout = store.workouts.find((w) => w.id === props.workoutId);
@@ -2178,6 +2180,8 @@ export function SessionView(props: {
     const compound =
       richExerciseByName(ex.name)?.mechanic === 'compound' &&
       resolveMuscles(ex).secondary.length >= 1;
+    const cap = conditionLimits.effects.rpeMax;
+    if (cap != null && est != null && est > cap) return { text: t.cndRpeHint(cap), preset: false };
     const why = suggestFailure({
       type: kind,
       estRpe: est,
@@ -2185,6 +2189,7 @@ export function SessionView(props: {
       current: ex.sets,
       plannedSets: Math.max(0, ex.plannedSets ?? 0),
       past: recentSessionsOf(ex.name, workout!.id, 3),
+      noFailure: !!conditionLimits.effects.noFailure,
     });
     if (!why) return null;
     const text =
@@ -2595,7 +2600,17 @@ export function SessionView(props: {
       blk?.kind === 'group' &&
       !blk.group.circuit &&
       blk.group.exercises.some((e) => e.sets.length < ex.sets.length);
-    const key = [s.id, s.weight, s.reps, s.type, s.failure, s.rpe, s.rpeAuto, midRound].join('|');
+    const key = [
+      s.id,
+      s.weight,
+      s.reps,
+      s.type,
+      s.failure,
+      s.rpe,
+      s.rpeAuto,
+      midRound,
+      conditionLimits.effects.restScale,
+    ].join('|');
     const hit = restPlanCache.get(key);
     if (hit) return hit;
     const idx = ex.sets.findIndex((x) => x.id === s.id);
@@ -2619,6 +2634,7 @@ export function SessionView(props: {
       illness: ctx.illnessCut > 0,
       shortSleep: ctx.sleepShortH >= 1.5,
       midRound,
+      restScale: conditionLimits.effects.restScale,
     });
     restPlanCache.set(key, plan);
     return plan;

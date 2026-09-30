@@ -228,16 +228,18 @@ export function migratePorts(
   };
   return {
     async list(c) {
-      if (c === 'body') {
-        const s = await getDoc(doc(db, 'users', uid(), 'meta', 'body'));
-        return s.exists() ? [{ id: 'body', data: s.data() }] : [];
+      if (c === 'body' || c === 'coachShare') {
+        const s = await getDoc(doc(db, 'users', uid(), 'meta', c));
+        return s.exists() ? [{ id: c, data: s.data() }] : [];
       }
       const snap = await getDocs(collection(db, 'users', uid(), c));
       return snap.docs.map((d) => ({ id: d.id, data: d.data() }));
     },
     async write(c, id, data) {
       const ref =
-        c === 'body' ? doc(db, 'users', uid(), 'meta', 'body') : doc(db, 'users', uid(), c, id);
+        c === 'body' || c === 'coachShare'
+          ? doc(db, 'users', uid(), 'meta', c)
+          : doc(db, 'users', uid(), c, id);
       await setDoc(ref, data);
     },
     enrich: (c, d) => (c === 'workouts' ? enrichWorkout(d) : d),

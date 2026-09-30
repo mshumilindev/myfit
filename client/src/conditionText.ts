@@ -21,6 +21,8 @@ export function effectText(l: EffectLine, t: Strings): string {
       return e.stepScale(Number(l.value));
     case 'cardioMax':
       return e.cardioMax(t.cndCardio[l.value as CardioCap]);
+    case 'restScale':
+      return e.restScale(Number(l.value));
     case 'noFailure':
       return e.noFailure;
     case 'noMaxEffort':

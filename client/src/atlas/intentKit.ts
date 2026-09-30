@@ -9,6 +9,7 @@ import { muscleReadiness } from '../recovery';
 import { VOLUME_MUSCLES } from '../volume';
 import { computePlaybook, playForWeekday } from '../playbook';
 import { planDayFor } from './plan';
+import { conditionLimits, isAutoExcluded, NO_LIMITS } from '../conditions';
 import type { Fmt } from './voice';
 import type { Temper } from './types';
 import type { AtlasMemory, SaidRec } from './memory';
@@ -21,7 +22,7 @@ export interface AskCtx {
     StoreState,
     'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics' | 'restPeriods' | 'exerciseRest'
   > &
-    Partial<Pick<StoreState, 'activities' | 'gyms' | 'goals'>>;
+    Partial<Pick<StoreState, 'activities' | 'gyms' | 'goals' | 'conditions'>>;
   now: number;
   locale: LocaleId;
   temper: Temper;
@@ -153,13 +154,25 @@ export function todayLine(c: AskCtx, L: Tr, at: number): string {
   const play = playForWeekday(computePlaybook(finished, at).plays, new Date(at).getDay());
   if (play) {
     const ms = play.coverage.filter((x) => x.primary).map((x) => c.fmt.muscle(x.muscle));
-    const lifts = play.exercises
+    // Limits from long-term conditions: never suggest a lift they rule out (effect-level note only).
+    const limits = c.s.conditions?.length ? conditionLimits(c.s.conditions, c.now) : NO_LIMITS;
+    const usual = play.exercises.filter((e) => !isAutoExcluded(e.name, limits));
+    const dropped = usual.length < play.exercises.length;
+    const lifts = usual
       .slice(0, 4)
       .map((e) => c.fmt.exercise(e.name))
       .join(', ');
-    return L(
-      `Usually ${play.name ?? ms.join(' + ')} on this day: ${lifts}.`,
-      `Зазвичай цього дня ${play.name ?? ms.join(' + ')}: ${lifts}.`,
+    const note = dropped
+      ? L(
+          ' I left out lifts your limits say to skip.',
+          ' Я прибрав вправи, які твої обмеження радять пропустити.',
+        )
+      : '';
+    return (
+      L(
+        `Usually ${play.name ?? ms.join(' + ')} on this day: ${lifts}.`,
+        `Зазвичай цього дня ${play.name ?? ms.join(' + ')}: ${lifts}.`,
+      ) + note
     );
   }
   const ready = muscleReadiness(finished, at);

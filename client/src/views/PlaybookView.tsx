@@ -12,6 +12,8 @@ import { Tag } from '../components/ui/Tag';
 import { useMemo, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import type { Shell } from '../App';
+import { useConditionLimits } from '../healthBuild';
+import { exerciseFlag } from '../conditions';
 import type { Workout } from '../types';
 import { programDayNameFor, repeatWorkout, useStore, workoutDayReadout } from '../store';
 import { startPlaySession } from '../data/programMine';
@@ -48,6 +50,9 @@ export function PlaybookView({
   const { t, locale } = useT();
   const exName = useExerciseName();
   const store = useStore();
+  const limits = useConditionLimits();
+  const careOf = (name: string) =>
+    limits.keys.length > 0 && exerciseFlag(name, limits).level !== 'ok';
 
   const [now] = useState(() => Date.now());
   const finished = useMemo(
@@ -124,6 +129,11 @@ export function PlaybookView({
                       <span className="pb-ex-i">{i + 1}</span>
                       <span className="pb-ex-name">
                         {exName(ex.name)}
+                        {careOf(ex.name) && (
+                          <span className="pg-care" title={t.pickCareful}>
+                            <Icon name="shield-check" />
+                          </span>
+                        )}
                         {ex.staple && (
                           <span className="pb-ex-star" title={t.playStaple} aria-hidden>
                             ●

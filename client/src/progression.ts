@@ -12,6 +12,7 @@ import { topSet, isStrengthExercise } from './store';
 import type { Workout } from './types';
 import type { MuscleGroup } from './data/exercises';
 import type { LoadType } from './loads';
+import type { ConditionEffects } from './data/conditionCatalog';
 
 export interface TopPoint {
   ts: number;
@@ -90,7 +91,7 @@ function isStalled(history: TopPoint[]): boolean {
   return recent.every((p) => (p.weight ?? 0) <= w) && (recent[2].weight ?? 0) === w;
 }
 
-export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
+function baseTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
   const { low, high } = repRange(opts.plannedReps);
   const base = { repLow: low, repHigh: high };
 
@@ -200,4 +201,39 @@ export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
     prevWeight,
     prevReps,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Long-term conditions: slower / no automatic load increases
+// ---------------------------------------------------------------------------
+
+let activeEffects: ConditionEffects = {};
+
+/** Set once from the app shell with the stacked effects of the active conditions. */
+export function setProgressionEffects(e: ConditionEffects): void {
+  activeEffects = e;
+}
+
+/** `nextTarget` with the person's conditions applied (every caller gets them for free). */
+export function nextTarget(history: TopPoint[], opts: ProgOpts = {}): Target {
+  return applyConditionEffects(baseTarget(history, opts), activeEffects);
+}
+
+export function applyConditionEffects(t: Target, e: ConditionEffects): Target {
+  if (t.state !== 'progress' || t.weight == null || t.prevWeight == null) return t;
+  if (t.deltaKg <= 0) return t;
+  if (e.noAutoIncrease) {
+    return {
+      ...t,
+      state: 'hold',
+      weight: t.prevWeight,
+      reps: Math.min((t.prevReps ?? t.repLow) + 1, t.repHigh),
+      deltaKg: 0,
+    };
+  }
+  if (e.stepScale != null && e.stepScale < 1) {
+    const delta = Math.max(0.5, roundTo(t.deltaKg * e.stepScale, 0.5));
+    return { ...t, weight: t.prevWeight + delta, deltaKg: delta };
+  }
+  return t;
 }

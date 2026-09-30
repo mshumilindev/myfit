@@ -138,3 +138,27 @@ export function AnatomyMap({
     </div>
   );
 }
+
+/**
+ * The same map on a turntable: `side` picks which face points at the viewer, and changing it
+ * spins the figure half a turn (pure CSS; reduced motion swaps instantly). Both faces stay
+ * mounted so the highlighted region is visible from whichever side it lies on.
+ */
+export function AnatomyTurntable({
+  side = 'front',
+  label,
+  ...rest
+}: Omit<AnatomyMapProps, 'view'> & { side?: AnatomyView }) {
+  return (
+    <div className="uianat-turn" data-side={side}>
+      <div className="uianat-turn-in">
+        <div className="uianat-face" aria-hidden={side !== 'front'}>
+          <AnatomyMap {...rest} label={label} view="front" />
+        </div>
+        <div className="uianat-face uianat-face-back" aria-hidden={side !== 'back'}>
+          <AnatomyMap {...rest} label={label} view="back" />
+        </div>
+      </div>
+    </div>
+  );
+}

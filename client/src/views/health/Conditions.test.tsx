@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { ConditionPage, ConditionsSection } from './Conditions';
+import {
+  ConditionPage,
+  ConditionsOnboardingRow,
+  ConditionsProfileRow,
+  ConditionsSection,
+} from './Conditions';
+import { setFlag } from '../../data/flags';
 import { __getStateForTests } from '../../store';
 
 afterEach(cleanup);
@@ -34,5 +40,32 @@ describe('conditions pages', () => {
     fireEvent.click(hit[0]);
     fireEvent.click(screen.getByRole('button', { name: /^(Add condition|Додати стан)$/ }));
     expect(__getStateForTests().conditions.length).toBeGreaterThan(0);
+  });
+
+  it('profile row: hidden with the flag off, opens Health with it on', () => {
+    setFlag('conditions', false);
+    let n = 0;
+    const { container } = render(<ConditionsProfileRow onOpen={() => n++} />);
+    expect(container.textContent).toBe('');
+    cleanup();
+    setFlag('conditions', true);
+    render(<ConditionsProfileRow onOpen={() => n++} />);
+    fireEvent.click(screen.getByText(/^(Long-term conditions|Тривалі стани)$/));
+    expect(n).toBe(1);
+    setFlag('conditions', false);
+  });
+
+  it('onboarding row: optional, says it is private, opens the add flow', () => {
+    setFlag('conditions', false);
+    const off = render(<ConditionsOnboardingRow onOpen={() => undefined} />);
+    expect(off.container.textContent).toBe('');
+    cleanup();
+    setFlag('conditions', true);
+    let n = 0;
+    render(<ConditionsOnboardingRow onOpen={() => n++} />);
+    expect(screen.getByText(/encrypted|зашифровано/i)).toBeTruthy();
+    fireEvent.click(screen.getByText(/long-term health conditions|тривалі проблеми/i));
+    expect(n).toBe(1);
+    setFlag('conditions', false);
   });
 });

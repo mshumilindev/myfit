@@ -353,6 +353,7 @@ export interface EffectLine {
     | 'stepScale'
     | 'noAutoIncrease'
     | 'cardioMax'
+    | 'restScale'
     | 'muscleCap';
   tags?: RiskTag[];
   muscle?: MuscleGroup;
@@ -370,6 +371,8 @@ export function effectLines(e: ConditionEffects): EffectLine[] {
     out.push({ id: 'volumeScale', value: Math.round(e.volumeScale * 100) });
   if (e.stepScale != null) out.push({ id: 'stepScale', value: Math.round(e.stepScale * 100) });
   if (e.cardioMax) out.push({ id: 'cardioMax', value: e.cardioMax as CardioCap });
+  if (e.restScale != null && e.restScale > 1)
+    out.push({ id: 'restScale', value: Math.round(e.restScale * 100) });
   if (e.noFailure) out.push({ id: 'noFailure' });
   if (e.noMaxEffort) out.push({ id: 'noMaxEffort' });
   if (e.noBreathHold) out.push({ id: 'noBreathHold' });

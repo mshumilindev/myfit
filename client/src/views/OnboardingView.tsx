@@ -32,6 +32,7 @@ import { Avatar } from '../components/Avatar';
 import { AvatarUploader } from '../components/AvatarUploader';
 import { InstallShortcut } from './InstallShortcut';
 import { Card } from '../components/ui/Card';
+import { ConditionPage, ConditionsOnboardingRow } from './health/Conditions';
 
 interface InviteInfo {
   state: 'valid' | 'expired' | 'claimed' | 'revoked';
@@ -143,6 +144,8 @@ export function OnboardingView({
   const [gym, setGym] = useState<Resume | null>(saved);
   const name = fullPersonName(firstName, lastName);
   const [requested, setRequested] = useState(false);
+  const [condOpen, setCondOpen] = useState(false);
+  const [condKey, setCondKey] = useState<string | undefined>();
 
   // AC-ONB-06: persist on every meaningful change.
   function persist(patch: Partial<Resume>): void {
@@ -449,7 +452,20 @@ export function OnboardingView({
         />
       )}
 
-      {step === 5 && (
+      {step === 5 && condOpen && (
+        <ConditionPage
+          cond="new"
+          condKey={condKey}
+          web={false}
+          onBack={() => {
+            setCondOpen(false);
+            setCondKey(undefined);
+          }}
+          onPickKey={setCondKey}
+        />
+      )}
+
+      {step === 5 && !condOpen && (
         <div className="onb-final">
           {gym?.gymName && gym.gymLat !== undefined && gym.gymLng !== undefined && (
             <div className="onb-final-bg">
@@ -475,6 +491,7 @@ export function OnboardingView({
             </div>
             <h2 className="display">{t.onbWow}</h2>
             <p className="lead">{gym?.gymName ? t.onbWowBody(gym.gymName) : t.onbWowBodyNoGym}</p>
+            <ConditionsOnboardingRow onOpen={() => setCondOpen(true)} />
             <Button
               variant="primary"
               size="lg"

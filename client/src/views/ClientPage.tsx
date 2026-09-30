@@ -26,6 +26,8 @@ import { Banner } from '../components/ui/Banner';
 import { HistoryTimeline } from '../components/HistoryTimeline';
 import type { Activity, RestPeriod, SleepNight, Workout } from '../types';
 import type { Shell } from '../App';
+import type { CoachView } from '../conditions';
+import { CoachConditions } from './health/Conditions';
 
 const NO_DAYS = new Set<number>();
 
@@ -77,6 +79,7 @@ interface ClientData {
     volumeKg: number;
     bestE1rm: number | null;
   }>;
+  conditionsShare?: CoachView | null;
   history?: {
     workouts: Workout[];
     activities: Activity[];
@@ -359,6 +362,13 @@ export function ClientPage({
           <p className="cp-empty">{t.clientNoSessions}</p>
         )}
       </section>
+
+      {data?.conditionsShare && (
+        <section className="cp-section">
+          <div className="section-label">{t.cndCoachTitle}</div>
+          <CoachConditions view={data.conditionsShare} />
+        </section>
+      )}
 
       {data && data.topExercises.length > 0 && (
         <section className="cp-section">

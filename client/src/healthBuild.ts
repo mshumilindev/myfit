@@ -21,7 +21,7 @@ export function healthBuildCtx(
   s: { injuries: readonly Injury[]; conditions: readonly ChronicCondition[] },
   now: number = Date.now(),
 ): HealthBuild {
-  const limits = conditionLimits(s.conditions, now);
+  const limits = conditionLimits(s.conditions ?? [], now);
   const caps = new Map(injuryLoadCaps([...s.injuries]));
   for (const [m, c] of Object.entries(limits.effects.muscleCaps ?? {}) as [MuscleGroup, number][])
     caps.set(m, Math.min(caps.get(m) ?? 1, c));
@@ -35,5 +35,5 @@ export function healthBuildCtx(
 /** The stacked limits of the signed-in person's active conditions, for screens that flag exercises. */
 export function useConditionLimits(): Limits {
   const { conditions } = useStore();
-  return useMemo(() => conditionLimits(conditions), [conditions]);
+  return useMemo(() => conditionLimits(conditions ?? []), [conditions]);
 }

@@ -9,6 +9,7 @@ import {
   coachView,
   conditionLimits,
   deidentifiedEffects,
+  effectLines,
   exerciseFlag,
   exerciseRisk,
   isAutoExcluded,
@@ -249,5 +250,27 @@ describe('body map reachability', () => {
     const regions = new Set(Object.values(AREAS).flatMap((l) => l.flatMap((a) => a.regions)));
     const missing = CONDITION_CATALOG.filter((c) => !regions.has(c.region) && !isOtherTab(c));
     expect(missing.map((c) => c.key)).toEqual([]);
+  });
+});
+
+describe('restScale', () => {
+  it('is only set as a multiplier of at least 1 and never shrinks with severity', () => {
+    let any = false;
+    for (const c of CONDITION_CATALOG) {
+      const v = [1, 2, 3].map((sev) => effectsAt(c.effects, sev as 1 | 2 | 3).restScale ?? 1);
+      for (const x of v) {
+        expect(x).toBeGreaterThanOrEqual(1);
+        expect(x).toBeLessThanOrEqual(2);
+      }
+      expect(v[0]).toBeLessThanOrEqual(v[1]);
+      expect(v[1]).toBeLessThanOrEqual(v[2]);
+      if (c.effects.restScale) any = true;
+    }
+    expect(any).toBe(true);
+  });
+  it('appears as an effect line for affected conditions', () => {
+    const c = CONDITION_CATALOG.find((x) => x.effects.restScale);
+    expect(c).toBeTruthy();
+    expect(effectLines(effectsAt(c!.effects, 2)).some((l) => l.id === 'restScale')).toBe(true);
   });
 });
