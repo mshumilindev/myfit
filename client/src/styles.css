@@ -8362,6 +8362,10 @@ h6 {
   cursor: pointer;
 }
 
+.past-ex-card.is-static {
+  cursor: default;
+}
+
 .past-ex-row {
   display: flex;
   align-items: center;

@@ -4,6 +4,7 @@ import { SwitchIndicator } from '../components/ui/Switch';
 import { BackButton } from '../components/ui/BackButton';
 import {
   type CSSProperties,
+  type KeyboardEvent,
   Fragment,
   type ReactNode,
   useEffect,
@@ -5163,11 +5164,19 @@ export function SessionView(props: {
                         <div
                           key={single.id}
                           data-exid={single.id}
-                          className={`past-ex-card${singleIsCurrent ? ' is-current' : ''}`}
-                          role="button"
-                          tabIndex={0}
-                          onClick={expandSingle}
-                          onKeyDown={(e) => rowKey(e, expandSingle)}
+                          className={`past-ex-card${singleIsCurrent ? ' is-current' : ''}${
+                            isMarkerExercise(single) ? ' is-static' : ''
+                          }`}
+                          // Warm-up / cool-down markers have nothing to open: only their cog acts.
+                          {...(isMarkerExercise(single)
+                            ? {}
+                            : {
+                                role: 'button',
+                                tabIndex: 0,
+                                onClick: expandSingle,
+                                onKeyDown: (e: KeyboardEvent<HTMLElement>) =>
+                                  rowKey(e, expandSingle),
+                              })}
                         >
                           <span className="past-ex-row">
                             {singleIsCurrent && (
