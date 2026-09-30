@@ -1,4 +1,4 @@
-/* WeekStepper — kit primitive. Arrows are kit IconButtons; the centre is the accent tone plate. */
+/* WeekStepper — kit primitive. Arrows are kit IconButtons, the centre a kit secondary Button. */
 .uiwk {
   /* Short page: sit on the bottom edge; long page: fall under the content. */
   margin-top: auto;
@@ -7,43 +7,29 @@
   gap: var(--s-8);
   padding: var(--s-8) 0 calc(var(--s-8) + env(safe-area-inset-bottom));
 }
-.uiwk-pick {
+.uiwk .uiwk-pick {
   flex: 1;
   min-width: 0;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-8);
-  padding: 0 var(--s-16);
-  border: 0;
+  height: auto;
+  min-height: 46px;
+  padding-block: var(--s-6);
   border-radius: var(--radius-pill);
-  font: inherit;
-  color: var(--t-text);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--t-base) 22%, transparent),
-    color-mix(in srgb, var(--t-base) 10%, transparent)
-  );
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--t-base) 75%, transparent);
-}
-button.uiwk-pick {
-  cursor: pointer;
 }
 .uiwk-text {
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1.15;
+  line-height: 1.2;
   min-width: 0;
 }
 .uiwk-label {
   font-size: var(--fs-14);
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
 .uiwk-sub {
   font-size: var(--fs-11);
-  color: var(--t-base);
+  font-weight: 400;
+  color: var(--color-text-muted);
   white-space: nowrap;
 }

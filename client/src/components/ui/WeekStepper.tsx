@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Icon } from '../../ui';
-import { IconButton } from './Button';
+import { Button, IconButton } from './Button';
 import './WeekStepper.css';
 
 export interface WeekStepperProps {
@@ -26,13 +25,10 @@ export interface WeekStepperProps {
 /** ‹ [ range · caption ▾ ] › — a week-at-a-time pager (design A "Week stepper"). */
 export function WeekStepper(p: WeekStepperProps) {
   const inner = (
-    <>
-      <span className="uiwk-text">
-        <b className="uiwk-label">{p.label}</b>
-        {p.sub != null && <span className="uiwk-sub">{p.sub}</span>}
-      </span>
-      {p.onOpen && <Icon name="caret-down" weight="bold" />}
-    </>
+    <span className="uiwk-text">
+      <b className="uiwk-label">{p.label}</b>
+      {p.sub != null && <span className="uiwk-sub">{p.sub}</span>}
+    </span>
   );
   return (
     <div className={['uiwk', p.className].filter(Boolean).join(' ')}>
@@ -45,16 +41,16 @@ export function WeekStepper(p: WeekStepperProps) {
         onClick={p.onPrev}
       />
       {p.onOpen ? (
-        <button
-          type="button"
-          className="uiwk-pick uit--accent"
+        <Button
+          variant="secondary"
+          className="uiwk-pick"
           aria-label={p.openLabel}
           onClick={p.onOpen}
         >
           {inner}
-        </button>
+        </Button>
       ) : (
-        <div className="uiwk-pick uit--accent">{inner}</div>
+        <div className="uiwk-pick uibtn uibtn--secondary">{inner}</div>
       )}
       <IconButton
         variant="secondary"
