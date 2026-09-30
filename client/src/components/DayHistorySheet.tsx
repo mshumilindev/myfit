@@ -116,6 +116,11 @@ export function DayHistorySheet({
   const totalKcal = (restKcal ?? 0) + activeKcal;
   const showEnergy = restKcal != null || activeKcal > 0;
 
+  // A "session" day means a finished workout — sleep or an activity alone doesn't
+  // make a planned training day done.
+  const hasWorkout = store.workouts.some(
+    (w) => w.finishedAt !== null && w.startedAt >= day && w.startedAt < end,
+  );
   // Day state note (rest / vacation / illness, or a skipped program day).
   const dk = dayKey(day);
   const rest = store.restPeriods.find(
@@ -124,12 +129,10 @@ export function DayHistorySheet({
   const restSpan = rest ? (rest.open ? todayKey : rest.endDay) - rest.startDay + 1 : 0;
   let note: NoteState | null = null;
   if (rest) note = rest.mode === 'illness' ? 'illness' : restSpan >= 4 ? 'vacation' : 'rest';
-  else if (rows.length === 0 && prescribedTrainingDays().has(weekdayOf(day))) note = 'missed';
+  else if (dk < todayKey && !hasWorkout && prescribedTrainingDays().has(weekdayOf(day)))
+    note = 'missed';
 
-  const doneDay = store.workouts.some(
-    (w) => w.finishedAt !== null && w.startedAt >= day && w.startedAt < end,
-  );
-  const sheetTone: Tone | undefined = note ? NOTE_TONE[note] : doneDay ? 'ok' : undefined;
+  const sheetTone: Tone | undefined = note ? NOTE_TONE[note] : hasWorkout ? 'ok' : undefined;
 
   const missedName = programDayNameForWeekday(weekdayOf(day));
   const noteText: Record<NoteState, { title: string; body: string }> = {
