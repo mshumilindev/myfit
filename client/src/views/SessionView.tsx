@@ -21,6 +21,8 @@ import { Card } from '../components/ui/Card';
 import { Ring } from '../components/ui/Ring';
 import { SetRow } from '../components/ui/SetRow';
 import { Tag } from '../components/ui/Tag';
+import { WarmupCard } from '../components/WarmupCard';
+import { dayMuscles, warmupSummary } from '../warmupLog';
 import { StatTile } from '../components/ui/StatTile';
 import { Chip } from '../components/ui/Chip';
 import { IconTile } from '../components/ui/IconTile';
@@ -2282,8 +2284,17 @@ export function SessionView(props: {
 
   /** One-line reading of a finished exercise (SS-3): «3 × 8 · 75 kg». */
   function pastSummary(ex: Exercise): string {
-    if (isMarkerExercise(ex))
+    if (isMarkerExercise(ex)) {
+      const wu = exerciseKind(ex) === 'warmup' ? warmupSummary(ex) : null;
+      if (wu?.detailed)
+        return [
+          wu.count > 0 ? t.nExercises(wu.count) : null,
+          wu.minutes ? `${wu.minutes} ${t.minShort}` : null,
+        ]
+          .filter(Boolean)
+          .join(' · ');
       return ex.plannedDurationMin ? `~${ex.plannedDurationMin} ${t.minShort}` : '';
+    }
     if (isTimedExercise(ex)) {
       const min = ex.sets.reduce((n, s) => n + (s.durationMin ?? 0), 0);
       return `${Math.round(min)} ${t.minShort}`;
@@ -3322,11 +3333,14 @@ export function SessionView(props: {
                 {ex.plannedDurationMin ? ` · ~${ex.plannedDurationMin} ${t.minShort}` : ''}
               </span>
               <span className="warmup-marker-sub">
-                {kind === 'cooldown' ? t.cooldownMarkerBody : t.warmupMarkerBody}
+                {kind === 'cooldown' ? t.cooldownMarkerBody : t.wuBody}
               </span>
             </div>
             {focusView && <span className="warmup-marker-cfg">{cfgBtn}</span>}
           </div>
+        ) : null}
+        {marker && kind === 'warmup' && (live || props.past) ? (
+          <WarmupCard workout={workout!} exercise={ex} muscles={dayMuscles(workout!)} />
         ) : null}
         {marker ? null : timed ? (
           <>

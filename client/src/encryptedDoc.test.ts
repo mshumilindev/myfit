@@ -26,6 +26,34 @@ describe('sealed documents', () => {
     expect(await unsealDoc(s, key)).toEqual(w);
   });
 
+  it('seals warm-up items inside the workout envelope (nothing new in the open)', async () => {
+    const v = await readyVault();
+    const { key, salt } = v.material();
+    const w = {
+      id: 'w2',
+      startedAt: 1000,
+      finishedAt: 2000,
+      updatedAt: 2000,
+      exercises: [
+        {
+          id: 'e1',
+          name: 'Warm-up',
+          kind: 'warmup',
+          sets: [],
+          warmupDetailed: true,
+          warmupItems: [{ id: 'i1', name: 'Band Pull Apart', reps: 15, done: true, at: 1500 }],
+        },
+      ],
+    };
+    const s = await sealDoc('workouts', w, key, salt);
+    expect(Object.keys(s).sort()).toEqual(['enc', 'finishedAt', 'id', 'startedAt', 'updatedAt']);
+    const text = JSON.stringify(s);
+    for (const secret of ['Band Pull Apart', 'warmupItems', 'Warm-up']) {
+      expect(text).not.toContain(secret);
+    }
+    expect(await unsealDoc(s, key)).toEqual(w);
+  });
+
   it('drops undefined fields (Firestore rejects them)', async () => {
     const v = await readyVault();
     const { key, salt } = v.material();

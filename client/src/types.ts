@@ -71,6 +71,24 @@ export interface SetEntry {
 
 export type ExerciseKind = 'strength' | 'cardio' | 'warmup' | 'cooldown';
 
+/**
+ * One specific move inside a detailed warm-up (the `kind:'warmup'` marker with
+ * `warmupDetailed`). Deliberately NOT a SetEntry: a marker keeps zero sets, so
+ * volume / PR / set-type stats never see warm-up items.
+ */
+export interface WarmupItem {
+  id: string;
+  /** Canonical English catalog name, or the free text the user typed. */
+  name: string;
+  /** Catalog id when picked from the library (absent for custom names). */
+  exerciseId?: string;
+  durationSec?: number;
+  reps?: number;
+  done: boolean;
+  /** When it was ticked off (ms epoch). */
+  at?: number;
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -94,6 +112,12 @@ export interface Exercise {
   /** Cool-down marker: when the athlete started it (ms). Rest stops from here
    *  until a set is logged again. */
   markerAt?: number | null;
+  /** Warm-up marker only: the warm-up is logged by exercises (`warmupItems`)
+   *  instead of as one single block. Absent = the classic single warm-up. */
+  warmupDetailed?: boolean;
+  /** Warm-up marker only: the specific moves, in order. Kept when the user
+   *  flips back to the single mode; only counted while `warmupDetailed`. */
+  warmupItems?: WarmupItem[];
   /** Muscle groups (design MG-1): one primary, any number of secondaries. */
   primaryMuscle?: string | null;
   secondaryMuscles?: string[];

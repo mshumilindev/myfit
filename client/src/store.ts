@@ -60,6 +60,7 @@ import {
   type SetType,
   type SyncStatus,
   type SyncError,
+  type WarmupItem,
   type WeightEntry,
   type Workout,
   type SleepNight,
@@ -97,6 +98,7 @@ import { REST_PREFS_DEFAULT, type RestPrefs } from './restTimer';
 import { isFlagOn } from './data/flags';
 import { describeDay, dayReadoutLabel, type DayReadout } from './data/daySuggest';
 import { t, getLocale, type LocaleId } from './i18n';
+import { secToMinutes, warmupDoneSeconds, warmupItemsOf } from './warmupLog';
 import { localizedEquipName } from './data/equipmentI18n';
 import {
   applyCheckin,
@@ -2028,6 +2030,167 @@ export function setMarkerStarted(workoutId: string, exerciseId: string, at: numb
     exercises: w.exercises.map((e) => (e.id === exerciseId ? { ...e, markerAt: at } : e)),
   });
   saveWorkout(workoutId);
+}
+
+// --- Warm-up: one block or split into specific moves -------------------------
+// The marker stays a marker (no sets). `warmupDetailed` + `warmupItems` are
+// optional extras on it; everything old keeps reading as the single warm-up.
+
+/** Apply `fn` to a warm-up marker of a workout; the marker's minutes follow the
+ *  done items while it is detailed (so summary / history have one number). */
+function patchWarmup(
+  workoutId: string,
+  exerciseId: string,
+  fn: (ex: Exercise) => Exercise,
+): Exercise | null {
+  const w = state.workouts.find((x) => x.id === workoutId);
+  const cur = w?.exercises.find((e) => e.id === exerciseId);
+  if (!w || !cur || cur.kind !== 'warmup' || cur.sets.length > 0) return null;
+  let out = fn(cur);
+  if (out.warmupDetailed === true) {
+    const min = secToMinutes(warmupDoneSeconds(warmupItemsOf(out)));
+    out = { ...out, plannedDurationMin: min > 0 ? min : null };
+  }
+  const next = out;
+  patchWorkout(workoutId, {
+    exercises: w.exercises.map((e) => (e.id === exerciseId ? next : e)),
+  });
+  saveWorkout(workoutId);
+  return next;
+}
+
+/** Switch a warm-up marker between "One warm-up" (false) and "By exercises". */
+export function setWarmupDetailed(workoutId: string, exerciseId: string, on: boolean): void {
+  patchWarmup(workoutId, exerciseId, (e) =>
+    on
+      ? { ...e, warmupDetailed: true, warmupItems: warmupItemsOf(e) }
+      : { ...e, warmupDetailed: false },
+  );
+}
+
+/** Minutes of the single warm-up (null clears it). */
+export function setWarmupMinutes(
+  workoutId: string,
+  exerciseId: string,
+  minutes: number | null,
+): void {
+  patchWarmup(workoutId, exerciseId, (e) => ({
+    ...e,
+    plannedDurationMin: minutes && minutes > 0 ? Math.round(minutes) : null,
+  }));
+}
+
+export interface WarmupItemDraft {
+  name: string;
+  exerciseId?: string;
+  durationSec?: number;
+  reps?: number;
+  done?: boolean;
+}
+
+function newWarmupItem(d: WarmupItemDraft, now: number): WarmupItem | null {
+  const name = d.name.trim();
+  if (!name) return null;
+  const done = d.done === true;
+  return {
+    id: uuid(),
+    name,
+    ...(d.exerciseId ? { exerciseId: d.exerciseId } : {}),
+    ...(d.durationSec && d.durationSec > 0 ? { durationSec: Math.round(d.durationSec) } : {}),
+    ...(d.reps && d.reps > 0 ? { reps: Math.round(d.reps) } : {}),
+    done,
+    ...(done ? { at: now } : {}),
+  };
+}
+
+/** Add a move to a detailed warm-up (switches the marker to detailed if needed). */
+export function addWarmupItem(
+  workoutId: string,
+  exerciseId: string,
+  draft: WarmupItemDraft,
+): WarmupItem | null {
+  const item = newWarmupItem(draft, Date.now());
+  if (!item) return null;
+  const r = patchWarmup(workoutId, exerciseId, (e) => ({
+    ...e,
+    warmupDetailed: true,
+    warmupItems: [...warmupItemsOf(e), item],
+  }));
+  return r ? item : null;
+}
+
+/** Replace the whole list (used by "Repeat last warm-up"): fresh ids, nothing done. */
+export function setWarmupItems(
+  workoutId: string,
+  exerciseId: string,
+  drafts: readonly WarmupItemDraft[],
+): void {
+  const now = Date.now();
+  const items = drafts
+    .map((d) => newWarmupItem({ ...d, done: false }, now))
+    .filter((i): i is WarmupItem => i !== null);
+  patchWarmup(workoutId, exerciseId, (e) => ({ ...e, warmupDetailed: true, warmupItems: items }));
+}
+
+export function updateWarmupItem(
+  workoutId: string,
+  exerciseId: string,
+  itemId: string,
+  patch: Partial<Pick<WarmupItem, 'name' | 'durationSec' | 'reps'>> & { done?: boolean },
+): void {
+  patchWarmup(workoutId, exerciseId, (e) => ({
+    ...e,
+    warmupItems: warmupItemsOf(e).map((i) => {
+      if (i.id !== itemId) return i;
+      const m = { ...i, ...patch };
+      const next: WarmupItem = { id: i.id, name: m.name.trim() || i.name, done: m.done };
+      if (i.exerciseId) next.exerciseId = i.exerciseId;
+      if (m.durationSec && m.durationSec > 0) next.durationSec = Math.round(m.durationSec);
+      if (m.reps && m.reps > 0) next.reps = Math.round(m.reps);
+      if (m.done) next.at = i.done && i.at ? i.at : Date.now();
+      return next;
+    }),
+  }));
+}
+
+/** Tick a move off (or back on); `done` omitted flips it. */
+export function toggleWarmupItem(
+  workoutId: string,
+  exerciseId: string,
+  itemId: string,
+  done?: boolean,
+): void {
+  const ex = state.workouts
+    .find((x) => x.id === workoutId)
+    ?.exercises.find((e) => e.id === exerciseId);
+  const cur = ex ? warmupItemsOf(ex).find((i) => i.id === itemId) : undefined;
+  if (!cur) return;
+  updateWarmupItem(workoutId, exerciseId, itemId, { done: done ?? !cur.done });
+}
+
+export function removeWarmupItem(workoutId: string, exerciseId: string, itemId: string): void {
+  patchWarmup(workoutId, exerciseId, (e) => ({
+    ...e,
+    warmupItems: warmupItemsOf(e).filter((i) => i.id !== itemId),
+  }));
+}
+
+/** Move a move one place up (-1) or down (+1). */
+export function moveWarmupItem(
+  workoutId: string,
+  exerciseId: string,
+  itemId: string,
+  dir: -1 | 1,
+): void {
+  patchWarmup(workoutId, exerciseId, (e) => {
+    const items = warmupItemsOf(e);
+    const i = items.findIndex((x) => x.id === itemId);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= items.length) return e;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    return { ...e, warmupItems: next };
+  });
 }
 
 /**
@@ -4825,6 +4988,10 @@ export function duplicateExercise(workoutId: string, exerciseId: string): void {
     equipment: ex.equipment ?? [],
     primaryMuscle: ex.primaryMuscle ?? null,
     secondaryMuscles: ex.secondaryMuscles ?? [],
+    ...(ex.warmupDetailed !== undefined ? { warmupDetailed: ex.warmupDetailed } : {}),
+    ...(ex.warmupItems
+      ? { warmupItems: warmupItemsOf(ex).map((i) => ({ ...i, id: uuid() })) }
+      : {}),
     sets: ex.sets.map((s, i) => ({ ...s, id: uuid(), position: i })),
   };
   restoreExercise(workoutId, copy);
