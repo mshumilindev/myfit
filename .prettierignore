@@ -12,6 +12,8 @@ package-lock.json
 *.sqlite
 client/public/
 docs/design/boards/
+docs/design/brass-glass/boards/
+docs/design/brass-glass/canvases/
 My Fit - FINAL.html
 _feature-programs-week/
 _sync/

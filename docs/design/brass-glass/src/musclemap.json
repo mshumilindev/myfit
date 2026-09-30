@@ -1,1 +1,353 @@
-{"LIB":{"chest":{"front":["chest-upper-left","chest-upper-right","chest-lower-left","chest-lower-right"],"back":[]},"back":{"front":[],"back":["lats-upper-left","lats-mid-left","lats-lower-left","lats-upper-right","lats-mid-right","lats-lower-right","traps-upper-left","traps-mid-left","traps-lower-left","traps-upper-right","traps-mid-right","traps-lower-right","lower-back-erectors-left","lower-back-ql-left","lower-back-erectors-right","lower-back-ql-right","spine"]},"lats":{"front":[],"back":["lats-upper-left","lats-mid-left","lats-lower-left","lats-upper-right","lats-mid-right","lats-lower-right"]},"traps":{"front":[],"back":["traps-upper-left","traps-mid-left","traps-lower-left","traps-upper-right","traps-mid-right","traps-lower-right"]},"lower_back":{"front":[],"back":["lower-back-erectors-left","lower-back-ql-left","lower-back-erectors-right","lower-back-ql-right","spine"]},"shoulders":{"front":["shoulder-front-left","shoulder-side-left","shoulder-front-right","shoulder-side-right"],"back":["deltoid-rear-left","deltoid-rear-right"]},"biceps":{"front":["biceps-left","biceps-right"],"back":[]},"triceps":{"front":[],"back":["triceps-long-left","triceps-lateral-left","triceps-long-right","triceps-lateral-right"]},"forearms":{"front":["forearm-left","forearm-right"],"back":["forearm-flexors-left","forearm-extensors-left","forearm-flexors-right","forearm-extensors-right"]},"core":{"front":["abs-upper-left","abs-upper-right","abs-lower-left","abs-lower-right","obliques-left","obliques-right","serratus-anterior-left","serratus-anterior-right"],"back":[]},"quads":{"front":["quads-left","quads-right"],"back":[]},"adductors":{"front":["adductors-left","adductors-right"],"back":[]},"hamstrings":{"front":[],"back":["hamstrings-medial-left","hamstrings-lateral-left","hamstrings-medial-right","hamstrings-lateral-right"]},"glutes":{"front":[],"back":["gluteus-maximus-left","gluteus-maximus-right"]},"abductors":{"front":[],"back":["gluteus-medius-left","gluteus-medius-right"]},"calves":{"front":["tibialis-anterior-left","tibialis-anterior-right"],"back":["calves-gastroc-medial-left","calves-gastroc-lateral-left","calves-soleus-left","calves-gastroc-medial-right","calves-gastroc-lateral-right","calves-soleus-right"]},"neck":{"front":["neck-left","neck-right"],"back":["nape"]},"fullbody":{"front":[],"back":[]}},"GROUP_VIEW":{"chest":"front","shoulders":"front","biceps":"front","forearms":"front","core":"front","quads":"front","adductors":"front","neck":"front","back":"back","lats":"back","traps":"back","lower_back":"back","triceps":"back","hamstrings":"back","glutes":"back","abductors":"back","calves":"back","fullbody":"front"},"GROUP_REGION":{"biceps":"upper","triceps":"upper","forearms":"upper","chest":"upper","shoulders":"upper","core":"upper","back":"upper","lats":"upper","traps":"upper","lower_back":"upper","neck":"upper","quads":"lower","adductors":"lower","hamstrings":"lower","glutes":"lower","abductors":"lower","calves":"lower","fullbody":"full"},"VIEWBOX":{"front":{"full":"-1.5 -2 34.5 96.5","upper":"-0.5 9 32.5 44.5","torso":"6 9 20 39","arms":"-2.5 10 36.5 43","lower":"4.5 36 22.5 59.5"},"back":{"full":"35 -2 35.5 96.6","upper":"36.4 3.5 32.2 41.5","torso":"36.4 3.5 32.2 41.5","arms":"34 12 37.5 40.5","lower":"41 36.5 23 59"}},"REGION_IDS":{"front":{"full":null,"arms":["shoulder-front-left","shoulder-side-left","shoulder-front-right","shoulder-side-right","biceps-left","biceps-right","forearm-left","forearm-right","elbow-left","elbow-right","hand-left","hand-right","chest-upper-left","chest-upper-right","chest-lower-left","chest-lower-right","abs-upper-left","abs-upper-right"],"upper":["neck-left","neck-right","shoulder-front-left","shoulder-side-left","shoulder-front-right","shoulder-side-right","biceps-left","biceps-right","forearm-left","forearm-right","chest-upper-left","chest-upper-right","chest-lower-left","chest-lower-right","abs-upper-left","abs-upper-right","abs-lower-left","abs-lower-right","obliques-left","obliques-right","serratus-anterior-left","serratus-anterior-right","hip-flexor-left","hip-flexor-right"],"torso":["chest-upper-left","chest-upper-right","chest-lower-left","chest-lower-right","abs-upper-left","abs-upper-right","abs-lower-left","abs-lower-right","obliques-left","obliques-right","serratus-anterior-left","serratus-anterior-right","neck-left","neck-right"],"lower":["quads-left","quads-right","adductors-left","adductors-right","hip-flexor-left","hip-flexor-right","knee-left","knee-right","tibialis-anterior-left","tibialis-anterior-right","foot-left","foot-right"]},"back":{"full":null,"arms":["deltoid-rear-left","deltoid-rear-right","triceps-long-left","triceps-lateral-left","triceps-long-right","triceps-lateral-right","forearm-flexors-left","forearm-extensors-left","forearm-flexors-right","forearm-extensors-right","hand-back-left","hand-back-right","lats-upper-left","lats-upper-right","lats-mid-left","lats-mid-right"],"upper":["nape","traps-upper-left","traps-mid-left","traps-lower-left","traps-upper-right","traps-mid-right","traps-lower-right","lats-upper-left","lats-mid-left","lats-lower-left","lats-upper-right","lats-mid-right","lats-lower-right","deltoid-rear-left","deltoid-rear-right","triceps-long-left","triceps-lateral-left","triceps-long-right","triceps-lateral-right","spine","lower-back-erectors-left","lower-back-erectors-right","lower-back-ql-left","lower-back-ql-right"],"torso":["nape","traps-upper-left","traps-mid-left","traps-lower-left","traps-upper-right","traps-mid-right","traps-lower-right","lats-upper-left","lats-mid-left","lats-lower-left","lats-upper-right","lats-mid-right","lats-lower-right","spine","lower-back-erectors-left","lower-back-erectors-right","lower-back-ql-left","lower-back-ql-right"],"lower":["gluteus-maximus-left","gluteus-medius-left","gluteus-maximus-right","gluteus-medius-right","hamstrings-medial-left","hamstrings-lateral-left","hamstrings-medial-right","hamstrings-lateral-right","knee-back-left","knee-back-right","calves-gastroc-medial-left","calves-gastroc-lateral-left","calves-soleus-left","calves-gastroc-medial-right","calves-gastroc-lateral-right","calves-soleus-right","foot-back-left","foot-back-right"]}}}
+{
+  "LIB": {
+    "chest": {
+      "front": ["chest-upper-left", "chest-upper-right", "chest-lower-left", "chest-lower-right"],
+      "back": []
+    },
+    "back": {
+      "front": [],
+      "back": [
+        "lats-upper-left",
+        "lats-mid-left",
+        "lats-lower-left",
+        "lats-upper-right",
+        "lats-mid-right",
+        "lats-lower-right",
+        "traps-upper-left",
+        "traps-mid-left",
+        "traps-lower-left",
+        "traps-upper-right",
+        "traps-mid-right",
+        "traps-lower-right",
+        "lower-back-erectors-left",
+        "lower-back-ql-left",
+        "lower-back-erectors-right",
+        "lower-back-ql-right",
+        "spine"
+      ]
+    },
+    "lats": {
+      "front": [],
+      "back": [
+        "lats-upper-left",
+        "lats-mid-left",
+        "lats-lower-left",
+        "lats-upper-right",
+        "lats-mid-right",
+        "lats-lower-right"
+      ]
+    },
+    "traps": {
+      "front": [],
+      "back": [
+        "traps-upper-left",
+        "traps-mid-left",
+        "traps-lower-left",
+        "traps-upper-right",
+        "traps-mid-right",
+        "traps-lower-right"
+      ]
+    },
+    "lower_back": {
+      "front": [],
+      "back": [
+        "lower-back-erectors-left",
+        "lower-back-ql-left",
+        "lower-back-erectors-right",
+        "lower-back-ql-right",
+        "spine"
+      ]
+    },
+    "shoulders": {
+      "front": [
+        "shoulder-front-left",
+        "shoulder-side-left",
+        "shoulder-front-right",
+        "shoulder-side-right"
+      ],
+      "back": ["deltoid-rear-left", "deltoid-rear-right"]
+    },
+    "biceps": { "front": ["biceps-left", "biceps-right"], "back": [] },
+    "triceps": {
+      "front": [],
+      "back": [
+        "triceps-long-left",
+        "triceps-lateral-left",
+        "triceps-long-right",
+        "triceps-lateral-right"
+      ]
+    },
+    "forearms": {
+      "front": ["forearm-left", "forearm-right"],
+      "back": [
+        "forearm-flexors-left",
+        "forearm-extensors-left",
+        "forearm-flexors-right",
+        "forearm-extensors-right"
+      ]
+    },
+    "core": {
+      "front": [
+        "abs-upper-left",
+        "abs-upper-right",
+        "abs-lower-left",
+        "abs-lower-right",
+        "obliques-left",
+        "obliques-right",
+        "serratus-anterior-left",
+        "serratus-anterior-right"
+      ],
+      "back": []
+    },
+    "quads": { "front": ["quads-left", "quads-right"], "back": [] },
+    "adductors": { "front": ["adductors-left", "adductors-right"], "back": [] },
+    "hamstrings": {
+      "front": [],
+      "back": [
+        "hamstrings-medial-left",
+        "hamstrings-lateral-left",
+        "hamstrings-medial-right",
+        "hamstrings-lateral-right"
+      ]
+    },
+    "glutes": { "front": [], "back": ["gluteus-maximus-left", "gluteus-maximus-right"] },
+    "abductors": { "front": [], "back": ["gluteus-medius-left", "gluteus-medius-right"] },
+    "calves": {
+      "front": ["tibialis-anterior-left", "tibialis-anterior-right"],
+      "back": [
+        "calves-gastroc-medial-left",
+        "calves-gastroc-lateral-left",
+        "calves-soleus-left",
+        "calves-gastroc-medial-right",
+        "calves-gastroc-lateral-right",
+        "calves-soleus-right"
+      ]
+    },
+    "neck": { "front": ["neck-left", "neck-right"], "back": ["nape"] },
+    "fullbody": { "front": [], "back": [] }
+  },
+  "GROUP_VIEW": {
+    "chest": "front",
+    "shoulders": "front",
+    "biceps": "front",
+    "forearms": "front",
+    "core": "front",
+    "quads": "front",
+    "adductors": "front",
+    "neck": "front",
+    "back": "back",
+    "lats": "back",
+    "traps": "back",
+    "lower_back": "back",
+    "triceps": "back",
+    "hamstrings": "back",
+    "glutes": "back",
+    "abductors": "back",
+    "calves": "back",
+    "fullbody": "front"
+  },
+  "GROUP_REGION": {
+    "biceps": "upper",
+    "triceps": "upper",
+    "forearms": "upper",
+    "chest": "upper",
+    "shoulders": "upper",
+    "core": "upper",
+    "back": "upper",
+    "lats": "upper",
+    "traps": "upper",
+    "lower_back": "upper",
+    "neck": "upper",
+    "quads": "lower",
+    "adductors": "lower",
+    "hamstrings": "lower",
+    "glutes": "lower",
+    "abductors": "lower",
+    "calves": "lower",
+    "fullbody": "full"
+  },
+  "VIEWBOX": {
+    "front": {
+      "full": "-1.5 -2 34.5 96.5",
+      "upper": "-0.5 9 32.5 44.5",
+      "torso": "6 9 20 39",
+      "arms": "-2.5 10 36.5 43",
+      "lower": "4.5 36 22.5 59.5"
+    },
+    "back": {
+      "full": "35 -2 35.5 96.6",
+      "upper": "36.4 3.5 32.2 41.5",
+      "torso": "36.4 3.5 32.2 41.5",
+      "arms": "34 12 37.5 40.5",
+      "lower": "41 36.5 23 59"
+    }
+  },
+  "REGION_IDS": {
+    "front": {
+      "full": null,
+      "arms": [
+        "shoulder-front-left",
+        "shoulder-side-left",
+        "shoulder-front-right",
+        "shoulder-side-right",
+        "biceps-left",
+        "biceps-right",
+        "forearm-left",
+        "forearm-right",
+        "elbow-left",
+        "elbow-right",
+        "hand-left",
+        "hand-right",
+        "chest-upper-left",
+        "chest-upper-right",
+        "chest-lower-left",
+        "chest-lower-right",
+        "abs-upper-left",
+        "abs-upper-right"
+      ],
+      "upper": [
+        "neck-left",
+        "neck-right",
+        "shoulder-front-left",
+        "shoulder-side-left",
+        "shoulder-front-right",
+        "shoulder-side-right",
+        "biceps-left",
+        "biceps-right",
+        "forearm-left",
+        "forearm-right",
+        "chest-upper-left",
+        "chest-upper-right",
+        "chest-lower-left",
+        "chest-lower-right",
+        "abs-upper-left",
+        "abs-upper-right",
+        "abs-lower-left",
+        "abs-lower-right",
+        "obliques-left",
+        "obliques-right",
+        "serratus-anterior-left",
+        "serratus-anterior-right",
+        "hip-flexor-left",
+        "hip-flexor-right"
+      ],
+      "torso": [
+        "chest-upper-left",
+        "chest-upper-right",
+        "chest-lower-left",
+        "chest-lower-right",
+        "abs-upper-left",
+        "abs-upper-right",
+        "abs-lower-left",
+        "abs-lower-right",
+        "obliques-left",
+        "obliques-right",
+        "serratus-anterior-left",
+        "serratus-anterior-right",
+        "neck-left",
+        "neck-right"
+      ],
+      "lower": [
+        "quads-left",
+        "quads-right",
+        "adductors-left",
+        "adductors-right",
+        "hip-flexor-left",
+        "hip-flexor-right",
+        "knee-left",
+        "knee-right",
+        "tibialis-anterior-left",
+        "tibialis-anterior-right",
+        "foot-left",
+        "foot-right"
+      ]
+    },
+    "back": {
+      "full": null,
+      "arms": [
+        "deltoid-rear-left",
+        "deltoid-rear-right",
+        "triceps-long-left",
+        "triceps-lateral-left",
+        "triceps-long-right",
+        "triceps-lateral-right",
+        "forearm-flexors-left",
+        "forearm-extensors-left",
+        "forearm-flexors-right",
+        "forearm-extensors-right",
+        "hand-back-left",
+        "hand-back-right",
+        "lats-upper-left",
+        "lats-upper-right",
+        "lats-mid-left",
+        "lats-mid-right"
+      ],
+      "upper": [
+        "nape",
+        "traps-upper-left",
+        "traps-mid-left",
+        "traps-lower-left",
+        "traps-upper-right",
+        "traps-mid-right",
+        "traps-lower-right",
+        "lats-upper-left",
+        "lats-mid-left",
+        "lats-lower-left",
+        "lats-upper-right",
+        "lats-mid-right",
+        "lats-lower-right",
+        "deltoid-rear-left",
+        "deltoid-rear-right",
+        "triceps-long-left",
+        "triceps-lateral-left",
+        "triceps-long-right",
+        "triceps-lateral-right",
+        "spine",
+        "lower-back-erectors-left",
+        "lower-back-erectors-right",
+        "lower-back-ql-left",
+        "lower-back-ql-right"
+      ],
+      "torso": [
+        "nape",
+        "traps-upper-left",
+        "traps-mid-left",
+        "traps-lower-left",
+        "traps-upper-right",
+        "traps-mid-right",
+        "traps-lower-right",
+        "lats-upper-left",
+        "lats-mid-left",
+        "lats-lower-left",
+        "lats-upper-right",
+        "lats-mid-right",
+        "lats-lower-right",
+        "spine",
+        "lower-back-erectors-left",
+        "lower-back-erectors-right",
+        "lower-back-ql-left",
+        "lower-back-ql-right"
+      ],
+      "lower": [
+        "gluteus-maximus-left",
+        "gluteus-medius-left",
+        "gluteus-maximus-right",
+        "gluteus-medius-right",
+        "hamstrings-medial-left",
+        "hamstrings-lateral-left",
+        "hamstrings-medial-right",
+        "hamstrings-lateral-right",
+        "knee-back-left",
+        "knee-back-right",
+        "calves-gastroc-medial-left",
+        "calves-gastroc-lateral-left",
+        "calves-soleus-left",
+        "calves-gastroc-medial-right",
+        "calves-gastroc-lateral-right",
+        "calves-soleus-right",
+        "foot-back-left",
+        "foot-back-right"
+      ]
+    }
+  }
+}

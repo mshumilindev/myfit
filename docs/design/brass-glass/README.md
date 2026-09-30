@@ -5,25 +5,25 @@ Full redesign of every screen, state, drawer and role of Spotter in the **brass 
 
 ## Live canvases (Claude Design)
 
-| Page | Area | Boards | Canvas |
-|---|---|---|---|
-| P00 | Foundations (kit) | 7 | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
-| P01 | Today | 47 | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
-| P02 | Widgets | 15 | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
-| P03 | Start workout | 56 | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
-| P04 | Session | 80 | [canvas 2](https://claude.ai/artifact/FmkZi76U1vBSeM6YvZk58o) |
-| P05 | Summary | 13 | [canvas 2](https://claude.ai/artifact/FmkZi76U1vBSeM6YvZk58o) |
-| P06 | History | 23 | [canvas 2](https://claude.ai/artifact/FmkZi76U1vBSeM6YvZk58o) |
-| P07 | Progress | 37 | [canvas 3](https://claude.ai/artifact/JzobQyBmgJwUxq5QPoTDGS) |
-| P08 | Plan | 64 | [canvas 3](https://claude.ai/artifact/JzobQyBmgJwUxq5QPoTDGS) |
-| P09 | Exercises | 58 | [canvas 4](https://claude.ai/artifact/MVKBaL1Xp4waX2U9hKh8KG) |
-| P10 | Health | 92 | [canvas 4](https://claude.ai/artifact/MVKBaL1Xp4waX2U9hKh8KG) |
-| P11 | Gyms | 33 | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
-| P12 | Atlas | 40 | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
-| P13 | Apex | 35 | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
-| P14 | Me / Settings | 58 | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
-| P15 | Auth & onboarding | 31 | [canvas 6](https://claude.ai/artifact/6r3fPtTcV7SKhAFjNRrmDi) |
-| P16 | Trainer / roles | 69 | [canvas 6](https://claude.ai/artifact/6r3fPtTcV7SKhAFjNRrmDi) |
+| Page | Area              | Boards | Canvas                                                        |
+| ---- | ----------------- | ------ | ------------------------------------------------------------- |
+| P00  | Foundations (kit) | 7      | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
+| P01  | Today             | 47     | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
+| P02  | Widgets           | 15     | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
+| P03  | Start workout     | 56     | [canvas 1](https://claude.ai/artifact/VaC5Zcs8WMPESB62XruLZh) |
+| P04  | Session           | 80     | [canvas 2](https://claude.ai/artifact/FmkZi76U1vBSeM6YvZk58o) |
+| P05  | Summary           | 13     | [canvas 2](https://claude.ai/artifact/FmkZi76U1vBSeM6YvZk58o) |
+| P06  | History           | 23     | [canvas 2](https://claude.ai/artifact/FmkZi76U1vBSeM6YvZk58o) |
+| P07  | Progress          | 37     | [canvas 3](https://claude.ai/artifact/JzobQyBmgJwUxq5QPoTDGS) |
+| P08  | Plan              | 64     | [canvas 3](https://claude.ai/artifact/JzobQyBmgJwUxq5QPoTDGS) |
+| P09  | Exercises         | 58     | [canvas 4](https://claude.ai/artifact/MVKBaL1Xp4waX2U9hKh8KG) |
+| P10  | Health            | 92     | [canvas 4](https://claude.ai/artifact/MVKBaL1Xp4waX2U9hKh8KG) |
+| P11  | Gyms              | 33     | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
+| P12  | Atlas             | 40     | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
+| P13  | Apex              | 35     | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
+| P14  | Me / Settings     | 58     | [canvas 5](https://claude.ai/artifact/5YM7e7Bp46rv3RJ6GHhXBm) |
+| P15  | Auth & onboarding | 31     | [canvas 6](https://claude.ai/artifact/6r3fPtTcV7SKhAFjNRrmDi) |
+| P16  | Trainer / roles   | 69     | [canvas 6](https://claude.ai/artifact/6r3fPtTcV7SKhAFjNRrmDi) |
 
 Music V2 reference: https://claude.ai/artifact/FBbRifvxyDihKjD2HcFsCf
 

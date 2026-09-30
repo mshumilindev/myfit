@@ -268,6 +268,7 @@ Every literal in feature CSS is a token; `tests/kit-guard.test.ts` fails on raw 
 Update: Overview drill-ins now use the round icon back button + title in ONE 36px row (`OverviewBack` has no text). In sheets only the grabber is pinned (`.sheet-grip`, sticky, no layout space); a row with `.uiback` pins below it and fills only once content scrolls under it. `--color-neutral-600` raised to #80858a (≥4.5:1 on the glass background).
 
 ### Update: states, labels, button sizes
+
 - `components/ui/States.css` owns hover/press for every interactive kit primitive (`--state-hover`, `--state-press`); feature CSS must not add its own `:active`/`:hover` transforms.
 - Button heights come only from kit sizes (sm 36 / md 46 / lg 52); feature classes (`pb-start`, `exl-new`, `pg-tile-members`) must not set `min-height`/`font-size`.
 - Disabled buttons are opaque (`filter`), never `opacity`; `--btn-under` keeps glass buttons opaque over content.
@@ -275,6 +276,7 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 - `RailItem` accepts `glyph` (text/number marker) besides `icon`.
 
 ### Update: radii, chips, buttons (iteration 19b)
+
 - Radius vocabulary (Brass Glass): card 18 (`--radius-lg`), hero 24, inset rows/tiles 12 (`--radius-md`), thumbs 8 (`--radius-sm`), fields 14, pills 999. `glass.css` forces card/hero radius with `!important` so a feature class can no longer change a Card's radius.
 - Small status labels are `Tag`; selectable/info pills are `Chip` (`size="sm"`, `muted`, `nested` for a chip inside a clickable card; label may hold figure + text + count). Do not add `.tag`/`*-chip` classes.
 - Muscle maps use `--body-dim` / `--body-dim-stroke` (light palette grey in glass, dark in graphite). Raster physique figures stay dark.
@@ -282,11 +284,13 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 - Page header → first block is exactly 16px on phone (`.screen` gap rule at the end of `redesign.css`); do not add `ug-*` gap utilities or body padding-top on screens with a header row.
 
 ## Update: iteration 19c
+
 - Remaining bespoke pills/badges (hours, live, current-exercise, muscle-target, feat/standard tags, plate, equipment, sleep-auto, activity category, sub-muscle) now use kit `Tag`.
 - Primary/secondary Button colour overrides (Mastery, Plate, Circuit, Session) removed; variants own colour.
 - `.mst-head` joined the shared page-header rules (26px title, 16px gap).
 
 ## Update: iteration 19d
+
 - `SearchField` is the ONLY search input (ref, id, aria-*, onFocus/onKeyDown, `hint` while empty). Exercise picker and both Log-activity searches now use it; `.la-search` field overrides removed.
 - Phone drawers (`.sheet`) have no close ×: grabber, swipe and scrim close them (`.sheet-close` is hidden < 720px). Sheets never carry an extra Back/× of their own (Exercise editor, Physique, Focus fixed). Desktop dialogs keep the ×.
 - Sticky search strips (`.la-sticky`) have no plate in Brass Glass.
@@ -294,6 +298,7 @@ Update: Overview drill-ins now use the round icon back button + title in ONE 36p
 - HealthForm: "Still ongoing" is disabled (with a hint) while start/end date is in the future.
 
 ## Update: set-type colour coding (iteration 19e)
+
 - Set-entry card (`.gset`) in Brass Glass: kind (warm-up blue, drop violet, reverse teal, static-dynamic pink, PR gold, failure red) tints plate + ring + glow via `::after` (glass.css).
 - Set editor: type chips, load/type/effort cards take the same hue (`se-kind-*` → `--kc`).
 - Options sheet footer: Delete exercise on This set / Exercise tabs, Discard session on Session tab; the Exercise tab no longer repeats the delete row.
