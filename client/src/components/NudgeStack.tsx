@@ -230,7 +230,14 @@ export function NudgeStack({ nudges }: { nudges: Nudge[] }) {
             <div className="nudge-scrim" onClick={close} />
             <div className="nudge-sheet" role="dialog">
               <div className="nudge-sheet-head">
-                <IconButton icon="x-circle" onClick={close} label={t.srClose} />
+                <IconButton
+                  icon="x"
+                  variant="fill"
+                  shape="round"
+                  size="sm"
+                  onClick={close}
+                  label={t.srClose}
+                />
               </div>
               <div className="nudge-sheet-scroll">
                 {/* Fixed importance order in the overlay — independent of the
