@@ -15993,6 +15993,7 @@ button.badge {
    ========================================================================== */
 .ch-screen {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--space-4);
   min-height: 0;
@@ -16010,9 +16011,13 @@ button.badge {
 }
 .ch-body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--space-6);
   min-height: 0;
+}
+.ch-body > .ch-sect:last-child {
+  flex: 1;
 }
 .ch-sect {
   display: flex;
@@ -16580,9 +16585,6 @@ button.badge {
   margin-top: var(--s-4);
 }
 /* Pager spacing inside the catalog section. */
-.ch-catalog + .uipager {
-  margin-top: var(--s-16);
-}
 
 /* ============================================================================
    Suite Shell + Apex (gamification app).

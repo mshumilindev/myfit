@@ -15,8 +15,8 @@ function Demo({ maxPage }: { maxPage: number }) {
   return <Pager page={page} maxPage={maxPage} onPage={setPage} />;
 }
 
-/** Few pages — every number shown. */
+/** Few pages. */
 export const Short: Story = { render: () => <Demo maxPage={3} /> };
 
-/** Many pages — first, a window around the current, last, with gaps. */
+/** Many pages — same control. */
 export const Long: Story = { render: () => <Demo maxPage={24} /> };

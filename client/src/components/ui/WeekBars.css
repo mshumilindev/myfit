@@ -1,0 +1,25 @@
+/* WeekBars — kit primitive. Bars take their colour from the tone class (--t-base). */
+.uiwb {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--s-4);
+  height: 18px;
+}
+.uiwb-bar {
+  display: block;
+  width: 8px;
+  border-radius: var(--r-2);
+  background: var(--t-base);
+}
+.uiwb-bar--1 {
+  height: 6px;
+}
+.uiwb-bar--2 {
+  height: 12px;
+}
+.uiwb-bar--3 {
+  height: 18px;
+}
+.uiwb-bar--none {
+  background: var(--color-neutral-700);
+}

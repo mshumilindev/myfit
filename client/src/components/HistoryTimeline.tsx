@@ -42,7 +42,8 @@ import type { MuscleGroup } from '../data/exercises';
 import { nightDurationMin, sleepKindOf } from '../sleep';
 import { useStore } from '../store';
 import { useState, type ReactNode } from 'react';
-import type { HealthFormSpec } from '../health';
+import { dayToTs, type HealthFormSpec } from '../health';
+import type { WeekBar } from './ui/WeekBars';
 import { PeriodEditSheet } from './PeriodEditSheet';
 import { fmtRange, illnessKindName, injuryLabel, periodLabel } from '../views/health/parts';
 import type { LocaleId } from '../i18n';
@@ -134,6 +135,7 @@ export function HistoryTimeline({
   bodyKg,
   maxDays,
   dayOffset = 0,
+  range,
   onOpenWorkout,
   onOpenActivity,
   onOpenSleep,
@@ -156,6 +158,8 @@ export function HistoryTimeline({
   maxDays?: number;
   /** Skip this many of the most-recent days first (for paging). */
   dayOffset?: number;
+  /** Show only these days (day keys, inclusive) — one week per page. */
+  range?: { fromDay: number; toDay: number };
   onOpenWorkout: (id: string) => void;
   /** Open a logged activity's detail/edit view. Omit to keep rows non-interactive. */
   onOpenActivity?: (id: string) => void;
@@ -183,7 +187,7 @@ export function HistoryTimeline({
   const lookback = sctx.lookback;
 
   const entries: TlDay[] = [];
-  const cur = new Date(todayMid);
+  const cur = new Date(range ? Math.min(todayMid.getTime(), dayToTs(range.toDay)) : todayMid);
   for (let guard = 0; guard < 400; guard++) {
     const ts = cur.getTime();
     const dk = dayBucket(ts);
@@ -195,6 +199,7 @@ export function HistoryTimeline({
       entries.push({ bucket: dk, ts: ets, items, state });
     }
     // Stop once we've covered every logged day and the missed-lookback window.
+    if (range && dk <= range.fromDay) break;
     if (dk < oldestLogged && todayK - dk > lookback) break;
     if (maxDays != null && entries.length >= dayOffset + maxDays) break;
     cur.setDate(cur.getDate() - 1);
@@ -290,6 +295,28 @@ function dayStateOf(dk: number, ts: number, items: Item[], c: StateCtx): DayStat
     return 'rest';
   if (items.length > 0) return 'logged';
   return null;
+}
+
+/** Day → the bar shown in a week's mini chart (WeekBars): the SAME day state the
+ *  timeline uses, coloured by its family; a workout always wins (green). */
+export function useDayBars(
+  workouts: Workout[],
+  activities: Activity[],
+  sleeps: SleepNight[],
+): (dk: number) => WeekBar {
+  const sctx = useStateCtx({});
+  const by = new Map<number, Item[]>();
+  for (const g of buildHistoryDays(workouts, activities, sleeps)) by.set(dayBucket(g.ts), g.items);
+  return (dk) => {
+    if (dk > sctx.todayK) return { level: 1 };
+    const state = dayStateOf(dk, dayToTs(dk), by.get(dk) ?? [], sctx);
+    if (!state) return { level: 1 };
+    const active = state === 'rest' && sctx.coveringRest(dk)?.mode === 'active';
+    return {
+      tone: active ? 'active' : STATE_TONE[state],
+      level: state === 'trained' ? 3 : state === 'logged' ? 1 : 2,
+    };
+  };
 }
 
 interface PeriodRow {

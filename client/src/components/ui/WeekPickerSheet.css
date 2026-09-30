@@ -1,0 +1,29 @@
+/* WeekPickerSheet — as tall as its rows (up to the screen height); the weeks are
+   paged so nothing scrolls inside; the pager sits at the bottom edge. */
+.sheet.uiwps {
+  overflow: hidden;
+}
+.uiwps-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+.uiwps-title {
+  font-size: var(--fs-22);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.uiwps-hint {
+  font-size: var(--fs-13);
+  color: var(--color-text-muted);
+}
+.uiwps-list {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+.sheet.uiwps > .uipager {
+  flex: none;
+  padding-bottom: var(--s-4);
+}
