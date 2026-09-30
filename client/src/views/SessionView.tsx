@@ -222,7 +222,7 @@ import { GymKitCard, GymKitTray, GymKitUndo } from '../components/GymKit';
 import { gymHasNoList, type KitEvidence } from '../gymEvidence';
 import { warmupRamp } from '../sessionBuilder';
 import { directReadiness } from '../picker';
-import { READINESS_COLOR, muscleReadiness } from '../recovery';
+import { READINESS_COLOR, carryOverSets, muscleReadiness } from '../recovery';
 import { dayReadoutLabel } from '../data/daySuggest';
 import { drawShareCard, cardBlob, type ShareModel, type ShareFormat } from '../data/shareCard';
 import {
@@ -733,6 +733,20 @@ export function SessionView(props: {
   // "Next up" after the workout (design log-activity p01–p05), summary only.
   const nextUp = useNextUp(workout, summary && !props.past, props.shell);
 
+  // Fatigue the muscles bring INTO this session (earlier sessions not yet
+  // recovered, faded over each muscle's own window) — the base of every meter.
+  const workoutId = workout?.id;
+  const workoutStart = workout?.startedAt;
+  const carry = useMemo(
+    () =>
+      workoutId !== undefined && workoutStart !== undefined
+        ? carryOverSets(
+            store.workouts.filter((w) => w.finishedAt !== null && w.id !== workoutId),
+            workoutStart,
+          )
+        : new Map<MuscleGroup, number>(),
+    [store.workouts, workoutId, workoutStart],
+  );
   if (!workout) return null;
 
   const sets = workoutSets(workout);
@@ -1248,6 +1262,12 @@ export function SessionView(props: {
   function sessionTally(): Map<string, number> {
     return muscleTally(workout!.exercises.filter(isStrengthExercise).map(liftOf));
   }
+  /** Today's tally plus what the muscles carried in from earlier sessions. */
+  function loadTally(): Map<string, number> {
+    const m = new Map(sessionTally());
+    for (const [k, v] of carry) m.set(k, (m.get(k) ?? 0) + v);
+    return m;
+  }
   /** What the lift's main muscle had done before this lift started. */
   function priorBefore(ex: Exercise): number {
     const primary = resolveMuscles(ex).primary;
@@ -1256,7 +1276,10 @@ export function SessionView(props: {
     const earlier = workout!.exercises.filter(
       (e) => e.id !== ex.id && isStrengthExercise(e) && firstAt(e) < start,
     );
-    return muscleTally(earlier.map(liftOf)).get(primary) ?? 0;
+    return (
+      (muscleTally(earlier.map(liftOf)).get(primary) ?? 0) +
+      (carry.get(primary as MuscleGroup) ?? 0)
+    );
   }
   /** Per-set stimulus (bar height) and performance drop (bar colour) for rows. */
   // Personal volume tolerance: per-session plateau scales with this athlete's
@@ -1304,7 +1327,7 @@ export function SessionView(props: {
     if (!isStrengthExercise(ex) || ex.sets.length === 0) return null;
     const primary = resolveMuscles(ex).primary;
     if (!primary) return null;
-    return marginalStimulus(sessionTally().get(primary) ?? 0, plateauFor(primary));
+    return marginalStimulus(loadTally().get(primary) ?? 0, plateauFor(primary));
   }
   /** Fractional hard sets per muscle PART (upper/lower chest, delt heads). */
   function regionTally(): Map<string, number> {
@@ -1338,12 +1361,13 @@ export function SessionView(props: {
     const plateau = plateauFor(primary);
     const v = tiredVerdict({
       sets: ex.sets,
-      muscleSets: tally.get(primary) ?? 0,
+      muscleSets: loadTally().get(primary) ?? 0,
       plannedLeft: Math.max(0, (ex.plannedSets ?? 0) - ex.sets.length),
       plateau,
       dropEnough: dropToleranceFor(ex),
     });
-    if (v.enough) return { kind: 'group', muscle: primary, sets: v.sets, drop: v.drop, tally };
+    if (v.enough)
+      return { kind: 'group', muscle: primary, sets: tally.get(primary) ?? 0, drop: v.drop, tally };
     // The whole muscle still has room, but this lift's PART may be done: e.g.
     // lots of incline work — upper chest had enough, lower chest barely any.
     const parts = SPLIT_GROUPS[primary as MuscleGroup];
@@ -3177,6 +3201,7 @@ export function SessionView(props: {
                           muscle={m}
                           workout={workout!}
                           todaySets={sessionTally().get(m) ?? 0}
+                          carry={carry.get(m) ?? 0}
                           plateau={plateauFor(m)}
                         />
                       )

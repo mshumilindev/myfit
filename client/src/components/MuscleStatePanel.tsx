@@ -23,6 +23,7 @@ export function MuscleStatePanel({
   workout,
   todaySets,
   plateau,
+  carry,
 }: {
   muscle: MuscleGroup;
   /** The live session (its sets count toward today's read). */
@@ -31,6 +32,8 @@ export function MuscleStatePanel({
   todaySets: number;
   /** Personal per-session plateau for the muscle. */
   plateau: number;
+  /** Fatigue carried in from earlier sessions (fractional sets). */
+  carry?: number;
 }) {
   const { t } = useT();
   const store = useStore();
@@ -47,7 +50,7 @@ export function MuscleStatePanel({
     return { state, before, week, lm, fat };
   }, [store.workouts, workout, muscle, now]);
 
-  const worth = Math.round(marginalStimulus(todaySets, plateau) * 100);
+  const worth = Math.round(marginalStimulus(todaySets + (carry ?? 0), plateau) * 100);
   // The readiness read counts direct (primary) work only; a muscle worked
   // today as a helper is still not "stale" — call it nearly recovered.
   const state = read.state.state === 'stale' && todaySets > 0 ? 'nearly' : read.state.state;

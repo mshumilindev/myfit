@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { computeReadiness } from './recovery';
+import { carryOverSets, computeReadiness } from './recovery';
+import type { Workout } from './types';
 
 describe('computeReadiness', () => {
   it('reads 0 right after a normal session, then climbs to ready over the window', () => {
@@ -45,5 +46,43 @@ describe('computeReadiness', () => {
     const base = computeReadiness(1, 7, 3, 14);
     const boosted = computeReadiness(1, 7, 3, 14, 1);
     expect(boosted.readiness).toBeGreaterThan(base.readiness);
+  });
+});
+
+describe('carryOverSets', () => {
+  const DAYMS = 24 * 3600 * 1000;
+  const at = Date.UTC(2026, 8, 30, 12);
+  const bench = (startedAt: number, n: number) =>
+    ({
+      id: `w${startedAt}`,
+      startedAt,
+      finishedAt: startedAt + 3600_000,
+      exercises: [
+        {
+          id: 'e',
+          name: 'Barbell Bench Press - Medium Grip',
+          position: 0,
+          kind: 'strength',
+          sets: Array.from({ length: n }, (_, i) => ({
+            id: `s${i}`,
+            position: i,
+            reps: 8,
+            weight: 80,
+            type: 'working',
+          })),
+        },
+      ],
+    }) as unknown as Workout;
+
+  it('yesterday leaves a head start on the meter, and it fades with time', () => {
+    const yesterday = carryOverSets([bench(at - 1 * DAYMS, 10)], at).get('chest') ?? 0;
+    const twoDays = carryOverSets([bench(at - 2 * DAYMS, 10)], at).get('chest') ?? 0;
+    expect(yesterday).toBeGreaterThan(1);
+    expect(twoDays).toBeLessThan(yesterday);
+    expect(carryOverSets([bench(at - 9 * DAYMS, 10)], at).get('chest') ?? 0).toBe(0);
+  });
+
+  it('ignores sessions that start at or after the reference time', () => {
+    expect(carryOverSets([bench(at + DAYMS, 10)], at).size).toBe(0);
   });
 });

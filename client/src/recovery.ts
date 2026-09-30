@@ -139,6 +139,42 @@ export function muscleReadiness(
   return out;
 }
 
+/** How much of a not-yet-recovered earlier session still counts against today's
+ *  capacity. Below 1: the old sets are partly recovered even before their window
+ *  ends, and a fresh set on a tired muscle is not as bad as a set already done today. */
+export const CARRY_WEIGHT = 0.5;
+
+/**
+ * Fatigue carried INTO a session from earlier training, per muscle, in the same
+ * unit as the in-session tally (fractional hard sets). Each earlier session's
+ * dose fades linearly over that muscle's own recovery window (RECOVERY_DAYS ×
+ * dose factor, as in computeReadiness) measured at `at`, then counts at
+ * CARRY_WEIGHT. So back trained yesterday starts today's back session with a
+ * head start on the meter; back trained five days ago does not.
+ */
+export function carryOverSets(
+  finished: Workout[],
+  at: number,
+  mavOf?: (m: MuscleGroup) => number,
+): Map<MuscleGroup, number> {
+  const out = new Map<MuscleGroup, number>();
+  const since = at - LOOKBACK_DAYS * DAY;
+  for (const w of finished) {
+    if (w.startedAt >= at || w.startedAt < since) continue;
+    const days = (at - w.startedAt) / DAY;
+    for (const [m, sets] of muscleSetsInWorkout(w)) {
+      if (sets <= 0) continue;
+      const base = RECOVERY_DAYS[m] ?? 2;
+      const mav =
+        mavOf?.(m) ?? (LANDMARKS[m as keyof typeof LANDMARKS] as Landmark | undefined)?.mav ?? 12;
+      const eff = base * clamp(sets / ((mav || 12) * 0.5), 0.7, 1.6);
+      const left = 1 - clamp(days / eff, 0, 1);
+      if (left > 0) out.set(m, (out.get(m) ?? 0) + sets * left * CARRY_WEIGHT);
+    }
+  }
+  return out;
+}
+
 /** Muscles ready to train now (ready or stale), worst-recovered dropped. */
 export function readyMuscles(map: Map<MuscleGroup, MuscleReadiness>): MuscleGroup[] {
   return [...map.values()]
