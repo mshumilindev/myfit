@@ -5,13 +5,12 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   overflow: hidden;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--color-accent-300);
-  background: linear-gradient(135deg, var(--color-accent-900), var(--color-accent-700));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-300) 35%, transparent);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--color-neutral-300);
+  background: var(--color-neutral-900);
   user-select: none;
 }
 .uiav-img {

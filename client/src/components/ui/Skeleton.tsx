@@ -12,9 +12,19 @@ export interface SkeletonProps {
 }
 
 /** One shimmering placeholder block (the old `.sk`). */
-export function Skeleton({ width = '100%', height = 14, round, style, className }: SkeletonProps) {
+export function Skeleton({ width, height, round, style, className }: SkeletonProps) {
   const cls = ['uisk', round ? 'uisk--round' : '', className].filter(Boolean).join(' ');
-  return <div className={cls} style={{ width, height, ...style }} aria-hidden="true" />;
+  // A feature class that sizes the block wins; with no class and no size it fills its row.
+  const w = width ?? (className || style ? undefined : '100%');
+  const h = height ?? (className || style ? undefined : 14);
+  const sized = w !== undefined || h !== undefined || style;
+  return (
+    <div
+      className={cls}
+      style={sized ? { width: w, height: h, ...style } : undefined}
+      aria-hidden="true"
+    />
+  );
 }
 
 /** N list rows of placeholder (kit `skel_rows`): tile + two lines each. */

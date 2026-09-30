@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Switch } from './Switch';
+import { Switch, SwitchIndicator } from './Switch';
 import { Row } from '../../stories/LocaleMatrix';
 import type { Tone } from './tones';
 
@@ -47,5 +47,16 @@ export const Tones: Story = {
         <Live key={t} tone={t} size="md" />
       ))}
     </Row>
+  ),
+};
+
+/** The read-only indicator used inside a row that owns the click. */
+export const Indicator: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: 12 }}>
+      <SwitchIndicator on={false} />
+      <SwitchIndicator on />
+      <SwitchIndicator on tone="ok" size="sm" />
+    </div>
   ),
 };

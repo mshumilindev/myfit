@@ -1,0 +1,6 @@
+/* DayTimeline — kit primitive. The graphite look lives in the page's legacy
+   `hist-tl-*` rules (kept as hooks); this file only adds what the kit owns:
+   the state → colour wiring through the tone family. */
+.uidt-day {
+  --nc: var(--t-base);
+}

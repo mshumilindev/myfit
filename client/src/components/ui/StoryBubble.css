@@ -9,7 +9,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
   padding: 0;
   border: 0;
   background: none;
@@ -115,7 +115,7 @@ button.uistory:focus-visible {
 .uistory-face--more {
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 600;
 }
 
@@ -147,11 +147,11 @@ button.uistory:focus-visible {
   right: 0;
   min-width: 18px;
   height: 18px;
-  padding: 0 4px;
+  padding: 0 var(--s-4);
   border-radius: var(--radius-pill);
   background: var(--color-danger);
   color: var(--color-danger-tint);
-  font-size: 10.5px;
+  font-size: var(--fs-11);
   font-weight: 700;
   line-height: 18px;
   text-align: center;
@@ -166,14 +166,14 @@ button.uistory:focus-visible {
   width: 16px;
   height: 16px;
   padding: 0;
-  font-size: 9px;
+  font-size: var(--fs-9);
   line-height: 16px;
   color: var(--color-neutral-100);
 }
 
 .uistory-label {
   max-width: 100%;
-  font-size: 11px;
+  font-size: var(--fs-11);
   color: var(--color-neutral-300);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -192,7 +192,7 @@ button.uistory:focus-visible {
 /* Row + divider */
 .uistory-row {
   display: flex;
-  gap: 14px;
+  gap: var(--s-14);
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -202,6 +202,6 @@ button.uistory:focus-visible {
 .uistory-divider {
   flex: none;
   width: 1px;
-  margin: 8px 0 24px;
+  margin: var(--s-8) 0 var(--s-24);
   background: var(--color-divider);
 }

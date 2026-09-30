@@ -8,9 +8,9 @@
  * has its stories next to it. This in-app screen stays as a quick on-device
  * check of the tokens and the core primitives inside the real app shell.
  */
+import { BackButton } from './BackButton';
 import { useState, type ReactNode } from 'react';
 import { useT } from '../../i18n';
-import { Icon } from '../../ui';
 import { Button, IconButton, type ButtonVariant } from './Button';
 import { Card, type CardTone } from './Card';
 import { Chip, ChipGroup, type ChipTone } from './Chip';
@@ -79,9 +79,7 @@ export function Gallery({ onClose }: { onClose: () => void }) {
   return (
     <div className="screen uik">
       <div className="uik-top">
-        <button className="icon-btn" aria-label={t.backAction} onClick={onClose}>
-          <Icon name="caret-left" />
-        </button>
+        <BackButton label={t.backAction} onClick={onClose} />
         <span className="uik-title">UI Kit</span>
       </div>
       <p className="uik-sub">

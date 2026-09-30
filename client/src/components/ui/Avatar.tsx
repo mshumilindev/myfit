@@ -11,12 +11,10 @@ export interface AvatarProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 export function initialsOf(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 /**
@@ -25,7 +23,7 @@ export function initialsOf(name: string): string {
  */
 export function Avatar({ src, name, size = 40, className, style, ...rest }: AvatarProps) {
   const cls = ['uiav', src ? 'uiav--img' : 'uiav--ini', className].filter(Boolean).join(' ');
-  const fs = Math.round(size * 0.4);
+  const fs = Math.max(10, Math.round(size * 0.38));
   return (
     <span
       className={cls}
@@ -34,7 +32,7 @@ export function Avatar({ src, name, size = 40, className, style, ...rest }: Avat
       aria-label={name}
       {...rest}
     >
-      {src ? <img className="uiav-img" src={src} alt="" /> : initialsOf(name)}
+      {src ? <img className="uiav-img lighten" src={src} alt="" /> : initialsOf(name)}
     </span>
   );
 }

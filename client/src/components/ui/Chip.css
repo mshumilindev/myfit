@@ -6,11 +6,11 @@
 .uichip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 13px;
-  border-radius: 999px;
+  gap: var(--s-6);
+  padding: var(--s-10) var(--s-14);
+  border-radius: var(--r-pill);
   font-family: var(--font);
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -28,9 +28,9 @@ button.uichip {
 }
 
 .uichip--sm {
-  padding: 6px 10px;
-  font-size: 11.5px;
-  gap: 5px;
+  padding: var(--s-6) var(--s-10);
+  font-size: var(--fs-12);
+  gap: var(--s-6);
 }
 
 /* Static tones */
@@ -60,6 +60,28 @@ button.uichip {
   color: var(--color-rest-200);
 }
 
+/* A chip never outgrows its row: long labels truncate. */
+.uichip {
+  max-width: 100%;
+}
+
+/* Label may hold a figure + text + count: lay them out as one row. */
+.uichip-l {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-6);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dimmed ink (secondary information) */
+.uichip--muted:not(.is-selected) {
+  color: var(--color-neutral-500);
+}
+
 /* Selected (the common selectable-chip active look) */
 .uichip.is-selected {
   background: var(--color-accent-900);
@@ -76,5 +98,11 @@ button.uichip {
 .uichip-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--s-8);
+}
+
+/* photo: a frosted chip that sits on top of imagery. */
+.uichip.uichip--photo {
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  color: var(--color-text);
 }

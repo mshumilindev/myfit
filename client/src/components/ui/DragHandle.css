@@ -7,7 +7,7 @@
   display: inline-grid;
   place-items: center;
   color: var(--color-text-faint);
-  font-size: 15px;
+  font-size: var(--fs-15);
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
@@ -31,7 +31,7 @@
 .uidrag.is-pinned {
   cursor: default;
   color: var(--color-neutral-700);
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .uidrag.is-pinned:hover {
   background: none;

@@ -1,0 +1,382 @@
+/* Overlays — Spotter UI kit primitives: toast/snackbar, scrim, sheet, dialog. Tokens only. */
+.toast-holder {
+  position: fixed;
+  left: 18px;
+  right: 18px;
+  /* Top of screen, clearing the status-bar / notch safe-area inset. */
+  top: calc(12px + var(--safe-top));
+  z-index: var(--z-40);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  pointer-events: none;
+}
+
+.toast,
+.snackbar,
+.notice {
+  display: flex;
+  align-items: center;
+  gap: var(--s-10);
+  padding: var(--s-12) var(--s-14);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-left: 3px solid var(--color-neutral-600);
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-13);
+  color: var(--color-neutral-200);
+  pointer-events: auto;
+}
+.toast > i,
+.snackbar > i,
+.notice > i {
+  font-size: var(--fs-17);
+  flex: none;
+  color: var(--color-neutral-400);
+}
+
+/* Semantic accent = left bar + icon tint; the card stays the same for every
+   kind, so toast/snackbar/update/notice read as one family (not four looks). */
+.toast.ok {
+  border-left-color: var(--color-ok);
+}
+.toast.ok > i {
+  color: var(--color-ok);
+}
+.toast.danger {
+  border-left-color: var(--color-danger);
+}
+.toast.danger > i {
+  color: var(--color-danger);
+}
+.toast.update {
+  border-left-color: var(--color-accent);
+}
+.toast.update > i {
+  color: var(--color-accent);
+}
+.snackbar {
+  border-left-color: var(--color-accent);
+}
+.snackbar > i {
+  color: var(--color-accent);
+}
+.notice {
+  border-left-color: var(--color-accent);
+}
+.notice > i {
+  color: var(--color-accent);
+}
+
+/* Functional extras (behaviour unchanged). */
+.toast .update-text {
+  flex: 1;
+}
+.snackbar .snack-text {
+  flex: 1;
+}
+.snackbar .snack-count {
+  font-size: var(--fs-11);
+  color: var(--color-neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Sheets & dialogs ----------------------------------------------------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--c-0a0b0d) 60%, transparent);
+  z-index: var(--z-50);
+  animation: scrimIn 0.22s ease both;
+}
+.scrim.scrim-closing {
+  animation: scrimOut 0.22s ease forwards;
+}
+@keyframes scrimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scrimOut {
+  to {
+    opacity: 0;
+  }
+}
+
+.sheet {
+  /* Phone: a bottom drawer with rounded shoulders and a grabber (S-18,
+     SS-2/DS-1/DS-3). Content-height by default; drag the grabber to expand to
+     full or flick down to dismiss. */
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: auto;
+  bottom: 0;
+  z-index: var(--z-51);
+  /* Frosted graphite liquid glass drawer — the page blurs through it. */
+  background: color-mix(in srgb, var(--color-surface) 62%, transparent);
+  backdrop-filter: blur(24px) saturate(1.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--c-ffffff) 8%, transparent),
+    var(--shadow-lg);
+  padding: var(--space-4) var(--gutter) calc(var(--space-8) + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: auto;
+  max-height: calc(100dvh - 46px);
+  overflow-y: auto;
+  /* 'backwards' (not 'both') so the finished slide-in does NOT keep overriding
+     the inline drag transform via forwards-fill. */
+  animation: sheetIn 0.26s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  transition:
+    transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1),
+    height 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+/* Following the finger — no easing. (Do NOT toggle `animation` here: setting it
+   to none and back re-triggers the slide-in on release, which makes the sheet
+   jump down to the bottom and replay. Only the transition is suppressed.) */
+.sheet.sheet-dragging {
+  transition: none;
+}
+/* Expanded to (near) full screen via a grabber drag-up. */
+.sheet.sheet-full {
+  height: calc(100dvh - var(--safe-top, 0px) - 8px);
+  max-height: none;
+}
+/* Slide out before the parent unmounts — the inline transform:translateY(100%)
+   (set while closing) rides the transform transition down from wherever the
+   sheet currently sits, so a flick-dismiss stays continuous. */
+.sheet.sheet-closing {
+  animation: none;
+}
+@keyframes sheetIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@media (min-width: 720px) {
+  /* Desktop panels aren't bottom drawers — don't slide or drag them. */
+  .sheet {
+    animation: none;
+    transition: none;
+  }
+}
+
+.sheet.backfill-sheet {
+  width: auto;
+  gap: var(--space-4);
+}
+
+.sheet-chrome {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: none;
+  min-height: 52px;
+  padding: var(--s-12) var(--s-14) 0;
+  /* The grabber owns vertical drags; keep the browser from scrolling instead. */
+  touch-action: none;
+  cursor: grab;
+}
+.sheet-dragging .sheet-chrome {
+  cursor: grabbing;
+}
+/* One chrome for every sheet: grabber centred on top (touch), close × in the top-right corner. */
+.sheet-grip .grabber {
+  display: block;
+  width: 34px;
+  height: 4px;
+  border-radius: var(--r-2);
+  background: var(--color-neutral-700);
+}
+@media (min-width: 720px) {
+  .sheet-chrome {
+    min-height: 44px;
+    cursor: default;
+  }
+  .sheet-grip {
+    display: none !important;
+  }
+}
+
+@media (max-width: 719px) {
+  .sheet.sheet-keyboard-expanded {
+    top: var(--sheet-keyboard-top, 0px);
+    bottom: auto;
+    height: var(--sheet-keyboard-height, 100dvh);
+    max-height: none;
+    border-radius: 0;
+    padding-top: max(var(--space-4), var(--safe-top));
+    overscroll-behavior: contain;
+  }
+}
+
+.dialog-scrim {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--c-0a0b0d) 66%, transparent);
+  display: grid;
+  place-items: center;
+  padding: var(--s-24);
+  z-index: var(--z-60);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--s-18);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dialog-title {
+  font-size: var(--fs-17);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--s-10);
+  margin: 0;
+}
+
+.dialog-title i {
+  font-size: var(--fs-17);
+  color: var(--color-danger);
+}
+
+.dialog-body {
+  font-size: var(--fs-13);
+  line-height: 1.55;
+  color: var(--color-neutral-400);
+  margin: 0;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: var(--s-10);
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+.sheet-rule {
+  height: 1px;
+  background: var(--color-divider);
+  margin: var(--s-6) var(--s-10);
+}
+
+/* One rule for the gap under the chrome: whatever leads the sheet (title,
+   head, card, field) sits exactly one sheet-gap below it — feature CSS never
+   adds its own top margin/padding to the first block. */
+.sheet > .sheet-chrome {
+  margin-bottom: calc(var(--s-16) - var(--sheet-gap, var(--space-4)));
+  margin-top: calc(-1 * var(--space-4));
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: calc(var(--gutter) + var(--s-14));
+  padding-top: calc(var(--space-4) + var(--s-12));
+  min-height: calc(var(--sheet-chrome-h) + var(--space-4));
+}
+/* The grabber (drag handle) is the only chrome that stays put while the body
+   scrolls; it takes no layout space and floats over the top edge. */
+.sheet > .sheet-grip {
+  position: sticky;
+  top: calc(-1 * var(--space-4));
+  z-index: var(--z-30);
+  flex: none;
+  height: 0;
+  margin-top: calc(-1 * var(--space-4));
+  align-self: center;
+  width: 96px;
+  touch-action: none;
+  cursor: grab;
+}
+.sheet > .sheet-grip::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(var(--s-28) + var(--space-4));
+}
+.sheet > .sheet-grip .grabber {
+  position: absolute;
+  top: calc(var(--s-8) + var(--space-4));
+  left: 50%;
+  transform: translateX(-50%);
+}
+.sheet {
+  --sheet-chrome-h: 52px;
+}
+/* Phone drawers have no × at all: the grabber, a swipe down and the scrim close
+   them. The chrome shrinks to the grabber zone. (Desktop dialogs keep the ×.) */
+@media (max-width: 719.98px) {
+  .sheet {
+    --sheet-chrome-h: 36px;
+  }
+  .sheet-close {
+    display: none;
+  }
+}
+@media (min-width: 720px) {
+  .sheet {
+    --sheet-chrome-h: 44px;
+  }
+}
+.sheet > .sheet-chrome + * {
+  margin-top: 0 !important;
+}
+.sheet > .sheet-chrome + .sheet-head,
+.sheet > .sheet-chrome + [class*='sheet-title'],
+.sheet > .sheet-chrome + [class*='sheet-head'] {
+  padding-top: 0 !important;
+}
+
+/* A sheet that carries a ‹ Back row keeps that row (back button + whatever
+   shares its line: title, actions) pinned while the body scrolls beneath. */
+.sheet :is(div, header):has(> .uiback) {
+  position: sticky;
+  top: calc(var(--s-28) - var(--space-4));
+  z-index: var(--z-20);
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
+  padding-block: var(--s-6);
+}
+
+/* Pinned rows look exactly like the resting sheet; only once content actually
+   scrolls under them do they take a surface so text does not show through. */
+@keyframes sheet-pin-fill {
+  to {
+    background-color: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .sheet :is(div, header):has(> .uiback) {
+    animation: sheet-pin-fill linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: 0 var(--s-16);
+  }
+}
+/* Under the grabber: the strip above a pinned row takes the same fill. */
+.sheet :is(div, header):has(> .uiback)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: var(--s-28);
+  background: inherit;
+  pointer-events: none;
+}

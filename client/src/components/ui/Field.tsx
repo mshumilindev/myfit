@@ -12,6 +12,8 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   lead?: ReactNode;
   /** Trailing content (a unit, a clear button). */
   trail?: ReactNode;
+  /** Well-less inline variant for a value inside a list row (no ring, no padding). */
+  bare?: boolean;
 }
 
 /**
@@ -21,10 +23,12 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
  * NumberStepper; typed times in TimeInput.
  */
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
-  { label, error, hint, lead, trail, className, id, ...rest },
+  { label, error, hint, lead, trail, bare, className, id, ...rest },
   ref,
 ) {
-  const cls = ['uifield', error ? 'uifield--err' : '', className].filter(Boolean).join(' ');
+  const cls = ['uifield', error ? 'uifield--err' : '', bare ? 'uifield--bare' : '', className]
+    .filter(Boolean)
+    .join(' ');
   return (
     <label className={cls}>
       {label != null && <span className="uifield-l">{label}</span>}

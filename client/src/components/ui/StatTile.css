@@ -2,11 +2,11 @@
 .uistat {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-6);
   min-width: 0;
 }
 .uistat-l {
-  font-size: 10.5px;
+  font-size: var(--fs-11);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -21,11 +21,11 @@
 .uistat-row {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: var(--s-6);
   min-width: 0;
 }
 .uistat-v {
-  font-size: 28px;
+  font-size: var(--fs-28);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.05;
@@ -33,33 +33,33 @@
   color: var(--color-text);
 }
 .uistat--big .uistat-v {
-  font-size: 44px;
+  font-size: var(--fs-44);
   letter-spacing: -0.03em;
   line-height: 1;
 }
 .uistat-u {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-neutral-400);
 }
 .uistat-d {
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 600;
   color: var(--t-base);
 }
 .uistat-bar {
   display: block;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
   overflow: hidden;
 }
 .uistat-bar > span {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--t-base);
 }
 .uistat-s {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-neutral-500);
 }

@@ -7,7 +7,7 @@ import './Card.css';
  * tones.ts (danger · ok · rest · accent · active · illness · injury · sleep ·
  * sport · kcal · apex · learn · atlas). */
 export type CardTone = 'neutral' | Tone;
-export type CardPad = 'sm' | 'md' | 'lg';
+export type CardPad = 'none' | 'sm' | 'md' | 'lg';
 /**
  * How much the card weighs on the screen (design rule 0b, KIT_RULES.md):
  *  - `hero`  — THE focal block of a screen, exactly one per screen (brass glass,
@@ -24,6 +24,10 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   tone?: CardTone;
   pad?: CardPad;
   emphasis?: CardEmphasis;
+  /** Solid surface instead of glass — for cards that stack over each other (decks). */
+  opaque?: boolean;
+  /** Only meaningful with `as="button"`. */
+  disabled?: boolean;
   /** Optional bold header rendered above the children. */
   header?: ReactNode;
   children?: ReactNode;
@@ -40,6 +44,7 @@ export function Card({
   tone = 'neutral',
   pad = 'md',
   emphasis = 'card',
+  opaque = false,
   header,
   children,
   className,
@@ -51,6 +56,7 @@ export function Card({
     tone !== 'neutral' ? toneClass(tone) : '',
     `uicard--pad-${pad}`,
     emphasis !== 'card' ? `uicard--e-${emphasis}` : '',
+    opaque ? 'uicard--opaque' : '',
     className,
   ]
     .filter(Boolean)

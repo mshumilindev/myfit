@@ -99,6 +99,10 @@ export interface ListRowProps extends RowAria {
   disabled?: boolean;
   /** Label keeps its width instead of flexing (label + input rows). */
   labelFixed?: boolean;
+  /** Compact row (Brass Glass list cards): tighter padding. */
+  dense?: boolean;
+  /** Bold label (Brass Glass): the row's name outweighs its sub-line. */
+  strong?: boolean;
   className?: string;
 }
 
@@ -124,6 +128,8 @@ export function ListRow(props: ListRowProps) {
     dim,
     disabled,
     labelFixed,
+    dense,
+    strong,
     className,
     ...aria
   } = props;
@@ -135,6 +141,8 @@ export function ListRow(props: ListRowProps) {
     tone && action ? 'is-toned' : '',
     selected ? 'is-selected' : '',
     dim ? 'is-dim' : '',
+    dense ? 'uirow--dense' : '',
+    strong ? 'uirow--strong' : '',
     className,
   ]
     .filter(Boolean)

@@ -1,14 +1,14 @@
 /* ProgressBar — Spotter UI kit primitive. Tokens only. */
 .uibar {
   width: 100%;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--color-text) 10%, transparent);
   overflow: hidden;
 }
 .uibar-fill {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--t-base);
   transition: width 240ms ease;
 }

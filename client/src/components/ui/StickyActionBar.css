@@ -18,7 +18,7 @@
   padding: var(--sp-4) var(--sp-6);
 }
 .uibar-note {
-  font-size: 12px;
+  font-size: var(--fs-12);
   line-height: 1.4;
   color: var(--color-text-muted);
 }

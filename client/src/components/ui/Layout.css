@@ -1,0 +1,159 @@
+/* Layout utilities — the only sanctioned way to lay out a one-off container from JSX
+   (replaces inline style={{ display:'flex', gap… }}). Spacing comes from --s-* tokens.
+   !important keeps the priority an inline style used to have over feature CSS. */
+.ul-flex {
+  display: flex !important;
+}
+.ul-iflex {
+  display: inline-flex !important;
+}
+.ul-grid {
+  display: grid !important;
+}
+.ul-col {
+  flex-direction: column !important;
+}
+.ul-wrap {
+  flex-wrap: wrap !important;
+}
+.ua-start {
+  align-items: flex-start !important;
+}
+.ua-center {
+  align-items: center !important;
+}
+.ua-end {
+  align-items: flex-end !important;
+}
+.ua-base {
+  align-items: baseline !important;
+}
+.uj-start {
+  justify-content: flex-start !important;
+}
+.uj-center {
+  justify-content: center !important;
+}
+.uj-end {
+  justify-content: flex-end !important;
+}
+.uj-between {
+  justify-content: space-between !important;
+}
+.uf-1 {
+  flex: 1 !important;
+}
+.uf-none {
+  flex: none !important;
+}
+.umw-0 {
+  min-width: 0 !important;
+}
+.uw-full {
+  width: 100% !important;
+}
+.utx-left {
+  text-align: left !important;
+}
+.utx-center {
+  text-align: center !important;
+}
+.utx-right {
+  text-align: right !important;
+}
+.ug-2 {
+  gap: var(--s-2) !important;
+}
+.ug-4 {
+  gap: var(--s-4) !important;
+}
+.ug-6 {
+  gap: var(--s-6) !important;
+}
+.ug-8 {
+  gap: var(--s-8) !important;
+}
+.ug-10 {
+  gap: var(--s-10) !important;
+}
+.ug-12 {
+  gap: var(--s-12) !important;
+}
+.ug-14 {
+  gap: var(--s-14) !important;
+}
+.ug-16 {
+  gap: var(--s-16) !important;
+}
+.ug-20 {
+  gap: var(--s-20) !important;
+}
+.ug-28 {
+  gap: var(--s-28) !important;
+}
+.umt-2 {
+  margin-top: var(--s-2) !important;
+}
+.umt-4 {
+  margin-top: var(--s-4) !important;
+}
+.umt-6 {
+  margin-top: var(--s-6) !important;
+}
+.umt-8 {
+  margin-top: var(--s-8) !important;
+}
+.umt-10 {
+  margin-top: var(--s-10) !important;
+}
+.umt-12 {
+  margin-top: var(--s-12) !important;
+}
+.umt-14 {
+  margin-top: var(--s-14) !important;
+}
+.umt-16 {
+  margin-top: var(--s-16) !important;
+}
+.umt-18 {
+  margin-top: var(--s-18) !important;
+}
+.umt-20 {
+  margin-top: var(--s-20) !important;
+}
+.umt-24 {
+  margin-top: var(--s-24) !important;
+}
+.umt-28 {
+  margin-top: var(--s-28) !important;
+}
+.umt-36 {
+  margin-top: var(--s-36) !important;
+}
+.umb-4 {
+  margin-bottom: var(--s-4) !important;
+}
+.umb-6 {
+  margin-bottom: var(--s-6) !important;
+}
+.umb-8 {
+  margin-bottom: var(--s-8) !important;
+}
+.umb-10 {
+  margin-bottom: var(--s-10) !important;
+}
+.umb-12 {
+  margin-bottom: var(--s-12) !important;
+}
+.umb-14 {
+  margin-bottom: var(--s-14) !important;
+}
+.umb-16 {
+  margin-bottom: var(--s-16) !important;
+}
+.ul-block {
+  display: block !important;
+}
+.umt-auto {
+  margin-top: auto !important;
+}

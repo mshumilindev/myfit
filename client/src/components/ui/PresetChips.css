@@ -10,7 +10,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   /* Room for the focus ring; chips scroll under the container edge. */
-  padding: 2px;
+  padding: var(--s-2);
   margin: -2px;
 }
 .uipc--scroll::-webkit-scrollbar {
@@ -24,16 +24,16 @@
   border: 1px solid var(--color-border);
   background: transparent;
   color: var(--color-text);
-  font: 500 13px var(--font);
+  font: 500 var(--fs-13) var(--font);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
   cursor: pointer;
 }
 .uipc--sm .uipc-chip {
   height: 32px;
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .uipc-chip:hover:not(:disabled):not(.is-on) {
   background: var(--color-tile);

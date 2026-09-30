@@ -1,0 +1,38 @@
+/* BackButton — kit primitive, the only back button. Round 36 px well in both
+   themes; glass.css only swaps the surface tokens. */
+.uiback {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-round);
+  background: var(--color-control);
+  box-shadow: inset 0 0 0 1px var(--color-divider);
+  color: var(--color-text);
+  font-size: var(--fs-18);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* With a destination label ("‹ Overview"): a pill. */
+.uiback--text {
+  width: auto;
+  padding: 0 var(--s-14) 0 var(--s-10);
+  border-radius: var(--r-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  font: inherit;
+  font-size: var(--fs-14);
+}
+.uiback-t {
+  line-height: 1;
+}
+/* On a photo: dark translucent, no ring. */
+.uiback--overlay {
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  box-shadow: none;
+  color: var(--color-text);
+}

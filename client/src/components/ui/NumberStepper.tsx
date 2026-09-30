@@ -14,8 +14,8 @@ export interface NumberStepperProps extends Omit<HTMLAttributes<HTMLDivElement>,
   unit?: string;
   /** Shown instead of the value while disabled ("BW" for bodyweight). */
   placeholder?: string;
-  /** `big` = the session set editor (32px value); `md` = plan / health (24px). */
-  size?: 'md' | 'big';
+  /** `big` = the session set editor (32px value); `md` = plan / health (24px); `xl` = a hero value flanked by two large −/+ tiles (program weeks). */
+  size?: 'md' | 'big' | 'xl';
   /** Highlight ring (the stepper the keypad / plate calculator targets). */
   focused?: boolean;
   disabled?: boolean;

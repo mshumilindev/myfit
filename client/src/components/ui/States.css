@@ -1,0 +1,70 @@
+/* Interaction states — ONE spec for every tappable kit surface.
+   hover  : brightness +8% (pointer devices only)
+   press  : scale .97 + brightness −6%  (all inputs)
+   focus  : the global :focus-visible ring (styles.css)
+   selected/on items keep their own look; they still hover and press like the rest.
+   Kept in :where() so a component can still override a single detail. */
+:where(
+  .uibtn,
+  .uiback,
+  button.uicard,
+  button.uichip,
+  .uiseg-opt,
+  button.uirow,
+  .uicat,
+  .uiopt,
+  .uisc,
+  .uiw.is-clickable,
+  .uipc-chip,
+  .uisnack-act,
+  .rail-item,
+  .tabbar button,
+  .tabbar-fab
+) {
+  transition:
+    transform 0.1s ease,
+    filter 0.12s ease,
+    background-color 0.12s ease,
+    box-shadow 0.12s ease,
+    color 0.12s ease;
+}
+@media (hover: hover) {
+  :where(
+      .uiback,
+      button.uicard,
+      button.uichip,
+      .uiseg-opt,
+      .uisc,
+      .uiw.is-clickable,
+      .uisnack-act,
+      .tabbar button,
+      .tabbar-fab
+    ):not(:disabled):not([aria-disabled='true']):hover {
+    filter: brightness(1.08);
+  }
+}
+:where(
+    .uibtn,
+    .uiback,
+    button.uicard,
+    button.uichip,
+    .uiseg-opt,
+    button.uirow,
+    .uicat,
+    .uiopt,
+    .uisc,
+    .uiw.is-clickable,
+    .uipc-chip,
+    .uisnack-act,
+    .rail-item,
+    .tabbar button,
+    .tabbar-fab
+  ):not(:disabled):not([aria-disabled='true']):active {
+  transform: scale(0.97);
+  filter: brightness(0.94);
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.uibtn, .uiback, button.uicard, button.uichip, .uiseg-opt, .rail-item):active {
+    transform: none;
+  }
+}

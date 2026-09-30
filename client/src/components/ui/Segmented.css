@@ -9,8 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font: 500 14px var(--font);
+  gap: var(--s-6);
+  font: 500 var(--fs-14) var(--font);
   cursor: pointer;
 }
 .uiseg-l {
@@ -20,7 +20,7 @@
   white-space: nowrap;
 }
 .uiseg .uiseg-opt .ui-icon {
-  font-size: 16px;
+  font-size: var(--fs-16);
   flex-shrink: 0;
 }
 .uiseg-opt:disabled {
@@ -32,23 +32,23 @@
   outline-offset: -2px;
 }
 .uiseg-opt.is-compact {
-  font-size: 12px;
+  font-size: var(--fs-12);
 }
 .uiseg--sm .uiseg-opt {
   height: 36px;
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 
 /* track: one grey trough, the selected segment raised */
 .uiseg--track {
   background: var(--color-tile);
   border-radius: var(--radius-xl);
-  padding: 3px;
-  gap: 3px;
+  padding: var(--s-4);
+  gap: var(--s-4);
 }
 .uiseg--track .uiseg-opt {
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--r-10);
   background: transparent;
   color: var(--color-text-muted);
 }
@@ -69,10 +69,10 @@
   color: var(--color-text);
 }
 .uiseg--buttons.is-dense {
-  gap: 6px;
+  gap: var(--s-6);
 }
 .uiseg.is-dense .uiseg-opt {
-  padding: 0 2px;
+  padding: 0 var(--s-2);
 }
 .uiseg--buttons .uiseg-opt:hover:not(:disabled):not(.is-on) {
   border-color: var(--color-text-faint);

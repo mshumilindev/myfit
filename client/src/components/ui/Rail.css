@@ -1,0 +1,7 @@
+/* Rail — Spotter UI kit shell primitive (desktop). The layout and tile rules
+   still live in styles.css (.rail, .rail-item, .rail-foot… inside the ≥720px
+   media query) until the desktop pass moves them here; this file only owns
+   what the kit adds. Tokens only. */
+.rail-item {
+  -webkit-tap-highlight-color: transparent;
+}

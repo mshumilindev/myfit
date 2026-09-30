@@ -49,6 +49,7 @@ export const States: Story = {
         <NumberStepper label="Sets" value={4} onChange={() => undefined} min={1} max={10} />
         <NumberStepper label="Rest" value={90} onChange={() => undefined} step={15} unit="s" />
       </Row>
+      <NumberStepper label="Weeks" value={8} onChange={() => undefined} unit="weeks" size="xl" />
       <Row>
         <NumberStepper
           label="Bodyweight"

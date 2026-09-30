@@ -2,7 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button, IconButton, type ButtonVariant } from './Button';
 import { LocaleMatrix, Row, Stack } from '../../stories/LocaleMatrix';
 
-const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'ghost', 'danger', 'rest', 'fill'];
+const VARIANTS: ButtonVariant[] = [
+  'primary',
+  'secondary',
+  'ghost',
+  'danger',
+  'rest',
+  'fill',
+  'sleep',
+  'sleep-fill',
+  'link',
+];
 
 const meta = {
   title: 'Kit/Button',

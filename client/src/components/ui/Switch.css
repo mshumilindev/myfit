@@ -63,3 +63,12 @@
     transition: none;
   }
 }
+
+/* Indicator (row-owned click): same look, state from .is-on. */
+.uisw--ind.is-on .uisw-track {
+  background: var(--t-base);
+}
+.uisw--ind.is-on .uisw-track::after {
+  transform: translateX(calc(var(--sw-w) - var(--sw-h)));
+  background: var(--color-bg);
+}

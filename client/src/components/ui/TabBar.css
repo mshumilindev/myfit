@@ -5,21 +5,22 @@
 .tabbar-wrap {
   position: relative;
   flex: none;
-  z-index: 30;
+  z-index: var(--z-30);
 }
 .tabbar {
   flex: none;
   display: grid;
   grid-auto-flow: row;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
   /* MFTabs: 8 12 22 in mockups where 22 === home indicator. On a real PWA the
      full safe-area under the labels reads as a dead band, so trim it (keeping a
      small floor for home-indicator clearance) — never 22px + safe-area. */
   padding: 8px 12px max(8px, calc(var(--safe-bottom) - 16px));
   background: var(--color-tabbar);
   border-top: 1px solid var(--color-divider);
-  z-index: 30;
-  /* The notch the Start button sits in (centre 18px below the bar's top). */
+  z-index: var(--z-30);
+}
+/* The notch the Start button sits in (centre 18px below the bar's top). */
+.tabbar-notched {
   -webkit-mask: radial-gradient(circle at 50% 18px, transparent 38px, var(--color-bg) 38.5px);
   mask: radial-gradient(circle at 50% 18px, transparent 38px, var(--color-bg) 38.5px);
 }
@@ -27,9 +28,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--s-4);
   min-width: 0;
-  padding: 6px 0;
+  padding: var(--s-6) 0;
   background: none;
   border: none;
   border-radius: var(--radius-md);
@@ -40,10 +41,10 @@
   color: var(--color-accent);
 }
 .tabbar i {
-  font-size: 20px;
+  font-size: var(--fs-20);
 }
 .tabbar span {
-  font-size: 11px;
+  font-size: var(--fs-11);
 }
 .tabbar-gap {
   display: block;
@@ -56,19 +57,52 @@
   height: 64px;
   margin-left: -32px;
   border: none;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   background: var(--color-accent);
   color: var(--color-accent-950);
   display: grid;
   place-items: center;
-  font-size: 26px;
+  font-size: var(--fs-26);
   box-shadow: 0 6px 16px color-mix(in srgb, var(--color-accent) 20%, transparent);
   cursor: pointer;
-  z-index: 31;
+  z-index: var(--z-31);
   -webkit-tap-highlight-color: transparent;
 }
-.tabbar-fab:active {
-  transform: scale(0.96);
+/* Attention ripple: two slow rings radiate from the Start button while `is-attention` (transform +
+   opacity only, staggered, off for reduced-motion users). */
+.tabbar-fab.is-attention::before,
+.tabbar-fab.is-attention::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-round);
+  border: 1px solid var(--color-accent);
+  opacity: 0;
+  pointer-events: none;
+  animation: tabbar-fab-ripple 7s ease-out infinite;
+}
+.tabbar-fab.is-attention::after {
+  animation-delay: 3.5s;
+}
+@keyframes tabbar-fab-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tabbar-fab.is-attention::before,
+  .tabbar-fab.is-attention::after {
+    animation: none;
+  }
 }
 @media (min-width: 720px) {
   .tabbar-wrap,

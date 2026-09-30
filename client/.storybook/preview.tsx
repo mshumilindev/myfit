@@ -14,29 +14,12 @@ const withLocale: Decorator = (Story, ctx) => {
   return <Story />;
 };
 
-/** Toolbar theme (graphite / brass glass) → the same root class the app sets
- * from the `brassGlass` flag (data/flags.ts + glass.css). */
-const withTheme: Decorator = (Story, ctx) => {
-  const theme = (ctx.globals.theme as string | undefined) ?? 'graphite';
-  document.documentElement.classList.toggle('theme-glass', theme === 'glass');
-  return <Story />;
-};
+/** Stories always render in Brass Glass — the app's only theme. */
+document.documentElement.classList.add('theme-glass');
 
 const preview: Preview = {
-  decorators: [withLocale, withTheme],
+  decorators: [withLocale],
   globalTypes: {
-    theme: {
-      description: 'Skin',
-      toolbar: {
-        title: 'Theme',
-        icon: 'paintbrush',
-        items: [
-          { value: 'graphite', title: 'Graphite (default)' },
-          { value: 'glass', title: 'Brass Glass' },
-        ],
-        dynamicTitle: true,
-      },
-    },
     locale: {
       description: 'UI locale',
       toolbar: {
@@ -49,7 +32,6 @@ const preview: Preview = {
   },
   initialGlobals: {
     locale: 'en',
-    theme: 'graphite',
     backgrounds: { value: 'app' },
     viewport: { value: 'phone', isRotated: false },
   },

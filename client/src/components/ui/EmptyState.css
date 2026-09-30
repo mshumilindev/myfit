@@ -11,18 +11,18 @@
   text-align: center;
 }
 .uiempty-i {
-  font-size: 26px;
+  font-size: var(--fs-26);
   color: var(--color-neutral-700);
 }
 .uiempty-t {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--fs-17);
   font-weight: 500;
   color: var(--color-text);
 }
 .uiempty-s {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-neutral-500);
   line-height: 1.55;
   max-width: 34ch;

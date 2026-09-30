@@ -30,6 +30,8 @@ export interface SegmentedProps<V extends string | number> {
    */
   variant?: 'track' | 'buttons';
   tone?: Tone;
+  /** Tab semantics (tablist / tab / aria-selected) for pickers that switch a panel. */
+  tabs?: boolean;
   size?: 'sm' | 'md';
   className?: string;
 }
@@ -44,6 +46,7 @@ export function Segmented<V extends string | number>({
   variant = 'track',
   tone = 'accent',
   size = 'md',
+  tabs,
   className,
 }: SegmentedProps<V>) {
   return (
@@ -58,7 +61,7 @@ export function Segmented<V extends string | number>({
       ]
         .filter(Boolean)
         .join(' ')}
-      role="group"
+      role={tabs ? 'tablist' : 'group'}
       aria-label={label}
       aria-labelledby={labelledBy}
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
@@ -70,7 +73,9 @@ export function Segmented<V extends string | number>({
             key={String(o.value)}
             type="button"
             className={`uiseg-opt${on ? ' is-on' : ''}${o.compact ? ' is-compact' : ''}`}
-            aria-pressed={on}
+            role={tabs ? 'tab' : undefined}
+            aria-pressed={tabs ? undefined : on}
+            aria-selected={tabs ? on : undefined}
             aria-label={o.ariaLabel}
             disabled={o.disabled}
             onClick={() => onChange(o.value)}

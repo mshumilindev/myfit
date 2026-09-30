@@ -1,11 +1,11 @@
 /* Notice — Spotter UI kit primitive. Tokens only (the old .banner strip). */
 .uinotice {
-  padding: 11px 13px;
+  padding: var(--s-12) var(--s-14);
   border-radius: var(--radius-md);
   background: var(--t-tint);
   box-shadow: inset 3px 0 0 var(--t-base);
   color: var(--t-text);
-  font-size: 12px;
+  font-size: var(--fs-12);
   line-height: 1.45;
 }
 .uit--neutral.uinotice {
@@ -16,10 +16,10 @@
 .uinotice-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--s-10);
 }
 .uinotice-i {
-  font-size: 16px;
+  font-size: var(--fs-16);
   flex: none;
   color: var(--t-base);
 }
@@ -36,5 +36,5 @@
   color: var(--color-neutral-500);
 }
 .uinotice-b {
-  margin-top: 10px;
+  margin-top: var(--s-10);
 }

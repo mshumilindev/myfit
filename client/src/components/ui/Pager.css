@@ -1,0 +1,19 @@
+/* Pager — kit primitive. Layout only; the controls are kit Chip / IconButton. */
+.uipager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--s-6);
+  padding: var(--space-5) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+.uipager .uichip {
+  min-width: 34px;
+  justify-content: center;
+}
+.uipager-gap {
+  min-width: 22px;
+  text-align: center;
+  color: var(--color-neutral-600);
+  font-size: var(--fs-13);
+}

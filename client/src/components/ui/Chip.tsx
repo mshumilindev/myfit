@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 
 import { Icon } from '../../ui';
 
@@ -13,7 +13,14 @@ export interface ChipProps extends HTMLAttributes<HTMLElement> {
   /** Active look for selectable chips (accent fill). */
   selected?: boolean;
   icon?: string;
+  /** Dimmed ink for secondary information (assisting muscles etc.). */
+  muted?: boolean;
+  /** Frosted look for a chip that sits on top of imagery. */
+  onPhoto?: boolean;
   disabled?: boolean;
+  /** Interactive chip that lives inside another clickable element (a card /
+   *  button): renders a span[role=button] instead of a nested <button>. */
+  nested?: boolean;
   children?: ReactNode;
 }
 
@@ -26,10 +33,13 @@ export function Chip({
   size = 'md',
   selected = false,
   icon,
+  onPhoto = false,
+  muted = false,
   children,
   className,
   onClick,
   disabled,
+  nested = false,
   ...rest
 }: ChipProps) {
   const cls = [
@@ -37,6 +47,8 @@ export function Chip({
     tone !== 'neutral' ? `uichip--${tone}` : '',
     size === 'sm' ? 'uichip--sm' : '',
     selected ? 'is-selected' : '',
+    onPhoto ? 'uichip--photo' : '',
+    muted ? 'uichip--muted' : '',
     className,
   ]
     .filter(Boolean)
@@ -44,9 +56,31 @@ export function Chip({
   const inner = (
     <>
       {icon && <Icon name={icon} />}
-      {children != null && <span>{children}</span>}
+      {children != null && <span className="uichip-l">{children}</span>}
     </>
   );
+  if (onClick && nested) {
+    return (
+      <span
+        className={cls}
+        role="button"
+        tabIndex={0}
+        onClick={(event) => {
+          event.stopPropagation();
+          onClick(event);
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          event.stopPropagation();
+          onClick(event as unknown as ReactMouseEvent<HTMLElement>);
+        }}
+        {...rest}
+      >
+        {inner}
+      </span>
+    );
+  }
   if (onClick) {
     return (
       <button

@@ -1,0 +1,111 @@
+/* Text & shape utilities — the ONLY way features set font size, weight, colour
+   or corner radius on an element. Features never write these inline; to restyle
+   the whole app edit the values here. Tokens only. */
+
+/* Selectors are doubled (.x.x) so a utility always beats a single-class feature rule. */
+
+/* size (px → role) */
+.ut-2xs.ut-2xs {
+  font-size: var(--fs-9);
+}
+.ut-xs.ut-xs {
+  font-size: var(--fs-11);
+}
+.ut-sm.ut-sm {
+  font-size: var(--fs-12);
+}
+.ut-base.ut-base {
+  font-size: var(--fs-13);
+}
+.ut-md.ut-md {
+  font-size: var(--fs-14);
+}
+.ut-lg.ut-lg {
+  font-size: var(--fs-15);
+}
+.ut-xl.ut-xl {
+  font-size: var(--fs-17);
+}
+.ut-2xl.ut-2xl {
+  font-size: var(--fs-20);
+}
+.ut-3xl.ut-3xl {
+  font-size: var(--fs-26);
+}
+.ut-hero.ut-hero {
+  font-size: var(--fs-30);
+}
+.ut-display.ut-display {
+  font-size: var(--fs-40);
+}
+
+/* weight */
+.ut-w5.ut-w5 {
+  font-weight: 500;
+}
+.ut-w6.ut-w6 {
+  font-weight: 600;
+}
+.ut-w7.ut-w7 {
+  font-weight: 700;
+}
+.ut-w8.ut-w8 {
+  font-weight: 800;
+}
+
+/* tracking / case */
+.ut-tight.ut-tight {
+  letter-spacing: -0.02em;
+}
+.ut-tighter.ut-tighter {
+  letter-spacing: -0.03em;
+}
+
+/* colour */
+.ut-text.ut-text {
+  color: var(--color-text);
+}
+.ut-muted.ut-muted {
+  color: var(--color-text-muted);
+}
+.ut-dim.ut-dim {
+  color: var(--color-neutral-500);
+}
+.ut-faint.ut-faint {
+  color: var(--color-text-faint);
+}
+.ut-accent.ut-accent {
+  color: var(--color-accent);
+}
+.ut-accent-hi.ut-accent-hi {
+  color: var(--color-accent-100);
+}
+.ut-accent-lo.ut-accent-lo {
+  color: var(--color-accent-300);
+}
+.ut-ok.ut-ok {
+  color: var(--color-ok);
+}
+.ut-danger.ut-danger {
+  color: var(--color-danger-text);
+}
+.ut-tone.ut-tone {
+  color: var(--t-base);
+}
+
+/* corner radius */
+.ur-sm.ur-sm {
+  border-radius: var(--radius-sm);
+}
+.ur-md.ur-md {
+  border-radius: var(--radius-md);
+}
+.ur-lg.ur-lg {
+  border-radius: var(--radius-lg);
+}
+.ur-pill.ur-pill {
+  border-radius: var(--radius-pill);
+}
+.ur-round.ur-round {
+  border-radius: var(--r-round);
+}

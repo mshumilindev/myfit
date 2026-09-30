@@ -1,18 +1,20 @@
 /* Button / IconButton — Spotter UI kit primitive.
+   Geometry (base, sizes, icon width) is wrapped in :where() = zero specificity,
+   so a feature class can always position / size a kit button without a fight.
    Canonical control built on design tokens (design spec: 46px / 15px / 600).
    Absorbs the global .btn* family and the .rx .btn.p/.s/.b system into one.
    Variants map to token families only; no raw hex. */
 
-.uibtn {
+:where(.uibtn) {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--s-8);
   min-height: 46px;
-  padding: 0 16px;
+  padding: 0 var(--s-16);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: var(--fs-15);
   font-weight: 600;
   line-height: 1.2;
   color: var(--color-text);
@@ -29,32 +31,34 @@
 
 .uibtn:disabled,
 .uibtn[aria-disabled='true'] {
-  opacity: 0.45;
+  /* Dimmed, never see-through: a disabled button over scrolling content must
+     stay opaque, so it is desaturated + darkened instead of faded. */
+  filter: saturate(0.5) brightness(0.62);
   cursor: not-allowed;
 }
 
-.uibtn--full {
+:where(.uibtn--full) {
   width: 100%;
 }
 
 /* Sizes */
-.uibtn--sm {
+:where(.uibtn--sm) {
   min-height: 36px;
-  font-size: 13px;
-  padding: 0 12px;
-  gap: 6px;
+  font-size: var(--fs-13);
+  padding: 0 var(--s-12);
+  gap: var(--s-6);
 }
-.uibtn--lg {
+:where(.uibtn--lg) {
   min-height: 60px;
-  font-size: 16px;
+  font-size: var(--fs-16);
   border-radius: var(--radius-lg);
-  gap: 10px;
+  gap: var(--s-10);
 }
 
 /* Variants — colours from token families only */
 .uibtn--primary {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
+  color: var(--t-base, var(--color-accent));
+  border-color: var(--t-base, var(--color-accent));
 }
 .uibtn--secondary {
   border-color: var(--color-divider);
@@ -64,6 +68,17 @@
   border-color: transparent;
   color: var(--color-text);
 }
+.uibtn--link {
+  min-height: 0;
+  padding: var(--s-2) var(--s-4);
+  border-color: transparent;
+  color: var(--color-accent);
+  font-size: var(--fs-13);
+  font-weight: 500;
+}
+.uibtn--link:not(:disabled):hover {
+  text-decoration: underline;
+}
 .uibtn--danger {
   color: var(--color-danger);
   border-color: var(--color-danger);
@@ -72,10 +87,20 @@
   color: var(--color-rest-400);
   border-color: var(--color-rest-700);
 }
+.uibtn--sleep {
+  color: var(--color-sleep-text);
+  border-color: var(--color-sleep-line);
+}
+.uibtn--sleep-fill {
+  background: var(--color-sleep);
+  color: var(--color-sleep-tint);
+  border-color: transparent;
+}
 .uibtn--fill {
-  background: var(--color-accent);
-  color: var(--color-accent-900);
-  border-color: var(--color-accent);
+  /* Takes the colour family of an enclosing tone (banner / card / dialog), brass otherwise. */
+  background: var(--t-base, var(--color-accent));
+  color: var(--t-on, var(--color-accent-900));
+  border-color: var(--t-base, var(--color-accent));
   font-weight: 700;
 }
 
@@ -84,10 +109,10 @@
     background: color-mix(in srgb, var(--color-accent) 12%, transparent);
   }
   .uibtn--secondary:not(:disabled):hover {
-    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+    background: var(--state-hover);
   }
   .uibtn--ghost:not(:disabled):hover {
-    background: color-mix(in srgb, var(--color-text) 7%, transparent);
+    background: var(--state-hover);
   }
   .uibtn--danger:not(:disabled):hover {
     background: color-mix(in srgb, var(--color-danger) 10%, transparent);
@@ -97,6 +122,12 @@
   }
   .uibtn--fill:not(:disabled):hover {
     background: var(--color-accent-400);
+  }
+  .uibtn--sleep:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-sleep) 12%, transparent);
+  }
+  .uibtn--sleep-fill:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-sleep) 85%, white);
   }
 }
 
@@ -115,14 +146,14 @@
 }
 
 /* Icon-only */
-.uibtn--icon {
+:where(.uibtn--icon) {
   padding: 0;
   width: 46px;
 }
-.uibtn--icon.uibtn--sm {
+:where(.uibtn--icon.uibtn--sm) {
   width: 36px;
 }
-.uibtn--icon.uibtn--lg {
+:where(.uibtn--icon.uibtn--lg) {
   width: 60px;
 }
 
@@ -138,7 +169,7 @@
   position: absolute;
   width: 1.1em;
   height: 1.1em;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   border: 2px solid currentColor;
   border-top-color: transparent;
   animation: uibtn-spin 0.6s linear infinite;
@@ -148,4 +179,37 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Callers often put an <Icon> inside the children; the label span then needs to
+   space it from the text exactly like the `icon` prop does. */
+.uibtn-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-8);
+}
+
+/* A LinkButton (<a>) never shows the browser / global link underline. */
+a.uibtn,
+a.uibtn:hover {
+  text-decoration: none;
+}
+
+/* Shape overrides and two extra variants (kept last so they win over variants). */
+.uibtn.uibtn--pill {
+  border-radius: var(--r-pill);
+}
+.uibtn.uibtn--round {
+  border-radius: var(--r-round);
+}
+/* ok: a positive action outline (advance / confirm). */
+.uibtn--ok {
+  color: var(--color-ok);
+  border-color: var(--color-ok);
+}
+/* photo: a frosted control that sits on top of imagery. */
+.uibtn--photo {
+  background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  color: var(--color-text);
 }

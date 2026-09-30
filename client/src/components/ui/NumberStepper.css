@@ -4,8 +4,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 10px 6px 8px;
+  gap: var(--s-2);
+  padding: var(--s-10) var(--s-6) var(--s-8);
   border-radius: var(--radius-lg);
   background: var(--color-bg);
   box-shadow: inset 0 0 0 1px var(--color-divider);
@@ -16,14 +16,14 @@
 }
 .uistep-ph {
   display: block;
-  padding: 8px 0;
+  padding: var(--s-8) 0;
   color: var(--color-neutral-400);
 }
 .uistep.is-disabled {
   opacity: 0.5;
 }
 .uistep-l {
-  font-size: 10px;
+  font-size: var(--fs-10);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -42,7 +42,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: var(--fs-22);
   line-height: 1;
   color: var(--color-neutral-400);
   background: none;
@@ -60,7 +60,7 @@
   width: 100%;
   text-align: center;
   font: inherit;
-  font-size: 24px;
+  font-size: var(--fs-24);
   font-weight: 600;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
@@ -79,11 +79,71 @@
 }
 .uistep-u {
   flex: none;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-neutral-500);
-  margin-right: 4px;
+  margin-right: var(--s-4);
 }
 .uistep--big .uistep-v {
-  font-size: 32px;
+  font-size: var(--fs-32);
   letter-spacing: -0.03em;
+}
+
+/* xl — a hero value flanked by two large tiles (no well, label visually hidden). */
+.uistep--xl {
+  position: relative;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.uistep--xl.is-focused,
+.uistep--xl:focus-within {
+  box-shadow: none;
+}
+.uistep--xl .uistep-l {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.uistep--xl .uistep-row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 84px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: var(--s-8);
+}
+.uistep--xl .uistep-b {
+  grid-row: 1 / 3;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-xl, 24px);
+  background: var(--color-control);
+  color: var(--color-text);
+  font-size: var(--fs-26);
+}
+.uistep--xl .uistep-b:first-child {
+  grid-column: 1;
+}
+.uistep--xl .uistep-b:last-child {
+  grid-column: 3;
+  color: var(--color-accent);
+}
+.uistep--xl .uistep-v {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  font-size: var(--fs-52);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.uistep--xl .uistep-u {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  margin: var(--s-4) 0 0;
+  text-align: center;
+  font-size: var(--fs-13);
 }

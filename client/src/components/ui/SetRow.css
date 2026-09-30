@@ -1,0 +1,55 @@
+/* Kit SetRow — one logged set. Base look moved here from styles.css. */
+.uisetrow {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 62px;
+  gap: var(--s-8);
+  align-items: center;
+  padding: var(--s-8) var(--s-8);
+  font-size: var(--fs-16);
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+  background: none;
+  border: none;
+  width: 100%;
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.uisetrow .idx {
+  font-size: var(--fs-11);
+  color: var(--color-neutral-600);
+}
+
+.uisetrow.warm .val {
+  color: var(--color-neutral-500);
+}
+
+.uisetrow .kind {
+  font-size: var(--fs-10);
+  color: var(--color-neutral-600);
+  text-align: right;
+}
+
+.uisetrow.record {
+  background: var(--color-ok-tint);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.uisetrow.record .idx {
+  color: var(--color-ok);
+}
+
+.uisetrow.record .val {
+  color: var(--color-ok-text);
+}
+
+.uisetrow.record .kind {
+  color: var(--color-ok);
+}
+
+.uisetrow.timed {
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 44px;
+}
