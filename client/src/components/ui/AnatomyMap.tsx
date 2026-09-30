@@ -87,7 +87,10 @@ export interface AnatomyMapProps {
 }
 
 const BASE = `${import.meta.env.BASE_URL ?? '/'}anatomy/`;
-const url = (layer: string, view: AnatomyView) => `url(${BASE}${layer}.${view}.webp)`;
+// CSS custom-property URLs otherwise resolve against the stylesheet's assets/
+// directory when the build uses a relative base (for example, Storybook).
+const url = (layer: string, view: AnatomyView) =>
+  `url("${new URL(`${BASE}${layer}.${view}.webp`, document.baseURI).href}")`;
 
 /**
  * Anatomical map: the skeleton with optional organs and highlighted regions,
