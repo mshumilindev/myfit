@@ -1320,6 +1320,7 @@ export const uk: Strings = {
   dayCore: 'Кор',
   dayFull: 'Все тіло',
   dayUpper: 'Верх тіла',
+  dayArms: 'Руки',
   likelyToday: 'Схоже на сьогодні',
   likelyFromHistory: 'з твоєї історії',
   likelyDayTitle: (d: string) => d,

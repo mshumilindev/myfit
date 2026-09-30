@@ -75,6 +75,8 @@ interface DayLabelStrings {
   dayCore: string;
   dayFull: string;
   dayUpper: string;
+  /** Biceps + triceps trained together; falls back to English when absent. */
+  dayArms?: string;
   muscleGroups: Record<MuscleGroup, string>;
 }
 export function dayReadoutLabel(r: DayReadout, t: DayLabelStrings): string {
@@ -91,7 +93,11 @@ export function dayReadoutLabel(r: DayReadout, t: DayLabelStrings): string {
   // as the split name ("Legs"), a lone muscle keeps its own name ("Core").
   const order: TrainingDay[] = [];
   const bySplit = new Map<TrainingDay, MuscleGroup[]>();
+  // Biceps and triceps sit in opposite splits, so a session hitting both would
+  // read "Push + Biceps" (the triceps vanishing into Push). Name them together.
+  const armsBoth = r.groups.includes('biceps') && r.groups.includes('triceps');
   for (const m of r.groups) {
+    if (armsBoth && (m === 'biceps' || m === 'triceps')) continue;
     const s = (exerciseDay(m) ?? 'full') as TrainingDay;
     if (!bySplit.has(s)) {
       bySplit.set(s, []);
@@ -104,12 +110,12 @@ export function dayReadoutLabel(r: DayReadout, t: DayLabelStrings): string {
   if (r.groups.includes('chest') && r.groups.includes('back')) {
     return bySplit.has('core') ? `${t.dayUpper} + ${DAY.core}` : t.dayUpper;
   }
-  return order
-    .map((s) => {
-      const ms = bySplit.get(s) as MuscleGroup[];
-      return ms.length >= 2 ? DAY[s] : t.muscleGroups[ms[0]];
-    })
-    .join(' + ');
+  const parts = order.map((s) => {
+    const ms = bySplit.get(s) as MuscleGroup[];
+    return ms.length >= 2 ? DAY[s] : t.muscleGroups[ms[0]];
+  });
+  if (armsBoth) parts.push(t.dayArms ?? 'Arms');
+  return parts.join(' + ');
 }
 
 /** The training day with the most logged sets, or null when nothing is logged. */

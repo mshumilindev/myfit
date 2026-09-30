@@ -1288,6 +1288,7 @@ export const pl: Strings = {
   dayCore: 'Tułów',
   dayFull: 'Całe ciało',
   dayUpper: 'Góra ciała',
+  dayArms: 'Ramiona',
   likelyToday: 'Prawdopodobnie dziś',
   likelyFromHistory: 'z Twojej historii',
   likelyDayTitle: (d: string) => d,

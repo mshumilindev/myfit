@@ -1283,6 +1283,7 @@ export const et: Strings = {
   dayCore: 'Keha',
   dayFull: 'Kogu keha',
   dayUpper: 'Ülakeha',
+  dayArms: 'Käed',
   likelyToday: 'Tõenäoliselt täna',
   likelyFromHistory: 'sinu ajaloost',
   likelyDayTitle: (d: string) => d,

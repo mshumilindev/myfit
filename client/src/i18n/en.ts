@@ -1275,6 +1275,7 @@ export const en = {
   dayCore: 'Core',
   dayFull: 'Full body',
   dayUpper: 'Upper body',
+  dayArms: 'Arms',
   likelyToday: 'Likely today',
   likelyFromHistory: 'from your history',
   likelyDayTitle: (d: string) => `${d} day`,

@@ -1306,6 +1306,7 @@ export const lt: Strings = {
   dayCore: 'Liemuo',
   dayFull: 'Visas kūnas',
   dayUpper: 'Viršutinė dalis',
+  dayArms: 'Rankos',
   likelyToday: 'Tikėtina šiandien',
   likelyFromHistory: 'iš tavo istorijos',
   likelyDayTitle: (d: string) => d,
