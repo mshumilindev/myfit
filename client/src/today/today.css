@@ -2,21 +2,8 @@
 /* "Customize Today" = kit <Button variant="ghost" fullWidth>; graphite keeps
    its muted text look. */
 .td-customize {
-  margin-top: 4px;
-  margin-bottom: 28px;
-}
-html:not(.theme-glass) .td-customize {
-  gap: 10px;
-  height: 50px;
-  border-radius: 12px;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-  font: 600 14px var(--font);
-}
-html:not(.theme-glass) .td-customize:hover {
-  color: var(--color-text);
-  background: var(--color-surface);
+  margin-top: var(--s-4);
+  margin-bottom: var(--s-28);
 }
 
 .tdc {
@@ -24,8 +11,8 @@ html:not(.theme-glass) .td-customize:hover {
   margin-top: -12px;
   display: flex;
   flex-direction: column;
-  gap: 26px;
-  padding-bottom: 40px;
+  gap: var(--s-28);
+  padding-bottom: var(--s-40);
 }
 /* Edit mode owns the screen: app header, Today's date row and the tab bar step aside. */
 body.td-editing .app-brand,
@@ -37,11 +24,11 @@ body.td-editing .today-page .td-topbar {
   position: sticky;
   /* the screen scroller has 12px top padding; stick flush to its very top */
   top: -12px;
-  z-index: 20;
+  z-index: var(--z-20);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-8);
   min-height: 60px;
   margin: 0 calc(-1 * var(--page-x, 20px));
   padding: calc(8px + var(--safe-top, 0px)) var(--page-x, 20px) 8px;
@@ -55,20 +42,20 @@ body.td-editing .today-page .td-topbar {
   justify-self: end;
 }
 .tdc-top-title {
-  font: 700 16px var(--font);
+  font: 700 var(--fs-16) var(--font);
   color: var(--color-text);
 }
 .tdc-block {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--s-8);
 }
 .tdc-block::after {
   content: '';
   position: absolute;
   inset: -8px -10px;
-  border-radius: 18px;
+  border-radius: var(--r-18);
   border: 1px dashed var(--color-neutral-800);
   pointer-events: none;
 }
@@ -78,7 +65,7 @@ body.td-editing .today-page .td-topbar {
 .tdc-tool {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
   min-height: 44px;
 }
 .tdc-name {
@@ -86,8 +73,8 @@ body.td-editing .today-page .td-topbar {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font: 700 12px var(--font);
+  gap: var(--s-8);
+  font: 700 var(--fs-12) var(--font);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-muted);
@@ -97,43 +84,17 @@ body.td-editing .today-page .td-topbar {
   overflow-wrap: anywhere;
   line-height: 1.2;
 }
+/* Section tags are kit <Tag>s; the row buttons are kit <IconButton size="sm">. */
 .tdc-tag {
   flex: none;
-  font-size: 10px;
   letter-spacing: 0.06em;
-  padding: 3px 7px;
-  border-radius: 6px;
-  background: var(--color-tile);
-  color: var(--color-text-faint);
-}
-.tdc-tag.is-custom {
-  background: var(--color-accent-tint);
-  color: var(--color-accent);
 }
 .tdc-ib {
   flex: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  font-size: 17px;
-}
-.tdc-ib:disabled {
-  opacity: 0.28;
-  cursor: default;
-}
-.tdc-ib.is-danger {
-  color: var(--color-danger);
-  border-color: var(--color-danger-line);
 }
 .tdc-preview {
   pointer-events: none;
-  border-radius: 14px;
+  border-radius: var(--r-14);
   opacity: 0.8;
   max-height: 220px;
   overflow: hidden;
@@ -144,9 +105,9 @@ body.td-editing .today-page .td-topbar {
   display: grid;
   place-items: center;
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--r-14);
   border: 1px dashed var(--color-border);
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
 }
 .tdc-slot {
@@ -157,7 +118,7 @@ body.td-editing .today-page .td-topbar {
   background: none;
   text-align: left;
   cursor: pointer;
-  border-radius: 18px;
+  border-radius: var(--r-18);
 }
 .tdc-slot {
   display: flex;
@@ -177,11 +138,11 @@ body.td-editing .today-page .td-topbar {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 0 6px;
+  gap: var(--s-6);
+  padding: 0 var(--s-6);
   border: 1.5px dashed var(--color-neutral-700);
   color: var(--color-text-muted);
-  font: 600 12.5px var(--font);
+  font: 600 var(--fs-13) var(--font);
   text-align: center;
 }
 .tdc-slot.is-empty > * {
@@ -190,7 +151,7 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-slot.is-empty.size-xs {
   flex-direction: column;
-  font-size: 11.5px;
+  font-size: var(--fs-12);
 }
 .tdc-slot.is-picking {
   border: 1.5px solid var(--color-accent);
@@ -199,7 +160,7 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-slot.is-empty.size-xs {
   min-height: 86px;
-  border-radius: 14px;
+  border-radius: var(--r-14);
 }
 .tdc-slot.is-empty.size-s,
 .tdc-slot.is-empty.size-l {
@@ -226,61 +187,47 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: var(--s-6);
 }
 .tdc-selbar-label {
   margin-right: auto;
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 .tdc-foot {
   display: flex;
   justify-content: space-between;
 }
-.tdc-link {
-  height: 44px;
-  border: 0;
-  background: none;
-  color: var(--color-text-muted);
-  font: 600 13px var(--font);
-  cursor: pointer;
-}
 /* sheets */
 .tdc-sheet-title {
-  font: 700 20px var(--font);
+  font: 700 var(--fs-20) var(--font);
   color: var(--color-text);
-  margin: 4px 0 4px;
+  margin: var(--s-4) 0 var(--s-4);
 }
 .tdc-sheet-lab {
-  font: 600 11.5px var(--font);
+  font: 600 var(--fs-12) var(--font);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-faint);
-  margin: 18px 0 10px;
+  margin: var(--s-18) 0 var(--s-10);
 }
+/* The section title is a kit <Field>. */
 .tdc-input {
   width: 100%;
-  height: 48px;
-  border-radius: 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  color: var(--color-text);
-  padding: 0 14px;
-  font: 500 15px var(--font);
 }
 .tdc-layouts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--s-10);
 }
 .tdc-lay {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 16px;
+  gap: var(--s-8);
+  padding: var(--s-10);
+  border-radius: var(--r-16);
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-control);
   color: var(--color-text);
   text-align: left;
   cursor: pointer;
@@ -295,11 +242,11 @@ body.td-editing .today-page .td-topbar {
      10px gaps): every cell keeps its real tile proportions. */
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
+  gap: var(--s-4);
   align-content: start;
 }
 .tdc-lay-pv i {
-  border-radius: 4px;
+  border-radius: var(--r-4);
   background: var(--color-neutral-800);
 }
 .tdc-lay.is-on .tdc-lay-pv i {
@@ -309,7 +256,7 @@ body.td-editing .today-page .td-topbar {
 .tdc-lay-pv i.xs {
   grid-column: span 1;
   aspect-ratio: 82 / 86;
-  border-radius: 3px;
+  border-radius: var(--r-4);
 }
 /* S square tile 174×150 */
 .tdc-lay-pv i.s {
@@ -320,7 +267,7 @@ body.td-editing .today-page .td-topbar {
 .tdc-lay-pv i.m {
   grid-column: span 4;
   aspect-ratio: 358 / 64;
-  border-radius: 3px;
+  border-radius: var(--r-4);
 }
 /* L wide 358×150 */
 .tdc-lay-pv i.l {
@@ -331,31 +278,31 @@ body.td-editing .today-page .td-topbar {
 .tdc-lay-pv i.xl {
   grid-column: span 4;
   aspect-ratio: 1 / 1;
-  border-radius: 6px;
+  border-radius: var(--r-6);
 }
 .tdc-lay-name {
   margin-top: auto;
   display: flex;
   justify-content: space-between;
-  font: 600 13px var(--font);
+  font: 600 var(--fs-13) var(--font);
 }
 .tdc-lay-name small {
-  font-size: 11px;
+  font-size: var(--fs-11);
   font-weight: 500;
   color: var(--color-text-faint);
 }
 .tdc-pick-group {
-  font: 600 11.5px var(--font);
+  font: 600 var(--fs-12) var(--font);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-faint);
-  margin: 16px 0 10px;
+  margin: var(--s-16) 0 var(--s-10);
 }
 .tdc-pick-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   /* rows need air: every tile carries its name underneath */
-  gap: 16px 10px;
+  gap: var(--s-16) var(--s-10);
 }
 .tdc-pick {
   border: 0;
@@ -364,7 +311,7 @@ body.td-editing .today-page .td-topbar {
   cursor: pointer;
   min-width: 0;
   text-align: left;
-  border-radius: 18px;
+  border-radius: var(--r-18);
 }
 .tdc-pick > * {
   pointer-events: none;
@@ -386,8 +333,8 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: var(--s-10);
+  margin-top: var(--s-20);
 }
 /* Core previews: full-bleed blocks (program card, Atlas band) sit inside the
    edit frame instead of running to the screen edges. */
@@ -395,7 +342,7 @@ body.td-editing .today-page .td-topbar {
 .tdc-preview .tac-band,
 .tdc-preview .tac-atlas {
   margin-inline: 0;
-  border-radius: 14px;
+  border-radius: var(--r-14);
 }
 .tdc-preview .tac-band,
 .tdc-preview .tac-atlas:not(.is-card) {
@@ -409,48 +356,22 @@ body.td-editing .today-page .td-topbar {
   width: 100%;
 }
 .tdc {
-  padding-bottom: 28px;
+  padding-bottom: var(--s-28);
 }
 
 /* "+ Add section here" between sections */
-.tdc-insert {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 28px;
-  margin: -12px 0;
-  border: 0;
-  background: none;
-  color: var(--color-text-faint);
-  font: 600 12px var(--font);
-  cursor: pointer;
-}
-.tdc-insert::before,
-.tdc-insert::after {
-  content: '';
-  flex: 1;
-  border-top: 1px dashed var(--color-neutral-800);
-}
-.tdc-insert span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.tdc-insert:hover {
-  color: var(--color-accent);
-}
 /* picker */
 .tdc-sheet-sub {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
-  margin-bottom: 14px;
+  margin-bottom: var(--s-14);
 }
 .tdc-picker > * {
   flex-shrink: 0;
 }
 .tdc-chips {
   display: flex;
-  gap: 8px;
+  gap: var(--s-8);
   overflow-x: auto;
   margin: 0 calc(-1 * var(--gutter, 18px)) 4px;
   padding: 2px var(--gutter, 18px) 6px;
@@ -462,27 +383,27 @@ body.td-editing .today-page .td-topbar {
 .tdc-pick {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--s-6);
 }
 .tdc-pick-tile {
   display: flex;
   flex-direction: column;
-  border-radius: 18px;
+  border-radius: var(--r-18);
 }
 .tdc-pick-tile > * {
   flex: 1 0 auto;
   width: 100%;
 }
 .tdc-pick.size-xs .tdc-pick-tile {
-  border-radius: 14px;
+  border-radius: var(--r-14);
 }
 .tdc-pick.is-chosen .tdc-pick-tile {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 .tdc-pick-name {
-  padding: 0 4px;
-  font: 600 12px var(--font);
+  padding: 0 var(--s-4);
+  font: 600 var(--fs-12) var(--font);
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -499,7 +420,7 @@ body.td-editing .today-page .td-topbar {
   --sheet-pb: calc(var(--space-8) + var(--safe-bottom, 0px));
   bottom: calc(-1 * var(--sheet-pb));
   display: flex;
-  gap: 10px;
+  gap: var(--s-10);
   margin: 18px calc(-1 * var(--gutter, 18px)) calc(-1 * var(--sheet-pb));
   padding: 12px var(--gutter, 18px) calc(12px + var(--safe-bottom, 0px));
   background: var(--color-bg);
@@ -513,10 +434,10 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--s-12);
 }
 .tdc-sheet-count {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -528,20 +449,6 @@ body.td-editing .today-page .td-topbar {
   flex: 1 0 auto;
   width: 100%;
 }
-.tdc-sc-more {
-  min-height: 86px;
-  border-radius: 14px;
-  border: 1.5px dashed var(--color-neutral-700);
-  background: none;
-  color: var(--color-text-muted);
-  font: 600 11.5px var(--font);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  cursor: pointer;
-}
 /* The edit toolbar already names each core block — drop the block's own heading. */
 .tdc-preview .td-history > .section-label {
   display: none;
@@ -551,7 +458,7 @@ body.td-editing .today-page .td-topbar {
 .tdc-cfg-lock {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
 }
 .tdc-cfg-preview {
   max-height: 260px;
@@ -559,9 +466,6 @@ body.td-editing .today-page .td-topbar {
 }
 .tdc-cfg-gap {
   height: var(--sp-3);
-}
-.tdc-cfg-note {
-  margin: var(--sp-2) 0 0;
 }
 .tdc-cfg-order {
   flex: none;
@@ -578,13 +482,13 @@ body.td-editing .today-page .td-topbar {
 .tdc-sk {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
   min-width: 0;
 }
 .tdc-sk.is-col {
   flex-direction: column;
   align-items: stretch;
-  gap: 5px;
+  gap: var(--s-6);
 }
 .tdc-sk.is-grow {
   flex: 1;
@@ -657,7 +561,7 @@ body.td-editing .today-page .td-topbar {
   border: 1px solid var(--color-atlas-line);
 }
 .tdc-sk.is-under {
-  padding-top: 3px;
+  padding-top: var(--s-4);
   border-top: 1px solid var(--color-border);
 }
 .tdc-sk.is-top {
@@ -679,7 +583,7 @@ body.td-editing .today-page .td-topbar {
   place-items: center;
   border-radius: var(--radius-sm);
   border: 1px dashed var(--color-neutral-700);
-  font-size: 10px;
+  font-size: var(--fs-10);
   color: var(--color-text-faint);
 }
 
@@ -688,18 +592,9 @@ body.td-editing .today-page .td-topbar {
 .tac-band {
   margin-inline: calc(-1 * var(--page-x));
   padding: 14px var(--page-x);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-text) 3%, transparent),
-    color-mix(in srgb, var(--color-text) 1%, transparent)
-  );
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 /* Only when the band is the last thing on Today does it need its own bottom edge;
    otherwise the next block's edge would double it. */
-.tac-band:last-child {
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
-}
 .tac-strip {
   margin-inline: calc(-1 * var(--page-x));
   padding-inline: var(--page-x);
@@ -708,11 +603,11 @@ body.td-editing .today-page .td-topbar {
   flex: none;
   min-width: 22px;
   height: 22px;
-  padding: 0 6px;
+  padding: 0 var(--s-6);
   border-radius: var(--radius-pill);
   background: var(--color-atlas);
   color: var(--color-atlas-tint);
-  font-size: 12px;
+  font-size: var(--fs-12);
   font-weight: 800;
   display: inline-grid;
   place-items: center;
@@ -741,10 +636,10 @@ body.td-editing .today-page .td-topbar {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--s-4);
 }
 .tac-solo-name {
-  font-size: 15px;
+  font-size: var(--fs-15);
   font-weight: 700;
 }
 .tac-solo-temper {
@@ -752,7 +647,7 @@ body.td-editing .today-page .td-topbar {
   color: var(--color-text-muted);
 }
 .tac-solo-line {
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   line-height: 18px;
   color: var(--color-neutral-300);
   display: -webkit-box;
@@ -770,22 +665,17 @@ body.td-editing .today-page .td-topbar {
 .tac-split.is-wide {
   flex-direction: row;
   align-items: stretch;
-  gap: 18px;
+  gap: var(--s-18);
 }
 .tac-atlas {
   --story-gap: var(--color-bg);
+  background: transparent;
+  border: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
   margin-inline: calc(-1 * var(--page-x));
   padding: 14px var(--page-x);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-atlas) 10%, transparent),
-    color-mix(in srgb, var(--color-atlas) 3%, transparent)
-  );
-  border-top: 1px solid color-mix(in srgb, var(--color-atlas) 24%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
   color: var(--color-text);
 }
 .tac-atlas.tac-note {
@@ -820,30 +710,30 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  font-size: 14px;
+  font-size: var(--fs-14);
   font-weight: 700;
 }
 .tac-temper {
-  padding: 2px 7px;
-  border-radius: 6px;
+  padding: var(--s-2) var(--s-8);
+  border-radius: var(--r-6);
   background: color-mix(in srgb, var(--color-atlas) 16%, transparent);
   color: color-mix(in srgb, var(--color-atlas) 55%, var(--color-atlas-text));
-  font-size: 10px;
+  font-size: var(--fs-10);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 .tac-head-sub {
-  margin-top: 2px;
-  font-size: 12px;
+  margin-top: var(--s-2);
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 .tac-head-sub.is-ok {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
+  gap: var(--s-6);
+  font-size: var(--fs-12);
   color: var(--color-ok);
 }
 .tac-online {
@@ -853,7 +743,7 @@ body.td-editing .today-page .td-topbar {
   background: var(--color-ok);
 }
 .tac-kicker {
-  font-size: 10.5px;
+  font-size: var(--fs-11);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -861,17 +751,17 @@ body.td-editing .today-page .td-topbar {
 }
 .tac-note-text {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--fs-16);
   line-height: 23px;
   font-weight: 500;
   color: var(--color-text);
 }
 .is-card .tac-note-text {
-  font-size: 15.5px;
+  font-size: var(--fs-16);
   line-height: 22px;
 }
 .tac-tags {
-  gap: 6px;
+  gap: var(--s-6);
 }
 .tac-actions {
   display: flex;
@@ -889,7 +779,7 @@ body.td-editing .today-page .td-topbar {
   /* quick replies wrap onto a second line, as in D — nothing hides off-screen */
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--s-6);
 }
 .tac-replies::-webkit-scrollbar {
   display: none;
@@ -914,11 +804,11 @@ body.td-editing .today-page .td-topbar {
   cursor: pointer;
 }
 .tac-bubble {
-  padding: 10px 12px;
-  border-radius: 4px 16px 16px 16px;
+  padding: var(--s-10) var(--s-12);
+  border-radius: var(--r-4) var(--r-16) var(--r-16) var(--r-16);
   background: color-mix(in srgb, var(--color-atlas) 12%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-atlas) 18%, transparent);
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   line-height: 19px;
   color: var(--color-text);
   display: -webkit-box;
@@ -928,7 +818,7 @@ body.td-editing .today-page .td-topbar {
 }
 .tac-bubble-time {
   padding-left: var(--sp-1);
-  font-size: 10.5px;
+  font-size: var(--fs-11);
   color: var(--color-text-faint);
 }
 .tac-ask {
@@ -937,13 +827,13 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  padding: 0 6px 0 14px;
+  padding: 0 var(--s-6) 0 var(--s-14);
   border-radius: var(--radius-pill);
-  background: var(--color-surface);
+  background: var(--color-control);
   border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
   color: var(--color-text-faint);
   font: inherit;
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   text-align: left;
   cursor: pointer;
 }
@@ -965,13 +855,13 @@ body.td-editing .today-page .td-topbar {
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  font-size: 16px;
+  font-size: var(--fs-16);
   color: var(--color-neutral-400);
 }
 .tac-ask-send {
   border: 1.5px solid var(--color-accent);
   color: var(--color-accent-400);
-  font-size: 14px;
+  font-size: var(--fs-14);
 }
 .tac-expand {
   flex: none;
@@ -982,8 +872,8 @@ body.td-editing .today-page .td-topbar {
 .tac-compact {
   flex-direction: row;
   align-items: center;
-  gap: 10px;
-  padding-block: 10px;
+  gap: var(--s-10);
+  padding-block: var(--s-10);
   border-left: 0;
   border-right: 0;
   font: inherit;
@@ -999,7 +889,7 @@ body.td-editing .today-page .td-topbar {
 .tac-compact-line {
   flex: 1;
   min-width: 0;
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   color: var(--color-neutral-300);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1012,7 +902,7 @@ body.td-editing .today-page .td-topbar {
 .tac-compact .tac-count {
   min-width: 20px;
   height: 20px;
-  font-size: 11px;
+  font-size: var(--fs-11);
 }
 
 /* Clients section */
@@ -1028,31 +918,16 @@ body.td-editing .today-page .td-topbar {
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
-  font-size: 11.5px;
+  font-size: var(--fs-12);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-faint);
 }
-.tac-all {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: var(--color-accent);
-  cursor: pointer;
-}
 .tac-sec-stats {
   display: flex;
-  gap: 10px;
-  font-size: 12px;
+  gap: var(--s-10);
+  font-size: var(--fs-12);
   letter-spacing: 0.04em;
   text-transform: none;
 }
@@ -1066,7 +941,7 @@ body.td-editing .today-page .td-topbar {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  padding: 10px 12px;
+  padding: var(--s-10) var(--s-12);
   border-radius: var(--radius-lg);
   background: linear-gradient(
     90deg,
@@ -1082,8 +957,8 @@ body.td-editing .today-page .td-topbar {
 .tac-live-kick {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10px;
+  gap: var(--s-6);
+  font-size: var(--fs-10);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1097,15 +972,15 @@ body.td-editing .today-page .td-topbar {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-ok) 25%, transparent);
 }
 .tac-live-name {
-  margin-top: 3px;
-  font-size: 14px;
+  margin-top: var(--s-4);
+  font-size: var(--fs-14);
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .tac-live-sub {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1129,18 +1004,15 @@ body.td-editing .today-page .td-topbar {
 .tac-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--s-10);
 }
 .tac-tile {
   --story-gap: var(--color-surface);
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--s-10);
   padding: var(--sp-3);
-  border-radius: 16px;
-  background: var(--color-surface);
-  border: 1px solid color-mix(in srgb, var(--color-text) 6%, transparent);
   color: var(--color-text);
   font: inherit;
   text-align: left;
@@ -1151,11 +1023,11 @@ body.td-editing .today-page .td-topbar {
 }
 .tac-tile.is-more {
   justify-content: center;
-  gap: 4px;
+  gap: var(--s-4);
   background: transparent;
   border: 1px dashed color-mix(in srgb, var(--color-text) 16%, transparent);
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: var(--fs-13);
   font-weight: 600;
 }
 .tac-tile-text {
@@ -1164,15 +1036,15 @@ body.td-editing .today-page .td-topbar {
   flex-direction: column;
 }
 .tac-tile-name {
-  font-size: 13.5px;
+  font-size: var(--fs-14);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .tac-tile-sub {
-  margin-top: 3px;
-  font-size: 12px;
+  margin-top: var(--s-4);
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1183,7 +1055,7 @@ body.td-editing .today-page .td-topbar {
 .pch-ex {
   margin: 0;
   padding: 0;
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   line-height: 1.45;
   color: var(--color-text-muted);
 }
@@ -1211,46 +1083,32 @@ body.td-editing .today-page .td-topbar {
 .td-logpast {
   align-self: flex-start;
 }
-.td-sc-add.uisc {
-  border: 1.5px dashed var(--color-neutral-700);
-  background: transparent;
-  color: var(--color-text-muted);
-}
-.td-sc-add-ic {
-  width: 36px;
-  height: 36px;
-  border-radius: 11px;
-  border: 1px dashed var(--color-neutral-700);
-  display: grid;
-  place-items: center;
-  font-size: 16px;
-}
 .tdc-sheet-sub b {
   color: var(--color-text);
   font-weight: 700;
 }
 .tdc-sizes-note {
-  margin-top: 14px;
-  font-size: 12px;
+  margin-top: var(--s-14);
+  font-size: var(--fs-12);
   line-height: 1.5;
   color: var(--color-text-muted);
 }
 .tdc-warn {
   display: flex;
-  gap: 8px;
+  gap: var(--s-8);
   align-items: flex-start;
-  margin-top: 14px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  margin-top: var(--s-14);
+  padding: var(--s-10) var(--s-12);
+  border-radius: var(--r-12);
   border: 1px solid var(--color-danger-line);
   background: var(--color-danger-tint);
   color: var(--color-danger-text, var(--color-text));
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   line-height: 1.45;
 }
 .tdc-warn svg {
   flex: none;
-  margin-top: 2px;
+  margin-top: var(--s-2);
   color: var(--color-danger);
 }
 
@@ -1272,8 +1130,7 @@ body.td-editing .today-page .td-topbar {
   flex: none;
   width: 216px;
 }
-.tdc-preview .td-hist-head,
-.tdc-preview .td-hcal-settings {
+.tdc-preview .td-hist-head {
   display: none;
 }
 .td-hcal {
@@ -1305,24 +1162,24 @@ body.td-editing .today-page .td-topbar {
   min-width: 0;
 }
 .td-hcal-month {
-  font-size: 19px;
+  font-size: var(--fs-20);
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
 .td-hcal.is-wide .td-hcal-month {
-  font-size: 22px;
+  font-size: var(--fs-22);
 }
 .td-hcal-sum {
-  margin-top: 2px;
-  font-size: 12px;
+  margin-top: var(--s-2);
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 .td-hcal-nav {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--s-6);
 }
 .td-hcal-foot {
   display: flex;
@@ -1345,7 +1202,7 @@ body.td-editing .today-page .td-topbar {
 /* Under the day card, aligned with it (rail 28 + gap 13). */
 .td-hcal-log {
   align-self: flex-start;
-  margin-left: 41px;
+  margin-left: var(--s-40);
 }
 .td-hcal.is-split .td-hcal-log {
   align-self: stretch;
@@ -1353,34 +1210,12 @@ body.td-editing .today-page .td-topbar {
 }
 .td-hcal-none {
   margin: calc(var(--sp-2) * -1) 0 0 41px;
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
-}
-.td-hcal-stats {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-  min-width: 0;
-}
-.td-hcal-stats > button {
-  margin-top: var(--sp-2);
-}
-.td-hcal-lab {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--sp-2);
-}
-.td-hcal-range {
-  font-size: 11.5px;
-  color: var(--color-text-muted);
-}
-.td-hcal-settings {
-  margin-top: var(--sp-2);
 }
 .hist-tl-aside {
   margin-left: auto;
-  font-size: 11px;
+  font-size: var(--fs-11);
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--color-text-faint);
@@ -1392,15 +1227,14 @@ body.td-editing .today-page .td-topbar {
 @media (min-width: 720px) {
   .pane-main > .td-customize {
     align-self: flex-start;
-    height: 46px;
-    padding: 0 var(--sp-4);
+
     margin-top: 0;
   }
 }
 .tdc.is-desk {
   /* the pane scroller has 26px top padding; the bar sticks flush to its top */
   margin-top: -26px;
-  gap: 30px;
+  gap: var(--s-32);
 }
 .tdc-top.is-desk {
   display: flex;
@@ -1414,20 +1248,20 @@ body.td-editing .today-page .td-topbar {
 .tdc-top-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--s-2);
   min-width: 0;
 }
 .tdc-top.is-desk .tdc-top-title {
-  font-size: 17px;
+  font-size: var(--fs-17);
 }
 .tdc-top-sub {
-  font-size: 12px;
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 .tdc-top-actions {
   flex: none;
   display: flex;
-  gap: 10px;
+  gap: var(--s-10);
 }
 .tdc.is-desk .tdc-tool {
   gap: var(--sp-2);
@@ -1438,8 +1272,8 @@ body.td-editing .today-page .td-topbar {
 .tdc.is-desk .tdc-ib {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: var(--r-10);
+  font-size: var(--fs-15);
 }
 .tdc-block.is-dragging {
   opacity: 0.4;
@@ -1513,12 +1347,12 @@ body.td-editing .today-page .td-topbar {
   margin-bottom: var(--sp-2);
 }
 .tdc-ap-title {
-  font: 700 21px var(--font);
+  font: 700 var(--fs-22) var(--font);
   letter-spacing: -0.01em;
   color: var(--color-text);
 }
 .tdc-ap-sub {
-  font-size: 12.5px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
 }
 .tdc-ap-picking {
@@ -1530,7 +1364,7 @@ body.td-editing .today-page .td-topbar {
   border: 1px solid var(--color-accent-line);
   background: var(--color-accent-tint);
   color: var(--color-accent);
-  font: 600 12.5px var(--font);
+  font: 600 var(--fs-13) var(--font);
 }
 .tdc-ap .tdc-pick-group {
   margin: var(--sp-2) 0 0;
@@ -1550,17 +1384,23 @@ body.td-editing .today-page .td-topbar {
 .tdc-ap-layouts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: var(--s-10);
 }
 .tdc-ap-scgrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--sp-2);
 }
+.tdc-sc-more {
+  width: 100%;
+}
+.tdc-insert {
+  margin: -12px 0;
+}
 .tdc-ap-sc {
   display: flex;
   min-width: 0;
-  border-radius: 14px;
+  border-radius: var(--r-14);
   cursor: grab;
 }
 .tdc-ap-sc > .tdc-inert > * {
@@ -1586,9 +1426,6 @@ body.td-editing .today-page .td-topbar {
 .tdc-ap .is-dragging {
   opacity: 0.5;
 }
-.tdc-ap .tdc-sc-more {
-  min-height: 78px;
-}
 @media (min-width: 900px) {
   /* Edit slots follow the same doubled desktop spans as the widgets. */
   .uiwgrid > .tdc-slot.size-s {
@@ -1609,25 +1446,51 @@ body.td-editing .today-page .td-topbar {
   }
 }
 /* Settings rows: the label keeps one line; the control gives way instead. */
-.td-hcal-settings .uirow-l {
-  white-space: nowrap;
-}
 /* Clients leading the block (clients first, or Atlas hidden): framed like the band. */
 .tac-split > .tac-clients:first-child {
   margin-inline: calc(-1 * var(--page-x));
   padding: 14px var(--page-x) 0;
-  border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 .tdc-search {
-  margin-bottom: 10px;
-}
-.tdc-empty {
-  padding: 28px 0;
-  text-align: center;
-  font-size: 13.5px;
-  color: var(--color-text-muted);
+  margin-bottom: var(--s-10);
 }
 /* Client page: why this client wears that ring on Today */
 .cp-ring-note {
-  margin: 4px 0 12px;
+  margin: var(--s-4) 0 var(--s-12);
+}
+
+/* Feature-local fills / tints used by widgets (tokens only; restyle here). */
+.tw-bg-text {
+  background: var(--color-text);
+}
+.tw-bg-n400 {
+  background: var(--color-neutral-400);
+}
+.tw-bg-n700 {
+  background: var(--color-neutral-700);
+}
+.tw-bg-n800 {
+  background: var(--color-neutral-800);
+}
+.tw-bg-ok-line {
+  background: var(--color-ok-line);
+}
+.tw-accent-deep {
+  color: var(--color-accent-400);
+}
+.tw-tone-text {
+  color: var(--t-text);
+}
+.tw-tint-card {
+  background: var(--t-tint);
+  border: 1px solid var(--t-line);
+}
+.tw-caps-wide {
+  letter-spacing: 0.12em;
+}
+.tw-photo-fill {
+  background: var(--color-tile);
+}
+.tw-photo-empty {
+  border: 1px dashed var(--color-border);
 }

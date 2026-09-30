@@ -1,4 +1,6 @@
 import { pushState, refreshPush, setAppBadge } from './push';
+import { ScreenSkeleton } from './components/ui/Skeletons';
+import { Button, IconButton } from './components/ui/Button';
 import { buildNotes, useAtlasFmt, useAtlasNotes } from './atlas/notes';
 import { setOverrideUid } from './accountOverrides';
 import { planNotePushes, planOutbox, syncOutbox } from './atlas/schedule';
@@ -44,10 +46,9 @@ import { computeMastery, rankIndexForRating, type MasteryResult } from './master
 import {
   Icon,
   LanguageSelector,
-  Snackbar,
+  UndoSnackbar,
   Toast,
   UpdatePlate,
-  ScreenSkeleton,
   type SnackState,
   type ToastState,
 } from './ui';
@@ -74,6 +75,8 @@ import type { HealthFormSpec } from './health';
 import type { MuscleGroup } from './data/exercises';
 import { useFlag, isFlagOn, startGlobalFlags } from './data/flags';
 import { TabBar } from './components/ui/TabBar';
+import { BrandBar, BellButton } from './components/ui/BrandBar';
+import { Rail as KitRail, RailItem } from './components/ui/Rail';
 import type { ProgramsPeer } from './components/ProgramsTabs';
 
 const OnboardingView = lazy(() =>
@@ -978,6 +981,11 @@ export function App() {
     setToasts((list) => list.filter((x) => x.id !== id));
   }, []);
   const open = store.workouts.find((w) => w.finishedAt === null);
+  const trainedToday = useMemo(() => {
+    const d0 = new Date();
+    d0.setHours(0, 0, 0, 0);
+    return store.workouts.some((w) => w.startedAt >= d0.getTime());
+  }, [store.workouts]);
   const role = getRole();
   const tabs = tabsForRole(role, t);
   const tabAllowed = TABS.includes(tab);
@@ -1099,16 +1107,6 @@ export function App() {
     if (!authed) return;
     return startGlobalFlags();
   }, [authed]);
-
-  // Brass Glass theme (global flag, admin-toggled in Settings): one root class,
-  // glass.css does the rest. Sub-app skins and night mode layer on top.
-  const brassGlass = useFlag('brassGlass');
-  useEffect(() => {
-    const el = document.documentElement;
-    if (brassGlass) el.classList.add('theme-glass');
-    else el.classList.remove('theme-glass');
-    return () => el.classList.remove('theme-glass');
-  }, [brassGlass]);
 
   // While Apex is open, put the amethyst accent on the document root too, so
   // sheets that portal to <body> (the challenge start/filter sheets) re-skin
@@ -1650,34 +1648,23 @@ export function App() {
       )}
       <div className="main-col">
         {!desktopRail && (
-          <div className="app-brand" aria-label="Spotter">
-            <div className="app-brand-lead">
-              <span className="app-brand-word">spotter</span>
-              <button
-                className="app-brand-app"
-                onClick={() => setShellOpen(true)}
-                aria-label={t.shellSwitch}
-              >
-                {t.shellGym}
-              </button>
-            </div>
-            <div className="app-brand-actions">
-              <Suspense fallback={null}>
-                <MasteryBadge onOpen={() => setOverlay({ screen: 'mastery' })} />
-              </Suspense>
-              <button
-                className="app-bell"
-                onClick={() => setOverlay({ screen: 'notifications' })}
-                aria-label={t.notifTitle}
-              >
-                <Icon name="bell" weight="fill" className="app-brand-icon" />
-                {notifUnread > 0 && (
-                  <span className="app-bell-badge">{notifUnread > 9 ? '9+' : notifUnread}</span>
-                )}
-              </button>
-              <LanguageSelector compact />
-            </div>
-          </div>
+          <BrandBar
+            app={t.shellGym}
+            onApp={() => setShellOpen(true)}
+            appLabel={t.shellSwitch}
+            actions={
+              <>
+                <Suspense fallback={null}>
+                  <MasteryBadge onOpen={() => setOverlay({ screen: 'mastery' })} />
+                </Suspense>
+                <BellButton
+                  label={t.notifTitle}
+                  onClick={() => setOverlay({ screen: 'notifications' })}
+                  count={notifUnread}
+                />
+              </>
+            }
+          />
         )}
         {store.syncStatus === 'failed' && (
           <SyncBlockedCard
@@ -1721,7 +1708,11 @@ export function App() {
             items={tabs.map((x) => ({ ...x, active: navActive(x.id, effectiveTab) }))}
             onSelect={goTab}
             apps={{ label: t.appsTab, ariaLabel: t.shellSwitch, onClick: () => setShellOpen(true) }}
-            fab={{ ariaLabel: t.startNew, onClick: () => setStartOpen(true) }}
+            fab={{
+              ariaLabel: t.startNew,
+              onClick: () => setStartOpen(true),
+              attention: !trainedToday,
+            }}
           />
         )}
         <div className="toast-holder">
@@ -1741,7 +1732,7 @@ export function App() {
               />
             </Suspense>
           )}
-          {snack && <Snackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
+          {snack && <UndoSnackbar key={snack.id} snack={snack} onDone={() => setSnack(null)} />}
           {toasts.map((tst) => (
             <Toast key={tst.id} toast={tst} id={tst.id} onExpire={removeToast} />
           ))}
@@ -2044,82 +2035,66 @@ function Rail(props: {
   const username = getUsername() ?? '';
 
   return (
-    <aside className="rail">
-      {/* Brand mark — the same across every app's rail. */}
-      <div className="rail-brand">
-        <SpotterMark size={40} variant="sidebar" />
-      </div>
+    <KitRail
+      brand={<SpotterMark size={40} variant="sidebar" />}
+      foot={
+        <>
+          {/* Mastery sits at the bottom of the rail, above notifications. */}
+          <div className="rail-mastery">
+            <Suspense fallback={null}>
+              <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
+            </Suspense>
+          </div>
+          {/* Notifications — the milestone feed, reachable from every app. */}
+          <RailItem
+            icon="bell"
+            fill
+            ariaLabel={t.notifTitle}
+            badge={
+              props.notifUnread > 0 ? (props.notifUnread > 9 ? '9+' : props.notifUnread) : null
+            }
+            onClick={props.onOpenNotifications}
+          />
+          {/* Apps — switch between Gym / Apex / Nutrition. */}
+          <RailItem
+            icon="squares-four"
+            className="rail-switch"
+            ariaLabel={t.shellSwitch}
+            onClick={props.onOpenShell}
+          />
+          {role === 'admin' && (
+            <RailItem icon="gear" label={t.settingsTitle} onClick={props.onOpenSettings} />
+          )}
+          <div className="rail-lang">
+            <LanguageSelector />
+          </div>
+          <Button
+            className="account-chip"
+            variant="ghost"
+            onClick={props.onOpenProfile}
+            aria-label={username}
+            title={username}
+          >
+            <span className="account-avatar">
+              <Avatar userId={currentUid() ?? undefined} name={username} hasPhoto size={34} />
+              <span className="dot" style={{ background: dotColor }} />
+            </span>
+          </Button>
+        </>
+      }
+    >
       {nav.map((x) => (
-        <button
+        <RailItem
           key={x.id}
-          className={`rail-item${navActive(x.id, props.tab) && !props.overlayOpen ? ' active' : ''}`}
-          aria-label={x.label}
-          title={x.label}
+          icon={x.icon}
+          label={x.label}
+          active={navActive(x.id, props.tab) && !props.overlayOpen}
+          live={x.id === 'today' && live}
           onClick={() => props.goTab(x.id)}
-        >
-          <Icon name={x.icon} />
-          <span className="rail-label">{x.label}</span>
-          {x.id === 'today' && live && <span className="rail-live-dot" aria-hidden />}
-        </button>
+        />
       ))}
       {/* Start lives in Today's side panel on desktop — no rail button. */}
-      <div className="rail-foot">
-        {/* Mastery sits at the bottom of the rail, above notifications. */}
-        <div className="rail-mastery">
-          <Suspense fallback={null}>
-            <MasteryBadge onOpen={props.onOpenMastery} variant="rail" />
-          </Suspense>
-        </div>
-        {/* Notifications — the milestone feed, reachable from every app. */}
-        <button
-          className="rail-item"
-          onClick={props.onOpenNotifications}
-          aria-label={t.notifTitle}
-          title={t.notifTitle}
-        >
-          <Icon name="bell" weight="fill" />
-          {props.notifUnread > 0 && (
-            <span className="rail-notif-badge">
-              {props.notifUnread > 9 ? '9+' : props.notifUnread}
-            </span>
-          )}
-        </button>
-        {/* Apps — switch between Gym / Apex / Nutrition. */}
-        <button
-          className="rail-item rail-switch"
-          onClick={props.onOpenShell}
-          aria-label={t.shellSwitch}
-          title={t.shellSwitch}
-        >
-          <Icon name="squares-four" />
-        </button>
-        {role === 'admin' && (
-          <button
-            className="rail-item"
-            aria-label={t.settingsTitle}
-            title={t.settingsTitle}
-            onClick={props.onOpenSettings}
-          >
-            <Icon name="gear" />
-            <span className="rail-label">{t.settingsTitle}</span>
-          </button>
-        )}
-        <div className="rail-lang">
-          <LanguageSelector />
-        </div>
-        <button
-          className="account-chip"
-          onClick={props.onOpenProfile}
-          aria-label={username}
-          title={username}
-        >
-          <span className="account-avatar">
-            <Avatar userId={currentUid() ?? undefined} name={username} hasPhoto size={34} />
-            <span className="dot" style={{ background: dotColor }} />
-          </span>
-        </button>
-      </div>
-    </aside>
+    </KitRail>
   );
 }
 
@@ -2141,12 +2116,12 @@ function SyncBlockedCard(props: {
       </div>
       {props.error && <code className="sync-blocked-line">{props.error.statusLine}</code>}
       <div className="sync-blocked-actions">
-        <button className="btn btn-secondary btn-sm" onClick={props.onDiscard}>
+        <Button variant="secondary" size="sm" onClick={props.onDiscard}>
           {t.syncDiscard}
-        </button>
-        <button className="btn btn-primary btn-sm" onClick={props.onRetry}>
+        </Button>
+        <Button variant="fill" size="sm" onClick={props.onRetry}>
           {t.retry}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -2167,9 +2142,7 @@ function NoticeStrip(props: { notices: Notice[]; onDismiss: (id: string) => void
         <div key={n.id} className="notice" role="status">
           <Icon name={noticeIcon(n.kind)} />
           <span className="notice-text">{t.noticeText(n.kind, n.actor, n.detail)}</span>
-          <button className="notice-x" aria-label={t.dismiss} onClick={() => props.onDismiss(n.id)}>
-            <Icon name="x" />
-          </button>
+          <IconButton icon="x" size="sm" label={t.dismiss} onClick={() => props.onDismiss(n.id)} />
         </div>
       ))}
     </>

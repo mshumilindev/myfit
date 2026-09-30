@@ -10,7 +10,6 @@
 .hl {
   font-variant-numeric: tabular-nums;
   color: var(--color-text);
-  background: var(--color-bg);
 }
 .screen.hl {
   padding: 0;
@@ -43,34 +42,15 @@
 
 /* --- page bar / scroll column --------------------------------------------- */
 .hl-pbar {
-  height: 56px;
+  height: auto;
   display: flex;
   align-items: center;
   gap: var(--sp-3);
   padding: 0 var(--sp-4);
   flex-shrink: 0;
 }
-.hl-back,
-.hl-ib {
-  width: var(--tap-min);
-  height: var(--tap-min);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.hl-back:hover,
-.hl-ib:hover {
-  background: var(--color-tile);
-}
 .hl-pt {
-  font-size: 20px;
+  font-size: var(--fs-20);
   font-weight: 600;
   flex: 1;
   min-width: 0;
@@ -87,7 +67,7 @@
 /* Section rhythm: 24px between groups, 16px gutters, room to scroll past the
    last footer. */
 .hl-cnt {
-  padding: var(--sp-2) var(--sp-4) var(--sp-8);
+  padding: var(--s-16) var(--page-x) var(--sp-8);
   display: flex;
   flex-direction: column;
   gap: var(--sp-6);
@@ -106,7 +86,7 @@
   flex-direction: column;
 }
 .hl-note {
-  font-size: 13px;
+  font-size: var(--fs-13);
   line-height: 1.45;
   color: var(--color-text-muted);
   padding: var(--sp-2) var(--sp-4) 0;
@@ -127,23 +107,6 @@
 }
 
 /* Name input inside a ListRow; Left / Right / Both segmented in a row. */
-.hl-tin {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: 0;
-  color: var(--color-text-muted);
-  font: 400 15px var(--font);
-  text-align: right;
-  padding: 0;
-  outline: none;
-}
-.hl-tin::placeholder {
-  color: var(--color-text-faint);
-}
-.hl-tin:focus {
-  color: var(--color-text);
-}
 .hl-side {
   width: 192px;
   flex-shrink: 0;
@@ -158,61 +121,6 @@
 }
 
 /* --- buttons (tone-filled primaries) ---------------------------------------- */
-.hl-btn {
-  height: 48px;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
-  font: 600 15px var(--font);
-  padding: 0 var(--sp-5);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  cursor: pointer;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hl-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.hl-btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.p-rest {
-  background: var(--color-rest);
-  border-color: var(--color-rest);
-  color: var(--color-rest-tint);
-}
-.p-act {
-  background: var(--color-active);
-  border-color: var(--color-active);
-  color: var(--color-active-tint);
-}
-.p-ill {
-  background: var(--color-illness);
-  border-color: var(--color-illness);
-  color: var(--color-illness-tint);
-}
-.p-inj {
-  background: var(--color-injury);
-  border-color: var(--color-injury);
-  color: var(--color-injury-tint);
-}
-.p-gold {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-bg);
-}
-.o-dst {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
 
 /* --- history list swipe ----------------------------------------------------- */
 .hl-swipe {
@@ -236,7 +144,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--sp-1);
-  font: 600 12px var(--font);
+  font: 600 var(--fs-12) var(--font);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -254,14 +162,14 @@
   position: fixed;
   inset: 0;
   background: var(--color-scrim);
-  z-index: 60;
+  z-index: var(--z-60);
 }
 .hl-sheet {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 61;
+  z-index: var(--z-61);
   background: var(--color-surface);
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   padding: var(--sp-2) var(--sp-4) calc(var(--sp-6) + var(--safe-bottom));
@@ -279,12 +187,12 @@
   margin: 0 auto var(--sp-1);
 }
 .hl-sh-t {
-  font-size: 20px;
+  font-size: var(--fs-20);
   font-weight: 600;
   padding: 0 var(--sp-1);
 }
 .hl-sh-b {
-  font-size: 15px;
+  font-size: var(--fs-15);
   color: var(--color-text-muted);
   line-height: 1.45;
   padding: 0 var(--sp-1);
@@ -295,9 +203,6 @@
   flex-direction: column;
   gap: var(--sp-3);
 }
-.hl-stk .hl-btn {
-  width: 100%;
-}
 
 /* --- inline destructive confirm -------------------------------------------- */
 .hl-cexp {
@@ -306,16 +211,13 @@
   gap: var(--sp-3);
 }
 .hl-cexp p {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
   line-height: 1.45;
 }
 .hl-cexp .row2 {
   display: flex;
   gap: var(--sp-3);
-}
-.hl-cexp .row2 .hl-btn {
-  flex: 1;
 }
 
 /* --- web (≥720px): W01–W03 -------------------------------------------------- */
@@ -333,11 +235,11 @@
   flex-shrink: 0;
 }
 .hl-top .hl-pt {
-  font-size: 22px;
+  font-size: var(--fs-22);
   flex: none;
 }
 .hl-top .tsub {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
   flex: 1;
   min-width: 0;
@@ -346,7 +248,7 @@
   text-overflow: ellipsis;
 }
 .hl-top .hl-val {
-  font-size: 13px;
+  font-size: var(--fs-13);
 }
 .hl-wbody {
   flex: 1;
@@ -394,41 +296,22 @@
   min-height: var(--tap-min);
 }
 .hl-phd h2 {
-  font-size: 17px;
+  font-size: var(--fs-17);
   font-weight: 600;
-}
-.hl-link {
-  font: 600 14px var(--font);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-accent);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  min-height: var(--tap-min);
-  padding: 0;
 }
 
 /* Form panel (W02/W03): header, two columns (dates | period), action bar. */
 .hl-panel {
   width: min(880px, 66%);
   flex: none;
-  background: var(--color-surface);
+  background: var(--color-control);
   border-left: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-.hl-panel .uigl-rows,
 .hl-panel .uitl {
   background: var(--color-tile);
-}
-.hl-panel .uigl .uirow.is-selected {
-  background: var(--color-border);
-}
-.hl-panel .uiseg--track {
-  background: var(--color-surface);
 }
 .hl-phead {
   height: 64px;
@@ -445,14 +328,14 @@
 }
 .hl-phead .t b {
   display: block;
-  font-size: 18px;
+  font-size: var(--fs-18);
   font-weight: 600;
 }
 .hl-phead .t span {
   display: block;
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: var(--s-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

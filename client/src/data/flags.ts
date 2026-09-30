@@ -11,8 +11,7 @@
  *    is mirrored to localStorage (`gym.flags.global`) so the app paints with
  *    the right value before Firestore answers.
  *
- * `brassGlass` (global) enables the Brass Glass theme: `html.theme-glass` +
- * `glass.css`. See docs/design/brass-glass/PLAN.md.
+ * (No global flag is live at the moment; the machinery stays for the next one.)
  */
 import { useEffect, useState } from 'react';
 import { doc, onSnapshot, setDoc, type Unsubscribe } from 'firebase/firestore';
@@ -20,12 +19,13 @@ import { db } from '../firebase';
 
 export type FlagScope = 'device' | 'global';
 
-export const FEATURE_FLAGS = [
+const FLAG_DEFS = [
   { id: 'gymPresence', scope: 'device' },
   { id: 'nutrition', scope: 'device' },
-  { id: 'brassGlass', scope: 'global' },
 ] as const satisfies readonly { id: string; scope: FlagScope }[];
-export type FlagId = (typeof FEATURE_FLAGS)[number]['id'];
+export type FlagId = (typeof FLAG_DEFS)[number]['id'];
+/** Widened so the `global` scope keeps type-checking while no global flag is live. */
+export const FEATURE_FLAGS: readonly { id: FlagId; scope: FlagScope }[] = FLAG_DEFS;
 
 const KEY = 'gym.flags';
 const GLOBAL_KEY = 'gym.flags.global';
