@@ -44,6 +44,7 @@ import {
   type IllnessKind,
   type RestPeriod,
   type Injury,
+  type ChronicCondition,
   type RehabStageId,
   type CheckinFeel,
   type RehabCheckin,
@@ -113,7 +114,13 @@ import {
   duplicateSleepIds,
 } from './sleep';
 import { currentUid, getRole, callFn } from './api';
-import { initVault, mirrorCollection, prepareWrite, runKeyExchange } from './vaultIO';
+import {
+  initVault,
+  mirrorCollection,
+  prepareWrite,
+  runKeyExchange,
+  setMigrationEnricher,
+} from './vaultIO';
 import {
   onWeekStartChange,
   resetWeekStart,
@@ -155,6 +162,7 @@ const GOALS_KEY = 'spotter.goals';
 const HOME_KEY = 'spotter.home';
 const REST_KEY = 'spotter.restPeriods';
 const INJURY_KEY = 'spotter.injuries';
+const CONDITIONS_KEY = 'spotter.conditions';
 const ACTIVITIES_KEY = 'spotter.activities';
 const EX_UNIT_KEY = 'spotter.exerciseUnits';
 const EX_LOAD_KEY = 'spotter.exerciseLoads';
@@ -248,6 +256,8 @@ export interface StoreState {
   restPeriods: RestPeriod[];
   /** Tracked injuries with feel-driven rehab plans. */
   injuries: Injury[];
+  /** Permanent private health conditions (sealed in the vault; see conditions.ts). */
+  conditions: ChronicCondition[];
   /** Logged non-lifting activities (cardio & recovery). */
   activities: Activity[];
   /** Account-wide weight unit (Load-entry B): the default everything is shown
@@ -312,6 +322,7 @@ let state: StoreState = {
   reminders: load<Reminder[]>(REMINDERS_KEY, []),
   restPeriods: load<RestPeriod[]>(REST_KEY, []),
   injuries: load<Injury[]>(INJURY_KEY, []),
+  conditions: load<ChronicCondition[]>(CONDITIONS_KEY, []),
   activities: load<Activity[]>(ACTIVITIES_KEY, []),
   weightUnit: load<DisplayUnit>(WEIGHT_UNIT_KEY, 'kg'),
   exerciseUnits: load<Record<string, DisplayUnit>>(EX_UNIT_KEY, {}),
@@ -368,6 +379,7 @@ function persist(): void {
     localStorage.setItem(REMINDERS_KEY, JSON.stringify(state.reminders));
     localStorage.setItem(REST_KEY, JSON.stringify(state.restPeriods));
     localStorage.setItem(INJURY_KEY, JSON.stringify(state.injuries));
+    localStorage.setItem(CONDITIONS_KEY, JSON.stringify(state.conditions));
     localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(state.activities));
     localStorage.setItem(WEIGHT_UNIT_KEY, JSON.stringify(state.weightUnit));
     localStorage.setItem(EX_UNIT_KEY, JSON.stringify(state.exerciseUnits));
@@ -940,6 +952,8 @@ export function workoutStats(
     ),
   };
 }
+
+setMigrationEnricher((d) => ({ ...d, stats: workoutStats(d as unknown as Workout) }));
 
 function writeWorkoutDoc(w: Workout): void {
   const uid = currentUid();
@@ -2363,6 +2377,42 @@ export function restDayKeys(
     for (let d = r.startDay; d <= end; d++) set.add(d);
   }
   return set;
+}
+
+// --- Chronic conditions -----------------------------------------------------
+function writeConditionDoc(c: ChronicCondition): void {
+  const uid = currentUid();
+  if (!uid) return;
+  prepareWrite('conditions', { ...c, updatedAt: Date.now() })
+    .then((d) => setDoc(doc(db, 'users', uid, 'conditions', c.id), d))
+    .catch(onWriteError);
+}
+
+export function addCondition(
+  input: Pick<ChronicCondition, 'key' | 'severity' | 'share'> &
+    Partial<Pick<ChronicCondition, 'note' | 'startedAt' | 'endsAt'>>,
+): ChronicCondition {
+  const c: ChronicCondition = { ...input, id: uuid(), createdAt: Date.now() };
+  setState({ conditions: [c, ...state.conditions], syncStatus: bumpPending() });
+  writeConditionDoc(c);
+  return c;
+}
+
+export function updateCondition(id: string, patch: Partial<Omit<ChronicCondition, 'id'>>): void {
+  const cur = state.conditions.find((c) => c.id === id);
+  if (!cur) return;
+  const next = { ...cur, ...patch };
+  setState({
+    conditions: state.conditions.map((c) => (c.id === id ? next : c)),
+    syncStatus: bumpPending(),
+  });
+  writeConditionDoc(next);
+}
+
+export function deleteCondition(id: string): void {
+  setState({ conditions: state.conditions.filter((c) => c.id !== id), syncStatus: bumpPending() });
+  const uid = currentUid();
+  if (uid) deleteDoc(doc(db, 'users', uid, 'conditions', id)).catch(onWriteError);
 }
 
 // --- Injuries & rehab -------------------------------------------------------
@@ -3972,6 +4022,20 @@ export function startSyncLoop(): () => void {
       () => undefined,
     ),
   );
+  const conditionsMirror = mirrorCollection<ChronicCondition & Record<string, unknown>>((items) => {
+    state = { ...state, conditions: items };
+    persist();
+    emit();
+  });
+  unsubs.push(conditionsMirror.dispose);
+  unsubs.push(
+    onSnapshot(
+      collection(db, 'users', uid, 'conditions'),
+      (snap) => conditionsMirror.push(snap.docs.map((d) => d.data())),
+      // Soft: if the conditions rule isn't deployed yet, don't block all sync.
+      () => undefined,
+    ),
+  );
   const activitiesMirror = mirrorCollection<Activity & Record<string, unknown>>((items) => {
     state = {
       ...state,
@@ -4900,6 +4964,7 @@ export function repeatWorkout(sourceId: string): Workout | undefined {
 
 export function resetLocalData(): void {
   stopListeners();
+  void initVault(null); // forget the data key on this device
   localStorage.removeItem(STATE_KEY);
   localStorage.removeItem(GYMS_KEY);
   localStorage.removeItem(REMINDERS_KEY);
@@ -4908,6 +4973,7 @@ export function resetLocalData(): void {
   localStorage.removeItem(COACH_KEY);
   localStorage.removeItem(HOME_KEY);
   localStorage.removeItem(INJURY_KEY);
+  localStorage.removeItem(CONDITIONS_KEY);
   localStorage.removeItem(ACTIVITIES_KEY);
   localStorage.removeItem(SLEEP_KEY);
   localStorage.removeItem(SLEEP_SCHED_KEY);
@@ -4936,6 +5002,7 @@ export function resetLocalData(): void {
     reminders: [],
     restPeriods: [],
     injuries: [],
+    conditions: [],
     activities: [],
     weightUnit: 'kg',
     exerciseUnits: {},

@@ -25,6 +25,7 @@ export * from './admin';
 export * from './trainer';
 export * from './programs';
 export * from './profile';
+export * from './vault';
 export * from './scheduled';
 // Web push delivery: outbox + exact-time rest alerts.
 export * from './push';

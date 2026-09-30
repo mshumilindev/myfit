@@ -25,6 +25,10 @@ import { dayReadoutLabel } from '../data/daySuggest';
 import type { Workout, Exercise } from '../types';
 import type { MuscleGroup } from '../data/exercises';
 import { Tag } from './ui/Tag';
+import { Notice } from './ui/Notice';
+import { effectLines } from '../conditions';
+import { effectText } from '../conditionText';
+import { useConditionLimits } from '../healthBuild';
 
 type T = ReturnType<typeof useT>['t'];
 const round = (n: number): number => Math.round(n);
@@ -133,11 +137,27 @@ export function hasSessionStartCoach(finished: Workout[], now: number): boolean 
   return sameDow[0].exercises.some((e) => e.sets.length > 0);
 }
 
+/** One quiet line-set: what today's plan already accounts for. Only with active conditions. */
+function ConditionReminder() {
+  const { t } = useT();
+  const limits = useConditionLimits();
+  if (!limits.keys.length) return null;
+  const lines = effectLines(limits.effects).slice(0, 4);
+  if (!lines.length) return null;
+  return (
+    <Notice tone="chronic" icon="shield-check">
+      <b>{t.cndRemember}</b>
+      {lines.map((l, i) => (
+        <div key={`${l.id}${i}`}>{effectText(l, t)}</div>
+      ))}
+    </Notice>
+  );
+}
+
 export function SessionStartCoach({ finished, now }: { finished: Workout[]; now: number }) {
   const { t } = useT();
-  if (finished.length < 2) return null;
-  const plan = predictToday(finished, now, t);
-  if (!plan) return null;
+  const plan = finished.length < 2 ? null : predictToday(finished, now, t);
+  if (!plan) return <ConditionReminder />;
 
   const map = muscleReadiness(finished, now);
   const rows = plan.muscles.map((m) => map.get(m)).filter((r): r is MuscleReadiness => !!r);
@@ -155,6 +175,7 @@ export function SessionStartCoach({ finished, now }: { finished: Workout[]; now:
 
   return (
     <div className="ssc">
+      <ConditionReminder />
       <div className={`ssc-read tone-${tone}`}>
         <div className="ssc-read-head">
           <span className="ssc-ic">

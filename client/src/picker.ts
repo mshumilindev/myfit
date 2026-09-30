@@ -6,6 +6,7 @@
  * weak point, good fit) with a progression target. Pure over its inputs (the
  * workouts, the gym, "now"), so it unit-tests without React.
  */
+import { isAutoExcluded, type Limits } from './conditions';
 import { landmarkFor } from './personalize';
 import type { Gym, Workout } from './types';
 import {
@@ -504,7 +505,14 @@ export function suggest(
   finished: Workout[],
   readiness: Map<MuscleGroup, Readiness>,
   now: number,
-  opts: { count?: number; family?: FamilyId | null; sub?: SubId | null; beforeTs?: number } = {},
+  opts: {
+    count?: number;
+    family?: FamilyId | null;
+    sub?: SubId | null;
+    beforeTs?: number;
+    /** Long-term condition limits: lifts they rule out are never suggested. */
+    limits?: Limits;
+  } = {},
 ): Suggestion[] {
   const count = opts.count ?? 5;
   const beforeTs = opts.beforeTs ?? now;
@@ -514,7 +522,8 @@ export function suggest(
     i.available &&
     i.primary !== null &&
     (!fam || fam.groups.includes(i.primary)) &&
-    (!opts.sub || matchesSub(i, opts.sub));
+    (!opts.sub || matchesSub(i, opts.sub)) &&
+    (!opts.limits || !isAutoExcluded(i.name, opts.limits));
   const pool = items.filter(inScope);
 
   let targets = day.groups;

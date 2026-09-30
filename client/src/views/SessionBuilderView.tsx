@@ -26,7 +26,7 @@ import {
   useStore,
   cardioBlockName,
 } from '../store';
-import { protectedMuscles as selProtected, loadCaps as selLoadCaps } from '../injury';
+import { healthBuildCtx } from '../healthBuild';
 import {
   buildDay,
   intentSpec,
@@ -101,8 +101,7 @@ export function SessionBuilderView({
     now,
     intent,
     targetMuscles: muscles ?? undefined,
-    protectedMuscles: [...selProtected(store.injuries)],
-    loadCaps: selLoadCaps(store.injuries),
+    ...healthBuildCtx(store, now),
     lengthMin,
     warmup,
     cardio,

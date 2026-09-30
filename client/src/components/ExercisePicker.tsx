@@ -7,6 +7,8 @@
  * this session are marked, never blocked. On desktop the same pieces sit in one
  * modal: family rail · suggestions + grid · live preview.
  */
+import { exerciseFlag, type ExerciseFlag } from '../conditions';
+import { useConditionLimits } from '../healthBuild';
 import { BackButton } from '../components/ui/BackButton';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Switch as KitSwitch } from './ui/Switch';
@@ -161,7 +163,14 @@ function AddedBadge({ on, t }: { on: boolean; t: Strings }) {
   );
 }
 
-function Badge({ item, t }: { item: PickItem; t: Strings }) {
+function Badge({ item, t, flag }: { item: PickItem; t: Strings; flag?: ExerciseFlag['level'] }) {
+  if (flag === 'avoid' || flag === 'caution')
+    return (
+      <span className="xp-badge care">
+        <Icon name="shield-check" />
+        {flag === 'avoid' ? t.pickNotAdvised : t.pickCareful}
+      </span>
+    );
   if (item.doneToday)
     return (
       <span className="xp-badge done">
@@ -179,6 +188,8 @@ export function ExercisePicker(props: ExercisePickerProps) {
   const { t } = useT();
   const exName = useExerciseName();
   const store = useStore();
+  const limits = useConditionLimits();
+  const flagOf = (name: string) => (limits.keys.length ? exerciseFlag(name, limits).level : 'ok');
   const isDesktop = useIsDesktop();
   const [now] = useState(() => Date.now());
   const hasInventory = !!props.gym?.inventory && props.gym.inventory.length > 0;
@@ -229,8 +240,11 @@ export function ExercisePicker(props: ExercisePickerProps) {
     () =>
       plain
         ? []
-        : suggest(eqFiltered, day, finished, readiness, now, { beforeTs: props.workout.startedAt }),
-    [plain, eqFiltered, day, finished, readiness, now, props.workout.startedAt],
+        : suggest(eqFiltered, day, finished, readiness, now, {
+            beforeTs: props.workout.startedAt,
+            limits,
+          }),
+    [plain, eqFiltered, day, finished, readiness, now, props.workout.startedAt, limits],
   );
   const addedKeys = useMemo(
     () => new Set((props.added ?? []).map((n) => canonicalExerciseName(n).toLowerCase())),
@@ -269,9 +283,10 @@ export function ExercisePicker(props: ExercisePickerProps) {
             family: fam.id,
             sub,
             beforeTs: props.workout.startedAt,
+            limits,
           })[0] ?? null)
         : null,
-    [plain, fam, sub, eqFiltered, day, finished, readiness, now, props.workout.startedAt],
+    [plain, fam, sub, eqFiltered, day, finished, readiness, now, props.workout.startedAt, limits],
   );
 
   const needle = q.trim().toLowerCase();
@@ -450,7 +465,11 @@ export function ExercisePicker(props: ExercisePickerProps) {
           <span className="xp-card-meta">{itemMeta(t, i, plain)}</span>
         </span>
       </Card>
-      {plain ? <AddedBadge on={addedKeys.has(i.key)} t={t} /> : <Badge item={i} t={t} />}
+      {plain ? (
+        <AddedBadge on={addedKeys.has(i.key)} t={t} />
+      ) : (
+        <Badge item={i} t={t} flag={flagOf(i.name)} />
+      )}
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
     </div>
   );
@@ -472,7 +491,7 @@ export function ExercisePicker(props: ExercisePickerProps) {
         ) : suggestedKeys.has(i.key) && !i.doneToday ? (
           <span className="xp-badge sug">{t.pickSuggestedTag}</span>
         ) : (
-          <Badge item={i} t={t} />
+          <Badge item={i} t={t} flag={flagOf(i.name)} />
         )}
       </Card>
       <InfoButton onClick={() => openInfo(i)} label={t.detailsAction} />
@@ -1018,14 +1037,15 @@ export function ExerciseDetail(props: {
       live = false;
     };
   }, [item.catalogId]);
+  const limits = useConditionLimits();
   const byKey = useMemo(() => new Map(props.items.map((i) => [i.key, i])), [props.items]);
   const swaps = useMemo(
     () =>
-      swapCandidates(item.name, props.gym, 4)
+      swapCandidates(item.name, props.gym, 4, limits)
         .map((s) => byKey.get(canonicalExerciseName(s.name).toLowerCase()))
         .filter((x): x is PickItem => !!x && x.key !== item.key)
         .slice(0, 2),
-    [item, props.gym, byKey],
+    [item, props.gym, byKey, limits],
   );
   const hist = useMemo(
     () => topHistory(props.finished, item.name).map((p) => p.weight ?? p.reps),

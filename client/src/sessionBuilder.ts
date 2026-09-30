@@ -13,6 +13,7 @@
  * (loadable reality). No store mutation, no React — it returns a plan the UI
  * renders, edits and materialises.
  */
+import { exerciseFlag, isAutoExcluded, type Limits } from './conditions';
 import type { Activity, BodyMetrics, Gym, Workout } from './types';
 import {
   BUILT_IN_CATALOG,
@@ -251,6 +252,9 @@ export interface BuildContext {
   /** Per-muscle rehab load cap (0..1) for Reintroduce/Rebuild — scales target
    *  weights so a returning muscle eases back instead of jumping to old loads. */
   loadCaps?: Map<MuscleGroup, number>;
+  /** Stacked long-term condition limits (conditions.ts): drops 'avoid' lifts, ranks 'careful'
+   *  ones last and scales sets. Muscle caps arrive folded into `loadCaps` (see healthBuild.ts). */
+  conditions?: Limits;
   lengthMin?: number;
   warmup?: boolean;
   cardio?: boolean;
@@ -527,10 +531,18 @@ export function buildDay(ctx: BuildContext): GeneratedDay {
     const lm = lms.get(m) ?? LANDMARKS[m];
     if (!lm) continue;
     let budget = sessionSetsForMuscle(lm, week.get(m) ?? 0, 2);
+    const vScale = ctx.conditions?.effects.volumeScale;
+    if (vScale != null && vScale < 1) budget = Math.max(1, Math.round(budget * vScale));
     const avoid = new Set((ctx.avoid ?? []).map((x) => x.toLowerCase()));
     const prefer = new Set((ctx.prefer ?? []).map((x) => x.toLowerCase()));
+    const limits = ctx.conditions;
+    const levelOf = (name: string) =>
+      limits ? (exerciseFlag(name, limits).level === 'caution' ? 1 : 0) : 0;
     const ranked = rankExercisesForMuscle(m, ctx.gym)
       .filter((c) => !avoid.has(c.name.toLowerCase()))
+      .filter((c) => !limits || !isAutoExcluded(c.name, limits))
+      // Lifts flagged "careful" go after the rest (stable: the ranking is otherwise kept).
+      .sort((a, b) => levelOf(a.name) - levelOf(b.name))
       // A requested swap goes to the front, keeping the rest of the order.
       .sort(
         (a, b) =>

@@ -6,6 +6,7 @@
  * primary=1 / secondary=0.5 weighting) and rank the gym-available ones first.
  * Pure over the catalog + gym inventory.
  */
+import { isAutoExcluded, type Limits } from './conditions';
 import { exerciseNeeds, missingAtGym } from './store';
 import { searchCatalog, muscleInfoByName, richExerciseByName } from './data/exercises';
 import type { MuscleGroup } from './data/exercises';
@@ -54,7 +55,12 @@ function isBodyweight(equipment: string[]): boolean {
  * whether the gym can equip them, then by the simplest kit. Stretches are
  * excluded and the exercise itself never appears.
  */
-export function swapCandidates(name: string, gym: Gym | null, count = 4): SwapCandidate[] {
+export function swapCandidates(
+  name: string,
+  gym: Gym | null,
+  count = 4,
+  limits?: Limits,
+): SwapCandidate[] {
   const info = muscleInfoByName(name);
   if (!info || info.primary === 'cardio') return [];
   const cur = vec(info.primary, info.secondary);
@@ -70,6 +76,7 @@ export function swapCandidates(name: string, gym: Gym | null, count = 4): SwapCa
     const primary = (ci?.primary ?? ex.muscle) as MuscleGroup;
     if (primary === 'cardio') continue;
     if (richExerciseByName(nm)?.category === 'stretching') continue;
+    if (limits && isAutoExcluded(nm, limits)) continue; // never suggest a lift the conditions rule out
     const secondary = ci?.secondary ?? [];
     const equipment = exerciseNeeds(nm);
     const missing = gym ? missingAtGym(gym, equipment) : [];

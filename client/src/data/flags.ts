@@ -28,6 +28,9 @@ export type FlagId = (typeof FLAG_DEFS)[number]['id'];
 /** Widened so the `global` scope keeps type-checking while no global flag is live. */
 export const FEATURE_FLAGS: readonly { id: FlagId; scope: FlagScope }[] = FLAG_DEFS;
 
+/** Flags that start ON in `npm run dev` (never in a production build or in tests). */
+const DEV_DEFAULT_ON: ReadonlySet<FlagId> = new Set<FlagId>(['conditions']);
+
 const KEY = 'gym.flags';
 const GLOBAL_KEY = 'gym.flags.global';
 const listeners = new Set<() => void>();
@@ -92,7 +95,10 @@ export function startGlobalFlags(): () => void {
 /** Default OFF: a flag is on only when explicitly stored `true`. */
 export function isFlagOn(id: FlagId): boolean {
   if (scopeOf(id) === 'global') return globalFlags[id] === true;
-  return readJson(KEY)[id] === true;
+  const stored = readJson(KEY)[id];
+  if (stored !== undefined) return stored === true;
+  // A local dev server shows features still being built; production stays default OFF.
+  return import.meta.env.DEV && !import.meta.env.VITEST && DEV_DEFAULT_ON.has(id);
 }
 
 export function setFlag(id: FlagId, on: boolean): void {

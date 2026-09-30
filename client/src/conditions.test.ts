@@ -223,3 +223,31 @@ describe('temporary conditions', () => {
       expect(isOtherTab(c)).toBe(true);
   });
 });
+
+describe('catalogue icons', () => {
+  it('every condition and category icon exists in the icon registry', async () => {
+    const { readFileSync } = await import('node:fs');
+    const ui = readFileSync(`${process.cwd()}/src/ui.tsx`, 'utf8');
+    const block = ui.slice(
+      ui.indexOf('const ICONS'),
+      ui.indexOf('\n};', ui.indexOf('const ICONS')),
+    );
+    const keys = new Set([...block.matchAll(/^\s*'?([a-z0-9-]+)'?:\s*[A-Z]/gm)].map((m) => m[1]));
+    const { CONDITION_CATALOG, CONDITION_CATEGORIES } = await import('./data/conditionCatalog');
+    const used = [
+      ...CONDITION_CATALOG.map((c) => c.icon),
+      ...CONDITION_CATEGORIES.map((c) => c.icon),
+    ];
+    expect([...new Set(used.filter((i) => !keys.has(i)))]).toEqual([]);
+  });
+});
+
+describe('body map reachability', () => {
+  it('every catalogue condition is reachable from a body area or the Other tab', async () => {
+    const { AREAS } = await import('./views/health/BodyMapPicker');
+    const { isOtherTab } = await import('./conditions');
+    const regions = new Set(Object.values(AREAS).flatMap((l) => l.flatMap((a) => a.regions)));
+    const missing = CONDITION_CATALOG.filter((c) => !regions.has(c.region) && !isOtherTab(c));
+    expect(missing.map((c) => c.key)).toEqual([]);
+  });
+});

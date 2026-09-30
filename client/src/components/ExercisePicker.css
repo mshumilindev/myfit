@@ -1017,3 +1017,10 @@ span.xp-noimg {
 .xp-row .xp-info {
   right: 0;
 }
+
+/* Flagged by a long-term condition: midnight-blue shield, never red. */
+.xp-badge.care {
+  background: color-mix(in srgb, var(--color-chronic-tint) 94%, transparent);
+  color: var(--color-chronic-text);
+  box-shadow: inset 0 0 0 1px var(--color-chronic-line);
+}

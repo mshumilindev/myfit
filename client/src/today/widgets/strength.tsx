@@ -7,6 +7,7 @@
  * The small shared helpers at the top (memo, local store, lift stats, empty
  * state) are also used by muscles.tsx.
  */
+import { useConditionLimits } from '../../healthBuild';
 import { useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { Field } from '../../components/ui/Field';
 import {
@@ -2702,11 +2703,12 @@ function SmartSwapWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const gym =
     (live?.gymId ? store.gyms.find((g) => g.id === live.gymId) : null) ?? pickSessionGym();
   const gymId = gym?.id ?? null;
+  const limits = useConditionLimits();
   const cands = useMemo(
-    () => (src ? swapCandidates(src, gym, 3) : []),
-    // `gym` is resolved from `gymId`; the list only changes with the lift or the gym.
+    () => (src ? swapCandidates(src, gym, 3, limits) : []),
+    // `gym` is resolved from `gymId`; the list only changes with the lift, the gym or the limits.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [src, gymId],
+    [src, gymId, limits],
   );
   if (!src || cands.length === 0)
     return (

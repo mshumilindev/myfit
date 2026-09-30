@@ -66,7 +66,7 @@ import {
 import type { Exercise, SetEntry, Workout } from '../../types';
 import { computePlaybook, playForWeekday, type Play, type PlaybookResult } from '../../playbook';
 import { buildDay, warmupRamp, type GeneratedDay } from '../../sessionBuilder';
-import { loadCaps, protectedMuscles } from '../../injury';
+import { healthBuildCtx } from '../../healthBuild';
 import { workoutCalories } from '../../activities';
 import { defaultRestSec, fmtCountdown, restAlert } from '../../restTimer';
 import { homeSetMoves, homeTotals, lastRunOf } from '../../homeSets';
@@ -521,8 +521,7 @@ function generate(ctx: WidgetCtx, len: number, focus: Focus, avoid: string[]): G
     now,
     intent: 'muscle',
     targetMuscles: FOCUS_MUSCLES[focus],
-    protectedMuscles: [...protectedMuscles(store.injuries)],
-    loadCaps: loadCaps(store.injuries),
+    ...healthBuildCtx(store, now),
     lengthMin: len,
     warmup: true,
     cooldown: false,

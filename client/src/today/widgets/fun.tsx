@@ -49,7 +49,7 @@ import {
 } from '../../store';
 import { buildDay, type GeneratedDay } from '../../sessionBuilder';
 import { muscleReadiness } from '../../recovery';
-import { protectedMuscles as selProtected, loadCaps as selLoadCaps } from '../../injury';
+import { healthBuildCtx } from '../../healthBuild';
 import { describeDay, dayReadoutLabel } from '../../data/daySuggest';
 import type { MuscleGroup } from '../../data/exercises';
 import {
@@ -263,14 +263,18 @@ interface Wildcard {
 }
 
 function wildcardFor(
-  store: Pick<StoreState, 'workouts' | 'activities' | 'bodyMetrics' | 'goals' | 'injuries'>,
+  store: Pick<
+    StoreState,
+    'workouts' | 'activities' | 'bodyMetrics' | 'goals' | 'injuries' | 'conditions'
+  >,
   now: number,
   roll: number,
 ): Wildcard | null {
   const done = store.workouts.filter((w) => w.finishedAt !== null);
   if (done.length < 2) return null;
   const ready = muscleReadiness(done, now);
-  const prot = selProtected(store.injuries);
+  const health = healthBuildCtx(store, now);
+  const prot = new Set(health.protectedMuscles);
   const usable = (m: MuscleGroup) => !prot.has(m) && ready.get(m)?.state !== 'recovering';
   let target: MuscleGroup[] | undefined;
   if (roll > 0) {
@@ -291,8 +295,7 @@ function wildcardFor(
     now,
     intent: 'muscle',
     targetMuscles: target,
-    protectedMuscles: [...prot],
-    loadCaps: selLoadCaps(store.injuries),
+    ...health,
     lengthMin: 35,
     warmup: false,
     cardio: false,
@@ -313,10 +316,11 @@ function WildcardWidget({ size, ctx }: { size: WidgetSize; ctx: WidgetCtx }) {
   const { store, now, t, locale, shell } = ctx;
   const s = fs(locale);
   const [roll, setRoll] = useState(0);
-  const { workouts, activities, bodyMetrics, goals, injuries } = store;
+  const { workouts, activities, bodyMetrics, goals, injuries, conditions } = store;
   const wc = useMemo(
-    () => wildcardFor({ workouts, activities, bodyMetrics, goals, injuries }, now, roll),
-    [workouts, activities, bodyMetrics, goals, injuries, now, roll],
+    () =>
+      wildcardFor({ workouts, activities, bodyMetrics, goals, injuries, conditions }, now, roll),
+    [workouts, activities, bodyMetrics, goals, injuries, conditions, now, roll],
   );
   if (!wc)
     return (

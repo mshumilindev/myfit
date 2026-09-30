@@ -267,6 +267,9 @@ export type Overlay =
       view?: 'history';
       hist?: 'list' | 'timeline';
       form?: HealthFormSpec;
+      /** A long-term condition page: 'new' or a condition id; `condKey` = the picked catalogue entry. */
+      cond?: string;
+      condKey?: string;
     }
   | { screen: 'uikit' }
   | { screen: 'widget-library' }
@@ -432,6 +435,10 @@ function healthHash(o: Extract<Overlay, { screen: 'health' }>): string {
   if (f?.kind === 'new') parts.push('new', f.ctx, f.type);
   else if (f?.kind === 'edit') parts.push('edit', encodeURIComponent(f.periodId));
   else if (f?.kind === 'edit-injury') parts.push('injury', encodeURIComponent(f.injuryId));
+  if (o.cond) {
+    parts.push('cond', encodeURIComponent(o.cond));
+    if (o.condKey) parts.push(encodeURIComponent(o.condKey));
+  }
   return parts.join('/');
 }
 
@@ -452,6 +459,10 @@ function healthFromHash(rest: string[]): Extract<Overlay, { screen: 'health' }> 
     o.form = { kind: 'new', ctx: a, type: b as (typeof types)[number] };
   else if (k === 'edit' && a) o.form = { kind: 'edit', periodId: decodeURIComponent(a) };
   else if (k === 'injury' && a) o.form = { kind: 'edit-injury', injuryId: decodeURIComponent(a) };
+  else if (k === 'cond' && a) {
+    o.cond = decodeURIComponent(a);
+    if (b) o.condKey = decodeURIComponent(b);
+  }
   return o;
 }
 
@@ -878,7 +889,10 @@ export function App() {
       if (o === null) return { cur: null, stack: [] };
       // Navigating within the same screen (e.g. switching the library's tab)
       // replaces the current overlay instead of stacking a new parent.
-      if (n.cur && n.cur.screen === o.screen) return { cur: o, stack: n.stack };
+      // Health is the exception: its pages (history, a form, a condition) are real
+      // steps, so Back returns to the Health overview, not past it.
+      if (n.cur && n.cur.screen === o.screen && o.screen !== 'health')
+        return { cur: o, stack: n.stack };
       return { cur: o, stack: n.cur === null ? n.stack : [...n.stack, n.cur] };
     });
   }, []);
@@ -974,6 +988,10 @@ export function App() {
       if (n.stack.length > 0) {
         return { cur: n.stack[n.stack.length - 1], stack: n.stack.slice(0, -1) };
       }
+      // A Health page reached by a link, a refresh or a shortcut: up one level is the
+      // Health overview (never straight past it to Today).
+      if (n.cur?.screen === 'health' && (n.cur.view || n.cur.form || n.cur.cond))
+        return { cur: { screen: 'health' }, stack: [] };
       return { cur: null, stack: [] };
     });
   }, []);
@@ -1567,6 +1585,8 @@ export function App() {
           view={activeOverlay.view}
           hist={activeOverlay.hist}
           form={activeOverlay.form}
+          cond={activeOverlay.cond}
+          condKey={activeOverlay.condKey}
           onClose={closeOverlay}
         />
       )}

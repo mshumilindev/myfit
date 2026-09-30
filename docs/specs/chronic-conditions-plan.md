@@ -219,3 +219,16 @@ exerciseFlags(name, limits): { level: 'ok'|'info'|'caution'|'avoid'; reasons: st
 - **Тимчасові стани** (вагітність, відновлення після операцій): дата початку + орієнтовний кінець. Кінець підставляється з типової тривалості (`TEMPORARY` у `conditions.ts`), користувач може змінити. Для вагітності триместр визначається сам за датою початку (`pregnancyKeyAt`). Стан неактивний до початку й після кінця (ефекти зникають, у списку лишається «Завершено» з пропозицією продовжити/видалити). Показуємо «день N з M».
 - Модель: `ChronicCondition.startedAt?`, `endsAt?`.
 - Дизайн: додати на полотно Other-вкладку Body map і блок «Початок / Тривалість» у Set up для тимчасових (на реальних екранах + kit).
+
+## 14. Automatic keys (supersedes the recovery-key parts of §13)
+
+Decision: nothing for the user to save, type or pass around. Encryption is against third parties (database viewers, leaked backups), not against the operator.
+
+- **Key source.** Callable `vaultKey` (functions/src/vault.ts) returns the signed-in account's own data key: `HKDF-SHA256(VAULT_MASTER, salt=uid)`. The master lives only in Secret Manager; nothing is stored in Firestore, so a database dump or backup is ciphertext only. The master can be replaced by Cloud KMS without client changes.
+- **Device.** The fresh key is held in memory (extractable, so it can be granted to a coach); a non-extractable copy is cached in IndexedDB so the app starts offline. Sign-out forgets both.
+- **Migration.** Existing plaintext is sealed once in the background (idempotent, verified by a round-trip before each write, marker per account). No backup step or button.
+- **Coach.** Unchanged: ECDH grants are created and revoked automatically when the coach assignment changes.
+- **Interception.** TLS plus Firebase Auth ID token; the key is never written to logs or storage on the server. Recommended: enable App Check on the callable.
+- **Ops.** `firebase functions:secrets:set VAULT_MASTER` (32+ random bytes, base64), deploy `functions` and `firestore.rules`. Rotating the master makes existing sealed data unreadable, so it needs a re-key job first.
+- **UI.** Profile → Settings shows a status row only ("Encrypted" / "getting ready"). The recovery-key screens and strings were removed; `vault.ts` (recovery-key vault) is now unused.
+- **Limit.** Anyone with access to both the Secret Manager secret and the database can decrypt; that is the accepted trade-off of a zero-friction model.

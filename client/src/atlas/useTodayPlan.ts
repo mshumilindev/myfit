@@ -5,7 +5,7 @@
  */
 import { useMemo } from 'react';
 import { latestWeight, pickSessionGym, useStore } from '../store';
-import { loadCaps, protectedMuscles } from '../injury';
+import { healthBuildCtx } from '../healthBuild';
 import { buildPlanDay, planDayFor, type CoachPlanDay } from './plan';
 import type { GeneratedDay } from '../sessionBuilder';
 import { memoryBuildHints } from './memoryPlan';
@@ -31,8 +31,14 @@ export function useTodayPlan(now: number, excludeWorkoutId?: string): TodayPlan 
       gym: pickSessionGym(),
       now,
       intent: 'muscle',
-      protectedMuscles: [...protectedMuscles(s.injuries)],
-      ...memoryBuildHints(s.coach.memory, loadCaps(s.injuries), now),
+      ...(() => {
+        const h = healthBuildCtx(s, now);
+        return {
+          protectedMuscles: h.protectedMuscles,
+          conditions: h.conditions,
+          ...memoryBuildHints(s.coach.memory, h.loadCaps, now),
+        };
+      })(),
       bodyKg: latestWeight(s.bodyMetrics)?.weight ?? null,
       sex: s.bodyMetrics.sex,
     });

@@ -506,3 +506,15 @@ describe('setCoach', () => {
     expect(c.updatedAt ?? 0).toBeGreaterThan(a);
   });
 });
+
+describe('conditions store', () => {
+  it('adds, edits and deletes a condition', async () => {
+    const s = await import('./store');
+    const c = s.addCondition({ key: 'asthma', severity: 2, share: 'effects' });
+    expect(s.__getStateForTests().conditions.some((x) => x.id === c.id)).toBe(true);
+    s.updateCondition(c.id, { severity: 3 });
+    expect(s.__getStateForTests().conditions.find((x) => x.id === c.id)?.severity).toBe(3);
+    s.deleteCondition(c.id);
+    expect(s.__getStateForTests().conditions.some((x) => x.id === c.id)).toBe(false);
+  });
+});

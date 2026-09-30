@@ -10,28 +10,21 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import type { MigratePorts } from './vaultMigrate';
 import { db } from './firebase';
-import { createVault, idbKeyCache, type Vault, type VaultHeader } from './vault';
+import { createAutoVault } from './autoVault';
+import { idbKeyCache, type Vault } from './vault';
+import { callFn } from './api';
+import { isFlagOn } from './data/flags';
+import { migrateAll } from './vaultMigrate';
 import { sealDoc, unsealDoc, isSealed, type SealedCollection } from './encryptedDoc';
-import { isEnvelope } from './vaultCrypto';
 import { ensureCoachKey, ensureGrant, type GrantPorts, type StoredGrant } from './vaultGrants';
 import type { CoachKeyRecord } from './vaultShare';
 
 let uidNow: string | null = null;
 
-export const vault: Vault = createVault({
-  remote: {
-    async load() {
-      if (!uidNow) return null;
-      const s = await getDoc(doc(db, 'users', uidNow, 'meta', 'vault'));
-      const d = s.exists() ? (s.data() as Partial<VaultHeader>) : null;
-      return d && typeof d.salt === 'string' && isEnvelope(d.check) ? (d as VaultHeader) : null;
-    },
-    async save(h) {
-      if (!uidNow) throw new Error('not signed in');
-      await setDoc(doc(db, 'users', uidNow, 'meta', 'vault'), h);
-    },
-  },
-  // Cache is keyed per account so a shared browser never reuses another user's key.
+// The key is handed out by the server for the signed-in account: no key to save or type.
+// The per-account IndexedDB cache keeps a non-extractable copy for offline starts.
+export const vault: Vault = createAutoVault({
+  fetchKey: () => callFn<{ key: string; salt: string }>('vaultKey', {}, { quiet: true }),
   cache: {
     get: () => idbKeyCache('spotter.vault', uidNow ?? 'anon').get(),
     set: (v) => idbKeyCache('spotter.vault', uidNow ?? 'anon').set(v),
@@ -39,11 +32,64 @@ export const vault: Vault = createVault({
   },
 });
 
-/** Call after sign-in (and on sign-out with null). */
+let enrichWorkout: (d: Record<string, unknown>) => Record<string, unknown> = (d) => d;
+/** The store registers how a workout gets its readable `stats` (avoids an import cycle). */
+export function setMigrationEnricher(f: typeof enrichWorkout): void {
+  enrichWorkout = f;
+}
+
+const migratedKey = (uid: string) => `spotter.vault.migrated.${uid}`;
+let migrating = false;
+
+/** Seals existing plaintext once per account; idempotent, and a failure just retries next start. */
+async function autoMigrate(): Promise<void> {
+  const uid = uidNow;
+  if (!uid || migrating || vault.status() !== 'ready') return;
+  try {
+    if (localStorage.getItem(migratedKey(uid))) return;
+  } catch {
+    /* storage unavailable: migrate anyway, it is idempotent */
+  }
+  migrating = true;
+  try {
+    const { ok } = await migrateAll(vault, migratePorts(enrichWorkout));
+    if (ok && uidNow === uid) {
+      try {
+        localStorage.setItem(migratedKey(uid), '1');
+      } catch {
+        /* fine */
+      }
+    }
+  } catch {
+    /* offline or rules not deployed: next start retries */
+  } finally {
+    migrating = false;
+  }
+}
+
+/** Call after sign-in (and on sign-out with null). Off unless the feature flag is on. */
 export async function initVault(uid: string | null): Promise<void> {
+  if (!uid) {
+    uidNow = null;
+    await vault.lock();
+    return;
+  }
   uidNow = uid;
-  if (!uid) return;
+  if (!isFlagOn('conditions')) return;
   await vault.init();
+  // Let the first sync settle before rewriting documents in place.
+  setTimeout(() => void autoMigrate(), 8000);
+}
+
+if (typeof window !== 'undefined') {
+  // Came back online / returned to the tab without a key: ask again.
+  const retry = () => {
+    if (uidNow && isFlagOn('conditions') && vault.status() !== 'ready') void vault.init();
+  };
+  window.addEventListener('online', retry);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') retry();
+  });
 }
 
 /** What to store for `data`. Plaintext until the vault is set up. */

@@ -154,3 +154,13 @@ export function isEnvelope(x: unknown): x is VaultEnvelope {
     typeof e.ct === 'string'
   );
 }
+
+/** A raw 256-bit AES-GCM data key (as delivered by the server) as a CryptoKey. */
+export async function importRawKey(rawB64: string, extractable: boolean): Promise<CryptoKey> {
+  const raw = unb64(rawB64);
+  if (raw.length !== 32) throw new Error('bad-key');
+  return subtle().importKey('raw', raw as BufferSource, { name: 'AES-GCM' }, extractable, [
+    'encrypt',
+    'decrypt',
+  ]);
+}

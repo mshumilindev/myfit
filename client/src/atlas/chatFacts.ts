@@ -6,6 +6,7 @@
 import type { StoreState } from '../store';
 import { est1rm, setTopWeight, topSet, setTypeOf } from '../store';
 import { activeInjuries } from '../injury';
+import { deidentifiedEffects, isActive } from '../conditions';
 import { finishedNights, nightDurationMin } from '../sleep';
 import { latestWeight } from '../store';
 import { blockWeek, planDayFor } from './plan';
@@ -74,7 +75,7 @@ const iso = (ts: number) => {
 
 export function buildChatFacts(
   s: Pick<StoreState, 'workouts' | 'coach' | 'injuries' | 'sleeps' | 'bodyMetrics'> &
-    Partial<Pick<StoreState, 'activities'>>,
+    Partial<Pick<StoreState, 'activities' | 'conditions'>>,
   notes: AtlasNote[],
   temper: Temper,
   now: number,
@@ -146,6 +147,14 @@ export function buildChatFacts(
     allLifts: liftHistory(finished),
     yourRecentNotes: notes.slice(-8).map((n) => n.text),
     injuredMuscles: activeInjuries(s.injuries).flatMap((i) => i.muscles ?? []),
+    // Long-term conditions leave the device only as de-identified training effects:
+    // never a name, an area or a note (conditions.ts: deidentifiedEffects).
+    trainingLimits: deidentifiedEffects(
+      (s.conditions ?? [])
+        .filter((c) => isActive(c, now))
+        // The coach sharing choice does not apply to Atlas: it only ever sees effects.
+        .map((c) => ({ ...c, share: 'effects' as const })),
+    ),
     lastNightSleepH: night ? Math.round((nightDurationMin(night, now) / 60) * 10) / 10 : null,
     bodyweightKg: temper < 4 ? (latestWeight(s.bodyMetrics)?.weight ?? null) : undefined,
   };

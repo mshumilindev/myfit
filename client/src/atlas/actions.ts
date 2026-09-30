@@ -20,7 +20,8 @@ import {
   logActivity,
 } from '../store';
 import { activityType, estimateCalories } from '../activities';
-import { bodyPart as bodyPartOf, loadCaps, protectedMuscles } from '../injury';
+import { bodyPart as bodyPartOf } from '../injury';
+import { healthBuildCtx } from '../healthBuild';
 import { buildPlanDay, planDayFor, proposePlan } from './plan';
 import { computePlaybook } from '../playbook';
 import { clearSaid, mergeMemory } from './memory';
@@ -141,8 +142,14 @@ export function runAction(
           gym: pickSessionGym(),
           now,
           intent: 'muscle',
-          protectedMuscles: [...protectedMuscles(s.injuries)],
-          ...memoryBuildHints(mem, loadCaps(s.injuries), now),
+          ...(() => {
+            const h = healthBuildCtx(s, now);
+            return {
+              protectedMuscles: h.protectedMuscles,
+              conditions: h.conditions,
+              ...memoryBuildHints(mem, h.loadCaps, now),
+            };
+          })(),
           bodyKg: latestWeight(s.bodyMetrics)?.weight ?? null,
           sex: s.bodyMetrics.sex,
         });

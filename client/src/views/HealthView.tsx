@@ -51,6 +51,8 @@ import {
   toneOf,
   typeName,
 } from './health/parts';
+import { ConditionPage, ConditionsSection } from './health/Conditions';
+import { isFlagOn } from '../data/flags';
 import './Health.css';
 import { Button } from '../components/ui/Button';
 
@@ -59,6 +61,8 @@ export interface HealthViewProps {
   view?: 'history';
   hist?: 'list' | 'timeline';
   form?: HealthFormSpec;
+  cond?: string;
+  condKey?: string;
   onClose: () => void;
 }
 
@@ -349,6 +353,9 @@ export function HealthView(props: HealthViewProps) {
       {startRow({ kind: 'new', ctx: 'past', type: 'injury' }, t.hlGotHurt, '')}
     </GroupedList>
   );
+  const conditionsGroup = isFlagOn('conditions') ? (
+    <ConditionsSection key="cond" onOpen={(cond) => go({ cond })} />
+  ) : null;
   const historyGroup = (
     <GroupedList key="hist" header={t.hlHistory}>
       {recent.map((it) => (
@@ -432,10 +439,21 @@ export function HealthView(props: HealthViewProps) {
         onRehab={onRehab}
       />
     ) : null;
+  const condPage =
+    !form && props.cond && isFlagOn('conditions') ? (
+      <ConditionPage
+        cond={props.cond}
+        condKey={props.condKey}
+        web={web}
+        onBack={props.onClose}
+        onPickKey={(key) => go({ cond: 'new', condKey: key }, true)}
+      />
+    ) : null;
 
   // ============================ mobile ============================
   if (!web) {
     if (form) return form;
+    if (condPage) return condPage;
     if (props.view === 'history') {
       const mode = props.hist ?? 'list';
       return (
@@ -497,6 +515,7 @@ export function HealthView(props: HealthViewProps) {
             {sleepGroup}
             {startGroup}
             {pastGroup}
+            {conditionsGroup}
             {historyGroup}
           </div>
         </div>
@@ -517,12 +536,13 @@ export function HealthView(props: HealthViewProps) {
   const left = (
     <section className="hl-pane" aria-label={t.startHealthTitle}>
       <div className="hl-wc">
-        {form ? (
+        {form || condPage ? (
           <>
             {nowGroups}
             {sleepGroup}
             {startGroup}
             {pastGroup}
+            {conditionsGroup}
           </>
         ) : (
           <div className="hl-cols">
@@ -533,6 +553,7 @@ export function HealthView(props: HealthViewProps) {
             <div className="hl-col">
               {startGroup}
               {pastGroup}
+              {conditionsGroup}
             </div>
           </div>
         )}
@@ -541,6 +562,8 @@ export function HealthView(props: HealthViewProps) {
   );
   const right = form ? (
     form
+  ) : condPage ? (
+    condPage
   ) : (
     <section className="hl-pane hl-hist" aria-labelledby="hl-hist-h">
       <div className="hl-wc tight">
