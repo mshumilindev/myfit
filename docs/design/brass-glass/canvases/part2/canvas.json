@@ -1,0 +1,1115 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-29T08:00:00Z"
+ },
+ "title": "Spotter — Brass Glass · 2/6 · Session → History",
+ "launch": {
+  "view": "canvas",
+  "page": "cover"
+ },
+ "pages": [
+  {
+   "id": "cover",
+   "name": "Cover"
+  },
+  {
+   "id": "session",
+   "name": "04 · Session"
+  },
+  {
+   "id": "summary",
+   "name": "05 · Summary & recap"
+  },
+  {
+   "id": "history",
+   "name": "06 · History"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Cover",
+   "page": "cover"
+  },
+  "P04-Session.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1250,
+   "title": "Session · live, rest running (scroll)",
+   "page": "session"
+  },
+  "P04-Rest-Over.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 980,
+   "title": "Rest over · PR attempt next",
+   "page": "session"
+  },
+  "P04-PR.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 910,
+   "title": "Record moment",
+   "page": "session"
+  },
+  "P04-Fail.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 1100,
+   "title": "Set read as failure",
+   "page": "session"
+  },
+  "P04-Fatigue.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 1400,
+   "title": "Muscle tired · worth meter",
+   "page": "session"
+  },
+  "P04-Session-Empty.dc.html": {
+   "x": 0,
+   "y": 1560,
+   "w": 390,
+   "h": 1260,
+   "title": "Session · not started (scroll)",
+   "page": "session"
+  },
+  "P04-Warmup-Marker.dc.html": {
+   "x": 470,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Warm-up marker step",
+   "page": "session"
+  },
+  "P04-Warmup-Ramp.dc.html": {
+   "x": 940,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Warm-up ramp · first set",
+   "page": "session"
+  },
+  "P04-PerSide.dc.html": {
+   "x": 1410,
+   "y": 1560,
+   "w": 390,
+   "h": 1270,
+   "title": "Per hand ×2 · next up",
+   "page": "session"
+  },
+  "P04-Superset.dc.html": {
+   "x": 1880,
+   "y": 1560,
+   "w": 390,
+   "h": 890,
+   "title": "Superset step",
+   "page": "session"
+  },
+  "P04-Dropset.dc.html": {
+   "x": 2350,
+   "y": 1560,
+   "w": 390,
+   "h": 1040,
+   "title": "Dropset · logged + entry",
+   "page": "session"
+  },
+  "P04-Circuit.dc.html": {
+   "x": 2820,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Circuit step",
+   "page": "session"
+  },
+  "P04-Circuit-Building.dc.html": {
+   "x": 3290,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Circuit · building",
+   "page": "session"
+  },
+  "P04-Hold.dc.html": {
+   "x": 3760,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · timed hold running",
+   "page": "session"
+  },
+  "P04-Cardio.dc.html": {
+   "x": 4230,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Cardio · interval running",
+   "page": "session"
+  },
+  "P04-Offline.dc.html": {
+   "x": 4700,
+   "y": 1560,
+   "w": 390,
+   "h": 1000,
+   "title": "Session · offline, queued",
+   "page": "session"
+  },
+  "P04-Undo.dc.html": {
+   "x": 5170,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Set deleted · undo",
+   "page": "session"
+  },
+  "P04-Music.dc.html": {
+   "x": 5640,
+   "y": 1560,
+   "w": 390,
+   "h": 1230,
+   "title": "Session · Music (planned, V2)",
+   "page": "session"
+  },
+  "P04-Session-Night.dc.html": {
+   "x": 6110,
+   "y": 1560,
+   "w": 390,
+   "h": 1328,
+   "title": "Session · live, rest running · Night",
+   "page": "session"
+  },
+  "P04-Rest-Over-Night.dc.html": {
+   "x": 6580,
+   "y": 1560,
+   "w": 390,
+   "h": 1058,
+   "title": "Rest over · Night",
+   "page": "session"
+  },
+  "P04-Opts-Set-Night.dc.html": {
+   "x": 7050,
+   "y": 1560,
+   "w": 390,
+   "h": 1138,
+   "title": "Options · This set · Night",
+   "page": "session"
+  },
+  "P04-Finish-Night.dc.html": {
+   "x": 7520,
+   "y": 1560,
+   "w": 390,
+   "h": 922,
+   "title": "Finish · confirm · Night",
+   "page": "session"
+  },
+  "P04-Cooldown-Marker.dc.html": {
+   "x": 7990,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Cool-down marker step (last step)",
+   "page": "session"
+  },
+  "P04-Cardio-Idle.dc.html": {
+   "x": 8460,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Cardio · between intervals",
+   "page": "session"
+  },
+  "P04-Hold-Idle.dc.html": {
+   "x": 8930,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · timed hold, ready",
+   "page": "session"
+  },
+  "P04-Static-Dynamic.dc.html": {
+   "x": 9400,
+   "y": 1560,
+   "w": 390,
+   "h": 910,
+   "title": "Static-dynamic set",
+   "page": "session"
+  },
+  "P04-Tired-Part.dc.html": {
+   "x": 9870,
+   "y": 1560,
+   "w": 390,
+   "h": 1230,
+   "title": "Part of a muscle had enough",
+   "page": "session"
+  },
+  "P04-Planned-New.dc.html": {
+   "x": 10340,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Program lift · first time, weight required",
+   "page": "session"
+  },
+  "P04-Circuit-Done.dc.html": {
+   "x": 10810,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Circuit · all rounds done",
+   "page": "session"
+  },
+  "P04-Exercise-Deleted.dc.html": {
+   "x": 11280,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise deleted · undo",
+   "page": "session"
+  },
+  "P04-Kit-Tray.dc.html": {
+   "x": 11750,
+   "y": 1560,
+   "w": 390,
+   "h": 1000,
+   "title": "Kit not on the gym’s list · tray",
+   "page": "session"
+  },
+  "P04-Atlas-Jab.dc.html": {
+   "x": 12220,
+   "y": 1560,
+   "w": 390,
+   "h": 1000,
+   "title": "Atlas jab after a set",
+   "page": "session"
+  },
+  "P04-Photos.dc.html": {
+   "x": 12690,
+   "y": 1560,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise photos · full screen",
+   "page": "session"
+  },
+  "P04-Opts-Set.dc.html": {
+   "x": 0,
+   "y": 3048,
+   "w": 390,
+   "h": 1060,
+   "title": "Options · This set (scroll)",
+   "page": "session"
+  },
+  "P04-Edit-Set.dc.html": {
+   "x": 470,
+   "y": 3048,
+   "w": 390,
+   "h": 950,
+   "title": "Edit logged set (scroll)",
+   "page": "session"
+  },
+  "P04-Opts-Exercise.dc.html": {
+   "x": 940,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Options · Exercise",
+   "page": "session"
+  },
+  "P04-Opts-Exercise-Sides.dc.html": {
+   "x": 1410,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Options · Exercise · sides + superset",
+   "page": "session"
+  },
+  "P04-Opts-Session.dc.html": {
+   "x": 1880,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Options · Session",
+   "page": "session"
+  },
+  "P04-Rest-Settings.dc.html": {
+   "x": 2350,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Rest target & alerts",
+   "page": "session"
+  },
+  "P04-Plates.dc.html": {
+   "x": 2820,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Plate calculator",
+   "page": "session"
+  },
+  "P04-Picker.dc.html": {
+   "x": 3290,
+   "y": 3048,
+   "w": 390,
+   "h": 1180,
+   "title": "Exercise picker · home (scroll)",
+   "page": "session"
+  },
+  "P04-Picker-Search.dc.html": {
+   "x": 3760,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise picker · search",
+   "page": "session"
+  },
+  "P04-Picker-Group.dc.html": {
+   "x": 4230,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise picker · muscle group, no matches",
+   "page": "session"
+  },
+  "P04-Picker-Equipment.dc.html": {
+   "x": 4700,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise picker · equipment filter",
+   "page": "session"
+  },
+  "P04-Exercise-Detail.dc.html": {
+   "x": 5170,
+   "y": 3048,
+   "w": 390,
+   "h": 880,
+   "title": "Exercise details (ⓘ) · swaps (scroll)",
+   "page": "session"
+  },
+  "P04-Replace.dc.html": {
+   "x": 5640,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Replace exercise (swap)",
+   "page": "session"
+  },
+  "P04-Cardio-Machine.dc.html": {
+   "x": 6110,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Which machine?",
+   "page": "session"
+  },
+  "P04-Equipment.dc.html": {
+   "x": 6580,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Equipment for this exercise",
+   "page": "session"
+  },
+  "P04-Muscle-Map.dc.html": {
+   "x": 7050,
+   "y": 3048,
+   "w": 390,
+   "h": 870,
+   "title": "Today’s muscle map",
+   "page": "session"
+  },
+  "P04-Superset-With.dc.html": {
+   "x": 7520,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Superset with…",
+   "page": "session"
+  },
+  "P04-Group-Menu.dc.html": {
+   "x": 7990,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Superset menu",
+   "page": "session"
+  },
+  "P04-Circuit-Run.dc.html": {
+   "x": 8460,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Circuit · run a round",
+   "page": "session"
+  },
+  "P04-Circuit-Round.dc.html": {
+   "x": 8930,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Circuit · round complete",
+   "page": "session"
+  },
+  "P04-Playbook.dc.html": {
+   "x": 9400,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Playbook · how do you want to start?",
+   "page": "session"
+  },
+  "P04-New-Exercise.dc.html": {
+   "x": 9870,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Create exercise · Member",
+   "page": "session"
+  },
+  "P04-New-Exercise-Trainer.dc.html": {
+   "x": 10340,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Create exercise · Trainer",
+   "page": "session"
+  },
+  "P04-New-Exercise-Admin.dc.html": {
+   "x": 10810,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Create exercise · Admin",
+   "page": "session"
+  },
+  "P04-Cardio-Entry.dc.html": {
+   "x": 11280,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Cardio entry · console readings",
+   "page": "session"
+  },
+  "P04-Edit-Reverse.dc.html": {
+   "x": 11750,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Set editor · reverse dropset",
+   "page": "session"
+  },
+  "P04-Edit-Assist.dc.html": {
+   "x": 12220,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Set editor · assisted machine",
+   "page": "session"
+  },
+  "P04-Edit-Band.dc.html": {
+   "x": 12690,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Set editor · resistance band",
+   "page": "session"
+  },
+  "P04-Band-Library.dc.html": {
+   "x": 13160,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Band library",
+   "page": "session"
+  },
+  "P04-Plates-Build.dc.html": {
+   "x": 13630,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Plate calculator · build",
+   "page": "session"
+  },
+  "P04-Plates-Closest.dc.html": {
+   "x": 14100,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Plate calculator · not loadable",
+   "page": "session"
+  },
+  "P04-Picker-Group-Filled.dc.html": {
+   "x": 14570,
+   "y": 3048,
+   "w": 390,
+   "h": 1210,
+   "title": "Exercise picker · muscle group (scroll)",
+   "page": "session"
+  },
+  "P04-Home-Pick.dc.html": {
+   "x": 15040,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · add move",
+   "page": "session"
+  },
+  "P04-Gym-Picker.dc.html": {
+   "x": 15510,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Where are you training?",
+   "page": "session"
+  },
+  "P04-Coach.dc.html": {
+   "x": 15980,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Today’s read (session coach)",
+   "page": "session"
+  },
+  "P04-PR-Share.dc.html": {
+   "x": 16450,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Share the record",
+   "page": "session"
+  },
+  "P04-Muscle-Info.dc.html": {
+   "x": 16920,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Muscle chip · state drawer",
+   "page": "session"
+  },
+  "P04-Muscle-Map-Covered.dc.html": {
+   "x": 17390,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Today’s muscle map · all covered",
+   "page": "session"
+  },
+  "P04-Menu-Closed.dc.html": {
+   "x": 17860,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise menu (not live)",
+   "page": "session"
+  },
+  "P04-Edit-Hold.dc.html": {
+   "x": 18330,
+   "y": 3048,
+   "w": 390,
+   "h": 844,
+   "title": "Set editor · hold time (typed)",
+   "page": "session"
+  },
+  "P04-Finish.dc.html": {
+   "x": 0,
+   "y": 4418,
+   "w": 390,
+   "h": 844,
+   "title": "Finish · confirm",
+   "page": "session"
+  },
+  "P04-Discard.dc.html": {
+   "x": 470,
+   "y": 4418,
+   "w": 390,
+   "h": 844,
+   "title": "Discard session · confirm",
+   "page": "session"
+  },
+  "P04-Delete-Set.dc.html": {
+   "x": 940,
+   "y": 4418,
+   "w": 390,
+   "h": 844,
+   "title": "Delete set · confirm",
+   "page": "session"
+  },
+  "P04-Delete-Exercise.dc.html": {
+   "x": 1410,
+   "y": 4418,
+   "w": 390,
+   "h": 844,
+   "title": "Delete exercise · confirm",
+   "page": "session"
+  },
+  "P04-Closed.dc.html": {
+   "x": 1880,
+   "y": 4418,
+   "w": 390,
+   "h": 1000,
+   "title": "Closed automatically (scroll)",
+   "page": "session"
+  },
+  "P04-Hero-States.dc.html": {
+   "x": 2350,
+   "y": 4418,
+   "w": 390,
+   "h": 560,
+   "title": "Live hero · states",
+   "page": "session"
+  },
+  "P04-Finish-Clean.dc.html": {
+   "x": 2820,
+   "y": 4418,
+   "w": 390,
+   "h": 844,
+   "title": "Finish · confirm (no empty exercise)",
+   "page": "session"
+  },
+  "P05-Summary.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1880,
+   "title": "Workout summary (scroll)",
+   "page": "summary"
+  },
+  "P05-Share.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Share workout sheet",
+   "page": "summary"
+  },
+  "P05-Recap.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 2080,
+   "title": "Recap · September (scroll)",
+   "page": "summary"
+  },
+  "P05-Recap-Story.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 2110,
+   "h": 844,
+   "title": "Recap story · 5 panels",
+   "page": "summary"
+  },
+  "P05-RecapBlock.dc.html": {
+   "x": 0,
+   "y": 2240,
+   "w": 390,
+   "h": 900,
+   "title": "Your recaps · Notifications block",
+   "page": "summary"
+  },
+  "P05-RecapBlock-NotReady.dc.html": {
+   "x": 470,
+   "y": 2240,
+   "w": 390,
+   "h": 844,
+   "title": "Your recaps · month not ready",
+   "page": "summary"
+  },
+  "P05-Summary-NextUpRunning.dc.html": {
+   "x": 940,
+   "y": 2240,
+   "w": 390,
+   "h": 1450,
+   "title": "Summary · next up running (scroll)",
+   "page": "summary"
+  },
+  "P05-Summary-Home.dc.html": {
+   "x": 1410,
+   "y": 2240,
+   "w": 390,
+   "h": 844,
+   "title": "Summary · home set, nothing suggested",
+   "page": "summary"
+  },
+  "P05-Summary-NextUpLogged.dc.html": {
+   "x": 1880,
+   "y": 2240,
+   "w": 390,
+   "h": 844,
+   "title": "Summary · next up logged, undo",
+   "page": "summary"
+  },
+  "P05-Summary-Night.dc.html": {
+   "x": 2350,
+   "y": 2240,
+   "w": 390,
+   "h": 1480,
+   "title": "Workout summary · night (sleep live)",
+   "page": "summary"
+  },
+  "P05-NextUp-Options.dc.html": {
+   "x": 0,
+   "y": 3880,
+   "w": 390,
+   "h": 844,
+   "title": "Next up · options",
+   "page": "summary"
+  },
+  "P05-AllRecaps.dc.html": {
+   "x": 470,
+   "y": 3880,
+   "w": 390,
+   "h": 844,
+   "title": "All recaps sheet",
+   "page": "summary"
+  },
+  "P05-Recap-Share.dc.html": {
+   "x": 940,
+   "y": 3880,
+   "w": 390,
+   "h": 900,
+   "title": "Recap · share card sheet",
+   "page": "summary"
+  },
+  "P06-History.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1180,
+   "title": "History · all sessions (scroll)",
+   "page": "history"
+  },
+  "P06-Past-Workout.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 960,
+   "title": "Past workout · Chest 2 (scroll)",
+   "page": "history"
+  },
+  "P06-Past-Edit.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 1600,
+   "title": "Editing a past session · card open (scroll)",
+   "page": "history"
+  },
+  "P06-Trainee-Session.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 1760,
+   "title": "Trainee session · Trainer (scroll)",
+   "page": "history"
+  },
+  "P06-Exercise-History.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 1100,
+   "title": "Exercise history · Bench press (scroll)",
+   "page": "history"
+  },
+  "P06-Muscle-History.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 1250,
+   "title": "Muscle history · Chest (scroll)",
+   "page": "history"
+  },
+  "P06-History-Empty.dc.html": {
+   "x": 0,
+   "y": 1920,
+   "w": 390,
+   "h": 844,
+   "title": "History · no history yet",
+   "page": "history"
+  },
+  "P06-History-Page.dc.html": {
+   "x": 470,
+   "y": 1920,
+   "w": 390,
+   "h": 960,
+   "title": "History · page 4 of 9 (pager window)",
+   "page": "history"
+  },
+  "P06-History-Night.dc.html": {
+   "x": 940,
+   "y": 1920,
+   "w": 390,
+   "h": 1080,
+   "title": "History · night mode",
+   "page": "history"
+  },
+  "P06-Past-Night.dc.html": {
+   "x": 1410,
+   "y": 1920,
+   "w": 390,
+   "h": 1080,
+   "title": "Past workout · night mode",
+   "page": "history"
+  },
+  "P06-Past-Auto.dc.html": {
+   "x": 1880,
+   "y": 1920,
+   "w": 390,
+   "h": 900,
+   "title": "Past workout · closed automatically",
+   "page": "history"
+  },
+  "P06-Past-Home.dc.html": {
+   "x": 2350,
+   "y": 1920,
+   "w": 390,
+   "h": 860,
+   "title": "Past workout · home set",
+   "page": "history"
+  },
+  "P06-Past-Superset.dc.html": {
+   "x": 2820,
+   "y": 1920,
+   "w": 390,
+   "h": 1110,
+   "title": "Past workout · superset (collapsed) + note",
+   "page": "history"
+  },
+  "P06-Past-Circuit.dc.html": {
+   "x": 3290,
+   "y": 1920,
+   "w": 390,
+   "h": 1080,
+   "title": "Past workout · circuit (summary)",
+   "page": "history"
+  },
+  "P06-Past-Empty.dc.html": {
+   "x": 3760,
+   "y": 1920,
+   "w": 390,
+   "h": 844,
+   "title": "Past session · no exercises yet (backfill)",
+   "page": "history"
+  },
+  "P06-Trainee-Loading.dc.html": {
+   "x": 4230,
+   "y": 1920,
+   "w": 390,
+   "h": 844,
+   "title": "Trainee session · loading · Trainer",
+   "page": "history"
+  },
+  "P06-Trainee-Error.dc.html": {
+   "x": 4700,
+   "y": 1920,
+   "w": 390,
+   "h": 844,
+   "title": "Trainee session · failed · Trainer",
+   "page": "history"
+  },
+  "P06-Exercise-History-Few.dc.html": {
+   "x": 5170,
+   "y": 1920,
+   "w": 390,
+   "h": 900,
+   "title": "Exercise history · not enough data",
+   "page": "history"
+  },
+  "P06-Exercise-History-Client.dc.html": {
+   "x": 5640,
+   "y": 1920,
+   "w": 390,
+   "h": 1120,
+   "title": "Exercise history · a client’s lift · Trainer",
+   "page": "history"
+  },
+  "P06-Past-Menu.dc.html": {
+   "x": 0,
+   "y": 3200,
+   "w": 390,
+   "h": 844,
+   "title": "Past session · exercise menu (gear)",
+   "page": "history"
+  },
+  "P06-Past-Cleared.dc.html": {
+   "x": 470,
+   "y": 3200,
+   "w": 390,
+   "h": 844,
+   "title": "Past session · sets cleared · undo",
+   "page": "history"
+  },
+  "P06-Delete-Workout.dc.html": {
+   "x": 0,
+   "y": 4204,
+   "w": 390,
+   "h": 844,
+   "title": "Delete this workout? · confirm",
+   "page": "history"
+  },
+  "P06-Discard-Backfill.dc.html": {
+   "x": 470,
+   "y": 4204,
+   "w": 390,
+   "h": 844,
+   "title": "Discard session · empty backfill",
+   "page": "history"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "P04-Session.dc.html",
+  "P04-Rest-Over.dc.html",
+  "P04-PR.dc.html",
+  "P04-Fail.dc.html",
+  "P04-Fatigue.dc.html",
+  "P04-Session-Empty.dc.html",
+  "P04-Warmup-Marker.dc.html",
+  "P04-Warmup-Ramp.dc.html",
+  "P04-PerSide.dc.html",
+  "P04-Superset.dc.html",
+  "P04-Dropset.dc.html",
+  "P04-Circuit.dc.html",
+  "P04-Circuit-Building.dc.html",
+  "P04-Hold.dc.html",
+  "P04-Cardio.dc.html",
+  "P04-Offline.dc.html",
+  "P04-Undo.dc.html",
+  "P04-Music.dc.html",
+  "P04-Session-Night.dc.html",
+  "P04-Rest-Over-Night.dc.html",
+  "P04-Opts-Set-Night.dc.html",
+  "P04-Finish-Night.dc.html",
+  "P04-Cooldown-Marker.dc.html",
+  "P04-Cardio-Idle.dc.html",
+  "P04-Hold-Idle.dc.html",
+  "P04-Static-Dynamic.dc.html",
+  "P04-Tired-Part.dc.html",
+  "P04-Planned-New.dc.html",
+  "P04-Circuit-Done.dc.html",
+  "P04-Exercise-Deleted.dc.html",
+  "P04-Kit-Tray.dc.html",
+  "P04-Atlas-Jab.dc.html",
+  "P04-Photos.dc.html",
+  "P04-Opts-Set.dc.html",
+  "P04-Edit-Set.dc.html",
+  "P04-Opts-Exercise.dc.html",
+  "P04-Opts-Exercise-Sides.dc.html",
+  "P04-Opts-Session.dc.html",
+  "P04-Rest-Settings.dc.html",
+  "P04-Plates.dc.html",
+  "P04-Picker.dc.html",
+  "P04-Picker-Search.dc.html",
+  "P04-Picker-Group.dc.html",
+  "P04-Picker-Equipment.dc.html",
+  "P04-Exercise-Detail.dc.html",
+  "P04-Replace.dc.html",
+  "P04-Cardio-Machine.dc.html",
+  "P04-Equipment.dc.html",
+  "P04-Muscle-Map.dc.html",
+  "P04-Superset-With.dc.html",
+  "P04-Group-Menu.dc.html",
+  "P04-Circuit-Run.dc.html",
+  "P04-Circuit-Round.dc.html",
+  "P04-Playbook.dc.html",
+  "P04-New-Exercise.dc.html",
+  "P04-New-Exercise-Trainer.dc.html",
+  "P04-New-Exercise-Admin.dc.html",
+  "P04-Cardio-Entry.dc.html",
+  "P04-Edit-Reverse.dc.html",
+  "P04-Edit-Assist.dc.html",
+  "P04-Edit-Band.dc.html",
+  "P04-Band-Library.dc.html",
+  "P04-Plates-Build.dc.html",
+  "P04-Plates-Closest.dc.html",
+  "P04-Picker-Group-Filled.dc.html",
+  "P04-Home-Pick.dc.html",
+  "P04-Gym-Picker.dc.html",
+  "P04-Coach.dc.html",
+  "P04-PR-Share.dc.html",
+  "P04-Muscle-Info.dc.html",
+  "P04-Muscle-Map-Covered.dc.html",
+  "P04-Menu-Closed.dc.html",
+  "P04-Edit-Hold.dc.html",
+  "P04-Finish.dc.html",
+  "P04-Discard.dc.html",
+  "P04-Delete-Set.dc.html",
+  "P04-Delete-Exercise.dc.html",
+  "P04-Closed.dc.html",
+  "P04-Hero-States.dc.html",
+  "P04-Finish-Clean.dc.html",
+  "P05-Summary.dc.html",
+  "P05-Share.dc.html",
+  "P05-Recap.dc.html",
+  "P05-Recap-Story.dc.html",
+  "P05-RecapBlock.dc.html",
+  "P05-RecapBlock-NotReady.dc.html",
+  "P05-Summary-NextUpRunning.dc.html",
+  "P05-Summary-Home.dc.html",
+  "P05-Summary-NextUpLogged.dc.html",
+  "P05-Summary-Night.dc.html",
+  "P05-NextUp-Options.dc.html",
+  "P05-AllRecaps.dc.html",
+  "P05-Recap-Share.dc.html",
+  "P06-History.dc.html",
+  "P06-Past-Workout.dc.html",
+  "P06-Past-Edit.dc.html",
+  "P06-Trainee-Session.dc.html",
+  "P06-Exercise-History.dc.html",
+  "P06-Muscle-History.dc.html",
+  "P06-History-Empty.dc.html",
+  "P06-History-Page.dc.html",
+  "P06-History-Night.dc.html",
+  "P06-Past-Night.dc.html",
+  "P06-Past-Auto.dc.html",
+  "P06-Past-Home.dc.html",
+  "P06-Past-Superset.dc.html",
+  "P06-Past-Circuit.dc.html",
+  "P06-Past-Empty.dc.html",
+  "P06-Trainee-Loading.dc.html",
+  "P06-Trainee-Error.dc.html",
+  "P06-Exercise-History-Few.dc.html",
+  "P06-Exercise-History-Client.dc.html",
+  "P06-Past-Menu.dc.html",
+  "P06-Past-Cleared.dc.html",
+  "P06-Delete-Workout.dc.html",
+  "P06-Discard-Backfill.dc.html"
+ ],
+ "notes": {
+  "t_session": {
+   "x": 0,
+   "y": -300,
+   "text": "Session",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "session"
+  },
+  "t_summary": {
+   "x": 0,
+   "y": -300,
+   "text": "Summary & recap",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "summary"
+  },
+  "t_history": {
+   "x": 0,
+   "y": -300,
+   "text": "History",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "history"
+  }
+ },
+ "designSystems": [],
+ "attachments": {}
+}

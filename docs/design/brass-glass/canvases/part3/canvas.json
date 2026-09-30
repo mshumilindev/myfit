@@ -1,0 +1,968 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-29T08:00:00Z"
+ },
+ "title": "Spotter — Brass Glass · 3/6 · Progress → Plan",
+ "launch": {
+  "view": "canvas",
+  "page": "cover"
+ },
+ "pages": [
+  {
+   "id": "cover",
+   "name": "Cover"
+  },
+  {
+   "id": "progress",
+   "name": "07 · Progress"
+  },
+  {
+   "id": "plan",
+   "name": "08 · Plan & programs"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Cover",
+   "page": "cover"
+  },
+  "P07-Overview.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Overview · hub tab",
+   "page": "progress"
+  },
+  "P07-Progress.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 960,
+   "title": "Progress · Total",
+   "page": "progress"
+  },
+  "P07-Progress-Muscle.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 1060,
+   "title": "Progress · By muscle",
+   "page": "progress"
+  },
+  "P07-Progress-Volume.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 2000,
+   "title": "Progress · Volume (list, scroll)",
+   "page": "progress"
+  },
+  "P07-Progress-Records.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 1380,
+   "title": "Progress · Records (scroll)",
+   "page": "progress"
+  },
+  "P07-Trends.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 1560,
+   "title": "Trends · Atlas (coach on, scroll)",
+   "page": "progress"
+  },
+  "P07-Goals.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 1400,
+   "title": "Goals · physique + focus (scroll)",
+   "page": "progress"
+  },
+  "P07-Mastery.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 1100,
+   "title": "Mastery · detail (scroll)",
+   "page": "progress"
+  },
+  "P07-Mastery-Shortfall.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 990,
+   "title": "Mastery · where you fall short",
+   "page": "progress"
+  },
+  "P07-Mastery-Ladder.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mastery · the ladder",
+   "page": "progress"
+  },
+  "P07-Mastery-Calibrate.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Mastery · training history (Experience)",
+   "page": "progress"
+  },
+  "P07-Overview-Empty.dc.html": {
+   "x": 0,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Overview · new account",
+   "page": "progress"
+  },
+  "P07-Overview-Night.dc.html": {
+   "x": 470,
+   "y": 2160,
+   "w": 390,
+   "h": 900,
+   "title": "Overview · night mode · all clear, rest day",
+   "page": "progress"
+  },
+  "P07-Progress-Night.dc.html": {
+   "x": 940,
+   "y": 2160,
+   "w": 390,
+   "h": 1030,
+   "title": "Progress · night mode",
+   "page": "progress"
+  },
+  "P07-Mastery-Night.dc.html": {
+   "x": 1410,
+   "y": 2160,
+   "w": 390,
+   "h": 1180,
+   "title": "Mastery · night mode",
+   "page": "progress"
+  },
+  "P07-Progress-Locked.dc.html": {
+   "x": 1880,
+   "y": 2160,
+   "w": 390,
+   "h": 900,
+   "title": "Progress · locked (1 of 3 sessions)",
+   "page": "progress"
+  },
+  "P07-Progress-Locked-Empty.dc.html": {
+   "x": 2350,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Progress · empty account",
+   "page": "progress"
+  },
+  "P07-Progress-Range.dc.html": {
+   "x": 2820,
+   "y": 2160,
+   "w": 390,
+   "h": 960,
+   "title": "Progress · custom period",
+   "page": "progress"
+  },
+  "P07-Progress-Zones.dc.html": {
+   "x": 3290,
+   "y": 2160,
+   "w": 390,
+   "h": 1160,
+   "title": "Progress · Volume · Zones, cold start",
+   "page": "progress"
+  },
+  "P07-Progress-Fatigue-Map.dc.html": {
+   "x": 3760,
+   "y": 2160,
+   "w": 390,
+   "h": 1180,
+   "title": "Progress · Volume · Fatigue lens · map",
+   "page": "progress"
+  },
+  "P07-Progress-Volume-Map.dc.html": {
+   "x": 4230,
+   "y": 2160,
+   "w": 390,
+   "h": 1300,
+   "title": "Progress · Volume · volume lens · map",
+   "page": "progress"
+  },
+  "P07-Progress-Readiness.dc.html": {
+   "x": 4700,
+   "y": 2160,
+   "w": 390,
+   "h": 1300,
+   "title": "Progress · Volume · Readiness lens · list",
+   "page": "progress"
+  },
+  "P07-Progress-Readiness-Map.dc.html": {
+   "x": 5170,
+   "y": 2160,
+   "w": 390,
+   "h": 1240,
+   "title": "Progress · Volume · Readiness lens · map",
+   "page": "progress"
+  },
+  "P07-Trends-States.dc.html": {
+   "x": 5640,
+   "y": 2160,
+   "w": 390,
+   "h": 1400,
+   "title": "Trends · coach off + empty states",
+   "page": "progress"
+  },
+  "P07-Goals-Empty.dc.html": {
+   "x": 6110,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Goals · nothing set",
+   "page": "progress"
+  },
+  "P07-Mastery-Calibrating.dc.html": {
+   "x": 6580,
+   "y": 2160,
+   "w": 390,
+   "h": 1260,
+   "title": "Mastery · calibrating (new account)",
+   "page": "progress"
+  },
+  "P07-Range-Sheet.dc.html": {
+   "x": 0,
+   "y": 3720,
+   "w": 390,
+   "h": 844,
+   "title": "Progress · range sheet",
+   "page": "progress"
+  },
+  "P07-Volume-View-Sheet.dc.html": {
+   "x": 470,
+   "y": 3720,
+   "w": 390,
+   "h": 844,
+   "title": "Progress · volume view sheet",
+   "page": "progress"
+  },
+  "P07-Fix-Sheet.dc.html": {
+   "x": 940,
+   "y": 3720,
+   "w": 390,
+   "h": 844,
+   "title": "Progress · Fix → add Calves work",
+   "page": "progress"
+  },
+  "P07-Focus-Editor.dc.html": {
+   "x": 1410,
+   "y": 3720,
+   "w": 390,
+   "h": 1580,
+   "title": "Goals · Focus editor (sheet, scroll)",
+   "page": "progress"
+  },
+  "P07-Physique-Picker.dc.html": {
+   "x": 1880,
+   "y": 3720,
+   "w": 390,
+   "h": 844,
+   "title": "Goals · physique target picker",
+   "page": "progress"
+  },
+  "P07-Physique-Picker-Sex.dc.html": {
+   "x": 2350,
+   "y": 3720,
+   "w": 390,
+   "h": 844,
+   "title": "Goals · physique picker · no sex on account",
+   "page": "progress"
+  },
+  "P07-Practice-Sheet.dc.html": {
+   "x": 2820,
+   "y": 3720,
+   "w": 390,
+   "h": 844,
+   "title": "Mastery · practice signals sheet",
+   "page": "progress"
+  },
+  "P07-Goals-Reset.dc.html": {
+   "x": 0,
+   "y": 5460,
+   "w": 390,
+   "h": 844,
+   "title": "Goals · reset confirm",
+   "page": "progress"
+  },
+  "P07-Rank-Up.dc.html": {
+   "x": 470,
+   "y": 5460,
+   "w": 390,
+   "h": 844,
+   "title": "Mastery · rank-up moment (MasteryRankUp)",
+   "page": "progress"
+  },
+  "P07-Desktop-Records.dc.html": {
+   "x": 940,
+   "y": 5460,
+   "w": 1440,
+   "h": 900,
+   "title": "Progress · Records · desktop (detail pane)",
+   "page": "progress"
+  },
+  "P07-Desktop-Volume.dc.html": {
+   "x": 2460,
+   "y": 5460,
+   "w": 1440,
+   "h": 900,
+   "title": "Progress · Volume · desktop (map pane)",
+   "page": "progress"
+  },
+  "P08-Programs-Member.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Programs home · Member",
+   "page": "plan"
+  },
+  "P08-Programs-Trainer.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Programs home · Trainer",
+   "page": "plan"
+  },
+  "P08-Programs-Admin.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Programs home · Admin",
+   "page": "plan"
+  },
+  "P08-Builder-Basics.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · 1 basics (new)",
+   "page": "plan"
+  },
+  "P08-Builder-Basics-Ongoing.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · 1 basics · saved, no end date (back → review)",
+   "page": "plan"
+  },
+  "P08-Builder-Week.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Builder · 2 week",
+   "page": "plan"
+  },
+  "P08-Builder-Day-Exercises.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 960,
+   "title": "Builder · 3 day · by exercises",
+   "page": "plan"
+  },
+  "P08-Builder-Day-More.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 1200,
+   "title": "Builder · 3 day · exercise “More” open",
+   "page": "plan"
+  },
+  "P08-Builder-Day-Muscles.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 1320,
+   "title": "Builder · 3 day · by muscles (body map + tiles)",
+   "page": "plan"
+  },
+  "P08-Builder-Review.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · 4 review (saved, active)",
+   "page": "plan"
+  },
+  "P08-Builder-Review-Draft.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · 4 review · draft, a day unfilled",
+   "page": "plan"
+  },
+  "P08-Builder-Review-Ready.dc.html": {
+   "x": 5170,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · 4 review · draft, ready to activate",
+   "page": "plan"
+  },
+  "P08-Builder-Review-ReadOnly.dc.html": {
+   "x": 5640,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Program from my trainer · read-only",
+   "page": "plan"
+  },
+  "P08-Builder-Day-ReadOnly.dc.html": {
+   "x": 6110,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Program from my trainer · a day, read-only",
+   "page": "plan"
+  },
+  "P08-Playbook.dc.html": {
+   "x": 6580,
+   "y": 0,
+   "w": 390,
+   "h": 1240,
+   "title": "Playbook (learned plays)",
+   "page": "plan"
+  },
+  "P08-Programs-Loading.dc.html": {
+   "x": 0,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Programs · loading",
+   "page": "plan"
+  },
+  "P08-Programs-Failed.dc.html": {
+   "x": 470,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Programs · list failed · no program assigned",
+   "page": "plan"
+  },
+  "P08-Programs-Empty.dc.html": {
+   "x": 940,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Programs · nothing created yet",
+   "page": "plan"
+  },
+  "P08-Programs-Archived.dc.html": {
+   "x": 1410,
+   "y": 1480,
+   "w": 390,
+   "h": 1000,
+   "title": "Programs · archived shown · Trainer",
+   "page": "plan"
+  },
+  "P08-Programs-ByTrainer.dc.html": {
+   "x": 1880,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Programs · assigned by my trainer · Member",
+   "page": "plan"
+  },
+  "P08-Programs-Night.dc.html": {
+   "x": 2350,
+   "y": 1480,
+   "w": 390,
+   "h": 900,
+   "title": "Programs home · night",
+   "page": "plan"
+  },
+  "P08-Seed-Week.dc.html": {
+   "x": 2820,
+   "y": 1480,
+   "w": 390,
+   "h": 900,
+   "title": "From Today suggestion · prefilled week + toast",
+   "page": "plan"
+  },
+  "P08-Builder-Day-Empty.dc.html": {
+   "x": 3290,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · day with no exercises yet",
+   "page": "plan"
+  },
+  "P08-Builder-Week-Partial.dc.html": {
+   "x": 3760,
+   "y": 1480,
+   "w": 390,
+   "h": 900,
+   "title": "Builder · week · a day switched on, not named",
+   "page": "plan"
+  },
+  "P08-Builder-Week-None.dc.html": {
+   "x": 4230,
+   "y": 1480,
+   "w": 390,
+   "h": 900,
+   "title": "Builder · week · no training day yet (CTA disabled)",
+   "page": "plan"
+  },
+  "P08-Builder-SaveFailed.dc.html": {
+   "x": 4700,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · save failed",
+   "page": "plan"
+  },
+  "P08-Builder-Saving.dc.html": {
+   "x": 5170,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Builder · saving",
+   "page": "plan"
+  },
+  "P08-Playbook-Empty.dc.html": {
+   "x": 5640,
+   "y": 1480,
+   "w": 390,
+   "h": 844,
+   "title": "Playbook · nothing learned yet",
+   "page": "plan"
+  },
+  "P08-Playbook-Night.dc.html": {
+   "x": 6110,
+   "y": 1480,
+   "w": 390,
+   "h": 900,
+   "title": "Playbook · night",
+   "page": "plan"
+  },
+  "P08-Menu-Trainer.dc.html": {
+   "x": 0,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Program options · Trainer (saved, active)",
+   "page": "plan"
+  },
+  "P08-Menu-Admin.dc.html": {
+   "x": 470,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Program options · Admin (saved, active)",
+   "page": "plan"
+  },
+  "P08-Menu-Member.dc.html": {
+   "x": 940,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Program options · Member (saved, active)",
+   "page": "plan"
+  },
+  "P08-Menu-Unsaved.dc.html": {
+   "x": 1410,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Program options · new unsaved draft (no Archive, no Delete) · Member",
+   "page": "plan"
+  },
+  "P08-Assignees-Trainer.dc.html": {
+   "x": 1880,
+   "y": 2640,
+   "w": 390,
+   "h": 900,
+   "title": "Members drawer · Trainer",
+   "page": "plan"
+  },
+  "P08-Assignees-Admin.dc.html": {
+   "x": 2350,
+   "y": 2640,
+   "w": 390,
+   "h": 900,
+   "title": "Members drawer · Admin",
+   "page": "plan"
+  },
+  "P08-Assignees-Empty.dc.html": {
+   "x": 2820,
+   "y": 2640,
+   "w": 390,
+   "h": 900,
+   "title": "Members drawer · no clients",
+   "page": "plan"
+  },
+  "P08-Assignees-Error.dc.html": {
+   "x": 3290,
+   "y": 2640,
+   "w": 390,
+   "h": 900,
+   "title": "Members drawer · save failed",
+   "page": "plan"
+  },
+  "P08-Duplicate.dc.html": {
+   "x": 3760,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Duplicate a program (from basics)",
+   "page": "plan"
+  },
+  "P08-Duplicate-Empty.dc.html": {
+   "x": 4230,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Duplicate · nothing to copy",
+   "page": "plan"
+  },
+  "P08-CopyDay.dc.html": {
+   "x": 4700,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Copy day to",
+   "page": "plan"
+  },
+  "P08-Sets.dc.html": {
+   "x": 5170,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Sets × reps sheet",
+   "page": "plan"
+  },
+  "P08-Minutes.dc.html": {
+   "x": 5640,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Minutes sheet (cardio / timed)",
+   "page": "plan"
+  },
+  "P08-Equipment.dc.html": {
+   "x": 6110,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Equipment sheet (exercise “More”)",
+   "page": "plan"
+  },
+  "P08-SupersetWith.dc.html": {
+   "x": 6580,
+   "y": 2640,
+   "w": 390,
+   "h": 1000,
+   "title": "Superset with",
+   "page": "plan"
+  },
+  "P08-Picker.dc.html": {
+   "x": 7050,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Add exercise to a day (plain picker)",
+   "page": "plan"
+  },
+  "P08-Picker-Group.dc.html": {
+   "x": 7520,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Plain picker · muscle group (Added badges)",
+   "page": "plan"
+  },
+  "P08-Picker-Search.dc.html": {
+   "x": 7990,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Plain picker · search + create",
+   "page": "plan"
+  },
+  "P08-Picker-Info.dc.html": {
+   "x": 8460,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Plain picker · exercise info (Add to the day)",
+   "page": "plan"
+  },
+  "P08-Picker-Equipment.dc.html": {
+   "x": 8930,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Plain picker · equipment filter (no gym → no in-gym labels, no “only this gym”)",
+   "page": "plan"
+  },
+  "P08-Picker-Cardio.dc.html": {
+   "x": 9400,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Plain picker · Cardio → which machine (no gym)",
+   "page": "plan"
+  },
+  "P08-CSV-Pick.dc.html": {
+   "x": 9870,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Import CSV · pick",
+   "page": "plan"
+  },
+  "P08-CSV-NoRows.dc.html": {
+   "x": 10340,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Import CSV · no rows",
+   "page": "plan"
+  },
+  "P08-CSV-Map.dc.html": {
+   "x": 10810,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Import CSV · map columns",
+   "page": "plan"
+  },
+  "P08-CSV-Preview.dc.html": {
+   "x": 11280,
+   "y": 2640,
+   "w": 390,
+   "h": 844,
+   "title": "Import CSV · validating preview",
+   "page": "plan"
+  },
+  "P08-AssignDialog-Trainer.dc.html": {
+   "x": 11750,
+   "y": 2640,
+   "w": 390,
+   "h": 900,
+   "title": "ProgramAssignDialog (PG-03, unmounted) · Trainer",
+   "page": "plan"
+  },
+  "P08-Delete.dc.html": {
+   "x": 0,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Delete program",
+   "page": "plan"
+  },
+  "P08-MakeRest.dc.html": {
+   "x": 470,
+   "y": 3800,
+   "w": 390,
+   "h": 900,
+   "title": "Make a day rest",
+   "page": "plan"
+  },
+  "P08-Discard.dc.html": {
+   "x": 940,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Discard changes",
+   "page": "plan"
+  },
+  "P08-SwitchMuscles.dc.html": {
+   "x": 1410,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Define day by muscles?",
+   "page": "plan"
+  },
+  "P08-Desktop-Builder-Day.dc.html": {
+   "x": 1880,
+   "y": 3800,
+   "w": 1440,
+   "h": 1180,
+   "title": "Desktop · builder, day by exercises",
+   "page": "plan"
+  },
+  "P08-Desktop-Builder-Review.dc.html": {
+   "x": 3400,
+   "y": 3800,
+   "w": 1440,
+   "h": 900,
+   "title": "Desktop · builder, review",
+   "page": "plan"
+  },
+  "P08-Desktop-Builder-Muscles.dc.html": {
+   "x": 4920,
+   "y": 3800,
+   "w": 1440,
+   "h": 1000,
+   "title": "Desktop · builder, day by muscles",
+   "page": "plan"
+  },
+  "P08-Desktop-Builder-New.dc.html": {
+   "x": 6440,
+   "y": 3800,
+   "w": 1440,
+   "h": 1000,
+   "title": "Desktop · new program (start-from, nothing set)",
+   "page": "plan"
+  },
+  "P08-Desktop-Programs-Trainer.dc.html": {
+   "x": 7960,
+   "y": 3800,
+   "w": 1440,
+   "h": 760,
+   "title": "Desktop · Programs home · Trainer",
+   "page": "plan"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "P07-Overview.dc.html",
+  "P07-Progress.dc.html",
+  "P07-Progress-Muscle.dc.html",
+  "P07-Progress-Volume.dc.html",
+  "P07-Progress-Records.dc.html",
+  "P07-Trends.dc.html",
+  "P07-Goals.dc.html",
+  "P07-Mastery.dc.html",
+  "P07-Mastery-Shortfall.dc.html",
+  "P07-Mastery-Ladder.dc.html",
+  "P07-Mastery-Calibrate.dc.html",
+  "P07-Overview-Empty.dc.html",
+  "P07-Overview-Night.dc.html",
+  "P07-Progress-Night.dc.html",
+  "P07-Mastery-Night.dc.html",
+  "P07-Progress-Locked.dc.html",
+  "P07-Progress-Locked-Empty.dc.html",
+  "P07-Progress-Range.dc.html",
+  "P07-Progress-Zones.dc.html",
+  "P07-Progress-Fatigue-Map.dc.html",
+  "P07-Progress-Volume-Map.dc.html",
+  "P07-Progress-Readiness.dc.html",
+  "P07-Progress-Readiness-Map.dc.html",
+  "P07-Trends-States.dc.html",
+  "P07-Goals-Empty.dc.html",
+  "P07-Mastery-Calibrating.dc.html",
+  "P07-Range-Sheet.dc.html",
+  "P07-Volume-View-Sheet.dc.html",
+  "P07-Fix-Sheet.dc.html",
+  "P07-Focus-Editor.dc.html",
+  "P07-Physique-Picker.dc.html",
+  "P07-Physique-Picker-Sex.dc.html",
+  "P07-Practice-Sheet.dc.html",
+  "P07-Goals-Reset.dc.html",
+  "P07-Rank-Up.dc.html",
+  "P07-Desktop-Records.dc.html",
+  "P07-Desktop-Volume.dc.html",
+  "P08-Programs-Member.dc.html",
+  "P08-Programs-Trainer.dc.html",
+  "P08-Programs-Admin.dc.html",
+  "P08-Builder-Basics.dc.html",
+  "P08-Builder-Basics-Ongoing.dc.html",
+  "P08-Builder-Week.dc.html",
+  "P08-Builder-Day-Exercises.dc.html",
+  "P08-Builder-Day-More.dc.html",
+  "P08-Builder-Day-Muscles.dc.html",
+  "P08-Builder-Review.dc.html",
+  "P08-Builder-Review-Draft.dc.html",
+  "P08-Builder-Review-Ready.dc.html",
+  "P08-Builder-Review-ReadOnly.dc.html",
+  "P08-Builder-Day-ReadOnly.dc.html",
+  "P08-Playbook.dc.html",
+  "P08-Programs-Loading.dc.html",
+  "P08-Programs-Failed.dc.html",
+  "P08-Programs-Empty.dc.html",
+  "P08-Programs-Archived.dc.html",
+  "P08-Programs-ByTrainer.dc.html",
+  "P08-Programs-Night.dc.html",
+  "P08-Seed-Week.dc.html",
+  "P08-Builder-Day-Empty.dc.html",
+  "P08-Builder-Week-Partial.dc.html",
+  "P08-Builder-Week-None.dc.html",
+  "P08-Builder-SaveFailed.dc.html",
+  "P08-Builder-Saving.dc.html",
+  "P08-Playbook-Empty.dc.html",
+  "P08-Playbook-Night.dc.html",
+  "P08-Menu-Trainer.dc.html",
+  "P08-Menu-Admin.dc.html",
+  "P08-Menu-Member.dc.html",
+  "P08-Menu-Unsaved.dc.html",
+  "P08-Assignees-Trainer.dc.html",
+  "P08-Assignees-Admin.dc.html",
+  "P08-Assignees-Empty.dc.html",
+  "P08-Assignees-Error.dc.html",
+  "P08-Duplicate.dc.html",
+  "P08-Duplicate-Empty.dc.html",
+  "P08-CopyDay.dc.html",
+  "P08-Sets.dc.html",
+  "P08-Minutes.dc.html",
+  "P08-Equipment.dc.html",
+  "P08-SupersetWith.dc.html",
+  "P08-Picker.dc.html",
+  "P08-Picker-Group.dc.html",
+  "P08-Picker-Search.dc.html",
+  "P08-Picker-Info.dc.html",
+  "P08-Picker-Equipment.dc.html",
+  "P08-Picker-Cardio.dc.html",
+  "P08-CSV-Pick.dc.html",
+  "P08-CSV-NoRows.dc.html",
+  "P08-CSV-Map.dc.html",
+  "P08-CSV-Preview.dc.html",
+  "P08-AssignDialog-Trainer.dc.html",
+  "P08-Delete.dc.html",
+  "P08-MakeRest.dc.html",
+  "P08-Discard.dc.html",
+  "P08-SwitchMuscles.dc.html",
+  "P08-Desktop-Builder-Day.dc.html",
+  "P08-Desktop-Builder-Review.dc.html",
+  "P08-Desktop-Builder-Muscles.dc.html",
+  "P08-Desktop-Builder-New.dc.html",
+  "P08-Desktop-Programs-Trainer.dc.html"
+ ],
+ "notes": {
+  "t_progress": {
+   "x": 0,
+   "y": -300,
+   "text": "Progress",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "progress"
+  },
+  "t_plan": {
+   "x": 0,
+   "y": -300,
+   "text": "Plan & programs",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "plan"
+  }
+ },
+ "designSystems": [],
+ "attachments": {}
+}

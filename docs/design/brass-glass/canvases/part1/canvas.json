@@ -1,0 +1,1208 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-29T08:00:00Z"
+ },
+ "title": "Spotter — Brass Glass · 1/6 · Foundations → Start",
+ "launch": {
+  "view": "canvas",
+  "page": "cover"
+ },
+ "pages": [
+  {
+   "id": "cover",
+   "name": "Cover"
+  },
+  {
+   "id": "foundations",
+   "name": "00 · Foundations"
+  },
+  {
+   "id": "today",
+   "name": "01 · Today & customize"
+  },
+  {
+   "id": "widgets",
+   "name": "02 · Widget library"
+  },
+  {
+   "id": "start",
+   "name": "03 · Start & logging"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Cover",
+   "page": "cover"
+  },
+  "P00-Colors.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Colour, glass & surfaces",
+   "page": "foundations"
+  },
+  "P00-Type.dc.html": {
+   "x": 1680,
+   "y": 0,
+   "w": 1100,
+   "h": 700,
+   "title": "Typography",
+   "page": "foundations"
+  },
+  "P00-Controls.dc.html": {
+   "x": 2860,
+   "y": 0,
+   "w": 1600,
+   "h": 1000,
+   "title": "Buttons, chips, controls",
+   "page": "foundations"
+  },
+  "P00-Content.dc.html": {
+   "x": 4540,
+   "y": 0,
+   "w": 1600,
+   "h": 1000,
+   "title": "Lists, cards and stats",
+   "page": "foundations"
+  },
+  "P00-States.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1600,
+   "h": 700,
+   "title": "Empty, loading, failed, offline",
+   "page": "foundations"
+  },
+  "P00-Overlays.dc.html": {
+   "x": 1680,
+   "y": 1160,
+   "w": 1600,
+   "h": 840,
+   "title": "Sheets, dialogs, snackbars",
+   "page": "foundations"
+  },
+  "P00-Shell.dc.html": {
+   "x": 3360,
+   "y": 1160,
+   "w": 1600,
+   "h": 900,
+   "title": "Shell: header, tab bar, rail",
+   "page": "foundations"
+  },
+  "P01-Today.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1760,
+   "title": "Today · with custom sections (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Today-Default.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 1280,
+   "title": "Today · default layout (core blocks only) · Member",
+   "page": "today"
+  },
+  "P01-Today-Admin.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 1760,
+   "title": "Today · Atlas & clients stories (scroll) · Admin",
+   "page": "today"
+  },
+  "P01-Edit.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 2000,
+   "title": "Customize Today · edit mode (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Edit-Admin.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 2000,
+   "title": "Customize Today · edit mode (scroll) · Admin",
+   "page": "today"
+  },
+  "P01-AtlasStrip.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 620,
+   "title": "Atlas & clients: solo or stories · Member / Admin",
+   "page": "today"
+  },
+  "P01-Atlas-Variants.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 1700,
+   "h": 1680,
+   "title": "Atlas & clients — variants · Admin",
+   "page": "today"
+  },
+  "P01-History-Calendar.dc.html": {
+   "x": 4600,
+   "y": 0,
+   "w": 390,
+   "h": 1500,
+   "title": "History · calendar view (Today, scroll) · Member",
+   "page": "today"
+  },
+  "P01-EmptySlot.dc.html": {
+   "x": 5070,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Customize Today · new section, empty slots · Member",
+   "page": "today"
+  },
+  "P01-Today-Night.dc.html": {
+   "x": 0,
+   "y": 2160,
+   "w": 390,
+   "h": 1840,
+   "title": "Today · night live (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Edit-Night.dc.html": {
+   "x": 470,
+   "y": 2160,
+   "w": 390,
+   "h": 2080,
+   "title": "Customize Today · night live (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Today-Loading.dc.html": {
+   "x": 940,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · loading (skeleton) · Member",
+   "page": "today"
+  },
+  "P01-Today-Offline.dc.html": {
+   "x": 1410,
+   "y": 2160,
+   "w": 390,
+   "h": 1840,
+   "title": "Today · offline, changes queued (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Today-Live.dc.html": {
+   "x": 1880,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · session live (LiveHero compact) · Member",
+   "page": "today"
+  },
+  "P01-Today-Activity.dc.html": {
+   "x": 2350,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · activity in progress · Member",
+   "page": "today"
+  },
+  "P01-Today-Injury.dc.html": {
+   "x": 2820,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · injury rehab · Member",
+   "page": "today"
+  },
+  "P01-Today-Rest.dc.html": {
+   "x": 3290,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · program rest day · Member",
+   "page": "today"
+  },
+  "P01-Today-Empty.dc.html": {
+   "x": 3760,
+   "y": 2160,
+   "w": 390,
+   "h": 1000,
+   "title": "Today · new user (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Today-Trainer.dc.html": {
+   "x": 4230,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · clients only · Trainer",
+   "page": "today"
+  },
+  "P01-Status.dc.html": {
+   "x": 4700,
+   "y": 2160,
+   "w": 1600,
+   "h": 1060,
+   "title": "Status block · every banner · Member",
+   "page": "today"
+  },
+  "P01-Nudges.dc.html": {
+   "x": 6380,
+   "y": 2160,
+   "w": 1600,
+   "h": 1560,
+   "title": "Nudges block · deck and every card · Member",
+   "page": "today"
+  },
+  "P01-DaySheet-Night.dc.html": {
+   "x": 8060,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Day drawer · a trained day · night live · Member",
+   "page": "today"
+  },
+  "P01-Desktop-Night.dc.html": {
+   "x": 8530,
+   "y": 2160,
+   "w": 1440,
+   "h": 1460,
+   "title": "Desktop · Today · night live · Member",
+   "page": "today"
+  },
+  "P01-Today-Live-Home.dc.html": {
+   "x": 10050,
+   "y": 2160,
+   "w": 390,
+   "h": 844,
+   "title": "Today · home set live (LiveHero compact, home image) · Member",
+   "page": "today"
+  },
+  "P01-Program-Modes.dc.html": {
+   "x": 10520,
+   "y": 2160,
+   "w": 1600,
+   "h": 880,
+   "title": "Program & week · every card mode · Member",
+   "page": "today"
+  },
+  "P01-Shortcuts.dc.html": {
+   "x": 0,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Shortcuts sheet · Member",
+   "page": "today"
+  },
+  "P01-AddSection.dc.html": {
+   "x": 470,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "New section sheet · Member",
+   "page": "today"
+  },
+  "P01-EditSection.dc.html": {
+   "x": 940,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Edit section sheet · layout change warning · Member",
+   "page": "today"
+  },
+  "P01-FillSlot.dc.html": {
+   "x": 1410,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Fill a slot · widget picker (S) · Member",
+   "page": "today"
+  },
+  "P01-ConfigCore.dc.html": {
+   "x": 1880,
+   "y": 4400,
+   "w": 390,
+   "h": 920,
+   "title": "Configure · Atlas & clients · Admin",
+   "page": "today"
+  },
+  "P01-ConfigAtlas-Member.dc.html": {
+   "x": 2350,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Configure · Atlas & clients (no clients: Atlas view only) · Member",
+   "page": "today"
+  },
+  "P01-ConfigProgram.dc.html": {
+   "x": 2820,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Configure · Program & week · Member",
+   "page": "today"
+  },
+  "P01-ConfigNudges.dc.html": {
+   "x": 3290,
+   "y": 4400,
+   "w": 390,
+   "h": 940,
+   "title": "Configure · Nudges & reminders · Member",
+   "page": "today"
+  },
+  "P01-ConfigHistory.dc.html": {
+   "x": 3760,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Configure · History · Member",
+   "page": "today"
+  },
+  "P01-Nudges-Open.dc.html": {
+   "x": 4230,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Nudges · stack open · Member",
+   "page": "today"
+  },
+  "P01-ProgSuggest.dc.html": {
+   "x": 4700,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Create your program sheet · Member",
+   "page": "today"
+  },
+  "P01-DaySheet.dc.html": {
+   "x": 5170,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Day drawer · a trained day · Member",
+   "page": "today"
+  },
+  "P01-DaySheet-Today.dc.html": {
+   "x": 5640,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Day drawer · today, start from it · Member",
+   "page": "today"
+  },
+  "P01-DaySheet-Notes.dc.html": {
+   "x": 6110,
+   "y": 4400,
+   "w": 1600,
+   "h": 420,
+   "title": "Day drawer · day notes · Member",
+   "page": "today"
+  },
+  "P01-EditSection-Kind.dc.html": {
+   "x": 7790,
+   "y": 4400,
+   "w": 390,
+   "h": 844,
+   "title": "Edit section sheet · shortcuts ↔ widgets warning · Member",
+   "page": "today"
+  },
+  "P01-Discard.dc.html": {
+   "x": 0,
+   "y": 5500,
+   "w": 390,
+   "h": 844,
+   "title": "Customize Today · discard changes · Member",
+   "page": "today"
+  },
+  "P01-RemoveConfirm.dc.html": {
+   "x": 470,
+   "y": 5500,
+   "w": 390,
+   "h": 844,
+   "title": "Remove section · confirm · Member",
+   "page": "today"
+  },
+  "P01-EndRest.dc.html": {
+   "x": 940,
+   "y": 5500,
+   "w": 390,
+   "h": 844,
+   "title": "End rest period · confirm · Member",
+   "page": "today"
+  },
+  "P01-EndIllness.dc.html": {
+   "x": 1410,
+   "y": 5500,
+   "w": 390,
+   "h": 844,
+   "title": "Back from illness · confirm · Member",
+   "page": "today"
+  },
+  "P01-Desktop.dc.html": {
+   "x": 1880,
+   "y": 5500,
+   "w": 1440,
+   "h": 1380,
+   "title": "Desktop · Today · Member",
+   "page": "today"
+  },
+  "P01-Desktop-Edit.dc.html": {
+   "x": 3400,
+   "y": 5500,
+   "w": 1440,
+   "h": 1960,
+   "title": "Desktop · Customize Today (scroll) · Member",
+   "page": "today"
+  },
+  "P01-Desktop-Calendar.dc.html": {
+   "x": 4920,
+   "y": 5500,
+   "w": 1440,
+   "h": 1100,
+   "title": "Desktop · History · calendar view · Member",
+   "page": "today"
+  },
+  "P02-01-Training.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1640,
+   "h": 3940,
+   "title": "Training",
+   "page": "widgets"
+  },
+  "P02-02-Plan-sessions.dc.html": {
+   "x": 1720,
+   "y": 0,
+   "w": 1640,
+   "h": 5785,
+   "title": "Plan & sessions",
+   "page": "widgets"
+  },
+  "P02-03-Strength.dc.html": {
+   "x": 3440,
+   "y": 0,
+   "w": 1640,
+   "h": 5668,
+   "title": "Strength",
+   "page": "widgets"
+  },
+  "P02-04-Muscles-consistency.dc.html": {
+   "x": 5160,
+   "y": 0,
+   "w": 1640,
+   "h": 5545,
+   "title": "Muscles & consistency",
+   "page": "widgets"
+  },
+  "P02-05-Body-recovery.dc.html": {
+   "x": 6880,
+   "y": 0,
+   "w": 1640,
+   "h": 5504,
+   "title": "Body & recovery",
+   "page": "widgets"
+  },
+  "P02-06-Cardio-gyms.dc.html": {
+   "x": 8600,
+   "y": 0,
+   "w": 1640,
+   "h": 3677,
+   "title": "Cardio & gyms",
+   "page": "widgets"
+  },
+  "P02-07-Apex.dc.html": {
+   "x": 10320,
+   "y": 0,
+   "w": 1640,
+   "h": 4452,
+   "title": "Apex",
+   "page": "widgets"
+  },
+  "P02-08-Learn.dc.html": {
+   "x": 12040,
+   "y": 0,
+   "w": 1640,
+   "h": 2358,
+   "title": "Learn",
+   "page": "widgets"
+  },
+  "P02-09-Atlas.dc.html": {
+   "x": 13760,
+   "y": 0,
+   "w": 1640,
+   "h": 3527,
+   "title": "Atlas",
+   "page": "widgets"
+  },
+  "P02-10-Discover.dc.html": {
+   "x": 15480,
+   "y": 0,
+   "w": 1640,
+   "h": 3561,
+   "title": "Discover",
+   "page": "widgets"
+  },
+  "P02-11-Fun-tools.dc.html": {
+   "x": 17200,
+   "y": 0,
+   "w": 1640,
+   "h": 4802,
+   "title": "Fun & tools",
+   "page": "widgets"
+  },
+  "P02-12-Calendar.dc.html": {
+   "x": 18920,
+   "y": 0,
+   "w": 1640,
+   "h": 1056,
+   "title": "Calendar",
+   "page": "widgets"
+  },
+  "P02-00-Sizes.dc.html": {
+   "x": 0,
+   "y": 5945,
+   "w": 1640,
+   "h": 757,
+   "title": "Sizes · XS S M L XL",
+   "page": "widgets"
+  },
+  "P02-13-Shortcuts.dc.html": {
+   "x": 1720,
+   "y": 5945,
+   "w": 1640,
+   "h": 938,
+   "title": "Shortcuts · XS",
+   "page": "widgets"
+  },
+  "P02-14-Music.dc.html": {
+   "x": 3440,
+   "y": 5945,
+   "w": 1000,
+   "h": 1076,
+   "title": "Music widgets · in app + iPhone",
+   "page": "widgets"
+  },
+  "P03-Start-Sheet.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · today in program",
+   "page": "start"
+  },
+  "P03-Start-Coach.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Session start coach · Today’s read",
+   "page": "start"
+  },
+  "P03-Builder-Intent.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Session builder · Intent",
+   "page": "start"
+  },
+  "P03-Builder-Muscles.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Session builder · Muscles",
+   "page": "start"
+  },
+  "P03-Builder-Day.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Session builder · The day",
+   "page": "start"
+  },
+  "P03-Builder-Review.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 1360,
+   "title": "Session builder · Review (scroll)",
+   "page": "start"
+  },
+  "P03-HomeSet.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · your sets",
+   "page": "start"
+  },
+  "P03-HomeSet-Builder.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Home set · new",
+   "page": "start"
+  },
+  "P03-LogActivity.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 1460,
+   "title": "Log activity (scroll)",
+   "page": "start"
+  },
+  "P03-QuickLog-Run.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Quick log · run · now",
+   "page": "start"
+  },
+  "P03-Activity-Running.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Activity · running",
+   "page": "start"
+  },
+  "P03-Activity-Edit.dc.html": {
+   "x": 5170,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Activity · edit a logged run",
+   "page": "start"
+  },
+  "P03-Activity-Paused.dc.html": {
+   "x": 0,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Activity · paused",
+   "page": "start"
+  },
+  "P03-Start-Locked.dc.html": {
+   "x": 470,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · something live",
+   "page": "start"
+  },
+  "P03-Start-Usual.dc.html": {
+   "x": 940,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · usual day (playbook)",
+   "page": "start"
+  },
+  "P03-Start-Scratch.dc.html": {
+   "x": 1410,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · no plan, no history",
+   "page": "start"
+  },
+  "P03-LogActivity-First.dc.html": {
+   "x": 1880,
+   "y": 1620,
+   "w": 390,
+   "h": 1240,
+   "title": "Log activity · first time",
+   "page": "start"
+  },
+  "P03-LogActivity-Locked.dc.html": {
+   "x": 2350,
+   "y": 1620,
+   "w": 390,
+   "h": 1160,
+   "title": "Log activity · a session is live",
+   "page": "start"
+  },
+  "P03-LogActivity-Search.dc.html": {
+   "x": 2820,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Log activity · search",
+   "page": "start"
+  },
+  "P03-LogActivity-Category.dc.html": {
+   "x": 3290,
+   "y": 1620,
+   "w": 390,
+   "h": 1320,
+   "title": "Log activity · category (scroll)",
+   "page": "start"
+  },
+  "P03-Controls.dc.html": {
+   "x": 3760,
+   "y": 1620,
+   "w": 1600,
+   "h": 1500,
+   "title": "Pickers: date, time, duration, timeline, effort",
+   "page": "start"
+  },
+  "P03-Start-Sheet-Night.dc.html": {
+   "x": 5440,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · night (sleep live)",
+   "page": "start"
+  },
+  "P03-LogActivity-Night.dc.html": {
+   "x": 5910,
+   "y": 1620,
+   "w": 390,
+   "h": 1360,
+   "title": "Log activity · night (sleep live)",
+   "page": "start"
+  },
+  "P03-QuickLog-Night.dc.html": {
+   "x": 6380,
+   "y": 1620,
+   "w": 390,
+   "h": 900,
+   "title": "Quick log · night (starting locked)",
+   "page": "start"
+  },
+  "P03-Builder-Review-Assigned.dc.html": {
+   "x": 6850,
+   "y": 1620,
+   "w": 390,
+   "h": 1000,
+   "title": "Session builder · Review · Member with a trainer-assigned program",
+   "page": "start"
+  },
+  "P03-Start-EmptySession.dc.html": {
+   "x": 7320,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · empty session open (not locked)",
+   "page": "start"
+  },
+  "P03-Start-ProgramMuscles.dc.html": {
+   "x": 7790,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Start sheet · program day with target muscles only",
+   "page": "start"
+  },
+  "P03-Start-Coach-Recovering.dc.html": {
+   "x": 8260,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Session start coach · a lot still recovering",
+   "page": "start"
+  },
+  "P03-Builder-Goal.dc.html": {
+   "x": 8730,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Session builder · Goal (physique not set yet)",
+   "page": "start"
+  },
+  "P03-Builder-Review-Saved.dc.html": {
+   "x": 9200,
+   "y": 1620,
+   "w": 390,
+   "h": 844,
+   "title": "Session builder · Review · cardio on, day saved",
+   "page": "start"
+  },
+  "P03-LogActivity-ActivityLive.dc.html": {
+   "x": 9670,
+   "y": 1620,
+   "w": 390,
+   "h": 1320,
+   "title": "Log activity · an activity is live (queue)",
+   "page": "start"
+  },
+  "P03-LogActivity-UpNext.dc.html": {
+   "x": 10140,
+   "y": 1620,
+   "w": 390,
+   "h": 1040,
+   "title": "Log activity · up next after an activity, also-card done",
+   "page": "start"
+  },
+  "P03-HomeSet-Edit.dc.html": {
+   "x": 0,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · edit",
+   "page": "start"
+  },
+  "P03-HomeSet-AddMove.dc.html": {
+   "x": 470,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · add move",
+   "page": "start"
+  },
+  "P03-HomeSet-Move.dc.html": {
+   "x": 940,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · new move",
+   "page": "start"
+  },
+  "P03-GymPicker.dc.html": {
+   "x": 1410,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Gym picker",
+   "page": "start"
+  },
+  "P03-GymPicker-Searching.dc.html": {
+   "x": 1880,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Gym picker · looking for gyms nearby",
+   "page": "start"
+  },
+  "P03-GymPicker-NoLocation.dc.html": {
+   "x": 2350,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Gym picker · no location",
+   "page": "start"
+  },
+  "P03-GymPicker-NoneNearby.dc.html": {
+   "x": 2820,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Gym picker · none nearby",
+   "page": "start"
+  },
+  "P03-LogPast.dc.html": {
+   "x": 3290,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Log a past session · gym",
+   "page": "start"
+  },
+  "P03-LogPast-Home.dc.html": {
+   "x": 3760,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Log a past session · home set · future time",
+   "page": "start"
+  },
+  "P03-LogPast-GymInline.dc.html": {
+   "x": 4230,
+   "y": 3280,
+   "w": 390,
+   "h": 900,
+   "title": "Log a past session · gym list open",
+   "page": "start"
+  },
+  "P03-QuickLog-Walk.dc.html": {
+   "x": 4700,
+   "y": 3280,
+   "w": 390,
+   "h": 900,
+   "title": "Quick log · walk · earlier today",
+   "page": "start"
+  },
+  "P03-QuickLog-Day.dc.html": {
+   "x": 5170,
+   "y": 3280,
+   "w": 390,
+   "h": 1240,
+   "title": "Quick log · football · pick a day",
+   "page": "start"
+  },
+  "P03-Activity-New.dc.html": {
+   "x": 5640,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Activity · new · start now",
+   "page": "start"
+  },
+  "P03-Activity-New-Past.dc.html": {
+   "x": 6110,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Activity · new · log a past one",
+   "page": "start"
+  },
+  "P03-LogPast-NoGyms.dc.html": {
+   "x": 6580,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Log a past session · no saved gyms / no home sets",
+   "page": "start"
+  },
+  "P03-GymPicker-NoSaved.dc.html": {
+   "x": 7050,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Gym picker · no saved gyms yet",
+   "page": "start"
+  },
+  "P03-HomeSet-MoveEdit.dc.html": {
+   "x": 7520,
+   "y": 3280,
+   "w": 390,
+   "h": 844,
+   "title": "Home set · edit own move (name taken)",
+   "page": "start"
+  },
+  "P03-QuickLog-OtherSport.dc.html": {
+   "x": 7990,
+   "y": 3280,
+   "w": 390,
+   "h": 900,
+   "title": "Quick log · other sport by name, no body weight",
+   "page": "start"
+  },
+  "P03-Logged-Undo.dc.html": {
+   "x": 0,
+   "y": 4680,
+   "w": 390,
+   "h": 844,
+   "title": "Activity logged · undo",
+   "page": "start"
+  },
+  "P03-Activity-Discard.dc.html": {
+   "x": 470,
+   "y": 4680,
+   "w": 390,
+   "h": 844,
+   "title": "Discard activity?",
+   "page": "start"
+  },
+  "P03-Activity-Finish.dc.html": {
+   "x": 940,
+   "y": 4680,
+   "w": 390,
+   "h": 844,
+   "title": "Finish activity?",
+   "page": "start"
+  },
+  "P03-Activity-Delete.dc.html": {
+   "x": 1410,
+   "y": 4680,
+   "w": 390,
+   "h": 844,
+   "title": "Delete this activity?",
+   "page": "start"
+  },
+  "P03-HomeSet-Delete.dc.html": {
+   "x": 1880,
+   "y": 4680,
+   "w": 390,
+   "h": 844,
+   "title": "Delete home set?",
+   "page": "start"
+  },
+  "P03-HomeMove-Delete.dc.html": {
+   "x": 2350,
+   "y": 4680,
+   "w": 390,
+   "h": 844,
+   "title": "Delete move?",
+   "page": "start"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "P00-Colors.dc.html",
+  "P00-Type.dc.html",
+  "P00-Controls.dc.html",
+  "P00-Content.dc.html",
+  "P00-States.dc.html",
+  "P00-Overlays.dc.html",
+  "P00-Shell.dc.html",
+  "P01-Today.dc.html",
+  "P01-Today-Default.dc.html",
+  "P01-Today-Admin.dc.html",
+  "P01-Edit.dc.html",
+  "P01-Edit-Admin.dc.html",
+  "P01-AtlasStrip.dc.html",
+  "P01-Atlas-Variants.dc.html",
+  "P01-History-Calendar.dc.html",
+  "P01-EmptySlot.dc.html",
+  "P01-Today-Night.dc.html",
+  "P01-Edit-Night.dc.html",
+  "P01-Today-Loading.dc.html",
+  "P01-Today-Offline.dc.html",
+  "P01-Today-Live.dc.html",
+  "P01-Today-Activity.dc.html",
+  "P01-Today-Injury.dc.html",
+  "P01-Today-Rest.dc.html",
+  "P01-Today-Empty.dc.html",
+  "P01-Today-Trainer.dc.html",
+  "P01-Status.dc.html",
+  "P01-Nudges.dc.html",
+  "P01-DaySheet-Night.dc.html",
+  "P01-Desktop-Night.dc.html",
+  "P01-Today-Live-Home.dc.html",
+  "P01-Program-Modes.dc.html",
+  "P01-Shortcuts.dc.html",
+  "P01-AddSection.dc.html",
+  "P01-EditSection.dc.html",
+  "P01-FillSlot.dc.html",
+  "P01-ConfigCore.dc.html",
+  "P01-ConfigAtlas-Member.dc.html",
+  "P01-ConfigProgram.dc.html",
+  "P01-ConfigNudges.dc.html",
+  "P01-ConfigHistory.dc.html",
+  "P01-Nudges-Open.dc.html",
+  "P01-ProgSuggest.dc.html",
+  "P01-DaySheet.dc.html",
+  "P01-DaySheet-Today.dc.html",
+  "P01-DaySheet-Notes.dc.html",
+  "P01-EditSection-Kind.dc.html",
+  "P01-Discard.dc.html",
+  "P01-RemoveConfirm.dc.html",
+  "P01-EndRest.dc.html",
+  "P01-EndIllness.dc.html",
+  "P01-Desktop.dc.html",
+  "P01-Desktop-Edit.dc.html",
+  "P01-Desktop-Calendar.dc.html",
+  "P02-01-Training.dc.html",
+  "P02-02-Plan-sessions.dc.html",
+  "P02-03-Strength.dc.html",
+  "P02-04-Muscles-consistency.dc.html",
+  "P02-05-Body-recovery.dc.html",
+  "P02-06-Cardio-gyms.dc.html",
+  "P02-07-Apex.dc.html",
+  "P02-08-Learn.dc.html",
+  "P02-09-Atlas.dc.html",
+  "P02-10-Discover.dc.html",
+  "P02-11-Fun-tools.dc.html",
+  "P02-12-Calendar.dc.html",
+  "P02-00-Sizes.dc.html",
+  "P02-13-Shortcuts.dc.html",
+  "P02-14-Music.dc.html",
+  "P03-Start-Sheet.dc.html",
+  "P03-Start-Coach.dc.html",
+  "P03-Builder-Intent.dc.html",
+  "P03-Builder-Muscles.dc.html",
+  "P03-Builder-Day.dc.html",
+  "P03-Builder-Review.dc.html",
+  "P03-HomeSet.dc.html",
+  "P03-HomeSet-Builder.dc.html",
+  "P03-LogActivity.dc.html",
+  "P03-QuickLog-Run.dc.html",
+  "P03-Activity-Running.dc.html",
+  "P03-Activity-Edit.dc.html",
+  "P03-Activity-Paused.dc.html",
+  "P03-Start-Locked.dc.html",
+  "P03-Start-Usual.dc.html",
+  "P03-Start-Scratch.dc.html",
+  "P03-LogActivity-First.dc.html",
+  "P03-LogActivity-Locked.dc.html",
+  "P03-LogActivity-Search.dc.html",
+  "P03-LogActivity-Category.dc.html",
+  "P03-Controls.dc.html",
+  "P03-Start-Sheet-Night.dc.html",
+  "P03-LogActivity-Night.dc.html",
+  "P03-QuickLog-Night.dc.html",
+  "P03-Builder-Review-Assigned.dc.html",
+  "P03-Start-EmptySession.dc.html",
+  "P03-Start-ProgramMuscles.dc.html",
+  "P03-Start-Coach-Recovering.dc.html",
+  "P03-Builder-Goal.dc.html",
+  "P03-Builder-Review-Saved.dc.html",
+  "P03-LogActivity-ActivityLive.dc.html",
+  "P03-LogActivity-UpNext.dc.html",
+  "P03-HomeSet-Edit.dc.html",
+  "P03-HomeSet-AddMove.dc.html",
+  "P03-HomeSet-Move.dc.html",
+  "P03-GymPicker.dc.html",
+  "P03-GymPicker-Searching.dc.html",
+  "P03-GymPicker-NoLocation.dc.html",
+  "P03-GymPicker-NoneNearby.dc.html",
+  "P03-LogPast.dc.html",
+  "P03-LogPast-Home.dc.html",
+  "P03-LogPast-GymInline.dc.html",
+  "P03-QuickLog-Walk.dc.html",
+  "P03-QuickLog-Day.dc.html",
+  "P03-Activity-New.dc.html",
+  "P03-Activity-New-Past.dc.html",
+  "P03-LogPast-NoGyms.dc.html",
+  "P03-GymPicker-NoSaved.dc.html",
+  "P03-HomeSet-MoveEdit.dc.html",
+  "P03-QuickLog-OtherSport.dc.html",
+  "P03-Logged-Undo.dc.html",
+  "P03-Activity-Discard.dc.html",
+  "P03-Activity-Finish.dc.html",
+  "P03-Activity-Delete.dc.html",
+  "P03-HomeSet-Delete.dc.html",
+  "P03-HomeMove-Delete.dc.html"
+ ],
+ "notes": {
+  "t_foundations": {
+   "x": 0,
+   "y": -300,
+   "text": "Foundations",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "foundations"
+  },
+  "t_today": {
+   "x": 0,
+   "y": -300,
+   "text": "Today & customize",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "today"
+  },
+  "t_widgets": {
+   "x": 0,
+   "y": -300,
+   "text": "Widget library",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "widgets"
+  },
+  "t_start": {
+   "x": 0,
+   "y": -300,
+   "text": "Start & logging",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "start"
+  }
+ },
+ "designSystems": [],
+ "attachments": {}
+}

@@ -1,0 +1,1409 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-29T08:00:00Z"
+ },
+ "title": "Spotter — Brass Glass · 4/6 · Exercises → Health & sleep",
+ "launch": {
+  "view": "canvas",
+  "page": "cover"
+ },
+ "pages": [
+  {
+   "id": "cover",
+   "name": "Cover"
+  },
+  {
+   "id": "exercises",
+   "name": "09 · Exercises & Learn"
+  },
+  {
+   "id": "health",
+   "name": "10 · Health, sleep, injury"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Cover",
+   "page": "cover"
+  },
+  "P09-Exercises-Member.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1500,
+   "title": "Exercises · Library · Member",
+   "page": "exercises"
+  },
+  "P09-Exercises-Trainer.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 1500,
+   "title": "Exercises · Library · Trainer",
+   "page": "exercises"
+  },
+  "P09-Exercises-Admin.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 1500,
+   "title": "Exercises · Library · Admin",
+   "page": "exercises"
+  },
+  "P09-Mine-Trainer.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Exercises · My exercises · Trainer",
+   "page": "exercises"
+  },
+  "P09-Mine-Admin.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Exercises · My exercises · Admin",
+   "page": "exercises"
+  },
+  "P09-Mine-Member.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Exercises · My exercises · Member",
+   "page": "exercises"
+  },
+  "P09-Detail.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 2060,
+   "title": "Exercise detail · rich (scroll)",
+   "page": "exercises"
+  },
+  "P09-Detail-Custom-Trainer.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise detail · custom lift · Trainer",
+   "page": "exercises"
+  },
+  "P09-Detail-Custom-Member.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise detail · custom lift · Member",
+   "page": "exercises"
+  },
+  "P09-Equipment-Detail.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 1900,
+   "title": "Machine detail · in this gym (scroll)",
+   "page": "exercises"
+  },
+  "P09-Learn-Home-Member.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 1700,
+   "title": "Learn · Home · Member (scroll)",
+   "page": "exercises"
+  },
+  "P09-Learn-Topics-Member.dc.html": {
+   "x": 5170,
+   "y": 0,
+   "w": 390,
+   "h": 1200,
+   "title": "Learn · Topics · Member",
+   "page": "exercises"
+  },
+  "P09-Learn-Topic.dc.html": {
+   "x": 5640,
+   "y": 0,
+   "w": 390,
+   "h": 1020,
+   "title": "Learn · Topic · Logging",
+   "page": "exercises"
+  },
+  "P09-Learn-Player.dc.html": {
+   "x": 6110,
+   "y": 0,
+   "w": 390,
+   "h": 1300,
+   "title": "Learn · Player · phone cut",
+   "page": "exercises"
+  },
+  "P09-Learn-Saved.dc.html": {
+   "x": 6580,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Learn · Saved",
+   "page": "exercises"
+  },
+  "P09-Exercises-Filtered.dc.html": {
+   "x": 0,
+   "y": 2220,
+   "w": 390,
+   "h": 1420,
+   "title": "Library · muscle filter on (primary, then secondary)",
+   "page": "exercises"
+  },
+  "P09-Exercises-Search.dc.html": {
+   "x": 470,
+   "y": 2220,
+   "w": 390,
+   "h": 900,
+   "title": "Library · search",
+   "page": "exercises"
+  },
+  "P09-Mine-Empty.dc.html": {
+   "x": 940,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "My exercises · none yet · Trainer",
+   "page": "exercises"
+  },
+  "P09-Exercises-Night.dc.html": {
+   "x": 1410,
+   "y": 2220,
+   "w": 390,
+   "h": 1000,
+   "title": "Exercises · night",
+   "page": "exercises"
+  },
+  "P09-Detail-Night.dc.html": {
+   "x": 1880,
+   "y": 2220,
+   "w": 390,
+   "h": 980,
+   "title": "Exercise detail · night",
+   "page": "exercises"
+  },
+  "P09-Equipment-NotHere.dc.html": {
+   "x": 2350,
+   "y": 2220,
+   "w": 390,
+   "h": 900,
+   "title": "Machine detail · not in this gym",
+   "page": "exercises"
+  },
+  "P09-Equipment-NoGym.dc.html": {
+   "x": 2820,
+   "y": 2220,
+   "w": 390,
+   "h": 1000,
+   "title": "Machine detail · opened without a gym (no gym button, no here flags)",
+   "page": "exercises"
+  },
+  "P09-Equipment-NoMuscles.dc.html": {
+   "x": 3290,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "Machine detail · kit with no muscle tags (no exercise list, no alternatives)",
+   "page": "exercises"
+  },
+  "P09-Equipment-Missing.dc.html": {
+   "x": 3760,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "Machine detail · unknown item",
+   "page": "exercises"
+  },
+  "P09-Learn-Home-Trainer.dc.html": {
+   "x": 4230,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "Learn · Home · Trainer",
+   "page": "exercises"
+  },
+  "P09-Learn-Topics-Trainer.dc.html": {
+   "x": 4700,
+   "y": 2220,
+   "w": 390,
+   "h": 1200,
+   "title": "Learn · Topics · Trainer",
+   "page": "exercises"
+  },
+  "P09-Learn-Home-Admin.dc.html": {
+   "x": 5170,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "Learn · Home · Admin",
+   "page": "exercises"
+  },
+  "P09-Learn-Topics-Admin.dc.html": {
+   "x": 5640,
+   "y": 2220,
+   "w": 390,
+   "h": 1200,
+   "title": "Learn · Topics · Admin",
+   "page": "exercises"
+  },
+  "P09-Learn-Filters.dc.html": {
+   "x": 6110,
+   "y": 2220,
+   "w": 390,
+   "h": 1180,
+   "title": "Learn · filters open + results",
+   "page": "exercises"
+  },
+  "P09-Learn-NoResults.dc.html": {
+   "x": 6580,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "Learn · no results",
+   "page": "exercises"
+  },
+  "P09-Learn-Saved-Empty.dc.html": {
+   "x": 7050,
+   "y": 2220,
+   "w": 390,
+   "h": 844,
+   "title": "Learn · Saved · empty",
+   "page": "exercises"
+  },
+  "P09-Learn-Player-Web.dc.html": {
+   "x": 7520,
+   "y": 2220,
+   "w": 390,
+   "h": 1000,
+   "title": "Learn · Player · web cut on phone, saved",
+   "page": "exercises"
+  },
+  "P09-Learn-Night.dc.html": {
+   "x": 7990,
+   "y": 2220,
+   "w": 390,
+   "h": 1100,
+   "title": "Learn · Home · night (moon, no sky)",
+   "page": "exercises"
+  },
+  "P09-Filters.dc.html": {
+   "x": 0,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Library · filters sheet",
+   "page": "exercises"
+  },
+  "P09-Editor-New-Trainer.dc.html": {
+   "x": 470,
+   "y": 3800,
+   "w": 390,
+   "h": 1000,
+   "title": "New exercise · Trainer",
+   "page": "exercises"
+  },
+  "P09-Editor-Edit-Admin.dc.html": {
+   "x": 940,
+   "y": 3800,
+   "w": 390,
+   "h": 1120,
+   "title": "Edit exercise · sub-regions · Admin",
+   "page": "exercises"
+  },
+  "P09-Lightbox.dc.html": {
+   "x": 1410,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Exercise detail · form photo lightbox",
+   "page": "exercises"
+  },
+  "P09-Inventory.dc.html": {
+   "x": 1880,
+   "y": 3800,
+   "w": 390,
+   "h": 1560,
+   "title": "Gym · band library + inventory (all categories collapsed)",
+   "page": "exercises"
+  },
+  "P09-Inventory-Open.dc.html": {
+   "x": 2350,
+   "y": 3800,
+   "w": 390,
+   "h": 1300,
+   "title": "Inventory · a category opened",
+   "page": "exercises"
+  },
+  "P09-Inventory-Filter.dc.html": {
+   "x": 2820,
+   "y": 3800,
+   "w": 390,
+   "h": 1440,
+   "title": "Inventory · muscle filter + My focus",
+   "page": "exercises"
+  },
+  "P09-Inventory-Search.dc.html": {
+   "x": 3290,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · search (categories auto-open)",
+   "page": "exercises"
+  },
+  "P09-Inventory-Fresh.dc.html": {
+   "x": 3760,
+   "y": 3800,
+   "w": 390,
+   "h": 1300,
+   "title": "Inventory · nothing ticked yet (no count badge)",
+   "page": "exercises"
+  },
+  "P09-Inventory-NoMatch.dc.html": {
+   "x": 4230,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · no match",
+   "page": "exercises"
+  },
+  "P09-Inventory-Selected.dc.html": {
+   "x": 4700,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · selected sheet",
+   "page": "exercises"
+  },
+  "P09-EquipmentPicker.dc.html": {
+   "x": 5170,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Session · equipment for this exercise",
+   "page": "exercises"
+  },
+  "P09-EquipmentPicker-Empty.dc.html": {
+   "x": 5640,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Equipment picker · no match",
+   "page": "exercises"
+  },
+  "P09-BandSheet.dc.html": {
+   "x": 6110,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Session · band library sheet (seeded defaults, swatches open)",
+   "page": "exercises"
+  },
+  "P09-BandSaved.dc.html": {
+   "x": 6580,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Gym · band library saved",
+   "page": "exercises"
+  },
+  "P09-CardioMachine.dc.html": {
+   "x": 7050,
+   "y": 3800,
+   "w": 390,
+   "h": 844,
+   "title": "Cardio · which machine (gym stocked)",
+   "page": "exercises"
+  },
+  "P09-Delete-Custom.dc.html": {
+   "x": 0,
+   "y": 5520,
+   "w": 390,
+   "h": 844,
+   "title": "Delete custom exercise · Trainer",
+   "page": "exercises"
+  },
+  "P09-Inventory-RemoveOne.dc.html": {
+   "x": 470,
+   "y": 5520,
+   "w": 390,
+   "h": 844,
+   "title": "Remove from gym?",
+   "page": "exercises"
+  },
+  "P09-Inventory-ClearAll.dc.html": {
+   "x": 940,
+   "y": 5520,
+   "w": 390,
+   "h": 844,
+   "title": "Clear all inventory?",
+   "page": "exercises"
+  },
+  "P09-Inventory-Undo.dc.html": {
+   "x": 1410,
+   "y": 5520,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · removed, undo",
+   "page": "exercises"
+  },
+  "P09-Inventory-Cleared.dc.html": {
+   "x": 1880,
+   "y": 5520,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · cleared, undo",
+   "page": "exercises"
+  },
+  "P09-Desktop-Exercises-Trainer.dc.html": {
+   "x": 2350,
+   "y": 5520,
+   "w": 1440,
+   "h": 1080,
+   "title": "Desktop · Exercises · Trainer",
+   "page": "exercises"
+  },
+  "P09-Desktop-Detail.dc.html": {
+   "x": 3870,
+   "y": 5520,
+   "w": 1440,
+   "h": 1400,
+   "title": "Desktop · exercise detail",
+   "page": "exercises"
+  },
+  "P09-Desktop-Learn.dc.html": {
+   "x": 5390,
+   "y": 5520,
+   "w": 1440,
+   "h": 820,
+   "title": "Desktop · Learn home (landscape cut)",
+   "page": "exercises"
+  },
+  "P09-Desktop-Learn-Player.dc.html": {
+   "x": 6910,
+   "y": 5520,
+   "w": 1440,
+   "h": 1000,
+   "title": "Desktop · Learn player (web cut)",
+   "page": "exercises"
+  },
+  "P10-Health.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1330,
+   "title": "Health · home (scroll)",
+   "page": "health"
+  },
+  "P10-Form-FullRest.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 1260,
+   "title": "Start · Full rest (scroll)",
+   "page": "health"
+  },
+  "P10-Form-Unwell.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 1180,
+   "title": "Start · Unwell (open-ended)",
+   "page": "health"
+  },
+  "P10-History-List.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "History · List (scroll)",
+   "page": "health"
+  },
+  "P10-History-Timeline.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 1080,
+   "title": "History · Timeline (scroll)",
+   "page": "health"
+  },
+  "P10-Health-Unwell.dc.html": {
+   "x": 0,
+   "y": 1490,
+   "w": 390,
+   "h": 1130,
+   "title": "Health · unwell now",
+   "page": "health"
+  },
+  "P10-Health-Rest.dc.html": {
+   "x": 470,
+   "y": 1490,
+   "w": 390,
+   "h": 1130,
+   "title": "Health · full rest running",
+   "page": "health"
+  },
+  "P10-Health-Active.dc.html": {
+   "x": 940,
+   "y": 1490,
+   "w": 390,
+   "h": 1130,
+   "title": "Health · active recovery running",
+   "page": "health"
+  },
+  "P10-Health-Back.dc.html": {
+   "x": 1410,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "Health · welcome back after illness",
+   "page": "health"
+  },
+  "P10-Health-Clear.dc.html": {
+   "x": 1880,
+   "y": 1490,
+   "w": 390,
+   "h": 1330,
+   "title": "Health · all clear, no nights yet",
+   "page": "health"
+  },
+  "P10-Health-Stage0.dc.html": {
+   "x": 2350,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "Health · injury in clinician full rest",
+   "page": "health"
+  },
+  "P10-Health-Busy.dc.html": {
+   "x": 2820,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "Health · Start sleep disabled (session running)",
+   "page": "health"
+  },
+  "P10-History-Empty.dc.html": {
+   "x": 3290,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "History · nothing logged",
+   "page": "health"
+  },
+  "P10-History-Filter.dc.html": {
+   "x": 3760,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "History · filter Injury",
+   "page": "health"
+  },
+  "P10-History-Swipe.dc.html": {
+   "x": 4230,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "History · row swiped (Edit / Delete)",
+   "page": "health"
+  },
+  "P10-Form-Active.dc.html": {
+   "x": 4700,
+   "y": 1490,
+   "w": 390,
+   "h": 1000,
+   "title": "Start · Active recovery (scroll)",
+   "page": "health"
+  },
+  "P10-Form-Schedule.dc.html": {
+   "x": 5170,
+   "y": 1490,
+   "w": 390,
+   "h": 1260,
+   "title": "Start · Full rest planned ahead",
+   "page": "health"
+  },
+  "P10-Form-Type.dc.html": {
+   "x": 5640,
+   "y": 1490,
+   "w": 390,
+   "h": 1000,
+   "title": "Type row expanded",
+   "page": "health"
+  },
+  "P10-Form-Error.dc.html": {
+   "x": 6110,
+   "y": 1490,
+   "w": 390,
+   "h": 844,
+   "title": "Dates · error (end before start)",
+   "page": "health"
+  },
+  "P10-Form-Past.dc.html": {
+   "x": 0,
+   "y": 2980,
+   "w": 390,
+   "h": 1300,
+   "title": "Log the past · break with a workout inside (scroll)",
+   "page": "health"
+  },
+  "P10-Form-Past-Remove.dc.html": {
+   "x": 470,
+   "y": 2980,
+   "w": 390,
+   "h": 844,
+   "title": "Overlap · remove the session",
+   "page": "health"
+  },
+  "P10-Form-Conflict.dc.html": {
+   "x": 940,
+   "y": 2980,
+   "w": 390,
+   "h": 1110,
+   "title": "Overlap with another period",
+   "page": "health"
+  },
+  "P10-Form-Injury.dc.html": {
+   "x": 1410,
+   "y": 2980,
+   "w": 390,
+   "h": 1330,
+   "title": "Log the past · I got hurt (scroll)",
+   "page": "health"
+  },
+  "P10-Form-Injury-Healed.dc.html": {
+   "x": 1880,
+   "y": 2980,
+   "w": 390,
+   "h": 1060,
+   "title": "I got hurt · healed (scroll)",
+   "page": "health"
+  },
+  "P10-Form-Injury-Empty.dc.html": {
+   "x": 2350,
+   "y": 2980,
+   "w": 390,
+   "h": 920,
+   "title": "I got hurt · no body part yet",
+   "page": "health"
+  },
+  "P10-Form-Edit.dc.html": {
+   "x": 2820,
+   "y": 2980,
+   "w": 390,
+   "h": 1000,
+   "title": "Edit period · delete open (scroll)",
+   "page": "health"
+  },
+  "P10-Form-Edit-Removed.dc.html": {
+   "x": 3290,
+   "y": 2980,
+   "w": 390,
+   "h": 844,
+   "title": "Edit period · workout marked removed",
+   "page": "health"
+  },
+  "P10-Form-Edit-Injury.dc.html": {
+   "x": 3760,
+   "y": 2980,
+   "w": 390,
+   "h": 1000,
+   "title": "Edit injury · delete open",
+   "page": "health"
+  },
+  "P10-Form-SaveError.dc.html": {
+   "x": 4230,
+   "y": 2980,
+   "w": 390,
+   "h": 844,
+   "title": "Save refused · overlap found on save",
+   "page": "health"
+  },
+  "P10-Recovered.dc.html": {
+   "x": 4700,
+   "y": 2980,
+   "w": 390,
+   "h": 844,
+   "title": "I'm recovered · sheet",
+   "page": "health"
+  },
+  "P10-EndRest.dc.html": {
+   "x": 0,
+   "y": 4470,
+   "w": 390,
+   "h": 844,
+   "title": "End rest period · confirm",
+   "page": "health"
+  },
+  "P10-History-Delete.dc.html": {
+   "x": 470,
+   "y": 4470,
+   "w": 390,
+   "h": 844,
+   "title": "Delete period · confirm",
+   "page": "health"
+  },
+  "P10-History-Delete-Injury.dc.html": {
+   "x": 940,
+   "y": 4470,
+   "w": 390,
+   "h": 844,
+   "title": "Delete injury · confirm",
+   "page": "health"
+  },
+  "P10-Health-Desktop.dc.html": {
+   "x": 1410,
+   "y": 4470,
+   "w": 1440,
+   "h": 1100,
+   "title": "Health · desktop",
+   "page": "health"
+  },
+  "P10-Health-Desktop-Form.dc.html": {
+   "x": 2930,
+   "y": 4470,
+   "w": 1440,
+   "h": 1100,
+   "title": "Health · desktop · form in the right panel",
+   "page": "health"
+  },
+  "P10-History-Desktop.dc.html": {
+   "x": 4450,
+   "y": 4470,
+   "w": 1440,
+   "h": 900,
+   "title": "Health history · desktop list",
+   "page": "health"
+  },
+  "P10-Sleep-Night.dc.html": {
+   "x": 0,
+   "y": 5730,
+   "w": 390,
+   "h": 844,
+   "title": "Sleep · night (live, night mode)",
+   "page": "health"
+  },
+  "P10-Sleep-Wake.dc.html": {
+   "x": 470,
+   "y": 5730,
+   "w": 390,
+   "h": 844,
+   "title": "Sleep · wake (honest wake time)",
+   "page": "health"
+  },
+  "P10-Sleep-Logged.dc.html": {
+   "x": 940,
+   "y": 5730,
+   "w": 390,
+   "h": 844,
+   "title": "Sleep · logged (good morning)",
+   "page": "health"
+  },
+  "P10-Sleep-Hub.dc.html": {
+   "x": 1410,
+   "y": 5730,
+   "w": 390,
+   "h": 900,
+   "title": "Sleep · hub",
+   "page": "health"
+  },
+  "P10-Sleep-Backfill.dc.html": {
+   "x": 1880,
+   "y": 5730,
+   "w": 390,
+   "h": 1060,
+   "title": "Sleep · add a past night (scroll)",
+   "page": "health"
+  },
+  "P10-Sleep-Schedule.dc.html": {
+   "x": 2350,
+   "y": 5730,
+   "w": 390,
+   "h": 844,
+   "title": "Sleep · schedule (same most nights)",
+   "page": "health"
+  },
+  "P10-Sleep-Edit.dc.html": {
+   "x": 2820,
+   "y": 5730,
+   "w": 390,
+   "h": 900,
+   "title": "Sleep · edit a logged night",
+   "page": "health"
+  },
+  "P10-Sleep-Discard.dc.html": {
+   "x": 0,
+   "y": 6950,
+   "w": 390,
+   "h": 844,
+   "title": "Discard sleep · confirm (night)",
+   "page": "health"
+  },
+  "P10-Sleep-Wake-Picker.dc.html": {
+   "x": 470,
+   "y": 6950,
+   "w": 390,
+   "h": 844,
+   "title": "Wake · time picker open",
+   "page": "health"
+  },
+  "P10-Sleep-Logged-Nap.dc.html": {
+   "x": 940,
+   "y": 6950,
+   "w": 390,
+   "h": 844,
+   "title": "Sleep · nap logged",
+   "page": "health"
+  },
+  "P10-Sleep-Hub-Empty.dc.html": {
+   "x": 1410,
+   "y": 6950,
+   "w": 390,
+   "h": 844,
+   "title": "Sleep · hub, no nights yet",
+   "page": "health"
+  },
+  "P10-Sleep-Backfill-Invalid.dc.html": {
+   "x": 1880,
+   "y": 6950,
+   "w": 390,
+   "h": 1060,
+   "title": "Backfill · wake before bedtime",
+   "page": "health"
+  },
+  "P10-Sleep-Backfill-Nap.dc.html": {
+   "x": 2350,
+   "y": 6950,
+   "w": 390,
+   "h": 1060,
+   "title": "Backfill · nap",
+   "page": "health"
+  },
+  "P10-Sleep-Schedule-Weekday.dc.html": {
+   "x": 2820,
+   "y": 6950,
+   "w": 390,
+   "h": 1000,
+   "title": "Schedule · by weekday",
+   "page": "health"
+  },
+  "P10-Sleep-Edit-Nap.dc.html": {
+   "x": 3290,
+   "y": 6950,
+   "w": 390,
+   "h": 900,
+   "title": "Edit night · nap",
+   "page": "health"
+  },
+  "P10-Sleep-Edit-Delete.dc.html": {
+   "x": 3760,
+   "y": 6950,
+   "w": 390,
+   "h": 900,
+   "title": "Delete night · confirm",
+   "page": "health"
+  },
+  "P10-Sleep-Schedule-Night.dc.html": {
+   "x": 4230,
+   "y": 6950,
+   "w": 390,
+   "h": 844,
+   "title": "Schedule · opened during a live night",
+   "page": "health"
+  },
+  "P10-Sleep-Backfill-Typing.dc.html": {
+   "x": 4700,
+   "y": 6950,
+   "w": 390,
+   "h": 1060,
+   "title": "Backfill · typing the wake time (focused field)",
+   "page": "health"
+  },
+  "P10-Sleep-Backfill-Night.dc.html": {
+   "x": 5170,
+   "y": 6950,
+   "w": 390,
+   "h": 1060,
+   "title": "Backfill · opened during a live night",
+   "page": "health"
+  },
+  "P10-Sleep-AutoDim.dc.html": {
+   "x": 0,
+   "y": 8170,
+   "w": 390,
+   "h": 844,
+   "title": "Auto-dim · it’s your bedtime",
+   "page": "health"
+  },
+  "P10-Sleep-AutoLog-Offer.dc.html": {
+   "x": 470,
+   "y": 8170,
+   "w": 390,
+   "h": 844,
+   "title": "Auto-log offer · pattern learned",
+   "page": "health"
+  },
+  "P10-Sleep-Parts.dc.html": {
+   "x": 940,
+   "y": 8170,
+   "w": 1600,
+   "h": 560,
+   "title": "Sleep parts · SleepHero, MoonGlyph (night)",
+   "page": "health"
+  },
+  "P10-Sleep-Today-Cards.dc.html": {
+   "x": 2620,
+   "y": 8170,
+   "w": 900,
+   "h": 420,
+   "title": "Sleep cards on Today · forgot to log, auto-filled",
+   "page": "health"
+  },
+  "P10-Night-Today.dc.html": {
+   "x": 0,
+   "y": 9174,
+   "w": 390,
+   "h": 844,
+   "title": "Night · Today with SleepHero",
+   "page": "health"
+  },
+  "P10-Night-Overview.dc.html": {
+   "x": 470,
+   "y": 9174,
+   "w": 390,
+   "h": 844,
+   "title": "Night · Overview",
+   "page": "health"
+  },
+  "P10-Night-Gyms.dc.html": {
+   "x": 940,
+   "y": 9174,
+   "w": 390,
+   "h": 844,
+   "title": "Night · Gyms",
+   "page": "health"
+  },
+  "P10-Night-Health.dc.html": {
+   "x": 1410,
+   "y": 9174,
+   "w": 390,
+   "h": 920,
+   "title": "Night · Health (Asleep since)",
+   "page": "health"
+  },
+  "P10-Night-Sheet.dc.html": {
+   "x": 1880,
+   "y": 9174,
+   "w": 390,
+   "h": 844,
+   "title": "Night · a sheet (Which gym?)",
+   "page": "health"
+  },
+  "P10-Night-Dialog.dc.html": {
+   "x": 2350,
+   "y": 9174,
+   "w": 390,
+   "h": 844,
+   "title": "Night · a dialog",
+   "page": "health"
+  },
+  "P10-Night-Paused.dc.html": {
+   "x": 2820,
+   "y": 9174,
+   "w": 390,
+   "h": 844,
+   "title": "Night · SleepHero paused over Today",
+   "page": "health"
+  },
+  "P10-Night-Desktop.dc.html": {
+   "x": 3290,
+   "y": 9174,
+   "w": 1440,
+   "h": 900,
+   "title": "Night · desktop",
+   "page": "health"
+  },
+  "P10-Readiness.dc.html": {
+   "x": 0,
+   "y": 10254,
+   "w": 1600,
+   "h": 1180,
+   "title": "Readiness · nudge and lens",
+   "page": "health"
+  },
+  "P10-MuscleState.dc.html": {
+   "x": 1680,
+   "y": 10254,
+   "w": 390,
+   "h": 844,
+   "title": "Muscle drawer · state right now (live session)",
+   "page": "health"
+  },
+  "P10-MuscleState-States.dc.html": {
+   "x": 2150,
+   "y": 10254,
+   "w": 1600,
+   "h": 520,
+   "title": "Muscle state · every read",
+   "page": "health"
+  },
+  "P10-FixSheet.dc.html": {
+   "x": 3830,
+   "y": 10254,
+   "w": 390,
+   "h": 844,
+   "title": "Fix sheet · add lagging-muscle work",
+   "page": "health"
+  },
+  "P10-FixSheet-NoGym.dc.html": {
+   "x": 4300,
+   "y": 10254,
+   "w": 390,
+   "h": 844,
+   "title": "Fix sheet · no gym, no session",
+   "page": "health"
+  },
+  "P10-FixSheet-None.dc.html": {
+   "x": 4770,
+   "y": 10254,
+   "w": 390,
+   "h": 844,
+   "title": "Fix sheet · no matches",
+   "page": "health"
+  },
+  "P10-Injury-Where.dc.html": {
+   "x": 0,
+   "y": 11594,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab setup · where",
+   "page": "health"
+  },
+  "P10-Injury-General.dc.html": {
+   "x": 470,
+   "y": 11594,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab setup · general reason",
+   "page": "health"
+  },
+  "P10-Injury-Feel.dc.html": {
+   "x": 940,
+   "y": 11594,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab setup · how it feels (also the entry from Health › Still healing)",
+   "page": "health"
+  },
+  "P10-Injury-Clinician.dc.html": {
+   "x": 1410,
+   "y": 11594,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab setup · timeframe · no",
+   "page": "health"
+  },
+  "P10-Injury-Clinician-Yes.dc.html": {
+   "x": 1880,
+   "y": 11594,
+   "w": 390,
+   "h": 940,
+   "title": "Rehab setup · timeframe · fixed no-load",
+   "page": "health"
+  },
+  "P10-Injury-Where-Empty.dc.html": {
+   "x": 2350,
+   "y": 11594,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab setup · nothing picked yet",
+   "page": "health"
+  },
+  "P10-Injury-Plan.dc.html": {
+   "x": 0,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab plan · Reintroduce",
+   "page": "health"
+  },
+  "P10-Injury-Plan-Rebuild.dc.html": {
+   "x": 470,
+   "y": 12694,
+   "w": 390,
+   "h": 1000,
+   "title": "Rehab plan · Rebuild with weight ramp (scroll)",
+   "page": "health"
+  },
+  "P10-Injury-Plan-Protect.dc.html": {
+   "x": 940,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab plan · Protect (no check-in yet)",
+   "page": "health"
+  },
+  "P10-Injury-Plan-FullRest.dc.html": {
+   "x": 1410,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab plan · clinician full rest",
+   "page": "health"
+  },
+  "P10-Injury-Plan-General.dc.html": {
+   "x": 1880,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Rehab plan · general reason (After surgery)",
+   "page": "health"
+  },
+  "P10-Injury-Checkin.dc.html": {
+   "x": 2350,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Check-in · how did it feel?",
+   "page": "health"
+  },
+  "P10-Injury-Result-Advance.dc.html": {
+   "x": 2820,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Check-in result · green light",
+   "page": "health"
+  },
+  "P10-Injury-Result-Hold.dc.html": {
+   "x": 3290,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Check-in result · hold",
+   "page": "health"
+  },
+  "P10-Injury-Result-Back.dc.html": {
+   "x": 3760,
+   "y": 12694,
+   "w": 390,
+   "h": 844,
+   "title": "Check-in result · step back",
+   "page": "health"
+  },
+  "P10-Injury-Manage.dc.html": {
+   "x": 0,
+   "y": 13854,
+   "w": 390,
+   "h": 844,
+   "title": "Manage rehab",
+   "page": "health"
+  },
+  "P10-Injury-Healed.dc.html": {
+   "x": 470,
+   "y": 13854,
+   "w": 390,
+   "h": 844,
+   "title": "Mark as healed · confirm",
+   "page": "health"
+  },
+  "P10-Injury-Cancel.dc.html": {
+   "x": 940,
+   "y": 13854,
+   "w": 390,
+   "h": 844,
+   "title": "Cancel rehab plan · confirm",
+   "page": "health"
+  },
+  "P10-Injury-Desktop.dc.html": {
+   "x": 1410,
+   "y": 13854,
+   "w": 1440,
+   "h": 900,
+   "title": "Rehab plan · desktop hub",
+   "page": "health"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "P09-Exercises-Member.dc.html",
+  "P09-Exercises-Trainer.dc.html",
+  "P09-Exercises-Admin.dc.html",
+  "P09-Mine-Trainer.dc.html",
+  "P09-Mine-Admin.dc.html",
+  "P09-Mine-Member.dc.html",
+  "P09-Detail.dc.html",
+  "P09-Detail-Custom-Trainer.dc.html",
+  "P09-Detail-Custom-Member.dc.html",
+  "P09-Equipment-Detail.dc.html",
+  "P09-Learn-Home-Member.dc.html",
+  "P09-Learn-Topics-Member.dc.html",
+  "P09-Learn-Topic.dc.html",
+  "P09-Learn-Player.dc.html",
+  "P09-Learn-Saved.dc.html",
+  "P09-Exercises-Filtered.dc.html",
+  "P09-Exercises-Search.dc.html",
+  "P09-Mine-Empty.dc.html",
+  "P09-Exercises-Night.dc.html",
+  "P09-Detail-Night.dc.html",
+  "P09-Equipment-NotHere.dc.html",
+  "P09-Equipment-NoGym.dc.html",
+  "P09-Equipment-NoMuscles.dc.html",
+  "P09-Equipment-Missing.dc.html",
+  "P09-Learn-Home-Trainer.dc.html",
+  "P09-Learn-Topics-Trainer.dc.html",
+  "P09-Learn-Home-Admin.dc.html",
+  "P09-Learn-Topics-Admin.dc.html",
+  "P09-Learn-Filters.dc.html",
+  "P09-Learn-NoResults.dc.html",
+  "P09-Learn-Saved-Empty.dc.html",
+  "P09-Learn-Player-Web.dc.html",
+  "P09-Learn-Night.dc.html",
+  "P09-Filters.dc.html",
+  "P09-Editor-New-Trainer.dc.html",
+  "P09-Editor-Edit-Admin.dc.html",
+  "P09-Lightbox.dc.html",
+  "P09-Inventory.dc.html",
+  "P09-Inventory-Open.dc.html",
+  "P09-Inventory-Filter.dc.html",
+  "P09-Inventory-Search.dc.html",
+  "P09-Inventory-Fresh.dc.html",
+  "P09-Inventory-NoMatch.dc.html",
+  "P09-Inventory-Selected.dc.html",
+  "P09-EquipmentPicker.dc.html",
+  "P09-EquipmentPicker-Empty.dc.html",
+  "P09-BandSheet.dc.html",
+  "P09-BandSaved.dc.html",
+  "P09-CardioMachine.dc.html",
+  "P09-Delete-Custom.dc.html",
+  "P09-Inventory-RemoveOne.dc.html",
+  "P09-Inventory-ClearAll.dc.html",
+  "P09-Inventory-Undo.dc.html",
+  "P09-Inventory-Cleared.dc.html",
+  "P09-Desktop-Exercises-Trainer.dc.html",
+  "P09-Desktop-Detail.dc.html",
+  "P09-Desktop-Learn.dc.html",
+  "P09-Desktop-Learn-Player.dc.html",
+  "P10-Health.dc.html",
+  "P10-Form-FullRest.dc.html",
+  "P10-Form-Unwell.dc.html",
+  "P10-History-List.dc.html",
+  "P10-History-Timeline.dc.html",
+  "P10-Health-Unwell.dc.html",
+  "P10-Health-Rest.dc.html",
+  "P10-Health-Active.dc.html",
+  "P10-Health-Back.dc.html",
+  "P10-Health-Clear.dc.html",
+  "P10-Health-Stage0.dc.html",
+  "P10-Health-Busy.dc.html",
+  "P10-History-Empty.dc.html",
+  "P10-History-Filter.dc.html",
+  "P10-History-Swipe.dc.html",
+  "P10-Form-Active.dc.html",
+  "P10-Form-Schedule.dc.html",
+  "P10-Form-Type.dc.html",
+  "P10-Form-Error.dc.html",
+  "P10-Form-Past.dc.html",
+  "P10-Form-Past-Remove.dc.html",
+  "P10-Form-Conflict.dc.html",
+  "P10-Form-Injury.dc.html",
+  "P10-Form-Injury-Healed.dc.html",
+  "P10-Form-Injury-Empty.dc.html",
+  "P10-Form-Edit.dc.html",
+  "P10-Form-Edit-Removed.dc.html",
+  "P10-Form-Edit-Injury.dc.html",
+  "P10-Form-SaveError.dc.html",
+  "P10-Recovered.dc.html",
+  "P10-EndRest.dc.html",
+  "P10-History-Delete.dc.html",
+  "P10-History-Delete-Injury.dc.html",
+  "P10-Health-Desktop.dc.html",
+  "P10-Health-Desktop-Form.dc.html",
+  "P10-History-Desktop.dc.html",
+  "P10-Sleep-Night.dc.html",
+  "P10-Sleep-Wake.dc.html",
+  "P10-Sleep-Logged.dc.html",
+  "P10-Sleep-Hub.dc.html",
+  "P10-Sleep-Backfill.dc.html",
+  "P10-Sleep-Schedule.dc.html",
+  "P10-Sleep-Edit.dc.html",
+  "P10-Sleep-Discard.dc.html",
+  "P10-Sleep-Wake-Picker.dc.html",
+  "P10-Sleep-Logged-Nap.dc.html",
+  "P10-Sleep-Hub-Empty.dc.html",
+  "P10-Sleep-Backfill-Invalid.dc.html",
+  "P10-Sleep-Backfill-Nap.dc.html",
+  "P10-Sleep-Schedule-Weekday.dc.html",
+  "P10-Sleep-Edit-Nap.dc.html",
+  "P10-Sleep-Edit-Delete.dc.html",
+  "P10-Sleep-Schedule-Night.dc.html",
+  "P10-Sleep-Backfill-Typing.dc.html",
+  "P10-Sleep-Backfill-Night.dc.html",
+  "P10-Sleep-AutoDim.dc.html",
+  "P10-Sleep-AutoLog-Offer.dc.html",
+  "P10-Sleep-Parts.dc.html",
+  "P10-Sleep-Today-Cards.dc.html",
+  "P10-Night-Today.dc.html",
+  "P10-Night-Overview.dc.html",
+  "P10-Night-Gyms.dc.html",
+  "P10-Night-Health.dc.html",
+  "P10-Night-Sheet.dc.html",
+  "P10-Night-Dialog.dc.html",
+  "P10-Night-Paused.dc.html",
+  "P10-Night-Desktop.dc.html",
+  "P10-Readiness.dc.html",
+  "P10-MuscleState.dc.html",
+  "P10-MuscleState-States.dc.html",
+  "P10-FixSheet.dc.html",
+  "P10-FixSheet-NoGym.dc.html",
+  "P10-FixSheet-None.dc.html",
+  "P10-Injury-Where.dc.html",
+  "P10-Injury-General.dc.html",
+  "P10-Injury-Feel.dc.html",
+  "P10-Injury-Clinician.dc.html",
+  "P10-Injury-Clinician-Yes.dc.html",
+  "P10-Injury-Where-Empty.dc.html",
+  "P10-Injury-Plan.dc.html",
+  "P10-Injury-Plan-Rebuild.dc.html",
+  "P10-Injury-Plan-Protect.dc.html",
+  "P10-Injury-Plan-FullRest.dc.html",
+  "P10-Injury-Plan-General.dc.html",
+  "P10-Injury-Checkin.dc.html",
+  "P10-Injury-Result-Advance.dc.html",
+  "P10-Injury-Result-Hold.dc.html",
+  "P10-Injury-Result-Back.dc.html",
+  "P10-Injury-Manage.dc.html",
+  "P10-Injury-Healed.dc.html",
+  "P10-Injury-Cancel.dc.html",
+  "P10-Injury-Desktop.dc.html"
+ ],
+ "notes": {
+  "t_exercises": {
+   "x": 0,
+   "y": -300,
+   "text": "Exercises & Learn",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "exercises"
+  },
+  "t_health": {
+   "x": 0,
+   "y": -300,
+   "text": "Health, sleep, injury",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "health"
+  }
+ },
+ "designSystems": [],
+ "attachments": {}
+}

@@ -1,0 +1,1577 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-29T08:00:00Z"
+ },
+ "title": "Spotter — Brass Glass · 5/6 · Gyms → Me",
+ "launch": {
+  "view": "canvas",
+  "page": "cover"
+ },
+ "pages": [
+  {
+   "id": "cover",
+   "name": "Cover"
+  },
+  {
+   "id": "gyms",
+   "name": "11 · Gyms"
+  },
+  {
+   "id": "atlas",
+   "name": "12 · Atlas"
+  },
+  {
+   "id": "apex",
+   "name": "13 · Apex & challenges"
+  },
+  {
+   "id": "me",
+   "name": "14 · Me & settings"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Cover",
+   "page": "cover"
+  },
+  "P11-Gyms.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 1000,
+   "title": "Gyms · my gyms + nearby (scroll)",
+   "page": "gyms"
+  },
+  "P11-Gyms-Search.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Search · typing, providers streaming",
+   "page": "gyms"
+  },
+  "P11-Detail.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 3200,
+   "title": "Gym detail · saved (scroll)",
+   "page": "gyms"
+  },
+  "P11-Detail-Candidate.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 1080,
+   "title": "Gym detail · search result, not saved",
+   "page": "gyms"
+  },
+  "P11-Gyms-Empty.dc.html": {
+   "x": 0,
+   "y": 3360,
+   "w": 390,
+   "h": 1000,
+   "title": "Gyms · none yet",
+   "page": "gyms"
+  },
+  "P11-Gyms-Searching.dc.html": {
+   "x": 470,
+   "y": 3360,
+   "w": 390,
+   "h": 844,
+   "title": "Search · skeleton before first result",
+   "page": "gyms"
+  },
+  "P11-Gyms-NoResults.dc.html": {
+   "x": 940,
+   "y": 3360,
+   "w": 390,
+   "h": 844,
+   "title": "Search · nothing found",
+   "page": "gyms"
+  },
+  "P11-Gyms-Locating.dc.html": {
+   "x": 1410,
+   "y": 3360,
+   "w": 390,
+   "h": 920,
+   "title": "Add by location · reading position",
+   "page": "gyms"
+  },
+  "P11-Gyms-Coarse.dc.html": {
+   "x": 1880,
+   "y": 3360,
+   "w": 390,
+   "h": 844,
+   "title": "Add by location · GPS too coarse",
+   "page": "gyms"
+  },
+  "P11-Gyms-Denied.dc.html": {
+   "x": 2350,
+   "y": 3360,
+   "w": 390,
+   "h": 844,
+   "title": "Location blocked",
+   "page": "gyms"
+  },
+  "P11-Gyms-Added.dc.html": {
+   "x": 2820,
+   "y": 3360,
+   "w": 390,
+   "h": 844,
+   "title": "Gym added · toast",
+   "page": "gyms"
+  },
+  "P11-Detail-Hours-Week.dc.html": {
+   "x": 3290,
+   "y": 3360,
+   "w": 390,
+   "h": 1000,
+   "title": "Detail · hours, all week open",
+   "page": "gyms"
+  },
+  "P11-Detail-Hours-States.dc.html": {
+   "x": 3760,
+   "y": 3360,
+   "w": 390,
+   "h": 1100,
+   "title": "Detail · hours: 24/7, unknown · no route · no stats",
+   "page": "gyms"
+  },
+  "P11-Detail-Missing.dc.html": {
+   "x": 4230,
+   "y": 3360,
+   "w": 390,
+   "h": 844,
+   "title": "Detail · gym no longer exists (stale link)",
+   "page": "gyms"
+  },
+  "P11-Detail-Split-Hours.dc.html": {
+   "x": 4700,
+   "y": 3360,
+   "w": 390,
+   "h": 1100,
+   "title": "Detail · split hours, website only, empty band library & inventory",
+   "page": "gyms"
+  },
+  "P11-Kit-Review.dc.html": {
+   "x": 0,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Seen in your workouts · review sheet",
+   "page": "gyms"
+  },
+  "P11-Kit-Undo.dc.html": {
+   "x": 470,
+   "y": 4620,
+   "w": 390,
+   "h": 1500,
+   "title": "Kit added · undo in place",
+   "page": "gyms"
+  },
+  "P11-Kit-Tray.dc.html": {
+   "x": 940,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Live session · kit tray",
+   "page": "gyms"
+  },
+  "P11-Kit-Tray-Undo.dc.html": {
+   "x": 1410,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Live session · added, undo",
+   "page": "gyms"
+  },
+  "P11-Inventory-Selected.dc.html": {
+   "x": 1880,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · selected sheet",
+   "page": "gyms"
+  },
+  "P11-Inventory-Filter.dc.html": {
+   "x": 2350,
+   "y": 4620,
+   "w": 390,
+   "h": 1100,
+   "title": "Inventory · muscle filter open",
+   "page": "gyms"
+  },
+  "P11-Inventory-Search.dc.html": {
+   "x": 2820,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Inventory · search, no match",
+   "page": "gyms"
+  },
+  "P11-Bands-Pick.dc.html": {
+   "x": 3290,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Band library · colour picker open",
+   "page": "gyms"
+  },
+  "P11-Bands-Saved.dc.html": {
+   "x": 3760,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Band library · saved",
+   "page": "gyms"
+  },
+  "P11-GymPicker.dc.html": {
+   "x": 4230,
+   "y": 4620,
+   "w": 390,
+   "h": 844,
+   "title": "Which gym? · picker sheet",
+   "page": "gyms"
+  },
+  "P11-Delete.dc.html": {
+   "x": 0,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Delete gym · confirm",
+   "page": "gyms"
+  },
+  "P11-Inventory-Remove.dc.html": {
+   "x": 470,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Remove one item · confirm",
+   "page": "gyms"
+  },
+  "P11-Inventory-Clear.dc.html": {
+   "x": 940,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Clear all inventory · confirm",
+   "page": "gyms"
+  },
+  "P11-Inventory-Undo.dc.html": {
+   "x": 1410,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Item removed · undo",
+   "page": "gyms"
+  },
+  "P11-Desktop.dc.html": {
+   "x": 1880,
+   "y": 6280,
+   "w": 1440,
+   "h": 1080,
+   "title": "Gyms · desktop list + detail pane",
+   "page": "gyms"
+  },
+  "P11-Desktop-Busy.dc.html": {
+   "x": 3400,
+   "y": 6280,
+   "w": 1440,
+   "h": 900,
+   "title": "Gyms · desktop, session running (Start disabled), no sessions here",
+   "page": "gyms"
+  },
+  "P11-Night-Gyms.dc.html": {
+   "x": 4920,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Night · Gyms (live night)",
+   "page": "gyms"
+  },
+  "P11-Night-Detail.dc.html": {
+   "x": 5390,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Night · gym detail",
+   "page": "gyms"
+  },
+  "P12-Setup-Meet.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · meet",
+   "page": "atlas"
+  },
+  "P12-Setup-Temper.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · temper",
+   "page": "atlas"
+  },
+  "P12-Setup-Fine.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · Merciless fine print",
+   "page": "atlas"
+  },
+  "P12-Setup-Role.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · role",
+   "page": "atlas"
+  },
+  "P12-Setup-Data.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas setup · what I know · sex",
+   "page": "atlas"
+  },
+  "P12-Setup-Push.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · notifications",
+   "page": "atlas"
+  },
+  "P12-Thread.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 880,
+   "title": "Atlas chat · notes feed · extra coach",
+   "page": "atlas"
+  },
+  "P12-Welcome.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas chat · empty chat welcome",
+   "page": "atlas"
+  },
+  "P12-Thread-Main.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 1200,
+   "title": "Atlas chat · main coach · programme",
+   "page": "atlas"
+  },
+  "P12-Answer.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas chat · answer · chart · rating · follow-ups",
+   "page": "atlas"
+  },
+  "P12-Setup-Temper-Merciless.dc.html": {
+   "x": 0,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · temper · Merciless picked",
+   "page": "atlas"
+  },
+  "P12-Setup-Data-Birth.dc.html": {
+   "x": 470,
+   "y": 1360,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas setup · what I know · year of birth",
+   "page": "atlas"
+  },
+  "P12-Setup-Data-Height.dc.html": {
+   "x": 940,
+   "y": 1360,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas setup · what I know · height",
+   "page": "atlas"
+  },
+  "P12-Setup-Data-Complete.dc.html": {
+   "x": 1410,
+   "y": 1360,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas setup · what I know · nothing missing",
+   "page": "atlas"
+  },
+  "P12-Setup-Role-HumanCoach.dc.html": {
+   "x": 1880,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · role · you have a coach",
+   "page": "atlas"
+  },
+  "P12-Setup-Push-Install.dc.html": {
+   "x": 2350,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · notifications · iPhone needs install",
+   "page": "atlas"
+  },
+  "P12-Setup-Push-Denied.dc.html": {
+   "x": 2820,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas setup · notifications · blocked",
+   "page": "atlas"
+  },
+  "P12-Thread-Typing.dc.html": {
+   "x": 3290,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas chat · thinking, then typing",
+   "page": "atlas"
+  },
+  "P12-Action.dc.html": {
+   "x": 3760,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas chat · proposed action · Do it / Cancel",
+   "page": "atlas"
+  },
+  "P12-DidYouMean.dc.html": {
+   "x": 4230,
+   "y": 1360,
+   "w": 390,
+   "h": 1000,
+   "title": "Atlas chat · did you mean · rated down",
+   "page": "atlas"
+  },
+  "P12-Puter.dc.html": {
+   "x": 4700,
+   "y": 1360,
+   "w": 390,
+   "h": 900,
+   "title": "Atlas chat · Gemini out · Puter offer",
+   "page": "atlas"
+  },
+  "P12-OffTopic.dc.html": {
+   "x": 5170,
+   "y": 1360,
+   "w": 390,
+   "h": 1180,
+   "title": "Atlas chat · off-topic guard · blocked",
+   "page": "atlas"
+  },
+  "P12-Safety.dc.html": {
+   "x": 5640,
+   "y": 1360,
+   "w": 390,
+   "h": 1100,
+   "title": "Atlas chat · safety net (every temper, plain)",
+   "page": "atlas"
+  },
+  "P12-Thread-Softened.dc.html": {
+   "x": 6110,
+   "y": 1360,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas chat · Merciless, softer today (injury)",
+   "page": "atlas"
+  },
+  "P12-Thread-Night.dc.html": {
+   "x": 6580,
+   "y": 1360,
+   "w": 390,
+   "h": 960,
+   "title": "Atlas chat · night mode",
+   "page": "atlas"
+  },
+  "P12-Thread-Older.dc.html": {
+   "x": 7050,
+   "y": 1360,
+   "w": 390,
+   "h": 920,
+   "title": "Atlas chat · older messages load on scroll up",
+   "page": "atlas"
+  },
+  "P12-Reply-States.dc.html": {
+   "x": 7520,
+   "y": 1360,
+   "w": 1600,
+   "h": 1000,
+   "title": "Atlas reply states",
+   "page": "atlas"
+  },
+  "P12-Tempers.dc.html": {
+   "x": 9200,
+   "y": 1360,
+   "w": 1600,
+   "h": 980,
+   "title": "Atlas tempers · voice",
+   "page": "atlas"
+  },
+  "P12-Plan-States.dc.html": {
+   "x": 10880,
+   "y": 1360,
+   "w": 1600,
+   "h": 640,
+   "title": "Atlas programme card states",
+   "page": "atlas"
+  },
+  "P12-Settings.dc.html": {
+   "x": 0,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas settings",
+   "page": "atlas"
+  },
+  "P12-Settings-Merciless.dc.html": {
+   "x": 470,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas settings · Merciless picked (dirty)",
+   "page": "atlas"
+  },
+  "P12-Settings-HumanCoach.dc.html": {
+   "x": 940,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas settings · you have a coach (locked)",
+   "page": "atlas"
+  },
+  "P12-Confirm-Clear.dc.html": {
+   "x": 1410,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Clear the chat?",
+   "page": "atlas"
+  },
+  "P12-Confirm-Off.dc.html": {
+   "x": 1880,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Turn Atlas off?",
+   "page": "atlas"
+  },
+  "P12-Consent.dc.html": {
+   "x": 2350,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Chat with Atlas · consent",
+   "page": "atlas"
+  },
+  "P12-Portrait.dc.html": {
+   "x": 2820,
+   "y": 2700,
+   "w": 390,
+   "h": 844,
+   "title": "Atlas portrait (tap the face)",
+   "page": "atlas"
+  },
+  "P12-Components.dc.html": {
+   "x": 0,
+   "y": 3704,
+   "w": 1600,
+   "h": 820,
+   "title": "Atlas on other screens",
+   "page": "atlas"
+  },
+  "P12-Progress-Notes.dc.html": {
+   "x": 1680,
+   "y": 3704,
+   "w": 390,
+   "h": 844,
+   "title": "Overview › Atlas · notes above the trends",
+   "page": "atlas"
+  },
+  "P12-Progress-Notes-Empty.dc.html": {
+   "x": 2150,
+   "y": 3704,
+   "w": 390,
+   "h": 844,
+   "title": "Overview › Atlas · no notes yet",
+   "page": "atlas"
+  },
+  "P12-Desktop.dc.html": {
+   "x": 2620,
+   "y": 3704,
+   "w": 1440,
+   "h": 1060,
+   "title": "Atlas chat · desktop",
+   "page": "atlas"
+  },
+  "P13-Home.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 880,
+   "title": "Apex · Home",
+   "page": "apex"
+  },
+  "P13-Challenges.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 1820,
+   "title": "Apex · Challenges hub (scroll)",
+   "page": "apex"
+  },
+  "P13-Ranks.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 3900,
+   "title": "Apex · Ranks (scroll)",
+   "page": "apex"
+  },
+  "P13-Awards.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 3220,
+   "title": "Apex · Awards (scroll)",
+   "page": "apex"
+  },
+  "P13-Feed.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 930,
+   "title": "Apex · Milestones feed (bell)",
+   "page": "apex"
+  },
+  "P13-Home-Empty.dc.html": {
+   "x": 0,
+   "y": 4060,
+   "w": 390,
+   "h": 844,
+   "title": "Apex · Home · nothing yet",
+   "page": "apex"
+  },
+  "P13-Challenges-NoActive.dc.html": {
+   "x": 470,
+   "y": 4060,
+   "w": 390,
+   "h": 1000,
+   "title": "Challenges · none active",
+   "page": "apex"
+  },
+  "P13-Challenges-Filtered.dc.html": {
+   "x": 940,
+   "y": 4060,
+   "w": 390,
+   "h": 1080,
+   "title": "Challenges · filter Strength",
+   "page": "apex"
+  },
+  "P13-Challenges-NoMatch.dc.html": {
+   "x": 1410,
+   "y": 4060,
+   "w": 390,
+   "h": 844,
+   "title": "Challenges · search, no match",
+   "page": "apex"
+  },
+  "P13-Challenges-Page3.dc.html": {
+   "x": 1880,
+   "y": 4060,
+   "w": 390,
+   "h": 1320,
+   "title": "Challenges · last page (3 of 3)",
+   "page": "apex"
+  },
+  "P13-Ranks-Gate.dc.html": {
+   "x": 2350,
+   "y": 4060,
+   "w": 390,
+   "h": 844,
+   "title": "Ranks · profile missing",
+   "page": "apex"
+  },
+  "P13-Awards-Empty.dc.html": {
+   "x": 2820,
+   "y": 4060,
+   "w": 390,
+   "h": 844,
+   "title": "Awards · no sessions yet",
+   "page": "apex"
+  },
+  "P13-Feed-Empty.dc.html": {
+   "x": 3290,
+   "y": 4060,
+   "w": 390,
+   "h": 844,
+   "title": "Milestones · empty",
+   "page": "apex"
+  },
+  "P13-Feed-Read.dc.html": {
+   "x": 3760,
+   "y": 4060,
+   "w": 390,
+   "h": 930,
+   "title": "Milestones · all read",
+   "page": "apex"
+  },
+  "P13-Home-Night.dc.html": {
+   "x": 4230,
+   "y": 4060,
+   "w": 390,
+   "h": 1000,
+   "title": "Apex · Home · night mode",
+   "page": "apex"
+  },
+  "P13-Challenges-Night.dc.html": {
+   "x": 4700,
+   "y": 4060,
+   "w": 390,
+   "h": 1300,
+   "title": "Challenges · night mode",
+   "page": "apex"
+  },
+  "P13-Filter-Sheet.dc.html": {
+   "x": 0,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Challenges · filters",
+   "page": "apex"
+  },
+  "P13-Start-Sheet.dc.html": {
+   "x": 470,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Start challenge · adjustable target",
+   "page": "apex"
+  },
+  "P13-Start-Sheet-Strength.dc.html": {
+   "x": 940,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Start challenge · strength target",
+   "page": "apex"
+  },
+  "P13-Start-Sheet-Fixed.dc.html": {
+   "x": 1410,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Start challenge · fixed (streak)",
+   "page": "apex"
+  },
+  "P13-Detail.dc.html": {
+   "x": 1880,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Challenge detail",
+   "page": "apex"
+  },
+  "P13-Detail-GiveUp.dc.html": {
+   "x": 2350,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Challenge detail · give up?",
+   "page": "apex"
+  },
+  "P13-Detail-Ended.dc.html": {
+   "x": 2820,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Challenge detail · time’s up",
+   "page": "apex"
+  },
+  "P13-Detail-Reach.dc.html": {
+   "x": 3290,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Challenge detail · reach target",
+   "page": "apex"
+  },
+  "P13-Complete.dc.html": {
+   "x": 3760,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Challenge complete",
+   "page": "apex"
+  },
+  "P13-Awards-List.dc.html": {
+   "x": 4230,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Awards · earned list",
+   "page": "apex"
+  },
+  "P13-Awards-Detail.dc.html": {
+   "x": 4700,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Awards · achievement (unlocked)",
+   "page": "apex"
+  },
+  "P13-Awards-Detail-Locked.dc.html": {
+   "x": 5170,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Awards · achievement (next)",
+   "page": "apex"
+  },
+  "P13-Share-Ranks.dc.html": {
+   "x": 5640,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Ranks · share card",
+   "page": "apex"
+  },
+  "P13-Share-Awards.dc.html": {
+   "x": 6110,
+   "y": 5540,
+   "w": 390,
+   "h": 844,
+   "title": "Awards · share card",
+   "page": "apex"
+  },
+  "P13-Awards-Upcoming.dc.html": {
+   "x": 6580,
+   "y": 5540,
+   "w": 390,
+   "h": 900,
+   "title": "Awards · upcoming list",
+   "page": "apex"
+  },
+  "P13-Desktop-Home.dc.html": {
+   "x": 0,
+   "y": 6600,
+   "w": 1440,
+   "h": 900,
+   "title": "Apex · desktop Home",
+   "page": "apex"
+  },
+  "P13-Desktop-Challenges.dc.html": {
+   "x": 1520,
+   "y": 6600,
+   "w": 1440,
+   "h": 1000,
+   "title": "Apex · desktop Challenges",
+   "page": "apex"
+  },
+  "P13-Components.dc.html": {
+   "x": 3040,
+   "y": 6600,
+   "w": 1600,
+   "h": 720,
+   "title": "Apex components · states",
+   "page": "apex"
+  },
+  "P13-Share-Desktop.dc.html": {
+   "x": 4720,
+   "y": 6600,
+   "w": 1440,
+   "h": 960,
+   "title": "Awards · share card · desktop",
+   "page": "apex"
+  },
+  "P14-Me-Member.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 2440,
+   "title": "Me · Overview · Member",
+   "page": "me"
+  },
+  "P14-Me-Trainer.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 2460,
+   "title": "Me · Overview · Trainer",
+   "page": "me"
+  },
+  "P14-Me-Admin.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 2440,
+   "title": "Me · Overview · Admin",
+   "page": "me"
+  },
+  "P14-Me-Body.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 2420,
+   "title": "Me · Body tab",
+   "page": "me"
+  },
+  "P14-Me-Settings.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 1840,
+   "title": "Me · Settings tab · Member / Trainer",
+   "page": "me"
+  },
+  "P14-Me-Settings-Admin.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 1880,
+   "title": "Me · Settings tab · Admin",
+   "page": "me"
+  },
+  "P14-Profile-Admin-Overview.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 2280,
+   "title": "Profile · other user · Admin view · Overview",
+   "page": "me"
+  },
+  "P14-Profile-Admin-Settings.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 1240,
+   "title": "Profile · other user · Admin view · Settings",
+   "page": "me"
+  },
+  "P14-Profile-Admin-Trainer.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 1300,
+   "title": "Profile · a trainer · Admin view · Settings",
+   "page": "me"
+  },
+  "P14-Profile-Trainer-View.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 2170,
+   "title": "Profile · client · Trainer view (live)",
+   "page": "me"
+  },
+  "P14-Notifications.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 1480,
+   "title": "Notifications · Gym overlay",
+   "page": "me"
+  },
+  "P14-Shell-Member.dc.html": {
+   "x": 5170,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Apps switcher · Member",
+   "page": "me"
+  },
+  "P14-Shell-Trainer.dc.html": {
+   "x": 5640,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Apps switcher · Trainer",
+   "page": "me"
+  },
+  "P14-Shell-Admin.dc.html": {
+   "x": 6110,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Apps switcher · Admin",
+   "page": "me"
+  },
+  "P14-Settings.dc.html": {
+   "x": 6580,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Settings · Admin only (phone, #/settings)",
+   "page": "me"
+  },
+  "P14-Me-Loading.dc.html": {
+   "x": 0,
+   "y": 2620,
+   "w": 390,
+   "h": 1030,
+   "title": "Me · loading (ProfileSkeleton)",
+   "page": "me"
+  },
+  "P14-Profile-Errors.dc.html": {
+   "x": 470,
+   "y": 2620,
+   "w": 1250,
+   "h": 844,
+   "title": "Profile · locked / not found / failed",
+   "page": "me"
+  },
+  "P14-Me-Editing.dc.html": {
+   "x": 1800,
+   "y": 2620,
+   "w": 390,
+   "h": 1670,
+   "title": "Me · details changed (Save enabled, Edit → Done)",
+   "page": "me"
+  },
+  "P14-Me-Edit-Error.dc.html": {
+   "x": 2270,
+   "y": 2620,
+   "w": 390,
+   "h": 1200,
+   "title": "Me · editing · save failed",
+   "page": "me"
+  },
+  "P14-Me-Password.dc.html": {
+   "x": 2740,
+   "y": 2620,
+   "w": 390,
+   "h": 2000,
+   "title": "Me · Settings · password editing (mismatch)",
+   "page": "me"
+  },
+  "P14-Me-NoPhoto.dc.html": {
+   "x": 3210,
+   "y": 2620,
+   "w": 390,
+   "h": 1780,
+   "title": "Me · no photo, new account (empty lists)",
+   "page": "me"
+  },
+  "P14-Me-Body-Empty.dc.html": {
+   "x": 3680,
+   "y": 2620,
+   "w": 390,
+   "h": 1680,
+   "title": "Me · Body · no weight entries",
+   "page": "me"
+  },
+  "P14-Profile-Body-ReadOnly.dc.html": {
+   "x": 4150,
+   "y": 2620,
+   "w": 390,
+   "h": 2000,
+   "title": "Profile · client Body · Trainer view (read-only)",
+   "page": "me"
+  },
+  "P14-Notifications-Empty.dc.html": {
+   "x": 4620,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "Notifications · empty",
+   "page": "me"
+  },
+  "P14-Notifications-Feed.dc.html": {
+   "x": 5090,
+   "y": 2620,
+   "w": 390,
+   "h": 1100,
+   "title": "Notifications · People app Feed tab (Milestones)",
+   "page": "me"
+  },
+  "P14-Shell-Nutrition-On.dc.html": {
+   "x": 5560,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "Apps switcher · Nutrition flag on (Admin), from People",
+   "page": "me"
+  },
+  "P14-Toasts.dc.html": {
+   "x": 6030,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "NoticeStrip + UpdatePlate (toast holder) over Today",
+   "page": "me"
+  },
+  "P14-SyncBlocked.dc.html": {
+   "x": 6500,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "SyncBlockedCard under the header",
+   "page": "me"
+  },
+  "P14-Notifications-Night.dc.html": {
+   "x": 6970,
+   "y": 2620,
+   "w": 390,
+   "h": 1100,
+   "title": "Notifications · night",
+   "page": "me"
+  },
+  "P14-Shell-Night.dc.html": {
+   "x": 7440,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "Apps switcher · night",
+   "page": "me"
+  },
+  "P14-Settings-Night.dc.html": {
+   "x": 7910,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "Settings · night (Admin)",
+   "page": "me"
+  },
+  "P14-Me-Night.dc.html": {
+   "x": 8380,
+   "y": 2620,
+   "w": 390,
+   "h": 1930,
+   "title": "Me · night (People app: moon, no sky, no SleepHero)",
+   "page": "me"
+  },
+  "P14-Toasts-Night.dc.html": {
+   "x": 8850,
+   "y": 2620,
+   "w": 390,
+   "h": 844,
+   "title": "NoticeStrip + UpdatePlate · night",
+   "page": "me"
+  },
+  "P14-Language.dc.html": {
+   "x": 0,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "LanguageSelector · popover open (Gym header)",
+   "page": "me"
+  },
+  "P14-Language-People.dc.html": {
+   "x": 470,
+   "y": 4780,
+   "w": 390,
+   "h": 1340,
+   "title": "LanguageSelector · full chip, Settings tab",
+   "page": "me"
+  },
+  "P14-Avatar-Crop.dc.html": {
+   "x": 940,
+   "y": 4780,
+   "w": 390,
+   "h": 1000,
+   "title": "Avatar · position & zoom",
+   "page": "me"
+  },
+  "P14-Avatar-Camera.dc.html": {
+   "x": 1410,
+   "y": 4780,
+   "w": 390,
+   "h": 1000,
+   "title": "Avatar · camera",
+   "page": "me"
+  },
+  "P14-Avatar-Error.dc.html": {
+   "x": 1880,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "Avatar · camera unavailable",
+   "page": "me"
+  },
+  "P14-Weight-Add.dc.html": {
+   "x": 2350,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "Body · Add weight sheet",
+   "page": "me"
+  },
+  "P14-Weight-Edit.dc.html": {
+   "x": 2820,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "Body · Edit weight sheet",
+   "page": "me"
+  },
+  "P14-Assign-Trainer-Error.dc.html": {
+   "x": 3290,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "Assign trainer sheet · save failed",
+   "page": "me"
+  },
+  "P14-Assign-Trainer.dc.html": {
+   "x": 3760,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "Assign trainer sheet (Admin)",
+   "page": "me"
+  },
+  "P14-Assign-Clients.dc.html": {
+   "x": 4230,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "Assign clients sheet (Admin, trainer profile)",
+   "page": "me"
+  },
+  "P14-Physique.dc.html": {
+   "x": 4700,
+   "y": 4780,
+   "w": 390,
+   "h": 960,
+   "title": "PhysiquePicker · no sex on account (Goals)",
+   "page": "me"
+  },
+  "P14-Physique-Picked.dc.html": {
+   "x": 5170,
+   "y": 4780,
+   "w": 390,
+   "h": 960,
+   "title": "PhysiquePicker · female account, target set",
+   "page": "me"
+  },
+  "P14-Physique-Male-Picked.dc.html": {
+   "x": 5640,
+   "y": 4780,
+   "w": 390,
+   "h": 960,
+   "title": "PhysiquePicker · male, V-Taper picked (lit figure)",
+   "page": "me"
+  },
+  "P14-Install-iOS.dc.html": {
+   "x": 6110,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "InstallShortcut · guide sheet · iOS",
+   "page": "me"
+  },
+  "P14-Install-Android.dc.html": {
+   "x": 6580,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "InstallShortcut · guide sheet · Android",
+   "page": "me"
+  },
+  "P14-Install-Mac.dc.html": {
+   "x": 7050,
+   "y": 4780,
+   "w": 390,
+   "h": 844,
+   "title": "InstallShortcut · guide sheet · Mac",
+   "page": "me"
+  },
+  "P14-SignOut-Queue.dc.html": {
+   "x": 0,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Sign out? · with queued changes (Apps sheet)",
+   "page": "me"
+  },
+  "P14-SignOut-Clean.dc.html": {
+   "x": 470,
+   "y": 6280,
+   "w": 390,
+   "h": 844,
+   "title": "Sign out? · clean (Me · Settings)",
+   "page": "me"
+  },
+  "P14-Header-Parts.dc.html": {
+   "x": 940,
+   "y": 6280,
+   "w": 1600,
+   "h": 1000,
+   "title": "Header parts: MasteryBadge, bell, language, notices, update, sync",
+   "page": "me"
+  },
+  "P14-Desktop-Settings.dc.html": {
+   "x": 2620,
+   "y": 6280,
+   "w": 1440,
+   "h": 900,
+   "title": "Desktop · Settings (Admin rail)",
+   "page": "me"
+  },
+  "P14-Desktop-Settings-Night.dc.html": {
+   "x": 4140,
+   "y": 6280,
+   "w": 1440,
+   "h": 900,
+   "title": "Desktop · Settings · night",
+   "page": "me"
+  },
+  "P14-Desktop-Notifications.dc.html": {
+   "x": 5660,
+   "y": 6280,
+   "w": 1440,
+   "h": 1100,
+   "title": "Desktop · Notifications (Member rail)",
+   "page": "me"
+  },
+  "P14-Desktop-Me.dc.html": {
+   "x": 7180,
+   "y": 6280,
+   "w": 1440,
+   "h": 1400,
+   "title": "Desktop · Me (People app, Admin AppRail)",
+   "page": "me"
+  },
+  "P14-Desktop-Me-Night.dc.html": {
+   "x": 8700,
+   "y": 6280,
+   "w": 1440,
+   "h": 900,
+   "title": "Desktop · Me · night (People: moon)",
+   "page": "me"
+  },
+  "P14-Desktop-Profile-Overlay.dc.html": {
+   "x": 10220,
+   "y": 6280,
+   "w": 1440,
+   "h": 1400,
+   "title": "Desktop · own profile from the Gym rail avatar (overlay, not embedded)",
+   "page": "me"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "P11-Gyms.dc.html",
+  "P11-Gyms-Search.dc.html",
+  "P11-Detail.dc.html",
+  "P11-Detail-Candidate.dc.html",
+  "P11-Gyms-Empty.dc.html",
+  "P11-Gyms-Searching.dc.html",
+  "P11-Gyms-NoResults.dc.html",
+  "P11-Gyms-Locating.dc.html",
+  "P11-Gyms-Coarse.dc.html",
+  "P11-Gyms-Denied.dc.html",
+  "P11-Gyms-Added.dc.html",
+  "P11-Detail-Hours-Week.dc.html",
+  "P11-Detail-Hours-States.dc.html",
+  "P11-Detail-Missing.dc.html",
+  "P11-Detail-Split-Hours.dc.html",
+  "P11-Kit-Review.dc.html",
+  "P11-Kit-Undo.dc.html",
+  "P11-Kit-Tray.dc.html",
+  "P11-Kit-Tray-Undo.dc.html",
+  "P11-Inventory-Selected.dc.html",
+  "P11-Inventory-Filter.dc.html",
+  "P11-Inventory-Search.dc.html",
+  "P11-Bands-Pick.dc.html",
+  "P11-Bands-Saved.dc.html",
+  "P11-GymPicker.dc.html",
+  "P11-Delete.dc.html",
+  "P11-Inventory-Remove.dc.html",
+  "P11-Inventory-Clear.dc.html",
+  "P11-Inventory-Undo.dc.html",
+  "P11-Desktop.dc.html",
+  "P11-Desktop-Busy.dc.html",
+  "P11-Night-Gyms.dc.html",
+  "P11-Night-Detail.dc.html",
+  "P12-Setup-Meet.dc.html",
+  "P12-Setup-Temper.dc.html",
+  "P12-Setup-Fine.dc.html",
+  "P12-Setup-Role.dc.html",
+  "P12-Setup-Data.dc.html",
+  "P12-Setup-Push.dc.html",
+  "P12-Thread.dc.html",
+  "P12-Welcome.dc.html",
+  "P12-Thread-Main.dc.html",
+  "P12-Answer.dc.html",
+  "P12-Setup-Temper-Merciless.dc.html",
+  "P12-Setup-Data-Birth.dc.html",
+  "P12-Setup-Data-Height.dc.html",
+  "P12-Setup-Data-Complete.dc.html",
+  "P12-Setup-Role-HumanCoach.dc.html",
+  "P12-Setup-Push-Install.dc.html",
+  "P12-Setup-Push-Denied.dc.html",
+  "P12-Thread-Typing.dc.html",
+  "P12-Action.dc.html",
+  "P12-DidYouMean.dc.html",
+  "P12-Puter.dc.html",
+  "P12-OffTopic.dc.html",
+  "P12-Safety.dc.html",
+  "P12-Thread-Softened.dc.html",
+  "P12-Thread-Night.dc.html",
+  "P12-Thread-Older.dc.html",
+  "P12-Reply-States.dc.html",
+  "P12-Tempers.dc.html",
+  "P12-Plan-States.dc.html",
+  "P12-Settings.dc.html",
+  "P12-Settings-Merciless.dc.html",
+  "P12-Settings-HumanCoach.dc.html",
+  "P12-Confirm-Clear.dc.html",
+  "P12-Confirm-Off.dc.html",
+  "P12-Consent.dc.html",
+  "P12-Portrait.dc.html",
+  "P12-Components.dc.html",
+  "P12-Progress-Notes.dc.html",
+  "P12-Progress-Notes-Empty.dc.html",
+  "P12-Desktop.dc.html",
+  "P13-Home.dc.html",
+  "P13-Challenges.dc.html",
+  "P13-Ranks.dc.html",
+  "P13-Awards.dc.html",
+  "P13-Feed.dc.html",
+  "P13-Home-Empty.dc.html",
+  "P13-Challenges-NoActive.dc.html",
+  "P13-Challenges-Filtered.dc.html",
+  "P13-Challenges-NoMatch.dc.html",
+  "P13-Challenges-Page3.dc.html",
+  "P13-Ranks-Gate.dc.html",
+  "P13-Awards-Empty.dc.html",
+  "P13-Feed-Empty.dc.html",
+  "P13-Feed-Read.dc.html",
+  "P13-Home-Night.dc.html",
+  "P13-Challenges-Night.dc.html",
+  "P13-Filter-Sheet.dc.html",
+  "P13-Start-Sheet.dc.html",
+  "P13-Start-Sheet-Strength.dc.html",
+  "P13-Start-Sheet-Fixed.dc.html",
+  "P13-Detail.dc.html",
+  "P13-Detail-GiveUp.dc.html",
+  "P13-Detail-Ended.dc.html",
+  "P13-Detail-Reach.dc.html",
+  "P13-Complete.dc.html",
+  "P13-Awards-List.dc.html",
+  "P13-Awards-Detail.dc.html",
+  "P13-Awards-Detail-Locked.dc.html",
+  "P13-Share-Ranks.dc.html",
+  "P13-Share-Awards.dc.html",
+  "P13-Awards-Upcoming.dc.html",
+  "P13-Desktop-Home.dc.html",
+  "P13-Desktop-Challenges.dc.html",
+  "P13-Components.dc.html",
+  "P13-Share-Desktop.dc.html",
+  "P14-Me-Member.dc.html",
+  "P14-Me-Trainer.dc.html",
+  "P14-Me-Admin.dc.html",
+  "P14-Me-Body.dc.html",
+  "P14-Me-Settings.dc.html",
+  "P14-Me-Settings-Admin.dc.html",
+  "P14-Profile-Admin-Overview.dc.html",
+  "P14-Profile-Admin-Settings.dc.html",
+  "P14-Profile-Admin-Trainer.dc.html",
+  "P14-Profile-Trainer-View.dc.html",
+  "P14-Notifications.dc.html",
+  "P14-Shell-Member.dc.html",
+  "P14-Shell-Trainer.dc.html",
+  "P14-Shell-Admin.dc.html",
+  "P14-Settings.dc.html",
+  "P14-Me-Loading.dc.html",
+  "P14-Profile-Errors.dc.html",
+  "P14-Me-Editing.dc.html",
+  "P14-Me-Edit-Error.dc.html",
+  "P14-Me-Password.dc.html",
+  "P14-Me-NoPhoto.dc.html",
+  "P14-Me-Body-Empty.dc.html",
+  "P14-Profile-Body-ReadOnly.dc.html",
+  "P14-Notifications-Empty.dc.html",
+  "P14-Notifications-Feed.dc.html",
+  "P14-Shell-Nutrition-On.dc.html",
+  "P14-Toasts.dc.html",
+  "P14-SyncBlocked.dc.html",
+  "P14-Notifications-Night.dc.html",
+  "P14-Shell-Night.dc.html",
+  "P14-Settings-Night.dc.html",
+  "P14-Me-Night.dc.html",
+  "P14-Toasts-Night.dc.html",
+  "P14-Language.dc.html",
+  "P14-Language-People.dc.html",
+  "P14-Avatar-Crop.dc.html",
+  "P14-Avatar-Camera.dc.html",
+  "P14-Avatar-Error.dc.html",
+  "P14-Weight-Add.dc.html",
+  "P14-Weight-Edit.dc.html",
+  "P14-Assign-Trainer-Error.dc.html",
+  "P14-Assign-Trainer.dc.html",
+  "P14-Assign-Clients.dc.html",
+  "P14-Physique.dc.html",
+  "P14-Physique-Picked.dc.html",
+  "P14-Physique-Male-Picked.dc.html",
+  "P14-Install-iOS.dc.html",
+  "P14-Install-Android.dc.html",
+  "P14-Install-Mac.dc.html",
+  "P14-SignOut-Queue.dc.html",
+  "P14-SignOut-Clean.dc.html",
+  "P14-Header-Parts.dc.html",
+  "P14-Desktop-Settings.dc.html",
+  "P14-Desktop-Settings-Night.dc.html",
+  "P14-Desktop-Notifications.dc.html",
+  "P14-Desktop-Me.dc.html",
+  "P14-Desktop-Me-Night.dc.html",
+  "P14-Desktop-Profile-Overlay.dc.html"
+ ],
+ "notes": {
+  "t_gyms": {
+   "x": 0,
+   "y": -300,
+   "text": "Gyms",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "gyms"
+  },
+  "t_atlas": {
+   "x": 0,
+   "y": -300,
+   "text": "Atlas",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "atlas"
+  },
+  "t_apex": {
+   "x": 0,
+   "y": -300,
+   "text": "Apex & challenges",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "apex"
+  },
+  "t_me": {
+   "x": 0,
+   "y": -300,
+   "text": "Me & settings",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "me"
+  }
+ },
+ "designSystems": [],
+ "attachments": {}
+}

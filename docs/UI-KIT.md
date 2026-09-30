@@ -200,25 +200,32 @@ npm run build-storybook    # static catalog → client/storybook-static/
 
 ## Current kit
 
-| Primitive                                    | For                                                                                                                                                |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Button` / `IconButton`                      | every button variant / size / state                                                                                                                |
-| `Card`, `Banner`, `Chip` + `ChipGroup`       | surfaces, frosted banners, pills                                                                                                                   |
-| `Calendar` (+ `CalendarLegend`)              | THE calendar: single / range, open end, min / max / disabled, markers, today ring, keyboard grid, presets slot, 1–2 months                         |
-| `GroupedList` + `ListRow` + `ListPanel`      | settings-style groups: icon, label + sub, value, chevron, check, switch, action rows, expansion panel                                              |
-| `Segmented`                                  | one-of-N: iOS `track` or toned `buttons`                                                                                                           |
-| `Switch`                                     | role="switch" checkbox, toned                                                                                                                      |
-| `PresetChips`                                | toggle chips (date presets, body parts, filters), wrap or scroll                                                                                   |
-| `PinToggle`                                  | pin / unpin: icon, boxed, row-with-switch                                                                                                          |
-| `IconTile`                                   | rounded icon square in a family, 22–56px                                                                                                           |
-| `CategoryRow`                                | browse-by-category card (tile, title, count, meta, minis)                                                                                          |
-| `Snackbar`                                   | confirmation with Undo (presentational; caller owns the timer)                                                                                     |
-| `StickyActionBar`                            | pinned bottom bar (page, safe-area) or panel foot                                                                                                  |
-| `Timeline` (+ `TimelineDate`)                | read-only period rail with lanes, Now, gaps, months                                                                                                |
-| `ToneText`                                   | inline text in a family colour                                                                                                                     |
-| `MonthGrid` (+ `MonthGridLegend`)            | browse a month of day tiles: markers (phone) or named chips (desktop), health tints, planned dashes, today ring, selection                         |
-| `StatStrip`                                  | a row of numbers in one card (value + unit + label per cell, toned values)                                                                         |
-| `StoryBubble` (+ `StoryRow`, `StoryDivider`) | stories bubble: face/initial in a state ring (default · new · live · alert · atlas), count or "!" badge, name, "+N more"; scrolling row + hairline |
+| Primitive                                                     | For                                                                                                                                                |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Button` / `IconButton`                                       | every button variant / size / state                                                                                                                |
+| `Card`, `Banner`, `Chip` + `ChipGroup`                        | surfaces, frosted banners, pills                                                                                                                   |
+| `Calendar` (+ `CalendarLegend`)                               | THE calendar: single / range, open end, min / max / disabled, markers, today ring, keyboard grid, presets slot, 1–2 months                         |
+| `GroupedList` + `ListRow` + `ListPanel`                       | settings-style groups: icon, label + sub, value, chevron, check, switch, action rows, expansion panel                                              |
+| `Segmented`                                                   | one-of-N: iOS `track` or toned `buttons`                                                                                                           |
+| `Switch`                                                      | role="switch" checkbox, toned                                                                                                                      |
+| `PresetChips`                                                 | toggle chips (date presets, body parts, filters), wrap or scroll                                                                                   |
+| `PinToggle`                                                   | pin / unpin: icon, boxed, row-with-switch                                                                                                          |
+| `IconTile`                                                    | rounded icon square in a family, 22–56px                                                                                                           |
+| `CategoryRow`                                                 | browse-by-category card (tile, title, count, meta, minis)                                                                                          |
+| `Snackbar`                                                    | confirmation with Undo (presentational; caller owns the timer)                                                                                     |
+| `StickyActionBar`                                             | pinned bottom bar (page, safe-area) or panel foot                                                                                                  |
+| `Timeline` (+ `TimelineDate`)                                 | read-only period rail with lanes, Now, gaps, months                                                                                                |
+| `ToneText`                                                    | inline text in a family colour                                                                                                                     |
+| `MonthGrid` (+ `MonthGridLegend`)                             | browse a month of day tiles: markers (phone) or named chips (desktop), health tints, planned dashes, today ring, selection                         |
+| `StatStrip`                                                   | a row of numbers in one card (value + unit + label per cell, toned values)                                                                         |
+| `StoryBubble` (+ `StoryRow`, `StoryDivider`)                  | stories bubble: face/initial in a state ring (default · new · live · alert · atlas), count or "!" badge, name, "+N more"; scrolling row + hairline |
+| `BrandBar` (+ `BellButton`)                                   | THE app header in every sub-app: wordmark, app label, actions slot, language chip                                                                  |
+| `TabBar`                                                      | THE bottom bar (generic items; optional centre `fab` with attention pulse; `tabs` + `activeFill` for sub-apps)                                     |
+| `BackButton`                                                  | every back control (round well; `text` pill; `overlay`)                                                                                            |
+| `Field` / `TimeField` / `Select` / `Textarea` / `SearchField` | every text, time, select, multi-line and search input (label, hint, error, lead / trail; `bare` for in-row values)                                 |
+| `Widget` + `uiw-t-*`                                          | Today widgets; typography only through the `uiw-t-*` scale, never inline styles                                                                    |
+
+**Guards (tests/kit-guard.test.ts):** no raw `<button>`, no legacy `.btn` class, no raw `<select>` / `<textarea>`, and `<input>` only with a `// kit-ok` comment (hidden file / range inputs) outside `components/ui/`.
 
 ## Primitive backlog & prop shapes
 
@@ -228,3 +235,66 @@ Summary of the canonical set: `Button`/`IconButton`, `Card`, `Chip`/`Pill` (+`Ch
 `WizardStepper`, `ProgressDots`, `StatTile`, `TrafficLightOption`. Each maps variants to
 tokens only, ships all states to the gallery, and absorbs the feature-scoped classes it
 replaces (`.btn*` + `.rx .btn.*` → `Button`, etc.).
+
+## Text.css utilities, geometry contract, guards (Brass Glass)
+
+- `components/ui/Text.css` holds atomic utilities: type (`ut-2xs…ut-display`, `ut-w5..w8`, `ut-tight/tighter/caps/num`), colour (`ut-text/muted/dim/faint/accent/accent-hi/accent-lo/ok/danger/tone`) and radius (`ur-sm/md/lg/pill/round`). Selectors are doubled (`.ut-x.ut-x`) so they beat feature CSS. Use these instead of inline `style`.
+- Kit geometry (padding/size/radius of `.uibtn`, `.uicard`, …) lives in `:where()` so feature CSS can override it with a qualified selector (`.uibtn.my-hook`). Feature CSS must never restyle kit visuals (colour, radius, background) — change the kit or `glass.css`.
+- `TimeField` is the kit time input; `Chip` wraps children in `span.uichip-l`.
+- `tests/kit-guard.test.ts` enforces: no raw `<button>`, no legacy `.btn`, no raw select/textarea (`<input>` needs `// kit-ok`), no static visual inline styles.
+
+## Design tokens (single source of truth: `styles.css` :root, theme overrides in `glass.css`)
+
+Every literal in feature CSS is a token; `tests/kit-guard.test.ts` fails on raw values.
+
+- Type: `--fs-9 … --fs-52` (21 steps). Radius: `--r-2 … --r-24`, `--r-pill`, `--r-round`. Spacing (gap/padding/margin 2–48px): `--s-2 … --s-48`. Stacking layers: `--z-20 … --z-200`. Colours: semantic `--color-*`/tone families, plus the raw palette `--c-RRGGBB` (alpha via `color-mix(in srgb, var(--c-…) 14%, transparent)`).
+- To restyle globally edit those values (verified: changing `--r-*`, `--fs-*`, `--s-*` and `--color-accent` in one `<style>` re-skins the whole app).
+
+## Kit API for one-off looks (no feature CSS on kit elements)
+
+- `Button`/`IconButton`: `shape="pill"|"round"`, variants `ok` (positive outline) and `photo` (frosted on imagery). `Chip onPhoto`. `Card emphasis="hero"`.
+- `Field`/`SearchField` skin hooks (custom properties, set on the field or a wrapper): `--field-radius`, `--field-bg`, `--field-ring`, `--field-ph`, `--field-lead`.
+- Layout utilities in `components/ui/Layout.css`: `ul-flex ul-col ul-wrap ua-* uj-* uf-1 umw-0 uw-full utx-* ug-N umt-N umb-N` (replace inline `style={{ display:'flex', gap… }}`).
+- Overlays live in `components/ui/Overlays.tsx` (+ `.css`): `Sheet`, `Dialog`, `ConfirmDialog`, `Toast`, `UndoSnackbar`, `UpdatePlate` (re-exported from `ui.tsx`). Skeletons: `Skeleton`, `Skeletons.tsx`. Empty states: `EmptyState` only.
+- Guards: no feature CSS (outside `components/ui`, `glass.css`) sets background/colour/radius/shadow/border-colour on a kit element; no static layout inline styles; no raw px/colour/z literals.
+
+## Sheet chrome & page headers (consistency rules)
+
+- Every sheet: chrome (grabber centred, round × top-right) → exactly 16px → first block. Enforced by `.sheet > .sheet-chrome` margin + `.sheet > .sheet-chrome + * { margin-top: 0 }` in `Overlays.css`; feature CSS must not add top margin to a sheet's first block.
+- A sheet row that contains a `‹ Back` button (`.sheet :has(> .uiback)`) is sticky: back + title + row actions stay visible while the body scrolls.
+- Nutrition's sheet is the kit `Sheet` (no own chrome).
+- Page headers: stacked (‹ Overview pill → `--head-gap` 14px → title 30/700) and row (round back + title 26, min-height 48 so back sits at y=72 everywhere). All title selectors are listed in `redesign.css` "Page titles come in exactly two sizes".
+
+Update: Overview drill-ins now use the round icon back button + title in ONE 36px row (`OverviewBack` has no text). In sheets only the grabber is pinned (`.sheet-grip`, sticky, no layout space); a row with `.uiback` pins below it and fills only once content scrolls under it. `--color-neutral-600` raised to #80858a (≥4.5:1 on the glass background).
+
+### Update: states, labels, button sizes
+- `components/ui/States.css` owns hover/press for every interactive kit primitive (`--state-hover`, `--state-press`); feature CSS must not add its own `:active`/`:hover` transforms.
+- Button heights come only from kit sizes (sm 36 / md 46 / lg 52); feature classes (`pb-start`, `exl-new`, `pg-tile-members`) must not set `min-height`/`font-size`.
+- Disabled buttons are opaque (`filter`), never `opacity`; `--btn-under` keeps glass buttons opaque over content.
+- Sheets: `.sheet-grip` (draggable handle, sticky) is separate from `.sheet-chrome` (× row); first content gap is 16px everywhere.
+- `RailItem` accepts `glyph` (text/number marker) besides `icon`.
+
+### Update: radii, chips, buttons (iteration 19b)
+- Radius vocabulary (Brass Glass): card 18 (`--radius-lg`), hero 24, inset rows/tiles 12 (`--radius-md`), thumbs 8 (`--radius-sm`), fields 14, pills 999. `glass.css` forces card/hero radius with `!important` so a feature class can no longer change a Card's radius.
+- Small status labels are `Tag`; selectable/info pills are `Chip` (`size="sm"`, `muted`, `nested` for a chip inside a clickable card; label may hold figure + text + count). Do not add `.tag`/`*-chip` classes.
+- Muscle maps use `--body-dim` / `--body-dim-stroke` (light palette grey in glass, dark in graphite). Raster physique figures stay dark.
+- Button/IconButton sizes come from the kit only (sm 36, md 46, lg 52); feature classes may not set `height`/`min-height`/`font-size`/`padding` on them (154 such declarations were removed).
+- Page header → first block is exactly 16px on phone (`.screen` gap rule at the end of `redesign.css`); do not add `ug-*` gap utilities or body padding-top on screens with a header row.
+
+## Update: iteration 19c
+- Remaining bespoke pills/badges (hours, live, current-exercise, muscle-target, feat/standard tags, plate, equipment, sleep-auto, activity category, sub-muscle) now use kit `Tag`.
+- Primary/secondary Button colour overrides (Mastery, Plate, Circuit, Session) removed; variants own colour.
+- `.mst-head` joined the shared page-header rules (26px title, 16px gap).
+
+## Update: iteration 19d
+- `SearchField` is the ONLY search input (ref, id, aria-*, onFocus/onKeyDown, `hint` while empty). Exercise picker and both Log-activity searches now use it; `.la-search` field overrides removed.
+- Phone drawers (`.sheet`) have no close ×: grabber, swipe and scrim close them (`.sheet-close` is hidden < 720px). Sheets never carry an extra Back/× of their own (Exercise editor, Physique, Focus fixed). Desktop dialogs keep the ×.
+- Sticky search strips (`.la-sticky`) have no plate in Brass Glass.
+- Standalone tiles (la-sug, onb-gym-card, tac-tile, past-ex-card, resume-activity) are plain Cards; their own bg/border/radius removed.
+- HealthForm: "Still ongoing" is disabled (with a hint) while start/end date is in the future.
+
+## Update: set-type colour coding (iteration 19e)
+- Set-entry card (`.gset`) in Brass Glass: kind (warm-up blue, drop violet, reverse teal, static-dynamic pink, PR gold, failure red) tints plate + ring + glow via `::after` (glass.css).
+- Set editor: type chips, load/type/effort cards take the same hue (`se-kind-*` → `--kc`).
+- Options sheet footer: Delete exercise on This set / Exercise tabs, Discard session on Session tab; the Exercise tab no longer repeats the delete row.
+- Effort (RPE) chips: equal cells, centred labels.

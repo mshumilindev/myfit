@@ -1,0 +1,959 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-09-29T08:00:00Z"
+ },
+ "title": "Spotter — Brass Glass · 6/6 · Auth → Trainer & admin",
+ "launch": {
+  "view": "canvas",
+  "page": "cover"
+ },
+ "pages": [
+  {
+   "id": "cover",
+   "name": "Cover"
+  },
+  {
+   "id": "auth",
+   "name": "15 · Auth & onboarding"
+  },
+  {
+   "id": "trainer",
+   "name": "16 · Trainer & admin"
+  }
+ ],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1600,
+   "h": 900,
+   "title": "Cover",
+   "page": "cover"
+  },
+  "P15-Auth.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Sign in",
+   "page": "auth"
+  },
+  "P15-Onb-Landing.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding · landing (invite link)",
+   "page": "auth"
+  },
+  "P15-Onb-Who.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding · step 1 · who you are",
+   "page": "auth"
+  },
+  "P15-Onb-Face.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Onboarding · step 2 · your face",
+   "page": "auth"
+  },
+  "P15-Onb-Gym.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "Onboarding · step 3 · your gym (nearby)",
+   "page": "auth"
+  },
+  "P15-Onb-Body.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding · step 4 · your body",
+   "page": "auth"
+  },
+  "P15-Onb-Ready.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding · ready (gym picked)",
+   "page": "auth"
+  },
+  "P15-Body-Gate.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "Member · finish your profile (blocking gate)",
+   "page": "auth"
+  },
+  "P15-Auth-Error.dc.html": {
+   "x": 0,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Sign in · wrong credentials",
+   "page": "auth"
+  },
+  "P15-Auth-Locked.dc.html": {
+   "x": 470,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Sign in · locked 15 min (429)",
+   "page": "auth"
+  },
+  "P15-Auth-Unreachable.dc.html": {
+   "x": 940,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Sign in · server unreachable",
+   "page": "auth"
+  },
+  "P15-Auth-Busy.dc.html": {
+   "x": 1410,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Sign in · signing in",
+   "page": "auth"
+  },
+  "P15-Onb-Skeleton.dc.html": {
+   "x": 1880,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding · invite preview loading",
+   "page": "auth"
+  },
+  "P15-Onb-Dead.dc.html": {
+   "x": 2350,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Invite link expired / used / revoked",
+   "page": "auth"
+  },
+  "P15-Onb-Dead-Requested.dc.html": {
+   "x": 2820,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Invite link dead · new link requested",
+   "page": "auth"
+  },
+  "P15-Onb-Reset.dc.html": {
+   "x": 3290,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Password-reset link (single step)",
+   "page": "auth"
+  },
+  "P15-Onb-Reset-Error.dc.html": {
+   "x": 3760,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Password-reset link · claim failed",
+   "page": "auth"
+  },
+  "P15-Onb-Who-Error.dc.html": {
+   "x": 4230,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Step 1 · filled, claim failed (no invite name)",
+   "page": "auth"
+  },
+  "P15-Onb-Who-Empty.dc.html": {
+   "x": 4700,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Step 1 · empty (Continue disabled)",
+   "page": "auth"
+  },
+  "P15-Onb-Face-Crop.dc.html": {
+   "x": 5170,
+   "y": 1060,
+   "w": 390,
+   "h": 900,
+   "title": "Step 2 · position & zoom",
+   "page": "auth"
+  },
+  "P15-Onb-Face-Camera.dc.html": {
+   "x": 5640,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Step 2 · camera",
+   "page": "auth"
+  },
+  "P15-Onb-Face-TooBig.dc.html": {
+   "x": 6110,
+   "y": 1060,
+   "w": 390,
+   "h": 960,
+   "title": "Step 2 · file too big",
+   "page": "auth"
+  },
+  "P15-Onb-Face-Type.dc.html": {
+   "x": 6580,
+   "y": 1060,
+   "w": 390,
+   "h": 940,
+   "title": "Step 2 · wrong file type",
+   "page": "auth"
+  },
+  "P15-Onb-Gym-Loading.dc.html": {
+   "x": 7050,
+   "y": 1060,
+   "w": 390,
+   "h": 900,
+   "title": "Step 3 · locating / nearby loading",
+   "page": "auth"
+  },
+  "P15-Onb-Gym-Denied.dc.html": {
+   "x": 7520,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Step 3 · location refused",
+   "page": "auth"
+  },
+  "P15-Onb-Gym-Search.dc.html": {
+   "x": 7990,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Step 3 · search results",
+   "page": "auth"
+  },
+  "P15-Onb-Body-Filled.dc.html": {
+   "x": 8460,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Step 4 · required filled",
+   "page": "auth"
+  },
+  "P15-Onb-Ready-NoGym.dc.html": {
+   "x": 8930,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding · ready (gym skipped)",
+   "page": "auth"
+  },
+  "P15-Body-Gate-Filled.dc.html": {
+   "x": 9400,
+   "y": 1060,
+   "w": 390,
+   "h": 844,
+   "title": "Member gate · both fields filled",
+   "page": "auth"
+  },
+  "P15-Auth-Desktop.dc.html": {
+   "x": 0,
+   "y": 2180,
+   "w": 1440,
+   "h": 900,
+   "title": "Sign in · desktop (centred 380 px card; .auth-visual is display:none)",
+   "page": "auth"
+  },
+  "P15-Onb-Desktop.dc.html": {
+   "x": 1520,
+   "y": 2180,
+   "w": 1440,
+   "h": 900,
+   "title": "Onboarding · landing · desktop",
+   "page": "auth"
+  },
+  "P16-Trainer-Clients.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 920,
+   "title": "People · Clients · Trainer (scroll)",
+   "page": "trainer"
+  },
+  "P16-Admin-Users.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 1080,
+   "title": "People · Users · Admin (scroll)",
+   "page": "trainer"
+  },
+  "P16-Member-Me.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 2500,
+   "title": "People · Me · Member (scroll)",
+   "page": "trainer"
+  },
+  "P16-Trainer-Me.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 1060,
+   "title": "People · Me · Trainer",
+   "page": "trainer"
+  },
+  "P16-Admin-Me.dc.html": {
+   "x": 1880,
+   "y": 0,
+   "w": 390,
+   "h": 1060,
+   "title": "People · Me · Admin",
+   "page": "trainer"
+  },
+  "P16-Member-Me-Settings.dc.html": {
+   "x": 2350,
+   "y": 0,
+   "w": 390,
+   "h": 960,
+   "title": "People · Me · Settings · Member (scroll)",
+   "page": "trainer"
+  },
+  "P16-Admin-Me-Settings.dc.html": {
+   "x": 2820,
+   "y": 0,
+   "w": 390,
+   "h": 1000,
+   "title": "People · Me · Settings · Admin (scroll)",
+   "page": "trainer"
+  },
+  "P16-Me-Body.dc.html": {
+   "x": 3290,
+   "y": 0,
+   "w": 390,
+   "h": 1520,
+   "title": "People · Me · Body (scroll)",
+   "page": "trainer"
+  },
+  "P16-Trainer-Client-Profile.dc.html": {
+   "x": 3760,
+   "y": 0,
+   "w": 390,
+   "h": 2080,
+   "title": "People · a client’s profile · Trainer (scroll)",
+   "page": "trainer"
+  },
+  "P16-Admin-Person-Profile.dc.html": {
+   "x": 4230,
+   "y": 0,
+   "w": 390,
+   "h": 1980,
+   "title": "People · a person’s profile · Admin (scroll)",
+   "page": "trainer"
+  },
+  "P16-Admin-Person-Settings.dc.html": {
+   "x": 4700,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "People · a member’s profile · Settings · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Trainer-Settings.dc.html": {
+   "x": 5170,
+   "y": 0,
+   "w": 390,
+   "h": 900,
+   "title": "People · a trainer’s profile · Settings · Admin",
+   "page": "trainer"
+  },
+  "P16-Feed.dc.html": {
+   "x": 5640,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "People · Milestones (bell) · Trainer",
+   "page": "trainer"
+  },
+  "P16-Trainer-Client-Settings.dc.html": {
+   "x": 0,
+   "y": 2660,
+   "w": 390,
+   "h": 900,
+   "title": "People · a client’s profile · Settings tab · Trainer (empty for a trainer)",
+   "page": "trainer"
+  },
+  "P16-Trainer-Client-Body.dc.html": {
+   "x": 470,
+   "y": 2660,
+   "w": 390,
+   "h": 1400,
+   "title": "People · a client’s profile · Body · Trainer (read-only)",
+   "page": "trainer"
+  },
+  "P16-Profile-Empty.dc.html": {
+   "x": 940,
+   "y": 2660,
+   "w": 390,
+   "h": 1320,
+   "title": "People · an invited person (no data) + save error · Admin (scroll)",
+   "page": "trainer"
+  },
+  "P16-Me-Body-Empty.dc.html": {
+   "x": 1410,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "People · Me · Body · no entries yet",
+   "page": "trainer"
+  },
+  "P16-Feed-Empty.dc.html": {
+   "x": 1880,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "People · Milestones · empty",
+   "page": "trainer"
+  },
+  "P16-Trainer-Loading.dc.html": {
+   "x": 2350,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Clients · loading · Trainer",
+   "page": "trainer"
+  },
+  "P16-Trainer-Failed.dc.html": {
+   "x": 2820,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Clients · failed · Trainer",
+   "page": "trainer"
+  },
+  "P16-Trainer-Empty.dc.html": {
+   "x": 3290,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Clients · no clients · Trainer",
+   "page": "trainer"
+  },
+  "P16-Admin-Loading.dc.html": {
+   "x": 3760,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Users · loading · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Failed.dc.html": {
+   "x": 4230,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Users · failed · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Empty.dc.html": {
+   "x": 4700,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Users · no one but you · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Offline.dc.html": {
+   "x": 5170,
+   "y": 2660,
+   "w": 390,
+   "h": 1300,
+   "title": "Users · offline + action error · Admin (scroll)",
+   "page": "trainer"
+  },
+  "P16-Admin-Filter-Pending.dc.html": {
+   "x": 5640,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Users · filter Pending + search · Admin",
+   "page": "trainer"
+  },
+  "P16-Profile-States.dc.html": {
+   "x": 6110,
+   "y": 2660,
+   "w": 1600,
+   "h": 640,
+   "title": "Profile · loading, locked, not found, failed",
+   "page": "trainer"
+  },
+  "P16-Client-States.dc.html": {
+   "x": 7790,
+   "y": 2660,
+   "w": 1600,
+   "h": 700,
+   "title": "Clients · card, table and status states",
+   "page": "trainer"
+  },
+  "P16-Trainer-Clients-Night.dc.html": {
+   "x": 9470,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "People · Clients · Trainer · night",
+   "page": "trainer"
+  },
+  "P16-Admin-Users-Night.dc.html": {
+   "x": 9940,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "People · Users · Admin · night",
+   "page": "trainer"
+  },
+  "P16-Member-Me-Night.dc.html": {
+   "x": 10410,
+   "y": 2660,
+   "w": 390,
+   "h": 1060,
+   "title": "People · Me · Member · night",
+   "page": "trainer"
+  },
+  "P16-Today-Trainer-Night.dc.html": {
+   "x": 10880,
+   "y": 2660,
+   "w": 390,
+   "h": 844,
+   "title": "Gym · Today · Trainer · night",
+   "page": "trainer"
+  },
+  "P16-Me-Edit.dc.html": {
+   "x": 0,
+   "y": 4220,
+   "w": 390,
+   "h": 1000,
+   "title": "People · Me · Edit tapped, username changed (Save enabled)",
+   "page": "trainer"
+  },
+  "P16-Me-Password.dc.html": {
+   "x": 470,
+   "y": 4220,
+   "w": 390,
+   "h": 960,
+   "title": "People · Me · Settings · change password",
+   "page": "trainer"
+  },
+  "P16-Trainer-AddClient.dc.html": {
+   "x": 940,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Add client sheet · Trainer",
+   "page": "trainer"
+  },
+  "P16-Trainer-AddClient-Error.dc.html": {
+   "x": 1410,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Add client sheet · error · Trainer",
+   "page": "trainer"
+  },
+  "P16-Trainer-Invite.dc.html": {
+   "x": 1880,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Invite link sheet · Trainer",
+   "page": "trainer"
+  },
+  "P16-Admin-NewMember.dc.html": {
+   "x": 2350,
+   "y": 4220,
+   "w": 390,
+   "h": 1000,
+   "title": "New member sheet · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Link.dc.html": {
+   "x": 2820,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Invite link sheet · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Link-QR.dc.html": {
+   "x": 3290,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Invite link sheet · QR shown, copied · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Menu.dc.html": {
+   "x": 3760,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Person menu · active member · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Menu-Invited.dc.html": {
+   "x": 4230,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Person menu · invited · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-Menu-Suspended.dc.html": {
+   "x": 4700,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Person menu · suspended · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-AssignTrainer.dc.html": {
+   "x": 5170,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Change trainer sheet · Admin (from menu and from profile)",
+   "page": "trainer"
+  },
+  "P16-Admin-Edit.dc.html": {
+   "x": 5640,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Edit user details sheet · Admin",
+   "page": "trainer"
+  },
+  "P16-Admin-AssignClients.dc.html": {
+   "x": 6110,
+   "y": 4220,
+   "w": 390,
+   "h": 844,
+   "title": "Assign clients sheet · Admin (trainer’s profile)",
+   "page": "trainer"
+  },
+  "P16-Admin-Delete.dc.html": {
+   "x": 0,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Delete member · typed-name confirm · Admin",
+   "page": "trainer"
+  },
+  "P16-Me-SignOut.dc.html": {
+   "x": 470,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Sign out · confirm (Me)",
+   "page": "trainer"
+  },
+  "P16-Me-SignOut-Queued.dc.html": {
+   "x": 940,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Sign out · changes still queued (Me)",
+   "page": "trainer"
+  },
+  "P16-Today-Trainer.dc.html": {
+   "x": 1410,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Gym · Today · Trainer (clients strip only)",
+   "page": "trainer"
+  },
+  "P16-Today-Trainer-NoClients.dc.html": {
+   "x": 1880,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Gym · Today · Trainer, no clients (Atlas solo)",
+   "page": "trainer"
+  },
+  "P16-Today-Admin.dc.html": {
+   "x": 2350,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Gym · Today · Admin (Atlas & clients block = clients strip)",
+   "page": "trainer"
+  },
+  "P16-ClientPage.dc.html": {
+   "x": 2820,
+   "y": 5380,
+   "w": 390,
+   "h": 1640,
+   "title": "Client page · live client · Trainer (scroll)",
+   "page": "trainer"
+  },
+  "P16-ClientPage-History-Fallback.dc.html": {
+   "x": 3290,
+   "y": 5380,
+   "w": 900,
+   "h": 460,
+   "title": "Client page · history fallback (no full history from the server)",
+   "page": "trainer"
+  },
+  "P16-ClientPage-Empty.dc.html": {
+   "x": 4270,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Client page · no sessions yet · Trainer",
+   "page": "trainer"
+  },
+  "P16-ClientPage-Loading.dc.html": {
+   "x": 4740,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Client page · before data (cache miss)",
+   "page": "trainer"
+  },
+  "P16-TraineeSession.dc.html": {
+   "x": 5210,
+   "y": 5380,
+   "w": 390,
+   "h": 1640,
+   "title": "Athlete session · read-only recap · Trainer (scroll)",
+   "page": "trainer"
+  },
+  "P16-TraineeSession-States.dc.html": {
+   "x": 5680,
+   "y": 5380,
+   "w": 900,
+   "h": 360,
+   "title": "Athlete session · loading / error",
+   "page": "trainer"
+  },
+  "P16-Programs-Coach.dc.html": {
+   "x": 6660,
+   "y": 5380,
+   "w": 390,
+   "h": 1160,
+   "title": "Overview › Programs · Trainer / Admin (assign on every tile, scroll)",
+   "page": "trainer"
+  },
+  "P16-Programs-Assignees.dc.html": {
+   "x": 7130,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Members drawer · assign / unassign a program · Trainer",
+   "page": "trainer"
+  },
+  "P16-Programs-Assignees-Empty.dc.html": {
+   "x": 7600,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Members drawer · no clients / save failed",
+   "page": "trainer"
+  },
+  "P16-Programs-Builder-Menu.dc.html": {
+   "x": 8070,
+   "y": 5380,
+   "w": 900,
+   "h": 440,
+   "title": "Program builder ⋯ menu · Trainer / Admin",
+   "page": "trainer"
+  },
+  "P16-TrainerLiveBanner.dc.html": {
+   "x": 9050,
+   "y": 5380,
+   "w": 1600,
+   "h": 900,
+   "title": "TrainerLiveBanner (component exists, not mounted in the app)",
+   "page": "trainer"
+  },
+  "P16-ClientsStrip-States.dc.html": {
+   "x": 10730,
+   "y": 5380,
+   "w": 1600,
+   "h": 560,
+   "title": "TrainerClientsStrip · every state",
+   "page": "trainer"
+  },
+  "P16-ProgramAssignDialog.dc.html": {
+   "x": 12410,
+   "y": 5380,
+   "w": 390,
+   "h": 844,
+   "title": "Assign program sheet (ProgramAssignDialog — in code, not mounted)",
+   "page": "trainer"
+  },
+  "P16-Role-Deltas.dc.html": {
+   "x": 12880,
+   "y": 5380,
+   "w": 1600,
+   "h": 560,
+   "title": "Role differences elsewhere in the app",
+   "page": "trainer"
+  },
+  "P16-Desktop-Trainer.dc.html": {
+   "x": 0,
+   "y": 7180,
+   "w": 1440,
+   "h": 900,
+   "title": "Desktop · People · Clients · Trainer",
+   "page": "trainer"
+  },
+  "P16-Desktop-Admin.dc.html": {
+   "x": 1520,
+   "y": 7180,
+   "w": 1440,
+   "h": 900,
+   "title": "Desktop · People · Users · Admin",
+   "page": "trainer"
+  },
+  "P16-Desktop-Member-Me.dc.html": {
+   "x": 3040,
+   "y": 7180,
+   "w": 1440,
+   "h": 1300,
+   "title": "Desktop · People · Me · Member",
+   "page": "trainer"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "P15-Auth.dc.html",
+  "P15-Onb-Landing.dc.html",
+  "P15-Onb-Who.dc.html",
+  "P15-Onb-Face.dc.html",
+  "P15-Onb-Gym.dc.html",
+  "P15-Onb-Body.dc.html",
+  "P15-Onb-Ready.dc.html",
+  "P15-Body-Gate.dc.html",
+  "P15-Auth-Error.dc.html",
+  "P15-Auth-Locked.dc.html",
+  "P15-Auth-Unreachable.dc.html",
+  "P15-Auth-Busy.dc.html",
+  "P15-Onb-Skeleton.dc.html",
+  "P15-Onb-Dead.dc.html",
+  "P15-Onb-Dead-Requested.dc.html",
+  "P15-Onb-Reset.dc.html",
+  "P15-Onb-Reset-Error.dc.html",
+  "P15-Onb-Who-Error.dc.html",
+  "P15-Onb-Who-Empty.dc.html",
+  "P15-Onb-Face-Crop.dc.html",
+  "P15-Onb-Face-Camera.dc.html",
+  "P15-Onb-Face-TooBig.dc.html",
+  "P15-Onb-Face-Type.dc.html",
+  "P15-Onb-Gym-Loading.dc.html",
+  "P15-Onb-Gym-Denied.dc.html",
+  "P15-Onb-Gym-Search.dc.html",
+  "P15-Onb-Body-Filled.dc.html",
+  "P15-Onb-Ready-NoGym.dc.html",
+  "P15-Body-Gate-Filled.dc.html",
+  "P15-Auth-Desktop.dc.html",
+  "P15-Onb-Desktop.dc.html",
+  "P16-Trainer-Clients.dc.html",
+  "P16-Admin-Users.dc.html",
+  "P16-Member-Me.dc.html",
+  "P16-Trainer-Me.dc.html",
+  "P16-Admin-Me.dc.html",
+  "P16-Member-Me-Settings.dc.html",
+  "P16-Admin-Me-Settings.dc.html",
+  "P16-Me-Body.dc.html",
+  "P16-Trainer-Client-Profile.dc.html",
+  "P16-Admin-Person-Profile.dc.html",
+  "P16-Admin-Person-Settings.dc.html",
+  "P16-Admin-Trainer-Settings.dc.html",
+  "P16-Feed.dc.html",
+  "P16-Trainer-Client-Settings.dc.html",
+  "P16-Trainer-Client-Body.dc.html",
+  "P16-Profile-Empty.dc.html",
+  "P16-Me-Body-Empty.dc.html",
+  "P16-Feed-Empty.dc.html",
+  "P16-Trainer-Loading.dc.html",
+  "P16-Trainer-Failed.dc.html",
+  "P16-Trainer-Empty.dc.html",
+  "P16-Admin-Loading.dc.html",
+  "P16-Admin-Failed.dc.html",
+  "P16-Admin-Empty.dc.html",
+  "P16-Admin-Offline.dc.html",
+  "P16-Admin-Filter-Pending.dc.html",
+  "P16-Profile-States.dc.html",
+  "P16-Client-States.dc.html",
+  "P16-Trainer-Clients-Night.dc.html",
+  "P16-Admin-Users-Night.dc.html",
+  "P16-Member-Me-Night.dc.html",
+  "P16-Today-Trainer-Night.dc.html",
+  "P16-Me-Edit.dc.html",
+  "P16-Me-Password.dc.html",
+  "P16-Trainer-AddClient.dc.html",
+  "P16-Trainer-AddClient-Error.dc.html",
+  "P16-Trainer-Invite.dc.html",
+  "P16-Admin-NewMember.dc.html",
+  "P16-Admin-Link.dc.html",
+  "P16-Admin-Link-QR.dc.html",
+  "P16-Admin-Menu.dc.html",
+  "P16-Admin-Menu-Invited.dc.html",
+  "P16-Admin-Menu-Suspended.dc.html",
+  "P16-Admin-AssignTrainer.dc.html",
+  "P16-Admin-Edit.dc.html",
+  "P16-Admin-AssignClients.dc.html",
+  "P16-Admin-Delete.dc.html",
+  "P16-Me-SignOut.dc.html",
+  "P16-Me-SignOut-Queued.dc.html",
+  "P16-Today-Trainer.dc.html",
+  "P16-Today-Trainer-NoClients.dc.html",
+  "P16-Today-Admin.dc.html",
+  "P16-ClientPage.dc.html",
+  "P16-ClientPage-History-Fallback.dc.html",
+  "P16-ClientPage-Empty.dc.html",
+  "P16-ClientPage-Loading.dc.html",
+  "P16-TraineeSession.dc.html",
+  "P16-TraineeSession-States.dc.html",
+  "P16-Programs-Coach.dc.html",
+  "P16-Programs-Assignees.dc.html",
+  "P16-Programs-Assignees-Empty.dc.html",
+  "P16-Programs-Builder-Menu.dc.html",
+  "P16-TrainerLiveBanner.dc.html",
+  "P16-ClientsStrip-States.dc.html",
+  "P16-ProgramAssignDialog.dc.html",
+  "P16-Role-Deltas.dc.html",
+  "P16-Desktop-Trainer.dc.html",
+  "P16-Desktop-Admin.dc.html",
+  "P16-Desktop-Member-Me.dc.html"
+ ],
+ "notes": {
+  "t_auth": {
+   "x": 0,
+   "y": -300,
+   "text": "Auth & onboarding",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "auth"
+  },
+  "t_trainer": {
+   "x": 0,
+   "y": -300,
+   "text": "Trainer & admin",
+   "kind": "title1",
+   "maxW": 3000,
+   "page": "trainer"
+  }
+ },
+ "designSystems": [],
+ "attachments": {}
+}

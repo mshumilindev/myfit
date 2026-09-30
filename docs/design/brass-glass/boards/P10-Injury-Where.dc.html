@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rehab setup · where</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:#0f1012;color:#e9eaec;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit;color:inherit}
+svg{flex:none}
+.num{font-variant-numeric:tabular-nums}
+.t-d1{font-size:34px;font-weight:600;letter-spacing:-.025em;line-height:1.08}
+.t-h1{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
+.t-h2{font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.t-h3{font-size:16px;font-weight:600;line-height:1.3}
+.t-b{font-size:15px;line-height:1.45}
+.t-s{font-size:13px;line-height:1.4;color:#b0b4b8}
+.t-m{font-size:12px;line-height:1.35;color:#90959a}
+.t-l{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#b0b4b8}
+.t-big{font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.c-mut{color:#b0b4b8}.c-dim{color:#90959a}.c-brass{color:#eed3a5}.c-ok{color:#4cbe8c}.c-bad{color:#f3c2bf}.c-rest{color:#93d4f2}.c-sleep{color:#d6cffa}
+.scr{position:relative;overflow:hidden;background:radial-gradient(90% 40% at 80% 100%,rgba(138,100,46,.45),transparent 70%),radial-gradient(70% 32% at 8% 96%,rgba(43,31,58,.75),transparent 70%),radial-gradient(80% 28% at 92% 0%,rgba(138,100,46,.22),transparent 70%),#121316}
+.m-art{background:radial-gradient(80% 42% at 22% 14%,rgba(43,31,58,.95),transparent 70%),radial-gradient(90% 55% at 88% 34%,rgba(138,100,46,.8),transparent 70%),radial-gradient(90% 45% at 50% 96%,rgba(52,39,19,.9),transparent 70%),#121316}
+.m-rest{background:radial-gradient(90% 42% at 80% 100%,rgba(28,111,154,.45),transparent 70%),radial-gradient(70% 32% at 8% 96%,rgba(43,31,58,.7),transparent 70%),radial-gradient(80% 30% at 92% 0%,rgba(51,168,224,.18),transparent 70%),#111417}
+.m-sleep{background:radial-gradient(90% 45% at 75% 0%,rgba(90,70,170,.5),transparent 70%),radial-gradient(80% 40% at 10% 100%,rgba(43,31,58,.85),transparent 70%),#0f0f16}
+.m-ok{background:radial-gradient(90% 50% at 50% 28%,rgba(76,190,140,.26),transparent 70%),radial-gradient(80% 50% at 60% 40%,rgba(138,100,46,.45),transparent 70%),radial-gradient(70% 30% at 8% 96%,rgba(43,31,58,.7),transparent 70%),#0f1311}
+.m-bad{background:radial-gradient(90% 40% at 80% 100%,rgba(125,48,43,.45),transparent 70%),radial-gradient(70% 32% at 8% 96%,rgba(43,31,58,.7),transparent 70%),#131112}
+.m-night{background:radial-gradient(120% 70% at 30% 10%,#2a2f36 0%,#111214 60%,#0a0a0b 100%)}
+.body{padding:12px 16px 24px;display:flex;flex-direction:column;gap:14px}
+/* surfaces */
+.card{background:rgba(31,33,37,.72);border:1px solid rgba(233,234,236,.07);border-radius:18px}
+.card.glass{background:linear-gradient(180deg,rgba(60,48,30,.38),rgba(20,18,14,.58));border:0;box-shadow:inset 0 1.2px .5px rgba(238,211,165,.45),inset 0 0 0 1px rgba(217,162,79,.26)}
+.card.ok{background:linear-gradient(180deg,rgba(40,80,60,.38),rgba(14,26,20,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(183,232,207,.42),inset 0 0 0 1px rgba(76,190,140,.3)}
+.card.bad{background:linear-gradient(180deg,rgba(90,34,30,.38),rgba(30,14,12,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(243,194,191,.38),inset 0 0 0 1px rgba(226,86,79,.32)}
+.card.rest{background:linear-gradient(180deg,rgba(28,70,100,.36),rgba(10,26,38,.58));border:0;box-shadow:inset 0 1.2px .5px rgba(147,212,242,.42),inset 0 0 0 1px rgba(51,168,224,.3)}
+.card.sleep{background:linear-gradient(180deg,rgba(60,50,110,.36),rgba(20,16,38,.58));border:0;box-shadow:inset 0 1.2px .5px rgba(214,207,250,.4),inset 0 0 0 1px rgba(157,140,240,.3)}
+.card.dash{background:transparent;border:1px dashed rgba(233,234,236,.18)}
+.pad{padding:14px 16px}
+/* list */
+.li{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 16px;border-top:1px solid rgba(233,234,236,.07)}
+.li:first-child{border-top:0}
+.li .tt{flex:1;min-width:0}
+.li .t1{font-size:15px;line-height:1.3}
+.li .t2{font-size:12.5px;color:#90959a;line-height:1.35;margin-top:1px}
+.li .tr{font-size:14px;color:#b0b4b8;display:flex;align-items:center;gap:8px}
+/* tiles & avatars */
+.tile{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none}
+.tile.lg{width:48px;height:48px;border-radius:14px}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#eed3a5;background:linear-gradient(135deg,#342713,#8a642e);box-shadow:inset 0 0 0 1px rgba(238,211,165,.35);flex:none}
+.atlas{border-radius:50%;background:radial-gradient(circle at 40% 35%,#6b4a3f,#2a1d19 72%);box-shadow:0 0 0 2px #d0584d;flex:none}
+.art{border-radius:10px;background:linear-gradient(135deg,#2b1f3a 0%,#8a642e 55%,#eed3a5 100%);flex:none}
+.house{background:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 2px,transparent 2px 11px),linear-gradient(90deg,#23262a,#1a1c20)}
+/* buttons */
+.btn{height:48px;padding:0 22px;border-radius:24px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.btn.sm{height:36px;padding:0 14px;border-radius:18px;font-size:13.5px}
+.btn.full{width:100%}
+.btn.pri{background:rgba(217,162,79,.18);box-shadow:inset 0 0 0 1px rgba(217,162,79,.62);color:#eed3a5}
+.btn.sec{background:rgba(233,234,236,.08);color:#e9eaec;font-weight:500}
+.btn.ok{background:rgba(76,190,140,.16);box-shadow:inset 0 0 0 1px rgba(76,190,140,.55);color:#b7e8cf}
+.btn.dan{background:rgba(226,86,79,.14);box-shadow:inset 0 0 0 1px rgba(226,86,79,.55);color:#f3c2bf}
+.btn.txt{height:44px;padding:0 6px;color:#e4bb76;font-weight:600}
+.btn.dis{opacity:.4}
+.ib{width:44px;height:44px;border-radius:22px;display:inline-flex;align-items:center;justify-content:center;color:#e9eaec;flex:none}
+.ib.fill{background:rgba(233,234,236,.08)}
+.ib.pri{background:rgba(217,162,79,.18);box-shadow:inset 0 0 0 1px rgba(217,162,79,.62);color:#eed3a5}
+.ib.sm{width:36px;height:36px}
+/* chips / tags / segmented */
+.chip{height:34px;padding:0 14px;border-radius:17px;font-size:13px;display:inline-flex;align-items:center;gap:6px;background:rgba(233,234,236,.07);color:#d0d3d6;white-space:nowrap}
+.chip.on{background:rgba(217,162,79,.2);box-shadow:inset 0 0 0 1px rgba(217,162,79,.6);color:#eed3a5}
+.tag{height:22px;padding:0 8px;border-radius:11px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.seg{display:flex;padding:3px;border-radius:14px;background:rgba(10,10,12,.45);border:1px solid rgba(233,234,236,.08)}
+.seg button{flex:1;height:34px;border-radius:11px;font-size:13.5px;color:#b0b4b8;white-space:nowrap;padding:0 8px}
+.seg button.on{background:rgba(217,162,79,.2);box-shadow:inset 0 0 0 1px rgba(217,162,79,.55);color:#eed3a5;font-weight:600}
+/* inputs */
+.field{min-height:50px;border-radius:14px;background:rgba(10,10,12,.45);border:1px solid rgba(233,234,236,.1);padding:0 14px;display:flex;align-items:center;gap:10px;font-size:15px}
+.field input{background:none;border:0;outline:0;flex:1;min-width:0;height:48px;padding:0;color:#e9eaec}
+.field.focus{border-color:rgba(217,162,79,.7);box-shadow:0 0 0 3px rgba(217,162,79,.14)}
+.field.err{border-color:rgba(226,86,79,.7);box-shadow:0 0 0 3px rgba(226,86,79,.14)}
+.flabel{font-size:12.5px;color:#b0b4b8;margin-bottom:6px}
+.ferr{font-size:12.5px;color:#f3c2bf;margin-top:6px}
+.tg{width:48px;height:28px;border-radius:14px;background:rgba(233,234,236,.12);position:relative;flex:none;display:inline-block}
+.tg span{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:11px;background:#d0d3d6}
+.tg.on{background:rgba(217,162,79,.4);box-shadow:inset 0 0 0 1px rgba(217,162,79,.7)}
+.tg.on span{left:23px;background:#eed3a5}
+.step{display:flex;align-items:center;gap:6px}
+.step .v{min-width:86px;text-align:center}
+.chk{width:22px;height:22px;border-radius:7px;border:1.5px solid #55595e;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.chk.on{background:rgba(217,162,79,.25);border-color:#d9a24f;color:#eed3a5}
+.radio{width:22px;height:22px;border-radius:11px;border:1.5px solid #55595e;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.radio.on{border-color:#d9a24f}.radio.on span{width:10px;height:10px;border-radius:5px;background:#d9a24f}
+/* bars */
+.bar{height:6px;border-radius:3px;background:rgba(233,234,236,.1);overflow:hidden}
+.bar span{display:block;height:100%;border-radius:3px}
+.sk{background:linear-gradient(90deg,rgba(233,234,236,.05),rgba(233,234,236,.11),rgba(233,234,236,.05));border-radius:10px}
+/* shell */
+.hdr{height:56px;display:flex;align-items:center;gap:6px;padding:0 8px}
+.hdr .ttl{flex:1;text-align:center;font-size:16px;font-weight:600}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:80px;padding:0 10px 14px;background:linear-gradient(180deg,rgba(18,19,22,.55),rgba(14,15,17,.94) 40%);backdrop-filter:blur(18px);border-top:1px solid rgba(233,234,236,.07);display:flex;align-items:center;justify-content:space-around}
+.tab{width:62px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:#90959a}
+.tab.on{color:#eed3a5}
+.fab{width:54px;height:54px;border-radius:27px;display:flex;align-items:center;justify-content:center;color:#eed3a5;background:linear-gradient(180deg,rgba(60,48,30,.6),rgba(20,18,14,.8));box-shadow:inset 0 1.2px .5px rgba(238,211,165,.5),inset 0 0 0 1px rgba(217,162,79,.55);margin-top:-18px}
+.live{height:44px;border-radius:22px;display:flex;align-items:center;gap:10px;padding:0 6px 0 14px}
+.dot{width:8px;height:8px;border-radius:4px;flex:none}
+.scrim{position:absolute;inset:0;background:rgba(6,6,8,.62)}
+.sheet{position:absolute;left:0;right:0;bottom:0;border-radius:26px 26px 0 0;background:linear-gradient(180deg,rgba(40,34,26,.94),rgba(18,17,16,.98));box-shadow:inset 0 1.2px .5px rgba(238,211,165,.45),inset 0 0 0 1px rgba(217,162,79,.22);display:flex;flex-direction:column}
+.grab{width:38px;height:5px;border-radius:3px;background:rgba(233,234,236,.35);margin:10px auto 4px}
+.dialog{position:absolute;left:24px;right:24px;border-radius:24px;padding:22px;background:linear-gradient(180deg,rgba(40,34,26,.96),rgba(18,17,16,.98));box-shadow:inset 0 1.2px .5px rgba(238,211,165,.45),inset 0 0 0 1px rgba(217,162,79,.22);display:flex;flex-direction:column;gap:12px}
+.snack{position:absolute;left:16px;right:16px;height:52px;border-radius:26px;display:flex;align-items:center;gap:10px;padding:0 8px 0 18px;background:linear-gradient(180deg,rgba(50,42,30,.95),rgba(24,22,18,.97));box-shadow:inset 0 1.2px .5px rgba(238,211,165,.45),inset 0 0 0 1px rgba(217,162,79,.26);font-size:14px}
+.rail{position:absolute;left:0;top:0;bottom:0;width:76px;background:rgba(16,17,19,.92);border-right:1px solid rgba(233,234,236,.07);display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0}
+.rail .ri{width:52px;height:52px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9.5px;color:#90959a}
+.rail .ri.on{color:#eed3a5;background:rgba(217,162,79,.14);box-shadow:inset 0 0 0 1px rgba(217,162,79,.4)}
+.wg{position:relative;overflow:hidden;display:flex;flex-direction:column}
+/* ---- emphasis levels: e1 hero · e2 glass · e3 card · e4 quiet ---- */
+.t-hero{font-size:56px;font-weight:600;letter-spacing:-.035em;line-height:1}
+.t-num{font-size:28px;font-weight:600;letter-spacing:-.02em;line-height:1.05}
+.card.hero{background:radial-gradient(120% 90% at 20% 0%,rgba(217,162,79,.20),transparent 60%),linear-gradient(180deg,rgba(66,52,30,.62),rgba(22,19,14,.78));border:0;border-radius:24px;box-shadow:inset 0 1.4px .5px rgba(238,211,165,.62),inset 0 0 0 1px rgba(217,162,79,.5),0 22px 60px -22px rgba(217,162,79,.55),0 10px 30px -12px rgba(0,0,0,.7)}
+.card.quiet{background:transparent;border:0;border-radius:0}
+.card.quiet.pad{padding:4px 2px}
+.well{background:rgba(6,6,8,.5);border-radius:16px;box-shadow:inset 0 1px 0 rgba(0,0,0,.4),inset 0 0 0 1px rgba(233,234,236,.06)}
+.wstep{flex:1 1 0;min-width:0;padding:10px 6px 8px;display:flex;flex-direction:column;gap:2px}
+.wstep .lab{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#90959a;text-align:center}
+.wstep .rw{display:flex;align-items:center;justify-content:space-between}
+.wstep .rw button{width:34px;height:44px;display:flex;align-items:center;justify-content:center;color:#b0b4b8;flex:none}
+.wstep .v{flex:1;min-width:0;text-align:center;font-size:32px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.card.hero .wstep .v{font-size:36px}
+.lhero{position:relative;overflow:hidden;box-shadow:inset 0 -1px 0 #d9a24f}
+.lhero .bgp{position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 2px,transparent 2px 11px),linear-gradient(90deg,#23262a,#2c2f33)}
+.lhero .scr2{position:absolute;inset:0;background:linear-gradient(90deg,rgba(22,23,26,.96) 30%,rgba(22,23,26,.62) 75%,rgba(22,23,26,.4))}
+.lhero .bd{position:absolute;inset:0;right:120px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 18px}
+.lhero .ac{position:absolute;right:14px;top:0;bottom:0;display:flex;align-items:center;gap:8px}
+.card.illness{background:linear-gradient(180deg,rgba(110,70,34,.38),rgba(40,24,12,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(249,215,182,.4),inset 0 0 0 1px rgba(240,163,94,.32)}
+.card.injury{background:linear-gradient(180deg,rgba(111,49,41,.38),rgba(40,18,15,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(245,201,194,.4),inset 0 0 0 1px rgba(226,120,106,.34)}
+.card.active{background:linear-gradient(180deg,rgba(36,92,78,.38),rgba(10,34,30,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(191,234,219,.4),inset 0 0 0 1px rgba(92,200,168,.3)}
+.card.kcal{background:linear-gradient(180deg,rgba(28,58,90,.38),rgba(12,24,38,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(203,224,246,.4),inset 0 0 0 1px rgba(61,132,201,.32)}
+.card.sport{background:linear-gradient(180deg,rgba(61,90,42,.36),rgba(20,30,14,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(215,240,193,.38),inset 0 0 0 1px rgba(168,220,124,.3)}
+.card.apex{background:linear-gradient(180deg,rgba(74,54,128,.38),rgba(26,18,44,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(217,201,251,.4),inset 0 0 0 1px rgba(157,111,240,.32)}
+.card.learn{background:linear-gradient(180deg,rgba(110,42,62,.38),rgba(40,15,24,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(249,196,211,.4),inset 0 0 0 1px rgba(229,83,126,.32)}
+.card.atlas{background:linear-gradient(180deg,rgba(107,50,44,.38),rgba(40,20,18,.6));border:0;box-shadow:inset 0 1.2px .5px rgba(243,193,187,.4),inset 0 0 0 1px rgba(208,88,77,.32)}
+.c-illness{color:#f9d7b6}.c-injury{color:#f5c9c2}.c-active{color:#bfeadb}.c-kcal{color:#cbe0f6}.c-sport{color:#d7f0c1}.c-apex{color:#d9c9fb}.c-learn{color:#f9c4d3}.c-atlas{color:#f3c1bb}
+.pic{display:block;object-fit:cover;background:#1f2125}
+.tin{width:78px;height:40px;border-radius:12px;background:rgba(6,6,8,.5);box-shadow:inset 0 0 0 1px rgba(233,234,236,.12);border:0;outline:0;color:#e9eaec;font:600 20px/1 Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;text-align:center;padding:0}
+.tin.focus{box-shadow:inset 0 0 0 1.5px rgba(217,162,79,.8),0 0 0 3px rgba(217,162,79,.14)}
+.hl{border-top:1px solid rgba(233,234,236,.08)}
+.vl{border-left:1px solid rgba(233,234,236,.08)}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #121316">
+<div class="scr m-bad" style="width: 390px; height: 844px"><div class="body" style="padding-bottom: 24px"><div style="display: flex; align-items: center; justify-content: flex-start; gap: 10px; height: 56px; padding: 0 12px 0 16px"><span style="font-size: 18px; font-weight: 700; letter-spacing: -.02em">spotter</span><button class="chip">Gym</button><div style="flex: 1"></div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; "><div style="position: relative; width: 34px; height: 34px; flex: none"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17.0" cy="17.0" r="15.5" fill="none" stroke="rgba(233,234,236,.1)" stroke-width="3"/><circle cx="17.0" cy="17.0" r="15.5" fill="none" stroke="#d9a24f" stroke-width="3" stroke-linecap="round" stroke-dasharray="62.3 97.4" transform="rotate(-90 17.0 17.0)"/></svg><div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column"><span class="num" style="font-size: 10px; font-weight: 600">640</span></div></div><button class="ib fill sm" aria-label="Notifications" style=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4zM10 20a2 2 0 004 0"/></svg></button><button class="ib fill sm" aria-label="Language" style=""><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></button></div></div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; "><button class="ib " aria-label="Back" style=""><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="t-h3" style="flex: 1">Where does it hurt?</div></div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; "><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; "><div class="card bad" style="display: flex; flex-direction: column; gap: 10px; width: 26px; height: 26px; align-items: center; justify-content: center"><span class="t-s num c-bad" style="">1</span></div><div class="t-s c-bad" style="">Where</div></div><div class="hl" style="flex: 1"></div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; "><div class="card " style="display: flex; flex-direction: column; gap: 10px; width: 26px; height: 26px; align-items: center; justify-content: center"><span class="t-s num c-dim" style="">2</span></div><div class="t-s c-dim" style="">How</div></div><div class="hl" style="flex: 1"></div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; "><div class="card " style="display: flex; flex-direction: column; gap: 10px; width: 26px; height: 26px; align-items: center; justify-content: center"><span class="t-s num c-dim" style="">3</span></div><div class="t-s c-dim" style="">Plan</div></div></div><div class="t-s" style="">Pick the sore spot — no anatomy degree needed.</div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap; "><button class="chip">Shoulder</button><button class="chip">Elbow</button><button class="chip">Wrist</button><button class="chip">Neck</button><button class="chip">Lower back</button><button class="chip">Hip</button><div class="card bad" style="display: flex; flex-direction: column; gap: 10px; height: 34px; padding: 0 14px; justify-content: center"><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; "><span class="c-bad" style=""><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg></span><span class="t-s c-bad" style="">Knee</span></div></div><button class="chip">Ankle</button></div><div class="seg"><button class="">Left</button><button class="on">Right</button><button class="">Both</button></div><div class="card bad pad" style="display: flex; flex-direction: column; gap: 10px; "><div style="display: flex; align-items: flex-start; justify-content: flex-start; gap: 10px; "><div style="display: flex; flex-direction: column; gap: 8px; flex: 1"><div class="t-h3 c-bad" style="">Good to know</div><div class="t-s" style="">This area loads these muscles — we’ll ease them back together:</div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; "><span class="tag" style="background: rgba(226,86,79,.15); color: #f3c2bf; box-shadow: inset 0 0 0 1px rgba(226,86,79,.42)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Quads</span><span class="tag" style="background: rgba(226,86,79,.15); color: #f3c2bf; box-shadow: inset 0 0 0 1px rgba(226,86,79,.42)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Hamstrings</span><span class="tag" style="background: rgba(226,86,79,.15); color: #f3c2bf; box-shadow: inset 0 0 0 1px rgba(226,86,79,.42)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Calves</span><span class="tag" style="background: rgba(226,86,79,.15); color: #f3c2bf; box-shadow: inset 0 0 0 1px rgba(226,86,79,.42)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Adductors</span></div></div><div style="display: flex; align-items: center; justify-content: flex-start; gap: 2px; "><svg viewBox="4.5 36 22.5 59.5" height="130" style="display: block"><path d="m 14.404465,45.040075 0.0221,-0.0277 -0.14866,-0.37945 -3.10172,-3.40449 -0.23283,-0.0825 2.05918,5.32009 z m -1.17263,2.01833 1.27705,3.29948 0.42631,-4.04862 -0.25196,-0.64303 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 17.284025,45.040455 -0.0221,-0.0281 0.14867,-0.37926 3.10171,-3.40449 0.23246,-0.0825 -2.05843,5.3199 z m 1.17263,2.01795 -1.27706,3.29948 -0.42631,-4.04843 0.25197,-0.64303 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 23.419015,50.399125 -0.15504,4.75091 -2.40263,6.60949 0.7362,1.90021 2.36401,-8.34435 z m -0.58154,-11.60825 -0.15485,4.00722 1.31793,7.93154 0.61977,-6.40308 z m -0.38731,5.12268 -2.75152,6.07258 -0.62015,4.87425 1.16232,6.85771 2.51886,-6.98144 0.15504,-7.18764 z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="m 22.063225,39.369605 v 4.21363 l -2.94574,5.82511 -1.86027,5.78349 0.19365,-4.0072 z m -3.24944,13.42596 -0.0649,0.15467 -1.21294,2.90207 0.78325,7.18803 1.23619,-0.66122 -1.0714,-6.69272 z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="m 17.255895,87.868445 0.1243,3.45228 0.28983,1.20638 h 0.87136 l 0.24897,-0.83181 0.29058,-0.0416 -0.0624,0.83181 1.09914,-0.33332 0.29058,-0.16629 1.24444,-0.27033 0.0416,-0.97748 -1.20319,-2.03743 -0.82974,-1.0399 -2.03294,-0.83181 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 18.251375,70.441125 0.29058,0.91486 0.6224,3.8681 0.0829,5.15733 -0.87136,5.03304 0.0412,-6.44714 -0.91242,-2.57848 -0.12561,-2.82837 z m 1.9915,2.32915 -0.20753,7.73637 -1.65949,6.23904 1.80478,-0.853 3.00816,-10.83583 -1.03727,-6.82095 z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="m 21.404635,64.784375 0.1243,1.12295 -0.87118,1.08171 -0.29058,1.70599 -0.58116,0.24933 -0.49774,-2.57866 -0.33182,-0.91486 0.29058,-0.58247 z m -3.85853,0.0832 0.6224,1.74685 1.3273,2.57867 -0.33182,2.37095 -0.95423,-2.66209 -0.78738,-1.49734 z m 4.97811,-2.37039 -0.95423,5.11609 0.62241,-0.33295 0.49773,1.66381 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 8.2694651,50.399125 0.15504,4.75053 2.4026299,6.60968 -0.73638,1.90021 -2.3640099,-8.34435 z m 0.58117,-11.60768 0.15503,4.00684 -1.31754,7.93154 -0.61978,-6.40308 z m 0.38769,5.1223 2.7515099,6.07239 0.61997,4.87425 -1.16232,6.85771 -2.5190499,-6.98163 -0.15504,-7.18801 z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="m 9.6258251,39.369415 v 4.21363 l 2.9451699,5.8253 1.86028,5.78349 -0.19366,-4.0072 z m 3.2488699,13.42559 0.0647,0.15485 1.21294,2.90207 -0.78307,7.18803 -1.23618,-0.66102 1.0714,-6.69273 z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="m 14.433335,87.868265 -0.12448,3.45228 -0.29058,1.20637 h -0.87118 l -0.24877,-0.83181 -0.29059,-0.0416 0.0623,0.83181 -1.09934,-0.33333 -0.29058,-0.16629 -1.2448,-0.27033 -0.0412,-0.97747 1.2031899,-2.03781 0.82975,-1.04009 2.03294,-0.83181 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 13.437675,70.440945 -0.29058,0.91486 -0.62241,3.86828 -0.0829,5.15733 0.87174,5.03304 -0.0418,-6.44714 0.91298,-2.57848 0.1243,-2.82837 z m -1.99151,2.32914 0.20735,7.73637 1.65968,6.23904 -1.80497,-0.85299 -3.0079799,-10.83584 1.03728,-6.82095 z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="m 10.284405,64.784375 -0.12448,1.12295 0.87118,1.08171 0.29058,1.70599 0.58116,0.24933 0.49774,-2.57866 0.33182,-0.91486 -0.29058,-0.58247 z m 3.85854,0.0832 -0.62241,1.74685 -1.32767,2.57867 0.33182,2.37095 0.95423,-2.66209 0.78832,-1.4964 z m -4.9786799,-2.37058 0.9542299,5.11609 -0.6223999,-0.33313 -0.49793,1.6638 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/></svg><svg viewBox="41 36.5 23 59" height="130" style="display: block"><path d="M 50.191,41.481 L 44.740,39.690 L 43.830,41.580 L 43.431,44.301 Z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="M 50.249,41.619 L 43.489,44.439 L 44.410,50.520 L 47.180,51.030 L 51.620,49.090 L 52.200,49.480 L 52.200,42.880 Z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="M 55.274,41.079 L 61.354,45.519 L 60.640,42.150 L 59.740,39.860 Z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="M 55.186,41.201 L 52.800,42.880 L 52.800,49.480 L 53.570,49.090 L 57.680,50.760 L 60.500,50.600 L 61.266,45.641 Z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 51.176145,64.073985 -1.20605,3.01461 0.70738,0.26558 0.89754,3.51771 -0.55801,-4.01191 z m -5.08496,-3.15003 0.63355,1.8609 0.16813,2.03261 0.61314,1.93117 -0.90585,-0.0851 -0.28534,2.15982 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="m 54.019305,64.073985 1.20605,3.01461 -0.70737,0.26558 -0.89755,3.51771 0.55802,-4.01191 z m 5.08496,-3.15003 -0.63355,1.8609 -0.16813,2.03261 -0.61313,1.93117 0.90584,-0.0851 0.28534,2.15982 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="M 50.568,67.512 L 51.669,72.509 L 51.379,75.532 L 51.292,76.825 L 48.983,76.825 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 50.218,67.512 L 48.633,76.825 L 46.283,76.825 L 45.533,74.263 L 46.783,67.088 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 46.386,77.175 L 51.269,77.175 L 50.701,85.598 L 49.037,86.233 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 54.628,67.512 L 53.526,72.509 L 53.816,75.532 L 53.903,76.825 L 56.213,76.825 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 54.978,67.512 L 56.563,76.825 L 58.912,76.825 L 59.662,74.263 L 58.412,67.088 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 53.927,77.175 L 58.810,77.175 L 56.158,86.233 L 54.495,85.598 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 50.933115,88.340995 l 0.85194,1.3581 0.37189,0.79238 -0.15588,1.21774 -0.76984,0.74446 -1.51185,0.12543 -1.1299,-0.29192 -0.24225,-0.95894 0.80765,-1.30405 -0.22562,-0.85987 0.29679,-0.84153 -0.0194,-1.81524 1.53568,-0.54817 z m -1.19598,0.4675 0.15943,1.25776 -0.6023,0.97431 m -0.54436,0.29544 1.06474,0.40084 1.55326,-0.65137 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="M 49.550,50.504 L 51.751,49.461 L 52.389,49.692 L 52.424,51.499 L 52.499,56.145 L 50.521,62.188 L 50.997,63.602 L 49.569,66.897 L 48.755,66.754 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 49.400,50.496 L 48.605,66.746 L 47.803,66.596 L 47.302,64.480 L 47.133,62.723 L 44.712,54.565 L 44.369,50.918 L 47.200,51.500 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 54.262335,88.340995 l -0.85194,1.3581 -0.37189,0.79238 0.15589,1.21774 0.76983,0.74446 1.51186,0.12543 1.12989,-0.29192 0.24225,-0.95894 -0.80765,-1.30405 0.22563,-0.85987 -0.29679,-0.84153 0.0194,-1.81524 -1.53568,-0.54817 z m 1.19598,0.4675 -0.15943,1.25776 0.6023,0.97431 m 0.54436,0.29544 -1.06474,0.40084 -1.55326,-0.65137 z" fill="#3b3f43" stroke="#262a2d" stroke-width="0.12"/><path d="M 57.425,51.196 L 56.565,66.806 L 55.759,66.965 L 54.331,63.670 L 54.807,62.256 L 52.829,56.213 L 52.904,51.567 L 52.956,49.769 L 53.520,49.498 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/><path d="M 57.575,51.204 L 60.625,50.950 L 60.616,54.633 L 58.195,62.791 L 58.026,64.547 L 57.525,66.663 L 56.715,66.814 Z" fill="#e2564f" stroke="#16171a" stroke-width="0.25"/></svg></div></div></div><button class="btn txt" style="align-self: flex-start">Not a spot? Surgery, illness, general →</button><div style="flex: none; height: 150px; width: 0px"></div></div><div style="position: absolute; left: 16px; right: 16px; bottom: 18px"><div style="display: flex; flex-direction: column; gap: 10px; "><button class="btn dan full" style="height: 54px">Next: how it feels →</button></div></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
